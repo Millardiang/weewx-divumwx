@@ -1,0 +1,42 @@
+#errorCatcher Echo
+##
+## Specifying an encoding of UTF-8 is usually safe, but if your text is 
+## actually in Latin-1, then you should replace the string "UTF-8" with "latin-1"
+## If you do this, you should also change the 'Content-Type' metadata below.
+#encoding UTF-8
+##
+<?php
+////previous day data
+$dvm['temperature_yesterday_outside_max'] = "$yesterday.outTemp.max.format(add_label=False, $localize=False)";
+$dvm['temperature_yesterday_outside_maxtime'] = "$yesterday.outTemp.maxtime";
+$dvm['temperature_yesterday_outside_min'] = "$yesterday.outTemp.min.format(add_label=False, $localize=False)";  
+$dvm['temperature_yesterday_outside_mintime'] = "$yesterday.outTemp.mintime";
+$dvm['temperature_yesterday_outside_avg'] = "$yesterday.outTemp.avg.format(add_label=False, $localize=False)";
+$dvm['dewpoint_yesterday_max'] = "$yesterday.dewpoint.max.format(add_label=False, $localize=False)";
+$dvm['dewpoint_yesterday_maxtime'] = "$yesterday.dewpoint.maxtime";  
+$dvm['dewpoint_yesterday_min'] = "$yesterday.dewpoint.min.format(add_label=False, $localize=False)";
+$dvm['dewpoint_yesterday_mintime'] = "$yesterday.dewpoint.mintime";
+$dvm['wind_yesterday_speed_max'] = "$yesterday.windSpeed.max.format(add_label=False, $localize=False)";
+$dvm['wind_yesterday_speed_maxtime'] = "$yesterday.windSpeed.maxtime";    
+$dvm['wind_yesterday_speed_avg'] = "$yesterday.windSpeed.avg.format(add_label=False, $localize=False)";
+$dvm['wind_yesterday_gust_max'] = "$yesterday.windGust.max.format(add_label=False, $localize=False)";
+$dvm['wind_yesterday_speed_maxtime'] = "$yesterday.windGust.maxtime";
+$dvm['wind_yesterday_run'] = "$yesterday.windrun.maxsum.km.format(add_label=False, $localize=False)";
+$dvm['barometer_yesterday_max'] = "$yesterday.barometer.max.format(add_label=False, $localize=False)";	
+$dvm['barometer_yesterday_maxtime'] = "$yesterday.barometer.maxtime";
+$dvm['barometer_yesterday_min'] = "$yesterday.barometer.min.format(add_label=False, $localize=False)";
+$dvm['barometer_yesterday_mintime'] = "$yesterday.barometer.mintime";
+$dvm['barometer_yesterday_avg'] = "$yesterday.barometer.avg.format(add_label=False, $localize=False)";
+$dvm['uvi_yesterday_max'] = "$yesterday.UV.max.format(add_label=False, $localize=False)";
+$dvm['uvi_yesterday_maxtime'] = "$yesterday.UV.maxtime";
+$dvm['humidity_yesterday_max'] = "$yesterday.outHumidity.max.format(add_label=False, $localize=False)";
+$dvm['humidity_yesterday_maxtime'] = "$yesterday.outHumidity.maxtime";
+$dvm['humidity_yesterday_min'] = "$yesterday.outHumidity.min.format(add_label=False, $localize=False)";
+$dvm['humidity_yesterday_mintime'] = "$yesterday.outHumidity.mintime";
+$dvm['rain_yesterday_rate_max'] = "$yesterday.rainRate.max.format(add_label=False, $localize=False)";
+$dvm['rain_yesterday_rate_maxtime'] = "$yesterday.rainRate.maxtime";
+$dvm['rain_yesterday_sum'] = "$yesterday.rain.sum.format(add_label=False, $localize=False)";
+$dvm['lightning_yesterday_strike_count_sum'] = "$yesterday.lightning_strike_count.sum";
+$dvm['lightning_yesterday_max'] = "$yesterday.radiation.max.format(add_label=False, $localize=False)";
+$dvm['radiation_yesterday_maxtime'] = "$yesterday.radiation.maxtime";
+?>

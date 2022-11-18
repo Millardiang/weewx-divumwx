@@ -1,0 +1,86 @@
+#errorCatcher Echo
+##
+## Specifying an encoding of UTF-8 is usually safe, but if your text is 
+## actually in Latin-1, then you should replace the string "UTF-8" with "latin-1"
+## If you do this, you should also change the 'Content-Type' metadata below.
+#encoding UTF-8
+##
+<?php
+include('settings.php');
+include('dvmBarometerFunctions.php');
+
+// live values from realtime data
+    $file_live = file_get_contents($livedata);
+    if (isset($dvm[0]))
+{
+    $weewxrt = explode(" ", $file_live);
+    $barometer_live = $dvm[0] = $weewxrt[10];
+    $dvm["barometer_live_trend"] = $dvm[1] = $weewxrt[18];
+    $dvm["barometer_live_max"] = $dvm[2] = $weewxrt[34];
+    $dvm["barometer_live_maxtime"] = $dvm[3] = $weewxrt[35];
+    $dvm["barometer_live_min"] = $dvm[4] = $weewxrt[36];
+    $dvm["barometer_live_mintime"] = $dvm[5] = $weewxrt[37];
+
+//archive values from weewx database
+$dvm["barometer_yesterday_maxtime"] = $dvm[6] = "$yesterday.barometer.max.format(add_label=False, $localize=False)";
+$dvm["barometer_yesterday_maxtime"] = $dvm[7] = "$yesterday.barometer.maxtime.format(format_string="%Y%m%d%H%M%S")";
+$dvm["barometer_yesterday_min"] = $dvm[8] = "$yesterday.barometer.min.format(add_label=False, $localize=False)";
+$dvm["barometer_yesterday_mintime"] = $dvm[9] = "$yesterday.barometer.mintime.format(format_string="%Y%m%d%H%M%S")";
+
+$dvm["barometer_day_max"] = $dvm[10] = "$day.outTemp.max.format(add_label=False, $localize=False)";
+$dvm["barometer_day_maxtime"] = $dvm[11] = "$day.outTemp.maxtime.format(format_string="%H:%M")";
+$dvm["barometer_day_min"] = $dvm[12] = "$day.barometer.min.format(add_label=False, $localize=False)";
+$dvm["barometer_day_mintime"] = $dvm[13] = "$day.barometer.mintime.format(format_string="%H:%M")";
+
+$dvm["barometer_month_max"] = $dvm[14] = "$month.barometer.max.format(add_label=False, $localize=False)";	
+$dvm["barometer_month_maxtime"] = $dvm[15] = "$month.barometer.maxtime.format(format_string="%Y%m%d%H%M%S")";
+$dvm["barometer_month_min"] = $dvm[16] = "$month.barometer.min.format(add_label=False, $localize=False)";	
+$dvm["barometer_month_mintime"] = $dvm[17] = "$month.barometer.mintime.format(format_string="%Y%m%d%H%M%S")";
+
+$dvm["barometer_year_max"] = $dvm[18] = "$year.barometer.max.format(add_label=False, $localize=False)";	
+$dvm["barometer_year_maxtime"] = $dvm[19] = "$year.barometer.maxtime.format(format_string="%Y%m%d%H%M%S")";
+$dvm["barometer_year_min"] = $dvm[20] = "$year.barometer.min.format(add_label=False, $localize=False)";	
+$dvm["barometer_year_mintime"] = $dvm[21] = "$year.barometer.mintime.format(format_string="%Y%m%d%H%M%S")";
+
+$dvm["barometer_alltime_max"] = $dvm[22] = "$alltime.barometer.max.format(add_label=False, $localize=False)";	
+$dvm["barometer_alltime_maxtime"] = $dvm[23] = "$alltime.barometer.maxtime.format(format_string="%Y%m%d%H%M%S")";
+$dvm["barometer_alltime_min"] = $dvm[25] = "$alltime.barometer.min.format(add_label=False, $localize=False)";	
+$dvm["barometer_alltime_mintime"] = $dvm[26] = "$alltime.barometer.mintime.format(format_string="%Y%m%d%H%M%S")";
+
+ //barometer units
+    if ($weather["barometer_units"] == "in")
+    {
+        // standardize format
+        $weather["barometer_units"] = "inHg";
+    }
+}
+// Convert pressure units if necessary
+if ($pressureunit != $dvm["barometer_units"])
+{
+    if (($pressureunit == 'hPa' && $dvm["barometer_units"] == 'mb') || ($pressureunit == 'mb' && $dvm["barometer_units"] == 'hPa') || ($pressureunit == 'kPa' && $dvm["barometer_units"] == 'mb') || ($pressureunit == 'mb' && $dvm["barometer_units"] == 'kPa') || ($pressureunit == 'kPa' && $dvm["barometer_units"] == 'hPa') || ($pressureunit == 'hPa' && $dvm["barometer_units"] == 'kPa'))
+    {
+        // 1 mb = 1 hPa so just change the unit being displayed
+        $dvm["barometer_units"] = $pressureunit;
+    }
+    else if ($pressureunit == "inHg" && ($dvm["barometer_units"] == 'mb' || $dvm["barometer_units"] == 'hPa' || $dvm["barometer_units"] == 'kPa'))
+    {
+        mbToin($dvm, "barometer_live", ($dvm["barometer_units"] == 'kPa' ? 1000 : 1));
+        mbToin($dvm, "barometer_live_max", ($dvm["barometer_units"] == 'kPa' ? 1000 : 1));
+        mbToin($dvm, "barometer_live_min", ($dvm["barometer_units"] == 'kPa' ? 1000 : 1));
+        $dvm["barometer_units"] = $pressureunit;
+    }
+    else if (($pressureunit == "mb" || $pressureunit == 'hPa' || $pressureunit == 'kPa') && $dvm["barometer_units"] == 'inHg')
+    {
+        inTomb($dvm, "barometer_live", ($pressureunit == 'kPa' ? 0.001 : 1));
+        inTomb($dvm, "barometer_live_max", ($pressureunit == 'kPa' ? 0.001 : 1));
+        inTomb($dvm, "barometer_live_min", ($pressureunit == 'kPa' ? 0.001 : 1));
+        $dvm["barometer_units"] = $pressureunit;
+    }
+}
+
+
+?>
+
+
+
+
