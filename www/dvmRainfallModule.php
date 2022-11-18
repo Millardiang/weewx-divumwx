@@ -29,7 +29,7 @@ echo " &nbsp;&nbsp;<valuetextheading1>Last 24hr</valuetextheading1><br><div clas
 </smallrainunit2></div></div></div></div>
 <!DOCTYPE html>
 <html lang="en">
-<script src="d3/d3.min.js"></script>
+<script src="js/d3.min.js"></script>
 
 <style>
 .rainposs {
