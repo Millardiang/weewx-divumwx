@@ -123,7 +123,7 @@ class w34_installer:
             weewx_config_file = d["weewx_config_file"]
             locations = {copy_list[i+1]:copy_list[i] for i in range(0, len(copy_list), 2)}
             config_data = ConfigObj(weewx_config_file, encoding='utf8', list_values=False,write_empty_values=True)
-            www_path = locations["www"].split('weather34')[0][:-1]
+            www_path = locations["www"].split('divumwx')[0][:-1]
             if www_path != config_data['StdReport'].get('HTML_ROOT'):
                 print("!!! WEEWX HTML ROOT  " + config_data['StdReport'].get('HTML_ROOT') + "  DOES NOT MATCH W34_INSTALLER www PATH.  " + www_path + "  INSTALL ABORTED!!!") 
                 sys.exit(1)
