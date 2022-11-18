@@ -29,11 +29,11 @@ echo " &nbsp;&nbsp;<valuetextheading1>Last 24hr</valuetextheading1><br><div clas
 </smallrainunit2></div></div></div></div>
 <!DOCTYPE html>
 <html lang="en">
-<script src="js/d3.min.js"></script>
+<script src="d3/d3.min.js"></script>
 
 <style>
 .rainposs {
-  margin-top: -1.5px;
+  margin-top: -5px;
   margin-left: -160px;
 }
 </style>
@@ -175,7 +175,7 @@ var scale = d3.scale.linear()
   var isMax = (t == maxRain),
       label = (isMax ? "max" : "min"),
       textCol = (isMax ? "rgb(230, 0, 0)" : "rgb(0, 0, 230)"),
-      textOffset = (isMax ? -4 : 4);
+      textOffset = (isMax ? - 4 : 4);
 
 });
 
@@ -187,7 +187,7 @@ svg.append("rect")
     .attr("x", width / 2 - 18.75 )
     .attr("y", tubeFill_top - 2)
     .attr("width", 37.5)
-    .attr("height", tubeFill_bottom - 17 - tubeFill_top)
+    .attr("height", tubeFill_bottom - 17.5 - tubeFill_top)
     .style("fill", rainColor);
     
 svg.append("rect")
@@ -197,12 +197,21 @@ svg.append("rect")
     .attr("width", 37.5)
     .attr("height", 4)
     .style("fill", "rgba(45,47,50,1)");    
+
+svg.append("line")
+    .attr("x1", width / 2 - 20.5)
+    .attr("x2", width / 2 + 20.5)
+    .attr("y1", 145)
+    .attr("y2", 145)
+    .style("stroke", tubeBorderColor)
+    .style("stroke-width", "3.5px")
+    .style("fill", "none");    
   
 svg.append("line")
     .attr("x1", width / 2 - 30)
     .attr("x2", width / 2 + 30)
-    .attr("y1", 145)
-    .attr("y2", 145)
+    .attr("y1", 148)
+    .attr("y2", 148)
     .style("stroke", tubeBorderColor)
     .style("stroke-width", "3px")
     .style("fill", "none")    
@@ -379,7 +388,7 @@ var scale = d3.scale.linear()
   var isMax = (t == maxRain),
       label = (isMax ? "max" : "min"),
       textCol = (isMax ? "rgb(230, 0, 0)" : "rgb(0, 0, 230)"),
-      textOffset = (isMax ? -4 : 4);
+      textOffset = (isMax ? - 4 : 4);
 
 });
    
@@ -391,7 +400,7 @@ svg.append("rect")
     .attr("x", width / 2 - 18.75 )
     .attr("y", tubeFill_top - 2)
     .attr("width", 37.5)
-    .attr("height", tubeFill_bottom - 17 - tubeFill_top)
+    .attr("height", tubeFill_bottom - 17.5 - tubeFill_top)
     .style("fill", rainColor);
     
 svg.append("rect")
@@ -403,10 +412,19 @@ svg.append("rect")
     .style("fill", "rgba(230, 232, 239, 1)");
 
 svg.append("line")
-    .attr("x1", width / 2 - 30)
-    .attr("x2", width / 2 + 30)
+    .attr("x1", width / 2 - 20.5)
+    .attr("x2", width / 2 + 20.5)
     .attr("y1", 145)
     .attr("y2", 145)
+    .style("stroke", tubeBorderColor)
+    .style("stroke-width", "3.5px")
+    .style("fill", "none");    
+
+svg.append("line")
+    .attr("x1", width / 2 - 30)
+    .attr("x2", width / 2 + 30)
+    .attr("y1", 148)
+    .attr("y2", 148)
     .style("stroke", tubeBorderColor)
     .style("stroke-width", "3px")
     .style("fill", "none")    
