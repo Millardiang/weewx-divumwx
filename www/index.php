@@ -319,7 +319,7 @@ else echo '<a href="https://https://claydonsweather.org.uk/" title="https://clay
 &nbsp;<?php echo $info ?>&nbsp;(<value><?php echo $templateversion ?></value>)&nbsp;
 <?php echo "WeeWX"; ?>-(<value><maxred><?php echo $weather["swversion"]; ?></value>)&nbsp;
 <?php echo $info . "&nbsp;" . $weatherhardware; ?></div> 
-<div class=footertext><a href="https://github.com/steepleian/weewx-Weather34"><?php echo $github; ?>&nbsp; WeeWX Version Repository at https://github.com/steepleian/weewx-Weather34 &nbsp; <img src="img/flags/<?php echo $flag; ?>.svg" width="20px" ></a></div>
+<div class=footertext><a href="https://github.com/Millardiang/weewx-divumwx"><?php echo $github; ?>&nbsp; Private Repository at https://github.com/Millardiang/weewx-divumwx &nbsp; <img src="img/flags/<?php echo $flag; ?>.svg" width="20px" ></a></div>
   <div class=footertext><a href="https://www.aerisweather.com/"><img src="img/aerisweather-attribution-h-<?php echo $theme;?>.png" width="75px"></a></br><a href="https://developer.yr.no/featured-products/forecast/">&nbsp; &nbsp; Meteogram Data by <img src="img/yr.svg" width="14px" ></a></br><a href="https://bas.dev/work/meteocons">&nbsp; &nbsp; Animated Icons by <img src="img/bm.svg" width="14px" ></a></div>
 
 

@@ -412,8 +412,8 @@ if (!empty($webcamurl) && $webcamurl != ' ' && $webcamurl != 'Null' && $webcamur
         </a>
       </li>
       <li>
-        <a href="https://github.com/steepleian/weewx-Weather34/" title="weewx-Weather34 on Github" target="_blank">
-          <weather34menumarkerbluegrey></weather34menumarkerbluegrey> Download weewx-Weather34 skin
+        <a href="https://github.com/Millardiang/weewx-divumwx/" title="weewx-DivumWX on Github" target="_blank">
+          <weather34menumarkerbluegrey></weather34menumarkerbluegrey> Private Download weewx-DivumWX template
         </a>
       </li>
       <li>
@@ -428,7 +428,7 @@ if (!empty($webcamurl) && $webcamurl != ' ' && $webcamurl != 'Null' && $webcamur
       </li>
       <li>
         <a href="https://weather34.com/homeweatherstation/" title="Weather34" target="_blank">
-          <weather34menumarkerbluegrey></weather34menumarkerbluegrey> Designed by weather34.com
+          <weather34menumarkerbluegrey></weather34menumarkerbluegrey> Based on an idea by Weather34
         </a>
       </li>
       <!-- USA WeatherFinder -->
