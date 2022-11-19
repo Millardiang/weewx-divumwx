@@ -316,7 +316,7 @@ else echo '<a href="https://https://claydonsweather.org.uk/" title="https://clay
 
 
 <div class=footertext>
-&nbsp;<?php echo $info ?>&nbsp;(<value><?php echo $templateversion ?></value>)&nbsp;
+&nbsp;<?php echo $info ?>&nbsp;<value><?php echo "In Transition From weewx-Weather34 to weewx-DivumWX (".$templateversion ?></value>)&nbsp;
 <?php echo "WeeWX"; ?>-(<value><maxred><?php echo $weather["swversion"]; ?></value>)&nbsp;
 <?php echo $info . "&nbsp;" . $weatherhardware; ?></div> 
 <div class=footertext><a href="https://github.com/Millardiang/weewx-divumwx"><?php echo $github; ?>&nbsp; Private Repository at https://github.com/Millardiang/weewx-divumwx &nbsp; <img src="img/flags/<?php echo $flag; ?>.svg" width="20px" ></a></div>
