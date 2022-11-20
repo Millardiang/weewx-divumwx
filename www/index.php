@@ -273,4 +273,45 @@ if ($position13 == 'dvmMoonPhaseModule.php')
 <!--/div><span class='moduletitle'><?php echo 'testmodule.php' ?></span></span><div id="updatex"></div-->
 </div></div>
  <!--end outdoor data for homeweatherstation template-->
- 
+   <!--footer area for homeweatherstation template warning dont mess with this below this line unless you really know what you are doing-->
+<div class=weatherfooter-container><div class=weatherfooter-item> 
+<div class=hardwarelogo1>
+<a href="http://weewx.com" alt="http://weewx.com" title="http://weewx.com">
+  <?php
+echo '<img src="img/icon-weewx.svg" alt="WeeWX" title="WeeWX"  width="150px" height="55px" ><div class=hardwarelogo1text></div>';
+?></a> </div>
+<div class=hardwarelogo2 ><?php
+if ($weatherhardware == "Davis Vantage Vue")
+{
+    echo '<img src="img/designedfordavisvue.svg" alt="Davis Instruments-Meteobridge" title="Davis Instruments-Meteobridge"  width="160px" height="65px" >';
+}
+else if ($weatherhardware == "Davis Envoy8x")
+{
+    echo '<img src="img/designedfordavisenvoy8x.svg" alt="Davis Instruments-Meteobridge" title="Davis Instruments-Meteobridge"  width="160px" height="65px" >';
+}
+else if ($davis == "Yes")
+{
+    echo '<img src="img/designedfor-1.svg" alt="Davis Instruments-Meteobridge" title="Davis Instruments-Meteobridge"  width="160px" height="65px" >';
+}
+else if ($weatherhardware == 'Weatherflow Air-Sky')
+{
+    echo '<a href="http://weatherflow.com/" title="http://weatherflow.com/" target="_blank"><img src="img/wflogo.svg" width="125px" height=65px alt="http://weatherflow.com/" ></a>';
+}
+else echo '<a href="https://https://claydonsweather.org.uk/" title="https://claydonsweather.org.uk/" target="_blank"><br><img src="img/divumLogo.svg" width="40px" alt="https://https://claydonsweather.org.uk/" class="homeweatherstationlogo" ><weather34>Team DivumWX design in progress 2021-' . date('Y') . '</weather34></a>'; ?> </div>
+
+
+<div class=footertext>
+&nbsp;<?php echo $info ?>&nbsp;<value><?php echo "Design In Transition From weewx-Weather34 to weewx-DivumWX (".$templateversion ?></value>)&nbsp;
+<?php echo "WeeWX"; ?>-(<value><maxred><?php echo $weather["swversion"]; ?></value>)&nbsp;
+<?php echo $info . "&nbsp;" . $weatherhardware; ?></div> 
+<div class=footertext><a href="https://github.com/Millardiang/weewx-divumwx"><?php echo $github; ?>&nbsp; Private Repository at https://github.com/Millardiang/weewx-divumwx &nbsp; <img src="img/flags/<?php echo $flag; ?>.svg" width="20px" ></a></div>
+  <div class=footertext><a href="https://www.aerisweather.com/"><img src="img/aerisweather-attribution-h-<?php echo $theme;?>.png" width="75px"></a></br><a href="https://developer.yr.no/featured-products/forecast/">&nbsp; &nbsp; Meteogram Data powered by <img src="img/yr.svg" width="14px" ></a></br><a href="https://bas.dev/work/meteocons">&nbsp; &nbsp; Animated Icons by <img src="img/bm.svg" width="14px" ></a></div>
+
+
+
+</div></div>
+<div id=lightningalert></div>
+<?php include_once ('dvmUpdater.php');
+include_once ('menu.php');?>
+</body>
+</html>
