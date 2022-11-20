@@ -25,12 +25,12 @@ include ('serverdata/archivedata.php');
         </weather34mbuptime>
           <?php if ($units != 'us')
 { ?>
-            <a href="./?units=us" title="select Imperial"><topbarimperial>US</topbarimperial></a>
+            <a href="./?units=us" title="Select US Units"><topbarimperial>US</topbarimperial></a>
           <?php
 }
 else
 { ?>
-            <a href="./?units=metric" title="select Metric"><topbarmetric>M</topbarmetric></a>
+            <a href="./?units=metric" title="Select Metric Units"><topbarmetric>M</topbarmetric></a>
           <?php
 } ?>
       </div>
