@@ -19,7 +19,7 @@ $sun_elevation = round($sun_alt,2)."&deg;<div class=sunaboveweather34>&nbsp;</di
 } else if (round($sun_alt,2) < 0) { 
 $sun_elevation = round($sun_alt,2)."&deg;<div class=sunbelowweather34>&nbsp;</div>"; 
 }?>
-<div class="updatedtime1"><?php if(file_exists($livedata)&&time()- filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>';else echo $online." ".$weather["time"];?></div>
+<div class="updatedtime1"><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>';else echo $online." ".$weather["time"];?></div>
 
 <div class="daylightmoduleposition"> 
 <?php echo 
@@ -52,7 +52,7 @@ $sun_elevation = round($sun_alt,2)."&deg;<div class=sunbelowweather34>&nbsp;</di
 <div style="overflow: hidden">
 <div class="wrap">
 <div id="sundial" width="130" height="130"></div>
-  </div>
+</div>
 </div>
 
 <script>
@@ -64,27 +64,27 @@ function toRadians(x) {
   return x * (Math.PI / 180.0);
 }
 				                 
-    let sr = "<?php echo $alm["sunrise"];?>"; // string
+    var sr = "<?php echo $alm["sunrise"];?>"; // string
     
-	let srarr = sr.split(":");
-	let srhour = parseInt(srarr[0]);
-	let srmin = parseInt(srarr[1]);
+	var srarr = sr.split(":");
+	var srhour = parseInt(srarr[0]);
+	var srmin = parseInt(srarr[1]);
 	var srmins = 360.0 / 60.0 * srmin;
 	var sunrise = (360.0 / 24.0 * srhour + srmins / 24.0);
 	
-	let smt = "<?php echo $alm["sun_meridian_transit"];?>"; // string
+	var smt = "<?php echo $alm["sun_meridian_transit"];?>"; // string
 
-	let smtarr = smt.split(":");
-	let smthour = parseInt(smtarr[0]);
-	let smtmin = parseInt(smtarr[1]);
+	var smtarr = smt.split(":");
+	var smthour = parseInt(smtarr[0]);
+	var smtmin = parseInt(smtarr[1]);
 	var smtmins = 360.0 / 60.0 * smtmin;
 	var sun_meridian_transit = (360.0 / 24.0 * smthour + smtmins / 24.0);
     	
-	let ss = "<?php echo $alm["sunset"];?>"; // string
+	var ss = "<?php echo $alm["sunset"];?>"; // string
 	
-	let ssarr = ss.split(":");
-	let sshour = parseInt(ssarr[0]);
-	let ssmin = parseInt(ssarr[1]);
+	var ssarr = ss.split(":");
+	var sshour = parseInt(ssarr[0]);
+	var ssmin = parseInt(ssarr[1]);
 	var ssmins = 360.0 / 60.0 * ssmin;
 	var sunset = (360.0 / 24.0 * sshour + ssmins / 24.0);
 	
