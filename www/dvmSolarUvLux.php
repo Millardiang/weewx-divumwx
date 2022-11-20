@@ -1,14 +1,15 @@
 <?php
 include('common.php');
 include('dvmCombinedData.php');
+include('settings1.php');
 date_default_timezone_set($TZ);
 
 if ($uv["now"]==0){$uv["color"]="grey";}
-else if ($uv["now"]<3){$uv["color"]="rgba(46,139,87,1)";} // earth green
-else if ($uv["now"]<6){$uv["color"]="rgba(20,22,276,1)";} // yellow
-else if ($uv["now"]<8){$uv["color"]="rgba(255,99,71,1)";} // tomato (orange)
-else if ($uv["now"]<11){$uv["color"]="rgba(255,85,85,1)";} // sunset red
-else {$uv["color"]="rgba(190,104,139,1)";} // jupiter (pastel purple)
+else if ($uv["now"]<3){$uv["color"]="#2e8b57";} // earth green
+else if ($uv["now"]<6){$uv["color"]="#ffcf00";} // yellow
+else if ($uv["now"]<8){$uv["color"]="#ff6347";} // tomato (orange)
+else if ($uv["now"]<11){$uv["color"]="#ff5555";} // sunset red
+else {$uv["color"]="#be688b";} // jupiter (pastel purple)
 
 ?>
 
@@ -27,7 +28,7 @@ else if ($uv["now"]>=0 ) {echo $uviclear,'<span>UVI</span> Low';}
 
 <html>
 
-<script type="text/javascript" src='js/d3.min.js'></script>    
+<script src='js/d3.min.js'></script>    
 
        
 <style>
@@ -50,9 +51,16 @@ else if ($uv["now"]>=0 ) {echo $uviclear,'<span>UVI</span> Low';}
     height = 150;
         
     var currentSolar = "<?php echo $solar["now"];?>";
+    currentSolar = currentSolar || 0;
+    
     var maxSolar = "<?php echo $solar["day_max"];?>";
+    maxSolar = maxSolar || 0;
+    
     var minSolar = 0;
-    var solarMaxTime = "<?php echo $solar["day_maxtime"];?>";   
+    
+    var solarMaxTime = "<?php echo $solar["day_maxtime"];?>";
+    solarMaxTime = solarMaxTime || 0;
+       
     var solarunits = "W/m²";    
     
 var bottomY = height + 10,
@@ -80,7 +88,7 @@ svg.append("rect")
     .attr("y", 13)
     .attr("rx", 2)
     .style("stroke", tubeBorderColor)
-    .attr("height", 101.85)
+    .attr("height", 104.85)
     .attr("width", tubeWidth - 10)
     .style("fill", "none");    
     
@@ -89,7 +97,7 @@ svg.append("rect")
     .attr("y", 13)
     .attr("rx", 2)
     .style("fill", "rgba(45,47,50,1)")
-    .attr("height", 101.85)
+    .attr("height", 104.85)
     .attr("width", tubeWidth - 10);
 
 // Scale step size
@@ -149,7 +157,7 @@ svg.append("rect")
     .attr("y", tubeFill_top)
     .attr("rx", 2)
     .attr("width", tubeWidth - 11)
-    .attr("height", tubeFill_bottom - 20 - tubeFill_top)
+    .attr("height", tubeFill_bottom - 17 - tubeFill_top)
     .style("fill", solarColor);
 
 // Values to use along the scale ticks up the solar tube
@@ -189,7 +197,7 @@ svgAxis.selectAll(".tick line")
 svg.append("text")
 	.text("Solar" + " " + currentSolar + " " + solarunits )
 	.attr("x", width / 2)
-	.attr("y", 130)
+	.attr("y", 133)
 	.attr("text-anchor", "middle")
 	.style("font-size", "9px")
 	.style("font-family", "Helvetica")
@@ -198,7 +206,7 @@ svg.append("text")
 svg.append("text") // max solar text output
 	.text("Max " + maxSolar + " " + "(" + solarMaxTime + ")")
     .attr("x", width / 2)
-    .attr("y", 140)
+    .attr("y", 143)
     .style("text-anchor", "middle")
     .style("font-size", "8px")
     .style("font-family", "Helvetica")    
@@ -210,9 +218,16 @@ svg.append("text") // max solar text output
     height = 150;
     
     var currentSolar = "<?php echo $solar["now"];?>";
+    currentSolar = currentSolar || 0;
+    
     var maxSolar = "<?php echo $solar["day_max"];?>";
+    maxSolar = maxSolar || 0;
+    
     var minSolar = 0;
-    var solarMaxTime = "<?php echo $solar["day_maxtime"];?>";   
+    
+    var solarMaxTime = "<?php echo $solar["day_maxtime"];?>";
+    solarMaxTime = solarMaxTime || 0;
+      
     var solarunits = "W/m²"; 
 
 var bottomY = height + 10,
@@ -240,7 +255,7 @@ svg.append("rect")
     .attr("y", 13)
     .attr("rx", 2)
     .style("stroke", tubeBorderColor)
-    .attr("height", 101.85)
+    .attr("height", 104.85)
     .attr("width", tubeWidth - 10)
     .style("fill", "none");    
     
@@ -249,7 +264,7 @@ svg.append("rect")
     .attr("y", 13)
     .attr("rx", 2)
     .style("fill", "rgba(230, 232, 239, 1)")
-    .attr("height", 101.85)
+    .attr("height", 104.85)
     .attr("width", tubeWidth - 10);
        
 // Scale step size
@@ -309,7 +324,7 @@ svg.append("rect")
     .attr("y", tubeFill_top)
     .attr("rx", 2)
     .attr("width", tubeWidth - 11)
-    .attr("height", tubeFill_bottom - 20 - tubeFill_top)
+    .attr("height", tubeFill_bottom - 17 - tubeFill_top)
     .style("fill", solarColor);
 
 // Values to use along the scale ticks up the solar tube
@@ -349,7 +364,7 @@ svgAxis.selectAll(".tick line")
 svg.append("text")
 	.text("Solar" + " " + currentSolar + " " + solarunits )
 	.attr("x", width / 2)
-	.attr("y", 130)
+	.attr("y", 133)
 	.attr("text-anchor", "middle")
 	.style("font-size", "9px")
 	.style("font-family", "Helvetica")
@@ -358,7 +373,7 @@ svg.append("text")
 svg.append("text") // max solar text output
 	.text("Max " + maxSolar + " " + "(" + solarMaxTime + ")")
     .attr("x", width / 2)
-    .attr("y", 140)
+    .attr("y", 143)
     .style("text-anchor", "middle")
     .style("font-size", "8px")
     .style("font-family", "Helvetica")
@@ -382,9 +397,16 @@ svg.append("text") // max solar text output
     height = 150;
     
     var currentUVI = "<?php echo $uv["now"];?>";
+    currentUVI = currentUVI || 0;
+    
     var maxUVI = "<?php echo $uv["day_max"];?>";
+    maxUVI = maxUVI || 0;
+    
     var minUVI = 0.0;
-    var uviMaxTime = "<?php echo $uv["day_maxtime"];?>";    
+    
+    var uviMaxTime = "<?php echo $uv["day_maxtime"];?>";
+    uviMaxTime = uviMaxTime || 0;
+        
     var uviunits = "UVI";    
     
 var bottomY = height + 10,
@@ -412,7 +434,7 @@ svg.append("rect")
     .attr("y", 13)
     .attr("rx", 2)
     .style("stroke", tubeBorderColor)
-    .attr("height", 101.85)
+    .attr("height", 104.85)
     .attr("width", tubeWidth - 10)
     .style("fill", "none");    
     
@@ -421,7 +443,7 @@ svg.append("rect")
     .attr("y", 13)
     .attr("rx", 2)
     .style("fill", "rgba(45,47,50,1)")
-    .attr("height", 101.85)
+    .attr("height", 104.85)
     .attr("width", tubeWidth - 10);
        
 // Scale step size
@@ -481,7 +503,7 @@ svg.append("rect")
     .attr("y", tubeFill_top)
     .attr("rx", 2)
     .attr("width", tubeWidth - 11)
-    .attr("height", tubeFill_bottom - 20 - tubeFill_top)
+    .attr("height", tubeFill_bottom - 17 - tubeFill_top)
     .style("fill", uviColor);
 
 // Values to use along the scale ticks up the uvi tube
@@ -521,7 +543,7 @@ svgAxis.selectAll(".tick line")
 svg.append("text")
 	.text( uviunits + " " + currentUVI )
 	.attr("x", width / 2)
-	.attr("y", 130)
+	.attr("y", 133)
 	.attr("text-anchor", "middle")
 	.style("font-size", "9px")
 	.style("font-family", "Helvetica")
@@ -529,7 +551,7 @@ svg.append("text")
 	
  svg.append("text") // max uvi text output
     .attr("x", width / 2)
-    .attr("y", 140)
+    .attr("y", 143)
     .style("fill", "silver")
     .style("font-family", "Helvetica")
     .style("font-size", "8px")
@@ -543,9 +565,16 @@ svg.append("text")
     height = 150;
     
     var currentUVI = "<?php echo $uv["now"];?>";
+    currentUVI = currentUVI || 0;
+    
     var maxUVI = "<?php echo $uv["day_max"];?>";
+    maxUVI = maxUVI || 0;
+    
     var minUVI = 0.0;
-    var uviMaxTime = "<?php echo $uv["day_maxtime"];?>";    
+    
+    var uviMaxTime = "<?php echo $uv["day_maxtime"];?>";
+    uviMaxTime = uviMaxTime || 0;
+        
     var uviunits = "UVI"; 
 
 var bottomY = height + 10,
@@ -573,7 +602,7 @@ svg.append("rect")
     .attr("y", 13)
     .attr("rx", 2)
     .style("stroke", tubeBorderColor)
-    .attr("height", 101.85)
+    .attr("height", 104.85)
     .attr("width", tubeWidth - 10)
     .style("fill", "none");    
     
@@ -582,7 +611,7 @@ svg.append("rect")
     .attr("y", 13)
     .attr("rx", 2)
     .style("fill", "rgba(230, 232, 239, 1)")
-    .attr("height", 101.85)
+    .attr("height", 104.85)
     .attr("width", tubeWidth - 10);
          
 // Scale step size
@@ -642,7 +671,7 @@ svg.append("rect")
     .attr("y", tubeFill_top)
     .attr("rx", 2)
     .attr("width", tubeWidth - 11)
-    .attr("height", tubeFill_bottom - 20 - tubeFill_top)
+    .attr("height", tubeFill_bottom - 17 - tubeFill_top)
     .style("fill", uviColor);
 
 // Values to use along the scale ticks up the uvi tube
@@ -682,7 +711,7 @@ svgAxis.selectAll(".tick line")
 svg.append("text")
 	.text("UVI" + " " + currentUVI )
 	.attr("x", width / 2)
-	.attr("y", 130)
+	.attr("y", 133)
 	.attr("text-anchor", "middle")
 	.style("font-size", "9px")
 	.style("font-family", "Helvetica")
@@ -690,7 +719,7 @@ svg.append("text")
 	
 svg.append("text") // max uvi text output
     .attr("x", width / 2)
-    .attr("y", 140)
+    .attr("y", 143)
     .style("fill", "silver")
     .style("font-family", "Helvetica")
     .style("font-size", "8px")
@@ -714,8 +743,12 @@ svg.append("text") // max uvi text output
     var width = 95,
     height = 150;
     
-    var currentLux = <?php echo $sky["lux"];?>;
+    var currentLux = "<?php echo $sky["lux"];?>";
+    currentLux = currentLux || 0;
+    
     var maxLux = currentLux;
+    maxLux = maxLux || 0;
+    
     var minLux = 0;    
     
 var bottomY = height + 10,
@@ -743,7 +776,7 @@ svg.append("rect")
     .attr("y", 13)
     .attr("rx", 2)
     .style("stroke", tubeBorderColor)
-    .attr("height", 101.85)
+    .attr("height", 104.85)
     .attr("width", tubeWidth - 10)
     .style("fill", "none");    
     
@@ -752,7 +785,7 @@ svg.append("rect")
     .attr("y", 13)
     .attr("rx", 2)
     .style("fill", "rgba(45,47,50,1)")
-    .attr("height", 101.85)
+    .attr("height", 104.85)
     .attr("width", tubeWidth - 10);
 
 // Scale step size
@@ -793,7 +826,7 @@ svg.append("rect")
     .attr("y", tubeFill_top)
     .attr("rx", 2)
     .attr("width", tubeWidth - 11)
-    .attr("height", tubeFill_bottom - 20 - tubeFill_top)
+    .attr("height", tubeFill_bottom - 17 - tubeFill_top)
     .style("fill", LuxColor);
 
 // Values to use along the scale ticks up the lux tube
@@ -833,7 +866,7 @@ svgAxis.selectAll(".tick line")
 svg.append("text")
 	.text("Lux" + " " + currentLux )
 	.attr("x", width / 2)
-	.attr("y", 130)
+	.attr("y", 133)
 	.attr("text-anchor", "middle")
 	.style("font-size", "9px")
 	.style("font-family", "Helvetica")
@@ -844,9 +877,13 @@ svg.append("text")
     var width = 95,
     height = 150;
     
-    var currentLux = <?php echo $sky["lux"];?>;
+    var currentLux = "<?php echo $sky["lux"];?>";
+    currentLux = currentLux || 0;
+    
     var maxLux = currentLux;
-    var minLux = 0; 
+    maxLux = maxLux || 0;
+    
+    var minLux = 0;
 
 var bottomY = height + 10,
     topY = 0,
@@ -873,7 +910,7 @@ svg.append("rect")
     .attr("y", 13)
     .attr("rx", 2)
     .style("stroke", tubeBorderColor)
-    .attr("height", 101.85)
+    .attr("height", 104.85)
     .attr("width", tubeWidth - 10)
     .style("fill", "none");    
     
@@ -882,7 +919,7 @@ svg.append("rect")
     .attr("y", 13)
     .attr("rx", 2)
     .style("fill", "rgba(230, 232, 239, 1)")
-    .attr("height", 101.85)
+    .attr("height", 104.85)
     .attr("width", tubeWidth - 10);
        
 // Scale step size
@@ -923,7 +960,7 @@ svg.append("rect")
     .attr("y", tubeFill_top)
     .attr("rx", 2)
     .attr("width", tubeWidth - 11)
-    .attr("height", tubeFill_bottom - 20 - tubeFill_top)
+    .attr("height", tubeFill_bottom - 17 - tubeFill_top)
     .style("fill", LuxColor);
 
 // Values to use along the scale ticks up the lux tube
@@ -963,7 +1000,7 @@ svgAxis.selectAll(".tick line")
 svg.append("text")
 	.text("Lux" + " " + currentLux )
 	.attr("x", width / 2)
-	.attr("y", 130)
+	.attr("y", 133)
 	.attr("text-anchor", "middle")
 	.style("font-size", "9px")
 	.style("font-family", "Helvetica")

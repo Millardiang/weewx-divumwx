@@ -42,7 +42,6 @@ $paddingtop = $percentage;
 <html>
 <head>
 
-
 <title><?php echo $stationlocation; ?> Weather Station</title> 
 <meta content="Home weather station providing current weather conditions for <?php echo $stationlocation; ?>" name="description">
 <!--Google / Search Engine Tags -->
@@ -99,18 +98,16 @@ if ('serviceWorker' in navigator) {
 </div></div></div></div>
 <!--begin outside/station data section for homeweatherstation template-->
 <div class="weather-container"><div class="weather-item"><div class="chartforecast">
-<span class="yearpopup">  <a alt="temp charts" title="temp charts" href="pop_menu_temperature.php" data-lity ><?php echo $menucharticonpage ?> Temperature Almanac and Derived Charts</a></span>
-</div>
-<span class='moduletitle'> <?php echo $lang['Temperature']; ?> (<valuetitleunit>&deg;<?php echo $temp["units"]; ?></valuetitleunit>) </span><br /></span>
-  <div id="temperature"></div><br></div>
+<span class="yearpopup">  <a alt="temp charts" title="temp charts" href="pop_menu_temperature.php" data-lity ><?php echo $menucharticonpage ?> Temperature Almanac and Derived Charts</a></span></div>
+<span class='moduletitle'> <?php echo $lang['Temperature']; ?> (<valuetitleunit>&deg;<?php echo $temp["units"]; ?></valuetitleunit>) </span><br /></span><div id="position5"></div><br></div>
   <!--forecast for homeweatherstation template-->
-<?php $percentage = "98%"; ?>
+<!--?php $percentage = "98%"; ?-->
 <div class="weather-item"><div class="chartforecast">
-<span class="yearpopup">
+<!--span class="yearpopup"-->
 <span class="yearpopup">  <a alt="Forecast Menu" title="Forecast Menu" href="pop_menu_forecast.php" data-lity ><?php echo $menucharticonpage ?> Forecasts</a></span>
 <?php if ($position4 == 'top_advisory_eu.php')
 {
-    echo '<a alt="Europe Alerts" title="Europe Alerts" href="pop_europealerts.php"  data-lity>&nbsp;' . $chartinfo . " Weather Alerts</a>";
+     echo '<a alt="Europe Alerts" title="Europe Alerts" href="pop_europealerts.php"  data-lity>&nbsp;' . $chartinfo . " Weather Alerts</a>";
 } ?></span>
 <?php if ($position4 == 'top_advisory_uk.php')
 {
@@ -123,13 +120,9 @@ if ('serviceWorker' in navigator) {
 
 
 <span class="yearpopup">  <a alt="Meteogram" title="Meteogram" href="meteogram.php" data-lity ><?php echo $menucharticonpage ?> Meteogram</a></span>
+</div>
 
-
-  
-      </div>
-  <span class='moduletitle'>
-    <?php echo $position6title; ?>  (<valuetitleunit>&deg;<?php echo $temp["units"]; ?></valuetitleunit>)  </span><br />
-  <div id="currentfore"></div></div>
+<span class='moduletitle'><?php echo $position6title; ?>  (<valuetitleunit>&deg;<?php echo $temp["units"]; ?></valuetitleunit>)</span><br /><div id="position6"></div></div>
   <!--currentsky for homeweatherstation template-->
   <div class="weather-item"><div class="chartforecast">
          <!-- HOURLY & Outlook for homeweather station-->
@@ -141,42 +134,34 @@ else echo "" ?></a></span>
   <span class="monthpopup"><a href="pop_windyradar.php" title="Windy.com Radar" alt="Windy.com Radar" data-lity><?php echo $chartinfo ?> Radar</a></span>
   <span class="monthpopup"><a href="pop_windywind.php" title="Windy.com Wind Map" alt="Windy.com Wind Map" data-lity><?php echo $chartinfo ?> Wind Map</a></span>
   <span class="todaypopup"><a alt="cloud cover" title="cloud cover" href="<?php echo $chartsource; ?>/<?php echo $theme1; ?>-charts.html?chart='cloudcoverplot'&span='weekly'&temp='<?php echo $weather['temp_units']; ?>'&pressure='<?php echo $weather['barometer_units']; ?>'&wind='<?php echo $weather['wind_units']; ?>'&rain='<?php echo $weather['rain_units'] ?>" data-lity ><?php echo $menucharticonpage ?> Cloud Cover</a></span>
+</div>
 
-  
-  </div>
-  <span class='moduletitle'><?php echo $lang['Currentsky']; ?></span><br />
-  <div id="currentsky"></div></div></div>
+<span class='moduletitle'><?php echo $lang['Currentsky']; ?></span><br /><div id="position7"></div></div></div>
  <!--windspeed for homeweatherstation template-->
 <?php if ($weather["wind_units"] == 'kts')
 {
     $weather["wind_units"] = "kn";
 } ?>
-<div class="weather-container"><div class="weather-item"><div class="chartforecast">
-<span class="yearpopup">  <a alt="wind charts" title="wind charts" href="pop_menu_wind.php" data-lity ><?php echo $menucharticonpage ?> Wind Almanac and Charts</a></span>
-      </div>
-  <span class='moduletitle'><?php echo $lang['Direction']; ?> | <?php echo $lang['Windspeed'], " (<valuetitleunit>", $wind["units"]; ?></valuetitleunit>)</span><br />
-         <div id="windspeed"></div></div>
-       <!--barometer for homeweatherstation template-->
-  <div class="weather-item"><div class="chartforecast" >
-<span class="yearpopup">  <a alt="barometer charts" title="barometer charts" href="pop_menu_barometer.php" data-lity ><?php echo $menucharticonpage ?> Barometer Almanac and Charts</a></span>
-      </div>
-  <span class='moduletitle'><?php echo $lang['Barometer'], " (<valuetitleunit>", $barom["units"]; ?></valuetitleunit>)</span><br />
-         <div id="barometer"></div></div>
-      <!--solardial for homeweatherstation template includes reverse for southern hemisohere-->
-<div class=weather-item><div class=chartforecast>
 
+<div class="weather-container"><div class="weather-item"><div class="chartforecast">
+<span class="yearpopup">  <a alt="wind charts" title="wind charts" href="pop_menu_wind.php" data-lity ><?php echo $menucharticonpage;?> Wind Almanac and Charts</a></span></div>
+<span class='moduletitle'><?php echo $lang['Direction']; ?> | <?php echo $lang['Windspeed'], " (<valuetitleunit>", $wind["units"]; ?></valuetitleunit>)</span><br /><div id="position8"></div></div>
+<!--barometer for homeweatherstation template-->
+<div class="weather-item"><div class="chartforecast" >
+<span class="yearpopup">  <a alt="barometer charts" title="barometer charts" href="pop_menu_barometer.php" data-lity ><?php echo $menucharticonpage;?> Barometer Almanac and Charts</a></span></div>
+<span class='moduletitle'><?php echo $lang['Barometer'], " (<valuetitleunit>", $barom["units"];?></valuetitleunit>)</span><br /><div id="position9"></div></div>
+
+<!--solardial for homeweatherstation template includes reverse for southern hemisohere-->
+<div class=weather-item><div class=chartforecast>
 <span class="yearpopup"><a alt="celestial" title="celestial" href=pop_menu_celestial.php data-lity><?php echo $info; ?> Celestial Data</a></span>
 <span class="yearpopup"><a alt="orrery" title="orrery" href=dvmOrreyPopup.php data-lity><?php echo $info; ?> Orrery</a></span>
 <span class="yearpopup"><a alt="Astroclock" title="Astroclock" href=dvmAstroclockPopup.php data-lity><?php echo $info; ?> Astroclock</a></span>
-<span class="yearpopup"><a alt="daylightmap" title="daylightmap" href=dvmDaylightMapPopup.php data-lity><?php echo $info; ?> Daylight Map</a></span>
-</div>
-<span class='moduletitle'><?php echo 'Solar Dial'; ?></span><br />
-  <div id="solardial"></div> </div></div></div>
+<span class="yearpopup"><a alt="daylightmap" title="daylightmap" href=dvmDaylightMapPopup.php data-lity><?php echo $info; ?> Daylight Map</a></span></div>
+<span class='moduletitle'><?php echo 'Solar Dial'; ?></span><br /><div id="position10"></div> </div></div></div>
  <!--rainfall for homeweatherstation template-->
 <div class="weather-container"><div class="weather-item"><div class="chartforecast" >
-<span class="yearpopup">  <a alt="rain charts" title="rain charts" href="pop_menu_rain.php" data-lity ><?php echo $menucharticonpage ?> Rainfall Almanac and Charts</a></span>      </div>
-  <span class='moduletitle'><?php echo $lang['Rainfalltoday'], " (<valuetitleunit>" . $rain["units"] ?></valuetitleunit>)</span><br />
-         <div id="rainfall"></div></div>       
+<span class="yearpopup">  <a alt="rain charts" title="rain charts" href="pop_menu_rain.php" data-lity ><?php echo $menucharticonpage;?> Rainfall Almanac and Charts</a></span></div>
+<span class='moduletitle'><?php echo $lang['Rainfalltoday'], " (<valuetitleunit>" . $rain["units"];?></valuetitleunit>)</span><br /><div id="position11"></div></div>       
          
   <!--position 12th module (second to last) for homeweatherstation template-->
   <div class="weather-item"><div class="chartforecast" >
@@ -195,7 +180,7 @@ if ($position12 == 'airqualitymodule.php')
 {
     echo ' <span class="yearpopup"><a alt="air quality information" title="air quality information" href="purpleair.php" data-lity>' . $chartinfo . " Air Quality | Cloudbase </a></span>";
 }
-if ($position12 == 'uvsolarlux.php')
+if ($position12 == 'dvmSolarUvLux.php')
 {
     echo ' <span class="yearpopup"><a alt="solar" title="UV Guide" href="pop_menu_solar.php" data-lity>' . $chartinfo . " UV and Solar Almanacs and Guide  </a></span>";
 }
@@ -280,7 +265,7 @@ if ($positionlastmodule == 'eq_uk.php')
 {
     echo ' <span class="yearpopup"><a alt="Earthquakes UK" title="Earthquakes UK" href="pop_eqlist_uk.php" data-lity>' . $chartinfo . " UK Earthquakes </a></span>";
 }
-if ($positionlastmodule == 'purpleair.php')
+if ($position13 == 'dvmMoonPhaseModule.php')
 {
     echo '<span class="yearpopup"><a alt="Earthquakes Worldwide" title="Earthquakes Worldwide" href="pop_eqlist.php" data-lity>' . $chartinfo . " Worldwide Earthquakes </a></span>";
 } ?>
@@ -288,45 +273,4 @@ if ($positionlastmodule == 'purpleair.php')
 <!--/div><span class='moduletitle'><?php echo 'testmodule.php' ?></span></span><div id="updatex"></div-->
 </div></div>
  <!--end outdoor data for homeweatherstation template-->
-  <!--footer area for homeweatherstation template warning dont mess with this below this line unless you really know what you are doing-->
-<div class=weatherfooter-container><div class=weatherfooter-item> 
-<div class=hardwarelogo1>
-<a href="http://weewx.com" alt="http://weewx.com" title="http://weewx.com">
-  <?php
-echo '<img src="img/icon-weewx.svg" alt="WeeWX" title="WeeWX"  width="150px" height="55px" ><div class=hardwarelogo1text></div>';
-?></a> </div>
-<div class=hardwarelogo2 ><?php
-if ($weatherhardware == "Davis Vantage Vue")
-{
-    echo '<img src="img/designedfordavisvue.svg" alt="Davis Instruments-Meteobridge" title="Davis Instruments-Meteobridge"  width="160px" height="65px" >';
-}
-else if ($weatherhardware == "Davis Envoy8x")
-{
-    echo '<img src="img/designedfordavisenvoy8x.svg" alt="Davis Instruments-Meteobridge" title="Davis Instruments-Meteobridge"  width="160px" height="65px" >';
-}
-else if ($davis == "Yes")
-{
-    echo '<img src="img/designedfor-1.svg" alt="Davis Instruments-Meteobridge" title="Davis Instruments-Meteobridge"  width="160px" height="65px" >';
-}
-else if ($weatherhardware == 'Weatherflow Air-Sky')
-{
-    echo '<a href="http://weatherflow.com/" title="http://weatherflow.com/" target="_blank"><img src="img/wflogo.svg" width="125px" height=65px alt="http://weatherflow.com/" ></a>';
-}
-else echo '<a href="https://https://claydonsweather.org.uk/" title="https://claydonsweather.org.uk/" target="_blank"><br><img src="img/divumLogo.svg" width="40px" alt="https://https://claydonsweather.org.uk/" class="homeweatherstationlogo" ><weather34>Team DivumWX design in progress 2021-' . date('Y') . '</weather34></a>'; ?> </div>
-
-
-<div class=footertext>
-&nbsp;<?php echo $info ?>&nbsp;<value><?php echo "Design In Transition From weewx-Weather34 to weewx-DivumWX (".$templateversion ?></value>)&nbsp;
-<?php echo "WeeWX"; ?>-(<value><maxred><?php echo $weather["swversion"]; ?></value>)&nbsp;
-<?php echo $info . "&nbsp;" . $weatherhardware; ?></div> 
-<div class=footertext><a href="https://github.com/Millardiang/weewx-divumwx"><?php echo $github; ?>&nbsp; Private Repository at https://github.com/Millardiang/weewx-divumwx &nbsp; <img src="img/flags/<?php echo $flag; ?>.svg" width="20px" ></a></div>
-  <div class=footertext><a href="https://www.aerisweather.com/"><img src="img/aerisweather-attribution-h-<?php echo $theme;?>.png" width="75px"></a></br><a href="https://developer.yr.no/featured-products/forecast/">&nbsp; &nbsp; Meteogram Data by <img src="img/yr.svg" width="14px" ></a></br><a href="https://bas.dev/work/meteocons">&nbsp; &nbsp; Animated Icons by <img src="img/bm.svg" width="14px" ></a></div>
-
-
-
-</div></div>
-<div id=lightningalert></div>
-<?php include_once ('dvmUpdater.php');
-include_once ('menu.php');?>
-</body>
-</html>
+ 

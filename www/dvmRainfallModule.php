@@ -1,6 +1,7 @@
 <?php  //weather34 rain module 15th Feb 2019 //
 include('dvmCombinedData.php');
 include('common.php');
+include('settings1.php');
 header('Content-type: text/html; charset = utf-8');
 ?>
 <div class="updatedtime1"><span><?php if (file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$weather["time"];?></div>
@@ -27,8 +28,10 @@ echo " &nbsp;&nbsp;<valuetextheading1>Last 24hr</valuetextheading1><br><div clas
 <div class="rainrateextra">
 <?php echo "<div class=rainratemodulehome><rainratetextheading>&nbsp;Rate&nbsp;</rainratetextheading><raiblue>"; if ($rain["rate"]>100){echo number_format($rain["rate"],1);} else echo number_format($rain["rate"],2); echo"&nbsp;</raiblue><smallrainunit2>".$weather["rain_units"];?>
 </smallrainunit2></div></div></div></div>
-<!DOCTYPE html>
-<html lang="en">
+
+
+<html>
+
 <script src="js/d3.min.js"></script>
 
 <style>
@@ -40,6 +43,7 @@ echo " &nbsp;&nbsp;<valuetextheading1>Last 24hr</valuetextheading1><br><div clas
 
 <div class="rainposs">
 <div id="raingaugex"></div>
+<div id="svg"></div>
 </div>
 		
 	<script>
@@ -48,8 +52,12 @@ echo " &nbsp;&nbsp;<valuetextheading1>Last 24hr</valuetextheading1><br><div clas
 
 	if (theme == 'dark') {
 	
-	var currentRain = <?php echo $rain["day"];?>;
+	var currentRain = "<?php echo $rain["day"];?>";
+	currentRain = currentRain || 0;
+	
 	var maxRain = currentRain;
+	maxRain = maxRain || 0;
+	
 	var minRain = 0.0;	
 	var rainColor = "rgba(59, 156, 172, 1)";
 	
@@ -262,8 +270,12 @@ svg.append("text")
 		
 } else {
 
-	var currentRain = <?php echo $rain["day"];?>;
+	var currentRain = "<?php echo $rain["day"];?>";
+	currentRain = currentRain || 0;
+	
 	var maxRain = currentRain;
+	maxRain = maxRain || 0;
+	
 	var minRain = 0.0;	
 	var rainColor = "rgba(59, 156, 172, 1)";
 	
@@ -480,7 +492,7 @@ svg.append("text")
 
 <script>
 
-var raining = <?php echo $rain["rate"];?>;
+var raining = "<?php echo $rain["rate"];?>";
 
 if ( raining > 0 ) {
   

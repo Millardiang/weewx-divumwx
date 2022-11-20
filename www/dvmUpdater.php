@@ -20,64 +20,56 @@ if ($sta["latitude"] > "90") {
 
 //update the modules position 1
 (function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position1").show()}});var c=a("#position1");c.load("<?php echo $position1; ?>");
-var b=setInterval(function(){c.load("<?php echo $position1; ?>")},<?php echo $sensorcycle5; ?>)})})(jQuery);//60 minutes
+var b=setInterval(function(){c.load("<?php echo $position1; ?>")},<?php echo $cycles1; ?>)})})(jQuery); // 24 hours 
     
 //update the modules position 2
 (function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position2").show()}});var c=a("#position2");c.load("<?php echo $position2; ?>");
-var b=setInterval(function(){c.load("<?php echo $position2; ?>")},<?php echo $sensorcycle4; ?>)})})(jQuery);//60 seconds
+var b=setInterval(function(){c.load("<?php echo $position2; ?>")},<?php echo $cycles2; ?>)})})(jQuery); // 60 seconds
   
 //update the modules  position 3
 (function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position3").show()}});var c=a("#position3");c.load("<?php echo $position3; ?>");
-var b=setInterval(function(){c.load("<?php echo $position3; ?>")},<?php echo $sensorcycle4; ?>)})})(jQuery);//60 seconds
+var b=setInterval(function(){c.load("<?php echo $position3; ?>")},<?php echo $cycles3; ?>)})})(jQuery); // 60 seconds
   
 //update the modules  position 4
 (function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position4").show()}});var c=a("#position4");c.load("<?php echo $position4; ?>");
-var b=setInterval(function(){c.load("<?php echo $position4; ?>")},<?php echo $sensorcycle5; ?>)})})(jQuery);//60 minutes
+var b=setInterval(function(){c.load("<?php echo $position4; ?>")},<?php echo $cycles4; ?>)})})(jQuery); // 60 seconds
 
 //update the modules position 5
-(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#temperature").show()}});var c=a("#temperature");c.load("dvmTemperatureModule.php");
-var b=setInterval(function(){c.load("dvmTemperatureModule.php")},<?php echo $sensorcycle4; ?>)})})(jQuery);//60 seconds
+(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position5").show()}});var c=a("#position5");c.load("<?php echo $position5; ?>");
+var b=setInterval(function(){c.load("<?php echo $position5; ?>")},<?php echo $cycles5; ?>)})})(jQuery); // 60 seconds
 
 //update the modules position 6
-(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#currentfore").show()}});var c=a("#currentfore");c.load("<?php echo $position6; ?>");
-var b=setInterval(function(){c.load("<?php echo $position6; ?>")},<?php echo $sensorcycle4; ?>)})})(jQuery);//60 seconds
+(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position6").show()}});var c=a("#position6");c.load("<?php echo $position6; ?>");
+var b=setInterval(function(){c.load("<?php echo $position6; ?>")},<?php echo $cycles6; ?>)})})(jQuery); // 60 seconds
 
 //update the modules position 7
-(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#currentsky").show()}});var c=a("#currentsky");c.load("dvmCurrentModule.php");
-var b=setInterval(function(){c.load("dvmCurrentModule.php")},<?php echo $sensorcycle4; ?>)})})(jQuery);//60 seconds
+(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position7").show()}});var c=a("#position7");c.load("<?php echo $position7; ?>");
+var b=setInterval(function(){c.load("<?php echo $position7; ?>")},<?php echo $cycles7; ?>)})})(jQuery); // 60 seconds
 
 //update the modules position 8
-(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#windspeed").show()}});var c=a("#windspeed");c.load("dvmWindModule.php");
-var b=setInterval(function(){c.load("dvmWindModule.php")},<?php echo $sensorcycle1; ?>)})})(jQuery);//4.8 seconds
+(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position8").show()}});var c=a("#position8");c.load("<?php echo $position8; ?>");
+var b=setInterval(function(){c.load("<?php echo $position8; ?>")},<?php echo $cycles8; ?>)})})(jQuery); // 4 seconds (wind module)
      
-
 //update the modules position 9
-var refreshId;$(document).ready(function(){barometer()});function barometer(){$.ajax({cache:false,success:function(a){$("#barometer").html(a);<?php if (
-    $baroRefresh > 0
-) {
-    echo "setTimeout(barometer," . $sensorcycle4 . ")";
-} ?>},
-	type:"GET",url:"dvmBarometerModule.php"})};
+(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position9").show()}});var c=a("#position9");c.load("<?php echo $position9; ?>");
+var b=setInterval(function(){c.load("<?php echo $position9; ?>")},<?php echo $cycles9; ?>)})})(jQuery); // 60 seconds
 
 //update the modules position 10
-(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#solardial").show()}});var c=a("#solardial");c.load("dvmSolarDialModule.php");
-var b=setInterval(function(){c.load("dvmSolarDialModule.php")},<?php echo $sensorcycle5; ?>)})})(jQuery);//60 minutes
+(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position10").show()}});var c=a("#position10");c.load("<?php echo $position10; ?>");
+var b=setInterval(function(){c.load("<?php echo $position10; ?>")},<?php echo $cycles10; ?>)})})(jQuery); // 60 seconds
 
 //update the modules position 11
-var refreshId;$(document).ready(function(){rainfall()});function rainfall(){$.ajax({cache:false,success:function(a){$("#rainfall").html(a);<?php if (
-    $rainRefresh > 0
-) {
-    echo "setTimeout(rainfall," . $sensorcycle3 . ")";
-} ?>},
-	type:"GET",url:"dvmRainfallModule.php"})};
+(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position11").show()}});var c=a("#position11");c.load("<?php echo $position11; ?>");
+var b=setInterval(function(){c.load("<?php echo $position11; ?>")},<?php echo $cycles11; ?>)})})(jQuery); // 60 seconds
 
 //update the modules position 12
 (function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position12").show()}});var c=a("#position12");c.load("<?php echo $position12; ?>");
-var b=setInterval(function(){c.load("<?php echo $position12; ?>")},<?php echo $sensorcycle4; ?>)})})(jQuery);//60 seconds
+var b=setInterval(function(){c.load("<?php echo $position12; ?>")},<?php echo $cycles12; ?>)})})(jQuery); // 60 seconds
 
 //update the modules position 13
 (function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position13").show()}});var c=a("#position13");c.load("<?php echo $position13; ?>");
-var b=setInterval(function(){c.load("<?php echo $position13; ?>")},<?php echo $sensorcycle5; ?>)})})(jQuery);//60 minutes
+var b=setInterval(function(){c.load("<?php echo $position13; ?>")},<?php echo $cycles13; ?>)})})(jQuery); // 60 seconds
+
 
 //update the moonphase image
 var refreshId;$(document).ready(function(){moonimage()});function moonimage(){$.ajax({cache:false,success:function(a){$("#moonimage").html(a);<?php if (
@@ -85,7 +77,8 @@ var refreshId;$(document).ready(function(){moonimage()});function moonimage(){$.
 ) {
     echo "setTimeout(moonimage, 3600000)";
 } ?>},
-	type:"GET",url:"dvmGetMoon.php"})};			
+	type:"GET",url:"dvmGetMoon.php"})};
+			
 
 </script>
 <?php if ($position1 == "dvmWeatherClockModule.php") { ?>

@@ -2,7 +2,7 @@
 
 include('dvmCombinedData.php');
 include('common.php');
-//include('settings1.php');
+include('settings1.php');
 
 if ($theme === "dark")
 {$bordercolor = "#393d40";}
@@ -98,9 +98,9 @@ else if(anyToC($temp["outside_now"])<100){$tempcolor = "#e26870";}
 <div class="updatedtime1"><?php if(file_exists($livedata)&&time()- filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>';else echo $online." ".$weather["time"];?></div>
 <!--iframe style="width: auto; height: 155px; overflow: hidden; border: 0px;" src="thermometer.php"></iframe-->
 <!--iframe style="width: auto; height: 155px; overflow: hidden; border: 0px;" src="thermo.php"></iframe-->
-<script src='js/d3.min.js'></script>
-<html>
 
+<html>
+<script src='js/d3.min.js'></script>
 
 <style>
 .temppos {
@@ -122,16 +122,23 @@ else if(anyToC($temp["outside_now"])<100){$tempcolor = "#e26870";}
 
     var width = 80,
     height = 150;
-    maxTemp = <?php echo $temp["outside_day_max"];?>;
-    minTemp = <?php echo $temp["outside_day_min"];?>;
-    currentTemp = <?php echo $temp["outside_now"];?>;
+    
+    var maxTemp = "<?php echo $temp["outside_day_max"];?>";
+    maxTemp = maxTemp || 0;
+    
+    var minTemp = "<?php echo $temp["outside_day_min"];?>";
+    minTemp = minTemp || 0;
+    
+    var currentTemp = "<?php echo $temp["outside_now"];?>";
+    currentTemp = currentTemp || 0;
+    
+    var mercuryColor = "<?php echo $tempcolor;?>";
 
 var bottomY = height - 5,
     topY = 5,
     bulbRadius = 25.5,
     tubeWidth = 25.5,
-    tubeBorderWidth = 1,
-    mercuryColor = "<?php echo $tempcolor;?>",
+    tubeBorderWidth = 1,    
     innerBulbColor = "rgb(230, 200, 200)",
     tubeBorderColor = "#999999";
 
@@ -301,16 +308,23 @@ svg.append("text")
    
     var width = 80,
     height = 150;
-    maxTemp = <?php echo $temp["outside_day_max"];?>;
-    minTemp = <?php echo $temp["outside_day_min"];?>;
-    currentTemp = <?php echo $temp["outside_now"];?>;
+    
+    var maxTemp = "<?php echo $temp["outside_day_max"];?>";
+    maxTemp = maxTemp || 0;
+    
+    var minTemp = "<?php echo $temp["outside_day_min"];?>";
+    minTemp = minTemp || 0;
+    
+    var currentTemp = "<?php echo $temp["outside_now"];?>";
+    currentTemp = currentTemp || 0;
+    
+    var mercuryColor = "<?php echo $tempcolor;?>";
 
 var bottomY = height - 5,
     topY = 5,
     bulbRadius = 25.5,
     tubeWidth = 25.5,
-    tubeBorderWidth = 1,
-    mercuryColor = "<?php echo $tempcolor;?>",
+    tubeBorderWidth = 1,    
     innerBulbColor = "rgb(230, 200, 200)",
     tubeBorderColor = "#999999";
 
@@ -578,7 +592,8 @@ if ($temp["outside_day_max"]<10){echo "&nbsp;".$temp["outside_day_max"]."&deg;".
 <div class="divTableCell"><?php echo $temp["outside_trend"].'&deg;' ?><smalltempunit2><?php echo $temp["units"];?></smalltempunit2><?php 
 if($temp["outside_trend"]>0){echo '&nbsp;'.$risingsymbol;}else if($temp["outside_trend"]<0){echo '&nbsp;'.$fallingsymbol;}else{ echo '&nbsp;'.$steadysymbol;}?></div>
 
-<div class="divTableCell" style="border-left: 5px solid <?php echo $humidcolor; ?>;"><?php echo $humid["now"]; ?><smalltempunit2>%</smalltempunit2></div>
+<div class="divTableCell" style="border-left: 5px solid <?php echo $humidcolor; ?>;"><?php echo $humid["now"]; ?><smalltempunit2>%</smalltempunit2><?php //humidity trend
+if($humid["trend"]>0){echo '&nbsp;'.$risingsymbol;}else if($humid["trend"]<0){echo '&nbsp;'.$fallingsymbol;}else{ echo '';}?></div>
 
 <div class="divTableCell" style="border-left: 5px solid <?php echo $dewcolor; ?>;"><?php //dewpoint
 echo "&nbsp;".$dew["now"].'&deg;<smalltempunit2>'.$temp["units"];?><?php //dewpoint trend
