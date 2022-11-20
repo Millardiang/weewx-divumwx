@@ -28,7 +28,7 @@ $alm["fullmoon"] = $adata["almanac"]["full moon"]["at"];
 $alm["newmoon"] = $adata["almanac"]["new moon"]["at"];
 if($alm["moonphase_no"]>4){$waxwan = "wan";}
 else{$waxwan = "wax";}
-//$moonimg = "img/moon/moon".$waxwan."-".$alm["luminance2"].".png";   
+  
 $moonimg = "img/moon-1.jpg"; 
 if ($theme === "dark")
 {$circleborder = "rgb(30,32,36";}
@@ -68,6 +68,8 @@ foreach ($meteor_events as $meteor_check) {
 <div class="updatedtime1"><span><?php if(file_exists($livedata2)&&time()- filemtime($livedata2)>300)echo $offline. '<offline> Offline </offline>';else echo $online." ".$weather["time"];?></span></div>
 <div class="moonphasemoduleposition">
 <div class="moonrise1">
+<svg id="weather34 moon rise" viewBox="0 0 32 32" width="6" height="6" fill="none" stroke="#01a4b5" stroke-linecap="round" stroke-linejoin="round" stroke-width="10%">    
+<path d="M30 20 L16 8 2 20" /></svg>
  <?php echo $lang['Moon'];?> <br /><?php  echo 'Rise<blueu> ' .$alm["moonrise"].'</blueu>';?>
 
 <div class="moonmodulepos">
@@ -114,5 +116,4 @@ echo $meteor_default;?>
 
 <?php echo'<div class="weather34moonphasem2">Moon Phase<br>'.$alm["moonphase"].'</div>
 <div class="weather34luminancem2">Luminance<br>'.round($alm["luminance"],2).' %</div>';?>
-
 
