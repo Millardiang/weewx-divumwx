@@ -1,0 +1,225 @@
+#errorCatcher Echo
+##
+## Specifying an encoding of UTF-8 is usually safe, but if your text is 
+## actually in Latin-1, then you should replace the string "UTF-8" with "latin-1"
+## If you do this, you should also change the 'Content-Type' metadata below.
+#encoding UTF-8
+##
+##
+##		Calculate length of daylight
+	  #set $daylength = time.strftime('%H:%M', time.gmtime(int($almanac.sun.set.raw -  $almanac.sun.rise.raw)))
+##		Truncate station uptime decimals
+	  #set $stationuptime = str($station.os_uptime.raw).split('.')[0]
+ 	
+          #if $almanac.moon_phase.lower() == "New".lower()
+            #set $moonphase_no = "0"
+          #else if $almanac.moon_phase.lower() == "Waxing Crescent".lower()
+            #set $moonphase_no = "1"
+	  #else if $almanac.moon_phase.lower() == "First Quarter".lower()
+            #set $moonphase_no = "2"
+	  #else if $almanac.moon_phase.lower() == "Waxing Gibbous".lower()
+            #set $moonphase_no = "3"
+          #else if $almanac.moon_phase.lower() == "Full".lower()
+            #set $moonphase_no = "4"
+	  #else if $almanac.moon_phase.lower() == "Waning Gibbous".lower()
+            #set $moonphase_no = "5"
+	  #else if $almanac.moon_phase.lower() == "Last Quarter".lower()
+            #set $moonphase_no = "6"
+	  #else if $almanac.moon_phase.lower() == "Waning Crescent".lower()
+            #set $moonphase_no = "7"
+          #end if
+          
+
+    
+      #import datetime
+      #set $now = datetime.datetime.now()
+      #set $nowHour = $now.hour
+      #set $sunrise_hour = datetime.datetime.fromtimestamp($almanac.sunrise.raw).strftime('%H')
+      #set $sunset_hour = datetime.datetime.fromtimestamp($almanac.sunset.raw).strftime('%H')
+        ##if $sunrise_hour <= $nowHour < $sunset_hour ## This works but to keep it inline with JavaScript the below works too
+        #if int($sunrise_hour) <= int($nowHour) and int($nowHour) < int($sunset_hour)
+            #set $bodyTheme = "light"
+            
+        #else
+            ## Night time, use dark mode
+            #set $bodyTheme = "dark"
+            
+        #end if  
+
+        #set $mlsc = "N/A"
+        #if $varExists('month.lightning_strike_count') and $month.lightning_strike_count.sum is not None 
+          #set $mlsc = $month.lightning_strike_count.sum 
+        #end if
+        #set $ylsc = "N/A"
+        #if $varExists('year.lightning_strike_count') and $year.lightning_strike_count.sum is not None 
+          #set $ylsc = $year.lightning_strike_count.sum 
+        #end if
+        #set $dysc = "N/A"
+        #if $varExists('day.lightning_strike_count') and $day.lightning_strike_count.sum is not None 
+          #set $dysc = $day.lightning_strike_count.sum 
+        #end if
+	#set $atsc = "N/A"
+        #if $varExists('day.lightning_strike_count') and $day.lightning_strike_count.sum is not None
+          #set $atsc = $alltime.lightning_strike_count.sum
+        #end if
+        #set $ydsc = "N/A"
+        #if $varExists('day.lightning_strike_count') and $day.lightning_strike_count.sum is not None
+          #set $ydsc = $yesterday.lightning_strike_count.sum
+        #end if
+        #set $ldlt = "N/A"
+        #if $varExists('year.lightning_distance.lasttime') and $year.lightning_distance.lasttime is not None  
+           #set $ldlt = $year.lightning_distance.lasttime
+        #end if
+
+  
+          #import time
+#set almost_end = $rainyear.end.raw - 1
+#set almost_end_tt = $time.localtime($almost_end)
+{
+    "info":
+    {
+        "location": "$station.location",
+        "latitude": $station.stn_info.latitude_f,
+        "longitude": $station.stn_info.longitude_f,
+        "altitude meters": $station.altitude.meter.raw,
+        "metgramlink": "$station.station_url",
+        "daylight": "$daylength",
+        "trend period": "$trend.time_delta"
+    },
+    "generation":
+    {
+        "time": "$current.dateTime.format("%a, %d %b %Y %H:%M:%S %Z")",
+        "generator": "weewx $station.version"
+    },
+    "lightning":
+    {
+        
+        "lightning strike count yesterday": {"value": $ydsc},
+        "lightning strike count day": {"value": $dysc},
+        "lightning strike count month": {"value": $mlsc},
+        "lightning strike count year": {"value": $ylsc},
+        "lightning last distance": {"value":   "$alltime.lightning_distance.lastnonzero.format(add_label=False, $localize=False)"},
+        "lightning last time": {"at": "$alltime.lightning_last_det_time.lastnonzero.raw"},
+        "lightning strike count alltime": {"value": $atsc},
+        "lightning strike count 3hr": {"value": $span($hour_delta=3)lightning_strike_count.sum},
+        ## Last value can't end with a comma
+        "void_end": null
+    },
+    "airquality":
+    {
+        #if $current.pm2_5.has_data
+        "pm25 current": {"value": $current.pm2_5.format($localize=False,add_label=False)},
+        "pm25 rolling 24hr": {"value": $current.pm2_5.format($localize=False,add_label=False)},
+        #end if
+        #if $current.pm10_0.has_data
+        "pm10 current": {"value": $current.pmpm10_0.format($localize=False,add_label=False)},
+        "pm10 rolling 24hr": {"value": $current.pm10_0.format($localize=False,add_label=False)},
+        #end if
+        ## Last value can't end with a comma
+        "void_end": null
+    },
+    "cloudcover":
+    {
+        #if $current.signal8.has_data
+        "cloud cover": {"value": $current.signal8.format($localize=False,add_label=False)},
+        #end if
+        ## Last value can't end with a comma
+        "void_end": null
+
+    },
+    "almanac":
+    {
+        ## If extended almanac information is available, do extra calculations.
+#if $almanac.hasExtras
+  #set $sun_altitude = $almanac.sun.alt
+  #set $moonDays = int(round(($current.dateTime.raw - $almanac.previous_new_moon.raw)/86400,0))
+  #if $sun_altitude < 0
+    #set $sun_None="<i>(Always down)</i>"
+    #set $daylight_str = "00:00"
+  #else
+    #set $sun_None="<i>(Always up)</i>"
+    #set $daylight_str = "24:00"
+  #end if
+  #set $sunrise_ts = $almanac.sun.rise.raw
+  #set $sunset_ts = $almanac.sun.set.raw
+  #if $sunrise_ts and $sunset_ts
+    #set $now = $current.dateTime.raw
+    #set $today_daylight = $sunset_ts -  $sunrise_ts
+    #set $seconds = $today_daylight
+    #set $hours = $seconds //3600
+    #set $seconds %= 3600
+    #set $minutes = $seconds//60
+    #set $seconds %= 60
+    #set $daylight_str = "%d hours, %d minutes, %d seconds" % ($hours, $minutes, $seconds)
+    #set $yesterday = $now - 24*3600
+    #set $yesterday_daylight = $almanac($almanac_time=$yesterday).sun.set.raw - $almanac($almanac_time=$yesterday).sun.rise.raw
+    #set $difference = $today_daylight - $yesterday_daylight
+    #if $difference
+      #set $delta = abs($difference)
+      #set $amt_str = "%s%d seconds" % (str(int($delta) // 60) + ' minutes, ' if ($delta // 60) > 0 else '', $delta % 60 if ($delta // 60) > 0 else $delta)
+      #if $difference > 0
+        #set $delta_str = "%s more than yesterday" % $amt_str
+      #else
+        #set $delta_str = "%s less than yesterday" % $amt_str
+      #end if
+      ##set $daylight_str = "%s<br/>%s" % ($daylight_str, $delta_str)
+    #end if
+  #end if
+#end if
+#if $almanac.hasExtras        
+        "sun rise date": {"at": "$almanac.sun.rise.format("%b %d %Y %H:%M:%S")"},
+        "sun set date": {"at": "$almanac.sun.set.format("%b %d %Y %H:%M:%S")"},
+        "moon rise date": {"at": "$almanac.moon.rise.format("%d %b %H:%M")"},
+        "moon set date": {"at": "$almanac.moon.set.format("%d %b %H:%M")"},
+        "nautical twighlight begin": {"at": "$almanac(horizon=-12).sun(use_center=1).rise.format(format_string="%H:%M")"},
+        "civil twighlight begin": {"at": "$almanac(horizon=-6).sun(use_center=1).rise.format(format_string="%H:%M")"},
+        "astronomical twighlight begin": {"at": "$almanac(horizon=-18).sun(use_center=1).rise.format(format_string="%H:%M")"},
+        "sun rise": {"at": "$almanac.sun.rise.format(format_string="%H:%M")"},
+        "sun next rise": {"at": "$almanac.sun.next_rising.format(format_string="%H:%M")"},
+        "sun meridian transit": {"at": "$almanac.sun.transit.format(format_string="%H:%M")"},
+        "sun set": {"at": "$almanac.sun.set.format(format_string="%H:%M")"},
+        "sun next set":{"at":"$almanac.sun.next_setting.format(format_string="%H:%M")"},
+        "civil twighlight end": {"at": "$almanac(horizon=-6).sun(use_center=1).set.format(format_string="%H:%M")"},
+        "nautical twighlight end": {"at": "$almanac(horizon=-12).sun(use_center=1).set.format(format_string="%H:%M")"},
+        "astronomical twighlight end": {"at": "$almanac(horizon=-18).sun(use_center=1).set.format(format_string="%H:%M")"},
+        "hour sun": {"value": $(almanac.sun.ha % 360.0)},
+        "sun azimuth": {"value": $almanac.sun.az},          
+        "sun altitude": {"value": $almanac.sun.alt},         
+        "sun right ascension": {"value": $almanac.sun.ra},          
+        "sun declination": {"value": $almanac.sun.dec},
+        "sidereal time": {"at": $almanac.sidereal_time},         
+        "winter solstice": {"at": "$almanac.next_winter_solstice.format(format_string="%H:%M")"},
+        "solstice": {"at": "$almanac.next_solstice"},
+        "summer solstice": {"at": "$almanac.next_summer_solstice"},
+        "vernal equinox": {"at": "$almanac.next_vernal_equinox"},
+        "equinox": {"at": "$almanac.next_equinox"},
+        "moon rise": {"at": "$almanac.moon.rise.format(format_string="%H:%M")"},
+        "moon meridian transit": {"at": "$almanac.moon.transit.format(format_string="%H:%M")"},
+        "moon set": {"at": "$almanac.moon.set.format(format_string="%H:%M")"},
+        "hour moon": {"value": $(almanac.moon.ha % 360.0)},
+        "moon azimuth": {"value": $almanac.moon.az},          
+        "moon altitude": {"value": $almanac.moon.alt},          
+        "moon right ascension": {"value": $almanac.moon.ra},          
+        "moon declination": {"value": $almanac.moon.dec},         
+        "new moon": {"at": "$almanac.next_new_moon.format("%d %b %H:%M")"},
+        "first quarter moon": {"at": "$almanac.next_first_quarter_moon.format("%d %b %H:%M")"},
+        "full moon": {"at": "$almanac.next_full_moon.format("%d %b %H:%M")"},
+        "last quarter moon": {"at": "$almanac.next_last_quarter_moon.format("%d %b %H:%M")"},
+        "moon phase": {"value": "$almanac.moon_phase"},
+        "moon phase number": {"value": $moonphase_no},
+        "moon fullness": {"value": "$almanac.moon.moon_fullness"},
+        "moon age": {"value": $moonDays},
+        "mercury hlongitude": {"value": $almanac.mercury.hlong},
+        "venus hlongitude": {"value": $almanac.venus.hlong},
+        "earth hlongitude": {"value": $almanac.sun.hlong},
+        "mars hlongitude": {"value": $almanac.mars.hlong},
+        "jupiter hlongitude": {"value": $almanac.jupiter.hlong},
+        "saturn hlongitude": {"value": $almanac.saturn.hlong},
+        "uranus hlongitude": {"value": $almanac.uranus.hlong},
+        "neptune hlongitude": {"value": $almanac.neptune.hlong},
+        "pluto hlongitude": {"value": $almanac.pluto.hlong},        
+        #end if
+        ## Last value can't end with a comma
+        "void_end": null
+    }
+}
