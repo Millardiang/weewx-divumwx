@@ -1,0 +1,103 @@
+ 	
+          
+
+    
+            
+
+
+  
+{
+    "info":
+    {
+        "location": "Steeple Claydon, UK",
+        "latitude": 51.94,
+        "longitude": -0.987,
+        "altitude meters": 88.0,
+        "metgramlink": "https://claydonsweather.org.uk",
+        "daylight": "08:10",
+        "trend period": "10800 seconds"
+    },
+    "generation":
+    {
+        "time": "Wed, 30 Nov 2022 11:00:00 GMT",
+        "generator": "weewx 4.9.2a1"
+    },
+    "lightning":
+    {
+        
+        "lightning strike count yesterday": {"value": 0},
+        "lightning strike count day": {"value": 0},
+        "lightning strike count month": {"value": 1},
+        "lightning strike count year": {"value": 274},
+        "lightning last distance": {"value":   "10.0"},
+        "lightning last time": {"at": "1667320750"},
+        "lightning strike count alltime": {"value": 458},
+        "lightning strike count 3hr": {"value": 0},
+        "void_end": null
+    },
+    "airquality":
+    {
+        "void_end": null
+    },
+    "cloudcover":
+    {
+        "cloud cover": {"value": 64.264706},
+        "void_end": null
+
+    },
+    "almanac":
+    {
+        "sun rise date": {"at": "Nov 30 2022 07:47:01"},
+        "sun set date": {"at": "Nov 30 2022 15:57:45"},
+        "moon rise date": {"at": "30 Nov 13:20"},
+        "moon set date": {"at": "30 Nov 23:35"},
+        "nautical twighlight begin": {"at": "06:25"},
+        "civil twighlight begin": {"at": "07:07"},
+        "astronomical twighlight begin": {"at": "05:45"},
+        "sun rise": {"at": "07:47"},
+        "sun next rise": {"at": "07:48"},
+        "sun meridian transit": {"at": "11:52"},
+        "sun set": {"at": "15:57"},
+        "sun next set":{"at":"15:57"},
+        "civil twighlight end": {"at": "16:37"},
+        "nautical twighlight end": {"at": "17:19"},
+        "astronomical twighlight end": {"at": "17:59"},
+        "hour sun": {"value": 6.053813942536046},
+        "sun azimuth": {"value": 167.33507209894682},          
+        "sun altitude": {"value": 15.548396305873352},         
+        "sun right ascension": {"value": 246.45433315604635},          
+        "sun declination": {"value": -21.677020368264987},
+        "sidereal time": {"at": 233.3123220208153},         
+        "winter solstice": {"at": "21:48"},
+        "solstice": {"at": "21/12/22 21:48:00"},
+        "summer solstice": {"at": "21/06/23 15:57:55"},
+        "vernal equinox": {"at": "20/03/23 21:24:15"},
+        "equinox": {"at": "20/03/23 21:24:15"},
+        "moon rise": {"at": "13:20"},
+        "moon meridian transit": {"at": "18:20"},
+        "moon set": {"at": "23:35"},
+        "hour moon": {"value": 4.413165112980067},
+        "moon azimuth": {"value": 85.57290611090768},          
+        "moon altitude": {"value": -21.816947558172416},          
+        "moon right ascension": {"value": 340.4565867526823},          
+        "moon declination": {"value": -14.385217203797245},         
+        "new moon": {"at": "23 Dec 10:16"},
+        "first quarter moon": {"at": "30 Nov 14:36"},
+        "full moon": {"at": "08 Dec 04:08"},
+        "last quarter moon": {"at": "16 Dec 08:56"},
+        "moon phase": {"value": "First quarter"},
+        "moon phase number": {"value": 2},
+        "moon fullness": {"value": "48.47430469118182"},
+        "moon age": {"value": 7},
+        "mercury hlongitude": {"value": 287.4959127328265},
+        "venus hlongitude": {"value": 270.94773041171965},
+        "earth hlongitude": {"value": 68.21687633552835},
+        "mars hlongitude": {"value": 72.0755370656137},
+        "jupiter hlongitude": {"value": 9.61992273367016},
+        "saturn hlongitude": {"value": 325.28161205160427},
+        "uranus hlongitude": {"value": 47.14579055736321},
+        "neptune hlongitude": {"value": 354.4821460742695},
+        "pluto hlongitude": {"value": 297.99839409123166},        
+        "void_end": null
+    }
+}
