@@ -346,8 +346,10 @@ if (
     $temp["outside_month_mintime"] = date('D j H:i:s', $sdata["month.outTemp.mintime.raw"]);
     $temp["outside_year_max"] = $sdata["year.outTemp.max.formatted"];
     $temp["outside_year_maxtime"] = date('j M H:i:s', $sdata["year.outTemp.maxtime.raw"]);
+    $temp["outside_year_maxtime2"] = date('j M', $sdata["year.outTemp.maxtime.raw"]);
     $temp["outside_year_min"] = $sdata["year.outTemp.min.formatted"];
     $temp["outside_year_mintime"] = date('j M H:i:s', $sdata["year.outTemp.mintime.raw"]);
+    $temp["outside_year_mintime2"] = date('j M', $sdata["year.outTemp.mintime.raw"]);
     $temp["outside_alltime_max"] = $sdata["alltime.outTemp.max.formatted"];
     $temp["outside_alltime_maxtime"] = date('j M Y',  $sdata["alltime.outTemp.maxtime.raw"]);
     $temp["outside_alltime_min"] = $sdata["alltime.outTemp.min.formatted"];
@@ -394,12 +396,14 @@ if (
     $wind["gust_24h_maxtime"] = date('D j H:i:s',  $sdata["24h.windGust.maxtime.raw"]);
     $wind["speed_month_max"] = $sdata["month.windSpeed.max.formatted"];
     $wind["speed_month_maxtime"] = date('D j H:i:s', $sdata["month.windSpeed.maxtime.raw"]);
+    $wind["gust_month_maxtime2"] = date('D j', $sdata["month.windGust.maxtime.raw"]);
     $wind["gust_month_max"] = $sdata["month.windGust.max.formatted"];
     $wind["gust_month_maxtime"] = date('D j H:i:s', $sdata["month.windGust.maxtime.raw"]);
     $wind["speed_year_max"] = $sdata["year.windSpeed.max.formatted"];
     $wind["speed_year_maxtime"] = date('j M H:i:s', $sdata["year.windSpeed.maxtime.raw"]);
     $wind["gust_year_max"] = $sdata["year.windGust.max.formatted"];
     $wind["gust_year_maxtime"] = date('j M H:i:s',  $sdata["year.windGust.maxtime.raw"]);
+    $wind["gust_year_maxtime2"] = date('j M', $sdata["year.windGust.maxtime.raw"]);
     $wind["speed_alltime_max"] = $sdata["alltime.windSpeed.max.formatted"];
     $wind["speed_alltime_maxtime"] = date('j M Y',  $sdata["alltime.windSpeed.maxtime.raw"]);
     $wind["gust_alltime_max"] = $sdata["alltime.windGust.max.formatted"];
