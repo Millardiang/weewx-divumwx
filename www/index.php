@@ -114,9 +114,7 @@ echo $weather['temp_units'];?>'&pressure='<?php echo $weather['barometer_units']
 <span class='moduletitle'><?php echo $lang['Direction'];?> | <?php echo $lang['Windspeed'], " (<valuetitleunit>", $wind["units"];?></valuetitleunit>)</span><br/><div id="position8"></div></div>
 
 <!-- position 9--->
-<div class="weather-item"><div class="chartforecast">
-<span class="yearpopup"><a alt="barometer charts" title="barometer charts" href="pop_menu_barometer.php" data-lity ><?php echo $menucharticonpage;?> Barometer Almanac and Charts</a></span></div>
-<span class='moduletitle'><?php echo $lang['Barometer'], " (<valuetitleunit>", $barom["units"];?></valuetitleunit>)</span><br/><div id="position9"></div></div>
+<div class="weather-item"><br/> <div id="position9"></div></div>
 
 <!-- position 10--->
 <div class="weather-item"><div class="chartforecast">
