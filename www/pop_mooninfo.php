@@ -392,7 +392,7 @@ document.getElementById("weather34shape").setAttribute("d",weather34moonCurve);}
 <div class=moonphasetext>    
 <?php echo "<aqivalue1>".$moon_phase." </aqivalue1>";?>             
 <br>
-<?php echo" Luminance <orange>" .round($moon_fullness,2)."</orange> %";?>            
+<?php echo" Luminance <orange>" .round($alm["luminance"],2)."</orange> %";?>            
 </div>      
 </article>  
   
