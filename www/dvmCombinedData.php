@@ -250,7 +250,7 @@ if (
     $lightning["day_strike_count"] = $adata["lightning"]["lightning strike count day"]["value"];
     $lightning["month_strike_count"] = $adata["lightning"]["lightning strike count month"]["value"];
     $lightning["year_strike_count"] = $adata["lightning"]["lightning strike count year"]["value"];
-    $lightning["last_distance"] =  $adata["alltime"]["lightning last distance"]["value"];
+    $lightning["last_distance"] =  $adata["lightning"]["lightning last distance"]["value"];
     $lightning["last_time"] = $adata["lightning"]["lightning last time"]["at"];
     $lightning["alltime_strike_count"] = $adata["lightning"]["lightning strike count alltime"]["value"];
     $lightning['strike_count_last_3hr'] = $adata["lightning"]["lightning strike count 3hr"]["value"];
