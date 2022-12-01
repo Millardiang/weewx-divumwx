@@ -32,7 +32,7 @@ explode(" ", file_get_contents($livedata)));
             $weewxrt[23] = (float)(1 * $weewxrt[23]);
             $weewxrt[23] = number_format((float)$weewxrt[23], 0, '.', '');
         }
-    $sundial_time = date("M d Y H:i:s",filemtime('serverdata/w34realtime.txt'));    
+    $sundial_time = date("M d Y H:i:s",filemtime('serverdata/dvmRealtime.txt'));    
         
     $recordDate = mktime(substr($weewxrt[1], 0, 2) , substr($weewxrt[1], 3, 2) , substr($weewxrt[1], 6, 2) , substr($weewxrt[0], 3, 2) , substr($weewxrt[0], 0, 2) , $year);
     $stationlocation = $adata["info"]["location"];
