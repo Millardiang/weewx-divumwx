@@ -7,11 +7,11 @@ error_reporting(0);
 
 <div class="wfstrike">
 <?php
-// Detected Lightning Last 3 Hours
-echo "<wfstriketoday>",$lightning['strike_count_last_3hr'];?>
+// Detected Lightning Last Hour
+echo "<wfstriketoday>",$lightning["hour_strike_count"];?>
  </wfstriketoday></div>
 <div class="minwordl">Strikes</div></div>
-<div class="mintimedatex"><value>&nbsp;Last 3 Hrs<value></div>
+<div class="mintimedatex"><value>&nbsp;Last Hour<value></div>
 
 <div class='wflaststrike'>
 <?php

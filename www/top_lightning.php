@@ -10,11 +10,11 @@
   <div class="wfstrike">
     <?php
       //weather34 lightning
-      echo "<wfstriketoday>".$lightning['strike_count_3hr']; ?>
+      echo "<wfstriketoday>".$lightning["hour_strike_count"]; ?>
     </wfstriketoday>
   </div>
   <div class="minwordl">Strikes</div></div>
-  <div class="mintimedatex"><value>&nbsp;Last 3 Hrs<value></div>
+  <div class="mintimedatex"><value>&nbsp;Last Hour<value></div>
   <div class='wflaststrike'>
   <?php
     //weather34 weather34 last detect
@@ -22,9 +22,9 @@
       echo "<spanfeelstitle>Last Strike: <orange> ".date("j M Y", $lightning['last_time'])." </orange> ";}?><br />
   <?php
     if ($windunit == 'mph'){
-      echo "<spanfeelstitle>Last Distance At:<orange> " .number_format($lightning['light_last_distance']*0.621371,1). "  </orange>miles";
+      echo "<spanfeelstitle>Last Distance At:<orange> " .number_format($lightning["last_distance"]*0.621371,1). "  </orange>miles";
     }else{
-      echo "<spanfeelstitle>Last Distance At:<orange> " .$lightning['light_last_distance']. "  </orange>km";
+      echo "<spanfeelstitle>Last Distance At:<orange> " .$lightning["last_distance"]. "  </orange>km";
     }
   ?><br />
   <?php
