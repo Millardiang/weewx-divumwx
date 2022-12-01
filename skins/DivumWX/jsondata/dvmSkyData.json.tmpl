@@ -94,14 +94,8 @@
     "lightning":
     {
         
-        "lightning strike count yesterday": {"value": $ydsc},
-        "lightning strike count day": {"value": $dysc},
-        "lightning strike count month": {"value": $mlsc},
-        "lightning strike count year": {"value": $ylsc},
         "lightning last distance": {"value":   "$alltime.lightning_distance.lastnonzero.format(add_label=False, $localize=False)"},
         "lightning last time": {"at": "$alltime.lightning_last_det_time.lastnonzero.raw"},
-        "lightning strike count alltime": {"value": $atsc},
-        "lightning strike count 3hr": {"value": $span($hour_delta=3)lightning_strike_count.sum},
         ## Last value can't end with a comma
         "void_end": null
     },
