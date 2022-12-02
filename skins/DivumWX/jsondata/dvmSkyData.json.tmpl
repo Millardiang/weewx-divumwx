@@ -59,11 +59,11 @@
           #set $dysc = $day.lightning_strike_count.sum 
         #end if
 	#set $atsc = "N/A"
-        #if $varExists('day.lightning_strike_count') and $day.lightning_strike_count.sum is not None
+        #if $varExists('day.lightning_strike_count') and $alltime.lightning_strike_count.sum is not None
           #set $atsc = $alltime.lightning_strike_count.sum
         #end if
         #set $ydsc = "N/A"
-        #if $varExists('day.lightning_strike_count') and $day.lightning_strike_count.sum is not None
+        #if $varExists('day.lightning_strike_count') and $yesterday.lightning_strike_count.sum is not None
           #set $ydsc = $yesterday.lightning_strike_count.sum
         #end if
         #set $ldlt = "N/A"
