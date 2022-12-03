@@ -9,7 +9,7 @@ import os
 import re
 
 services_file = "../services.txt"
-class w34_installer:
+class dvm_installer:
     def change_permissions_recursive(self, path_list, uid_gid):
         import grp,pwd
         uid = pwd.getpwnam(uid_gid[0]).pw_uid
@@ -208,4 +208,4 @@ class w34_installer:
             print (e)
             
 if __name__ == '__main__':
-    w34_installer(sys.argv[1] if len(sys.argv) > 1 else None)
+    dvm_installer(sys.argv[1] if len(sys.argv) > 1 else None)
