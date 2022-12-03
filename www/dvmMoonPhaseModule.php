@@ -15,7 +15,7 @@ include('weather34skydata.php');
 include('common.php');
 include('settings1.php');
 header('Content-type: text/html; charset=utf-8');
-$json = 'jsondata/dvmArchiveData.json';
+$json = 'jsondata/dvmSkyData.json';
 $json = file_get_contents($json);
 $adata = json_decode($json, true);
 $alm["moonrise"] = $adata["almanac"]["moon rise"]["at"];
