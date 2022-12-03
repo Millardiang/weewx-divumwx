@@ -45,10 +45,10 @@ $paddingtop = $percentage;
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name=apple-mobile-web-app-title content="HOME WEATHER STATION">
 <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, viewport-fit=cover">
-<!--link rel="manifest" href="manifest.php"-->
-<link href="favicon.ico" rel="icon" type="image/x-icon">
-<link href="favicon.ico" rel="shortcut icon" type="image/x-icon">
-<link rel="apple-touch-icon" sizes="180x180" href="img/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="manifest" href="site.webmanifest">
 <!--link rel="preload" href="css/fonts/clock3-webfont.woff" as="font" type="font/woff" crossorigin-->
 <!--link rel="preload" href="css/fonts/verbatim-regular.woff" as="font" type="font/woff" crossorigin-->
 <link href="css/main.<?php echo $theme;?>.css?version=<?php echo filemtime('css/main.' . $theme . '.css');?>" rel="stylesheet prefetch">
