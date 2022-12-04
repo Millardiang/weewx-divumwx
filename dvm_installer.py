@@ -24,7 +24,7 @@ class dvm_installer:
                     if "json_day" in directory:
                         os.chmod(directory, 0o777)
                 for filename in [os.path.join(root, f) for f in files]:
-                    os.chmod(filename, (0o777 if "w34_reports" in filename else 0o755))
+                    os.chmod(filename, (0o777 if "dvm_reports" in filename else 0o755))
                     os.chown(filename, uid, gid)
     
     def find_replace(self, d, k, v, do_overwrite, append = False, delete = False):
@@ -96,7 +96,7 @@ class dvm_installer:
                     conf_file = conf_files[1]
                 else:
                     if file_count > 1:
-                        print("\nList of found w34_installer conf files to install that have existing weewx paths") 
+                        print("\nList of found dvm_installer conf files to install that have existing weewx paths") 
                         for f in range(len(conf_files)):
                             print(str(f+1) + " -> " + conf_files[f+1])
                         response = 0
@@ -109,7 +109,7 @@ class dvm_installer:
                     else:
                         print("!!! NO VALID W34_INSTALLER CONFIG FILE. INSTALL ABORTED!!!")
                         sys.exit(1)
-            print("w34_installer Config file " + conf_file + " was chosen.")
+            print("dvm_installer Config file " + conf_file + " was chosen.")
             try:
                 response = raw_input("IS THIS CORRECT? (Yes/No) ").strip()
             except:
