@@ -313,10 +313,10 @@ if (
     $solar["24h_maxtime"] = date('D j H:i:s',  $sdata["24h.maxSolarRad.maxtime.raw"]);
     $solar["month_max"] = $sdata["month.maxSolarRad.max.formatted"];
     $solar["month_maxtime"] = date('D j H:i:s',  $sdata["month.maxSolarRad.maxtime.raw"]);
-    $solar["year_max"] = $sdata["year.maxSolarRad.max.formatted"];
-    $solar["year_maxtime"] = date('j M H:i:s',  $sdata["year.maxSolarRad.maxtime.raw"]);
-    $solar["alltime_max"] = $sdata["alltime.maxSolarRad.max.formatted"];
-    $solar["alltime_maxtime"] = date('j M Y',  $sdata["alltime.maxSolarRad.maxtime.raw"]);
+    $solar["year_max"] = $adata["solar"]["max solar year"]["value"];
+    $solar["year_maxtime"] = $adata["solar"]["max solar year"]["at"];
+    $solar["alltime_max"] = $adata["solar"]["max solar alltime"]["value"];
+    $solar["alltime_maxtime"] = $adata["solar"]["max solar alltime"]["at"];
 
     //temperature
     $temp["units"] = $sdata["unit.label.outTemp"];
