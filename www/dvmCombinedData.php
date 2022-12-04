@@ -296,8 +296,8 @@ if (
     $rain["year_rate_maxtime"] = date('j M H:i:s', $sdata["year.rainRate.maxtime.raw"]);
     $rain["year_total"] = $sdata["year.rain.sum.formatted"];
     $rain["alltime_rate_max"] = $sdata["alltime.rainRate.max.formatted"];
-    $rain["alltime_rate_maxtime"] = $sdata["alltime.rainRate.maxtime.raw"];
-    $rain["alltime_total"] = date('j M Y', $sdata["alltime.rain.sum.formatted"]);
+    $rain["alltime_rate_maxtime"] = date('j M Y', $sdata["alltime.rainRate.maxtime.raw"]);
+    $rain["alltime_total"] = $sdata["alltime.rain.sum.formatted"];
     
     //sky
     $sky["lux"] = round($sdata["current.maxSolarRad.formatted"] / 0.00809399477, 0 ,PHP_ROUND_HALF_UP);
@@ -374,7 +374,7 @@ if (
     $wind["units"] = $sdata["unit.label.windSpeed"]; // m/s or mph or km/h or kts
     if ($wind["units"] == " m/s"){$wind["units"] = "m/s";}
     else if ($wind["units"] == " mph"){$wind["units"] = "mph";}
-    else if ($wind["units"] == " km/h"){$wind["units"] = "kmh";}
+    else if ($wind["units"] == " km/h"){$wind["units"] = "km/h";}
     else if ($wind["units"] == " kt"){$wind["units"] = "kt";}
     $wind["speed_avg"] = $sdata["day.windSpeed.avg.formatted"];
     $wind["direction"] = $sdata["current.windDir.formatted"];
