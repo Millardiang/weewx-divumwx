@@ -134,7 +134,7 @@ var theme = "<?php echo $theme;?>";
    
 var angle = "<?php echo $wind["direction"];?>";
 
-var tenminAvD = "<?php echo $wind["direction_10min_avg"];?>";
+var tenminAvD = "<?php echo $wind["direction_10m_avg"];?>";
 
 var cardinal = "<?php echo $wind["cardinal"];?>";
     

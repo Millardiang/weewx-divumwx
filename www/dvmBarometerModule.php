@@ -30,7 +30,7 @@ $barom["max"]=$barom["max"]*0.1;
 if ($barom["trend_code"] > 20  && $barom["trend_code"] < 100) { echo '<rising><rise><maxred> '.$risingsymbol.' </rise></maxred><br>'; echo $barom["trend_desc"], '</rising> '; 
 } else if ($barom["trend_code"] < 0) { echo '<falling><fall><minblue> '.$fallingsymbol.'</fall><minblue><br>'; echo $barom["trend_desc"], '</falling>';
 } else if ($barom["trend_code"] > 0 && $barom["trend_code"] < 100) { echo '<rising><rise></maxred> '.$risingsymbol.'</rise></maxred><br>'; echo $barom["trend_desc"], '</rising> '; 
-} else echo '<ogreen>'.$steadysymbol.'<br>$barom["trend_desc"]</ogreen></valuetext>';?></div>
+} else echo '<ogreen>'.$steadysymbol.'<br>'.$barom["trend_desc"].' </ogreen></valuetext>';?></div>
 
 <div class="barometerconverter">
 <?php echo "<div class=barometerconvertercircleblue>";
