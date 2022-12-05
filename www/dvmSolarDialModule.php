@@ -19,7 +19,7 @@ $sun_elevation = round($sun_alt,2)."&deg;<div class=sunaboveweather34>&nbsp;</di
 } else if (round($sun_alt,2) < 0) { 
 $sun_elevation = round($sun_alt,2)."&deg;<div class=sunbelowweather34>&nbsp;</div>"; 
 }?>
-<div class="updatedtime1"><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>';else echo $online." ".$weather["time"];?></div>
+<div class="updatedtime1"><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$weather["time"];?></div>
 
 <div class="daylightmoduleposition"> 
 <?php echo 
@@ -231,7 +231,7 @@ var theme = "<?php echo $theme;?>";
   	sunsc.size = 10;
   	sunsc.weight = "normal";
   	sunsc.family = "Helvetica";
-  	sunsc.fill = "#2d3a4b"; // gray
+  	sunsc.fill = "silver"; // gray
   	sunsc.alignment = "center";
   	
   	var CountDown = h + " hrs " + m + " mins";
@@ -239,7 +239,7 @@ var theme = "<?php echo $theme;?>";
   	countdown.size = 8;
   	countdown.weight = "normal";
   	countdown.family = "Helvetica";
-  	countdown.fill = "#2d3a4b"; // gray
+  	countdown.fill = "silver"; // gray
   	countdown.alignment = "center";
   	
   	two.scene.add(countdown, sunsc);
@@ -270,7 +270,7 @@ var theme = "<?php echo $theme;?>";
   	sunrc.size = 10;
   	sunrc.weight = "normal";
   	sunrc.family = "Helvetica";
-  	sunrc.fill = "#2d3a4b"; // gray
+  	sunrc.fill = "silver"; // gray
   	sunrc.alignment = "center";
   	
  	var CountUp = h + " hrs " + m + " mins";
@@ -278,7 +278,7 @@ var theme = "<?php echo $theme;?>";
   	countup.size = 8;
   	countup.weight = "normal";
   	countup.family = "Helvetica";
-  	countup.fill = "#2d3a4b"; // gray
+  	countup.fill = "silver"; // gray
   	countup.alignment = "center";
   	
   	two.scene.add(countup, sunrc);

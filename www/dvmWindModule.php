@@ -5,7 +5,7 @@ require('common.php');
 ?>
 <meta http-equiv="Content-Type: text/html; charset=UTF-8"/>
 
-<div class="updatedtime"><span><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>';else echo $online." ".$weather["time"];?></div> <br />
+<div class="updatedtime"><span><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$weather["time"];?></div> <br />
 
 <div class="windspeedvalues"><div class="windspeedvalue">
 <?php  
@@ -15,15 +15,15 @@ if ($wind["speed"]<10){echo "&nbsp;".number_format($wind["speed"],1);}else echo 
 <div class="windgustvalue">
 <?php 
 //weather34-windgust
-if ($wind["gust"]*$toKnots>=26.9978){echo "<windred>",number_format($wind["gust"],1),"</span>";}else if ($wind["gust"]*$toKnots>=21.5983){echo "<windorange>",number_format($wind["gust"],1),"</span>";}else if ($wind["gust"]*$toKnots>=16.1987){echo "<windgreen>",number_format($wind["gust"],1),"</span>";}else if ($wind["gust"]<10){echo "&nbsp;",number_format($wind["gust"],1);}else echo number_format($wind["gust"],1);?>
+if ($wind["gust"]*$toKnots>=26.9978){echo "<windred>",number_format($wind["gust"],1),"</span>";}else if ($wind["gust"]*$toKnots>=21.5983){echo "<windorange>",number_format($wind["gust"],1),"</span>";}
+else if ($wind["gust"]*$toKnots>=16.1987){echo "<windgreen>",number_format($wind["gust"],1),"</span>";}else if ($wind["gust"]<10){echo "&nbsp;",number_format($wind["gust"],1);}else echo number_format($wind["gust"],1);?>
 <div class="windunitgust2"><?php echo  $wind["units"]?></div>
 <div class="windunitidgust"><?php echo $lang['Gust']; ?></div></span></div></div>
 <div class="windspeedtrend1">
 <?php echo "<valuetext>Max "."<max><value><maxred>".number_format($wind["gust_max"],1)."</maxred></max></span>"."<supmb> ".$wind["units"]."</supmb><br> ".$lang['Gust']." (".$wind["gust_maxtime"].")</valuetext>";?></div>
 <div class="windconverter"><?php 
 //weather34-convert kmh to mph
-if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots>=26.9978){echo "<div class=windconvertercirclered1><tred>".number_format($wind["gust"]*0.621371,1)." </tred><smallrainunit>mph
-</smallrainunit>";}
+if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots>=26.9978){echo "<div class=windconvertercirclered1><tred>".number_format($wind["gust"]*0.621371,1)." <tred><smallrainunit>mph</smallrainunit>";}
 else if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots>=21.5983){echo "<div class=windconvertercircleorange1><torange>".number_format($wind["gust"]*0.621371,1)." </torange><smallrainunit>&nbsp;mph</smallrainunit>";}
 else if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots>=16.1987){echo "<div class=windconvertercirclegreen1><tgreen>".number_format($wind["gust"]*0.621371,1)." </tgreen><smallrainunit>&nbsp;mph</smallrainunit>";}
 else if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots<16.1987){echo "<div class=windconvertercircleblue1>".number_format($wind["gust"]*0.621371,1)." <smallrainunit>&nbsp;mph
@@ -44,7 +44,7 @@ if ($wind["units"] == 'mph'){$wind["wind_run"]=$wind["wind_run"]*0.621371;}
 else if ($wind["units"] == 'kts'){$wind["wind_run"]=$wind["wind_run"]*0.621371;}
 else {$wind["wind_run"]=$wind["wind_run"]*1;}
 
-echo ' <div class=weather34windrun>'.$windrunicon.' &nbsp;<grey><valuetext1>',number_format($wind["wind_run"],1);?>
+echo ' <div class=weather34windrun>'.$windalert3.' &nbsp;<grey><valuetext1>',number_format($wind["wind_run"],1);?>
 <grey><weather34windrunspan></valuetext>
 <?php if ($wind["units"] == 'mph') echo 'mi'; else if ($wind["units"] == 'm/s') echo 'km'; else if ($wind["units"] == 'kts') echo 'mi';else echo 'km';?></weather34windrunspan>
 </div></div><br /><div class=windrun1><?php echo  $lang['Wind Run'];?></div>
@@ -115,7 +115,7 @@ if ($wind["speed_bft"] == 0) {
   margin-left: 0px;
 }
 </style>
-
+<!DOCTYPE html>
 <html>
 <div class="compass1">
 <svg id="compass" width="140" height="140" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg"></svg>  
@@ -133,10 +133,13 @@ var theme = "<?php echo $theme;?>";
 	if (theme == 'dark') {
    
 var angle = "<?php echo $wind["direction"];?>";
+angle = angle || 0;
 
 var tenminAvD = "<?php echo $wind["direction_10m_avg"];?>";
+tenminAvD = tenminAvD || 0;
 
 var cardinal = "<?php echo $wind["cardinal"];?>";
+cardinal = cardinal || 0;
     
     
 	DirectionAngle(70, 58, angle + "°"); // Direction in degrees
@@ -262,10 +265,13 @@ var svgNS = "http://www.w3.org/2000/svg";
 var svg = document.getElementById("compass");
 
 var angle = "<?php echo $wind["direction"];?>";
+angle = angle || 0;
 
-var tenminAvD = "<?php echo $wind["direction_10_avg"];?>";
+var tenminAvD = "<?php echo $wind["direction_10m_avg"];?>";
+tenminAvD = tenminAvD || 0;
 
 var cardinal = "<?php echo $wind["cardinal"];?>";
+cardinal = cardinal || 0;
 
     
 	DirectionAngle(70, 58, angle + "°"); // Direction in degrees
