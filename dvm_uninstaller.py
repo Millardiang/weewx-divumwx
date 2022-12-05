@@ -7,25 +7,25 @@ import sys
 import os
 import re
 
-KEYS_TO_DELETE   = ['Weather34RealTime','Weather34WebServices','Weather34CloudCover','W34_DB_Backup','StdReport:w34Highcharts','StdReport:Weather34Report','StdReport:w34skinReport']
-VALUES_TO_DELETE = ['Engine:Services:process_services:user.w34_db_backup.W34_DB_Backup','Engine:Services:process_services:user.weather34.Weather34RealTime','Engine:Services:xtype_services:user.lastnonzero.LastNonZeroService']
-DIRS_TO_DELETE   = ['www:','skins:DivumWx','skins:w34Highcharts','skins:w34Highcharts-day']
-FILES_TO_DELETE  = ['user:w34highchartsSearchX.py','user:divumwx.py','user:w34_db_backup.py','user:lastrain.py','user:ml.py','user:stats.py','user:lastnonzero.py']
+KEYS_TO_DELETE   = ['DivumWXRealTime','DivumWXWebServices','DivumWXCloudCover','DVM_DB_Backup','StdReport:dvmHighcharts','StdReport:DivumWXReport','StdReport:dvmskinReport']
+VALUES_TO_DELETE = ['Engine:Services:process_services:user.dvm_db_backup.DVM_DB_Backup','Engine:Services:process_services:user.divumwx.DivumWXRealTime','Engine:Services:xtype_services:user.divumwx.LastNonZeroService',Engine:report_services:user.divumwx.SensorData']
+DIRS_TO_DELETE   = ['www:','skins:DivumWx','skins:dvmHighcharts','skins:dvmHighcharts-day']
+FILES_TO_DELETE  = ['user:dvmhighchartsSearchX.py','user:divumwx.py','user:dvm_db_backup.py','user:lastrain.py','user:ml.py','user:stats.py','user:lastnonzero.py']
   
-class w34_uninstaller:
+class dvm_uninstaller:
     def __init__(self, conf_file):
         try:
             try:
-                response = raw_input("Do you want to UNinstall w34 Template Yes/No? ").strip().upper()
+                response = raw_input("Do you want to UNinstall DivumWX Template Yes/No? ").strip().upper()
             except:
-                response = input("Do you want to UNinstall w34 Template Yes/No? ").strip().upper()
+                response = input("Do you want to UNinstall DivumWX Template Yes/No? ").strip().upper()
             if response != "YES":
                 sys.exit(0)
-            print ("!!!!!!!!!!!!UNINSTALLING W34 TEMPLATE!!!!!!!!!!!!!!")
+            print ("!!!!!!!!!!!!UNINSTALLING DivumWX TEMPLATE!!!!!!!!!!!!!!")
             try:
-                response = raw_input("Are you SURE you want to UNinstall w34 Template Yes/No? ").strip().upper()
+                response = raw_input("Are you SURE you want to UNinstall DivumWX Template Yes/No? ").strip().upper()
             except:
-                response = input("Are you SURE you want to UNinstall w34 Template Yes/No? ").strip().upper()
+                response = input("Are you SURE you want to UNinstall DivumWX Template Yes/No? ").strip().upper()
             if response != "YES":
                 sys.exit(0)
             conf_files = {}
@@ -45,7 +45,7 @@ class w34_uninstaller:
                     conf_file = conf_files[1]
                 else:
                     if file_count > 1:
-                        print("\nList of found w34_uninstaller conf files to uninstall that have existing weewx paths") 
+                        print("\nList of found dvm_uninstaller conf files to uninstall that have existing weewx paths") 
                         for f in range(len(conf_files)):
                             print(str(f+1) + " -> " + conf_files[f+1])
                         response = 0
@@ -56,7 +56,7 @@ class w34_uninstaller:
                                 response = int(input("Enter the NUMBER of the uninstaller config file ").strip())
                         conf_file = conf_files[response]
                     else:
-                        print("!!! NO VALID W34_INSTALLER CONFIG FILE. UNINSTALL ABORTED!!!")
+                        print("!!! NO VALID DVM_INSTALLER CONFIG FILE. UNINSTALL ABORTED!!!")
                         sys.exit(1)
             print("Uninstaller Config file " + conf_file + " was chosen.")
             with open(conf_file) as infile:
@@ -107,4 +107,4 @@ class w34_uninstaller:
             print (e)
             
 if __name__ == '__main__':
-    w34_uninstaller(sys.argv[1] if len(sys.argv) > 1 else None)
+    dvm_uninstaller(sys.argv[1] if len(sys.argv) > 1 else None)
