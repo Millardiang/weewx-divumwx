@@ -7,8 +7,8 @@ import sys
 import os
 import re
 
-KEYS_TO_DELETE   = ['DivumWXRealTime','DivumWXWebServices','DivumWXCloudCover','DVM_DB_Backup','StdReport:dvmHighcharts','StdReport:DivumWXReport','StdReport:dvmskinReport']
-VALUES_TO_DELETE = ['Engine:Services:process_services:user.dvm_db_backup.DVM_DB_Backup','Engine:Services:process_services:user.divumwx.DivumWXRealTime','Engine:Services:xtype_services:user.divumwx.LastNonZeroService','Engine:report_services:user.divumwx.SensorData']
+KEYS_TO_DELETE   = ['DivumWXRealTime','DivumWXWebServices','DivumWXCloudCover','SensorData','LastNonZero','StdReport:dvmHighcharts','StdReport:DivumWXReport','StdReport:dvmskinReport','StdReport:SensorDataReport']
+VALUES_TO_DELETE = ['Engine:Services:process_services:user.divumwx.DivumWXRealTime','Engine:Services:xtype_services:user.divumwx.LastNonZeroService','Engine:Services:report_services:user.divumwx.SensorData']
 DIRS_TO_DELETE   = ['www:','skins:DivumWx','skins:dvmHighcharts','skins:dvmHighcharts-day']
 FILES_TO_DELETE  = ['user:dvmhighchartsSearchX.py','user:divumwx.py','user:dvm_db_backup.py','user:lastrain.py','user:ml.py','user:stats.py','user:lastnonzero.py']
   
