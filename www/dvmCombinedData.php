@@ -375,7 +375,7 @@ if (
     if ($wind["units"] == " m/s"){$wind["units"] = "m/s";}
     else if ($wind["units"] == " mph"){$wind["units"] = "mph";}
     else if ($wind["units"] == " km/h"){$wind["units"] = "km/h";}
-    else if ($wind["units"] == " kt"){$wind["units"] = "kt";}
+    else if ($wind["units"] == " kts"){$wind["units"] = "kts";}
     $wind["speed_avg"] = $sdata["day.windSpeed.avg.formatted"];
     $wind["direction"] = $sdata["current.windDir.formatted"];
     $wind["direction_10m_avg"] = $sdata["10m.windDir.avg.formatted"];
