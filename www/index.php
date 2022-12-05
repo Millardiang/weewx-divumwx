@@ -92,8 +92,7 @@ if ('serviceWorker' in navigator) {
 <!-- position 6--->
 <div class="weather-item"><div class="chartforecast">
 <span class="yearpopup"><a alt="Forecast Menu" title="Forecast Menu" href="pop_menu_forecast.php" data-lity ><?php echo $menucharticonpage;?> Forecasts</a></span>
-<span class="yearpopup"><a alt="Lightning Tracker" title="Almanac Lightning" href="dvmpop_menu_lightning.php". data-lity>&nbsp;<?php echo $menucharticonpage;?> Lightning Almanac</a>
-<span class="yearpopup"><a alt="Meteogram" title="Meteogram" href="meteogram.php" data-lity ><?php echo $menucharticonpage;?> Meteogram</a></span></div>
+<span class="yearpopup"><a alt="Lightning Tracker" title="Almanac Lightning" href="dvmpop_menu_lightning.php". data-lity>&nbsp;<?php echo $menucharticonpage;?> Lightning Almanac</a></span></div>
 <span class='moduletitle'><?php echo $position6title;?> (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span><br/><div id="position6">
 </div></div>
 
