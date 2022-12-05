@@ -2,11 +2,11 @@
 
 **The installer now defaults to overwrite mode, settings1.php will not be overwritten as it does not exist in the package. However, it is essential that any customisations you may have been made are backed up before running the install.**
 
-IMPORTANT. If you are making a completley clean install of WeeWX and Weather34 Template it is strongly recommended that you allow the WeeWX database to establish itself for 24hours before attempting installing the template.
+IMPORTANT. If you are making a completley clean install of WeeWX and DivumWX Template it is strongly recommended that you allow the WeeWX database to establish itself for 24hours before attempting installing the template.
 
 This installation guide assumes that you are already reasonably familiar with WeeWX and that it is already installed on your computer along with a webserver, php and curl.
 
-If you have not already done so, you must update your WeeWX installation to version 4.6.0 or later. This is required to facillitate nested copying during the skin install process. Follow the various installation type links on this page http://weewx.com/docs/usersguide.htm#installation_methods for instructions on updating. This version of Weather34 is compatible with WeeWX 4.6.0/Python3.x.
+If you have not already done so, you must update your WeeWX installation to version 4.6.0 or later. This is required to facillitate nested copying during the skin install process. Follow the various installation type links on this page http://weewx.com/docs/usersguide.htm#installation_methods for instructions on updating. This version of DivumWX is compatible with WeeWX 4.9.1/Python3.x.
 
 If you have not already done so update your WeeWX database to the wview_extended.schema (standard from WeeWX 4 onwards). Follow the directions in the section *Adding a new type to the database* (https://www.weewx.com/docs/customizing.htm#add_archive_type), except skip step #1 and in step #2, specify *schemas.wview_extended.schema* as the schema. 
 
@@ -30,21 +30,34 @@ IMPORTANT. Installing PHP; please make sure you install all the PHP modules appr
 
 Once completed, make sure you save weewx.conf
 
+* Install SortedContainers
+
+		sudo pip3 install sortedcontainers
+
 * If you have have the CRT extension (Cumulus Real-Time) extension installed, unless you require it for another purpose, you can remove it now. (sudo ./wee_extension --uninstall crt)
 
-* This install process assumes that your are using one of the officially documented WeeWX installs and a typical Apache2 web server configuration of /var/www/html. In this instance, at the end of the installation process your path to thw Weather34 skin will be /var/www/html/weewx/weather34. If your installation deviates from this, you will need to adjust the paths in your weewx.conf file after the installation process has taken place.
+* This install process assumes that your are using one of the officially documented WeeWX installs and a typical Apache2 web server configuration of /var/www/html. In this instance, at the end of the installation process your path to thw DivumWX skin will be /var/www/html/weewx/divumwx. If your installation deviates from this, you will need to adjust the paths in your weewx.conf file after the installation process has taken place.
 
 * I am very gratefully to Jerry Dietrich for writing a new installer specially for Weather34. This installer copies everything to the correct places and automatically configures the correct web server ownerships, permissions and groups etc. The whole process is very fast and your skin will be up and running in no time. By using the supplied configuration files, setup.py, packaged or MacOS installed versions of WeeWX can be catered for.
 
 * Go to https://steepleian.github.io/weewx-Weather34 to complete the pre-install web services settings which which generates 'services.txt' in your default Download folder. 
 
-* From the command line: - 
+
+IMPORTANT if you have previously used the weewx-Weather34 template, you must backup ALL of your previous files INCLUDING MOST IMPORTANTLY YOUR WEEWX DATABASE. DOUBLE CHECK BEFORE YOY PROCEED TO THE NEXT STAGE.
+
+    * From the command line: - 
                 
-		Download weewx-Weather34-main.zip from https://github.com/steepleian/weewx-Waether34/edit/main/ into your Download folder alongside the services.txt file
+		Download weewx-divumwx-alpha.zip from https://github.com/Millardiang/weewx-divumwx/archive/refs/heads/alpha.zip/ into your Download folder alongside the services.txt file
 		cd [path_to_your_Download_folder]
-		unzip weewx-Weather34-main.zip
-		cd weewx-Weather34-main
-		sudo python w34_installer.py or sudo python3 w34_installer.py (if you are running Python3)
+		unzip weewx-divumwx-alpha.zip
+		cd weewx-divumwx-alpha
+
+		(This stage can be skipped if you have never run Weather34)
+        sudo python w34_uninstaller.py or sudo python3 w34_uninstaller.py (if you are running Python3)
+
+		Install DivumWX: -
+
+		sudo python dvm_installer.py or sudo python3 dvm_installer.py (if you are running Python3)
 		
 		    You will be prompted for the config file for your WeeWX install type.
 		    Select packaged if your WeeWX was installed by Debian, RedHat or Suse methods [default option]
@@ -52,6 +65,8 @@ Once completed, make sure you save weewx.conf
 		    Select setup_py. if your WeeWX was installed by setup.py method
 		    or
 		    Select macos if your WeeWX was installed by MacOS method
+			or
+		    Select archsetup if your WeeWX for an ArchLinux OS 
 		
 
 
@@ -63,17 +78,17 @@ This will allow some of the required variable data to be generated immediately w
 
 * You can now test that the template is working by opening it up in your browser. Initially you will see random demo data. Click on the menu button at the top-left corner and select settings. This will open up a web form in which you apply your own settings. The default password is '12345'. Please change this to your own unique password for your own protection. Pay particular attention to the location of the w34realtime.txt file being generated on a loop cycle by weeWX. The default location is “/[html_root]/weewx/w34weather/serverdata/w34realtime.txt” (for example /var/www/html/weewx/w34weather/serverdata/w34realtime.txt). IMPORTANT the unit codes that you select for the Weather Underground and DarkSky forecast APIs must be identical to those that you select in the pre-install settings process. Failure to do so will possibly produce some bizzare data.
 
-* Using a RAM Disk for w34realtime.txt. The default location is hard-coded but can be changed: -
+* Using a RAM Disk for dvmRealtime.txt. The default location is hard-coded but can be changed: -
 
-	Edit the [Weather34Realtime] stanza in weewx.conf
+	Edit the [DivumWXRealtime] stanza in weewx.conf
 
-			[Weather34RealTime]
+			[DivumWXRealTime]
     
     				realtime_path_only = /[your path to your ram disk] # no trailing /
 
-        Edit line 33 in weather34/settings.php
+        Edit line 33 in divumwx/settings.php
     				
-				$livedata = "/[your path to ram disk]/w34realtime.txt";
+				$livedata = "/[your path to ram disk]/dvmRealtime.txt";
 
   These edited settings may not be persistent after an update / re-install so you may need to re-edit the above files.
 
@@ -81,11 +96,11 @@ This will allow some of the required variable data to be generated immediately w
 
     Open your weewx.conf file and find the [[Services]] section in the [Engine] stanza. Find the line that starts with process_services. At the end of that line add:-
 
-			,user.w34_db_backup.W34_DB_Backup
+			,user.dvm_db_backup.DVM_DB_Backup
 			
    Then at the end of the file add this stanza: -
 
-			[W34_DB_Backup]
+			[DVM_DB_Backup]
 				
 				# database path(s) seperated by , rename this/these database(s) to match your own
     				databases = /home/weewx/archive/weewx.sdb,/home/weewx/archive/another.sdb
@@ -101,4 +116,3 @@ This will allow some of the required variable data to be generated immediately w
 
 * Any problems, please raise an Issue in this repository attaching a debug report (see here for details http://www.weewx.com/docs/utilities.htm#wee_debug_utility), your skin.conf files and a syslog tail report covering at least two archive cycles from startup.
 
-* There is further guide of how to install weewx_Weather34 on a remote server here: - https://github.com/steepleian/weewx-Weather34/blob/main/REMOTE_SERVER.md and an excellent online guide by User Chris Alemany at https://www.chrisalemany.ca/2021/02/24/installing-the-weather34-skin-on-weewx-with-remote-web-server-2021-edition/
