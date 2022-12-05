@@ -263,7 +263,7 @@ var svg = document.getElementById("compass");
 
 var angle = "<?php echo $wind["direction"];?>";
 
-var tenminAvD = "<?php echo $wind["direction_10min_avg"];?>";
+var tenminAvD = "<?php echo $wind["direction_10_avg"];?>";
 
 var cardinal = "<?php echo $wind["cardinal"];?>";
 
