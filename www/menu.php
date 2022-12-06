@@ -1,7 +1,7 @@
 <?php
 
 
-include ('serverdata/archivedata.php');
+//include ('serverdata/archivedata.php');
 
 
 ?>
@@ -53,11 +53,7 @@ else
       
       
       <li class="header">ADMIN</li>
-      <li>
-        <a href="templateSetup.php" target="_blank" title="WEATHERSTATION SETTINGS PAGE">
-          <weather34menumarkeryellow></weather34menumarkeryellow> <?php echo $lang['Settings']; ?>
-        </a>
-      </li>
+     
       <li>
         <a href="index.php" title="WEATHERSTATION HOME PAGE">
           <weather34menumarkergreen></weather34menumarkergreen> Home
