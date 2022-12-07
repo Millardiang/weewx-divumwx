@@ -54,7 +54,7 @@ foreach ($meteor_events as $meteor_check) {
         $meteor_default=$meteor_check["event_title"];
     }
 };?>
-<div class="updatedtime1"><span><?php if(file_exists($moonimg)&&time()- filemtime($moonimg)>300)echo $offline. '<offline> Offline </offline>';else echo $online." ".$weather["time"];?></span></div>
+<div class="updatedtime1"><span><?php if(file_exists($moonimg)&&time()- filemtime($moonimg)>3600)echo $offline. '<offline> Offline </offline>';else echo $online." ".$weather["time"];?></span></div>
 <div class="moonphasemoduleposition">
 <div class="moonrise1">
 <svg id="weather34 moon rise" viewBox="0 0 32 32" width="6" height="6" fill="none" stroke="#01a4b5" stroke-linecap="round" stroke-linejoin="round" stroke-width="10%">    
