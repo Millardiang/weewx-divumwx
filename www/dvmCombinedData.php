@@ -38,6 +38,11 @@ explode(" ", file_get_contents($livedata)));
     $stationlocation = $adata["info"]["location"];
     $lat = $adata["info"]["latitude"];
     $lon = $adata["info"]["longitude"];
+    if ($lat >= "0" && $lat <= "180"){$NS = "North";}
+    else {$NS = "South";}
+    if ($lon >= "0" && $lat <= "180"){$EW = "East";}
+    else {$EW = "West";}
+
     $elevation = $adata["info"]["altitude meters"];
     $meteogramURL = $adata["info"]["metgramlink"];
     $weather["datetime"] = $recordDate;
