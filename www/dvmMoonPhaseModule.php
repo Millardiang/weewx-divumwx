@@ -11,21 +11,10 @@
 }
 </style>
 <?php 
-include('weather34skydata.php');
+include('dvmCombinedData.php');
 include('common.php');
 include('settings1.php');
 header('Content-type: text/html; charset=utf-8');
-$json = 'jsondata/dvmSkyData.json';
-$json = file_get_contents($json);
-$adata = json_decode($json, true);
-$alm["moonrise"] = $adata["almanac"]["moon rise"]["at"];
-$alm["moonset"] = $adata["almanac"]["moon set"]["at"];
-$alm["moonphase"] = $adata["almanac"]["moon phase"]["value"];
-$alm["moonphase_no"] = $adata["almanac"]["moon phase number"]["value"];
-$alm["luminance"] = round($adata["almanac"]["moon fullness"]["value"],2);
-$alm["luminance2"] = round($adata["almanac"]["moon fullness"]["value"],0);
-$alm["fullmoon"] = $adata["almanac"]["full moon"]["at"];
-$alm["newmoon"] = $adata["almanac"]["new moon"]["at"];
 if($alm["moonphase_no"]>4){$waxwan = "wan";}
 else{$waxwan = "wax";}
   
@@ -65,7 +54,7 @@ foreach ($meteor_events as $meteor_check) {
         $meteor_default=$meteor_check["event_title"];
     }
 };?>
-<div class="updatedtime1"><span><?php if(file_exists($livedata2)&&time()- filemtime($livedata2)>300)echo $offline. '<offline> Offline </offline>';else echo $online." ".$weather["time"];?></span></div>
+<div class="updatedtime1"><span><?php if(file_exists($moonimg)&&time()- filemtime($moonimg)>300)echo $offline. '<offline> Offline </offline>';else echo $online." ".$weather["time"];?></span></div>
 <div class="moonphasemoduleposition">
 <div class="moonrise1">
 <svg id="weather34 moon rise" viewBox="0 0 32 32" width="6" height="6" fill="none" stroke="#01a4b5" stroke-linecap="round" stroke-linejoin="round" stroke-width="10%">    
