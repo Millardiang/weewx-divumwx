@@ -124,6 +124,9 @@
 
     "solar":
     {
+         #if $current.radiation.has_data
+        "max solar current": {"value": $current.radiation.format($localize=False,add_label=False)},
+        #end if
          #if $day.radiation.has_data
         "max solar day": {"value": $day.radiation.max.format($localize=False,add_label=False), "at": "$day.radiation.maxtime.format(format_string="%H:%M")"},
         #end if

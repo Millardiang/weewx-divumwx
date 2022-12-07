@@ -311,7 +311,7 @@ if (
     $sky["cloud_cover"] = round($adata['cloudcover']['cloud cover']['value'],0);
 
     //solar
-    $solar["now"] = $adata["solar"]["max solar day"]["value"];
+    $solar["now"] = $adata["solar"]["max solar current"]["value"];
     $solar["day_max"] = $adata["solar"]["max solar day"]["value"];
     $solar["day_maxtime"] = $adata["solar"]["max solar day"]["at"];
     $solar["24h_max"] = $adata["solar"]["max solar 24h"]["value"];
