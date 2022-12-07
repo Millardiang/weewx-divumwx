@@ -107,7 +107,7 @@ class dvm_installer:
                                 response = int(input("Enter the NUMBER of the installer config file ").strip())
                         conf_file = conf_files[response]
                     else:
-                        print("!!! NO VALID W34_INSTALLER CONFIG FILE. INSTALL ABORTED!!!")
+                        print("!!! NO VALID DVM_INSTALLER CONFIG FILE. INSTALL ABORTED!!!")
                         sys.exit(1)
             print("dvm_installer Config file " + conf_file + " was chosen.")
             try:
