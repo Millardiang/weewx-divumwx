@@ -124,6 +124,15 @@
 
     "solar":
     {
+         #if $day.radiation.has_data
+        "max solar day": {"value": $day.radiation.max.format($localize=False,add_label=False), "at": "$day.radiation.maxtime.format(format_string="%H:%M")"},
+        #end if
+         #if $yesterday.radiation.has_data
+        "max solar 24h": {"value": $span($hour_delta=24).radiation.max.format($localize=False,add_label=False), "at": "$span($hour_delta=24).radiation.maxtime.format(format_string="%H:%M")"},
+        #end if
+         #if $month.radiation.has_data
+        "max solar month": {"value": $month.radiation.max.format($localize=False,add_label=False), "at": "$month.radiation.maxtime.format(format_string="%d %H:%M")"},
+        #end if
         #if $year.radiation.has_data
         "max solar year": {"value": $year.radiation.max.format($localize=False,add_label=False), "at": "$year.radiation.maxtime.format(format_string="%d %b %H:%M")"},
         #end if

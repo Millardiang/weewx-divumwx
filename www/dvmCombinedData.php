@@ -311,13 +311,13 @@ if (
     $sky["cloud_cover"] = round($adata['cloudcover']['cloud cover']['value'],0);
 
     //solar
-    $solar["now"] = $sdata["current.maxSolarRad.formatted"];
-    $solar["day_max"] = $sdata["day.maxSolarRad.max.formatted"];
-    $solar["day_maxtime"] = date('H:i:s',  $sdata["day.maxSolarRad.maxtime.raw"]);
-    $solar["24h_max"] = $sdata["24h.maxSolarRad.max.formatted"];
-    $solar["24h_maxtime"] = date('D j H:i:s',  $sdata["24h.maxSolarRad.maxtime.raw"]);
-    $solar["month_max"] = $sdata["month.maxSolarRad.max.formatted"];
-    $solar["month_maxtime"] = date('D j H:i:s',  $sdata["month.maxSolarRad.maxtime.raw"]);
+    $solar["now"] = $adata["solar"]["max solar day"]["value"];
+    $solar["day_max"] = $adata["solar"]["max solar day"]["value"];
+    $solar["day_maxtime"] = $adata["solar"]["max solar day"]["at"];
+    $solar["24h_max"] = $adata["solar"]["max solar 24h"]["value"];
+    $solar["24h_maxtime"] = $adata["solar"]["max solar 24h"]["at"];
+    $solar["month_max"] = $adata["solar"]["max solar month"]["value"];
+    $solar["month_maxtime"] = $adata["solar"]["max solar month"]["at"];
     $solar["year_max"] = $adata["solar"]["max solar year"]["value"];
     $solar["year_maxtime"] = $adata["solar"]["max solar year"]["at"];
     $solar["alltime_max"] = $adata["solar"]["max solar alltime"]["value"];
