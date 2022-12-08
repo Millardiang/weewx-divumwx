@@ -26,17 +26,36 @@ if ($cloud_region[0] !== "Europe"){$sky["cloud_cover"]  = $parsed_visibility['re
 <?php $forecastime=filemtime('jsondata/awc.txt');$weather34wuurl = file_get_contents("jsondata/awc.txt");if(filesize('jsondata/awc.txt')<10){echo  $online;}
 else echo $online,"";echo " ",	date($timeFormat,$forecastime);	?></div>
 <div class="cloudconverter">
-<?php //cloudbase-weather34
+<?php //cloudbase
+
+if($theme == 'dark') {
+
 $cloudcoverunit = '%';
 $clouds = "Cloudbase";
-if ($windunit =='mph' ||  $windunit =='kts'){$distance="ft";}
-else if ($windunit =='km/h' ||  $windunit =='m/s'){$distance="m";}
-if ($sky["cloud_base"]>0){
-if ($windunit =='mph' ||  $windunit =='kts' && $sky["cloud_base"]>=1999){echo "<div class=cloudconvertercircle2000>".$clouds."<tyellow> ".$sky["cloud_base"]."</tyellow><smalltempunit2> ".$distance."</tblue><smalltempunit2>" ;}
-else if ($windunit =='mph' ||  $windunit =='kts' && $sky["cloud_base"]<1999){echo "<div class=cloudconvertercircle>".$clouds."<tblue> ".$sky["cloud_base"]."</tblue><smalltempunit2> ".$distance."</tblue><smalltempunit2>" ;}
-else if ($windunit =='km/h' ||  $windunit =='m/s' && $sky["cloud_base"]>=609){echo "<div class=cloudconvertercircle2000>".$clouds."<tyellow> ".$sky["cloud_base"]."</tyellow><smalltempunit2> ".$distance."</tblue><smalltempunit2>" ;}
-else if ($windunit =='km/h' ||  $windunit =='m/s' && $sky["cloud_base"]<609){echo "<div class=cloudconvertercircle>".$clouds."<tblue> ".$sky["cloud_base"]."</tblue><smalltempunit2> ".$distance."</tblue><smalltempunit2>" ;}
-}?></div></div>
+
+if ($windunit =='mph' || $windunit =='kts'){$distance="ft";}
+else if ($windunit =='km/h' || $windunit =='m/s'){$distance="m";}
+if ($sky["cloud_base"] > 0){
+if ($windunit =='mph' || $windunit =='kts' && $sky["cloud_base"]>=1999){echo "<div class=cloudconvertercircle2000>".$clouds."<tyellow> ".$sky["cloud_base"]."</tyellow><smalltempunit2> ".$distance."</tblue><smalltempunit2>" ;}
+else if ($windunit =='mph' || $windunit =='kts' && $sky["cloud_base"]<1999){echo "<div class=cloudconvertercircle>".$clouds."<tblue> ".$sky["cloud_base"]."</tblue><smalltempunit2> ".$distance."</tblue><smalltempunit2>" ;}
+else if ($windunit =='km/h' || $windunit =='m/s' && $sky["cloud_base"]>=609){echo "<div class=cloudconvertercircle2000>".$clouds."<tyellow> ".$sky["cloud_base"]."</tyellow><smalltempunit2> ".$distance."</tblue><smalltempunit2>" ;}
+else if ($windunit =='km/h' || $windunit =='m/s' && $sky["cloud_base"]<609){echo "<div class=cloudconvertercircle>".$clouds."<tblue> ".$sky["cloud_base"]."</tblue><smalltempunit2> ".$distance."</tblue><smalltempunit2>" ;}}
+
+} else {
+
+$cloudcoverunit = '%';
+$clouds = "Cloudbase";
+if ($windunit =='mph' || $windunit =='kts'){$distance="ft";}
+else if ($windunit =='km/h' || $windunit =='m/s'){$distance="m";}
+if ($sky["cloud_base"] > 0){
+if ($windunit =='mph' || $windunit =='kts' && $sky["cloud_base"]>=1999){echo "<div class=cloudconvertercircle2000>".$clouds."<weathertext2> ".$sky["cloud_base"]."</weathertext2><smalltempunit2> ".$distance."</smalltempunit2>" ;}
+else if ($windunit =='mph' || $windunit =='kts' && $sky["cloud_base"]<1999){echo "<div class=cloudconvertercircle>".$clouds."<weathertext2> ".$sky["cloud_base"]."</weathertext2><smalltempunit2> ".$distance."</smalltempunit2>" ;}
+else if ($windunit =='km/h' || $windunit =='m/s' && $sky["cloud_base"]>=609){echo "<div class=cloudconvertercircle2000>".$clouds."<weathertext2> ".$sky["cloud_base"]."</weathertext2><smalltempunit2> ".$distance."</smalltempunit2>" ;}
+else if ($windunit =='km/h' || $windunit =='m/s' && $sky["cloud_base"]<609){echo "<div class=cloudconvertercircle>".$clouds."<weathertext2> ".$sky["cloud_base"]."</weathertext2><smalltempunit2> ".$distance."</smalltempunit2>" ;}
+
+}
+}?>
+</div></div>
 <div class="darkskyiconcurrent"><span1>
 <?php 
 //homeweatherstation weather34 current conditions using hardware values
@@ -129,7 +148,7 @@ else if($sky["cloud_cover"]<=100) {$sky["cloud_oktas"]="8 oktas";}
 ?>
 </span></div>
  <!-- weather34 generated Data--> 
-<div class="darkskynexthours" style="margin: 60px auto auto; margin-top: 55px; margin-left: 25px; text-align: center">
+<div class="darkskynexthours" style="margin: 60px auto auto; margin-top: 55px; margin-left: 35px; text-align: center">
 <?php //weather34 average station data
 //echo "Average <oblue>Cloud Cover</oblue> last 5 minutes <ogreen>" .$sky["cloud_cover"]."</ogreen><valuetext>".$cloudcoverunit. "(".$sky["cloud_oktas"].")";
 
