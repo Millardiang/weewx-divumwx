@@ -66,7 +66,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script> 
-<script src="https://cdnres.willyweather.co.uk/widget/warning/loadView.html?id=3837" type="application/javascript"></script>
+
 </head>
 
 <!-- begin top layout-->
