@@ -5,7 +5,7 @@ import weecfg
 import weewx.station
 import weewx.reportengine
 
-def w34_reports():
+def dvm_reports():
     _config_path, config_dict = weecfg.read_config(None, None)
     save_entries = ["SKIN_ROOT","HTML_ROOT","data_binding","log_success","log_failure","dvmHighcharts"]
     for key in config_dict['StdReport']:
@@ -32,4 +32,4 @@ def w34_reports():
         weewx.reportengine.StdReportEngine(config_dict, weewx.station.StationInfo(**config_dict['Station']), record=record, gen_ts=ts).run()
     
 if __name__=="__main__" :
-    w34_reports()
+    dvm_reports()
