@@ -1,92 +1,10 @@
 # DivumWX skin for WeeWX - Now Under Construction
-Weather Station website skin with Live Data for WeeWX. This version is compatible with WeeWX 4.x.x builds / Python 2.7 and Python 3.x. **This version of the template requires either the extended database schema introduced with WeeWX 4.0.0 or one that has been manually extended to included fields for lightning data.** It is strongly recommended that you start with an entirely new clean Python3 install of WeeWX 4.4.0 or later.
-
-Version W34-HC-IMJD-4.3.0
-
-Packaged for installation using its own unique installer and an online pre-installation settings form https://steepleian.github.io/weewx-Weather34
-
-This repository contains the WeeWX version of Brian Underdown's Weather34 website template set. Brian's main website is https://weather34.com/homeweatherstation/index.html In January, 2019, Brian asked others to take over the distribution/maintainence of his design whilst he concentrated on development only for MB NanoSD, called Weather34 MB-SMART. This WeeWX version of the template is actively developed by Ian Millard and Jerry Dietrich.
-
-The repository contains a main and development branch. To maintain integrity of the main branch, all pull request must be made via the development branch. 
-
-This version requires WeeWX version 4.1.1 or later software. WeeWX is available at http://weewx.com. It is PHP 8 compatible.
-
-This version is designed explicitly to harness the powerful WeeWX database to generate the weather data charts and statistical data. It was originally built on the current MB-UB40-IHVN which is now maintained by Lightmaster (Meteobridge-Weather34-Template). Although we maintain a similar look and feel with MB-UB40-IHVN,the weewx-Weather34 now has many unique features.
-
-This version is assembled as an install package and uses its own unique installer and un-installer utilities. This greatly simplifies the installation process from that of previous versions. Depending on your own WeeWX setup, minor edits may be required to be made to weewx.conf and Weather34 skin.conf files. Please see the Weather34 skin Installation Guide for detailed instructions.
-
-# What's New in this Version W34-4.3.0
-
-DarkSky has been removed as a source of forecasting data etc - the API has been withdrawn by its owners Apple.
-
-AerisWeather is now included and is the default forecasting, alerts and current conditions data source. A free developers subscribtion is required via the link in the install instructions. Weather Underground is also included as an alternative source but it does not supply the same level of data via its API.
-
-The services.txt generating form has been updated with an improved interface, thanks to User Stephen.
-
-With newer versions of Python3.x several fixes have add to be applied. Thanks once again to Jerry Dietrich in keeping us on track with the changes and fixes.
-
-There are one or two other features included at the suggestion of User Sean, so thanks to him as well.
-
-The default symbol set is now based on the yr.no symbols. (Please note that Weather Underground still uses the old set for forecasts).
-
-Significant update of settings page.
-
-Compliant with WeeWX 4.7.0 for remote syncrinisation. Thanks to Jerry (and to Chris for raising the issue).
-
-Various bugs squashed. Thanks to mutiple users support in raising issues.
-
-# Demo
-
-A live example of Weather34 WeeWX skin can be seen at https://claydonsweather.org.uk
-
-# Weather34 Historic Timeline of design 2014-2019 
-https://weather34.com/homeweatherstation/weather34timeline/weather34timeline.html
-
-# Template Screenshots
-
-**Dark Theme**
-
-![image](https://user-images.githubusercontent.com/18438654/86633765-fb60a200-bfc8-11ea-99dc-f8dc8de56e8c.png)
-
-**Light Theme**
-
-![image](https://user-images.githubusercontent.com/18438654/86635273-c8b7a900-bfca-11ea-9efd-76962364c2fd.png)
-
-**Pop Up Chart - Dark Theme**
-
-![image](https://user-images.githubusercontent.com/18438654/86635575-277d2280-bfcb-11ea-9452-e7acd7f44e62.png)
-
-**Pop Up Chart - Light Theme
-
-![image](https://user-images.githubusercontent.com/18438654/86636143-dae61700-bfcb-11ea-966d-4db7b487033f.png)
-
-**Pop Up AQI Info**
-
-![image](https://user-images.githubusercontent.com/18438654/86636425-2c8ea180-bfcc-11ea-957d-72c1180f44fb.png)
-
-**Pop UP Alerts**
-
-![image](https://user-images.githubusercontent.com/18438654/86637661-da4e8000-bfcd-11ea-8df6-1f872a6bb6ed.png)
-
-**Radial Charts**
-
-![Untitled](https://user-images.githubusercontent.com/18438654/86875356-34d50280-c0da-11ea-9b39-33acd451eb46.png)
-
-**Hays Charts**
-
-![image](https://user-images.githubusercontent.com/18438654/86639506-e25bef00-bfd0-11ea-9da3-043d2a640b46.png)
+Weather Station website skin with Live Data for WeeWX. This version is compatible with WeeWX 4.6.x builds / Python 3.x. **This version of the template requires either the extended database schema introduced with WeeWX 4.0.0 or one that has been manually extended to included fields for lightning data.** It is strongly recommended that you start with an entirely new clean Python3 install of WeeWX 4.4.0 or later.
 
 
 # Setup
 
-**If you are upgrading from a previous version of this skin, due to the significant changes, you must recreate your settings1.php file by running the full install process. Just copying your previous settings1.php will cause errors which are then more difficult to resolve.**
-
 Follow the instructions in the 'installation guide' (INSTALLATION_GUIDE.md) to install the template.
-Browse to http://your/path/to/weewx/weather34/templateSetup.php
-There is no initial password when the page prompts the first time -- just press LOGIN to enter the page.
-IMPORTANT set a password in the screen for future use -- your browser can remember it. This will make future updates    reasonably secure so only you can do the updates to the configuration.
-Make setting entries in the templateSetup.php page and SAVE. The next time you run it, use the password you set in the step above.
-Repeat running templateSetup.php until the main screen appears as you like it.
 
 # License
 
