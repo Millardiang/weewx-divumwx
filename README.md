@@ -4,7 +4,7 @@ Weather Station website skin with Live Data for WeeWX. This version is compatibl
 
 # Setup
 
-Follow the instructions in the 'installation guide' (INSTALLATION_GUIDE.md) to install the template.
+Follow the instructions in the 'installation guide' ([INSTALLATION_GUIDE.md](https://github.com/Millardiang/weewx-divumwx/blob/alpha/INSTALLATION_GUIDE.md)) to install the template.
 
 # License
 
