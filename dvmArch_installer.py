@@ -69,6 +69,12 @@ class dvm_installer:
                 print("!!!NO VALID PYTHON EPHEM FOUND INSTALL CANNOT CONTINUE. PLEASE READ INSTALL README!!!") 
                 sys.exit(1)
             try:
+                import sortedcontainers
+                print("PYTHON SORTED CONTAINERS VERSION " + sortedcontainers.__version__ + " INSTALLED") 
+            except:
+                print("!!!NO VALID PYTHON SORTED CONTAINERS FOUND INSTALL CANNOT CONTINUE. PLEASE READ INSTALL README!!!") 
+                sys.exit(1)
+            try:
                 php = os.system('php --version')
                 #print("!!!PHP NOT INSTALLED!!!" if php !=0 else "PHP INSTALLED " + php)
             except:
