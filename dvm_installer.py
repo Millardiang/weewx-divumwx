@@ -69,6 +69,12 @@ class dvm_installer:
                 print("!!!NO VALID PYTHON EPHEM FOUND INSTALL CANNOT CONTINUE. PLEASE READ INSTALL README!!!") 
                 sys.exit(1)
             try:
+                import sortedcontainers
+                print("PYTHON SORTED CONTAINERS VERSION " + sortedcontainers.__version__ + " INSTALLED") 
+            except:
+                print("!!!NO VALID PYTHON SORTED CONTAINERS FOUND INSTALL CANNOT CONTINUE. PLEASE READ INSTALL README!!!") 
+                sys.exit(1)
+            try:
                 php = os.system('php --version')
                 #print("!!!PHP NOT INSTALLED!!!" if php !=0 else "PHP INSTALLED " + php)
             except:
@@ -125,7 +131,7 @@ class dvm_installer:
             config_data = ConfigObj(weewx_config_file, encoding='utf8', list_values=False,write_empty_values=True)
             www_path = locations["www"].split('divumwx')[0][:-1]
             if www_path != config_data['StdReport'].get('HTML_ROOT'):
-                print("!!! WEEWX HTML ROOT  " + config_data['StdReport'].get('HTML_ROOT') + "  DOES NOT MATCH W34_INSTALLER www PATH.  " + www_path + "  INSTALL ABORTED!!!") 
+                print("!!! WEEWX HTML ROOT  " + config_data['StdReport'].get('HTML_ROOT') + "  DOES NOT MATCH DVM_INSTALLER www PATH.  " + www_path + "  INSTALL ABORTED!!!") 
                 sys.exit(1)
             with open(services_file) as infile:
                 d.update(eval(re.sub(".*\"##.*\n",'', infile.read()).replace("\n", "").replace("\t", "")))
