@@ -40,7 +40,7 @@ Once completed, make sure you save weewx.conf
 
 * I am very gratefully to Jerry Dietrich for writing a new installer specially for Weather34. This installer copies everything to the correct places and automatically configures the correct web server ownerships, permissions and groups etc. The whole process is very fast and your skin will be up and running in no time. By using the supplied configuration files, setup.py, packaged or MacOS installed versions of WeeWX can be catered for.
 
-* Go to https://steepleian.github.io/weewx-Weather34 to complete the pre-install web services settings which which generates 'services.txt' in your default Download folder. 
+* Go to https://steepleian.github.io/weewx-Weather34/divumwx_settings_txt.html to complete the pre-install web services settings which which generates 'services.txt' in your default Download folder. 
 
 
 IMPORTANT if you have previously used the weewx-Weather34 template, you must backup ALL of your previous files INCLUDING MOST IMPORTANTLY YOUR WEEWX DATABASE. DOUBLE CHECK BEFORE YOY PROCEED TO THE NEXT STAGE.

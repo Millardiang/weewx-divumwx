@@ -7,10 +7,10 @@ import sys
 import os
 import re
 
-KEYS_TO_DELETE   = ['DivumWXRealTime','DivumWXWebServices','DivumWXCloudCover','SensorData','LastNonZero','StdReport:dvmHighcharts','StdReport:DivumWXReport','StdReport:dvmskinReport','StdReport:SensorDataReport']
+KEYS_TO_DELETE   = ['DivumWXRealTime','DivumWXWebServices','DivumWXCloudCover','SensorData','StdReport:dvmHighcharts','StdReport:DivumWXReport','StdReport:dvmskinReport','StdReport:SensorDataReport']
 VALUES_TO_DELETE = ['Engine:Services:process_services:user.divumwx.DivumWXRealTime','Engine:Services:xtype_services:user.divumwx.LastNonZeroService','Engine:Services:report_services:user.divumwx.SensorData']
-DIRS_TO_DELETE   = ['www:','skins:DivumWx','skins:dvmHighcharts','skins:dvmHighcharts-day']
-FILES_TO_DELETE  = ['user:dvmhighchartsSearchX.py','user:divumwx.py','user:dvm_db_backup.py','user:lastrain.py','user:ml.py','user:stats.py','user:lastnonzero.py']
+DIRS_TO_DELETE   = ['www:','skins:DivumWX','skins:dvmHighcharts','skins:dvmHighcharts-day']
+FILES_TO_DELETE  = ['user:dvmhighchartsSearchX.py','user:divumwx.py','user:dvm_db_backup.py','user:lastrain.py','user:ml.py','user:stats.py']
   
 class dvm_uninstaller:
     def __init__(self, conf_file):
