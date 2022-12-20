@@ -40,8 +40,10 @@ $position2title   = "Wind";
 $position3title   = "Temperature";
 $position4title   = "Weather <ored>Alerts</orange>";
 $position6title   = "Forecast";
-$position12title   = "Solar | UV | Lux";
+$position12   = "dvmSolarUvLux.php";
+$position12title   = "Solar | UV | LUX";
 $position13title   = "Moonphase";
+
 $webcamurl   = "";
 $videoWeatherCamURL  = "";
 $email    = "";

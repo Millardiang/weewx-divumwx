@@ -384,14 +384,12 @@ h6 {
 }
 
 .weather-item {
-  width: 32.84%;
+  width: 64.84%;
   height: 195px;
+  border-radius: 5px;
   border: 1px solid rgba(230, 232, 239, .8);
   border-bottom: 18px solid #f6f8fc;
-  -webkit-box-shadow: inset 0 20px #f6f8fc;
-  box-shadow: inset 0 20px #f6f8fc;
-  -webkit-box-sizing: border-box;
-  box-sizing: border-box;
+  border-top: 20px solid #f6f8fc;
   font-size: 1em;
   margin: 2px;
   padding: 0;
@@ -459,10 +457,7 @@ h6 {
   width: 100%;
   border: 1px solid #e9ebf1;
   text-align: center;
-  -webkit-border-radius: 4px;
-  -o-border-radius: 4px;
-  -ms-border-radius: 4px;
-  border-radius: 4px;
+  border-radius: 5px;
   margin: 0 2px 2px 0;
   padding: 15px;
   color: #505153
@@ -685,7 +680,7 @@ suprain2 {
   margin-left: 0;
   font-size: .67em;
   color: #2d3a4b;
-  margin-top: 175px;
+  margin-top: 155px;
   width: 300px;
   padding-left: 10px;
   text-align: left
@@ -909,7 +904,7 @@ supdavis {
   font: .65em weathertext2;
   margin-left: 235px;
   padding: 0;
-  margin-top: -15px;
+  margin-top: -35px;
   color: #2d3a4b;
   line-height: 10px
 }
@@ -1257,8 +1252,10 @@ hr {
 }
 
 .moduletitle {
+  position: relative;
+  top: -20px;
   font-size: .8em;
-  float: none
+  float: none;
 }
 
 .yearpopup {
@@ -2031,10 +2028,14 @@ lightningrain {
 .weather34box.earthquake,
 .weather34box.indoor {
   background-color: #fff;
-  -webkit-box-shadow: inset 0 18px #f6f8fc;
-  box-shadow: inset 0 18px #f6f8fc;
-  -webkit-box-sizing: border-box;
-  box-sizing: border-box
+}
+
+.weatherbox-top-border {
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  background: #f6f8fc;
+  width: 234px;
+  height: 18px;
 }
 
 .lightningrain,
@@ -2077,15 +2078,15 @@ lightningrain {
 }
 
 .weather34box {
+  border-radius: 6px;
   border: 1px solid rgba(230, 232, 239, .8);
-  border-top: 1px solid rgba(230, 232, 239, .8);
-  border-bottom: 1px solid rgba(230, 232, 239, .8);
   float: left;
-  padding: 5px;
+  top: -5px;
+  padding: 0px;
+  margin: 2px;
   position: relative;
-  width: 24.93%;
+  width: 236px;
   height: 83px;
-  margin: -3px auto 0
 }
 
 .weather34box .title,
@@ -8142,7 +8143,7 @@ topblue1 {
 
 .updatedtime,
 updatedtime1 {
-  margin-top: -18px;
+  margin-top: -38px;
   line-height: 10px
 }
 
@@ -8156,7 +8157,7 @@ updatedtime1 {
 }
 
 .updatedtimecurrent {
-  margin-top: -18px;
+  margin-top: -38px;
   margin-left: 235px;
   color: #2d3a4b;
   font: .65em weathertext2;
@@ -9885,7 +9886,7 @@ baro-units {
 }
 
 .updatedtime2 {
-  margin-top: -16.5px;
+  margin-top: -36.5px;
   font: .65em weathertext2;
   margin-left: 237px;
   color: #2d3a4b;

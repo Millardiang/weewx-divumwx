@@ -16,7 +16,7 @@ selector{ property:value; }
 
 .davisfooterlogo,
 img {
-  image-rendering: auto
+  image-rendering: auto;
 }
 
 @font-face {
@@ -27,10 +27,10 @@ img {
 
 .menu,
 .thearrow7:after {
-  -webkit-border-radius: 0
+  -webkit-border-radius: 0;
 }
 
-.div:empty { display: none }
+.div:empty { display: none; }
 
 .averagedir,
 .averagedir span,
@@ -74,7 +74,7 @@ suptemp {
   color-adjust: [exact];
   -webkit-osx-font-smoothing: grayscale;
   -moz-osx-font-smoothing: grayscale;
-  font-smoothing: grayscale
+  font-smoothing: grayscale;
 }
 
 .logo,
@@ -82,7 +82,7 @@ suptemp {
 .menu copyright,
 body,
 h1 {
-  font-weight: 500
+  font-weight: 500;
 }
 
 .h2,
@@ -102,7 +102,7 @@ h3,
 h4,
 h5,
 h6 {
-  -webkit-text-size-adjust: 100%
+  -webkit-text-size-adjust: 100%;
 }
 
 .h2,
@@ -122,7 +122,7 @@ h5,
 h6 {
   -ms-text-size-adjust: 100%;
   -moz-font-smoothing: antialiased;
-  -webkit-font-smoothing: antialiased
+  -webkit-font-smoothing: antialiased;
 }
 
 .heading1,
@@ -145,20 +145,20 @@ a,
 body,
 h3 {
   text-rendering: optimizeLegibility;
-  color-adjust: [exact]
+  color-adjust: [exact];
 }
 
 #beaker,
 #raintoday,
 .bar,
 .norain {
-  shape-rendering: crispEdges
+  shape-rendering: crispEdges;
 }
 
 .bt,
 .cl,
 a {
-  text-decoration: none
+  text-decoration: none;
 }
 
 *,
@@ -166,14 +166,14 @@ a {
 :before,
 html {
   -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box
+  -moz-box-sizing: border-box;
 }
 
 *,
 :after,
 :before,
 hr {
-  -o-box-sizing: border-box
+  -o-box-sizing: border-box;
 }
 
 @font-face {
@@ -190,7 +190,7 @@ hr {
 :after,
 :before {
   -ms-box-sizing: border-box;
-  box-sizing: inherit
+  box-sizing: inherit;
 }
 
 body {
@@ -199,7 +199,7 @@ body {
   font-size: 14px;
   line-height: 1.42857143;
   color: silver;
-  cursor:default
+  cursor:default;
  
 }
 .menu {
@@ -217,7 +217,7 @@ body {
   background: rgba(37, 41, 45, .7);
   border-right: 1px solid #333;
   border-top: 0;
-  border-bottom: 1px solid #333
+  border-bottom: 1px solid #333;
 }
 
 .menu li {
@@ -226,7 +226,7 @@ body {
   padding: 2px 2px 3px;
   border: 0;
   line-height: .8em;
-  margin-bottom: 0
+  margin-bottom: 0;
 }
 
 .w34uptime {
@@ -245,17 +245,17 @@ body {
   background: rgba(86, 95, 103, .4);
   -webkit-border-radius: 2px;
   border-radius: 2px;
-  margin-top: -27px
+  margin-top: -27px;
 }
 
 .weather-item,
 body,
 header {
-  text-align: center
+  text-align: center;
 }
 
 .menu copyright {
-  font-size: 10px
+  font-size: 10px;
 }
 
 header {
@@ -270,7 +270,7 @@ header {
   top: 0;
   width: 100%;
   z-index: 4;
-  margin-bottom: -10px
+  margin-bottom: -10px;
 }
 
 button {
@@ -282,22 +282,22 @@ button {
   margin-top: -45px;
   width: auto;
   padding: 0;
-  background: 0
+  background: 0;
 }
 
 .logo,
 header {
-  position: absolute
+  position: absolute;
 }
 
 .logo,
 h1 {
-  padding-right: .5em
+  padding-right: .5em;
 }
 
 h1 {
   font-size: .9rem;
-  top: 10px
+  top: 10px;
 }
 
 .h2,
@@ -314,14 +314,14 @@ h6 {
   font-family: inherit;
   line-height: 1.1;
   color: inherit;
-  font-smoothing: antialiased
+  font-smoothing: antialiased;
 }
 
 .barometertrend,
 .barometertrend steady,
 .logo,
 .logo span {
-  color: silver
+  color: silver;
 }
 
 .h1 .small,
@@ -337,7 +337,7 @@ h4 .small,
 h5 .small,
 h6 .small {
   line-height: 1;
-  color: silver
+  color: silver;
 }
 
 .h1,
@@ -347,7 +347,7 @@ h1,
 h2,
 h3 {
   margin-top: 20px;
-  margin-bottom: 10px
+  margin-bottom: 10px;
 }
 
 .h4,
@@ -357,18 +357,18 @@ h4,
 h5,
 h6 {
   margin-top: 10px;
-  margin-bottom: 10px
+  margin-bottom: 10px;
 }
 
 .logo {
   font-size: 1.4em;
   font-weight: 600;
   line-height: 3.3em;
-  margin-top: -90px
+  margin-top: -90px;
 }
 
 .logo span {
-  font-weight: 500
+  font-weight: 500;
 }
 
 .weather-container {
@@ -378,22 +378,20 @@ h6 {
   height: 200px;
   overflow: hidden;
   margin: 2px auto;
-  background: 0
+  background: 0;
 }
 
 .weather-item {
   width: 32.84%;
   height: 195px;
   border: 0;
+  border-radius: 5px;
   border-bottom: 18px solid rgba(97, 106, 114, .1);
-  -webkit-box-shadow: inset 0 20px rgba(97, 106, 114, .1);
-  box-shadow: inset 0 20px rgba(97, 106, 114, .1);
-  -webkit-box-sizing: border-box;
-  box-sizing: border-box;
+  border-top: 20px solid rgba(97, 106, 114, .1);
   font-size: 1em;
   margin: 2px;
   padding: 0;
-  background: rgba(33, 34, 39, .8)
+  background: rgba(33, 34, 39, .8);
 }
 
 .weather2-item {
@@ -401,7 +399,7 @@ h6 {
   text-align: left;
   text-transform: none;
   height: 80px;
-  display: none
+  display: none;
 }
 
 .weather2-container {
@@ -416,7 +414,7 @@ h6 {
   width: 960px;
   height: 100px;
   background-color: 0;
-  margin: 50px auto -20px
+  margin: 50px auto -20px;
 }
 
 .weather2-item {
@@ -426,30 +424,30 @@ h6 {
   background-color: #fff;
   border: 0 solid #e9ebf1;
   float: left;
-  font-size: .9em
+  font-size: .9em;
 }
 
 .weather2-alert,
 .weather2-clock,
 .weatherfooter-item {
   background: rgba(33, 34, 39, .8);
-  height: 90px
+  height: 90px;
 }
 
 .weatherfooter-container,
 .weatherfooter-item {
-  font-family: Arial, system
+  font-family: Arial, system;
 }
 
 .alerttopicons svg {
   margin-top: 33px;
-  opacity: .5
+  opacity: .5;
 }
 
 .weatherfooter-container {
   display: flex;
   width: 960px;
-  margin: 0 auto 2px
+  margin: 0 auto 2px;
 }
 
 .weatherfooter-item {
@@ -459,15 +457,15 @@ h6 {
   -webkit-border-radius: 2px;
   -o-border-radius: 2px;
   -ms-border-radius: 2px;
-  border-radius: 2px;
+  border-radius: 5px;
   margin: 0 2px 2px 0;
-  padding: 15px
+  padding: 15px;
 }
 
 .barometergaugegrid {
   width: 90%;
   text-align: center;
-  margin: 10px 0 auto
+  margin: 10px 0 auto;
 }
 
 .barometertrend {
@@ -475,7 +473,7 @@ h6 {
   text-align: center;
   z-index: 1;
   font: 12px Arial, system;
-  margin: -58px auto auto
+  margin: -58px auto auto;
 }
 
 
@@ -487,7 +485,7 @@ h6 {
   z-index: auto;
   font-size: 0;
   color: #fff;
-  font-family: Arial, system
+  font-family: Arial, system;
 }
 
 trendmovementfalling,
@@ -495,22 +493,22 @@ trendmovementrising {
   color: #fff;
   font-size: 13px;
   margin-left: 15px;
-  font-family: weathertext2
+  font-family: weathertext2;
 }
 
 trendmovementsteady {
   color: #fff;
   font-size: 12px;
-  margin-left: 10px
+  margin-left: 10px;
 }
 
 h3 {
-  font: 4em weathertext2
+  font: 4em weathertext2;
 }
 
 .beaufortconditions,
 .nexthours {
-  display: inline-block
+  display: inline-block;
 }
 
 .baromcircle,
@@ -526,26 +524,26 @@ canvas,
 daylighthours:after,
 in,
 mb {
-  position: absolute
+  position: absolute;
 }
 
 .heading1,
 supmb,
 supunit {
-  color: silver
+  color: silver;
 }
 
 .indoorlocation,
 .stationlocationtime {
   padding: 2px 4px 2px 2px;
   margin-left: 35px;
-  width: auto
+  width: auto;
 }
 
 .stationlocationtime {
   margin-top: 41px;
   text-align: left;
-  font: 10px arial, system
+  font: 10px arial, system;
 }
 
 .indoortitles {
@@ -680,7 +678,7 @@ suprain2 {
   margin-left: 0;
   font-size: .67em;
   color: silver;
-  margin-top: 175px;
+  margin-top: 155px;
   width: 300px;
   padding-left: 10px;
   text-align: left
@@ -904,7 +902,7 @@ supdavis {
   font: .65em weathertext2;
   margin-left: 235px;
   padding: 0;
-  margin-top: -15px;
+  margin-top: -35px;
   color: silver;
   line-height: 10px
 }
@@ -1252,8 +1250,10 @@ hr {
 }
 
 .moduletitle {
+  position: relative;
+  top: -20px;
   font-size: .8em;
-  float: none
+  float: none;
 }
 
 .yearpopup {
@@ -1971,7 +1971,8 @@ lightningrain {
 .footertext {
   position: relative;
   float: left;
-  margin-left: 25px
+  top: -10px;
+  margin-left: -5px;
 }
 
 .feelstemp,
@@ -2025,10 +2026,16 @@ lightningrain {
 .weather34box.earthquake,
 .weather34box.indoor {
   background-color: rgba(33, 34, 39, .8);
-  -webkit-box-shadow: inset 0 18px rgba(97, 106, 114, .1);
-  box-shadow: inset 0 18px rgba(97, 106, 114, .1);
-  -webkit-box-sizing: border-box;
-  box-sizing: border-box
+}
+
+.weatherbox-top-border {
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  background: rgba(97, 106, 114, .1);
+  margin-left: -5px;
+  margin-top: -5px;
+  width: 235px;
+  height: 18px;
 }
 
 .lightningrain,
@@ -2074,13 +2081,14 @@ lightningrain {
   border: 2px solid #151718;
   border-top: 1px;
   border-bottom: 1px;
+  border-radius: 6px;
   color: silver;
   float: left;
   padding: 5px;
   position: relative;
   width: 24.93%;
   height: 83px;
-  margin: -3px auto 0
+  margin: -5px auto 0
 }
 
 .weather34box .title,
@@ -3785,7 +3793,7 @@ rainu {
 
 /* CSS for the flyout menu */
 .weather34sidebarMenuInner li.sub {
-  background-image: url(sub2.svg);
+//  background-image: url(sub2.svg);
   background-repeat: no-repeat;
   background-position-x: right;
   background-position-y: center;
@@ -3800,7 +3808,7 @@ rainu {
   /* set up the overrun area */
   padding: 30px;
   /* this is for IE to make it interpret the overrrun padding */
-  background: transparent url(transparent.gif);
+//  background: transparent url(transparent.gif);
 }
 
 .weather34sidebarMenuInner li.sub ul li {
@@ -4116,25 +4124,17 @@ thunder {
   color: silver
 }
 
-.darkskyiconcurrent {
-  postion: relative;
-  position: relative;
-  margin-top: 10px;
-  margin-bottom: -5px;
-  margin-left: 35px;
-  float: left
-}
 
 .darkskyiconcurrent {
   position: relative;
   margin-top: 10px;
   margin-bottom: -5px;
   margin-left: 35px;
-  float: left
+  float: left;
 }
 
 .darkskyiconcurrent span1 {
-  font-size: .9em
+  font-size: .9em;
 }
 
 heatindex {
@@ -5002,8 +5002,10 @@ body {
 }
 
 
-
-
+.lightningconverter {
+  margin-top: 5px;
+  margin-left: 237px;
+}
 
 .rainconverter,
 .tempconverter {
@@ -5137,6 +5139,11 @@ redtime {
   height: 1rem;
   line-height: 16px;
   overflow: hidden
+}
+
+lightningtext {
+  font-size: 9.25px;
+  font-family: weathertext2;
 }
 
 .rainconverter {
@@ -6529,6 +6536,10 @@ tgreen {
 oblue,
 tblue {
   color: #3b9cac
+}
+
+maxblue {
+  color: #3b9cac;
 }
 
 .tempindoorextra {
@@ -8040,8 +8051,8 @@ topblue1 {
 
 .updatedtime,
 updatedtime1 {
-  margin-top: -18px;
-  line-height: 10px
+  margin-top: -38px;
+  line-height: 10px;
 }
 
 .updatedtimeuv {
@@ -8054,7 +8065,7 @@ updatedtime1 {
 }
 
 .updatedtimecurrent {
-  margin-top: -18px;
+  margin-top: -38px;
   margin-left: 235px;
   color: silver;
   font: .65em weathertext2;
@@ -9485,10 +9496,10 @@ body:hover {
   right: -90px;
   margin-top: 25px;
 }
+
 .lightningiconx {
-  position: absolute;
-  display: inline;
-  left: -175px;
+  position: relative;
+  left: -235px;
   margin-top: -5px;
 }
 .maxtimedate,
@@ -9506,7 +9517,7 @@ body:hover {
   margin-top: 62px;  
 }
 
-logo {
+.logox {
   position: absolute;
   display: inline;
   right: 20px;
@@ -9653,15 +9664,22 @@ baro-units {
 }
 
 .updatedtime2 {
-  margin-top: -16px;
+  margin-top: -38.25px;
   font: .65em weathertext2;
   margin-left: 237px;
   color: silver;
   background: 0;
   padding: 3px;
 }
-.maxblue {
-  color: #3b9cac;
+valuetextpwsbold {
+  font-family: weathertext2;
+  font-size: .65em;
+  font-weight: bold;
+  color: silver;
 }
-
-
+valuetextpws {
+  font-family: weathertext2;
+  font-size: .65em;
+  font-weight: 500;
+  color: silver;
+}

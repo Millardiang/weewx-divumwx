@@ -4,7 +4,7 @@ var weereportcmd = "./dvm_reports";  //Command to run dvm_reports. DO NOT CHANGE
 var realtimefilename = "serverdata/dvmRealtime.txt"; //File name must match what is in the weewx config for realtime
 
 var autoupdateinterval = 60; //This is seconds
-var realtimeinterval = 10;  //This is seconds
+var realtimeinterval = 2;  //This is seconds
 var hide_zero_wind_barb = false;  //Hide/display Zero Barb
 var disable_day_plots = false; //Disable day plots
 var enable_radial_charts_reload = true; //Hack for highcharts radial charts

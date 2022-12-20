@@ -10,7 +10,6 @@ else if ($uv["now"]<6){$uv["color"]="#fde396";} // pastel yellow
 else if ($uv["now"]<8){$uv["color"]="#ff964f";} // pastel orange
 else if ($uv["now"]<11){$uv["color"]="#ff6181";} // pastel red
 else {$uv["color"]="#be688b";} // pastel purple (jupiter)
-
 ?>
 
 <div class="updatedtime1"><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>';else echo $online." ".$weather["time"];?></div>

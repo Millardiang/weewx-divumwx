@@ -5,9 +5,8 @@ include('settings1.php');
 header('Content-type: text/html; charset=utf-8');
 ?>
 
-<div class='moduletitlebaro'><?php echo $lang['Barometer'], " (<valuetitleunit>", $barom["units"];?></valuetitleunit>)</div>
 <div class="updatedtime2">
-<?php if(file_exists($livedata)&&time() - filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>';else echo $online." ".$weather["time"];?>
+<?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$weather["time"];?>
 </div>
  
 <?php
@@ -27,10 +26,10 @@ $barom["max"]=$barom["max"]*0.1;
 
 <div class="barometertrend10">
 <?php  echo "<valuetext>&nbsp;&nbsp;Trend";
-if ($barom["trend_code"] > 20  && $barom["trend_code"] < 100) { echo '<rising><rise><maxred> '.$risingsymbol.' </rise></maxred><br>'; echo $barom["trend_desc"], '</rising> '; 
-} else if ($barom["trend_code"] < 0) { echo '<falling><fall><minblue> '.$fallingsymbol.'</fall><minblue><br>'; echo $barom["trend_desc"], '</falling>';
-} else if ($barom["trend_code"] > 0 && $barom["trend_code"] < 100) { echo '<rising><rise></maxred> '.$risingsymbol.'</rise></maxred><br>'; echo $barom["trend_desc"], '</rising> '; 
-} else echo '<ogreen>'.$steadysymbol.'<br>'.$barom["trend_desc"].' </ogreen></valuetext>';?></div>
+if ($barom["trend_code"] > 20  && $barom["trend_code"] < 100) { echo '<rising><rise><maxred> '.$risingsymbol.' </rise><maxred><br>'; echo $barom["trend_desc"], '<maxred></rising> '; 
+} else if ($barom["trend_code"] < 0) { echo '<falling><fall><minblue> '.$fallingsymbol.'</fall><minblue><br>'; echo $barom["trend_desc"], '</minblue></falling>';
+} else if ($barom["trend_code"] > 0 && $barom["trend_code"] < 100) { echo '<rising><rise></maxred> '.$risingsymbol.'</rise><maxred><br>'; echo $barom["trend_desc"], '</maxred></rising> '; 
+} else echo '<ogreen>'.$steadysymbol.'<br>Steady</ogreen></valuetext>';?></div>
 
 <div class="barometerconverter">
 <?php echo "<div class=barometerconvertercircleblue>";
@@ -54,7 +53,7 @@ echo
     
     	.barometer {
     		position: relative; 
-    		margin-top: -12.75px; 
+    		margin-top: -12.50px; 
     		margin-left: -2.75px;
     		z-index: auto;
     	}
@@ -396,6 +395,143 @@ echo
 
         gauge.value(currentMax);
         
+        } else if (units == "mb") {
+        
+         var svg = d3.select(".barometer")
+                .append("svg")
+                //.style("background", "#292E35")
+                .attr("width", 140)
+                .attr("height", 140);
+                
+             if (theme == "dark") {
+             
+             svg.append("text") // barometer now pressure text output
+             	.attr("x", 70)
+            	.attr("y", 127)
+            	.style("fill", "silver")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "11px")
+            	.style("text-anchor", "middle")
+            	.style("font-weight", "normal")
+   				.text(currentP + " " + units);
+   				
+   			} else {
+   			
+   			svg.append("text") // barometer now pressure text output
+             	.attr("x", 70)
+            	.attr("y", 127)
+            	.style("fill", "#2d3a4b")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "11px")
+            	.style("text-anchor", "middle")
+            	.style("font-weight", "normal")
+   				.text(currentP + " " + units);
+   			}
+         
+                                                                      
+        var gauge = iopctrl.arcslider()
+                .radius(52.5)
+                .events(false)
+                .transitionDuration(0) // needle speed, a higher value makes it slower
+                .indicator(function(g, width) {
+                
+    				g.append("line")
+            		 .attr("y1", - width - 3) // needle length
+            		 .attr("y2", width - 42) // needle tail length
+            		 .style("stroke", "red")
+            		 .style("stroke-linecap", "round")
+            		 .style("stroke-width", 1);
+            		 
+
+            		 g.append("circle")
+            		 .attr("cx", 0) // center circle
+            		 .attr("cy", 0)
+            		 .attr("r", 5);
+            		             		             	            		            		 
+            });
+                                                                    
+        gauge.axis().orient("out").tickFormat(d3.format("d"))
+                .normalize(false)
+                .ticks(12)
+                .tickSubdivide(10)
+                .tickSize(7, 7, 10)
+                .tickPadding(3)
+                .scale(d3.scale.linear()
+                        .domain([940, 1060]) // min max text scale mbar
+                        .range([- 3 * Math.PI / 4, 3 * Math.PI / 4]));
+                                                                                                     
+        svg.append("g")
+                .attr("class", "gauge")
+                .attr('transform', 'translate(-32.5, -32.5)')
+                .call(gauge);
+                
+                 
+        gauge.value(currentP);
+        
+         var gauge = iopctrl.arcslider()
+                .radius(52.5)
+                .events(false)
+                .transitionDuration(0) // needle speed, a higher value makes it slower
+                .indicator(function(g, width) {
+    				g.append("line")
+            		 .attr("y1", - width - 7) // needle length
+            		 .attr("y2", - width + 0) // needle tail length
+            		 .style("stroke", "rgba(59, 156, 172, 1)")
+            		 .style("stroke-linecap", "round")
+            		 .style("stroke-width", 2);
+            		     		            		 
+            });
+                                              
+        gauge.axis().orient("in").tickFormat(d3.format("d"))
+                .normalize(true)
+                .ticks(0)
+                .tickSubdivide(0)
+                .tickSize(7, 7, 10)
+                .tickPadding(3)
+                .scale(d3.scale.linear()
+                        .domain([940, 1060]) // min max text scale mbar
+                        .range([- 3 * Math.PI / 4, 3 * Math.PI / 4]));
+                                                
+        svg.append("g")
+                .attr("class", "gauge")
+                .attr('transform', 'translate(-32.5, -32.5)')
+                .call(gauge);
+
+
+        gauge.value(currentMin);
+        
+          var gauge = iopctrl.arcslider()
+                .radius(52.5)
+                .events(false)
+                .transitionDuration(0) // needle speed, a higher value makes it slower
+                .indicator(function(g, width) {
+    				g.append("line")
+            		 .attr("y1", - width - 7) // needle length
+            		 .attr("y2", - width + 0) // needle tail length
+            		 .style("stroke", "rgba(255, 124, 57, 1)")
+            		 .style("stroke-linecap", "round")
+            		 .style("stroke-width", 2);            		             		 
+            	            		            		 
+            });
+                                              
+        gauge.axis().orient("in").tickFormat(d3.format("d"))
+                .normalize(true)
+                .ticks(0)
+                .tickSubdivide(0)
+                .tickSize(7, 7, 10)
+                .tickPadding(3)
+                .scale(d3.scale.linear()
+                        .domain([940, 1060]) // min max text scale mbar
+                        .range([- 3 * Math.PI / 4, 3 * Math.PI / 4]));
+                                                
+        svg.append("g")
+                .attr("class", "gauge")
+                .attr('transform', 'translate(-32.5, -32.5)')
+                .call(gauge);
+
+
+        gauge.value(currentMax);
+        
         } else if (units == "inHg") {
         
          var svg = d3.select(".barometer")
@@ -584,7 +720,7 @@ echo
                 .tickSize(7, 7, 10)
                 .tickPadding(3)
                 .scale(d3.scale.linear()
-                        .domain([95, 105]) // min max text scale hPa
+                        .domain([95, 105]) // min max text scale inHg
                         .range([- 3 * Math.PI / 4, 3 * Math.PI / 4]));                                                   
                                                                     
         svg.append("g")
@@ -615,7 +751,7 @@ echo
                 .tickSize(7, 7, 10)
                 .tickPadding(3)
                 .scale(d3.scale.linear()
-                        .domain([95, 105]) // min max text scale hPa
+                        .domain([95, 105]) // min max text scale inHg
                         .range([- 3 * Math.PI / 4, 3 * Math.PI / 4]));
                                                 
         svg.append("g")
@@ -647,7 +783,7 @@ echo
                 .tickSize(7, 7, 10)
                 .tickPadding(3)
                 .scale(d3.scale.linear()
-                        .domain([95, 105]) // min max text scale hPa
+                        .domain([95, 105]) // min max text scale inHg
                         .range([- 3 * Math.PI / 4, 3 * Math.PI / 4]));
                                                 
         svg.append("g")
@@ -661,7 +797,4 @@ echo
       }
       
 </script>
-<div class='weather-itembaro'>
-<div class="yearpopupbaro"><a alt="barometer charts" title="barometer charts" href="pop_menu_barometer.php" data-lity ><?php echo $menucharticonpage;?> Barometer Almanac and Charts</a></div>
-    </div>
 </html>

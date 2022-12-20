@@ -6,14 +6,7 @@
         <description>Weather warnings of severe and extreme weather from the Met Office</description>
         <language>en-gb</language>
         <copyright>(c) Crown copyright</copyright>
-        <pubDate>Thu, 01 Dec 2022 14:10:31 GMT</pubDate>
+        <pubDate>Tue, 20 Dec 2022 06:01:30 GMT</pubDate>
         <dc:creator>webteam@metoffice.gov.uk</dc:creator>
-        <item>
-            <title>Yellow warning of fog affecting London &amp; South East England</title>
-            <link>https://www.metoffice.gov.uk/weather/warnings-and-advice/uk-warnings#?date=2022-12-01&amp;id=6c65a60a-5f7a-4eb4-930d-98572f5dfdfd&amp;referrer=rss</link>
-            <description>Yellow warning of fog affecting London &amp; South East England: Bracknell Forest, Buckinghamshire, Hampshire, Oxfordshire, Reading, Southampton, Surrey, West Berkshire, West Sussex, Wokingham valid from 1600 Thu 01 Dec to 1100 Fri 02 Dec</description>
-            <guid isPermaLink="false">https://www.metoffice.gov.uk/weather/warnings-and-advice/uk-warnings#?date=2022-12-01&amp;id=6c65a60a-5f7a-4eb4-930d-98572f5dfdfd&amp;referrer=rss&amp;region=London &amp; South East England</guid>
-            <enclosure length="100668" type="image/png" url="https://cdn.prod.weathercloud.metoffice.gov.uk/warnings/rss/image/yellow-fog.png"/>
-        </item>
     </channel>
 </rss>

@@ -53,8 +53,7 @@ else
       
       
       <li class="header">ADMIN</li>
-     
-      <li>
+        <li>
         <a href="index.php" title="WEATHERSTATION HOME PAGE">
           <weather34menumarkergreen></weather34menumarkergreen> Home
         </a>
