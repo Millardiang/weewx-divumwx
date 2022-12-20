@@ -19,7 +19,7 @@
     },
     "generation":
     {
-        "time": "Tue, 20 Dec 2022 10:00:00 GMT",
+        "time": "Tue, 20 Dec 2022 10:20:00 GMT",
         "generator": "weewx 4.9.2a1"
     },
     "lightning":
@@ -35,16 +35,16 @@
     },
     "cloudcover":
     {
-        "cloud cover": {"value": 34.049020},
+        "cloud cover": {"value": 32.529412},
         "void_end": null
 
     },
 
     "solar":
     {
-        "max solar current": {"value": 62},
-        "max solar day": {"value": 66, "at": "09:59"},
-        "max solar 24h": {"value": 62, "at": "10:00"},
+        "max solar current": {"value": 77},
+        "max solar day": {"value": 93, "at": "10:16"},
+        "max solar 24h": {"value": 79, "at": "10:15"},
         "max solar month": {"value": 224, "at": "08 10:58"},
         "max solar year": {"value": 1898, "at": "16 Jun 07:55"},
         "max solar alltime": {"value": 1898, "at": "16 Jun 2022 07:55"},
@@ -71,12 +71,12 @@
         "civil twighlight end": {"at": "16:36"},
         "nautical twighlight end": {"at": "17:18"},
         "astronomical twighlight end": {"at": "17:59"},
-        "hour sun": {"value": 5.753293318085612},
-        "sun azimuth": {"value": 151.8991177822848},          
-        "sun altitude": {"value": 10.16413769258479},         
-        "sun right ascension": {"value": 268.34490050861433},          
-        "sun declination": {"value": -23.431701949345598},
-        "sidereal time": {"at": 237.9843259357374},         
+        "hour sun": {"value": 5.840531925515154},
+        "sun azimuth": {"value": 156.3620863293762},          
+        "sun altitude": {"value": 11.49869774602369},         
+        "sun right ascension": {"value": 268.3601862844412},          
+        "sun declination": {"value": -23.431888952640232},
+        "sidereal time": {"at": 242.99801572787564},         
         "winter solstice": {"at": "21:48"},
         "solstice": {"at": "21/12/22 21:48:00"},
         "summer solstice": {"at": "21/06/23 15:57:55"},
@@ -85,28 +85,28 @@
         "moon rise": {"at": "04:23"},
         "moon meridian transit": {"at": "09:05"},
         "moon set": {"at": "13:35"},
-        "hour moon": {"value": 0.2320867505031714},
-        "moon azimuth": {"value": 193.3264144193249},          
-        "moon altitude": {"value": 18.783136330750956},          
-        "moon right ascension": {"value": 224.68673465099994},          
-        "moon declination": {"value": -18.372687671621605},         
+        "hour moon": {"value": 0.3171746101062025},
+        "moon azimuth": {"value": 198.10984178189494},          
+        "moon altitude": {"value": 17.90460495630536},          
+        "moon right ascension": {"value": 224.82524920008282},          
+        "moon declination": {"value": -18.440493216299082},         
         "new moon": {"at": "23 Dec 10:16"},
         "first quarter moon": {"at": "30 Dec 01:20"},
         "full moon": {"at": "06 Jan 23:07"},
         "last quarter moon": {"at": "15 Jan 02:10"},
         "moon phase": {"value": "Waning crescent"},
         "moon phase number": {"value": 7},
-        "moon fullness": {"value": "12.313564252758786"},
+        "moon fullness": {"value": "12.20985921063678"},
         "moon age": {"value": 26},
-        "mercury hlongitude": {"value": 1.0386676141357796},
-        "venus hlongitude": {"value": 302.5136955477437},
-        "earth hlongitude": {"value": 88.48951299971901},
-        "mars hlongitude": {"value": 82.30473572513745},
-        "jupiter hlongitude": {"value": 11.449939586859907},
-        "saturn hlongitude": {"value": 325.9099348137321},
-        "uranus hlongitude": {"value": 47.36951340362698},
-        "neptune hlongitude": {"value": 354.60391468679245},
-        "pluto hlongitude": {"value": 298.0946997585288},        
+        "mercury hlongitude": {"value": 1.1051164968584237},
+        "venus hlongitude": {"value": 302.5356614361144},
+        "earth hlongitude": {"value": 88.50365149130094},
+        "mars hlongitude": {"value": 82.31173666903672},
+        "jupiter hlongitude": {"value": 11.451213417140115},
+        "saturn hlongitude": {"value": 325.91037194583896},
+        "uranus hlongitude": {"value": 47.36967049797789},
+        "neptune hlongitude": {"value": 354.60399664906254},
+        "pluto hlongitude": {"value": 298.09478172079884},        
         "void_end": null
     }
 }
