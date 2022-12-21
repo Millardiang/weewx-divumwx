@@ -10,7 +10,7 @@
 //###################################################################################################################
 include_once('settings1.php');
 include_once('common.php');
-include('w34CombinedData.php');
+include('dvmCombinedData.php');
 
 date_default_timezone_set($TZ);
 
