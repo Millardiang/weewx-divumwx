@@ -1,7 +1,7 @@
 <?php
 
 
-//include ('serverdata/archivedata.php');
+include ('settings1.php');
 
 
 ?>
