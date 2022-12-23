@@ -63,14 +63,14 @@ function msTomph(&$wind, $field){
 	$wind[$field] = number_format(2.236936*$wind[$field], 1);
 }
 
-function anyWtomph($field){
+function anyWtomph($wind, $field){
 	if($wind["units"]=='mph') return $field;
 	if($wind["units"]=='kts') return number_format(1.150779*$field,1);
 	if($wind["units"]=='kmh') return number_format(0.621371*$field,1);
 	if($wind["units"]=='ms')  return number_format(2.236936*$field,1);
 }
 
-function anyWtoms($field){
+function anyWtoms($wind, $field){
 	if($wind["units"]=='ms')  return $field;
 	if($wind["units"]=='kts') return number_format(0.514444*$field,1);
 	if($wind["units"]=='kmh') return number_format(0.2777778*$field,1);

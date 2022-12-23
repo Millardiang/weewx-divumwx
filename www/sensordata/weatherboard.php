@@ -1,5 +1,5 @@
 <?php
-Include(“dvmCombinedData.php”;
+Include('dvmCombinedData.php');
 
 ?>
 

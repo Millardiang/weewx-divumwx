@@ -426,12 +426,6 @@ function phase($time = 0)
         $time = time();
     }
     $pdate = jtime($time);
-    $pphase;
-    $mage;
-    $dist;
-    $angdia;
-    $sudist;
-    $suangdia;
     $Day = $pdate - EPOCH;
     $N = fixangle((360 / 365.2422) * $Day);
     $M = fixangle($N + ELONGE - ELONGP);

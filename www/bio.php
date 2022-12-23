@@ -20,7 +20,7 @@ echo "<body style='background-color:#222328'>";
   <div class="container:fluid">
     <div class="row xs:center xs:middle">
         <div class="xl">
-            
+
             <div class="card" style="margin-top:50px;overflow:hidden;max-height:370px;">
                 <div class="card:header">
                     <div class="card:info">
@@ -29,11 +29,11 @@ echo "<body style='background-color:#222328'>";
                     </div>
                     <div class="card:image">
                         <img src="img/designedfor-1.svg" alt="weather34 logo">
-                    </div>                    
+                    </div>
                 </div>
                 <div class="card:content">
                     <ul>
-                    
+
                         <li>
                             <a href="#!">
                                 <div class="collection">
@@ -42,8 +42,6 @@ echo "<body style='background-color:#222328'>";
     <path d="M2 26 L30 26 30 6 2 6 Z M2 6 L16 16 30 6" />
 </svg>
                                     </div>
-                                    
-                                    
                                     <div class="collection:data">
                                         <h3>Mail</h3>
                                         <span><?php echo $email;?></span>
@@ -84,7 +82,6 @@ echo "<body style='background-color:#222328'>";
                     </ul>
                 </div>
             </div>
-        
         </div>
     </div>
 </div>
