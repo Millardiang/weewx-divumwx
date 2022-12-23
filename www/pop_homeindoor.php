@@ -23,7 +23,7 @@ $windchillwu='<svg "weather34 windchill icon" width="10px" height="10px" viewBox
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="css/homeindoor.<?php echo $theme; ?>.css?version=<?php echo filemtime('css/homeindoor.' . $theme . '.css'); ?>" rel="stylesheet prefetch">
 
-<div class="weather34darkbrowser" url="Home Enviroment Temperature | Humidity"></div>
+<div class="weather34darkbrowser" url="Home Environment Temperature | Humidity"></div>
   
 <main class="grid">
   <article>  

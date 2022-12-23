@@ -26,7 +26,6 @@ $forecastime = filemtime ('jsondata/uk.txt');
   <div class="container:fluid">
     <div class="row xs:center xs:middle">
         <div class="xl">
-            
             <div class="card" style="margin-top:50px;overflow:hidden;max-height:370px;">
                 <div class="card:header">
                     <div class="card:info">
@@ -35,24 +34,20 @@ $forecastime = filemtime ('jsondata/uk.txt');
                     </div>
                     <div class="card:image">
                         <img src="img/designedfor-1.svg" alt="weather34 logo" title="weather34 logo">
-                    </div>                    
+                    </div>
                 </div>
                 <div class="card:content">
                     <ul>
-                    
                         <li>
                             <a href="">
                                 <div class="collection">
                                     <div class="collection:icon">
-                                    
                                     <svg id="i-info" viewBox="0 0 32 32" width="32" height="32" fill="none" stroke="rgba(255, 93, 46, 1.000)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
     <path d="M16 14 L16 23 M16 8 L16 10" />
     <circle cx="16" cy="16" r="14" />
 </svg>
 
                                     </div>
-                                    
-                                    
                                     <div class="collection:data">
                                         <h3>Weather Station <blue> WeeWX</blue></h3>
                                         <span>Model: <?php echo $weatherhardware?></span>
@@ -61,7 +56,6 @@ $forecastime = filemtime ('jsondata/uk.txt');
                                 </div>
                             </a>
                         </li>
-                        
                         <li>
                             <a href="weewx.com" target="_blank" title="weewx.com">
                                 <div class="collection">
@@ -82,7 +76,6 @@ $forecastime = filemtime ('jsondata/uk.txt');
                             <a href="https://github.com/steepleian/weewx-Weather34" alt="weewx-Weather34 skin Download" title="weewx-Weather34 skin Download" target="_blank">
                                 <div class="collection">
                                     <div class="collection:icon">
-                                        
     <svg width="60pt" height="60pt" viewBox="0 0 320 320" version="1.1" xmlns="http://www.w3.org/2000/svg">
 <g id="#00bcd4ff">
 <path fill="#00bcd4" opacity="1.00" d=" M 66.89 64.86 C 88.31 43.61 117.15 30.28 147.13 27.19 C 156.99 25.45 167.30 25.97 177.14 27.81 C 211.50 32.10 243.63 50.71 264.89 77.97 C 280.57 97.75 290.14 122.07 292.81 147.13 C 294.32 153.93 293.70 161.04 293.58 167.97 C 291.83 180.82 289.81 193.79 285.08 205.96 C 273.50 237.56 249.43 264.28 219.33 279.29 C 204.84 286.63 188.96 290.98 172.85 292.81 C 163.21 294.48 153.11 294.08 143.49 292.28 C 113.39 288.60 84.81 274.09 63.91 252.14 C 43.20 230.83 30.26 202.40 27.19 172.88 C 25.97 168.73 26.41 164.32 26.21 160.04 C 26.41 155.74 25.96 151.29 27.19 147.11 C 30.38 116.19 44.49 86.48 66.89 64.86 M 125.87 58.93 C 101.14 67.26 79.77 85.04 67.01 107.81 C 55.71 127.60 51.28 151.08 54.09 173.66 C 54.44 178.19 55.71 182.58 56.75 186.99 C 65.58 221.32 92.63 250.16 126.30 261.22 C 130.70 262.60 135.16 263.76 139.66 264.76 C 140.23 264.87 141.38 265.08 141.96 265.19 C 147.81 266.23 153.75 266.53 159.68 266.75 C 160.42 266.73 161.92 266.70 162.67 266.69 C 169.84 266.50 177.00 265.49 184.00 263.97 C 184.97 263.73 185.94 263.50 186.92 263.25 C 189.97 262.32 193.06 261.48 196.02 260.27 C 198.64 259.07 201.73 259.13 203.98 257.15 C 234.19 243.61 257.16 215.31 264.25 182.97 C 264.33 182.35 264.50 181.10 264.58 180.48 C 265.00 180.19 265.83 179.61 266.25 179.32 C 266.05 177.53 266.01 175.73 265.77 173.94 C 268.42 154.57 265.45 134.49 257.46 116.66 C 246.78 92.61 226.88 72.87 202.80 62.30 C 178.78 51.61 150.73 50.36 125.87 58.93 Z" />
@@ -103,7 +96,6 @@ $forecastime = filemtime ('jsondata/uk.txt');
                     </ul>
                 </div>
             </div>
-        
         </div>
     </div>
 </div>
