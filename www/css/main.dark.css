@@ -1770,7 +1770,6 @@ suptemp3 {
     float: none;
     width: 310px;
     margin: 10px auto 0;
-    overflow: hidden
   }
 
   .c {
@@ -1802,7 +1801,6 @@ suptemp3 {
     float: none;
     width: 310px;
     margin: 10px auto 0;
-    overflow: hidden
   }
 
   .c {
@@ -1834,7 +1832,6 @@ suptemp3 {
     float: none;
     width: 310px;
     margin: 10px auto 0;
-    overflow: hidden
   }
 }
 
@@ -2088,7 +2085,7 @@ lightningrain {
   position: relative;
   width: 24.93%;
   height: 83px;
-  margin: -5px auto 0
+  margin: -4.5px auto 0
 }
 
 .weather34box .title,
@@ -7297,7 +7294,7 @@ wfstriketoday {
 
 .wflaststrike {
   margin-left: 55px;
-  margin-top: 34px;
+  margin-top: 26px;
   font-size: .55rem;
   width: 200px
 }
@@ -7326,7 +7323,12 @@ wfstriketoday {
 
 .eqcontainer1 {
   margin-left: 30px;
-  margin-top: 30px
+  margin-top: 14px
+}
+
+.eqconverter {
+  margin-top: 0px;
+  margin-left: 237px;
 }
 
 .eqtoday1,
@@ -7385,8 +7387,8 @@ wfstriketoday {
 .eqtext {
   float: left;
   width: 100px;
-  margin-left: 130px;
-  margin-top: -70px;
+  margin-left: 150px;
+  margin-top: -74px;
   font: .7rem arial, system;
   font-family: weathertext2;
   line-height: 10px
