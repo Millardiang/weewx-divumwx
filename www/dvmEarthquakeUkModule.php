@@ -1,4 +1,4 @@
-<?php include('w34CombinedData.php');header('Content-type: text/html; charset=utf-8');
+<?php include('dvmCombinedData.php');header('Content-type: text/html; charset=utf-8');
 
 //current eq
 date_default_timezone_set($TZ);
@@ -31,7 +31,7 @@ $shorttime=date( "j M Y", strtotime("$time1") );
 // Brian Underdown July 28th 2016 //
 $eqdist;if ($weather["wind_units"] == 'mph') {$eqdist = round(distance($lat, $lon, $lati, $longi) * 0.621371) ."mi";} else {$eqdist = round(distance($lat, $lon, $lati, $longi)) ."km";}
 $eqdista;if ($weather["wind_units"] == 'mph') {$eqdista = round(distance($lat, $lon, $lati, $longi)) ."<smallrainunit>km";} else {$eqdista = round(distance($lat, $lon, $lati, $longi) * 0.621371) ."<smallrainunit>mi";} ?>  
-<div class="updatedtime">
+<div class="updatedtime2">
 <span><?php 
 $updated=filemtime('jsondata/bg.txt');
 echo  $online, " ",date($timeFormat, $updated);?></span>

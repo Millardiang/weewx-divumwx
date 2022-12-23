@@ -1,4 +1,4 @@
-<?php  include('shared.php');include('common.php');
+<?php  include('dvmShared.php');include('common.php');
 $json_string             = file_get_contents("jsondata/aq.txt");
 $parsed_json             = json_decode($json_string, true);
 $aqiweather["aqi"]       = $parsed_json['data']['aqi'];
@@ -7,7 +7,7 @@ $aqiweather["time"]     = date($timeFormat,$parsed_json['data']['time']['v']);
 $aqiweather["city"]      = $parsed_json['data']['city']['name'];
 
 ?>
-<div class="updatedtime"><span><?php if(file_exists('jsondata/aq.txt') && time() - filemtime('jsondata/aq.txt')<1800) {
+<div class="updatedtime2"><span><?php if(file_exists('jsondata/aq.txt') && time() - filemtime('jsondata/aq.txt')<1800) {
   echo $online." ".date($timeFormat, filemtime('jsondata/aq.txt'));
   } else {
   echo $offline. '<offline> Offline </offline>';
