@@ -276,6 +276,6 @@ echo '<a href="https://https://claydonsweather.org.uk/" title="https://claydonsw
 
 <?php 
 include_once ('dvmUpdater.php');
-include_once ('menu.php');
+include_once ('dvmDashboardMenu.php');
 ?>
 </html>
