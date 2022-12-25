@@ -87,26 +87,6 @@ $extraLinkTitle = "";
 $extraLinkColor = "";
 $extraLinkURL = "";
 $darkskyunit = "";
-$cycles1 = '8640000';
-$cycles2 = '60000';
-$cycles3 = '60000';
-$cycles4 = '60000';
-$cycles5 = '60000';
-$cycles6 = '60000';
-$cycles7 = '60000';
-$cycles8 = '4000'; 
-$cycles9 = '60000';
-$cycles10 = '60000';
-$cycles11 = '60000';
-$cycles12 = '60000';
-$cycles13 = '60000';
-$cycles14 = '60000';
-$cycles15 = '60000';
-$cycles16 = '60000';
-$cycles17 = '60000';
-$cycles18 = '60000';
-$cycles19 = '60000';
-$cycles20 = '60000';
 
 
 ?>
