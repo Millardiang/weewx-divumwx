@@ -1,5 +1,5 @@
 <?php
-$themelayout = "Layout 2"; //Layout, 1 Layout 2
+$themelayout = "tablet"; //extra_row, extra_col, extra_row_col, tablet
 $theme = isset($theme) ? $theme : "dark";
 $TZ = "Europe/London"; 
 $units = "uk"; //us, uk, metric, ca, scandinavia
