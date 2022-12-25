@@ -1,7 +1,7 @@
 <?php
 
 
-include ('settings1.php');
+include ('settings.php');
 
 
 ?>
@@ -439,4 +439,3 @@ if (!empty($webcamurl) && $webcamurl != ' ' && $webcamurl != 'Null' && $webcamur
     </ul>
   </div>
 </div>
-
