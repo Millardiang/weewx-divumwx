@@ -11,7 +11,7 @@ error_reporting(0);
 ####################################################################################################
 
 ###########################################################################
-# THE SETTINGS BELOW MUST BE LEFT UNTOUCHED UNLESS YOU REALLY NEED  #######
+# THE SETIINGS BELOW MUST BE LEFT UNTOUCHED UNLESS YOU REALLY NEED  #######
 # TO MAKE THE CHANGES HERE TO MAKE IT WORK ON YOUR SERVER// ###############
 # TAKE THE TIME TO STUDY THEM DONT TAKE IT FOR GRANTED      ###############
 # USE THE EASY SETUP PANEL TO MAKE CHANGES IN THE TEMPLATE  ###############
@@ -36,6 +36,28 @@ $chartsource =  "dvmhighcharts";
 // Refresh Data Main Page  //																	   #
 // Automatic refresh times (in seconds) of each panel on the main dashboard						   #
 ####################################################################################################
+
+$cycles1 = '8640000';
+$cycles2 = '60000';
+$cycles3 = '60000';
+$cycles4 = '60000';
+$cycles5 = '60000';
+$cycles6 = '60000';
+$cycles7 = '60000';
+$cycles8 = '4000'; 
+$cycles9 = '60000';
+$cycles10 = '60000';
+$cycles11 = '60000';
+$cycles12 = '60000';
+$cycles13 = '60000';
+$cycles14 = '60000';
+$cycles15 = '60000';
+$cycles16 = '60000';
+$cycles17 = '60000';
+$cycles18 = '60000';
+$cycles19 = '60000';
+$cycles20 = '60000';
+
 $copyYear = 2015;
 $curYear = date("Y");
 $copyrightcredit =
@@ -73,6 +95,8 @@ $notifyDewpointcold = 3; // degrees C, default is 8 celsius 46.4 degrees F OR WH
 $notifyRainRate = 7.62; // millimeters, default is 10 which is 0.4 in"
 $notifyDewPoint = 21; // dewpoint comfortable zone alert 22 degrees C or 71.6 degrees F OR WHATEVER MAKES YOU FEEL UNCOMFORTABLY HOT
 $notifyFlooding = 25.4; // dewpoint comfortable zone alert 22 degrees C or 71.6 degrees F OR WHATEVER MAKES YOU FEEL UNCOMFORTABLY HOT
+
+$theme1 = $theme;
 
 ####################################################################################################
 // Probably won't have to change anything past this line IF SO BE VER VERY CAREFUL!!!!!!		   #
@@ -135,15 +159,17 @@ if ($units == "uk") {
     $tempunit = "C";
     $rainunit = "mm";
     $pressureunit = "hPa";
+    $distanceunit = "mi"; 
     $windconv = "0.621371";
     $rainfallconv = "10";
     $pressureinterval = "0.5";
-    $rainfallconvmm = "10";
+    $rainfallconvmm = "10"; 
 } elseif ($units == "scandinavia") {
     $windunit = "m/s";
     $tempunit = "C";
     $rainunit = "mm";
     $pressureunit = "hPa";
+    $distanceunit = "km"; 
     $windconv = "0.277778";
     $rainfallconv = "10";
     $pressureinterval = "0.5";
@@ -153,6 +179,7 @@ if ($units == "uk") {
     $tempunit = "C";
     $rainunit = "mm";
     $pressureunit = "hPa";
+    $distanceunit = "km"; 
     $windconv = "1";
     $rainfallconv = "10";
     $pressureinterval = "0.5";
@@ -162,6 +189,7 @@ if ($units == "uk") {
     $tempunit = "C";
     $rainunit = "mm";
     $pressureunit = "kPa";
+    $distanceunit = "km"; 
     $windconv = "1";
     $rainfallconv = "10";
     $pressureinterval = "0.5";
@@ -171,6 +199,7 @@ if ($units == "uk") {
     $tempunit = "F";
     $rainunit = "in";
     $pressureunit = "inHg";
+    $distanceunit = "mi"; 
     $windconv = "1";
     $rainfallconv = "1";
     $pressureinterval = "0.5";
