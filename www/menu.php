@@ -78,24 +78,10 @@ else
       
       
       <li class="header">UNITS</li>
-      <?php if ($units != Null && $units != 'default')
-{ ?>
-        <li>
-          <a href="./?units=default"><weather34menumarkerred></weather34menumarkerred> Default Units
-            <?php if ($tempunit == 'F')
-    { ?>
-              <topbarimperialf>&deg;F</topbarimperialf>
-            <?php
-    }
-    else
-    { ?>
-              <topbarmetricc>&deg;C</topbarmetricc>
-            <?php
-    } ?>
-          </a>
-        </li>
       <?php
-}
+
+
+
 if ($units != 'us')
 { ?>
         <li>
