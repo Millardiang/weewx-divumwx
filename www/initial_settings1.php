@@ -86,7 +86,6 @@ $USAWeatherFinder = "";
 $extraLinkTitle = "";
 $extraLinkColor = "";
 $extraLinkURL = "";
-$darkskyunit = "";
 
 
 ?>
