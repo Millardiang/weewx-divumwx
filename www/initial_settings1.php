@@ -79,14 +79,13 @@ $linkAmbientWeatherID = "";
 $linkPWSWeatherID = "";
 $linkMetOfficeID = "";
 $linkCustom1Title = "Services Config";
-$linkCustom1URL = "https://steepleian.github.io/weewx-Weather34/";
+$linkCustom1URL = "https://steepleian.github.io/weewx-Weather34/divumwx_settings_txt.html";
 $linkCustom2Title = "";
 $linkCustom2URL = "";
 $USAWeatherFinder = "";
 $extraLinkTitle = "";
 $extraLinkColor = "";
 $extraLinkURL = "";
-$darkskyunit = "";
 
 
 ?>
