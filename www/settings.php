@@ -1,14 +1,6 @@
 <?php
 include "settings1.php";
 error_reporting(0);
-####################################################################################################
-#	HOME WEATHER STATION TEMPLATE SETUP please set up and check thoroughly                         #
-#	CREATED FOR HOMEWEATHERSTATION TEMPLATE at https://weather34.com/homeweatherstation/index.html #
-# 	   FILE= SETTINGS.PHP                                                                          #
-# 	                                                                                               #
-# 	WEATHER34 HOMEWEATHER METEOBRIDGE MYSQL                                                        #
-#   https://www.weather34.com 	                                                                   #
-####################################################################################################
 
 ###########################################################################
 # THE SETIINGS BELOW MUST BE LEFT UNTOUCHED UNLESS YOU REALLY NEED  #######
@@ -28,7 +20,7 @@ $emailform = $email; // PLEASE LEAVE FIXED
 $timeFormatShort = "H:i"; // time format to use when showing times ('g:i a' for '5:34 pm'; 'H:i' for '09:28')
 $showFeelsLike = true; // whether to always show either the heat index (when temp > 80F/27C) or real feel (when temp between 50F/10C and 80F/27C) even when no concern
 $lightLeft = true; // shows amount of light/darkness left rather than total amount per day in the moon display
-$theme = $theme1;
+$theme1 = $theme;
 $charttheme = $theme;
 $livedata = "serverdata/dvmRealtime.txt";
 $chartsource =  "dvmhighcharts"; 
@@ -205,4 +197,23 @@ if ($units == "uk") {
     $pressureinterval = "0.5";
     $rainfallconvmm = "1";
 }
+
+if ($position4 == "top_advisory_uk.php") {
+    $advisory = "pop_ukalerts.php";
+}
+else if ($position4 == "top_advisory_eu.php") {
+    $advisory = "pop_europealerts.php";
+}
+
+else if ($position4 == "top_advisory_eu.php") {
+    $advisory = "pop_europealerts.php";
+}
+else if ($position4 == "top_advisory_au.php") {
+    $advisory = "pop_bomalerts.php";
+} 
+else if ($position4 == "top_advisory_nws.php") {
+    $advisory = "pop_nwsalerts.php";
+}
+
 ?>
+
