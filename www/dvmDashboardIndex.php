@@ -123,7 +123,7 @@ error_reporting(0);
   <div class="weather-item">
     <div class="chartforecast">
       <span class="yearpopup"><a alt="Forecast Menu" title="Forecast Menu" href="pop_menu_forecast.php" data-lity><?php echo $menucharticonpage;?> Forecasts</a></span>
-      <!--span class="yearpopup"><a alt="Lightning Tracker" title="Almanac Lightning" href="pop_menu_lightning.php" . data-lity>&nbsp;<?php echo $menucharticonpage;?> Lightning Almanac</a></span-->
+      <span class="yearpopup"><a alt="Advisories" title="Advisories" href="pop_nwsalerts.php" . data-lity>&nbsp;<?php echo $menucharticonpage;?> Advisories</a></span>
         <span class="yearpopup"><a alt="Meteogram" title="Meteogram" href="pop_dvmMeteogram.php" data-lity><?php echo $menucharticonpage;?> Meteogram</a></span>
     </div>
     <span class='moduletitle'><?php echo $position6title;?> (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span>
