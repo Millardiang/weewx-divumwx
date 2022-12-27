@@ -1,5 +1,5 @@
 <?php //original weather34 script original css/svg/php by weather34 2015-2019 clearly marked as original by weather34//
-include('settings.php');include('w34CombinedData.php');error_reporting(0); 
+include('settings.php');include('dvmCombinedData.php');error_reporting(0); 
 $result = date_sun_info(time(), $lat, $lon);
 $sunr=date_sunrise(time(), SUNFUNCS_RET_STRING, $lat, $lon, $rise_zenith, $UTC_offset);
 $suns=date_sunset(time(), SUNFUNCS_RET_STRING, $lat, $lon, $set_zenith, $UTC_offset);
