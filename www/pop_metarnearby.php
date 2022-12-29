@@ -1,4 +1,4 @@
-<?php include('metar34get.php');
+<?php include('dvmGetMetar.php');
 //weather34 original metarnearby script 201-2019//
 if($theme==="light"){$background="white";$text="black";}
 else if($theme==="dark"){$background="rgba(33, 34, 39, .8)";$text="white";}
