@@ -104,7 +104,7 @@ $chartsource = "dvmhighcharts";
 $creditsURL = ""; // for chart pages only
 $credits = "Data Supplied via Weather Underground"; // for chart pages only
 $templateinfo = ""; // template information page
-$templateversion = "DVM-<maxblue>Alpha build 0.1.3</maxblue>";
+$templateversion = "DVM-<maxblue>Alpha build 0.1.4</maxblue>";
 
 $software = "WeeWX <span>Hardware</span> Users";
 $designedfor = "<br>For WeeWX Users";
@@ -211,8 +211,8 @@ else if ($position4 == "top_advisory_eu.php") {
 else if ($position4 == "top_advisory_au.php") {
     $advisory = "pop_bomalerts.php";
 } 
-else if ($position4 == "top_advisory_nws.php") {
-    $advisory = "pop_nwsalerts.php";
+else if ($position4 == "top_advisory_na.php") {
+    $advisory = "pop_naalerts.php";
 }
 
 ?>
