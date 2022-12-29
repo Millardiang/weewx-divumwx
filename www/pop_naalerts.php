@@ -20,12 +20,13 @@ $parsed_icon = json_decode($json_icon, true);
 $json_string = file_get_contents("jsondata/awa.txt");
 $parsed_json = json_decode($json_string, true);
 $code = $parsed_json["error"]["code"];
+$source = $parsed_json["response"][0]["dataSource"];
 ?>
 
 
 </head>
 <body>
-<?php echo '<div class="weather34darkbrowser" url="NWS Advisory via AerisWeather for ' . $stationlocation . '"></div>'; ?> 
+<?php echo '<div class="weather34darkbrowser" url="'.strtoupper($source).' Advisory via AerisWeather for ' . $stationlocation . '"></div>'; ?> 
 
   
     <?php
@@ -52,6 +53,7 @@ else
         $warnimage[$i] = "css/svg/" . $parsed_icon[$background[$i]][$type[$i]];
         $begins[$i] = $parsed_json["response"][$i]["timestamps"]["beginsISO"];
         $expires[$i] = $parsed_json["response"][$i]["timestamps"]["expiresISO"];
+        
 ?><p><main class="grid2"><articlegraph2 class="alert-row" style="font-size:11px;background-color:<?php echo $background[$i]; ?>"><?php
         echo $alertlevel[$i];
         echo $alerttype[$i]. "</br></br>";
