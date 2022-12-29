@@ -3280,7 +3280,7 @@ class LoopProcessor:
             remote_root = os.path.join(remote_dir, filename),
             server=remote_server,
             user=remote_user,
-            port=str(remote_port) if remote_port is not None else None,
+            port=int(remote_port) if remote_port is not None else None,
             ssh_options=ssh_options,
             compress=compress,
             delete=False,
