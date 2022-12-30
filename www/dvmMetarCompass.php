@@ -1,5 +1,5 @@
 <?php
-include('metar34get.php');
+include('dvmGetMetar.php');
 date_default_timezone_set($TZ);
 error_reporting(0);
 header('Content-type: text/html; charset = utf-8');

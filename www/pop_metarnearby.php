@@ -149,7 +149,7 @@ stationid{font-size:1.4em;font-family:weathertext2;color:#009bb4}
 .icontext{position:absolute;float:left;margin-top:60px;text-align:left;}
 .pressure{position:absolute;float:left;margin-top:60px;text-align:left;}
 </style>
-<div class="weather34darkbrowser" url="Dresden City Airport Conditions"></div>
+<div class="weather34darkbrowser" url="<?php echo $metar34stationname;?> Conditions"></div>
   
 <main class="grid">
 
@@ -350,7 +350,7 @@ echo $$metarspot4;
 
 <div style="overflow: hidden">
 <div class="compassx">
-<iframe style="width: 140; height: 150px; border: none;" src="metarcompass.php"></iframe>
+<iframe style="width: 140; height: 150px; border: none;" src="dvmMetarCompass.php"></iframe>
 </div>
 </div>
 
