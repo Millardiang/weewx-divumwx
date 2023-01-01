@@ -3,10 +3,10 @@
 -----------------
 Language Translation File for HOMEWEATHERSTATION Template
 Language: Spanish
-Translated by : Santgenismeteo TxWeather.org/
+Translated by : Santgenismeteo TxWeather.org/ & EA5ZF MeteoLaVall
 Developed By: Lightmaster/Brian Underdown/Erik M Madsen
 October/November 2016
-Revised: 2019
+Revised: 2022
 -----------------
 */
 # -----------------------------------------------------
@@ -27,46 +27,46 @@ $lang['Layout']                 = 'Cambiar de tema';
 $lang['Lighttheme']             = 'Tema Claro';
 $lang['Darktheme']              = 'Tema oscuro';
 $lang['Nonmetric']              = 'US (F) ';
-$lang['Metric']                 = 'Metrico (C)';
+$lang['Metric']                 = 'Métrico (C)';
 $lang['UKmetric']               = 'UK (MPH - Metrico) ';
 $lang['Scandinavia']            = 'Scandinavia(M/S)';
 $lang['Worldwideearthquakes']   = 'Terremotos en el mundo';
 $lang['Toggle']                 = 'Pantalla entera ';
-$lang['Contactinfo']            = 'Estación & Informacion de contacto';
-$lang['Templateinfo']           = 'Colboradores';
+$lang['Contactinfo']            = 'Estación & Información de contacto';
+$lang['Templateinfo']           = 'Colaboradores';
 $lang['language']               = 'Seleccione el idioma';
-$lang['Weatherstationinfo']     = 'Información de la estación';
-$lang['Webdesigninfo']          = 'Información de la plantilla';
-$lang['Contact']                = 'Contact';
+$lang['Weatherstationinfo']     = 'Información de estación';
+$lang['Webdesigninfo']          = 'Información de plantilla';
+$lang['Contact']                = 'Contacto';
 //days
-$lang['Monday']                 = 'Monday';
-$lang['Tuesday']                = 'Tuesday';
-$lang['Wednesday']              = 'Wednesday';
-$lang['Thursday']               = 'Thursday';
-$lang['Friday']                 = 'Friday ';
-$lang['Saturday']               = 'Saturday';
-$lang['Sunday']                 = 'Sunday';
+$lang['Monday']                 = 'Lunes';
+$lang['Tuesday']                = 'Martes';
+$lang['Wednesday']              = 'Miercoles';
+$lang['Thursday']               = 'Jueves';
+$lang['Friday']                 = 'Viernes ';
+$lang['Saturday']               = 'Sábado';
+$lang['Sunday']                 = 'Domingo';
 //months
-$lang['January']                = 'January';
-$lang['Febuary']                = 'Febuary';
-$lang['March']                  = 'March';
-$lang['April']                  = 'April';
-$lang['May']                    = 'May';
-$lang['June']                   = 'June';
-$lang['July']                   = 'July';
-$lang['August']                 = 'August';
-$lang['September']              = 'September';
-$lang['October']                = 'October';
-$lang['November']               = 'November';
-$lang['December']               = 'December';
+$lang['January']                = 'Enero';
+$lang['Febuary']                = 'Febrero';
+$lang['March']                  = 'Marzo';
+$lang['April']                  = 'Abril';
+$lang['May']                    = 'Mayo';
+$lang['June']                   = 'Junio';
+$lang['July']                   = 'Julio';
+$lang['August']                 = 'Agosto';
+$lang['September']              = 'Septiembre';
+$lang['October']                = 'Octubre';
+$lang['November']               = 'Noviembre';
+$lang['December']               = 'Diciembre';
 //temperature
 $lang['Temperature']            = 'Temperatura';
-$lang['Feelslike']              = 'Sensacion';
+$lang['Feelslike']              = 'Sensación';
 $lang['Humidity']               = 'Humedad';
 $lang['Dewpoint']               = 'Punto de rocío';
-$lang['Trend']                  = 'Tend ';
+$lang['Trend']                  = 'Tendencia ';
 $lang['Heatindex']              = 'Índice de calor';
-$lang['Windchill']              = 'Sensacion ';
+$lang['Windchill']              = 'Sensación ';
 $lang['Tempfactors']            = 'Factor de temp';
 $lang['Nocautions']             = 'Sin precauciones';
 $lang['Wetbulb']                = 'T. condensación';
@@ -76,21 +76,21 @@ $lang['verydry']                = '& Muy seco';
 $lang['FreezingCold']           = 'Helada';
 $lang['FeelingVeryCold']        = 'Mucho frío';
 $lang['FeelingCold']            = 'Frio';
-$lang['FeelingCool']            = 'Sensacion de frio';
+$lang['FeelingCool']            = 'Sensación de frío';
 $lang['FeelingComfortable']     = 'Agradable ';
 $lang['FeelingWarm']            = 'Calor';
-$lang['FeelingHot']             = 'Sensacion de Calor';
-$lang['FeelingUncomfortable']   = 'Sensacion incomoda';
+$lang['FeelingHot']             = 'Sensación de Calor';
+$lang['FeelingUncomfortable']   = 'Sensación incómoda';
 $lang['FeelingVeryHot']         = 'Calor elevado';
 $lang['FeelingExtremelyHot']    = 'Calor extremo';
 //wind
 $lang['Windspeed']              = 'Velocidad';
 $lang['Gust']                   = 'Ráfaga';
-$lang['Direction']              = 'Direccion';
+$lang['Direction']              = 'Dirección';
 $lang['Gusting']                = 'Racheado a';
 $lang['Blowing']                = 'Soplando a';
 $lang['Wind']                   = 'Viento';
-$lang['Wind Run']               = 'Viento Run';
+$lang['Wind Run']               = 'Dist. viento';
 // Wind phrases for Beaufort scale for windspeed area
 $lang['Calm']                   = 'Calma';
 $lang['Lightair']               = 'Viento ligero';
@@ -99,7 +99,7 @@ $lang['Gentelbreeze']           = 'Brisa suave';
 $lang['Moderatebreeze']         = 'Brisa moderada';
 $lang['Freshbreeze']            = 'Brisa fresca';
 $lang['Strongbreeze']           = 'Brisa fuerte';
-$lang['Neargale']               = 'Vendaval';
+$lang['Neargale']               = 'Casi vendaval';
 $lang['Galeforce']              = 'Vendaval';
 $lang['Stronggale']             = 'Fuerte vendaval';
 $lang['Storm']                  = 'Tormenta';
@@ -118,7 +118,7 @@ $lang['StrongGaleattimes']      = 'Temporal fuerte';
 $lang['StormConditions']        = 'Temporal duro';
 $lang['ViolentStormConditions'] = 'Temporal muy duro';
 $lang['HurricaneConditions']    = 'Temporal huracanado';
-$lang['Avg']                    = '<span2> Avg: </span2>';
+$lang['Avg']                    = '<span2> Media: </span2>';
 //wind direction compass
 $lang['Northdir']               = 'Del <span>Norte<br></span>';
 $lang['NNEdir']                 = 'Norte Norte <br><span>Este</span>';
@@ -194,14 +194,14 @@ $lang['Waxingcrescent']         = 'Luna creciente';
 $lang['Firstquarter']           = 'Cuarto creciente';
 $lang['Waxinggibbous']          = 'Luna menguante';
 $lang['Fullmoon']               = 'Luna llena';
-$lang['Waninggibbous']          = 'Gibbosa menguante';
+$lang['Waninggibbous']          = 'Gibosa menguante';
 $lang['Lastquarter']            = 'Cuarto menguante';
 $lang['Waningcrescent']         = 'Creciente menguante';
 //trends
 $lang['Falling']                = 'Bajando';
 $lang['Rising']                 = 'Subiendo';
 $lang['Steady']                 = 'Estable';
-$lang['Rapidly']                = 'Rapidamente';
+$lang['Rapidly']                = 'Rápidamente';
 $lang['Temp']                   = 'Temp';
 //Solar-UV
 //uv
@@ -209,8 +209,8 @@ $lang['Nocaution']              = 'Sin <color>precaucion</color> requerida';
 $lang['Wearsunglasses']         = 'Use <color>gafas de sol</color> en días soleados';
 $lang['Stayinshade']            = 'Permanecer en la sombra cerca del medio día cuando el <color>sol</color> es fuerte';
 $lang['Reducetime']             = 'Reducir el tiempo en el <color>s0l</color> entre 10am-4pm ';
-$lang['Minimize']               = 'Reducir al mínimo <color>sol</color> exposicion entre 10am-4pm ';
-$lang['Trytoavoid']             = 'Tratar de evitar el <color>sol</color> exposicion entre 10am-4pm ';
+$lang['Minimize']               = 'Reducir al mínimo <color>sol</color> exposición entre 10am-4pm ';
+$lang['Trytoavoid']             = 'Tratar de evitar el <color>sol</color> exposición entre 10am-4pm ';
 //solar
 $lang['Poor']                   = 'Radiación<color> <br>Pobre</color>';
 $lang['Low']                    = 'Radiación<br><color>Baja</color>';
@@ -229,34 +229,34 @@ $lang['Heatindexalert']         = 'Precaución de calor ';
 $lang['Windchillalert']         = 'Precaución sensación térmica';
 $lang['Dewpointalert']          = 'Humedad incómoda';
 $lang['Dewpointcolderalert']    = 'Humedad incómoda';
-$lang['Feelslikecolderalert']   = 'Sensacion de Frio';
-$lang['Feelslikewarmeralert']   = 'Sensacion de Calor';
+$lang['Feelslikecolderalert']   = 'Sensación de Frío';
+$lang['Feelslikewarmeralert']   = 'Sensación de Calor';
 $lang['Rainratealert']          = 'por/hr<span> Lluvia ';
 //Earthquake Notifications
 $lang['Regional']               = 'Terremoto regional';
-$lang['Significant']            = 'Terremotos importantes';
-$lang['Nosignificant']          = 'Terremotos no significativos';
+$lang['Significant']            = 'Terremoto importante';
+$lang['Nosignificant']          = 'Terremoto no significativo';
 //Main page
-$lang['Barometer']              = 'Barometro';
+$lang['Barometer']              = 'Barómetro';
 $lang['UVSOLAR']                = 'UV | Datos Sol';
-$lang['Earthquake']             = ' Terratremols';
-$lang['Daynight']               = 'Dia & Noche Info';
-$lang['SunPosition']            = 'Sun Position';
+$lang['Earthquake']             = ' Terremoto';
+$lang['Daynight']               = 'Día & Noche Info';
+$lang['SunPosition']            = 'Position sol';
 $lang['Location']               = 'Ubicación';
 $lang['Hardware']               = 'Hardware';
 $lang['Rainfalltoday']          = 'Lluvia hoy';
 $lang['Windspeed']              = ' Viento';
-$lang['Winddirection']          = 'Direccion del Viento';
+$lang['Winddirection']          = 'Dirección del Viento';
 $lang['Measured']               = 'Medido hoy';
-$lang['Forecast']               = 'Prevision';
-$lang['Forecastahead']          = 'Pronostico proximo';
-$lang['Forecastsummary']        = 'Resumen prevision';
+$lang['Forecast']               = 'Previsión';
+$lang['Forecastahead']          = 'Pronóstico próximo';
+$lang['Forecastsummary']        = 'Resumen previsión';
 $lang['WindGust']               = 'Vel. Viento | Rachas';
-$lang['Hourlyforecast']         = 'Prevision horaria';
-$lang['Significantearthquake']  = 'Terremotos importantes';
+$lang['Hourlyforecast']         = 'Previsión horaria';
+$lang['Significantearthquake']  = 'Terremoto importante';
 $lang['Regionalearthquake']     = 'Terremoto regional';
 $lang['Average']                = 'Avisos';
-$lang['Notifications']          = 'Notificacion de Alerta';
+$lang['Notifications']          = 'Notificación de Alerta';
 $lang['Indoor']                 = 'Interior';
 $lang['Today']                  = 'Hoy';
 $lang['Tonight']                = 'Noche';
@@ -276,40 +276,40 @@ $lang['uvalert']                = 'Precaucion UVINDEX';
 $lang['Max']                    = 'Max';
 $lang['Min']                    = 'Min';
 //earthquake TOP MODULE 10 July 2017
-$lang['MicroE']                  = 'Micro Earthquake';
-$lang['MinorE']                  = 'pequeño Terremoto';
-$lang['LightE']                  = 'Light Earthquake';
-$lang['ModerateE']               = 'Terremoto moderado';
+$lang['MicroE']                  = 'Micro Terremoto';
+$lang['MinorE']                  = 'Pequeño Terremoto';
+$lang['LightE']                  = 'Ligero Terremoto';
+$lang['ModerateE']               = 'Moderado Terremoto';
 $lang['StrongE']                 = 'Fuerte terremoto';
-$lang['MajorE']                  = 'Major Earthquake';
-$lang['GreatE']                  = 'Great Earthquake';
+$lang['MajorE']                  = 'Gran Terremoto';
+$lang['GreatE']                  = 'Enorme Terremoto';
 $lang['RegionalE']              = 'Regional';
 $lang['Conditions']             = 'Condiciones';
 $lang['Cloudbase Height']       = 'Base de nubes';
-$lang['Station']                = 'Estacion';
-$lang['Detailed Forecast']      = 'Prevision detallada';
+$lang['Station']                = 'Estación';
+$lang['Detailed Forecast']      = 'Previsión detallada';
 $lang['Summary Outlook']        = 'Resumen';
 //Air Quality
-$lang['Hazordous']              = 'Condiciones perligrosas';
+$lang['Hazordous']              = 'Condiciones peligrosas';
 $lang['VeryUnhealthy']          = 'Muy insalubre ';
 $lang['Unhealthy']              = 'Aire Insalubre';
 $lang['UnhealthyFS']            = 'Insalubre';
-$lang['Moderate']               = 'Moderada calidad del Aire ';
-$lang['Good']                   = 'Buena calitat del Aire ';
+$lang['Moderate']               = 'Calidad moderada del Aire ';
+$lang['Good']                   = 'Buena calidad del Aire ';
 #notification additions
-$lang['notifyTitle']             = 'Notifications';
-$lang['notifyAlert']             = "Alert";
-$lang['notifyLowBatteryAlert']   = "Low Battery Alert";
-$lang['notifyConsoleLowBattery'] = "Console's battery is low";
-$lang['notifyStationLowBattery'] = "Station's battery is low";
-$lang['notifyUVIndex']           = "UV-Index Caution";
-$lang['notifyUVExposure']        = "Reduce Sun Exposure";
-$lang['notifyHeatExaustion']     = "Heat Exhaustion";
-$lang['notifyExtremeWind']       = "Extreme Wind Warning";
-$lang['notifyGustUpTo']          = "Gusts up to";
-$lang['notifySeekShelter']       = "Seek shelter <notifyred><b>immediately</b></notifyred>";
-$lang['notifyHighWindWarning']   = "High Wind Warning";
-$lang['notifySustainedAvg']      = "Sustained avg";
-$lang['notifyWindAdvisory']      = "Wind Advisory";
-$lang['notifyFreezing']          = "Below Freezing";
+$lang['notifyTitle']             = 'Notificaciones';
+$lang['notifyAlert']             = "Alerta";
+$lang['notifyLowBatteryAlert']   = "Alerta por baja batería";
+$lang['notifyConsoleLowBattery'] = "Batería consola baja";
+$lang['notifyStationLowBattery'] = "Batería estación baja";
+$lang['notifyUVIndex']           = "Precaución índice UV";
+$lang['notifyUVExposure']        = "Reducir exposición al Sol";
+$lang['notifyHeatExaustion']     = "Agotamiento por calor";
+$lang['notifyExtremeWind']       = "Aviso por vientos extremos";
+$lang['notifyGustUpTo']          = "Ráfagas hasta";
+$lang['notifySeekShelter']       = "Busque refugio <notifyred><b>immediatamente</b></notifyred>";
+$lang['notifyHighWindWarning']   = "Aviso por viento fuerte";
+$lang['notifySustainedAvg']      = "Media sostenida";
+$lang['notifyWindAdvisory']      = "Aviso por viento";
+$lang['notifyFreezing']          = "Aviso por temperatura bajo cero";
 ?>
