@@ -205,7 +205,7 @@ $lang['Rapidly']                = 'Ràpidament';
 $lang['Temp']                   = 'Temp';
 //Solar-UV
 //uv
-$lang['Nocaution']              = 'Sense <color>precaucio</color> requerida';
+$lang['Nocaution']              = 'Sense <color>precaució</color> requerida';
 $lang['Wearsunglasses']         = 'Utilitza <color>ulleres de sol</color> en dies assolellats';
 $lang['Stayinshade']            = 'Romandre a la ombra prop del migdia quan el <color>sol</color> és fort';
 $lang['Reducetime']             = 'Redueix el temps de <color>sol</color> entre 10am-4pm ';
@@ -249,7 +249,7 @@ $lang['Windspeed']              = 'Vent';
 $lang['Winddirection']          = 'Direccio Vent';
 $lang['Measured']               = 'Mesurat avui';
 $lang['Forecast']               = 'Pronòstic';
-$lang['Forecastahead']          = 'Pronòstic proxim';
+$lang['Forecastahead']          = 'Pronòstic pròxim';
 $lang['Forecastsummary']        = 'Resum Pronòstic';
 $lang['WindGust']               = 'Velocitat Vent | Ràfegues';
 $lang['Hourlyforecast']         = 'Pronòstic horari ';
@@ -259,7 +259,7 @@ $lang['Average']                = 'Mitjana';
 $lang['Notifications']          = 'Notificació Alerta';
 $lang['Indoor']                 = 'Interior';
 $lang['Today']                  = 'Avui';
-$lang['Tonight']                = 'La Nit';
+$lang['Tonight']                = 'Esta Nit';
 $lang['Tomorrow']               = 'Dema';
 $lang['Tomorrownight']          = 'Demà a la nit';
 $lang['Updated']                = 'Actualitzat';
