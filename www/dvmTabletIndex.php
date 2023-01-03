@@ -134,7 +134,7 @@ error_reporting(0);
   <!-- position 7--->
   <div class="weather-item">
     <div class="chartforecast">
-      <span class="yearpopup"><a alt="nearby metar station" title="nearby metar station" href="pop_metarnearby.php" data-lity><?php echo $chartinfo;?><?php echo ' Nearby Metar';?>
+      <span class="yearpopup"><a alt="nearby metar station" title="nearby metar station" href="pop_dvmMetar.php" data-lity><?php echo $chartinfo;?><?php echo ' Nearby Metar';?>
           <?php if (filesize('jsondata/me.txt') < 160) { echo "&nbsp;" , $offline;} else echo "";?></a></span>
       <span class="monthpopup"><a href="pop_windyradar.php" title="Windy.com Radar" alt="Windy.com Radar" data-lity><?php echo $chartinfo;?> Radar</a></span>
       <span class="monthpopup"><a href="pop_windywind.php" title="Windy.com Wind Map" alt="Windy.com Wind Map" data-lity><?php echo $chartinfo;?> Wind Map</a></span>
