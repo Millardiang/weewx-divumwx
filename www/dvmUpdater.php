@@ -1,6 +1,9 @@
 <!-- begin updater.php  14-Nov-2022 -->
 <?php
 include_once "settings1.php";
+
+include_once "settings.php";
+
 include_once "common.php";
 date_default_timezone_set($TZ);
 //check which hemisphere for sun option and moonphase option
@@ -70,6 +73,17 @@ var b=setInterval(function(){c.load("<?php echo $position12; ?>")},<?php echo $c
 (function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position13").show()}});var c=a("#position13");c.load("<?php echo $position13; ?>");
 var b=setInterval(function(){c.load("<?php echo $position13; ?>")},<?php echo $cycles13; ?>)})})(jQuery); // 60 seconds
 
+//update the modules position 14
+(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position14").show()}});var c=a("#position14");c.load("<?php echo $position14; ?>");
+var b=setInterval(function(){c.load("<?php echo $position14; ?>")},<?php echo $cycles14; ?>)})})(jQuery); // 60 seconds
+
+//update the modules position 15
+(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position15").show()}});var c=a("#position15");c.load("<?php echo $position15; ?>");
+var b=setInterval(function(){c.load("<?php echo $position15; ?>")},<?php echo $cycles15; ?>)})})(jQuery); // 60 seconds
+
+//update the modules position 16
+(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position16").show()}});var c=a("#position16");c.load("<?php echo $position16; ?>");
+var b=setInterval(function(){c.load("<?php echo $position16; ?>")},<?php echo $cycles16; ?>)})})(jQuery); // 60 seconds
 
 //update the moonphase image
 var refreshId;$(document).ready(function(){moonimage()});function moonimage(){$.ajax({cache:false,success:function(a){$("#moonimage").html(a);<?php if (
@@ -126,4 +140,3 @@ window.onload=function(){StartClock()};
 <?php } ?>
 
 <!-- end updater.php -->
-
