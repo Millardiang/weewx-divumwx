@@ -15,9 +15,6 @@ else if ($theme === "light")
     </style>';
 }
 ?>
-</head>
-<body>
-
 <?php if (!empty($videoWeatherCamURL) && $videoWeatherCamURL != ' ' && $videoWeatherCamURL != 'Null' && $videoWeatherCamURL != 'null') {
     #Don't refresh video's page
 } else {
@@ -29,5 +26,10 @@ else if ($theme === "light")
 <div class="weather34darkbrowser" url="Webcam for <?php echo $stationlocation;?>"></div>     
 
   
+<!-- HOMEWEATHER STATION TEMPLATE SIMPLE WEBCAM -add your url as shown below do NOT delete the class='webcam large' !!! -->
+<?php if (!empty($videoWeatherCamURL) && $videoWeatherCamURL != ' ' && $videoWeatherCamURL != 'Null' && $videoWeatherCamURL != 'null'){?>
     <iframe class="videoWeatherCamLarge" allowfullscreen webkitallowfullscreen mozallowfullscreen src="<?php echo $videoWeatherCamURL;?>" frameborder="0"></iframe>
+<?php } else {?>
+    <img src="<?php echo $webcamurl;?>?v=<?php echo date('YmdGis');?>" alt="weathercam" class="webcamlarge">
+<?php }?>
 </span>
