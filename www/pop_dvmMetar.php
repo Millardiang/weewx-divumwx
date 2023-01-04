@@ -1,5 +1,5 @@
 <?php 
-include('settings.php');include('dvmCombinedData.php');error_reporting(0); 
+include('fixedSettings.php');include('dvmCombinedData.php');error_reporting(0); 
 $result = date_sun_info(time(), $lat, $lon);
 $sunr=date_sunrise(time(), SUNFUNCS_RET_STRING, $lat, $lon, $rise_zenith, $UTC_offset);
 $suns=date_sunset(time(), SUNFUNCS_RET_STRING, $lat, $lon, $set_zenith, $UTC_offset);

@@ -1,4 +1,4 @@
-<?php include('settings.php');include('w34CombinedData.php');
+<?php include('fixedSettings.php');include('w34CombinedData.php');
 
 
 

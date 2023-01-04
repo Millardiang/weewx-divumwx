@@ -12,7 +12,7 @@
 // 	Issues for weewx-Weather34 template should be addressed to https://github.com/steepleian/weewx-Weather34/issues #                                                                                              #
 // 	                                                                                                				#
 //###################################################################################################################
-include('settings.php');include('dvmCombinedData.php');
+include('fixedSettings.php');include('dvmCombinedData.php');
 
 if ($theme === "dark")
 {

@@ -13,7 +13,7 @@
 // 	                                                                                                				#
 //###################################################################################################################
  
-include('dvmCombinedData.php');include('settings1.php');date_default_timezone_set($TZ);
+include('dvmCombinedData.php');include('userfixedSettings.php');date_default_timezone_set($TZ);
 $json_icon = file_get_contents("jsondata/lookupTable.json");
 $parsed_icon = json_decode($json_icon, true);
 $json_string = file_get_contents("jsondata/eu.txt");

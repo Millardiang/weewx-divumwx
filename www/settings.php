@@ -1,5 +1,5 @@
 <?php
-include "settings1.php";
+include "userfixedSettings.php";
 error_reporting(0);
 
 ###########################################################################

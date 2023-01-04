@@ -1,8 +1,8 @@
 <!-- begin updater.php  14-Nov-2022 -->
 <?php
-include_once "settings1.php";
+include_once "userfixedSettings.php";
 
-include_once "settings.php";
+include_once "fixedSettings.php";
 
 include_once "common.php";
 date_default_timezone_set($TZ);

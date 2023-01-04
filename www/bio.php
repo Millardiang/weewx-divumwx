@@ -1,4 +1,4 @@
-<?php include('settings.php');$url = 'https://skynetweather.com/html/weather34/index.php';
+<?php include('fixedSettings.php');$url = 'https://skynetweather.com/html/weather34/index.php';
 echo "<body style='background-color:#222328'>";
 ?>
 <!DOCTYPE html>

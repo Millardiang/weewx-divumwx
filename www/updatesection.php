@@ -16,7 +16,7 @@ function find_variable($strings, $str, $rstr){
     return "";
 }
 $pos = '$'.$_GET['pos'];
-$filetext = file('settings1.php');
+$filetext = file('userfixedSettings.php');
 $positions = find_variable($filetext, $pos.'s', '');
 $positiontitles = find_variable($filetext, $pos.'titles', '');
 $currenttitle = find_variable($filetext, $pos.'title', '');
@@ -28,7 +28,7 @@ if (strlen($positions) > 0 and strlen($positiontitles) > 0) {
             $x = ($x + 1) % count($titles); 
             $strings = find_variable(find_variable($filetext, $pos, $urls[$x]), $pos.'title', $titles[$x]);
             if (count($strings) > 0)
-                file_put_contents('settings1.php',$strings,LOCK_EX);
+                file_put_contents('userfixedSettings.php',$strings,LOCK_EX);
             sleep(3);
             break;
         }

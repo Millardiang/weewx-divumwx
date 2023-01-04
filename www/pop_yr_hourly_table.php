@@ -8,7 +8,7 @@
 // 	Issues for weewx-Weather34 template should be addressed to https://github.com/steepleian/weewx-Weather34/issues #                                                                                              #
 // 	                                                                                                				#
 //###################################################################################################################
-include_once ('settings.php');
+include_once ('fixedSettings.php');
 include ('dvmCombinedData.php');
 date_default_timezone_set($TZ);
 if ($theme === "dark")

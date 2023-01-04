@@ -1,7 +1,7 @@
 <?php
 
 
-include ('settings.php');
+include ('fixedSettings.php');
 
 
 ?>
