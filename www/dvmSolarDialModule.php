@@ -1,6 +1,8 @@
 <?php
 include('dvmCombinedData.php');
 include('common.php');
+date_default_timezone_set($TZ);
+header('Content-type: text/html; charset=utf-8');
 ?>
     
 <?php
