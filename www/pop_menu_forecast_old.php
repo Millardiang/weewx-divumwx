@@ -13,7 +13,7 @@
 // 	                                                                                                				#
 //###################################################################################################################
   
-include_once ('settings.php');
+include_once ('fixedSettings.php');
 include ('w34CombinedData.php');
 date_default_timezone_set($TZ);
 if($theme==="light"){$background="white";$text="black";}

@@ -13,7 +13,7 @@
 // 	                                                                                                				#
 //###################################################################################################################
 
-include_once('settings.php');
+include_once('fixedSettings.php');
 include_once('w34CombinedData.php');
 error_reporting(0);
 date_default_timezone_set($TZ);

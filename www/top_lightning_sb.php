@@ -13,7 +13,7 @@
 // 	                                                                                                				#
 //###################################################################################################################
 include('dvmCombinedData.php');
-include('settings.php');
+include('fixedSettings.php');
 include('shared.php');
 date_default_timezone_set($TZ);
 header('Content-type: text/html; charset=utf-8');

@@ -13,13 +13,13 @@
 // 	                                                                                                				#
 //###################################################################################################################
 
-if (!file_exists("settings1.php")) { 
-copy("initial_settings1.php", "settings1.php");}
+if (!file_exists("userSettings.php")) { 
+copy("initial_userSettings.php", "userSettings.php");}
 include_once ('dvmCombinedData.php');
 include_once ('common.php');
 include_once ('webserver_ip_address.php');
-include ('settings1.php');
-include ('settings.php');
+include ('userSettings.php');
+include ('fixedSettings.php');
 date_default_timezone_set($TZ);
 header('Content-type: text/html; charset=utf-8');
 error_reporting(0);

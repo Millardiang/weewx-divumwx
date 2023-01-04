@@ -1,7 +1,7 @@
 <?php  //weather34 rain module 15th Feb 2019 //
 include('dvmCombinedData.php');
 include('common.php');
-include('settings1.php');
+include('userSettings.php');
 header('Content-type: text/html; charset = utf-8');
 ?>
 <div class="updatedtime1"><span><?php if (file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$weather["time"];?></div>

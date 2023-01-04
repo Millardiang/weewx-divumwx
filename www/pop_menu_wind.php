@@ -13,7 +13,7 @@
 // 	                                                                                                				#
 //###################################################################################################################
   
-include_once ('settings.php');
+include_once ('fixedSettings.php');
 include ('dvmCombinedData.php');
 date_default_timezone_set($TZ);
 if($theme==="light"){$background="white";$text="black";}

@@ -1,5 +1,5 @@
 <?php //original weather34 script original css/svg/php by weather34 2015-2019 // 
- include_once('w34CombinedData.php');include_once('settings1.php');include_once('common.php');include_once('webserver_ip_address.php');date_default_timezone_set($TZ);
+ include_once('w34CombinedData.php');include_once('userSettings.php');include_once('common.php');include_once('webserver_ip_address.php');date_default_timezone_set($TZ);
 ?>
 <?php header('Content-type: text/html; charset=utf-8');error_reporting(0);
 

@@ -1,6 +1,6 @@
 <?php
 
-include ('settings.php');
+include ('fixedSettings.php');
 include ('dvmShared.php');
 error_reporting(0);
 
