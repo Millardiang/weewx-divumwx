@@ -15,7 +15,7 @@
 include_once ('w34CombinedData.php');
 include_once ('common.php');
 include_once ('webserver_ip_address.php');
-include ('userfixedSettings.php');include ('fixedSettings.php');
+include ('userSettings.php');include ('fixedSettings.php');
 include ('serverdata/celestialValues.php');
 date_default_timezone_set($TZ);
 ?>
@@ -60,7 +60,7 @@ function loadSettings($file)
     return get_defined_vars();
 }
 $s1d = loadSettings('./settings1.default.php');
-$s1 = loadSettings('./userfixedSettings.php');
+$s1 = loadSettings('./userSettings.php');
 $check = array_diff_key($s1d, $s1);
 if (!empty($check))
 {
@@ -79,7 +79,7 @@ if (!empty($check))
         /// ${var} = "{value}";\n
         $code .= '$' . $var . ' = ' . var_export($value, true) . ";\n";
     }
-    file_put_contents('./userfixedSettings.php', $code);
+    file_put_contents('./userSettings.php', $code);
 }
 
 $paddingtop = $percentage;

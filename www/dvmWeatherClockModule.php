@@ -8,7 +8,7 @@
 // 	Issues for weewx-Weather34 template should be addressed to https://github.com/steepleian/weewx-Weather34/issues #                                                                                              
 // 	                                                                                                				#
 //###################################################################################################################
-include_once('userfixedSettings.php');
+include_once('userSettings.php');
 include_once('common.php');
 include('dvmCombinedData.php');
 

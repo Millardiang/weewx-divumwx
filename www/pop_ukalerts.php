@@ -9,7 +9,7 @@
 // 	                                                                                                				#
 //###################################################################################################################
 include "dvmCombinedData.php";
-include ('userfixedSettings.php');
+include ('userSettings.php');
 error_reporting(0);
 if ($theme === "dark")
 {

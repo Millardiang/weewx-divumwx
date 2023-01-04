@@ -1,5 +1,5 @@
  <?php 
-include('dvmCombinedData.php');include('userfixedSettings.php');date_default_timezone_set($TZ);
+include('dvmCombinedData.php');include('userSettings.php');date_default_timezone_set($TZ);
 
 
 $json_string = file_get_contents("jsondata/awa.txt");

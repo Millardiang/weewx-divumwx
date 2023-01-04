@@ -1,6 +1,6 @@
 # Installation Guide
 
-**The installer now defaults to overwrite mode, userfixedSettings.php will not be overwritten as it does not exist in the package. However, it is essential that any customisations you may have been made are backed up before running the install.**
+**The installer now defaults to overwrite mode, userSettings.php will not be overwritten as it does not exist in the package. However, it is essential that any customisations you may have been made are backed up before running the install.**
 
 IMPORTANT. If you are making a completley clean install of WeeWX and DivumWX Template it is strongly recommended that you allow the WeeWX database to establish itself for 24hours before attempting installing the template.
 

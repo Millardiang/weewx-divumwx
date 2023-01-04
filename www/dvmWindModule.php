@@ -1,6 +1,6 @@
 <?php 
 require('dvmCombinedData.php');
-include('userfixedSettings.php');
+include('userSettings.php');
 require('common.php');
 ?>
 <meta http-equiv="Content-Type: text/html; charset=UTF-8"/>

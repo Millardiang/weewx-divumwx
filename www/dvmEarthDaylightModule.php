@@ -13,7 +13,7 @@
 <?php 
 include('dvmCombinedData.php');
 include('common.php');
-include('userfixedSettings.php');
+include('userSettings.php');
 header('Content-type: text/html; charset=utf-8');
 if($alm["moonphase_no"]>4){$waxwan = "wan";}
 else{$waxwan = "wax";}

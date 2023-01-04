@@ -1,5 +1,5 @@
 <?php
-include('userfixedSettings.php');
+include('userSettings.php');
 date_default_timezone_set($TZ);
 mb_internal_encoding('UTF-8');
 mb_http_output('UTF-8');

@@ -1,6 +1,6 @@
 <?php
 // Ian Millard
-include('dvmCombinedData.php');include('common.php');include('userfixedSettings.php');
+include('dvmCombinedData.php');include('common.php');include('userSettings.php');
 //chart theme
 if ($theme === "dark")
 {$body = "#292E35";

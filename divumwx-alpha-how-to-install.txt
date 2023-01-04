@@ -20,7 +20,7 @@ sudo ln -s /var/www/html/weewx/weather34/jsondata /var/www/html/weewx/divumwx/js
 
 sudo ln -s /var/www/html/weewx/weather34/w34highcharts /var/www/html/weewx/divumwx/w34highcharts
 
-4. When you open the web page for the first time a new userfixedSettings.php file is created. Please do not use your old one as there are additional variables included. Other variables have been removed. You will have to manually edit the userfixedSettings.php for your location information and time zone etc as I have not updated the settings page to incorporate the changes as Stephen is going to be writing a whole new administration section.
+4. When you open the web page for the first time a new userSettings.php file is created. Please do not use your old one as there are additional variables included. Other variables have been removed. You will have to manually edit the userSettings.php for your location information and time zone etc as I have not updated the settings page to incorporate the changes as Stephen is going to be writing a whole new administration section.
 
 7. You will also need to edit the file dvmGetMoon.php to add your latitude and longitude and whether you are East or West of the meridian and North or South of the equator.
 

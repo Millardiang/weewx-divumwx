@@ -1,6 +1,6 @@
 <!-- begin updater.php  14-Nov-2022 -->
 <?php
-include_once "userfixedSettings.php";
+include_once "userSettings.php";
 
 include_once "fixedSettings.php";
 
