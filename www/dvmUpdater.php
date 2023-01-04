@@ -85,13 +85,13 @@ var b=setInterval(function(){c.load("<?php echo $position15; ?>")},<?php echo $c
 (function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position16").show()}});var c=a("#position16");c.load("<?php echo $position16; ?>");
 var b=setInterval(function(){c.load("<?php echo $position16; ?>")},<?php echo $cycles16; ?>)})})(jQuery); // 60 seconds
 
-//update the moonphase image
-var refreshId;$(document).ready(function(){moonimage()});function moonimage(){$.ajax({cache:false,success:function(a){$("#moonimage").html(a);<?php if (
+//update the moonphase and earth image
+var refreshId;$(document).ready(function(){moonearthimage()});function moonearthimage(){$.ajax({cache:false,success:function(a){$("#moonearthimage").html(a);<?php if (
     $moonRefresh > 0
 ) {
-    echo "setTimeout(moonimage, 3600000)";
+    echo "setTimeout(moonearthimage, 3600000)";
 } ?>},
-	type:"GET",url:"dvmGetMoon.php"})};
+	type:"GET",url:"dvmGetMoonEarth.php"})};
 			
 
 </script>
