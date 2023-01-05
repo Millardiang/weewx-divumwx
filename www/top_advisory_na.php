@@ -17,10 +17,10 @@ $code = $parsed_json["error"]["code"];
 <?php
 ///aw alerts
 if ($code == "")
-{echo '<spanelightning><alertadvisory2><a alt="Alerts" title="Alerts" href="pop_nwsalerts.php" data-lity></alertadvisory2><alertpos><alertvalue>'.$name.'<br> '.$alerttype.'</alertvalue></alertpos>
+{echo '<spanelightning><alertadvisory2><a alt="Alerts" title="Alerts" href="pop_naalerts.php" data-lity></alertadvisory2><alertpos><alertvalue>'.$name.'<br> '.$alerttype.'</alertvalue></alertpos>
    </spanelightning></div></div></div>';}
   else if ($code == "warn_no_data")
-  {echo '<spanelightning><alertadvisory><a alt="Alerts" title="Alerts" href="pop_nwsalerts.php" data-lity>'.$newalertwhite.'</alertadvisory><alertvalue> Currently <lightgreen>No Advisories</lightgreen></alertvalue>
+  {echo '<spanelightning><alertadvisory><a alt="Alerts" title="Alerts" href="pop_naalerts.php" data-lity>'.$newalertwhite.'</alertadvisory><alertvalue> Currently <lightgreen>No Advisories</lightgreen></alertvalue>
  </spanelightning></div></div></div>';} 
    
    
