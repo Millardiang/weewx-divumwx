@@ -9906,3 +9906,14 @@ valuetextpws {
   margin-top: 5px;
   margin-left: 237px;
 }
+outlook-panel {
+  font-size: 0.90em;
+  font-family: Arial, system;
+  top: 20px;
+  left: 0px;
+  width: 210px;
+  position: absolute;
+  font-weight: 400;
+  padding: 1px;
+  overflow: hidden
+}

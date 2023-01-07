@@ -89,6 +89,11 @@ $notifyDewPoint = 21; // dewpoint comfortable zone alert 22 degrees C or 71.6 de
 $notifyFlooding = 25.4; // dewpoint comfortable zone alert 22 degrees C or 71.6 degrees F OR WHATEVER MAKES YOU FEEL UNCOMFORTABLY HOT
 
 $theme1 = $theme;
+$position1   = "dvmWeatherClockTop.php";
+$position1title   = "Station <ored> Time";
+$position4   = "dvmAdvisoryOutlookTop.php";
+$position4title   = "Weather <ored> Outlook | Advisories"; 
+
 
 ####################################################################################################
 // Probably won't have to change anything past this line IF SO BE VER VERY CAREFUL!!!!!!		   #
@@ -104,7 +109,7 @@ $chartsource = "dvmhighcharts";
 $creditsURL = ""; // for chart pages only
 $credits = "Data Supplied via Weather Underground"; // for chart pages only
 $templateinfo = ""; // template information page
-$templateversion = "DVM-<maxblue>Alpha build 0.1.8</maxblue>";
+$templateversion = "DVM-<maxblue>Alpha build 0.1.9</maxblue>";
 
 $software = "WeeWX <span>Hardware</span> Users";
 $designedfor = "<br>For WeeWX Users";
