@@ -95,7 +95,7 @@ var refreshId;$(document).ready(function(){moonearthimage()});function moonearth
 			
 
 </script>
-<?php if ($position1 == "dvmWeatherClockModule.php") { ?>
+<?php if ($position1 == "dvmWeatherClockTop.php") { ?>
 <script>
 var clockID;
 var yourTimeZoneFrom=<?php echo $UTC_offset; ?>;
