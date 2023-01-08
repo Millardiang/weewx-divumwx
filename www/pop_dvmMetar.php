@@ -809,14 +809,14 @@ var ticks = document.createElementNS(svgNS, "line");
   if (i % 30 == 0) {
     var t1 = document.createElementNS(svgNS, "text");
     if (i > 100) {
-      t1.setAttributeNS(null, "x", 64);
+      t1.setAttributeNS(null, "x", 62.50);
     } else if (i > 0) {
-      t1.setAttributeNS(null, "x", 66);
+      t1.setAttributeNS(null, "x", 65);
     } else {
-      t1.setAttributeNS(null, "x", 68.25);
+      t1.setAttributeNS(null, "x", 67.75);
     }
     t1.setAttributeNS(null, "y", 7);
-    t1.setAttributeNS(null, "font-size", "6px");
+    t1.setAttributeNS(null, "font-size", "8px");
     t1.setAttributeNS(null, "font-family", "Helvetica");
     t1.setAttributeNS(null, "fill", "rgba(147,147,147,1)");
     t1.setAttributeNS(null, "style", "letter-spacing: 1.0");
@@ -966,14 +966,14 @@ var ticks = document.createElementNS(svgNS, "line");
   if (i % 30 == 0) {
     var t1 = document.createElementNS(svgNS, "text");
     if (i > 100) {
-      t1.setAttributeNS(null, "x", 64);
+      t1.setAttributeNS(null, "x", 62.50);
     } else if (i > 0) {
-      t1.setAttributeNS(null, "x", 66);
+      t1.setAttributeNS(null, "x", 65);
     } else {
-      t1.setAttributeNS(null, "x", 68.25);
+      t1.setAttributeNS(null, "x", 67.75);
     }
     t1.setAttributeNS(null, "y", 7);
-    t1.setAttributeNS(null, "font-size", "6px");
+    t1.setAttributeNS(null, "font-size", "8px");
     t1.setAttributeNS(null, "font-family", "Helvetica");
     t1.setAttributeNS(null, "fill", "rgba(147, 147, 147, 1)");
     t1.setAttributeNS(null, "style", "letter-spacing: 1.0");
