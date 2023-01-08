@@ -50,9 +50,7 @@ if ($alertlevel !== "none")
   //outlook
   else if ($alertlevel === "none")
   {echo '<outlook-panel>'.$outlookmet.'</outlook-panel></div></div></div>';} 
- 
-  //solar eclipse events and no alerts 
-  else {echo '<spanelightning><alertvalue>'.$eclipse_default.'</spanelightning></div></div></div>';}   
+    
 } 
   
 else if($advisoryzone == "na")
@@ -112,12 +110,7 @@ if ($alertlevel != "")
    </spanelightning></div></div></div>';}
 //outlook
   else if ($level === "")
-  {if ($units == "us"){echo '<outlook-panel>'.$outlookusa.'</outlook-panel></div></div></div>';}
-  else {echo '<outlook-panel>'.$outlookmet.'</outlook-panel></div></div></div>';} 
- }  
-   
- //solar eclipse events and no alerts 
- else {echo '<spanelightning><alertvalue>'.$eclipse_default.'</spanelightning></div></div></div>';}
+  {echo '<outlook-panel>'.$outlookmet.'</outlook-panel></div></div></div>';}   
 
 }
 
@@ -144,11 +137,8 @@ if (strpos($alertlevel,'Yellow') !== false)
  
 //outlook
   else if ($alertlevel == "outlook")
-  {if ($units == "us"){echo '<outlook-panel>'.$outlookusa.'</outlook-panel></div></div></div>';}
-  else {echo '<outlook-panel>'.$outlookmet.'</outlook-panel></div></div></div>';}  }
+  {echo '<outlook-panel>'.$outlookmet.'</outlook-panel></div></div></div>';}  
 
-//solar eclipse events and no alerts 
- else {echo '<spanelightning><alertvalue>'.$eclipse_default.'</spanelightning></div></div></div>';}
 }
 
 else if($advisoryzone == "rw")
@@ -171,7 +161,3 @@ else if($advisoryzone == "rw")
 
 
 ?></noalert></div></div>
-
-
-
-
