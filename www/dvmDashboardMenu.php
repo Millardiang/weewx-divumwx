@@ -16,7 +16,7 @@ include ('userSettings.php');
       </div>
       <div class="weather34toolbar__center">
         <button class="weather34btn weather34btn--primary">
-          <weather34toptitle><?php echo $sta['location']; ?>&nbsp; Weather Station</weather34toptitle>
+          <weather34toptitle><?php echo $stationlocation; ?>&nbsp; Weather Station</weather34toptitle>
         </button>
       </div>
       <div class="weather34toolbar__right">
@@ -24,7 +24,7 @@ include ('userSettings.php');
           <?php echo "Server " . (shell_exec('uptime -p')); ?>
         </weather34mbuptime>
 
-            <a href="dvmTabletIndex.php" title="select tablet mode"><topbarmetric>T</topbarmetric></a>
+            <a href="dvmTabletIndex.php" title="select tablet mode"><topbarmetric>TL</topbarmetric></a>
 
       </div>
     </div>

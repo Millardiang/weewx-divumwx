@@ -20,7 +20,10 @@ $emailform = $email; // PLEASE LEAVE FIXED
 $timeFormatShort = "H:i"; // time format to use when showing times ('g:i a' for '5:34 pm'; 'H:i' for '09:28')
 $showFeelsLike = true; // whether to always show either the heat index (when temp > 80F/27C) or real feel (when temp between 50F/10C and 80F/27C) even when no concern
 $lightLeft = true; // shows amount of light/darkness left rather than total amount per day in the moon display
+
+$theme = isset($theme) ? $theme : "dark";
 $theme1 = $theme;
+
 $charttheme = $theme;
 $livedata = "serverdata/dvmRealtime.txt";
 $chartsource =  "dvmhighcharts"; 
@@ -109,7 +112,7 @@ $chartsource = "dvmhighcharts";
 $creditsURL = ""; // for chart pages only
 $credits = "Data Supplied via Weather Underground"; // for chart pages only
 $templateinfo = ""; // template information page
-$templateversion = "DVM-<maxblue>Alpha build 0.1.9</maxblue>";
+$templateversion = "DVM-<maxblue>Alpha build 0.1.10</maxblue>";
 
 $software = "WeeWX <span>Hardware</span> Users";
 $designedfor = "<br>For WeeWX Users";
@@ -203,20 +206,17 @@ if ($units == "uk") {
     $rainfallconvmm = "1";
 }
 
-if ($position4 == "top_advisory_uk.php") {
+if ($advisoryzone == "uk") {
     $advisory = "pop_ukalerts.php";
 }
-else if ($position4 == "top_advisory_eu.php") {
+else if ($advisoryzone == "eu") {
     $advisory = "pop_europealerts.php";
 }
 
-else if ($position4 == "top_advisory_eu.php") {
-    $advisory = "pop_europealerts.php";
-}
-else if ($position4 == "top_advisory_au.php") {
+else if ($advisoryzone == "au") {
     $advisory = "pop_bomalerts.php";
 } 
-else if ($position4 == "top_advisory_na.php") {
+else if ($advisoryzone == "na") {
     $advisory = "pop_naalerts.php";
 }
 

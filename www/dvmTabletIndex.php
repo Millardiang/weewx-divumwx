@@ -122,9 +122,9 @@ error_reporting(0);
   <!-- position 6--->
   <div class="weather-item">
     <div class="chartforecast">
-      <span class="yearpopup"><a alt="Forecast Menu" title="Forecast Menu" href="pop_menu_forecast.php" data-lity><?php echo $menucharticonpage;?> Forecasts</a></span>
+      <span class="yearpopup"><a alt="Forecast Menu" title="Forecast Menu" href="dvmMenuForecastPopup.php" data-lity><?php echo $menucharticonpage;?> Forecasts</a></span>
       <span class="yearpopup"><a alt="Advisories" title="Advisories" href="<?php echo $advisory;?>" . data-lity>&nbsp;<?php echo $menucharticonpage;?> Advisories</a></span>
-        <span class="yearpopup"><a alt="Meteogram" title="Meteogram" href="pop_dvmMeteogram.php" data-lity><?php echo $menucharticonpage;?> Meteogram</a></span>
+        <span class="yearpopup"><a alt="Meteogram" title="Meteogram" href="dvmMeteogramPopup.php" data-lity><?php echo $menucharticonpage;?> Meteogram</a></span>
     </div>
     <span class='moduletitle'><?php echo $position6title;?> (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span>
     <div id="position6">
@@ -242,6 +242,6 @@ echo '<a href="https://https://claydonsweather.org.uk/" title="https://claydonsw
 
 <?php 
 include_once ('dvmUpdater.php');
-include_once ('menu.php');
+include_once ('dvmTabletMenu.php');
 ?>
 </html>
