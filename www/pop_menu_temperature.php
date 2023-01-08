@@ -14,7 +14,6 @@
 //###################################################################################################################
 
 include_once ('fixedSettings.php');
-include ('dvmCombinedData.php');
 date_default_timezone_set($TZ);
 if($theme==="light"){$background="white";$text="black";}
 else if($theme==="dark"){$background="rgba(34, 35, 40)";$text="white";}
