@@ -49,7 +49,7 @@ if ($alertlevel !== "none")
   
   //outlook
   else if ($alertlevel === "none")
-  {echo '<outlook-panel>'.$outlookmet.'</outlook-panel></div></div></div>';} 
+  {echo '<outlook-panel><p>'.$outlookmet.'</p></outlook-panel></div></div></div>';} 
     
 } 
   
@@ -67,8 +67,8 @@ $code = $parsed_json["error"]["code"];
 <?php
 ///aw alerts
 if ($code == "warn_no_data")
-  {if ($units == "us"){echo '<outlook-panel>'.$outlookusa.'</outlook-panel></div></div></div>';}
-  else {echo '<outlook-panel>'.$outlookmet.'</outlook-panel></div></div></div>';} 
+  {if ($units == "us"){echo '<outlook-panel><p>'.$outlookusa.'</p></outlook-panel></div></div></div>';}
+  else {echo '<outlook-panel><p>'.$outlookmet.'</p></outlook-panel></div></div></div>';} 
  }  
 else if ($code == "")
 {echo '<spanelightning><alertadvisory><a alt="Alerts" title="Alerts" href="pop_naalerts.php" data-lity></alertadvisory><alertpos><alertvalue>'.$name.'<br> '.$alerttype.'</alertvalue></alertpos>
@@ -110,7 +110,7 @@ if ($alertlevel != "")
    </spanelightning></div></div></div>';}
 //outlook
   else if ($level === "")
-  {echo '<outlook-panel>'.$outlookmet.'</outlook-panel></div></div></div>';}   
+  {echo '<outlook-panel><p>'.$outlookmet.'</p></outlook-panel></div></div></div>';}   
 
 }
 
@@ -137,7 +137,7 @@ if (strpos($alertlevel,'Yellow') !== false)
  
 //outlook
   else if ($alertlevel == "outlook")
-  {echo '<outlook-panel>'.$outlookmet.'</outlook-panel></div></div></div>';}  
+  {echo '<outlook-panel><p>'.$outlookmet.'</p></outlook-panel></div></div></div>';}  
 
 }
 
@@ -151,9 +151,9 @@ else if($advisoryzone == "rw")
  
 //outlook
   
-  if ($units == "us"){echo '<outlook-panel>'.$outlookusa.'</outlook-panel></div></div></div>';}
+  if ($units == "us"){echo '<outlook-panel><p>'.$outlookusa.'</p></outlook-panel></div></div></div>';}
   
-  else if ($units !== "us"){echo '<outlook-panel>'.$outlookmet.'</outlook-panel></div></div></div>';}
+  else if ($units !== "us"){echo '<outlook-panel><p>'.$outlookmet.'</p></outlook-panel></div></div></div>';}
 }
 
   //solar eclipse events and no alerts 
@@ -161,3 +161,7 @@ else if($advisoryzone == "rw")
 
 
 ?></noalert></div></div>
+
+
+
+
