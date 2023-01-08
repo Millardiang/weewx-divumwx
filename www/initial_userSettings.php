@@ -1,7 +1,8 @@
 <?php
 $themelayout = "extra_row"; //extra_row, extra_col, extra_row_col, tablet
+$TZ = "Europe/London";
 $theme = isset($theme) ? $theme : "dark";
-$TZ = "Europe/London"; 
+$theme1 = $theme; 
 $units = "eu"; //us, uk, metric, ca, scandinavia
 $extralinks   = "yes";
 $languages   = "yes";
@@ -9,7 +10,7 @@ $dateFormat   = "d-m-Y"; //m-d-Y, Y-m-d
 $timeFormat    = "H:i:s"; //g:i:s, g:i:s a
 $timeFormatShort    = "H:i"; //g:i, g:i a
 $clockformat    = "24"; //12, 24
-$advisoryzone = "eu"; //uk, na, eu, au, rw (= UK, North America, Europe, Australia, Rest of World) 
+$advisoryzone = "uk"; //uk, na, eu, au, rw (= UK, North America, Europe, Australia, Rest of World) 
 $position2   = "dvmWindGustYearTop.php";
 $position2title   = "Wind <ored> Month | Year"; 
 $position3   = "dvmLightningEwTop.php";
