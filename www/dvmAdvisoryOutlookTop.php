@@ -120,8 +120,7 @@ $xml = simplexml_load_file("jsondata/au.txt") or die("Error: Cannot create objec
 $jsonData = json_encode($xml, JSON_PRETTY_PRINT);
 $parsed_json = json_decode($jsonData, true);
 if(($parsed_json['channel']['item'][0]['title'])!==null){$alertlevel="Yellow";}
-else $alertlevel="outlook";
-
+else $alertlevel="LightGreen";
 
 ?>
 
@@ -135,9 +134,9 @@ if (strpos($alertlevel,'Yellow') !== false)
    </spanelightning></div></div></div>';}  
 
  
-//outlook
-  else if ($alertlevel == "outlook")
-  {echo '<outlook-panel><p>'.$outlookmet.'</p></outlook-panel></div></div></div>';}  
+else if (strpos($alertlevel,'LightGreen') !== false)
+  {echo '<spanelightning><alertadvisory><a alt="Alerts" title="Alerts" href="pop_bom_alerts.php" data-lity>'.$newalertgreen.'</alertadvisory><alertvalue> Currently <lightgreen>No Alerts</lightgreen></alertvalue>
+  </spanelightning></div></div></div>';} 
 
 }
 
@@ -161,7 +160,5 @@ else if($advisoryzone == "rw")
 
 
 ?></noalert></div></div>
-
-
 
 
