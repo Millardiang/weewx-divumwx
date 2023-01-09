@@ -112,7 +112,7 @@ error_reporting(0);
 <div class="weather-container">
   <div class="weather-item">
     <div class="chartforecast">
-      <span class="yearpopup"><a alt="temp charts" title="temp charts" href="pop_menu_temperature.php" data-lity><?php echo $menucharticonpage;?> Temperature Almanac and Derived Charts</a></span>
+      <span class="yearpopup"><a alt="temp charts" title="temp charts" href="dvmMenuTemperaturePopup.php" data-lity><?php echo $menucharticonpage;?> Temperature Almanac and Derived Charts</a></span>
     </div>    
     <span class='moduletitle'><?php echo $lang['Temperature'];?> (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span>
     <div id="position5">
