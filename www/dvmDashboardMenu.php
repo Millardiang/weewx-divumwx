@@ -308,12 +308,12 @@ if ($extralinks == 'yes')
 if (!empty($webcamurl) && $webcamurl != ' ' && $webcamurl != 'Null' && $webcamurl != 'null')
 { ?>
         <li><!--webcam-->
-          <a href="cam.php" data-lity title="WEATHERSTATION WEBCAM"><weather34menumarkeryellow></weather34menumarkeryellow> Web Cam</a>
+          <a href="pop_cam.php" data-lity title="WEATHERSTATION WEBCAM"><weather34menumarkeryellow></weather34menumarkeryellow> Web Cam</a>
         </li>
       <?php
 } ?>
       <li><!--contact info-->
-        <a href="bio.php" data-lity title="Weather Station Owner Contact Card Info"><weather34menumarkerorange></weather34menumarkerorange> Contact Card</a>
+        <a href="pop_bio.php" data-lity title="Weather Station Owner Contact Card Info"><weather34menumarkerorange></weather34menumarkerorange> Contact Card</a>
       </li>
       <li><!--hardware info-->
         <a href="stationinfo.php" data-lity title="Hardware Weather Station Hardware Info"><weather34menumarkerred></weather34menumarkerred> Hardware Info</a>
