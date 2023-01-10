@@ -29,7 +29,7 @@ if ($aqiweather["pm25"] >300){echo "<topdaqi9>",$aqiweather["pm25"]."<smallwindu
   
 </div></smalluvunit>
 <!--<a alt="Air Quality Information" title="Air Quality Information" href="aqipopup.php" data-lity > -->
-<a alt="DAQI air quality info" title="AQI air quality info" href="pop_aqinfo.php" data-lity>
+<a alt="DAQI air quality info" title="AQI air quality info" href="dvmAqiInfoPopup.php" data-lity>
 <div class="yearwordbig"><?php echo "WAQI" ?></div>
 <?php //small title PM2.5
 

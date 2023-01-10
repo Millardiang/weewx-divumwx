@@ -18,7 +18,6 @@ include ('dvmCombinedData.php');
 date_default_timezone_set($TZ);
 if($theme==="light"){$background="white";$text="black";}
 else if($theme==="dark"){$background="rgba(34, 35, 40)";$text="white";}
-// pop_forecast_graph.php
 ?>  
   <style>
 * {box-sizing: border-box}
@@ -63,46 +62,31 @@ body, html {
 #Tab2 {background-color: <?php echo $background ?>;}
 #Tab3 {background-color: <?php echo $background ?>;}
 #Tab4 {background-color: <?php echo $background ?>;}
-#Tab5 {background-color: <?php echo $background ?>;}
-#Tab6 {background-color: <?php echo $background ?>;}    
-   
+#Tab5 {background-color: <?php echo $background ?>;}    
 
 </style>
 </head>
 <body>
 
-<button class="tablink" onclick="openPage('Tab1', this, 'rgba(194, 102, 58)')" id="defaultOpen">Hourly Forecast</button>
-<button class="tablink" onclick="openPage('Tab2', this, 'rgba(194, 102, 58)')">Hourly Forecast Table</button>
-<button class="tablink" onclick="openPage('Tab3', this, 'rgba(194, 102, 58)')">Day and Night Foecast</button>  
-<button class="tablink" onclick="openPage('Tab4', this, 'rgba(194, 102, 58)')">Day and Night Forecast Table</button>  
-<button class="tablink" onclick="openPage('Tab5', this, 'rgba(194, 102, 58)')">Meteogram</button>  
-  
+<button class="tablink" onclick="openPage('Tab1', this, 'rgba(194, 102, 58)')" id="defaultOpen">UV Index Almanac</button>
+<button class="tablink" onclick="openPage('Tab2', this, 'rgba(194, 102, 58)')">Solar Almanac</button>
+<button class="tablink" onclick="openPage('Tab3', this, 'rgba(194, 102, 58)')">UV Guide</button>  
   
   <div id="Tab1" class="tabcontent">
   
-  <iframe width="100%" height="92%" scrolling="no" src="dvmForecastHourlyPopup.php" frameborder="0"></iframe>
+  <iframe width="100%" height="92%" scrolling="no" src="dvmUvAlmanac.php" frameborder="0"></iframe>
 </div>
 
 <div id="Tab2" class="tabcontent">
   
-  <iframe width="100%" height="92%" scrolling="no" src="dvmForecastHourlyTablePopup.php" frameborder="0"></iframe>
+  <iframe width="100%" height="92%" scrolling="no" src="dvmSolarAlmanac.php" frameborder="0"></iframe>
 </div>
   
   
   
   <div id="Tab3" class="tabcontent">
   
-  <iframe width="100%" height="92%" scrolling="no" src="dvmForecastDaynightPopup.php" frameborder="0"></iframe>
-</div>
-  
-  <div id="Tab4" class="tabcontent">
-  
-  <iframe width="100%" height="92%" scrolling="no" src="dvmForecastDaynightTablePopup.php" frameborder="0"></iframe>
-</div>
-  
-  <div id="Tab5" class="tabcontent">
-  
-  <iframe width="100%" height="92%" scrolling="no" src="dvmMeteogramPopup.php" frameborder="0"></iframe>
+  <iframe width="100%" height="92%" scrolling="no" src="dvmUvindexInfo.php" frameborder="0"></iframe>
 </div>
   
   
