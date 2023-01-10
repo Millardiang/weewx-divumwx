@@ -18,17 +18,19 @@ include ('dvmCombinedData.php');
 date_default_timezone_set($TZ);
 if($theme==="light"){$background="white";$text="black";}
 else if($theme==="dark"){$background="rgba(34, 35, 40)";$text="white";}
-// pop_forecast_graph.php
 ?>  
   <style>
 * {box-sizing: border-box}
 
 /* Set height of body and the document to 100% */
-body, html {
-  height: 100%;
+body {
+  overflow:hidden
+  }
+    body, html {
+  height: 90%;
   margin: 0;
   font-family: Arial;
-  overflow: hidden;
+  
 }
 
 /* Style tab links */
@@ -64,47 +66,45 @@ body, html {
 #Tab3 {background-color: <?php echo $background ?>;}
 #Tab4 {background-color: <?php echo $background ?>;}
 #Tab5 {background-color: <?php echo $background ?>;}
-#Tab6 {background-color: <?php echo $background ?>;}    
-   
-
+    
 </style>
 </head>
 <body>
 
-<button class="tablink" onclick="openPage('Tab1', this, 'rgba(194, 102, 58)')" id="defaultOpen">Hourly Forecast</button>
-<button class="tablink" onclick="openPage('Tab2', this, 'rgba(194, 102, 58)')">Hourly Forecast Table</button>
-<button class="tablink" onclick="openPage('Tab3', this, 'rgba(194, 102, 58)')">Day and Night Foecast</button>  
-<button class="tablink" onclick="openPage('Tab4', this, 'rgba(194, 102, 58)')">Day and Night Forecast Table</button>  
-<button class="tablink" onclick="openPage('Tab5', this, 'rgba(194, 102, 58)')">Meteogram</button>  
-  
-  
+<button class="tablink" onclick="openPage('Tab1', this, 'rgba(194, 102, 58)')" id="defaultOpen">Wind Almanac</button>  
+<button class="tablink" onclick="openPage('Tab2', this, 'rgba(194, 102, 58)')">Yearly Wind</button>
+<button class="tablink" onclick="openPage('Tab3', this, 'rgba(194, 102, 58)')">Weekly Wind</button>
+<button class="tablink" onclick="openPage('Tab4', this, 'rgba(194, 102, 58)')">Wind Barb Chart</button>  
+<button class="tablink" onclick="openPage('Tab5', this, 'rgba(194, 102, 58)')">Wind Rose</button>  
+
   <div id="Tab1" class="tabcontent">
   
-  <iframe width="100%" height="92%" scrolling="no" src="dvmForecastHourlyPopup.php" frameborder="0"></iframe>
+  <iframe width="100%" height="92%" scrolling="no" src="dvmWindAlmanac.php" frameborder="0"></iframe>
+</div>
+  
+  <div id="Tab2" class="tabcontent">
+  
+  <iframe width="100%" height="92%" scrolling="no" src="<?php echo $chartsource;?>/<?php echo $theme1;?>-charts.html?chart='windplot'&span='yearly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>"frameborder="0"></iframe>
 </div>
 
-<div id="Tab2" class="tabcontent">
+<div id="Tab3" class="tabcontent">
   
-  <iframe width="100%" height="92%" scrolling="no" src="dvmForecastHourlyTablePopup.php" frameborder="0"></iframe>
+  <iframe width="100%" height="92%" scrolling="no" src="<?php echo $chartsource;?>/<?php echo $theme1;?>-charts.html?chart='windallplot'&span='yearly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>"frameborder="0"></iframe>
+</div>
 </div>
   
   
-  
-  <div id="Tab3" class="tabcontent">
-  
-  <iframe width="100%" height="92%" scrolling="no" src="dvmForecastDaynightPopup.php" frameborder="0"></iframe>
-</div>
   
   <div id="Tab4" class="tabcontent">
   
-  <iframe width="100%" height="92%" scrolling="no" src="dvmForecastDaynightTablePopup.php" frameborder="0"></iframe>
+  <iframe width="100%" height="92%" scrolling="no" src="<?php echo $chartsource;?>/<?php echo $theme1;?>-charts.html?chart='windbarbplot'&span='weekly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>" frameborder="0"></iframe>
+  
 </div>
   
   <div id="Tab5" class="tabcontent">
   
-  <iframe width="100%" height="92%" scrolling="no" src="dvmMeteogramPopup.php" frameborder="0"></iframe>
+  <iframe width="100%" height="92%" scrolling="no" src="<?php echo $chartsource;?>/<?php echo $theme1;?>-charts.html?chart='windroseplot'&span='weekly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>" frameborder="0"></iframe>
 </div>
-  
   
   
 
