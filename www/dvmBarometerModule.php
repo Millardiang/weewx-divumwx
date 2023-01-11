@@ -1,7 +1,7 @@
 <?php 
 include('common.php');
 include('dvmCombinedData.php');
-include('settings1.php');
+include('userSettings.php');
 header('Content-type: text/html; charset=utf-8');
 ?>
 

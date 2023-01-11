@@ -1,4 +1,4 @@
-<?php include('settings.php');include('shared.php');date_default_timezone_set($TZ);header('Content-type: text/html; charset=utf-8');error_reporting(0);
+<?php include('fixedSettings.php');include('shared.php');date_default_timezone_set($TZ);header('Content-type: text/html; charset=utf-8');error_reporting(0);
 echo "<body style='background-color:#292E35'>";
 ?>
 

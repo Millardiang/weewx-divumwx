@@ -2,7 +2,7 @@
 
 include('dvmCombinedData.php');
 include('common.php');
-include('settings1.php');
+include('userSettings.php');
 
 if ($theme === "dark")
 {$bordercolor = "#393d40";}

@@ -1,6 +1,8 @@
 <?php
 include('dvmCombinedData.php');
 include('common.php');
+date_default_timezone_set($TZ);
+header('Content-type: text/html; charset=utf-8');
 ?>
     
 <?php
@@ -25,8 +27,8 @@ $sun_elevation = round($sun_alt,2)."&deg;<div class=sunbelowweather34>&nbsp;</di
 <?php echo 
 '<div class="weather34sunlightday"><weather34daylightdaycircle></weather34daylightdaycircle> '.$alm["daylight"].' hrs<br>'.$lang['TotalDaylight'].'</div>
 <div class="weather34sundarkday">'.$darkhours.':'.$darkminutes.' hrs <weather34darkdaycircle></weather34darkdaycircle><br>'.$lang['TotalDarkness'].'</div>
-<div class="weather34sunriseday">'.$sunuphalf.''.$lang['Sunrise'].'<br>Today: '.$alm["sunrise"].'<br>First Light: (<blueu>'.$alm["civil_twilight_begin"] .'</blueu>)</div>
-<div class="weather34sunsetday">'.$sundownhalf.''.$lang['Sunset'].'<br>Tonight: '.$alm["sunset"].'<br>Last Light: (<blueu>'.$alm["civil_twilight_end"].'</blueu>)</div>
+<div class="weather34sunriseday">'.$sunuphalf.''.$lang['Sunrise'].'<br><value>'.$lang["Today"].'<span><value>: '.$alm["sunrise"].'<br>First Light: (<blueu>'.$alm["civil_twilight_begin"] .'</blueu>)</div>
+<div class="weather34sunsetday">'.$sundownhalf.''.$lang['Sunset'].'<br><value>'.$lang["Tonight"].'<span><value>: '.$alm["sunset"].'<br>Last Light: (<blueu>'.$alm["civil_twilight_end"].'</blueu>)</div>
 
 <div class="daylightword"><value>Sun Azimuth<span><value><maxred> '.round($alm["sun_azimuth"],2).'°</maxred></value></span></div>
 
@@ -34,8 +36,8 @@ $sun_elevation = round($sun_alt,2)."&deg;<div class=sunbelowweather34>&nbsp;</di
 
 <div class="sundialcontainerdiv2" ><div id="sundialcontainer" class=sundialcontainer><div class="suncanvasstyle"></div></div>
 
-<div class="weather34moonphasem">Moon Phase <br>'.$alm["moonphase"].'<br>'.$lang['Moonrise'].'<br>'.'<blueu> '.$alm["moonrise"].'</blueu></div>
-<div class="weather34luminancem">Luminance<br> '.$alm["luminance"].' %<br>'.$lang['Moonset'].'<br>'.'<maxred> '.$alm["moonset"].'</maxred></div>';?>
+<div class="weather34moonphasem"><value>'.$lang["Moonphase"].'<span><value><br>'.$alm["moonphase"].'<br>'.$lang['Moonrise'].'<br>'.'<blueu> '.$alm["moonrise"].'</blueu></div>
+<div class="weather34luminancem"><value>'.$lang["Luminance"].'<span><value><br> '.$alm["luminance"].' %<br>'.$lang['Moonset'].'<br>'.'<maxred> '.$alm["moonset"].'</maxred></div>';?>
 
 <html>
 

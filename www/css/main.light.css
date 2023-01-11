@@ -1772,7 +1772,6 @@ suptemp3 {
     float: none;
     width: 310px;
     margin: 10px auto 0;
-    overflow: hidden
   }
 
   .c {
@@ -1804,7 +1803,6 @@ suptemp3 {
     float: none;
     width: 310px;
     margin: 10px auto 0;
-    overflow: hidden
   }
 
   .c {
@@ -1836,7 +1834,6 @@ suptemp3 {
     float: none;
     width: 310px;
     margin: 10px auto 0;
-    overflow: hidden
   }
 }
 
@@ -4377,16 +4374,15 @@ agolightning {
   background: rgba(245, 247, 252, 1);
   padding: 0px;
   color: #d35d4e;
-  -moz-border-radius: 2px;
-  -o-border-radius: 2px;
   border-radius: 2px;
+  border: 1px solid rgba(230, 232, 239, .8);
   width: 6.5rem;
   height: 1.25rem;
   text-align: center;
   margin-left: 40px;
   margin-top: 3px;
   font-size: .9rem;
-  font-family: weathertext2
+  font-family: weathertext2;
 }
 
 .azimuth,
@@ -7418,7 +7414,7 @@ wfstriketoday {
 
 .eqcontainer1 {
   margin-left: 30px;
-  margin-top: 30px
+  margin-top: 14px
 }
 
 .eqtoday1,
@@ -7477,8 +7473,8 @@ wfstriketoday {
 .eqtext {
   float: left;
   width: 100px;
-  margin-left: 130px;
-  margin-top: -70px;
+  margin-left: 150px;
+  margin-top: -74px;
   font: .7rem arial, system;
   font-family: weathertext2;
   line-height: 10px
@@ -9905,3 +9901,22 @@ valuetextpws {
   font-weight: 500;
   color: #2d3a4b;
 }
+
+.eqconverter {
+  margin-top: 5px;
+  margin-left: 237px;
+}
+outlook-panel {
+ 
+  font-size: 0.95em;
+  font-family: Arial, system;
+  top: 11px;
+  left: 0px;
+  width: 210px;
+  height: auto;
+  position: absolute;
+  font-weight: 400;
+  overflow: hidden;
+  align-items: center;
+}
+

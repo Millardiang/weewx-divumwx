@@ -1,4 +1,4 @@
-<?php include('settings.php');$url = (isset($_SERVER['HTTPS']) ? 'https://' : 'http://').$_SERVER['SERVER_NAME'];
+<?php include('fixedSettings.php');$url = (isset($_SERVER['HTTPS']) ? 'https://' : 'http://').$_SERVER['SERVER_NAME'];
 include('w34CombinedData.php');error_reporting(0);
 echo "<body style='background-color:#222328'>";
 if($theme==="dark"){$text1="silver";}

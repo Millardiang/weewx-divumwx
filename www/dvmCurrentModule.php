@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <title>weather34 current conditions</title>
 <?php
-include('settings1.php');
+include('fixedSettings.php');
 include('dvmCombinedData.php');
 $iconset = "icon2";
 $cloud_region = explode("/", $TZ);
