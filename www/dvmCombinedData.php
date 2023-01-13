@@ -363,7 +363,7 @@ if (
     $temp["outside_alltime_mintime"] = date('j M Y',  $sdata["alltime.outTemp.mintime.raw"]);
 
     //uv
-    $uv["now"] = $sdat["current.UV.formatted"];
+    $uv["now"] = $sdata["current.UV.formatted"];
     $uv["day_max"] = $sdata["day.UV.max.formatted"];
     $uv["day_maxtime"] = date('H:i:s', $sdata["day.UV.maxtime.raw"]);
     $uv["24h_max"] = $sdata["24h.UV.max.formatted"];
