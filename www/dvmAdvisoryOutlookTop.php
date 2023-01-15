@@ -12,17 +12,18 @@ $parsed_icon = json_decode($json_icon, true);
 
 if($advisoryzone == "uk")
 {
+$json_icon = file_get_contents("jsondata/lookupTable.json");
+$parsed_icon = json_decode($json_icon, true);
 $xml=simplexml_load_file("jsondata/uk.txt") or die("Error: Cannot create object");
 $jsonData = json_encode($xml, JSON_PRETTY_PRINT);
 $parsed_json = json_decode($jsonData, true);
-
 if(($parsed_json['channel']['item'][0]['description'])!==null){$description=$parsed_json['channel']['item'][0]['description'];}
 else if (($parsed_json['channel']['item']['description']) !== null){$description=$parsed_json['channel']['item']['description'];}
       
        if (strpos($description, "Red") === 0) {$alertlevel="Red"; $lowercasealert="red"; $uppercasealert="Red Alert";}
        else if (strpos($description, "Amber") === 0) {$alertlevel="Orange"; $lowercasealert="amber"; $uppercasealert="Amber Alert";}
        else if (strpos($description, "Yellow") === 0) {$alertlevel="Yellow"; $lowercasealert="yellow"; $uppercasealert="Yellow Alert";}
-       else {$alertlevel="none";}
+       else {$uppercasealert="No Alerts"; $alerttype='In Force'; $alertlevel="White"; }
        
        if(strpos($description, "heat") !== false) {$alerttype='Extreme Heat';}
        else if(strpos($description, "wind") !== false) {$alerttype='Wind';}
@@ -32,8 +33,10 @@ else if (($parsed_json['channel']['item']['description']) !== null){$description
        else if(strpos($description, "rain") !== false) {$alerttype='Rain';}
        else if(strpos($description, "lightning") !== false) {$alerttype='Lightning';}
        else if(strpos($description, "thunder") !== false) {$alerttype='Thunderstorms';}
-       else {$alerttype="none";}
-       
+       else {$alerttype='In Force';}
+
+       if ($alerttype==='In Force'){$warnimage = "icon-warning-noalert-white.svg";}
+       else {$warnimage = "css/svg/" . $parsed_icon[$lowercasealert][$alerttype];}
 
 ?>
 
@@ -44,7 +47,7 @@ else if (($parsed_json['channel']['item']['description']) !== null){$description
 <?php
 ///MetOffice
 if ($alertlevel !== "none")
-{echo '<spanelightning><alertadvisory><a alt="Alerts" title="Alerts" href="pop_ukalerts.php" data-lity><img src="css/svg/' . $warnimage . '" width="100%" class="iconpos"></img></alertadvisory><alertpos><alertvalue>'.$uppercasealert.'<br> '.$alerttype.'</alertvalue></alertpos>
+{echo '<spanelightning><alertadvisory><a alt="Alerts" title="Alerts" href="'.$advisory.'" data-lity><img class="iconpos" src='.$warnimage.' width="100%" ></img></alertadvisory><alertpos><alertvalue>'.$uppercasealert.'<br> '.$alerttype.'</alertvalue></alertpos>
    </spanelightning></div></div></div>';}
   
   //outlook
@@ -71,7 +74,7 @@ if ($code == "warn_no_data")
   else {echo '<outlook-panel><p>'.$outlookmet.'</p></outlook-panel></div></div></div>';} 
  }  
 else if ($code == "")
-{echo '<spanelightning><alertadvisory><a alt="Alerts" title="Alerts" href="pop_naalerts.php" data-lity></alertadvisory><alertpos><alertvalue>'.$name.'<br> '.$alerttype.'</alertvalue></alertpos>
+{echo '<spanelightning><alertadvisory><a alt="Alerts" title="Alerts" href="'.$advisory.'" data-lity></alertadvisory><alertpos><alertvalue>'.$name.'<br> '.$alerttype.'</alertvalue></alertpos>
    </spanelightning></div></div></div>';}
 
 }
@@ -106,7 +109,7 @@ $alerttype = $parsed_icon['top']['alertdesc'][$alertdesc];
 <?php
 ///aw alerts
 if ($alertlevel != "")
-{echo '<spanelightning><alertadvisory2><a alt="Alerts" title="Alerts" href="pop_europealerts.php" data-lity><img src="css/svg/' . $warnimage . '" width="100%" class="iconpos"></img></alertadvisory2><alertpos><alertvalue>'.$alertlevel.'<br> '.$alerttype.'</alertvalue></alertpos>
+{echo '<spanelightning><alertadvisory2><a alt="Alerts" title="Alerts" href="'.$advisory.'" data-lity><img src="css/svg/' . $warnimage . '" width="100%" class="iconpos"></img></alertadvisory2><alertpos><alertvalue>'.$alertlevel.'<br> '.$alerttype.'</alertvalue></alertpos>
    </spanelightning></div></div></div>';}
 //outlook
   else if ($level === "")
@@ -130,12 +133,12 @@ else $alertlevel="LightGreen";
 <?php 
 ///BOM Warning
 if (strpos($alertlevel,'Yellow') !== false)
- {echo '<spanelightning><alertadvisory2><a alt="Alerts" title="Alerts" href="pop_bomalerts.php" data-lity>'.$newalertyellow.'</alertadvisory2><alertvalue>Warning(s)<br>In Force</alertvalue>
+ {echo '<spanelightning><alertadvisory2><a alt="Alerts" title="Alerts" href="'.$advisory.'" data-lity>'.$newalertyellow.'</alertadvisory2><alertvalue>Warning(s)<br>In Force</alertvalue>
    </spanelightning></div></div></div>';}  
 
  
 else if (strpos($alertlevel,'LightGreen') !== false)
-  {echo '<spanelightning><alertadvisory><a alt="Alerts" title="Alerts" href="pop_bom_alerts.php" data-lity>'.$newalertgreen.'</alertadvisory><alertvalue> Currently <lightgreen>No Alerts</lightgreen></alertvalue>
+  {echo '<spanelightning><alertadvisory><a alt="Alerts" title="Alerts" href="'.$advisory.'" data-lity>'.$newalertgreen.'</alertadvisory><alertvalue> Currently <lightgreen>No Alerts</lightgreen></alertvalue>
   </spanelightning></div></div></div>';} 
 
 }
