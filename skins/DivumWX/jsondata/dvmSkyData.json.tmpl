@@ -102,12 +102,12 @@
     "airquality":
     {
         #if $current.pm2_5.has_data
-        "pm25 current": {"value": $current.pm2_5.format($localize=False,add_label=False)},
-        "pm25 rolling 24hr": {"value": $current.pm2_5.format($localize=False,add_label=False)},
+        "pm25 current": {"value": $current.pm2_5.format(add_label=False, format_string="%.1f")},
+        "pm25 rolling 24hr": {"value": $current.pm2_5.format(add_label=False, format_string="%.1f")},
         #end if
         #if $current.pm10_0.has_data
-        "pm10 current": {"value": $current.pmpm10_0.format($localize=False,add_label=False)},
-        "pm10 rolling 24hr": {"value": $current.pm10_0.format($localize=False,add_label=False)},
+        "pm10 current": {"value": $current.pm10_0.format(add_label=False, format_string="%.1f")},
+        "pm10 rolling 24hr": {"value": $current.pm10_0.format(add_label=False, format_string="%.1f")},
         #end if
         ## Last value can't end with a comma
         "void_end": null
