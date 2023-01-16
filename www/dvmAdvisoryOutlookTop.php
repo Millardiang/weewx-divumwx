@@ -12,8 +12,6 @@ $parsed_icon = json_decode($json_icon, true);
 
 if($advisoryzone == "uk")
 {
-$json_icon = file_get_contents("jsondata/lookupTable.json");
-$parsed_icon = json_decode($json_icon, true);
 $xml=simplexml_load_file("jsondata/uk.txt") or die("Error: Cannot create object");
 $jsonData = json_encode($xml, JSON_PRETTY_PRINT);
 $parsed_json = json_decode($jsonData, true);
@@ -33,10 +31,9 @@ else if (($parsed_json['channel']['item']['description']) !== null){$description
        else if(strpos($description, "rain") !== false) {$alerttype='Rain';}
        else if(strpos($description, "lightning") !== false) {$alerttype='Lightning';}
        else if(strpos($description, "thunder") !== false) {$alerttype='Thunderstorms';}
-       else {$alerttype='In Force';}
+       else {$alerttype='none';}
 
-       if ($alerttype==='In Force'){$warnimage = "icon-warning-noalert-white.svg";}
-       else {$warnimage = "css/svg/" . $parsed_icon[$lowercasealert][$alerttype];}
+       $warnimage = "css/svg/" . $parsed_icon[$lowercasealert][$alerttype];
 
 ?>
 
