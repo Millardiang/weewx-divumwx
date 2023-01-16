@@ -112,7 +112,7 @@ $chartsource = "dvmhighcharts";
 $creditsURL = ""; // for chart pages only
 $credits = "Data Supplied via Weather Underground"; // for chart pages only
 $templateinfo = ""; // template information page
-$templateversion = "DVM-<maxblue>Alpha build 0.2.1</maxblue>";
+$templateversion = "DVM-<maxblue>Alpha build 0.2.2</maxblue>";
 
 $software = "WeeWX <span>Hardware</span> Users";
 $designedfor = "<br>For WeeWX Users";
@@ -207,17 +207,17 @@ if ($units == "uk") {
 }
 
 if ($advisoryzone == "uk") {
-    $advisory = "pop_ukalerts.php";
+    $advisory = "dvmAdvisoryUkPopup.php";
 }
 else if ($advisoryzone == "eu") {
-    $advisory = "pop_europealerts.php";
+    $advisory = "dvmAdvisoryEuPopup.php";
 }
 
 else if ($advisoryzone == "au") {
-    $advisory = "pop_bomalerts.php";
+    $advisory = "dvmAdvisoryAuPopup.php";
 } 
 else if ($advisoryzone == "na") {
-    $advisory = "pop_naalerts.php";
+    $advisory = "dvmAdvisoryNaPopup.php";
 }
 
 ?>
