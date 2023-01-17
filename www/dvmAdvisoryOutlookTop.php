@@ -33,7 +33,7 @@ else if (($parsed_json['channel']['item']['description']) !== null){$description
        else if(strpos($description, "lightning") !== false) {$alerttype='Lightning';}
        else if(strpos($description, "thunder") !== false) {$alerttype='Thunderstorms';}
        else {$alerttype="none";}
-       $warnimage = "css/svg/" . $parsed_icon[$lowercasealert][$alerttype];
+       $warnimage = $parsed_icon[$lowercasealert][$alerttype];
 
 ?>
 
@@ -44,7 +44,7 @@ else if (($parsed_json['channel']['item']['description']) !== null){$description
 <?php
 ///MetOffice
 if ($alertlevel !== "none")
-{echo '<spanelightning><alertadvisory><a alt="Alerts" title="Alerts" href="pop_ukalerts.php" data-lity><img src="css/svg/' . $warnimage . '" width="100%" class="iconpos"></img></alertadvisory><alertpos><alertvalue>'.$uppercasealert.'<br> '.$alerttype.'</alertvalue></alertpos>
+{echo '<spanelightning><alertadvisory><a alt="Alerts" title="Alerts" href= "' . $advisory . '" data-lity><img src="css/svg/' . $warnimage . '" width="100%" class="iconpos"></img></alertadvisory><alertpos><alertvalue>'.$uppercasealert.'<br> '.$alerttype.'</alertvalue></alertpos>
    </spanelightning></div></div></div>';}
   
   //outlook
@@ -71,7 +71,7 @@ if ($code == "warn_no_data")
   else {echo '<outlook-panel><p>'.$outlookmet.'</p></outlook-panel></div></div></div>';} 
  }  
 else if ($code == "")
-{echo '<spanelightning><alertadvisory><a alt="Alerts" title="Alerts" href="pop_naalerts.php" data-lity></alertadvisory><alertpos><alertvalue>'.$name.'<br> '.$alerttype.'</alertvalue></alertpos>
+{echo '<spanelightning><alertadvisory><a alt="Alerts" title="Alerts" href="' . $advisory . '" data-lity></alertadvisory><alertpos><alertvalue>'.$name.'<br> '.$alerttype.'</alertvalue></alertpos>
    </spanelightning></div></div></div>';}
 
 }
@@ -106,7 +106,7 @@ $alerttype = $parsed_icon['top']['alertdesc'][$alertdesc];
 <?php
 ///aw alerts
 if ($alertlevel != "")
-{echo '<spanelightning><alertadvisory2><a alt="Alerts" title="Alerts" href="pop_europealerts.php" data-lity><img src="css/svg/' . $warnimage . '" width="100%" class="iconpos"></img></alertadvisory2><alertpos><alertvalue>'.$alertlevel.'<br> '.$alerttype.'</alertvalue></alertpos>
+{echo '<spanelightning><alertadvisory2><a alt="Alerts" title="Alerts" href="' . $advisory . '" data-lity><img src="css/svg/' . $warnimage . '" width="100%" class="iconpos"></img></alertadvisory2><alertpos><alertvalue>'.$alertlevel.'<br> '.$alerttype.'</alertvalue></alertpos>
    </spanelightning></div></div></div>';}
 //outlook
   else if ($level === "")
@@ -130,12 +130,12 @@ else $alertlevel="LightGreen";
 <?php 
 ///BOM Warning
 if (strpos($alertlevel,'Yellow') !== false)
- {echo '<spanelightning><alertadvisory2><a alt="Alerts" title="Alerts" href="pop_bomalerts.php" data-lity>'.$newalertyellow.'</alertadvisory2><alertvalue>Warning(s)<br>In Force</alertvalue>
+ {echo '<spanelightning><alertadvisory2><a alt="Alerts" title="Alerts" href="' . $advisory . '" data-lity>'.$newalertyellow.'</alertadvisory2><alertvalue>Warning(s)<br>In Force</alertvalue>
    </spanelightning></div></div></div>';}  
 
  
 else if (strpos($alertlevel,'LightGreen') !== false)
-  {echo '<spanelightning><alertadvisory><a alt="Alerts" title="Alerts" href="pop_bom_alerts.php" data-lity>'.$newalertgreen.'</alertadvisory><alertvalue> Currently <lightgreen>No Alerts</lightgreen></alertvalue>
+  {echo '<spanelightning><alertadvisory><a alt="Alerts" title="Alerts" href="' . $advisory . '" data-lity>'.$newalertgreen.'</alertadvisory><alertvalue> Currently <lightgreen>No Alerts</lightgreen></alertvalue>
   </spanelightning></div></div></div>';} 
 
 }
