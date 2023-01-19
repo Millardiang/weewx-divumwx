@@ -28,9 +28,6 @@ $airqual["pm25"] = round($parsed_json['pm25'],1);
 $airqual["pm10"] = round($parsed_json['pm10'],1);
 }
 
-$airqual["pm25"] = 160;
-$airqual["pm10"] = 120;
-
 //Europe
 if ($airqual["zone"] == "eu"){
 
