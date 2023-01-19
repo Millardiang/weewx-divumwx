@@ -11,6 +11,8 @@ $timeFormat    = "H:i:s"; //g:i:s, g:i:s a
 $timeFormatShort    = "H:i"; //g:i, g:i a
 $clockformat    = "24"; //12, 24
 $advisoryzone = "uk"; //uk, na, eu, au, rw (= UK, North America, Europe, Australia, Rest of World) 
+$airqual["zone"] = "au"; //uk, us, eu, au (= UK, US/EPS, Europe, Australia)
+$airqual["source"] = "weewx";  //purple, weewx, sds
 $position2   = "dvmAqiDaqiTop.php";
 $position2title   = "Air Quality"; 
 $position3   = "dvmLightningEwTop.php";
