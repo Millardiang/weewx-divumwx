@@ -32,7 +32,7 @@ else if (($parsed_json['channel']['item']['description']) !== null){$description
        else if(strpos($description, "rain") !== false) {$alerttype='Rain';}
        else if(strpos($description, "lightning") !== false) {$alerttype='Lightning';}
        else if(strpos($description, "thunder") !== false) {$alerttype='Thunderstorms';}
-       else {$alerttype="none";}
+       else {$alertlevel="none";}
        $warnimage = $parsed_icon[$lowercasealert][$alerttype];
 
 ?>
