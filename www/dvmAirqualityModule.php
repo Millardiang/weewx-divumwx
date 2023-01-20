@@ -2,7 +2,7 @@
 include('dvmCombinedData.php');
 include('common.php');
 
-$airqual["units"] = $air["pm_units"];
+$airqual["pm_units"] = "μg/㎥";
 $airqual["city"] = $stationlocation;
 
 if ($airqual["source"] == "purple") {
@@ -231,31 +231,92 @@ $airqual["priority10"] = 10;
 //USA & WAQI
 if ($airqual["zone"] == "us"){
 
-if ($airqual["pm25"] < 51 ){
+function pm25_to_aqi($pm25){
+	if ($pm25 > 500.5) {
+	  $aqi25 = 500;
+	} else if ($pm25 > 350.5 && $pm25 <= 500.5 ) {
+	  $aqi25 = map($pm25, 350.5, 500.5, 400, 500);
+	} else if ($pm25 > 250.5 && $pm25 <= 350.5 ) {
+	  $aqi25 = map($pm25, 250.5, 350.5, 300, 400);
+	} else if ($pm25 > 150.5 && $pm25 <= 250.5 ) {
+	  $aqi25 = map($pm25, 150.5, 250.5, 200, 300);
+	} else if ($pm25 > 55.5 && $pm25 <= 150.5 ) {
+	  $aqi25 = map($pm25, 55.5, 150.5, 150, 200);
+	} else if ($pm25 > 35.5 && $pm25 <= 55.5 ) {
+	  $aqi25 = map($pm25, 35.5, 55.5, 100, 150);
+	} else if ($pm25 > 12 && $pm25 <= 35.5 ) {
+	  $aqi25 = map($pm25, 12, 35.5, 50, 100);
+	} else if ($pm25 > 0 && $pm25 <= 12 ) {
+	  $aqi25 = map($pm25, 0, 12, 0, 50);
+	}
+	return $aqi25;
+}
+
+function pm10_to_aqi($pm10){
+	if ($pm10 > 604) {
+	  $aqi10 = 500;
+	} else if ($pm10 > 505 && $pm10 <= 604 ) {
+	  $aqi10 = map($pm10, 505, 600.4, 400, 500);
+	} else if ($pm10 > 424 && $pm10 <= 504 ) {
+	  $aqi10 = map($pm10, 425, 504, 300, 400);
+	} else if ($pm10 > 354 && $pm10 <= 424 ) {
+	  $aqi10 = map($pm10, 355, 424, 200, 300);
+	} else if ($pm10 > 254 && $pm10 <= 354 ) {
+	  $aqi10 = map($pm10, 255, 354, 150, 200);
+	} else if ($pm10 > 154 && $pm10 <= 254 ) {
+	  $aqi10 = map($pm10, 155, 254, 100, 150);
+	} else if ($pm10 > 54 && $pm10 <= 154 ) {
+	  $aqi10 = map($pm10, 55, 154, 50, 100);
+	} else if ($pm10 > 0 && $pm10 <= 54 ) {
+	  $aqi10 = map($pm10, 0, 54, 0, 50);
+	}
+	return $aqi10;
+}
+
+function map($value, $fromLow, $fromHigh, $toLow, $toHigh){
+    $fromRange = $fromHigh - $fromLow;
+    $toRange = $toHigh - $toLow;
+    $scaleFactor = $toRange / $fromRange;
+
+    // Re-zero the value within the from range
+    $tmpValue = $value - $fromLow;
+    // Rescale the value to the to range
+    $tmpValue *= $scaleFactor;
+    // Re-zero back to the to range
+    return $tmpValue + $toLow;
+}
+
+//$airqual["aqi25"]       = number_format(pm25_to_aqi($airqual["pm25"],1));
+//echo $airqual["aqi25"];
+
+//$airqual["aqi10"]       = number_format(pm10_to_aqi($airqual["pm10"],1));
+//echo $airqual["aqi10"];
+
+if ($airqual["aqi25"] < 51 ){
 $airqual["image25"] = "./css/aqi/goodair.svg?ver=1.4";
 $airqual["color25"] = "#00e400";
 $airqual["text25"] = "Good Air Quality";
 $airqual["priority25"] = 1;
 }
-else if ($airqual["pm25"] < 101){
+else if ($airqual["aqi25"] < 101){
 $airqual["image25"] = "./css/aqi/modair.svg?ver=1.4";
 $airqual["color25"] = "#ffff00";
 $airqual["text25"] = "Moderate Air Quality";
 $airqual["priority25"] = 2;
 }
-else if ($airqual["pm25"] < 151 ){
+else if ($airqual["aqi25"] < 151 ){
 $airqual["image25"] = "./css/aqi/uhsfhair.svg?ver=1.4";
 $airqual["color25"] = "#ff7e00";
 $airqual["text25"] = "Unhealthy for Sensitive Groups";
 $airqual["priority25"] = 3;
 }
-else if ($airqual["pm25"] < 201 ){
+else if ($airqual["aqi25"] < 201 ){
 $airqual["image25"] = "./css/aqi/uhair.svg?ver=1.4";
 $airqual["color25"] = "#ff0000";
 $airqual["text25"] = "Unhealthy Air Quality";
 $airqual["priority25"] = 4;
 }
-else if ($airqual["pm25"] < 301 ){
+else if ($airqual["aqi25"] < 301 ){
 $airqual["image25"] = "./css/aqi/vhair.svg?ver=1.4";
 $airqual["color25"] = "#8f3f97";
 $airqual["text25"] = "Very Unhealthy Air Quality";
@@ -268,31 +329,31 @@ $airqual["text25"] = "Hazardous Air Quality";
 $airqual["priority25"] = 6;
 }
 
-if ($airqual["pm10"] < 51 ){
+if ($airqual["aqi10"] < 55 ){
     $airqual["image10"] = "./css/aqi/goodair.svg?ver=1.4";
     $airqual["color10"] = "#00e400";
     $airqual["text10"] = "Good Air Quality";
     $airqual["priority10"] = 1;
     }
-    else if ($airqual["pm10"] < 101){
+    else if ($airqual["aqi10"] < 155){
     $airqual["image10"] = "./css/aqi/modair.svg?ver=1.4";
     $airqual["color10"] = "#ffff00";
     $airqual["text10"] = "Moderate Air Quality";
     $airqual["priority10"] = 2;
     }
-    else if ($airqual["pm10"] < 151 ){
+    else if ($airqual["aqi10"] < 255 ){
     $airqual["image10"] = "./css/aqi/uhsfhair.svg?ver=1.4";
     $airqual["color10"] = "#ff7e00";
     $airqual["text10"] = "Unhealthy for Sensitive Groups";
     $airqual["priority10"] = 3;
     }
-    else if ($airqual["pm10"] < 201 ){
+    else if ($airqual["aqi10"] < 355 ){
     $airqual["image10"] = "./css/aqi/uhair.svg?ver=1.4";
     $airqual["color10"] = "#ff0000";
     $airqual["text10"] = "Unhealthy Air Quality";
     $airqual["priority10"] = 4;
     }
-    else if ($airqual["pm10"] < 301 ){
+    else if ($airqual["aqi10"] < 425 ){
     $airqual["image25"] = "./css/aqi/vhair.svg?ver=1.4";
     $airqual["color25"] = "#8f3f97";
     $airqual["text25"] = "Very Unhealthy Air Quality";
@@ -309,32 +370,32 @@ if ($airqual["pm10"] < 51 ){
 
 //Australia
 if ($airqual["zone"] == "au"){
-
-if ($airqual["pm25"] < 34 ){
+$airqual["aqi25"] = $airqual["pm25"]*4;
+if ($airqual["aqi25"] < 34 ){
 $airqual["image25"] = "./css/aqi/goodair.svg?ver=1.4";
 $airqual["color25"] = "#32ADD3";
 $airqual["text25"] = "Very Good Air Quality";
 $airqual["priority25"] = 1;
 }
-else if ($airqual["pm25"] < 67){
+else if ($airqual["aqi25"] < 67){
 $airqual["image25"] = "./css/aqi/goodair.svg?ver=1.4";
 $airqual["color25"] = "#99B964";
 $airqual["text25"] = "Good Air Quality";
 $airqual["priority25"] = 2;
 }
-else if ($airqual["pm25"] < 100 ){
+else if ($airqual["aqi25"] < 100 ){
 $airqual["image25"] = "./css/aqi/modhair.svg?ver=1.4";
 $airqual["color25"] = "#FFD235";
 $airqual["text25"] = "Fair Air Quality";
 $airqual["priority25"] = 3;
 }
-else if ($airqual["pm25"] < 150 ){
+else if ($airqual["aqi25"] < 150 ){
 $airqual["image25"] = "./css/aqi/uhair.svg?ver=1.4";
 $airqual["color25"] = "#EC783A";
 $airqual["text25"] = "Poor Air Quality";
 $airqual["priority25"] = 4;
 }
-else if ($airqual["pm25"] < 200 ){
+else if ($airqual["aqi25"] < 200 ){
 $airqual["image25"] = "./css/aqi/vhair.svg?ver=1.4";
 $airqual["color25"] = "#782D49";
 $airqual["text25"] = "Very Poor Air Quality";
@@ -346,32 +407,32 @@ $airqual["color25"] = "#D04730";
 $airqual["text25"] = "Hazardous Air Quality";
 $airqual["priority25"] = 6;
 }
-
-if ($airqual["pm10"] < 34 ){
+$airqual["aqi10"] = $airqual["pm10"]*2;
+if ($airqual["aqi10"] < 34 ){
     $airqual["image10"] = "./css/aqi/goodair.svg?ver=1.4";
     $airqual["color10"] = "#32ADD3";
     $airqual["text10"] = "Very Good Air Quality";
     $airqual["priority10"] = 1;
     }
-    else if ($airqual["pm10"] < 67){
+    else if ($airqual["aqi10"] < 67){
     $airqual["image10"] = "./css/aqi/goodair.svg?ver=1.4";
     $airqual["color10"] = "#99B964";
     $airqual["text10"] = "Good Air Quality";
     $airqual["priority10"] = 2;
     }
-    else if ($airqual["pm10"] < 100 ){
+    else if ($airqual["aqi10"] < 100 ){
     $airqual["image10"] = "./css/aqi/modhair.svg?ver=1.4";
     $airqual["color10"] = "#FFD235";
     $airqual["text10"] = "Fair Air Quality";
     $airqual["priority10"] = 3;
     }
-    else if ($airqual["pm10"] < 150 ){
+    else if ($airqual["aqi10"] < 150 ){
     $airqual["image10"] = "./css/aqi/uhair.svg?ver=1.4";
     $airqual["color10"] = "#EC783A";
     $airqual["text10"] = "Poor Air Quality";
     $airqual["priority10"] = 4;
     }
-    else if ($airqual["pm10"] < 200 ){
+    else if ($airqual["aqi10"] < 200 ){
     $airqual["image10"] = "./css/aqi/vhair.svg?ver=1.4";
     $airqual["color10"] = "#782D49";
     $airqual["text10"] = "Very Poor Air Quality";
