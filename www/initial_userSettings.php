@@ -10,8 +10,8 @@ $dateFormat   = "d-m-Y"; //m-d-Y, Y-m-d
 $timeFormat    = "H:i:s"; //g:i:s, g:i:s a
 $timeFormatShort    = "H:i"; //g:i, g:i a
 $clockformat    = "24"; //12, 24
-$advisoryzone = "uk"; //uk, na, eu, au, rw (= UK, North America, Europe, Australia, Rest of World) 
-$airqual["zone"] = "au"; //uk, us, eu, au (= UK, US/EPS, Europe, Australia)
+$advisoryzone = "uk"; //uk, na, eu, au, rw (= UK, North America, Europe, Australia, Rest of World)
+$airqual["zone"] = "uk"; //uk, us, ei, ci, au, (= UK DAQI, US EPS, Europe EAQI, Europe CAQI, Australia)
 $airqual["source"] = "weewx";  //purple, weewx, sds
 $position2   = "dvmAqiDaqiTop.php";
 $position2title   = "Air Quality"; 

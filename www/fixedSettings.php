@@ -112,7 +112,7 @@ $chartsource = "dvmhighcharts";
 $creditsURL = ""; // for chart pages only
 $credits = "Data Supplied via Weather Underground"; // for chart pages only
 $templateinfo = ""; // template information page
-$templateversion = "DVM-<maxblue>Alpha build 0.2.4</maxblue>";
+$templateversion = "DVM-<maxblue>Alpha build 0.2.5</maxblue>";
 
 $software = "WeeWX <span>Hardware</span> Users";
 $designedfor = "<br>For WeeWX Users";
@@ -223,15 +223,18 @@ else if ($advisoryzone == "na") {
 if ($airqual["zone"] == "uk") {
     $airqual["subtitle"] = " - UK DAQI";
 }
-else if ($airqual["zone"] == "eu") {
-    $airqual["subtitle"] = " - European AQI";
+else if ($airqual["zone"] == "ei") {
+    $airqual["subtitle"] = " - Europe EAQI";
 }
 
+else if ($airqual["zone"] == "ci") {
+    $airqual["subtitle"] = " - Europe CAQI";
+}
 else if ($airqual["zone"] == "au") {
     $airqual["subtitle"] = " - Australian AQI";
 } 
 else if ($airqual["zone"] == "us") {
-    $airqual["subtitle"] = " - USA & WAQI";
+    $airqual["subtitle"] = " - USA EPA";
 }
 
 ?>
