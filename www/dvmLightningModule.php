@@ -37,6 +37,9 @@ $lightning["bearing"] = $arr['StrikeData'][0]['bng'];
 	else {$lightning["bearingx"]='North';}
 	
 	} else { $source = '0';}
+        
+        if ($wind["units"] == "mph"){$lightning["last_distance"]=$lightning["last_distance"]*0.621371;$lightning["distunit"]="mi";}
+        else {$lightning["distunit"]="km";}
 ?>
 
 <style>
@@ -82,7 +85,7 @@ $lightning["bearing"] = $arr['StrikeData'][0]['bng'];
 	
 	var Last_detected = "<?php echo date('jS M H:i',$lightning['last_time']);?>";
 	
-	var Last_distance = "<?php echo number_format($lightning["last_distance"],0);?>";
+	var Last_distance = "<?php echo number_format($lightning["last_distance"],1);?>";
 	
 	var Bearing = "<?php echo $lightning["bearing"];?>";
 	
@@ -91,6 +94,8 @@ $lightning["bearing"] = $arr['StrikeData'][0]['bng'];
 	var theme = "<?php echo $theme;?>";
 	
 	var source = "<?php echo $source;?>";
+
+        var distunit = "<?php echo $lightning["distunit"];?>";
 
   var svg = d3.select(".Strikes")
     			.append("svg")
@@ -395,7 +400,7 @@ $lightning["bearing"] = $arr['StrikeData'][0]['bng'];
             	.style("font-size", "10px")
             	.style("text-anchor", "left")
             	.style("font-weight", "normal")
-				.text(Last_distance+" "+"km");
+				.text(Last_distance+" "+(distunit));
 	
 	if (source == "Boltek") {
 								
