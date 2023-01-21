@@ -43,9 +43,7 @@ $eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $l
 <script>
 
 	var theme = "<?php echo $theme;?>";
-	
-	if (theme == 'dark') {
-           
+	           
     var Location = "<?php echo $eqtitle;?>";
     
 	var Magnitude = "<?php echo $magnitude;?>";
@@ -66,6 +64,7 @@ $eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $l
                 .attr("width", 300)
                 .attr("height", 150);
                 
+          if (theme == 'dark') {      
              
              svg.append("text") // Earthquake Location text output
              	.attr("x", 150)
@@ -88,14 +87,13 @@ $eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $l
    				.text("Magnitude");
    				
    			svg.append("text") // Earthquake Magnitude text output
-             	.attr("x", 0)
-            	.attr("y", 0)
+             	.attr("x", 60)
+            	.attr("y", 100)
             	.style("fill", "silver")
             	.style("font-family", "Helvetica")
             	.style("font-size", "16px")
             	.style("text-anchor", "middle")
             	.style("font-weight", "normal")
-            	.attr('transform', 'translate(60, 100)')
    				.text(d3.format(".1f")(Magnitude));
    		   				
    			svg.append("text") // Time and Date text output
@@ -168,7 +166,17 @@ $eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $l
             	.style("font-size", "11px")
             	.style("text-anchor", "left")
             	.style("font-weight", "normal")
-   				.text("Category"+" Minor");
+   				.text("Category");
+   				
+   			svg.append("text") // category text output
+             	.attr("x", 193)
+            	.attr("y", 130)
+            	.style("fill", "#2e8b57")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "11px")
+            	.style("text-anchor", "left")
+            	.style("font-weight", "normal")
+   				.text("Minor");
    				
    		} else if (Magnitude < 5.0) {
    		
@@ -180,7 +188,17 @@ $eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $l
             	.style("font-size", "11px")
             	.style("text-anchor", "left")
             	.style("font-weight", "normal")
-   				.text("Category"+" Light");
+   				.text("Category");
+   				
+   			svg.append("text") // Category text output
+             	.attr("x", 193)
+            	.attr("y", 130)
+            	.style("fill", "#fde396")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "11px")
+            	.style("text-anchor", "left")
+            	.style("font-weight", "normal")
+   				.text("Light");
    				
    		} else if (Magnitude < 6.0) {
    		
@@ -192,7 +210,17 @@ $eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $l
             	.style("font-size", "11px")
             	.style("text-anchor", "left")
             	.style("font-weight", "normal")
-   				.text("Category"+" Moderate");
+   				.text("Category");
+   				
+   			svg.append("text") // Category text output
+             	.attr("x", 193)
+            	.attr("y", 130)
+            	.style("fill", "#ff964f")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "11px")
+            	.style("text-anchor", "left")
+            	.style("font-weight", "normal")
+   				.text("Moderate");
    				
    		} else if (Magnitude < 7.0) {
    		
@@ -204,7 +232,17 @@ $eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $l
             	.style("font-size", "11px")
             	.style("text-anchor", "left")
             	.style("font-weight", "normal")
-   				.text("Category"+" Strong");
+   				.text("Category");
+   				
+   			svg.append("text") // Category text output
+             	.attr("x", 193)
+            	.attr("y", 130)
+            	.style("fill", "#ff6181")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "11px")
+            	.style("text-anchor", "left")
+            	.style("font-weight", "normal")
+   				.text("Strong");
    				
    		 } else if (Magnitude < 8.0) {
    		 
@@ -216,7 +254,17 @@ $eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $l
             	.style("font-size", "11px")
             	.style("text-anchor", "left")
             	.style("font-weight", "normal")
-   				.text("Category"+" Great");
+   				.text("Category");
+   				
+   			svg.append("text") // Category text output
+             	.attr("x", 193)
+            	.attr("y", 130)
+            	.style("fill", "#be688b")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "11px")
+            	.style("text-anchor", "left")
+            	.style("font-weight", "normal")
+   				.text("Great");
    				
    		 } else if (Magnitude > 8.0) {
    		 
@@ -228,659 +276,452 @@ $eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $l
             	.style("font-size", "11px")
             	.style("text-anchor", "left")
             	.style("font-weight", "normal")
-   				.text("Category"+" Major");
+   				.text("Category");
+   				
+   			svg.append("text") // Category text output
+             	.attr("x", 193)
+            	.attr("y", 130)
+            	.style("fill", "#007FFF")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "11px")
+            	.style("text-anchor", "left")
+            	.style("font-weight", "normal")
+   				.text("Major");
    				
    		}		
+   			   		            
+          } else {
+                                
+             svg.append("text") // Earthquake Location text output
+             	.attr("x", 150)
+            	.attr("y", 20)
+            	.style("fill", "black")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "11px")
+            	.style("text-anchor", "middle")
+            	.style("font-weight", "normal")
+   				.text(Location);
+   			
+   			svg.append("text") // Magnitude word output
+             	.attr("x", 60)
+            	.attr("y", 40)
+            	.style("fill", "black")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "11px")
+            	.style("text-anchor", "middle")
+            	.style("font-weight", "normal")
+   				.text("Magnitude");
    				
-   	
-   		if (Magnitude < 4.0) {		
+   			svg.append("text") // Earthquake Magnitude text output
+             	.attr("x", 60)
+            	.attr("y", 100)
+            	.style("fill", "black")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "16px")
+            	.style("text-anchor", "middle")
+            	.style("font-weight", "normal")
+   				.text(d3.format(".1f")(Magnitude));
+   		   				
+   			svg.append("text") // Time and Date text output
+             	.attr("x", 145)
+            	.attr("y", 70)
+            	.style("fill", "black")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "11px")
+            	.style("text-anchor", "left")
+            	.style("font-weight", "normal")
+   				.text(Time);
+   				
+   			svg.append("text") // Depth text output
+             	.attr("x", 145)
+            	.attr("y", 85)
+            	.style("fill", "black")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "11px")
+            	.style("text-anchor", "left")
+            	.style("font-weight", "normal")
+   				.text("Depth");
+   				
+   			svg.append("text") // Depth text output
+             	.attr("x", 177.5)
+            	.attr("y", 85)
+            	.style("fill", "#2e8b57")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "11px")
+            	.style("text-anchor", "left")
+            	.style("font-weight", "normal")
+   				.text(Depth+" km");
+   				
+   			svg.append("text") // Distance text output
+             	.attr("x", 145)
+            	.attr("y", 100)
+            	.style("fill", "black")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "11px")
+            	.style("text-anchor", "left")
+            	.style("font-weight", "normal")
+   				.text("Epicenter");
+   				
+   			svg.append("text") // Distance text output
+             	.attr("x", 194.5)
+            	.attr("y", 100)
+            	.style("fill", "#ff964f")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "11px")
+            	.style("text-anchor", "left")
+            	.style("font-weight", "normal")
+   				.text(Distance);
+   				
+   			svg.append("text") // Station text output
+             	.attr("x", 145)
+            	.attr("y", 115)
+            	.style("fill", "black")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "11px")
+            	.style("text-anchor", "left")
+            	.style("font-weight", "normal")
+   				.text("From"+" "+Station);
+   			
+   		if (Magnitude < 4.0) {	
+   			
+   			svg.append("text") // category text output
+             	.attr("x", 145)
+            	.attr("y", 130)
+            	.style("fill", "black")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "11px")
+            	.style("text-anchor", "left")
+            	.style("font-weight", "normal")
+   				.text("Category");
+   				
+   			svg.append("text") // category text output
+             	.attr("x", 193)
+            	.attr("y", 130)
+            	.style("fill", "#2e8b57")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "11px")
+            	.style("text-anchor", "left")
+            	.style("font-weight", "normal")
+   				.text("Minor");
+   				
+   		} else if (Magnitude < 5.0) {
+   		
+   			svg.append("text") // Category text output
+             	.attr("x", 145)
+            	.attr("y", 130)
+            	.style("fill", "black")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "11px")
+            	.style("text-anchor", "left")
+            	.style("font-weight", "normal")
+   				.text("Category");
+   				
+   			svg.append("text") // Category text output
+             	.attr("x", 193)
+            	.attr("y", 130)
+            	.style("fill", "#fde396")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "11px")
+            	.style("text-anchor", "left")
+            	.style("font-weight", "normal")
+   				.text("Light");
+   				
+   		} else if (Magnitude < 6.0) {
+   		
+   			svg.append("text") // Category text output
+             	.attr("x", 145)
+            	.attr("y", 130)
+            	.style("fill", "black")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "11px")
+            	.style("text-anchor", "left")
+            	.style("font-weight", "normal")
+   				.text("Category");
+   				
+   			svg.append("text") // Category text output
+             	.attr("x", 193)
+            	.attr("y", 130)
+            	.style("fill", "#ff964f")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "11px")
+            	.style("text-anchor", "left")
+            	.style("font-weight", "normal")
+   				.text("Moderate");
+   				
+   		} else if (Magnitude < 7.0) {
+   		
+   			svg.append("text") // Category text output
+             	.attr("x", 145)
+            	.attr("y", 130)
+            	.style("fill", "black")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "11px")
+            	.style("text-anchor", "left")
+            	.style("font-weight", "normal")
+   				.text("Category");
+   				
+   			svg.append("text") // Category text output
+             	.attr("x", 193)
+            	.attr("y", 130)
+            	.style("fill", "#ff6181")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "11px")
+            	.style("text-anchor", "left")
+            	.style("font-weight", "normal")
+   				.text("Strong");
+   				
+   		 } else if (Magnitude < 8.0) {
+   		 
+   		 	svg.append("text") // Category text output
+             	.attr("x", 145)
+            	.attr("y", 130)
+            	.style("fill", "black")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "11px")
+            	.style("text-anchor", "left")
+            	.style("font-weight", "normal")
+   				.text("Category");
+   				
+   			svg.append("text") // Category text output
+             	.attr("x", 193)
+            	.attr("y", 130)
+            	.style("fill", "#be688b")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "11px")
+            	.style("text-anchor", "left")
+            	.style("font-weight", "normal")
+   				.text("Great");
+   				
+   		 } else if (Magnitude > 8.0) {
+   		 
+   			svg.append("text") // Category text output
+             	.attr("x", 145)
+            	.attr("y", 130)
+            	.style("fill", "black")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "11px")
+            	.style("text-anchor", "left")
+            	.style("font-weight", "normal")
+   				.text("Category");
+   				
+   			svg.append("text") // Category text output
+             	.attr("x", 193)
+            	.attr("y", 130)
+            	.style("fill", "#007FFF")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "11px")
+            	.style("text-anchor", "left")
+            	.style("font-weight", "normal")
+   				.text("Major");
+   				
+   		}		
+   				   	   		     
+      }
+      
+      if (Magnitude < 4.0) {		
    				
    			svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
+            		 .attr("cx", 60) // center circle
+            		 .attr("cy", 95)
             		 .attr("r", 17)
             		 .attr('stroke', '#2e8b57')
             		 .attr('fill', 'none')
-            		 .attr('stroke-width', 2.5)
-            		 .attr('transform', 'translate(60, 95)');
+            		 .attr('stroke-width', 2.5);
             		 
             svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
+            		 .attr("cx", 60) // center circle
+            		 .attr("cy", 95)
             		 .attr("r", 27)
             		 .attr('stroke', '#2e8b57')
             		 .attr('fill', 'none')
-            		 .attr('stroke-width', 2)
-            		 .attr('transform', 'translate(60, 95)');
+            		 .attr('stroke-width', 2);
    				
 			svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
+            		 .attr("cx", 60) // center circle
+            		 .attr("cy", 95)
             		 .attr("r", 37)
             		 .attr('stroke', '#2e8b57')
             		 .attr('fill', 'none')
-            		 .attr('stroke-width', 1)
-            		 .attr('transform', 'translate(60, 95)');
+            		 .attr('stroke-width', 1);
             		 
             svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
+            		 .attr("cx", 60) // center circle
+            		 .attr("cy", 95)
             		 .attr("r", 47)
             		 .attr('stroke', '#2e8b57')
             		 .attr('fill', 'none')
-            		 .attr('stroke-width', 0.5)
-            		 .attr('transform', 'translate(60, 95)');
+            		 .attr('stroke-width', 0.5);
             		 
             } else if (Magnitude < 5.0) {
             
             svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
+            		 .attr("cx", 60) // center circle
+            		 .attr("cy", 95)
             		 .attr("r", 17)
             		 .attr('stroke', '#fde396')
             		 .attr('fill', 'none')
-            		 .attr('stroke-width', 2.5)
-            		 .attr('transform', 'translate(60, 95)');
+            		 .attr('stroke-width', 2.5);
             		 
             svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
+            		 .attr("cx", 60) // center circle
+            		 .attr("cy", 95)
             		 .attr("r", 27)
             		 .attr('stroke', '#fde396')
             		 .attr('fill', 'none')
-            		 .attr('stroke-width', 2)
-            		 .attr('transform', 'translate(60, 95)');
+            		 .attr('stroke-width', 2);
    				
 			svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
+            		 .attr("cx", 60) // center circle
+            		 .attr("cy", 95)
             		 .attr("r", 37)
             		 .attr('stroke', '#fde396')
             		 .attr('fill', 'none')
-            		 .attr('stroke-width', 1)
-            		 .attr('transform', 'translate(60, 95)');
+            		 .attr('stroke-width', 1);
             		 
             svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
+            		 .attr("cx", 60) // center circle
+            		 .attr("cy", 95)
             		 .attr("r", 47)
             		 .attr('stroke', '#fde396')
             		 .attr('fill', 'none')
-            		 .attr('stroke-width', 0.5)
-            		 .attr('transform', 'translate(60, 95)');
+            		 .attr('stroke-width', 0.5);
             
            } else if (Magnitude < 6.0) { 
             
             svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
+            		 .attr("cx", 60) // center circle
+            		 .attr("cy", 95)
             		 .attr("r", 17)
             		 .attr('stroke', '#ff964f')
             		 .attr('fill', 'none')
-            		 .attr('stroke-width', 2.5)
-            		 .attr('transform', 'translate(60, 95)');
+            		 .attr('stroke-width', 2.5);
             		 
             svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
+            		 .attr("cx", 60) // center circle
+            		 .attr("cy", 95)
             		 .attr("r", 27)
             		 .attr('stroke', '#ff964f')
             		 .attr('fill', 'none')
-            		 .attr('stroke-width', 2)
-            		 .attr('transform', 'translate(60, 95)');
+            		 .attr('stroke-width', 2);
    				
 			svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
+            		 .attr("cx", 60) // center circle
+            		 .attr("cy", 95)
             		 .attr("r", 37)
             		 .attr('stroke', '#ff964f')
             		 .attr('fill', 'none')
-            		 .attr('stroke-width', 1)
-            		 .attr('transform', 'translate(60, 95)');
+            		 .attr('stroke-width', 1);
             		 
             svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
+            		 .attr("cx", 60) // center circle
+            		 .attr("cy", 95)
             		 .attr("r", 47)
             		 .attr('stroke', '#ff964f')
             		 .attr('fill', 'none')
-            		 .attr('stroke-width', 0.5)
-            		 .attr('transform', 'translate(60, 95)');
+            		 .attr('stroke-width', 0.5);
                         
             } else if (Magnitude < 7.0) {
                         
             svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
+            		 .attr("cx", 60) // center circle
+            		 .attr("cy", 95)
             		 .attr("r", 17)
             		 .attr('stroke', '#ff6181')
             		 .attr('fill', 'none')
-            		 .attr('stroke-width', 2.5)
-            		 .attr('transform', 'translate(60, 95)');
+            		 .attr('stroke-width', 2.5);
             		 
             svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
+            		 .attr("cx", 60) // center circle
+            		 .attr("cy", 95)
             		 .attr("r", 27)
             		 .attr('stroke', '#ff6181')
             		 .attr('fill', 'none')
-            		 .attr('stroke-width', 2)
-            		 .attr('transform', 'translate(60, 95)');
+            		 .attr('stroke-width', 2);
    				
 			svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
+            		 .attr("cx", 60) // center circle
+            		 .attr("cy", 95)
             		 .attr("r", 37)
             		 .attr('stroke', '#ff6181')
             		 .attr('fill', 'none')
-            		 .attr('stroke-width', 1)
-            		 .attr('transform', 'translate(60, 95)');
+            		 .attr('stroke-width', 1);
             		 
             svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
+            		 .attr("cx", 60) // center circle
+            		 .attr("cy", 95)
             		 .attr("r", 47)
             		 .attr('stroke', '#ff6181')
             		 .attr('fill', 'none')
-            		 .attr('stroke-width', 0.5)
-            		 .attr('transform', 'translate(60, 95)');
+            		 .attr('stroke-width', 0.5);
             
             } else if (Magnitude < 8.0) {
             
             svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
+            		 .attr("cx", 60) // center circle
+            		 .attr("cy", 95)
             		 .attr("r", 17)
             		 .attr('stroke', '#be688b')
             		 .attr('fill', 'none')
-            		 .attr('stroke-width', 2.5)
-            		 .attr('transform', 'translate(60, 95)');
+            		 .attr('stroke-width', 2.5);
             		 
             svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
+            		 .attr("cx", 60) // center circle
+            		 .attr("cy", 95)
             		 .attr("r", 27)
             		 .attr('stroke', '#be688b')
             		 .attr('fill', 'none')
-            		 .attr('stroke-width', 2)
-            		 .attr('transform', 'translate(60, 95)');
+            		 .attr('stroke-width', 2);
    				
 			svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
+            		 .attr("cx", 60) // center circle
+            		 .attr("cy", 95)
             		 .attr("r", 37)
             		 .attr('stroke', '#be688b')
             		 .attr('fill', 'none')
-            		 .attr('stroke-width', 1)
-            		 .attr('transform', 'translate(60, 95)');
+            		 .attr('stroke-width', 1);
             		 
             svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
+            		 .attr("cx", 60) // center circle
+            		 .attr("cy", 95)
             		 .attr("r", 47)
             		 .attr('stroke', '#be688b')
             		 .attr('fill', 'none')
-            		 .attr('stroke-width', 0.5)
-            		 .attr('transform', 'translate(60, 95)');
+            		 .attr('stroke-width', 0.5);
             
             } else if (Magnitude > 8.0) {
             
             svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
+            		 .attr("cx", 60) // center circle
+            		 .attr("cy", 95)
             		 .attr("r", 17)
             		 .attr('stroke', '#007FFF')
             		 .attr('fill', 'none')
-            		 .attr('stroke-width', 2.5)
-            		 .attr('transform', 'translate(60, 95)');
+            		 .attr('stroke-width', 2.5);
             		 
             svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
+            		 .attr("cx", 60) // center circle
+            		 .attr("cy", 95)
             		 .attr("r", 27)
             		 .attr('stroke', '#007FFF')
             		 .attr('fill', 'none')
-            		 .attr('stroke-width', 2)
-            		 .attr('transform', 'translate(60, 95)');
+            		 .attr('stroke-width', 2);
    				
 			svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
+            		 .attr("cx", 60) // center circle
+            		 .attr("cy", 95)
             		 .attr("r", 37)
             		 .attr('stroke', '#007FFF')
             		 .attr('fill', 'none')
-            		 .attr('stroke-width', 1)
-            		 .attr('transform', 'translate(60, 95)');
+            		 .attr('stroke-width', 1);
             		 
             svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
+            		 .attr("cx", 60) // center circle
+            		 .attr("cy", 95)
             		 .attr("r", 47)
             		 .attr('stroke', '#007FFF')
             		 .attr('fill', 'none')
-            		 .attr('stroke-width', 0.5)
-            		 .attr('transform', 'translate(60, 95)');
+            		 .attr('stroke-width', 0.5);
             
             }
-            
-          } else {
-          
-    var Location = "<?php echo $eqtitle;?>";
-    
-	var Magnitude = "<?php echo $magnitude;?>";
-	
-	var units = "<?php echo $wind["units"];?>";
-	
-	var Time = "<?php echo $eventime;?>";
-	
-	var Station = "<?php echo $stationlocation;?>";
-	
-	var Distance = "<?php echo $eqdist;?>";
-	
-	var Depth = "<?php echo $depth;?>";
-                   
-           var svg = d3.select(".quakes")
-                .append("svg")
-                //.style("background", "#292E35")
-                .attr("width", 300)
-                .attr("height", 150);
-                
-             
-             svg.append("text") // Earthquake Location text output
-             	.attr("x", 150)
-            	.attr("y", 20)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "middle")
-            	.style("font-weight", "normal")
-   				.text(Location);
-   			
-   			svg.append("text") // Magnitude word output
-             	.attr("x", 60)
-            	.attr("y", 40)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "middle")
-            	.style("font-weight", "normal")
-   				.text("Magnitude");
-   				
-   			svg.append("text") // Earthquake Magnitude text output
-             	.attr("x", 0)
-            	.attr("y", 0)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "16px")
-            	.style("text-anchor", "middle")
-            	.style("font-weight", "normal")
-            	.attr('transform', 'translate(60, 100)')
-   				.text(d3.format(".1f")(Magnitude));
-   		   				
-   			svg.append("text") // Time and Date text output
-             	.attr("x", 145)
-            	.attr("y", 70)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-   				.text(Time);
-   				
-   			svg.append("text") // Depth text output
-             	.attr("x", 145)
-            	.attr("y", 85)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-   				.text("Depth");
-   				
-   			svg.append("text") // Depth text output
-             	.attr("x", 177.5)
-            	.attr("y", 85)
-            	.style("fill", "#2e8b57")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-   				.text(Depth+" km");
-   				
-   			svg.append("text") // Distance text output
-             	.attr("x", 145)
-            	.attr("y", 100)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-   				.text("Epicenter");
-   				
-   			svg.append("text") // Distance text output
-             	.attr("x", 194.5)
-            	.attr("y", 100)
-            	.style("fill", "#ff964f")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-   				.text(Distance);
-   				
-   			svg.append("text") // Station text output
-             	.attr("x", 145)
-            	.attr("y", 115)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-   				.text("From"+" "+Station);
-   			
-   		if (Magnitude < 4.0) {	
-   			
-   			svg.append("text") // category text output
-             	.attr("x", 145)
-            	.attr("y", 130)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-   				.text("Category"+" Minor");
-   				
-   		} else if (Magnitude < 5.0) {
-   		
-   			svg.append("text") // Category text output
-             	.attr("x", 145)
-            	.attr("y", 130)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-   				.text("Category"+" Light");
-   				
-   		} else if (Magnitude < 6.0) {
-   		
-   			svg.append("text") // Category text output
-             	.attr("x", 145)
-            	.attr("y", 130)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-   				.text("Category"+" Moderate");
-   				
-   		} else if (Magnitude < 7.0) {
-   		
-   			svg.append("text") // Category text output
-             	.attr("x", 145)
-            	.attr("y", 130)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-   				.text("Category"+" Strong");
-   				
-   		 } else if (Magnitude < 8.0) {
-   		 
-   		 	svg.append("text") // Category text output
-             	.attr("x", 145)
-            	.attr("y", 130)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-   				.text("Category"+" Great");
-   				
-   		 } else if (Magnitude > 8.0) {
-   		 
-   			svg.append("text") // Category text output
-             	.attr("x", 145)
-            	.attr("y", 130)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-   				.text("Category"+" Major");
-   				
-   		}		
-   				
-   	
-   		if (Magnitude < 4.0) {		
-   				
-   			svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
-            		 .attr("r", 17)
-            		 .attr('stroke', '#2e8b57')
-            		 .attr('fill', 'none')
-            		 .attr('stroke-width', 2.5)
-            		 .attr('transform', 'translate(60, 95)');
-            		 
-            svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
-            		 .attr("r", 27)
-            		 .attr('stroke', '#2e8b57')
-            		 .attr('fill', 'none')
-            		 .attr('stroke-width', 2)
-            		 .attr('transform', 'translate(60, 95)');
-   				
-			svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
-            		 .attr("r", 37)
-            		 .attr('stroke', '#2e8b57')
-            		 .attr('fill', 'none')
-            		 .attr('stroke-width', 1)
-            		 .attr('transform', 'translate(60, 95)');
-            		 
-            svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
-            		 .attr("r", 47)
-            		 .attr('stroke', '#2e8b57')
-            		 .attr('fill', 'none')
-            		 .attr('stroke-width', 0.5)
-            		 .attr('transform', 'translate(60, 95)');
-            		 
-            } else if (Magnitude < 5.0) {
-            
-            svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
-            		 .attr("r", 17)
-            		 .attr('stroke', '#fde396')
-            		 .attr('fill', 'none')
-            		 .attr('stroke-width', 2.5)
-            		 .attr('transform', 'translate(60, 95)');
-            		 
-            svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
-            		 .attr("r", 27)
-            		 .attr('stroke', '#fde396')
-            		 .attr('fill', 'none')
-            		 .attr('stroke-width', 2)
-            		 .attr('transform', 'translate(60, 95)');
-   				
-			svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
-            		 .attr("r", 37)
-            		 .attr('stroke', '#fde396')
-            		 .attr('fill', 'none')
-            		 .attr('stroke-width', 1)
-            		 .attr('transform', 'translate(60, 95)');
-            		 
-            svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
-            		 .attr("r", 47)
-            		 .attr('stroke', '#fde396')
-            		 .attr('fill', 'none')
-            		 .attr('stroke-width', 0.5)
-            		 .attr('transform', 'translate(60, 95)');
-            
-           } else if (Magnitude < 6.0) { 
-            
-            svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
-            		 .attr("r", 17)
-            		 .attr('stroke', '#ff964f')
-            		 .attr('fill', 'none')
-            		 .attr('stroke-width', 2.5)
-            		 .attr('transform', 'translate(60, 95)');
-            		 
-            svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
-            		 .attr("r", 27)
-            		 .attr('stroke', '#ff964f')
-            		 .attr('fill', 'none')
-            		 .attr('stroke-width', 2)
-            		 .attr('transform', 'translate(60, 95)');
-   				
-			svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
-            		 .attr("r", 37)
-            		 .attr('stroke', '#ff964f')
-            		 .attr('fill', 'none')
-            		 .attr('stroke-width', 1)
-            		 .attr('transform', 'translate(60, 95)');
-            		 
-            svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
-            		 .attr("r", 47)
-            		 .attr('stroke', '#ff964f')
-            		 .attr('fill', 'none')
-            		 .attr('stroke-width', 0.5)
-            		 .attr('transform', 'translate(60, 95)');
-                        
-            } else if (Magnitude < 7.0) {
-                        
-            svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
-            		 .attr("r", 17)
-            		 .attr('stroke', '#ff6181')
-            		 .attr('fill', 'none')
-            		 .attr('stroke-width', 2.5)
-            		 .attr('transform', 'translate(60, 95)');
-            		 
-            svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
-            		 .attr("r", 27)
-            		 .attr('stroke', '#ff6181')
-            		 .attr('fill', 'none')
-            		 .attr('stroke-width', 2)
-            		 .attr('transform', 'translate(60, 95)');
-   				
-			svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
-            		 .attr("r", 37)
-            		 .attr('stroke', '#ff6181')
-            		 .attr('fill', 'none')
-            		 .attr('stroke-width', 1)
-            		 .attr('transform', 'translate(60, 95)');
-            		 
-            svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
-            		 .attr("r", 47)
-            		 .attr('stroke', '#ff6181')
-            		 .attr('fill', 'none')
-            		 .attr('stroke-width', 0.5)
-            		 .attr('transform', 'translate(60, 95)');
-            
-            } else if (Magnitude < 8.0) {
-            
-            svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
-            		 .attr("r", 17)
-            		 .attr('stroke', '#be688b')
-            		 .attr('fill', 'none')
-            		 .attr('stroke-width', 2.5)
-            		 .attr('transform', 'translate(60, 95)');
-            		 
-            svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
-            		 .attr("r", 27)
-            		 .attr('stroke', '#be688b')
-            		 .attr('fill', 'none')
-            		 .attr('stroke-width', 2)
-            		 .attr('transform', 'translate(60, 95)');
-   				
-			svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
-            		 .attr("r", 37)
-            		 .attr('stroke', '#be688b')
-            		 .attr('fill', 'none')
-            		 .attr('stroke-width', 1)
-            		 .attr('transform', 'translate(60, 95)');
-            		 
-            svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
-            		 .attr("r", 47)
-            		 .attr('stroke', '#be688b')
-            		 .attr('fill', 'none')
-            		 .attr('stroke-width', 0.5)
-            		 .attr('transform', 'translate(60, 95)');
-            
-            } else if (Magnitude > 8.0) {
-            
-            svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
-            		 .attr("r", 17)
-            		 .attr('stroke', '#007FFF')
-            		 .attr('fill', 'none')
-            		 .attr('stroke-width', 2.5)
-            		 .attr('transform', 'translate(60, 95)');
-            		 
-            svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
-            		 .attr("r", 27)
-            		 .attr('stroke', '#007FFF')
-            		 .attr('fill', 'none')
-            		 .attr('stroke-width', 2)
-            		 .attr('transform', 'translate(60, 95)');
-   				
-			svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
-            		 .attr("r", 37)
-            		 .attr('stroke', '#007FFF')
-            		 .attr('fill', 'none')
-            		 .attr('stroke-width', 1)
-            		 .attr('transform', 'translate(60, 95)');
-            		 
-            svg.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
-            		 .attr("r", 47)
-            		 .attr('stroke', '#007FFF')
-            		 .attr('fill', 'none')
-            		 .attr('stroke-width', 0.5)
-            		 .attr('transform', 'translate(60, 95)');
-            
-            }     
-      }
 </script>
 </html>
