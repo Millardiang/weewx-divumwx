@@ -106,122 +106,142 @@ if ($airqual["zone"] == "uk"){
 if ($airqual["pm25"] < 12 ){
 $airqual["image25"] = "./css/aqi/goodair.svg?ver=1.4";
 $airqual["color25"] = "#CCFFCC";
-$airqual["text25"] = " Low Pollution - AQI 1";
+$airqual["text25"] = " Low Pollution";
+$airqual["aqi25"] = "1";
 $airqual["priority25"] = 1;
 }
 else if ($airqual["pm25"] < 24){
 $airqual["image25"] = "./css/aqi/goodair.svg?ver=1.4";
 $airqual["color25"] = "#66FF66";
-$airqual["text25"] = " Low Pollution - AQI 2";
+$airqual["text25"] = " Low Pollution";
+$airqual["aqi25"] = "2";
 $airqual["priority25"] = 2;
 }
 else if ($airqual["pm25"] < 36){
 $airqual["image25"] = "./css/aqi/goodair.svg?ver=1.4";
 $airqual["color25"] = "#00FF00";
-$airqual["text25"] = " Low Pollution - AQI 3";
+$airqual["text25"] = " Low Pollution";
+$airqual["aqi25"] = "3";
 $airqual["priority25"] = 3;
 }
 else if ($airqual["pm25"] < 42 ){
 $airqual["image25"] = "./css/aqi/modair.svg?ver=1.4";
 $airqual["color25"] = "#99FF00";
-$airqual["text25"] = " Moderate Pollution - AQI 4";
+$airqual["text25"] = " Moderate Pollution";
+$airqual["aqi25"] = "4echo '<sub>PM2.5</sub>'";
 $airqual["priority25"] = 4;
 }
 else if ($airqual["pm25"] < 48 ){
 $airqual["image25"] = "./css/aqi/modair.svg?ver=1.4";
 $airqual["color25"] = "#FFFF00";
-$airqual["text25"] = " Moderate Pollution - AQI 5";
+$airqual["text25"] = " Moderate Pollution";
+$airqual["aqi25"] = "5";
 $airqual["priority25"] = 5;
 }
 else if ($airqual["pm25"] < 54 ){
 $airqual["image25"] = "./css/aqi/modair.svg?ver=1.4";
 $airqual["color25"] = "#FFCC00";
-$airqual["text25"] = " Moderate Pollution - AQI 6";
+$airqual["text25"] = " Moderate Pollution";
+$airqual["aqi25"] = "6";
 $airqual["priority25"] = 6;
 }
 else if ($airqual["pm25"] < 59 ){
 $airqual["image25"] = "./css/aqi/uhfsair.svg?ver=1.4";
 $airqual["color25"] = "#FF6600";
-$airqual["text25"] = " High Pollution - AQI 7";
+$airqual["text25"] = " High Pollution";
+$airqual["aqi25"] = "7";
 $airqual["priority25"] = 7;
 }
 else if ($airqual["pm25"] < 65 ){
 $airqual["image25"] = "./css/aqi/uhair.svg?ver=1.4";
 $airqual["color25"] = "#FF3300";
-$airqual["text25"] = " High Pollution - AQI 8";
+$airqual["text25"] = " High Pollution";
+$airqual["aqi25"] = "8";
 $airqual["priority25"] = 8;
 }
 else if ($airqual["pm25"] < 71 ){
 $airqual["image25"] = "./css/aqi/uhair.svg?ver=1.4";
 $airqual["color25"] = "#FF0000";
-$airqual["text25"] = " High Pollution - AQI 9";
+$airqual["text25"] = " High Pollution";
+$airqual["aqi25"] = "9";
 $airqual["priority25"] = 9;
 }
 else {
 $airqual["image25"] = "./css/aqi/vhair.svg?ver=1.4";
 $airqual["color25"] = "#FF0066";
-$airqual["text25"] = "Very High Pollution - AQI 10";
+$airqual["text25"] = "Very High Pollution";
+$airqual["aqi25"] = "10";
 $airqual["priority25"] = 10;
 }
 
 if ($airqual["pm10"] < 17 ){
 $airqual["image10"] = "./css/aqi/goodair.svg?ver=1.4";
 $airqual["color10"] = "#CCFFCC";
-$airqual["text10"] = " Low Pollution - AQI 1";
+$airqual["text10"] = " Low Pollution";
+$airqual["aqi10"] = "1";
 $airqual["priority10"] = 1;
 }
 else if ($airqual["pm10"] < 34){
 $airqual["image10"] = "./css/aqi/goodair.svg?ver=1.4";
 $airqual["color10"] = "#66FF66";
-$airqual["text10"] = " Low Pollution - AQI 2";
+$airqual["text10"] = " Low Pollution";
+$airqual["aqi10"] = "2";
 $airqual["priority10"] = 2;
 }
 else if ($airqual["pm10"] < 51){
 $airqual["image10"] = "./css/aqi/goodair.svg?ver=1.4";
 $airqual["color10"] = "#00FF00";
-$airqual["text10"] = " Low Pollution - AQI 3";
+$airqual["text10"] = " Low Pollution";
+$airqual["aqi10"] = "3";
 $airqual["priority10"] = 3;
 }
 else if ($airqual["pm10"] < 59 ){
 $airqual["image10"] = "./css/aqi/modair.svg?ver=1.4";
 $airqual["color10"] = "#99FF00";
-$airqual["text10"] = " Moderate Pollution - AQI 4";
+$airqual["text10"] = " Moderate Pollution";
+$airqual["aqi10"] = "4";
 $airqual["priority10"] = 4;
 }
 else if ($airqual["pm10"] < 67 ){
 $airqual["image10"] = "./css/aqi/modair.svg?ver=1.4";
 $airqual["color10"] = "#FFFF00";
-$airqual["text10"] = " Moderate Pollution - AQI 5";
+$airqual["text10"] = " Moderate Pollution";
+$airqual["aqi10"] = "5";
 $airqual["priority10"] = 5;
 }
 else if ($airqual["pm10"] < 76 ){
 $airqual["image10"] = "./css/aqi/modair.svg?ver=1.4";
 $airqual["color10"] = "#FFCC00";
-$airqual["text10"] = " Moderate Pollution - AQI 6";
+$airqual["text10"] = " Moderate Pollution";
+$airqual["aqi10"] = "6";
 $airqual["priority10"] = 6;
 }
 else if ($airqual["pm10"] < 84 ){
 $airqual["image10"] = "./css/aqi/uhfsair.svg?ver=1.4";
 $airqual["color10"] = "#FF6600";
-$airqual["text10"] = " High Pollution - AQI 7";
+$airqual["text10"] = " High Pollution";
+$airqual["aqi10"] = "7";
 $airqual["priority10"] = 7;
 }
 else if ($airqual["pm10"] < 92 ){
 $airqual["image10"] = "./css/aqi/uhair.svg?ver=1.4";
 $airqual["color10"] = "#FF3300";
-$airqual["text10"] = " High Pollution - AQI 8";
+$airqual["text10"] = " High Pollution";
+$airqual["aqi10"] = "8";
 $airqual["priority10"] = 8;
 }
 else if ($airqual["pm10"] < 101 ){
 $airqual["image10"] = "./css/aqi/uhair.svg?ver=1.4";
 $airqual["color10"] = "#FF0000";
-$airqual["text10"] = " High Pollution - AQI 9";
+$airqual["text10"] = " High Pollution9";
+$airqual["aqi10"] = "9";
 $airqual["priority10"] = 9;
 }
 else {
 $airqual["image10"] = "./css/aqi/vhair.svg?ver=1.4";
 $airqual["color10"] = "#FF0066";
-$airqual["text10"] = "Very High Pollution - AQI 10";
+$airqual["text10"] = "Very High Pollution";
+$airqual["aqi10"] = "10";
 $airqual["priority10"] = 10;
 }
 
@@ -286,35 +306,40 @@ function map($value, $fromLow, $fromHigh, $toLow, $toHigh){
     return $tmpValue + $toLow;
 }
 
-//$airqual["aqi25"]       = number_format(pm25_to_aqi($airqual["pm25"],1));
-//echo $airqual["aqi25"];
+$airqual["aqi25"]       = number_format(pm25_to_aqi($airqual["pm25"],1));
 
-//$airqual["aqi10"]       = number_format(pm10_to_aqi($airqual["pm10"],1));
-//echo $airqual["aqi10"];
+
+$airqual["aqi10"]       = number_format(pm10_to_aqi($airqual["pm10"],1));
+
+
 
 if ($airqual["aqi25"] < 51 ){
 $airqual["image25"] = "./css/aqi/goodair.svg?ver=1.4";
 $airqual["color25"] = "#00e400";
 $airqual["text25"] = "Good Air Quality";
 $airqual["priority25"] = 1;
+
 }
 else if ($airqual["aqi25"] < 101){
 $airqual["image25"] = "./css/aqi/modair.svg?ver=1.4";
 $airqual["color25"] = "#ffff00";
 $airqual["text25"] = "Moderate Air Quality";
 $airqual["priority25"] = 2;
+
 }
 else if ($airqual["aqi25"] < 151 ){
 $airqual["image25"] = "./css/aqi/uhsfhair.svg?ver=1.4";
 $airqual["color25"] = "#ff7e00";
 $airqual["text25"] = "Unhealthy for Sensitive Groups";
 $airqual["priority25"] = 3;
+
 }
 else if ($airqual["aqi25"] < 201 ){
 $airqual["image25"] = "./css/aqi/uhair.svg?ver=1.4";
 $airqual["color25"] = "#ff0000";
 $airqual["text25"] = "Unhealthy Air Quality";
 $airqual["priority25"] = 4;
+
 }
 else if ($airqual["aqi25"] < 301 ){
 $airqual["image25"] = "./css/aqi/vhair.svg?ver=1.4";
@@ -370,7 +395,7 @@ if ($airqual["aqi10"] < 55 ){
 
 //Australia
 if ($airqual["zone"] == "au"){
-$airqual["aqi25"] = $airqual["pm25"]*4;
+$airqual["aqi25"] = round($airqual["pm25"]*4, 0);
 if ($airqual["aqi25"] < 34 ){
 $airqual["image25"] = "./css/aqi/goodair.svg?ver=1.4";
 $airqual["color25"] = "#32ADD3";
@@ -407,7 +432,7 @@ $airqual["color25"] = "#D04730";
 $airqual["text25"] = "Hazardous Air Quality";
 $airqual["priority25"] = 6;
 }
-$airqual["aqi10"] = $airqual["pm10"]*2;
+$airqual["aqi10"] = round($airqual["pm10"]*2, 0);
 if ($airqual["aqi10"] < 34 ){
     $airqual["image10"] = "./css/aqi/goodair.svg?ver=1.4";
     $airqual["color10"] = "#32ADD3";
@@ -478,8 +503,11 @@ $airqual["qualColor"] = $airqual["color10"];
 
 <script>
 
-	var aqiA = "<?php echo $airqual["pm25"];?>";
-	var aqiB = "<?php echo $airqual["pm10"];?>";
+	var aqiA = "<?php echo $airqual["aqi25"];?>";
+	var aqiB = "<?php echo $airqual["aqi10"];?>";
+        var pmA = "<?php echo $airqual["pm25"];?>";
+	var pmB = "<?php echo $airqual["pm10"];?>";
+      
 	var city = "<?php echo $airqual["city"];?>";
 	
 	var qualityA = "<?php echo $airqual["text"];?>";
@@ -508,6 +536,33 @@ $airqual["qualColor"] = $airqual["color10"];
             	.style("text-anchor", "middle")
             	.style("font-weight", "normal")   				
    				.text(city);
+
+           svg.append("foreignObject")
+     .attr("x", 70)
+              .attr("y", 30)
+    .attr("width", 50)
+    .attr("height", 25)
+    .append("xhtml:div")
+    .style("fill", "silver")
+    .style("font-size", "10px")
+    .style("text-anchor", "middle")
+              .style("font-weight", "normal")          
+   .html("<p>PM<sub>2.5</sub>");
+
+
+svg.append("foreignObject")
+     .attr("x", 220)
+              .attr("y", 30)
+    .attr("width", 50)
+    .attr("height", 25)
+    .append("xhtml:div")
+    .style("fill", "silver")
+    .style("font-family", "Helvetica")
+    .style("font-size", "10px")
+    .style("text-anchor", "middle")
+              .style("font-weight", "normal")          
+    .html("<p>PM<sub>10</sub>");
+
    				                 				   				
    			 svg.append("line") // horizontal lozenge left
     			.attr("x1", 82)
@@ -535,7 +590,7 @@ $airqual["qualColor"] = $airqual["color10"];
             	.style("font-size", "10px")
             	.style("text-anchor", "middle")
             	.style("font-weight", "bold")
-   				.text(d3.format(".1f")(aqiA)+" "+"μg/m³");
+   				.text(d3.format(".1f")(pmA)+" "+"μg/m³");
    				
    			svg.append("text") // pm 10 micro gram text output
              	.attr("x", 261)
@@ -545,7 +600,7 @@ $airqual["qualColor"] = $airqual["color10"];
             	.style("font-size", "10px")
             	.style("text-anchor", "middle")
             	.style("font-weight", "bold")
-   				.text(d3.format(".1f")(aqiB)+" "+"μg/m³");
+   				.text(d3.format(".1f")(pmB)+" "+"μg/m³");
 	
    				               
       		// begin pm 2.5          	
@@ -595,15 +650,17 @@ $airqual["qualColor"] = $airqual["color10"];
             	.style("font-weight", "normal")
    				.text(qualityA);
    				
-   			svg.append("text") // AQ Index text output
-             	.attr("x", 90)
+
+                        svg.append("text") // AQ Index text output
+             	.attr("x", 86)
             	.attr("y", 82)
             	.style("fill", "black")
             	.style("font-family", "Helvetica")
-            	.style("font-size", "18px")
+            	.style("font-size", "10px")
             	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-   				.text("2.5");
+            	.style("font-weight", "bold")
+   				.text("AQI"+" "+(aqiA));
+
 		 
 		           		             		 
 			// begin pm 10		
@@ -645,14 +702,14 @@ $airqual["qualColor"] = $airqual["color10"];
     			.attr('y', 24);
     				   				
    			svg.append("text") // AQ Index text output
-             	.attr("x", 242)
+             	.attr("x", 238)
             	.attr("y", 82)
             	.style("fill", "black")
             	.style("font-family", "Helvetica")
-            	.style("font-size", "18px")
+            	.style("font-size", "10px")
             	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-   				.text("10");
+            	.style("font-weight", "bold")
+   				.text("AQI"+" "+(aqiB));
 		          
 </script>
 </html>
