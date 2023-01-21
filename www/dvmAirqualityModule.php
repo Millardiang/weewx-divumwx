@@ -3,7 +3,7 @@ include('dvmCombinedData.php');
 include('common.php');
 
 $airqual["pm_units"] = "μg/㎥";
-$airqual["city"] = $stationlocation;
+$airqual["city"] = $stationlocation.$airqual["subtitle"];
 
 if ($airqual["source"] == "purple") {
 $json_string = file_get_contents("jsondata/pu.txt");
@@ -28,8 +28,8 @@ $airqual["pm25"] = round($parsed_json['pm25'],1);
 $airqual["pm10"] = round($parsed_json['pm10'],1);
 }
 
-//Europe
-if ($airqual["zone"] == "eu"){
+//Europe EAQI
+if ($airqual["zone"] == "ei"){
  
 if ($airqual["pm25"] < 11 ){
 $airqual["image25"] = "./css/aqi/goodair.svg?ver=1.4";
@@ -109,6 +109,83 @@ $airqual["priority10"] = 5;
 $airqual["aqi25"] = $airqual["priority25"];
 $airqual["aqi10"] = $airqual["priority10"];
 }
+
+//Europe CAQI
+if ($airqual["zone"] == "ci"){
+ 
+if ($airqual["pm25"] < 16 ){
+$airqual["image25"] = "./css/aqi/goodair.svg?ver=1.4";
+$airqual["color25"] = "#7ABC6A";
+$airqual["text25"] = "Very Low Air Pollution";
+$airqual["priority25"] = 1;
+}
+else if ($airqual["pm25"] < 31){
+$airqual["image25"] = "./css/aqi/goodair.svg?ver=1.4";
+$airqual["color25"] = "#BBCF4C";
+$airqual["text25"] = "Low Air Pollution";
+$airqual["priority25"] = 2;
+}
+else if ($airqual["pm25"] < 56){
+$airqual["image25"] = "./css/aqi/modair.svg?ver=1.4";
+$airqual["color25"] = "#EEC209";
+$airqual["text25"] = "Medium Air Pollution";
+$airqual["priority25"] = 3;
+}
+else if ($airqual["pm25"] < 111 ){
+$airqual["image25"] = "./css/aqi/uhair.svg?ver=1.4";
+$airqual["color25"] = "#DB8503";
+$airqual["text25"] = "High Air Pollution";
+$airqual["priority25"] = 4;
+}
+else {
+$airqual["image25"] = "./css/aqi/uhair.svg?ver=1.4";
+$airqual["color25"] = "#E8416F";
+$airqual["text25"] = "Very High Air Pollution";
+$airqual["priority25"] = 5;
+
+}
+
+if ($airqual["pm10"] < 25){
+$airqual["image10"] = "./css/aqi/goodair.svg?ver=1.4";
+$airqual["color10"] = "#7ABC6A";
+$airqual["text10"] = "Very Low Air Pollution";
+$airqual["priority10"] = 1;
+
+}
+else if ($airqual["pm10"] < 50 ){
+$airqual["image10"] = "./css/aqi/modair.svg?ver=1.4";
+$airqual["color10"] = "#BBCF4C";
+$airqual["text10"] = "Low Air Pollution";
+$airqual["priority10"] = 2;
+
+}
+else if ($airqual["pm10"] < 90 ){
+$airqual["image10"] = "./css/aqi/uhfsair.svg?ver=1.4";
+$airqual["color10"] = "#EEC209";
+$airqual["text10"] = "Medium Air Pollution";
+$airqual["priority10"] = 3;
+
+}
+else if ($airqual["pm10"] < 180 ){
+$airqual["image10"] = "./css/aqi/uhair.svg?ver=1.4";
+$airqual["color10"] = "#DB8503";
+$airqual["text10"] = "High Air Pollution";
+$airqual["priority10"] = 4;
+
+}
+else 
+{
+$airqual["image10"] = "./css/aqi/hazair.svg?ver=1.4";
+$airqual["color10"] = "#E8416F";
+$airqual["text10"] = "Very High Air Pollution";
+$airqual["priority10"] = 5;
+
+}
+$airqual["aqi25"] = $airqual["priority25"];
+$airqual["aqi10"] = $airqual["priority10"];
+}
+
+
 //UK
 if ($airqual["zone"] == "uk"){
 
@@ -314,12 +391,8 @@ function map($value, $fromLow, $fromHigh, $toLow, $toHigh){
     return $tmpValue + $toLow;
 }
 
-$airqual["aqi25"]       = number_format(pm25_to_aqi($airqual["pm25"],1));
-
-
-$airqual["aqi10"]       = number_format(pm10_to_aqi($airqual["pm10"],1));
-
-
+$airqual["aqi25"] = number_format(pm25_to_aqi($airqual["pm25"],1));
+$airqual["aqi10"] = number_format(pm10_to_aqi($airqual["pm10"],1));
 
 if ($airqual["aqi25"] < 51 ){
 $airqual["image25"] = "./css/aqi/goodair.svg?ver=1.4";
@@ -487,9 +560,7 @@ else {$airqual["text"] = $airqual["text10"];
 $airqual["qualColor"] = $airqual["color10"];
 }
 
-
 ?>
-
 
 <div class="updatedtime1"><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online.' '.date($timeFormat);?></div>
 
@@ -501,7 +572,6 @@ $airqual["qualColor"] = $airqual["color10"];
   position: relative; 
   margin-top: -1.5px; 
   margin-left: 0px;
-  //z-index: auto;
 }
 
 </style>
@@ -513,7 +583,7 @@ $airqual["qualColor"] = $airqual["color10"];
 
 	var aqiA = "<?php echo $airqual["aqi25"];?>";
 	var aqiB = "<?php echo $airqual["aqi10"];?>";
-        var pmA = "<?php echo $airqual["pm25"];?>";
+	var pmA = "<?php echo $airqual["pm25"];?>";
 	var pmB = "<?php echo $airqual["pm10"];?>";
       
 	var city = "<?php echo $airqual["city"];?>";
@@ -523,7 +593,7 @@ $airqual["qualColor"] = $airqual["color10"];
 	  	
 	var colorA = "<?php echo $airqual["color25"];?>";
 	var colorB = "<?php echo $airqual["color10"];?>"; 
-        var colorQ = "<?php echo $airqual["qualColor"];?>";
+    var colorQ = "<?php echo $airqual["qualColor"];?>";
 		
 	var imageA = "<?php echo $airqual["image25"];?>";
 	var imageB = "<?php echo $airqual["image10"];?>";
@@ -534,7 +604,9 @@ $airqual["qualColor"] = $airqual["color10"];
                 //.style("background", "#292E35")
                 .attr("width", 300)
                 .attr("height", 150);
-  
+
+	if (theme == 'dark') {
+	
             svg.append("text") // City text output
              	.attr("x", 150)
             	.attr("y", 20)
@@ -546,31 +618,68 @@ $airqual["qualColor"] = $airqual["color10"];
    				.text(city);
 
            svg.append("foreignObject")
-     .attr("x", 70)
-              .attr("y", 30)
-    .attr("width", 50)
-    .attr("height", 25)
-    .append("xhtml:div")
-    .style("fill", "silver")
-    .style("font-size", "10px")
-    .style("text-anchor", "middle")
-              .style("font-weight", "normal")          
-   .html("<p>PM<sub>2.5</sub>");
+     			.attr("x", 70)
+              	.attr("y", 30)
+    			.attr("width", 50)
+    			.attr("height", 25)    			
+    			.style("fill", "silver")
+    			.style("font-size", "10px")
+    			.style("text-anchor", "middle")
+              	.style("font-weight", "normal")
+              	.append("xhtml:div")          
+   				.html("<p>PM<sub>2.5</sub></p>");
 
+			svg.append("foreignObject")
+     			.attr("x", 220)
+              	.attr("y", 30)
+    			.attr("width", 50)
+    			.attr("height", 25)   			
+    			.style("fill", "silver")
+    			.style("font-family", "Helvetica")
+    			.style("font-size", "10px")
+    			.style("text-anchor", "middle")
+              	.style("font-weight", "normal")
+              	.append("xhtml:div")          
+    			.html("<p>PM<sub>10</sub></p>");
 
-svg.append("foreignObject")
-     .attr("x", 220)
-              .attr("y", 30)
-    .attr("width", 50)
-    .attr("height", 25)
-    .append("xhtml:div")
-    .style("fill", "silver")
-    .style("font-family", "Helvetica")
-    .style("font-size", "10px")
-    .style("text-anchor", "middle")
-              .style("font-weight", "normal")          
-    .html("<p>PM<sub>10</sub>");
+	} else {
+	
+		svg.append("text") // City text output
+             	.attr("x", 150)
+            	.attr("y", 20)
+            	.style("fill", "black")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "12px")
+            	.style("text-anchor", "middle")
+            	.style("font-weight", "normal")   				
+   				.text(city);
 
+           svg.append("foreignObject")
+     			.attr("x", 70)
+              	.attr("y", 30)
+    			.attr("width", 50)
+    			.attr("height", 25)    			
+    			.style("fill", "black")
+    			.style("font-size", "10px")
+    			.style("text-anchor", "middle")
+              	.style("font-weight", "normal")
+              	.append("xhtml:div")          
+   				.html("<p>PM<sub>2.5</sub></p>");
+
+			svg.append("foreignObject")
+     			.attr("x", 220)
+              	.attr("y", 30)
+    			.attr("width", 50)
+    			.attr("height", 25)   			
+    			.style("fill", "black")
+    			.style("font-family", "Helvetica")
+    			.style("font-size", "10px")
+    			.style("text-anchor", "middle")
+              	.style("font-weight", "normal")
+              	.append("xhtml:div")          
+    			.html("<p>PM<sub>10</sub></p>");
+	
+	}
    				                 				   				
    			 svg.append("line") // horizontal lozenge left
     			.attr("x1", 82)
@@ -620,14 +729,14 @@ svg.append("foreignObject")
             	.style('fill', colorA);
 	 
             svg.append("rect") // fill rectangle
-    			.attr("x", 65)
+    			.attr("x", 69)
     			.attr("y", 54.5)    			
     			.attr("height", 41)
     			.attr("width", 40)
     			.style("fill", colorA);
     				              		 
            	svg.append("circle")
-            	.attr("cx", 105) // side circle
+            	.attr("cx", 110) // side circle
             	.attr("cy", 75)
             	.attr("r", 20)
             	.style('stroke', colorA)
@@ -658,19 +767,16 @@ svg.append("foreignObject")
             	.style("font-weight", "normal")
    				.text(qualityA);
    				
-
-                        svg.append("text") // AQ Index text output
-             	.attr("x", 86)
-            	.attr("y", 82)
+			svg.append("text") // AQ Index text output
+             	.attr("x", 106)
+            	.attr("y", 79)
             	.style("fill", "black")
             	.style("font-family", "Helvetica")
             	.style("font-size", "10px")
-            	.style("text-anchor", "left")
+            	.style("text-anchor", "middle")
             	.style("font-weight", "bold")
    				.text("AQI"+" "+(aqiA));
-
-		 
-		           		             		 
+			           		             		 
 			// begin pm 10		
 			svg.append("circle")
             	.attr("cx", 202) // main circle
@@ -680,7 +786,7 @@ svg.append("foreignObject")
             	.style('fill', colorB);
             		 
             svg.append("rect") // fill rectangle
-    			.attr("x", 215)
+    			.attr("x", 220)
     			.attr("y", 54.5)
     			.attr("rx", 0)    			
     			.attr("height", 41)
@@ -688,7 +794,7 @@ svg.append("foreignObject")
     			.style("fill", colorB);
     				              		 
            	svg.append("circle")
-            	.attr("cx", 257) // side circle
+            	.attr("cx", 261) // side circle
             	.attr("cy", 75)
             	.attr("r", 20)
             	.style('stroke', colorB)
@@ -710,12 +816,12 @@ svg.append("foreignObject")
     			.attr('y', 24);
     				   				
    			svg.append("text") // AQ Index text output
-             	.attr("x", 238)
-            	.attr("y", 82)
+             	.attr("x", 258)
+            	.attr("y", 79)
             	.style("fill", "black")
             	.style("font-family", "Helvetica")
             	.style("font-size", "10px")
-            	.style("text-anchor", "left")
+            	.style("text-anchor", "middle")
             	.style("font-weight", "bold")
    				.text("AQI"+" "+(aqiB));
 		          
