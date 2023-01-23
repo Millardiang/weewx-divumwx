@@ -18,8 +18,8 @@ $airqual["pm10"] = $air["24h.rollingavg.pm10_0"];
 else if ($airqual["source"] == "waqi") {
 $json_string = file_get_contents("jsondata/aq.txt");
 $parsed_json = json_decode($json_string, true);
-$airqual["pm25"] = $parsed_json['data']['iaqi']['pm25']['v'];
-$airqual["pm10"] = $parsed_json['data']['iaqi']['pm10']['v'];
+$airqual["pm25"] = $parsed_json["data"]["iaqi"]["pm25"]["v"];
+$airqual["pm10"] = $parsed_json["data"]["iaqi"]["pm10"]["v"];
 }
 else if ($airqual["source"] == "sds"){
 $json_string = file_get_contents("jsondata/aqiJson.txt");
@@ -214,7 +214,7 @@ else if ($airqual["pm25"] < 42 ){
 $airqual["image25"] = "./css/aqi/modair.svg?ver=1.4";
 $airqual["color25"] = "#99FF00";
 $airqual["text25"] = " Moderate Pollution";
-$airqual["aqi25"] = "4echo '<sub>PM2.5</sub>'";
+$airqual["aqi25"] = "4";
 $airqual["priority25"] = 4;
 }
 else if ($airqual["pm25"] < 48 ){
