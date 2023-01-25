@@ -15,7 +15,7 @@ $webcamurl = "img/picam.jpg";
     <div class="chartforecast2">
        <span class="yearpopup"><a alt="aquinfo" title="Webcam" href="dvmWebcamPopup.php" data-lity><?php echo $webcamicon;?> Webcam</a></span>
     </div>
-    <span class='moduletitle2'>Webcam</span>
+    <span class='moduletitle2'><?php echo $lang['webcamModule'];?></span>
 
 
 <div class="updatedtime1"><span>
