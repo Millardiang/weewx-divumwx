@@ -14,7 +14,7 @@ date_default_timezone_set($TZ);
 <html>
 <?php
 
-if ($source == "Boltek") {
+if ($lightning["source"] == "Boltek") {
 
 $json = "boltek/data/ngxarchive.json";
 $jsonobj = file_get_contents($json);
