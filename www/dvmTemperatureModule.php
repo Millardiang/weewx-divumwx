@@ -1,4 +1,29 @@
-<?php
+<!DOCTYPE html>
+<title>weather34 current conditions</title>
+<style>
+.moduletitle4 {
+  position: relative;
+  top: -21px;
+  font-size: .8em;
+  float: none;
+}
+.chartforecast4 {
+  position: absolute;
+  font-family: arial, system;
+  z-index: 20;
+  padding-top: 1px;
+  margin-left: 0;
+  font-size: .67em;
+  color: silver;
+  margin-top: 159px;
+  width: 300px;
+  padding-left: 10px;
+  text-align: left
+}
+.chartforecast4:hover, {
+  color: #90b12a
+}
+</style><?php
 
 include('dvmCombinedData.php');
 include('common.php');
@@ -94,11 +119,16 @@ else if(anyToC($temp["outside_now"])<40){$tempcolor = "#dc4953";}
 else if(anyToC($temp["outside_now"])<100){$tempcolor = "#e26870";}
 
 ?>
+    <div class="chartforecast4">
+      <span class="yearpopup"><a alt="temp charts" title="temp charts" href="dvmMenuTemperaturePopup.php" data-lity><?php echo $menucharticonpage;?> Temperature Almanac and Derived Charts</a></span>
+    </div>    
+    <span class='moduletitle4'>Temperature (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span>
 
 <div class="updatedtime1"><?php if(file_exists($livedata)&&time()- filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>';else echo $online." ".$weather["time"];?></div>
-<!--iframe style="width: auto; height: 155px; overflow: hidden; border: 0px;" src="thermometer.php"></iframe-->
-<!--iframe style="width: auto; height: 155px; overflow: hidden; border: 0px;" src="thermo.php"></iframe-->
 
+
+
+    </div>
 <html>
 <script src='js/d3.min.js'></script>
 

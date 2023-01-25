@@ -110,6 +110,7 @@ else if ($theme === "light")
     </style>';
 }
 ?>
+      
 
 <div class="calendar34" style="padding-top: 10px" ><svg id="weather34clock icon" width="60pt" height="60pt" viewBox="0 0 720 720" version="12-10-21" ></svg>
 </div><span id="theTime"></span></div>

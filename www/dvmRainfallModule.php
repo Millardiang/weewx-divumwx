@@ -4,6 +4,13 @@ include('common.php');
 include('userSettings.php');
 header('Content-type: text/html; charset = utf-8');
 ?>
+
+    <div class="chartforecast2">
+      <span class="yearpopup"><a alt="rain charts" title="rain charts" href="dvmMenuRainfall.php" data-lity><?php echo $menucharticonpage;?> Rainfall Almanac and Charts</a></span>
+    </div>
+    <span class='moduletitle2'><?php echo $lang['Rainfalltoday'], " (<valuetitleunit>" . $rain["units"];?></valuetitleunit>)</span>
+
+
 <div class="updatedtime1"><span><?php if (file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$weather["time"];?></div>
   
 <div class="yearbox"><div class="heatcircle-content">

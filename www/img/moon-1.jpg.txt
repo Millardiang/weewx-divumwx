@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Service Denied</title>
+<meta name="robots" content="noindex" />
+</head>
+<body style="margin-left: 15%; margin-right: 15%;">
+<h1>Service Denied</h1>
+<p style="font-size: larger; text-align: justify;">
+Your request has been denied by the Fourmilab server
+because you have submitted too many requests
+within a 10 minute period.
+</p>
+</body>
+</html>

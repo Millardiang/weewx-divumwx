@@ -4,7 +4,40 @@ include('common.php');
 date_default_timezone_set($TZ);
 header('Content-type: text/html; charset=utf-8');
 ?>
-    
+<style>
+.wrap {
+  position: relative;
+  margin-top: -2px;
+  margin-right: 0px;
+}
+.moduletitle2 {
+  position: relative;
+  top: -20px;
+  font-size: .8em;
+  float: none;
+}
+.chartforecast2 {
+  position: absolute;
+  font-family: arial, system;
+  z-index: 20;
+  padding-top: 1px;
+  margin-left: 0;
+  font-size: .67em;
+  color: silver;
+  margin-top: 159px;
+  width: 300px;
+  padding-left: 10px;
+  text-align: left
+}
+.chartforecast2:hover, {
+  color: #90b12a
+}
+.daylightmoduleposition2 {
+  position: relative;
+  left: 5px;
+  margin-top: 0px;
+}
+</style>    
 <?php
 $light = $alm["daylight"]; 
 $daylight = ltrim($light, '0'); 
@@ -21,9 +54,22 @@ $sun_elevation = round($sun_alt,2)."&deg;<div class=sunaboveweather34>&nbsp;</di
 } else if (round($sun_alt,2) < 0) { 
 $sun_elevation = round($sun_alt,2)."&deg;<div class=sunbelowweather34>&nbsp;</div>"; 
 }?>
+<div class="chartforecast2">
+      <span class="yearpopup"><a alt="orrery" title="orrery" href="dvmOrreyPopup.php" data-lity><?php echo $info;?> Orrery</a></span>
+      <span class="yearpopup"><a alt="Astroclock" title="Astroclock" href="dvmAstroclockPopup.php" data-lity><?php echo $info;?> Astroclock</a></span>
+      <span class="yearpopup"><a alt="celestial" title="celestial" href="dvmMenuCelestialPopup.php" data-lity><?php echo $info;?> Celestial Data</a></span>
+
+</div>
+
+<span class="moduletitle2"><?php echo "Solar Dial";?></span>
+
 <div class="updatedtime1"><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$weather["time"];?></div>
 
-<div class="daylightmoduleposition"> 
+
+
+    </div>
+
+<div class="daylightmoduleposition2"> 
 <?php echo 
 '<div class="weather34sunlightday"><weather34daylightdaycircle></weather34daylightdaycircle> '.$alm["daylight"].' hrs<br>'.$lang['TotalDaylight'].'</div>
 <div class="weather34sundarkday">'.$darkhours.':'.$darkminutes.' hrs <weather34darkdaycircle></weather34darkdaycircle><br>'.$lang['TotalDarkness'].'</div>
@@ -43,13 +89,7 @@ $sun_elevation = round($sun_alt,2)."&deg;<div class=sunbelowweather34>&nbsp;</di
 
 <script src="js/two.js"></script>
     
-<style>
-.wrap {
-  position: relative;
-  margin-top: -2px;
-  margin-right: 0px;
-}
-</style>
+
 
 <div style="overflow: hidden">
 <div class="wrap">
@@ -430,5 +470,6 @@ Sun();
 two.update();
 
 </script>
+
 
 </html>
