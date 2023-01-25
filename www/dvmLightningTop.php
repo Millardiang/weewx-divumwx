@@ -92,7 +92,7 @@ $lightning["bearing"] = $arr['StrikeData'][0]['bng'];
 	
 	var theme = "<?php echo $theme;?>";
 	
-	var source = "<?php echo $source;?>";
+	var source = "<?php echo $lightning["source"];?>";
 	
 	var unit = "<?php echo $lightning["unit"];?>";
 	
