@@ -1,7 +1,7 @@
 <style>
 .earthmodulepos {
   position: absolute;
-  top: 16px;
+  top: 60px;
   left: 110px
 }
 .earthpos {
@@ -12,7 +12,6 @@
 </style>
 <?php
 include('dvmCombinedData.php');
-include('common.php');
 date_default_timezone_set($TZ);
 header('Content-type: text/html; charset=utf-8');
 ?>
@@ -33,6 +32,13 @@ $sun_elevation = round($sun_alt,2)."&deg;<div class=sunaboveweather34>&nbsp;</di
 } else if (round($sun_alt,2) < 0) { 
 $sun_elevation = round($sun_alt,2)."&deg;<div class=sunbelowweather34>&nbsp;</div>"; 
 }?>
+
+   <div class="chartforecast2">
+        <span class="yearpopup"><a alt="daylightmap" title="daylightmap" href="dvmDaylightMapPopup.php" data-lity><?php echo $info;?> World Daylight Map</a></span>
+        <span class="yearpopup"><a alt="celestial" title="celestial" href="pop_menu_celestial.php" data-lity><?php echo $info;?> Celestial Data</a></span>
+    </div>
+    <span class='moduletitle2'><?php echo $lang['earthDaylightModule'];?></span>
+
 <div class="updatedtime1"><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$weather["time"];?></div>
 
 <div class="daylightmoduleposition"> 

@@ -6,7 +6,7 @@ date_default_timezone_set($TZ);
     <div class="chartforecast">
        <span class="yearpopup"><a alt="aquinfo" title="Lightning Almanac" href="dvmLightningAlmanac.php" data-lity><?php echo $info;?> Lightning Almanac</a></span>
     </div>
-    <span class='moduletitle'>Lightning</span>
+    <span class='moduletitle'><?php echo $lang['lightningModule'];?></span>
 
 
 <div class="updatedtime1"><span><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$weather["time"];?></div>
@@ -16,7 +16,7 @@ date_default_timezone_set($TZ);
 
 if ($source == "Boltek") {
 
-$json = "/srv/http/html/divumwx/boltek/data/ngxarchive.json";
+$json = "boltek/data/ngxarchive.json";
 $jsonobj = file_get_contents($json);
 $arr = json_decode($jsonobj, true); 
 $lightning["bearingx"] = $arr['StrikeData'][0]['bng'];

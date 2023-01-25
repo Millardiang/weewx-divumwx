@@ -1,5 +1,29 @@
 <!DOCTYPE html>
 <title>weather34 current conditions</title>
+<style>
+.moduletitle3 {
+  position: relative;
+  top: -21px;
+  font-size: .8em;
+  float: none;
+}
+.chartforecast3 {
+  position: absolute;
+  font-family: arial, system;
+  z-index: 20;
+  padding-top: 1px;
+  margin-left: 0;
+  font-size: .67em;
+  color: silver;
+  margin-top: 159px;
+  width: 300px;
+  padding-left: 10px;
+  text-align: left
+}
+.chartforecast3:hover, {
+  color: #90b12a
+}
+</style>
 <?php
 include('fixedSettings.php');
 include('dvmCombinedData.php');
@@ -46,9 +70,26 @@ $visibility = round($parsed_visibility['response'][0]['periods'][0]['visibilityK
 }
 if ($cloud_region[0] !== "Europe"){$sky["cloud_cover"] = $parsed_visibility['response'][0]['periods'][0]['sky'];}
 ?>
+
+<div class="chartforecast3">
+      <span class="yearpopup"><a alt="nearby metar station" title="nearby metar station" href="dvmMetarPopup.php" data-lity><?php echo $chartinfo;?><?php echo ' Nearby Metar';?>
+      <span class="monthpopup"><a href="dvmWindyRadarPopup.php" title="Windy.com Radar" alt="Windy.com Radar" data-lity><?php echo $chartinfo;?> Radar</a></span>
+      <span class="monthpopup"><a href="dvmWindyWindPopup.php" title="Windy.com Wind Map" alt="Windy.com Wind Map" data-lity><?php echo $chartinfo;?> Wind Map</a></span>
+      <span class="todaypopup"><a alt="cloud cover" title="cloud cover" href="<?php echo $chartsource;?>/<?php echo $theme1;?>-charts.html?chart='cloudcoverplot'&span='weekly'&temp='<?php 
+echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units'];?>" data-lity><?php echo $menucharticonpage;?> Cloud Cover</a></span>
+    </div>
+    <span class='moduletitle3'><?php echo $lang['currentModule'];?></span>
+
+
+
 <div class="updatedtimecurrent">
 <?php $forecastime=filemtime('jsondata/awc.txt');$weather34wuurl = file_get_contents("jsondata/awc.txt");if(filesize('jsondata/awc.txt')<10){echo $online;}
 else echo $online,"";echo " ",	date($timeFormat,$forecastime);	?></div>
+    
+
+
+
+
 <div class="cloudconverter">
 <?php //cloudbase
 
