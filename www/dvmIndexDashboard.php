@@ -68,10 +68,10 @@ error_reporting(0);
 <!-- begin top layout-->
 <div class="weather2-container">
   <div class="container weather34box-toparea">
-    <!-- position 1 --->
+    <!-- position 1 - Fixed Position --->
     <div class="weather34box clock">
     <div class="weatherbox-top-border">
-      <div class="title"><?php echo $info;?><?php echo $position1title;?></div>
+      <div class="title"><?php echo $info;?><?php echo $lang['timeTop'];?></div>
       <div class="value">
         <div id="position1"></div>
       </div>
@@ -80,7 +80,6 @@ error_reporting(0);
     <!-- position 2--->
     <div class="weather34box indoor">
      <div class="weatherbox-top-border">
-      <div class="title"><?php echo $info;?><?php echo $position2title;?></div>
       <div class="value">
         <div id="position2"></div>
       </div>
@@ -89,16 +88,15 @@ error_reporting(0);
     <!-- position 3--->
     <div class="weather34box earthquake">
      <div class="weatherbox-top-border">
-      <div class="title"><?php echo $info;?><?php echo $position3title;?></div>
-      <div class="value">
+           <div class="value">
         <div id="position3"></div>
       </div>
     </div>
    </div>
-    <!-- position 4--->
+    <!-- position 4 - Fixed Position --->
     <div class="weather34box alert">
      <div class="weatherbox-top-border">
-      <div class="title"><?php echo $info;?><?php echo $position4title;?></div>
+      <div class="title"><?php echo $info;?><?php echo $lang['advisoriesTop'];?></div>
       <div class="value">
         <div id="position4"></div>
        </div>
@@ -111,73 +109,39 @@ error_reporting(0);
 <!-- position 5--->
 <div class="weather-container">
   <div class="weather-item">
-    <div class="chartforecast">
-      <span class="yearpopup"><a alt="temp charts" title="temp charts" href="dvmMenuTemperaturePopup.php" data-lity><?php echo $menucharticonpage;?> Temperature Almanac and Derived Charts</a></span>
-    </div>    
-    <span class='moduletitle'><?php echo $lang['Temperature'];?> (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span>
     <div id="position5">
     </div>
   </div>
  
   <!-- position 6--->
   <div class="weather-item">
-    <div class="chartforecast">
-      <span class="yearpopup"><a alt="Forecast Menu" title="Forecast Menu" href="dvmMenuForecastPopup.php" data-lity><?php echo $menucharticonpage;?> Forecasts</a></span>
-      <span class="yearpopup"><a alt="Advisories" title="Advisories" href="<?php echo $advisory;?>" . data-lity>&nbsp;<?php echo $menucharticonpage;?> Advisories</a></span>
-        <span class="yearpopup"><a alt="Meteogram" title="Meteogram" href="dvmMeteogramPopup.php" data-lity><?php echo $menucharticonpage;?> Meteogram</a></span>
-    </div>
-    <span class='moduletitle'><?php echo $position6title;?> (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span>
     <div id="position6">
     </div>
   </div>
  
   <!-- position 7--->
   <div class="weather-item">
-    <div class="chartforecast">
-      <span class="yearpopup"><a alt="nearby metar station" title="nearby metar station" href="dvmMetarPopup.php" data-lity><?php echo $chartinfo;?><?php echo ' Nearby Metar';?>
-          <?php if (filesize('jsondata/me.txt') < 160) { echo "&nbsp;" , $offline;} else echo "";?></a></span>
-      <span class="monthpopup"><a href="dvmWindyRadarPopup.php" title="Windy.com Radar" alt="Windy.com Radar" data-lity><?php echo $chartinfo;?> Radar</a></span>
-      <span class="monthpopup"><a href="dvmWindyWindPopup.php" title="Windy.com Wind Map" alt="Windy.com Wind Map" data-lity><?php echo $chartinfo;?> Wind Map</a></span>
-      <span class="todaypopup"><a alt="cloud cover" title="cloud cover" href="<?php echo $chartsource;?>/<?php echo $theme1;?>-charts.html?chart='cloudcoverplot'&span='weekly'&temp='<?php 
-echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units'];?>" data-lity><?php echo $menucharticonpage;?> Cloud Cover</a></span>
-    </div>
-    <span class='moduletitle'><?php echo 'Current Conditions';?></span>
     <div id="position7">
      </div>
    </div>
   </div>
  
 <!-- position 8--->
-<?php if ($wind["units"] == "kts") { echo $wind["units"] = "kts"; };?>
+
 <div class="weather-container">
   <div class="weather-item">
-    <div class="chartforecast">
-      <span class="yearpopup"><a alt="wind charts" title="wind charts" href="dvmMenuWind.php" data-lity><?php echo $menucharticonpage;?> Wind Almanac and Charts</a></span>
-    </div>
-    <span class='moduletitle'><?php echo $lang['Direction'];?> | <?php echo $lang['Windspeed'], " (<valuetitleunit>", $wind["units"];?></valuetitleunit>)</span>
     <div id="position8">
     </div>
   </div>
  
   <!-- position 9--->
   <div class="weather-item">
-    <div class="chartforecast">
-      <span class="yearpopup"><a alt="barometer charts" title="barometer charts" href="dvmMenuBarometer.php" data-lity><?php echo $menucharticonpage;?> Barometer Almanac and Charts</a></span>
-    </div>    
-    <span class='moduletitle'><?php echo $lang['Barometer'], " (<valuetitleunit>", $barom["units"];?></valuetitleunit>)</span>
     <div id="position9">
     </div>
   </div>
  
   <!-- position 10--->
   <div class="weather-item">
-    <div class="chartforecast">
-      <span class="yearpopup"><a alt="orrery" title="orrery" href="dvmOrreyPopup.php" data-lity><?php echo $info;?> Orrery</a></span>
-      <span class="yearpopup"><a alt="Astroclock" title="Astroclock" href="dvmAstroclockPopup.php" data-lity><?php echo $info;?> Astroclock</a></span>
-      <span class="yearpopup"><a alt="celestial" title="celestial" href="dvmMenuCelestialPopup.php" data-lity><?php echo $info;?> Celestial Data</a></span>
-
-    </div>
-    <span class='moduletitle'><?php echo 'Solar Dial';?></span>
     <div id="position10">
      </div>
     </div>
@@ -186,68 +150,38 @@ echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php ech
 <!-- position 11--->
 <div class="weather-container"> 
   <div class="weather-item">
-    <div class="chartforecast">
-      <span class="yearpopup"><a alt="rain charts" title="rain charts" href="dvmMenuRainfall.php" data-lity><?php echo $menucharticonpage;?> Rainfall Almanac and Charts</a></span>
-    </div>
-    <span class='moduletitle'><?php echo $lang['Rainfalltoday'], " (<valuetitleunit>" . $rain["units"];?></valuetitleunit>)</span>
     <div id="position11">
     </div>
   </div>
  
   <!--position 12-->
   <div class="weather-item">
-    <div class="chartforecast">
-       <span class="yearpopup"><a alt="solar" title="UV Guide" href="dvmMenuSolarUvLux.php" data-lity><?php echo $menucharticonpage;?> UV and Solar Almanacs and Guide</a></span>
-    </div>
-    <span class='moduletitle'><?php echo $position12title;?></span>
     <div id="position12">
     </div>
   </div>
  
   <!--position 13-->
   <div class="weather-item">
-    <div class="chartforecast">
-<span class="yearpopup"><a alt="meteor showers" title="meteor showers" href="pop_meteorshowers.php" data-lity><?php echo $meteorinfo; ?> &nbsp;<?php if (
-     $meteor_default == "No Meteor"
- ) {
-     echo "Meteor Showers";
- } else {
-     echo $meteor_default;
- } ?></a></span>    </div>
-    <span class='moduletitle'><?php echo $position13title;?></span>
+
     <div id="position13">
       </div>
      </div>
    </div>
-
 <!-- position 14--->
 <div class="weather-container"> 
   <div class="weather-item">
-    <div class="chartforecast">
-        <span class="yearpopup"><a alt="Earthquakes Worldwide" title="Earthquakes Worldwide" href="dvmEarthquakePopup.php" data-lity><?php echo $chartinfo;?> Worldwide Earthquakes</a></span>
-    </div>
-    <span class='moduletitle'><?php echo $position14title;?></valuetitleunit></span>
     <div id="position14">
     </div>
   </div>
  
   <!--position 15-->
   <div class="weather-item">
-    <div class="chartforecast">
-       <span class="yearpopup"><a alt="webcam" title="Webcam" href="dvmWebcamPopup.php" data-lity><?php echo $webcamicon;?> Webcam</a></span>
-    </div>
-    <span class='moduletitle'><?php echo $position15title;?></span>
     <div id="position15">
     </div>
   </div>
  
   <!--position 16-->
   <div class="weather-item">
-    <div class="chartforecast">
-        <span class="yearpopup"><a alt="daylightmap" title="daylightmap" href="dvmDaylightMapPopup.php" data-lity><?php echo $info;?> World Daylight Map</a></span>
-        <span class="yearpopup"><a alt="celestial" title="celestial" href="pop_menu_celestial.php" data-lity><?php echo $info;?> Celestial Data</a></span>
-    </div>
-    <span class='moduletitle'><?php echo $position16title;?></span>
     <div id="position16">
       </div>
      </div>

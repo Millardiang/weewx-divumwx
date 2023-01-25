@@ -21,9 +21,9 @@ if ($sta["latitude"] > "90") {
 
 //update the modules
 
-//update the modules position 1
-(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position1").show()}});var c=a("#position1");c.load("<?php echo $position1; ?>");
-var b=setInterval(function(){c.load("<?php echo $position1; ?>")},<?php echo $cycles1; ?>)})})(jQuery); // 24 hours 
+//update the modules position 1 - fixed position
+(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position1").show()}});var c=a("#position1");c.load("dvmWeatherClockTop.php");
+var b=setInterval(function(){c.load("dvmWeatherClockTop.php")},<?php echo $cycles1; ?>)})})(jQuery); // 24 hours 
     
 //update the modules position 2
 (function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position2").show()}});var c=a("#position2");c.load("<?php echo $position2; ?>");
@@ -33,9 +33,9 @@ var b=setInterval(function(){c.load("<?php echo $position2; ?>")},<?php echo $cy
 (function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position3").show()}});var c=a("#position3");c.load("<?php echo $position3; ?>");
 var b=setInterval(function(){c.load("<?php echo $position3; ?>")},<?php echo $cycles3; ?>)})})(jQuery); // 60 seconds
   
-//update the modules  position 4
-(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position4").show()}});var c=a("#position4");c.load("<?php echo $position4; ?>");
-var b=setInterval(function(){c.load("<?php echo $position4; ?>")},<?php echo $cycles4; ?>)})})(jQuery); // 60 seconds
+//update the modules  position 4 - fixed position
+(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position4").show()}});var c=a("#position4");c.load("dvmAdvisoryOutlookTop.php");
+var b=setInterval(function(){c.load("dvmAdvisoryOutlookTop.php")},<?php echo $cycles4; ?>)})})(jQuery); // 60 seconds
 
 //update the modules position 5
 (function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position5").show()}});var c=a("#position5");c.load("<?php echo $position5; ?>");
@@ -86,7 +86,7 @@ var b=setInterval(function(){c.load("<?php echo $position15; ?>")},<?php echo $c
 var b=setInterval(function(){c.load("<?php echo $position16; ?>")},<?php echo $cycles16; ?>)})})(jQuery); // 60 seconds
 
 //update the moonphase and earth image
-var refreshId;$(document).ready(function(){moonearthimage()});function moonearthimage(){$.ajax({cache:false,success:function(a){$("#moonearthimage").html(a);<?php if (
+var refreshId;$(document).ready(function(){moonearthimage()});function moonearthimage(){$.ajax({cache:true,success:function(a){$("#moonearthimage").html(a);<?php if (
     $moonRefresh > 0
 ) {
     echo "setTimeout(moonearthimage, 3600000)";
@@ -95,7 +95,9 @@ var refreshId;$(document).ready(function(){moonearthimage()});function moonearth
 			
 
 </script>
-<?php if ($position1 == "dvmWeatherClockTop.php") { ?>
+<?php 
+$position1 = "dvmWeatherClockTop.php";//fixed position
+if ($position1 == "dvmWeatherClockTop.php") { ?>
 <script>
 var clockID;
 var yourTimeZoneFrom=<?php echo $UTC_offset; ?>;

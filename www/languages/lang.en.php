@@ -308,7 +308,7 @@ $lang['Unhealthy']               = 'Unhealthy Air Quality';
 $lang['UnhealthyFS']             = 'Unhealthy For Some';
 $lang['Moderate']                = 'Moderate Air Quality ';
 $lang['Good']                    = 'Good Air Quality ';
-$lang['Concentration']           = 'Air Quality <ored>Current PM<sub>2.5</sub> Concentration';
+
 #notification additions
 $lang['notifyTitle']             = 'Notifications';
 $lang['notifyAlert']             = "Alert";
@@ -325,5 +325,9 @@ $lang['notifyHighWindWarning']   = "High Wind Warning";
 $lang['notifySustainedAvg']      = "Sustained avg";
 $lang['notifyWindAdvisory']      = "Wind Advisory";
 $lang['notifyFreezing']          = "Below Freezing";
-
+//Top row
+$lang['timeTop']                 = 'Station <ored>Time';
+$lang['airQualityTop']           = 'Air Quality <ored>Current PM<sub>2.5</sub> Concentration';
+$lang['lightningTop']            = 'Lightning <ored>Strikes';
+$lang['advisoriesTop']           = 'Weather <ored>Outlook and Advisories';
 ?>

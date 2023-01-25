@@ -11,6 +11,13 @@ $webcamurl = "img/picam.jpg";
 </style>
 
 <?php $file_headers = @get_headers($webcamurl); ?>
+
+    <div class="chartforecast2">
+       <span class="yearpopup"><a alt="aquinfo" title="Webcam" href="dvmWebcamPopup.php" data-lity><?php echo $webcamicon;?> Webcam</a></span>
+    </div>
+    <span class='moduletitle2'>Webcam</span>
+
+
 <div class="updatedtime1"><span>
 <?php if($file_headers && $file_headers[0] != 'HTTP/1.1 404 Not Found') {
   echo $online.' '.date($timeFormat);

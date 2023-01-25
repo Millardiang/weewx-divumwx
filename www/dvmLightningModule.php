@@ -3,6 +3,12 @@ date_default_timezone_set($TZ);
 
 ?>
 
+    <div class="chartforecast">
+       <span class="yearpopup"><a alt="aquinfo" title="Lightning Almanac" href="dvmLightningAlmanac.php" data-lity><?php echo $info;?> Lightning Almanac</a></span>
+    </div>
+    <span class='moduletitle'>Lightning</span>
+
+
 <div class="updatedtime1"><span><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$weather["time"];?></div>
 
 <html>

@@ -54,6 +54,17 @@ foreach ($meteor_events as $meteor_check) {
         $meteor_default=$meteor_check["event_title"];
     }
 };?>
+
+    <div class="chartforecast">
+<span class="yearpopup"><a alt="meteor showers" title="meteor showers" href="pop_meteorshowers.php" data-lity><?php echo $meteorinfo; ?> &nbsp;<?php if (
+     $meteor_default == "No Meteor"
+ ) {
+     echo "Meteor Showers";
+ } else {
+     echo $meteor_default;
+ } ?></a></span>    </div>
+    <span class='moduletitle'>Moonphase</span>
+
 <div class="updatedtime1"><span><?php if(file_exists($moonimg)&&time()- filemtime($moonimg)>3600)echo $offline. '<offline> Offline </offline>';else echo $online." ". date("H:i:s",  filemtime($moonimg));?></span></div>
 <div class="moonphasemoduleposition">
 <div class="moonrise1">

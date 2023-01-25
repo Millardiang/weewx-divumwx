@@ -12,6 +12,12 @@ else if ($uv["now"]<11){$uv["color"]="#ff6181";} // pastel red
 else {$uv["color"]="#be688b";} // pastel purple (jupiter)
 ?>
 
+    <div class="chartforecast2">
+       <span class="yearpopup"><a alt="solar" title="UV Guide" href="dvmMenuSolarUvLux.php" data-lity><?php echo $menucharticonpage;?> UV and Solar Almanacs and Guide</a></span>
+    </div>
+    <span class='moduletitle2'>Solar | UV | Lux</span>
+
+
 <div class="updatedtime1"><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>';else echo $online." ".$weather["time"];?></div>
 
 <div class="uvcautionbig2">

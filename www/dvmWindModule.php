@@ -2,8 +2,15 @@
 require('dvmCombinedData.php');
 include('userSettings.php');
 require('common.php');
+if ($wind["units"] == "kts") { echo $wind["units"] = "kts"; }
 ?>
 <meta http-equiv="Content-Type: text/html; charset=UTF-8"/>
+
+   <div class="chartforecast2">
+      <span class="yearpopup"><a alt="wind charts" title="wind charts" href="dvmMenuWind.php" data-lity><?php echo $menucharticonpage;?> Wind Almanac and Charts</a></span>
+    </div>
+    <span class='moduletitle2'><?php echo $lang['Direction'];?> | <?php echo $lang['Windspeed'], " (<valuetitleunit>", $wind["units"];?></valuetitleunit>)</span>
+  
 
 <div class="updatedtime2"><span><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$weather["time"];?></div><br />
 

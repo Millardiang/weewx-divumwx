@@ -1,3 +1,27 @@
+<style>
+.moduletitle4 {
+  position: relative;
+  top: -21px;
+  font-size: .8em;
+  float: none;
+}
+.chartforecast4 {
+  position: absolute;
+  font-family: arial, system;
+  z-index: 20;
+  padding-top: 1px;
+  margin-left: 0;
+  font-size: .67em;
+  color: silver;
+  margin-top: 159px;
+  width: 300px;
+  padding-left: 10px;
+  text-align: left
+}
+.chartforecast4:hover, {
+  color: #90b12a
+}
+</style>
 <?php 
 
 //###################################################################################################################
@@ -20,7 +44,14 @@ error_reporting(0); date_default_timezone_set($TZ);
 header('Content-type: text/html; charset=UTF-8');
 if ($windunit=='kts'){$windunit="kn";}
 $jsonfile="jsondata/awd.txt";if(!file_exists($jsonfile)) {return;}
+
 ?>
+    <div class="chartforecast4">
+      <span class="yearpopup"><a alt="Forecast Menu" title="Forecast Menu" href="dvmMenuForecastPopup.php" data-lity><?php echo $menucharticonpage;?> Forecasts</a></span>
+      <span class="yearpopup"><a alt="Advisories" title="Advisories" href="<?php echo $advisory;?>" . data-lity>&nbsp;<?php echo $menucharticonpage;?> Advisories</a></span>
+        <span class="yearpopup"><a alt="Meteogram" title="Meteogram" href="dvmMeteogramPopup.php" data-lity><?php echo $menucharticonpage;?> Meteogram</a></span>
+    </div>
+    <span class='moduletitle4'>Forecast (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span>
 
 
 <div class="updatedtime1"><?php $forecastime=filemtime('jsondata/awd.txt');
@@ -28,6 +59,9 @@ $jsonfile="jsondata/awd.txt";if(!file_exists($jsonfile)) {return;}
 $forecasturl = file_get_contents("jsondata/awd.txt");
 if(filesize('jsondata/awd.txt')<1){echo "".$offline. "";}
 else echo $online,"";echo " ",	date($timeFormat,$forecastime);	?></div>
+
+
+
 <div class="darkskyforecasthome" ><div class="darkskydiv">
 <?php //begin ad stuff 
 $jsonIcon = 'jsondata/lookupTable.json';

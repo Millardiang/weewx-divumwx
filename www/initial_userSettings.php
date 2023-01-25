@@ -3,7 +3,7 @@ $themelayout = "extra_row"; //extra_row, extra_col, extra_row_col, tablet
 $TZ = "Europe/London";
 $theme = isset($theme) ? $theme : "dark";
 $theme1 = $theme; 
-$units = "eu"; //us, uk, metric, ca, scandinavia
+//$units = "us"; //us, uk, metric, ca, scandinavia
 $extralinks   = "yes";
 $languages   = "yes";
 $dateFormat   = "d-m-Y"; //m-d-Y, Y-m-d
@@ -13,42 +13,42 @@ $clockformat    = "24"; //12, 24
 $advisoryzone = "uk"; //uk, na, eu, au, rw (= UK, North America, Europe, Australia, Rest of World)
 $airqual["zone"] = "uk"; //uk, us, ei, ci, au, (= UK DAQI, US EPS, Europe EAQI, Europe CAQI, Australia)
 $airqual["source"] = "weewx";  //purple, weewx, sds
-$position2   = "dvmAqiDaqiTop.php";
-$position2title   = "Air Quality"; 
-$position3   = "dvmLightningEwTop.php";
-$position3title   = "Lightning <ored> Strikes"; 
+$source = '0'; // use 'Boltek' or '0'
+$position2   = "dvmAirqualityTop.php"; 
+$position3   = "dvmLightningTop.php";
+$position3title   = "Weather <ored> Outlook"; 
 $position5   = "dvmTemperatureModule.php";
-$position5title   = "Temperature"; 
+ 
 $position6   = "dvmForecastModule.php";
-$position6title   = "Forecast"; 
+
 $position7   = "dvmCurrentModule.php";
-$position7title   = "Current Conditions"; 
+ 
 $position8   = "dvmWindModule.php";
-$position8title   = "Wind Speed & Direction"; 
+
 $position9   = "dvmBarometerModule.php";
-$position9title   = "Barometer"; 
+
 $position10   = "dvmSolarDialModule.php";
-$position10title   = "Solar Dial"; 
+
 $position11   = "dvmRainfallModule.php";
-$position11title   = "Rainfall"; 
+ 
 $position12   = "dvmSolarUvLuxModule.php";
-$position12title   = "Solar | UV | Lux"; 
-$position13   = "dvmMoonPhaseModule.php";
-$position13title   = "Moonphase"; 
-$position14   = "dvmEarthquakeModule.php";
-$position14title   = "Earthquake"; 
+ 
+$position13   = "dvmLightningModule.php";
+ 
+$position14   = "dvmAirqualityModule.php";
+
 $position15   = "dvmWebcamModule.php";
-$position15title   = "Cloudcam"; 
+ 
 $position16   = "dvmEarthDaylightModule.php";
-$position16title   = "Earth Daylight | Darkness"; 
+ 
 $position17   = "";
-$position17title   = "";
+
 $position18   = "";
-$position18title   = ""; 
+
 $position19   = "";
-$position19title   = ""; 
-$position120   = "";
-$position120title   = "";
+
+$position20   = "";
+
 $webcamurl   = "";
 $videoWeatherCamURL  = "";
 $email    = "";
