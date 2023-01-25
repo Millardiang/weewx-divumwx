@@ -12,7 +12,6 @@
 </style>
 <?php 
 include('dvmCombinedData.php');
-include('common.php');
 include('userSettings.php');
 header('Content-type: text/html; charset=utf-8');
 if($alm["moonphase_no"]>4){$waxwan = "wan";}
@@ -63,7 +62,7 @@ foreach ($meteor_events as $meteor_check) {
  } else {
      echo $meteor_default;
  } ?></a></span>    </div>
-    <span class='moduletitle'>Moonphase</span>
+    <span class='moduletitle'><?php echo $lang['moonPhaseModule'];?></span>
 
 <div class="updatedtime1"><span><?php if(file_exists($moonimg)&&time()- filemtime($moonimg)>3600)echo $offline. '<offline> Offline </offline>';else echo $online." ". date("H:i:s",  filemtime($moonimg));?></span></div>
 <div class="moonphasemoduleposition">

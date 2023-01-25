@@ -1,6 +1,5 @@
 <?php  //weather34 rain module 15th Feb 2019 //
 include('dvmCombinedData.php');
-include('common.php');
 include('userSettings.php');
 header('Content-type: text/html; charset = utf-8');
 ?>
@@ -8,7 +7,7 @@ header('Content-type: text/html; charset = utf-8');
     <div class="chartforecast2">
       <span class="yearpopup"><a alt="rain charts" title="rain charts" href="dvmMenuRainfall.php" data-lity><?php echo $menucharticonpage;?> Rainfall Almanac and Charts</a></span>
     </div>
-    <span class='moduletitle2'><?php echo $lang['Rainfalltoday'], " (<valuetitleunit>" . $rain["units"];?></valuetitleunit>)</span>
+    <span class='moduletitle2'><?php echo $lang['rainfallModule'], " (<valuetitleunit>" . $rain["units"];?></valuetitleunit>)</span>
 
 
 <div class="updatedtime1"><span><?php if (file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$weather["time"];?></div>

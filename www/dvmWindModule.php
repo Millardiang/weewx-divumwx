@@ -1,7 +1,6 @@
 <?php 
 require('dvmCombinedData.php');
 include('userSettings.php');
-require('common.php');
 if ($wind["units"] == "kts") { echo $wind["units"] = "kts"; }
 ?>
 <meta http-equiv="Content-Type: text/html; charset=UTF-8"/>

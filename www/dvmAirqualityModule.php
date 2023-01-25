@@ -1,31 +1,33 @@
 <?php
 include('dvmCombinedData.php');
-include('common.php');
-
 $airqual["pm_units"] = "μg/㎥";
-$airqual["city"] = $stationlocation.$airqual["subtitle"];
+
 
 if ($airqual["source"] == "purple") {
 $json_string = file_get_contents("jsondata/pu.txt");
 $parsed_json = json_decode($json_string, true);
 $airqual["pm25"] = $parsed_json["sensor"]["stats"]["pm2.5_24hour"];
 $airqual["pm10"] = $parsed_json["sensor"]["pm10.0"];
+$airqual["city"] = $parsed_json["sensor"]["name"].$airqual["subtitle"];
 }
 else if ($airqual["source"] == "weewx") {
 $airqual["pm25"] = $air["24h.rollingavg.pm2_5"];
 $airqual["pm10"] = $air["24h.rollingavg.pm10_0"];
+$airqual["city"] = $stationlocation.$airqual["subtitle"];
 }
 else if ($airqual["source"] == "waqi") {
 $json_string = file_get_contents("jsondata/aq.txt");
 $parsed_json = json_decode($json_string, true);
 $airqual["pm25"] = $parsed_json["data"]["iaqi"]["pm25"]["v"];
 $airqual["pm10"] = $parsed_json["data"]["iaqi"]["pm10"]["v"];
+$airqual["city"] = $parsed["data"]["city"]["name"].$airqual["subtitle"];
 }
 else if ($airqual["source"] == "sds"){
 $json_string = file_get_contents("jsondata/aqiJson.txt");
 $parsed_json = json_decode($json_string, true);
 $airqual["pm25"] = round($parsed_json['pm25'],1);
 $airqual["pm10"] = round($parsed_json['pm10'],1);
+$airqual["city"] = $stationlocation.$airqual["subtitle"];
 }
 
 //Europe EAQI
@@ -214,7 +216,7 @@ else if ($airqual["pm25"] < 42 ){
 $airqual["image25"] = "./css/aqi/modair.svg?ver=1.4";
 $airqual["color25"] = "#99FF00";
 $airqual["text25"] = " Moderate Pollution";
-$airqual["aqi25"] = "4";
+$airqual["aqi25"] = "4echo '<sub>PM2.5</sub>'";
 $airqual["priority25"] = 4;
 }
 else if ($airqual["pm25"] < 48 ){
@@ -561,6 +563,12 @@ $airqual["qualColor"] = $airqual["color10"];
 }
 
 ?>
+
+    <div class="chartforecast2">
+       <span class="yearpopup"><a alt="aquinfo" title="AQI Info" href="dvmAqiInfoPopup.php" data-lity><?php echo $info;?> AQI Info</a></span>
+    </div>
+    <span class='moduletitle2'><?php echo $lang['airqualityModule'];?></span>
+
 
 <div class="updatedtime1"><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online.' '.date($timeFormat);?></div>
 

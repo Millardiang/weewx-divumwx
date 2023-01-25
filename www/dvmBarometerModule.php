@@ -1,9 +1,12 @@
 <?php 
-include('common.php');
 include('dvmCombinedData.php');
 include('userSettings.php');
 header('Content-type: text/html; charset=utf-8');
 ?>
+    <div class="chartforecast2">
+      <span class="yearpopup"><a alt="barometer charts" title="barometer charts" href="dvmMenuBarometer.php" data-lity><?php echo $menucharticonpage;?> Barometer Almanac and Charts</a></span>
+    </div>    
+    <span class='moduletitle2'><?php echo $lang['barometerModule'], " (<valuetitleunit>", $barom["units"];?></valuetitleunit>)</span>
 
 <div class="updatedtime2">
 <?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$weather["time"];?>

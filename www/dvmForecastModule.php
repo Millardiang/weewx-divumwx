@@ -51,7 +51,7 @@ $jsonfile="jsondata/awd.txt";if(!file_exists($jsonfile)) {return;}
       <span class="yearpopup"><a alt="Advisories" title="Advisories" href="<?php echo $advisory;?>" . data-lity>&nbsp;<?php echo $menucharticonpage;?> Advisories</a></span>
         <span class="yearpopup"><a alt="Meteogram" title="Meteogram" href="dvmMeteogramPopup.php" data-lity><?php echo $menucharticonpage;?> Meteogram</a></span>
     </div>
-    <span class='moduletitle4'>Forecast (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span>
+    <span class='moduletitle4'><?php echo $lang['forecastModule'];?> (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span>
 
 
 <div class="updatedtime1"><?php $forecastime=filemtime('jsondata/awd.txt');

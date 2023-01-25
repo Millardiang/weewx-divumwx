@@ -1,6 +1,7 @@
 <?php
 include ('fixedSettings.php');
 include ('dvmShared.php');
+include('common.php');
 error_reporting(0);
 
 $jsonS = 'jsondata/dvmSensorData.json';
@@ -142,7 +143,13 @@ if (
     $dayPartNatural = "night";
 }
     
-    
+    //air quality
+    $air["pm_units"] = "μg/m<sup><b>3</b></sup>";
+    $air["current.pm2_5"] = $adata["airquality"]["pm25 current"]["value"];
+    $air["current.pm10_0"] = $adata["airquality"]["pm10 current"]["value"];
+    $air["24h.rollingavg.pm2_5"] = $adata ["airquality"]["pm25 rolling 24hr"]["value"];
+    $air["24h.rollingavg.pm10_0"] = $adata["airquality"]["pm10 rolling 24hr"]["value"];
+
     //barometer
     $barom["units"] = $sdata["unit.label.barometer"];
     if ($barom["units"] == " inHg"){$barom["units"] = "inHg";}

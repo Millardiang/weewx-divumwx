@@ -1,6 +1,5 @@
 <?php
 include('dvmCombinedData.php');
-include('common.php');
 date_default_timezone_set($TZ);
 header('Content-type: text/html; charset=utf-8');
 ?>
@@ -61,7 +60,7 @@ $sun_elevation = round($sun_alt,2)."&deg;<div class=sunbelowweather34>&nbsp;</di
 
 </div>
 
-<span class="moduletitle2"><?php echo "Solar Dial";?></span>
+<span class="moduletitle2"><?php echo $lang['solarDialModule'];?></span>
 
 <div class="updatedtime1"><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$weather["time"];?></div>
 
