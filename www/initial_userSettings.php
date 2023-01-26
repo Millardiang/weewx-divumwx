@@ -10,6 +10,7 @@ $timeFormat    = "H:i:s"; //g:i:s, g:i:s a
 $timeFormatShort    = "H:i"; //g:i, g:i a
 $clockformat    = "24"; //12, 24
 $advisoryzone = "uk"; //uk, na, eu, au, rw (= UK, North America, Europe, Australia, Rest of World)
+$airqual["in_use"] = "yes"; // yes, no
 $airqual["zone"] = "uk"; //uk, us, ei, ci, au, (= UK DAQI, US EPS, Europe EAQI, Europe CAQI, Australia)
 $airqual["source"] = "weewx";  //purple, weewx, sds
 $lightning["source"] = '0'; // use 'Boltek' or '0'
@@ -21,12 +22,12 @@ $position6   = "dvmForecastModule.php";
 $position7   = "dvmCurrentModule.php";
 $position8   = "dvmWindModule.php";
 $position9   = "dvmBarometerModule.php";
-$position10   = "dvmSolarDialModule.php";
+$position10    = "dvmSolarDialModule.php";
 $position11   = "dvmRainfallModule.php";
 $position12   = "dvmSolarUvLuxModule.php";
 $position13   = "dvmLightningModule.php";
 $position14   = "dvmAirqualityModule.php";
-$position15   = "dvmWebcamModule.php";
+$position15   = "dvmIndoorTemperatureModule.php";
 $position16   = "dvmEarthDaylightModule.php";
 $position17   = "";
 $position18   = "";
