@@ -233,7 +233,7 @@ if (
     $humid["alltime_maxtime"] = date('j M Y' ,$sdata['alltime.outHumidity.maxtime.raw']);
     $humid["alltime_min"] = $sdata['alltime.outHumidity.min.formatted'];
     $humid["alltime_mintime"] = date('j M Y', $sdata['alltime.outHumidity.mintime.raw']);
-
+    $humid["indoors_trend"] = $sdata ["trend.inHumidity.formatted"];
     $humid["indoors_now"] = $sdata ["current.inHumidity.formatted"];
     $humid["indoors_day_max"] = $sdata["day.inHumidity.max.formatted"];
     $humid["indoors_day_maxtime"] = date('H:i:s', $sdata["day.inHumidity.maxtime.raw"]);
@@ -368,6 +368,19 @@ if (
     $temp["outside_alltime_maxtime"] = date('j M Y',  $sdata["alltime.outTemp.maxtime.raw"]);
     $temp["outside_alltime_min"] = $sdata["alltime.outTemp.min.formatted"];
     $temp["outside_alltime_mintime"] = date('j M Y',  $sdata["alltime.outTemp.mintime.raw"]);
+    $Temp = $temp["indoor_now"];
+    $Humidity = $humid["indoors_now"];
+    $T = $Temp*9/5+32;
+    $RH = $Humidity;
+    $HI = 0;
+    if($T <= 40.0) {$HI = $T;}
+    else {$HI = -42.379 + (2.04901523*$T) + (10.14333127*$RH) - (0.22475541*$T*$RH) - (0.00683783*$T*$T) - (0.05481717*$RH*$RH) + (0.00122874*$T*$T*$RH) + (0.00085282*$T*$RH*$RH) - (0.00000199*$T*$T*$RH*$RH);}
+    if ($RH < 13 && $T >= 80 && $T <= 112) {$adjust = ((13-RH)/4)  * sqrt(17-abs($T-95)/17);              $HI = $HI-$adjust;}
+    else if ($RH > 85 && $T >= 80 && $T <= 87) {$adjust = (($RH-85)/10) * ((87-$T)/5); $HI = $HI+$adjust;}
+    else if ($T < 80){$HI = 0.5 * ($T + 61.0 + (($T-68.0)*1.2) + ($RH*0.094));}
+
+    //$temp["indoor_now_feels"] = number_format(($HI - 32) * 5/9, 1);
+      $temp["indoor_now_feels"] = number_format($HI, 1);
 
     //uv
     $uv["now"] = $sdata["current.UV.formatted"];
