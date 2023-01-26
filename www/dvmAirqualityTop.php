@@ -299,7 +299,6 @@ $airqual["qualColor"] = $airqual["color25"];
 
 ?>
 
-     <div class="weatherbox-top-border">
       <div class="title"><?php echo $info;?><?php echo $lang['airQualityTop'];?></div>
 
 <!--div class="updatedtime1"><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online.' '.date($timeFormat);?></div-->
