@@ -31,27 +31,32 @@ $chartsource =  "dvmhighcharts";
 // Refresh Data Main Page  //																	   #
 // Automatic refresh times (in seconds) of each panel on the main dashboard						   #
 ####################################################################################################
+// Updater timing cycles
 
-$cycles1 = '8640000';
-$cycles2 = '60000';
-$cycles3 = '60000';
-$cycles4 = '60000';
-$cycles5 = '60000';
-$cycles6 = '60000';
-$cycles7 = '60000';
-$cycles8 = '4000'; 
-$cycles9 = '60000';
-$cycles10 = '60000';
-$cycles11 = '60000';
-$cycles12 = '60000';
-$cycles13 = '60000';
-$cycles14 = '60000';
-$cycles15 = '60000';
-$cycles16 = '60000';
-$cycles17 = '60000';
-$cycles18 = '60000';
-$cycles19 = '60000';
-$cycles20 = '60000';
+$json_string = file_get_contents("jsondata/dvmPositionCycles.json");
+$parsed_json = json_decode($json_string, true);
+
+$cycles1 = "8640000";
+$cycles2 = $parsed_json[$position2]["cycle"];
+$cycles3 = $parsed_json[$position3]["cycle"];
+$cycles4 = "60000";
+$cycles5 = $parsed_json[$position5]["cycle"];
+$cycles6 = $parsed_json[$position6]["cycle"];
+$cycles7 = $parsed_json[$position7]["cycle"];
+$cycles8 = $parsed_json[$position8]["cycle"]; 
+$cycles9 = $parsed_json[$position9]["cycle"];
+$cycles10 = $parsed_json[$position10]["cycle"];
+$cycles11 = $parsed_json[$position11]["cycle"];
+$cycles12 = $parsed_json[$position12]["cycle"];
+$cycles13 = $parsed_json[$position13]["cycle"];
+$cycles14 = $parsed_json[$position14]["cycle"];
+$cycles15 = $parsed_json[$position15]["cycle"];
+$cycles16 = $parsed_json[$position16]["cycle"];
+$cycles17 = $parsed_json[$position17]["cycle"];
+$cycles18 = $parsed_json[$position18]["cycle"];
+$cycles19 = $parsed_json[$position19]["cycle"];
+$cycles20 = $parsed_json[$position20]["cycle"];
+
 
 $copyYear = 2015;
 $curYear = date("Y");
@@ -108,7 +113,7 @@ $chartsource = "dvmhighcharts";
 $creditsURL = ""; // for chart pages only
 $credits = "Data Supplied via Weather Underground"; // for chart pages only
 $templateinfo = ""; // template information page
-$templateversion = "DVM-<maxblue>Alpha build 0.3.0</maxblue>";
+$templateversion = "DVM-<maxblue>Alpha build 0.3.1</maxblue>";
 
 $software = "WeeWX <span>Hardware</span> Users";
 $designedfor = "<br>For WeeWX Users";
