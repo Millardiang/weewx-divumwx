@@ -39,7 +39,7 @@ $sun_elevation = round($sun_alt,2)."&deg;<div class=sunbelowweather34>&nbsp;</di
     </div>
     <span class='moduletitle2'><?php echo $lang['earthDaylightModule'];?></span>
 
-<div class="updatedtime1"><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$weather["time"];?></div>
+<div class="updatedtime1"><?php if(file_exists($livedata)&&time() - filemtime($livedata)>3600) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$weather["time"];?></div>
 
 <div class="daylightmoduleposition"> 
 <?php echo 
