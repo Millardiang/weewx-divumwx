@@ -6,7 +6,7 @@ error_reporting(0);
 ?>
 
 <?php
-$json = "/srv/http/html/divumwx/boltek/data/ngxarchive.json";
+$json = "jsondata/ngxarchive.json";
 $jsonobj = file_get_contents($json);
 $arr = json_decode($jsonobj, true); 
 $lightning["bearingx"] = $arr['StrikeData'][0]['bng'];
