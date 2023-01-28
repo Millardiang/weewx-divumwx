@@ -1,9 +1,7 @@
 <?php 
 include('dvmCombinedData.php');
-
 if($temp["units"]== "C"){
 $temp["indoor_now_feels"] = ($temp["indoor_now_feels"]-32)/9*5;}
-
 ?>
 
 <div class="chartforecast">
@@ -44,7 +42,7 @@ else if(anyToC($temp["indoor_now_feels"])<100){$feelscolor = "#e26870";}
 <div class="updatedtime1"><span><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>'; else echo $online." ".$weather["time"];?></div><br/>
  
 <div class="tempindoorconverter">
-<?php //chuck
+<?php
 if($temp["units"]=='F' &&  anyToC($temp["indoor_now"])>=30){echo "<div class=tempconvertercirclered><tred>".anyToC($temp["indoor_now"])."</tred>&deg;<smalltempunit2>C" ;}
 else if($temp["units"]=='F' &&  anyToC($temp["indoor_now"])>=25){echo "<div class=tempconvertercircleorange><torange>".anyToC($temp["indoor_now"])."</torange>&deg;<smalltempunit2>C" ;}
 else if($temp["units"]=='F' && anyToC($temp["indoor_now"])>=18){echo "<div class=tempconvertercircleyellow>".anyToC($temp["indoor_now"])."&deg;<smalltempunit2>C" ;}
@@ -59,6 +57,12 @@ else if($temp["units"]=='C' && anyToC($temp["indoor_now"])<10){echo "<div class=
 
 
 <style>
+
+.tempindoorconverter {
+  margin-left: 235px;
+  margin-top: -20px
+}
+
 .house {
   position: relative; 
   margin-top: -21.5px; 
@@ -84,10 +88,14 @@ else if($temp["units"]=='C' && anyToC($temp["indoor_now"])<10){echo "<div class=
 	var humidity = "<?php echo $humid["indoors_now"];?>";
 
 	var feels = "<?php echo number_format($temp["indoor_now_feels"],1);?>";
+	
+	var h_trend = "<?php echo $humid["indoors_trend"];?>"; 
 		
 	var hcolor = "<?php echo $humidcolor;?>";
 
 	var fcolor = "<?php echo $feelscolor;?>";
+	
+	var units = "<?php echo $temp["units"];?>";
  
 
 var svg = d3.select(".house")
@@ -97,7 +105,7 @@ var svg = d3.select(".house")
     			.attr("height", 150);
     			    			
     			// begin drawing a house of sorts ( Das ist das Hause von Nikolaus und neben an wohnt der Weihnachtsmann :-) )
-    			
+    			    			
     			svg.append("line") // floor
     			.attr("x1", 25)
     			.attr("x2", 150)
@@ -110,7 +118,7 @@ var svg = d3.select(".house")
     			svg.append("line") // left wall
     			.attr("x1", 25)
     			.attr("x2", 25)
-    			.attr("y1", 70)
+    			.attr("y1", 71)
     			.attr("y2", 145)
     			.style("stroke", "#38383c")
     			.style("stroke-width", "3px")
@@ -118,10 +126,10 @@ var svg = d3.select(".house")
     			    			    			
     			// roof structure left
     			svg.append("line") // left horizontal line
-    			.attr("x1", 10)
+    			.attr("x1", 9)
     			.attr("x2", 25)
-    			.attr("y1", 70)
-    			.attr("y2", 70)
+    			.attr("y1", 70.25)
+    			.attr("y2", 70.25)
     			.style("stroke", "#38383c")
     			.style("stroke-width", "3px")
     			.style("stroke-linecap", "round");
@@ -138,7 +146,7 @@ var svg = d3.select(".house")
     			
     			svg.append("line") //  roof left diagonal line
     			.attr("x1", 5)
-    			.attr("x2", 82.5)
+    			.attr("x2", 83)
     			.attr("y1", 59.5)
     			.attr("y2", 5)
     			.style("stroke", "#38383c")
@@ -153,12 +161,12 @@ var svg = d3.select(".house")
     			svg.append("path")
     			.attr("d", arc)
     			.attr("fill", "#38383c")
-    			.attr("transform", "translate(87.5,10)");
+    			.attr("transform", "translate(87.5,9.75)");
     			
     			svg.append("line") // right wall
     			.attr("x1", 150)
     			.attr("x2", 150)
-    			.attr("y1", 70)
+    			.attr("y1", 71)
     			.attr("y2", 145)
     			.style("stroke", "#38383c")
     			.style("stroke-width", "3px")
@@ -168,8 +176,8 @@ var svg = d3.select(".house")
     			svg.append("line") // right horizontal line
     			.attr("x1", 150)
     			.attr("x2", 165)
-    			.attr("y1", 70)
-    			.attr("y2", 70)
+    			.attr("y1", 70.25)
+    			.attr("y2", 70.25)
     			.style("stroke", "#38383c")
     			.style("stroke-width", "3px")
     			.style("stroke-linecap", "round");
@@ -210,7 +218,7 @@ var svg = d3.select(".house")
     			svg.append("path")
     			.attr("d", arc)
     			.attr("fill", "#38383c")
-    			.attr("transform", "translate(87.5,10)");
+    			.attr("transform", "translate(87.5,9.75)");
     			
     			// Chimney 
     			svg.append("line") //  chimney left virtical line
@@ -245,7 +253,7 @@ var svg = d3.select(".house")
     			// Humidity
     		svg.append("text")	
 				.attr("x", 235)
-				.attr("y", 60)
+				.attr("y", 59)
 				.attr("text-anchor", "middle")
 				.style("font-size", "12px")
 				.style("font-family", "Helvetica")
@@ -254,7 +262,7 @@ var svg = d3.select(".house")
 				.text("Humidity");
 				
 			svg.append("text")	
-				.attr("x", 233)
+				.attr("x", 230)
 				.attr("y", 77)
 				.attr("text-anchor", "middle")
 				.style("font-size", "10px")
@@ -274,8 +282,10 @@ var svg = d3.select(".house")
 				.style("fill", "silver")
 				.text("Feels");
 				
+		if (units == 'C') {
+				
 			svg.append("text")	
-				.attr("x", 233)
+				.attr("x", 235)
 				.attr("y", 113)
 				.attr("text-anchor", "middle")
 				.style("font-size", "10px")
@@ -286,10 +296,68 @@ var svg = d3.select(".house")
 				
 		} else {
 		
+			svg.append("text")	
+				.attr("x", 235)
+				.attr("y", 113)
+				.attr("text-anchor", "middle")
+				.style("font-size", "10px")
+				.style("font-family", "Helvetica")
+				.style("font-weight", "normal")
+				.style("fill", "silver")
+				.text(feels+"°F");
+				
+			}
+		
+				
+		if (h_trend > 0) {
+    	
+    	 svg.append('polyline') // trend rising
+                .attr('points', "245 77 248 73 251 75 255 70")
+                .attr('stroke-width', "0.75px")
+                .style("fill", "none")
+                .style("stroke-linecap", "round")
+                .attr('stroke', "#ff7c39");
+                
+            svg.append('polyline') // trend rising
+                .attr('points', "255 70 251.5 70 255 70 256 73")
+                .attr('stroke-width', "0.75px")
+                .style("fill", "none")
+                .style("stroke-linecap", "round")
+                .attr('stroke', "#ff7c39");   		
+                
+		 } else if (h_trend < 0) {
+		 		 
+		 svg.append('polyline') // trend falling
+                .attr('points', "245 69 248 73 251 71 255 76")
+                .attr('stroke-width', "0.75px")
+                .style("fill", "none")
+                .style("stroke-linecap", "round")
+                .attr('stroke', "#3b9cac");
+                
+            svg.append('polyline') // trend falling
+                .attr('points', "255 76 251.5 76 255 76 256 73")
+                .attr('stroke-width', "0.75px")
+                .style("fill", "none")
+                .style("stroke-linecap", "round")
+                .attr('stroke', "#3b9cac");
+		           
+		} else if (h_trend == 0) {
+		
+		 	svg.append('polyline') // steady trend
+                .attr('points', "247 70.5 250 73.5 247 76.5")
+                .attr('stroke-width', "0.75px")
+                .style("fill", "none")
+                .style("stroke-linecap", "round")
+                .attr('stroke', "#90b12a");
+		}
+				
+				
+		} else {
+		
 				// Humidity
 			svg.append("text")	
 				.attr("x", 235)
-				.attr("y", 60)
+				.attr("y", 59)
 				.attr("text-anchor", "middle")
 				.style("font-size", "12px")
 				.style("font-family", "Helvetica")
@@ -298,7 +366,7 @@ var svg = d3.select(".house")
 				.text("Humidity");
 				
 			svg.append("text")	
-				.attr("x", 233)
+				.attr("x", 230)
 				.attr("y", 77)
 				.attr("text-anchor", "middle")
 				.style("font-size", "10px")
@@ -318,8 +386,10 @@ var svg = d3.select(".house")
 				.style("fill", "black")
 				.text("Feels");
 				
+			if (units == 'C') {
+				
 			svg.append("text")	
-				.attr("x", 233)
+				.attr("x", 235)
 				.attr("y", 113)
 				.attr("text-anchor", "middle")
 				.style("font-size", "10px")
@@ -328,9 +398,64 @@ var svg = d3.select(".house")
 				.style("fill", "black")
 				.text(feels+"°C");
 				
-			}
+		} else {
 		
+			svg.append("text")	
+				.attr("x", 235)
+				.attr("y", 113)
+				.attr("text-anchor", "middle")
+				.style("font-size", "10px")
+				.style("font-family", "Helvetica")
+				.style("font-weight", "normal")
+				.style("fill", "black")
+				.text(feels+"°F");
 				
+			}
+				
+		if (h_trend > 0) {
+    	
+    	 svg.append('polyline') // trend rising
+                .attr('points', "245 77 248 73 251 75 255 70")
+                .attr('stroke-width', "0.75px")
+                .style("fill", "none")
+                .style("stroke-linecap", "round")
+                .attr('stroke', "#ff7c39");
+                
+            svg.append('polyline') // trend rising
+                .attr('points', "255 70 251.5 70 255 70 256 73")
+                .attr('stroke-width', "0.75px")
+                .style("fill", "none")
+                .style("stroke-linecap", "round")
+                .attr('stroke', "#ff7c39");   		
+                
+		 } else if (h_trend < 0) {
+		 		 
+		 svg.append('polyline') // trend falling
+                .attr('points', "245 69 248 73 251 71 255 76")
+                .attr('stroke-width', "0.75px")
+                .style("fill", "none")
+                .style("stroke-linecap", "round")
+                .attr('stroke', "#3b9cac");
+                
+            svg.append('polyline') // trend falling
+                .attr('points', "255 76 251.5 76 255 76 256 73")
+                .attr('stroke-width', "0.75px")
+                .style("fill", "none")
+                .style("stroke-linecap", "round")
+                .attr('stroke', "#3b9cac");
+		           
+		} else if (h_trend == 0) {
+		
+		 	svg.append('polyline') // steady trend
+                .attr('points', "247 70.5 250 73.5 247 76.5")
+                .attr('stroke-width', "0.75px")
+                .style("fill", "none")
+                .style("stroke-linecap", "round")
+                .attr('stroke', "#90b12a");
+		}
+								
+			}
+						
 			svg.append("rect")
     			.attr("x", 206)
     			.attr("y", 66)
@@ -343,7 +468,7 @@ var svg = d3.select(".house")
     		svg.append("rect")
     			.attr("x", 207)
     			.attr("y", 67)
-    			.attr("rx", 0)
+    			.attr("rx", 0.5)
     			.style("stroke", hcolor)
     			.attr("height", 13)
     			.attr("width", 3)
@@ -361,14 +486,13 @@ var svg = d3.select(".house")
     		svg.append("rect")
     			.attr("x", 207)
     			.attr("y", 103)
-    			.attr("rx", 0)
+    			.attr("rx", 0.5)
     			.style("stroke", fcolor)
     			.attr("height", 13)
     			.attr("width", 3)
-    			.style("fill", fcolor); 
+    			.style("fill", fcolor);
     			
-    			
-   			
+       			      		   		  			
 </script>
 
 <script>
