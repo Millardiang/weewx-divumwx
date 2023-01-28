@@ -208,7 +208,8 @@ function map($value, $fromLow, $fromHigh, $toLow, $toHigh){
     return $tmpValue + $toLow;
 }
 
-$airqual["aqi25"] = number_format(pm25_to_aqi($airqual["pm25"],1));
+$airqual["aqi25"] = number_format($airqual["pm25"],1);
+$airqual["aqi25"] = pm25_to_aqi($airqual["pm25"]);
 
 if ($airqual["aqi25"] < 51 ){
 $airqual["image25"] = "./css/aqi/goodair.svg?ver=1.4";
