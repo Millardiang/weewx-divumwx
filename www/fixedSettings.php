@@ -3,7 +3,7 @@ include "userSettings.php";
 error_reporting(0);
 
 ###########################################################################
-# THE SETIINGS BELOW MUST BE LEFT UNTOUCHED UNLESS YOU REALLY NEED  #######
+# THE SETTINGS BELOW MUST BE LEFT UNTOUCHED UNLESS YOU REALLY NEED  #######
 # TO MAKE THE CHANGES HERE TO MAKE IT WORK ON YOUR SERVER// ###############
 # TAKE THE TIME TO STUDY THEM DONT TAKE IT FOR GRANTED      ###############
 # USE THE EASY SETUP PANEL TO MAKE CHANGES IN THE TEMPLATE  ###############
@@ -107,7 +107,7 @@ $scriptcredits =
     date("Y") .
     ""; // for modules
 $creditsEnabled = "true"; // for chart pages only
-$creditsmysql = "Weather Data Recorded from $stationName Database"; //for chart pages only
+$creditsmysql = "Weather Data Recorded from ".$stationName." Database"; //for chart pages only
 $wucredits = "Data provided by Weather Underground"; // for chart pages only
 $chartsource = "dvmhighcharts";
 $creditsURL = ""; // for chart pages only
