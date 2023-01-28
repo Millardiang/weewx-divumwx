@@ -1,16 +1,48 @@
-<?php include('dvmCombinedData.php');
+<?php 
+include('dvmCombinedData.php');
+
+if($temp["units"]== "C"){
+$temp["indoor_now_feels"] = ($temp["indoor_now_feels"]-32)/9*5;}
+
 ?>
 
-    <div class="chartforecast">
+<div class="chartforecast">
        <span class="yearpopup"><a alt="Home Indoors" title="Home Indoors" href="dvmHomeIndoorPopup.php" data-lity><?php echo $info;?> Home Indoors</a></span>
     </div>
     <span class='moduletitle'><?php echo $lang['indoorTempModule'];?></span>
 
+<?php
+if(anyToC($temp["indoor_now"])<=-10){$indoorcolor = "#8781bd";}
+else if(anyToC($temp["indoor_now"])<=0){$indoorcolor = "#487ea9";}
+else if(anyToC($temp["indoor_now"])<=5){$indoorcolor = "#3b9cac";}
+else if(anyToC($temp["indoor_now"])<10){$indoorcolor = "#9aba2f";}
+else if(anyToC($temp["indoor_now"])<20){$indoorcolor = "#e6a141";}
+else if(anyToC($temp["indoor_now"])<25){$indoorcolor = "#ec5a34";}
+else if(anyToC($temp["indoor_now"])<30){$indoorcolor = "#d05f2d";}
+else if(anyToC($temp["indoor_now"])<35){$indoorcolor = "#d65b4a";}
+else if(anyToC($temp["indoor_now"])<40){$indoorcolor = "#dc4953";}
+else if(anyToC($temp["indoor_now"])<100){$indoorcolor = "#e26870";}
 
-<div class="updatedtime"><span><?php if(file_exists($livedata)&&time()- filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>';else echo $online." ".$weather["time"];?></div><br/>
+if($humid["indoors_now"]>90){$humidcolor = "#4e95a0";}
+else if($humid["indoors_now"]>70){$humidcolor = "#e6a141";}
+else if($humid["indoors_now"]>35){$humidcolor = "#90b12a";}
+else if($humid["indoors_now"]>25){$humidcolor = "#d05f2d";}
+else if($humid["indoors_now"]<=25){$humidcolor = "#d35d4e";}
 
+if(anyToC($temp["indoor_now_feels"])<=-10){$feelscolor = "#8781bd";}
+else if(anyToC($temp["indoor_now_feels"])<=0){$feelscolor = "#487ea9";}
+else if(anyToC($temp["indoor_now_feels"])<=5){$feelscolor = "#3b9cac";}
+else if(anyToC($temp["indoor_now_feels"])<10){$feelscolor = "#9aba2f";}
+else if(anyToC($temp["indoor_now_feels"])<20){$feelscolor = "#e6a141";}
+else if(anyToC($temp["indoor_now_feels"])<25){$feelscolor = "#ec5a34";}
+else if(anyToC($temp["indoor_now_feels"])<30){$feelscolor = "#d05f2d";}
+else if(anyToC($temp["indoor_now_feels"])<35){$feelscolor = "#d65b4a";}
+else if(anyToC($temp["indoor_now_feels"])<40){$feelscolor = "#dc4953";}
+else if(anyToC($temp["indoor_now_feels"])<100){$feelscolor = "#e26870";}
+?>
 
-
+<div class="updatedtime1"><span><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>'; else echo $online." ".$weather["time"];?></div><br/>
+ 
 <div class="tempindoorconverter">
 <?php //chuck
 if($temp["units"]=='F' &&  anyToC($temp["indoor_now"])>=30){echo "<div class=tempconvertercirclered><tred>".anyToC($temp["indoor_now"])."</tred>&deg;<smalltempunit2>C" ;}
@@ -18,48 +50,718 @@ else if($temp["units"]=='F' &&  anyToC($temp["indoor_now"])>=25){echo "<div clas
 else if($temp["units"]=='F' && anyToC($temp["indoor_now"])>=18){echo "<div class=tempconvertercircleyellow>".anyToC($temp["indoor_now"])."&deg;<smalltempunit2>C" ;}
 else if($temp["units"]=='F' &&  anyToC($temp["indoor_now"])>=10){echo "<div class=tempconvertercirclegreen>".anyToC($temp["indoor_now"])."&deg;<smalltempunit2>C" ;}
 else if($temp["units"]=='F' && anyToC($temp["indoor_now"])<10){echo "<div class=tempconvertercircleblue>".anyToC($temp["indoor_now"])."&deg;<smalltempunit2>C" ;}
-else if( $temp["units"]=='C' &&  anyToC($temp["indoor_now"])>=30){echo "<div class=tempconvertercirclered><tred>".anyToF($temp["indoor_now"])."</tred>&deg;<smalltempunit2>F" ;}
-else if( $temp["units"]=='C' &&  anyToC($temp["indoor_now"])>=25){echo "<div class=tempconvertercircleorange><torange>".anyToF($temp["indoor_now"])."</torange>&deg;<smalltempunit2>F" ;}
-else if( $temp["units"]=='C' &&  anyToC($temp["indoor_now"])>=18){echo "<div class=tempconvertercircleyellow>".anyToF($temp["indoor_now"])."&deg;<smalltempunit2>F" ;}
-else if( $temp["units"]=='C' &&  anyToC($temp["indoor_now"])>=10){echo "<div class=tempconvertercirclegreen>".anyToF($temp["indoor_now"])."&deg;<smalltempunit2>F" ;}
-else if( $temp["units"]=='C' && anyToC($temp["indoor_now"])<10){echo "<div class=tempconvertercircleblue>".anyToF($temp["indoor_now"])."&deg;<smalltempunit2>F" ;}
+else if($temp["units"]=='C' &&  anyToC($temp["indoor_now"])>=30){echo "<div class=tempconvertercirclered><tred>".anyToF($temp["indoor_now"])."</tred>&deg;<smalltempunit2>F" ;}
+else if($temp["units"]=='C' &&  anyToC($temp["indoor_now"])>=25){echo "<div class=tempconvertercircleorange><torange>".anyToF($temp["indoor_now"])."</torange>&deg;<smalltempunit2>F" ;}
+else if($temp["units"]=='C' &&  anyToC($temp["indoor_now"])>=18){echo "<div class=tempconvertercircleyellow>".anyToF($temp["indoor_now"])."&deg;<smalltempunit2>F" ;}
+else if($temp["units"]=='C' &&  anyToC($temp["indoor_now"])>=10){echo "<div class=tempconvertercirclegreen>".anyToF($temp["indoor_now"])."&deg;<smalltempunit2>F" ;}
+else if($temp["units"]=='C' && anyToC($temp["indoor_now"])<10){echo "<div class=tempconvertercircleblue>".anyToF($temp["indoor_now"])."&deg;<smalltempunit2>F" ;}
 ?></smalltempunit2></div></div>
-<div class="indoortrendhouse1">Indoor</oorange></div>  
-<div class="indoorhomesvg1">
-<svg id="weather34 indoor house" width="138pt" height="128pt" viewBox="0 0 475 497" version="30092018" fill="currentcolor">
-<path d=" M 211.42 96.39 C 219.31 93.33 229.02 94.82 235.24 100.72 C 248.26 113.57 261.09 126.66 274.50 139.11 C 274.67 130.74 274.26 122.36 274.67 114.00 C 275.00 106.78 281.80 100.82 288.94 100.98 C 299.32 101.01 309.70 100.99 320.08 100.99 C 328.19 101.00 335.21 108.86 334.03 116.97 C 333.93 143.01 334.05 169.04 333.97 195.07 C 333.94 196.71 333.92 198.57 335.39 199.65 C 345.35 209.34 355.26 219.08 365.19 228.80 C 368.20 231.79 371.69 234.49 373.60 238.39 C 376.82 244.35 376.98 251.89 373.92 257.95 C 370.54 265.08 362.95 270.12 355.02 270.16 C 348.03 270.32 341.04 270.18 334.05 270.20 C 333.91 304.45 334.07 338.71 333.96 372.96 C 257.99 372.94 182.01 372.95 106.04 372.96 C 105.93 338.71 106.09 304.45 105.95 270.20 C 98.96 270.18 91.96 270.32 84.98 270.16 C 76.81 270.07 68.98 264.78 65.78 257.28 C 62.30 249.81 63.74 240.43 69.22 234.29 C 97.88 205.26 127.47 177.17 156.23 148.23 C 169.74 134.74 183.40 121.40 197.03 108.04 C 201.58 103.90 205.47 98.61 211.42 96.39 M 210.66 108.63 C 196.77 122.41 182.90 136.21 168.90 149.88 C 139.19 178.84 110.04 208.38 80.23 237.23 C 77.80 239.59 75.27 242.13 74.35 245.50 C 72.16 252.29 77.88 260.06 84.97 260.31 C 95.24 260.46 105.53 260.38 115.81 260.31 C 115.81 294.66 115.67 329.00 115.70 363.35 C 185.23 363.42 254.77 363.42 324.31 363.35 C 324.33 329.00 324.19 294.66 324.20 260.31 C 334.14 260.42 344.09 260.38 354.04 260.37 C 357.75 260.43 361.45 258.63 363.66 255.64 C 367.05 251.37 366.91 244.85 363.13 240.86 C 350.32 228.69 337.96 216.05 325.35 203.68 C 323.83 202.61 324.21 200.65 324.11 199.06 C 324.19 172.02 324.09 144.98 324.17 117.95 C 324.12 115.98 324.22 113.74 322.84 112.16 C 320.96 110.54 318.31 110.92 316.03 110.83 C 307.33 110.92 298.63 110.79 289.94 110.88 C 287.54 110.71 284.49 112.24 284.71 115.00 C 284.50 131.07 284.78 147.14 284.59 163.22 C 280.42 159.80 276.82 155.78 272.94 152.06 C 258.16 137.50 243.58 122.74 228.68 108.30 C 223.87 103.44 215.31 103.67 210.66 108.63 Z" /><path  d=" M 138.23 285.20 C 138.85 285.82 138.85 285.82 138.23 285.20 Z" /><path d=" M 141.13 289.24 C 144.43 289.45 139.58 292.30 141.13 289.24 Z" /><path d=" M 142.14 292.22 C 142.76 292.84 142.76 292.84 142.14 292.22 Z" /><path d=" M 141.21 294.42 C 142.54 294.64 142.77 295.37 141.89 296.61 C 140.56 296.40 140.33 295.67 141.21 294.42 Z" /><path d=" M 140.24 298.22 C 140.86 298.84 140.86 298.84 140.24 298.22 Z" /><path d=" M 133.21 300.21 C 133.83 300.83 133.83 300.83 133.21 300.21 Z" /><path d=" M 138.21 300.20 C 138.83 300.82 138.83 300.82 138.21 300.20 Z" /></svg></div>
-<div class="indoorhomevalue1">
-<?php //temperture indoor celsius
- if (anyToC($temp["indoor_now"]) >30){echo "<indoorred1>",$temp["indoor_now"]  ;echo "&deg;<smalluvunit>".$temp["units"] ; } else if (anyToC($temp["indoor_now"]) >24){echo "<indoororange1>",$temp["indoor_now"]  ;echo "&deg;<smalluvunit>".$temp["units"] ; } else if (anyToC($temp["indoor_now"]) >20){echo "<indooryellow1>",$temp["indoor_now"]  ;echo "&deg;<smalluvunit>".$temp["units"] ; }
- else if (anyToC($temp["indoor_now"]) >15){ echo "<indoorgreen1>", $temp["indoor_now"]  ;echo "&deg;<smalluvunit>".$temp["units"] ; } else if (anyToC($temp["indoor_now"]) >0){ echo "<indoorblue1>", $temp["indoor_now"]  ;echo "&deg;<smalluvunit>".$temp["units"] ; }?></div>
-<div class="weather34indoorword">
-<?php if($temp["indoor_trend"] >0)echo number_format($temp["indoor_trend"],1).'&deg;&nbsp; '.$risingsymbol;else if($temp["indoor_trend"]<0)echo number_format($temp["indoor_trend"],1).'&deg;&nbsp;'.$fallingsymbol;else if($temp["indoor_trend"] ==0)echo 'Steady'; ?></div>
-</div></smalluvunit></div></div>
-
-<div class="heatcircle6"><div class="inheatcircle-content"><valuetextheading1><?php echo $lang['Humidity']?></valuetextheading1>
-<?php //humidity
-if ( $humid["indoors_now"]>90){echo "<div class=tempconverter1><div class=temphumcircle80-100>". $humid["indoors_now"];}
-else if ( $humid["indoors_now"]>70){echo "<div class=tempconverter1><div class=temphumcircle60-80>". $humid["indoors_now"];}
-else if ( $humid["indoors_now"]>35){echo "<div class=tempconverter1><div class=temphumcircle35-60>". $humid["indoors_now"];}
-else if ( $humid["indoors_now"]>25){echo "<div class=tempconverter1><div class=temphumcircle25-35>". $humid["indoors_now"];}
-else if ( $humid["indoors_now"]<=25){echo "<div class=tempconverter1><div class=temphumcircle0-25>". $humid["indoors_now"];}?><smalltempunit2>%</smalltempunit2>
-<?php //humidity trend
-if( $humid["indoors_trend"]>0){echo '&nbsp;'.$risingsymbol;}else if( $humid["indoors_trend"]<0){echo '&nbsp;'.$fallingsymbol;}else{ echo '';}?></span></div></div></div>
 
 
+<style>
+.house {
+  position: relative; 
+  margin-top: -21.5px; 
+  margin-left: 0px;
+}
+.idtemppos {
+  margin-top: -153px;
+  margin-left: -135.5px;
+}
+</style>
 
-<div class="inheatcircle2-content"><valuetextheading1>Feels</valuetextheading1></div>
-<div class="heatcircle7">
-<?php  
-if($temp["units"]== "C"){
-$temp["indoor_now_feels"] = ($temp["indoor_now_feels"]-32)/9*5;}
-if (anyToC($temp ["indoor_now_feels"])>28){ echo "<div class=tempmodulehome30-35c><div class=rainratesmall>";} 
-else if (anyToC($temp ["indoor_now_feels"])>25){ echo "<div class=tempmodulehome25-30c><div class=rainratesmall>";}
-else if (anyToC($temp ["indoor_now_feels"])>20){ echo "<div class=tempmodulehome20-25c><div class=rainratesmall>";}  
-else if (anyToC($temp ["indoor_now_feels"])>15){ echo "<div class=tempmodulehome15-20c><div class=rainratesmall>";}
-else if (anyToC($temp ["indoor_now_feels"])>10){ echo "<div class=tempmodulehome10-15c><div class=rainratesmall>";} 
-else if (anyToC($temp ["indoor_now_feels"])>0){ echo "<div class=tempmodulehome0-5c><div class=rainratesmall>";}
+<script src="js/d3.min.js"></script>
 
-echo "</div>". number_format($temp["indoor_now_feels"],1)."&deg;<smalltempunit2>".$temp["units"];?> </smalltempunit2>
-</span></div></div></div></div>
+<div class="house"></div>
+<div class="idtemppos">
+<div id="idthermometer"></div>
+</div>
 
+<script>
+
+	var theme = "<?php echo $theme;?>";
+
+	var humidity = "<?php echo $humid["indoors_now"];?>";
+
+	var feels = "<?php echo number_format($temp["indoor_now_feels"],1);?>";
+		
+	var hcolor = "<?php echo $humidcolor;?>";
+
+	var fcolor = "<?php echo $feelscolor;?>";
+ 
+
+var svg = d3.select(".house")
+    			.append("svg")
+    			//.style("background", "#292E35")
+    			.attr("width", 310)
+    			.attr("height", 150);
+    			    			
+    			// begin drawing a house of sorts ( Das ist das Hause von Nikolaus und neben an wohnt der Weihnachtsmann :-) )
+    			
+    			svg.append("line") // floor
+    			.attr("x1", 25)
+    			.attr("x2", 150)
+    			.attr("y1", 145)
+    			.attr("y2", 145)
+    			.style("stroke", "#38383c")
+    			.style("stroke-width", "3px")
+    			.style("stroke-linecap", "round");
+    			    			
+    			svg.append("line") // left wall
+    			.attr("x1", 25)
+    			.attr("x2", 25)
+    			.attr("y1", 70)
+    			.attr("y2", 145)
+    			.style("stroke", "#38383c")
+    			.style("stroke-width", "3px")
+    			.style("stroke-linecap", "round");
+    			    			    			
+    			// roof structure left
+    			svg.append("line") // left horizontal line
+    			.attr("x1", 10)
+    			.attr("x2", 25)
+    			.attr("y1", 70)
+    			.attr("y2", 70)
+    			.style("stroke", "#38383c")
+    			.style("stroke-width", "3px")
+    			.style("stroke-linecap", "round");
+    			
+    			var arc = d3.svg.arc() // bottom left arc
+    			.innerRadius(5)
+    			.outerRadius(8)
+    			.startAngle(-45 * (Math.PI/180))
+    			.endAngle(-3)    			
+    			svg.append("path")
+    			.attr("d", arc)
+    			.attr("fill", "#38383c")
+    			.attr("transform", "translate(10,63.75)");
+    			
+    			svg.append("line") //  roof left diagonal line
+    			.attr("x1", 5)
+    			.attr("x2", 82.5)
+    			.attr("y1", 59.5)
+    			.attr("y2", 5)
+    			.style("stroke", "#38383c")
+    			.style("stroke-width", "3px")
+    			.style("stroke-linecap", "round");
+    			
+    			var arc = d3.svg.arc() // Apex arc left
+    			.innerRadius(5)
+    			.outerRadius(8)
+    			.startAngle(-45 * (Math.PI/180))
+    			.endAngle(0)   			
+    			svg.append("path")
+    			.attr("d", arc)
+    			.attr("fill", "#38383c")
+    			.attr("transform", "translate(87.5,10)");
+    			
+    			svg.append("line") // right wall
+    			.attr("x1", 150)
+    			.attr("x2", 150)
+    			.attr("y1", 70)
+    			.attr("y2", 145)
+    			.style("stroke", "#38383c")
+    			.style("stroke-width", "3px")
+    			.style("stroke-linecap", "round");
+    			    		   			
+    			// roof structure right
+    			svg.append("line") // right horizontal line
+    			.attr("x1", 150)
+    			.attr("x2", 165)
+    			.attr("y1", 70)
+    			.attr("y2", 70)
+    			.style("stroke", "#38383c")
+    			.style("stroke-width", "3px")
+    			.style("stroke-linecap", "round");
+    			    
+				var arc = d3.svg.arc() // bottom right arc
+    			.innerRadius(5)
+    			.outerRadius(8)
+    			.startAngle(45 * (Math.PI/180))
+    			.endAngle(3)   			
+    			svg.append("path")
+    			.attr("d", arc)
+    			.attr("fill", "#38383c")
+    			.attr("transform", "translate(164,63.75)");
+    			
+    			svg.append("line") //  roof diagonal to Chimney left line
+    			.attr("x1", 92)
+    			.attr("x2", 127)
+    			.attr("y1", 5)
+    			.attr("y2", 30)
+    			.style("stroke", "#38383c")
+    			.style("stroke-width", "3px")
+    			.style("stroke-linecap", "round");
+    			
+    			svg.append("line") //  roof diagonal to Chimney right line
+    			.attr("x1", 145)
+    			.attr("x2", 169)
+    			.attr("y1", 42)
+    			.attr("y2", 59.5)
+    			.style("stroke", "#38383c")
+    			.style("stroke-width", "3px")
+    			.style("stroke-linecap", "round");
+    			    			    			   			
+    			var arc = d3.svg.arc() // Apex arc right
+    			.innerRadius(5)
+    			.outerRadius(8)
+    			.startAngle(45 * (Math.PI/180))
+    			.endAngle(0)   			
+    			svg.append("path")
+    			.attr("d", arc)
+    			.attr("fill", "#38383c")
+    			.attr("transform", "translate(87.5,10)");
+    			
+    			// Chimney 
+    			svg.append("line") //  chimney left virtical line
+    			.attr("x1", 127)
+    			.attr("x2", 127)
+    			.attr("y1", 10)
+    			.attr("y2", 30)
+    			.style("stroke", "#38383c")
+    			.style("stroke-width", "3px")
+    			.style("stroke-linecap", "round");
+    			
+    			svg.append("line") //  chimney right virtical line
+    			.attr("x1", 145)
+    			.attr("x2", 145)
+    			.attr("y1", 10)
+    			.attr("y2", 42)
+    			.style("stroke", "#38383c")
+    			.style("stroke-width", "3px")
+    			.style("stroke-linecap", "round");
+    			
+    			svg.append("line") //  chimney top horizontal line
+    			.attr("x1", 127)
+    			.attr("x2", 145)
+    			.attr("y1", 10)
+    			.attr("y2", 10)
+    			.style("stroke", "#38383c")
+    			.style("stroke-width", "3px")
+    			.style("stroke-linecap", "round");
+
+		if (theme == 'dark') {
+    			
+    			// Humidity
+    		svg.append("text")	
+				.attr("x", 235)
+				.attr("y", 60)
+				.attr("text-anchor", "middle")
+				.style("font-size", "12px")
+				.style("font-family", "Helvetica")
+				.style("font-weight", "normal")
+				.style("fill", "silver")
+				.text("Humidity");
+				
+			svg.append("text")	
+				.attr("x", 233)
+				.attr("y", 77)
+				.attr("text-anchor", "middle")
+				.style("font-size", "10px")
+				.style("font-family", "Helvetica")
+				.style("font-weight", "normal")
+				.style("fill", "silver")
+				.text(humidity+"%");
+				
+			// feels temp	
+    		svg.append("text")	
+				.attr("x", 235)
+				.attr("y", 95)
+				.attr("text-anchor", "middle")
+				.style("font-size", "12px")
+				.style("font-family", "Helvetica")
+				.style("font-weight", "normal")
+				.style("fill", "silver")
+				.text("Feels");
+				
+			svg.append("text")	
+				.attr("x", 233)
+				.attr("y", 113)
+				.attr("text-anchor", "middle")
+				.style("font-size", "10px")
+				.style("font-family", "Helvetica")
+				.style("font-weight", "normal")
+				.style("fill", "silver")
+				.text(feels+"°C");
+				
+		} else {
+		
+				// Humidity
+			svg.append("text")	
+				.attr("x", 235)
+				.attr("y", 60)
+				.attr("text-anchor", "middle")
+				.style("font-size", "12px")
+				.style("font-family", "Helvetica")
+				.style("font-weight", "normal")
+				.style("fill", "black")
+				.text("Humidity");
+				
+			svg.append("text")	
+				.attr("x", 233)
+				.attr("y", 77)
+				.attr("text-anchor", "middle")
+				.style("font-size", "10px")
+				.style("font-family", "Helvetica")
+				.style("font-weight", "normal")
+				.style("fill", "black")
+				.text(humidity+"%");
+				
+			// feels temp	
+    		svg.append("text")	
+				.attr("x", 235)
+				.attr("y", 95)
+				.attr("text-anchor", "middle")
+				.style("font-size", "12px")
+				.style("font-family", "Helvetica")
+				.style("font-weight", "normal")
+				.style("fill", "black")
+				.text("Feels");
+				
+			svg.append("text")	
+				.attr("x", 233)
+				.attr("y", 113)
+				.attr("text-anchor", "middle")
+				.style("font-size", "10px")
+				.style("font-family", "Helvetica")
+				.style("font-weight", "normal")
+				.style("fill", "black")
+				.text(feels+"°C");
+				
+			}
+		
+				
+			svg.append("rect")
+    			.attr("x", 206)
+    			.attr("y", 66)
+    			.attr("rx", 2)
+    			.style("stroke", "#38383c")
+    			.attr("height", 15)
+    			.attr("width", 55)
+    			.style("fill", "none");
+    			
+    		svg.append("rect")
+    			.attr("x", 207)
+    			.attr("y", 67)
+    			.attr("rx", 0)
+    			.style("stroke", hcolor)
+    			.attr("height", 13)
+    			.attr("width", 3)
+    			.style("fill", hcolor);
+    		    					
+			svg.append("rect")
+    			.attr("x", 206)
+    			.attr("y", 102)
+    			.attr("rx", 2)
+    			.style("stroke", "#38383c")
+    			.attr("height", 15)
+    			.attr("width", 55)
+    			.style("fill", "none");
+    			
+    		svg.append("rect")
+    			.attr("x", 207)
+    			.attr("y", 103)
+    			.attr("rx", 0)
+    			.style("stroke", fcolor)
+    			.attr("height", 13)
+    			.attr("width", 3)
+    			.style("fill", fcolor); 
+    			
+    			
+   			
+</script>
+
+<script>
+    			
+   	var theme = "<?php echo $theme;?>";
+
+	if (theme == 'dark') {
+
+    var width = 80,
+    height = 150;
+        
+    var units = "<?php echo $temp["units"];?>";
+
+	if (units == "C") {
+	var maxTemp = "<?php echo number_format($temp["indoor_day_max"],1);?>";
+	maxTemp = maxTemp || 0;
+	var minTemp = "<?php echo number_format($temp["indoor_day_min"],1);?>";
+	minTemp = minTemp || 0;
+	} else {
+	var maxTemp = "<?php echo number_format(($temp["indoor_day_max"]*9/5)+32,1);?>";
+	maxTemp = maxTemp || 0;
+	var minTemp = "<?php echo number_format(($temp["indoor_day_min"]*9/5)+32,1);?>";
+	minTemp = minTemp || 0;
+	}
+    
+    var currentTemp = "<?php echo $temp["indoor_now"];?>";
+    currentTemp = currentTemp || 0;
+    
+    var mercuryColor = "<?php echo $indoorcolor;?>";
+
+var bottomY = height - 5,
+    topY = 15,
+    bulbRadius = 25.5,
+    tubeWidth = 25.5,
+    tubeBorderWidth = 1,    
+    innerBulbColor = "rgb(230, 200, 200)",
+    tubeBorderColor = "#999999";
+
+var bulb_cy = bottomY - bulbRadius,
+    bulb_cx = width / 2,
+    top_cy = topY + tubeWidth / 2;
+
+
+var svg = d3.select("#idthermometer")
+  .append("svg")
+  .attr("width", width)
+  .attr("height", height);
+
+var defs = svg.append("defs");
+
+// Define the radial gradient for the bulb fill colour
+var bulbGradientx = defs.append("radialGradient")
+  .attr("id", "bulbGradientx")
+  .attr("cx", "50%")
+  .attr("cy", "50%")
+  .attr("r", "50%")
+  .attr("fx", "50%")
+  .attr("fy", "50%");
+
+bulbGradientx.append("stop")
+  .attr("offset", "0%")
+  .style("stop-color", innerBulbColor);
+
+bulbGradientx.append("stop")
+  .attr("offset", "90%")
+  .style("stop-color", mercuryColor); 
+
+svg.append("line")
+    .attr("x1", width / 2)
+    .attr("x2", width / 2)
+    .attr("y1", 20)
+    .attr("y2", 120)
+    .style("stroke", tubeBorderColor)
+    .style("stroke-width", "15.75px")
+    .style("fill", "none")    
+    .style("stroke-linecap", "round");
+    
+svg.append("line")
+    .attr("x1", width / 2)
+    .attr("x2", width / 2)
+    .attr("y1", 20)
+    .attr("y2", 120)
+    .style("stroke", "rgba(45,47,50,1)")
+    .style("stroke-width", "14.75px")
+    .style("stroke-linecap", "round");
+     
+// Scale step size
+var step = 5;
+
+// Determine a suitable range of the temperature scale
+var domain = [
+  step * Math.floor(minTemp / step),
+  step * Math.ceil(maxTemp / step)
+  ];
+
+if (minTemp - domain[0] < 0.66 * step)
+  domain[0] -= step;
+
+if (domain[1] - maxTemp < 0.66 * step)
+  domain[1] += step;
+
+// D3 scale object
+var scale = d3.scale.linear()
+  .range([bulb_cy - bulbRadius / 2 - 8.5, top_cy])
+  .domain(domain);
+
+// Max and min temperature lines
+[minTemp, maxTemp].forEach(function(t) {
+
+  var isMax = (t == maxTemp),
+      label = (isMax ? "Max" : "Min"),
+      textCol = (isMax ? "silver" : "silver"),
+      textOffset = (isMax ? - 3 : 3);
+
+  svg.append("line")
+    .attr("id", label + "Line")
+    .attr("x1", width / 2 + 25 - tubeWidth / 2)
+    .attr("x2", width / 2 + 25 + tubeWidth / 2 - 8)
+    .attr("y1", scale(t))
+    .attr("y2", scale(t))
+    .style("stroke", tubeBorderColor)
+    .style("stroke-width", "1px")
+    .style("stroke-linecap", "round");
+
+
+  svg.append("text")
+    .attr("x", width / 2 + tubeWidth / 2 + 1)
+    .attr("y", scale(t) + textOffset)
+    .attr("dy", isMax ? null : "0.75em")
+    .text(label)
+    .style("fill", textCol)
+    .style("font-size", "8px");
+
+});
+
+var tubeFill_bottom = bulb_cy,
+    tubeFill_top = scale(currentTemp);
+
+// Rect element for the red mercury column
+svg.append("rect")
+  .attr("x", width / 2 - (tubeWidth - 10) / 2)
+  .attr("y", tubeFill_top)
+  .attr("width", tubeWidth - 10)
+  .attr("height", tubeFill_bottom - tubeFill_top)
+  .style("fill", mercuryColor);
+
+// Main thermometer bulb fill
+svg.append("circle")
+  .attr("r", bulbRadius - 6)
+  .attr("cx", bulb_cx)
+  .attr("cy", bulb_cy)
+  .style("fill", "url(#bulbGradientx)")
+  .style("stroke", mercuryColor)
+  .style("stroke-width", "2px");
+
+// Values to use along the scale ticks up the thermometer
+var tickValues = d3.range((domain[1] - domain[0]) / step + 1).map(function(v) { return domain[0] + v * step; });
+
+// D3 axis object for the temperature scale
+var axis = d3.svg.axis()
+  .scale(scale)
+  .innerTickSize(7)
+  .outerTickSize(0)
+  .tickValues(tickValues)
+  .orient("left");
+
+// Add the axis to the image
+var svgAxis = svg.append("g")
+  .attr("id", "tempScale")
+  .attr("transform", "translate(" + (width / 2 - tubeWidth / 2) + ", 0)")
+  .call(axis);
+
+// Format text labels
+svgAxis.selectAll(".tick text")
+    .style("fill", "#777777")
+    .style("font-size", "8px");
+
+// Set main axis line to no stroke or fill
+svgAxis.select("path")
+  .style("stroke", "none")
+  .style("fill", "none");
+
+// Set the style of the ticks 
+svgAxis.selectAll(".tick line")
+  .style("stroke", tubeBorderColor)
+  .style("stroke-linecap", "round")
+  .style("stroke-width", "2px");
+ 
+svg.append("text")	
+	.attr("x", width / 2)
+	.attr("y", 126)
+	.attr("text-anchor", "middle")
+	.style("font-size", "18px")
+	.style("font-family", "Helvetica")
+	.style("font-weight", "600")
+	.style("fill", "rgba(30, 32, 36, 1)")
+	.text(d3.format(".1f")(currentTemp));	
+  
+  } else {
+   
+    var width = 80,
+    height = 150;
+    
+    var units = "<?php echo $temp["units"];?>";
+
+	if (units == "C") {
+	var maxTemp = "<?php echo number_format($temp["indoor_day_max"],1);?>";
+	maxTemp = maxTemp || 0;
+	var minTemp = "<?php echo number_format($temp["indoor_day_min"],1);?>";
+	minTemp = minTemp || 0;
+	} else {
+	var maxTemp = "<?php echo number_format(($temp["indoor_day_max"]*9/5)+32,1);?>";
+	maxTemp = maxTemp || 0;
+	var minTemp = "<?php echo number_format(($temp["indoor_day_min"]*9/5)+32,1);?>";
+	minTemp = minTemp || 0;
+	}
+    
+    var currentTemp = "<?php echo $temp["indoor_now"];?>";
+    currentTemp = currentTemp || 0;
+    
+    var mercuryColor = "<?php echo $indoorcolor;?>";
+
+var bottomY = height - 5,
+    topY = 15,
+    bulbRadius = 25.5,
+    tubeWidth = 25.5,
+    tubeBorderWidth = 1,    
+    innerBulbColor = "rgb(230, 200, 200)",
+    tubeBorderColor = "#999999";
+
+var bulb_cy = bottomY - bulbRadius,
+    bulb_cx = width / 2,
+    top_cy = topY + tubeWidth / 2;
+
+var svg = d3.select("#idthermometer")
+  .append("svg")
+  //.style("background", "#292E35") // box background to be commented out
+  .attr("width", width)
+  .attr("height", height);
+
+var defs = svg.append("defs");
+
+// Define the radial gradient for the bulb fill colour
+var bulbGradientx = defs.append("radialGradient")
+  .attr("id", "bulbGradientx")
+  .attr("cx", "50%")
+  .attr("cy", "50%")
+  .attr("r", "50%")
+  .attr("fx", "50%")
+  .attr("fy", "50%");
+
+bulbGradientx.append("stop")
+  .attr("offset", "0%")
+  .style("stop-color", innerBulbColor);
+
+bulbGradientx.append("stop")
+  .attr("offset", "90%")
+  .style("stop-color", mercuryColor); 
+
+svg.append("line")
+    .attr("x1", width / 2)
+    .attr("x2", width / 2)
+    .attr("y1", 20)
+    .attr("y2", 120)
+    .style("stroke", tubeBorderColor)
+    .style("stroke-width", "15.75px")
+    .style("fill", "none")    
+    .style("stroke-linecap", "round");
+    
+svg.append("line")
+    .attr("x1", width / 2)
+    .attr("x2", width / 2)
+    .attr("y1", 20)
+    .attr("y2", 120)
+    .style("stroke", "rgba(230, 232, 239, 1)")
+    .style("stroke-width", "14.75px")   
+    .style("stroke-linecap", "round");
+       
+// Scale step size
+var step = 5;
+
+// Determine a suitable range of the temperature scale
+var domain = [
+  step * Math.floor(minTemp / step),
+  step * Math.ceil(maxTemp / step)
+  ];
+
+if (minTemp - domain[0] < 0.66 * step)
+  domain[0] -= step;
+
+if (domain[1] - maxTemp < 0.66 * step)
+  domain[1] += step;
+
+
+// D3 scale object
+var scale = d3.scale.linear()
+  .range([bulb_cy - bulbRadius / 2 - 8.5, top_cy])
+  .domain(domain);
+
+
+// Max and min temperature lines
+[minTemp, maxTemp].forEach(function(t) {
+
+  var isMax = (t == maxTemp),
+      label = (isMax ? "Max" : "Min"),
+      textCol = (isMax ? "silver" : "silver"),
+      textOffset = (isMax ? - 3 : 3);
+
+  svg.append("line")
+    .attr("id", label + "Line")
+    .attr("x1", width / 2 + 25 - tubeWidth / 2)
+    .attr("x2", width / 2 + 25 + tubeWidth / 2 - 8)
+    .attr("y1", scale(t))
+    .attr("y2", scale(t))
+    .style("stroke", tubeBorderColor)
+    .style("stroke-width", "1px")
+    .style("stroke-linecap", "round");
+
+
+  svg.append("text")
+    .attr("x", width / 2 + tubeWidth / 2 + 1)
+    .attr("y", scale(t) + textOffset)
+    .attr("dy", isMax ? null : "0.75em")
+    .text(label)
+    .style("fill", textCol)
+    .style("font-size", "8px");
+
+});
+
+var tubeFill_bottom = bulb_cy,
+    tubeFill_top = scale(currentTemp);
+
+// Rect element for the red mercury column
+svg.append("rect")
+  .attr("x", width / 2 - (tubeWidth - 10) / 2)
+  .attr("y", tubeFill_top)
+  .attr("width", tubeWidth - 10)
+  .attr("height", tubeFill_bottom - tubeFill_top)
+  .style("fill", mercuryColor);
+
+
+// Main thermometer bulb fill
+svg.append("circle")
+  .attr("r", bulbRadius - 6)
+  .attr("cx", bulb_cx)
+  .attr("cy", bulb_cy)
+  .style("fill", "url(#bulbGradientx)")
+  .style("stroke", mercuryColor)
+  .style("stroke-width", "2px");
+
+// Values to use along the scale ticks up the thermometer
+var tickValues = d3.range((domain[1] - domain[0]) / step + 1).map(function(v) { return domain[0] + v * step; });
+
+// D3 axis object for the temperature scale
+var axis = d3.svg.axis()
+  .scale(scale)
+  .innerTickSize(7)
+  .outerTickSize(0)
+  .tickValues(tickValues)
+  .orient("left");
+
+// Add the axis to the image
+var svgAxis = svg.append("g")
+  .attr("id", "tempScale")
+  .attr("transform", "translate(" + (width / 2 - tubeWidth / 2) + ",0)")
+  .call(axis);
+
+// Format text labels
+svgAxis.selectAll(".tick text")
+    .style("fill", "#777777")
+    .style("font-size", "8px");
+
+// Set main axis line to no stroke or fill
+svgAxis.select("path")
+  .style("stroke", "none")
+  .style("fill", "none");
+
+// Set the style of the ticks 
+svgAxis.selectAll(".tick line")
+  .style("stroke", tubeBorderColor)
+  .style("stroke-linecap", "round")
+  .style("stroke-width", "2px");
+  
+svg.append("text")
+	.text( d3.format(".1f")(currentTemp) )
+	.attr("x", width / 2)
+	.attr("y", 126)
+	.attr("text-anchor", "middle")
+	.style("font-size", "18px")
+	.style("font-family", "Helvetica")
+	.style("font-weight", "600")
+	.style("fill", "rgba(30, 32, 36, 1)");
+
+}		
+    			   			
+</script>
