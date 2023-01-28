@@ -1,8 +1,9 @@
 # Change Log
+# The following conventions apply:
+# ! = Bug Fix
+# * = New Addition
+# @ = Information
 
-**Version W34-HC-IMJD-3.0.0**
+## [0.3.3-alpha] - 29/01/202
 
-1. weather34.py. Change for time out in P3
-2. weather34.py corrected hard coded path
-3. w34CombinedData.php try catch around loading archivedata.php
-4. Corrected font weight WU large forecast in light theme
+@ InitiaL release of pre-production alpha version
