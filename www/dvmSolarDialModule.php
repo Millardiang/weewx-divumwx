@@ -26,10 +26,10 @@ header('Content-type: text/html; charset=utf-8');
   margin-top: 159px;
   width: 300px;
   padding-left: 10px;
-  text-align: left
+  text-align: left;
 }
-.chartforecast2:hover, {
-  color: #90b12a
+.chartforecast2:hover {
+  color: #90b12a;
 }
 .daylightmoduleposition2 {
   position: relative;
