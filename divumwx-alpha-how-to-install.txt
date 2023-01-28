@@ -26,7 +26,7 @@ sudo ln -s /var/www/html/weewx/weather34/w34highcharts /var/www/html/weewx/divum
 
 5. Add this stanza to your weewx.conf file (you may have to edit the path to suit your own setup): -
 
-         
+
     [[DivumWXReport]]
         skin = DivumWX
         HTML_ROOT = /var/www/html/weewx/divumwx/
