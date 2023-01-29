@@ -329,4 +329,20 @@ $lang['notifyHighWindWarning'] = "High Wind Warning";
 $lang['notifySustainedAvg'] = "Sustained avg";
 $lang['notifyWindAdvisory'] = "Wind Advisory";
 $lang['notifyFreezing'] = "Below Freezing";
+//Main Modules
+$lang['temperatureModule']       = 'Temperature';
+$lang['forecastModule']          = 'Forecast';
+$lang['currentModule']           = 'Current Conditions';
+$lang['windModule']              = 'Wind Speed | Direction';
+$lang['barometerModule']         = 'Barometer';
+$lang['solarDialModule']         = 'Solar Dial';
+$lang['rainfallModule']          = 'Rainfall';
+$lang['solarUvLuxModule']        = 'Solar | UVI | Lux';
+$lang['lightningModule']         = 'Lightning';
+$lang['airqualityModule']        = 'Air Quality | AQI';
+$lang['webcamModule']            = 'Weather Camera';
+$lang['earthDaylightModule']     = 'Earth Daylight';
+$lang['moonPhaseModule']         = 'Current Moonphase';
+$lang['earthquakeModule']        = 'Earthquake';
+$lang['indoorTempModule']        = 'Inside Conditions';
 ?>

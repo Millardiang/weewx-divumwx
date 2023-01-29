@@ -345,4 +345,5 @@ $lang['webcamModule']            = 'Weather Camera';
 $lang['earthDaylightModule']     = 'Earth Daylight';
 $lang['moonPhaseModule']         = 'Current Moonphase';
 $lang['earthquakeModule']        = 'Earthquake';
+$lang['indoorTempModule']        = 'Inside Conditions';
 ?>

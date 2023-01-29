@@ -1,3 +1,36 @@
+
+Skip to content
+Pull requests
+Issues
+Codespaces
+Marketplace
+Explore
+@Millardiang
+Millardiang /
+weewx-divumwx
+Private
+
+Fork your own copy of Millardiang/weewx-divumwx
+
+Code
+Issues 1
+Pull requests 1
+Actions
+Projects
+Security
+Insights
+
+    Settings
+
+weewx-divumwx/www/languages/lang.sp.php /
+@EA5ZF
+EA5ZF Update lang.sp.php
+Latest commit ce66543 Jan 29, 2023
+History
+2 contributors
+@EA5ZF
+@Millardiang
+executable file 336 lines (336 sloc) 16.2 KB
 <?php
 /* 
 -----------------
@@ -334,3 +367,20 @@ $lang['moonPhaseModule']         = 'Fase lunar actual';
 $lang['earthquakeModule']        = 'Terremotos';
 $lang['indoorTempModule']        = 'Temperatura Interior';
 ?>
+Footer
+© 2023 GitHub, Inc.
+Footer navigation
+
+    Terms
+    Privacy
+    Security
+    Status
+    Docs
+    Contact GitHub
+    Pricing
+    API
+    Training
+    Blog
+    About
+
+weewx-divumwx/lang.sp.php at alpha · Millardiang/weewx-divumwx

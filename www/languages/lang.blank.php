@@ -66,7 +66,9 @@ $lang['Humidity']                = 'Humidity';
 $lang['Dewpoint']                = 'Dewpoint';
 $lang['Trend']                   = 'trend ';
 $lang['Heatindex']               = 'Heat Index';
-$lang['Windchill']               = 'Windchill ';
+$lang['Apparent']                = 'Apparent';
+$lang['Windchill']               = 'Windchill';
+$lang['IndoorTemp']              = 'Indoor Temp';
 $lang['Tempfactors']             = 'Temp Factors';
 $lang['Nocautions']              = 'No Cautions';
 $lang['Wetbulb']                 = 'Wet Bulb';
@@ -203,6 +205,16 @@ $lang['Rising']                  = 'Rising';
 $lang['Steady']                  = 'Steady';
 $lang['Rapidly']                 = 'Rapidly';
 $lang['Temp']                    = 'Temp';
+$lang['RISING_VERY_RAPIDLY']     = 'Rising Very Rapidly';
+$lang['RISING_QUICKLY']          = 'Rising Quickly';
+$lang['RISING']                  = 'Rising';
+$lang['RISING_SLOWLY']           = 'Rising Slowly';
+$lang['STEADY']                  = 'Steady';
+$lang['FALLING_SLOWLY']          = 'Falling Slowly';
+$lang['FALLING']                 = 'Falling';
+$lang['FALLING_QUICKLY']         = 'Falling Quickly';
+$lang['FALLING_VERY_RAPIDLY']    = 'Falling Very Rapidly';
+
 //Solar-UV
 //uv
 $lang['Nocaution']               = 'No <color>caution</color> required';
@@ -296,6 +308,7 @@ $lang['Unhealthy']               = 'Unhealthy Air Quality';
 $lang['UnhealthyFS']             = 'Unhealthy For Some';
 $lang['Moderate']                = 'Moderate Air Quality ';
 $lang['Good']                    = 'Good Air Quality ';
+
 #notification additions
 $lang['notifyTitle']             = 'Notifications';
 $lang['notifyAlert']             = "Alert";
@@ -312,4 +325,25 @@ $lang['notifyHighWindWarning']   = "High Wind Warning";
 $lang['notifySustainedAvg']      = "Sustained avg";
 $lang['notifyWindAdvisory']      = "Wind Advisory";
 $lang['notifyFreezing']          = "Below Freezing";
+//Top Row Modules
+$lang['timeTop']                 = 'Station <ored>Time';
+$lang['airQualityTop']           = 'Air Quality <ored>Current PM<sub>2.5</sub> Concentration';
+$lang['lightningTop']            = 'Lightning <ored>Strikes';
+$lang['advisoriesTop']           = 'Weather <ored>Outlook and Advisories';
+//Main Modules
+$lang['temperatureModule']       = 'Temperature';
+$lang['forecastModule']          = 'Forecast';
+$lang['currentModule']           = 'Current Conditions';
+$lang['windModule']              = 'Wind Speed | Direction';
+$lang['barometerModule']         = 'Barometer';
+$lang['solarDialModule']         = 'Solar Dial';
+$lang['rainfallModule']          = 'Rainfall';
+$lang['solarUvLuxModule']        = 'Solar | UVI | Lux';
+$lang['lightningModule']         = 'Lightning';
+$lang['airqualityModule']        = 'Air Quality | AQI';
+$lang['webcamModule']            = 'Weather Camera';
+$lang['earthDaylightModule']     = 'Earth Daylight';
+$lang['moonPhaseModule']         = 'Current Moonphase';
+$lang['earthquakeModule']        = 'Earthquake';
+$lang['indoorTempModule']        = 'Inside Conditions';
 ?>
