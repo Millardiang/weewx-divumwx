@@ -276,13 +276,13 @@ $lang['uvalert']                = 'Precaucion UVINDEX';
 $lang['Max']                    = 'Max';
 $lang['Min']                    = 'Min';
 //earthquake TOP MODULE 10 July 2017
-$lang['MicroE']                  = 'Micro Terremoto';
-$lang['MinorE']                  = 'Pequeño Terremoto';
-$lang['LightE']                  = 'Ligero Terremoto';
-$lang['ModerateE']               = 'Moderado Terremoto';
-$lang['StrongE']                 = 'Fuerte terremoto';
-$lang['MajorE']                  = 'Gran Terremoto';
-$lang['GreatE']                  = 'Enorme Terremoto';
+$lang['MicroE']                 = 'Micro Terremoto';
+$lang['MinorE']                 = 'Pequeño Terremoto';
+$lang['LightE']                 = 'Ligero Terremoto';
+$lang['ModerateE']              = 'Moderado Terremoto';
+$lang['StrongE']                = 'Fuerte terremoto';
+$lang['MajorE']                 = 'Gran Terremoto';
+$lang['GreatE']                 = 'Enorme Terremoto';
 $lang['RegionalE']              = 'Regional';
 $lang['Conditions']             = 'Condiciones';
 $lang['Cloudbase Height']       = 'Base de nubes';
@@ -312,4 +312,25 @@ $lang['notifyHighWindWarning']   = "Aviso por viento fuerte";
 $lang['notifySustainedAvg']      = "Media sostenida";
 $lang['notifyWindAdvisory']      = "Aviso por viento";
 $lang['notifyFreezing']          = "Aviso por temperatura bajo cero";
+//Top Row Modules
+$lang['timeTop']                 = 'Hora <ored>Estación';
+$lang['airQualityTop']           = 'Calidad del Aire <ored>Actual PM<sub>2.5</sub> Concentración';
+$lang['lightningTop']            = 'Impactos <ored>Rayos';
+$lang['advisoriesTop']           = 'Meteo <ored>Pronóstico y avisos';
+//Main Modules
+$lang['temperatureModule']       = 'Temperatura';
+$lang['forecastModule']          = 'Pronóstico';
+$lang['currentModule']           = 'Condiciones actuales';
+$lang['windModule']              = 'Velocidad viento | Dirección';
+$lang['barometerModule']         = 'Barómetro';
+$lang['solarDialModule']         = 'Dial Solar';
+$lang['rainfallModule']          = 'Lluvia';
+$lang['solarUvLuxModule']        = 'Solar | UVI | Lux';
+$lang['lightningModule']         = 'Rayos';
+$lang['airqualityModule']        = 'Calidad del Aire | AQI';
+$lang['webcamModule']            = 'MeteoCámara';
+$lang['earthDaylightModule']     = 'Earth Daylight';
+$lang['moonPhaseModule']         = 'Fase lunar actual';
+$lang['earthquakeModule']        = 'Terremotos';
+$lang['indoorTempModule']        = 'Temperatura Interior';
 ?>
