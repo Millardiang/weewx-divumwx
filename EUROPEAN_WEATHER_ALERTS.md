@@ -9,7 +9,7 @@ After clicking on save, restart WeeWX to prime the new service.
 
 When an alert is force, a brief description and either a yellow, orange or red warning triangle will appear in the top row advisory module. Clicking on the alert will activate a pop-up window with more details of the alert(s) either in force or about to be in force.
 
-I would welcome Weather34 users' input to code interfaces for othe weather alert systems in othe parts of the Globe to make this a complete service.
+I would welcome Weather34 users' input to code interfaces for other weather alert systems in other parts of the Globe to make this a complete service.
 
 Below is a copy of an e-mail to Ken True of saratoga-weather.com outlining the conditions that are required by EUMETNET - MeteoAlarm for public use of the data.
 
@@ -55,5 +55,3 @@ Ken True schrieb:
 > Ken True
 > webmaster@saratoga-weather.org
 > Saratoga, California, USA
-
-      

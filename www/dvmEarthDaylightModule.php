@@ -24,8 +24,7 @@ $lighthours = substr($alm["daylight"], 0, 2);
 $lightmins = substr($alm["daylight"], - 2);
 $darkhours = 23 - $lighthours; 
 $darkminutes = 60 - $lightmins;
-if ($darkminutes < 10) $darkminutes = '0' .$darkminutes;
-else $darkminutes = $darkminutes;
+$darkminutes = ($darkminutes < 10) ? '0' .$darkminutes : $darkminutes;
 
 if (round($sun_alt,2) >= 0) { 
 $sun_elevation = round($sun_alt,2)."&deg;<div class=sunaboveweather34>&nbsp;</div>";

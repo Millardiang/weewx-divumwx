@@ -11,9 +11,7 @@ $jsonobj = file_get_contents($json);
 $arr = json_decode($jsonobj, true); 
 $lightning["bearingx"] = $arr['StrikeData'][0]['bng'];
 $lightning["bearing"] = $arr['StrikeData'][0]['bng'];
-	
-	if (!isset($lightning["bearingx"])) {$lightning["bearingx"] = $lightning["bearingx"];}
-		
+
 	// Bearing	
 	if ($lightning["bearingx"]<=11.25){$lightning["bearingx"]='North';}
 	else if ($lightning["bearingx"]<=33.75){$lightning["bearingx"]='NNE';}
