@@ -114,35 +114,34 @@ explode(" ", file_get_contents($livedata)));
     {
         $alm['luminance'] = 100;
     }
-    if ($alm['luminance'] < 100)
+
+    if (strtotime(date("G.i")) >= strtotime($alm["civil_twilight_begin"]) && strtotime(date("G.i")) < strtotime($alm["civil_twilight_end"]))
     {
-        $alm['luminance'] = $alm['luminance'];
+        $dayPartCivil = "day";
     }
-    if (
-    strtotime(date("G.i")) >= strtotime($alm["civil_twilight_begin"]) &&
-    strtotime(date("G.i")) < strtotime($alm["civil_twilight_end"])
-    ) {
-    $dayPartCivil = "day";
-    } else {
-    $dayPartCivil = "night";
+    else
+    {
+        $dayPartCivil = "night";
     }
-    if (
-    strtotime(date("G.i")) >= strtotime($alm["nautical_twilight_begin"]) &&
-    strtotime(date("G.i")) < strtotime($alm["nautical_twilight_end"])
-    ) {
-    $dayPartNautical = "day";
-    } else {
-    $dayPartNautical = "night";
-}
-if (
-    strtotime(date("G.i")) >= strtotime($alm["sunrise"]) &&
-    strtotime(date("G.i")) < strtotime($alm["sunset"])
-) {
-    $dayPartNatural = "day";
-} else {
-    $dayPartNatural = "night";
-}
-    
+
+    if (strtotime(date("G.i")) >= strtotime($alm["nautical_twilight_begin"]) && strtotime(date("G.i")) < strtotime($alm["nautical_twilight_end"]))
+    {
+        $dayPartNautical = "day";
+    }
+    else
+    {
+        $dayPartNautical = "night";
+    }
+
+    if (strtotime(date("G.i")) >= strtotime($alm["sunrise"]) && strtotime(date("G.i")) < strtotime($alm["sunset"]))
+    {
+        $dayPartNatural = "day";
+    }
+    else
+    {
+        $dayPartNatural = "night";
+    }
+
     //air quality
     $air["pm_units"] = "μg/m<sup><b>3</b></sup>";
     $air["current.pm2_5"] = $adata["airquality"]["pm25 current"]["value"];
@@ -152,11 +151,25 @@ if (
 
     //barometer
     $barom["units"] = $sdata["unit.label.barometer"];
-    if ($barom["units"] == " inHg"){$barom["units"] = "inHg";}
-    else if ($barom["units"] == " hPa"){$barom["units"] = "hPa";}
-    else if ($barom["units"] == " kPa"){$barom["units"] = "kPa";}
-    else if ($barom["units"] == " mmHg"){$barom["units"] = "mmHg";}
-    else if ($barom["units"] == " mb"){$barom["units"] = "mb";}
+    if ($barom["units"] == " inHg"){
+        $barom["units"] = "inHg";
+    }
+    else if ($barom["units"] == " hPa")
+    {
+        $barom["units"] = "hPa";
+    }
+    else if ($barom["units"] == " kPa")
+    {
+        $barom["units"] = "kPa";
+    }
+    else if ($barom["units"] == " mmHg")
+    {
+        $barom["units"] = "mmHg";
+    }
+    else if ($barom["units"] == " mb")
+    {
+        $barom["units"] = "mb";
+    }
     $barom["now"] = $sdata["current.barometer.formatted"];
     $barom["max"] = $sdata["day.barometer.max.formatted"];
     $barom["maxtime"] = date('H:i', $sdata["day.barometer.maxtime.raw"]); 
@@ -273,7 +286,7 @@ if (
     $lightning["now_strike_count"] = $weewxrt[60];
     $lightning["now_noise_count"] = $weewxrt[61];
     $lightning["now_disturber_count"] = $weewxrt[62];
-  if (trim($lightning["last_time"]) == 'N/A' || $lightning["last_time"] == '0')
+    if (trim($lightning["last_time"]) == 'N/A' || $lightning["last_time"] == '0')
     {
         $lightning["time_ago"] = 0;
     }
@@ -282,13 +295,22 @@ if (
         $parts = explode(" ", $lightning["last_time"]);
         $parts1 = explode("/", $parts[0]);
         $lightning["time_ago"] = time() - strtotime("20" . $parts1[2] . $parts1[1] . $parts1[0] . " " . $parts[1]);
-    } 
+    }
 
     //rainfall
     $rain["units"] = $sdata["unit.label.rain"];
-    if($rain["units"] == " mm"){$rain["units"] = "mm";}
-    else if($rain["units"] == " cm"){$rain["units"] = "cm";}
-    else if($rain["units"] == " in"){$rain["units"] = "in";}
+    if($rain["units"] == " mm")
+    {
+        $rain["units"] = "mm";
+    }
+    else if($rain["units"] == " cm")
+    {
+        $rain["units"] = "cm";
+    }
+    else if($rain["units"] == " in")
+    {
+        $rain["units"] = "in";
+    }
     $rain["rate"] = $sdata["current.rainRate.formatted"];
     $rain["total"] = $sdata["day.rain.sum.formatted"];
     $rain["last_hour"] = $sdata["hour.rain.sum.formatted"];
@@ -310,7 +332,7 @@ if (
     $rain["alltime_rate_max"] = $sdata["alltime.rainRate.max.formatted"];
     $rain["alltime_rate_maxtime"] = date('j M Y', $sdata["alltime.rainRate.maxtime.raw"]);
     $rain["alltime_total"] = $sdata["alltime.rain.sum.formatted"];
-    
+
     //sky
     $sky["lux"] = round($sdata["current.maxSolarRad.formatted"] / 0.00809399477, 0 ,PHP_ROUND_HALF_UP);
     $sky["day_lux_max"] = round($sdata["day.maxSolarRad.formatted"] / 0.00809399477, 0 ,PHP_ROUND_HALF_UP);
@@ -332,8 +354,13 @@ if (
 
     //temperature
     $temp["units"] = $sdata["unit.label.outTemp"];
-    if($temp["units"] == "°C"){$temp["units"] = "C";}
-    else if($temp["units"] == "°F"){$temp["units"] = "F";}
+    if($temp["units"] == "°C"){
+        $temp["units"] = "C";
+    }
+    else if($temp["units"] == "°F")
+    {
+        $temp["units"] = "F";
+    }
     $temp["indoor_now"] = $sdata["current.inTemp.formatted"];
     $temp["indoor_trend"] = $sdata["trend.inTemp.formatted"];
     $temp["indoor_day_max"] = $sdata["day.inTemp.max.formatted"];
@@ -375,7 +402,10 @@ if (
     $HI = 0;
     if($T <= 40.0) {$HI = $T;}
     else {$HI = -42.379 + (2.04901523*$T) + (10.14333127*$RH) - (0.22475541*$T*$RH) - (0.00683783*$T*$T) - (0.05481717*$RH*$RH) + (0.00122874*$T*$T*$RH) + (0.00085282*$T*$RH*$RH) - (0.00000199*$T*$T*$RH*$RH);}
-    if ($RH < 13 && $T >= 80 && $T <= 112) {$adjust = ((13-RH)/4)  * sqrt(17-abs($T-95)/17);              $HI = $HI-$adjust;}
+    if ($RH < 13 && $T >= 80 && $T <= 112){
+        $adjust = ((13 - $RH)/4)  * sqrt(17 - abs($T - 95) / 17);
+        $HI = $HI - $adjust;
+    }
     else if ($RH > 85 && $T >= 80 && $T <= 87) {$adjust = (($RH-85)/10) * ((87-$T)/5); $HI = $HI+$adjust;}
     else if ($T < 80){$HI = 0.5 * ($T + 61.0 + (($T-68.0)*1.2) + ($RH*0.094));}
 
@@ -397,10 +427,21 @@ if (
 
     //wind
     $wind["units"] = $sdata["unit.label.windSpeed"]; // m/s or mph or km/h or kts
-    if ($wind["units"] == " m/s"){$wind["units"] = "m/s";}
-    else if ($wind["units"] == " mph"){$wind["units"] = "mph";}
-    else if ($wind["units"] == " km/h"){$wind["units"] = "km/h";}
-    else if ($wind["units"] == " kts"){$wind["units"] = "kts";}
+    if ($wind["units"] == " m/s"){
+        $wind["units"] = "m/s";
+    }
+    else if ($wind["units"] == " mph")
+    {
+        $wind["units"] = "mph";
+    }
+    else if ($wind["units"] == " km/h")
+    {
+        $wind["units"] = "km/h";
+    }
+    else if ($wind["units"] == " kts")
+    {
+        $wind["units"] = "kts";
+    }
     $wind["speed_avg"] = $sdata["day.windSpeed.avg.formatted"];
     $wind["direction"] = $sdata["current.windDir.formatted"];
     $wind["direction_10m_avg"] = $sdata["10m.windDir.avg.formatted"];
@@ -1035,12 +1076,13 @@ function convert_uptime($uptime)
     $dt2 = new DateTime("@$uptime");
     return $dt1->diff($dt2)->format('%a day(s) %h hrs %i min');
 }
+
+
+
+
+
 //
 //  Why are these in here still? Check necessity and validitity of this area
-//
-//
-//
-//
 //
 //lunar and solar eclipse /meteor shpwers advisory 2018-2019-2020
 $eclipse_default = " <noalert>No Current Weather <spanyellow><ored>Alerts " . $alert . "</ored></spanyellow></noalert>";
