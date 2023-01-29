@@ -6,11 +6,12 @@ error_reporting(0);
 ?>
 
 <?php
-$json = "jsondata/ngxarchive.json";
-$jsonobj = file_get_contents($json);
-$arr = json_decode($jsonobj, true); 
-$lightning["bearingx"] = $arr['StrikeData'][0]['bng'];
-$lightning["bearing"] = $arr['StrikeData'][0]['bng'];
+if ($lightning["source"] == "Boltek") {
+    $json = "jsondata/ngxarchive.json";
+    $jsonobj = file_get_contents($json);
+    $arr = json_decode($jsonobj, true); 
+    $lightning["bearingx"] = $arr['StrikeData'][0]['bng'];
+    $lightning["bearing"] = $arr['StrikeData'][0]['bng'];
 
 	// Bearing	
 	if ($lightning["bearingx"]<=11.25){$lightning["bearingx"]='North';}
@@ -29,6 +30,7 @@ $lightning["bearing"] = $arr['StrikeData'][0]['bng'];
 	else if ($lightning["bearingx"]<=326.25){$lightning["bearingx"]='NW';}
 	else if ($lightning["bearingx"]<=348.75){$lightning["bearingx"]='NWN';}
 	else {$lightning["bearingx"]='North';}
+	} else { $lightning["source"] = "0";}
 
 	if ($wind["units"] == "mph"){$lightning["last_distance"] = $lightning["last_distance"] * 0.621371;$lightning["unit"] = "mi";} else {$lightning["unit"] = "km";}
 ?>
