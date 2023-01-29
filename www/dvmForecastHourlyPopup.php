@@ -85,7 +85,7 @@ for ($k = 0;$k < 12;$k++)
     //heatindex
     if ($tempunit == 'F')
     {
-        $wuskyheatindex[$k] = ($wuskyheatindex[$k] * 9 / 5) + 32;
+        $forecastheatindex[$k] = ($forecastheatindex[$k] * 9 / 5) + 32;
     }
 
     //rain inches to mm
