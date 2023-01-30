@@ -1,6 +1,6 @@
 <?php include('dvmCombinedData.php');header('Content-type: text/html; charset=utf-8');date_default_timezone_set($TZ);?>
 <div class="topmin">
-<?php //temperture min year
+<?php //temperature min year
  if ($wind["units"]=='C' && $temp["outside_year_min"]>30){echo "<topred1>",$temp["outside_year_min"]  ;echo "&deg;<smalluvunit>".$wind["units"] ; }
  else if ($temp["units"]=='C' && $temp["outside_year_min"]>=24){echo "<toporange1>",$temp["outside_year_min"]  ;echo "&deg;<smalluvunit>".$temp["units"] ; }
  else if ($temp["units"]=='C' && $temp["outside_year_min"]>18){echo "<topyellow1>",$temp["outside_year_min"]  ;echo "&deg;<smalluvunit>".$temp["units"] ; }

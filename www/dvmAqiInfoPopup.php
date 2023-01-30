@@ -8,7 +8,7 @@
         font-family:arial, helvetica, verdana, sans-serif;
         font-size: 10px;
         margin-bottom: 50px; /*whatever distance you want between the two tables*/
-        margin-top: 50px
+        margin-top: 50px;
         margin-left: 50%;
         margin-right: -50%;
         width: 100%;
@@ -62,11 +62,9 @@
 		background-color:#ce30ff;
         color:white;
 	}
-   
 </style>
 <table class="demo">
  <caption style="text-align:left; color:#aaa"><small>The World AQI Indices are based on the US EPA (United States Environmental Protection Agency) Scale, latest 24 hour running mean for the current day.</small></p></caption>
-  
   <tbody>
 	<tr>
         <th id="CELL1">WORLD (US EPA) AQI PM<sub>2.5</sub></th>
@@ -76,10 +74,7 @@
 		<th id="CELL5">Unhealthy</th>
 		<th id="CELL6">Very Unhealthy</th>
 		<th id="CELL7">Hazardous</th>
-		
-		
 	</tr>
-	
 	<tr>
 		<td id="CELL1"><b>Range<b></td>
 		<td id="CELL3">0-50</td>
@@ -88,9 +83,8 @@
 		<td id="CELL9">151-200</td>
 		<td id="CELL11">201-300</td>
 		<td id="CELL10">300</td>
-		
 	</tr>
-	<tr> 	 	 	 	 	 	 	 	 	
+	<tr>
 		<td id="CELL1"><b>µg/m³<b></td>
 		<td id="CELL3">0-12</td>
 		<td id="CELL6">12-35</td>
@@ -98,14 +92,12 @@
 		<td id="CELL9">55-150</td>
 		<td id="CELL11">150-250</td>
 		<td id="CELL10">250</td>
-		
 	</tr>
 	</tbody>
 </table>
 
 <table class="demo">
-  <caption style="text-align:left; color:#aaa"><small>The Defra (UK Government Department for Environment and Rural Affairs) DAQI Indices are based on the daily mean concentration for historical data, latest 24 hour running mean for the current day.</small></p></caption>
-  	
+  <caption style="text-align:left; color:#aaa"><small>The DEFRA (UK Government Department for Environment, Food and Rural Affairs) DAQI Indices are based on the daily mean concentration for historical data, latest 24 hour running mean for the current day.</small></p></caption>
 	<thead>
 	<tr>
         <th id="CELL1">UK DAQI</th>
@@ -148,7 +140,7 @@
 		<td id="CELL10">65-70</td>
 		<td id="CELL11">71 or more</td>
 	</tr>
-    <tr> 	 	 	 	 	 	 	 	 	
+    <tr>
 		<td id="CELL1"><b>PM<sub>10 </sub>µg/m³<b></td>
 		<td id="CELL2">0-16</td>
 		<td id="CELL3">17-33</td>
@@ -160,6 +152,5 @@
 		<td id="CELL9">84-91</td>
 		<td id="CELL10">92-100</td>
 		<td id="CELL11">101 or more</td>
-	</tr>      
+	</tr>
 	</tbody>
- 
