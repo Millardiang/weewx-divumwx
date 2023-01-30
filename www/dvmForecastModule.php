@@ -16,9 +16,9 @@
   margin-top: 159px;
   width: 300px;
   padding-left: 10px;
-  text-align: left
+  text-align: left;
 }
-.chartforecast4:hover, {
+.chartforecast4:hover {
   color: #90b12a
 }
 </style>

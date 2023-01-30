@@ -20,8 +20,8 @@
   padding-left: 10px;
   text-align: left
 }
-.chartforecast3:hover, {
-  color: #90b12a
+.chartforecast3:hover {
+  color: #90b12a;
 }
 </style>
 <?php

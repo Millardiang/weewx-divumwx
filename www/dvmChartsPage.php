@@ -130,7 +130,6 @@ $paddingtop = $percentage;
     -ms-text-size-adjust: 100%;
     -moz-font-smoothing: antialiased;
     -webkit-font-smoothing: antialiased;
-    font-smoothing: antialiased;
     background: 0;
     display: -webkit-box;
     display: -moz-box;

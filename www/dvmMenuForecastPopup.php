@@ -73,7 +73,7 @@ body, html {
 
 <button class="tablink" onclick="openPage('Tab1', this, 'rgba(194, 102, 58)')" id="defaultOpen">Hourly Forecast</button>
 <button class="tablink" onclick="openPage('Tab2', this, 'rgba(194, 102, 58)')">Hourly Forecast Table</button>
-<button class="tablink" onclick="openPage('Tab3', this, 'rgba(194, 102, 58)')">Day and Night Foecast</button>  
+<button class="tablink" onclick="openPage('Tab3', this, 'rgba(194, 102, 58)')">Day and Night Forecast</button>
 <button class="tablink" onclick="openPage('Tab4', this, 'rgba(194, 102, 58)')">Day and Night Forecast Table</button>  
 <button class="tablink" onclick="openPage('Tab5', this, 'rgba(194, 102, 58)')">Meteogram</button>  
   
