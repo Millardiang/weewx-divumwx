@@ -257,7 +257,7 @@ for ($k = 0;$k < 14;$k++)
 
 <main class="grid3" style="height:400px">
   <articlegraph3> 
-<table class="demo" style="width: 100%; height: 100%; text-center: left; overflow: auto;">
+<table class="demo" style="width: 100%; height: 100%; text-align: left; overflow: auto;">
     
 
 <th style="font-size: 12px;">Period</th>
