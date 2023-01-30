@@ -213,7 +213,7 @@ for ($k = 0;$k < 24;$k++)
 
 <main class="grid3" style="height:420px; width:700px;">
   <articlegraph3> 
-<table class="demo" style="width: 98%; height: 98%; text-center: left; overflow: auto;">
+<table class="demo" style="width: 98%; height: 98%; text-align: left; overflow: auto;">
     
  <tr style="border-bottom: 0px grey solid; ">
 <th style="font-size: 9px;">Time</th>

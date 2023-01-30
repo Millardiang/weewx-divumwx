@@ -75,7 +75,7 @@ moonphaseriseset{font-size:.9rem;}credit{position:relative;font-size:.8em;top:10
 
 
 smalluvunit{font-size:.9rem;font-family:Arial,Helvetica,system;font-weight:600}
-.kpcontainer1{left:100px;top:0}.kptoday1,.kptoday11,.kptoday4,.kptoday6,.kptoday7{font-family:weathertext2,Arial,Helvetica,system;width:8rem;height:3rem;-webkit-border-radius:3px;-moz-border-radius:3px;-o-border-radius:3px;display:flex}.kptoday1,.kptoday11,.kptoday4,.kptoday6,.kptoday7{font-size:1.5rem;padding-top:7px;color:#fff;border-bottom:15px solid rgba(56,56,60,1);align-items:center;justify-content:center;border-radius:3px}
+.kpcontainer1{left:100px;top:0}.kptoday1,.kptoday11,.kptoday4,.kptoday6,.kptoday7{font-family:weathertext2,Arial,Helvetica,system;width:8rem;height:3rem;-webkit-border-radius:3px;-moz-border-radius:3px;border-radius:3px;display:flex}.kptoday1,.kptoday11,.kptoday4,.kptoday6,.kptoday7{font-size:1.5rem;padding-top:7px;color:#fff;border-bottom:15px solid rgba(56,56,60,1);align-items:center;justify-content:center;border-radius:3px}
 .kpcaution,.uvtrend{position:absolute;font-size:.8rem}
 .kptoday1{background:#9aba2f}.kptoday4{background:rgba(230,161,65,1)}.kptoday6{background:rgba(255,124,57,.8)}.kptoday7{background:rgba(211,93,78,.8)}.kptoday11{background:rgba(204,135,248,.7)}
 .kpcaution{margin-left:38px;margin-top:-14px;font-family:Arial,Helvetica,system}.kptrend{margin-left:135px;margin-top:48px;z-index:1;color:#fff}

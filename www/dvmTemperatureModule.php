@@ -20,7 +20,7 @@
   padding-left: 10px;
   text-align: left
 }
-.chartforecast4:hover, {
+.chartforecast4:hover {
   color: #90b12a
 }
 </style><?php
@@ -540,8 +540,7 @@ div.temperature {
 .divTable.temperature .divTableBody .divTableCell {
   font-size: .65em;
 }
-.divTable.temperature .divTableHeading {
-  }
+
 .divTable.temperature .divTableHeading .divTableHead {
   font-size: .7em;
   font-weight: normal;
