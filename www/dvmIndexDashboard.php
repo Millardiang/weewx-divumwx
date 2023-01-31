@@ -1,16 +1,12 @@
 <?php
 //###################################################################################################################
-//	weewx-Weather34 Template maintained by Ian Millard (Steepleian)                                 				#
-//	                                                                                                				#
-//  Contains original legacy code (by agreement) created and developed by Brian Underdown (https://weather34.com)   #
-//  for the (now superseeded) original Weather34 Template which is no longer maintained by its creator              #
-//  © weather34.com original CSS/SVG/PHP 2015-2019                                                                  #
-// 	                                                                                                				#
-//  Contains original code by Ian Millard and collaborators															#
-//  © claydonsweather.org.uk original CSS/SVG/PHP 2020-2021                                                         #   
-// 	                                                                                                				#
-// 	Issues for weewx-Weather34 template should be addressed to https://github.com/steepleian/weewx-Weather34/issues #                                                                                              
-// 	                                                                                                				#
+//                                                           
+// 	                                                                                                				
+//  Contains original code by Ian Millard and collaborators															
+//  © claydonsweather.org.uk original CSS/SVG/PHP 2020-2021                                                          
+// 	                                                                                                				
+//                                                                                               
+// 	                                                                                                				
 //###################################################################################################################
 
 if (!file_exists("userSettings.php")) { 
@@ -33,8 +29,8 @@ error_reporting(0);
   <title><?php echo $stationlocation;?> Weather Station</title>
   <!--Google / Search Engine Tags -->
   <meta itemprop="image" content="img/divumMeta-1.png">
-  <meta itemprop="name" content="Home Weather Station <?php echo $stationlocation;?>">
-  <meta content="Home weather station providing current weather conditions for <?php echo $stationlocation;?>" name="description">
+  <meta itemprop="name" content="Weather Station <?php echo $stationlocation;?>">
+  <meta content="Weather station providing current weather conditions for <?php echo $stationlocation;?>" name="description">
   <meta itemprop="description" content="Home weather station providing current weather conditions for <?php echo $stationlocation;?>">
   <meta content="DivumWX" name="author">
   <meta content="place" property="og:type">
@@ -42,7 +38,7 @@ error_reporting(0);
   <meta name="theme-color" content="#ffffff">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name=apple-mobile-web-app-title content="HOME WEATHER STATION">
+  <meta name=apple-mobile-web-app-title content="WEATHER STATION">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, viewport-fit=cover">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
@@ -65,7 +61,7 @@ error_reporting(0);
   </script>
 </head>
 
-<!-- begin top layout-->
+<!-- Top Grid Area-->
 <div class="weather2-container">
   <div class="container weather34box-toparea">
     <!-- position 1 - Fixed Position --->
@@ -104,7 +100,8 @@ error_reporting(0);
    </div>
  </div>
 </div>
-<!--begin outside station data-->
+
+<!--Main Grid Area-->
 
 <!-- position 5--->
 <div class="weather-container">
@@ -167,6 +164,8 @@ error_reporting(0);
       </div>
      </div>
    </div>
+<?php
+?>
 <!-- position 14--->
 <div class="weather-container"> 
   <div class="weather-item">
@@ -187,10 +186,31 @@ error_reporting(0);
      </div>
    </div>
 
+<!-- position 17--->
+<div class="weather-container"> 
+  <div class="weather-item">
+    <div id="position17">
+    </div>
+  </div>
+ 
+  <!--position 18-->
+  <div class="weather-item">
+    <div id="position18">
+    </div>
+  </div>
+ 
+  <!--position 19-->
+  <div class="weather-item">
+    <div id="position19">
+      </div>
+     </div>
+   </div>
 
-<!--end outdoor data-->
 
-<!--footer area for homeweatherstation template warning dont mess with this below this line unless you really know what you are doing-->
+<!--End Main Grid area-->
+
+<!--footer area -->
+
 <div class="weatherfooter-container">
   <div class="weatherfooter-item">
     <div class="hardwarelogo1"><a href="http://weewx.com" alt="http://weewx.com" title="http://weewx.com">
@@ -212,6 +232,8 @@ echo '<a href="https://https://claydonsweather.org.uk/" title="https://claydonsw
     </div>
   </div>
 </div>
+
+<!--end of footer area -->
 
 <?php 
 include_once ('dvmUpdater.php');
