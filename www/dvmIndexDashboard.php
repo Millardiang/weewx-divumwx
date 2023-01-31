@@ -62,11 +62,11 @@ error_reporting(0);
 </head>
 
 <!-- Top Grid Area-->
-<div class="weather2-container">
-  <div class="container weather34box-toparea">
+<div class="dvm-top-container">
+  <div class="container dvmbox-toparea">
     <!-- position 1 - Fixed Position --->
-    <div class="weather34box clock">
-    <div class="weatherbox-top-border">
+    <div class="dvmbox clock">
+    <div class="dvmbox-top-border">
       <div class="title"><?php echo $info;?><?php echo $lang['timeTop'];?></div>
       <div class="value">
         <div id="position1"></div>
@@ -74,24 +74,24 @@ error_reporting(0);
     </div>
    </div>
     <!-- position 2--->
-    <div class="weather34box indoor">
-     <div class="weatherbox-top-border">
+    <div class="dvmbox indoor">
+     <div class="dvmbox-top-border">
       <div class="value">
         <div id="position2"></div>
       </div>
     </div>
    </div>
     <!-- position 3--->
-    <div class="weather34box earthquake">
-     <div class="weatherbox-top-border">
+    <div class="dvmbox earthquake">
+     <div class="dvmbox-top-border">
            <div class="value">
         <div id="position3"></div>
       </div>
     </div>
    </div>
     <!-- position 4 - Fixed Position --->
-    <div class="weather34box alert">
-     <div class="weatherbox-top-border">
+    <div class="dvmbox alert">
+     <div class="dvmbox-top-border">
       <div class="title"><?php echo $info;?><?php echo $lang['advisoriesTop'];?></div>
       <div class="value">
         <div id="position4"></div>
@@ -104,20 +104,20 @@ error_reporting(0);
 <!--Main Grid Area-->
 
 <!-- position 5--->
-<div class="weather-container">
-  <div class="weather-item">
+<div class="dvm-container">
+  <div class="dvm-item">
     <div id="position5">
     </div>
   </div>
  
   <!-- position 6--->
-  <div class="weather-item">
+  <div class="dvm-item">
     <div id="position6">
     </div>
   </div>
  
   <!-- position 7--->
-  <div class="weather-item">
+  <div class="dvm-item">
     <div id="position7">
      </div>
    </div>
@@ -125,40 +125,40 @@ error_reporting(0);
  
 <!-- position 8--->
 
-<div class="weather-container">
-  <div class="weather-item">
+<div class="dvm-container">
+  <div class="dvm-item">
     <div id="position8">
     </div>
   </div>
  
   <!-- position 9--->
-  <div class="weather-item">
+  <div class="dvm-item">
     <div id="position9">
     </div>
   </div>
  
   <!-- position 10--->
-  <div class="weather-item">
+  <div class="dvm-item">
     <div id="position10">
      </div>
     </div>
    </div>
   
 <!-- position 11--->
-<div class="weather-container"> 
-  <div class="weather-item">
+<div class="dvm-container"> 
+  <div class="dvm-item">
     <div id="position11">
     </div>
   </div>
  
   <!--position 12-->
-  <div class="weather-item">
+  <div class="dvm-item">
     <div id="position12">
     </div>
   </div>
  
   <!--position 13-->
-  <div class="weather-item">
+  <div class="dvm-item">
 
     <div id="position13">
       </div>
@@ -167,40 +167,40 @@ error_reporting(0);
 <?php
 ?>
 <!-- position 14--->
-<div class="weather-container"> 
-  <div class="weather-item">
+<div class="dvm-container"> 
+  <div class="dvm-item">
     <div id="position14">
     </div>
   </div>
  
   <!--position 15-->
-  <div class="weather-item">
+  <div class="dvm-item">
     <div id="position15">
     </div>
   </div>
  
   <!--position 16-->
-  <div class="weather-item">
+  <div class="dvm-item">
     <div id="position16">
       </div>
      </div>
    </div>
 
 <!-- position 17--->
-<div class="weather-container"> 
-  <div class="weather-item">
+<div class="dvm-container"> 
+  <div class="dvm-item">
     <div id="position17">
     </div>
   </div>
  
   <!--position 18-->
-  <div class="weather-item">
+  <div class="dvm-item">
     <div id="position18">
     </div>
   </div>
  
   <!--position 19-->
-  <div class="weather-item">
+  <div class="dvm-item">
     <div id="position19">
       </div>
      </div>
@@ -211,8 +211,8 @@ error_reporting(0);
 
 <!--footer area -->
 
-<div class="weatherfooter-container">
-  <div class="weatherfooter-item">
+<div class="dvmfooter-container">
+  <div class="dvmfooter-item">
     <div class="hardwarelogo1"><a href="http://weewx.com" alt="http://weewx.com" title="http://weewx.com">
         <?php echo '<img src="img/icon-weewx.svg" alt="WeeWX" title="WeeWX" width="150px" height="55px"><div class="hardwarelogo1text"></div>';?></a>
       </div>

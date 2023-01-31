@@ -90,9 +90,9 @@ h1 {
 .h4,
 .h5,
 .h6,
-.weather-container,
-.weather-item,
-.weather2-container,
+.dvm-container,
+.dvm-item,
+.dvm-top-container,
 .weather2-item,
 a,
 body,
@@ -110,8 +110,8 @@ h6 {
 .h4,
 .h5,
 .h6,
-.weather-container,
-.weather-item,
+.dvm-container,
+.dvm-item,
 a,
 body,
 h1,
@@ -131,16 +131,16 @@ h6 {
 .indoortrend,
 .tempcontainer,
 .tempcontainer1,
-.weather-container,
-.weather-item,
+.dvm-container,
+.dvm-item,
 .weather2-alert,
-.weather2-alert.weatherfooter-item,
+.weather2-alert.dvmfooter-item,
 .weather2-clock,
-.weather2-container,
+.dvm-top-container,
 .weather2-indoor,
 .weather2-item,
-.weatherfooter-container,
-.weatherfooter-item,
+.dvmfooter-container,
+.dvmfooter-item,
 a,
 body,
 h3 {
@@ -248,7 +248,7 @@ body {
   margin-top: -27px;
 }
 
-.weather-item,
+.dvm-item,
 body,
 header {
   text-align: center;
@@ -371,7 +371,7 @@ h6 {
   font-weight: 500;
 }
 
-.weather-container {
+.dvm-container {
   display: flex;
   list-style: none;
   width: 960px;
@@ -381,7 +381,7 @@ h6 {
   background: 0;
 }
 
-.weather-item {
+.dvm-item {
   width: 32.84%;
   height: 195px;
   border: 0;
@@ -402,7 +402,7 @@ h6 {
   display: none;
 }
 
-.weather2-container {
+.dvm-top-container {
   -ms-text-size-adjust: 100%;
   -moz-font-smoothing: antialiased;
   -webkit-font-smoothing: antialiased;
@@ -429,13 +429,13 @@ h6 {
 
 .weather2-alert,
 .weather2-clock,
-.weatherfooter-item {
+.dvmfooter-item {
   background: rgba(33, 34, 39, .8);
   height: 90px;
 }
 
-.weatherfooter-container,
-.weatherfooter-item {
+.dvmfooter-container,
+.dvmfooter-item {
   font-family: Arial, system;
 }
 
@@ -444,13 +444,13 @@ h6 {
   opacity: .5;
 }
 
-.weatherfooter-container {
+.dvmfooter-container {
   display: flex;
   width: 960px;
   margin: 0 auto 2px;
 }
 
-.weatherfooter-item {
+.dvmfooter-item {
   width: 100%;
   border: 1px solid #191b1e;
   text-align: center;
@@ -1748,7 +1748,7 @@ suptemp3 {
 }
 
 @media screen and (max-width:768px) {
-  .weather-container {
+  .dvm-container {
     display: inline;
     width: 300px;
     height: 200px;
@@ -1760,13 +1760,13 @@ suptemp3 {
 
   .almanacpopup,
   .w34uptime,
-  .weather2-container,
-  .weatherfooter-container,
+  .dvm-top-container,
+  .dvmfooter-container,
   header {
     display: none
   }
 
-  .weather-item {
+  .dvm-item {
     float: none;
     width: 310px;
     margin: 10px auto 0;
@@ -1780,7 +1780,7 @@ suptemp3 {
 }
 
 @media screen and (max-width:1024px) and (orientation:portrait) {
-  .weather-container {
+  .dvm-container {
     display: inline;
     width: 300px;
     height: 200px;
@@ -1791,13 +1791,13 @@ suptemp3 {
   }
 
   .almanacpopup,
-  .weather2-container,
-  .weatherfooter-container,
+  .dvm-top-container,
+  .dvmfooter-container,
   header {
     display: none
   }
 
-  .weather-item {
+  .dvm-item {
     float: none;
     width: 310px;
     margin: 10px auto 0;
@@ -1811,7 +1811,7 @@ suptemp3 {
 }
 
 @media screen and (max-width:640px) {
-  .weather-container {
+  .dvm-container {
     display: inline;
     width: 300px;
     height: 200px;
@@ -1822,13 +1822,13 @@ suptemp3 {
   }
 
   .almanacpopup,
-  .weather2-container,
-  .weatherfooter-container,
+  .dvm-top-container,
+  .dvmfooter-container,
   header {
     display: none
   }
 
-  .weather-item {
+  .dvm-item {
     float: none;
     width: 310px;
     margin: 10px auto 0;
@@ -2018,14 +2018,14 @@ lightningrain {
   display: none
 }
 
-.weather34box.alert,
-.weather34box.clock,
-.weather34box.earthquake,
-.weather34box.indoor {
+.dvmbox.alert,
+.dvmbox.clock,
+.dvmbox.earthquake,
+.dvmbox.indoor {
   background-color: rgba(33, 34, 39, .8);
 }
 
-.weatherbox-top-border {
+.dvmbox-top-border {
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
   background: rgba(97, 106, 114, .1);
@@ -2069,12 +2069,12 @@ lightningrain {
   font-weight: 500
 }
 
-.weather34box-toparea {
+.dvmbox-toparea {
   margin: 0 0 -10px;
   width: 100%
 }
 
-.weather34box {
+.dvmbox {
   border: 2px solid #151718;
   border-top: 1px;
   border-bottom: 1px;
@@ -2088,14 +2088,14 @@ lightningrain {
   margin: -4.5px auto 0
 }
 
-.weather34box .title,
-.weather34box .value {
+.dvmbox .title,
+.dvmbox .value {
   position: absolute;
   float: left;
   color: silver
 }
 
-.weather34box .title {
+.dvmbox .title {
   font-family: arial, helvetica;
   font-size: 9px;
   top: 2px;
@@ -2108,41 +2108,41 @@ spanm2 {
   font-family: Arial, Helvetica, system
 }
 
-.weather34box .value {
+.dvmbox .value {
   font-size: 26px;
   font-weight: lighter;
   padding: 0 3px;
   top: 0
 }
 
-.weather34box.indoor span {
+.dvmbox.indoor span {
   color: silver;
   font-weight: 500
 }
 
-.weather34box.indoor titlespan {
+.dvmbox.indoor titlespan {
   color: #90b12a;
   font-weight: 500
 }
 
-.weather34box.clock {
+.dvmbox.clock {
   background-repeat: no-repeat;
   background-position: left 10px bottom 18px;
   color: #fff
 }
 
-.weather34box.clock span {
+.dvmbox.clock span {
   color: silver;
   font-weight: 500
 }
 
-.weather34box.clock titlespan {
+.dvmbox.clock titlespan {
   color: #90b12a;
   font-weight: 500
 }
 
-.weather34box.alert span,
-.weather34box.earthquake span {
+.dvmbox.alert span,
+.dvmbox.earthquake span {
   color: #ff7c39;
   font-weight: 500
 }
@@ -5110,7 +5110,7 @@ redtime {
   color: #d35d4e
 }
 
-.weather34box .value1 {
+.dvmbox .value1 {
   position: absolute;
   font-size: 14px;
   font-weight: lighter;
@@ -9265,7 +9265,7 @@ weather34menumarkerlight {
     top: 10px
   }
 
-  .weather-item {
+  .dvm-item {
     margin-top: 32px;
     margin-bottom: -28px
   }

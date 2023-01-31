@@ -74,7 +74,7 @@ echo
   			margin-left: -135px;
   			margin-top: 2px;
 		}
-		.weather-itembaro {
+		.dvm-itembaro {
   			width: 32.84%;
   			height: 195px;
   			border: 0;
@@ -171,7 +171,7 @@ echo
   			color: black;
 		}
 		
-		.weather-itembaro {
+		.dvm-itembaro {
   			height: 200px;
   			width: 33.3333%;  			
   			border: 0;
