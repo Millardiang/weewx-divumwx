@@ -85,6 +85,22 @@ var b=setInterval(function(){c.load("<?php echo $position15; ?>")},<?php echo $c
 (function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position16").show()}});var c=a("#position16");c.load("<?php echo $position16; ?>");
 var b=setInterval(function(){c.load("<?php echo $position16; ?>")},<?php echo $cycles16; ?>)})})(jQuery); // 60 seconds
 
+//update the modules position 16
+(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position16").show()}});var c=a("#position16");c.load("<?php echo $position16; ?>");
+var b=setInterval(function(){c.load("<?php echo $position16; ?>")},<?php echo $cycles16; ?>)})})(jQuery); // 60 seconds
+
+//update the modules position 17
+(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position17").show()}});var c=a("#position17");c.load("<?php echo $position17; ?>");
+var b=setInterval(function(){c.load("<?php echo $position17; ?>")},<?php echo $cycles17; ?>)})})(jQuery); // 60 seconds
+
+//update the modules position 18
+(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position18").show()}});var c=a("#position18");c.load("<?php echo $position18; ?>");
+var b=setInterval(function(){c.load("<?php echo $position18; ?>")},<?php echo $cycles18; ?>)})})(jQuery); // 60 seconds
+
+//update the modules position 19
+(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position19").show()}});var c=a("#position19");c.load("<?php echo $position19; ?>");
+var b=setInterval(function(){c.load("<?php echo $position19; ?>")},<?php echo $cycles19; ?>)})})(jQuery); // 60 seconds
+
 //update the moonphase and earth image
 var refreshId;$(document).ready(function(){moonearthimage()});function moonearthimage(){$.ajax({cache:true,success:function(a){$("#moonearthimage").html(a);<?php if (
     $moonRefresh > 0
@@ -92,6 +108,15 @@ var refreshId;$(document).ready(function(){moonearthimage()});function moonearth
     echo "setTimeout(moonearthimage, 3600000)";
 } ?>},
 	type:"GET",url:"dvmGetMoonEarth.php"})};
+
+//update the AQI data
+var refreshId;$(document).ready(function(){aqidata()});function aqidata(){$.ajax({cache:true,success:function(a){$("#aqidata").html(a);<?php if (
+    $aqiRefresh > 0
+) {
+    echo "setTimeout(aqidata, 60000)";
+} ?>},
+	type:"GET",url:"aqitextcreate.php"})};
+
 			
 
 </script>

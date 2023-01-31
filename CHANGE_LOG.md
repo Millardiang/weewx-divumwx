@@ -4,6 +4,9 @@
 # * = New Addition
 # @ = Information
 
+## [0.3.7-alpha] - 31/1/2023
+@ - Rolled back corrupted files and reinstated missing files
+
 ## [0.3.6-alpha] - 31/1/2023
 @ - Rolled back dvmAirqualityTop.php changes
 
