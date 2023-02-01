@@ -55,12 +55,7 @@ date_default_timezone_set($TZ);
 		$source = '0';
 	}
 
-	if ($wind["units"] == "mph"){
-		$lightning["last_distance"] = $lightning["last_distance"] * 0.621371;
-		$lightning["distunit"] = "mi";
-	}else {
-		$lightning["distunit"] = "km";
-	}
+	if ($wind["units"] == "mph"){$lightning["last_distance"] = $lightning["last_distance"] * 0.621371; $lightning["distunit"] = "mi";} else {$lightning["distunit"] = "km";}
 ?>
 
 <style>
@@ -79,7 +74,7 @@ date_default_timezone_set($TZ);
 
 </style>
 
-<script src="js/d3.v3.min.js"></script>
+<script src="js/d3.min.js"></script>
 
 <div class="Strikes"></div>
 
@@ -310,7 +305,7 @@ date_default_timezone_set($TZ);
 
 	// Begin color Text output
    	svg.append("text") // Last 1 hour
-             	.attr("x", 191)
+             	.attr("x", 177)
             	.attr("y", 45)
             	.style("fill", "#ff964f")
             	.style("font-family", "Helvetica")
@@ -319,7 +314,7 @@ date_default_timezone_set($TZ);
             	.style("font-weight", "normal")
    				.text(Strikes_last_hour);
    	svg.append("text") // Month
-             	.attr("x", 220)
+             	.attr("x", 224)
             	.attr("y", 60)
             	.style("fill", "#ff964f")
             	.style("font-family", "Helvetica")
