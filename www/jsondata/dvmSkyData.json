@@ -19,7 +19,7 @@
     },
     "generation":
     {
-        "time": "Wed, 01 Feb 2023 00:05:00 GMT",
+        "time": "Wed, 01 Feb 2023 22:10:00 GMT",
         "generator": "weewx 4.10.1"
     },
     "lightning":
@@ -31,15 +31,15 @@
     },
     "airquality":
     {
-        "pm25 current": {"value": 4.7},
-        "pm25 rolling 24hr": {"value": 4.7},
-        "pm10 current": {"value": 11.2},
-        "pm10 rolling 24hr": {"value": 11.2},
+        "pm25 current": {"value": 4.6},
+        "pm25 rolling 24hr": {"value": 4.6},
+        "pm10 current": {"value": 14.9},
+        "pm10 rolling 24hr": {"value": 14.9},
         "void_end": null
     },
     "cloudcover":
     {
-        "cloud cover": {"value": 5.833333},
+        "cloud cover": {"value": 48.833333},
         "void_end": null
 
     },
@@ -47,9 +47,9 @@
     "solar":
     {
         "max solar current": {"value": 0},
-        "max solar day": {"value": 0, "at": "00:00"},
-        "max solar 24h": {"value": 218, "at": "13:25"},
-        "max solar month": {"value": 0, "at": "01 00:00"},
+        "max solar day": {"value": 297, "at": "11:02"},
+        "max solar 24h": {"value": 258, "at": "11:05"},
+        "max solar month": {"value": 297, "at": "01 11:02"},
         "max solar year": {"value": 329, "at": "19 Jan 11:17"},
         "max solar alltime": {"value": 1898, "at": "16 Jun 2022 07:55"},
   
@@ -60,27 +60,27 @@
 
     "almanac":
     {
-        "sun rise date": {"at": "Feb 01 2023 07:43:28"},
-        "sun set date": {"at": "Feb 01 2023 16:52:04"},
+        "sun rise date": {"at": "Feb 01 2023 07:43:31"},
+        "sun set date": {"at": "Feb 01 2023 16:52:01"},
         "moon rise date": {"at": "01 Feb 12:17"},
         "moon set date": {"at": "01 Feb 05:26"},
         "nautical twighlight begin": {"at": "06:26"},
         "civil twighlight begin": {"at": "07:06"},
         "astronomical twighlight begin": {"at": "05:47"},
         "sun rise": {"at": "07:43"},
-        "sun next rise": {"at": "07:43"},
+        "sun next rise": {"at": "07:41"},
         "sun meridian transit": {"at": "12:17"},
         "sun set": {"at": "16:52"},
-        "sun next set":{"at":"16:52"},
+        "sun next set":{"at":"16:53"},
         "civil twighlight end": {"at": "17:29"},
         "nautical twighlight end": {"at": "18:08"},
         "astronomical twighlight end": {"at": "18:48"},
-        "hour sun": {"value": 3.087562190851289},
-        "sun azimuth": {"value": 354.81332828674505},          
-        "sun altitude": {"value": -55.211045268948936},         
-        "sun right ascension": {"value": 314.3062113051606},          
-        "sun declination": {"value": -17.237423675217656},
-        "sidereal time": {"at": 131.21049382510552},         
+        "hour sun": {"value": 2.5852531669281102},
+        "sun azimuth": {"value": 312.29490892979544},          
+        "sun altitude": {"value": -46.936042278141294},         
+        "sun right ascension": {"value": 315.24335443721947},          
+        "sun declination": {"value": -16.975871277271075},
+        "sidereal time": {"at": 103.36744987503027},         
         "winter solstice": {"at": "03:27"},
         "solstice": {"at": "21/06/23 15:57:55"},
         "summer solstice": {"at": "21/06/23 15:57:55"},
@@ -89,28 +89,28 @@
         "moon rise": {"at": "12:17"},
         "moon meridian transit": {"at": "21:19"},
         "moon set": {"at": "05:26"},
-        "hour moon": {"value": 0.9231038624568999},
-        "moon azimuth": {"value": 257.54733639226146},          
-        "moon altitude": {"value": 42.72370410754893},          
-        "moon right ascension": {"value": 78.32053845410032},          
-        "moon declination": {"value": 25.869921459099},         
+        "hour moon": {"value": 0.21639308317897576},
+        "moon azimuth": {"value": 205.28025633484438},          
+        "moon altitude": {"value": 63.39932534786493},          
+        "moon right ascension": {"value": 90.9690394930516},          
+        "moon declination": {"value": 27.019413184906075},         
         "new moon": {"at": "20 Feb 07:05"},
         "first quarter moon": {"at": "27 Feb 08:05"},
         "full moon": {"at": "05 Feb 18:28"},
         "last quarter moon": {"at": "13 Feb 16:00"},
         "moon phase": {"value": "Waxing gibbous"},
         "moon phase number": {"value": 3},
-        "moon fullness": {"value": "80.90108088378607"},
-        "moon age": {"value": 10},
-        "mercury hlongitude": {"value": 215.18717251838106},
-        "venus hlongitude": {"value": 10.04778371252633},
-        "earth hlongitude": {"value": 131.85389226650975},
-        "mars hlongitude": {"value": 103.09275797352976},
-        "jupiter hlongitude": {"value": 15.355463952388002},
-        "saturn hlongitude": {"value": 327.25275000455656},
-        "uranus hlongitude": {"value": 47.84715194738056},
-        "neptune hlongitude": {"value": 354.86373508281974},
-        "pluto hlongitude": {"value": 298.2999879242227},        
+        "moon fullness": {"value": "87.2257274590375"},
+        "moon age": {"value": 11},
+        "mercury hlongitude": {"value": 218.03974638372353},
+        "venus hlongitude": {"value": 11.513628539549337},
+        "earth hlongitude": {"value": 132.78767474869886},
+        "mars hlongitude": {"value": 103.52820985387476},
+        "jupiter hlongitude": {"value": 15.439849232036217},
+        "saturn hlongitude": {"value": 327.28181928966416},
+        "uranus hlongitude": {"value": 47.857475778311034},
+        "neptune hlongitude": {"value": 354.8693631586959},
+        "pluto hlongitude": {"value": 298.30441388680487},        
         "void_end": null
     }
 }

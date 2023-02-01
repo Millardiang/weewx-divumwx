@@ -73,7 +73,7 @@ a:hover {
 a:active {
   color: white;
 }
-.weather34darkbrowser {
+.divumwxdarkbrowser {
   position: relative;
   background: 0;
   width: 97%;
@@ -85,7 +85,7 @@ a:active {
   border-top-right-radius: 5px;
   padding-top: 10px;
 }
-.weather34darkbrowser[url]:after {
+.divumwxdarkbrowser[url]:after {
   content: attr(url);
   color: white;
   font-size: 14px;
@@ -187,7 +187,7 @@ purple {
   top: 0;
 }
 
-<!-- weather34 rain beaker css -- > .rainfallcontainer1 {
+<!-- divumwx rain beaker css -- > .rainfallcontainer1 {
   left: 5px;
   top: 0;
 }

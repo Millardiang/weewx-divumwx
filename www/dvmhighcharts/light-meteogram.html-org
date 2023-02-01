@@ -53,7 +53,7 @@ container {
  * developers to go beyond the basic chart types and show how the library can
  * be extended programmatically. This is what the demo does:
  *
- * - Loads weather forecast from www.yr.no in form of an XML service. The XML
+ * - Loads divum forecast from www.yr.no in form of an XML service. The XML
  *   is translated on the Higcharts website into JSONP for the sake of the demo
  *   being shown on both our website and JSFiddle.
  * - When the data arrives async, a Meteogram instance is created. We have
@@ -65,7 +65,7 @@ container {
  *   some smoothing on the graph, but keep the original data in the tooltip.
  * - After this, the options structure is build, and the chart generated with the
  *   parsed data.
- * - In the callback (on chart load), we weather icons on top of the temperature series.
+ * - In the callback (on chart load), we divum icons on top of the temperature series.
  *   The icons are sprites from a single PNG image, placed inside a clipped 30x30
  *   SVG <g> element. VML interprets this as HTML images inside a clipped div.
  * - Lastly, the wind arrows are built and added below the plot area, and a grid is
@@ -91,7 +91,7 @@ function Meteogram(xml, container) {
     this.parseYrData();
 }
 /**
- * Return weather symbol sprites as laid out at http://om.yr.no/forklaring/symbol/
+ * Return divum symbol sprites as laid out at http://om.yr.no/forklaring/symbol/
  */
 
 
@@ -148,7 +148,7 @@ Meteogram.prototype.tooltipFormatter = function (tooltip) {
 };
 
 /**
- * Draw the weather symbols on top of the temperature series. The symbols are sprites of a single
+ * Draw the divum symbols on top of the temperature series. The symbols are sprites of a single
  * file, defined in the getSymbolSprites function above.
  */
 Meteogram.prototype.drawWeatherSymbols = function (chart) {
@@ -554,7 +554,7 @@ if (!location.hash) {
     //place = 'Norway/Sogn_og_Fjordane/Vik/Målset';
     //place = 'United_States/California/San_Francisco';
     //place = 'United_States/Minnesota/Minneapolis';
-    location.hash = 'https://claydonsweather.org.uk/weewx/weather34/jsondata/yr.xml';
+    location.hash = 'https://claydonsweather.org.uk/weewx/divumwx/jsondata/yr.xml';
 	//location.hash = 'https://www.yr.no/place/United_Kingdom/England/Steeple_Claydon/forecast_hour_by_hour.xml';
 
 }
@@ -564,7 +564,7 @@ if (!location.hash) {
 // for source code.
 $.ajax({
     dataType: 'json',
-    url: 'https://claydonsweather.org.uk/weewx/weather34/w34highcharts/jsonp.php?url=' + location.hash.substr(1) + '&callback=?',
+    url: 'https://claydonsweather.org.uk/weewx/divumwx/w34highcharts/jsonp.php?url=' + location.hash.substr(1) + '&callback=?',
     success: function (xml) {
         window.meteogram = new Meteogram(xml, 'container');
     },

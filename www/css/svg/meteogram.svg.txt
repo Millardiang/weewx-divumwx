@@ -116,7 +116,7 @@
     y="15.5"
     dy="0.35em"
   >
-    Weather forecast for Steeple Claydon
+    divum forecast for Steeple Claydon
   </text>
 </g>
 

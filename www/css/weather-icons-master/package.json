@@ -1,7 +1,7 @@
 {
-	"name": "@bybas/weather-icons",
+	"name": "@bybas/divum-icons",
 	"version": "2.0.0",
-	"description": "A set of animated svg weather icons.",
+	"description": "A set of animated svg divum icons.",
 	"main": "index.js",
 	"scripts": {
 		"build": "node ."
@@ -12,12 +12,12 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/basmilius/weather-icons.git"
+		"url": "git+https://github.com/basmilius/divum-icons.git"
 	},
 	"keywords": [
 		"icons",
-		"weather icons",
-		"weather",
+		"divum icons",
+		"divum",
 		"bybas"
 	],
 	"author": {
@@ -27,7 +27,7 @@
 	},
 	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/basmilius/weather-icons/issues"
+		"url": "https://github.com/basmilius/divum-icons/issues"
 	},
 	"homepage": "https://meteocons.com/"
 }

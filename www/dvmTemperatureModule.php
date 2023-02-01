@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<title>weather34 current conditions</title>
+<title>divumwx current conditions</title>
 <style>
 .moduletitle4 {
   position: relative;
@@ -124,7 +124,7 @@ else if(anyToC($temp["outside_now"])<100){$tempcolor = "#e26870";}
     </div>    
     <span class='moduletitle4'>Temperature (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span>
 
-<div class="updatedtime1"><?php if(file_exists($livedata)&&time()- filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>';else echo $online." ".$weather["time"];?></div>
+<div class="updatedtime1"><?php if(file_exists($livedata)&&time()- filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>';else echo $online." ".$divum["time"];?></div>
 
 
 

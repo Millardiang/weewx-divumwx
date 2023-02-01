@@ -1,4 +1,4 @@
-<?php  //weather34 rain module 15th Feb 2019 //
+<?php  //divumwx rain module 15th Feb 2019 //
 include('dvmCombinedData.php');
 include('userSettings.php');
 header('Content-type: text/html; charset = utf-8');
@@ -10,7 +10,7 @@ header('Content-type: text/html; charset = utf-8');
     <span class='moduletitle2'><?php echo $lang['rainfallModule'], " (<valuetitleunit>" . $rain["units"];?></valuetitleunit>)</span>
 
 
-<div class="updatedtime1"><span><?php if (file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$weather["time"];?></div>
+<div class="updatedtime1"><span><?php if (file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?></div>
   
 <div class="yearbox"><div class="heatcircle-content">
 <?php  //rain year
@@ -32,7 +32,7 @@ echo " &nbsp;&nbsp;<valuetextheading1>Last 24hr</valuetextheading1><br><div clas
 <?php if ($rain["units"] =='in'){echo "<div class=rainconvertercircle>".number_format($rain["day"]*25.400013716,1)."&nbsp;<smallrainunit>mm";} else if ($rain["units"] =='mm'){echo "<div class=rainconvertercircle>".number_format($rain["day"]*0.0393701,2)."&nbsp;<smallrainunit>in";}?></span>
 </div></div></div></div>
 <div class="rainrateextra">
-<?php echo "<div class=rainratemodulehome><rainratetextheading>&nbsp;Rate&nbsp;</rainratetextheading><raiblue>"; if ($rain["rate"]>100){echo number_format($rain["rate"],1);} else echo number_format($rain["rate"],2); echo"&nbsp;</raiblue><smallrainunit2>".$weather["rain_units"];?>
+<?php echo "<div class=rainratemodulehome><rainratetextheading>&nbsp;Rate&nbsp;</rainratetextheading><raiblue>"; if ($rain["rate"]>100){echo number_format($rain["rate"],1);} else echo number_format($rain["rate"],2); echo"&nbsp;</raiblue><smallrainunit2>".$divum["rain_units"];?>
 </smallrainunit2></div></div></div></div>
 
 

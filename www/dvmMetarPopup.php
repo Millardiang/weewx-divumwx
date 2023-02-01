@@ -6,7 +6,7 @@ $suns=date_sunset(time(), SUNFUNCS_RET_STRING, $lat, $lon, $set_zenith, $UTC_off
 $suns2 =date('G.i', $result['sunset']);
 $sunrs2 =date('G.i', $result['sunrise']);
 $now =date('G.i');
- //weather34 wxcheck API aviation metar script May 2018 
+ //divumwx wxcheck API aviation metar script May 2018 
 $json_string             = file_get_contents("jsondata/me.txt");
 $parsed_json             = json_decode($json_string);
 $metar34time       = $parsed_json->{'data'}[0]->{'observed'};
@@ -39,7 +39,7 @@ $metar34rainmm          = number_format($metar34raininches*25.4,2) ;
 $metar34visibility=str_replace(',', '', $metar34visibility);
 $metar34vismiles        = number_format($metar34visibility*0.000621371,1) ;
 $metar34viskm        = number_format($metar34visibility*0.00099999969062399994,1) ;
-// start the weather34 icon output and descriptions
+// start the divumwx icon output and descriptions
 if($metar34conditions =='-SHRA'){
 if ($now >$suns2 ){$sky_icon='40n.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='40n.svg';} 
@@ -370,7 +370,7 @@ $iconset = "icon2";
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Weather34 Nearby Metar</title>
+  <title>divumwx Nearby Metar</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 @font-face{font-family:weathertext2;src:url(css/fonts/verbatim-regular.woff) format("woff"),url(fonts/verbatim-regular.woff2) format("woff2"),url(fonts/verbatim-regular.ttf) format("truetype")}
@@ -420,7 +420,7 @@ a:active {
 .grid > article img {
   max-width: 100%;
 }
-.weather34darkbrowser {
+.divumwxdarkbrowser {
   position: relative;
   width: 97%;
   height: 30px;
@@ -433,7 +433,7 @@ a:active {
   color: <?php echo $text; ?>;
 }
 
-.weather34darkbrowser[url]:after {
+.divumwxdarkbrowser[url]:after {
   content: attr(url);
   font-size: 14px;
   text-align: center;
@@ -512,7 +512,7 @@ stationid{font-size:1.4em;font-family:weathertext2;color:#009bb4}
 .pressure{position:absolute;float:left;margin-top:60px;text-align:left;}
 </style>
 
-<div class="weather34darkbrowser" url="<?php echo $metar34stationname;?> Conditions"></div>
+<div class="divumwxdarkbrowser" url="<?php echo $metar34stationname;?> Conditions"></div>
   
 <main class="grid">
 
@@ -1074,20 +1074,20 @@ $date = strtotime($date) + 60 * 60 * $UTC; echo date('jS M H:i',$date);
   <article>
   <div class=actualt style="background:teal;color:white;">&nbsp;&nbsp Raw Metar Info</div>  
   <div class="lotemp">
-  <?php echo $info?> Raw METAR is the most common format in the world for the transmission of observational weather data. It is highly standardized through the International Civil Aviation Organization (ICAO), which allows it to be understood throughout most of the world.</span></div>
+  <?php echo $info?> Raw METAR is the most common format in the world for the transmission of observational divum data. It is highly standardized through the International Civil Aviation Organization (ICAO), which allows it to be understood throughout most of the world.</span></div>
   </article> 
   
   <article>
   <div class=actualt style="background:teal;color:white;">&nbsp;&nbsp API  Info</div>  
   <div class="lotemp">
-  <?php echo $info?> Data Provided by </span><a href="https://www.checkwx.com/weather/<?php echo $icao1;?>" title="https://www.checkwx.com/weather/<?php echo $icao1;?>" target="_blank" ><br><img src=img/checkwx.svg width=130px alt="https://www.checkwx.com/weather/<?php echo $icao1;?>"></a></span></div>
+  <?php echo $info?> Data Provided by </span><a href="https://www.checkwx.com/divum/<?php echo $icao1;?>" title="https://www.checkwx.com/divum/<?php echo $icao1;?>" target="_blank" ><br><img src=img/checkwx.svg width=130px alt="https://www.checkwx.com/divum/<?php echo $icao1;?>"></a></span></div>
   </article> 
   
   
   <article>
   <div class=actualt style="background:teal;color:white;">&nbsp;&nbsp &copy; Info</div>  
   <div class="lotemp">
-  <?php echo $info?> CSS/SVG/PHP scripts were developed by <a href="https://weather34.com" title="weather34.com" target="_blank" style="font-size:9px;">weather34.com</a>  for use in the weather34 template &copy; 2015-<?php echo date('Y');?>
+  <?php echo $info?> CSS/SVG/PHP scripts were developed by <a href="https://divumwx.com" title="divumwx.com" target="_blank" style="font-size:9px;">divumwx.com</a>  for use in the divumwx template &copy; 2015-<?php echo date('Y');?>
   <br><br>
   <?php echo $info?> Guide Info provided  by <a href="https://en.wikipedia.org/wiki/METAR" title="https://en.wikipedia.org/wiki/METAR" target="_blank" style="font-size:9px;">Metar-Wikipedia </a>  
   </div></article> 

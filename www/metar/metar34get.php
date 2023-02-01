@@ -6,7 +6,7 @@ $suns=date_sunset(time(), SUNFUNCS_RET_STRING, $lat, $lon, $set_zenith, $UTC_off
 $suns2 =date('G.i', $result['sunset']);
 $sunrs2 =date('G.i', $result['sunrise']);
 $now =date('G.i');
- //weather34 wxcheck API aviation metar script May 2018 
+ //divumwx wxcheck API aviation metar script May 2018 
 $json_string             = file_get_contents("jsondata/me.txt");
 $parsed_json             = json_decode($json_string);
 $metar34time       = $parsed_json->{'data'}[0]->{'observed'};
@@ -34,7 +34,7 @@ $metar34rainmm          = number_format($metar34raininches*25.4,2) ;
 $metar34visibility=str_replace(',', '', $metar34visibility);
 $metar34vismiles        = number_format($metar34visibility*0.000621371,1) ;
 $metar34viskm        = number_format($metar34visibility*0.00099999969062399994,0) ;
-// start the weather34 icon output and descriptions
+// start the divumwx icon output and descriptions
 if($metar34conditions =='-SHRA'){
 if ($now >$suns2 ){$sky_icon='rain.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='rain.svg';} 
@@ -349,6 +349,6 @@ else{
 	$sky_icon='offline.svg';
 	$sky_desc='Data Offline';
 };
-//end weather34 metar aviation script API	 
+//end divumwx metar aviation script API	 
 
 ?>

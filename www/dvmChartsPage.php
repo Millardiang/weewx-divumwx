@@ -1,15 +1,14 @@
 <?php
 //###################################################################################################################
-//	weewx-Weather34 Template maintained by Ian Millard (Steepleian)                                 				#
+//	weewx-divumwx Template maintained by Ian Millard (Steepleian)                                 				#
 //	                                                                                                				#
-//  Contains original legacy code (by agreement) created and developed by Brian Underdown (https://weather34.com)   #
-//  for the (now superseeded) original Weather34 Template which is no longer maintained by its creator              #
-//  © weather34.com original CSS/SVG/PHP 2015-2019                                                                  #
+//                #
+//  © divumwx.com original CSS/SVG/PHP 2015-2019                                                                  #
 // 	                                                                                                				#
 //  Contains original code by Ian Millard and collaborators															#
 //  © claydonsweather.org.uk original CSS/SVG/PHP 2020-2021                                                         #
 // 	                                                                                                				#
-// 	Issues for weewx-Weather34 template should be addressed to https://github.com/steepleian/weewx-Weather34/issues #                                                                                              #
+// 	Issues for weewx-divumwx template should be addressed to https://github.com/steepleian/weewx-divumwx/issues #                                                                                              #
 // 	                                                                                                				#
 //###################################################################################################################
 include_once ('w34CombinedData.php');
@@ -30,7 +29,7 @@ function downloadfromgit($filename)
         $options = array(
             CURLOPT_FILE => $fileopen,
             CURLOPT_TIMEOUT => 10,
-            CURLOPT_URL => 'https://github.com/steepleian/weewx-Weather34/blob/master/www/settings1.default.php'
+            CURLOPT_URL => 'https://github.com/steepleian/weewx-divumwx/blob/master/www/settings1.default.php'
         );
         $ch = curl_init();
         curl_setopt_array($ch, $options);
@@ -40,7 +39,7 @@ function downloadfromgit($filename)
         fclose($fileopen);
         if (!file_exists($filename) || $fstat['size'] < 100)
         {
-            echo ($filename . " did not download properly, please visit <a href='https://raw.githubusercontent.com/steepleian/weewx-Weather34/master/www/settings1.default.php?token=AEMVT7U4QB6O67Z35VADMUK6QGMRM' target='_blank'>https://raw.githubusercontent.com/steepleian/weewx-Weather34/master/www/settings1.default.php?token=AEMVT7U4QB6O67Z35VADMUK6QGMRM</a>, right click anywhere on the page and choose to save the file. Then copy the file into the root of your website (where you downloaded the website files to on your server).<br/>");
+            echo ($filename . " did not download properly, please visit <a href='https://raw.githubusercontent.com/steepleian/weewx-divumwx/master/www/settings1.default.php?token=AEMVT7U4QB6O67Z35VADMUK6QGMRM' target='_blank'>https://raw.githubusercontent.com/steepleian/weewx-divumwx/master/www/settings1.default.php?token=AEMVT7U4QB6O67Z35VADMUK6QGMRM</a>, right click anywhere on the page and choose to save the file. Then copy the file into the root of your website (where you downloaded the website files to on your server).<br/>");
             die();
         }
     }
@@ -87,18 +86,18 @@ $paddingtop = $percentage;
 <!DOCTYPE html>
 <html>
 <head>
-<title><?php echo $stationlocation; ?> Weather Station</title> 
-<meta content="Home weather station providing current weather conditions for <?php echo $stationlocation; ?>" name="description">
+<title><?php echo $stationlocation; ?> divum Station</title> 
+<meta content="Home divum station providing current divum conditions for <?php echo $stationlocation; ?>" name="description">
 <!--Google / Search Engine Tags -->
-<meta itemprop="name" content="Home Weather Station <?php echo $stationlocation; ?>">
-<meta itemprop="description" content="Home weather station providing current weather conditions for <?php echo $stationlocation; ?>">
+<meta itemprop="name" content="Home divum Station <?php echo $stationlocation; ?>">
+<meta itemprop="description" content="Home divum station providing current divum conditions for <?php echo $stationlocation; ?>">
 <meta itemprop="image" content="img/weather34_meta.png">
 <meta content="place" property="og:type">
-<meta content="weather34" name="author">
+<meta content="divumwx" name="author">
     <meta content="INDEX,FOLLOW" name="robots">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name=apple-mobile-web-app-title content="HOME WEATHER STATION">
+    <meta name=apple-mobile-web-app-title content="HOME divum STATION">
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, viewport-fit=cover">
 <link rel="apple-touch-icon" sizes="180x180" href="img/apple-touch-icon.png">
 <link rel="manifest" href="manifest.php">
@@ -126,7 +125,7 @@ $paddingtop = $percentage;
   margin: 0 auto;
   margin-left: 0px
 }
-.weather2-container {
+.divum2-container {
     -ms-text-size-adjust: 100%;
     -moz-font-smoothing: antialiased;
     -webkit-font-smoothing: antialiased;
@@ -139,7 +138,7 @@ $paddingtop = $percentage;
     background-color: 0;
     margin: 50px auto -20px;
 }
-  .weather-container {
+  .divum-container {
     display: flex;
     list-style: none;
     width: 1280px;
@@ -148,7 +147,7 @@ $paddingtop = $percentage;
     margin: 2px auto;
     background: 0;
 }
-.weather-item {
+.divum-item {
     width: 24.6%;
     height: 195px;
     border: 0;
@@ -165,7 +164,7 @@ $paddingtop = $percentage;
     padding: 0;
     background: rgba(33, 34, 39, .8);
 }
-.weatherfooter-container {
+.divumfooter-container {
     display: flex;
     width: 1280px;
     margin: 0 auto 2px;
@@ -174,12 +173,12 @@ $paddingtop = $percentage;
 </head>
 <body>
 <!-- begin top layout for homeweatherstation template-->
-<div class="weather2-container">
-<div class="container weather34box-toparea">
+<div class="divum2-container">
+<div class="container divumwxbox-toparea">
 
 
 <!-- position1 main clock--->
-  <div class="weather34box clock">
+  <div class="divumwxbox clock">
     <div class="title"><svg viewBox='0 0 32 32' width=10 height=10 fill=none stroke=currentcolor stroke-linecap=round stroke-linejoin=round stroke-width=6.25%>
 <path d='M16 14 L16 23 M16 8 L16 10' />
 <circle cx=16 cy=16 r=14 />
@@ -189,7 +188,7 @@ $paddingtop = $percentage;
 
 
 <!-- position2--->
-  <div class="weather34box indoor">
+  <div class="divumwxbox indoor">
     <div class="title"><svg viewBox='0 0 32 32' width=10 height=10 fill=none stroke=currentcolor stroke-linecap=round stroke-linejoin=round stroke-width=6.25%>
 <path d='M16 14 L16 23 M16 8 L16 10' />
 <circle cx=16 cy=16 r=14 />
@@ -199,14 +198,14 @@ $paddingtop = $percentage;
  
  
  <!-- position3--->
-  <div class="weather34box alert">
+  <div class="divumwxbox alert">
     <div class="title"><svg viewBox="0 0 32 32" width=10 height=10 fill=none stroke=currentcolor stroke-linecap=round stroke-linejoin=round stroke-width=6.25%><path d="M16 14 L16 23 M16 8 L16 10" /><circle cx=16 cy=16 r=14 /></svg> <?php echo $position3title ;?> </div>
     <div class="value">
     <div id="position3"></div></div></div>
  
  
   <!-- position4--->   
-  <div class="weather34box earthquake">
+  <div class="divumwxbox earthquake">
     <div class="title">
     <svg viewBox="0 0 32 32" width=10 height=10 fill=none stroke=currentcolor stroke-linecap=round stroke-linejoin=round stroke-width=6.25%><path d="M16 14 L16 23 M16 8 L16 10" /><circle cx=16 cy=16 r=14 /></svg> <?php echo $position4title ;?></div>
     <div class="value"><div id="position4"></div></div></div>
@@ -215,40 +214,40 @@ $paddingtop = $percentage;
   </div></div></div></div>
 <!--end position section for homeweatherstation template-->
 <!--Top Row 1 Box 1-->
-<div class="weather-container"><div class="weather-item"><div class="chartforecast">
+<div class="divum-container"><div class="divum-item"><div class="chartforecast">
 <!--<span <span class="yearpopup">  <a alt="temp charts" title="temp charts" href="pop_tempalmanac.php" data-lity ><?php echo $menucharticonpage ?> Temperature Almanac and Derived Charts</a></span>-->
   
-<!--<span class="yearpopup">  <a alt="yearly temperature" title="yearly temperature" href="<?php echo $chartsource; ?>/<?php echo $theme1; ?>-charts.html?chart='temperatureplot'&span='yearly'&temp='<?php echo $weather['temp_units']; ?>'&pressure='<?php echo $weather['barometer_units']; ?>'&wind='<?php echo $weather['wind_units']; ?>'&rain='<?php echo $weather['rain_units'] ?>" data-lity ><?php echo $menucharticonpage ?> Yearly</a></span>-->
+<!--<span class="yearpopup">  <a alt="yearly temperature" title="yearly temperature" href="<?php echo $chartsource; ?>/<?php echo $theme1; ?>-charts.html?chart='temperatureplot'&span='yearly'&temp='<?php echo $divum['temp_units']; ?>'&pressure='<?php echo $divum['barometer_units']; ?>'&wind='<?php echo $divum['wind_units']; ?>'&rain='<?php echo $divum['rain_units'] ?>" data-lity ><?php echo $menucharticonpage ?> Yearly</a></span>-->
 <span <span class="yearpopup">  <a alt="temp charts" title="temp charts" href="pop_menu_temperature.php" data-lity ><?php echo $menucharticonpage ?> Temperature Almanac and Derived Charts</a></span>
 
-  <!--<a alt="yearly Feels" title="yearly Feels" href="<?php echo $chartsource; ?>/<?php echo $theme1; ?>-charts.html?chart='tempderivedplot'&span='yearly'&temp='<?php echo $weather['temp_units']; ?>'&pressure='<?php echo $weather['barometer_units']; ?>'&wind='<?php echo $weather['wind_units']; ?>'&rain='<?php echo $weather['rain_units'] ?>" data-lity > <?php echo '| Feels'; ?> </a></span>-->
-<!--<a alt="yearly humidity" title="yearly humidity" href="<?php echo $chartsource; ?>/<?php echo $theme1; ?>-charts.html?chart='humidityplot'&span='yearly'&temp='<?php echo $weather['temp_units']; ?>'&pressure='<?php echo $weather['barometer_units']; ?>'&wind='<?php echo $weather['wind_units']; ?>'&rain='<?php echo $weather['rain_units'] ?>" data-lity > <?php echo '| Hum'; ?> </a></span> --> 
-<!--<span class="todaypopup"> <a alt="weekly temperature" title="weekly temperature" href="<?php echo $chartsource; ?>/<?php echo $theme1; ?>-charts.html?chart='tempallplot'&span='weekly'&temp='<?php echo $weather['temp_units']; ?>'&pressure='<?php echo $weather['barometer_units']; ?>'&wind='<?php echo $weather['wind_units']; ?>'&rain='<?php echo $weather['rain_units'] ?>" data-lity >  <?php echo $menucharticonpage ?> Weekly </a></span>-->
-<!--<a alt="weekly Feels" title="weekly Feels" href="<?php echo $chartsource; ?>/<?php echo $theme1; ?>-charts.html?chart='tempderivedplot'&span='weekly'&temp='<?php echo $weather['temp_units']; ?>'&pressure='<?php echo $weather['barometer_units']; ?>'&wind='<?php echo $weather['wind_units']; ?>'&rain='<?php echo $weather['rain_units'] ?>" data-lity > <?php echo '| Feels'; ?> </a></span>-->
-<!--<a alt="weekly humidity" title="weekly humidity" href="<?php echo $chartsource; ?>/<?php echo $theme1; ?>-charts.html?chart='humidityplot'&span='weekly'&temp='<?php echo $weather['temp_units']; ?>'&pressure='<?php echo $weather['barometer_units']; ?>'&wind='<?php echo $weather['wind_units']; ?>'&rain='<?php echo $weather['rain_units'] ?>" data-lity > <?php echo '| Hum'; ?> </a></span>-->
+  <!--<a alt="yearly Feels" title="yearly Feels" href="<?php echo $chartsource; ?>/<?php echo $theme1; ?>-charts.html?chart='tempderivedplot'&span='yearly'&temp='<?php echo $divum['temp_units']; ?>'&pressure='<?php echo $divum['barometer_units']; ?>'&wind='<?php echo $divum['wind_units']; ?>'&rain='<?php echo $divum['rain_units'] ?>" data-lity > <?php echo '| Feels'; ?> </a></span>-->
+<!--<a alt="yearly humidity" title="yearly humidity" href="<?php echo $chartsource; ?>/<?php echo $theme1; ?>-charts.html?chart='humidityplot'&span='yearly'&temp='<?php echo $divum['temp_units']; ?>'&pressure='<?php echo $divum['barometer_units']; ?>'&wind='<?php echo $divum['wind_units']; ?>'&rain='<?php echo $divum['rain_units'] ?>" data-lity > <?php echo '| Hum'; ?> </a></span> --> 
+<!--<span class="todaypopup"> <a alt="weekly temperature" title="weekly temperature" href="<?php echo $chartsource; ?>/<?php echo $theme1; ?>-charts.html?chart='tempallplot'&span='weekly'&temp='<?php echo $divum['temp_units']; ?>'&pressure='<?php echo $divum['barometer_units']; ?>'&wind='<?php echo $divum['wind_units']; ?>'&rain='<?php echo $divum['rain_units'] ?>" data-lity >  <?php echo $menucharticonpage ?> Weekly </a></span>-->
+<!--<a alt="weekly Feels" title="weekly Feels" href="<?php echo $chartsource; ?>/<?php echo $theme1; ?>-charts.html?chart='tempderivedplot'&span='weekly'&temp='<?php echo $divum['temp_units']; ?>'&pressure='<?php echo $divum['barometer_units']; ?>'&wind='<?php echo $divum['wind_units']; ?>'&rain='<?php echo $divum['rain_units'] ?>" data-lity > <?php echo '| Feels'; ?> </a></span>-->
+<!--<a alt="weekly humidity" title="weekly humidity" href="<?php echo $chartsource; ?>/<?php echo $theme1; ?>-charts.html?chart='humidityplot'&span='weekly'&temp='<?php echo $divum['temp_units']; ?>'&pressure='<?php echo $divum['barometer_units']; ?>'&wind='<?php echo $divum['wind_units']; ?>'&rain='<?php echo $divum['rain_units'] ?>" data-lity > <?php echo '| Hum'; ?> </a></span>-->
       </div>
-<span class='moduletitle'> <?php echo $lang['Temperature']; ?> (<valuetitleunit>&deg;<?php echo $weather["temp_units"]; ?></valuetitleunit>) </span><br /></span>
+<span class='moduletitle'> <?php echo $lang['Temperature']; ?> (<valuetitleunit>&deg;<?php echo $divum["temp_units"]; ?></valuetitleunit>) </span><br /></span>
 <div id="temperature"></div>
   <!--end Top Row 1 Box 1-->
   
   <!--Top Row 1 Box 2-->
-  <div class="weather-container"><div class="weather-item"><div class="chartforecast">
+  <div class="divum-container"><div class="divum-item"><div class="chartforecast">
 <!--<span <span class="yearpopup">  <a alt="temp charts" title="temp charts" href="pop_tempalmanac.php" data-lity ><?php echo $menucharticonpage ?> Temperature Almanac and Derived Charts</a></span>-->
   
-<!--<span class="yearpopup">  <a alt="yearly temperature" title="yearly temperature" href="<?php echo $chartsource; ?>/<?php echo $theme1; ?>-charts.html?chart='temperatureplot'&span='yearly'&temp='<?php echo $weather['temp_units']; ?>'&pressure='<?php echo $weather['barometer_units']; ?>'&wind='<?php echo $weather['wind_units']; ?>'&rain='<?php echo $weather['rain_units'] ?>" data-lity ><?php echo $menucharticonpage ?> Yearly</a></span>-->
+<!--<span class="yearpopup">  <a alt="yearly temperature" title="yearly temperature" href="<?php echo $chartsource; ?>/<?php echo $theme1; ?>-charts.html?chart='temperatureplot'&span='yearly'&temp='<?php echo $divum['temp_units']; ?>'&pressure='<?php echo $divum['barometer_units']; ?>'&wind='<?php echo $divum['wind_units']; ?>'&rain='<?php echo $divum['rain_units'] ?>" data-lity ><?php echo $menucharticonpage ?> Yearly</a></span>-->
 <span <span class="yearpopup">  <a alt="temp charts" title="temp charts" href="pop_menu_temperature.php" data-lity ><?php echo $menucharticonpage ?> Temperature Almanac and Derived Charts</a></span>
 
-  <!--<a alt="yearly Feels" title="yearly Feels" href="<?php echo $chartsource; ?>/<?php echo $theme1; ?>-charts.html?chart='tempderivedplot'&span='yearly'&temp='<?php echo $weather['temp_units']; ?>'&pressure='<?php echo $weather['barometer_units']; ?>'&wind='<?php echo $weather['wind_units']; ?>'&rain='<?php echo $weather['rain_units'] ?>" data-lity > <?php echo '| Feels'; ?> </a></span>-->
-<!--<a alt="yearly humidity" title="yearly humidity" href="<?php echo $chartsource; ?>/<?php echo $theme1; ?>-charts.html?chart='humidityplot'&span='yearly'&temp='<?php echo $weather['temp_units']; ?>'&pressure='<?php echo $weather['barometer_units']; ?>'&wind='<?php echo $weather['wind_units']; ?>'&rain='<?php echo $weather['rain_units'] ?>" data-lity > <?php echo '| Hum'; ?> </a></span> --> 
-<!--<span class="todaypopup"> <a alt="weekly temperature" title="weekly temperature" href="<?php echo $chartsource; ?>/<?php echo $theme1; ?>-charts.html?chart='tempallplot'&span='weekly'&temp='<?php echo $weather['temp_units']; ?>'&pressure='<?php echo $weather['barometer_units']; ?>'&wind='<?php echo $weather['wind_units']; ?>'&rain='<?php echo $weather['rain_units'] ?>" data-lity >  <?php echo $menucharticonpage ?> Weekly </a></span>-->
-<!--<a alt="weekly Feels" title="weekly Feels" href="<?php echo $chartsource; ?>/<?php echo $theme1; ?>-charts.html?chart='tempderivedplot'&span='weekly'&temp='<?php echo $weather['temp_units']; ?>'&pressure='<?php echo $weather['barometer_units']; ?>'&wind='<?php echo $weather['wind_units']; ?>'&rain='<?php echo $weather['rain_units'] ?>" data-lity > <?php echo '| Feels'; ?> </a></span>-->
-<!--<a alt="weekly humidity" title="weekly humidity" href="<?php echo $chartsource; ?>/<?php echo $theme1; ?>-charts.html?chart='humidityplot'&span='weekly'&temp='<?php echo $weather['temp_units']; ?>'&pressure='<?php echo $weather['barometer_units']; ?>'&wind='<?php echo $weather['wind_units']; ?>'&rain='<?php echo $weather['rain_units'] ?>" data-lity > <?php echo '| Hum'; ?> </a></span>-->
+  <!--<a alt="yearly Feels" title="yearly Feels" href="<?php echo $chartsource; ?>/<?php echo $theme1; ?>-charts.html?chart='tempderivedplot'&span='yearly'&temp='<?php echo $divum['temp_units']; ?>'&pressure='<?php echo $divum['barometer_units']; ?>'&wind='<?php echo $divum['wind_units']; ?>'&rain='<?php echo $divum['rain_units'] ?>" data-lity > <?php echo '| Feels'; ?> </a></span>-->
+<!--<a alt="yearly humidity" title="yearly humidity" href="<?php echo $chartsource; ?>/<?php echo $theme1; ?>-charts.html?chart='humidityplot'&span='yearly'&temp='<?php echo $divum['temp_units']; ?>'&pressure='<?php echo $divum['barometer_units']; ?>'&wind='<?php echo $divum['wind_units']; ?>'&rain='<?php echo $divum['rain_units'] ?>" data-lity > <?php echo '| Hum'; ?> </a></span> --> 
+<!--<span class="todaypopup"> <a alt="weekly temperature" title="weekly temperature" href="<?php echo $chartsource; ?>/<?php echo $theme1; ?>-charts.html?chart='tempallplot'&span='weekly'&temp='<?php echo $divum['temp_units']; ?>'&pressure='<?php echo $divum['barometer_units']; ?>'&wind='<?php echo $divum['wind_units']; ?>'&rain='<?php echo $divum['rain_units'] ?>" data-lity >  <?php echo $menucharticonpage ?> Weekly </a></span>-->
+<!--<a alt="weekly Feels" title="weekly Feels" href="<?php echo $chartsource; ?>/<?php echo $theme1; ?>-charts.html?chart='tempderivedplot'&span='weekly'&temp='<?php echo $divum['temp_units']; ?>'&pressure='<?php echo $divum['barometer_units']; ?>'&wind='<?php echo $divum['wind_units']; ?>'&rain='<?php echo $divum['rain_units'] ?>" data-lity > <?php echo '| Feels'; ?> </a></span>-->
+<!--<a alt="weekly humidity" title="weekly humidity" href="<?php echo $chartsource; ?>/<?php echo $theme1; ?>-charts.html?chart='humidityplot'&span='weekly'&temp='<?php echo $divum['temp_units']; ?>'&pressure='<?php echo $divum['barometer_units']; ?>'&wind='<?php echo $divum['wind_units']; ?>'&rain='<?php echo $divum['rain_units'] ?>" data-lity > <?php echo '| Hum'; ?> </a></span>-->
       </div>
-<span class='moduletitle'> <?php echo $lang['Temperature']; ?> (<valuetitleunit>&deg;<?php echo $weather["temp_units"]; ?></valuetitleunit>) </span><br /></span>
+<span class='moduletitle'> <?php echo $lang['Temperature']; ?> (<valuetitleunit>&deg;<?php echo $divum["temp_units"]; ?></valuetitleunit>) </span><br /></span>
   <div id="temperature"></div><br></div></div>
   <!--end Top Row 1 Box 2-->
   <!--Bottom Row 3 Box 8-->
-  <div class="weather-item">
+  <div class="divum-item">
   <div class="chartforecast">
   
   <!--Insert link to pop up module here-->  
@@ -262,14 +261,14 @@ $paddingtop = $percentage;
  <div id="wxchartbox8" style="border:solid 1px RGBA(46, 46, 46, 0.3);padding-top:2px;border-radius:4px;margin-top:23px">  
  
  <!--Box 8 Insert link to source image or iframe keep width at 290px height 165px-->
- <img rel="prefetch" src=img/iframe.jpg title="weather34 logo" width="295px" height="145px">
+ <img rel="prefetch" src=img/iframe.jpg title="divumwx logo" width="295px" height="145px">
  <!--end Insert link to source image or iframe-->
  
  </div><br>
   </div>
    <!--end Bottom Row 3 Box 8-->
   <!--Top Row 1 Box 3-->
-  <div class="weather-item">
+  <div class="divum-item">
    <div class="chartforecast">
       
       <!--Insert link to pop up module here--> 
@@ -290,8 +289,8 @@ $paddingtop = $percentage;
  </div>
   <!--end Top Row 1 Box 3-->
  <!--Middle Row 2 Box 4-->
-<div class="weather-container">
-  <div class="weather-item">
+<div class="divum-container">
+  <div class="divum-item">
   <div class="chartforecast">
   <!--Insert link to pop up module here-->
    <a href="https://www.windy.com/?clouds,<?php echo $lat ;?>,<?php echo $lon ;?>,8" data-lity>
@@ -310,7 +309,7 @@ $paddingtop = $percentage;
       </div>
       <!--end Middle Row 2 Box 4-->
    <!--Bottom Row 3 Box 8-->
-  <div class="weather-item">
+  <div class="divum-item">
   <div class="chartforecast">
   
   <!--Insert link to pop up module here-->  
@@ -324,14 +323,14 @@ $paddingtop = $percentage;
  <div id="wxchartbox8" style="border:solid 1px RGBA(46, 46, 46, 0.3);padding-top:2px;border-radius:4px;margin-top:23px">  
  
  <!--Box 8 Insert link to source image or iframe keep width at 290px height 165px-->
- <img rel="prefetch" src=img/iframe.jpg title="weather34 logo" width="295px" height="145px">
+ <img rel="prefetch" src=img/iframe.jpg title="divumwx logo" width="295px" height="145px">
  <!--end Insert link to source image or iframe-->
  
  </div><br>
   </div>
    <!--end Bottom Row 3 Box 8-->   
        <!--Middle Row 2 Box 5-->
-  <div class="weather-item">
+  <div class="divum-item">
    <div class="chartforecast">
    
    <!--Insert link to pop up module here-->
@@ -353,7 +352,7 @@ $paddingtop = $percentage;
   <!--end Middle Row 2 Box 5-->
   
        <!--Middle Row 2 Box 6-->
-  <div class="weather-item">
+  <div class="divum-item">
   <div class="chartforecast">
   
   <!--Insert link to pop up module here-->
@@ -376,8 +375,8 @@ $paddingtop = $percentage;
          </div></div>
     <!--end Middle Row 2 Box 6-->  
  <!--Middle Row 2 Box 4-->
-<div class="weather-container">
-  <div class="weather-item">
+<div class="divum-container">
+  <div class="divum-item">
   <div class="chartforecast">
   <!--Insert link to pop up module here-->
    <a href="https://www.windy.com/?clouds,<?php echo $lat ;?>,<?php echo $lon ;?>,8" data-lity>
@@ -396,7 +395,7 @@ $paddingtop = $percentage;
       </div>
       <!--end Middle Row 2 Box 4-->
    <!--Bottom Row 3 Box 8-->
-  <div class="weather-item">
+  <div class="divum-item">
   <div class="chartforecast">
   
   <!--Insert link to pop up module here-->  
@@ -410,14 +409,14 @@ $paddingtop = $percentage;
  <div id="wxchartbox8" style="border:solid 1px RGBA(46, 46, 46, 0.3);padding-top:2px;border-radius:4px;margin-top:23px">  
  
  <!--Box 8 Insert link to source image or iframe keep width at 290px height 165px-->
- <img rel="prefetch" src=img/iframe.jpg title="weather34 logo" width="295px" height="145px">
+ <img rel="prefetch" src=img/iframe.jpg title="divumwx logo" width="295px" height="145px">
  <!--end Insert link to source image or iframe-->
  
  </div><br>
   </div>
    <!--end Bottom Row 3 Box 8-->   
        <!--Middle Row 2 Box 5-->
-  <div class="weather-item">
+  <div class="divum-item">
    <div class="chartforecast">
    
    <!--Insert link to pop up module here-->
@@ -439,7 +438,7 @@ $paddingtop = $percentage;
   <!--end Middle Row 2 Box 5-->
   
        <!--Middle Row 2 Box 6-->
-  <div class="weather-item">
+  <div class="divum-item">
   <div class="chartforecast">
   
   <!--Insert link to pop up module here-->
@@ -463,8 +462,8 @@ $paddingtop = $percentage;
     <!--end Middle Row 2 Box 6-->     
      
  <!--Bottom Row 3 Box 7-->
-<div class="weather-container">
-  <div class="weather-item">
+<div class="divum-container">
+  <div class="divum-item">
   <div class="chartforecast">
   
   <!--Insert link to pop up module here-->
@@ -478,7 +477,7 @@ $paddingtop = $percentage;
   <div id="wxchartbox7" style="border:solid 1px RGBA(46, 46, 46, 0.3);padding-top:2px;border-radius:4px;margin-top:23px">  
   
   <!-- Box 7 Insert link to source image or iframe keep width at 290px height 165px-->
-  <img rel="prefetch" src=img/iframe.jpg title="weather34 logo" width="295px" height="145px">
+  <img rel="prefetch" src=img/iframe.jpg title="divumwx logo" width="295px" height="145px">
   <!--end Insert link to source image or iframe-->
   
   
@@ -487,7 +486,7 @@ $paddingtop = $percentage;
      <!--end Bottom Row 3 Box 7--> 
      
   <!--Bottom Row 3 Box 8-->
-  <div class="weather-item">
+  <div class="divum-item">
   <div class="chartforecast">
   
   <!--Insert link to pop up module here-->  
@@ -501,14 +500,14 @@ $paddingtop = $percentage;
  <div id="wxchartbox8" style="border:solid 1px RGBA(46, 46, 46, 0.3);padding-top:2px;border-radius:4px;margin-top:23px">  
  
  <!--Box 8 Insert link to source image or iframe keep width at 290px height 165px-->
- <img rel="prefetch" src=img/iframe.jpg title="weather34 logo" width="295px" height="145px">
+ <img rel="prefetch" src=img/iframe.jpg title="divumwx logo" width="295px" height="145px">
  <!--end Insert link to source image or iframe-->
  
  </div><br>
   </div>
    <!--end Bottom Row 3 Box 8-->
   <!--Bottom Row 3 Box 8-->
-  <div class="weather-item">
+  <div class="divum-item">
   <div class="chartforecast">
   
   <!--Insert link to pop up module here-->  
@@ -522,14 +521,14 @@ $paddingtop = $percentage;
  <div id="wxchartbox8" style="border:solid 1px RGBA(46, 46, 46, 0.3);padding-top:2px;border-radius:4px;margin-top:23px">  
  
  <!--Box 8 Insert link to source image or iframe keep width at 290px height 165px-->
- <img rel="prefetch" src=img/iframe.jpg title="weather34 logo" width="295px" height="145px">
+ <img rel="prefetch" src=img/iframe.jpg title="divumwx logo" width="295px" height="145px">
  <!--end Insert link to source image or iframe-->
  
  </div><br>
   </div>
    <!--end Bottom Row 3 Box 8--> 
   <!--Bottom Row 3 Box 9 last one-->
-  <div class="weather-item">
+  <div class="divum-item">
   <div class="chartforecast">
   
   <!--Insert link to pop up module here-->
@@ -542,7 +541,7 @@ $paddingtop = $percentage;
    <div id="wxchartbox9" style="border-radius:4px; border:solid 1px RGBA(46, 46, 46, 0.3);padding:2px;margin-top:23px">  
    
    <!--Box 9 Insert link to source image or iframe keep width at 290px height 165px-->
- <img rel="prefetch" src=img/iframe.jpg title="weather34 logo" width="295px" height="145px">
+ <img rel="prefetch" src=img/iframe.jpg title="divumwx logo" width="295px" height="145px">
    
    <!--end Insert link to source image or iframe-->
    
@@ -552,7 +551,7 @@ $paddingtop = $percentage;
   </div>
  <!--end outdoor data for homeweatherstation template-->
   <!--footer area for homeweatherstation template warning don't mess with this below this line unless you really know what you are doing-->
-<div class=weatherfooter-container><div class=weatherfooter-item> 
+<div class=divumfooter-container><div class=divumfooter-item> 
 <div class=hardwarelogo1>
 <a href="http://weewx.com" alt="http://weewx.com" title="http://weewx.com">
   <?php
@@ -575,13 +574,13 @@ else if ($weatherhardware == 'Weatherflow Air-Sky')
 {
     echo '<a href="http://weatherflow.com/" title="http://weatherflow.com/" target="_blank"><img src="img/wflogo.svg" width="125px" height=65px alt="http://weatherflow.com/" ></a>';
 }
-else echo '<a href="https://weather34.com/homeweatherstation/" title="https://weather34.com/homeweatherstation/" target="_blank"><br><img src="img/weather34logo.svg" width="40px" alt="https://weather34.com/homeweatherstation/" class="homeweatherstationlogo" ><weather34>designed by weather34 2015-' . date('Y') . '</weather34></a>'; ?> </div>
+else echo '<a href="https://divumwx.com/homeweatherstation/" title="https://divumwx.com/homeweatherstation/" target="_blank"><br><img src="img/weather34logo.svg" width="40px" alt="https://divumwx.com/homeweatherstation/" class="homeweatherstationlogo" ><divumwx>designed by divumwx 2015-' . date('Y') . '</divumwx></a>'; ?> </div>
 <div class=footertext>
 &nbsp;<?php echo $info ?>&nbsp;(<value><?php echo $templateversion ?></value>)&nbsp;
-<?php echo "WeeWX"; ?>-(<value><maxred><?php echo $weather["swversion"]; ?></value>)&nbsp;
+<?php echo "WeeWX"; ?>-(<value><maxred><?php echo $divum["swversion"]; ?></value>)&nbsp;
 <?php echo $info . "&nbsp;" . $weatherhardware; ?></div> 
-<div class=footertext><a href="https://github.com/steepleian/weewx-Weather34"><?php echo $github; ?>&nbsp; WeeWX Version Repository at https://github.com/steepleian/weewx-Weather34 &nbsp; <img src="img/flags/<?php echo $flag; ?>.svg" width="20px" ></a></div>
-  <div class=footertext><a href="https://hjelp.yr.no/hc/en-us/articles/203786121-Weather-symbols-on-Yr">Weather Symbols by <img src="img/yr.svg" width="14px" ></a></div>
+<div class=footertext><a href="https://github.com/steepleian/weewx-divumwx"><?php echo $github; ?>&nbsp; WeeWX Version Repository at https://github.com/steepleian/weewx-divumwx &nbsp; <img src="img/flags/<?php echo $flag; ?>.svg" width="20px" ></a></div>
+  <div class=footertext><a href="https://hjelp.yr.no/hc/en-us/articles/203786121-divum-symbols-on-Yr">divum Symbols by <img src="img/yr.svg" width="14px" ></a></div>
 
 </div></div>
 <div id=lightningalert></div></body><?php include_once ('updater.php');

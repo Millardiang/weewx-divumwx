@@ -46,12 +46,12 @@ explode(" ", file_get_contents($livedata)));
 
     $elevation = $adata["info"]["altitude meters"];
     $meteogramURL = $adata["info"]["metgramlink"];
-    $weather["datetime"] = $recordDate;
-    $weather["date"] = date($dateFormat, $recordDate);
-    $weather["time"] = date($timeFormat, $recordDate);
-    $weather["swversion"] = $weewxrt[38];
-    $weather["build"] = $weewxrt[39];
-    $convertuptimemb34 = $weather["uptime"];
+    $divum["datetime"] = $recordDate;
+    $divum["date"] = date($dateFormat, $recordDate);
+    $divum["time"] = date($timeFormat, $recordDate);
+    $divum["swversion"] = $weewxrt[38];
+    $divum["build"] = $weewxrt[39];
+    $convertuptimemb34 = $divum["uptime"];
     $uptimedays = floor($convertuptimemb34 / 86400);
     $uptimehours = floor(($convertuptimemb34 - ($uptimedays * 86400)) / 3600);
 
@@ -643,17 +643,17 @@ if ($windunit != $wind["units"])
 {
     if (($windunit == 'mph' || $windunit == 'kts') && ($wind["units"] == 'm/s' || $wind["units"] == 'km/h'))
     {
-        $weather["cloudbase3"] = round($weather["cloudbase3"] * 3.281, 0);
+        $divum["cloudbase3"] = round($divum["cloudbase3"] * 3.281, 0);
     }
     else if (($windunit == 'm/s' || $windunit == 'km/h') && ($wind["units"] == 'mph' || $wind["units"] == 'kts'))
     {
-        $weather["cloudbase3"] = round($weather["cloudbase3"] / 3.281, 0);
+        $divum["cloudbase3"] = round($divum["cloudbase3"] / 3.281, 0);
     }
 }
 // Convert wind speed units if necessary
 if ($windunit != $wind["units"])
 {
-    if ($windunit == 'mph' && $weather["wind_units"] == 'kts')
+    if ($windunit == 'mph' && $divum["wind_units"] == 'kts')
     {
         ktsTomph($wind, "speed_avg");
         ktsTomph($wind, "speed");
@@ -914,7 +914,7 @@ else
     $toKnots = 1;
 }
 
-$o = "Designed by weather34.com";
+$o = "Designed by divumwx.com";
 date_default_timezone_set($TZ);
 // meteor shower alternative by betejuice cumulus forum
 $meteor_default = "No Meteor";
@@ -1069,7 +1069,7 @@ foreach ($meteor_events as $meteor_check)
     }
 };
 //end meteor
-$uptime = $weather["uptime"];
+$uptime = $divum["uptime"];
 function convert_uptime($uptime)
 {
     $dt1 = new DateTime("@0");
@@ -1085,7 +1085,7 @@ function convert_uptime($uptime)
 //  Why are these in here still? Check necessity and validitity of this area
 //
 //lunar and solar eclipse /meteor shpwers advisory 2018-2019-2020
-$eclipse_default = " <noalert>No Current Weather <spanyellow><ored>Alerts " . $alert . "</ored></spanyellow></noalert>";
+$eclipse_default = " <noalert>No Current divum <spanyellow><ored>Alerts " . $alert . "</ored></spanyellow></noalert>";
 //2 jul solar 2019
 $eclipse_events[] = array(
     "event_start" => mktime(0, 0, 0, 7, 2, 2019) ,
@@ -1149,17 +1149,17 @@ foreach ($eclipse_events as $eclipse_check)
 //end lunar and solar eclipse /meteor shpwers advisory 2018-2019-2020
 // This is not used in Australia, where is it used?
 // firerisk based on cumulus forum thread http://sandaysoft.com/forum/viewtopic.php?f=14&t=2789&sid=77ffab8f6f2359e09e6c58d8b13a0c3c&start=30
-$firerisk = number_format((((110 - 1.373 * $weather["humidity"]) - 0.54 * (10.20 - $weather["temp"])) * (124 * pow(10, (-0.0142 * $weather["humidity"])))) / 60, 0);
+$firerisk = number_format((((110 - 1.373 * $divum["humidity"]) - 0.54 * (10.20 - $divum["temp"])) * (124 * pow(10, (-0.0142 * $divum["humidity"])))) / 60, 0);
 
 //wetbulb
-$Tc = ($weather['temp']);
-$P = $weather['barometer'];
-$RH = $weather['humidity'];
+$Tc = ($divum['temp']);
+$P = $divum['barometer'];
+$RH = $divum['humidity'];
 $Tdc = (($Tc - (14.55 + 0.114 * $Tc) * (1 - (0.01 * $RH)) - pow((2.5 + 0.007 * $Tc) * (1 - (0.01 * $RH)) , 3) - (15.9 + 0.117 * $Tc) * pow(1 - (0.01 * $RH) , 14)));
 $E = (6.11 * pow(10, (7.5 * $Tdc / (237.7 + $Tdc))));
 $wetbulbcalc = (((0.00066 * $P) * $Tc) + ((4098 * $E) / pow(($Tdc + 237.7) , 2) * $Tdc)) / ((0.00066 * $P) + (4098 * $E) / pow(($Tdc + 237.7) , 2));
 $wetbulbx = number_format($wetbulbcalc, 1);
-// K-INDEX & SOLAR DATA FOR WEATHER34 HOMEWEATHERSTATION TEMPLATE RADIO HAMS REJOICE :-) //
+// K-INDEX & SOLAR DATA FOR divumwx HOMEWEATHERSTATION TEMPLATE RADIO HAMS REJOICE :-) //
 $str = file_get_contents('jsondata/ki.txt');
 $json = array_reverse(json_decode($str, false));
 $kp = $json[1][1];
@@ -1171,21 +1171,21 @@ $mod34file = $break[count($break) - 1];
 //Convert Start times for Pro and Nano SD, Other MBs unforunately don't provide this data
 if (is_numeric($weewxapi[186]) && $weewxapi[186] != '--')
 {
-    $weather['tempStartTime'] = date('M jS Y', strtotime($weewxapi[186]));
-    $weather['windStartTime'] = date('M jS Y', strtotime($weewxapi[187]));
-    $weather['pressStartTime'] = date('M jS Y', strtotime($weewxapi[188]));
-    $weather['rainStartSec'] = strtotime($weewxapi[189]);
-    $weather['rainStartTime'] = date('M jS Y', $weather['rainStartSec']);
+    $divum['tempStartTime'] = date('M jS Y', strtotime($weewxapi[186]));
+    $divum['windStartTime'] = date('M jS Y', strtotime($weewxapi[187]));
+    $divum['pressStartTime'] = date('M jS Y', strtotime($weewxapi[188]));
+    $divum['rainStartSec'] = strtotime($weewxapi[189]);
+    $divum['rainStartTime'] = date('M jS Y', $divum['rainStartSec']);
 }
 else
 {
-    $weather['tempStartTime'] = 'All Time';
-    $weather['windStartTime'] = 'All Time';
-    $weather['pressStartTime'] = 'All Time';
-    $weather['rainStartTime'] = 'All Time';
+    $divum['tempStartTime'] = 'All Time';
+    $divum['windStartTime'] = 'All Time';
+    $divum['pressStartTime'] = 'All Time';
+    $divum['rainStartTime'] = 'All Time';
 }
 
-$weather['consoleLowBattery'] = intval($weewxapi[171]); # Console battery, 0 when battery is good, 1 when battery is low
-$weather['stationLowBattery'] = intval($weewxapi[172]); # Station battery, 0 when battery is good, 1 when battery is low
+$divum['consoleLowBattery'] = intval($weewxapi[171]); # Console battery, 0 when battery is good, 1 when battery is low
+$divum['stationLowBattery'] = intval($weewxapi[172]); # Station battery, 0 when battery is good, 1 when battery is low
 
 ?>

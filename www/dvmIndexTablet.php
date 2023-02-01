@@ -1,15 +1,14 @@
 <?php
 //###################################################################################################################
-//	weewx-Weather34 Template maintained by Ian Millard (Steepleian)                                 				#
+//	weewx-divumwx Template maintained by Ian Millard (Steepleian)                                 				#
 //	                                                                                                				#
-//  Contains original legacy code (by agreement) created and developed by Brian Underdown (https://weather34.com)   #
-//  for the (now superseeded) original Weather34 Template which is no longer maintained by its creator              #
-//  © weather34.com original CSS/SVG/PHP 2015-2019                                                                  #
+//                #
+//  © divumwx.com original CSS/SVG/PHP 2015-2019                                                                  #
 // 	                                                                                                				#
 //  Contains original code by Ian Millard and collaborators															#
 //  © claydonsweather.org.uk original CSS/SVG/PHP 2020-2021                                                         #   
 // 	                                                                                                				#
-// 	Issues for weewx-Weather34 template should be addressed to https://github.com/steepleian/weewx-Weather34/issues #                                                                                              
+// 	Issues for weewx-divumwx template should be addressed to https://github.com/steepleian/weewx-divumwx/issues #                                                                                              
 // 	                                                                                                				#
 //###################################################################################################################
 
@@ -33,16 +32,16 @@ error_reporting(0);
   <title><?php echo $stationlocation;?> Weather Station</title>
   <!--Google / Search Engine Tags -->
   <meta itemprop="image" content="img/divumMeta-1.png">
-  <meta itemprop="name" content="Home Weather Station <?php echo $stationlocation;?>">
-  <meta content="Home weather station providing current weather conditions for <?php echo $stationlocation;?>" name="description">
-  <meta itemprop="description" content="Home weather station providing current weather conditions for <?php echo $stationlocation;?>">
+  <meta itemprop="name" content="Home divum Station <?php echo $stationlocation;?>">
+  <meta content="Home divum station providing current divum conditions for <?php echo $stationlocation;?>" name="description">
+  <meta itemprop="description" content="Home divum station providing current divum conditions for <?php echo $stationlocation;?>">
   <meta content="DivumWX" name="author">
   <meta content="place" property="og:type">
   <meta content="INDEX,FOLLOW" name="robots">
   <meta name="theme-color" content="#ffffff">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name=apple-mobile-web-app-title content="HOME WEATHER STATION">
+  <meta name=apple-mobile-web-app-title content="WEATHER STATION">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, viewport-fit=cover">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
@@ -66,11 +65,11 @@ error_reporting(0);
 </head>
 
 <!-- begin top layout-->
-<div class="weather2-container">
-  <div class="container weather34box-toparea">
+<div class="divum2-container">
+  <div class="container divumwxbox-toparea">
     <!-- position 1 --->
-    <div class="weather34box clock">
-    <div class="weatherbox-top-border">
+    <div class="divumwxbox clock">
+    <div class="divumbox-top-border">
       <div class="title"><?php echo $info;?><?php echo $lang['timeTop'];?></div>
       <div class="value">
         <div id="position1"></div>
@@ -78,24 +77,24 @@ error_reporting(0);
     </div>
    </div>
     <!-- position 2--->
-    <div class="weather34box indoor">
-     <div class="weatherbox-top-border">
+    <div class="divumwxbox indoor">
+     <div class="divumbox-top-border">
       <div class="value">
         <div id="position2"></div>
       </div>
     </div>
    </div>
     <!-- position 3--->
-    <div class="weather34box earthquake">
-     <div class="weatherbox-top-border">
+    <div class="divumwxbox earthquake">
+     <div class="divumbox-top-border">
            <div class="value">
         <div id="position3"></div>
       </div>
     </div>
    </div>
     <!-- position 4--->
-    <div class="weather34box alert">
-     <div class="weatherbox-top-border">
+    <div class="divumwxbox alert">
+     <div class="divumbox-top-border">
       <div class="title"><?php echo $info;?><?php echo $lang['advisoriesTop'];?></div>
       <div class="value">
         <div id="position4"></div>
@@ -107,20 +106,20 @@ error_reporting(0);
 <!--begin outside station data-->
 
 <!-- position 5--->
-<div class="weather-container">
-  <div class="weather-item">
+<div class="divum-container">
+  <div class="divum-item">
     <div id="position5">
     </div>
   </div>
  
   <!-- position 6--->
-  <div class="weather-item">
+  <div class="divum-item">
     <div id="position6">
     </div>
   </div>
  
   <!-- position 7--->
-  <div class="weather-item">
+  <div class="divum-item">
     <div id="position7">
      </div>
    </div>
@@ -128,40 +127,40 @@ error_reporting(0);
  
 <!-- position 8--->
 
-<div class="weather-container">
-  <div class="weather-item">
+<div class="divum-container">
+  <div class="divum-item">
     <div id="position8">
     </div>
   </div>
  
   <!-- position 9--->
-  <div class="weather-item">
+  <div class="divum-item">
     <div id="position9">
     </div>
   </div>
  
   <!-- position 10--->
-  <div class="weather-item">
+  <div class="divum-item">
     <div id="position10">
      </div>
     </div>
    </div>
   
 <!-- position 11--->
-<div class="weather-container"> 
-  <div class="weather-item">
+<div class="divum-container"> 
+  <div class="divum-item">
     <div id="position11">
     </div>
   </div>
  
   <!--position 12-->
-  <div class="weather-item">
+  <div class="divum-item">
     <div id="position12">
     </div>
   </div>
  
   <!--position 13-->
-  <div class="weather-item">
+  <div class="divum-item">
 
     <div id="position13">
       </div>
@@ -171,20 +170,20 @@ error_reporting(0);
 <!--end outdoor data-->
 
 <!--footer area for homeweatherstation template warning dont mess with this below this line unless you really know what you are doing-->
-<div class="weatherfooter-container">
-  <div class="weatherfooter-item">
+<div class="divumfooter-container">
+  <div class="divumfooter-item">
     <div class="hardwarelogo1"><a href="http://weewx.com" alt="http://weewx.com" title="http://weewx.com">
         <?php echo '<img src="img/icon-weewx.svg" alt="WeeWX" title="WeeWX" width="150px" height="55px"><div class="hardwarelogo1text"></div>';?></a>
       </div>
 
     <div class="hardwarelogo2">
       <?php
-echo '<a href="https://https://claydonsweather.org.uk/" title="https://claydonsweather.org.uk/" target="_blank"><br><img src="img/divumLogo.svg" width="40px" alt="https://https://claydonsweather.org.uk/" class="homeweatherstationlogo" ><weather34>Team DivumWX design in progress 2021-' . date('Y') . '</weather34></a>';?>
+echo '<a href="https://https://claydonsweather.org.uk/" title="https://claydonsweather.org.uk/" target="_blank"><br><img src="img/divumLogo.svg" width="40px" alt="https://https://claydonsweather.org.uk/" class="homeweatherstationlogo" ><divumwx>Team DivumWX design in progress 2021-' . date('Y') . '</divumwx></a>';?>
     </div>
 
     <div class="footertext">
       &nbsp;<?php echo $info;?>&nbsp;(<value><?php echo $templateversion;?></value>)&nbsp;<?php echo "WeeWX";?>-(<value>
-        <maxred><?php echo $weather["swversion"];?>
+        <maxred><?php echo $divum["swversion"];?>
       </value>)&nbsp;<?php echo $info . "&nbsp;" . $weatherhardware;?></div>
     <div class="footertext"><a href="https://github.com/steepleian/weewx-Weather34"><?php echo $github;?>&nbsp; WeeWX Version Repository at https://github.com/steepleian/weewx-Weather34 &nbsp;<img src="img/flags/<?php echo $flag;?>.svg" width="20px"></a></div>
     <div class="footertext">

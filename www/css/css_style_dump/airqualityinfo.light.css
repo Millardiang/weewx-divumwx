@@ -32,7 +32,7 @@ html {
   -moz-osx-font-smoothing: grayscale;
   height: 160px;
 }
-.weather34darkbrowser {
+.divumwxdarkbrowser {
   position: relative;
   background: 0;
   width: 97%;
@@ -44,7 +44,7 @@ html {
   border-top-right-radius: 5px;
   padding-top: 10px;
 }
-.weather34darkbrowser[url]:after {
+.divumwxdarkbrowser[url]:after {
   content: attr(url);
   color: black;
   font-size: 14px;

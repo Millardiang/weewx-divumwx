@@ -55,7 +55,7 @@ foreach ($meteor_events as $meteor_check) {
 };?>
 
     <div class="chartforecast">
-<span class="yearpopup"><a alt="meteor showers" title="meteor showers" href="pop_meteorshowers.php" data-lity><?php echo $meteorinfo; ?> &nbsp;<?php if (
+<span class="yearpopup"><a alt="meteor showers" title="meteor showers" href="dvmMeteorshowersPopup.php" data-lity><?php echo $meteorinfo; ?> &nbsp;<?php if (
      $meteor_default == "No Meteor"
  ) {
      echo "Meteor Showers";
@@ -67,7 +67,7 @@ foreach ($meteor_events as $meteor_check) {
 <div class="updatedtime1"><span><?php if(file_exists($moonimg)&&time()- filemtime($moonimg)>3600)echo $offline. '<offline> Offline </offline>';else echo $online." ". date("H:i:s",  filemtime($moonimg));?></span></div>
 <div class="moonphasemoduleposition">
 <div class="moonrise1">
-<svg id="weather34 moon rise" viewBox="0 0 32 32" width="6" height="6" fill="none" stroke="#01a4b5" stroke-linecap="round" stroke-linejoin="round" stroke-width="10%">    
+<svg id="divumwx moon rise" viewBox="0 0 32 32" width="6" height="6" fill="none" stroke="#01a4b5" stroke-linecap="round" stroke-linejoin="round" stroke-width="10%">    
 <path d="M30 20 L16 8 2 20" /></svg>
  <?php echo $lang['Moon'];?> <br /><?php  echo 'Rise<blueu> ' .$alm["moonrise"].'</blueu>';?>
 
@@ -84,7 +84,7 @@ foreach ($meteor_events as $meteor_check) {
   </div>
 
 <div class="fullmoon1">
-<svg id="weather34 full moon" viewBox="0 0 32 32" width="6" height="6" fill="#aaa" stroke="#aaa" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%"><circle cx="16" cy="16" r="14" /><path d="M6 6 L26 26" /></svg>
+<svg id="divumwx full moon" viewBox="0 0 32 32" width="6" height="6" fill="#aaa" stroke="#aaa" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%"><circle cx="16" cy="16" r="14" /><path d="M6 6 L26 26" /></svg>
 <?php echo $lang['Nextfullmoon'];?>	<br /> <div class="nextfullmoon"><value><moonm>
 <?php echo $alm["fullmoon"] ;?></value></div>
 
@@ -95,14 +95,14 @@ foreach ($meteor_events as $meteor_check) {
 
 
 <div class="newmoon1">
-<svg id="weather34 new moon" viewBox="0 0 32 32" width="6" height="6" fill="#777" stroke="#777" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%"><circle cx="16" cy="16" r="14" /> <path d="M6 6 L26 26" /></svg>
+<svg id="divumwx new moon" viewBox="0 0 32 32" width="6" height="6" fill="#777" stroke="#777" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%"><circle cx="16" cy="16" r="14" /> <path d="M6 6 L26 26" /></svg>
 <?php echo $lang['Nextnewmoon'];?> <div class="nextnewmoon"><value><moonm>
 <?php echo $alm["newmoon"] ;?></value></div>
 
  </span>
 </div>
 <div class="moonset1">
-<svg id="weather34 moon set" viewBox="0 0 32 32" width="6" height="6" fill="none" stroke="#f26c4f" stroke-linecap="round" stroke-linejoin="round" stroke-width="10%">
+<svg id="divumwx moon set" viewBox="0 0 32 32" width="6" height="6" fill="none" stroke="#f26c4f" stroke-linecap="round" stroke-linejoin="round" stroke-width="10%">
     <path d="M30 12 L16 24 2 12" /></svg>
 <?php echo $lang['Moon']?><div class="nextnewmoon">
 <?php echo 'Set<maxred> '.$alm["moonset"].'</maxred>' ;?></span> 

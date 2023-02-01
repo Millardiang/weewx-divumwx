@@ -70,7 +70,7 @@ a:active {
   height: 325px;
 }
 
-.weather34darkbrowser {
+.divumwxdarkbrowser {
   color: black;
   position: relative;
   background: 0;
@@ -84,7 +84,7 @@ a:active {
   padding-top: 10px;
   color: black;
 }
-.weather34darkbrowser[url]:after {
+.divumwxdarkbrowser[url]:after {
   content: attr(url);
   color: white;
   font-size: 14px;

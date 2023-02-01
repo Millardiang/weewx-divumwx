@@ -2,7 +2,7 @@
 include('./userSettings.php');
 $sitebase=substr($_SERVER['REQUEST_URI'], 0, strrpos($_SERVER['REQUEST_URI'], '/') + 1);
 $manifest = [
-    "name" => $stationName.' Weather',
+    "name" => $stationName.' divum',
     "short_name" => $manifestShortName,
     "start_url" => $sitebase,
     "display" => "standalone",

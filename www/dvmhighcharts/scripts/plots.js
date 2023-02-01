@@ -1,9 +1,9 @@
 /*****************************************************************************
-Javascript to setup, configure and display Highcharts plots of weewx weather data.
+Javascript to setup, configure and display Highcharts plots of weewx divum data.
 Based on Highcharts documentation and examples, and a lot of Stackoverflow Q&As.
 History
     v1.0.0      June 2019  By Jerry Dietrich
-        -  large rewrite of the original plots.js to support w34 type charts
+        -  large rewrite of the original plots.js to support dvm type charts
 *****************************************************************************/
 function plot_js(units, ptype, span, plt_div, dplots = false, cdates = false, reload_plot_type_span = null, realtime = false, radial = false){
 	var createweeklyfunctions = {

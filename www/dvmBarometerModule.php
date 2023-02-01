@@ -9,7 +9,7 @@ header('Content-type: text/html; charset=utf-8');
     <span class='moduletitle2'><?php echo $lang['barometerModule'], " (<valuetitleunit>", $barom["units"];?></valuetitleunit>)</span>
 
 <div class="updatedtime2">
-<?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$weather["time"];?>
+<?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?>
 </div>
  
 <?php
@@ -74,7 +74,7 @@ echo
   			margin-left: -135px;
   			margin-top: 2px;
 		}
-		.weather-itembaro {
+		.divum-itembaro {
   			width: 32.84%;
   			height: 195px;
   			border: 0;
@@ -171,7 +171,7 @@ echo
   			color: black;
 		}
 		
-		.weather-itembaro {
+		.divum-itembaro {
   			height: 200px;
   			width: 33.3333%;  			
   			border: 0;
