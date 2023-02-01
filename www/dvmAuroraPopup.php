@@ -7,13 +7,13 @@ echo $kp;
 
 
 	####################################################################################################
-	#	HOME WEATHER STATION TEMPLATE by BRIAN UNDERDOWN 2015-18                                       #
-	#	CREATED FOR HOMEWEATHERSTATION TEMPLATE at https://weather34.com/homeweatherstation/index.html # 
+	#	HOME divum STATION TEMPLATE by BRIAN UNDERDOWN 2015-18                                       #
+	#	CREATED FOR HOMEWEATHERSTATION TEMPLATE at https://divumwx.com/homeweatherstation/index.html # 
 	# 	                                                                                               #
 	# 	                                                                                               #
-	# 	WEATHER34 AURORA SUN INDEX: 25th January 2018   	                                           #
+	# 	divumwx AURORA SUN INDEX: 25th January 2018   	                                           #
 	# 	                                                                                               #
-	#   https://www.weather34.com 	                                                                   #
+	#   https://www.divumwx.com 	                                                                   #
 	####################################################################################################
 
 ?>
@@ -22,7 +22,7 @@ echo $kp;
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Weather34 Radio Aurora/ Northern Lights<br>s</title>
+  <title>divumwx Radio Aurora/ Northern Lights<br>s</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   
@@ -66,8 +66,8 @@ a:hover {
 a:active {
   color: white;
 }  
-.weather34darkbrowser{position:relative;background:0;width:97%;height:30px;margin:auto;margin-top:-5px;margin-left:0px;border-top-left-radius:5px;border-top-right-radius:5px;padding-top:10px;}
-.weather34darkbrowser[url]:after{content:attr(url);color:#aaa;font-size:14px;text-align: center;position:absolute;left:0;right:0;top:0;padding:4px 15px;margin:11px 10px 0 auto;font-family:arial;height:20px;}
+.divumwxdarkbrowser{position:relative;background:0;width:97%;height:30px;margin:auto;margin-top:-5px;margin-left:0px;border-top-left-radius:5px;border-top-right-radius:5px;padding-top:10px;}
+.divumwxdarkbrowser[url]:after{content:attr(url);color:#aaa;font-size:14px;text-align: center;position:absolute;left:0;right:0;top:0;padding:4px 15px;margin:11px 10px 0 auto;font-family:arial;height:20px;}
  blue{color:#01a4b4}orange{color:#009bb4}orange1{position:relative;color:#009bb4;margin:0 auto;text-align:center;margin-left:5%;font-size:1.1rem}green{color:#aaa}red{color:#f37867}red6{color:#d65b4a}value{color:#fff}yellow{color:#CC0}purple{color:#916392}meteotextshowertext{font-size:1.2rem;color:#009bb4}meteorsvgicon{color:#f5f7fc}  
 .moonphasetext{font-size:1.1rem;color:#f5f7fc;position:absolute;display:inline;left:140px;top:80px}
 moonphaseriseset{font-size:.9rem;}credit{position:relative;font-size:.8em;top:10%}
@@ -86,7 +86,7 @@ align-items:center;justify-content:center;margin-bottom:10px;top:0}
 padding:5px;font-family:Arial, Helvetica, sans-serif;width:100px;height:0.8em;font-size:0.8rem;padding-top:2px;color:#aaa;border-bottom:2px solid rgba(56,56,60,1);
 align-items:center;justify-content:center;margin-bottom:10px;top:0}
 </style>
-<div class="weather34darkbrowser" url="Radio Aurora | Northern Lights"></div> 
+<div class="divumwxdarkbrowser" url="Radio Aurora | Northern Lights"></div> 
   
 <main class="grid">
   <article>       
@@ -148,7 +148,7 @@ Aurora scatter communications using specialised operating techniques allows comm
   </article> 
   <article>
   <div class=actualt>&nbsp;&nbsp &copy; Information</div>  
-  <?php echo $info?> CSS/SVG/PHP scripts were developed by <a href="https://weather34.com" title="weather34.com" target="_blank" style="font-size:9px;">weather34.com</a>  for use in the weather34 template &copy; 2015-<?php echo date('Y');?></span>
+  <?php echo $info?> CSS/SVG/PHP scripts were developed by <a href="https://divumwx.com" title="divumwx.com" target="_blank" style="font-size:9px;">divumwx.com</a>  for use in the divumwx template &copy; 2015-<?php echo date('Y');?></span>
   <br><br><?php echo $info ;?> Data Provided by <a href="https://www.swpc.noaa.gov/products/station-k-and-indices" title="https://www.swpc.noaa.gov/products/station-k-and-indices" target="_blank"><br>NATIONAL OCEANIC AND ATMOSPHERIC ADMINISTRATION</a> 
   
         <br>  <br> <br>     

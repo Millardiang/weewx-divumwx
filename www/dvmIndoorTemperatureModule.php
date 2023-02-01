@@ -39,7 +39,7 @@ else if(anyToC($temp["indoor_now_feels"])<40){$feelscolor = "#dc4953";}
 else if(anyToC($temp["indoor_now_feels"])<100){$feelscolor = "#e26870";}
 ?>
 
-<div class="updatedtime1"><span><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>'; else echo $online." ".$weather["time"];?></div><br/>
+<div class="updatedtime1"><span><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?></div><br/>
  
 <div class="tempindoorconverter">
 <?php

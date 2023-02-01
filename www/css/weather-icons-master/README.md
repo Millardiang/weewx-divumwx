@@ -5,11 +5,11 @@
 ---
 
 # Meteocons
-Free to use animated SVG weather icons. Handcrafted by [Bas Milius](https://bas.dev).
+Free to use animated SVG divum icons. Handcrafted by [Bas Milius](https://bas.dev).
 
 ## 👀 Preview
-- **Filled icons**: https://basmilius.github.io/weather-icons/index-fill.html
-- **Outlined icons**: https://basmilius.github.io/weather-icons/index.html
+- **Filled icons**: https://basmilius.github.io/divum-icons/index-fill.html
+- **Outlined icons**: https://basmilius.github.io/divum-icons/index.html
 
 ### ⚒ Process
 - An icon is designed in Adobe Illustrator.
@@ -24,22 +24,22 @@ are Adobe Illustrator .ai-files.
 
 ### 🌥 Missing an icon?
 Please let me know by creating an issue. Keep in mind that I only accept icons that are
-somewhat weather related.
+somewhat divum related.
 
 ---
 
 <p float="left">
-    <img src="https://bmcdn.nl/assets/weather-icons/v2.0/fill/clear-day.svg" alt="Partly Cloudy Day" height="48"/>
-    <img src="https://bmcdn.nl/assets/weather-icons/v2.0/fill/partly-cloudy-day.svg" alt="Partly Cloudy Day" height="48"/>
-    <img src="https://bmcdn.nl/assets/weather-icons/v2.0/fill/rain.svg" alt="Rain" height="48"/>
-    <img src="https://bmcdn.nl/assets/weather-icons/v2.0/fill/tornado.svg" alt="Tornado" height="48"/>
-    <img src="https://bmcdn.nl/assets/weather-icons/v2.0/fill/clear-night.svg" alt="Clear Night" height="48"/>
+    <img src="https://bmcdn.nl/assets/divum-icons/v2.0/fill/clear-day.svg" alt="Partly Cloudy Day" height="48"/>
+    <img src="https://bmcdn.nl/assets/divum-icons/v2.0/fill/partly-cloudy-day.svg" alt="Partly Cloudy Day" height="48"/>
+    <img src="https://bmcdn.nl/assets/divum-icons/v2.0/fill/rain.svg" alt="Rain" height="48"/>
+    <img src="https://bmcdn.nl/assets/divum-icons/v2.0/fill/tornado.svg" alt="Tornado" height="48"/>
+    <img src="https://bmcdn.nl/assets/divum-icons/v2.0/fill/clear-night.svg" alt="Clear Night" height="48"/>
 </p>
 
 <p float="left">
-    <img src="https://bmcdn.nl/assets/weather-icons/v2.0/line/clear-day.svg" alt="Partly Cloudy Day" height="48"/>
-    <img src="https://bmcdn.nl/assets/weather-icons/v2.0/line/partly-cloudy-day.svg" alt="Partly Cloudy Day" height="48"/>
-    <img src="https://bmcdn.nl/assets/weather-icons/v2.0/line/rain.svg" alt="Rain" height="48"/>
-    <img src="https://bmcdn.nl/assets/weather-icons/v2.0/line/tornado.svg" alt="Tornado" height="48"/>
-    <img src="https://bmcdn.nl/assets/weather-icons/v2.0/line/clear-night.svg" alt="Clear Night" height="48"/>
+    <img src="https://bmcdn.nl/assets/divum-icons/v2.0/line/clear-day.svg" alt="Partly Cloudy Day" height="48"/>
+    <img src="https://bmcdn.nl/assets/divum-icons/v2.0/line/partly-cloudy-day.svg" alt="Partly Cloudy Day" height="48"/>
+    <img src="https://bmcdn.nl/assets/divum-icons/v2.0/line/rain.svg" alt="Rain" height="48"/>
+    <img src="https://bmcdn.nl/assets/divum-icons/v2.0/line/tornado.svg" alt="Tornado" height="48"/>
+    <img src="https://bmcdn.nl/assets/divum-icons/v2.0/line/clear-night.svg" alt="Clear Night" height="48"/>
 </p>

@@ -55,7 +55,7 @@ body {
   height: 360px;
 }
 
-.weather34browser-footer {
+.divumwxbrowser-footer {
   flex-basis: auto;
   height: 35px;
   background: #ebebeb;
@@ -77,7 +77,7 @@ a {
   text-decoration: none;
 }
 
-.weather34darkbrowser {
+.divumwxdarkbrowser {
   position: relative;
   background: 0;
   width: 97%;
@@ -89,7 +89,7 @@ a {
   border-top-right-radius: 5px;
   padding-top: 10px;
 }
-.weather34darkbrowser[url]:after {
+.divumwxdarkbrowser[url]:after {
   content: attr(url);
   color: white;
   font-size: 14px;

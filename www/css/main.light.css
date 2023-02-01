@@ -90,10 +90,10 @@ h1 {
 .h4,
 .h5,
 .h6,
-.weather-container,
-.weather-item,
-.weather2-container,
-.weather2-item,
+.divum-container,
+.divum-item,
+.divum2-container,
+.divum2-item,
 a,
 body,
 h1,
@@ -110,8 +110,8 @@ h6 {
 .h4,
 .h5,
 .h6,
-.weather-container,
-.weather-item,
+.divum-container,
+.divum-item,
 a,
 body,
 h1,
@@ -131,16 +131,16 @@ h6 {
 .indoortrend,
 .tempcontainer,
 .tempcontainer1,
-.weather-container,
-.weather-item,
-.weather2-alert,
-.weather2-alert.weatherfooter-item,
-.weather2-clock,
-.weather2-container,
-.weather2-indoor,
-.weather2-item,
-.weatherfooter-container,
-.weatherfooter-item,
+.divum-container,
+.divum-item,
+.divum2-alert,
+.divum2-alert.divumfooter-item,
+.divum2-clock,
+.divum2-container,
+.divum2-indoor,
+.divum2-item,
+.divumfooter-container,
+.divumfooter-item,
 a,
 body,
 h3 {
@@ -248,7 +248,7 @@ body {
   margin-top: -27px;
 }
 
-.weather-item,
+.divum-item,
 body,
 header {
   text-align: center;
@@ -371,7 +371,7 @@ h6 {
   font-weight: 500;
 }
 
-.weather-container {
+.divum-container {
   display: -webkit-box;
   display: -moz-box;
   display: flex;
@@ -383,7 +383,7 @@ h6 {
   background: 0;
 }
 
-.weather-item {
+.divum-item {
   width: 64.84%;
   height: 195px;
   border-radius: 5px;
@@ -396,7 +396,7 @@ h6 {
   background: #fff;
 }
 
-.weather2-item {
+.divum2-item {
   padding-left: 10px;
   text-align: left;
   text-transform: none;
@@ -404,7 +404,7 @@ h6 {
   display: none;
 }
 
-.weather2-container {
+.divum2-container {
   -ms-text-size-adjust: 100%;
   -moz-font-smoothing: antialiased;
   -webkit-font-smoothing: antialiased;
@@ -419,7 +419,7 @@ h6 {
   margin: 50px auto -20px;
 }
 
-.weather2-item {
+.divum2-item {
   width: 33.3333%;
   margin: 0 2px 2px 0;
   font-smoothing: antialiased;
@@ -429,15 +429,15 @@ h6 {
   font-size: .9em;
 }
 
-.weather2-alert,
-.weather2-clock,
-.weatherfooter-item {
+.divum2-alert,
+.divum2-clock,
+.divumfooter-item {
   background: rgba(33, 34, 39, .8);
   height: 90px;
 }
 
-.weatherfooter-container,
-.weatherfooter-item {
+.divumfooter-container,
+.divumfooter-item {
   font-family: Arial, system;
 }
 
@@ -446,13 +446,13 @@ h6 {
   opacity: .5;
 }
 
-.weatherfooter-container {
+.divumfooter-container {
   display: flex;
   width: 960px;
   margin: 0 auto 2px;
 }
 
-.weatherfooter-item {
+.divumfooter-item {
   background-color: #fff;
   width: 100%;
   border: 1px solid #e9ebf1;
@@ -1750,7 +1750,7 @@ suptemp3 {
 }
 
 @media screen and (max-width:768px) {
-  .weather-container {
+  .divum-container {
     display: inline;
     width: 300px;
     height: 200px;
@@ -1762,13 +1762,13 @@ suptemp3 {
 
   .almanacpopup,
   .w34uptime,
-  .weather2-container,
-  .weatherfooter-container,
+  .divum2-container,
+  .divumfooter-container,
   header {
     display: none
   }
 
-  .weather-item {
+  .divum-item {
     float: none;
     width: 310px;
     margin: 10px auto 0;
@@ -1782,7 +1782,7 @@ suptemp3 {
 }
 
 @media screen and (max-width:1024px) and (orientation:portrait) {
-  .weather-container {
+  .divum-container {
     display: inline;
     width: 300px;
     height: 200px;
@@ -1793,13 +1793,13 @@ suptemp3 {
   }
 
   .almanacpopup,
-  .weather2-container,
-  .weatherfooter-container,
+  .divum2-container,
+  .divumfooter-container,
   header {
     display: none
   }
 
-  .weather-item {
+  .divum-item {
     float: none;
     width: 310px;
     margin: 10px auto 0;
@@ -1813,7 +1813,7 @@ suptemp3 {
 }
 
 @media screen and (max-width:640px) {
-  .weather-container {
+  .divum-container {
     display: inline;
     width: 300px;
     height: 200px;
@@ -1824,13 +1824,13 @@ suptemp3 {
   }
 
   .almanacpopup,
-  .weather2-container,
-  .weatherfooter-container,
+  .divum2-container,
+  .divumfooter-container,
   header {
     display: none
   }
 
-  .weather-item {
+  .divum-item {
     float: none;
     width: 310px;
     margin: 10px auto 0;
@@ -2020,14 +2020,14 @@ lightningrain {
   display: none
 }
 
-.weather34box.alert,
-.weather34box.clock,
-.weather34box.earthquake,
-.weather34box.indoor {
+.divumwxbox.alert,
+.divumwxbox.clock,
+.divumwxbox.earthquake,
+.divumwxbox.indoor {
   background-color: #fff;
 }
 
-.weatherbox-top-border {
+.divumbox-top-border {
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
   background: #f6f8fc;
@@ -2069,12 +2069,12 @@ lightningrain {
   font-weight: 500
 }
 
-.weather34box-toparea {
+.divumwxbox-toparea {
   margin: 0 0 -10px;
   width: 100%
 }
 
-.weather34box {
+.divumwxbox {
   border-radius: 6px;
   border: 1px solid rgba(230, 232, 239, .8);
   float: left;
@@ -2086,14 +2086,14 @@ lightningrain {
   height: 83px;
 }
 
-.weather34box .title,
-.weather34box .value {
+.divumwxbox .title,
+.divumwxbox .value {
   position: absolute;
   float: left;
   color: #2d2d2d
 }
 
-.weather34box .title {
+.divumwxbox .title {
   font-family: arial, helvetica;
   font-size: 9px;
   top: 2px;
@@ -2106,41 +2106,41 @@ spanm2 {
   font-family: Arial, Helvetica, system
 }
 
-.weather34box .value {
+.divumwxbox .value {
   font-size: 26px;
   font-weight: lighter;
   padding: 0 3px;
   top: 0
 }
 
-.weather34box.indoor span {
+.divumwxbox.indoor span {
   color: #2d2d2d;
   font-weight: 500
 }
 
-.weather34box.indoor titlespan {
+.divumwxbox.indoor titlespan {
   color: #2d2d2d;
   font-weight: 500
 }
 
-.weather34box.clock {
+.divumwxbox.clock {
   background-repeat: no-repeat;
   background-position: left 10px bottom 18px;
   color: #2d2d2d
 }
 
-.weather34box.clock span {
+.divumwxbox.clock span {
   color: #2d2d2d;
   font-weight: 500
 }
 
-.weather34box.clock titlespan {
+.divumwxbox.clock titlespan {
   color: #2d2d2d;
   font-weight: 500
 }
 
-.weather34box.alert span,
-.weather34box.earthquake span {
+.divumwxbox.alert span,
+.divumwxbox.earthquake span {
   color: #2d2d2d;
   font-weight: 500
 }
@@ -3672,26 +3672,26 @@ memclock {
   width: 50px
 }
 
-#weather34sidebarMenu,
-.weather34sidebarMenuInner li {
+#divumwxsidebarMenu,
+.divumwxsidebarMenuInner li {
   background: rgba(18, 18, 18, 1);
   width: 240px;
   float: left
 }
 
-.weather34sidebarMenuInner li.flagstop{
+.divumwxsidebarMenuInner li.flagstop{
   margin-bottom: -4px;
   padding-top: 0;
   padding-bottom: 0
 }
 
-.weather34sidebarMenuInner li.flagsmiddle {
+.divumwxsidebarMenuInner li.flagsmiddle {
   margin-top: -4px;
   margin-bottom: -4px;
   padding-top: 0;
   padding-bottom:0
 }
-.weather34sidebarMenuInner li.flagsbottom {
+.divumwxsidebarMenuInner li.flagsbottom {
   margin-top: -4px;
   padding-top: 0;
   padding-bottom: 5px
@@ -3703,7 +3703,7 @@ civil {
   font-weight: 500
 }
 
-#weather34sidebarMenu {
+#divumwxsidebarMenu {
   position: absolute;
   left: 0;
   top: 0;
@@ -3713,14 +3713,14 @@ civil {
   z-index: 30
 }
 
-.weather34sidebarIconToggle,
-.weather34spinner,
+.sidebarIconToggle,
+.menuspinner,
 input[type=checkbox] {
   transition: all .3s;
   box-sizing: border-box
 }
 
-.weather34sidebarMenuInner {
+.divumwxsidebarMenuInner {
   margin: 0;
   padding: 0;
   border-top: 0;
@@ -3729,12 +3729,12 @@ input[type=checkbox] {
   font-weight: 500
 }
 
-.weather34cross.part-2,
-.weather34horizontal {
+.menucross.part-2,
+.menuhorizontal {
   margin-top: 3px
 }
 
-.weather34sidebarMenuInner li {
+.divumwxsidebarMenuInner li {
   background: rgba(18, 18, 18, .7);
   list-style: none;
   //color: silver;
@@ -3750,8 +3750,8 @@ rainu {
   padding-left: 0
 }
 
-.weather34sidebarMenuInner li.header,
-.weather34sidebarMenuInner li.header.sub {
+.divumwxsidebarMenuInner li.header,
+.divumwxsidebarMenuInner li.header.sub {
   font-size: 15px;
   text-align: left;
   color: #ff8841;
@@ -3761,7 +3761,7 @@ rainu {
   padding-left: 8px
 }
 
-.weather34sidebarMenuInner li span {
+.divumwxsidebarMenuInner li span {
   display: block;
   font-size: 12px;
   color: #aaa;
@@ -3770,7 +3770,7 @@ rainu {
   font-weight: 500
 }
 
-.weather34sidebarMenuInner li a {
+.divumwxsidebarMenuInner li a {
   color: #aaa;
   cursor: pointer;
   text-decoration: none;
@@ -3779,7 +3779,7 @@ rainu {
   font-weight: 500
 }
 
-.weather34sidebarMenuInner li a:hover {
+.divumwxsidebarMenuInner li a:hover {
   color: #f5650a;
   cursor: pointer;
   text-decoration: none;
@@ -3789,14 +3789,14 @@ rainu {
 }
 
 /* CSS for the flyout menu */
-.weather34sidebarMenuInner li.sub {
+.divumwxsidebarMenuInner li.sub {
 //  background-image: url(sub2.svg);
   background-repeat: no-repeat;
   background-position-x: right;
   background-position-y: center;
 }
 
-.weather34sidebarMenuInner li ul {
+.divumwxsidebarMenuInner li ul {
   visibility: hidden;
   position: absolute;
   top: -30px;
@@ -3808,65 +3808,65 @@ rainu {
 //  background: transparent url(transparent.gif);
 }
 
-.weather34sidebarMenuInner li.sub ul li {
+.divumwxsidebarMenuInner li.sub ul li {
   padding-top: 6px;
   background-color: rgba(33, 34, 39, .95);
 }
 
-.weather34sidebarMenuInner li:hover {
+.divumwxsidebarMenuInner li:hover {
   position: relative;
 }
 
 /* For accessibility of the top level menu when tabbing */
-/* .weather34sidebarMenuInner a:active,
-.weather34sidebarMenuInner a:focus {
+/* .divumwxsidebarMenuInner a:active,
+.divumwxsidebarMenuInner a:focus {
   color: #000;
 } */
 
 /* for browsers that understand this is all you need for the flyouts */
-.weather34sidebarMenuInner li:hover>ul {
+.divumwxsidebarMenuInner li:hover>ul {
   visibility: visible;
 }
 
 /* for IE5.5 and IE6 you need to style each level hover */
 
 /* keep the third level+ hidden when you hover on first level link */
-.weather34sidebarMenuInner ul a:hover ul ul {
+.divumwxsidebarMenuInner ul a:hover ul ul {
   visibility: hidden;
 }
 
 /* keep the fourth level+ hidden when you hover on second level link */
-.weather34sidebarMenuInner ul a:hover ul a:hover ul ul {
+.divumwxsidebarMenuInner ul a:hover ul a:hover ul ul {
   visibility: hidden;
 }
 
 /* keep the fifth level hidden when you hover on third level link */
-.menweather34sidebarMenuInneru ul a:hover ul a:hover ul a:hover ul ul {
+.mendivumwxsidebarMenuInneru ul a:hover ul a:hover ul a:hover ul ul {
   visibility: hidden;
 }
 
 /* make the second level visible when hover on first level link */
-.weather34sidebarMenuInner ul a:hover ul {
+.divumwxsidebarMenuInner ul a:hover ul {
   visibility: visible;
 }
 
 /* make the third level visible when you hover over second level link */
-.meweather34sidebarMenuInnernu ul a:hover ul a:hover ul {
+.medivumwxsidebarMenuInnernu ul a:hover ul a:hover ul {
   visibility: visible;
 }
 
 /* make the fourth level visible when you hover over third level link */
-.weather34sidebarMenuInner ul a:hover ul a:hover ul a:hover ul {
+.divumwxsidebarMenuInner ul a:hover ul a:hover ul a:hover ul {
   visibility: visible;
 }
 
 /* make the fifth level visible when you hover over fourth level link */
-.weather34sidebarMenuInner ul a:hover ul a:hover ul a:hover ul a:hover ul {
+.divumwxsidebarMenuInner ul a:hover ul a:hover ul a:hover ul a:hover ul {
   visibility: visible;
 }
 /* End flyout menu */
 
-input[type=checkbox]:checked~#weather34sidebarMenu {
+input[type=checkbox]:checked~#divumwxsidebarMenu {
   transform: translateX(0)
 }
 
@@ -3874,7 +3874,7 @@ input[type=checkbox] {
   display: none
 }
 
-.weather34sidebarIconToggle {
+.sidebarIconToggle {
   cursor: pointer;
   position: absolute;
   z-index: 99;
@@ -3884,16 +3884,16 @@ input[type=checkbox] {
   width: 22px
 }
 
-.weather34spinner {
+.menuspinner {
   position: absolute;
   height: 3px;
   width: 100%;
   background-color: #aaa
 }
 
-.weather34cross.part-1,
-.weather34cross.part-2,
-.weather34horizontal {
+.menucross.part-1,
+.menucross.part-2,
+.menuhorizontal {
   position: relative;
   transition: all .3s;
   box-sizing: border-box;
@@ -3908,20 +3908,20 @@ uptime {
   position: absolute
 }
 
-input[type=checkbox]:checked~.weather34sidebarIconToggle>.weather34horizontal {
+input[type=checkbox]:checked~.sidebarIconToggle>.menuhorizontal {
   transition: all .3s;
   box-sizing: border-box;
   opacity: 0
 }
 
-input[type=checkbox]:checked~.weather34sidebarIconToggle>.weather34cross.part-1 {
+input[type=checkbox]:checked~.sidebarIconToggle>.menucross.part-1 {
   transition: all .3s;
   box-sizing: border-box;
   transform: rotate(135deg);
   margin-top: 8px
 }
 
-input[type=checkbox]:checked~.weather34sidebarIconToggle>.weather34cross.part-2 {
+input[type=checkbox]:checked~.sidebarIconToggle>.menucross.part-2 {
   transition: all .3s;
   box-sizing: border-box;
   transform: rotate(-135deg);
@@ -4778,7 +4778,7 @@ solarluxvalue {
   font-size: 5px
 }
 
-.weather34-barometerruler {
+.divumwx-barometerruler {
   position: absolute;
   width: 135px;
   height: 1px;
@@ -4787,30 +4787,30 @@ solarluxvalue {
   margin-top: 62px
 }
 
-weather34-barometerlimitmax,
-weather34-barometerlimitmin,
-weather34-barometerlimitminf {
+divumwx-barometerlimitmax,
+divumwx-barometerlimitmin,
+divumwx-barometerlimitminf {
   margin-top: -6px;
   position: absolute;
   font-size: 11px
 }
 
-weather34-barometerlimitmin {
+divumwx-barometerlimitmin {
   left: -27px;
   color: #07727d
 }
 
-weather34-barometerlimitmax {
+divumwx-barometerlimitmax {
   left: 140px;
   color: #d35d4e
 }
 
-weather34-barometerlimitminf {
+divumwx-barometerlimitminf {
   left: -20px;
   color: #07727d
 }
 
-weather34-barometerlimitmaxf {
+divumwx-barometerlimitmaxf {
   position: absolute;
   margin-top: 0;
   left: 163px;
@@ -5125,7 +5125,7 @@ redtime {
   color: #d35d4e
 }
 
-.weather34box .value1 {
+.divumwxbox .value1 {
   position: absolute;
   font-size: 14px;
   font-weight: lighter;
@@ -8204,7 +8204,7 @@ updatedtime {
   margin-left: 50px
 }
 
-weather34 {
+divumwx {
   font: .55em weathertext2;
   margin-top: -4px;
   margin-left: 45px;
@@ -8777,7 +8777,7 @@ weather34darkdaycircle {
 }
 
 topbarimperial,
-topbarmetric {
+topbartablet {
   display: flex;
   -webkit-border-radius: 2px;
   border-radius: 2px;
@@ -8797,7 +8797,7 @@ topbarimperial {
   color: #ff7c39
 }
 
-topbarmetric {
+topbartablet {
   border: 1px solid #009bab;
   color: #009bab
 }
@@ -9238,7 +9238,7 @@ wuheatindex {
   color: #d35d4e
 }
 
-.weather34admin {
+.menuadmin {
   --spacing: 1.1rem;
   display: flex;
   flex-wrap: wrap;
@@ -9248,7 +9248,7 @@ wuheatindex {
   font-weight: 500
 }
 
-.weather34admin__header {
+.menuadmin__header {
   display: flex;
   flex-basis: 100%;
   grid-area: header;
@@ -9258,7 +9258,7 @@ wuheatindex {
   font-size: 12px
 }
 
-.weather34toolbar {
+.menutoolbar {
   display: flex;
   flex: 1;
   justify-content: space-between;
@@ -9267,11 +9267,11 @@ wuheatindex {
   font-size: 1.15em
 }
 
-.weather34toolbar right {
+.menutoolbar right {
   font-size: 1.2em
 }
 
-.weather34btn {
+.menubutton {
   display: inline-block;
   border-radius: 2px;
   border: 0;
@@ -9281,7 +9281,7 @@ wuheatindex {
   top: 1px
 }
 
-.weather34btn--primary {
+.menubutton--primary {
   color: silver;
   background-color: rgba(86, 95, 103, 0);
   max-height: 22px;
@@ -9292,7 +9292,7 @@ wuheatindex {
   margin-left: -60px
 }
 
-.weather34btn--primary a {
+.menubutton--primary a {
   position: relative;
   color: silver;
   font-size: 0.85em;
@@ -9301,12 +9301,12 @@ wuheatindex {
   background: 0
 }
 
-.weather34btn--primary svg {
+.menubutton--primary svg {
   width: 10px;
   color: rgba(230, 232, 239, 1)
 }
 
-weather34mbuptime {
+menuuptime {
   position: absolute;
   display: inline;
   right: 60px;
@@ -9371,13 +9371,13 @@ topbarmetricc {
   color: #009bab
 }
 
-weather34menumarkerlight,
-weather34menumarkerred,
-weather34menumarkerbluegrey,
-weather34menumarkergreen,
-weather34menumarkeryellow,
-weather34menumarkerblue,
-weather34menumarkerorange {
+menumarkerlight,
+menumarkerred,
+menumarkerbluegrey,
+menumarkergreen,
+menumarkeryellow,
+menumarkerblue,
+menumarkerorange {
   display: inline-block;
   -webkit-border-radius: 2px;
   border-radius: 2px;
@@ -9394,46 +9394,46 @@ weather34menumarkerorange {
   line-height: 12px
 }
 
-weather34menumarkerblue {
+menumarkerblue {
   background: #44a6b5
 }
 
-weather34menumarkerorange {
+menumarkerorange {
   background: #ff832f
 }
 
-weather34menumarkeryellow {
+menumarkeryellow {
   background: #e6a141
 }
 
-weather34menumarkergreen {
+menumarkergreen {
   background: #90b12a
 }
 
-weather34menumarkerbluegrey {
+menumarkerbluegrey {
   background: #565f67
 }
 
-weather34menumarkerred {
+menumarkerred {
   background: #d35d4e
 }
 
-weather34menumarkerlight {
+menumarkerlight {
   background: #b5b9c1
 }
 
 @media screen and (max-width:820px) {
-  .weather34admin {
+  .menuadmin {
     --spacing: 1.3rem;
     display: inline;
     background: 0
   }
 
-  .weather34btn {
+  .menubutton {
     background-color: 0;
   }
 
-  .weather34toolbar {
+  .menutoolbar {
     display: flex;
     flex: 1;
     font-size: 1em;
@@ -9442,7 +9442,7 @@ weather34menumarkerlight {
     height: 30px;
   }
 
-  .weather34btn--primary {
+  .menubutton--primary {
     color: silver;
     background-color: 0;
     font-family: Arial, Helvetica, sans-serif;
@@ -9451,7 +9451,7 @@ weather34menumarkerlight {
     color: silver;
   }
 
-  .weather34admin__header {
+  .menuadmin__header {
     display: flex;
     flex-basis: 100%;
     grid-area: header;
@@ -9461,22 +9461,22 @@ weather34menumarkerlight {
     font-size: 12px;
   }
 
-  .weather34btn--primary a {
+  .menubutton--primary a {
     color: silver;
     font-size: 0.85em;
     font-weight: 500;
     color: silver;
   }
 
-  weather34toptitle {
+  menutoptitle {
     display: none
   }
 
-  weather34mbuptime {
+  menuuptime {
     top: 10px
   }
 
-  .weather-item {
+  .divum-item {
     margin-top: 32px;
     margin-bottom: -28px
   }
@@ -9510,7 +9510,7 @@ weather34menumarkerlight {
     z-index: 3
   }
 
-  .weather34sidebarIconToggle {
+  .sidebarIconToggle {
     cursor: pointer;
     position: absolute;
     z-index: 99;

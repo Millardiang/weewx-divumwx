@@ -50,7 +50,7 @@ html,body{
 }
 
   
-.weather34darkbrowser {
+.divumwxdarkbrowser {
   position: relative;
   background: 0;
   width: 97%;
@@ -62,7 +62,7 @@ html,body{
   border-top-right-radius: 5px;
   padding-top: 10px;
 }
-.weather34darkbrowser[url]:after {
+.divumwxdarkbrowser[url]:after {
   content: attr(url);
   color: black;
   font-size: 14px;
@@ -670,21 +670,21 @@ else if ($aqiweather["aqi"]>=50) echo "#e6a141";
 else if ($aqiweather["aqi"]>=0) echo "#90b12a";
 ?>;}
 .humicon{margin:0 auto;display:flex;margin-top:37px;align-items:center;justify-content:center;font-size:1.85em;font-family:weathertext2;position:absolute;color:
-<?php if($weather["humidity_indoor"]<35)echo "#d35d4e";
-else if($weather["humidity_indoor"]<60)echo "#e6a141";
-else if($weather["humidity_indoor"]<80)echo "#ec5519";
-else if($weather["humidity_indoor"]<=100)echo "#44a6b5";?>;}
+<?php if($divum["humidity_indoor"]<35)echo "#d35d4e";
+else if($divum["humidity_indoor"]<60)echo "#e6a141";
+else if($divum["humidity_indoor"]<80)echo "#ec5519";
+else if($divum["humidity_indoor"]<=100)echo "#44a6b5";?>;}
 
 .tempicon{margin:0 auto;display:flex;margin-top:37px;align-items:center;justify-content:center;font-size:1.85em;font-family:weathertext2;position:absolute;color:
 <?php  
-if($weather["temp_units"]=='F' &&  $weather["temp_indoor"]>78.8)echo "#d35d4e";
-else if($weather["temp_units"]=='F' &&  $weather["temp_indoor"]>64.4)echo "#ff832f";
-else if($weather["temp_units"]=='F' &&  $weather["temp_indoor"]>59)echo "#e6a141";
-else if($weather["temp_units"]=='F' &&  $weather["temp_indoor"]>0)echo "#44a6b5";
-else if ($weather["temp_indoor"]>=26) echo "#d35d4e";
-else if ($weather["temp_indoor"]>18) echo "#ff832f";
-elseif ($weather["temp_indoor"]>15) echo "#e6a141";
-else if ($weather["temp_indoor"]>=0) echo "#44a6b5";
+if($divum["temp_units"]=='F' &&  $divum["temp_indoor"]>78.8)echo "#d35d4e";
+else if($divum["temp_units"]=='F' &&  $divum["temp_indoor"]>64.4)echo "#ff832f";
+else if($divum["temp_units"]=='F' &&  $divum["temp_indoor"]>59)echo "#e6a141";
+else if($divum["temp_units"]=='F' &&  $divum["temp_indoor"]>0)echo "#44a6b5";
+else if ($divum["temp_indoor"]>=26) echo "#d35d4e";
+else if ($divum["temp_indoor"]>18) echo "#ff832f";
+elseif ($divum["temp_indoor"]>15) echo "#e6a141";
+else if ($divum["temp_indoor"]>=0) echo "#44a6b5";
 ?>;}
 
 

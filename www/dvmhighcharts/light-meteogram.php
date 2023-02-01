@@ -168,7 +168,7 @@ $scrollbar-track-border: #404043;
  * developers to go beyond the basic chart types and show how the library can
  * be extended programmatically. This is what the demo does:
  *
- * - Loads weather forecast from www.yr.no in form of a JSON service.
+ * - Loads divum forecast from www.yr.no in form of a JSON service.
  * - When the data arrives async, a Meteogram instance is created. We have
  *   created the Meteogram prototype to provide an organized structure of the
  *   different methods and subroutines associated with the demo.
@@ -177,7 +177,7 @@ $scrollbar-track-border: #404043;
  *   precipitation and air pressure.
  * - After this, the options structure is built, and the chart generated with
  *   the parsed data.
- * - On chart load, weather icons and the frames for the wind arrows are
+ * - On chart load, divum icons and the frames for the wind arrows are
  *   rendered using custom logic.
  */
 
@@ -373,9 +373,9 @@ Meteogram.dictionary = {
 };
 
 /**
- * Draw the weather symbols on top of the temperature series. The symbols are
- * fetched from yr.no's MIT licensed weather symbol collection.
- * https://github.com/YR/weather-symbols
+ * Draw the divum symbols on top of the temperature series. The symbols are
+ * fetched from yr.no's MIT licensed divum symbol collection.
+ * https://github.com/YR/divum-symbols
  */
 Meteogram.prototype.drawWeatherSymbols = function (chart) {
 
@@ -389,7 +389,7 @@ Meteogram.prototype.drawWeatherSymbols = function (chart) {
       if (Meteogram.dictionary[symbol]) {
         chart.renderer
           .image(
-            'https://cdn.jsdelivr.net/gh/nrkno/yr-weather-symbols' +
+            'https://cdn.jsdelivr.net/gh/nrkno/yr-divum-symbols' +
               `@8.0.1/dist/svg/${icon}.svg`,
             point.plotX + chart.plotLeft - 8,
             point.plotY + chart.plotTop - 30,

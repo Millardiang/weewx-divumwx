@@ -55,13 +55,12 @@ $sun_elevation = round($sun_alt,2)."&deg;<div class=sunbelowweather34>&nbsp;</di
 <div class="chartforecast2">
       <span class="yearpopup"><a alt="orrery" title="orrery" href="dvmOrreyPopup.php" data-lity><?php echo $info;?> Orrery</a></span>
       <span class="yearpopup"><a alt="Astroclock" title="Astroclock" href="dvmAstroclockPopup.php" data-lity><?php echo $info;?> Astroclock</a></span>
-      <span class="yearpopup"><a alt="celestial" title="celestial" href="dvmMenuCelestialPopup.php" data-lity><?php echo $info;?> Celestial Data</a></span>
 
 </div>
 
 <span class="moduletitle2"><?php echo $lang['solarDialModule'];?></span>
 
-<div class="updatedtime1"><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$weather["time"];?></div>
+<div class="updatedtime1"><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?></div>
 
 
 

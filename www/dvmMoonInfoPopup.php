@@ -1,15 +1,14 @@
 <?php 
 //###################################################################################################################
-//	weewx-Weather34 Template maintained by Ian Millard (Steepleian)                                 				#
+//	weewx-divumwx Template maintained by Ian Millard (Steepleian)                                 				#
 //	                                                                                                				#
-//  Contains original legacy code (by agreement) created and developed by Brian Underdown (https://weather34.com)   #
-//  for the (now superseeded) original Weather34 Template which is no longer maintained by its creator              #
-//  © weather34.com original CSS/SVG/PHP 2015-2019                                                                  #
+//                #
+//  © divumwx.com original CSS/SVG/PHP 2015-2019                                                                  #
 // 	                                                                                                				#
 //  Contains original code by Ian Millard and collaborators															#
 //  © claydonsweather.org.uk original CSS/SVG/PHP 2020-2021                                                         #
 // 	                                                                                                				#
-// 	Issues for weewx-Weather34 template should be addressed to https://github.com/steepleian/weewx-Weather34/issues #                                                                                              #
+// 	Issues for weewx-divumwx template should be addressed to https://github.com/steepleian/weewx-divumwx/issues #                                                                                              #
 // 	                                                                                                				#
 //###################################################################################################################
 include('dvmCombinedData.php');
@@ -52,7 +51,7 @@ body {
   max-width: 100%;
 }
 
-.weather34darkbrowser {
+.divumwxdarkbrowser {
   position: relative;
   background: 0;
   width: 97%;
@@ -64,7 +63,7 @@ body {
   border-top-right-radius: 5px;
   padding-top: 10px;
 }
-.weather34darkbrowser[url]:after {
+.divumwxdarkbrowser[url]:after {
   content: attr(url);
   color: white;
   font-size: 14px;
@@ -221,7 +220,7 @@ body {
   max-width: 100%;
 }
 
-.weather34darkbrowser {
+.divumwxdarkbrowser {
   position: relative;
   background: 0;
   width: 97%;
@@ -233,7 +232,7 @@ body {
   border-top-right-radius: 5px;
   padding-top: 10px;
 }
-.weather34darkbrowser[url]:after {
+.divumwxdarkbrowser[url]:after {
   content: attr(url);
   color: black;
   font-size: 14px;
@@ -357,10 +356,10 @@ credit {
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Weather34 Home Weather Moon Phase Information</title>
+  <title>divumwx Home divum Moon Phase Information</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<div class="weather34darkbrowser" url="Moon Phase Information"></div>
+<div class="divumwxdarkbrowser" url="Moon Phase Information"></div>
   
 <main class="grid">
 <article>
@@ -368,8 +367,8 @@ credit {
 <?php echo $info;?> Current Moon Phase<br><br>  
  
 <div id="weather34moonphases" class="moonphasesvg"></div>
-<svg id="weather34 simple moonphase"><circle cx="50" cy="50" r="49.5" fill="rgba(86, 95, 103, .4)"/><path id="weather34shape" fill="rgba(230, 232, 239, .5)"/></svg>
-<script> //simple moonphase for weather34
+<svg id="divumwx simple moonphase"><circle cx="50" cy="50" r="49.5" fill="rgba(86, 95, 103, .4)"/><path id="weather34shape" fill="rgba(230, 232, 239, .5)"/></svg>
+<script> //simple moonphase for divumwx
 weather34Moon();
 function weather34Moon() {
 var day = Date.now() / 86400000;
@@ -468,5 +467,5 @@ Earth–Moon–Earth communication (<orange>EME</orange>), also known as Moon bo
 </article> 
 <article>
 <div class=actualt>&nbsp;&nbsp &copy; Information</div>  
-<?php echo $info?> CSS/SVG/PHP scripts were developed by <a href="https://weather34.com" title="weather34.com" target="_blank" style="font-size:9px;">weather34.com</a>  for use in the weather34 template &copy; 2015-<?php echo date('Y');?></span></article> 
+<?php echo $info?> CSS/SVG/PHP scripts were developed by <a href="https://divumwx.com" title="divumwx.com" target="_blank" style="font-size:9px;">divumwx.com</a>  for use in the divumwx template &copy; 2015-<?php echo date('Y');?></span></article> 
 </main>

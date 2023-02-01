@@ -18,7 +18,7 @@ else {$uv["color"]="#be688b";} // pastel purple (jupiter)
     <span class='moduletitle2'>Solar | UV | Lux</span>
 
 
-<div class="updatedtime1"><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>';else echo $online." ".$weather["time"];?></div>
+<div class="updatedtime1"><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>';else echo $online." ".$divum["time"];?></div>
 
 <div class="uvcautionbig2">
 <?php 

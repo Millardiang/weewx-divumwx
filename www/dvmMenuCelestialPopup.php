@@ -4,12 +4,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <?php
 //###################################################################################################################
-//	weewx-Weather34 Template maintained by Ian Millard (Steepleian)                                 				#
+//	weewx-divumwx Template maintained by Ian Millard (Steepleian)                                 				#
 //	                                                                                                				#
 //  Contains original code by Ian Millard and collaborators															#
 //  © claydonsweather.org.uk original CSS/SVG/PHP 2020-2021                                                            #
 // 	                                                                                                				#
-// 	Issues for weewx-Weather34 template should be addressed to https://github.com/steepleian/weewx-Weather34/issues #                                                                                              #
+// 	Issues for weewx-divumwx template should be addressed to https://github.com/steepleian/weewx-divumwx/issues #                                                                                              #
 // 	                                                                                                				#
 //###################################################################################################################
   
@@ -77,17 +77,17 @@ body, html {
   
   <div id="Tab1" class="tabcontent">
   
-  <iframe width="100%" height="92%" scrolling="no" src="pop_meteorshowers.php" frameborder="0"></iframe>
+  <iframe width="100%" height="92%" scrolling="no" src="dvmMeteorshowersPopup.php" frameborder="0"></iframe>
 </div>
 
 <div id="Tab2" class="tabcontent">
   
-  <iframe width="100%" height="92%" scrolling="no" src="pop_aurora.php" frameborder="0"></iframe>
+  <iframe width="100%" height="92%" scrolling="no" src="dvmAuroraPopup.php" frameborder="0"></iframe>
 </div>
 
 <div id="Tab3" class="tabcontent">
   
-  <iframe width="100%" height="92%" scrolling="no" src="pop_mooninfo.php" frameborder="0"></iframe>
+  <iframe width="100%" height="92%" scrolling="no" src="dvmMoonInfoPopup.php" frameborder="0"></iframe>
 </div>
 
   

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<title>weather34 current conditions</title>
+<title>divumwx current conditions</title>
 <?php
 include('fixedSettings.php');
 include('dvmCombinedData.php');
@@ -74,42 +74,42 @@ else if ($windunit =='km/h' || $windunit =='m/s' && $sky["cloud_base"]<609){echo
 </div></div>
 <div class="darkskyiconcurrent"><span1>
 <?php 
-//homeweatherstation weather34 current conditions using hardware values
+//homeweatherstation divumwx current conditions using hardware values
 if ($windunit=='kts'){$windunit="kn";}       
-//rain-weather34
-if($rain["rate"]>0 && $wind["speed_avg"]>15){echo "<img rel='prefetch' src='img/meteocons/umbrella-wind.svg' width='60px' height='55px' margin-bottom='15px' alt='weather34 windy rain icon'>";}
-else if($rain["rate"]>10){echo "<img rel='prefetch' src='img/meteocons/umbrella-wind-alt.svg' width='70px' height='55px' alt='weather34 heavy rain icon'>";}
-else if($rain["rate"]>0){echo "<img rel='prefetch' src='img/meteocons/overcast-rain.svg' width='70px' height='55px' alt='weather34 rain icon'>";}
-//fog-weather34
-else if($temp["outside_now"] -$dew["now"] <0.8  && $dayPartNatural == "night" && $temp["outside_now"]>5){echo "<img rel='prefetch' src='img/meteocons/fog-night.svg' width='70px' height='55px' alt='weather34 fog icon'>";}
-else if($temp["outside_now"] -$dew["now"] <0.8  && $temp["outside_now"]>5){echo "<img rel='prefetch' src='img/meteocons/fog-day.svg' width='70px' height='55px' alt='weather34 fog'>";}
-//windy moderate-weather34
-else if($wind["speed_avg"]>=15 && $dayPartNatural == "night" && $sky["cloud_cover"]<20){echo "<img rel='prefetch' src='img/meteocons/wind.svg' width='70px' height='55px' alt='weather34 windy icon'>";}
-else if($wind["speed_avg"]>=15 && $sky["cloud_cover"]<20){echo "<img rel='prefetch' src='img/meteocons/wind.svg' width='70px' height='55px' alt='weather34 windy icon'>";}
-//windy moderate-weather34
-else if($wind["speed_avg"]>=15 && $dayPartNatural == "night"){echo "<img rel='prefetch' src='img/meteocons/wind.svg' width='70px' height='55px' alt='weather34 windy icon'>";}
-else if($wind["speed_avg"]>=15){echo "<img rel='prefetch' src='img/meteocons/wind.svg' width='70px' height='55px' alt='weather34 windy icon'>";}
+//rain-divumwx
+if($rain["rate"]>0 && $wind["speed_avg"]>15){echo "<img rel='prefetch' src='img/meteocons/umbrella-wind.svg' width='60px' height='55px' margin-bottom='15px' alt='divumwx windy rain icon'>";}
+else if($rain["rate"]>10){echo "<img rel='prefetch' src='img/meteocons/umbrella-wind-alt.svg' width='70px' height='55px' alt='divumwx heavy rain icon'>";}
+else if($rain["rate"]>0){echo "<img rel='prefetch' src='img/meteocons/overcast-rain.svg' width='70px' height='55px' alt='divumwx rain icon'>";}
+//fog-divumwx
+else if($temp["outside_now"] -$dew["now"] <0.8  && $dayPartNatural == "night" && $temp["outside_now"]>5){echo "<img rel='prefetch' src='img/meteocons/fog-night.svg' width='70px' height='55px' alt='divumwx fog icon'>";}
+else if($temp["outside_now"] -$dew["now"] <0.8  && $temp["outside_now"]>5){echo "<img rel='prefetch' src='img/meteocons/fog-day.svg' width='70px' height='55px' alt='divumwx fog'>";}
+//windy moderate-divumwx
+else if($wind["speed_avg"]>=15 && $dayPartNatural == "night" && $sky["cloud_cover"]<20){echo "<img rel='prefetch' src='img/meteocons/wind.svg' width='70px' height='55px' alt='divumwx windy icon'>";}
+else if($wind["speed_avg"]>=15 && $sky["cloud_cover"]<20){echo "<img rel='prefetch' src='img/meteocons/wind.svg' width='70px' height='55px' alt='divumwx windy icon'>";}
+//windy moderate-divumwx
+else if($wind["speed_avg"]>=15 && $dayPartNatural == "night"){echo "<img rel='prefetch' src='img/meteocons/wind.svg' width='70px' height='55px' alt='divumwx windy icon'>";}
+else if($wind["speed_avg"]>=15){echo "<img rel='prefetch' src='img/meteocons/wind.svg' width='70px' height='55px' alt='divumwx windy icon'>";}
 
 //cloud-icon
 else if ($sky["cloud_cover"]<7 and $sky["cloud_cover"]>0) {
-if ($dayPartNatural == "night" ){echo "<img rel='prefetch' src='img/meteocons/clear-night.svg' width='70px' height='55px' alt='weather34 windy icon'>";} 
-else echo "<img rel='prefetch' src='img/meteocons/clear-day.svg' width='70px' height='55px' alt='weather34 windy icon'>"; 
+if ($dayPartNatural == "night" ){echo "<img rel='prefetch' src='img/meteocons/clear-night.svg' width='70px' height='55px' alt='divumwx windy icon'>";} 
+else echo "<img rel='prefetch' src='img/meteocons/clear-day.svg' width='70px' height='55px' alt='divumwx windy icon'>"; 
 } 
 else if ($sky["cloud_cover"]<32) {
-if ($dayPartNatural == "night" ){echo "<img rel='prefetch' src='img/meteocons/mostly-clear-night.svg' width='70px' height='55px' alt='weather34 windy icon'>";} 
-else echo "<img rel='prefetch' src='img/meteocons/mostly-clear-day.svg' width='70px' height='55px' alt='weather34 windy icon'>"; 
+if ($dayPartNatural == "night" ){echo "<img rel='prefetch' src='img/meteocons/mostly-clear-night.svg' width='70px' height='55px' alt='divumwx windy icon'>";} 
+else echo "<img rel='prefetch' src='img/meteocons/mostly-clear-day.svg' width='70px' height='55px' alt='divumwx windy icon'>"; 
 }
 else if ($sky["cloud_cover"]<70) {
-if ($dayPartNatural == "night" ){echo "<img rel='prefetch' src='img/meteocons/partly-cloudy-night.svg' width='70px' height='55px' alt='weather34 windy icon'>";} 
-else echo "<img rel='prefetch' src='img/meteocons/partly-cloudy-day.svg' width='70px' height='55px' alt='weather34 windy icon'>"; 
+if ($dayPartNatural == "night" ){echo "<img rel='prefetch' src='img/meteocons/partly-cloudy-night.svg' width='70px' height='55px' alt='divumwx windy icon'>";} 
+else echo "<img rel='prefetch' src='img/meteocons/partly-cloudy-day.svg' width='70px' height='55px' alt='divumwx windy icon'>"; 
 }
 else if ($sky["cloud_cover"]<95) {
-if ($dayPartNatural == "night" ){echo "<img rel='prefetch' src='img/meteocons/overcast-day.svg' width='70px' height='55px' alt='weather34 windy icon'>";} 
-else echo "<img rel='prefetch' src='img/meteocons/overcast-night.svg' width='70px' height='55px' alt='weather34 windy icon'>"; 
+if ($dayPartNatural == "night" ){echo "<img rel='prefetch' src='img/meteocons/overcast-day.svg' width='70px' height='55px' alt='divumwx windy icon'>";} 
+else echo "<img rel='prefetch' src='img/meteocons/overcast-night.svg' width='70px' height='55px' alt='divumwx windy icon'>"; 
 }
 else if($sky["cloud_cover"]>=95) {
-if ($dayPartNatural == "night" ){echo "<img rel='prefetch' src='img/meteocons/overcast.svg' width='70px' height='55px' alt='weather34 windy icon'>";} 
-else echo "<img rel='prefetch' src='img/meteocons/overcast.svg' width='70px' height='55px' alt='weather34 windy icon'>"; 
+if ($dayPartNatural == "night" ){echo "<img rel='prefetch' src='img/meteocons/overcast.svg' width='70px' height='55px' alt='divumwx windy icon'>";} 
+else echo "<img rel='prefetch' src='img/meteocons/overcast.svg' width='70px' height='55px' alt='divumwx windy icon'>"; 
 }
 
 ?>
@@ -117,20 +117,20 @@ else echo "<img rel='prefetch' src='img/meteocons/overcast.svg' width='70px' hei
 <div class="darkskysummary"><span>
 <?php echo '';
 if ($windunit=='kts'){$windunit="kn";}
-//rain-weather34
+//rain-divumwx
 if($rain["rate"]>0 && $wind["speed_avg"]>15){echo "Rain Showers"; echo '<br>';echo "Windy Conditions";}
 else if($rain["rate"]>=20){echo "Heavy Rain"; echo '<br>';echo "Flooding Possible";}
 else if($rain["rate"]>=10){echo "Heavy Rain"; echo '<br>Showers';}
 else if($rain["rate"]>=5){echo "Moderate Rain"; echo '<br>Showers';}
 else if($rain["rate"]>=1){echo "Steady Rain";echo '<br>Showers';}
 else if($rain["rate"]>0){echo "Light Rain";echo '<br>Showers';}
-//fog-weather34
+//fog-divumwx
 else if($temp["outside_now"] -$dew["now"] <0.5  && $dayPartNatural == "night" && $temp["outside_now"]>5){echo "Misty Fog<br>Conditions ".$alert."";}
 else if($temp["outside_now"] -$dew["now"] <0.5  && $temp["outside_now"]>5){echo "Misty Fog<br>Conditions ".$alert."";}
-//misty-weather34
+//misty-divumwx
 else if($temp["outside_now"] -$dew["now"] <0.8  && $dayPartNatural == "night" && $temp["outside_now"]>5){echo "Fog Hazy<br>Conditions";}
 else if($temp["outside_now"] -$dew["now"] <0.8  && $temp["outside_now"]>5){echo "Misty Hazy<br>Conditions";}
-//windy-weather34
+//windy-divumwx
 else if($wind["speed_avg"]>=40){echo "Strong Wind ".$alert."<br>Conditions" ;}
 else if($wind["speed_avg"]>=30){echo "Very Windy ".$alert."<br>Conditions";}
 else if($wind["speed_avg"]>=22){echo "Moderate Wind <br>Conditions";}
@@ -159,13 +159,13 @@ else if($sky["cloud_cover"]<=62.5) {$sky["cloud_oktas"]="5 oktas";}
 else if($sky["cloud_cover"]<=75) {$sky["cloud_oktas"]="6 oktas";}
 else if($sky["cloud_cover"]<=87.5) {$sky["cloud_oktas"]="7 oktas";}
 else if($sky["cloud_cover"]<=100) {$sky["cloud_oktas"]="8 oktas";}
-//metar conditions-weather34
+//metar conditions-divumwx
 
 ?>
 </span></div>
- <!-- weather34 generated Data--> 
+ <!-- divumwx generated Data--> 
 <div class="darkskynexthours" style="margin: 60px auto auto; margin-top: 55px; margin-left: 35px; text-align: center">
-<?php //weather34 average station data
+<?php //divumwx average station data
 //echo "Average <oblue>Cloud Cover</oblue> last 5 minutes <ogreen>" .$sky["cloud_cover"]."</ogreen><valuetext>".$cloudcoverunit. "(".$sky["cloud_oktas"].")";
 
 if ($visibility!==0){echo "</br>Visibility <oorange>".$visibility."</oorange></br>";}

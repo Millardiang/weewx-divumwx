@@ -3,8 +3,7 @@
 -----------------
 Language Translation File for HOMEWEATHERSTATION Template
 Language: Hungarian
-Translated by: BRIAN UNDERDOWN
-Developed By: Lightmaster/Brian Underdown/Erik M Madsen
+Translated by: Developed By: Lightmaster/Brian Underdown/Erik M Madsen
 October/November 2016
 Revised: 2019
 -----------------
@@ -35,7 +34,7 @@ $lang['Toggle']                 = 'Teljes Képernyő ';
 $lang['Contactinfo']            = 'Station & Kapcsolat';
 $lang['Templateinfo']           = 'Template Info';
 $lang['language']               = 'Nyelv válaszás';
-$lang['Weatherstationinfo']     = 'Weather Station Info';
+$lang['Weatherstationinfo']     = 'divum Station Info';
 $lang['Webdesigninfo']          = 'Weboldal infó';
 $lang['Contact']                = 'Kapcsolat';
 //days

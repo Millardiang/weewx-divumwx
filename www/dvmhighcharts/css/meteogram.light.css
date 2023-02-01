@@ -356,7 +356,7 @@ table {
   width: 790px;
   height: 90%;
 }
-.weather34darkbrowser {
+.divumwxdarkbrowser {
   position: relative;
   width: 97%;
   height: 30px;
@@ -369,7 +369,7 @@ table {
   color: black;
 }
 
-.weather34darkbrowser[url]:after {
+.divumwxdarkbrowser[url]:after {
   content: attr(url);
   font-size: 14px;
   text-align: center;

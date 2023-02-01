@@ -12,7 +12,7 @@
     <email>meteoalarm@zamg.ac.at</email>
   </author>
   <id>tag:meteoalarm.org,2021-02-19:IT</id>
-  <title>Meteoalarm - severe weather warnings for Europe</title>
+  <title>Meteoalarm - severe divum warnings for Europe</title>
   <updated>2022-06-28T14:25:15.574649Z</updated>
   <entry>
     <cap:geocode>

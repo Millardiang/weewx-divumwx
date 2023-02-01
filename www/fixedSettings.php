@@ -11,7 +11,7 @@ error_reporting(0);
 
 $TZconf = $TZ; // PLEASE LEAVE it is fixed
 $UTC_offset = timezone_offset_get(timezone_open($TZ), new DateTime()) / 3600; // DO NOT CHANGE
-$api2 = "xxx"; // optional Weather Underground api key developer key '1234567890'
+$api2 = "xxx"; // optional divum Underground api key developer key '1234567890'
 $rise_zenith = 90 + 40 / 60; // try 50/60 or something/60 until it matches correctly to your sunrise .this allows you to fine tune the sunrise
 $set_zenith = 90 + 36 / 60; // try 50/60 or something/60 until it matches correctly to your sunset .this allows you to fine tune the sunset
 $forecastlocation = $stationlocation; //
@@ -104,15 +104,15 @@ $theme1 = $theme;
 // Probably won't have to change anything past this line IF SO BE VER VERY CAREFUL!!!!!!		   #
 ####################################################################################################
 $scriptcredits =
-    "Original CSS/SVG ICONS/PHP scripts by <a href='https://weather34.com' title='weather34.com' target='_blank'>weather34.com 2015 - " .
+    "Original CSS/SVG ICONS/PHP scripts by <a href='https://divumwx.com' title='divumwx.com' target='_blank'>divumwx.com 2015 - " .
     date("Y") .
     ""; // for modules
 $creditsEnabled = "true"; // for chart pages only
-$creditsmysql = "Weather Data Recorded from ".$stationName." Database"; //for chart pages only
-$wucredits = "Data provided by Weather Underground"; // for chart pages only
+$creditsmysql = "divum Data Recorded from ".$stationName." Database"; //for chart pages only
+$wucredits = "Data provided by divum Underground"; // for chart pages only
 $chartsource = "dvmhighcharts";
 $creditsURL = ""; // for chart pages only
-$credits = "Data Supplied via Weather Underground"; // for chart pages only
+$credits = "Data Supplied via divum Underground"; // for chart pages only
 $templateinfo = ""; // template information page
 $templateversion = "DVM-<maxblue>Alpha build 0.3.8</maxblue>";
 

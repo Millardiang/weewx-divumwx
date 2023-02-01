@@ -6,23 +6,23 @@ include ('fixedSettings.php');
 
 ?>
 
-<div class="weather34admin">
+<div class="menuadmin">
   
   <!-- Top Bar -->
-  <header class="weather34admin__header">
-    <div class="weather34toolbar">
-      <div class="weather34toolbar__left">
-        <button class="weather34btn weather34btn--primary"></button>
+  <header class="menuadmin__header">
+    <div class="menutoolbar">
+      <div class="menutoolbar__left">
+        <button class="menubutton menubutton--primary"></button>
       </div>
-      <div class="weather34toolbar__center">
-        <button class="weather34btn weather34btn--primary">
-          <weather34toptitle><?php echo strtoupper($stationlocation); ?>&nbsp; WEATHER STATION</weather34toptitle>
+      <div class="menutoolbar__center">
+        <button class="menubutton menubutton--primary">
+          <menutoptitle><?php echo strtoupper($stationlocation); ?>&nbsp; WEATHER STATION</menutoptitle>
         </button>
       </div>
-      <div class="weather34toolbar__right">
-        <weather34mbuptime>
+      <div class="menutoolbar__right">
+        <menuuptime>
           <?php echo "Server " . (shell_exec('uptime -p')); ?>
-        </weather34mbuptime>
+        </menuuptime>
 
             <a href="dvmIndexDashboard.php" title="select dashboard mode"><topbarimperial>16</topbarimperial></a>
 
@@ -32,14 +32,14 @@ include ('fixedSettings.php');
 
 
   <!-- Side Menu -->
-  <input type="checkbox" class="openweather34sidebarMenu" id="openweather34sidebarMenu"/>
-  <label for="openweather34sidebarMenu" class="weather34sidebarIconToggle">
-    <div class="weather34spinner weather34cross part-1"></div>
-    <div class="weather34spinner weather34horizontal"></div>
-    <div class="weather34spinner weather34cross part-2"></div>
+  <input type="checkbox" class="sidebarmenu" id="sidebarmenu"/>
+  <label for="sidebarmenu" class="sidebarIconToggle">
+    <div class="menuspinner menucross part-1"></div>
+    <div class="menuspinner menuhorizontal"></div>
+    <div class="menuspinner menucross part-2"></div>
   </label>
-  <div id="weather34sidebarMenu">
-    <ul class="weather34sidebarMenuInner">
+  <div id="divumwxsidebarMenu">
+    <ul class="divumwxsidebarMenuInner">
       <br/>
       <br/>
       <br/>
@@ -48,7 +48,7 @@ include ('fixedSettings.php');
       <li class="header">ADMIN</li>
         <li>
         <a href="index.php" title="WEATHERSTATION HOME PAGE">
-          <weather34menumarkergreen></weather34menumarkergreen> Home
+          <menumarkergreen></menumarkergreen> Home
         </a>
       </li>
       
@@ -58,12 +58,12 @@ include ('fixedSettings.php');
         <a href="<?php echo ($theme == 'dark') ? '?theme=light' : '?theme=dark'; ?>">
           <?php if ($theme == 'dark')
 { ?>
-            <weather34menumarkerlight></weather34menumarkerlight> Light Theme
+            <menumarkerlight></menumarkerlight> Light Theme
           <?php
 }
 else
 { ?>
-            <weather34menumarkerbluegrey></weather34menumarkerbluegrey> Dark Theme
+            <menumarkerbluegrey></menumarkerbluegrey> Dark Theme
           <?php
 } ?>
         </a>
@@ -74,7 +74,7 @@ else
       <?php if ($units != Null && $units != 'default')
 { ?>
         <li>
-          <a href="./?units=default"><weather34menumarkerred></weather34menumarkerred> Default Units
+          <a href="./?units=default"><menumarkerred></menumarkerred> Default Units
             <?php if ($tempunit == 'F')
     { ?>
               <topbarimperialf>&deg;F</topbarimperialf>
@@ -92,49 +92,49 @@ else
 if ($units != 'us')
 { ?>
         <li>
-          <a href="./?units=us"><weather34menumarkerorange></weather34menumarkerorange> Imperial <topbarimperialf>&deg;F</topbarimperialf></a>
+          <a href="./?units=us"><menumarkerorange></menumarkerorange> Imperial <topbarimperialf>&deg;F</topbarimperialf></a>
         </li>
       <?php
 }
 if ($units != 'metric')
 { ?>
         <li>
-          <a href="./?units=metric"><weather34menumarkerblue></weather34menumarkerblue> Metric <topbarmetricc>&deg;C</topbarmetricc></a>
+          <a href="./?units=metric"><menumarkerblue></menumarkerblue> Metric <topbarmetricc>&deg;C</topbarmetricc></a>
         </li>
       <?php
 }
 if ($units != 'uk')
 { ?>
         <li>
-          <a href="./?units=uk"><weather34menumarkeryellow></weather34menumarkeryellow> UK (MPH) <topbarmetricc>&deg;C</topbarmetricc></a>
+          <a href="./?units=uk"><menumarkeryellow></menumarkeryellow> UK (MPH) <topbarmetricc>&deg;C</topbarmetricc></a>
         </li>
       <?php
 }
 if ($units != 'scandinavia')
 { ?>
         <li>
-          <a href="./?units=scandinavia"><weather34menumarkerred></weather34menumarkerred> M/S <topbarmetricc>&deg;C</topbarmetricc></a>
+          <a href="./?units=scandinavia"><menumarkerred></menumarkerred> M/S <topbarmetricc>&deg;C</topbarmetricc></a>
         </li>
       <?php
 }
 if ($units != 'ca')
 { ?>
         <li>
-          <a href="./?units=ca"><weather34menumarkerred></weather34menumarkerred> CA (kPa) <topbarmetricc>&deg;C</topbarmetricc></a>
+          <a href="./?units=ca"><menumarkerred></menumarkerred> CA (kPa) <topbarmetricc>&deg;C</topbarmetricc></a>
         </li>
       <?php
 }
 
 if ($extralinks == 'yes')
 { ?>
-      <li class="header sub">LINKS <img class="menuimg" src="img/arrow34iconlink.svg" alt=""/>
+      <li class="header sub">LINKS <img class="menuimg" src="img/arrowiconlink.svg" alt=""/>
         <ul>
           <?php if ($linkWU == 'yes')
     { ?>
             <li>
               <?php # if its linkWUNew is either yes or missing, use the new WU Site, else use the old site
          ?>
-              <a href="<?php echo ($linkWUNew == 'yes' || empty($linkWUNew) ? 'https://www.wunderground.com/dashboard/pws/' : 'https://www.wunderground.com/personal-weather-station/dashboard?id=') . $id; ?>" title="<?php echo $id; ?> on Weather Underground" target="_blank">
+              <a href="<?php echo ($linkWUNew == 'yes' || empty($linkWUNew) ? 'https://www.wunderground.com/dashboard/pws/' : 'https://www.wunderground.com/personal-divum-station/dashboard?id=') . $id; ?>" title="<?php echo $id; ?> on divum Underground" target="_blank">
                 <img class="menuimg" src="img/wulogo.svg" style="width:30px" alt=""/>
                 <?php echo $id; ?> on WU
               </a>
@@ -145,7 +145,7 @@ if ($extralinks == 'yes')
     { ?>
             <li>
               <a href="https://weather.gladstonefamily.net/site/<?php echo $linkCWOPID; ?>" title="<?php echo $linkCWOPID; ?> on CWOP" target="_blank">
-                <img class="menuimg" src="img/arrow34iconlink.svg" alt=""/>
+                <img class="menuimg" src="img/arrowiconlink.svg" alt=""/>
                 <?php echo $linkCWOPID; ?> on CWOP
               </a>
             </li>
@@ -155,7 +155,7 @@ if ($extralinks == 'yes')
     { ?>
             <li>
               <a href="http://www.findu.com/cgi-bin/wxpage.cgi?call=<?php echo $linkFindUID; ?>&last=48" title="<?php echo $linkFindUID; ?> on Findu.com" target="_blank">
-                <img class="menuimg" src="img/arrow34iconlink.svg" alt=""/>
+                <img class="menuimg" src="img/arrowiconlink.svg" alt=""/>
                 <?php echo $linkFindUID; ?> on FindU.com
               </a>
             </li>
@@ -244,9 +244,9 @@ if ($extralinks == 'yes')
           <?php if (!empty($linkAmbientWeatherID))
     { ?>
             <li>
-              <a href="https://dashboard.ambientweather.net/devices/public/<?php echo $linkAmbientWeatherID; ?>" title="Ambient Weather" target= "_blank">
+              <a href="https://dashboard.ambientweather.net/devices/public/<?php echo $linkAmbientWeatherID; ?>" title="Ambient divum" target= "_blank">
                 <img class="menuimg" src="img/ambientweather.svg" alt=""/>
-                View on Ambient Weather
+                View on Ambient divum
               </a>
             </li>
           <?php
@@ -275,7 +275,7 @@ if ($extralinks == 'yes')
     { ?>
             <li>
               <a href="<?php echo $linkCustom1URL; ?>" title="<?php echo $linkCustom1Title; ?>" target="_blank">
-                <img class="menuimg" src="img/arrow34iconlink.svg" alt=""/>
+                <img class="menuimg" src="img/arrowiconlink.svg" alt=""/>
                 <?php echo $linkCustom1Title; ?>
               </a>
             </li>
@@ -285,7 +285,7 @@ if ($extralinks == 'yes')
     { ?>
             <li>
               <a href="<?php echo $linkCustom2URL; ?>" title="<?php echo $linkCustom2Title; ?>" target="_blank">
-                <img class="menuimg" src="img/arrow34iconlink.svg" alt=""/>
+                <img class="menuimg" src="img/arrowiconlink.svg" alt=""/>
                 <?php echo $linkCustom2Title; ?>
               </a>
             </li>
@@ -299,8 +299,8 @@ if ($extralinks == 'yes')
       <?php if ($weatherflowoption == "yes")
 { ?>
         <li>
-          <a href="https://tempestwx.com/map/<?php echo $lat . '/' . $lon . '/' . $weatherflowmapzoom; ?>" data-lity title='see your weather station on official weatherflow map'>
-            <weather34menumarkerblue></weather34menumarkerblue> Weatherflow Map
+          <a href="https://tempestwx.com/map/<?php echo $lat . '/' . $lon . '/' . $weatherflowmapzoom; ?>" data-lity title='see your divum station on official weatherflow map'>
+            <menumarkerblue></menumarkerblue> Weatherflow Map
           </a>
         </li>
       <?php
@@ -308,15 +308,15 @@ if ($extralinks == 'yes')
 if (!empty($webcamurl) && $webcamurl != ' ' && $webcamurl != 'Null' && $webcamurl != 'null')
 { ?>
         <li><!--webcam-->
-          <a href="cam.php" data-lity title="WEATHERSTATION WEBCAM"><weather34menumarkeryellow></weather34menumarkeryellow> Web Cam</a>
+          <a href="cam.php" data-lity title="WEATHERSTATION WEBCAM"><menumarkeryellow></menumarkeryellow> Web Cam</a>
         </li>
       <?php
 } ?>
       <li><!--contact info-->
-        <a href="bio.php" data-lity title="Weather Station Owner Contact Card Info"><weather34menumarkerorange></weather34menumarkerorange> Contact Card</a>
+        <a href="bio.php" data-lity title="Weather Station Owner Contact Card Info"><menumarkerorange></menumarkerorange> Contact Card</a>
       </li>
       <li><!--hardware info-->
-        <a href="stationinfo.php" data-lity title="Hardware Weather Station Hardware Info"><weather34menumarkerred></weather34menumarkerred> Hardware Info</a>
+        <a href="stationinfo.php" data-lity title="Hardware Weather Station Hardware Info"><menumarkerred></menumarkerred> Hardware Info</a>
       </li>
       <?php if (!empty($extraLinkTitle) && !empty($extraLinkURL) && !empty($extraLinkColor))
 { ?>
@@ -324,37 +324,37 @@ if (!empty($webcamurl) && $webcamurl != ' ' && $webcamurl != 'Null' && $webcamur
           <a href="<?php echo $extraLinkURL; ?>" title="<?php echo $extraLinkTitle; ?>" target="_blank">
             <?php if ($extraLinkColor == 'white')
     { ?>
-              <weather34menumarkerlight></weather34menumarkerlight>
+              <menumarkerlight></menumarkerlight>
             <?php
     }
     else if ($extraLinkColor == 'red')
     { ?>
-              <weather34menumarkerred></weather34menumarkerred>
+              <menumarkerred></menumarkerred>
             <?php
     }
     else if ($extraLinkColor == 'grey')
     { ?>
-              <weather34menumarkerbluegrey></weather34menumarkerbluegrey>
+              <menumarkerbluegrey></menumarkerbluegrey>
             <?php
     }
     else if ($extraLinkColor == 'green')
     { ?>
-              <weather34menumarkergreen></weather34menumarkergreen>
+              <menumarkergreen></menumarkergreen>
             <?php
     }
     else if ($extraLinkColor == 'yellow')
     { ?>
-              <weather34menumarkeryellow></weather34menumarkeryellow>
+              <menumarkeryellow></menumarkeryellow>
             <?php
     }
     else if ($extraLinkColor == 'blue')
     { ?>
-              <weather34menumarkerblue></weather34menumarkerblue>
+              <menumarkerblue></menumarkerblue>
             <?php
     }
     else
     { ?>
-              <weather34menumarkerorange></weather34menumarkerorange>
+              <menumarkerorange></menumarkerorange>
             <?php
     }
     echo $extraLinkTitle; ?>
@@ -395,28 +395,28 @@ if (!empty($webcamurl) && $webcamurl != ' ' && $webcamurl != 'Null' && $webcamur
       <?php // please do not remove this and if so no support is given and your domain will be blacklisted from support it is not much to ask //
  ?>
       <li>
-        <a href="https://www.chrisalemany.ca/2021/02/24/installing-the-weather34-skin-on-weewx-with-remote-web-server-2021-edition/" title="remote setup" target="_blank">
-          <weather34menumarkerbluegrey></weather34menumarkerbluegrey> Remote Setup Guide
+        <a href="https://www.chrisalemany.ca/2021/02/24/installing-the-divumwx-skin-on-weewx-with-remote-web-server-2021-edition/" title="remote setup" target="_blank">
+          <menumarkerbluegrey></menumarkerbluegrey> Remote Setup Guide
         </a>
       </li>
       <li>
         <a href="https://github.com/Millardiang/weewx-divumwx/" title="weewx-DivumWX on Github" target="_blank">
-          <weather34menumarkerbluegrey></weather34menumarkerbluegrey> Private Download weewx-DivumWX template
+          <menumarkerbluegrey></menumarkerbluegrey> Private Download weewx-DivumWX template
         </a>
       </li>
       <li>
-        <a href="https://steepleian.github.io/weewx-Weather34/" title="Web Services Setup Page" target="_blank">
-          <weather34menumarkerbluegrey></weather34menumarkerbluegrey> Web Services Setup Page
+        <a href="https://steepleian.github.io/weewx-divumwx/" title="Web Services Setup Page" target="_blank">
+          <menumarkerbluegrey></menumarkerbluegrey> Web Services Setup Page
         </a>
       </li>
       <li>
         <a href="mailto://steepleian@gmail.com" title="Email Steepleian for Support" target="_blank">
-          <weather34menumarkerbluegrey></weather34menumarkerbluegrey> Maintained by Ian Millard (Steepleian)
+          <menumarkerbluegrey></menumarkerbluegrey> Maintained by Ian Millard (Steepleian)
         </a>
       </li>
       <li>
-        <a href="https://weather34.com/homeweatherstation/" title="Weather34" target="_blank">
-          <weather34menumarkerbluegrey></weather34menumarkerbluegrey> Based on an idea by Weather34
+        <a href="https://divumwx.com/homeweatherstation/" title="divumwx" target="_blank">
+          <menumarkerbluegrey></menumarkerbluegrey> Based on an idea by divumwx
         </a>
       </li>
       <!-- USA WeatherFinder -->

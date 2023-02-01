@@ -21,7 +21,7 @@ html,body{font-size:13px;font-family: "weathertext2", Helvetica, Arial, sans-ser
 }
 
   
-.weather34darkbrowser {
+.divumwxdarkbrowser {
   position: relative;
   width: 97%;
   height: 30px;
@@ -34,7 +34,7 @@ html,body{font-size:13px;font-family: "weathertext2", Helvetica, Arial, sans-ser
   color: white;
 }
 
-.weather34darkbrowser[url]:after {
+.divumwxdarkbrowser[url]:after {
   content: attr(url);
   font-size: 14px;
   text-align: center;

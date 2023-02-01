@@ -8,8 +8,8 @@
 		<language>en-au</language>
 		<copyright>Copyright: (C) Copyright Commonwealth of Australia 2010, Bureau of Meteorology (ABN 92637 533532), see http://www.bom.gov.au/other/copyright.shtml for terms and conditions of reuse.</copyright>
 		<webMaster>webops@bom.gov.au (Help desk)</webMaster>
-		<pubDate>Wed, 01 Feb 2023 00:05:53 GMT</pubDate>
-		<lastBuildDate>Wed, 01 Feb 2023 00:05:53 GMT</lastBuildDate>
+		<pubDate>Wed, 01 Feb 2023 22:11:02 GMT</pubDate>
+		<lastBuildDate>Wed, 01 Feb 2023 22:11:02 GMT</lastBuildDate>
 		<generator>Australian Bureau of Meteorology</generator>
 		<ttl>10</ttl>
 		<image>
@@ -18,10 +18,17 @@
 			<link>http://www.bom.gov.au/fwo/IDZ00059.warnings_vic.xml</link>
 		</image>
 		<item>
-			<title>01/10:00 EDT Marine Wind Warning Summary for Victoria</title>
+			<title>02/05:10 EDT Marine Wind Warning Summary for Victoria</title>
 			<link>http://www.bom.gov.au/vic/warnings/marinewind.shtml</link>
-			<pubDate>Tue, 31 Jan 2023 23:00:13 GMT</pubDate>
+			<pubDate>Wed, 01 Feb 2023 18:10:14 GMT</pubDate>
 			<guid isPermaLink="false">http://www.bom.gov.au/vic/warnings/marinewind.shtml</guid>
+		</item>
+		<item>
+			<title>02/04:44 EDT Warning to Sheep Graziers
+for North Central, North East, South West, Central and West and South Gippsland forecast districts</title>
+			<link>http://www.bom.gov.au/vic/warnings/sheep.shtml</link>
+			<pubDate>Wed, 01 Feb 2023 17:44:57 GMT</pubDate>
+			<guid isPermaLink="false">http://www.bom.gov.au/vic/warnings/sheep.shtml</guid>
 		</item>
 		<item>
 			<title>01/09:14 EDT Flood Warning Summary for Victoria</title>

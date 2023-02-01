@@ -25,16 +25,16 @@
 <?php 
 
 //###################################################################################################################
-//	weewx-Weather34 Template maintained by Ian Millard (Steepleian)                                 				#
+//	weewx-divumwx Template maintained by Ian Millard (Steepleian)                                 				#
 //	                                                                                                				#
-//  Contains original legacy code (by agreement) created and developed by Brian Underdown (https://weather34.com)   # 
-//  for the (now superseeded) original Weather34 Template which is no longer developed or maintained by its creator              #
-//  © weather34.com original CSS/SVG/PHP 2015-2019                                                                  #
+//  Contains original legacy code (by agreement) created and developed by Brian Underdown (https://divumwx.com)   # 
+//  for the (now superseeded) original divumwx Template which is no longer developed or maintained by its creator              #
+//  © divumwx.com original CSS/SVG/PHP 2015-2019                                                                  #
 // 	                                                                                                				#
 //  Contains original code by Ian Millard and collaborators															#
 //  © claydonsweather.org original CSS/SVG/PHP 2020-2021                                                            #
 // 	                                                                                                				#
-// 	Issues for weewx-Weather34 template should be addressed to https://github.com/steepleian/weewx-Weather34/issues #                                                                                              //
+// 	Issues for weewx-divumwx template should be addressed to https://github.com/steepleian/weewx-divumwx/issues #                                                                                              //
 // 	                                                                                                				#
 //###################################################################################################################
 
