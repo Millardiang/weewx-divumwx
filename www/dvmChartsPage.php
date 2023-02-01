@@ -126,7 +126,7 @@ $paddingtop = $percentage;
   margin: 0 auto;
   margin-left: 0px
 }
-.dvm-top-container {
+.weather2-container {
     -ms-text-size-adjust: 100%;
     -moz-font-smoothing: antialiased;
     -webkit-font-smoothing: antialiased;
@@ -139,7 +139,7 @@ $paddingtop = $percentage;
     background-color: 0;
     margin: 50px auto -20px;
 }
-  .dvm-container {
+  .weather-container {
     display: flex;
     list-style: none;
     width: 1280px;
@@ -148,7 +148,7 @@ $paddingtop = $percentage;
     margin: 2px auto;
     background: 0;
 }
-.dvm-item {
+.weather-item {
     width: 24.6%;
     height: 195px;
     border: 0;
@@ -165,7 +165,7 @@ $paddingtop = $percentage;
     padding: 0;
     background: rgba(33, 34, 39, .8);
 }
-.dvmfooter-container {
+.weatherfooter-container {
     display: flex;
     width: 1280px;
     margin: 0 auto 2px;
@@ -174,12 +174,12 @@ $paddingtop = $percentage;
 </head>
 <body>
 <!-- begin top layout for homeweatherstation template-->
-<div class="dvm-top-container">
-<div class="container dvmbox-toparea">
+<div class="weather2-container">
+<div class="container weather34box-toparea">
 
 
 <!-- position1 main clock--->
-  <div class="dvmbox clock">
+  <div class="weather34box clock">
     <div class="title"><svg viewBox='0 0 32 32' width=10 height=10 fill=none stroke=currentcolor stroke-linecap=round stroke-linejoin=round stroke-width=6.25%>
 <path d='M16 14 L16 23 M16 8 L16 10' />
 <circle cx=16 cy=16 r=14 />
@@ -189,7 +189,7 @@ $paddingtop = $percentage;
 
 
 <!-- position2--->
-  <div class="dvmbox indoor">
+  <div class="weather34box indoor">
     <div class="title"><svg viewBox='0 0 32 32' width=10 height=10 fill=none stroke=currentcolor stroke-linecap=round stroke-linejoin=round stroke-width=6.25%>
 <path d='M16 14 L16 23 M16 8 L16 10' />
 <circle cx=16 cy=16 r=14 />
@@ -199,14 +199,14 @@ $paddingtop = $percentage;
  
  
  <!-- position3--->
-  <div class="dvmbox alert">
+  <div class="weather34box alert">
     <div class="title"><svg viewBox="0 0 32 32" width=10 height=10 fill=none stroke=currentcolor stroke-linecap=round stroke-linejoin=round stroke-width=6.25%><path d="M16 14 L16 23 M16 8 L16 10" /><circle cx=16 cy=16 r=14 /></svg> <?php echo $position3title ;?> </div>
     <div class="value">
     <div id="position3"></div></div></div>
  
  
   <!-- position4--->   
-  <div class="dvmbox earthquake">
+  <div class="weather34box earthquake">
     <div class="title">
     <svg viewBox="0 0 32 32" width=10 height=10 fill=none stroke=currentcolor stroke-linecap=round stroke-linejoin=round stroke-width=6.25%><path d="M16 14 L16 23 M16 8 L16 10" /><circle cx=16 cy=16 r=14 /></svg> <?php echo $position4title ;?></div>
     <div class="value"><div id="position4"></div></div></div>
@@ -215,7 +215,7 @@ $paddingtop = $percentage;
   </div></div></div></div>
 <!--end position section for homeweatherstation template-->
 <!--Top Row 1 Box 1-->
-<div class="dvm-container"><div class="dvm-item"><div class="chartforecast">
+<div class="weather-container"><div class="weather-item"><div class="chartforecast">
 <!--<span <span class="yearpopup">  <a alt="temp charts" title="temp charts" href="pop_tempalmanac.php" data-lity ><?php echo $menucharticonpage ?> Temperature Almanac and Derived Charts</a></span>-->
   
 <!--<span class="yearpopup">  <a alt="yearly temperature" title="yearly temperature" href="<?php echo $chartsource; ?>/<?php echo $theme1; ?>-charts.html?chart='temperatureplot'&span='yearly'&temp='<?php echo $weather['temp_units']; ?>'&pressure='<?php echo $weather['barometer_units']; ?>'&wind='<?php echo $weather['wind_units']; ?>'&rain='<?php echo $weather['rain_units'] ?>" data-lity ><?php echo $menucharticonpage ?> Yearly</a></span>-->
@@ -232,7 +232,7 @@ $paddingtop = $percentage;
   <!--end Top Row 1 Box 1-->
   
   <!--Top Row 1 Box 2-->
-  <div class="dvm-container"><div class="dvm-item"><div class="chartforecast">
+  <div class="weather-container"><div class="weather-item"><div class="chartforecast">
 <!--<span <span class="yearpopup">  <a alt="temp charts" title="temp charts" href="pop_tempalmanac.php" data-lity ><?php echo $menucharticonpage ?> Temperature Almanac and Derived Charts</a></span>-->
   
 <!--<span class="yearpopup">  <a alt="yearly temperature" title="yearly temperature" href="<?php echo $chartsource; ?>/<?php echo $theme1; ?>-charts.html?chart='temperatureplot'&span='yearly'&temp='<?php echo $weather['temp_units']; ?>'&pressure='<?php echo $weather['barometer_units']; ?>'&wind='<?php echo $weather['wind_units']; ?>'&rain='<?php echo $weather['rain_units'] ?>" data-lity ><?php echo $menucharticonpage ?> Yearly</a></span>-->
@@ -248,7 +248,7 @@ $paddingtop = $percentage;
   <div id="temperature"></div><br></div></div>
   <!--end Top Row 1 Box 2-->
   <!--Bottom Row 3 Box 8-->
-  <div class="dvm-item">
+  <div class="weather-item">
   <div class="chartforecast">
   
   <!--Insert link to pop up module here-->  
@@ -269,7 +269,7 @@ $paddingtop = $percentage;
   </div>
    <!--end Bottom Row 3 Box 8-->
   <!--Top Row 1 Box 3-->
-  <div class="dvm-item">
+  <div class="weather-item">
    <div class="chartforecast">
       
       <!--Insert link to pop up module here--> 
@@ -290,8 +290,8 @@ $paddingtop = $percentage;
  </div>
   <!--end Top Row 1 Box 3-->
  <!--Middle Row 2 Box 4-->
-<div class="dvm-container">
-  <div class="dvm-item">
+<div class="weather-container">
+  <div class="weather-item">
   <div class="chartforecast">
   <!--Insert link to pop up module here-->
    <a href="https://www.windy.com/?clouds,<?php echo $lat ;?>,<?php echo $lon ;?>,8" data-lity>
@@ -310,7 +310,7 @@ $paddingtop = $percentage;
       </div>
       <!--end Middle Row 2 Box 4-->
    <!--Bottom Row 3 Box 8-->
-  <div class="dvm-item">
+  <div class="weather-item">
   <div class="chartforecast">
   
   <!--Insert link to pop up module here-->  
@@ -331,7 +331,7 @@ $paddingtop = $percentage;
   </div>
    <!--end Bottom Row 3 Box 8-->   
        <!--Middle Row 2 Box 5-->
-  <div class="dvm-item">
+  <div class="weather-item">
    <div class="chartforecast">
    
    <!--Insert link to pop up module here-->
@@ -353,7 +353,7 @@ $paddingtop = $percentage;
   <!--end Middle Row 2 Box 5-->
   
        <!--Middle Row 2 Box 6-->
-  <div class="dvm-item">
+  <div class="weather-item">
   <div class="chartforecast">
   
   <!--Insert link to pop up module here-->
@@ -376,8 +376,8 @@ $paddingtop = $percentage;
          </div></div>
     <!--end Middle Row 2 Box 6-->  
  <!--Middle Row 2 Box 4-->
-<div class="dvm-container">
-  <div class="dvm-item">
+<div class="weather-container">
+  <div class="weather-item">
   <div class="chartforecast">
   <!--Insert link to pop up module here-->
    <a href="https://www.windy.com/?clouds,<?php echo $lat ;?>,<?php echo $lon ;?>,8" data-lity>
@@ -396,7 +396,7 @@ $paddingtop = $percentage;
       </div>
       <!--end Middle Row 2 Box 4-->
    <!--Bottom Row 3 Box 8-->
-  <div class="dvm-item">
+  <div class="weather-item">
   <div class="chartforecast">
   
   <!--Insert link to pop up module here-->  
@@ -417,7 +417,7 @@ $paddingtop = $percentage;
   </div>
    <!--end Bottom Row 3 Box 8-->   
        <!--Middle Row 2 Box 5-->
-  <div class="dvm-item">
+  <div class="weather-item">
    <div class="chartforecast">
    
    <!--Insert link to pop up module here-->
@@ -439,7 +439,7 @@ $paddingtop = $percentage;
   <!--end Middle Row 2 Box 5-->
   
        <!--Middle Row 2 Box 6-->
-  <div class="dvm-item">
+  <div class="weather-item">
   <div class="chartforecast">
   
   <!--Insert link to pop up module here-->
@@ -463,8 +463,8 @@ $paddingtop = $percentage;
     <!--end Middle Row 2 Box 6-->     
      
  <!--Bottom Row 3 Box 7-->
-<div class="dvm-container">
-  <div class="dvm-item">
+<div class="weather-container">
+  <div class="weather-item">
   <div class="chartforecast">
   
   <!--Insert link to pop up module here-->
@@ -487,7 +487,7 @@ $paddingtop = $percentage;
      <!--end Bottom Row 3 Box 7--> 
      
   <!--Bottom Row 3 Box 8-->
-  <div class="dvm-item">
+  <div class="weather-item">
   <div class="chartforecast">
   
   <!--Insert link to pop up module here-->  
@@ -508,7 +508,7 @@ $paddingtop = $percentage;
   </div>
    <!--end Bottom Row 3 Box 8-->
   <!--Bottom Row 3 Box 8-->
-  <div class="dvm-item">
+  <div class="weather-item">
   <div class="chartforecast">
   
   <!--Insert link to pop up module here-->  
@@ -529,7 +529,7 @@ $paddingtop = $percentage;
   </div>
    <!--end Bottom Row 3 Box 8--> 
   <!--Bottom Row 3 Box 9 last one-->
-  <div class="dvm-item">
+  <div class="weather-item">
   <div class="chartforecast">
   
   <!--Insert link to pop up module here-->
@@ -552,7 +552,7 @@ $paddingtop = $percentage;
   </div>
  <!--end outdoor data for homeweatherstation template-->
   <!--footer area for homeweatherstation template warning don't mess with this below this line unless you really know what you are doing-->
-<div class=dvmfooter-container><div class=dvmfooter-item> 
+<div class=weatherfooter-container><div class=weatherfooter-item> 
 <div class=hardwarelogo1>
 <a href="http://weewx.com" alt="http://weewx.com" title="http://weewx.com">
   <?php
