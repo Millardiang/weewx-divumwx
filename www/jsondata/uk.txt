@@ -6,7 +6,7 @@
         <description>Weather warnings of severe and extreme weather from the Met Office</description>
         <language>en-gb</language>
         <copyright>(c) Crown copyright</copyright>
-        <pubDate>Tue, 10 Jan 2023 23:29:31 GMT</pubDate>
+        <pubDate>Wed, 01 Feb 2023 00:06:31 GMT</pubDate>
         <dc:creator>webteam@metoffice.gov.uk</dc:creator>
     </channel>
 </rss>

@@ -1,6 +1,6 @@
 <?php 
 include('dvmCombinedData.php');
-include('userSettings.php');
+//include('userSettings.php');
 header('Content-type: text/html; charset=utf-8');
 ?>
     <div class="chartforecast2">

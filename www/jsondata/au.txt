@@ -8,8 +8,8 @@
 		<language>en-au</language>
 		<copyright>Copyright: (C) Copyright Commonwealth of Australia 2010, Bureau of Meteorology (ABN 92637 533532), see http://www.bom.gov.au/other/copyright.shtml for terms and conditions of reuse.</copyright>
 		<webMaster>webops@bom.gov.au (Help desk)</webMaster>
-		<pubDate>Tue, 10 Jan 2023 23:30:30 GMT</pubDate>
-		<lastBuildDate>Tue, 10 Jan 2023 23:30:30 GMT</lastBuildDate>
+		<pubDate>Wed, 01 Feb 2023 00:05:53 GMT</pubDate>
+		<lastBuildDate>Wed, 01 Feb 2023 00:05:53 GMT</lastBuildDate>
 		<generator>Australian Bureau of Meteorology</generator>
 		<ttl>10</ttl>
 		<image>
@@ -18,27 +18,15 @@
 			<link>http://www.bom.gov.au/fwo/IDZ00059.warnings_vic.xml</link>
 		</image>
 		<item>
-			<title>09/13:48 EDT Minor to Moderate Flood Warning for the Murray River</title>
-			<link>http://www.bom.gov.au/nsw/warnings/flood/murrayriver.shtml</link>
-			<pubDate>Mon, 09 Jan 2023 02:48:00 GMT</pubDate>
-			<guid isPermaLink="false">http://www.bom.gov.au/nsw/warnings/flood/murrayriver.shtml</guid>
-		</item>
-		<item>
-			<title>11/10:00 EDT Marine Wind Warning Summary for Victoria</title>
+			<title>01/10:00 EDT Marine Wind Warning Summary for Victoria</title>
 			<link>http://www.bom.gov.au/vic/warnings/marinewind.shtml</link>
-			<pubDate>Tue, 10 Jan 2023 23:00:14 GMT</pubDate>
+			<pubDate>Tue, 31 Jan 2023 23:00:13 GMT</pubDate>
 			<guid isPermaLink="false">http://www.bom.gov.au/vic/warnings/marinewind.shtml</guid>
 		</item>
 		<item>
-			<title>10/15:06 EDT Heatwave Warning (VIC)</title>
-			<link>http://www.bom.gov.au/vic/warnings/heatwave.shtml</link>
-			<pubDate>Tue, 10 Jan 2023 04:06:14 GMT</pubDate>
-			<guid isPermaLink="false">http://www.bom.gov.au/vic/warnings/heatwave.shtml</guid>
-		</item>
-		<item>
-			<title>09/10:13 EDT Flood Warning Summary for Victoria</title>
+			<title>01/09:14 EDT Flood Warning Summary for Victoria</title>
 			<link>http://www.bom.gov.au/vic/warnings/flood/summary.shtml</link>
-			<pubDate>Sun, 08 Jan 2023 23:13:24 GMT</pubDate>
+			<pubDate>Tue, 31 Jan 2023 22:14:08 GMT</pubDate>
 			<guid isPermaLink="false">http://www.bom.gov.au/vic/warnings/flood/summary.shtml</guid>
 		</item>
 	</channel>

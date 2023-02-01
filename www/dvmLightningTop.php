@@ -51,7 +51,7 @@ if ($lightning["source"] == "Boltek") {
 
 </style>
 
-<script src="js/d3.v3.min.js"></script>
+<script src="js/d3.min.js"></script>
 
       <div class="title"><?php echo $info;?><?php echo $lang['lightningTop'];?></div>
       
@@ -391,7 +391,7 @@ if ($lightning["source"] == "Boltek") {
 				.text(Last_detected);
 				
 	svg.append("text") // Month
-             	.attr("x", 190)
+             	.attr("x", 194)
             	.attr("y", 22)
             	.style("fill", "#ff964f")
             	.style("font-family", "Helvetica")
@@ -453,7 +453,7 @@ if ($lightning["source"] == "Boltek") {
 				.text(Last_detected);
 				
 	svg.append("text") // Month
-             	.attr("x", 190)
+             	.attr("x", 194)
             	.attr("y", 28)
             	.style("fill", "#ff964f")
             	.style("font-family", "Helvetica")
@@ -484,4 +484,3 @@ if ($lightning["source"] == "Boltek") {
 	
 	}
 </script>
-

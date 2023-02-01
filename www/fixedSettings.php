@@ -79,6 +79,7 @@ $p13Refresh = 600; // 10 minutes        Last Postion refresh (if not webcam)
 $moonphaseRefresh = 600; // 10 minutes
 $eqRefresh = 600; // 10 minutes
 $moonRefresh = 3600;
+$aqiRefresh = 60;
 $forecastRefresh = 900; // 15 minutes
 $notificationcenterRefresh = 300; // 5 minutes set refresh time for notification of earthquakes default 5 minutes
 $wuupdate = 1800; // 30 minutes
@@ -113,7 +114,7 @@ $chartsource = "dvmhighcharts";
 $creditsURL = ""; // for chart pages only
 $credits = "Data Supplied via Weather Underground"; // for chart pages only
 $templateinfo = ""; // template information page
-$templateversion = "DVM-<maxblue>Alpha build 0.3.7</maxblue>";
+$templateversion = "DVM-<maxblue>Alpha build 0.3.8</maxblue>";
 
 $software = "WeeWX <span>Hardware</span> Users";
 $designedfor = "<br>For WeeWX Users";

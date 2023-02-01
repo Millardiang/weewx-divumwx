@@ -1,4 +1,7 @@
 <?php
+
+$units = "metric";
+
 $themelayout = "extra_row"; //extra_row, extra_col, extra_row_col, tablet
 $TZ = "Europe/London";
 $theme = isset($theme) ? $theme : "dark";
@@ -15,23 +18,22 @@ $airqual["zone"] = "uk"; //uk, us, ei, ci, au, (= UK DAQI, US EPS, Europe EAQI, 
 $airqual["source"] = "weewx";  //purple, weewx, sds
 $lightning["source"] = '0'; // use 'Boltek' or '0'
 $position2   = "dvmAirqualityTop.php"; 
-$position3   = "dvmLightningTop.php";
-$position3title   = "Weather <ored> Outlook"; 
+$position3   = "dvmLightningTop.php"; 
 $position5   = "dvmTemperatureModule.php";
 $position6   = "dvmForecastModule.php";
 $position7   = "dvmCurrentModule.php";
 $position8   = "dvmWindModule.php";
-$position9   = "dvmBarometerModule.php";
-$position10    = "dvmSolarDialModule.php";
-$position11   = "dvmRainfallModule.php";
-$position12   = "dvmSolarUvLuxModule.php";
-$position13   = "dvmLightningModule.php";
+$position10   = "dvmBarometerModule.php";
+$position12   = "dvmSolarDialModule.php";
+$position9   = "dvmRainfallModule.php";
+$position16   = "dvmSolarUvLuxModule.php";
+$position13   = "dvmMoonPhaseModule.php";
 $position14   = "dvmAirqualityModule.php";
 $position15   = "dvmIndoorTemperatureModule.php";
-$position16   = "dvmEarthDaylightModule.php";
-$position17   = "";
-$position18   = "";
-$position19   = "";
+$position11  = "dvmEarthDaylightModule.php";
+$position17   = "dvmEarthquakeModule.php";
+$position18   = "dvmWebcamModule.php";
+$position19   = "dvmLightningModule.php";
 $position20   = "";
 $webcamurl   = "";
 $videoWeatherCamURL  = "";
