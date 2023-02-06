@@ -139,7 +139,39 @@ if ($wind["speed_bft"] == 0) {
   margin-top: -31px;
   margin-left: 0px;
 }
-</style>
+.wrap {
+  position: relative;
+  margin-top: -2px;
+  margin-right: 0px;
+}
+.moduletitle2 {
+  position: relative;
+  top: -20px;
+  font-size: .8em;
+  float: none;
+}
+.chartforecast2 {
+  position: absolute;
+  font-family: arial, system;
+  z-index: 20;
+  padding-top: 1px;
+  margin-left: 0;
+  font-size: .67em;
+  color: silver;
+  margin-top: 159px;
+  width: 300px;
+  padding-left: 10px;
+  text-align: left;
+}
+.chartforecast2:hover {
+  color: #90b12a;
+}
+.daylightmoduleposition2 {
+  position: relative;
+  left: 5px;
+  margin-top: 0px;
+}
+</style>    
 <!DOCTYPE html>
 <html>
 <div class="compass1">
