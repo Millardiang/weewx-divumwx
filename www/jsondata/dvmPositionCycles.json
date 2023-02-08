@@ -11,7 +11,7 @@
 "dvmAirqualityTop.php":{"cycle": "60000"},
 "dvmLightningTop.php":{"cycle": "60000"},
 "dvmMoonPhaseModule.php":{"cycle": "3600000"},
-"dvmRainfalMonthYearTop.php":{"cycle": "3600000"},
+"dvmRainfallMonthYearTop.php":{"cycle": "3600000"},
 "dvmRainfallModule.php":{"cycle": "60000"},
 "dvmSolarDialModule.php":{"cycle": "60000"},
 "dvmSolarUvLuxModule.php":{"cycle": "60000"},
