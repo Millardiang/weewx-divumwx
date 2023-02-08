@@ -4,7 +4,7 @@
 Language Translation File for HOMEWEATHERSTATION Template
 Language: German
 Translated by: Stefan Griessner
-Developed By: Lightmaster/Brian Underdown/Erik M Madsen
+Developed By: Lightmaster//Erik M Madsen
 October/November 2016
 Revised: 2019
 -----------------

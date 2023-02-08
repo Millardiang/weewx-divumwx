@@ -1,24 +1,9 @@
 <?php
-//###################################################################################################################
-//	weewx-divumwx Template maintained by Ian Millard (Steepleian)                                 				#
-//	                                                                                                				#
-//                #
-//  © divumwx.com original CSS/SVG/PHP 2015-2019                                                                  #
-// 	                                                                                                				#
-//  Contains original code by Ian Millard and collaborators															#
-//  © claydonsweather.org.uk original CSS/SVG/PHP 2020-2021                                                         #   
-// 	                                                                                                				#
-// 	Issues for weewx-divumwx template should be addressed to https://github.com/steepleian/weewx-divumwx/issues #                                                                                              
-// 	                                                                                                				#
-//###################################################################################################################
 
 if (!file_exists("userSettings.php")) { 
 copy("initial_userSettings.php", "userSettings.php");}
 include_once ('dvmCombinedData.php');
-include_once ('common.php');
 include_once ('webserver_ip_address.php');
-include ('userSettings.php');
-include ('fixedSettings.php');
 date_default_timezone_set($TZ);
 header('Content-type: text/html; charset=utf-8');
 error_reporting(0);
@@ -32,9 +17,9 @@ error_reporting(0);
   <title><?php echo $stationlocation;?> Weather Station</title>
   <!--Google / Search Engine Tags -->
   <meta itemprop="image" content="img/divumMeta-1.png">
-  <meta itemprop="name" content="Home divum Station <?php echo $stationlocation;?>">
-  <meta content="Home divum station providing current divum conditions for <?php echo $stationlocation;?>" name="description">
-  <meta itemprop="description" content="Home divum station providing current divum conditions for <?php echo $stationlocation;?>">
+  <meta itemprop="name" content="Private Weather Station <?php echo $stationlocation;?>">
+  <meta content="Home weather station providing current weather conditions for <?php echo $stationlocation;?>" name="description">
+  <meta itemprop="description" content="Private weather station providing current weather conditions for <?php echo $stationlocation;?>">
   <meta content="DivumWX" name="author">
   <meta content="place" property="og:type">
   <meta content="INDEX,FOLLOW" name="robots">
@@ -185,15 +170,38 @@ echo '<a href="https://https://claydonsweather.org.uk/" title="https://claydonsw
       &nbsp;<?php echo $info;?>&nbsp;(<value><?php echo $templateversion;?></value>)&nbsp;<?php echo "WeeWX";?>-(<value>
         <maxred><?php echo $divum["swversion"];?>
       </value>)&nbsp;<?php echo $info . "&nbsp;" . $weatherhardware;?></div>
-    <div class="footertext"><a href="https://github.com/steepleian/weewx-Weather34"><?php echo $github;?>&nbsp; WeeWX Version Repository at https://github.com/steepleian/weewx-Weather34 &nbsp;<img src="img/flags/<?php echo $flag;?>.svg" width="20px"></a></div>
+    <div class="footertext"><a href="https://github.com/steepleian/weewx-divumwx"><?php echo $github;?>&nbsp; WeeWX Version Repository at https://github.com/steepleian/weewx-divumwx &nbsp;<img src="img/flags/<?php echo $flag;?>.svg" width="20px"></a></div>
     <div class="footertext">
       <a href="https://www.aerisweather.com/"><img src="img/aerisweather-attribution-h-<?php echo $theme;?>.png" width="75px"></a></br><a href="https://developer.yr.no/featured-products/forecast/">&nbsp; &nbsp; Meteogram Data by <img src="img/yr.svg" width="14px"></a></br><a href="https://bas.dev/work/meteocons">&nbsp; &nbsp; Animated Icons by <img src="img/bm.svg" width="14px"></a>
     </div>
   </div>
 </div>
+<div class="menuadmin">
+  
+  <!-- Top Bar -->
+  <header class="menuadmin__header">
+    <div class="menutoolbar">
+      <div class="menutoolbar__left">
+        <button class="menubutton menubutton--primary"></button>
+      </div>
+      <div class="menutoolbar__center">
+        <button class="menubutton menubutton--primary">
+          <menutoptitle><?php echo strtoupper($stationlocation); ?>&nbsp; WEATHER STATION</menutoptitle>
+        </button>
+      </div>
+      <div class="menutoolbar__right">
+        <menuuptime>
+          <?php echo "Server " . (shell_exec('uptime -p')); ?>
+        </menuuptime>
 
+            <a href="dvmIndexDashboard.php" title="select dashboard mode"><topbarimperial>D</topbarimperial></a>
+
+      </div>
+    </div>
+  </header>
 <?php 
 include_once ('dvmUpdater.php');
-include_once ('dvmMenuTablet.php');
+include_once ('dvmSideMenu.php');
 ?>
+
 </html>

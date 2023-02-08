@@ -1,13 +1,5 @@
 <?php
-//###################################################################################################################
-//	weewx-divumwx Template maintained by Ian Millard (Steepleian)                                 				#
-//	                                                                                                				#
-//  Contains original code by Ian Millard and collaborators															#
-//  © claydonsweather.org.uk original CSS/SVG/PHP 2020-2021                                                         #
-// 	                                                                                                				#
-// 	Issues for weewx-divumwx template should be addressed to https://github.com/steepleian/weewx-divumwx/issues #                                                                                              #
-// 	                                                                                                				#
-//###################################################################################################################
+
 
 include('dvmCombinedData.php');error_reporting(0);
 if ($theme === "dark")
@@ -28,7 +20,7 @@ else if ($theme === "light")
   <?php if($theme==="dark"){$text1="silver";}
 else if($theme==="light"){$text1="black";}
 $forecastime = filemtime ('inc_history.html');?>
-<div class="divumwxdarkbrowser" style="color:<?php echo $text1 ?>;" url="divum Statistics for <?php echo $stationName ?>
+<div class="divumwxdarkbrowser" style="color:<?php echo $text1 ?>;" url="Weather Statistics for <?php echo $stationName ?>
                                          <?php echo '&nbsp;';echo "Updated &nbsp;".date( $timeFormatShort, $forecastime);?>"></div>  
  
  

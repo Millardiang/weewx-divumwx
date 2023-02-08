@@ -1,5 +1,5 @@
 <?php 
-//original divumwx script original css/svg/php by divumwx 2015-2019 clearly marked as original by divumwx//
+
 include('dvmCombinedData.php');
 $heatindexwu='<svg "divumwx heatindex icon" width="10px" height="10px" viewBox="0 0 250 250" version="3.4.2019" >
 <path fill="#ff832f" stroke="#ff832f" stroke-width="0.09375" opacity="1.00" d=" M 94.24 33.23 C 106.10 23.71 121.88 18.18 137.10 20.91 C 150.77 23.09 162.89 30.83 172.86 40.14 C 185.30 51.88 198.09 63.70 213.46 71.52 C 222.73 76.23 233.65 79.13 243.92 76.10 C 245.97 75.67 248.52 74.29 250.00 76.59 L 250.00 77.41 C 243.65 83.99 235.05 88.09 226.37 90.62 C 211.92 94.57 196.20 91.32 183.71 83.32 C 173.86 77.45 166.16 68.84 157.60 61.36 C 148.96 53.84 139.88 46.65 129.66 41.38 C 120.64 36.87 110.14 33.45 100.05 36.12 C 97.82 36.48 95.53 37.70 93.28 36.81 C 92.94 35.46 92.75 33.94 94.24 33.23 Z" /><path fill="#ff832f" stroke="#ff832f" stroke-width="0.09375" opacity="1.00" d=" M 40.96 70.24 C 55.35 59.16 73.48 51.97 91.86 53.82 C 112.91 55.25 131.31 67.49 146.46 81.37 C 160.43 94.60 174.85 107.67 191.64 117.27 C 205.48 125.28 221.84 130.62 237.92 127.34 C 240.94 127.12 244.23 125.18 247.05 127.08 C 247.03 127.74 246.99 129.04 246.97 129.70 C 232.18 142.37 212.89 151.02 193.10 149.31 C 176.62 148.37 161.34 140.68 148.46 130.76 C 141.24 125.29 134.74 118.98 128.15 112.80 C 113.51 99.62 97.87 86.88 79.42 79.47 C 68.23 74.90 55.71 73.38 43.88 76.15 C 41.67 76.37 38.79 77.88 37.14 75.68 C 36.36 73.01 39.31 71.67 40.96 70.24 Z" /><path fill="#ff832f" stroke="#ff832f" stroke-width="0.09375" opacity="1.00" d=" M 3.50 118.53 C 15.56 108.44 30.33 100.94 46.17 99.59 C 64.81 97.72 83.26 104.85 98.11 115.75 C 106.84 121.93 114.50 129.44 122.30 136.71 C 134.76 147.91 147.93 158.61 162.99 166.12 C 173.19 171.17 184.49 174.68 195.98 174.06 C 201.25 173.92 206.34 172.21 211.61 171.97 C 212.00 172.54 212.79 173.68 213.18 174.25 C 211.39 177.16 208.29 178.78 205.59 180.71 C 195.79 187.36 184.84 192.67 173.06 194.55 C 161.43 196.13 149.37 194.93 138.42 190.57 C 122.59 184.47 109.28 173.47 97.23 161.77 C 84.46 149.94 71.03 138.53 55.65 130.21 C 44.46 124.18 31.89 119.80 19.01 120.66 C 14.33 120.76 9.80 122.01 5.19 122.66 C 3.05 123.04 1.43 119.77 3.50 118.53 Z" /><path fill="#ff832f" stroke="#ff832f" stroke-width="0.09375" opacity="1.00" d=" M 26.44 157.60 C 40.14 154.39 54.65 158.24 66.35 165.64 C 77.14 172.14 85.34 181.89 94.99 189.83 C 106.04 199.15 118.02 208.17 132.13 212.13 C 139.32 214.27 147.04 213.87 154.14 211.59 C 156.28 210.49 158.15 213.79 156.18 215.09 C 147.11 222.60 135.83 227.63 124.02 228.51 C 106.54 229.76 90.07 220.91 77.61 209.29 C 63.90 196.42 49.84 183.15 32.41 175.48 C 23.21 171.33 12.55 170.13 2.91 173.51 C 1.29 174.56 -1.18 171.20 0.84 170.21 C 8.51 164.54 17.09 159.79 26.44 157.60 Z" /></svg>';
@@ -59,9 +59,9 @@ else if($temp["indoor_trend"]<0)echo $windchillwu;
 else if($temp["indoor_trend"] ==0)echo $airqualitybreeze; 
 ?> </div>
 <?php 
-if($temp["indoor_trend"] >0)echo "<div class='weather34indoortrendup'>",number_format($temp["indoor_trend"],1).'&deg; '.$risingsymbol;
-else if($temp["indoor_trend"] <0)echo "<div class='weather34indoortrenddown'>", number_format($temp["indoor_trend"],1).'&deg;'.$fallingsymbol;
-else if($temp["indoor_trend"] ==0)echo "<div class='weather34indoortrendsteady'>Steady"; 
+if($temp["indoor_trend"] >0)echo "<div class='divumwxindoortrendup'>",number_format($temp["indoor_trend"],1).'&deg; '.$risingsymbol;
+else if($temp["indoor_trend"] <0)echo "<div class='divumwxindoortrenddown'>", number_format($temp["indoor_trend"],1).'&deg;'.$fallingsymbol;
+else if($temp["indoor_trend"] ==0)echo "<div class='divumwxindoortrendsteady'>Steady"; 
 ?></div></div>
 </div>
    
@@ -98,9 +98,9 @@ else if($humid["indoors_ now"] >35)echo $humiditybreeze;
 else if($humid["indoors_ now"] <35)echo $heatindexwu;
 ?></div>
 <?php 
-if($humid["indoors_ trend"] >0)echo "<div class='weather34indoortrendup'>",number_format($humid["indoors_ trend"],0)."<sup>%</sup>".$risingsymbol;
-else if($humid["indoors_ trend"] <0)echo "<div class='weather34indoortrenddown'>", number_format($humid["indoors_ trend"],0)."<sup>%</sup>".$fallingsymbol;
-else if($humid["indoors_ trend"] ==0)echo "<div class='weather34indoortrendsteady'>Steady"; 
+if($humid["indoors_ trend"] >0)echo "<div class='divumwxindoortrendup'>",number_format($humid["indoors_ trend"],0)."<sup>%</sup>".$risingsymbol;
+else if($humid["indoors_ trend"] <0)echo "<div class='divumwxindoortrenddown'>", number_format($humid["indoors_ trend"],0)."<sup>%</sup>".$fallingsymbol;
+else if($humid["indoors_ trend"] ==0)echo "<div class='divumwxindoortrendsteady'>Steady"; 
 ?></div></div>
 </div></div></div>
 
@@ -143,14 +143,14 @@ else if ($temp["indoor_now_feels"] >=0) echo $windchillwu;
 ?></div>
 
 <?php
-if($temp["units"] =='F' && $temp["indoor_now_feels"] >78.8)echo "<div class='weather34indoorhot'>Hot";   
-else if($temp["units"] =='F' &&  $temp["indoor_now_feels"] >64.4)echo "<div class='weather34indoorwarm'>Warm";
-else if($temp["units"] =='F' &&  $temp["indoor_now_feels"] <53.6)echo "<div class='weather34indoorcold'>Cold";
-else if($temp["units"] =='F' && $temp["indoor_now_feels"] <=64.4)echo "<div class='weather34indoormild'>Mild";
-else if($temp["indoor_now_feels"] >26)echo "<div class='weather34indoorhot'>Hot";   
-else if($temp["indoor_now_feels"] >18)echo "<div class='weather34indoorwarm'>Warm";
-else if($temp["indoor_now_feels"] <12)echo "<div class='weather34indoorcold'>Cold";
-else if($temp["indoor_now_feels"] <=18)echo "<div class='weather34indoormild'>Mild";
+if($temp["units"] =='F' && $temp["indoor_now_feels"] >78.8)echo "<div class='divumwxindoorhot'>Hot";   
+else if($temp["units"] =='F' &&  $temp["indoor_now_feels"] >64.4)echo "<div class='divumwxindoorwarm'>Warm";
+else if($temp["units"] =='F' &&  $temp["indoor_now_feels"] <53.6)echo "<div class='divumwxindoorcold'>Cold";
+else if($temp["units"] =='F' && $temp["indoor_now_feels"] <=64.4)echo "<div class='divumwxindoormild'>Mild";
+else if($temp["indoor_now_feels"] >26)echo "<div class='divumwxindoorhot'>Hot";   
+else if($temp["indoor_now_feels"] >18)echo "<div class='divumwxindoorwarm'>Warm";
+else if($temp["indoor_now_feels"] <12)echo "<div class='divumwxindoorcold'>Cold";
+else if($temp["indoor_now_feels"] <=18)echo "<div class='divumwxindoormild'>Mild";
 ?></div></div>
 </div></div>
 </article>
@@ -186,7 +186,7 @@ else if ($air["current.pm2_5"] >=0) echo "#90b12a";
 </svg>    
 <div class=indoorsvgnestvalue> <?php echo $air["current.pm2_5"];?></div>
 <div class="airqicon"><?php echo $airqualitybreeze;?></div>
-<div class="weather34indoorpm">PM 2.5</div></div>
+<div class="divumwxindoorpm">PM 2.5</div></div>
 </div></div>
 </article> 
 <?php ;}?>
@@ -219,7 +219,7 @@ Long periods above <humblue>80%</humblue> can cause <br>
     <article>
   <div class=actualt>&copy; Info</div>  
   <div class="lotemp">
-  <?php echo $info?> Adapted by Steepleian for the WeeWX divumwx skin from the original CSS/SVG/PHP scripts by divumwx.com &copy; 2015-<?php echo date('Y');?>
+  
   <br><br>
      </div>
   </div></article> 

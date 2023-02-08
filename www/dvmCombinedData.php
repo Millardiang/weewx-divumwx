@@ -45,7 +45,7 @@ explode(" ", file_get_contents($livedata)));
     else {$EW = "West";}
 
     $elevation = $adata["info"]["altitude meters"];
-    $meteogramURL = $adata["info"]["metgramlink"];
+    $url = $adata["info"]["metgramlink"];
     $divum["datetime"] = $recordDate;
     $divum["date"] = date($dateFormat, $recordDate);
     $divum["time"] = date($timeFormat, $recordDate);
@@ -914,9 +914,8 @@ else
     $toKnots = 1;
 }
 
-$o = "Designed by divumwx.com";
 date_default_timezone_set($TZ);
-// meteor shower alternative by betejuice cumulus forum
+
 $meteor_default = "No Meteor";
 $meteor_events[] = array(
     "event_start" => mktime(0, 0, 0, 1, 3) ,
@@ -1085,7 +1084,7 @@ function convert_uptime($uptime)
 //  Why are these in here still? Check necessity and validitity of this area
 //
 //lunar and solar eclipse /meteor shpwers advisory 2018-2019-2020
-$eclipse_default = " <noalert>No Current divum <spanyellow><ored>Alerts " . $alert . "</ored></spanyellow></noalert>";
+$eclipse_default = " <noalert>No Current Weather <spanyellow><ored>Alerts " . $alert . "</ored></spanyellow></noalert>";
 //2 jul solar 2019
 $eclipse_events[] = array(
     "event_start" => mktime(0, 0, 0, 7, 2, 2019) ,
@@ -1146,9 +1145,7 @@ foreach ($eclipse_events as $eclipse_check)
         $eclipse_default = $eclipse_check["event_title"];
     }
 };
-//end lunar and solar eclipse /meteor shpwers advisory 2018-2019-2020
-// This is not used in Australia, where is it used?
-// firerisk based on cumulus forum thread http://sandaysoft.com/forum/viewtopic.php?f=14&t=2789&sid=77ffab8f6f2359e09e6c58d8b13a0c3c&start=30
+
 $firerisk = number_format((((110 - 1.373 * $divum["humidity"]) - 0.54 * (10.20 - $divum["temp"])) * (124 * pow(10, (-0.0142 * $divum["humidity"])))) / 60, 0);
 
 //wetbulb
@@ -1159,33 +1156,13 @@ $Tdc = (($Tc - (14.55 + 0.114 * $Tc) * (1 - (0.01 * $RH)) - pow((2.5 + 0.007 * $
 $E = (6.11 * pow(10, (7.5 * $Tdc / (237.7 + $Tdc))));
 $wetbulbcalc = (((0.00066 * $P) * $Tc) + ((4098 * $E) / pow(($Tdc + 237.7) , 2) * $Tdc)) / ((0.00066 * $P) + (4098 * $E) / pow(($Tdc + 237.7) , 2));
 $wetbulbx = number_format($wetbulbcalc, 1);
-// K-INDEX & SOLAR DATA FOR divumwx HOMEWEATHERSTATION TEMPLATE RADIO HAMS REJOICE :-) //
+// K-INDEX & SOLAR DATA
 $str = file_get_contents('jsondata/ki.txt');
 $json = array_reverse(json_decode($str, false));
 $kp = $json[1][1];
 $file = $_SERVER["SCRIPT_NAME"];
 $break = Explode('/', $file);
-$mod34file = $break[count($break) - 1];
+$moddvmfile = $break[count($break) - 1];
 
-//Can this be removed, it appears to be Metobridge specific
-//Convert Start times for Pro and Nano SD, Other MBs unforunately don't provide this data
-if (is_numeric($weewxapi[186]) && $weewxapi[186] != '--')
-{
-    $divum['tempStartTime'] = date('M jS Y', strtotime($weewxapi[186]));
-    $divum['windStartTime'] = date('M jS Y', strtotime($weewxapi[187]));
-    $divum['pressStartTime'] = date('M jS Y', strtotime($weewxapi[188]));
-    $divum['rainStartSec'] = strtotime($weewxapi[189]);
-    $divum['rainStartTime'] = date('M jS Y', $divum['rainStartSec']);
-}
-else
-{
-    $divum['tempStartTime'] = 'All Time';
-    $divum['windStartTime'] = 'All Time';
-    $divum['pressStartTime'] = 'All Time';
-    $divum['rainStartTime'] = 'All Time';
-}
-
-$divum['consoleLowBattery'] = intval($weewxapi[171]); # Console battery, 0 when battery is good, 1 when battery is low
-$divum['stationLowBattery'] = intval($weewxapi[172]); # Station battery, 0 when battery is good, 1 when battery is low
 
 ?>

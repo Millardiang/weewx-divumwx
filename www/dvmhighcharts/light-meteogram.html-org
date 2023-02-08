@@ -564,7 +564,7 @@ if (!location.hash) {
 // for source code.
 $.ajax({
     dataType: 'json',
-    url: 'https://claydonsweather.org.uk/weewx/divumwx/w34highcharts/jsonp.php?url=' + location.hash.substr(1) + '&callback=?',
+    url: 'https://claydonsweather.org.uk/weewx/divumwx/dvmhighcharts/jsonp.php?url=' + location.hash.substr(1) + '&callback=?',
     success: function (xml) {
         window.meteogram = new Meteogram(xml, 'container');
     },

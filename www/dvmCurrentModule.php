@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<title>divumwx current conditions</title>
+<title>weather current conditions</title>
 <?php
-include('fixedSettings.php');
+//include('fixedSettings.php');
 include('dvmCombinedData.php');
 $iconset = "icon2";
 $cloud_region = explode("/", $TZ);
@@ -48,7 +48,7 @@ echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php ech
 
 
 <div class="updatedtimecurrent">
-<?php $forecastime=filemtime('jsondata/awc.txt');$weather34wuurl = file_get_contents("jsondata/awc.txt");if(filesize('jsondata/awc.txt')<10){echo $online;}
+<?php $forecastime=filemtime('jsondata/awc.txt');$divumwxwuurl = file_get_contents("jsondata/awc.txt");if(filesize('jsondata/awc.txt')<10){echo $online;}
 else echo $online,"";echo " ",	date($timeFormat,$forecastime);	?></div>
     
 
@@ -72,9 +72,9 @@ else if ($windunit =='km/h' || $windunit =='m/s' && $sky["cloud_base"]>=609){ech
 else if ($windunit =='km/h' || $windunit =='m/s' && $sky["cloud_base"]<609){echo "<div class=cloudconvertercircle2000>".$clouds."<tblue> ".$sky["cloud_base"]."</tblue><smalltempunit2> ".$distance."</tblue><smalltempunit2>" ;}}
 ?>
 </div></div>
-<div class="darkskyiconcurrent"><span1>
+<div class="aerisiconcurrent"><span1>
 <?php 
-//homeweatherstation divumwx current conditions using hardware values
+//current conditions using hardware values
 if ($windunit=='kts'){$windunit="kn";}       
 //rain-divumwx
 if($rain["rate"]>0 && $wind["speed_avg"]>15){echo "<img rel='prefetch' src='img/meteocons/umbrella-wind.svg' width='60px' height='55px' margin-bottom='15px' alt='divumwx windy rain icon'>";}
@@ -114,7 +114,7 @@ else echo "<img rel='prefetch' src='img/meteocons/overcast.svg' width='70px' hei
 
 ?>
 </div>
-<div class="darkskysummary"><span>
+<div class="aerissummary"><span>
 <?php echo '';
 if ($windunit=='kts'){$windunit="kn";}
 //rain-divumwx
@@ -163,9 +163,9 @@ else if($sky["cloud_cover"]<=100) {$sky["cloud_oktas"]="8 oktas";}
 
 ?>
 </span></div>
- <!-- divumwx generated Data--> 
-<div class="darkskynexthours" style="margin: 60px auto auto; margin-top: 55px; margin-left: 35px; text-align: center">
-<?php //divumwx average station data
+ <!-- weewx generated Data--> 
+<div class="aerisnexthours" style="margin: 60px auto auto; margin-top: 55px; margin-left: 35px; text-align: center">
+<?php //weewx average station data
 //echo "Average <oblue>Cloud Cover</oblue> last 5 minutes <ogreen>" .$sky["cloud_cover"]."</ogreen><valuetext>".$cloudcoverunit. "(".$sky["cloud_oktas"].")";
 
 if ($visibility!==0){echo "</br>Visibility <oorange>".$visibility."</oorange></br>";}

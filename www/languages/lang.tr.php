@@ -3,8 +3,8 @@
 -----------------
 Language Translation File for HOMEWEATHERSTATION Template
 Language: Turkish
-Translated by: Brian Underdown / Erim Mehmet Eren
-Developed By: Lightmaster/Brian Underdown/Erik M Madsen
+Translated by:  / Erim Mehmet Eren
+Developed By: Lightmaster//Erik M Madsen
 October/November 2016
 Revised: 2019
 -----------------

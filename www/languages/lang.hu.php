@@ -3,7 +3,7 @@
 -----------------
 Language Translation File for HOMEWEATHERSTATION Template
 Language: Hungarian
-Translated by: Developed By: Lightmaster/Brian Underdown/Erik M Madsen
+Translated by: Developed By: Lightmaster//Erik M Madsen
 October/November 2016
 Revised: 2019
 -----------------

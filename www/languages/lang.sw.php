@@ -4,7 +4,7 @@
 Language Translation File for HOMEWEATHERSTATION Template
 Language: Swedish
 Translated by : Mats Ahlklo, metzallo@gmail.com 2017-05-01
-Developed By: Lightmaster/Brian Underdown/Erik M Madsen
+Developed By: Lightmaster//Erik M Madsen
 January  2017
 Revised: 2019
 -----------------

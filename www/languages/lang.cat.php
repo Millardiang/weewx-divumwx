@@ -4,7 +4,7 @@
 Language Translation File for HOMEWEATHERSTATION Template
 Language: Catalan
 Translated by: Santgenismeteo & EA5ZF MeteoLaVall
-Developed By: Lightmaster/Brian Underdown/Erik M Madsen
+Developed By: Lightmaster//Erik M Madsen
 October/November 2016
 Revised: 2022
 -----------------

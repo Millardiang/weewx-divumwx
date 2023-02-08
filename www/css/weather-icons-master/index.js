@@ -6,7 +6,7 @@ const SVGOptimizer = require("svgo");
 const OPTIMIZED_ICONS = {};
 const ICONS_MAP = {
 	all: {},
-	darksky: {
+	aeris: {
 		"clear-day": "clear-day",
 		"clear-night": "clear-night",
 		"cloudy": "cloudy",

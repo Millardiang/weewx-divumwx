@@ -1,17 +1,6 @@
 <?php
-//###################################################################################################################
-//	weewx-divumwx Template maintained by Ian Millard (Steepleian)                                 				#
-//	                                                                                                				#
-//                #
-//  © divumwx.com original CSS/SVG/PHP 2015-2019                                                                  #
-// 	                                                                                                				#
-//  Contains original code by Ian Millard and collaborators															#
-//  © claydonsweather.org original CSS/SVG/PHP 2020-2021                                                            #
-// 	                                                                                                				#
-// 	Issues for weewx-divumwx template should be addressed to https://github.com/steepleian/weewx-divumwx/issues #                                                                                              #
-// 	                                                                                                				#
-//###################################################################################################################
-include_once ('fixedSettings.php');
+
+//include_once ('fixedSettings.php');
 include ('dvmCombinedData.php');
 $iconset = "icon2";
 if ($theme === "dark")
@@ -68,9 +57,9 @@ for ($k = 0;$k < 12;$k++)
     $forecastPrecipProb[$k] = $parsed_json['response'][0]['periods'][$k]['pop'];
     $forecastUV[$k] = $parsed_json['response'][0]['periods'][$k]['uvi'];
     $forecastsnow[$k] = $parsed_json['response'][0]['periods'][$k]['snowCM'];
-    $forecastsummary[$k] = $parsed_json['response'][0]['periods'][$k]['divum'];
+    $forecastsummary[$k] = $parsed_json['response'][0]['periods'][$k]['weather'];
     $forecastnight[$k] = $parsed_json['response'][0]['periods'][$k]['isDay'];
-    $forecastdesc[$k] = $parsed_json['response'][0]['periods'][$k]['divum'];
+    $forecastdesc[$k] = $parsed_json['response'][0]['periods'][$k]['weather'];
     $forecastheatindex[$k] = $parsed_json['response'][0]['periods'][$k]['avgFeelslikeC'];
     $forecasthumidity[$k] = $parsed_json['response'][0]['periods'][$k]['humidity'];
 
@@ -328,17 +317,15 @@ for ($k = 0;$k < 12;$k++)
  <!-- copyright needs to be kept please be ethical--->
   <article>
     <span style="font-size:9px;color:<?php echo $text1 ?>;">
-  <?php echo $knfo ?> CSS/SVG/PHP original scripts were developed by <a href="https://divumwx.com" title="divumwx.com" target="_blank" style="font-size:8px;">divumwx.com</a>  for use in the divumwx template &copy; 2015-<?php echo date('Y'); ?></span> <br>
-    </article>
+     </article>
   <article>
     <span style="font-size:9px;color:<?php echo $text1 ?>;">
-  <?php echo $knfo ?> CSS/SVG/PHP these scripts were adapted by <a href="https://claydonsweather.org.uk" title="Steepleian" target="_blank" style="font-size:8px;">Steepleian</a>  for use in the weewx-divumwx skin &copy; 2015-<?php echo date('Y'); ?></span> <br>
-    </article>
+     </article>
   <article>
     <span style="font-size:9px;color:<?php echo $text1 ?>;">
   <?php echo $knfo ?> Data for Forecast provided by <a href="https://www.aerisweather.com/develop/api/" title="AerisWeather API" target="_blank">AerisWeather</a></span></br>
     <span style="font-size:9px;color:<?php echo $text1 ?>;">
-  <?php echo $knfo ?> Icons for Forecast provided by <a href="https://github.com/nrkno/yr-divum-symbols/tree/master/dist/svg" title="YR" target="_blank">Yr.no</a></span>
+  <?php echo $knfo ?> Icons for Forecast provided by <a href="https://github.com/nrkno/yr-weather-symbols/tree/master/dist/svg" title="YR" target="_blank">Yr.no</a></span>
  
     </article>
 </main>

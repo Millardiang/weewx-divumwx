@@ -1,37 +1,4 @@
-<?php
-
-
-include ('userSettings.php');
-
-
-?>
-
-<div class="menuadmin">
-  
-  <!-- Top Bar -->
-  <header class="menuadmin__header">
-    <div class="menutoolbar">
-      <div class="menutoolbar__left">
-        <button class="menubutton menubutton--primary"></button>
-      </div>
-      <div class="menutoolbar__center">
-        <button class="menubutton menubutton--primary">
-          <menutoptitle><?php echo strtoupper($stationlocation); ?>&nbsp; WEATHER STATION</menutoptitle>
-        </button>
-      </div>
-      <div class="menutoolbar__right">
-        <menuuptime>
-          <?php echo "Server " . (shell_exec('uptime -p')); ?>
-        </menuuptime>
-
-            <a href="dvmIndexTablet.php" title="select tablet mode"><topbartablet>13</topbartablet></a>
-
-      </div>
-    </div>
-  </header>
-
-
-  <!-- Side Menu -->
+ <!-- Side Menu -->
   <input type="checkbox" class="sidebarmenu" id="sidebarmenu"/>
   <label for="sidebarmenu" class="sidebarIconToggle">
     <div class="menuspinner menucross part-1"></div>
@@ -134,7 +101,7 @@ if ($extralinks == 'yes')
             <li>
               <?php # if its linkWUNew is either yes or missing, use the new WU Site, else use the old site
          ?>
-              <a href="<?php echo ($linkWUNew == 'yes' || empty($linkWUNew) ? 'https://www.wunderground.com/dashboard/pws/' : 'https://www.wunderground.com/personal-divum-station/dashboard?id=') . $id; ?>" title="<?php echo $id; ?> on divum Underground" target="_blank">
+              <a href="<?php echo ($linkWUNew == 'yes' || empty($linkWUNew) ? 'https://www.wunderground.com/dashboard/pws/' : 'https://www.wunderground.com/personal-weather-station/dashboard?id=') . $id; ?>" title="<?php echo $id; ?> on weather Underground" target="_blank">
                 <img class="menuimg" src="img/wulogo.svg" style="width:30px" alt=""/>
                 <?php echo $id; ?> on WU
               </a>
@@ -244,9 +211,9 @@ if ($extralinks == 'yes')
           <?php if (!empty($linkAmbientWeatherID))
     { ?>
             <li>
-              <a href="https://dashboard.ambientweather.net/devices/public/<?php echo $linkAmbientWeatherID; ?>" title="Ambient divum" target= "_blank">
+              <a href="https://dashboard.ambientweather.net/devices/public/<?php echo $linkAmbientWeatherID; ?>" title="Ambient weather" target= "_blank">
                 <img class="menuimg" src="img/ambientweather.svg" alt=""/>
-                View on Ambient divum
+                View on Ambient weather
               </a>
             </li>
           <?php
@@ -299,7 +266,7 @@ if ($extralinks == 'yes')
       <?php if ($weatherflowoption == "yes")
 { ?>
         <li>
-          <a href="https://tempestwx.com/map/<?php echo $lat . '/' . $lon . '/' . $weatherflowmapzoom; ?>" data-lity title='see your divum station on official weatherflow map'>
+          <a href="https://tempestwx.com/map/<?php echo $lat . '/' . $lon . '/' . $weatherflowmapzoom; ?>" data-lity title='see your weather station on official weatherflow map'>
             <menumarkerblue></menumarkerblue> Weatherflow Map
           </a>
         </li>
@@ -405,7 +372,7 @@ if (!empty($webcamurl) && $webcamurl != ' ' && $webcamurl != 'Null' && $webcamur
         </a>
       </li>
       <li>
-        <a href="https://steepleian.github.io/weewx-divumwx/" title="Web Services Setup Page" target="_blank">
+        <a href="https://steepleian.github.io/weewx-Weather34/" title="Web Services Setup Page" target="_blank">
           <menumarkerbluegrey></menumarkerbluegrey> Web Services Setup Page
         </a>
       </li>
@@ -414,11 +381,7 @@ if (!empty($webcamurl) && $webcamurl != ' ' && $webcamurl != 'Null' && $webcamur
           <menumarkerbluegrey></menumarkerbluegrey> Maintained by Ian Millard (Steepleian)
         </a>
       </li>
-      <li>
-        <a href="https://divumwx.com/homeweatherstation/" title="divumwx" target="_blank">
-          <menumarkerbluegrey></menumarkerbluegrey> Based on an idea by divumwx
-        </a>
-      </li>
+      
       <!-- USA WeatherFinder -->
       <?php if (!empty($USAWeatherFinder))
 { ?>

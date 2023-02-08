@@ -4,7 +4,7 @@
 Language Translation File for HOMEWEATHERSTATION Template
 Language: Norwegian
 Translated by: Torjan
-Developed By: Lightmaster/Brian Underdown/Erik M Madsen
+Developed By: Lightmaster//Erik M Madsen
 November 4th 2016
 Revised: 2019
 -----------------
