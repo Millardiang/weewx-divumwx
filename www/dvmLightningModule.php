@@ -52,7 +52,7 @@ date_default_timezone_set($TZ);
 			$lightning["bearingx"]='NWN';
 		}else {$lightning["bearingx"]='North';}
 	} else {
-		$source = '0';
+		$lightning["source"] = '0';
 	}
 
 	if ($wind["units"] == "mph"){$lightning["last_distance"] = $lightning["last_distance"] * 0.621371; $lightning["distunit"] = "mi";} else {$lightning["distunit"] = "km";}
