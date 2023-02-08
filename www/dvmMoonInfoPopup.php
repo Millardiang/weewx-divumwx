@@ -1,18 +1,6 @@
 <?php 
-//###################################################################################################################
-//	weewx-divumwx Template maintained by Ian Millard (Steepleian)                                 				#
-//	                                                                                                				#
-//                #
-//  © divumwx.com original CSS/SVG/PHP 2015-2019                                                                  #
-// 	                                                                                                				#
-//  Contains original code by Ian Millard and collaborators															#
-//  © claydonsweather.org.uk original CSS/SVG/PHP 2020-2021                                                         #
-// 	                                                                                                				#
-// 	Issues for weewx-divumwx template should be addressed to https://github.com/steepleian/weewx-divumwx/issues #                                                                                              #
-// 	                                                                                                				#
-//###################################################################################################################
+
 include('dvmCombinedData.php');
-//include('serverdata/archivedata.php');
 if ($theme === "dark") {
     echo '<style>@font-face {
   font-family: weathertext;
@@ -356,7 +344,7 @@ credit {
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>divumwx Home divum Moon Phase Information</title>
+  <title>Moon Phase Information</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <div class="divumwxdarkbrowser" url="Moon Phase Information"></div>
@@ -366,26 +354,26 @@ credit {
        
 <?php echo $info;?> Current Moon Phase<br><br>  
  
-<div id="weather34moonphases" class="moonphasesvg"></div>
-<svg id="divumwx simple moonphase"><circle cx="50" cy="50" r="49.5" fill="rgba(86, 95, 103, .4)"/><path id="weather34shape" fill="rgba(230, 232, 239, .5)"/></svg>
+<div id="divumwxmoonphases" class="moonphasesvg"></div>
+<svg id="divumwx simple moonphase"><circle cx="50" cy="50" r="49.5" fill="rgba(86, 95, 103, .4)"/><path id="divumwxshape" fill="rgba(230, 232, 239, .5)"/></svg>
 <script> //simple moonphase for divumwx
-weather34Moon();
-function weather34Moon() {
+divumwxMoon();
+function divumwxMoon() {
 var day = Date.now() / 86400000;
-var referenceweather34Moon = Date.UTC(2018, 0, 17, 2, 17, 0, 0);
-var refweather34Day = referenceweather34Moon / 86400000;
-var phase = (day - refweather34Day) % 29.530588853 * 1.008;
+var referencedivumwxMoon = Date.UTC(2018, 0, 17, 2, 17, 0, 0);
+var refdivumwxDay = referencedivumwxMoon / 86400000;
+var phase = (day - refdivumwxDay) % 29.530588853 * 1.008;
 var s = String;
-switch (Math.round(phase / 3.75)){}document.getElementById("weather34moonphases");
-var weather34moonCurve;
+switch (Math.round(phase / 3.75)){}document.getElementById("divumwxmoonphases");
+var divumwxmoonCurve;
 var lf = Math.min(3 - 4 * (phase / 30), 1);
 var lc = Math.abs(lf * 50);	
 var lb = (lf < 0) ? "0" : "1";
 var rf = Math.min(3 + 4 * ((phase - 30) / 30), 1);	
 var rc = Math.abs(rf * 50);	
 var rb = (rf < 0) ? "0" : "1";
-weather34moonCurve = "M 50,0 "+ "a "+s(lc)+",50 0 0 "+lb+" 0,100 "+ "a "+s(rc)+",50 0 0 "+rb+" 0,-100";
-document.getElementById("weather34shape").setAttribute("d",weather34moonCurve);}
+divumwxmoonCurve = "M 50,0 "+ "a "+s(lc)+",50 0 0 "+lb+" 0,100 "+ "a "+s(rc)+",50 0 0 "+rb+" 0,-100";
+document.getElementById("divumwxshape").setAttribute("d",divumwxmoonCurve);}
 </script>
  
 <div class=moonphasetext>    
@@ -467,5 +455,4 @@ Earth–Moon–Earth communication (<orange>EME</orange>), also known as Moon bo
 </article> 
 <article>
 <div class=actualt>&nbsp;&nbsp &copy; Information</div>  
-<?php echo $info?> CSS/SVG/PHP scripts were developed by <a href="https://divumwx.com" title="divumwx.com" target="_blank" style="font-size:9px;">divumwx.com</a>  for use in the divumwx template &copy; 2015-<?php echo date('Y');?></span></article> 
 </main>

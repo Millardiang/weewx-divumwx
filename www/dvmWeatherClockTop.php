@@ -1,15 +1,7 @@
 <?php
-//###################################################################################################################
-//	weewx-divumwx Template maintained by Ian Millard (Steepleian)                                 				#
-//	                                                                                                				#
-//  Contains original code by Ian Millard and collaborators															#
-//  © claydonsweather.org.uk original CSS/SVG/PHP 2020-2021                                                         #
-// 	                                                                                                				#
-// 	Issues for weewx-divumwx template should be addressed to https://github.com/steepleian/weewx-divumwx/issues #                                                                                              
-// 	                                                                                                				#
-//###################################################################################################################
-include_once('userSettings.php');
-include_once('common.php');
+
+//include_once('userSettings.php');
+//include_once('common.php');
 include('dvmCombinedData.php');
 
 date_default_timezone_set($TZ);
@@ -112,7 +104,7 @@ else if ($theme === "light")
 ?>
       
 
-<div class="calendar34" style="padding-top: 10px" ><svg id="weather34clock icon" width="60pt" height="60pt" viewBox="0 0 720 720" version="12-10-21" ></svg>
+<div class="calendar34" style="padding-top: 10px" ><svg id="divumwxclock icon" width="60pt" height="60pt" viewBox="0 0 720 720" version="12-10-21" ></svg>
 </div><span id="theTime"></span></div>
 
 <div class="clock"  width="48" height="48" style="position:relative; top: 27px; left: 5px;">

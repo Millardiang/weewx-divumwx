@@ -1,13 +1,5 @@
 <?php
-//###################################################################################################################
-//	weewx-divumwx Template maintained by Ian Millard (Steepleian)                                 				#
-//	                                                                                                				#
-//  Contains original code by Ian Millard and collaborators															#
-//  © claydonsweather.org.uk original CSS/SVG/PHP 2020-2021                                                         #
-// 	                                                                                                				#
-// 	Issues for weewx-divumwx template should be addressed to https://github.com/steepleian/weewx-divumwx/issues #                                                                                              #
-// 	                                                                                                				#
-//###################################################################################################################
+
 include ('dvmCombinedData.php');
 $iconset = "icon2";
 if ($theme === "dark")
@@ -105,9 +97,9 @@ for ($k = 0;$k < 14;$k++)
     $forecastPrecipProb[$k] = $parsed_json['response'][0]['periods'][$k]['pop'];
     $forecastUV[$k] = $parsed_json['response'][0]['periods'][$k]['uvi'];
     $forecastsnow[$k] = $parsed_json['response'][0]['periods'][$k]['snowCM'];
-    $forecastsummary[$k] = $parsed_json['response'][0]['periods'][$k]['divum'];
+    $forecastsummary[$k] = $parsed_json['response'][0]['periods'][$k]['weather'];
     $forecastnight[$k] = $parsed_json['response'][0]['periods'][$k]['isDay'];
-    $forecastdesc[$k] = $parsed_json['response'][0]['periods'][$k]['divum'];
+    $forecastdesc[$k] = $parsed_json['response'][0]['periods'][$k]['weather'];
     $forecastheatindex[$k] = $parsed_json['response'][0]['periods'][$k]['avgFeelslikeC'];
     $forecasthumidity[$k] = $parsed_json['response'][0]['periods'][$k]['humidity'];
     if ($forecastUV[$k] === 0 or $forecastUV[$k] === null)

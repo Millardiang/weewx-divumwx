@@ -176,7 +176,7 @@ purple {
   font-size: 0.7rem;
 }
 
-.w34convertrain {
+.dvmconvertrain {
   position: relative;
   font-size: 0.5em;
   top: 10px;
@@ -196,7 +196,7 @@ indooryellow1 {
   color: rgba(53, 56, 58, 1);
   margin-left: 0;
 }
-.weather34indoorword {
+.divumwxindoorword {
   margin-left: 127px;
   margin-top: 42px;
 }
@@ -414,7 +414,7 @@ smallhumunit {
   position: absolute;
 }
 
-.weather34indoortrendup {
+.divumwxindoortrendup {
   font-family: weathertext2, Arial, Helvetica, system;
   width: 3.2rem;
   height: 1rem;
@@ -434,7 +434,7 @@ smallhumunit {
   left: 130px;
   top: 128px;
 }
-.weather34indoortrenddown {
+.divumwxindoortrenddown {
   font-family: weathertext2, Arial, Helvetica, system;
   width: 3.2rem;
   height: 1rem;
@@ -454,7 +454,7 @@ smallhumunit {
   left: 130px;
   top: 128px;
 }
-.weather34indoortrendsteady {
+.divumwxindoortrendsteady {
   font-family: weathertext2, Arial, Helvetica, system;
   width: 3.2rem;
   height: 1rem;
@@ -475,7 +475,7 @@ smallhumunit {
   top: 128px;
 }
 
-.weather34indoorcomfort {
+.divumwxindoorcomfort {
   font-family: weathertext2, Arial, Helvetica, system;
   width: 4rem;
   height: 1rem;
@@ -495,7 +495,7 @@ smallhumunit {
   left: 130px;
   top: 128px;
 }
-.weather34indoorhumid {
+.divumwxindoorhumid {
   font-family: weathertext2, Arial, Helvetica, system;
   width: 4rem;
   height: 1rem;
@@ -515,7 +515,7 @@ smallhumunit {
   left: 130px;
   top: 128px;
 }
-.weather34indoordry {
+.divumwxindoordry {
   font-family: weathertext2, Arial, Helvetica, system;
   width: 4rem;
   height: 1rem;
@@ -536,7 +536,7 @@ smallhumunit {
   top: 128px;
 }
 
-.weather34indoorwarm {
+.divumwxindoorwarm {
   font-family: weathertext2, Arial, Helvetica, system;
   width: 3.2rem;
   height: 1rem;
@@ -556,7 +556,7 @@ smallhumunit {
   left: 130px;
   top: 128px;
 }
-.weather34indoorcold {
+.divumwxindoorcold {
   font-family: weathertext2, Arial, Helvetica, system;
   width: 3.2rem;
   height: 1rem;
@@ -576,7 +576,7 @@ smallhumunit {
   left: 130px;
   top: 128px;
 }
-.weather34indoormild {
+.divumwxindoormild {
   font-family: weathertext2, Arial, Helvetica, system;
   width: 3.2rem;
   height: 1rem;
@@ -596,7 +596,7 @@ smallhumunit {
   left: 130px;
   top: 128px;
 }
-.weather34indoorhot {
+.divumwxindoorhot {
   font-family: weathertext2, Arial, Helvetica, system;
   width: 3.2rem;
   height: 1rem;
@@ -616,7 +616,7 @@ smallhumunit {
   left: 130px;
   top: 128px;
 }
-.weather34indoorpm {
+.divumwxindoorpm {
   font-family: weathertext2, Arial, Helvetica, system;
   width: 3.2rem;
   height: 1rem;

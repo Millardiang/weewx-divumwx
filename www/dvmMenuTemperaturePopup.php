@@ -3,15 +3,7 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <?php
-//###################################################################################################################
-//	maintained by Ian Millard (Steepleian)                                 				#
-//	                                                                                                				#
-//  Contains original code by Ian Millard and collaborators															#
-//  © claydonsweather.org.uk original CSS/SVG/PHP 2020-2021                                                         #
-// 	                                                                                                				#
-// 	Issues for weewx-divumwx template should be addressed to https://github.com/steepleian/weewx-divumwx/issues #  
-// 	                                                                                                				#
-//###################################################################################################################
+
 include ('dvmCombinedData.php');
 
 date_default_timezone_set($TZ);

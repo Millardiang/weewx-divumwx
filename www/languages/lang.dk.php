@@ -4,7 +4,7 @@
 Language Translation File for HOMEWEATHERSTATION Template
 Language: Danish
 Translation By : Erik M Madsen
-Developed By: Brian Underdown/Erik M Madsen
+Developed By: /Erik M Madsen
 November 4th 2016
 Revised: May 2017 
 -----------------

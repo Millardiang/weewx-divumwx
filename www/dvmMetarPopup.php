@@ -9,276 +9,276 @@ $now =date('G.i');
  //divumwx wxcheck API aviation metar script May 2018 
 $json_string             = file_get_contents("jsondata/me.txt");
 $parsed_json             = json_decode($json_string);
-$metar34time       = $parsed_json->{'data'}[0]->{'observed'};
-$metar34raw       = $parsed_json->{'data'}[0]->{'raw_text'};
-$metar34stationid       = $parsed_json->{'data'}[0]->{'icao'};
-$metar34stationname       = $parsed_json->{'data'}[0]->{'station'}->{'name'};
+$metartime       = $parsed_json->{'data'}[0]->{'observed'};
+$metarraw       = $parsed_json->{'data'}[0]->{'raw_text'};
+$metarstationid       = $parsed_json->{'data'}[0]->{'icao'};
+$metarstationname       = $parsed_json->{'data'}[0]->{'station'}->{'name'};
 
-$metar34lat = $parsed_json->{'data'}[0]->{'station'}->{'geometry'}->{'coordinates'}[1];
+$metarlat = $parsed_json->{'data'}[0]->{'station'}->{'geometry'}->{'coordinates'}[1];
 $metat34lon = $parsed_json->{'data'}[0]->{'station'}->{'geometry'}->{'coordinates'}[0];
-$airport1dist = round(distance($lat, $lon, $metar34lat, $metat34lon));
-$metar34pressurehg       = $parsed_json->{'data'}[0]->{'barometer'}->{'hg'};	
-$metar34pressuremb       = $parsed_json->{'data'}[0]->{'barometer'}->{'mb'};
-$metar34conditions         = $parsed_json->{'data'}[0]->{'conditions'}[0]->{'code'};
-$metar34conditionstext         = $parsed_json->{'data'}[0]->{'conditions'}[0]->{'text'};
-$metar34clouds          = $parsed_json->{'data'}[0]->{'clouds'}[0]->{'code'};
-$metar34cloudstext          = $parsed_json->{'data'}[0]->{'clouds'}[0]->{'text'};
-$metar34dewpointc          = $parsed_json->{'data'}[0]->{'dewpoint'}->{'celsius'};
-$metar34dewpointf          = $parsed_json->{'data'}[0]->{'dewpoint'}->{'fahrenheit'};
-$metar34temperaturec          = $parsed_json->{'data'}[0]->{'temperature'}->{'celsius'};
-$metar34temperaturef          = $parsed_json->{'data'}[0]->{'temperature'}->{'fahrenheit'};
-$metar34humidity          = $parsed_json->{'data'}[0]->{'humidity'}->{'percent'};
-$metar34visibility        = $parsed_json->{'data'}[0]->{'visibility'}->{'meters'};
-$metar34windir          = $parsed_json->{'data'}[0]->{'wind'}->{'degrees'};
-$metar34windspeedmph          = $parsed_json->{'data'}[0]->{'wind'}->{'speed_mph'};
-$metar34windspeedkmh          = number_format($metar34windspeedmph*1.60934,0);//kmh
-$metar34windspeedkts          = $parsed_json->{'data'}[0]->{'wind'}->{'speed_kts'};
-$metar34windspeedms          = number_format($metar34windspeedmph*0.44704,1);
-$metar34raininches          = $parsed_json->{'data'}[0]->{'rain_in'};
-$metar34rainmm          = number_format($metar34raininches*25.4,2) ;
-$metar34visibility=str_replace(',', '', $metar34visibility);
-$metar34vismiles        = number_format($metar34visibility*0.000621371,1) ;
-$metar34viskm        = number_format($metar34visibility*0.00099999969062399994,1) ;
+$airport1dist = round(distance($lat, $lon, $metarlat, $metat34lon));
+$metarpressurehg       = $parsed_json->{'data'}[0]->{'barometer'}->{'hg'};	
+$metarpressuremb       = $parsed_json->{'data'}[0]->{'barometer'}->{'mb'};
+$metarconditions         = $parsed_json->{'data'}[0]->{'conditions'}[0]->{'code'};
+$metarconditionstext         = $parsed_json->{'data'}[0]->{'conditions'}[0]->{'text'};
+$metarclouds          = $parsed_json->{'data'}[0]->{'clouds'}[0]->{'code'};
+$metarcloudstext          = $parsed_json->{'data'}[0]->{'clouds'}[0]->{'text'};
+$metardewpointc          = $parsed_json->{'data'}[0]->{'dewpoint'}->{'celsius'};
+$metardewpointf          = $parsed_json->{'data'}[0]->{'dewpoint'}->{'fahrenheit'};
+$metartemperaturec          = $parsed_json->{'data'}[0]->{'temperature'}->{'celsius'};
+$metartemperaturef          = $parsed_json->{'data'}[0]->{'temperature'}->{'fahrenheit'};
+$metarhumidity          = $parsed_json->{'data'}[0]->{'humidity'}->{'percent'};
+$metarvisibility        = $parsed_json->{'data'}[0]->{'visibility'}->{'meters'};
+$metarwindir          = $parsed_json->{'data'}[0]->{'wind'}->{'degrees'};
+$metarwindspeedmph          = $parsed_json->{'data'}[0]->{'wind'}->{'speed_mph'};
+$metarwindspeedkmh          = number_format($metarwindspeedmph*1.60934,0);//kmh
+$metarwindspeedkts          = $parsed_json->{'data'}[0]->{'wind'}->{'speed_kts'};
+$metarwindspeedms          = number_format($metarwindspeedmph*0.44704,1);
+$metarraininches          = $parsed_json->{'data'}[0]->{'rain_in'};
+$metarrainmm          = number_format($metarraininches*25.4,2) ;
+$metarvisibility=str_replace(',', '', $metarvisibility);
+$metarvismiles        = number_format($metarvisibility*0.000621371,1) ;
+$metarviskm        = number_format($metarvisibility*0.00099999969062399994,1) ;
 // start the divumwx icon output and descriptions
-if($metar34conditions =='-SHRA'){
+if($metarconditions =='-SHRA'){
 if ($now >$suns2 ){$sky_icon='40n.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='40n.svg';} 
 else $sky_icon='40d.svg'; 
 $sky_desc='Light Rain <br>Showers';
 }
 //rain 
-else if($metar34conditions =='SHRA'){
+else if($metarconditions =='SHRA'){
 if ($now >$suns2 ){$sky_icon='40n.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='40n.svg';} 
 else $sky_icon='40d.svg'; 
 $sky_desc='Light Rain <br>Showers';
 }
 //rain heavy
-else if($metar34conditions =='+SHRA'){
+else if($metarconditions =='+SHRA'){
 if ($now >$suns2 ){$sky_icon='41n.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='41n.svg';} 
 else $sky_icon='41d.svg'; 
 $sky_desc='Heavy Rain <br>Showers';
 }
 //rain light
-else if($metar34conditions=='-RA'){
+else if($metarconditions=='-RA'){
 if ($now >$suns2 ){$sky_icon='40n.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='40n.svg';} 
 else $sky_icon='40d.svg'; 
 $sky_desc='Light Rain <br>Showers';
 }
 //rain moderate
-else if($metar34conditions=='+RA'){
+else if($metarconditions=='+RA'){
 if ($now >$suns2 ){$sky_icon='05n.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='05n.svg';} 
 else $sky_icon='05d.svg'; 
 $sky_desc='Moderate Rain <br>Showers';
 }
 //rain
-else if($metar34conditions=='RA'){
+else if($metarconditions=='RA'){
 if ($now >$suns2 ){$sky_icon='46.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='46.svg';} 
 else $sky_icon='46.svg'; 
 $sky_desc='Light Rain <br>Showers';
 }
 //rain squalls
-else if($metar34conditions=='SQ'){
+else if($metarconditions=='SQ'){
 if ($now >$suns2 ){$sky_icon='10w.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='10w.svg';} 
 else $sky_icon='10w.svg'; 
 $sky_desc='Rain Squall<br>Showers';
 }
 //snow light
-else if($metar34conditions=='-SN'){
+else if($metarconditions=='-SN'){
 if ($now >$suns2 ){$sky_icon='49.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='49.svg';} 
 else $sky_icon='49.svg'; 
 $sky_desc='Light Snow <br>Showers';
 }
 //snow moderate
-else if($metar34conditions=='+SN'){
+else if($metarconditions=='+SN'){
 if ($now >$suns2 ){$sky_icon='13.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='13.svg';} 
 else $sky_icon='13.svg'; 
 $sky_desc='Moderate Snow <br>Showers';
 }
 //snow
-else if($metar34conditions=='SN'){
+else if($metarconditions=='SN'){
 if ($now >$suns2 ){$sky_icon='13.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='13.svg';} 
 else $sky_icon='13.svg'; 
 $sky_desc='Snow Showers <br>';
 }
 //snow grains
-else if($metar34conditions=='SG'){
+else if($metarconditions=='SG'){
 if ($now >$suns2 ){$sky_icon='13.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='13.svg';} 
 else $sky_icon='13.svg'; 
 $sky_desc='Snow Grains <br>';
 }
 //snow grains
-else if($metar34conditions=='SNINCR'){
+else if($metarconditions=='SNINCR'){
 if ($now >$suns2 ){$sky_icon='13.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='13.svg';} 
 else $sky_icon='13.svg'; 
 $sky_desc='Snow Showers <br>';
 }
 //sleet
-else if($metar34conditions=='IP'){
+else if($metarconditions=='IP'){
 if ($now >$suns2 ){$sky_icon='12.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='12.svg';} 
 else $sky_icon='12.svg'; 
 $sky_desc='Sleet Showers';
 }
 //Haze
-else if($metar34conditions=='HZ'){
+else if($metarconditions=='HZ'){
 if ($now >$suns2 ){$sky_icon='hazyn.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='hazyn.svg';} 
 else $sky_icon='hazyd.svg'; 
 $sky_desc='Hazy <br>Conditions';
 }
 //Batches Fog
-else if($metar34conditions=='BCFG'){
+else if($metarconditions=='BCFG'){
 if ($now >$suns2 ){$sky_icon='15.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='15.svg';} 
 else $sky_icon='15.svg'; 
 $sky_desc='Foggy <br>Conditions';
 }
 //Fog
-else if($metar34conditions=='FG'){
+else if($metarconditions=='FG'){
 if ($now >$suns2 ){$sky_icon='15.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='15.svg';} 
 else $sky_icon='15.svg'; 
 $sky_desc='Foggy <br>Conditions';
 }
 //Fog-NIGHT
-else if($metar34conditions=='NFG'){
+else if($metarconditions=='NFG'){
 if ($now >$suns2 ){$sky_icon='15.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='15.svg';} 
 else $sky_icon='15.svg'; 
 $sky_desc='Foggy <br>Conditions';
 }
 //Mist-Night
-else if($metar34conditions=='BR'){
+else if($metarconditions=='BR'){
 if ($now >$suns2 ){$sky_icon='15.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='15.svg';} 
 else $sky_icon='15.svg'; 
 $sky_desc='Misty <br>Conditions';
 }
 //Mist
-else if($metar34conditions=='NBR'){
+else if($metarconditions=='NBR'){
 if ($now >$suns2 ){$sky_icon='15.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='15.svg';} 
 else $sky_icon='15.svg'; 
 $sky_desc='Misty <br>Conditions';
 }
 //Hail
-else if($metar34conditions=='GR'){
+else if($metarconditions=='GR'){
 if ($now >$suns2 ){$sky_icon='12.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='12.svg';} 
 else $sky_icon='12.svg'; 
 $sky_desc='Hail and Rain <br>Conditions';
 }
 //Hail GS
-else if($metar34conditions=='GS'){
+else if($metarconditions=='GS'){
 if ($now >$suns2 ){$sky_icon='12.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='12.svg';} 
 else $sky_icon='12.svg'; 
 $sky_desc='Hail <br>Conditions';
 }
 //ICE CYSTALS
-else if($metar34conditions=='IC'){
+else if($metarconditions=='IC'){
 if ($now >$suns2 ){$sky_icon='13.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='13.svg';} 
 else $sky_icon='13.svg'; 
 $sky_desc='Ice Crystals';
 }
 //ICE PELLETS
-else if($metar34conditions=='PL'){
+else if($metarconditions=='PL'){
 if ($now >$suns2 ){$sky_icon='13.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='13.svg';} 
 else $sky_icon='13.svg'; 
 $sky_desc='Ice Pellets <br>';
 }
 //Thunderstorms
-else if($metar34conditions=='TS'){
+else if($metarconditions=='TS'){
 if ($now >$suns2 ){$sky_icon='22.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='22.svg';} 
 else $sky_icon='22.svg'; 
 $sky_desc='Thunderstorm <br>Conditions';
 }
 //Thunderstorms
-else if($metar34conditions=='-TS'){
+else if($metarconditions=='-TS'){
 if ($now >$suns2 ){$sky_icon='22.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='22.svg';} 
 else $sky_icon='22.svg'; 
 $sky_desc='Thunderstorm <br>Conditions';
 }
 //Thunderstorms
-else if($metar34conditions=='+TS'){
+else if($metarconditions=='+TS'){
 if ($now >$suns2 ){$sky_icon='11.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='11.svg';} 
 else $sky_icon='11.svg'; 
 $sky_desc='Heavy <br>Thunderstorms';
 }
 //Thunderstorms
-else if($metar34conditions=='TSRA'){
+else if($metarconditions=='TSRA'){
 if ($now >$suns2 ){$sky_icon='22.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='22.svg';} 
 else $sky_icon='22.svg'; 
 $sky_desc='Thunderstorm <br>Conditions';
 }
 //Scattered Thunderstorms
-else if($metar34conditions=='SCTTSRA'){
+else if($metarconditions=='SCTTSRA'){
 if ($now >$suns2 ){$sky_icon='30.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='30.svg';} 
 else $sky_icon='30.svg'; 
 $sky_desc='Scattered <br>Thunderstorms';
 }
 //Scattered Thunderstorms
-else if($metar34conditions=='NTSRA'){
+else if($metarconditions=='NTSRA'){
 if ($now >$suns2 ){$sky_icon='30.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='30.svg';} 
 else $sky_icon='30.svg'; 
 $sky_desc='Scattered <br>Thunderstorms';
 }
 //Dust
-else if($metar34conditions=='DS'){
+else if($metarconditions=='DS'){
 if ($now >$suns2 ){$sky_icon='hazyn.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='hazyn.svg';} 
 else $sky_icon='hazyd.svg'; 
 $sky_desc='Dust Storm <br>Conditions';
 }
 //Widespread Dust
-else if($metar34conditions=='DU'){
+else if($metarconditions=='DU'){
 if ($now >$suns2 ){$sky_icon='hazyn.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='hazyn.svg';} 
 else $sky_icon='hazyd.svg'; 
 $sky_desc='Widespread Dust <br>Conditions';
 }
 //Dust-Sand Whirls
-else if($metar34conditions=='PO'){
+else if($metarconditions=='PO'){
 if ($now >$suns2 ){$sky_icon='hazyn.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='hazyn.svg';} 
 else $sky_icon='hazyd.svg'; 
 $sky_desc='Dust-Sand Whirls <br>Conditions';
 }
 //Sand
-else if($metar34conditions=='SA'){
+else if($metarconditions=='SA'){
 if ($now >$suns2 ){$sky_icon='hazyn.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='hazyn.svg';} 
 else $sky_icon='hazyd.svg'; 
 $sky_desc='Dust-Sand <br>Conditions';
 }
 //Sandstorm
-else if($metar34conditions=='SS'){
+else if($metarconditions=='SS'){
 if ($now >$suns2 ){$sky_icon='hazyn.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='hazyn.svg';} 
 else $sky_icon='hazyd.svg'; 
 $sky_desc='Sandstorm <br>Conditions';
 }
 //Volcanic Ash
-else if($metar34conditions=='VA'){
+else if($metarconditions=='VA'){
 if ($now >$suns2 ){$sky_icon='volcanoe.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='volcanoe.svg';} 
 else $sky_icon='volcanoe.svg'; 
@@ -286,7 +286,7 @@ $sky_desc='Volcanic Ash <br>Conditions';
 }
 
 //+FC
-else if($metar34conditions=='+FC'){
+else if($metarconditions=='+FC'){
 if ($now >$suns2 ){$sky_icon='nsvrtsa.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='nsvrtsa.svg';} 
 else $sky_icon='nsvrtsat.svg'; 
@@ -294,56 +294,56 @@ $sky_desc='Tornado <br> Water Sprout';
 }
 //2nd part clouds
 //clear
-else if ($metar34clouds=='SKC') {
+else if ($metarclouds=='SKC') {
 if ($now >$suns2 ){$sky_icon='01n.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='01n.svg';} 
 else $sky_icon='01d.svg'; 
 $sky_desc='Clear <br>Conditions';
 }
 //clear
-else if($metar34clouds=='CLR'){
+else if($metarclouds=='CLR'){
 if ($now >$suns2 ){$sky_icon='01n.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='01n.svg';} 
 else $sky_icon='01d.svg'; 
 $sky_desc='Clear <br>Conditions';
 }
 //clear
-else if($metar34clouds=='CAVOK'){
+else if($metarclouds=='CAVOK'){
 if ($now >$suns2 ){$sky_icon='01n.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='01n.svg';} 
 else $sky_icon='01d.svg'; 
 $sky_desc='Clear <br>Conditions';
 }
 //few
-else if($metar34clouds=='FEW'){
+else if($metarclouds=='FEW'){
 if ($now >$suns2 ){$sky_icon='03n.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='03n.svg';} 
 else $sky_icon='03d.svg'; 
 $sky_desc='Partly Cloudy <br>Conditions';
 }
 //scattered clouds
-else if($metar34clouds=='SCT'){
+else if($metarclouds=='SCT'){
 if ($now >$suns2 ){$sky_icon='02n.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='02n.svg';} 
 else $sky_icon='02d.svg'; 	
 $sky_desc='Mostly Scattered <br>Clouds';
 }
 //mostly cloudy
-else if($metar34clouds=='BKN'){		
+else if($metarclouds=='BKN'){		
 if ($now >$suns2 ){$sky_icon='03n.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='03n.svg';} 
 else $sky_icon='03d.svg'; 	
 $sky_desc='Mostly Cloudy <br>Conditions';
 }
 //overcast
-else if($metar34clouds=='OVC'){
+else if($metarclouds=='OVC'){
 if ($now >$suns2 ){$sky_icon='04.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='04.svg';} 
 else $sky_icon='04.svg'; 
 $sky_desc='Overcast <br>Conditions';
 }
 //overcast
-else if($metar34clouds=='OVX'){
+else if($metarclouds=='OVX'){
 if ($now >$suns2 ){$sky_icon='04.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='04.svg';} 
 else $sky_icon='04.svg'; 
@@ -512,7 +512,7 @@ stationid{font-size:1.4em;font-family:weathertext2;color:#009bb4}
 .pressure{position:absolute;float:left;margin-top:60px;text-align:left;}
 </style>
 
-<div class="divumwxdarkbrowser" url="<?php echo $metar34stationname;?> Conditions"></div>
+<div class="divumwxdarkbrowser" url="<?php echo $metarstationname;?> Conditions"></div>
   
 <main class="grid">
 
@@ -525,32 +525,32 @@ stationid{font-size:1.4em;font-family:weathertext2;color:#009bb4}
 <blue>Pressure</blue> <br>
 <?php
 if ($pressureunit == 'mb' || $pressureunit == 'hPa' || $pressureunit == 'kPa' ) {
-	echo $metar34pressuremb ," (".$pressureunit.")";
+	echo $metarpressuremb ," (".$pressureunit.")";
 } else {
-	echo $metar34pressurehg ," (inHG)";
+	echo $metarpressurehg ," (inHG)";
 }
 ?> - 
 <?php
 if ($pressureunit == 'mb' || $pressureunit == 'hPa' || $pressureunit == 'kPa') {
-	echo $metar34pressurehg ," (inHG)";
+	echo $metarpressurehg ," (inHG)";
 } else {
-	echo $metar34pressuremb ," (mb)";
+	echo $metarpressuremb ," (mb)";
 }
 ?>
 <blue><br>Visibility</blue> <br>
 <?php
 if ($distanceunit == 'mi') {
-	echo $metar34vismiles  ," (miles)";
-    echo $metar34cloudbasefeet;
+	echo $metarvismiles  ," (miles)";
+    echo $metarcloudbasefeet;
 } else {
-	echo $metar34viskm ," (km)";
+	echo $metarviskm ," (km)";
 }
 ?> - 
 <?php
 if ($distanceunit =='mi') {
-	echo $metar34viskm  ," (km)";
+	echo $metarviskm  ," (km)";
 } else {
-	echo $metar34vismiles ," (miles)";
+	echo $metarvismiles ," (miles)";
 }
 ?>
 </div>
@@ -561,55 +561,55 @@ if ($distanceunit =='mi') {
 
  <div class="metartempcontainer1"><?php
  if ($tempunit == 'C') {
-	if ($metar34temperaturec >30) {echo '<div class=metartemptoday30>'.$metar34temperaturec."<smalluvunit> &nbsp;&deg;C";}
-	else if ($metar34temperaturec >25) {echo '<div class=metartemptoday25>'.$metar34temperaturec."<smalluvunit> &nbsp;&deg;C";}
-	else if ($metar34temperaturec >20) {echo '<div class=metartemptoday20>'.$metar34temperaturec."<smalluvunit> &nbsp;&deg;C";}
-	else if ($metar34temperaturec >10) {echo '<div class=metartemptoday10>'.$metar34temperaturec."<smalluvunit> &nbsp;&deg;C";}
-	else if ($metar34temperaturec >5) {echo '<div class=metartemptoday5>'.$metar34temperaturec."<smalluvunit> &nbsp;&deg;C";}
-	else if ($metar34temperaturec >-50) {echo '<div class=metartemptoday0>'.$metar34temperaturec."<smalluvunit> &nbsp;&deg;C";}
-	else if ($metar34temperaturec =='') {echo '<div class=metartemptoday0>'.$metar34temperaturec."<smalluvunit> N/A";}
+	if ($metartemperaturec >30) {echo '<div class=metartemptoday30>'.$metartemperaturec."<smalluvunit> &nbsp;&deg;C";}
+	else if ($metartemperaturec >25) {echo '<div class=metartemptoday25>'.$metartemperaturec."<smalluvunit> &nbsp;&deg;C";}
+	else if ($metartemperaturec >20) {echo '<div class=metartemptoday20>'.$metartemperaturec."<smalluvunit> &nbsp;&deg;C";}
+	else if ($metartemperaturec >10) {echo '<div class=metartemptoday10>'.$metartemperaturec."<smalluvunit> &nbsp;&deg;C";}
+	else if ($metartemperaturec >5) {echo '<div class=metartemptoday5>'.$metartemperaturec."<smalluvunit> &nbsp;&deg;C";}
+	else if ($metartemperaturec >-50) {echo '<div class=metartemptoday0>'.$metartemperaturec."<smalluvunit> &nbsp;&deg;C";}
+	else if ($metartemperaturec =='') {echo '<div class=metartemptoday0>'.$metartemperaturec."<smalluvunit> N/A";}
  } else {
-	 if ($metar34temperaturef >86) {echo '<div class=metartemptoday30>'.$metar34temperaturef."<smalluvunit> &nbsp;&deg;F";}
-	else if ($metar34temperaturef >77) {echo '<div class=metartemptoday25>'.$metar34temperaturef."<smalluvunit> &nbsp;&deg;F";}
-	else if ($metar34temperaturef >68) {echo '<div class=metartemptoday20>'.$metar34temperaturef."<smalluvunit> &nbsp;&deg;F";}
-	else if ($metar34temperaturef >50) {echo '<div class=metartemptoday10>'.$metar34temperaturef."<smalluvunit> &nbsp;&deg;F";}
-	else if ($metar34temperaturef >41) {echo '<div class=metartemptoday5>'.$metar34temperaturef."<smalluvunit> &nbsp;&deg;F";}
-	else if ($metar34temperaturef >-50) {echo '<div class=metartemptoday0>'.$metar34temperaturef."<smalluvunit> &nbsp;&deg;F";}
-	else if ($metar34temperaturef =='') {echo '<div class=metartemptoday0>'.$metar34temperaturef."<smalluvunit> N/A";}
+	 if ($metartemperaturef >86) {echo '<div class=metartemptoday30>'.$metartemperaturef."<smalluvunit> &nbsp;&deg;F";}
+	else if ($metartemperaturef >77) {echo '<div class=metartemptoday25>'.$metartemperaturef."<smalluvunit> &nbsp;&deg;F";}
+	else if ($metartemperaturef >68) {echo '<div class=metartemptoday20>'.$metartemperaturef."<smalluvunit> &nbsp;&deg;F";}
+	else if ($metartemperaturef >50) {echo '<div class=metartemptoday10>'.$metartemperaturef."<smalluvunit> &nbsp;&deg;F";}
+	else if ($metartemperaturef >41) {echo '<div class=metartemptoday5>'.$metartemperaturef."<smalluvunit> &nbsp;&deg;F";}
+	else if ($metartemperaturef >-50) {echo '<div class=metartemptoday0>'.$metartemperaturef."<smalluvunit> &nbsp;&deg;F";}
+	else if ($metartemperaturef =='') {echo '<div class=metartemptoday0>'.$metartemperaturef."<smalluvunit> N/A";}
  }
 ?></smalluvunit></div></div>
-<div class="tword"><?php if ($tempunit == 'F') {echo $metar34temperaturec."&deg;C";} else if ($tempunit == 'C'){echo $metar34temperaturef."&deg;F";}?></div>
+<div class="tword"><?php if ($tempunit == 'F') {echo $metartemperaturec."&deg;C";} else if ($tempunit == 'C'){echo $metartemperaturef."&deg;F";}?></div>
 </div>
 	 
 <div class="lotemp">
 
 <div class="metardewcontainer1"><?php
 if ($tempunit == 'C') {
-	if ($metar34dewpointc >30) {echo '<div class=metardewtoday30>'.$metar34dewpointc."<smalluvunit> &nbsp;&deg;C";}
-	else if ($metar34dewpointc >25) {echo '<div class=metardewtoday25>'.$metar34dewpointc."<smalluvunit> &nbsp;&deg;C";}
-	else if ($metar34dewpointc >20) {echo '<div class=metardewtoday20>'.$metar34dewpointc."<smalluvunit> &nbsp;&deg;C";}
-	else if ($metar34dewpointc >10) {echo '<div class=metardewtoday10>'.$metar34dewpointc."<smalluvunit> &nbsp;&deg;C";}
-	else if ($metar34dewpointc >5) {echo '<div class=metardewtoday5>'.$metar34dewpointc."<smalluvunit> &nbsp;&deg;C";}
-	else if ($metar34dewpointc >-50) {echo '<div class=metardewtoday0>'.$metar34dewpointc."<smalluvunit> &nbsp;&deg;C";}
-	else if ($metar34dewpointc=='') {echo '<div class=metartemptoday0>'.$metar34dewpointc."<smalluvunit> N/A";}
+	if ($metardewpointc >30) {echo '<div class=metardewtoday30>'.$metardewpointc."<smalluvunit> &nbsp;&deg;C";}
+	else if ($metardewpointc >25) {echo '<div class=metardewtoday25>'.$metardewpointc."<smalluvunit> &nbsp;&deg;C";}
+	else if ($metardewpointc >20) {echo '<div class=metardewtoday20>'.$metardewpointc."<smalluvunit> &nbsp;&deg;C";}
+	else if ($metardewpointc >10) {echo '<div class=metardewtoday10>'.$metardewpointc."<smalluvunit> &nbsp;&deg;C";}
+	else if ($metardewpointc >5) {echo '<div class=metardewtoday5>'.$metardewpointc."<smalluvunit> &nbsp;&deg;C";}
+	else if ($metardewpointc >-50) {echo '<div class=metardewtoday0>'.$metardewpointc."<smalluvunit> &nbsp;&deg;C";}
+	else if ($metardewpointc=='') {echo '<div class=metartemptoday0>'.$metardewpointc."<smalluvunit> N/A";}
 } else {
-	if ($metar34dewpointf>86) {echo '<div class=metartemptoday30>'.$metar34dewpointf."<smalluvunit> &nbsp;&deg;F";}
-	else if ($metar34dewpointf>77) {echo '<div class=metartemptoday25>'.$metar34dewpointf."<smalluvunit> &nbsp;&deg;F";}
-	else if ($metar34dewpointf>68) {echo '<div class=metartemptoday20>'.$metar34dewpointf."<smalluvunit> &nbsp;&deg;F";}
-	else if ($metar34dewpointf>50) {echo '<div class=metartemptoday10>'.$metar34dewpointf."<smalluvunit> &nbsp;&deg;F";}
-	else if ($metar34dewpointf>41) {echo '<div class=metartemptoday5>'.$metar34dewpointf."<smalluvunit> &nbsp;&deg;F";}
-	else if ($metar34dewpointf>-50) {echo '<div class=metartemptoday0>'.$metar34dewpointf."<smalluvunit> &nbsp;&deg;F";}
-	else if ($metar34dewpointf=='') {echo '<div class=metartemptoday0>'.$metar34dewpointf."<smalluvunit> N/A";}
+	if ($metardewpointf>86) {echo '<div class=metartemptoday30>'.$metardewpointf."<smalluvunit> &nbsp;&deg;F";}
+	else if ($metardewpointf>77) {echo '<div class=metartemptoday25>'.$metardewpointf."<smalluvunit> &nbsp;&deg;F";}
+	else if ($metardewpointf>68) {echo '<div class=metartemptoday20>'.$metardewpointf."<smalluvunit> &nbsp;&deg;F";}
+	else if ($metardewpointf>50) {echo '<div class=metartemptoday10>'.$metardewpointf."<smalluvunit> &nbsp;&deg;F";}
+	else if ($metardewpointf>41) {echo '<div class=metartemptoday5>'.$metardewpointf."<smalluvunit> &nbsp;&deg;F";}
+	else if ($metardewpointf>-50) {echo '<div class=metartemptoday0>'.$metardewpointf."<smalluvunit> &nbsp;&deg;F";}
+	else if ($metardewpointf=='') {echo '<div class=metartemptoday0>'.$metardewpointf."<smalluvunit> N/A";}
 }
 ?></smalluvunit></div></div> 
  <div class="dewword">Dewpoint</div>
 
  <div class="metarhumcontainer1"><?php 
-if ($metar34humidity >85) {echo '<div class=metarhumtoday85-100>'.$metar34humidity ."<smalluvunit> &nbsp;%";}
-else if ($metar34humidity >70) {echo '<div class=metarhumtoday70-85>'.$metar34humidity ."<smalluvunit> &nbsp;%";}
-else if ($metar34humidity  >35) {echo '<div class=metarhumtoday35-70>'.$metar34humidity ."<smalluvunit> &nbsp;%";}
-else if ($metar34humidity >=0) {echo '<div class=metarhumtoday0-35>'.$metar34humidity ."<smalluvunit> &nbsp;%";}
-else if ($metar34humidity=='') {echo '<div class=metarhumtoday0-35><smalluvunit> N/A';}
+if ($metarhumidity >85) {echo '<div class=metarhumtoday85-100>'.$metarhumidity ."<smalluvunit> &nbsp;%";}
+else if ($metarhumidity >70) {echo '<div class=metarhumtoday70-85>'.$metarhumidity ."<smalluvunit> &nbsp;%";}
+else if ($metarhumidity  >35) {echo '<div class=metarhumtoday35-70>'.$metarhumidity ."<smalluvunit> &nbsp;%";}
+else if ($metarhumidity >=0) {echo '<div class=metarhumtoday0-35>'.$metarhumidity ."<smalluvunit> &nbsp;%";}
+else if ($metarhumidity=='') {echo '<div class=metarhumtoday0-35><smalluvunit> N/A';}
 ?></smalluvunit></div></div> 
 <div class="humword">&nbsp;Humidity</div>
 </div>
@@ -641,25 +641,25 @@ if ($windunit == 'km/h') {
 	$metarwind3 = 'kmh';
 	$metarwind4 = 'kts';
 }
-	if ($metar34windspeedkmh >=50) {$metarkmh = '<div class=metarwindtoday30>'.$metar34windspeedkmh."<smalluvunit> &nbsp;km/h";}
-	else if ($metar34windspeedkmh >=40) {$metarkmh = '<div class=metarwindtoday25>'.$metar34windspeedkmh."<smalluvunit>&nbsp; km/h";}
-	else if ($metar34windspeedkmh >=30) {$metarkmh = '<div class=metarwindtoday20>'.$metar34windspeedkmh."<smalluvunit>&nbsp; km/h";}
-	else if ($metar34windspeedkmh >0) {$metarkmh = '<div class=metarwindtoday10>'.$metar34windspeedkmh."<smalluvunit>&nbsp; km/h";}
+	if ($metarwindspeedkmh >=50) {$metarkmh = '<div class=metarwindtoday30>'.$metarwindspeedkmh."<smalluvunit> &nbsp;km/h";}
+	else if ($metarwindspeedkmh >=40) {$metarkmh = '<div class=metarwindtoday25>'.$metarwindspeedkmh."<smalluvunit>&nbsp; km/h";}
+	else if ($metarwindspeedkmh >=30) {$metarkmh = '<div class=metarwindtoday20>'.$metarwindspeedkmh."<smalluvunit>&nbsp; km/h";}
+	else if ($metarwindspeedkmh >0) {$metarkmh = '<div class=metarwindtoday10>'.$metarwindspeedkmh."<smalluvunit>&nbsp; km/h";}
 	else {$metarkmh = '<div class=metarwindtoday10>'.'0'."<smalluvunit>&nbsp; km/h";}
-	if ($metar34windspeedmph >=31.06) {$metarmph = '<div class=metarwindtoday30>'.$metar34windspeedmph."<smalluvunit> &nbsp;mph";}
-	else if ($metar34windspeedmph >=24.85) {$metarmph = '<div class=metarwindtoday25>'.$metar34windspeedmph."<smalluvunit> &nbsp;mph";}
-	else if ($metar34windspeedmph >=18.6) {$metarmph = '<div class=metarwindtoday20>'.$metar34windspeedmph."<smalluvunit> &nbsp;mph";}
-	else if ($metar34windspeedmph >0) {$metarmph = '<div class=metarwindtoday10>'.$metar34windspeedmph."<smalluvunit> &nbsp;mph";}
+	if ($metarwindspeedmph >=31.06) {$metarmph = '<div class=metarwindtoday30>'.$metarwindspeedmph."<smalluvunit> &nbsp;mph";}
+	else if ($metarwindspeedmph >=24.85) {$metarmph = '<div class=metarwindtoday25>'.$metarwindspeedmph."<smalluvunit> &nbsp;mph";}
+	else if ($metarwindspeedmph >=18.6) {$metarmph = '<div class=metarwindtoday20>'.$metarwindspeedmph."<smalluvunit> &nbsp;mph";}
+	else if ($metarwindspeedmph >0) {$metarmph = '<div class=metarwindtoday10>'.$metarwindspeedmph."<smalluvunit> &nbsp;mph";}
 	else {$metarmph = '<div class=metarwindtoday10>'.'0'."<smalluvunit> &nbsp;mph";}
-	if ($metar34windspeedkts >=26.9) {$metarkts = '<div class=metarwindtoday30>'.$metar34windspeedkts."<smalluvunit> &nbsp;kts";}
-	else if ($metar34windspeedkts >=21.5) {$metarkts = '<div class=metarwindtoday25>'.$metar34windspeedkts."<smalluvunit> &nbsp;kts";}
-	else if ($metar34windspeedkts >=16.19) {$metarkts = '<div class=metarwindtoday20>'.$metar34windspeedkts."<smalluvunit> &nbsp;kts";}
-	else if ($metar34windspeedkts >0) {$metarkts = '<div class=metarwindtoday10>'.$metar34windspeedkts."<smalluvunit> &nbsp;kts";}
+	if ($metarwindspeedkts >=26.9) {$metarkts = '<div class=metarwindtoday30>'.$metarwindspeedkts."<smalluvunit> &nbsp;kts";}
+	else if ($metarwindspeedkts >=21.5) {$metarkts = '<div class=metarwindtoday25>'.$metarwindspeedkts."<smalluvunit> &nbsp;kts";}
+	else if ($metarwindspeedkts >=16.19) {$metarkts = '<div class=metarwindtoday20>'.$metarwindspeedkts."<smalluvunit> &nbsp;kts";}
+	else if ($metarwindspeedkts >0) {$metarkts = '<div class=metarwindtoday10>'.$metarwindspeedkts."<smalluvunit> &nbsp;kts";}
 	else {$metarkts = '<div class=metarwindtoday10>'.'0'."<smalluvunit> &nbsp;kts";}
-	if ($metar34windspeedms >=13.8) {$metarms = '<div class=metarwindtoday30>'.$metar34windspeedms."<smalluvunit> &nbsp;m/s";}
-	else if ($metar34windspeedms >=11.1) {$metarms = '<div class=metarwindtoday25>'.$metar34windspeedms."<smalluvunit> &nbsp;m/s";}
-	else if ($metar34windspeedms >=8.3) {$metarms = '<div class=metarwindtoday20>'.$metar34windspeedms."<smalluvunit> &nbsp;m/s";}
-	else if ($metar34windspeedms >0) {$metarms = '<div class=metarwindtoday10>'.$metar34windspeedms."<smalluvunit> &nbsp;m/s";}
+	if ($metarwindspeedms >=13.8) {$metarms = '<div class=metarwindtoday30>'.$metarwindspeedms."<smalluvunit> &nbsp;m/s";}
+	else if ($metarwindspeedms >=11.1) {$metarms = '<div class=metarwindtoday25>'.$metarwindspeedms."<smalluvunit> &nbsp;m/s";}
+	else if ($metarwindspeedms >=8.3) {$metarms = '<div class=metarwindtoday20>'.$metarwindspeedms."<smalluvunit> &nbsp;m/s";}
+	else if ($metarwindspeedms >0) {$metarms = '<div class=metarwindtoday10>'.$metarwindspeedms."<smalluvunit> &nbsp;m/s";}
 	else {$metarms = '<div class=metarwindtoday10>'.'0'."<smalluvunit> &nbsp;m/s";}
 $metarspot1 = 'metar'.$metarwind1;
 $metarspot2 = 'metar'.$metarwind2;
@@ -732,11 +732,11 @@ var theme = "<?php echo $theme;?>";
 	if (theme == 'dark') {
     
 
-	var angle = "<?php echo $metar34windir;?>";
+	var angle = "<?php echo $metarwindir;?>";
 	angle = angle || 0;
 
 		
-	var Bearing = "<?php echo $metar34windir;?>";
+	var Bearing = "<?php echo $metarwindir;?>";
 	Bearing = Bearing || 0;
 		
 	// Bearing	
@@ -891,10 +891,10 @@ var svgNS = "http://www.w3.org/2000/svg";
 var svg = document.getElementById("Metarcompass");
 
 
-	var angle = "<?php echo $metar34windir;?>";
+	var angle = "<?php echo $metarwindir;?>";
 	angle = angle || 0;
 	
-	var Bearing = "<?php echo $metar34windir;?>";
+	var Bearing = "<?php echo $metarwindir;?>";
 	Bearing = Bearing || 0;
 		
 	// Bearing	
@@ -1048,24 +1048,24 @@ var polypointer = document.createElementNS(svgNS, "polygon"); // wind direction 
  
   <article>
   <div class=actualt style="background:teal;color:white;">&nbsp;&nbsp Airport Data </div>   
-  <stationid><?php echo $metar34stationid ; ?></stationid><br>
+  <stationid><?php echo $metarstationid ; ?></stationid><br>
   <div class="lotemp">
    <?php
 
 if ($distanceunit == 'km') {$metdist1 = round($airport1dist,0,PHP_ROUND_HALF_UP); $metdist2 = round($airport1dist / 1.609,0,PHP_ROUND_HALF_UP); $metunit1 = 'km'; $metunit2 = 'mi';}
 else if ($distanceunit == 'mi') {$metdist1 = round($airport1dist / 1.609,0,PHP_ROUND_HALF_UP); $metdist2 = round($airport1dist,0,PHP_ROUND_HALF_UP); $metunit1 = 'mi'; $metunit2 = 'km';}
-echo "Location <orange>",$metar34stationname  ;
+echo "Location <orange>",$metarstationname  ;
 echo '</orange> <orange>'.$metdist1.'</orange> '.$metunit1.' (<orange>';
 echo $metdist2;
 echo '</orange>'.$metunit2.')';
     ?>
  <div class="lotemp">
 <?php //metar raw
-echo "Metar: " .$metar34raw."";?>
+echo "Metar: " .$metarraw."";?>
 </div>
 <div class="hitemp">
 <?php //update timestamp
-date_default_timezone_set($tz);$date = $metar34time;$date = str_replace('@', ' ', $date);
+date_default_timezone_set($tz);$date = $metartime;$date = str_replace('@', ' ', $date);
 $date = strtotime($date) + 60 * 60 * $UTC; echo date('jS M H:i',$date);
 ?> </div></div>
 
@@ -1074,21 +1074,20 @@ $date = strtotime($date) + 60 * 60 * $UTC; echo date('jS M H:i',$date);
   <article>
   <div class=actualt style="background:teal;color:white;">&nbsp;&nbsp Raw Metar Info</div>  
   <div class="lotemp">
-  <?php echo $info?> Raw METAR is the most common format in the world for the transmission of observational divum data. It is highly standardized through the International Civil Aviation Organization (ICAO), which allows it to be understood throughout most of the world.</span></div>
+  <?php echo $info?> Raw METAR is the most common format in the world for the transmission of observational weather data. It is highly standardized through the International Civil Aviation Organization (ICAO), which allows it to be understood throughout most of the world.</span></div>
   </article> 
   
   <article>
   <div class=actualt style="background:teal;color:white;">&nbsp;&nbsp API  Info</div>  
   <div class="lotemp">
-  <?php echo $info?> Data Provided by </span><a href="https://www.checkwx.com/divum/<?php echo $icao1;?>" title="https://www.checkwx.com/divum/<?php echo $icao1;?>" target="_blank" ><br><img src=img/checkwx.svg width=130px alt="https://www.checkwx.com/divum/<?php echo $icao1;?>"></a></span></div>
+  <?php echo $info?> Data Provided by </span><a href="https://www.checkwx.com/weather/<?php echo $icao1;?>" title="https://www.checkwx.com/weather/<?php echo $icao1;?>" target="_blank" ><br><img src=img/checkwx.svg width=130px alt="https://www.checkwx.com/weather/<?php echo $icao1;?>"></a></span></div>
   </article> 
   
   
   <article>
   <div class=actualt style="background:teal;color:white;">&nbsp;&nbsp &copy; Info</div>  
   <div class="lotemp">
-  <?php echo $info?> CSS/SVG/PHP scripts were developed by <a href="https://divumwx.com" title="divumwx.com" target="_blank" style="font-size:9px;">divumwx.com</a>  for use in the divumwx template &copy; 2015-<?php echo date('Y');?>
-  <br><br>
+   <br><br>
   <?php echo $info?> Guide Info provided  by <a href="https://en.wikipedia.org/wiki/METAR" title="https://en.wikipedia.org/wiki/METAR" target="_blank" style="font-size:9px;">Metar-Wikipedia </a>  
   </div></article> 
    

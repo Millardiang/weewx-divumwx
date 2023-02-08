@@ -4,7 +4,7 @@
 Language Translation File for HOMEWEATHERSTATION Template
 Language: Greek
 Translation By : Athanasios Tsioukanaras (meteothes.gr)
-Developed By: Lightmaster/Brian Underdown/Erik M Madsen
+Developed By: Lightmaster//Erik M Madsen
 4th August 2017
 Revised: 2019
 -----------------

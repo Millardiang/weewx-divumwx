@@ -1,6 +1,6 @@
 <?php 
-require('dvmCombinedData.php');
-include('userSettings.php');
+include('dvmCombinedData.php');
+//include('userSettings.php');
 if ($wind["units"] == "kts") { echo $wind["units"] = "kts"; }
 ?>
 <meta http-equiv="Content-Type: text/html; charset=UTF-8"/>
@@ -69,40 +69,40 @@ if ($wind["units"] == 'mph'){$wind["wind_run"]=$wind["wind_run"]*0.621371;}
 else if ($wind["units"] == 'kts'){$wind["wind_run"]=$wind["wind_run"]*0.621371;}
 else {$wind["wind_run"]=$wind["wind_run"]*1;}
 
-echo ' <div class=weather34windrun>'.$windalert3.' &nbsp;<grey><valuetext1>',number_format($wind["wind_run"],1);?>
-<grey><weather34windrunspan></valuetext>
-<?php if ($wind["units"] == 'mph') echo 'mi'; else if ($wind["units"] == 'm/s') echo 'km'; else if ($wind["units"] == 'kts') echo 'mi';else echo 'km';?></weather34windrunspan>
+echo ' <div class=divumwxwindrun>'.$windalert3.' &nbsp;<grey><valuetext1>',number_format($wind["wind_run"],1);?>
+<grey><divumwxwindrunspan></valuetext>
+<?php if ($wind["units"] == 'mph') echo 'mi'; else if ($wind["units"] == 'm/s') echo 'km'; else if ($wind["units"] == 'kts') echo 'mi';else echo 'km';?></divumwxwindrunspan>
 </div></div><br /><div class=windrun1><?php echo  $lang['Wind Run'];?></div>
 <?php // beaufort
 if ($wind["speed_bft"] >= 12) {
-  echo '<div class=weather34beaufort6>' . $beaufort12 . "&nbsp; " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort6>' . $beaufort12 . "&nbsp; " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 11) {
-  echo '<div class=weather34beaufort6>' . $beaufort11 . "&nbsp; " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort6>' . $beaufort11 . "&nbsp; " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 10) {
-  echo '<div class=weather34beaufort6>' . $beaufort10 . "&nbsp; " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort6>' . $beaufort10 . "&nbsp; " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 9) {
-  echo '<div class=weather34beaufort6>' . $beaufort9 . "&nbsp; " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort6>' . $beaufort9 . "&nbsp; " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 8) {
-  echo '<div class=weather34beaufort6>' . $beaufort8 . "&nbsp; " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort6>' . $beaufort8 . "&nbsp; " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 7) {
-  echo '<div class=weather34beaufort6>' . $beaufort7 . "&nbsp; " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort6>' . $beaufort7 . "&nbsp; " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 6) {
-  echo '<div class=weather34beaufort6>' . $beaufort6 . "&nbsp; " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort6>' . $beaufort6 . "&nbsp; " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 5) {
-  echo '<div class=weather34beaufort4-5>' . $beaufort5 . "&nbsp; " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort4-5>' . $beaufort5 . "&nbsp; " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 4) {
-  echo '<div class=weather34beaufort4-5>' . $beaufort4 . "&nbsp; " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort4-5>' . $beaufort4 . "&nbsp; " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 3) {
-  echo '<div class=weather34beaufort3-4>' . $beaufort3 . "&nbsp; " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort3-4>' . $beaufort3 . "&nbsp; " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 2) {
-  echo '<div class=weather34beaufort1-3>' . $beaufort2 . "&nbsp; " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort1-3>' . $beaufort2 . "&nbsp; " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 1) {
-  echo '<div class=weather34beaufort1-3>' . $beaufort1 . "&nbsp; " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort1-3>' . $beaufort1 . "&nbsp; " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 0) {
-  echo '<div class=weather34beaufort1-3>' . $beaufort0 . "&nbsp; " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort1-3>' . $beaufort0 . "&nbsp; " . $wind["speed_bft"];
 }
 ?>
-<weather34bftspan>BFT<weather34bftspan></div>
+<divumwxbftspan>BFT<divumwxbftspan></div>
 <div class="beaufort1"><?php
 if ($wind["speed_bft"] == 0) {
   echo "Calm";

@@ -1,11 +1,11 @@
-<?php include('fixedSettings.php');$url = 'https://skynetweather.com/html/divumwx/index.php';
+<?php include('dvmCombinedData.php');
 echo "<body style='background-color:#222328'>";
 ?>
 <!DOCTYPE html>
 <html lang="en" >
 <head>
   <meta charset="UTF-8">
-  <title>divum Station Bio Info card</title>  
+  <title>Weather Station Bio Info card</title>  
  <style>
  @charset "UTF-8";/*!
  * Flexgrid v2.2.0 (https://flexgrid.co)
@@ -15,7 +15,7 @@ echo "<body style='background-color:#222328'>";
 </style>
 </head>
 <body>
-<!--div class="divumwxdarkbrowser" url="<?php echo $stationlocation ?> divum Station Information"></div-->
+<!--div class="divumwxdarkbrowser" url="<?php echo $stationlocation ?> Weather Station Information"></div-->
  
   <div class="container:fluid">
     <div class="row xs:center xs:middle">
@@ -25,10 +25,10 @@ echo "<body style='background-color:#222328'>";
                 <div class="card:header">
                     <div class="card:info">
                         <h3><?php echo $stationlocation ;?></h3>
-                        <p>divum Station Information</p>
+                        <p>Weather Station Information</p>
                     </div>
                     <div class="card:image">
-                        <img src="img/designedfor-1.svg" alt="divumwx logo">
+                        <img src="img/icon-weewx.svg" alt="weewx logo">
                     </div>
                 </div>
                 <div class="card:content">

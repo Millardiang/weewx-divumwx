@@ -35,7 +35,7 @@ if ($code == "warn_no_data")
 { ?>
   <p><main class="grid3"><articlegraph3 class="alert-row-narrow" style="background-color:white; font-size:10px;"><img src="css/svg/icon-warning-noalert-white.svg" style="width:75px; height:75px;"><ul><li><?php
         echo "NO ADVISORIES in force for this location at the present time."
-?></li></br><li><?php echo "The divum alerts used by this website are provided by AerisWeather using data supplied to them by NWS.";
+?></li></br><li><?php echo "The weather alerts used by this website are provided by AerisWeather using data supplied to them by NWS.";
 ?></li></ul></articlegraph3>
 <?php
 }

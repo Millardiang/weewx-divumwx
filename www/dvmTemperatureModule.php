@@ -26,8 +26,8 @@
 </style><?php
 
 include('dvmCombinedData.php');
-include('common.php');
-include('userSettings.php');
+//include('common.php');
+//include('userSettings.php');
 
 if ($theme === "dark")
 {$bordercolor = "#393d40";}
@@ -122,7 +122,7 @@ else if(anyToC($temp["outside_now"])<100){$tempcolor = "#e26870";}
     <div class="chartforecast4">
       <span class="yearpopup"><a alt="temp charts" title="temp charts" href="dvmMenuTemperaturePopup.php" data-lity><?php echo $menucharticonpage;?> Temperature Almanac and Derived Charts</a></span>
     </div>    
-    <span class='moduletitle4'>Temperature (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span>
+    <span class='moduletitle4'><?php echo $lang['temperatureModule'];?> (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span>
 
 <div class="updatedtime1"><?php if(file_exists($livedata)&&time()- filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>';else echo $online." ".$divum["time"];?></div>
 

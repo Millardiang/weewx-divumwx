@@ -1,7 +1,7 @@
 <?php
-include('common.php');
+//include('common.php');
 include('dvmCombinedData.php');
-include('userSettings.php');
+//include('userSettings.php');
 date_default_timezone_set($TZ);
 
 if ($uv["now"]==0){$uv["color"]="grey";}

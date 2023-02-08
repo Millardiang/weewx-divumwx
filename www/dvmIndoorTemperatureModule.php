@@ -7,7 +7,7 @@ $temp["indoor_now_feels"] = ($temp["indoor_now_feels"]-32)/9*5;}
 <div class="chartforecast">
        <span class="yearpopup"><a alt="Home Indoors" title="Home Indoors" href="dvmHomeIndoorPopup.php" data-lity><?php echo $info;?> Home Indoors</a></span>
     </div>
-    <span class='moduletitle'><?php echo $lang['indoorTempModule'];?></span>
+    <span class='moduletitle'><?php echo $lang['indoorTempModule'];?> (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span> </span>
 
 <?php
 if(anyToC($temp["indoor_now"])<=-10){$indoorcolor = "#8781bd";}

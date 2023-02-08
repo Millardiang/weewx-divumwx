@@ -58,10 +58,10 @@ $cycles19 = $parsed_json[$position19]["cycle"];
 $cycles20 = $parsed_json[$position20]["cycle"];
 
 
-$copyYear = 2015;
+$copyYear = 2023;
 $curYear = date("Y");
 $copyrightcredit =
-    "&copy; DivumWX.com original CSS/SVG/PHP " .
+    "&copy; DivumWX Team " .
     $copyYear .
     ($copyYear != $curYear ? "-" . $curYear : "Copyright");
 $indoorRefresh = 600; // 10 minutes
@@ -114,7 +114,7 @@ $chartsource = "dvmhighcharts";
 $creditsURL = ""; // for chart pages only
 $credits = "Data Supplied via divum Underground"; // for chart pages only
 $templateinfo = ""; // template information page
-$templateversion = "DVM-<maxblue>Alpha build 0.3.9</maxblue>";
+$templateversion = "DVM-<maxblue>Alpha build 0.4.0</maxblue>";
 
 $software = "WeeWX <span>Hardware</span> Users";
 $designedfor = "<br>For WeeWX Users";

@@ -4,6 +4,15 @@
 # * = New Addition
 # @ = Information
 
+## [0.4.0-alpha] - 8/2/2023
+@ - Removal of all historic w34 legacy code, new variable sets for DivumWX, updated CSS to match
+
+## [0.3.9-alpha] - 6/2/2023
+@ - CSS fix
+
+## [0.3.8-alpha] - 4/2/2023
+@ - prep for 0.4.0
+
 ## [0.3.7-alpha] - 31/1/2023
 @ - Rolled back corrupted files and reinstated missing files
 

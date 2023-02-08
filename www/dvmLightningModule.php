@@ -9,7 +9,7 @@ date_default_timezone_set($TZ);
     <span class='moduletitle'><?php echo $lang['lightningModule'];?></span>
 
 
-<div class="updatedtime1"><span><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$weather["time"];?></div>
+<div class="updatedtime1"><span><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?></div>
 
 <html>
 <?php

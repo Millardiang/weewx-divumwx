@@ -1,20 +1,10 @@
 <?php include('shared.php');
-// K-INDEX & SOLAR DATA FOR HOMEWEATHERSTATION TEMPLATE RADIO HAMS REJOICE :-) //
+// K-INDEX & SOLAR DATA 
 $str = file_get_contents('jsondata/ki.txt');
 $json = array_reverse(json_decode($str,false));
 $kp =  $json[1][1];
 echo $kp;
 
-
-	####################################################################################################
-	#	HOME divum STATION TEMPLATE by BRIAN UNDERDOWN 2015-18                                       #
-	#	CREATED FOR HOMEWEATHERSTATION TEMPLATE at https://divumwx.com/homeweatherstation/index.html # 
-	# 	                                                                                               #
-	# 	                                                                                               #
-	# 	divumwx AURORA SUN INDEX: 25th January 2018   	                                           #
-	# 	                                                                                               #
-	#   https://www.divumwx.com 	                                                                   #
-	####################################################################################################
 
 ?>
 
@@ -22,7 +12,7 @@ echo $kp;
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>divumwx Radio Aurora/ Northern Lights<br>s</title>
+  <title>Weather Radio Aurora/ Northern Lights<br>s</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   
@@ -148,8 +138,7 @@ Aurora scatter communications using specialised operating techniques allows comm
   </article> 
   <article>
   <div class=actualt>&nbsp;&nbsp &copy; Information</div>  
-  <?php echo $info?> CSS/SVG/PHP scripts were developed by <a href="https://divumwx.com" title="divumwx.com" target="_blank" style="font-size:9px;">divumwx.com</a>  for use in the divumwx template &copy; 2015-<?php echo date('Y');?></span>
-  <br><br><?php echo $info ;?> Data Provided by <a href="https://www.swpc.noaa.gov/products/station-k-and-indices" title="https://www.swpc.noaa.gov/products/station-k-and-indices" target="_blank"><br>NATIONAL OCEANIC AND ATMOSPHERIC ADMINISTRATION</a> 
+  <?php echo $info ;?> Data Provided by <a href="https://www.swpc.noaa.gov/products/station-k-and-indices" title="https://www.swpc.noaa.gov/products/station-k-and-indices" target="_blank"><br>NATIONAL OCEANIC AND ATMOSPHERIC ADMINISTRATION</a> 
   
         <br>  <br> <br>     
  <?php echo '<svg viewBox="0 0 32 32" width=7 height=7 fill=#9aba2f stroke=#9aba2f stroke-linecap=round stroke-linejoin=round stroke-width=6.25%><path d="M16 14 L16 23 M16 8 L16 10" /><circle cx=16 cy=16 r=14 /></svg>';

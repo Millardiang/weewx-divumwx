@@ -11,7 +11,7 @@
 // 	Issues for weewx-divumwx template should be addressed to https://github.com/steepleian/weewx-divumwx/issues #                                                                                              #
 // 	                                                                                                				#
 //###################################################################################################################
-include_once ('w34CombinedData.php');
+include_once ('dvmCombinedData.php');
 include_once ('common.php');
 include_once ('webserver_ip_address.php');
 include ('userSettings.php');include ('fixedSettings.php');
@@ -91,7 +91,7 @@ $paddingtop = $percentage;
 <!--Google / Search Engine Tags -->
 <meta itemprop="name" content="Home divum Station <?php echo $stationlocation; ?>">
 <meta itemprop="description" content="Home divum station providing current divum conditions for <?php echo $stationlocation; ?>">
-<meta itemprop="image" content="img/weather34_meta.png">
+<meta itemprop="image" content="img/divumwx_meta.png">
 <meta content="place" property="og:type">
 <meta content="divumwx" name="author">
     <meta content="INDEX,FOLLOW" name="robots">
@@ -574,7 +574,7 @@ else if ($weatherhardware == 'Weatherflow Air-Sky')
 {
     echo '<a href="http://weatherflow.com/" title="http://weatherflow.com/" target="_blank"><img src="img/wflogo.svg" width="125px" height=65px alt="http://weatherflow.com/" ></a>';
 }
-else echo '<a href="https://divumwx.com/homeweatherstation/" title="https://divumwx.com/homeweatherstation/" target="_blank"><br><img src="img/weather34logo.svg" width="40px" alt="https://divumwx.com/homeweatherstation/" class="homeweatherstationlogo" ><divumwx>designed by divumwx 2015-' . date('Y') . '</divumwx></a>'; ?> </div>
+else echo '<a href="https://divumwx.com/homeweatherstation/" title="https://divumwx.com/homeweatherstation/" target="_blank"><br><img src="img/divumwxlogo.svg" width="40px" alt="https://divumwx.com/homeweatherstation/" class="homeweatherstationlogo" ><divumwx>designed by divumwx 2015-' . date('Y') . '</divumwx></a>'; ?> </div>
 <div class=footertext>
 &nbsp;<?php echo $info ?>&nbsp;(<value><?php echo $templateversion ?></value>)&nbsp;
 <?php echo "WeeWX"; ?>-(<value><maxred><?php echo $divum["swversion"]; ?></value>)&nbsp;

@@ -1,15 +1,5 @@
 <?php
-//###################################################################################################################
-//	weewx-divumwx Template maintained by Ian Millard (Steepleian)                                 				#
-//	                                                                                                				#
-//  Contains original code by Ian Millard and collaborators															#
-//  © claydonsweather.org.uk original CSS/SVG/PHP 2020-2021                                                         #
-// 	                                                                                                				#
-// 	Issues for weewx-divumwx template should be addressed to https://github.com/steepleian/weewx-divumwx/issues #
-// 	                                                                                                				#
-//###################################################################################################################
 include "dvmCombinedData.php";
-include ('userSettings.php');
 error_reporting(0);
 if ($theme === "dark")
 {
@@ -31,12 +21,12 @@ elseif ($theme === "light")
   <title>AerisWeather Alerts</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link href="css/popup.<?php echo $theme; ?>.css?version=<?php echo filemtime('css/popup.' . $theme . '.css'); ?>" rel="stylesheet prefetch">
+<!--link href="css/popup.<?php echo $theme; ?>.css?version=<?php echo filemtime('css/popup.' . $theme . '.css'); ?>" rel="stylesheet prefetch"-->
 
 <body>
 <?php
 $forecastime = filemtime('jsondata/uk.txt'); ?>
-<div class="divumwxdarkbrowser" style="color:<?php echo $text1 ?>;" url="divum Alerts for <?php echo $stationName ?>
+<div class="divumwxdarkbrowser" style="color:<?php echo $text1 ?>;" url="Weather Alerts for <?php echo $stationName ?>
                                          <?php echo '&nbsp;';
 echo "Risk Level Updated &nbsp;" . date($timeFormatShort, $forecastime); ?>"></div>  
  
@@ -81,7 +71,7 @@ switch ($favcolor)
             {
                 $description[$i] = $parsed_json['channel']['item'][$i]['description'];
             }
-            $url[$i] = "https://www.metoffice.gov.uk/divum/warnings-and-advice/uk-warnings#";
+            $url[$i] = "https://www.metoffice.gov.uk/weather/warnings-and-advice/uk-warnings#";
             $validpos = strpos($description[$i], "valid");
             $validtext = substr($description[$i], $validpos);
             $datestring = explode(" ", $validtext);
@@ -111,19 +101,19 @@ switch ($favcolor)
 
             {
                 $alertlevel[$i] = "red";
-                $warntext = "The divum is very dangerous. Exceptionally intense meteorological phenomena have been forecast. Major damage and accidents are likely, in many cases with threat to life and limb, over a wide area. Keep frequently informed about detailed expected meteorological conditions and risks. Follow orders and any advice given by your authorities under all circumstances, be prepared for extraordinary measures.";
+                $warntext = "The weather is very dangerous. Exceptionally intense meteorological phenomena have been forecast. Major damage and accidents are likely, in many cases with threat to life and limb, over a wide area. Keep frequently informed about detailed expected meteorological conditions and risks. Follow orders and any advice given by your authorities under all circumstances, be prepared for extraordinary measures.";
             }
 
             else if (strpos($description[$i], "Amber") === 0)
             {
                 $alertlevel[$i] = "orange";
-                $warntext = "The divum is dangerous. Unusual meteorological phenomena have been forecast. Damage and casualties are likely to happen. Be very vigilant and keep regularly informed about the detailed expected meteorological conditions. Be aware of the risks that might be unavoidable. Follow any advice given by your authorities.";
+                $warntext = "The weather is dangerous. Unusual meteorological phenomena have been forecast. Damage and casualties are likely to happen. Be very vigilant and keep regularly informed about the detailed expected meteorological conditions. Be aware of the risks that might be unavoidable. Follow any advice given by your authorities.";
             }
 
             else if (strpos($description[$i], "Yellow") === 0)
             {
                 $alertlevel[$i] = "yellow";
-                $warntext = "The divum is potentially dangerous. The divum phenomena that have been forecast are not unusual, but be attentive if you intend to practice activities exposed to meteorological risks. Keep informed about the expected meteorological conditions and do not take any avoidable risk.";
+                $warntext = "The weather is potentially dangerous. The weather phenomena that have been forecast are not unusual, but be attentive if you intend to practice activities exposed to meteorological risks. Keep informed about the expected meteorological conditions and do not take any avoidable risk.";
             }
 
             if ($alertlevel[$i] == 'yellow' && strpos($description[$i], "wind") !== false)
@@ -251,8 +241,8 @@ switch ($favcolor)
     case "none": ?>
     
 <p><main class="grid3"><articlegraph3 class="alert-row-narrow" style="background-color:white; font-size:10px;"><img src="css/svg/icon-warning-noalert-white.svg" style="width:75px; height:75px;"><ul><li><?php
-        echo "NO divum ALERTS in force for this location at the present time."
-?></li></br><li><?php echo "The divum alerts used by this website are provided by AerisWeather using data supplied to them by meteoalarm.org and metoffice.gov.uk. An explanation of the severity of the alerts can be found in the Glossary below.";
+        echo "NO WEATHER ALERTS in force for this location at the present time."
+?></li></br><li><?php echo "The weather alerts used by this website are provided by AerisWeather using data supplied to them by meteoalarm.org and metoffice.gov.uk. An explanation of the severity of the alerts can be found in the Glossary below.";
 ?></li></ul></articlegraph3>
     <main class="grid1"><articlegraph class="alert-row-narrow" style="background-color:teal; font-size:12px;color:white;height:20px"><?php
         echo "<b>Glossary</b>";
@@ -261,17 +251,17 @@ switch ($favcolor)
     
       
     <main class="grid3"><articlegraph3 class="alert-row-narrow" style="background-color:yellow; font-size:10px;"><img src="css/svg/icon-warning-generic-yellow.svg" style="width:75px; height:75px;"><ul><li><?php
-        echo "YELLOW ALERT. Yellow warnings can be issued for a range of divum situations."
-?></li></br><li><?php echo "It is important to read the content of yellow warnings to determine which divum situation is being covered by the warning.";
+        echo "YELLOW ALERT. Yellow warnings can be issued for a range of weather situations."
+?></li></br><li><?php echo "It is important to read the content of yellow warnings to determine which weather situation is being covered by the warning.";
 ?></li></ul></articlegraph3>
     
     <main class="grid3"><articlegraph3 class="alert-row-narrow" style="background-color:orange; font-size:10px;"><img src="css/svg/icon-warning-generic-orange.svg" style="width:75px; height:75px;"><ul><li><?php
-        echo "AMBER ALERT. There is an increased likelihood of impacts from severe divum, which could potentially disrupt your plans."
+        echo "AMBER ALERT. There is an increased likelihood of impacts from severe weather, which could potentially disrupt your plans."
 ?></li></br><li><?php echo "This means there is the possibility of travel delays, road and rail closures, power cuts and the potential risk to life and property.";
 ?></li></ul></articlegraph3>
       
     <main class="grid3"><articlegraph3 class="alert-row-narrow" style="background-color:red; font-size:10px; color:white;"><img src="css/svg/icon-warning-generic-red.svg" style="width:75px; height:75px;"><ul><li><?php
-        echo "RED ALERT. Dangerous divum is expected and, if you have not done so already, you should take action now to keep yourself and others safe from the impact of the severe divum."
+        echo "RED ALERT. Dangerous weather is expected and, if you have not done so already, you should take action now to keep yourself and others safe from the impact of the severe weather."
 ?></li></br><li><?php echo "It is very likely that there will be a risk to life, with substantial disruption to travel, energy supplies and possibly widespread damage to property and infrastructure.";
 ?></li></ul></articlegraph3>
 <?php

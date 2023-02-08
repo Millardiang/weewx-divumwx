@@ -1,21 +1,9 @@
 <?php
-//###################################################################################################################
-//                                                           
-// 	                                                                                                				
-//  Contains original code by Ian Millard and collaborators															
-//  © claydonsweather.org.uk original CSS/SVG/PHP 2020-2021                                                          
-// 	                                                                                                				
-//                                                                                               
-// 	                                                                                                				
-//###################################################################################################################
 
 if (!file_exists("userSettings.php")) { 
 copy("initial_userSettings.php", "userSettings.php");}
 include_once ('dvmCombinedData.php');
-include_once ('common.php');
 include_once ('webserver_ip_address.php');
-include ('userSettings.php');
-include ('fixedSettings.php');
 date_default_timezone_set($TZ);
 header('Content-type: text/html; charset=utf-8');
 error_reporting(0);
@@ -29,9 +17,9 @@ error_reporting(0);
   <title><?php echo $stationlocation;?> Weather Station</title>
   <!--Google / Search Engine Tags -->
   <meta itemprop="image" content="img/divumMeta-1.png">
-  <meta itemprop="name" content="divum Station <?php echo $stationlocation;?>">
-  <meta content="divum station providing current divum conditions for <?php echo $stationlocation;?>" name="description">
-  <meta itemprop="description" content="Home divum station providing current divum conditions for <?php echo $stationlocation;?>">
+  <meta itemprop="name" content="Private Weather Station <?php echo $stationlocation;?>">
+  <meta content="Private weather station providing current weather conditions for <?php echo $stationlocation;?>" name="description">
+  <meta itemprop="description" content="Private weather station providing current weather conditions for <?php echo $stationlocation;?>">
   <meta content="DivumWX" name="author">
   <meta content="place" property="og:type">
   <meta content="INDEX,FOLLOW" name="robots">
@@ -165,7 +153,7 @@ error_reporting(0);
      </div>
    </div>
 <?php
-?>
+if($themelayout == "4" || $themelayout == "5"){?>
 <!-- position 14--->
 <div class="divum-container"> 
   <div class="divum-item">
@@ -186,6 +174,12 @@ error_reporting(0);
      </div>
    </div>
 
+<?php
+}
+
+
+if($themelayout == "5"){?>
+
 <!-- position 17--->
 <div class="divum-container"> 
   <div class="divum-item">
@@ -205,6 +199,9 @@ error_reporting(0);
       </div>
      </div>
    </div>
+<?php
+}
+?>
 
 
 <!--End Main Grid area-->
@@ -235,8 +232,31 @@ echo '<a href="https://https://claydonsweather.org.uk/" title="https://claydonsw
 
 <!--end of footer area -->
 
+<div class="menuadmin">
+  
+  <!-- Top Bar -->
+  <header class="menuadmin__header">
+    <div class="menutoolbar">
+      <div class="menutoolbar__left">
+        <button class="menubutton menubutton--primary"></button>
+      </div>
+      <div class="menutoolbar__center">
+        <button class="menubutton menubutton--primary">
+          <menutoptitle><?php echo strtoupper($stationlocation); ?>&nbsp; WEATHER STATION</menutoptitle>
+        </button>
+      </div>
+      <div class="menutoolbar__right">
+        <menuuptime>
+          <?php echo "Server " . (shell_exec('uptime -p')); ?>
+        </menuuptime>
+
+            <a href="dvmIndexTablet.php" title="select tablet mode"><topbartablet>T</topbartablet></a>
+
+      </div>
+    </div>
+  </header>
 <?php 
 include_once ('dvmUpdater.php');
-include_once ('dvmMenuDashboard.php');
+include_once ('dvmSideMenu.php');
 ?>
 </html>

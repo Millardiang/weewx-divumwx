@@ -4,7 +4,7 @@
 <html >
 <head>
   <meta charset="UTF-8">
-  <title>divumwx divum STATION HARDWARE INFORMATION</title>
+  <title>WEATHER STATION HARDWARE INFORMATION</title>
      
       <style>
 .container .title-card,button,p{font-family:Helvetica,Arial,sans-serif}body{padding:0;margin:0;box-sizing:border-box;background:0;height:300px;font-family:Arial, Helvetica, sans-serif;line-height:16px;}
@@ -13,8 +13,8 @@
 </style>
 </head>
 <body>
-<div class="divumwxdarkbrowser" url="divumwx divum STATION HARDWARE INFORMATION"></div> 
+<div class="divumwxdarkbrowser" url="WEATHER STATION HARDWARE INFORMATION"></div> 
 <div class="container">
-<img src="img/weather34hardware.jpg?ver=5" width="790px" height="490px" alt="divumwx hardware" title="divumwx hardware">
+<img src="img/icon-weewx.svg?ver=5" width="790px" height="490px" alt="divumwx hardware" title="divumwx hardware">
 </div>
 </body></html>
