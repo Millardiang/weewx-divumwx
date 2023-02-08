@@ -1,12 +1,4 @@
 <?php 
-	####################################################################################################
-	#	HOME divum STATION TEMPLATE by  2015-2016-2017                                #
-	#	CREATED FOR HOMEWEATHERSTATION TEMPLATE at 													   #
-	#   https://divumwx.com/homeweatherstation/index.html 										   # 
-	# 	divum STATION TEMPLATE 2015-2017                 											   #
-	# 	                                                                                               #
-	#   https://www.divumwx.com 	                                                                   #
-	####################################################################################################
 include_once('livedata.php');include('common.php');header('Content-type: text/html; charset=utf-8');
 $json_string = file_get_contents("jsondata/almanac.txt");
 $parsed_json = json_decode($json_string);
