@@ -329,7 +329,7 @@ $lang['notifyFreezing']          = "Below Freezing";
 $lang['timeTop']                 = 'Station <ored>Time';
 $lang['airQualityTop']           = 'Air Quality <ored>Current PM<sub>2.5</sub> Concentration';
 $lang['lightningTop']            = 'Lightning <ored>Strikes';
-$lang['advisoriesTop']           = 'divum <ored>Outlook and Advisories';
+$lang['advisoriesTop']           = 'Weather <ored>Outlook and Advisories';
 //Main Modules
 $lang['temperatureModule']       = 'Temperature';
 $lang['forecastModule']          = 'Forecast';
@@ -341,7 +341,7 @@ $lang['rainfallModule']          = 'Rainfall';
 $lang['solarUvLuxModule']        = 'Solar | UVI | Lux';
 $lang['lightningModule']         = 'Lightning';
 $lang['airqualityModule']        = 'Air Quality | AQI';
-$lang['webcamModule']            = 'divum Camera';
+$lang['webcamModule']            = 'Weather Camera';
 $lang['earthDaylightModule']     = 'Earth Daylight';
 $lang['moonPhaseModule']         = 'Current Moonphase';
 $lang['earthquakeModule']        = 'Earthquake';
