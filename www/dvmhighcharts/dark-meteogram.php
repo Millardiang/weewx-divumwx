@@ -8,7 +8,7 @@
 		<style type="text/css"></style>
 <style>
 // Global font
-@import 'https://fonts.googleapis.com/css?family=Unica+One';
+
 
 // Chart background, point stroke for markers and columns etc
 $background-color: #2a2a2b;
