@@ -17,7 +17,7 @@ Next find the following sections in the userSettins.php file: -
 
             dvmAirqualityTop.php
             dvmLightningTop.php
-            dvmRainfalMonthYearTop.php
+            dvmRainfallMonthYearTop.php
             dvmTemperatureYearTop.php
             dvmWindGustYearTop.php
 
