@@ -1734,7 +1734,63 @@ $windchillwu='<svg "divumwx windchill wu icon" width="10px" height="10px" viewBo
 $lightningalert8='<svg id="divumwx wu lightning alert large" width="8pt" height="8pt" fill="#ff552e" viewBox="0 0 20 20"><path d="M19.64 16.36L11.53 2.3A1.85 1.85 0 0 0 10 1.21 1.85 1.85 0 0 0 8.48 2.3L.36 16.36C-.48 17.81.21 19 1.88 19h16.24c1.67 0 2.36-1.19 1.52-2.64zM11 16H9v-2h2zm0-4H9V6h2z"/></svg>';
 $rainfallalert8='<svg id="divumwx wu rainfall alert" width="8pt" height="8pt" fill="#009bab" viewBox="0 0 20 20"><path d="M19.64 16.36L11.53 2.3A1.85 1.85 0 0 0 10 1.21 1.85 1.85 0 0 0 8.48 2.3L.36 16.36C-.48 17.81.21 19 1.88 19h16.24c1.67 0 2.36-1.19 1.52-2.64zM11 16H9v-2h2zm0-4H9V6h2z"/></svg>';
 $infowu='<svg id=wu-info viewBox="0 0 32 32" width="9px" height="9px" fill=#3b9cac stroke=#3b9cac stroke-linecap=round stroke-linejoin=round stroke-width=6.25%><path d="M16 14 L16 23 M16 8 L16 10" /><circle cx=16 cy=16 r=14 /></svg> ';
-$humidity='<svg data-name="Layer 1" id="Layer_1" viewBox="0 0 64 64" width="7pt" height="7pt" version="1.1"><defs><style>.cls-1{fill:currentColor;}.cls-2{fill:#fff;}.cls-3{fill:none;stroke:#fff;stroke-linecap:round;stroke-linejoin:round;stroke-width:2px;}</style></defs><title/><path class="cls-1" d="M50,38.36a18.5,18.5,0,0,1-37,0C13,22.17,28,7.14,31.5,7.14S50,22.17,50,38.36Z"/><path class="cls-2" d="M29.3,34.07c0,3.32-2.1,5.05-4.4,5.05s-4.32-1.81-4.32-4.79,1.73-5,4.44-5S29.3,31.36,29.3,34.07Zm-6,.17c0,1.66.56,2.86,1.64,2.86s1.56-1.07,1.56-2.86c0-1.61-.44-2.86-1.59-2.86S23.34,32.66,23.34,34.24ZM43,40.67c0,3.32-2.1,5.05-4.4,5.05s-4.3-1.81-4.32-4.79,1.73-5,4.44-5S43,38,43,40.67Zm-5.93.17c0,1.66.54,2.86,1.61,2.86s1.56-1.07,1.56-2.86c0-1.61-.42-2.86-1.56-2.86S37.11,39.25,37.11,40.84Z"/><line class="cls-3" x1="36.7" x2="27.45" y1="29.69" y2="44.72"/></svg>';
+$humidity='<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   data-name="Layer 1"
+   id="Layer_1"
+   viewBox="0 0 64 64"
+   width="7pt"
+   height="7pt"
+   version="1.1"
+   sodipodi:docname="humidity.svg"
+   inkscape:version="1.1 (c4e8f9e, 2021-05-24)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview884"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="pt"
+     showgrid="false"
+     inkscape:zoom="74.357143"
+     inkscape:cx="4.6666667"
+     inkscape:cy="4.6599424"
+     inkscape:window-width="1312"
+     inkscape:window-height="1081"
+     inkscape:window-x="0"
+     inkscape:window-y="25"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="Layer_1" />
+  <defs
+     id="defs873">
+    <style
+       id="style871">.cls-1{fill:currentColor;}.cls-2{fill:#fff;}.cls-3{fill:none;stroke:#fff;stroke-linecap:round;stroke-linejoin:round;stroke-width:2px;}</style>
+  </defs>
+  <title
+     id="title875" />
+  <path
+     class="cls-1"
+     d="M50,38.36a18.5,18.5,0,0,1-37,0C13,22.17,28,7.14,31.5,7.14S50,22.17,50,38.36Z"
+     id="path877"
+     style="fill:#0000ff" />
+  <path
+     class="cls-2"
+     d="M29.3,34.07c0,3.32-2.1,5.05-4.4,5.05s-4.32-1.81-4.32-4.79,1.73-5,4.44-5S29.3,31.36,29.3,34.07Zm-6,.17c0,1.66.56,2.86,1.64,2.86s1.56-1.07,1.56-2.86c0-1.61-.44-2.86-1.59-2.86S23.34,32.66,23.34,34.24ZM43,40.67c0,3.32-2.1,5.05-4.4,5.05s-4.3-1.81-4.32-4.79,1.73-5,4.44-5S43,38,43,40.67Zm-5.93.17c0,1.66.54,2.86,1.61,2.86s1.56-1.07,1.56-2.86c0-1.61-.42-2.86-1.56-2.86S37.11,39.25,37.11,40.84Z"
+     id="path879" />
+  <line
+     class="cls-3"
+     x1="36.7"
+     x2="27.45"
+     y1="29.69"
+     y2="44.72"
+     id="line881" />
+</svg>';
 $windalert2='<?xml version="1.0" encoding="UTF-8" standalone="no"?> <svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="9.1884375" height="8.1674995" viewBox="0 0 537.82987 265.71599" version="1.1" id="svg866" sodipodi:docname="windalert3.svg" inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)"> <metadata id="metadata872"> <rdf:RDF> <cc:Work rdf:about=""> <dc:format>image/svg+xml</dc:format> <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage" /> <dc:title></dc:title> </cc:Work> </rdf:RDF> </metadata> <defs id="defs870" /> <sodipodi:namedview pagecolor="#ffffff" bordercolor="#666666" borderopacity="1" objecttolerance="10" gridtolerance="10" guidetolerance="10" inkscape:pageopacity="0" inkscape:pageshadow="2" inkscape:window-width="1920" inkscape:window-height="1051" id="namedview868" showgrid="false" inkscape:zoom="55.533333" inkscape:cx="4.7112579" inkscape:cy="3.4674104" inkscape:window-x="-9" inkscape:window-y="-9" inkscape:window-maximized="1" inkscape:current-layer="svg866" /> <g id="windalert wu" transform="translate(-163.23437,-236.04091)" /> <g id="g854" transform="matrix(39.83925,0,0,39.83925,-358.55325,-701.87262)" style="fill:#cccccc;fill-opacity:1;opacity:0.98"> <path fill="#000000" fill-rule="evenodd" d="m 16,16 a 1,1 0 0 0 -1,1 h -1 a 2,2 0 1 1 2,2 v -1 a 1,1 0 1 0 0,-2 z m 2,10 a 1,1 0 0 1 -1,-1 h -1 a 2,2 0 1 0 2,-2 v 1 a 1,1 0 1 1 0,2 z m 2.5,-7.5 a 1,1 0 0 0 -1,1 h -1 a 2,2 0 1 1 2,2 v -1 a 1,1 0 1 0 0,-2 z" clip-rule="evenodd" id="path8" style="fill:#cccccc;fill-opacity:1" /> <path fill="#000000" d="m 9,18 h 7 v 1 H 9 Z m 0,2.5 h 11.5 v 1 H 9 Z M 9,23 h 9 v 1 H 9 Z" id="path10" style="fill:#cccccc;fill-opacity:1" /> </g> </svg>';
 
 ?>
