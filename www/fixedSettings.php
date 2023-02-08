@@ -15,7 +15,6 @@ $api2 = "xxx"; // optional divum Underground api key developer key '1234567890'
 $rise_zenith = 90 + 40 / 60; // try 50/60 or something/60 until it matches correctly to your sunrise .this allows you to fine tune the sunrise
 $set_zenith = 90 + 36 / 60; // try 50/60 or something/60 until it matches correctly to your sunset .this allows you to fine tune the sunset
 $forecastlocation = $stationlocation; //
-$version = $livedataFormat; // template version and type of source: Clientraw, MeteoBridge, Cumulus, etc (for display only)
 $emailform = $email; // PLEASE LEAVE FIXED
 $timeFormatShort = "H:i"; // time format to use when showing times ('g:i a' for '5:34 pm'; 'H:i' for '09:28')
 $showFeelsLike = true; // whether to always show either the heat index (when temp > 80F/27C) or real feel (when temp between 50F/10C and 80F/27C) even when no concern
@@ -64,38 +63,8 @@ $copyrightcredit =
     "&copy; DivumWX Team " .
     $copyYear .
     ($copyYear != $curYear ? "-" . $curYear : "Copyright");
-$indoorRefresh = 600; // 10 minutes
-$advisoryRefresh = 60; // 60 seconds
-$tempRefresh = 60; // 60 seconds
-$skyRefresh = 600; // 10 minutes
-$windSpeedRefresh = 04; // 4 seconds
-$baroRefresh = 300; // 5 minutes
-$windDirRefresh = 04; // 4 seconds
-$solarRefresh = 300; // 10 minutes
-$moonRefresh = 300; // 30 minutes
-$rainRefresh = 60; // 60 seconds
-$p12Refresh = 600; // 10 minutes        Position 12 refresh (if not webcam)
-$p13Refresh = 600; // 10 minutes        Last Postion refresh (if not webcam)
-$moonphaseRefresh = 600; // 10 minutes
-$eqRefresh = 600; // 10 minutes
+
 $moonRefresh = 3600;
-$aqiRefresh = 60;
-$forecastRefresh = 900; // 15 minutes
-$notificationcenterRefresh = 300; // 5 minutes set refresh time for notification of earthquakes default 5 minutes
-$wuupdate = 1800; // 30 minutes
-$wfupdate = 60; // weatherflow api 60 seconds
-$camRefresh = 60; // 1 minute refresh on camera popup
-// Thresholds for warnings or notifications
-$notifyDistEQ = 300; // miles if $windunit is mph otherwise km
-$notifyEQMag = 5; // set this to minimum magnitude of earthquake for notifications, typically 5 or 6, or you can set to 12 to switch off if not required
-$notifyWindGust = 22; // knots; 22 knots, which is 40.7 km/h, 35 = 40.2 mph, 40 = 20.5  m/s
-$notifyHeatIndex = 30; // degrees C, default is 30 celsius which is 86 degrees F
-$notifyWindchill = 3; // degrees C, default is 10 celsius which is 50 degrees F
-$notifyFeelslike = 3; // degrees C, default is 10 celsius which is 50 degrees F
-$notifyDewpointcold = 3; // degrees C, default is 8 celsius 46.4 degrees F OR WHATEVER MAKES YOU FEEL COLDER
-$notifyRainRate = 7.62; // millimeters, default is 10 which is 0.4 in"
-$notifyDewPoint = 21; // dewpoint comfortable zone alert 22 degrees C or 71.6 degrees F OR WHATEVER MAKES YOU FEEL UNCOMFORTABLY HOT
-$notifyFlooding = 25.4; // dewpoint comfortable zone alert 22 degrees C or 71.6 degrees F OR WHATEVER MAKES YOU FEEL UNCOMFORTABLY HOT
 
 $theme1 = $theme;
 
@@ -108,19 +77,16 @@ $scriptcredits =
     date("Y") .
     ""; // for modules
 $creditsEnabled = "true"; // for chart pages only
-$creditsmysql = "divum Data Recorded from ".$stationName." Database"; //for chart pages only
-$wucredits = "Data provided by divum Underground"; // for chart pages only
+
 $chartsource = "dvmhighcharts";
 $creditsURL = ""; // for chart pages only
-$credits = "Data Supplied via divum Underground"; // for chart pages only
-$templateinfo = ""; // template information page
-$templateversion = "DVM-<maxblue>Alpha build 0.4.0</maxblue>";
+
+
+$templateversion = "DVM-<maxblue>Alpha build 0.4.2</maxblue>";
 
 $software = "WeeWX <span>Hardware</span> Users";
 $designedfor = "<br>For WeeWX Users";
-$chartversion = "(WUDATACHARTS)";
-$somethinggoeshere = "d4586dec-e7a2-47ae-99b6-25527b2563c9";
-$chartversionmysql = "(DATACHARTS WeeWX Database Version)";
+
 if (
     array_key_exists("theme", $_GET) &&
     ($_GET["theme"] == "dark" || $_GET["theme"] == "light")
