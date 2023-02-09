@@ -82,7 +82,7 @@ $chartsource = "dvmhighcharts";
 $creditsURL = ""; // for chart pages only
 
 
-$templateversion = "DVM-<maxblue>Alpha build 0.4.2</maxblue>";
+$templateversion = "DVM-<maxblue>Alpha build 0.4.3</maxblue>";
 
 $software = "WeeWX <span>Hardware</span> Users";
 $designedfor = "<br>For WeeWX Users";

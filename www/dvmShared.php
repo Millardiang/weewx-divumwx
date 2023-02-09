@@ -1614,7 +1614,7 @@ $aqiexclamationmark='<svg id="aqi-info" viewBox="0 0 32 32" width="32" height="3
 $aqialert='<svg id="aqi-alert" viewBox="0 0 32 32" width="28" height="28" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M16 3 L30 29 2 29 Z M16 11 L16 19 M16 23 L16 25" /></svg>';
 $aqiclock='<svg id="aqi-clock" viewBox="0 0 32 32" width="10" height="10" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="16" cy="16" r="14" /><path d="M16 8 L16 16 20 20" /></svg>';
 $moonpopup ='<svg id="divumwx moon popup icon" viewBox="0 0 32 32" width="9" height="9" fill="currentcolor" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%"><circle cx="16" cy="16" r="14" /><path d="M6 6 L26 26" /></svg>';
-$calendar34 ='<svg id="divumwx clock" viewBox="0 0 32 32" width="22" height="22" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="16" cy="16" r="14" /><path d="M16 8 L16 16 20 20" /></svg>';
+$calendardvm ='<svg id="divumwx clock" viewBox="0 0 32 32" width="22" height="22" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="16" cy="16" r="14" /><path d="M16 8 L16 16 20 20" /></svg>';
 $rainsvg= '<svg id="divumwx raindrop" x="0px" y="0px" viewBox="0 0 512 512" width="8px" fill="#01a4b5" stroke="#01a4b5" stroke-width="3%"><g><g><path d="M348.242,124.971C306.633,58.176,264.434,4.423,264.013,3.889C262.08,1.433,259.125,0,256,0	c-3.126,0-6.079,1.433-8.013,3.889c-0.422,0.535-42.621,54.287-84.229,121.083c-56.485,90.679-85.127,161.219-85.127,209.66	C78.632,432.433,158.199,512,256,512c97.802,0,177.368-79.567,177.368-177.369C433.368,286.19,404.728,215.65,348.242,124.971z M256,491.602c-86.554,0-156.97-70.416-156.97-156.97c0-93.472,123.907-263.861,156.971-307.658 C289.065,70.762,412.97,241.122,412.97,334.632C412.97,421.185,342.554,491.602,256,491.602z"/></g></g><g><g><path d="M275.451,86.98c-1.961-2.815-3.884-5.555-5.758-8.21c-3.249-4.601-9.612-5.698-14.215-2.45	c-4.601,3.249-5.698,9.613-2.45,14.215c1.852,2.623,3.75,5.328,5.688,8.108c1.982,2.846,5.154,4.369,8.377,4.369 c2.012,0,4.046-0.595,5.822-1.833C277.536,97.959,278.672,91.602,275.451,86.98z"/></g></g><g><g><path d="M362.724,231.075c-16.546-33.415-38.187-70.496-64.319-110.213c-3.095-4.704-9.42-6.01-14.126-2.914 c-4.706,3.096-6.01,9.421-2.914,14.127c25.677,39.025,46.9,75.379,63.081,108.052c1.779,3.592,5.391,5.675,9.148,5.675	c1.521,0,3.064-0.342,4.517-1.062C363.159,242.241,365.224,236.123,362.724,231.075z"/></g></svg>';
 $airok='<svg id="divumwx air quality ok" x="50px" y="0px" width="48px" fill="#9aba2f"  viewBox="0 0 1000 1000"><g><path d="M959.4,469.4c-16.9,0-30.6,13.7-30.6,30.6c0,236.4-192.3,428.7-428.7,428.7S71.3,736.4,71.3,500C71.3,263.6,263.6,71.3,500,71.3c93.7,0,182.7,29.7,257.4,85.8c13.5,10.2,32.7,7.4,42.9-6.1c10.2-13.5,7.4-32.7-6.1-42.8C708.8,43.9,607.1,10,500,10C229.8,10,10,229.8,10,500c0,270.2,219.8,490,490,490s490-219.8,490-490C990,483.1,976.3,469.4,959.4,469.4z"/><path d="M215.4,447.7c-12-12-31.3-12-43.3,0c-12,12-12,31.3,0,43.3l245,245c6,6,13.8,9,21.7,9c7.8,0,15.7-3,21.7-9L981,215.4c12-12,12-31.3,0-43.3c-12-12-31.3-12-43.3,0l-499,499L215.4,447.7z"/></g></svg>';
 $airokyellow='<svg id="divumwx air quality ok yellow" x="0px" y="0px" width="48px" fill="rgba(233, 171, 74, 1.000)"  viewBox="0 0 1000 1000">
@@ -1759,9 +1759,9 @@ $humidity='<?xml version="1.0" encoding="UTF-8" standalone="no"?>
      inkscape:document-units="pt"
      showgrid="false"
      inkscape:zoom="74.357143"
-     inkscape:cx="4.6666667"
-     inkscape:cy="4.6599424"
-     inkscape:window-width="1312"
+     inkscape:cx="2.8376561"
+     inkscape:cy="4.6061479"
+     inkscape:window-width="1836"
      inkscape:window-height="1081"
      inkscape:window-x="0"
      inkscape:window-y="25"
@@ -1776,9 +1776,9 @@ $humidity='<?xml version="1.0" encoding="UTF-8" standalone="no"?>
      id="title875" />
   <path
      class="cls-1"
-     d="M50,38.36a18.5,18.5,0,0,1-37,0C13,22.17,28,7.14,31.5,7.14S50,22.17,50,38.36Z"
+     d="m 53.885,39.6956 a 22.385,22.385 0 0 1 -44.77,0 c 0,-19.5899 18.15,-37.7762 22.385,-37.7762 4.235,0 22.385,18.1863 22.385,37.7762 z"
      id="path877"
-     style="fill:#0000ff" />
+     style="fill:#5991bc;stroke-width:1.21;fill-opacity:1" />
   <path
      class="cls-2"
      d="M29.3,34.07c0,3.32-2.1,5.05-4.4,5.05s-4.32-1.81-4.32-4.79,1.73-5,4.44-5S29.3,31.36,29.3,34.07Zm-6,.17c0,1.66.56,2.86,1.64,2.86s1.56-1.07,1.56-2.86c0-1.61-.44-2.86-1.59-2.86S23.34,32.66,23.34,34.24ZM43,40.67c0,3.32-2.1,5.05-4.4,5.05s-4.3-1.81-4.32-4.79,1.73-5,4.44-5S43,38,43,40.67Zm-5.93.17c0,1.66.54,2.86,1.61,2.86s1.56-1.07,1.56-2.86c0-1.61-.42-2.86-1.56-2.86S37.11,39.25,37.11,40.84Z"
@@ -1790,7 +1790,8 @@ $humidity='<?xml version="1.0" encoding="UTF-8" standalone="no"?>
      y1="29.69"
      y2="44.72"
      id="line881" />
-</svg>';
+</svg>
+';
 $windalert2='<?xml version="1.0" encoding="UTF-8" standalone="no"?> <svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="9.1884375" height="8.1674995" viewBox="0 0 537.82987 265.71599" version="1.1" id="svg866" sodipodi:docname="windalert3.svg" inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)"> <metadata id="metadata872"> <rdf:RDF> <cc:Work rdf:about=""> <dc:format>image/svg+xml</dc:format> <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage" /> <dc:title></dc:title> </cc:Work> </rdf:RDF> </metadata> <defs id="defs870" /> <sodipodi:namedview pagecolor="#ffffff" bordercolor="#666666" borderopacity="1" objecttolerance="10" gridtolerance="10" guidetolerance="10" inkscape:pageopacity="0" inkscape:pageshadow="2" inkscape:window-width="1920" inkscape:window-height="1051" id="namedview868" showgrid="false" inkscape:zoom="55.533333" inkscape:cx="4.7112579" inkscape:cy="3.4674104" inkscape:window-x="-9" inkscape:window-y="-9" inkscape:window-maximized="1" inkscape:current-layer="svg866" /> <g id="windalert wu" transform="translate(-163.23437,-236.04091)" /> <g id="g854" transform="matrix(39.83925,0,0,39.83925,-358.55325,-701.87262)" style="fill:#cccccc;fill-opacity:1;opacity:0.98"> <path fill="#000000" fill-rule="evenodd" d="m 16,16 a 1,1 0 0 0 -1,1 h -1 a 2,2 0 1 1 2,2 v -1 a 1,1 0 1 0 0,-2 z m 2,10 a 1,1 0 0 1 -1,-1 h -1 a 2,2 0 1 0 2,-2 v 1 a 1,1 0 1 1 0,2 z m 2.5,-7.5 a 1,1 0 0 0 -1,1 h -1 a 2,2 0 1 1 2,2 v -1 a 1,1 0 1 0 0,-2 z" clip-rule="evenodd" id="path8" style="fill:#cccccc;fill-opacity:1" /> <path fill="#000000" d="m 9,18 h 7 v 1 H 9 Z m 0,2.5 h 11.5 v 1 H 9 Z M 9,23 h 9 v 1 H 9 Z" id="path10" style="fill:#cccccc;fill-opacity:1" /> </g> </svg>';
 
 ?>

@@ -30,7 +30,7 @@ if ($lightning["source"] == "Boltek") {
 	else if ($lightning["bearingx"]<=326.25){$lightning["bearingx"]='NW';}
 	else if ($lightning["bearingx"]<=348.75){$lightning["bearingx"]='NWN';}
 	else {$lightning["bearingx"]='North';}
-	} else { $lightning["source"] = "0";}
+	}
 
 	if ($wind["units"] == "mph"){$lightning["last_distance"] = $lightning["last_distance"] * 0.621371;$lightning["unit"] = "mi";} else {$lightning["unit"] = "km";}
 ?>

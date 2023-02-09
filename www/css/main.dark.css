@@ -4162,7 +4162,7 @@ heatindex {
   line-height: 18px
 }
 
-.calendar34 {
+.calendardvm {
   position: absolute;
   left: 10px;
   top: 20px;
@@ -4356,7 +4356,7 @@ agolightning {
 
 .orangeclock {
   position: relative;
-  background: rgba(205, 82, 69, .8);
+  background: rgba(39, 123, 70, .8);
   padding: 0px;
   color: #fff;
   -moz-border-radius: 2px;
