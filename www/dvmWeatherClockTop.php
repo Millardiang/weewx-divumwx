@@ -104,7 +104,7 @@ else if ($theme === "light")
 ?>
       
 
-<div class="calendar34" style="padding-top: 10px" ><svg id="divumwxclock icon" width="60pt" height="60pt" viewBox="0 0 720 720" version="12-10-21" ></svg>
+<div class="calendardvm" style="padding-top: 10px" ><svg id="divumwxclock icon" width="60pt" height="60pt" viewBox="0 0 720 720" version="12-10-21" ></svg>
 </div><span id="theTime"></span></div>
 
 <div class="clock"  width="48" height="48" style="position:relative; top: 27px; left: 5px;">

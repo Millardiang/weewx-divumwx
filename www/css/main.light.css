@@ -4175,7 +4175,7 @@ heatindex {
   line-height: 18px
 }
 
-.calendar34 {
+.calendardvm {
   position: absolute;
   left: 10px;
   top: 20px;
@@ -4373,12 +4373,13 @@ agolightning {
   position: relative;
   background: rgba(245, 247, 252, 1);
   padding: 0px;
-  color: #d35d4e;
+  background: rgba(39, 123, 70, .8);
   border-radius: 2px;
   border: 1px solid rgba(230, 232, 239, .8);
   width: 6.5rem;
   height: 1.25rem;
   text-align: center;
+  color: white;
   margin-left: 40px;
   margin-top: 3px;
   font-size: .9rem;
