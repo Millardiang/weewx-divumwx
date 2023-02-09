@@ -1,5 +1,6 @@
 <?php
-include "userSettings.php";
+include ('userSettings.php');
+include ('dvmVersion.php');
 error_reporting(0);
 
 ###########################################################################
@@ -15,6 +16,7 @@ $api2 = "xxx"; // optional divum Underground api key developer key '1234567890'
 $rise_zenith = 90 + 40 / 60; // try 50/60 or something/60 until it matches correctly to your sunrise .this allows you to fine tune the sunrise
 $set_zenith = 90 + 36 / 60; // try 50/60 or something/60 until it matches correctly to your sunset .this allows you to fine tune the sunset
 $forecastlocation = $stationlocation; //
+$version = $livedataFormat; // template version and type of source: Clientraw, MeteoBridge, Cumulus, etc (for display only)
 $emailform = $email; // PLEASE LEAVE FIXED
 $timeFormatShort = "H:i"; // time format to use when showing times ('g:i a' for '5:34 pm'; 'H:i' for '09:28')
 $showFeelsLike = true; // whether to always show either the heat index (when temp > 80F/27C) or real feel (when temp between 50F/10C and 80F/27C) even when no concern
@@ -82,7 +84,7 @@ $chartsource = "dvmhighcharts";
 $creditsURL = ""; // for chart pages only
 
 
-$templateversion = "DVM-<maxblue>Alpha build 0.4.3</maxblue>";
+
 
 $software = "WeeWX <span>Hardware</span> Users";
 $designedfor = "<br>For WeeWX Users";
