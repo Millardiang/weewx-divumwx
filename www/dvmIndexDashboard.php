@@ -250,7 +250,7 @@ echo '<a href="https://https://claydonsweather.org.uk/" title="https://claydonsw
           <?php echo "Server " . (shell_exec('uptime -p')); ?>
         </menuuptime>
 
-            <a href="dvmIndexTablet.php" title="select tablet mode"><topbartablet>T</topbartablet></a>
+            <a href="dvmIndexTablet.php" title="Select Tablet Mode"><topbarbutton>T</topbarbutton></a>
 
       </div>
     </div>

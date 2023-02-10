@@ -1,7 +1,5 @@
 <?php
 
-//include_once('userSettings.php');
-//include_once('common.php');
 include('dvmCombinedData.php');
 
 date_default_timezone_set($TZ);
