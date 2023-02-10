@@ -8566,7 +8566,7 @@ divumwxdarkdaycircle {
   left: 75px
 }
 
-topbarimperial,
+imperial,
 topbartablet {
   display: flex;
   -webkit-border-radius: 2px;
@@ -8574,7 +8574,7 @@ topbartablet {
   width: 1.7em;
   height: 1.7em;
   padding: 1px;
-  background: 0;
+  topbarbackground: 0;
   font-weight: 500;
   font-family: weathertext2;
   font-size: .9em;
@@ -8590,6 +8590,21 @@ topbarimperial {
 topbartablet {
   border: 1px solid #009bab;
   color: #009bab
+}
+topbarbutton {
+  display: flex;
+  -webkit-border-radius: 2px;
+  border-radius: 2px;
+  width: 1.7em;
+  height: 1.7em;
+  padding: 1px;
+  background: rgba(39, 123, 70, .8);
+  color: white;
+  font-weight: 500;
+  font-family: weathertext2;
+  font-size: .9em;
+  align-items: center;
+  justify-content: center
 }
 
 .title {
