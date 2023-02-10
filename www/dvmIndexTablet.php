@@ -194,7 +194,7 @@ echo '<a href="https://https://claydonsweather.org.uk/" title="https://claydonsw
           <?php echo "Server " . (shell_exec('uptime -p')); ?>
         </menuuptime>
 
-            <a href="dvmIndexDashboard.php" title="select dashboard mode"><topbarimperial>D</topbarimperial></a>
+            <a href="dvmIndexDashboard.php" title="Select Full Dashboard Mode"><topbarbutton>D</topbarbutton></a>
 
       </div>
     </div>
