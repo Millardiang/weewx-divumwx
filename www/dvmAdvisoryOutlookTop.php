@@ -119,8 +119,9 @@ else if($advisoryzone == "au")
 $xml = simplexml_load_file("jsondata/au.txt") or die("Error: Cannot create object");
 $jsonData = json_encode($xml, JSON_PRETTY_PRINT);
 $parsed_json = json_decode($jsonData, true);
-if(($parsed_json['channel']['item'][0]['title'])!==null){$alertlevel="Yellow";}
-else $alertlevel="LightGreen";
+if(($parsed_json["channel"]["title"])!==null){$alertlevel="Yellow";}
+else {$alertlevel="outlook";}
+
 
 ?>
 
@@ -130,13 +131,13 @@ else $alertlevel="LightGreen";
 <?php 
 ///BOM Warning
 if (strpos($alertlevel,'Yellow') !== false)
- {echo '<spanelightning><alertadvisory2><a alt="Alerts" title="Alerts" href="' . $advisory . '" data-lity>'.$newalertyellow.'</alertadvisory2><alertvalue>Warning(s)<br>In Force</alertvalue>
+ {echo '<spanelightning><alertadvisory2><a alt="Alerts" title="Alerts" href="dvmAdvisoryAuPopup.php" data-lity>'.$newalertyellow.'</alertadvisory2><alertvalue>Warning(s)<br>In Force</alertvalue>
    </spanelightning></div></div></div>';}  
 
  
-else if (strpos($alertlevel,'LightGreen') !== false)
-  {echo '<spanelightning><alertadvisory><a alt="Alerts" title="Alerts" href="' . $advisory . '" data-lity>'.$newalertgreen.'</alertadvisory><alertvalue> Currently <lightgreen>No Alerts</lightgreen></alertvalue>
-  </spanelightning></div></div></div>';} 
+//outlook
+  else if ($alertlevel == "outlook")
+  {echo '<outlook-panel>'.$outlookmet.'</outlook-panel></div></div></div>';}  
 
 }
 
