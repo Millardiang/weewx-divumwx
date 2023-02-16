@@ -564,30 +564,18 @@ class CloudCover():
             lat = parts[2].split("&")[0]
             lon = parts[3].split("&")[0]
             url2 = settings_dict.get('cc2_url')
-            url3 = settings_dict.get('cc3_url')
-            url4 = settings_dict.get('cc4_url')
             file1 = "/tmp/divumwx/sat1.png"
             file2 = "/tmp/divumwx/sat2.png"
-            file3 = settings_dict.get('cc3_filename')
-            file4 = settings_dict.get('cc4_filename')
             time_interval = int(settings_dict.get('cc_interval', 600))
             logdbg("CloudCover Url 1 " + url1)
             logdbg("CloudCover Url 2 " + url2)
-            logdbg("CloudCover Url 3 " + url3)
-            logdbg("CloudCover Url 4" + url4)
             logdbg("CloudCover File 1 " + file1)
             logdbg("CloudCover File 2 " + file2)
-            logdbg("CloudCover File 3 " + file3)
-            logdbg("CloudCover File 4 " + file4)
             while True:
                 logdbg("CloudCover url1 exit code " + str(subprocess.call("wget -r -O " + "'" + file1 + "'" + " '" + url1 + "'", shell = True)))
                 os.chmod(file1, 0o666)
                 logdbg("CloudCover url2 exit code " + str(subprocess.call("wget -r -O " + "'" + file2 + "'" + " '" + url2 + "'", shell = True)))
                 os.chmod(file2, 0o666)
-                logdbg("CloudCover url3 exit code " + str(subprocess.call("wget -r -O " + "'" + file3 + "'" + " '" + url3 + "'", shell = True)))
-                os.chmod(file3, 0o666)
-                logdbg("CloudCover url4 exit code " + str(subprocess.call("wget -r -O " + "'" + file4 + "'" + " '" + url4 + "'", shell = True)))
-                os.chmod(file4, 0o666)
                 if os.stat(file1).st_size > 5000 and os.stat(file2).st_size > 5000:
                     alt = weewx.almanac.Almanac(time.time(), float(lat), float(lon)).sun.alt
                     pixarray = []
