@@ -158,7 +158,7 @@ function UpdateClock(){
   if(c<10){
     c="0"+c
   }
-  document.getElementById("theTime").innerHTML="<div class='weatherclock34'> "+i+" "+b+" "+h+" "+f+"<div class='orangeclock'>"+c+":"+a+":"+g+amorpm
+  document.getElementById("theTime").innerHTML="<div class='weatherclockdvm'> "+i+" "+b+" "+h+" "+f+"<div class='orangeclock'>"+c+":"+a+":"+g+amorpm
 }
 function StartClock(){clockID=setInterval(UpdateClock,500)}
 function KillClock(){clearTimeout(clockID)}
