@@ -16,7 +16,7 @@ error_reporting(0);
   
   <title><?php echo $stationlocation;?> Weather Station</title>
   <!--Google / Search Engine Tags -->
-  <meta itemprop="image" content="img/divumMeta-1.png">
+  <meta itemprop="image" content="img/divumMeta.png">
   <meta itemprop="name" content="Private Weather Station <?php echo $stationlocation;?>">
   <meta content="Home weather station providing current weather conditions for <?php echo $stationlocation;?>" name="description">
   <meta itemprop="description" content="Private weather station providing current weather conditions for <?php echo $stationlocation;?>">
@@ -28,9 +28,15 @@ error_reporting(0);
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name=apple-mobile-web-app-title content="WEATHER STATION">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, viewport-fit=cover">
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="theme-color" content="#ffffff">
+
+
   <link rel="manifest" href="site.webmanifest">
   <link href="css/main.<?php echo $theme;?>.css?version=<?php echo filemtime('css/main.' . $theme . '.css');?>" rel="stylesheet prefetch">
 
@@ -194,7 +200,7 @@ echo '<a href="https://https://claydonsweather.org.uk/" title="https://claydonsw
           <?php echo "Server " . (shell_exec('uptime -p')); ?>
         </menuuptime>
 
-            <a href="dvmIndexDashboard.php" title="Select Full Dashboard Mode"><topbarbutton>D</topbarbutton></a>
+            <a href="index.php" title="Select Full Dashboard Mode"><topbarbutton>D</topbarbutton></a>
 
       </div>
     </div>
