@@ -28,3 +28,5 @@ You will also have to add this stanza to your weewx.conf (manually for the time 
 ############################################################################## 
 
 Please note the latitude or longitude should be a maximum or 3 decimal places. Also no negative values if you are in a West of South location, just an absolute value for latitude or longitude example -12.345 should be entered as 12.345
+
+Also very very important you must delete dvmGetEarthMoon.php from your divumwx folder
