@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <title>weather current conditions</title>
 <?php
-//include('fixedSettings.php');
 include('dvmCombinedData.php');
 $iconset = "icon2";
 $cloud_region = explode("/", $TZ);
@@ -57,7 +56,6 @@ else echo $online,"";echo " ",	date($timeFormat,$forecastime);	?></div>
 
 <div class="cloudconverter">
 <?php //cloudbase
-
 
 $cloudcoverunit = '%';
 $clouds = "Cloudbase";

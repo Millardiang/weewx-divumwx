@@ -14,9 +14,11 @@
 include('dvmCombinedData.php');
 date_default_timezone_set($TZ);
 header('Content-type: text/html; charset=utf-8');
-?>
-    
-<?php
+$earthimg = "img/earth-1.jpg";
+if ($theme === "dark")
+{$circleborder = "rgb(30,32,36.1)";}
+else if ($theme === "light")
+{$circleborder = "white";} 
 $light = $alm["daylight"]; 
 $daylight = ltrim($light, '0'); 
 $dark = 24 - str_replace(':', '.', $alm["daylight"]);
@@ -39,7 +41,7 @@ $sun_elevation = round($sun_alt,2)."&deg;<div class=sunbelowdivumwx>&nbsp;</div>
     </div>
     <span class='moduletitle2'><?php echo $lang['earthDaylightModule'];?></span>
     
-<div class="updatedtime1"><?php if(file_exists($livedata)&&time() - filemtime($livedata)>3600) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?></div>
+<div class="updatedtime1"><?php if(file_exists($earthimg)&&time() - filemtime($earthimg)>3600) echo $offline. '<offline> Offline </offline>'; else echo $online." ".date("H:i:s", filemtime($earthimg));?></div>
 
 <div class="daylightmoduleposition"> 
 <?php echo 
@@ -57,13 +59,6 @@ $sun_elevation = round($sun_alt,2)."&deg;<div class=sunbelowdivumwx>&nbsp;</div>
 <!--div class="divumwxmoonphasem">Moon Phase <br>'.$alm["moonphase"].'<br>'.$lang['Moonrise'].'<br>'.'<blueu> '.$alm["moonrise"].'</blueu></div-->
 <!--div class="divumwxluminancem">Luminance<br> '.$alm["luminance"].' %<br>'.$lang['Moonset'].'<br>'.'<maxred> '.$alm["moonset"].'</maxred></div-->';
 
-?>
-<?php
-$earthimg = "img/earth-1.jpg"; 
-if ($theme === "dark")
-{$circleborder = "rgb(30,32,36.1)";}
-else if ($theme === "light")
-{$circleborder = "white";} 
 ?>
 
 <style>
