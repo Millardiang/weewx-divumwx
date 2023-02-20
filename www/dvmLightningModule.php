@@ -14,11 +14,20 @@ date_default_timezone_set($TZ);
 <html>
 <?php
 	if ($lightning["source"] == "Boltek") {
-		$json = "jsondata/ngxarchive.json";
-		$jsonobj = file_get_contents($json);
-		$arr = json_decode($jsonobj, true);
-		$lightning["bearingx"] = $arr['StrikeData'][0]['bng'];
-		$lightning["bearing"] = $arr['StrikeData'][0]['bng'];
+		$lightninglivedata = 'jsondata/nsd.txt';
+                $file_live = file_get_contents($lightninglivedata);
+                $lightningBolt = explode( ',',$file_live);
+	        $lightning['last_time']      = $lightningBolt[3]; // last strike date and time 
+                $lightning["last_distance"]  = $lightningBolt[5]; // last strike distance 
+                $lightning["laststriketype"]      = $lightningBolt[6]; // last strike type (cc+,cc-,cg+,cg-)
+                $lightning["hour_strike_count"]     = $lightningBolt[7]; // strikes last hour
+                $lightning["today_strike_count"]        = $lightningBolt[8]; // strikes today
+                $lightning["month_strike_count"]        = $lightningBolt[9]; // strikes this month
+                $lightning["year_strike_count"]         = $lightningBolt[10]; // strikes this year
+ 	        $lightning["bearing"] = $lightningBolt[4];
+	        $lightning["bearingx"] = $lightningBolt[4];	// Bearing ordinals
+                $lightning["bearingt"] = "Bearing";
+
 		// Bearing
 		if ($lightning["bearingx"]<=11.25){
 			$lightning["bearingx"]='North';
@@ -94,10 +103,11 @@ date_default_timezone_set($TZ);
 	var Last_detected = "<?php echo date('jS M H:i',$lightning['last_time']);?>";
 	var Last_distance = "<?php echo number_format($lightning["last_distance"],1);?>";
 	var Bearing = "<?php echo $lightning["bearing"];?>";
-	var Bearingx = "<?php echo $lightning["bearingx"];?>";  
+        var Bearingx = "<?php echo $lightning["bearingx"];?>";
+	var Bearingt = "Bearing"; 
 	var theme = "<?php echo $theme;?>";
-	var source = "<?php echo $source;?>";
-    var distunit = "<?php echo $lightning["distunit"];?>";
+	var source = "<?php echo $lightning["source"];?>";
+        var distunit = "<?php echo $lightning["distunit"];?>";
 	var svg = d3.select(".Strikes")
     			.append("svg")
     			//.style("background", "#292E35")
@@ -290,15 +300,6 @@ date_default_timezone_set($TZ);
 					.text("Distance");
 	}
 	if (source == 'Boltek') {
-			svg.append("text") // Last Bearing
-						.attr("x", 130)
-						.attr("y", 135)
-						.style("fill", "silver")
-						.style("font-family", "Helvetica")
-						.style("font-size", "10px")
-						.style("text-anchor", "left")
-						.style("font-weight", "normal")
-						.text("Bearing");
 	}
 
 	// Begin color Text output
@@ -357,7 +358,17 @@ date_default_timezone_set($TZ);
             	.style("font-weight", "normal")
 				.text(Last_distance+" "+(distunit));
 	if (source == "Boltek") {
-		svg.append("text") // Last Bearing
+
+	        svg.append("text") // Last Bearing
+						.attr("x", 130)
+						.attr("y", 135)
+						.style("fill", "silver")
+						.style("font-family", "Helvetica")
+						.style("font-size", "10px")
+						.style("text-anchor", "left")
+						.style("font-weight", "normal")
+						.text(Bearingt);
+                svg.append("text") // Last Bearing
 					.attr("x", 169)
 					.attr("y", 135)
 					.style("fill", "#2e8b57")

@@ -1,21 +1,27 @@
 <?php
-//include('common.php');
 include('dvmCombinedData.php');
-//include('userSettings.php');
 date_default_timezone_set($TZ);
-
-if ($uv["now"]==0){$uv["color"]="grey";}
-else if ($uv["now"]<3){$uv["color"]="#2e8b57";} // earth green
-else if ($uv["now"]<6){$uv["color"]="#fde396";} // pastel yellow
-else if ($uv["now"]<8){$uv["color"]="#ff964f";} // pastel orange
-else if ($uv["now"]<11){$uv["color"]="#ff6181";} // pastel red
-else {$uv["color"]="#be688b";} // pastel purple (jupiter)
+//align colours with Total sky UV index (provided by CAMS) https://climate-adapt.eea.europa.eu/en/observatory/evidence/projections-and-tools/cams-uv-index-forecast
+if ($uv["now"]<1){$uv["color"]="grey";}
+else if ($uv["now"]<2){$uv["color"]="#379925";} // darker green
+else if ($uv["now"]<3){$uv["color"]="#8bbe09";} // lighter green
+else if ($uv["now"]<4){$uv["color"]="#fff306";} // lighter yellow
+else if ($uv["now"]<5){$uv["color"]="#ffce0b";} // darker yellow
+else if ($uv["now"]<6){$uv["color"]="#f1a40a";} // lighter orange
+else if ($uv["now"]<7){$uv["color"]="#e87408";} // mid orange
+else if ($uv["now"]<8){$uv["color"]="#de5404";} // darker orange
+else if ($uv["now"]<9){$uv["color"]="#dd1d0f";} // red
+else if ($uv["now"]<10){$uv["color"]="#de006f";} // magenta
+else if ($uv["now"]<11){$uv["color"]="#a44c92";} // lighter purple
+else if ($uv["now"]<13){$uv["color"]="##6e67a6";} // darker purple
+else if ($uv["now"]<15){$uv["color"]="#6cceff";} // lighter cyan
+else {$uv["color"]="#40d2ff";} // darker cyan
 ?>
 
     <div class="chartforecast2">
        <span class="yearpopup"><a alt="solar" title="UV Guide" href="dvmMenuSolarUvLux.php" data-lity><?php echo $menucharticonpage;?> UV and Solar Almanacs and Guide</a></span>
     </div>
-    <span class='moduletitle2'>Solar | UV | Lux</span>
+    <span class='moduletitle2'><?php echo $lang['solarUvLuxModule'];?> </span>
 
 
 <div class="updatedtime1"><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>';else echo $online." ".$divum["time"];?></div>
