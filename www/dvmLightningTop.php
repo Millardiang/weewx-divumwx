@@ -6,34 +6,58 @@ error_reporting(0);
 ?>
 
 <?php
-if ($lightning["source"] == "Boltek") {
-    $json = "jsondata/ngxarchive.json";
-    $jsonobj = file_get_contents($json);
-    $arr = json_decode($jsonobj, true); 
-    $lightning["bearingx"] = $arr['StrikeData'][0]['bng'];
-    $lightning["bearing"] = $arr['StrikeData'][0]['bng'];
+	if ($lightning["source"] == "Boltek") {
+	        $lightninglivedata = 'jsondata/nsd.txt';
+                $file_live = file_get_contents($lightninglivedata);
+                $lightningBolt = explode( ',',$file_live);
+	        $lightning['last_time']      = $lightningBolt[3]; // last strike date and time 
+                $lightning["last_distance"]  = $lightningBolt[5]; // last strike distance 
+                $lightning["laststriketype"]      = $lightningBolt[6]; // last strike type (cc+,cc-,cg+,cg-)
+                $lightning["hour_strike_count"]     = $lightningBolt[7]; // strikes last hour
+                $lightning["today_strike_count"]        = $lightningBolt[8]; // strikes today
+                $lightning["month_strike_count"]        = $lightningBolt[9]; // strikes this month
+                $lightning["year_strike_count"]         = $lightningBolt[10]; // strikes this year
+ 	        $lightning["bearing"] = $lightningBolt[4];
+	        $lightning["bearingx"] = $lightningBolt[4];	// Bearing ordinals
+                $lightning["bearingt"] = "Bearing";
 
-	// Bearing	
-	if ($lightning["bearingx"]<=11.25){$lightning["bearingx"]='North';}
-	else if ($lightning["bearingx"]<=33.75){$lightning["bearingx"]='NNE';}
-	else if ($lightning["bearingx"]<=56.25){$lightning["bearingx"]='NE';}
-	else if ($lightning["bearingx"]<=78.75){$lightning["bearingx"]='ENE';}	
-	else if ($lightning["bearingx"]<=101.25){$lightning["bearingx"]='East';}
-	else if ($lightning["bearingx"]<=123.75){$lightning["bearingx"]='ESE';}
-	else if ($lightning["bearingx"]<=146.25){$lightning["bearingx"]='SE';}	
-	else if ($lightning["bearingx"]<=168.75){$lightning["bearingx"]='SSE';}
-	else if ($lightning["bearingx"]<=191.25){$lightning["bearingx"]='South';}	
-	else if ($lightning["bearingx"]<=213.75){$lightning["bearingx"]='SSW';}
-	else if ($lightning["bearingx"]<=236.25){$lightning["bearingx"]='SW';}	
-	else if ($lightning["bearingx"]<=281.25){$lightning["bearingx"]='West';}
-	else if ($lightning["bearingx"]<=303.75){$lightning["bearingx"]='WNW';}	
-	else if ($lightning["bearingx"]<=326.25){$lightning["bearingx"]='NW';}
-	else if ($lightning["bearingx"]<=348.75){$lightning["bearingx"]='NWN';}
-	else {$lightning["bearingx"]='North';}
-	}
+		// Bearing
+		if ($lightning["bearingx"]<=11.25){
+			$lightning["bearingx"]='North';
+		}else if ($lightning["bearingx"]<=33.75){
+			$lightning["bearingx"]='NNE';
+		}else if ($lightning["bearingx"]<=56.25){
+			$lightning["bearingx"]='NE';
+		}else if ($lightning["bearingx"]<=78.75){
+			$lightning["bearingx"]='ENE';
+		}else if ($lightning["bearingx"]<=101.25){
+			$lightning["bearingx"]='East';
+		}else if ($lightning["bearingx"]<=123.75){
+			$lightning["bearingx"]='ESE';
+		}else if ($lightning["bearingx"] <= 146.25){
+			$lightning["bearingx"] = 'SE';
+		}else if ($lightning["bearingx"]<=168.75){
+			$lightning["bearingx"]='SSE';
+		}else if ($lightning["bearingx"]<=191.25){
+			$lightning["bearingx"]='South';
+		}else if ($lightning["bearingx"]<=213.75){
+			$lightning["bearingx"]='SSW';
+		}else if ($lightning["bearingx"]<=236.25){
+			$lightning["bearingx"]='SW';
+		}else if ($lightning["bearingx"]<=281.25){
+			$lightning["bearingx"]='West';
+		}else if ($lightning["bearingx"]<=303.75){
+			$lightning["bearingx"]='WNW';
+		}else if ($lightning["bearingx"]<=326.25){
+			$lightning["bearingx"]='NW';
+		}else if ($lightning["bearingx"]<=348.75){
+			$lightning["bearingx"]='NWN';
+		}else {$lightning["bearingx"]='North';}
+	} 
 
-	if ($wind["units"] == "mph"){$lightning["last_distance"] = $lightning["last_distance"] * 0.621371;$lightning["unit"] = "mi";} else {$lightning["unit"] = "km";}
+	if ($wind["units"] == "mph"){$lightning["last_distance"] = $lightning["last_distance"] * 0.621371; $lightning["distunit"] = "mi";} else {$lightning["distunit"] = "km";}
 ?>
+
 
 
 <style>
@@ -89,12 +113,12 @@ if ($lightning["source"] == "Boltek") {
 	var Bearing = "<?php echo $lightning["bearing"];?>";
 	
 	var Bearingx = "<?php echo $lightning["bearingx"];?>";  
-	
+	var Bearingt = "Bearing";
 	var theme = "<?php echo $theme;?>";
 	
 	var source = "<?php echo $lightning["source"];?>";
 	
-	var unit = "<?php echo $lightning["unit"];?>";
+	var unit = "<?php echo $lightning["distunit"];?>";
 	
 
 	var svg = d3.select(".StrikesTop")
@@ -310,7 +334,7 @@ if ($lightning["source"] == "Boltek") {
             	.style("font-size", "9px")
             	.style("text-anchor", "left")
             	.style("font-weight", "normal")
-				.text("Bearing");
+				.text(Bearingt);
 				
 	} else {
 	
