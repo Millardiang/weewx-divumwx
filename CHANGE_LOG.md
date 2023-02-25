@@ -20,16 +20,16 @@
 @ - Rolled back dvmAirqualityTop.php changes
 
 ## [0.3.6-alpha] - 30/1/2023
-! - Fixed missing ';' in dvmAqiInfoPopup.php
-! - Corrected definition for DEFRA in dvmAqiInfoPopup.php
-! - Corrected missing "border-radius" in dvmAuroraPopup.php
-@ - Code formatting fixes for readability in dvmAirqualityTop.php
-! - Removed deprecated CSS style font-smoothing in dvmChartsPage.php
-! - Remove extra ',' on line 23 in dvmCurrentModule.php
-! - Replaced deprecated CSS Style text-center with text-align in dvmForecastDaynightTablePopup.php
-! - Replaced deprecated CSS Style text-center with text-align in dvmForecastHourlyTablePopup.php
-! - Remove extra ',' on line 21 in dvmForecastModule.php
-@ - Corrected misspelled "Foecast" in dvmMenuForecastPopup.php
+! - Fixed missing ';' in dvmAqiInfoPopup.php<br />
+! - Corrected definition for DEFRA in dvmAqiInfoPopup.php<br />
+! - Corrected missing "border-radius" in dvmAuroraPopup.php<br />
+@ - Code formatting fixes for readability in dvmAirqualityTop.php<br />
+! - Removed deprecated CSS style font-smoothing in dvmChartsPage.php<br />
+! - Remove extra ',' on line 23 in dvmCurrentModule.php<br />
+! - Replaced deprecated CSS Style text-center with text-align in dvmForecastDaynightTablePopup.php<br />
+! - Replaced deprecated CSS Style text-center with text-align in dvmForecastHourlyTablePopup.php<br />
+! - Remove extra ',' on line 21 in dvmForecastModule.php<br />
+@ - Corrected misspelled "Foecast" in dvmMenuForecastPopup.php<br />
 
 ## [0.3.5-alpha] - 30/01/2023
 ! Fixed issue with Temperature charts not converting units
