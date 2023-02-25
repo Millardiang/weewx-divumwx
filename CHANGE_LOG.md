@@ -20,7 +20,7 @@
 @ - Rolled back dvmAirqualityTop.php changes
 
 ## [0.3.6-alpha] - 30/1/2023
-! - Fixed missing ';' in dvmAqiInfoPopup.php
+! - Fixed missing ';' in dvmAqiInfoPopup.php<br />
 ! - Corrected definition for DEFRA in dvmAqiInfoPopup.php
 ! - Corrected missing "border-radius" in dvmAuroraPopup.php
 @ - Code formatting fixes for readability in dvmAirqualityTop.php
