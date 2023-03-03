@@ -2219,7 +2219,7 @@
   oorange,
   green,
   ogreen,
-  egreen {
+  sblue {
     font-weight: bold;
   }
   
@@ -2236,8 +2236,8 @@
     color: #d65b4a;
   }
 
-  egreen {
-    color: #1F5830
+  sblue {
+    color: #0c65ff
   } 
   
   .active a.area,
@@ -4378,7 +4378,7 @@
     position: relative;
     background: rgba(245, 247, 252, 1);
     padding: 0px;
-    background: rgba(39, 123, 70, .8);
+    background: #0c65ff;
     border-radius: 2px;
     border: 1px solid rgba(230, 232, 239, .8);
     width: 6.5rem;

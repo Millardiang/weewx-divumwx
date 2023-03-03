@@ -326,10 +326,10 @@ $lang['notifySustainedAvg']      = "Sustained avg";
 $lang['notifyWindAdvisory']      = "Wind Advisory";
 $lang['notifyFreezing']          = "Below Freezing";
 //Top Row Modules
-$lang['timeTop']                 = 'Station <ored>Time';
-$lang['airQualityTop']           = 'Air Quality <ored>Current PM<sub>2.5</sub> Concentration';
-$lang['lightningTop']            = 'Lightning <ored>Strikes';
-$lang['advisoriesTop']           = 'Weather <ored>Outlook and Advisories';
+$lang['timeTop']                 = 'Station <sblue>Time';
+$lang['airQualityTop']           = 'Air Quality <sblue>Current PM<sub>2.5</sub> Concentration';
+$lang['lightningTop']            = 'Lightning <sblue>Strikes';
+$lang['advisoriesTop']           = 'Weather <sblue>Outlook and Advisories';
 //Main Modules
 $lang['temperatureModule']       = 'Temperature';
 $lang['forecastModule']          = 'Forecast';
@@ -346,4 +346,6 @@ $lang['earthDaylightModule']     = 'Earth Daylight';
 $lang['moonPhaseModule']         = 'Current Moonphase';
 $lang['earthquakeModule']        = 'Earthquake';
 $lang['indoorTempModule']        = 'Inside Conditions';
+$lang['Anemometer']              = 'Anemometer';
+
 ?>
