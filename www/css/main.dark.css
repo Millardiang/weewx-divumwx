@@ -2220,7 +2220,8 @@
   orange,
   oorange,
   green,
-  ogreen {
+  ogreen, 
+  sblue {
     font-weight: bold;
   }
   
@@ -2461,6 +2462,9 @@
   oredh1 {
     color: #ff5c41
   }
+  sblue {
+    color: #0c65ff
+  } 
   
   ogreyh1 {
     margin: -5px auto 0;
@@ -4356,7 +4360,7 @@
   
   .orangeclock {
     position: relative;
-    background: rgba(39, 123, 70, .8);
+    background: #0c65ff;
     padding: 0px;
     color: #fff;
     -moz-border-radius: 2px;

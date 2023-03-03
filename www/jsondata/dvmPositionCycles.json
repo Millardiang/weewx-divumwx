@@ -20,5 +20,6 @@
 "dvmWeatherClockTop.php":{"cycle": "86400000"},
 "dvmWebcamModule.php":{"cycle": "60000"},
 "dvmWindGustYearTop.php":{"cycle": "3600000"},
-"dvmWindModule.php":{"cycle": "4000"}
+"dvmWindModule.php":{"cycle": "4000"},
+"dvmAnemometerModule.php":{"cycle": "4000"}
 }

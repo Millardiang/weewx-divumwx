@@ -2218,7 +2218,8 @@
   orange,
   oorange,
   green,
-  ogreen {
+  ogreen,
+  sblue {
     font-weight: bold;
   }
   
@@ -2234,6 +2235,10 @@
   red {
     color: #d65b4a;
   }
+
+  sblue {
+    color: #0c65ff
+  } 
   
   .active a.area,
   .main-menu .nav-text,
@@ -4373,7 +4378,7 @@
     position: relative;
     background: rgba(245, 247, 252, 1);
     padding: 0px;
-    background: rgba(39, 123, 70, .8);
+    background: #0c65ff;
     border-radius: 2px;
     border: 1px solid rgba(230, 232, 239, .8);
     width: 6.5rem;
