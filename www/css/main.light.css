@@ -2218,7 +2218,8 @@
   orange,
   oorange,
   green,
-  ogreen {
+  ogreen,
+  egreen {
     font-weight: bold;
   }
   
@@ -2234,6 +2235,10 @@
   red {
     color: #d65b4a;
   }
+
+  egreen {
+    color: #1F5830
+  } 
   
   .active a.area,
   .main-menu .nav-text,

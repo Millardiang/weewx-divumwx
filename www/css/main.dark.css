@@ -2220,7 +2220,8 @@
   orange,
   oorange,
   green,
-  ogreen {
+  ogreen, 
+  egreen {
     font-weight: bold;
   }
   
@@ -2461,6 +2462,9 @@
   oredh1 {
     color: #ff5c41
   }
+  egreen {
+    color: #1F5830
+  } 
   
   ogreyh1 {
     margin: -5px auto 0;
