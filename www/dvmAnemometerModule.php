@@ -300,42 +300,9 @@ if ($theme == "dark") { echo
    
      <script>
 
-    var Ordinal = "<?php echo $wind["direction"];?>";
+    var Ordinal = "<?php echo $wind["cardinal"];?>";
     Ordinal = Ordinal || 0;
     
-    // Ordinal 
-    if (Ordinal <= 11.25) { 
-    Ordinal = "North";
-    } else if (Ordinal <= 33.75) {
-    Ordinal = "NNE";
-    } else if (Ordinal <= 56.25) {
-    Ordinal = "NE";
-    } else if (Ordinal <= 78.75) {
-    Ordinal = "ENE";
-    } else if (Ordinal <= 101.25) {
-    Ordinal = "East";
-    } else if (Ordinal <= 123.75) { 
-    Ordinal = "ESE";
-    } else if (Ordinal <= 146.25) { 
-    Ordinal = "SE";
-    } else if (Ordinal <= 168.75) {
-    Ordinal = "SSE";
-    } else if (Ordinal <= 191.25) {
-    Ordinal = "South";
-    } else if (Ordinal <= 213.75) {
-    Ordinal = "SSW";
-    } else if (Ordinal <= 236.25) { 
-    Ordinal = "SW";
-    } else if (Ordinal <= 281.25) {
-    Ordinal = "West";
-    } else if (Ordinal <= 303.75) { 
-    Ordinal = "WNW";
-    } else if (Ordinal <= 326.25) {
-    Ordinal = "NW";
-    } else if (Ordinal <= 348.75) {
-    Ordinal = "NWN";
-    } else { Ordinal = "North"; }
-
     var current_direction = "<?php echo $wind["direction"];?>";  
     current_direction = current_direction || 0;
 
