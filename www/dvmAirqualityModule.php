@@ -483,7 +483,7 @@ if ($airqual["zone"] == "au"){
 		$airqual["priority25"] = 2;
 	}
 	else if ($airqual["aqi25"] < 100 ){
-		$airqual["image25"] = "./css/aqi/modhair.svg?ver=1.4";
+		$airqual["image25"] = "./css/aqi/modair.svg?ver=1.4";
 		$airqual["color25"] = "#FFD235";
 		$airqual["text25"] = "Fair Air Quality";
 		$airqual["priority25"] = 3;
@@ -520,7 +520,7 @@ if ($airqual["zone"] == "au"){
 		$airqual["priority10"] = 2;
 	}
 	else if ($airqual["aqi10"] < 100 ){
-		$airqual["image10"] = "./css/aqi/modhair.svg?ver=1.4";
+		$airqual["image10"] = "./css/aqi/modair.svg?ver=1.4";
 		$airqual["color10"] = "#FFD235";
 		$airqual["text10"] = "Fair Air Quality";
 		$airqual["priority10"] = 3;
