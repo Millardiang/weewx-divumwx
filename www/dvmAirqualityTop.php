@@ -1,6 +1,5 @@
   <?php
 include('dvmCombinedData.php');
-$airqual["source"] = "sds";
 
 $airqual["pm_units"] = "μg/㎥";
 
