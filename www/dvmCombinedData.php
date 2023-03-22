@@ -52,7 +52,7 @@ explode(" ", file_get_contents($livedata)));
     $divum["datetime"] = $recordDate;
     $divum["date"] = date($dateFormat, $recordDate);
     $divum["time"] = date($timeFormat, $recordDate);
-    $divum["swversion"] = $weewxrt[38];
+    $divum["swversion"] = $adata["generation"]["generator"];
     $divum["build"] = $weewxrt[39];
     $convertuptimemb34 = $divum["uptime"];
     $uptimedays = floor($convertuptimemb34 / 86400);
@@ -152,7 +152,7 @@ explode(" ", file_get_contents($livedata)));
     $air["24h.rollingavg.pm2_5"] = $adata ["airquality"]["pm25 rolling 24hr"]["value"];
     $air["24h.rollingavg.pm10_0"] = $adata["airquality"]["pm10 rolling 24hr"]["value"];
 
-    //barometer
+//barometer
     $barom["units"] = $sdata["unit.label.barometer"];
     if ($barom["units"] == " inHg"){
         $barom["units"] = "inHg";
@@ -169,9 +169,9 @@ explode(" ", file_get_contents($livedata)));
     {
         $barom["units"] = "mmHg";
     }
-    else if ($barom["units"] == " mb")
+    else if ($barom["units"] == " mbar")
     {
-        $barom["units"] = "mb";
+        $barom["units"] = "mbar";
     }
     $barom["now"] = $sdata["current.barometer.formatted"];
     $barom["max"] = $sdata["day.barometer.max.formatted"];

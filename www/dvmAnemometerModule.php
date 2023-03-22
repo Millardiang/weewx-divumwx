@@ -25,75 +25,75 @@ if ($wind["units"] == "kts") { echo $wind["units"] = "kts"; }
 
 if($theme == 'dark') { 
 //divumwx-convert kmh to mph
-if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots>=26.9978){echo "<div class=windconvertercirclered1><tred>".number_format($wind["gust"]*0.621371,1)." </tred><smallrainunit>mph</smallrainunit>";}
-else if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots>=21.5983){echo "<div class=windconvertercircleorange1><torange>".number_format($wind["gust"]*0.621371,1)." </torange><smallrainunit>&nbsp;mph</smallrainunit>";}
-else if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots>=16.1987){echo "<div class=windconvertercirclegreen1><tgreen>".number_format($wind["gust"]*0.621371,1)." </tgreen><smallrainunit>&nbsp;mph</smallrainunit>";}
-else if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots<16.1987){echo "<div class=windconvertercircleblue1><tblue>".number_format($wind["gust"]*0.621371,1)." </tblue><smallrainunit>&nbsp;mph</smallrainunit>";}
+if ($wind["units"]=="km/h" && $wind["gustf"]*$toKnots>=26.9978){echo "<div class=windconvertercirclered1><tred>".number_format($wind["gustf"]*0.621371,1)." </tred><smallrainunit>mph</smallrainunit>";}
+else if ($wind["units"]=="km/h" && $wind["gustf"]*$toKnots>=21.5983){echo "<div class=windconvertercircleorange1><torange>".number_format($wind["gustf"]*0.621371,1)." </torange><smallrainunit> mph</smallrainunit>";}
+else if ($wind["units"]=="km/h" && $wind["gustf"]*$toKnots>=8.09935){echo "<div class=windconvertercirclegreen1><tgreen>".number_format($wind["gustf"]*0.621371,1)." </tgreen><smallrainunit> mph</smallrainunit>";}
+else if ($wind["units"]=="km/h" && $wind["gustf"]*$toKnots<8.09935){echo "<div class=windconvertercircleblue1><tblue>".number_format($wind["gustf"]*0.621371,1)." </tblue><smallrainunit> mph</smallrainunit>";}
 //divumwx-convert mph to kmh
-else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots>=26.9978){echo "<div class=windconvertercirclered1><tred>".number_format($wind["gust"]*1.609343502101025,1)." </tred><smallrainunit>&nbsp;kmh</smallrainunit>";}
-else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots>=21.5983){echo "<div class=windconvertercircleorange1><torange>".number_format($wind["gust"]*1.609343502101025,1)." </torange><smallrainunit>&nbsp;kmh</smallrainunit>";}
-else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots>=16.1987){echo "<div class=windconvertercircleblue1><tgreen>".number_format($wind["gust"]*1.609343502101025,1)." </tgreen><smallrainunit>&nbsp;kmh</smallrainunit>";}
-else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots<16.1987){echo "<div class=windconvertercirclegreen1><tblue>".number_format($wind["gust"]*1.609343502101025,1)." </tblue><smallrainunit>&nbsp;kmh</smallrainunit>";}
+else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots>=26.9978){echo "<div class=windconvertercirclered1><tred>".number_format($wind["gust"]*1.609343502101025,1)." </tred><smallrainunit> km/h</smallrainunit>";}
+else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots>=21.5983){echo "<div class=windconvertercircleorange1><torange>".number_format($wind["gust"]*1.609343502101025,1)." </torange><smallrainunit> km/h</smallrainunit>";}
+else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots>=8.09935){echo "<div class=windconvertercircleblue1><tgreen>".number_format($wind["gust"]*1.609343502101025,1)." </tgreen><smallrainunit> km/h</smallrainunit>";}
+else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots<8.09935){echo "<div class=windconvertercirclegreen1><tblue>".number_format($wind["gust"]*1.609343502101025,1)." </tblue><smallrainunit> km/h</smallrainunit>";}
 //divumwx-convert ms to kmh
-else if ($wind["units"]=="m/s" && $wind["gust"]*$toKnots>=26.9978){echo "<div class=windconvertercirclered1><tred>".number_format($wind["gust"]*3.60000288,1)." </tred><smallrainunit>&nbsp;kmh</smallrainunit>";}
-else if ($wind["units"]=="m/s" && $wind["gust"]*$toKnots>=21.5983){echo "<div class=windconvertercircleorange1><torange>".number_format($wind["gust"]*3.60000288,1)." </torange><smallrainunit>&nbsp;kmh</smallrainunit>";}
-else if ($wind["units"]=="m/s" && $wind["gust"]*$toKnots>=16.1987){echo "<div class=windconvertercircleblue1><tgreen>".number_format($wind["gust"]*3.60000288,1)." </tgreen><smallrainunit>&nbsp;kmh</smallrainunit>";}
-else if ($wind["units"]=="m/s" && $wind["gust"]*$toKnots<16.1987){echo "<div class=windconvertercirclegreen1><tblue>".number_format($wind["gust"]*3.60000288,1)." </tblue><smallrainunit>&nbsp;kmh</smallrainunit>";}
+else if ($wind["units"]=="m/s" && $wind["gust"]*$toKnots>=26.9978){echo "<div class=windconvertercirclered1><tred>".number_format($wind["gust"]*3.60000288,1)." </tred><smallrainunit> km/h</smallrainunit>";}
+else if ($wind["units"]=="m/s" && $wind["gust"]*$toKnots>=21.5983){echo "<div class=windconvertercircleorange1><torange>".number_format($wind["gust"]*3.60000288,1)." </torange><smallrainunit> km/h</smallrainunit>";}
+else if ($wind["units"]=="m/s" && $wind["gust"]*$toKnots>=8.09935){echo "<div class=windconvertercircleblue1><tgreen>".number_format($wind["gust"]*3.60000288,1)." </tgreen><smallrainunit> km/h</smallrainunit>";}
+else if ($wind["units"]=="m/s" && $wind["gust"]*$toKnots<8.09935){echo "<div class=windconvertercirclegreen1><tblue>".number_format($wind["gust"]*3.60000288,1)." </tblue><smallrainunit> km/h</smallrainunit>";}
 
 } else {
 
 // convert kmh to mph
-if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots>=26.9978){echo "<div class=windconvertercirclered1><weathertext2>".number_format($wind["gust"]*0.621371,1)." </weathertext2><smallrainunit>mph</smallrainunit>";}
-else if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots>=21.5983){echo "<div class=windconvertercircleorange1><weathertext2>".number_format($wind["gust"]*0.621371,1)." </weathertext2><smallrainunit>&nbsp;mph</smallrainunit>";}
-else if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots>=16.1987){echo "<div class=windconvertercirclegreen1><weathertext2>".number_format($wind["gust"]*0.621371,1)." </weathertext2><smallrainunit>&nbsp;mph</smallrainunit>";}
-else if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots<16.1987){echo "<div class=windconvertercircleblue1><weathertext2>".number_format($wind["gust"]*0.621371,1)." </weathertext2><smallrainunit>&nbsp;mph</smallrainunit>";}
+if ($wind["units"]=="km/h" && $wind["gustf"]*$toKnots>=26.9978){echo "<div class=windconvertercirclered1><weathertext2>".number_format($wind["gustf"]*0.621371,1)." </weathertext2><smallrainunit>mph</smallrainunit>";}
+else if ($wind["units"]=="km/h" && $wind["gustf"]*$toKnots>=21.5983){echo "<div class=windconvertercircleorange1><weathertext2>".number_format($wind["gustf"]*0.621371,1)." </weathertext2><smallrainunit> mph</smallrainunit>";}
+else if ($wind["units"]=="km/h" && $wind["gustf"]*$toKnots>=8.09935){echo "<div class=windconvertercirclegreen1><weathertext2>".number_format($wind["gustf"]*0.621371,1)." </weathertext2><smallrainunit> mph</smallrainunit>";}
+else if ($wind["units"]=="km/h" && $wind["gustf"]*$toKnots<8.09935){echo "<div class=windconvertercircleblue1><weathertext2>".number_format($wind["gustf"]*0.621371,1)." </weathertext2><smallrainunit> mph</smallrainunit>";}
 // convert mph to kmh
-else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots>=26.9978){echo "<div class=windconvertercirclered1><weathertext2>".number_format($wind["gust"]*1.609343502101025,1)." </weathertext2><smallrainunit>&nbsp;kmh</smallrainunit>";}
-else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots>=21.5983){echo "<div class=windconvertercircleorange1><weathertext2>".number_format($wind["gust"]*1.609343502101025,1)." </weathertext2><smallrainunit>&nbsp;kmh</smallrainunit>";}
-else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots>=16.1987){echo "<div class=windconvertercircleblue1><weathertext2>".number_format($wind["gust"]*1.609343502101025,1)." </weathertext2><smallrainunit>&nbsp;kmh</smallrainunit>";}
-else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots<16.1987){echo "<div class=windconvertercirclegreen1><weathertext2>".number_format($wind["gust"]*1.609343502101025,1)." </weathertext2><smallrainunit>&nbsp;kmh</smallrainunit>";}
+else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots>=26.9978){echo "<div class=windconvertercirclered1><weathertext2>".number_format($wind["gust"]*1.609343502101025,1)." </weathertext2><smallrainunit> km/h</smallrainunit>";}
+else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots>=21.5983){echo "<div class=windconvertercircleorange1><weathertext2>".number_format($wind["gust"]*1.609343502101025,1)." </weathertext2><smallrainunit> km/h</smallrainunit>";}
+else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots>=8.09935){echo "<div class=windconvertercircleblue1><weathertext2>".number_format($wind["gust"]*1.609343502101025,1)." </weathertext2><smallrainunit> km/h</smallrainunit>";}
+else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots<8.09935){echo "<div class=windconvertercirclegreen1><weathertext2>".number_format($wind["gust"]*1.609343502101025,1)." </weathertext2><smallrainunit> km/h</smallrainunit>";}
 // convert ms to kmh
-else if ($wind["units"]=="m/s" && $wind["gust"]*$toKnots>=26.9978){echo "<div class=windconvertercirclered1><weathertext2>".number_format($wind["gust"]*3.60000288,1)." </weathertext2><smallrainunit>&nbsp;kmh</smallrainunit>";}
-else if ($wind["units"]=="m/s" && $wind["gust"]*$toKnots>=21.5983){echo "<div class=windconvertercircleorange1><weathertext2>".number_format($wind["gust"]*3.60000288,1)." </weathertext2><smallrainunit>&nbsp;kmh</smallrainunit>";}
-else if ($wind["units"]=="m/s" && $wind["gust"]*$toKnots>=16.1987){echo "<div class=windconvertercircleblue1><weathertext2>".number_format($wind["gust"]*3.60000288,1)." </weathertext2><smallrainunit>&nbsp;kmh</smallrainunit>";}
-else if ($wind["units"]=="m/s" && $wind["gust"]*$toKnots<16.1987){echo "<div class=windconvertercirclegreen1><weathertext2>".number_format($wind["gust"]*3.60000288,1)." </weathertext2><smallrainunit>&nbsp;kmh</smallrainunit>";}}?>
+else if ($wind["units"]=="m/s" && $wind["gust"]*$toKnots>=26.9978){echo "<div class=windconvertercirclered1><weathertext2>".number_format($wind["gust"]*3.60000288,1)." </weathertext2><smallrainunit> km/h</smallrainunit>";}
+else if ($wind["units"]=="m/s" && $wind["gust"]*$toKnots>=21.5983){echo "<div class=windconvertercircleorange1><weathertext2>".number_format($wind["gust"]*3.60000288,1)." </weathertext2><smallrainunit> km/h</smallrainunit>";}
+else if ($wind["units"]=="m/s" && $wind["gust"]*$toKnots>=8.09935){echo "<div class=windconvertercircleblue1><weathertext2>".number_format($wind["gust"]*3.60000288,1)." </weathertext2><smallrainunit> km/h</smallrainunit>";}
+else if ($wind["units"]=="m/s" && $wind["gust"]*$toKnots<8.09935){echo "<div class=windconvertercirclegreen1><weathertext2>".number_format($wind["gust"]*3.60000288,1)." </weathertext2><smallrainunit> km/h</smallrainunit>";}}?>
 </div></div>
 <?php 
 if ($wind["units"] == 'mph'){$wind["wind_run"]=$wind["wind_run"]*0.621371;}
 else if ($wind["units"] == 'kts'){$wind["wind_run"]=$wind["wind_run"]*0.621371;}
 else {$wind["wind_run"]=$wind["wind_run"]*1;}
 
-echo ' <div class=divumwxwindrun>'.$windalert3.' &nbsp;<grey><valuetext1>',number_format($wind["wind_run"],1);?>
+echo ' <div class=divumwxwindrun>'.$windalert3.'  <grey><valuetext1>',number_format($wind["wind_run"],1);?>
 <grey><divumwxwindrunspan></valuetext>
 <?php if ($wind["units"] == 'mph') echo 'mi'; else if ($wind["units"] == 'm/s') echo 'km'; else if ($wind["units"] == 'kts') echo 'mi';else echo 'km';?></divumwxwindrunspan>
 </div></div><br /><div class=windrun1><?php echo  $lang['Wind Run'];?></div>
 <?php // beaufort
 if ($wind["speed_bft"] >= 12) {
-  echo '<div class=divumwxbeaufort6>' . $beaufort12 . "&nbsp; " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort6>' . $beaufort12 . "  " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 11) {
-  echo '<div class=divumwxbeaufort6>' . $beaufort11 . "&nbsp; " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort6>' . $beaufort11 . "  " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 10) {
-  echo '<div class=divumwxbeaufort6>' . $beaufort10 . "&nbsp; " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort6>' . $beaufort10 . "  " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 9) {
-  echo '<div class=divumwxbeaufort6>' . $beaufort9 . "&nbsp; " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort6>' . $beaufort9 . "  " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 8) {
-  echo '<div class=divumwxbeaufort6>' . $beaufort8 . "&nbsp; " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort6>' . $beaufort8 . "  " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 7) {
-  echo '<div class=divumwxbeaufort6>' . $beaufort7 . "&nbsp; " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort6>' . $beaufort7 . "  " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 6) {
-  echo '<div class=divumwxbeaufort6>' . $beaufort6 . "&nbsp; " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort6>' . $beaufort6 . "  " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 5) {
-  echo '<div class=divumwxbeaufort4-5>' . $beaufort5 . "&nbsp; " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort4-5>' . $beaufort5 . "  " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 4) {
-  echo '<div class=divumwxbeaufort4-5>' . $beaufort4 . "&nbsp; " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort4-5>' . $beaufort4 . "  " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 3) {
-  echo '<div class=divumwxbeaufort3-4>' . $beaufort3 . "&nbsp; " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort3-4>' . $beaufort3 . "  " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 2) {
-  echo '<div class=divumwxbeaufort1-3>' . $beaufort2 . "&nbsp; " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort1-3>' . $beaufort2 . "  " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 1) {
-  echo '<div class=divumwxbeaufort1-3>' . $beaufort1 . "&nbsp; " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort1-3>' . $beaufort1 . "  " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 0) {
-  echo '<div class=divumwxbeaufort1-3>' . $beaufort0 . "&nbsp; " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort1-3>' . $beaufort0 . "  " . $wind["speed_bft"];
 }
 ?>
 <divumwxbftspan>BFT<divumwxbftspan></div>
@@ -129,15 +129,7 @@ if ($wind["speed_bft"] == 0) {
 </div>
 
 <style>
-.compass1 {
-  margin-top: -31px;
-  margin-left: 0px;
-}
-.wrap {
-  position: relative;
-  margin-top: -2px;
-  margin-right: 0px;
-}
+
 .moduletitle2 {
   position: relative;
   top: -20px;
@@ -168,12 +160,14 @@ if ($wind["speed_bft"] == 0) {
 </style>
 
 <html>
+
 <script src="js/d3.min.js"></script>
 <script src="js/iopctrl.js"></script>
 
+
 <?php 
 
-if ($theme == "dark") { echo
+if ($theme === "dark") { echo
     
     '<style>
     
@@ -182,7 +176,7 @@ if ($theme == "dark") { echo
         margin-top: -35px; 
         margin-left: -1px;
       }
-        
+
         .unselectable {
             -moz-user-select: -moz-none;
             -khtml-user-select: none;
@@ -229,7 +223,7 @@ if ($theme == "dark") { echo
          .gauge circle {
           stroke: rgba(59, 60, 63, 1);
           fill: rgba(59, 60, 63, 1);                
-    }         
+    }          
        
   </style>';
   
@@ -294,48 +288,15 @@ if ($theme == "dark") { echo
   
 }
 ?>
+
 <div class="anemometer"></div>
 <div id="svg"></div>
 
    
      <script>
 
-    var Ordinal = "<?php echo $wind["direction"];?>";
-    Ordinal = Ordinal || 0;
-    
-    // Ordinal 
-    if (Ordinal <= 11.25) { 
-    Ordinal = "North";
-    } else if (Ordinal <= 33.75) {
-    Ordinal = "NNE";
-    } else if (Ordinal <= 56.25) {
-    Ordinal = "NE";
-    } else if (Ordinal <= 78.75) {
-    Ordinal = "ENE";
-    } else if (Ordinal <= 101.25) {
-    Ordinal = "East";
-    } else if (Ordinal <= 123.75) { 
-    Ordinal = "ESE";
-    } else if (Ordinal <= 146.25) { 
-    Ordinal = "SE";
-    } else if (Ordinal <= 168.75) {
-    Ordinal = "SSE";
-    } else if (Ordinal <= 191.25) {
-    Ordinal = "South";
-    } else if (Ordinal <= 213.75) {
-    Ordinal = "SSW";
-    } else if (Ordinal <= 236.25) { 
-    Ordinal = "SW";
-    } else if (Ordinal <= 281.25) {
-    Ordinal = "West";
-    } else if (Ordinal <= 303.75) { 
-    Ordinal = "WNW";
-    } else if (Ordinal <= 326.25) {
-    Ordinal = "NW";
-    } else if (Ordinal <= 348.75) {
-    Ordinal = "NWN";
-    } else { Ordinal = "North"; }
-
+    var ordinal = "<?php echo $wind["cardinal"];?>";
+ 
     var current_direction = "<?php echo $wind["direction"];?>";  
     current_direction = current_direction || 0;
 
@@ -351,17 +312,16 @@ if ($theme == "dark") { echo
     var units = "<?php echo $wind["units"];?>";
     
     var theme = "<?php echo $theme;?>";
+   
+      if (units === "km/h") {
 
-     
-      if (units == "km/h") {
-                   
            var svg = d3.select(".anemometer")
                 .append("svg")
                 //.style("background", "#292E35")
                 .attr("width", 310)
-                .attr("height", 150);
-                
-             if (theme == "dark") {
+                .attr("height", 150);                  
+
+      if (theme === "dark") {
              
              svg.append("text") // current wind speed text output
               .attr("x", 155)
@@ -383,7 +343,7 @@ if ($theme == "dark") { echo
               .style("font-weight", "normal")
           .text("Bearing");
 
-          svg.append("text") // Ordinal text output
+          svg.append("text") // Cardinal text output
               .attr("x", 265)
               .attr("y", 55)
               .style("fill", "silver")
@@ -403,7 +363,7 @@ if ($theme == "dark") { echo
               .style("font-weight", "normal")
           .text(current_direction+"°");
 
-          svg.append("text") // Ordinal text output
+          svg.append("text") // Cardinal text output
               .attr("x", 265)
               .attr("y", 80)
               .style("fill", "silver")
@@ -411,7 +371,7 @@ if ($theme == "dark") { echo
               .style("font-size", "24px")
               .style("text-anchor", "middle")
               .style("font-weight", "normal")
-          .text(Ordinal);
+          .text(ordinal);
           
         } else {
         
@@ -435,7 +395,7 @@ if ($theme == "dark") { echo
               .style("font-weight", "normal")
           .text("Bearing");
 
-          svg.append("text") // Ordinal text output
+          svg.append("text") // Cardinal text output
               .attr("x", 265)
               .attr("y", 55)
               .style("fill", "#2d3a4b")
@@ -455,7 +415,7 @@ if ($theme == "dark") { echo
               .style("font-weight", "normal")
           .text(current_direction+"°");
 
-          svg.append("text") // Ordinal text output
+          svg.append("text") // Cardinal text output
               .attr("x", 265)
               .attr("y", 80)
               .style("fill", "#2d3a4b")
@@ -463,24 +423,30 @@ if ($theme == "dark") { echo
               .style("font-size", "24px")
               .style("text-anchor", "middle")
               .style("font-weight", "normal")
-          .text(Ordinal);
+          .text(ordinal);
 
         }
-         
-                                                                      
+        
         var gauge = iopctrl.arcslider()
                 .radius(52.5)
                 .events(false)
                 .transitionDuration(0) // needle speed, a higher value makes it slower
                 .indicator(function(g, width) {
-                
+                /*           
             g.append("line")
                  .attr("y1", - width - 3) // needle length
                  .attr("y2", width - 42) // needle tail length
                  .style("stroke", "rgba(0,127,255,1)")
                  .style("stroke-linecap", "round")
                  .style("stroke-width", 1);
-
+                */
+        
+            g.append('polyline') // needle
+                .attr('points', "1.5 11 0 -56 -1.5 11 0 11 1.5 11 -1.5 0")
+                .style('fill', 'rgba(0,127,255,1)')
+                .style('stroke', 'rgba(0,127,255,1)')
+                .style("stroke-width", 0.5)
+                .style("stroke-linecap", "round");
 
                  g.append("circle")
                  .attr("cx", 0) // center circle
@@ -488,7 +454,7 @@ if ($theme == "dark") { echo
                  .attr("r", 5);
                                                                                
             });
-                                                                    
+
         gauge.axis().orient("out").tickFormat(d3.format("d"))
                 .normalize(false)
                 .ticks(12)
@@ -498,29 +464,30 @@ if ($theme == "dark") { echo
                 .scale(d3.scale.linear()
                         .domain([0, 120]) // min max text scale current wind speed
                         .range([- 3 * Math.PI / 4, 3 * Math.PI / 4]));
-                                                                                                     
+                                                                                                                     
         svg.append("g")
                 .attr("class", "gauge")
                 .attr('transform', 'translate(52, -29)')
                 .call(gauge);
                 
                  
-        gauge.value(current_wind_speed);
-        
+        gauge.value(current_wind_speed); 
+                                                             
          var gauge = iopctrl.arcslider()
                 .radius(52.5)
                 .events(false)
                 .transitionDuration(0) // needle speed, a higher value makes it slower
                 .indicator(function(g, width) {
+                  
             g.append("line")
                  .attr("y1", - width - 7) // needle length
                  .attr("y2", - width + 0) // needle tail length
                  .style("stroke", "rgba(46,139,87,1)")
                  .style("stroke-linecap", "round")
                  .style("stroke-width", 2);
-                                         
+                                                          
             });
-                                              
+          
         gauge.axis().orient("in").tickFormat(d3.format("d"))
                 .normalize(true)
                 .ticks(0)
@@ -544,15 +511,16 @@ if ($theme == "dark") { echo
                 .events(false)
                 .transitionDuration(0) // needle speed, a higher value makes it slower
                 .indicator(function(g, width) {
+                  
             g.append("line")
                  .attr("y1", - width - 7) // needle length
                  .attr("y2", - width + 0) // needle tail length
                  .style("stroke", "rgba(255, 124, 57, 1)")
                  .style("stroke-linecap", "round")
-                 .style("stroke-width", 2);                                
-                                               
+                 .style("stroke-width", 2);
+                                                                                    
             });
-                                              
+            
         gauge.axis().orient("in").tickFormat(d3.format("d"))
                 .normalize(true)
                 .ticks(0)
@@ -562,16 +530,15 @@ if ($theme == "dark") { echo
                 .scale(d3.scale.linear()
                         .domain([0, 120]) // min max text scale max gust
                         .range([- 3 * Math.PI / 4, 3 * Math.PI / 4]));
-                                                
+                                               
         svg.append("g")
                 .attr("class", "gauge")
                 .attr('transform', 'translate(52, -29)')
                 .call(gauge);
 
-
         gauge.value(gust_max);
-        
-        } else if (units == "mph") {
+                
+        } else if (units === "mph") {
         
          var svg = d3.select(".anemometer")
                 .append("svg")
@@ -601,7 +568,7 @@ if ($theme == "dark") { echo
               .style("font-weight", "normal")
           .text("Bearing");
 
-          svg.append("text") // Ordinal text output
+          svg.append("text") // Cardinal text output
               .attr("x", 265)
               .attr("y", 55)
               .style("fill", "silver")
@@ -621,7 +588,7 @@ if ($theme == "dark") { echo
               .style("font-weight", "normal")
           .text(current_direction+"°");
 
-          svg.append("text") // Ordinal text output
+          svg.append("text") // Cardinal text output
               .attr("x", 265)
               .attr("y", 80)
               .style("fill", "silver")
@@ -629,7 +596,7 @@ if ($theme == "dark") { echo
               .style("font-size", "24px")
               .style("text-anchor", "middle")
               .style("font-weight", "normal")
-          .text(Ordinal);
+          .text(ordinal);
           
         } else {
         
@@ -653,7 +620,7 @@ if ($theme == "dark") { echo
               .style("font-weight", "normal")
           .text("Bearing");
 
-          svg.append("text") // Ordinal text output
+          svg.append("text") // Cardinal text output
               .attr("x", 265)
               .attr("y", 55)
               .style("fill", "#2d3a4b")
@@ -673,7 +640,7 @@ if ($theme == "dark") { echo
               .style("font-weight", "normal")
           .text(current_direction+"°");
 
-          svg.append("text") // Ordinal text output
+          svg.append("text") // Cardinal text output
               .attr("x", 265)
               .attr("y", 80)
               .style("fill", "#2d3a4b")
@@ -681,7 +648,7 @@ if ($theme == "dark") { echo
               .style("font-size", "24px")
               .style("text-anchor", "middle")
               .style("font-weight", "normal")
-          .text(Ordinal);
+          .text(ordinal);
         }
          
                                                                       
@@ -690,14 +657,20 @@ if ($theme == "dark") { echo
                 .events(false)
                 .transitionDuration(0) // needle speed, a higher value makes it slower
                 .indicator(function(g, width) {
-                
+              /*  
             g.append("line")
                  .attr("y1", - width - 3) // needle length
                  .attr("y2", width - 42) // needle tail length
                  .style("stroke", "rgba(0,127,255,1)")
                  .style("stroke-linecap", "round")
                  .style("stroke-width", 1);
-                
+                 */
+            g.append('polyline') // needle
+                .attr('points', "1.5 11 0 -56 -1.5 11 0 11 1.5 11 -1.5 0")
+                .style('fill', 'rgba(0,127,255,1)')
+                .style('stroke', 'rgba(0,127,255,1)')
+                .style("stroke-width", 0.5)
+                .style("stroke-linecap", "round");                
 
                  g.append("circle")
                  .attr("cx", 0) // center circle
@@ -729,12 +702,13 @@ if ($theme == "dark") { echo
                 .events(false)
                 .transitionDuration(0) // needle speed, a higher value makes it slower
                 .indicator(function(g, width) {
+                  
             g.append("line")
                  .attr("y1", - width - 7) // needle length
                  .attr("y2", - width + 0) // needle tail length
                  .style("stroke", "rgba(46,139,87,1)")
                  .style("stroke-linecap", "round")
-                 .style("stroke-width", 2);
+                 .style("stroke-width", 2);                
                                          
             });
                                               
@@ -761,13 +735,14 @@ if ($theme == "dark") { echo
                 .events(false)
                 .transitionDuration(0) // needle speed, a higher value makes it slower
                 .indicator(function(g, width) {
+                  
             g.append("line")
                  .attr("y1", - width - 7) // needle length
                  .attr("y2", - width + 0) // needle tail length
                  .style("stroke", "rgba(255, 124, 57, 1)")
                  .style("stroke-linecap", "round")
-                 .style("stroke-width", 2);                                
-                                               
+                 .style("stroke-width", 2);
+                                                                                              
             });
                                               
         gauge.axis().orient("in").tickFormat(d3.format("d"))
@@ -785,10 +760,9 @@ if ($theme == "dark") { echo
                 .attr('transform', 'translate(52, -29)')
                 .call(gauge);
 
-
         gauge.value(gust_max);
         
-        } else if (units == "m/s") {
+        } else if (units === "m/s") {
         
          var svg = d3.select(".anemometer")
                 .append("svg")
@@ -817,7 +791,7 @@ if ($theme == "dark") { echo
               .style("font-weight", "normal")
           .text("Bearing");
 
-          svg.append("text") // Ordinal text output
+          svg.append("text") // Cardinal text output
               .attr("x", 265)
               .attr("y", 55)
               .style("fill", "silver")
@@ -837,7 +811,7 @@ if ($theme == "dark") { echo
               .style("font-weight", "normal")
           .text(current_direction+"°");
 
-          svg.append("text") // Ordinal text output
+          svg.append("text") // Cardinal text output
               .attr("x", 265)
               .attr("y", 80)
               .style("fill", "silver")
@@ -845,7 +819,7 @@ if ($theme == "dark") { echo
               .style("font-size", "24px")
               .style("text-anchor", "middle")
               .style("font-weight", "normal")
-          .text(Ordinal);
+          .text(ordinal);
           
         } else {
         
@@ -869,7 +843,7 @@ if ($theme == "dark") { echo
               .style("font-weight", "normal")
           .text("Bearing");
 
-          svg.append("text") // Ordinal text output
+          svg.append("text") // Cardinal text output
               .attr("x", 265)
               .attr("y", 55)
               .style("fill", "#2d3a4b")
@@ -889,7 +863,7 @@ if ($theme == "dark") { echo
               .style("font-weight", "normal")
           .text(current_direction+"°");
 
-          svg.append("text") // Ordinal text output
+          svg.append("text") // Cardinal text output
               .attr("x", 265)
               .attr("y", 80)
               .style("fill", "#2d3a4b")
@@ -897,7 +871,7 @@ if ($theme == "dark") { echo
               .style("font-size", "24px")
               .style("text-anchor", "middle")
               .style("font-weight", "normal")
-          .text(Ordinal);
+          .text(ordinal);
         }     
 
         var gauge = iopctrl.arcslider()
@@ -905,13 +879,20 @@ if ($theme == "dark") { echo
                 .events(false)
                 .transitionDuration(0) // needle speed, a higher value makes it slower
                 .indicator(function(g, width) {
+                  /*
             g.append("line")
                  .attr("y1", - width - 3) // needle length
                  .attr("y2", width - 42) // needle tail length
                  .style("stroke", "rgba(0,127,255,1)")
                  .style("stroke-linecap", "round")
                  .style("stroke-width", 1);
-          
+            */
+            g.append('polyline') // needle
+                .attr('points', "1.5 11 0 -56 -1.5 11 0 11 1.5 11 -1.5 0")
+                .style('fill', 'rgba(0,127,255,1)')
+                .style('stroke', 'rgba(0,127,255,1)')
+                .style("stroke-width", 0.5)
+                .style("stroke-linecap", "round");
 
                  g.append("circle")
                  .attr("cx", 0) // center circle
@@ -942,12 +923,13 @@ if ($theme == "dark") { echo
                 .events(false)
                 .transitionDuration(0) // needle speed, a higher value makes it slower
                 .indicator(function(g, width) {
+                  
             g.append("line")
                  .attr("y1", - width - 7) // needle length
                  .attr("y2", - width + 0) // needle tail length
                  .style("stroke", "rgba(46,139,87,1)")
                  .style("stroke-linecap", "round")
-                 .style("stroke-width", 2);
+                 .style("stroke-width", 2);                 
                  
             });
                    
@@ -973,13 +955,14 @@ if ($theme == "dark") { echo
                 .events(false)
                 .transitionDuration(0) // needle speed, a higher value makes it slower
                 .indicator(function(g, width) {
+                  
             g.append("line")
                  .attr("y1", - width - 7) // needle length
                  .attr("y2", - width + 0) // needle tail length
                  .style("stroke", "rgba(255, 124, 57, 1)")
                  .style("stroke-linecap", "round")
-                 .style("stroke-width", 2);                                
-                                               
+                 .style("stroke-width", 2);
+                                                                                             
             });
                                               
         gauge.axis().orient("in").tickFormat(d3.format("d"))
@@ -997,10 +980,9 @@ if ($theme == "dark") { echo
                 .attr('transform', 'translate(52, -29)')
                 .call(gauge);
 
-
         gauge.value(gust_max);
                    
-      } else if (units == "kts") { 
+      } else if (units === "kts") { 
 
         var svg = d3.select(".anemometer")
                 .append("svg")
@@ -1029,7 +1011,7 @@ if ($theme == "dark") { echo
               .style("font-weight", "normal")
           .text("Bearing");
 
-          svg.append("text") // Ordinal text output
+          svg.append("text") // Cardinal text output
               .attr("x", 265)
               .attr("y", 55)
               .style("fill", "silver")
@@ -1049,7 +1031,7 @@ if ($theme == "dark") { echo
               .style("font-weight", "normal")
           .text(current_direction+"°");
 
-          svg.append("text") // Ordinal text output
+          svg.append("text") // Cardinal text output
               .attr("x", 265)
               .attr("y", 80)
               .style("fill", "silver")
@@ -1057,7 +1039,7 @@ if ($theme == "dark") { echo
               .style("font-size", "24px")
               .style("text-anchor", "middle")
               .style("font-weight", "normal")
-          .text(Ordinal);
+          .text(ordinal);
           
         } else {
         
@@ -1081,7 +1063,7 @@ if ($theme == "dark") { echo
               .style("font-weight", "normal")
           .text("Bearing");
 
-          svg.append("text") // Ordinal text output
+          svg.append("text") // Cardinal text output
               .attr("x", 265)
               .attr("y", 55)
               .style("fill", "#2d3a4b")
@@ -1101,7 +1083,7 @@ if ($theme == "dark") { echo
               .style("font-weight", "normal")
           .text(current_direction+"°");
 
-          svg.append("text") // Ordinal text output
+          svg.append("text") // Cardinal text output
               .attr("x", 265)
               .attr("y", 80)
               .style("fill", "#2d3a4b")
@@ -1109,7 +1091,7 @@ if ($theme == "dark") { echo
               .style("font-size", "24px")
               .style("text-anchor", "middle")
               .style("font-weight", "normal")
-          .text(Ordinal);
+          .text(ordinal);
         }     
 
         var gauge = iopctrl.arcslider()
@@ -1117,14 +1099,21 @@ if ($theme == "dark") { echo
                 .events(false)
                 .transitionDuration(0) // needle speed, a higher value makes it slower
                 .indicator(function(g, width) {
+/*
             g.append("line")
                  .attr("y1", - width - 3) // needle length
                  .attr("y2", width - 42) // needle tail length
                  .style("stroke", "rgba(0,127,255,1)")
                  .style("stroke-linecap", "round")
                  .style("stroke-width", 1);
+                 */
+            g.append('polyline') // needle
+                .attr('points', "1.5 11 0 -56 -1.5 11 0 11 1.5 11 -1.5 0")
+                .style('fill', 'rgba(0,127,255,1)')
+                .style('stroke', 'rgba(0,127,255,1)')
+                .style("stroke-width", 0.5)
+                .style("stroke-linecap", "round");
             
-
                  g.append("circle")
                  .attr("cx", 0) // center circle
                  .attr("cy", 0)
@@ -1154,6 +1143,7 @@ if ($theme == "dark") { echo
                 .events(false)
                 .transitionDuration(0) // needle speed, a higher value makes it slower
                 .indicator(function(g, width) {
+
             g.append("line")
                  .attr("y1", - width - 7) // needle length
                  .attr("y2", - width + 0) // needle tail length
@@ -1185,6 +1175,7 @@ if ($theme == "dark") { echo
                 .events(false)
                 .transitionDuration(0) // needle speed, a higher value makes it slower
                 .indicator(function(g, width) {
+
             g.append("line")
                  .attr("y1", - width - 7) // needle length
                  .attr("y2", - width + 0) // needle tail length
@@ -1208,7 +1199,6 @@ if ($theme == "dark") { echo
                 .attr("class", "gauge")
                 .attr('transform', 'translate(52, -29)')
                 .call(gauge);
-
 
         gauge.value(gust_max);
 

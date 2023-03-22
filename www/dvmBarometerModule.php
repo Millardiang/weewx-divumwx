@@ -1,6 +1,5 @@
 <?php 
 include('dvmCombinedData.php');
-//include('userSettings.php');
 header('Content-type: text/html; charset=utf-8');
 ?>
     <div class="chartforecast2">
@@ -22,13 +21,13 @@ $barom["max"]=$barom["max"]*0.1;
 ?>
  
 <div class='barometermax'>
-<?php echo '<div class=barometerorange><valuetext>Max ('.$barom["maxtime"].')<br><maxred>',$barom["max"],'</maxred>&nbsp;',$barom["units"],' </valuetext></div>';?></div>
+<?php echo '<div class=barometerorange><valuetext>Max ('.$barom["maxtime"].')<br><maxred>',$barom["max"],'</maxred> ',$barom["units"],' </valuetext></div>';?></div>
 <div class='barometermin'>
-<?php echo '<div class=barometerblue><valuetext>Min ('.$barom["mintime"].')<br><minblue>',$barom["min"],'</minblue>&nbsp;',$barom["units"],' </valuetext></div>';?></div>
+<?php echo '<div class=barometerblue><valuetext>Min ('.$barom["mintime"].')<br><minblue>',$barom["min"],'</minblue> ',$barom["units"],' </valuetext></div>';?></div>
 </div>
 
 <div class="barometertrend10">
-<?php  echo "<valuetext>&nbsp;&nbsp;Trend";
+<?php  echo "<valuetext>  Trend";
 if ($barom["trend_code"] > 20  && $barom["trend_code"] < 100) { echo '<rising><rise><maxred> '.$risingsymbol.' </rise><maxred><br>'; echo $barom["trend_desc"], '<maxred></rising> '; 
 } else if ($barom["trend_code"] < 0) { echo '<falling><fall><minblue> '.$fallingsymbol.'</fall><minblue><br>'; echo $barom["trend_desc"], '</minblue></falling>';
 } else if ($barom["trend_code"] > 0 && $barom["trend_code"] < 100) { echo '<rising><rise></maxred> '.$risingsymbol.'</rise><maxred><br>'; echo $barom["trend_desc"], '</maxred></rising> '; 
@@ -36,21 +35,17 @@ if ($barom["trend_code"] > 20  && $barom["trend_code"] < 100) { echo '<rising><r
 
 <div class="barometerconverter">
 <?php echo "<div class=barometerconvertercircleblue>";
-if ($barom["units"]=='mb' OR $barom["units"]=="hPa"){echo number_format($barom["now"]*0.029529983071445,2),"<smallrainunit>&nbsp;inHg</smallrainunit>";
-} else if ($barom["units"]=="kPa") { echo number_format($barom["now"]*0.29529983071445,2),"<smallrainunit>&nbsp;inHg</smallrainunit>";
-} else if ($barom["units"]=='inHg') { echo round($barom["now"]*33.863886666667,1),"<smallrainunit>&nbsp;hPa</smallrainunit>";}
+if ($barom["units"]=='mbar' OR $barom["units"]=="hPa"){echo number_format($barom["now"]*0.029529983071445,2),"<smallrainunit> inHg</smallrainunit>";
+} else if ($barom["units"]=="kPa") { echo number_format($barom["now"]*0.29529983071445,2),"<smallrainunit> inHg</smallrainunit>";
+} else if ($barom["units"]=='inHg') { echo round($barom["now"]*33.863886666667,1),"<smallrainunit> hPa</smallrainunit>";}
 ?>
 </div></div>
 
 <html>
-<script src="js/d3.v3.min.js"></script>
+<script src="js/d3.min.js"></script>
 <script src="js/iopctrl.js"></script>
 <style>
-.wrap {
-  position: relative;
-  margin-top: -2px;
-  margin-right: 0px;
-}
+
 .moduletitle2 {
   position: relative;
   top: -20px;
@@ -81,9 +76,7 @@ if ($barom["units"]=='mb' OR $barom["units"]=="hPa"){echo number_format($barom["
 </style>    
 <?php 
 
-if ($theme == "dark") {
-
-echo
+if ($theme === "dark") { echo
     
     '<style>
     
@@ -93,37 +86,7 @@ echo
     		margin-left: -2.75px;
     		z-index: auto;
     	}
-    	
-    	.moduletitlebaro {
-			margin-top: -18px; 
-			color: silver;
-  			font-size: .8em;
-  			float: none;
-  			z-index: auto;
-		}
-		
-		.yearpopupbaro {
-  			font-size: .7em;
-  			margin-left: -135px;
-  			margin-top: 2px;
-		}
-		.divum-itembaro {
-  			width: 32.84%;
-  			height: 195px;
-  			border: 0;
-  			border-bottom: 18px solid rgba(97, 106, 114, .1);
-  			-webkit-box-shadow: inset 0 20px rgba(97, 106, 114, .1);
-  			box-shadow: inset 0 20px rgba(97, 106, 114, .1);
-  			-webkit-box-sizing: border-box;
-  			box-sizing: border-box;
-  			font-size: 1em;
-  			padding: 0;
-  			float: none;
-    		width: 315px;
-    		margin: 2.5px auto 0;
-    		overflow: hidden;
-		}
-		   	
+    		   	
         .unselectable {
             -moz-user-select: -moz-none;
             -khtml-user-select: none;
@@ -131,7 +94,6 @@ echo
             -ms-user-select: none;
             user-select: none;
         }
-
         .gauge .domain {
             stroke-width: 0px;
             stroke: rgba(59, 60, 63, 1);
@@ -154,7 +116,6 @@ echo
         	stroke-width: 2px;
         	fill: rgba(59, 60, 63, 0);
         }
-
         .gauge .major {
             fill: rgba(147, 147, 147, 1);
             font-size: 8px;
@@ -176,9 +137,7 @@ echo
        
 	</style>';
 	
-	} else {
-	
-echo
+	} else { echo
 	
     '<style>
     
@@ -189,38 +148,6 @@ echo
     		z-index: auto;
     	}
     	
-    	.moduletitlebaro {
-			margin-top: -18px; 
-			color: black;
-  			font-size: .8em;
-  			float: none;
-  			z-index: auto;
-		}
-		
-		.yearpopupbaro {
-  			font-size: .7em;
-  			margin-left: -135px;
-  			margin-top: 3px;
-  			color: black;
-		}
-		
-		.divum-itembaro {
-  			height: 200px;
-  			width: 33.3333%;  			
-  			border: 0;
-  			border-bottom: 18px solid #f6f8fc;
-  			-webkit-box-shadow: inset 0 20px #f6f8fc;
-  			box-shadow: inset 0 20px #f6f8fc;
-  			-webkit-box-sizing: border-box;
-  			box-sizing: border-box;
-  			font-size: 1em;
-  			padding: 0;
-  			float: none;
-  			width: 315px;
-    		margin: 4px auto 0;
-    		overflow: hidden;
-		}
-    
         .unselectable {
             -moz-user-select: -moz-none;
             -khtml-user-select: none;
@@ -228,7 +155,6 @@ echo
             -ms-user-select: none;
             user-select: none;
         }
-
         .gauge .domain {
             stroke-width: 0px;
             stroke: rgba(59, 60, 63, 1);
@@ -245,13 +171,11 @@ echo
             stroke-width: 0.75px;
             stroke-linecap: round; 
         }
-
         .gauge .arc, .gauge .cursor {
         	stroke: rgba(59, 60, 63, 0);
         	stroke-width: 2px;
         	fill: rgba(59, 60, 63, 0);
         }
-
         .gauge .major {
             fill: rgba(147, 147, 147, 1);
             font-size: 8px;
@@ -294,15 +218,15 @@ echo
     
     var theme = "<?php echo $theme;?>";
     
-    	if (units == "hPa") {
+    	if (units === "hPa") {
                    
            var svg = d3.select(".barometer")
                 .append("svg")
                 //.style("background", "#292E35")
                 .attr("width", 140)
                 .attr("height", 140);
-                
-             if (theme == "dark") {
+   
+        if (theme === "dark") {
              
              svg.append("text") // barometer now pressure text output
              	.attr("x", 70)
@@ -326,26 +250,32 @@ echo
             	.style("font-weight", "normal")
    				.text(currentP + " " + units);
    			}
-         
-                                                                      
+                                                                               
         var gauge = iopctrl.arcslider()
                 .radius(52.5)
                 .events(false)
                 .transitionDuration(0) // needle speed, a higher value makes it slower
                 .indicator(function(g, width) {
-                
-    				g.append("line")
-            		 .attr("y1", - width - 3) // needle length
-            		 .attr("y2", width - 42) // needle tail length
-            		 .style("stroke", "red")
-            		 .style("stroke-linecap", "round")
-            		 .style("stroke-width", 1);
+                /*
+    			g.append("line")
+            		.attr("y1", - width - 3) // needle length
+            		.attr("y2", width - 42) // needle tail length
+            		.style("stroke", "red")
+            		.style("stroke-linecap", "round")
+            		.style("stroke-width", 1);
+                    */
+                g.append('polyline') // needle
+                    .attr('points', "1.5 11 0 -56 -1.5 11 0 11 1.5 11 -1.5 0")
+                    .style('fill', 'red')
+                    .style('stroke', 'red')
+                    .style("stroke-width", 0.5)
+                    .style("stroke-linecap", "round");
             		 
 
-            		 g.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
-            		 .attr("r", 5);
+            	g.append("circle")
+            		.attr("cx", 0) // center circle
+            		.attr("cy", 0)
+            		.attr("r", 5);
             		             		             	            		            		 
             });
                                                                     
@@ -363,8 +293,7 @@ echo
                 .attr("class", "gauge")
                 .attr('transform', 'translate(-32.5, -32.5)')
                 .call(gauge);
-                
-                 
+                                
         gauge.value(currentP);
         
          var gauge = iopctrl.arcslider()
@@ -372,6 +301,7 @@ echo
                 .events(false)
                 .transitionDuration(0) // needle speed, a higher value makes it slower
                 .indicator(function(g, width) {
+
     				g.append("line")
             		 .attr("y1", - width - 7) // needle length
             		 .attr("y2", - width + 0) // needle tail length
@@ -396,7 +326,6 @@ echo
                 .attr('transform', 'translate(-32.5, -32.5)')
                 .call(gauge);
 
-
         gauge.value(currentMin);
         
           var gauge = iopctrl.arcslider()
@@ -404,6 +333,7 @@ echo
                 .events(false)
                 .transitionDuration(0) // needle speed, a higher value makes it slower
                 .indicator(function(g, width) {
+
     				g.append("line")
             		 .attr("y1", - width - 7) // needle length
             		 .attr("y2", - width + 0) // needle tail length
@@ -431,7 +361,7 @@ echo
 
         gauge.value(currentMax);
         
-        } else if (units == "mb") {
+        } else if (units === "mbar") {
         
          var svg = d3.select(".barometer")
                 .append("svg")
@@ -439,7 +369,7 @@ echo
                 .attr("width", 140)
                 .attr("height", 140);
                 
-             if (theme == "dark") {
+             if (theme === "dark") {
              
              svg.append("text") // barometer now pressure text output
              	.attr("x", 70)
@@ -463,21 +393,26 @@ echo
             	.style("font-weight", "normal")
    				.text(currentP + " " + units);
    			}
-         
-                                                                      
+                                                                               
         var gauge = iopctrl.arcslider()
                 .radius(52.5)
                 .events(false)
                 .transitionDuration(0) // needle speed, a higher value makes it slower
                 .indicator(function(g, width) {
-                
+                /*
     				g.append("line")
             		 .attr("y1", - width - 3) // needle length
             		 .attr("y2", width - 42) // needle tail length
             		 .style("stroke", "red")
             		 .style("stroke-linecap", "round")
             		 .style("stroke-width", 1);
-            		 
+            	   */
+                     g.append('polyline') // needle
+                    .attr('points', "1.5 11 0 -56 -1.5 11 0 11 1.5 11 -1.5 0")
+                    .style('fill', 'red')
+                    .style('stroke', 'red')
+                    .style("stroke-width", 0.5)
+                    .style("stroke-linecap", "round");
 
             		 g.append("circle")
             		 .attr("cx", 0) // center circle
@@ -500,8 +435,7 @@ echo
                 .attr("class", "gauge")
                 .attr('transform', 'translate(-32.5, -32.5)')
                 .call(gauge);
-                
-                 
+                                 
         gauge.value(currentP);
         
          var gauge = iopctrl.arcslider()
@@ -509,6 +443,7 @@ echo
                 .events(false)
                 .transitionDuration(0) // needle speed, a higher value makes it slower
                 .indicator(function(g, width) {
+
     				g.append("line")
             		 .attr("y1", - width - 7) // needle length
             		 .attr("y2", - width + 0) // needle tail length
@@ -533,7 +468,6 @@ echo
                 .attr('transform', 'translate(-32.5, -32.5)')
                 .call(gauge);
 
-
         gauge.value(currentMin);
         
           var gauge = iopctrl.arcslider()
@@ -541,6 +475,7 @@ echo
                 .events(false)
                 .transitionDuration(0) // needle speed, a higher value makes it slower
                 .indicator(function(g, width) {
+
     				g.append("line")
             		 .attr("y1", - width - 7) // needle length
             		 .attr("y2", - width + 0) // needle tail length
@@ -565,17 +500,16 @@ echo
                 .attr('transform', 'translate(-32.5, -32.5)')
                 .call(gauge);
 
-
         gauge.value(currentMax);
         
-        } else if (units == "inHg") {
+        } else if (units === "inHg") {
         
          var svg = d3.select(".barometer")
                 .append("svg")
                 .attr("width", 140)
                 .attr("height", 140);
            
-            if (theme == "dark") {
+            if (theme === "dark") {
              
              svg.append("text") // barometer now pressure text output
              	.attr("x", 70)
@@ -605,13 +539,21 @@ echo
                 .events(false)
                 .transitionDuration(0) // needle speed, a higher value makes it slower
                 .indicator(function(g, width) {
+                    /*
     				g.append("line")
             		 .attr("y1", - width - 3) // needle length
             		 .attr("y2", width - 42) // needle tail length
             		 .style("stroke", "red")
             		 .style("stroke-linecap", "round")
             		 .style("stroke-width", 1);
-            		 
+            	   */
+                     g.append('polyline') // needle
+                    .attr('points', "1.5 11 0 -56 -1.5 11 0 11 1.5 11 -1.5 0")
+                    .style('fill', 'red')
+                    .style('stroke', 'red')
+                    .style("stroke-width", 0.5)
+                    .style("stroke-linecap", "round");
+
             		 g.append("circle")
             		 .attr("cx", 0) // center circle
             		 .attr("cy", 0)
@@ -641,6 +583,7 @@ echo
                 .events(false)
                 .transitionDuration(0) // needle speed, a higher value makes it slower
                 .indicator(function(g, width) {
+
     				g.append("line")
             		 .attr("y1", - width - 7) // needle length
             		 .attr("y2", - width + 0) // needle tail length
@@ -672,6 +615,7 @@ echo
                 .events(false)
                 .transitionDuration(0) // needle speed, a higher value makes it slower
                 .indicator(function(g, width) {
+
     				g.append("line")
             		 .attr("y1", - width - 7) // needle length
             		 .attr("y2", - width + 0) // needle tail length
@@ -705,7 +649,7 @@ echo
                 .attr("width", 140)
                 .attr("height", 140);
                 
-              if (theme == "dark") {
+              if (theme === "dark") {
              
              svg.append("text") // barometer now pressure text output
              	.attr("x", 70)
@@ -735,12 +679,20 @@ echo
                 .events(false)
                 .transitionDuration(0) // needle speed, a higher value makes it slower
                 .indicator(function(g, width) {
+                    /*
     				g.append("line")
             		 .attr("y1", - width - 3) // needle length
             		 .attr("y2", width - 42) // needle tail length
             		 .style("stroke", "red")
             		 .style("stroke-linecap", "round")
             		 .style("stroke-width", 1);
+                     */
+                    g.append('polyline') // needle
+                    .attr('points', "1.5 11 0 -56 -1.5 11 0 11 1.5 11 -1.5 0")
+                    .style('fill', 'red')
+                    .style('stroke', 'red')
+                    .style("stroke-width", 0.5)
+                    .style("stroke-linecap", "round");
 
             		 g.append("circle")
             		 .attr("cx", 0) // center circle
@@ -757,8 +709,7 @@ echo
                 .tickPadding(3)
                 .scale(d3.scale.linear()
                         .domain([95, 105]) // min max text scale inHg
-                        .range([- 3 * Math.PI / 4, 3 * Math.PI / 4]));                                                   
-                                                                    
+                        .range([- 3 * Math.PI / 4, 3 * Math.PI / 4]));                                                                                                
         svg.append("g")
                 .attr("class", "gauge")
                 .attr('transform', 'translate(-32.5, -32.5)')
@@ -771,6 +722,7 @@ echo
                 .events(false)
                 .transitionDuration(0) // needle speed, a higher value makes it slower
                 .indicator(function(g, width) {
+
     				g.append("line")
             		 .attr("y1", - width - 7) // needle length
             		 .attr("y2", - width + 0) // needle tail length
@@ -795,7 +747,6 @@ echo
                 .attr('transform', 'translate(-32.5, -32.5)')
                 .call(gauge);
 
-
         gauge.value(currentMin);
         
           var gauge = iopctrl.arcslider()
@@ -803,6 +754,7 @@ echo
                 .events(false)
                 .transitionDuration(0) // needle speed, a higher value makes it slower
                 .indicator(function(g, width) {
+
     				g.append("line")
             		 .attr("y1", - width - 7) // needle length
             		 .attr("y2", - width + 0) // needle tail length
@@ -826,7 +778,6 @@ echo
                 .attr("class", "gauge")
                 .attr('transform', 'translate(-32.5, -32.5)')
                 .call(gauge);
-
 
         gauge.value(currentMax);
       
