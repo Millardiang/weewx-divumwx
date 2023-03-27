@@ -25,10 +25,10 @@ if ($wind["units"] == "kts") { echo $wind["units"] = "kts"; }
 
 if($theme == 'dark') { 
 //divumwx-convert kmh to mph
-if ($wind["units"]=="km/h" && $wind["gustf"]*$toKnots>=26.9978){echo "<div class=windconvertercirclered1><tred>".number_format($wind["gustf"]*0.621371,1)." </tred><smallrainunit>mph</smallrainunit>";}
-else if ($wind["units"]=="km/h" && $wind["gustf"]*$toKnots>=21.5983){echo "<div class=windconvertercircleorange1><torange>".number_format($wind["gustf"]*0.621371,1)." </torange><smallrainunit> mph</smallrainunit>";}
-else if ($wind["units"]=="km/h" && $wind["gustf"]*$toKnots>=8.09935){echo "<div class=windconvertercirclegreen1><tgreen>".number_format($wind["gustf"]*0.621371,1)." </tgreen><smallrainunit> mph</smallrainunit>";}
-else if ($wind["units"]=="km/h" && $wind["gustf"]*$toKnots<8.09935){echo "<div class=windconvertercircleblue1><tblue>".number_format($wind["gustf"]*0.621371,1)." </tblue><smallrainunit> mph</smallrainunit>";}
+if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots>=26.9978){echo "<div class=windconvertercirclered1><tred>".number_format($wind["gust"]*0.621371,1)." </tred><smallrainunit>mph</smallrainunit>";}
+else if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots>=21.5983){echo "<div class=windconvertercircleorange1><torange>".number_format($wind["gust"]*0.621371,1)." </torange><smallrainunit> mph</smallrainunit>";}
+else if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots>=8.09935){echo "<div class=windconvertercirclegreen1><tgreen>".number_format($wind["gust"]*0.621371,1)." </tgreen><smallrainunit> mph</smallrainunit>";}
+else if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots<8.09935){echo "<div class=windconvertercircleblue1><tblue>".number_format($wind["gust"]*0.621371,1)." </tblue><smallrainunit> mph</smallrainunit>";}
 //divumwx-convert mph to kmh
 else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots>=26.9978){echo "<div class=windconvertercirclered1><tred>".number_format($wind["gust"]*1.609343502101025,1)." </tred><smallrainunit> km/h</smallrainunit>";}
 else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots>=21.5983){echo "<div class=windconvertercircleorange1><torange>".number_format($wind["gust"]*1.609343502101025,1)." </torange><smallrainunit> km/h</smallrainunit>";}
@@ -43,10 +43,10 @@ else if ($wind["units"]=="m/s" && $wind["gust"]*$toKnots<8.09935){echo "<div cla
 } else {
 
 // convert kmh to mph
-if ($wind["units"]=="km/h" && $wind["gustf"]*$toKnots>=26.9978){echo "<div class=windconvertercirclered1><weathertext2>".number_format($wind["gustf"]*0.621371,1)." </weathertext2><smallrainunit>mph</smallrainunit>";}
-else if ($wind["units"]=="km/h" && $wind["gustf"]*$toKnots>=21.5983){echo "<div class=windconvertercircleorange1><weathertext2>".number_format($wind["gustf"]*0.621371,1)." </weathertext2><smallrainunit> mph</smallrainunit>";}
-else if ($wind["units"]=="km/h" && $wind["gustf"]*$toKnots>=8.09935){echo "<div class=windconvertercirclegreen1><weathertext2>".number_format($wind["gustf"]*0.621371,1)." </weathertext2><smallrainunit> mph</smallrainunit>";}
-else if ($wind["units"]=="km/h" && $wind["gustf"]*$toKnots<8.09935){echo "<div class=windconvertercircleblue1><weathertext2>".number_format($wind["gustf"]*0.621371,1)." </weathertext2><smallrainunit> mph</smallrainunit>";}
+if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots>=26.9978){echo "<div class=windconvertercirclered1><weathertext2>".number_format($wind["gust"]*0.621371,1)." </weathertext2><smallrainunit>mph</smallrainunit>";}
+else if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots>=21.5983){echo "<div class=windconvertercircleorange1><weathertext2>".number_format($wind["gust"]*0.621371,1)." </weathertext2><smallrainunit> mph</smallrainunit>";}
+else if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots>=8.09935){echo "<div class=windconvertercirclegreen1><weathertext2>".number_format($wind["gust"]*0.621371,1)." </weathertext2><smallrainunit> mph</smallrainunit>";}
+else if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots<8.09935){echo "<div class=windconvertercircleblue1><weathertext2>".number_format($wind["gust"]*0.621371,1)." </weathertext2><smallrainunit> mph</smallrainunit>";}
 // convert mph to kmh
 else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots>=26.9978){echo "<div class=windconvertercirclered1><weathertext2>".number_format($wind["gust"]*1.609343502101025,1)." </weathertext2><smallrainunit> km/h</smallrainunit>";}
 else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots>=21.5983){echo "<div class=windconvertercircleorange1><weathertext2>".number_format($wind["gust"]*1.609343502101025,1)." </weathertext2><smallrainunit> km/h</smallrainunit>";}
@@ -163,7 +163,6 @@ if ($wind["speed_bft"] == 0) {
 
 <script src="js/d3.min.js"></script>
 <script src="js/iopctrl.js"></script>
-
 
 <?php 
 
@@ -290,8 +289,6 @@ if ($theme === "dark") { echo
 ?>
 
 <div class="anemometer"></div>
-<div id="svg"></div>
-
    
      <script>
 
@@ -319,7 +316,63 @@ if ($theme === "dark") { echo
                 .append("svg")
                 //.style("background", "#292E35")
                 .attr("width", 310)
-                .attr("height", 150);                  
+                .attr("height", 150);
+
+      const padding = 1.215;
+
+      var anglePercentage = d3.scale.linear()
+        .domain([0, 200])
+        .range([-135 * Math.PI/180, -135 * Math.PI/180 + 200 * Math.PI/180 + padding]);
+
+        // windy.com color scale
+
+      var color = d3.scale.ordinal()
+        .range([
+        "#ffffff", // Cat 3
+        "#f1ff6c", // Cat 2
+        "#c1fc77", // Cat 1
+        "#45698d",
+        "#754a92",
+        "#af5088",
+        "#d20032",
+        "#c8420d",
+        "#c2863e",
+        "#39a239", 
+        "#0f94a7", 
+        "#6e90d0",
+        "#7e98bb",
+        "#85a3aa"]);
+
+         windy = [ // 0 - 200 km/h
+          [175, 200, 1],
+          [155, 175, 2],
+          [120, 155, 3],
+          [100, 120, 4],
+          [90, 100, 5],
+          [75, 90, 6],
+          [60, 75, 7],
+          [50, 60, 8],
+          [40, 50, 9],
+          [30, 40, 10],
+          [20, 30, 11],
+          [10, 20, 12],
+          [5, 10, 13],
+          [0, 5, 14]]
+
+        var arc = d3.svg.arc()
+        .innerRadius(45)
+        .outerRadius(50)
+        .startAngle(function(d){return anglePercentage(d[0]);})
+        .endAngle(function(d){return anglePercentage(d[1]);});
+
+        svg.selectAll("path.windy")
+        .data(windy)
+        .enter()
+        .append("path")
+        .attr("class", "windy")
+        .attr("d", arc)
+        .style("fill", function(d){return color(d[2]);})
+        .attr("transform", "translate(154.5,73.5)");
 
       if (theme === "dark") {
              
@@ -432,14 +485,14 @@ if ($theme === "dark") { echo
                 .events(false)
                 .transitionDuration(0) // needle speed, a higher value makes it slower
                 .indicator(function(g, width) {
-                /*           
+            /*             
             g.append("line")
                  .attr("y1", - width - 3) // needle length
                  .attr("y2", width - 42) // needle tail length
                  .style("stroke", "rgba(0,127,255,1)")
                  .style("stroke-linecap", "round")
                  .style("stroke-width", 1);
-                */
+              */ 
         
             g.append('polyline') // needle
                 .attr('points', "1.5 11 0 -56 -1.5 11 0 11 1.5 11 -1.5 0")
@@ -447,12 +500,12 @@ if ($theme === "dark") { echo
                 .style('stroke', 'rgba(0,127,255,1)')
                 .style("stroke-width", 0.5)
                 .style("stroke-linecap", "round");
-
+ 
                  g.append("circle")
                  .attr("cx", 0) // center circle
                  .attr("cy", 0)
                  .attr("r", 5);
-                                                                               
+                                                                              
             });
 
         gauge.axis().orient("out").tickFormat(d3.format("d"))
@@ -462,7 +515,7 @@ if ($theme === "dark") { echo
                 .tickSize(7, 7, 10)
                 .tickPadding(3)
                 .scale(d3.scale.linear()
-                        .domain([0, 120]) // min max text scale current wind speed
+                        .domain([0, 200]) // min max text scale current wind speed
                         .range([- 3 * Math.PI / 4, 3 * Math.PI / 4]));
                                                                                                                      
         svg.append("g")
@@ -495,7 +548,7 @@ if ($theme === "dark") { echo
                 .tickSize(7, 7, 10)
                 .tickPadding(3)
                 .scale(d3.scale.linear()
-                        .domain([0, 120]) // min max text scale current wind gust
+                        .domain([0, 200]) // min max text scale current wind gust
                         .range([- 3 * Math.PI / 4, 3 * Math.PI / 4]));
                                                 
         svg.append("g")
@@ -528,7 +581,7 @@ if ($theme === "dark") { echo
                 .tickSize(7, 7, 10)
                 .tickPadding(3)
                 .scale(d3.scale.linear()
-                        .domain([0, 120]) // min max text scale max gust
+                        .domain([0, 200]) // min max text scale max gust
                         .range([- 3 * Math.PI / 4, 3 * Math.PI / 4]));
                                                
         svg.append("g")
@@ -545,6 +598,62 @@ if ($theme === "dark") { echo
                 //.style("background", "#292E35")
                 .attr("width", 310)
                 .attr("height", 150);
+
+      const padding = 2.44;
+
+      var anglePercentage = d3.scale.linear()
+        .domain([0, 130])
+        .range([-135 * Math.PI/180, -135 * Math.PI/180 + 130 * Math.PI/180 + padding]);
+
+        // windy.com color scale
+
+      var color = d3.scale.ordinal()
+        .range([
+        "#ffffff", // Cat 3
+        "#f1ff6c", // Cat 2
+        "#c1fc77", // Cat 1
+        "#45698d",
+        "#754a92",
+        "#af5088",
+        "#d20032",
+        "#c8420d",
+        "#c2863e",
+        "#39a239", 
+        "#0f94a7", 
+        "#6e90d0",
+        "#7e98bb",
+        "#85a3aa"]);
+
+         windy = [ // 0 - 130 mph
+            [110, 130, 1],
+            [95, 110, 2],
+            [72, 95, 3],
+            [63, 72, 4],
+            [54, 63, 5],
+            [46, 54, 6],
+            [38, 46, 7],
+            [31, 38, 8],
+            [24, 31, 9],
+            [18, 24, 10],
+            [12, 18, 11],
+            [7, 12, 12],
+            [3, 7, 13],
+            [0, 3, 14]]
+
+        var arc = d3.svg.arc()
+        .innerRadius(45)
+        .outerRadius(50)
+        .startAngle(function(d){return anglePercentage(d[0]);})
+        .endAngle(function(d){return anglePercentage(d[1]);});
+
+        svg.selectAll("path.windy")
+        .data(windy)
+        .enter()
+        .append("path")
+        .attr("class", "windy")
+        .attr("d", arc)
+        .style("fill", function(d){return color(d[2]);})
+        .attr("transform", "translate(154.5,73.5)");
                 
              if (theme == "dark") {
              
@@ -686,7 +795,7 @@ if ($theme === "dark") { echo
                 .tickSize(7, 7, 10)
                 .tickPadding(3)
                 .scale(d3.scale.linear()
-                        .domain([0, 100]) // min max text scale current wind speed
+                        .domain([0, 130]) // min max text scale current wind speed
                         .range([- 3 * Math.PI / 4, 3 * Math.PI / 4]));
                                                                                                      
         svg.append("g")
@@ -719,7 +828,7 @@ if ($theme === "dark") { echo
                 .tickSize(7, 7, 10)
                 .tickPadding(3)
                 .scale(d3.scale.linear()
-                        .domain([0, 100]) // min max text scale current wind gust
+                        .domain([0, 130]) // min max text scale current wind gust
                         .range([- 3 * Math.PI / 4, 3 * Math.PI / 4]));
                                                 
         svg.append("g")
@@ -752,7 +861,7 @@ if ($theme === "dark") { echo
                 .tickSize(7, 7, 10)
                 .tickPadding(3)
                 .scale(d3.scale.linear()
-                        .domain([0, 100]) // min max text scale max gust
+                        .domain([0, 130]) // min max text scale max gust
                         .range([- 3 * Math.PI / 4, 3 * Math.PI / 4]));
                                                 
         svg.append("g")
@@ -768,6 +877,63 @@ if ($theme === "dark") { echo
                 .append("svg")
                 .attr("width", 310)
                 .attr("height", 150);
+
+        const padding = 3.66;
+
+        var anglePercentage = d3.scale.linear()
+        .domain([0, 60])
+        .range([-135 * Math.PI/180, -135 * Math.PI/180 + 60 * Math.PI/180 + padding]);
+
+        // windy.com color scale
+
+      var color = d3.scale.ordinal()
+        .range([
+        "#ffffff", // Cat 3
+        "#f1ff6c", // Cat 2
+        "#c1fc77", // Cat 1
+        "#45698d",
+        "#754a92",
+        "#af5088",
+        "#d20032",
+        "#c8420d",
+        "#c2863e",
+        "#39a239", 
+        "#0f94a7", 
+        "#6e90d0",
+        "#7e98bb",
+        "#85a3aa"]);
+
+         windy = [ // 0 - 60 m/s
+            [49.1744, 60.0000, 1],
+            [42.4688, 49.1744, 2],
+            [32.1869, 42.4688, 3],
+            [28.1635, 32.1869, 4],
+            [24.1402, 28.1635, 5],
+            [20.5638, 24.1402, 6],
+            [16.9875, 20.5638, 7],
+            [13.8582, 16.9875, 8],
+            [10.7290, 13.8582, 9],
+            [8.04672, 10.7290, 10],
+            [5.36448, 8.04672, 11],
+            [3.12928, 5.36448, 12],
+            [1.34112, 3.12928, 13],
+            [0, 1.34112, 14]]
+
+        var arc = d3.svg.arc()
+        .innerRadius(45)
+        .outerRadius(50)
+        .startAngle(function(d){return anglePercentage(d[0]);})
+        .endAngle(function(d){return anglePercentage(d[1]);});
+
+        svg.selectAll("path.windy")
+        .data(windy)
+        .enter()
+        .append("path")
+        .attr("class", "windy")
+        .attr("d", arc)
+        .style("fill", function(d){return color(d[2]);})
+        .attr("transform", "translate(154.5,73.5)");
+                
            
             if (theme == "dark") {
              
@@ -908,7 +1074,7 @@ if ($theme === "dark") { echo
                 .tickSize(7, 7, 10)
                 .tickPadding(3)
                 .scale(d3.scale.linear()
-                        .domain([0, 50]) // min max text scale current wind speed
+                        .domain([0, 60]) // min max text scale current wind speed
                         .range([- 3 * Math.PI / 4, 3 * Math.PI / 4]));
 
         svg.append("g")
@@ -940,7 +1106,7 @@ if ($theme === "dark") { echo
                 .tickSize(7, 7, 10)
                 .tickPadding(3)
                 .scale(d3.scale.linear()
-                        .domain([0, 50]) // min max text scale current wind gust
+                        .domain([0, 60]) // min max text scale current wind gust
                         .range([- 3 * Math.PI / 4, 3 * Math.PI / 4]));
 
         svg.append("g")
@@ -972,7 +1138,7 @@ if ($theme === "dark") { echo
                 .tickSize(7, 7, 10)
                 .tickPadding(3)
                 .scale(d3.scale.linear()
-                        .domain([0, 50]) // min max text scale max gust
+                        .domain([0, 60]) // min max text scale max gust
                         .range([- 3 * Math.PI / 4, 3 * Math.PI / 4]));
                                                 
         svg.append("g")
@@ -988,6 +1154,82 @@ if ($theme === "dark") { echo
                 .append("svg")
                 .attr("width", 310)
                 .attr("height", 150);
+
+      const padding = 1.215;
+
+      var anglePercentage = d3.scale.linear()
+        .domain([0, 110])
+        .range([-135 * Math.PI/180, -135 * Math.PI/180 + 110 * Math.PI/180 + padding]);
+
+        // windy.com color scale
+
+      var color = d3.scale.ordinal()
+        .range([
+        "#ffffff", // Cat 3
+        "#f1ff6c", // Cat 2
+        "#c1fc77", // Cat 1
+        "#45698d",
+        "#754a92",
+        "#af5088",
+        "#d20032",
+        "#c8420d",
+        "#c2863e",
+        "#39a239", 
+        "#0f94a7", 
+        "#6e90d0",
+        "#7e98bb",
+        "#85a3aa"]);
+
+         windy = [ // 0 - 110 knots
+          [94.4924, 110.000, 1],
+          [83.6933, 94.4924, 2],
+          [64.7948, 83.6933, 3],
+          [53.9957, 64.7948, 4],
+          [48.5961, 53.9957, 5],
+          [40.4968, 48.5961, 6],
+          [32.3974, 40.4968, 7],
+          [26.9978, 32.3974, 8],
+          [21.5983, 26.9978, 9],
+          [16.1987, 21.5983, 10],
+          [10.7991, 16.1987, 11],
+          [5.39957, 10.7991, 12],
+          [2.69978, 5.39957, 13],
+          [0, 2.69978, 14]]
+
+        var arc = d3.svg.arc()
+        .innerRadius(45)
+        .outerRadius(50)
+        .startAngle(function(d){return anglePercentage(d[0]);})
+        .endAngle(function(d){return anglePercentage(d[1]);});
+
+        svg.selectAll("path.windy")
+        .data(windy)
+        .enter()
+        .append("path")
+        .attr("class", "windy")
+        .attr("d", arc)
+        .style("fill", function(d){return color(d[2]);})
+        .attr("transform", "translate(154.5,73.5)");
+
+          var arc = d3.svg.arc() // gust max arc segment
+          .innerRadius(0)
+          .outerRadius(50)
+          .startAngle(-135 * Math.PI/180)
+          .endAngle(-135 * Math.PI/180 + gust_max * 2.25 * Math.PI/180)         
+          svg.append("path")
+          .attr("d", arc)
+          .style("fill", "rgba(255,124,57,0.5)") // orange
+          .attr("transform", "translate(154.5,73.5)"); 
+
+          var arc = d3.svg.arc() // current wind gust arc segment
+          .innerRadius(0)
+          .outerRadius(50)
+          .startAngle(-135 * Math.PI/180)
+          .endAngle(-135 * Math.PI/180 + current_wind_gust * 2.25 * Math.PI/180)         
+          svg.append("path")
+          .attr("d", arc)
+          .style("fill", "rgba(46,139,87,0.75)") // earth green
+          .attr("transform", "translate(154.5,73.5)"); 
            
             if (theme == "dark") {
              
@@ -1128,7 +1370,7 @@ if ($theme === "dark") { echo
                 .tickSize(7, 7, 10)
                 .tickPadding(3)
                 .scale(d3.scale.linear()
-                        .domain([0, 100]) // min max text scale current wind speed
+                        .domain([0, 110]) // min max text scale current wind speed
                         .range([- 3 * Math.PI / 4, 3 * Math.PI / 4]));
 
         svg.append("g")
@@ -1160,7 +1402,7 @@ if ($theme === "dark") { echo
                 .tickSize(7, 7, 10)
                 .tickPadding(3)
                 .scale(d3.scale.linear()
-                        .domain([0, 100]) // min max text scale current wind gust
+                        .domain([0, 110]) // min max text scale current wind gust
                         .range([- 3 * Math.PI / 4, 3 * Math.PI / 4]));
 
         svg.append("g")
@@ -1192,7 +1434,7 @@ if ($theme === "dark") { echo
                 .tickSize(7, 7, 10)
                 .tickPadding(3)
                 .scale(d3.scale.linear()
-                        .domain([0, 100]) // min max text scale max gust
+                        .domain([0, 110]) // min max text scale max gust
                         .range([- 3 * Math.PI / 4, 3 * Math.PI / 4]));
                                                 
         svg.append("g")
