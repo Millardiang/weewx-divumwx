@@ -28,7 +28,7 @@ $eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $l
     <span class='moduletitle2'><?php echo $lang['earthquakeModule']; ?></valuetitleunit></span>
 
 
-<div class="updatedtime1"><span><?php $updated = filemtime('jsondata/eq.txt'); echo $online, " ",date($timeFormat, $updated);?></span></div>
+<div class= "updatedtime1"<span><?php if(file_exists('jsondata/eq.txt')&&time()- filemtime('jsondata/eq.txt')>1800)echo $offline. '<offline> Offline </offline>';else echo $online," ",date($timeFormat, filemtime('jsondata/eq.txt'));?></span></div>
 
 <html>
 <script src="js/d3.v3.min.js"></script>
