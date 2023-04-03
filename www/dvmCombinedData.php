@@ -289,9 +289,11 @@ explode(" ", file_get_contents($livedata)));
     $lightning["now_strike_count"] = $weewxrt[60];
     $lightning["now_noise_count"] = $weewxrt[61];
     $lightning["now_disturber_count"] = $weewxrt[62];
-    if (trim($lightning["last_time"]) == 'N/A' || $lightning["last_time"] == '0')
+    if (trim($lightning["last_time"]) == 'N/A' || $lightning["last_time"] == '0' || $lightning["last_time"] == 'NULL')
     {
         $lightning["time_ago"] = 0;
+        $lightning['last_time'] = time();
+        $lightning["last_distance"] = "0";
     }
     else
     {
