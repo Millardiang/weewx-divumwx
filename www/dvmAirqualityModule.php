@@ -1,7 +1,7 @@
 <?php
 include('dvmCombinedData.php');
 $airqual["pm_units"] = "μg/㎥";
-$airqual["source"] = "weewx";
+
 //PM10 is particulate matter 10 micrometers or less in diameter, PM25 is particulate matter 2.5 micrometers or less in diameter.
 //PM2.5 is generally described as fine particles. By way of comparison, a human hair is about 100 micrometres, so roughly
 //40 fine particles could be placed on its width.
