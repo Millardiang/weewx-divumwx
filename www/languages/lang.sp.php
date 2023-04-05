@@ -333,4 +333,5 @@ $lang['earthDaylightModule']     = 'Earth Daylight';
 $lang['moonPhaseModule']         = 'Fase lunar actual';
 $lang['earthquakeModule']        = 'Terremotos';
 $lang['indoorTempModule']        = 'Temperatura Interior';
+$lang['Anemometer']              = 'Anemómetro';
 ?>
