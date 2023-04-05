@@ -1,7 +1,7 @@
 <?php
 include('dvmCombinedData.php');
 $airqual["pm_units"] = "μg/㎥";
-
+$airqual["source"] = "weewx";
 //PM10 is particulate matter 10 micrometers or less in diameter, PM25 is particulate matter 2.5 micrometers or less in diameter.
 //PM2.5 is generally described as fine particles. By way of comparison, a human hair is about 100 micrometres, so roughly
 //40 fine particles could be placed on its width.
@@ -483,7 +483,7 @@ if ($airqual["zone"] == "au"){
 		$airqual["priority25"] = 2;
 	}
 	else if ($airqual["aqi25"] < 100 ){
-		$airqual["image25"] = "./css/aqi/modair.svg?ver=1.4";
+		$airqual["image25"] = "./css/aqi/modhair.svg?ver=1.4";
 		$airqual["color25"] = "#FFD235";
 		$airqual["text25"] = "Fair Air Quality";
 		$airqual["priority25"] = 3;
@@ -520,7 +520,7 @@ if ($airqual["zone"] == "au"){
 		$airqual["priority10"] = 2;
 	}
 	else if ($airqual["aqi10"] < 100 ){
-		$airqual["image10"] = "./css/aqi/modair.svg?ver=1.4";
+		$airqual["image10"] = "./css/aqi/modhair.svg?ver=1.4";
 		$airqual["color10"] = "#FFD235";
 		$airqual["text10"] = "Fair Air Quality";
 		$airqual["priority10"] = 3;
@@ -556,7 +556,11 @@ else {$airqual["text"] = $airqual["text10"];
 ?>
 
     <div class="chartforecast2">
-       <span class="yearpopup"><a alt="aquinfo" title="AQI Info" href="dvmAqiInfoPopup.php" data-lity><?php echo $info;?> AQI Info</a></span>
+      
+
+      <span class="yearpopup"><a alt="airquality charts" title="Airquality Charts" href="dvmMenuAirquality.php" data-lity><?php echo $menucharticonpage;?> Airquality Charts</a></span>
+      <span class="yearpopup"><a alt="aquinfo" title="AQI Info" href="dvmAqiInfoPopup.php" . data-lity> <?php echo $info;?> AQI Info</a></span>
+
     </div>
     <span class='moduletitle2'><?php echo $lang['airqualityModule'];?></span>
 
