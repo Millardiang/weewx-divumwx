@@ -94,8 +94,9 @@
     "lightning":
     {
         
-        "lightning last distance": {"value":   "$alltime.lightning_distance.lastnonzero.format(add_label=False, $localize=False)"},
-        "lightning last time": {"at": "$alltime.signal7.lastnonzero.raw"},
+        "lightning last distance": {"value": "$alltime.lightning_distance.lastnonzero.format(add_label=False, $localize=False)"},
+        "lightning last time": {"at": "$alltime.lightning_last_det_time.lastnonzero.raw"},
+        "lightning last hour": {"value": "$hour.lightning_strike_count.sum"},
         ## Last value can't end with a comma
         "void_end": null
     },
@@ -114,8 +115,8 @@
     },
     "cloudcover":
     {
-        #if $current.signal8.has_data
-        "cloud cover": {"value": $current.signal8.format($localize=False,add_label=False)},
+        #if $current.cloud_cover.has_data
+        "cloud cover": {"value": $current.cloud_cover.format($localize=False,add_label=False)},
         #end if
         ## Last value can't end with a comma
         "void_end": null

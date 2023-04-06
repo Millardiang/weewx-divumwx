@@ -277,7 +277,7 @@ explode(" ", file_get_contents($livedata)));
     $lightning["current_strike_count"] = $sdata["current.lightning_strike_count"]; 
     $lightning["2m_strike_count"] = $sdata["2m.lightning_strike_count.sum"]; 
     $lightning["10m_strike_count"] = $sdata["10m.lightning_strike_count.sum"]; 
-    $lightning["hour_strike_count"] = $sdata["hour.lightning_strike_count.sum"]; 
+    $lightning["hour_strike_count"] = $adata["lightning"]["lightning last hour"]["value"]; 
     $lightning["24h_strike_count"] = $sdata["24h.lightning_strike_count.sum"]; 
     $lightning["day_strike_count"] = $sdata["day.lightning_strike_count.sum"];
     $lightning["month_strike_count"] = $sdata["month.lightning_strike_count.sum"];
