@@ -243,7 +243,7 @@ $lightning["nsdcrop"]					= $lightningBolt[22]; // Max strikes in NSDStrikes fil
 					.style("font-size", "10px")
 					.style("text-anchor", "left")
 					.style("font-weight", "normal")
-					.text("Last Detected");
+					.text("Last Strike");
 		svg.append("text") // Last Distance
 					.attr("x", 130)
 					.attr("y", 120)
@@ -252,7 +252,7 @@ $lightning["nsdcrop"]					= $lightningBolt[22]; // Max strikes in NSDStrikes fil
 					.style("font-size", "10px")
 					.style("text-anchor", "left")
 					.style("font-weight", "normal")
-					.text("Distance");
+					.text("Distance @");
 	} else {
 		svg.append('polyline') // Lightning bolt
 					.attr("cx", 40)
@@ -347,7 +347,7 @@ $lightning["nsdcrop"]					= $lightningBolt[22]; // Max strikes in NSDStrikes fil
 					.style("font-size", "10px")
 					.style("text-anchor", "left")
 					.style("font-weight", "normal")
-					.text("Last Detected");
+					.text("Last Strike");
 		svg.append("text") // Last Distance
 					.attr("x", 130)
 					.attr("y", 120)
@@ -356,7 +356,7 @@ $lightning["nsdcrop"]					= $lightningBolt[22]; // Max strikes in NSDStrikes fil
 					.style("font-size", "10px")
 					.style("text-anchor", "left")
 					.style("font-weight", "normal")
-					.text("Distance");
+					.text("Distance @");
 	}
 
 	// Begin color Text output
@@ -388,7 +388,7 @@ $lightning["nsdcrop"]					= $lightningBolt[22]; // Max strikes in NSDStrikes fil
             	.style("font-weight", "normal")
 				.text(Alltime_strikes);
 	svg.append("text") // Last detected strike time
-             	.attr("x", 197)
+             	.attr("x", 182)
             	.attr("y", 105)
             	.style("fill", "#ff964f")
             	.style("font-family", "Helvetica")
@@ -397,7 +397,7 @@ $lightning["nsdcrop"]					= $lightningBolt[22]; // Max strikes in NSDStrikes fil
             	.style("font-weight", "normal")
 				.text(Last_detected);
 	svg.append("text") // Last Distance
-             	.attr("x", 175)
+             	.attr("x", 187)
             	.attr("y", 120)
             	.style("fill", "#ff964f")
             	.style("font-family", "Helvetica")
