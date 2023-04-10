@@ -16,6 +16,10 @@ date_default_timezone_set($TZ);
 
 <?php
 
+//check for any strikes to set last_time correctly
+
+if (empty ($lightning["alltime_strike_count"])) {$lightning['last_time'] =  "None";} else {$lightning['last_time'] =  date('jS M H:i',$lightning['last_time']);}
+
 if ($lightning["source"] == "Boltek") {
 
 $lightninglivedata = 'jsondata/NSDRealtime.txt';
@@ -126,7 +130,7 @@ $lightning["nsdcrop"]					= $lightningBolt[22]; // Max strikes in NSDStrikes fil
 	var Strikes_this_month = "<?php echo $lightning["month_strike_count"];?>";
 	var Strikes_this_year = "<?php echo $lightning["year_strike_count"];?>";
 	var Alltime_strikes = "<?php echo $lightning["alltime_strike_count"];?>";
-	var Last_detected = "<?php echo date('jS M H:i',$lightning['last_time']);?>";
+	var Last_detected = "<?php echo ($lightning['last_time']);?>";
 	var Last_distance = "<?php echo number_format($lightning["last_distance"],1);?>";
 	var Bearing = "<?php echo $lightning["bearing"];?>";
     var Bearingx = "<?php echo $lightning["bearingx"];?>";	
@@ -243,7 +247,7 @@ $lightning["nsdcrop"]					= $lightningBolt[22]; // Max strikes in NSDStrikes fil
 					.style("font-size", "10px")
 					.style("text-anchor", "left")
 					.style("font-weight", "normal")
-					.text("Last Detected");
+					.text("Last Strike");
 		svg.append("text") // Last Distance
 					.attr("x", 130)
 					.attr("y", 120)
@@ -252,7 +256,7 @@ $lightning["nsdcrop"]					= $lightningBolt[22]; // Max strikes in NSDStrikes fil
 					.style("font-size", "10px")
 					.style("text-anchor", "left")
 					.style("font-weight", "normal")
-					.text("Distance");
+					.text("Distance @");
 	} else {
 		svg.append('polyline') // Lightning bolt
 					.attr("cx", 40)
@@ -347,7 +351,7 @@ $lightning["nsdcrop"]					= $lightningBolt[22]; // Max strikes in NSDStrikes fil
 					.style("font-size", "10px")
 					.style("text-anchor", "left")
 					.style("font-weight", "normal")
-					.text("Last Detected");
+					.text("Last Strike");
 		svg.append("text") // Last Distance
 					.attr("x", 130)
 					.attr("y", 120)
@@ -356,7 +360,7 @@ $lightning["nsdcrop"]					= $lightningBolt[22]; // Max strikes in NSDStrikes fil
 					.style("font-size", "10px")
 					.style("text-anchor", "left")
 					.style("font-weight", "normal")
-					.text("Distance");
+					.text("Distance @");
 	}
 
 	// Begin color Text output
@@ -388,7 +392,7 @@ $lightning["nsdcrop"]					= $lightningBolt[22]; // Max strikes in NSDStrikes fil
             	.style("font-weight", "normal")
 				.text(Alltime_strikes);
 	svg.append("text") // Last detected strike time
-             	.attr("x", 197)
+             	.attr("x", 182)
             	.attr("y", 105)
             	.style("fill", "#ff964f")
             	.style("font-family", "Helvetica")
@@ -397,7 +401,7 @@ $lightning["nsdcrop"]					= $lightningBolt[22]; // Max strikes in NSDStrikes fil
             	.style("font-weight", "normal")
 				.text(Last_detected);
 	svg.append("text") // Last Distance
-             	.attr("x", 175)
+             	.attr("x", 187)
             	.attr("y", 120)
             	.style("fill", "#ff964f")
             	.style("font-family", "Helvetica")
