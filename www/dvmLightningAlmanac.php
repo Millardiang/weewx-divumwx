@@ -93,6 +93,11 @@ metricsblue {
     padding: 0 3px 0 3px;
 }</style>';
 }
+
+//Check if lightning yesterday is empty
+
+if (empty ($lightning["yesterday_strike_count"])) {$lightning["yesterday_strike_count"] = "0";}
+
 // lightningplot
  ?>
 <!DOCTYPE html>
