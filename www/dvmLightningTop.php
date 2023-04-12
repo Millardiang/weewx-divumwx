@@ -5,6 +5,10 @@ date_default_timezone_set($TZ);
 
 <?php
 
+//check for any strikes to set last_time correctly
+
+if (empty ($lightning["alltime_strike_count"])) {$lightning['last_time'] =  "None";} else {$lightning['last_time'] =  date('jS M H:i',$lightning['last_time']);}
+
 if ($lightning["source"] == "Boltek") {
 
 $lightninglivedata = 'jsondata/NSDRealtime.txt';
@@ -114,7 +118,7 @@ $lightning["nsdcrop"]									= $lightningBolt[22]; // Max strikes in NSDStrikes
 	var Strikes_last_one_hour = "<?php echo $lightning["hour_strike_count"];?>";	
 	var Strikes_this_month = "<?php echo $lightning["month_strike_count"];?>";
 	var Strikes_this_year = "<?php echo $lightning["year_strike_count"];?>";
-	var Last_detected = "<?php echo date('jS M H:i',$lightning['last_time']);?>";
+        var Last_detected = "<?php echo ($lightning['last_time']);?>";
 	var Last_distance = "<?php echo number_format($lightning["last_distance"],1);?>";
 	var Bearing = "<?php echo $lightning["bearing"];?>";
 	var Bearingx = "<?php echo $lightning["bearingx"];?>";
