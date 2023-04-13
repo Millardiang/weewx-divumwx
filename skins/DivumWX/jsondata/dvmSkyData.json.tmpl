@@ -9,7 +9,7 @@
 ##		Calculate length of daylight
 	  #set $daylength = time.strftime('%H:%M', time.gmtime(int($almanac.sun.set.raw -  $almanac.sun.rise.raw)))
 ##		Truncate station uptime decimals
-	  #set $stationuptime = str($station.os_uptime.raw).split('.')[0]
+	  #set $stationuptime = $alltime.outTemp.firsttime
  	
           #if $almanac.moon_phase.lower() == "New".lower()
             #set $moonphase_no = "0"
@@ -84,7 +84,8 @@
         "altitude meters": $station.altitude.meter.raw,
         "metgramlink": "$station.station_url",
         "daylight": "$daylength",
-        "trend period": "$trend.time_delta"
+        "trend period": "$trend.time_delta",
+        "start data": "$alltime.outTemp.firsttime.format("%d %b %Y %H:%M")"
     },
     "generation":
     {

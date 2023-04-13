@@ -57,6 +57,7 @@ explode(" ", file_get_contents($livedata)));
     $convertuptimemb34 = $divum["uptime"];
     $uptimedays = floor($convertuptimemb34 / 86400);
     $uptimehours = floor(($convertuptimemb34 - ($uptimedays * 86400)) / 3600);
+    $divum["since"] = $adata["info"]["start data"];
 
     //almanac
     $alm["sun_altitude"] = round($adata["almanac"]["sun altitude"]["value"],2);

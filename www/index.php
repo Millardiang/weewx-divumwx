@@ -28,12 +28,19 @@ error_reporting(0);
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name=apple-mobile-web-app-title content="WEATHER STATION">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, viewport-fit=cover">
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-  <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
-  <meta name="msapplication-TileColor" content="#da532c">
-  <link rel="manifest" href="site.webmanifest">
+  
+
+<link rel="apple-touch-icon" sizes="180x180" href="https://claydonsweather.org.uk/weewx/divumwx/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://claydonsweather.org.uk/weewx/divumwx/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://claydonsweather.org.uk/weewx/divumwx/favicon-16x16.png">
+<link rel="manifest" href="https://claydonsweather.org.uk/weewx/divumwx/site.webmanifest">
+<link rel="mask-icon" href="https://claydonsweather.org.uk/weewx/divumwx/safari-pinned-tab.svg" color="#5bbad5">
+<link rel="shortcut icon" href="https://claydonsweather.org.uk/weewx/divumwx/favicon.ico">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="msapplication-config" content="https://claydonsweather.org.uk/weewx/divumwx/browserconfig.xml">
+<meta name="theme-color" content="#ffffff">
+
+  <link rel="manifest" href="/site.webmanifest">
   <link href="css/main.<?php echo $theme;?>.css?version=<?php echo filemtime('css/main.' . $theme . '.css');?>" rel="stylesheet prefetch">
 
   <script>
@@ -222,12 +229,12 @@ echo '<a href="https://https://claydonsweather.org.uk/" title="https://claydonsw
     </div>
 
     <div class="footertext">
-      &nbsp;<?php echo $info;?>&nbsp;(<value><?php echo $templateversion;?></value>)&nbsp;<?php echo "WeeWX";?>-(<value>
+       <?php echo $info;?> (<value><?php echo $templateversion;?></value>) <?php echo "WeeWX";?>-(<value>
         <maxred><?php echo $divum["swversion"];?>
-      </value>)&nbsp;<?php echo $info . "&nbsp;" . $weatherhardware;?></div>
-    <div class="footertext"><a href="https://github.com/steepleian/weewx-Weather34"><?php echo $github;?>&nbsp; WeeWX Version Repository at https://github.com/steepleian/weewx-Weather34 &nbsp;<img src="img/flags/<?php echo $flag;?>.svg" width="20px"></a></div>
+      </value>) <?php echo $info . " " . $weatherhardware;?></div>
+    <div class="footertext"><a href="https://github.com/steepleian/weewx-Weather34"><?php echo $github;?>  WeeWX Version Repository at https://github.com/steepleian/weewx-Weather34  <img src="img/flags/<?php echo $flag;?>.svg" width="20px"></a></div>
     <div class="footertext">
-      <a href="https://www.aerisweather.com/"><img src="img/aerisweather-attribution-h-<?php echo $theme;?>.png" width="75px"></a></br><a href="https://developer.yr.no/featured-products/forecast/">&nbsp; &nbsp; Meteogram Data by <img src="img/yr.svg" width="14px"></a></br><a href="https://bas.dev/work/meteocons">&nbsp; &nbsp; Animated Icons by <img src="img/bm.svg" width="14px"></a>
+      <a href="https://www.aerisweather.com/"><img src="img/aerisweather-attribution-h-<?php echo $theme;?>.png" width="75px"></a></br><a href="https://developer.yr.no/featured-products/forecast/">    Meteogram Data by <img src="img/yr.svg" width="14px"></a></br><a href="https://bas.dev/work/meteocons">    Animated Icons by <img src="img/bm.svg" width="14px"></a>
     </div>
   </div>
 </div>
@@ -244,12 +251,12 @@ echo '<a href="https://https://claydonsweather.org.uk/" title="https://claydonsw
       </div>
       <div class="menutoolbar__center">
         <button class="menubutton menubutton--primary">
-          <menutoptitle><?php echo strtoupper($stationlocation); ?>&nbsp; WEATHER STATION</menutoptitle>
+          <menutoptitle><?php echo strtoupper($stationlocation); ?>  WEATHER STATION</menutoptitle>
         </button>
       </div>
       <div class="menutoolbar__right">
         <menuuptime>
-          <?php echo "Server " . (shell_exec('uptime -p')); ?>
+          <?php echo "Operational Since " . $divum["since"]; ?>
         </menuuptime>
 
             <a href="dvmIndexTablet.php" title="Select Tablet Mode"><topbarbutton>T</topbarbutton></a>
