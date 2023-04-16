@@ -26,74 +26,74 @@ if ($wind["units"] == "kts") { echo $wind["units"] = "kts"; }
 if($theme == 'dark') { 
 //divumwx-convert kmh to mph
 if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots>=26.9978){echo "<div class=windconvertercirclered1><tred>".number_format($wind["gust"]*0.621371,1)." </tred><smallrainunit>mph</smallrainunit>";}
-else if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots>=21.5983){echo "<div class=windconvertercircleorange1><torange>".number_format($wind["gust"]*0.621371,1)." </torange><smallrainunit> mph</smallrainunit>";}
-else if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots>=8.09935){echo "<div class=windconvertercirclegreen1><tgreen>".number_format($wind["gust"]*0.621371,1)." </tgreen><smallrainunit> mph</smallrainunit>";}
-else if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots<8.09935){echo "<div class=windconvertercircleblue1><tblue>".number_format($wind["gust"]*0.621371,1)." </tblue><smallrainunit> mph</smallrainunit>";}
+else if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots>=21.5983){echo "<div class=windconvertercircleorange1><torange>".number_format($wind["gust"]*0.621371,1)." </torange><smallrainunit> mph</smallrainunit>";}
+else if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots>=8.09935){echo "<div class=windconvertercirclegreen1><tgreen>".number_format($wind["gust"]*0.621371,1)." </tgreen><smallrainunit> mph</smallrainunit>";}
+else if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots<8.09935){echo "<div class=windconvertercircleblue1><tblue>".number_format($wind["gust"]*0.621371,1)." </tblue><smallrainunit> mph</smallrainunit>";}
 //divumwx-convert mph to kmh
-else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots>=26.9978){echo "<div class=windconvertercirclered1><tred>".number_format($wind["gust"]*1.609343502101025,1)." </tred><smallrainunit> km/h</smallrainunit>";}
-else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots>=21.5983){echo "<div class=windconvertercircleorange1><torange>".number_format($wind["gust"]*1.609343502101025,1)." </torange><smallrainunit> km/h</smallrainunit>";}
-else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots>=8.09935){echo "<div class=windconvertercircleblue1><tgreen>".number_format($wind["gust"]*1.609343502101025,1)." </tgreen><smallrainunit> km/h</smallrainunit>";}
-else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots<8.09935){echo "<div class=windconvertercirclegreen1><tblue>".number_format($wind["gust"]*1.609343502101025,1)." </tblue><smallrainunit> km/h</smallrainunit>";}
+else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots>=26.9978){echo "<div class=windconvertercirclered1><tred>".number_format($wind["gust"]*1.609343502101025,1)." </tred><smallrainunit> km/h</smallrainunit>";}
+else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots>=21.5983){echo "<div class=windconvertercircleorange1><torange>".number_format($wind["gust"]*1.609343502101025,1)." </torange><smallrainunit> km/h</smallrainunit>";}
+else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots>=8.09935){echo "<div class=windconvertercircleblue1><tgreen>".number_format($wind["gust"]*1.609343502101025,1)." </tgreen><smallrainunit> km/h</smallrainunit>";}
+else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots<8.09935){echo "<div class=windconvertercirclegreen1><tblue>".number_format($wind["gust"]*1.609343502101025,1)." </tblue><smallrainunit> km/h</smallrainunit>";}
 //divumwx-convert ms to kmh
-else if ($wind["units"]=="m/s" && $wind["gust"]*$toKnots>=26.9978){echo "<div class=windconvertercirclered1><tred>".number_format($wind["gust"]*3.60000288,1)." </tred><smallrainunit> km/h</smallrainunit>";}
-else if ($wind["units"]=="m/s" && $wind["gust"]*$toKnots>=21.5983){echo "<div class=windconvertercircleorange1><torange>".number_format($wind["gust"]*3.60000288,1)." </torange><smallrainunit> km/h</smallrainunit>";}
-else if ($wind["units"]=="m/s" && $wind["gust"]*$toKnots>=8.09935){echo "<div class=windconvertercircleblue1><tgreen>".number_format($wind["gust"]*3.60000288,1)." </tgreen><smallrainunit> km/h</smallrainunit>";}
-else if ($wind["units"]=="m/s" && $wind["gust"]*$toKnots<8.09935){echo "<div class=windconvertercirclegreen1><tblue>".number_format($wind["gust"]*3.60000288,1)." </tblue><smallrainunit> km/h</smallrainunit>";}
+else if ($wind["units"]=="m/s" && $wind["gust"]*$toKnots>=26.9978){echo "<div class=windconvertercirclered1><tred>".number_format($wind["gust"]*3.60000288,1)." </tred><smallrainunit> km/h</smallrainunit>";}
+else if ($wind["units"]=="m/s" && $wind["gust"]*$toKnots>=21.5983){echo "<div class=windconvertercircleorange1><torange>".number_format($wind["gust"]*3.60000288,1)." </torange><smallrainunit> km/h</smallrainunit>";}
+else if ($wind["units"]=="m/s" && $wind["gust"]*$toKnots>=8.09935){echo "<div class=windconvertercircleblue1><tgreen>".number_format($wind["gust"]*3.60000288,1)." </tgreen><smallrainunit> km/h</smallrainunit>";}
+else if ($wind["units"]=="m/s" && $wind["gust"]*$toKnots<8.09935){echo "<div class=windconvertercirclegreen1><tblue>".number_format($wind["gust"]*3.60000288,1)." </tblue><smallrainunit> km/h</smallrainunit>";}
 
 } else {
 
 // convert kmh to mph
 if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots>=26.9978){echo "<div class=windconvertercirclered1><weathertext2>".number_format($wind["gust"]*0.621371,1)." </weathertext2><smallrainunit>mph</smallrainunit>";}
-else if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots>=21.5983){echo "<div class=windconvertercircleorange1><weathertext2>".number_format($wind["gust"]*0.621371,1)." </weathertext2><smallrainunit> mph</smallrainunit>";}
-else if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots>=8.09935){echo "<div class=windconvertercirclegreen1><weathertext2>".number_format($wind["gust"]*0.621371,1)." </weathertext2><smallrainunit> mph</smallrainunit>";}
-else if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots<8.09935){echo "<div class=windconvertercircleblue1><weathertext2>".number_format($wind["gust"]*0.621371,1)." </weathertext2><smallrainunit> mph</smallrainunit>";}
+else if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots>=21.5983){echo "<div class=windconvertercircleorange1><weathertext2>".number_format($wind["gust"]*0.621371,1)." </weathertext2><smallrainunit> mph</smallrainunit>";}
+else if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots>=8.09935){echo "<div class=windconvertercirclegreen1><weathertext2>".number_format($wind["gust"]*0.621371,1)." </weathertext2><smallrainunit> mph</smallrainunit>";}
+else if ($wind["units"]=="km/h" && $wind["gust"]*$toKnots<8.09935){echo "<div class=windconvertercircleblue1><weathertext2>".number_format($wind["gust"]*0.621371,1)." </weathertext2><smallrainunit> mph</smallrainunit>";}
 // convert mph to kmh
-else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots>=26.9978){echo "<div class=windconvertercirclered1><weathertext2>".number_format($wind["gust"]*1.609343502101025,1)." </weathertext2><smallrainunit> km/h</smallrainunit>";}
-else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots>=21.5983){echo "<div class=windconvertercircleorange1><weathertext2>".number_format($wind["gust"]*1.609343502101025,1)." </weathertext2><smallrainunit> km/h</smallrainunit>";}
-else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots>=8.09935){echo "<div class=windconvertercircleblue1><weathertext2>".number_format($wind["gust"]*1.609343502101025,1)." </weathertext2><smallrainunit> km/h</smallrainunit>";}
-else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots<8.09935){echo "<div class=windconvertercirclegreen1><weathertext2>".number_format($wind["gust"]*1.609343502101025,1)." </weathertext2><smallrainunit> km/h</smallrainunit>";}
+else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots>=26.9978){echo "<div class=windconvertercirclered1><weathertext2>".number_format($wind["gust"]*1.609343502101025,1)." </weathertext2><smallrainunit> km/h</smallrainunit>";}
+else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots>=21.5983){echo "<div class=windconvertercircleorange1><weathertext2>".number_format($wind["gust"]*1.609343502101025,1)." </weathertext2><smallrainunit> km/h</smallrainunit>";}
+else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots>=8.09935){echo "<div class=windconvertercircleblue1><weathertext2>".number_format($wind["gust"]*1.609343502101025,1)." </weathertext2><smallrainunit> km/h</smallrainunit>";}
+else if ($wind["units"]=="mph" && $wind["gust"]*$toKnots<8.09935){echo "<div class=windconvertercirclegreen1><weathertext2>".number_format($wind["gust"]*1.609343502101025,1)." </weathertext2><smallrainunit> km/h</smallrainunit>";}
 // convert ms to kmh
-else if ($wind["units"]=="m/s" && $wind["gust"]*$toKnots>=26.9978){echo "<div class=windconvertercirclered1><weathertext2>".number_format($wind["gust"]*3.60000288,1)." </weathertext2><smallrainunit> km/h</smallrainunit>";}
-else if ($wind["units"]=="m/s" && $wind["gust"]*$toKnots>=21.5983){echo "<div class=windconvertercircleorange1><weathertext2>".number_format($wind["gust"]*3.60000288,1)." </weathertext2><smallrainunit> km/h</smallrainunit>";}
-else if ($wind["units"]=="m/s" && $wind["gust"]*$toKnots>=8.09935){echo "<div class=windconvertercircleblue1><weathertext2>".number_format($wind["gust"]*3.60000288,1)." </weathertext2><smallrainunit> km/h</smallrainunit>";}
-else if ($wind["units"]=="m/s" && $wind["gust"]*$toKnots<8.09935){echo "<div class=windconvertercirclegreen1><weathertext2>".number_format($wind["gust"]*3.60000288,1)." </weathertext2><smallrainunit> km/h</smallrainunit>";}}?>
+else if ($wind["units"]=="m/s" && $wind["gust"]*$toKnots>=26.9978){echo "<div class=windconvertercirclered1><weathertext2>".number_format($wind["gust"]*3.60000288,1)." </weathertext2><smallrainunit> km/h</smallrainunit>";}
+else if ($wind["units"]=="m/s" && $wind["gust"]*$toKnots>=21.5983){echo "<div class=windconvertercircleorange1><weathertext2>".number_format($wind["gust"]*3.60000288,1)." </weathertext2><smallrainunit> km/h</smallrainunit>";}
+else if ($wind["units"]=="m/s" && $wind["gust"]*$toKnots>=8.09935){echo "<div class=windconvertercircleblue1><weathertext2>".number_format($wind["gust"]*3.60000288,1)." </weathertext2><smallrainunit> km/h</smallrainunit>";}
+else if ($wind["units"]=="m/s" && $wind["gust"]*$toKnots<8.09935){echo "<div class=windconvertercirclegreen1><weathertext2>".number_format($wind["gust"]*3.60000288,1)." </weathertext2><smallrainunit> km/h</smallrainunit>";}}?>
 </div></div>
 <?php 
 if ($wind["units"] == 'mph'){$wind["wind_run"]=$wind["wind_run"]*0.621371;}
 else if ($wind["units"] == 'kts'){$wind["wind_run"]=$wind["wind_run"]*0.621371;}
 else {$wind["wind_run"]=$wind["wind_run"]*1;}
 
-echo ' <div class=divumwxwindrun>'.$windalert3.'  <grey><valuetext1>',number_format($wind["wind_run"],1);?>
+echo ' <div class=divumwxwindrun>'.$windalert3.'  <grey><valuetext1>',number_format($wind["wind_run"],1);?>
 <grey><divumwxwindrunspan></valuetext>
 <?php if ($wind["units"] == 'mph') echo 'mi'; else if ($wind["units"] == 'm/s') echo 'km'; else if ($wind["units"] == 'kts') echo 'mi';else echo 'km';?></divumwxwindrunspan>
 </div></div><br /><div class=windrun1><?php echo  $lang['Wind Run'];?></div>
 <?php // beaufort
 if ($wind["speed_bft"] >= 12) {
-  echo '<div class=divumwxbeaufort6>' . $beaufort12 . "  " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort12>' . $beaufort12 . "  " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 11) {
-  echo '<div class=divumwxbeaufort6>' . $beaufort11 . "  " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort11>' . $beaufort11 . "  " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 10) {
-  echo '<div class=divumwxbeaufort6>' . $beaufort10 . "  " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort10>' . $beaufort10 . "  " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 9) {
-  echo '<div class=divumwxbeaufort6>' . $beaufort9 . "  " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort9>' . $beaufort9 . "  " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 8) {
-  echo '<div class=divumwxbeaufort6>' . $beaufort8 . "  " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort8>' . $beaufort8 . "  " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 7) {
-  echo '<div class=divumwxbeaufort6>' . $beaufort7 . "  " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort7>' . $beaufort7 . "  " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 6) {
-  echo '<div class=divumwxbeaufort6>' . $beaufort6 . "  " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort6>' . $beaufort6 . "  " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 5) {
-  echo '<div class=divumwxbeaufort4-5>' . $beaufort5 . "  " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort5>' . $beaufort5 . "  " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 4) {
-  echo '<div class=divumwxbeaufort4-5>' . $beaufort4 . "  " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort4>' . $beaufort4 . "  " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 3) {
-  echo '<div class=divumwxbeaufort3-4>' . $beaufort3 . "  " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort3>' . $beaufort3 . "  " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 2) {
-  echo '<div class=divumwxbeaufort1-3>' . $beaufort2 . "  " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort2>' . $beaufort2 . "  " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 1) {
-  echo '<div class=divumwxbeaufort1-3>' . $beaufort1 . "  " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort1>' . $beaufort1 . "  " . $wind["speed_bft"];
 } else if ($wind["speed_bft"] >= 0) {
-  echo '<div class=divumwxbeaufort1-3>' . $beaufort0 . "  " . $wind["speed_bft"];
+  echo '<div class=divumwxbeaufort0>' . $beaufort0 . "  " . $wind["speed_bft"];
 }
 ?>
 <divumwxbftspan>BFT<divumwxbftspan></div>
@@ -113,17 +113,17 @@ if ($wind["speed_bft"] == 0) {
 } else if ($wind["speed_bft"] == 6) {
   echo "Strong Breeze";
 } else if ($wind["speed_bft"] == 7) {
-  echo "Near Gale " . $alert . "";
+  echo "Near Gale ";
 } else if ($wind["speed_bft"] == 8) {
-  echo "Gale Force " . $alert . "";
+  echo "Gale Force ";
 } else if ($wind["speed_bft"] == 9) {
-  echo "Strong Gale " . $alert . "";
+  echo "Strong Gale ";
 } else if ($wind["speed_bft"] == 10) {
-  echo "Storm Force " . $alert . "";
+  echo "Storm Force ";
 } else if ($wind["speed_bft"] == 11) {
-  echo "Violent Storm " . $alert . "";
+  echo "Violent Storm ";
 } else if ($wind["speed_bft"] >= 12) {
-  echo "Hurricane Force " . $alert . "";
+  echo "Hurricane Force ";
 }
 ?>
 </div>
@@ -169,7 +169,72 @@ if ($wind["speed_bft"] == 0) {
 if ($theme === "dark") { echo
     
     '<style>
-    
+    .divumwxbeaufort0 {
+    color: #85a3aa;
+  }
+  .divumwxbeaufort1 {
+    color: #7e98bb;
+  }
+  .divumwxbeaufort2 {
+    color: #6e90d0;
+  }
+  .divumwxbeaufort3 {
+    color: #0f94a7;
+  }
+  .divumwxbeaufort4 {
+    color: #39a239;
+  }
+  .divumwxbeaufort5 {
+    color: #c2863e;
+  }
+  .divumwxbeaufort6 {
+    color: #c8420d;
+  }
+  .divumwxbeaufort7 {
+    color: #d20032;
+  }
+  .divumwxbeaufort8 {
+    color: #af5088;
+  }
+  .divumwxbeaufort9 {
+    color: #754a92;
+  }
+  .divumwxbeaufort10 {
+    color: #45698d;
+  }
+  .divumwxbeaufort11 {
+    color: #c1fc77;
+  }
+  .divumwxbeaufort12 {
+    color: #f1ff6c;
+  }
+  .divumwxbeaufort0,
+  .divumwxbeaufort1,
+  .divumwxbeaufort2,
+  .divumwxbeaufort3,
+  .divumwxbeaufort4,
+  .divumwxbeaufort5,
+  .divumwxbeaufort6,
+  .divumwxbeaufort7,
+  .divumwxbeaufort8,
+  .divumwxbeaufort9,
+  .divumwxbeaufort10,
+  .divumwxbeaufort11,
+  .divumwxbeaufort12 {
+    font-size: .7rem;
+    position: absolute;
+    margin-top: 85px;
+    margin-left: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 1rem;
+    width: 4rem;
+    border: 1px solid rgba(74, 99, 111, .2);
+    overflow: hidden;
+    border-radius: 2px;
+    font-family: weathertext2;
+  }    
       .anemometer {
         position: relative; 
         margin-top: -35px; 
@@ -229,7 +294,90 @@ if ($theme === "dark") { echo
   } else { echo
   
     '<style>
-    
+    .divumwxbeaufort0 {
+    background: #85a3aa;
+  }
+  .divumwxbeaufort1 {
+    background: #7e98bb;
+  }
+  .divumwxbeaufort2 {
+    background: #6e90d0;
+  }
+  .divumwxbeaufort3 {
+    background: #0f94a7;
+  }
+  .divumwxbeaufort4 {
+    background: #39a239;
+  }
+  .divumwxbeaufort5 {
+    background: #c2863e;
+  }
+  .divumwxbeaufort6 {
+    background: #c8420d;
+  }
+  .divumwxbeaufort7 {
+    background: #d20032;
+  }
+  .divumwxbeaufort8 {
+    background: #af5088;
+  }
+  .divumwxbeaufort9 {
+    background: #754a92;
+  }
+  .divumwxbeaufort10 {
+    background: #45698d;
+  }
+  .divumwxbeaufort11 {
+    background: #c1fc77;
+  }
+  .divumwxbeaufort12 {
+    background: #f1ff6c;
+  }
+  .divumwxbeaufort0,
+  .divumwxbeaufort1,
+  .divumwxbeaufort2,
+  .divumwxbeaufort3,
+  .divumwxbeaufort4,
+  .divumwxbeaufort5,
+  .divumwxbeaufort6,
+  .divumwxbeaufort7,
+  .divumwxbeaufort8,
+  .divumwxbeaufort9,
+  .divumwxbeaufort10,
+  .divumwxbeaufort11,
+  .divumwxbeaufort12 {
+    font-size: .7rem;
+    position: absolute;
+    margin-top: 85px;
+    margin-left: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 1.05rem;
+    width: 4rem;
+    border: 1px solid #e6e8ef;
+    overflow: hidden;
+    border-radius: 2px;
+    color: #fff;
+    font-family: weathertext2
+  }
+  
+  .divumwxbeaufort1-3 {
+    background: #90b12a
+  }
+  
+  .divumwxbeaufort3-4 {
+    background: #e6a141
+  }
+  
+  .divumwxbeaufort4-5 {
+    background: #d05f2d
+  }
+  
+  .divumwxbeaufort6,
+  indoorred1 {
+    background: #d35d4e
+  }   
         .anemometer {
         position: relative; 
         margin-top: -35px; 
