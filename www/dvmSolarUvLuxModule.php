@@ -800,7 +800,7 @@ svg.append("rect")
     .attr("width", tubeWidth - 10);
 
 // Scale step size
-var step = 10000;
+var step = 20000;
 
 // Determine a suitable range for the lux scale
 var domain = [
@@ -934,7 +934,7 @@ svg.append("rect")
     .attr("width", tubeWidth - 10);
        
 // Scale step size
-var step = 10000;
+var step = 20000;
 
 // Determine a suitable range for the lux scale
 var domain = [
