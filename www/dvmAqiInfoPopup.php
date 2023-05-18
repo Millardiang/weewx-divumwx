@@ -1,5 +1,7 @@
 <style>
-    
+  body {
+  	overflow: hidden;
+  }  
 
 	.demo {
 		border: 1px solid #aaa;
@@ -106,7 +108,7 @@
   	
 	<thead>
 	<tr>
-        <th id="CELL1">UK DAQI</th>
+    <th id="CELL1">UK DAQI</th>
 		<th id="CELL2">Low</th>
 		<th id="CELL3">Low</th>
 		<th id="CELL4">Low</th>
@@ -160,4 +162,44 @@
 		<td id="CELL11">101 or more</td>
 	</tr>      
 	</tbody>
+
+	<table class="demo">
+ <caption style="text-align:left; color:#aaa"><small>The European CAQI (Common Air Quality Index) Indices are based on the daily mean concentration for historical data, latest 24 hour running mean for the current day.</small></p></caption>
+  
+  <tbody>
+	<tr>
+    <th id="CELL1">Europe (CAQI)</th>
+		<th id="CELL2">Very Low</th>
+		<th id="CELL3">Low</th>
+		<th id="CELL4">Medium</th>
+		<th id="CELL5">High</th>
+		<th id="CELL6">Very High</th>		
+	</tr>
+	<tr>
+		<td id="CELL1"><b>Range<b></td>
+		<td id="CELL3">0-25</td>
+		<td id="CELL6">25-50</td>
+		<td id="CELL7">50-75</td>
+		<td id="CELL9">75-100</td>
+		<td id="CELL11">100 or more</td>		
+	</tr>
+	<tr> 	 	 	 	 	 	 	 	 	
+		<td id="CELL1"><b>PM<sub>2.5 </sub>µg/m³<b></td>
+		<td id="CELL3">0-15</td>
+		<td id="CELL6">15-30</td>
+		<td id="CELL7">30-55</td>
+		<td id="CELL9">55-110</td>
+		<td id="CELL11">110 or more</td>	
+	</tr>
+	<tr> 	 	 	 	 	 	 	 	 	
+		<td id="CELL1"><b>PM<sub>10 </sub>µg/m³<b></td>
+		<td id="CELL3">0-25</td>
+		<td id="CELL6">25-50</td>
+		<td id="CELL7">50-90</td>
+		<td id="CELL9">90-180</td>
+		<td id="CELL11">180 or more</td>
+	</tr> 
+	</tbody>
+
+
  
