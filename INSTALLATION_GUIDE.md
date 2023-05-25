@@ -16,10 +16,10 @@ If you are carrying out a fresh install of WeeWX, my own personal preference is 
 
 IMPORTANT. Installing PHP; please make sure you install all the PHP modules appropriate for your version of PHP. Failure to due so may mean that forecasts and current conditions fail to update. This is an example for PHP8.0 modules on a Debian based distribution: -
 
-	sudo apt install php8.1
-	sudo apt install php8.1-cli php8.1-fpm php8.1-sqlite3 php8.1-zip php8.1-gd  php8.1-mbstring php8.1-curl php8.1-xml php8.1-bcmath
-	sudo apt install libapache2-mod-php8.1
-	sudo a2enmod php8.1
+	sudo apt install php8.2
+	sudo apt install php8.2-cli php8.2-fpm php8.2-sqlite3 php8.2-zip php8.2-gd  php8.2-mbstring php8.2-curl php8.2-xml php8.2-bcmath
+	sudo apt install libapache2-mod-php8.2
+	sudo a2enmod php8.2
 	sudo systemctl restart apache2
 
 * Install Ephem (https://rhodesmill.org/pyephem/). It is important that you install the latest version as versions prior to 4.1.3 are missing crucial libraries in the install package. It is also important that any previous versions are removed before hand. From the command line (if your version of Python is 2.x, use pip2 and python2 instead): -
