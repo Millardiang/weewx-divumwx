@@ -96,6 +96,14 @@ $lightning["nsdcrop"]									= $lightningBolt[22]; // Max strikes in NSDStrikes
 
 <script src="js/d3.min.js"></script>
 
+<script>
+	if (theme == 'dark') {
+var textFill = "silver";}
+else
+{var textFill = "rgba(85,85,85,1)";}
+</script>
+
+
 <div class="title"><?php echo $info;?><?php echo $lang['lightningTop'];?></div>      
 <div class="StrikesTop"></div>
 
@@ -157,14 +165,13 @@ $lightning["nsdcrop"]									= $lightningBolt[22]; // Max strikes in NSDStrikes
               .style("stroke-width", "0.5px")
               .style('stroke', '#6CA6CD');                  
     			
-    if (theme == 'dark') {
     
     if (source == 'Boltek') {
     
     svg.append("text") // Last hour
              	.attr("x", 73)
             	.attr("y", 15)
-            	.style("fill", "silver")
+            	.style("fill", textFill)
             	.style("font-family", "Helvetica")
             	.style("font-size", "9px")
             	.style("text-anchor", "middle")
@@ -174,7 +181,7 @@ $lightning["nsdcrop"]									= $lightningBolt[22]; // Max strikes in NSDStrikes
    	svg.append("text") // Last detected strike time
              	.attr("x", 110)
             	.attr("y", 10)
-            	.style("fill", "silver")
+            	.style("fill", textFill)
             	.style("font-family", "Helvetica")
             	.style("font-size", "9px")
             	.style("text-anchor", "left")
@@ -191,7 +198,7 @@ $lightning["nsdcrop"]									= $lightningBolt[22]; // Max strikes in NSDStrikes
   						.attr("y", function(d, i) {
     					return 22 + i * 22
   						})
-  						.style("fill", "silver")
+  						.style("fill", textFill)
   						.style("font-family", "Helvetica")
   						.style("font-size", "9px")
   						.style("text-anchor", "left")
@@ -208,7 +215,7 @@ $lightning["nsdcrop"]									= $lightningBolt[22]; // Max strikes in NSDStrikes
    	svg.append("text") // Year
              	.attr("x", 110)
             	.attr("y", 34)
-            	.style("fill", "silver")
+            	.style("fill", textFill)
             	.style("font-family", "Helvetica")
             	.style("font-size", "9px")
             	.style("text-anchor", "left")
@@ -218,7 +225,7 @@ $lightning["nsdcrop"]									= $lightningBolt[22]; // Max strikes in NSDStrikes
 	svg.append("text") // Last Distance
              	.attr("x", 110)
             	.attr("y", 46)
-            	.style("fill", "silver")
+            	.style("fill", textFill)
             	.style("font-family", "Helvetica")
             	.style("font-size", "9px")
             	.style("text-anchor", "left")
@@ -228,7 +235,7 @@ $lightning["nsdcrop"]									= $lightningBolt[22]; // Max strikes in NSDStrikes
 	svg.append("text") // Last Bearing
              	.attr("x", 110)
             	.attr("y", 58)
-            	.style("fill", "silver")
+            	.style("fill", textFill)
             	.style("font-family", "Helvetica")
             	.style("font-size", "9px")
             	.style("text-anchor", "left")
@@ -240,7 +247,7 @@ $lightning["nsdcrop"]									= $lightningBolt[22]; // Max strikes in NSDStrikes
 	svg.append("text") // Last 3 hours
              	.attr("x", 73)
             	.attr("y", 15)
-            	.style("fill", "silver")
+            	.style("fill", textFill)
             	.style("font-family", "Helvetica")
             	.style("font-size", "9px")
             	.style("text-anchor", "middle")
@@ -250,7 +257,7 @@ $lightning["nsdcrop"]									= $lightningBolt[22]; // Max strikes in NSDStrikes
    	svg.append("text") // Last detected strike time
              	.attr("x", 110)
             	.attr("y", 16)
-            	.style("fill", "silver")
+            	.style("fill", textFill)
             	.style("font-family", "Helvetica")
             	.style("font-size", "9px")
             	.style("text-anchor", "left")
@@ -267,7 +274,7 @@ $lightning["nsdcrop"]									= $lightningBolt[22]; // Max strikes in NSDStrikes
   						.attr("y", function(d, i) {
     					return 28 + i * 28
   						})
-  						.style("fill", "silver")
+  						.style("fill", textFill)
   						.style("font-family", "Helvetica")
   						.style("font-size", "9px")
   						.style("text-anchor", "left")
@@ -284,7 +291,7 @@ $lightning["nsdcrop"]									= $lightningBolt[22]; // Max strikes in NSDStrikes
    	svg.append("text") // Year
              	.attr("x", 110)
             	.attr("y", 40)
-            	.style("fill", "silver")
+            	.style("fill", textFill)
             	.style("font-family", "Helvetica")
             	.style("font-size", "9px")
             	.style("text-anchor", "left")
@@ -294,7 +301,7 @@ $lightning["nsdcrop"]									= $lightningBolt[22]; // Max strikes in NSDStrikes
 	svg.append("text") // Last Distance
              	.attr("x", 110)
             	.attr("y", 52)
-            	.style("fill", "silver")
+            	.style("fill", textFill)
             	.style("font-family", "Helvetica")
             	.style("font-size", "9px")
             	.style("text-anchor", "left")
@@ -303,154 +310,7 @@ $lightning["nsdcrop"]									= $lightningBolt[22]; // Max strikes in NSDStrikes
 				
 		}
         
-    } else {
-    
-    if (source == 'Boltek') {
-    
-    svg.append("text") // Last 1 hour
-             	.attr("x", 73)
-            	.attr("y", 15)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "9px")
-            	.style("text-anchor", "middle")
-            	.style("font-weight", "normal")
-   				.text("Last Hour");
-       				
-   	svg.append("text") // Last detected strike time
-             	.attr("x", 110)
-            	.attr("y", 10)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "9px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-				.text("Last Strike");
-				
-	var data = ["Total "+month+" "+"-"+Strikes_this_month];
 
-	var text = svg.selectAll(null)
-  						.data(data)
-  						.enter() 
-  						.append("text")
-  						.attr("x", 110)
-  						.attr("y", function(d, i) {
-    					return 22 + i * 22
-  						})
-  						.style("fill", "black")
-  						.style("font-family", "Helvetica")
-  						.style("font-size", "9px")
-  						.style("text-anchor", "left")
-  						.style("font-weight", "normal")
-  						.text(function(d) {
-    					return d.split("-")[0]
-  						})
-  						.append("tspan")
-  						.style("fill", "#ff964f")
-  						.text(function(d) {
-    					return d.split("-")[1]
-  						})
-   				
-   	svg.append("text") // Year
-             	.attr("x", 110)
-            	.attr("y", 34)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "9px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-				.text("Total"+" "+year);
-				
-	svg.append("text") // Last Distance
-             	.attr("x", 110)
-            	.attr("y", 46)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "9px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-				.text("Distance @");
-					
-	svg.append("text") // Last Bearing
-             	.attr("x", 110)
-            	.attr("y", 58)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "9px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-				.text("Bearing");
-				
-	} else {
-	
-	svg.append("text") // Last  hour
-             	.attr("x", 73)
-            	.attr("y", 15)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "9px")
-            	.style("text-anchor", "middle")
-            	.style("font-weight", "normal")
-   				.text("Last Hour");
-       				
-   	svg.append("text") // Last detected strike time
-             	.attr("x", 110)
-            	.attr("y", 16)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "9px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-				.text("Last Strike");
-				
-	  var data = ["Total "+month+" "+"-"+Strikes_this_month];
-
-	var text = svg.selectAll(null)
-  						.data(data)
-  						.enter() 
-  						.append("text")
-  						.attr("x", 110)
-  						.attr("y", function(d, i) {
-    					return 28 + i * 28
-  						})
-  						.style("fill", "black")
-  						.style("font-family", "Helvetica")
-  						.style("font-size", "9px")
-  						.style("text-anchor", "left")
-  						.style("font-weight", "normal")
-  						.text(function(d) {
-    					return d.split("-")[0]
-  						})
-  						.append("tspan")
-  						.style("fill", "#ff964f")
-  						.text(function(d) {
-    					return d.split("-")[1]
-  						})
-
-   				
-   	svg.append("text") // Year
-             	.attr("x", 110)
-            	.attr("y", 40)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "9px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-				.text("Total"+" "+year);
-				
-	svg.append("text") // Last Distance
-             	.attr("x", 110)
-            	.attr("y", 52)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "9px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-				.text("Distance @");
-	
-		}
-    
-    }
     
     if (source == 'Boltek') {
     

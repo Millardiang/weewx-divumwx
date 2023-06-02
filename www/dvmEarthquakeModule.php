@@ -18,8 +18,8 @@ $eqdist 		= round(distance($lat, $lon, $lati, $longi), 1) ;
 
 $eqdist; if ($wind["units"] == 'mph') {$eqdist = round(distance($lat, $lon, $lati, $longi) * 0.621371, 1) ." miles";
 } else {$eqdist = round(distance($lat, $lon, $lati, $longi), 1)." km";}
-$eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $lati, $longi), 1) ."<smallrainunit>&nbsp;km";
-} else {$eqdista = round(distance($lat, $lon, $lati, $longi) * 0.621371, 1)."<smallrainunit>&nbsp;miles";} 
+$eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $lati, $longi), 1) ."<smallrainunit> km";
+} else {$eqdista = round(distance($lat, $lon, $lati, $longi) * 0.621371, 1)."<smallrainunit> miles";} 
 ?>
 
     <div class="chartforecast2">
@@ -43,6 +43,14 @@ $eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $l
 }
 
 </style>
+
+<script>
+	if (theme == 'dark') {
+var textFill = "silver";}
+else
+{var textFill = "rgba(85,85,85,1)";}
+</script>
+
 
 <div class="quakes"></div>
 <div id="svg"></div>
@@ -71,12 +79,12 @@ $eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $l
                 .attr("width", 300)
                 .attr("height", 150);
                 
-          if (theme == 'dark') {      
+       
              
              svg.append("text") // Earthquake Location text output
              	.attr("x", 150)
             	.attr("y", 20)
-            	.style("fill", "silver")
+            	.style("fill", textFill)
             	.style("font-family", "Helvetica")
             	.style("font-size", "11px")
             	.style("text-anchor", "middle")
@@ -86,7 +94,7 @@ $eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $l
    			svg.append("text") // Magnitude word output
              	.attr("x", 60)
             	.attr("y", 40)
-            	.style("fill", "silver")
+            	.style("fill", textFill)
             	.style("font-family", "Helvetica")
             	.style("font-size", "11px")
             	.style("text-anchor", "middle")
@@ -96,7 +104,7 @@ $eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $l
    			svg.append("text") // Earthquake Magnitude text output
              	.attr("x", 60)
             	.attr("y", 100)
-            	.style("fill", "silver")
+            	.style("fill", textFill)
             	.style("font-family", "Helvetica")
             	.style("font-size", "16px")
             	.style("text-anchor", "middle")
@@ -106,7 +114,7 @@ $eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $l
    			svg.append("text") // Time and Date text output
              	.attr("x", 145)
             	.attr("y", 70)
-            	.style("fill", "silver")
+            	.style("fill", textFill)
             	.style("font-family", "Helvetica")
             	.style("font-size", "11px")
             	.style("text-anchor", "left")
@@ -116,7 +124,7 @@ $eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $l
    			svg.append("text") // Depth text output
              	.attr("x", 145)
             	.attr("y", 85)
-            	.style("fill", "silver")
+            	.style("fill", textFill)
             	.style("font-family", "Helvetica")
             	.style("font-size", "11px")
             	.style("text-anchor", "left")
@@ -136,7 +144,7 @@ $eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $l
    			svg.append("text") // Distance text output
              	.attr("x", 145)
             	.attr("y", 100)
-            	.style("fill", "silver")
+            	.style("fill", textFill)
             	.style("font-family", "Helvetica")
             	.style("font-size", "11px")
             	.style("text-anchor", "left")
@@ -156,7 +164,7 @@ $eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $l
    			svg.append("text") // Station text output
              	.attr("x", 145)
             	.attr("y", 115)
-            	.style("fill", "silver")
+            	.style("fill", textFill)
             	.style("font-family", "Helvetica")
             	.style("font-size", "11px")
             	.style("text-anchor", "left")
@@ -168,7 +176,7 @@ $eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $l
    			svg.append("text") // category text output
              	.attr("x", 145)
             	.attr("y", 130)
-            	.style("fill", "silver")
+            	.style("fill", textFill)
             	.style("font-family", "Helvetica")
             	.style("font-size", "11px")
             	.style("text-anchor", "left")
@@ -190,7 +198,7 @@ $eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $l
    			svg.append("text") // Category text output
              	.attr("x", 145)
             	.attr("y", 130)
-            	.style("fill", "silver")
+            	.style("fill", textFill)
             	.style("font-family", "Helvetica")
             	.style("font-size", "11px")
             	.style("text-anchor", "left")
@@ -212,7 +220,7 @@ $eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $l
    			svg.append("text") // Category text output
              	.attr("x", 145)
             	.attr("y", 130)
-            	.style("fill", "silver")
+            	.style("fill", textFill)
             	.style("font-family", "Helvetica")
             	.style("font-size", "11px")
             	.style("text-anchor", "left")
@@ -234,7 +242,7 @@ $eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $l
    			svg.append("text") // Category text output
              	.attr("x", 145)
             	.attr("y", 130)
-            	.style("fill", "silver")
+            	.style("fill", textFill)
             	.style("font-family", "Helvetica")
             	.style("font-size", "11px")
             	.style("text-anchor", "left")
@@ -256,7 +264,7 @@ $eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $l
    		 	svg.append("text") // Category text output
              	.attr("x", 145)
             	.attr("y", 130)
-            	.style("fill", "silver")
+            	.style("fill", textFill)
             	.style("font-family", "Helvetica")
             	.style("font-size", "11px")
             	.style("text-anchor", "left")
@@ -278,7 +286,7 @@ $eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $l
    			svg.append("text") // Category text output
              	.attr("x", 145)
             	.attr("y", 130)
-            	.style("fill", "silver")
+            	.style("fill", textFill)
             	.style("font-family", "Helvetica")
             	.style("font-size", "11px")
             	.style("text-anchor", "left")
@@ -297,233 +305,7 @@ $eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $l
    				
    		}		
    			   		            
-          } else {
-                                
-             svg.append("text") // Earthquake Location text output
-             	.attr("x", 150)
-            	.attr("y", 20)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "middle")
-            	.style("font-weight", "normal")
-   				.text(Location);
-   			
-   			svg.append("text") // Magnitude word output
-             	.attr("x", 60)
-            	.attr("y", 40)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "middle")
-            	.style("font-weight", "normal")
-   				.text("Magnitude");
-   				
-   			svg.append("text") // Earthquake Magnitude text output
-             	.attr("x", 60)
-            	.attr("y", 100)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "16px")
-            	.style("text-anchor", "middle")
-            	.style("font-weight", "normal")
-   				.text(d3.format(".1f")(Magnitude));
-   		   				
-   			svg.append("text") // Time and Date text output
-             	.attr("x", 145)
-            	.attr("y", 70)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-   				.text(Time);
-   				
-   			svg.append("text") // Depth text output
-             	.attr("x", 145)
-            	.attr("y", 85)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-   				.text("Depth");
-   				
-   			svg.append("text") // Depth text output
-             	.attr("x", 177.5)
-            	.attr("y", 85)
-            	.style("fill", "#2e8b57")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-   				.text(Depth+" km");
-   				
-   			svg.append("text") // Distance text output
-             	.attr("x", 145)
-            	.attr("y", 100)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-   				.text("Epicenter");
-   				
-   			svg.append("text") // Distance text output
-             	.attr("x", 194.5)
-            	.attr("y", 100)
-            	.style("fill", "#ff964f")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-   				.text(Distance);
-   				
-   			svg.append("text") // Station text output
-             	.attr("x", 145)
-            	.attr("y", 115)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-   				.text("From"+" "+Station);
-   			
-   		if (Magnitude < 4.0) {	
-   			
-   			svg.append("text") // category text output
-             	.attr("x", 145)
-            	.attr("y", 130)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-   				.text("Category");
-   				
-   			svg.append("text") // category text output
-             	.attr("x", 193)
-            	.attr("y", 130)
-            	.style("fill", "#2e8b57")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-   				.text("Minor");
-   				
-   		} else if (Magnitude < 5.0) {
-   		
-   			svg.append("text") // Category text output
-             	.attr("x", 145)
-            	.attr("y", 130)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-   				.text("Category");
-   				
-   			svg.append("text") // Category text output
-             	.attr("x", 193)
-            	.attr("y", 130)
-            	.style("fill", "#fde396")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-   				.text("Light");
-   				
-   		} else if (Magnitude < 6.0) {
-   		
-   			svg.append("text") // Category text output
-             	.attr("x", 145)
-            	.attr("y", 130)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-   				.text("Category");
-   				
-   			svg.append("text") // Category text output
-             	.attr("x", 193)
-            	.attr("y", 130)
-            	.style("fill", "#ff964f")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-   				.text("Moderate");
-   				
-   		} else if (Magnitude < 7.0) {
-   		
-   			svg.append("text") // Category text output
-             	.attr("x", 145)
-            	.attr("y", 130)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-   				.text("Category");
-   				
-   			svg.append("text") // Category text output
-             	.attr("x", 193)
-            	.attr("y", 130)
-            	.style("fill", "#ff6181")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-   				.text("Strong");
-   				
-   		 } else if (Magnitude < 8.0) {
-   		 
-   		 	svg.append("text") // Category text output
-             	.attr("x", 145)
-            	.attr("y", 130)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-   				.text("Category");
-   				
-   			svg.append("text") // Category text output
-             	.attr("x", 193)
-            	.attr("y", 130)
-            	.style("fill", "#be688b")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-   				.text("Great");
-   				
-   		 } else if (Magnitude > 8.0) {
-   		 
-   			svg.append("text") // Category text output
-             	.attr("x", 145)
-            	.attr("y", 130)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-   				.text("Category");
-   				
-   			svg.append("text") // Category text output
-             	.attr("x", 193)
-            	.attr("y", 130)
-            	.style("fill", "#007FFF")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-   				.text("Major");
-   				
-   		}		
-   				   	   		     
-      }
+
       
       if (Magnitude < 4.0) {		
    				

@@ -579,6 +579,13 @@ else {$airqual["text"] = $airqual["text10"];
 
 </style>
 
+<script>
+	if (theme == 'dark') {
+var cityTextFill = "silver";}
+else
+{var cityTextFill = "rgba(85,85,85,1)";}
+</script>
+
 <div class="aqi"></div>
 <div id="svg"></div>
 
@@ -608,12 +615,11 @@ else {$airqual["text"] = $airqual["text10"];
                 .attr("width", 300)
                 .attr("height", 150);
 
-	if (theme == 'dark') {
 	
             svg.append("text") // City text output
              	.attr("x", 150)
             	.attr("y", 20)
-            	.style("fill", "silver")
+            	.style("fill", cityTextFill)
             	.style("font-family", "Helvetica")
             	.style("font-size", "12px")
             	.style("text-anchor", "middle")
@@ -645,44 +651,6 @@ else {$airqual["text"] = $airqual["text10"];
               	.append("xhtml:div")          
     			.html("<p>PM<sub>10</sub></p>");
 
-	} else {
-	
-		svg.append("text") // City text output
-             	.attr("x", 150)
-            	.attr("y", 20)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "12px")
-            	.style("text-anchor", "middle")
-            	.style("font-weight", "normal")   				
-   				.text(city);
-
-           svg.append("foreignObject")
-     			.attr("x", 70)
-              	.attr("y", 30)
-    			.attr("width", 50)
-    			.attr("height", 25)    			
-    			.style("fill", "black")
-    			.style("font-size", "10px")
-    			.style("text-anchor", "middle")
-              	.style("font-weight", "normal")
-              	.append("xhtml:div")          
-   				.html("<p>PM<sub>2.5</sub></p>");
-
-			svg.append("foreignObject")
-     			.attr("x", 220)
-              	.attr("y", 30)
-    			.attr("width", 50)
-    			.attr("height", 25)   			
-    			.style("fill", "black")
-    			.style("font-family", "Helvetica")
-    			.style("font-size", "10px")
-    			.style("text-anchor", "middle")
-              	.style("font-weight", "normal")
-              	.append("xhtml:div")          
-    			.html("<p>PM<sub>10</sub></p>");
-
-	}
 
    			 svg.append("line") // horizontal lozenge left
     			.attr("x1", 82)

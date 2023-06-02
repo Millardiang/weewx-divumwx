@@ -1,52 +1,56 @@
 <?php
 include('dvmCombinedData.php');
 date_default_timezone_set($TZ);
-//align colours with Total sky UV index (provided by CAMS) https://climate-adapt.eea.europa.eu/en/observatory/evidence/projections-and-tools/cams-uv-index-forecast
-if ($uv["now"]<1){$uv["color"]="grey";}
-else if ($uv["now"]<2){$uv["color"]="#379925";} // darker green
-else if ($uv["now"]<3){$uv["color"]="#8bbe09";} // lighter green
-else if ($uv["now"]<4){$uv["color"]="#fff306";} // lighter yellow
-else if ($uv["now"]<5){$uv["color"]="#ffce0b";} // darker yellow
-else if ($uv["now"]<6){$uv["color"]="#f1a40a";} // lighter orange
-else if ($uv["now"]<7){$uv["color"]="#e87408";} // mid orange
-else if ($uv["now"]<8){$uv["color"]="#de5404";} // darker orange
-else if ($uv["now"]<9){$uv["color"]="#dd1d0f";} // red
-else if ($uv["now"]<10){$uv["color"]="#de006f";} // magenta
-else if ($uv["now"]<11){$uv["color"]="#a44c92";} // lighter purple
-else if ($uv["now"]<13){$uv["color"]="##6e67a6";} // darker purple
-else if ($uv["now"]<15){$uv["color"]="#6cceff";} // lighter cyan
-else {$uv["color"]="#40d2ff";} // darker cyan
+$lang['PollenModule'] = "Pollen Risk Index";
+$json_string = file_get_contents('jsondata/pollen.txt');
+$parsed_json = json_decode($json_string,true);
+
+$pollen["updated_time"] = date("H:i:s",strtotime($parsed_json["data"][0]["updatedAt"]));
+$pollen["grass_count"] = $parsed_json["data"][0]["Count"]["grass_pollen"];
+$pollen["tree_count"] = $parsed_json["data"][0]["Count"]["tree_pollen"];
+$pollen["weed_count"] = $parsed_json["data"][0]["Count"]["weed_pollen"];
+$pollen["grass_risk"] = $parsed_json["data"][0]["Risk"]["grass_pollen"];
+$pollen["tree_risk"] = $parsed_json["data"][0]["Risk"]["tree_pollen"];
+$pollen["weed_risk"] = $parsed_json["data"][0]["Risk"]["weed_pollen"];
+
+if ($pollen["grass_risk"]=="None"){$pollen["grass_index"]="0";$pollen["grass_color"]="#cecece";}
+else if ($pollen["grass_risk"]=="Low"){$pollen["grass_index"]="1";$pollen["grass_color"]="#b4e949";}
+else if ($pollen["grass_risk"]=="Moderate"){$pollen["grass_index"]="2";$pollen["grass_color"]="#e3bd40";}
+else if ($pollen["grass_risk"]=="High"){$pollen["grass_index"]="3";$pollen["grass_color"]="#e27a2e";}
+else if ($pollen["grass_risk"]=="Very High"){$pollen["grass_index"]="4";$pollen["grass_color"]="#ea3323";}
+
+if ($pollen["tree_risk"]=="None"){$pollen["tree_index"]="0";$pollen["tree_color"]="#cecece";}
+else if ($pollen["tree_risk"]=="Low"){$pollen["tree_index"]="1";$pollen["tree_color"]="#b4e949";}
+else if ($pollen["tree_risk"]=="Moderate"){$pollen["tree_index"]="2";$pollen["tree_color"]="#e3bd40";}
+else if ($pollen["tree_risk"]=="High"){$pollen["tree_index"]="3";$pollen["tree_color"]="#e27a2e";}
+else if ($pollen["tree_risk"]=="Very High"){$pollen["tree_index"]="4";$pollen["tree_color"]="#ea3323";}
+
+if ($pollen["weed_risk"]=="None"){$pollen["weed_index"]="0";$pollen["weed_color"]="#cecece";}
+else if ($pollen["weed_risk"]=="Low"){$pollen["weed_index"]="1";$pollen["weed_color"]="#b4e949";}
+else if ($pollen["weed_risk"]=="Moderate"){$pollen["weed_index"]="2";$pollen["weed_color"]="#e3bd40";}
+else if ($pollen["weed_risk"]=="High"){$pollen["weed_index"]="3";$pollen["weed_color"]="#e27a2e";}
+else if ($pollen["weed_risk"]=="Very High"){$pollen["weed_index"]="4";$pollen["weed_color"]="#ea3323";}
+
 ?>
 
     <div class="chartforecast2">
-       <span class="yearpopup"><a alt="solar" title="UV Guide" href="dvmMenuSolarUvLux.php" data-lity><?php echo $menucharticonpage;?> UV and Solar Almanacs and Guide</a></span>
+       <span class="yearpopup"><a alt="pollen" title="Pollen Data" href="dvmMenuPollenData.php" data-lity><?php echo $menucharticonpage;?> Pollen Data</a></span>
     </div>
-    <span class='moduletitle2'><?php echo $lang['solarUvLuxModule'];?> </span>
+    <span class='moduletitle2'><?php echo $lang['PollenModule'];?></span>
 
 
-<div class="updatedtime1"><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>';else echo $online." ".$divum["time"];?></div>
+<div class="updatedtime1"><?php if(file_exists('jsondata/pollen.txt')&&time() - filemtime('jsondata/pollen.txt')>1900)echo $offline. '<offline> Offline </offline>';else echo $online." ".$pollen["updated_time"];?></div>
 
-<div class="uvcautionbig2">
-<?php 
-if ($uv["now"]>=10) {
-echo $uviclear.'<span>UVI</span> Extreme';}
-else if ($uv["now"]>=8) {echo $uviclear.'<span>UVI</span> Very High';}
-else if ($uv["now"]>=6) {echo $uviclear.'<span>UVI</span> High';}
-else if ($uv["now"]>=3) {echo $uviclear.'<span>UVI</span> Moderate';}
-else if ($alm["sun_altitude"] < 0.0 && $uv["now"]>=0 ) {echo $uviclear,"Below Horizon";} 
-else if ($uv["now"]>=0 ) {echo $uviclear,'<span>UVI</span> Low';}
-?></div>
 
 <html>
 
 <script src='js/d3.min.js'></script>    
-
-       
 <style>
-.solarposx {margin-top: -2px; margin-left: -210px;}
-.uvipos {margin-top: -155px; margin-left: 0px;}
-.luxpos {margin-top: -155px; margin-left: 210px;}
+.grasspos {margin-top: -2px; margin-left: -210px;}
+.treepos {margin-top: -155px; margin-left: 0px;}
+.weedpos {margin-top: -155px; margin-left: 210px;}
 </style>
+
     <script>
        
     var theme = "<?php echo $theme;?>";
@@ -60,50 +64,47 @@ else if ($uv["now"]>=0 ) {echo $uviclear,'<span>UVI</span> Low';}
     }
 
     </script>
+       
 
-<div class="solarposx">
-<div id="solarx"></div>
+<div class="grasspos">
+<div class="grass"></div>
 </div>
-		
-	<script>
-		
-
+        
+    <script>
+   
     var width = 95,
     height = 150;
+    
+    var riskGrass = "<?php echo $pollen["grass_risk"];?>"; 
         
-    var currentSolar = "<?php echo $solar["now"];?>";
-    currentSolar = currentSolar || 0;
+    var currentGrass = "<?php echo $pollen["grass_index"];?>";
+    currentGrass = currentGrass || 0;
     
-    var maxSolar = "<?php echo $solar["day_max"];?>";
-    maxSolar = maxSolar || 0;
+    var maxGrass = 3;
+    maxGrass = maxGrass || 0;
     
-    var minSolar = 0;
-    
-    var solarMaxTime = "<?php echo $solar["day_maxtime"];?>";
-    solarMaxTime = solarMaxTime || 0;
-       
-    var solarunits = "W/m²";    
-    
-var bottomY = height + 10,
+    var minGrass = 0; 
+
+    var bottomY = height + 10,
     topY = 0,
     bulbRadius = 25.5,
     tubeWidth = 35,
     tubeBorderWidth = 1,
-    solarColor = "rgba(255,124,57,1)",
+    grassColor = "<?php echo $pollen["grass_color"];?>",
     tubeBorderColor = "#999999";
 
 var bulb_cy = bottomY - bulbRadius,
     bulb_cx = width / 2,
     top_cy = topY + tubeWidth / 2;
 
-var svg = d3.select("#solarx")
+var svg = d3.select(".grass")
     .append("svg")
-    //.style("background", "#292E35") // box background to be commented out
+  //.style("background", "#292E35") // box background to be commented out
     .attr("width", width)
     .attr("height", height);
 
 var defs = svg.append("defs");
-
+   
 svg.append("rect")
     .attr("x", width / 2 - 7.75)
     .attr("y", 13)
@@ -120,20 +121,20 @@ svg.append("rect")
     .style("fill", tubeFillColor)
     .attr("height", 104.85)
     .attr("width", tubeWidth - 10);
-
+       
 // Scale step size
-var step = 200;
+var step = 1;
 
-// Determine a suitable range for the solar scale
+// Determine a suitable range for the grass scale
 var domain = [
-  step * Math.floor(minSolar / step),
-  step * Math.ceil(maxSolar / step)
+  step * Math.floor(minGrass / step),
+  step * Math.ceil(maxGrass / step)
   ];
 
-if (minSolar - domain[0] < 0.0 * step)
+if (minGrass - domain[0] < 0.0 * step)
   domain[0] -= step;
 
-if (domain[1] - maxSolar < 0.66 * step)
+if (domain[1] - maxGrass < 0.66 * step)
   domain[1] += step;
 
 // D3 scale object
@@ -141,50 +142,31 @@ var scale = d3.scale.linear()
     .range([bulb_cy - bulbRadius / 2 - 8.5, top_cy])
     .domain(domain);
     
-[maxSolar].forEach(function(t) {
+[maxGrass].forEach(function(t) {
 
-  var isMax = (t == maxSolar),
+  var isMax = (t == maxGrass),
       label = (isMax ? "Max" : "min"),
-      textCol = (isMax ? "silver" : "silver"),
+      textCol = (isMax ? baseTextColor : baseTextColor),
       textOffset = (isMax ? - 3 : 3);
       
-  svg.append("line")
-    .attr("id", label + "Line")
-    .attr("x1", width / 2 + 38 - tubeWidth / 2)
-    .attr("x2", width / 2 + 38 + tubeWidth / 2 - 18)
-    .attr("y1", scale(t))
-    .attr("y2", scale(t))
-    .style("stroke", tubeBorderColor)
-    .style("stroke-width", "1px")
-    .style("stroke-linecap", "round");
-
-
-  svg.append("text")
-    .attr("x", width / 2 + tubeWidth / 2 + 4)
-    .attr("y", scale(t) + textOffset)
-    .attr("dy", isMax ? null : "0.75em")
-    .text(label)
-    .style("fill", textCol)
-    .style("font-size", "8px");
-
 });
 
 var tubeFill_bottom = bulb_cy,
-    tubeFill_top = scale(currentSolar);
+    tubeFill_top = scale(currentGrass);
 
-// Rect element for the solar tube
+// Rect element for the grass tube
 svg.append("rect")
     .attr("x", width / 2 - (tubeWidth - 20.5) / 2)
     .attr("y", tubeFill_top)
     .attr("rx", 2)
     .attr("width", tubeWidth - 11)
     .attr("height", tubeFill_bottom - 17 - tubeFill_top)
-    .style("fill", solarColor);
+    .style("fill", grassColor);
 
-// Values to use along the scale ticks up the solar tube
+// Values to use along the scale ticks up the grass tube
 var tickValues = d3.range((domain[1] - domain[0]) / step + 1).map(function(v) { return domain[0] + v * step; });
 
-// D3 axis object for the solar scale
+// D3 axis object for the grass scale
 var axis = d3.svg.axis()
     .scale(scale)
     .innerTickSize(7)
@@ -194,14 +176,14 @@ var axis = d3.svg.axis()
 
 // Add the axis to the image
 var svgAxis = svg.append("g")
-    .attr("id", "SolarScale")
-    .attr("transform", "translate(" + (width / 2 + 5 - tubeWidth / 2) + ", 0)")
+    .attr("id", "GrassScale")
+    .attr("transform", "translate(" + (width / 2 + 5 - tubeWidth / 2) + ",0)")
     .call(axis);
 
 // Format text labels
 svgAxis.selectAll(".tick text")
     .style("fill", "#777777")
-    .style("font-size", "7px");
+    .style("font-size", "8px");
 
 // Set main axis line to no stroke or fill
 svgAxis.select("path")
@@ -213,65 +195,62 @@ svgAxis.selectAll(".tick line")
     .style("stroke", tubeBorderColor)
     .style("stroke-linecap", "round")
     .style("stroke-width", "2px");
-
-// text output current solar  
+    
+// text output grass    
 svg.append("text")
-	.text("Solar" + " " + currentSolar + " " + solarunits )
-	.attr("x", width / 2)
-	.attr("y", 133)
-	.attr("text-anchor", "middle")
-	.style("font-size", "9px")
-	.style("font-family", "Helvetica")
-	.style("fill", baseTextColor);
-	
-svg.append("text") // max solar text output
-	.text("Max " + maxSolar + " " + "(" + solarMaxTime + ")")
+    .text("Grass")
+    .attr("x", width / 2)
+    .attr("y", 133)
+    .attr("text-anchor", "middle")
+    .style("font-size", "9px")
+    .style("font-family", "Helvetica")
+    .style("fill", baseTextColor);
+    
+svg.append("text") // risk text output
+    .text("Risk " + riskGrass)
     .attr("x", width / 2)
     .attr("y", 143)
     .style("text-anchor", "middle")
     .style("font-size", "8px")
     .style("font-family", "Helvetica")    
-   	.style("fill", baseTextColor);
-  
+    .style("fill", baseTextColor);
 
-			
+
+            
 </script>
-<div class="uvipos">
-<div id="uvi"></div>
+<div class="treepos">
+<div class="tree"></div>
 </div>
-		
-	<script>
-		
+        
+    <script>
+      
 
     var width = 95,
     height = 150;
+
+    var riskTree = "<?php echo $pollen["tree_risk"];?>"; 
     
-    var currentUVI = "<?php echo $uv["now"];?>";
-    currentUVI = currentUVI || 0;
+    var currentTree = "<?php echo $pollen["tree_index"];?>";
+    currentTree = currentTree || 0;
     
-    var maxUVI = "<?php echo $uv["day_max"];?>";
-    maxUVI = maxUVI || 0;
+    var maxTree = 3;
+    maxTree = maxTree || 0;
     
-    var minUVI = 0.0;
-    
-    var uviMaxTime = "<?php echo $uv["day_maxtime"];?>";
-    uviMaxTime = uviMaxTime || 0;
-        
-    var uviunits = "UVI";    
-    
+    var minTree = 0;
+       
 var bottomY = height + 10,
     topY = 0,
     bulbRadius = 25.5,
     tubeWidth = 35,
     tubeBorderWidth = 1,
-    uviColor = "<?php echo $uv["color"];?>",
+    treeColor = "<?php echo $pollen["tree_color"];?>",
     tubeBorderColor = "#999999";
 
 var bulb_cy = bottomY - bulbRadius,
     bulb_cx = width / 2,
     top_cy = topY + tubeWidth / 2;
 
-var svg = d3.select("#uvi")
+var svg = d3.select(".tree")
     .append("svg")
     //.style("background", "#292E35") // box background to be commented out
     .attr("width", width)
@@ -297,18 +276,18 @@ svg.append("rect")
     .attr("width", tubeWidth - 10);
        
 // Scale step size
-var step = 2;
+var step = 1;
 
-// Determine a suitable range for the uvi scale
+// Determine a suitable range for the tree scale
 var domain = [
-  step * Math.floor(minUVI / step),
-  step * Math.ceil(maxUVI / step)
+  step * Math.floor(minTree / step),
+  step * Math.ceil(maxTree / step)
   ];
 
-if (minUVI - domain[0] < 0.0 * step)
+if (minTree - domain[0] < 0.0 * step)
   domain[0] -= step;
 
-if (domain[1] - maxUVI < 0.66 * step)
+if (domain[1] - maxTree < 0.66 * step)
   domain[1] += step;
 
 // D3 scale object
@@ -316,50 +295,31 @@ var scale = d3.scale.linear()
     .range([bulb_cy - bulbRadius / 2 - 8.5, top_cy])
     .domain(domain);
     
-[maxUVI].forEach(function(t) {
+[maxTree].forEach(function(t) {
 
-  var isMax = (t == maxUVI),
+  var isMax = (t == maxTree),
       label = (isMax ? "Max" : "min"),
       textCol = (isMax ? "silver" : "silver"),
       textOffset = (isMax ? - 3 : 3);
       
-    svg.append("line")
-    .attr("id", label + "Line")
-    .attr("x1", width / 2 + 38 - tubeWidth / 2)
-    .attr("x2", width / 2 + 38 + tubeWidth / 2 - 18)
-    .attr("y1", scale(t))
-    .attr("y2", scale(t))
-    .style("stroke", tubeBorderColor)
-    .style("stroke-width", "1px")
-    .style("stroke-linecap", "round");
-
-
-  svg.append("text")
-    .attr("x", width / 2 + tubeWidth / 2 + 4)
-    .attr("y", scale(t) + textOffset)
-    .attr("dy", isMax ? null : "0.75em")
-    .text(label)
-    .style("fill", textCol)
-    .style("font-size", "8px");
-
 });
 
 var tubeFill_bottom = bulb_cy,
-    tubeFill_top = scale(currentUVI);
+    tubeFill_top = scale(currentTree);
 
-// Rect element for the uvi tube
+// Rect element for the tree tube
 svg.append("rect")
     .attr("x", width / 2 - (tubeWidth - 20.5) / 2)
     .attr("y", tubeFill_top)
     .attr("rx", 2)
     .attr("width", tubeWidth - 11)
     .attr("height", tubeFill_bottom - 17 - tubeFill_top)
-    .style("fill", uviColor);
+    .style("fill", treeColor);
 
-// Values to use along the scale ticks up the uvi tube
+// Values to use along the scale ticks up the tree tube
 var tickValues = d3.range((domain[1] - domain[0]) / step + 1).map(function(v) { return domain[0] + v * step; });
 
-// D3 axis object for the lux scale
+// D3 axis object for the tree scale
 var axis = d3.svg.axis()
     .scale(scale)
     .innerTickSize(7)
@@ -369,7 +329,7 @@ var axis = d3.svg.axis()
 
 // Add the axis to the image
 var svgAxis = svg.append("g")
-    .attr("id", "UVIScale")
+    .attr("id", "TreeScale")
     .attr("transform", "translate(" + (width / 2 + 5 - tubeWidth / 2) + ", 0)")
     .call(axis);
 
@@ -389,17 +349,17 @@ svgAxis.selectAll(".tick line")
     .style("stroke-linecap", "round")
     .style("stroke-width", "2px");
 
-// text output current uvi  
+// text output tree  
 svg.append("text")
-	.text( uviunits + " " + currentUVI )
-	.attr("x", width / 2)
-	.attr("y", 133)
-	.attr("text-anchor", "middle")
-	.style("font-size", "9px")
-	.style("font-family", "Helvetica")
-	.style("fill", baseTextColor);
-	
- svg.append("text") // max uvi text output
+    .text("Tree ")
+    .attr("x", width / 2)
+    .attr("y", 133)
+    .attr("text-anchor", "middle")
+    .style("font-size", "9px")
+    .style("font-family", "Helvetica")
+    .style("fill", baseTextColor);
+   
+ svg.append("text") // tree risk text output
     .attr("x", width / 2)
     .attr("y", 143)
     .style("fill", baseTextColor)
@@ -407,42 +367,43 @@ svg.append("text")
     .style("font-size", "8px")
     .style("text-anchor", "middle")
     .style("font-weight", "normal")
-    .text("Max " + maxUVI + " " + "(" + uviMaxTime + ")");
+    .text("Risk " + riskTree);
   
 
-			
+           
 </script>  
-<div class="luxpos">
-<div id="lux"></div>
+<div class="weedpos">
+<div class="weed"></div>
 </div>
-		
-	<script>
-		
+        
+    <script>
 
     var width = 95,
     height = 150;
+
+    var riskWeed = "<?php echo $pollen["weed_risk"];?>";
+
+    var currentWeed = "<?php echo $pollen["weed_index"];?>";
+    currentWeed = currentWeed || 0;
     
-    var currentLux = "<?php echo $sky["lux"];?>";
-    currentLux = currentLux || 0;
+    var maxWeed = 3;
+    maxWeed = maxWeed || 0;
     
-    var maxLux = currentLux;
-    maxLux = maxLux || 0;
-    
-    var minLux = 0;    
+    var minWeed = 0;    
     
 var bottomY = height + 10,
     topY = 0,
     bulbRadius = 25.5,
     tubeWidth = 35,
     tubeBorderWidth = 1,
-    LuxColor = "rgba(255, 85, 85, 1)",
+    weedColor = "<?php echo $pollen["weed_color"];?>",
     tubeBorderColor = "#999999";
 
 var bulb_cy = bottomY - bulbRadius,
     bulb_cx = width / 2,
     top_cy = topY + tubeWidth / 2;
 
-var svg = d3.select("#lux")
+var svg = d3.select(".weed")
     .append("svg")
     //.style("background", "#292E35") // box background to be commented out
     .attr("width", width)
@@ -468,18 +429,18 @@ svg.append("rect")
     .attr("width", tubeWidth - 10);
 
 // Scale step size
-var step = 20000;
+var step = 1;
 
-// Determine a suitable range for the lux scale
+// Determine a suitable range for the weed scale
 var domain = [
-  step * Math.floor(minLux / step),
-  step * Math.ceil(maxLux / step)
+  step * Math.floor(minWeed / step),
+  step * Math.ceil(maxWeed / step)
   ];
 
-if (minLux - domain[0] < 0.0 * step)
+if (minWeed - domain[0] < 0.0 * step)
   domain[0] -= step;
 
-if (domain[1] - maxLux < 0.66 * step)
+if (domain[1] - maxWeed < 0.66 * step)
   domain[1] += step;
 
 // D3 scale object
@@ -487,9 +448,9 @@ var scale = d3.scale.linear()
     .range([bulb_cy - bulbRadius / 2 - 8.5, top_cy])
     .domain(domain);
 
-[minLux, maxLux].forEach(function(t) {
+[maxWeed].forEach(function(t) {
 
-  var isMax = (t == maxLux),
+  var isMax = (t == maxWeed),
       label = (isMax ? "max" : "min"),
       textCol = (isMax ? "rgb(230, 0, 0)" : "rgb(0, 0, 230)"),
       textOffset = (isMax ? -4 : 4);
@@ -497,21 +458,21 @@ var scale = d3.scale.linear()
 });
 
 var tubeFill_bottom = bulb_cy,
-    tubeFill_top = scale(currentLux);
+    tubeFill_top = scale(currentWeed);
 
-// Rect element for the lux tube
+// Rect element for the weed tube
 svg.append("rect")
     .attr("x", width / 2 - (tubeWidth - 20.50) / 2)
     .attr("y", tubeFill_top)
     .attr("rx", 2)
     .attr("width", tubeWidth - 11)
     .attr("height", tubeFill_bottom - 17 - tubeFill_top)
-    .style("fill", LuxColor);
+    .style("fill", weedColor);
 
-// Values to use along the scale ticks up the lux tube
+// Values to use along the scale ticks up the weed tube
 var tickValues = d3.range((domain[1] - domain[0]) / step + 1).map(function(v) { return domain[0] + v * step; });
 
-// D3 axis object for the lux scale
+// D3 axis object for the weed scale
 var axis = d3.svg.axis()
     .scale(scale)
     .innerTickSize(7)
@@ -521,7 +482,7 @@ var axis = d3.svg.axis()
 
 // Add the axis to the image
 var svgAxis = svg.append("g")
-    .attr("id", "LuxScale")
+    .attr("id", "WeedScale")
     .attr("transform", "translate(" + (width / 2 + 5 - tubeWidth / 2) + ", 0)")
     .call(axis);
 
@@ -541,18 +502,27 @@ svgAxis.selectAll(".tick line")
     .style("stroke-linecap", "round")
     .style("stroke-width", "2px");
 
-// text output current lux  
+// text output weed  
 svg.append("text")
-	.text("Lux" + " " + currentLux )
-	.attr("x", width / 2)
-	.attr("y", 133)
-	.attr("text-anchor", "middle")
-	.style("font-size", "9px")
-	.style("font-family", "Helvetica")
-	.style("fill", baseTextColor);
+    .text("Weed ")
+    .attr("x", width / 2)
+    .attr("y", 133)
+    .attr("text-anchor", "middle")
+    .style("font-size", "9px")
+    .style("font-family", "Helvetica")
+    .style("fill", baseTextColor);
+
+svg.append("text") // weed risk text output
+    .attr("x", width / 2)
+    .attr("y", 143)
+    .style("fill", baseTextColor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "8px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text("Risk " + riskWeed);
   
 
-			
-</script>
-           
+            
+</script>          
 </html>
