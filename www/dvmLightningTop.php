@@ -403,15 +403,30 @@ $lightning["nsdcrop"]									= $lightningBolt[22]; // Max strikes in NSDStrikes
             	.style("font-weight", "normal")
 				.text("Last Strike");
 				
-	svg.append("text") // Month
-             	.attr("x", 110)
-            	.attr("y", 28)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "9px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-   				.text("Total"+" "+month);
+	  var data = ["Total "+month+" "+"-"+Strikes_this_month];
+
+	var text = svg.selectAll(null)
+  						.data(data)
+  						.enter() 
+  						.append("text")
+  						.attr("x", 110)
+  						.attr("y", function(d, i) {
+    					return 28 + i * 28
+  						})
+  						.style("fill", "black")
+  						.style("font-family", "Helvetica")
+  						.style("font-size", "9px")
+  						.style("text-anchor", "left")
+  						.style("font-weight", "normal")
+  						.text(function(d) {
+    					return d.split("-")[0]
+  						})
+  						.append("tspan")
+  						.style("fill", "#ff964f")
+  						.text(function(d) {
+    					return d.split("-")[1]
+  						})
+
    				
    	svg.append("text") // Year
              	.attr("x", 110)
