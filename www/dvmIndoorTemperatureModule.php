@@ -76,6 +76,13 @@ else if($temp["units"]=='C' && anyToC($temp["indoor_now"])<10){echo "<div class=
 
 <script src="js/d3.min.js"></script>
 
+<script>
+	if (theme == 'dark') {
+var textFill = "silver";}
+else
+{var textFill = "rgba(85,85,85,1)";}
+</script>
+
 <div class="house"></div>
 <div class="idtemppos">
 <div id="idthermometer"></div>
@@ -248,7 +255,7 @@ var svg = d3.select(".house")
     			.style("stroke-width", "3px")
     			.style("stroke-linecap", "round");
 
-		if (theme == 'dark') {
+
     			
     			// Humidity
     		svg.append("text")	
@@ -258,7 +265,7 @@ var svg = d3.select(".house")
 				.style("font-size", "12px")
 				.style("font-family", "Helvetica")
 				.style("font-weight", "normal")
-				.style("fill", "silver")
+				.style("fill", textFill)
 				.text("Humidity");
 				
 			svg.append("text")	
@@ -268,7 +275,7 @@ var svg = d3.select(".house")
 				.style("font-size", "10px")
 				.style("font-family", "Helvetica")
 				.style("font-weight", "normal")
-				.style("fill", "silver")
+				.style("fill", textFill)
 				.text(humidity+"%");
 				
 			// feels temp	
@@ -279,7 +286,7 @@ var svg = d3.select(".house")
 				.style("font-size", "12px")
 				.style("font-family", "Helvetica")
 				.style("font-weight", "normal")
-				.style("fill", "silver")
+				.style("fill", textFill)
 				.text("Feels");
 				
 		if (units == 'C') {
@@ -291,7 +298,7 @@ var svg = d3.select(".house")
 				.style("font-size", "10px")
 				.style("font-family", "Helvetica")
 				.style("font-weight", "normal")
-				.style("fill", "silver")
+				.style("fill", textFill)
 				.text(feels+"°C");
 				
 		} else {
@@ -303,7 +310,7 @@ var svg = d3.select(".house")
 				.style("font-size", "10px")
 				.style("font-family", "Helvetica")
 				.style("font-weight", "normal")
-				.style("fill", "silver")
+				.style("fill", textFill)
 				.text(feels+"°F");
 				
 			}
@@ -352,109 +359,6 @@ var svg = d3.select(".house")
 		}
 				
 				
-		} else {
-		
-				// Humidity
-			svg.append("text")	
-				.attr("x", 235)
-				.attr("y", 59)
-				.attr("text-anchor", "middle")
-				.style("font-size", "12px")
-				.style("font-family", "Helvetica")
-				.style("font-weight", "normal")
-				.style("fill", "black")
-				.text("Humidity");
-				
-			svg.append("text")	
-				.attr("x", 230)
-				.attr("y", 77)
-				.attr("text-anchor", "middle")
-				.style("font-size", "10px")
-				.style("font-family", "Helvetica")
-				.style("font-weight", "normal")
-				.style("fill", "black")
-				.text(humidity+"%");
-				
-			// feels temp	
-    		svg.append("text")	
-				.attr("x", 235)
-				.attr("y", 95)
-				.attr("text-anchor", "middle")
-				.style("font-size", "12px")
-				.style("font-family", "Helvetica")
-				.style("font-weight", "normal")
-				.style("fill", "black")
-				.text("Feels");
-				
-			if (units == 'C') {
-				
-			svg.append("text")	
-				.attr("x", 235)
-				.attr("y", 113)
-				.attr("text-anchor", "middle")
-				.style("font-size", "10px")
-				.style("font-family", "Helvetica")
-				.style("font-weight", "normal")
-				.style("fill", "black")
-				.text(feels+"°C");
-				
-		} else {
-		
-			svg.append("text")	
-				.attr("x", 235)
-				.attr("y", 113)
-				.attr("text-anchor", "middle")
-				.style("font-size", "10px")
-				.style("font-family", "Helvetica")
-				.style("font-weight", "normal")
-				.style("fill", "black")
-				.text(feels+"°F");
-				
-			}
-				
-		if (h_trend > 0) {
-    	
-    	 svg.append('polyline') // trend rising
-                .attr('points', "245 77 248 73 251 75 255 70")
-                .attr('stroke-width', "0.75px")
-                .style("fill", "none")
-                .style("stroke-linecap", "round")
-                .attr('stroke', "#ff7c39");
-                
-            svg.append('polyline') // trend rising
-                .attr('points', "255 70 251.5 70 255 70 256 73")
-                .attr('stroke-width', "0.75px")
-                .style("fill", "none")
-                .style("stroke-linecap", "round")
-                .attr('stroke', "#ff7c39");   		
-                
-		 } else if (h_trend < 0) {
-		 		 
-		 svg.append('polyline') // trend falling
-                .attr('points', "245 69 248 73 251 71 255 76")
-                .attr('stroke-width', "0.75px")
-                .style("fill", "none")
-                .style("stroke-linecap", "round")
-                .attr('stroke', "#3b9cac");
-                
-            svg.append('polyline') // trend falling
-                .attr('points', "255 76 251.5 76 255 76 256 73")
-                .attr('stroke-width', "0.75px")
-                .style("fill", "none")
-                .style("stroke-linecap", "round")
-                .attr('stroke', "#3b9cac");
-		           
-		} else if (h_trend == 0) {
-		
-		 	svg.append('polyline') // steady trend
-                .attr('points', "247 70.5 250 73.5 247 76.5")
-                .attr('stroke-width', "0.75px")
-                .style("fill", "none")
-                .style("stroke-linecap", "round")
-                .attr('stroke', "#90b12a");
-		}
-								
-			}
 						
 			svg.append("rect")
     			.attr("x", 206)

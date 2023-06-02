@@ -1,6 +1,7 @@
   <?php
 include('dvmCombinedData.php');
 
+
 $airqual["pm_units"] = "μg/㎥";
 
 
@@ -314,6 +315,12 @@ $airqual["qualColor"] = $airqual["color25"];
 }
 
 </style>
+<script>
+	if (theme == 'dark') {
+var cityTextFill = "silver";}
+else
+{var cityTextFill = "rgba(85,85,85,1)";}
+</script>
 
 <div class="aqiTop"></div>
 <div id="svg"></div>
@@ -344,32 +351,18 @@ $airqual["qualColor"] = $airqual["color25"];
 
 	
 	
-	if (theme == 'dark') {
+
 	
             svg.append("text") // City text output
              	.attr("x", 150)
             	.attr("y", 16)
-            	.style("fill", "silver")
+            	.style("fill", cityTextFill)
             	.style("font-family", "Helvetica")
             	.style("font-size", "11px")
             	.style("text-anchor", "middle")
             	.style("font-weight", "normal")   				
    				.text(city);
    				
-
-	} else {
-	
- 	svg.append("text") // City text output
-             	.attr("x", 150)
-            	.attr("y", 16)
-            	.style("fill", "black")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "middle")
-            	.style("font-weight", "normal")   				
-   				.text(city);
-    				
-	}
 	
 	  				                 				   				
    			 svg.append("line") // horizontal lozenge pm 2.5
