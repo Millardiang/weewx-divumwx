@@ -1,3 +1,4 @@
+
 # Installation Guide
 
 **The installer now defaults to overwrite mode, userSettings.php will not be overwritten as it does not exist in the package. However, it is essential that any customisations you may have been made are backed up before running the install.**
@@ -115,4 +116,5 @@ This will allow some of the required variable data to be generated immediately w
 * Save and restart WeeWX
 
 * Any problems, please raise an Issue in this repository attaching a debug report (see here for details http://www.weewx.com/docs/utilities.htm#wee_debug_utility), your skin.conf files and a syslog tail report covering at least two archive cycles from startup.
+
 

@@ -5330,7 +5330,20 @@
   .windconvertercirclegreen1,
   .windconvertercircleorange1,
   .windconvertercirclered1,
-  .windconvertercircleyellow1 {
+  .windconvertercircleyellow1,
+  .windconverter0,
+  .windconverter1,
+  .windconverter2,
+  .windconverter3,
+  .windconverter4,
+  .windconverter5,
+  .windconverter6,
+  .windconverter7,
+  .windconverter8,
+  .windconverter9,
+  .windconverter10,
+  .windconverter11,
+  .windconverter12 {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -5344,7 +5357,45 @@
     font-size: .85em;
     color: #fff
   }
-  
+  .windconverter0 {
+    background: #85a3aa;
+  }
+  .windconverter1 {
+    background: #7e98bb;
+  }
+  .windconverter2 {
+    background: #6e90d0;
+  }
+  .windconverter3 {
+    background: #0f94a7;
+  }
+  .windconverter4 {
+    background: #39a239;
+  }
+  .windconverter5 {
+    background: #c2863e;
+  }
+  .windconverter6 {
+    background: #c8420d;
+  }
+  .windconverter7 {
+    background: #d20032;
+  }
+  .windconverter8 {
+    background: #af5088;
+  }
+  .windconverter9 {
+    background: #754a92;
+  }
+  .windconverter10 {
+    background: #45698d;
+  }
+  .windconverter11 {
+    background: #c1fc77;
+  }
+  .windconverter12 {
+    background: #f1ff6c;
+  } 
   .windconvertercircleyellow1 {
     background: #e6a141
   }
