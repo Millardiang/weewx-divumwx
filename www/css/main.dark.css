@@ -5284,7 +5284,19 @@
     margin-top: 120px;
     margin-left: 100px;
   }
-  
+  .windconverter0,
+  .windconverter1,
+  .windconverter2,
+  .windconverter3,
+  .windconverter4,
+  .windconverter5,
+  .windconverter6,
+  .windconverter7,
+  .windconverter8,
+  .windconverter9,
+  .windconverter10,
+  .windconverter11,
+  .windconverter12, 
   .windconverter {
     margin-left: 252px;
     margin-top: -15px;
@@ -5294,7 +5306,20 @@
   .windconvertercirclegreen1,
   .windconvertercircleorange1,
   .windconvertercirclered1,
-  .windconvertercircleyellow1 {
+  .windconvertercircleyellow1,
+  .windconverter0,
+  .windconverter1,
+  .windconverter2,
+  .windconverter3,
+  .windconverter4,
+  .windconverter5,
+  .windconverter6,
+  .windconverter7,
+  .windconverter8,
+  .windconverter9,
+  .windconverter10,
+  .windconverter11,
+  .windconverter12 { {
     display: flex;
     align-items: center;
     justify-content: center;
