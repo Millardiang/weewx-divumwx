@@ -48,14 +48,16 @@ $darkminutes = 60 - $lightmins;
 $darkminutes = ($darkminutes < 10) ? '0' .$darkminutes : $darkminutes;
 
 if (round($sun_alt,2) >= 0) { 
-$sun_elevation = round($sun_alt,2)."&deg;<div class=sunabovedivumwx>&nbsp;</div>";
+$sun_elevation = round($sun_alt,2)."&deg;<div class=sunabovedivumwx> </div>";
 } else if (round($sun_alt,2) < 0) { 
-$sun_elevation = round($sun_alt,2)."&deg;<div class=sunbelowdivumwx>&nbsp;</div>"; 
+$sun_elevation = round($sun_alt,2)."&deg;<div class=sunbelowdivumwx> </div>"; 
 }?>
 <div class="chartforecast2">
-      <span class="yearpopup"><a alt="orrery" title="orrery" href="dvmOrreyPopup.php" data-lity><?php echo $info;?> Orrery</a></span>
+      <span class="yearpopup"><a alt="Orrery" title="Orrery" href="dvmOrreryPopup.php" data-lity><?php echo $info;?> Orrery</a></span>
       <span class="yearpopup"><a alt="Astroclock" title="Astroclock" href="dvmAstroclockPopup.php" data-lity><?php echo $info;?> Astroclock</a></span>
-
+      <span class="yearpopup"><a alt="Solar Path" title="Solar Path" href="dvmSolarpathModulePopup.php" data-lity><?php echo $info;?> Solar Path</a></span>
+      <span class="yearpopup"><a alt="Star Maps" title="Star Maps" href="dvmStarMapModulePopup.php" data-lity><?php echo $info;?> Star Maps</a></span>
+      <span class="yearpopup"><a alt="noise" title="noise" href="noise.php" data-lity><?php echo $info;?> noise</a></span>
 </div>
 
 <span class="moduletitle2"><?php echo $lang['solarDialModule'];?></span>
@@ -93,6 +95,20 @@ $sun_elevation = round($sun_alt,2)."&deg;<div class=sunbelowdivumwx>&nbsp;</div>
 <div id="sundial" width="130" height="130"></div>
 </div></div>
 
+ <script>
+            
+    var theme = "<?php echo $theme;?>";
+
+    if (theme === 'dark') {
+    var baseTextColor = "silver";
+    var backgroundRing = "rgba(59,60,63,1)";
+    } else {
+    var baseTextColor = "#2d3a4b";
+    var backgroundRing = "rgba(230,232,239,1)";
+    }
+
+</script>
+
 <script>
 function toDegrees(x) {
   return x * (180.0 / Math.PI);
@@ -102,7 +118,7 @@ function toRadians(x) {
   return x * (Math.PI / 180.0);
 }
 				                 
-    var sr = "<?php echo $alm["sunrise"];?>"; // string
+  var sr = "<?php echo $alm["sunrise"];?>"; // string
     
 	var srarr = sr.split(":");
 	var srhour = parseInt(srarr[0]);
@@ -143,20 +159,19 @@ var canvasSize = 130;
 // Create an instance of Two.js
 var skynet = document.getElementById("sundial");
 
-var params = { width: canvasSize, 
-			   height: canvasSize,
-			   fullscreen: false,
-			   autostart: true,
-			   type: Two.Types.svg };
+var params = { 
+					width: canvasSize, 
+			   	height: canvasSize,
+			   	fullscreen: false,
+			   	autostart: true,
+			   	type: Two.Types.svg };
 var two = new Two(params).appendTo(skynet);
 
 var theme = "<?php echo $theme;?>";
 
-	if (theme == 'dark') {
-	
 	var BGRing = two.makeCircle(0, 0, 52.5, 0, 2 * Math.PI);
 	
-	BGRing.stroke = "rgba(59, 60, 63, 1)";
+	BGRing.stroke = backgroundRing;
 	BGRing.linewidth = 7;
 	BGRing.noFill();
 		
@@ -183,15 +198,15 @@ var theme = "<?php echo $theme;?>";
   	sunsc.size = 10;
   	sunsc.weight = "normal";
   	sunsc.family = "Helvetica";
-  	sunsc.fill = "silver"; // gray
+  	sunsc.fill = baseTextColor; // gray
   	sunsc.alignment = "center";
   	
-  	var CountDown = h + " hrs " + m + " mins";
+  var CountDown = h + " hrs " + m + " mins";
 	var countdown = new Two.Text(CountDown, 0, 5);
   	countdown.size = 8;
   	countdown.weight = "normal";
   	countdown.family = "Helvetica";
-  	countdown.fill = "silver"; // gray
+  	countdown.fill = baseTextColor; // gray
   	countdown.alignment = "center";
   	
   	two.scene.add(countdown, sunsc);
@@ -201,9 +216,9 @@ var theme = "<?php echo $theme;?>";
   	
   	} else {
   	
-  	function updateTimer2() {
+  function updateTimer2() {
   	
-  	future2 = Date.parse("<?php echo $alm["sunrise_date"];?>"); // string
+  future2 = Date.parse("<?php echo $alm["sunrise_date"];?>"); // string
  	now = Date.parse("<?php echo $sundial_time;?>"); // string
  	diff = future2 - now;
 
@@ -217,12 +232,12 @@ var theme = "<?php echo $theme;?>";
  	m = mins - hours * 60;
  	s = secs - mins * 60;
   	
-  	var SunRise = "Sun Rise";
+  var SunRise = "Sun Rise";
 	var sunrc = new Two.Text(SunRise, 0, -10);
   	sunrc.size = 10;
   	sunrc.weight = "normal";
   	sunrc.family = "Helvetica";
-  	sunrc.fill = "silver"; // gray
+  	sunrc.fill = baseTextColor; // gray
   	sunrc.alignment = "center";
   	
  	var CountUp = h + " hrs " + m + " mins";
@@ -230,101 +245,12 @@ var theme = "<?php echo $theme;?>";
   	countup.size = 8;
   	countup.weight = "normal";
   	countup.family = "Helvetica";
-  	countup.fill = "silver"; // gray
+  	countup.fill = baseTextColor; // gray
   	countup.alignment = "center";
   	
   	two.scene.add(countup, sunrc);
   	}
   	updateTimer2();
-}
-
-
-} else {
-
-	var BGRing = two.makeCircle(0, 0, 52.5, 0, 2 * Math.PI);
-	
-	BGRing.stroke = "rgba(230, 232, 239, 1)";
-	BGRing.linewidth = 7;
-	BGRing.noFill();
-
- 	if (Altitude > 0.0) {
- 	
- 	function updateTimer1() {
- 	
- 	future1 = Date.parse("<?php echo $alm["sunset_date"];?>"); // string
- 	now = Date.parse("<?php echo $sundial_time;?>"); // string
- 	diff = future1 - now;
-
- 	days = Math.floor(diff / (1000 * 60 * 60 * 24));
- 	hours = Math.floor(diff / (1000 * 60 * 60));
- 	mins = Math.floor(diff / (1000 * 60));
- 	secs = Math.floor(diff / 1000);
-
- 	d = days;
- 	h = hours - days * 24;
- 	m = mins - hours * 60;
- 	s = secs - mins * 60;
-	
- 	var SunSet = "Sun Set";
-	var sunsc = new Two.Text(SunSet, 0, -10);
-  	sunsc.size = 10;
-  	sunsc.weight = "normal";
-  	sunsc.family = "Helvetica";
-  	sunsc.fill = "silver"; // gray
-  	sunsc.alignment = "center";
-  	
-  	var CountDown = h + " hrs " + m + " mins";
-	var countdown = new Two.Text(CountDown, 0, 5);
-  	countdown.size = 8;
-  	countdown.weight = "normal";
-  	countdown.family = "Helvetica";
-  	countdown.fill = "silver"; // gray
-  	countdown.alignment = "center";
-  	
-  	two.scene.add(countdown, sunsc);
-  	
-  	}
-  	updateTimer1();
-  	
-  	} else {
-  	
-  	function updateTimer2() {
-  	
-  	future2 = Date.parse("<?php echo $alm["sunrise_date"];?>"); // string
- 	now = Date.parse("<?php echo $sundial_time;?>"); // string
- 	diff = future2 - now;
-
- 	days = Math.floor(diff / (1000 * 60 * 60 * 24));
- 	hours = Math.floor(diff / (1000 * 60 * 60));
- 	mins = Math.floor(diff / (1000 * 60));
- 	secs = Math.floor(diff / 1000);
-
- 	d = days;
- 	h = hours - days * 24;
- 	m = mins - hours * 60;
- 	s = secs - mins * 60;
-  	
-  	var SunRise = "Sun Rise";
-	var sunrc = new Two.Text(SunRise, 0, -10);
-  	sunrc.size = 10;
-  	sunrc.weight = "normal";
-  	sunrc.family = "Helvetica";
-  	sunrc.fill = "silver"; // gray
-  	sunrc.alignment = "center";
-  	
- 	var CountUp = h + " hrs " + m + " mins";
-	var countup = new Two.Text(CountUp, 0, 5);
-  	countup.size = 8;
-  	countup.weight = "normal";
-  	countup.family = "Helvetica";
-  	countup.fill = "silver"; // gray
-  	countup.alignment = "center";
-  	
-  	two.scene.add(countup, sunrc);
-  	}
-  	updateTimer2();
-  }
-
 }
 
 	// center
@@ -408,14 +334,14 @@ for (let i = 0; i < 24; i++) {
   var ticks = two.makeLine(x, y, Ix, Iy);
   
   ticks.noFill();
-  ticks.stroke = "silver"; // gray
+  ticks.stroke = "silver";
   ticks.linewidth = 1.5;
   ticks.cap = "round";
 }
 
 function Moon() {
   
-  	var hour_MD = toRadians(hourMoon);
+  var hour_MD = toRadians(hourMoon);
 				
 	var Xm = xc + 52.5  * Math.sin(hour_MD);
 	var Ym = yc - 52.5  * Math.cos(hour_MD);
