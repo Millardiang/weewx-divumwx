@@ -328,29 +328,38 @@ if ($wind["speed_bft"] == 0) {
 <svg id="compass" width="140" height="140" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg"></svg>  
 </div>
 
- 
+ <script>
+            
+    var theme = "<?php echo $theme;?>";
+
+    if (theme === 'dark') {
+    var baseTextColor = "silver";
+    var ringColor = "rgba(59,60,63,1)";
+    } else {
+    var baseTextColor = "#2d3a4b";
+    var ringColor = "rgba(230,232,239,1)";
+    }
+
+</script>
+
 <script>
 
 var svgNS = "http://www.w3.org/2000/svg";
 
 var svg = document.getElementById("compass");
-
-var theme = "<?php echo $theme;?>";
-
-	if (theme == 'dark') {
    
 var angle = "<?php echo $wind["direction"];?>";
 angle = angle || 0;
 
 var tenminAvD = "<?php echo $wind["direction_10m_avg"];?>";
-tenminAvD = tenminAvD || 0;
+tenminAvD = tenminAvD || 0; 
 
-var cardinal = "<?php echo $wind["cardinal"];?>";
-cardinal = cardinal || 0;
-    
-    
+var Bearing = "<?php echo $wind["cardinal"];?>";
+Bearing = Bearing || "North";
+	
+	DirectionBearing(70, 74, Bearing); // Bearing
+        
 	DirectionAngle(70, 58, angle + "°"); // Direction in degrees
-	DirectionCardinal(70, 74, cardinal); // Direction in text
 
 	CardinalNorth(66.75, 29, "N");
 	CardinalDirection(111, 72.75, "E");
@@ -365,7 +374,7 @@ var polygon3 = document.createElementNS(svgNS, "polygon"); // 10 minute avarage 
 
 for (var i = 0; i < 360; i += 2) {
   // draw degree lines
-  var s = "rgba(59, 60, 63, 1)"; // dark grey
+  var s = ringColor; // dark grey
   if (i == 0 || i % 30 == 0) {
     w = 1;
     s = "rgba(255, 99, 71, 1)"; // tomato
@@ -427,7 +436,7 @@ function CardinalDirection(x, y, displayText) {
   	direction.setAttributeNS(null, "y", y);
   	direction.setAttributeNS(null, "font-size", "8px");
   	direction.setAttributeNS(null, "font-family", "Helvetica");
-  	direction.setAttributeNS(null, "fill", "rgba(192,192,192,1)");
+  	direction.setAttributeNS(null, "fill", baseTextColor);
 	var textNode = document.createTextNode(displayText);
   	direction.appendChild(textNode);
   	svg.appendChild(direction);
@@ -439,24 +448,24 @@ function DirectionAngle(x, y, displayText) {
   	anglen.setAttributeNS(null, "y", y);
   	anglen.setAttributeNS(null, "font-size", "12px");
   	anglen.setAttributeNS(null, "font-family", "Helvetica");
-  	anglen.setAttributeNS(null, "fill", "rgba(192,192,192,1)");  
+  	anglen.setAttributeNS(null, "fill", baseTextColor);  
   	anglen.setAttributeNS(null, "text-anchor", "middle");  
   	var textNode = document.createTextNode(displayText);
   	anglen.appendChild(textNode);
   	svg.appendChild(anglen);
 }
 
-function DirectionCardinal(x, y, displayText) {
-  	var anglet = document.createElementNS(svgNS, "text");
-  	anglet.setAttributeNS(null, "x", x);
-  	anglet.setAttributeNS(null, "y", y);
-  	anglet.setAttributeNS(null, "font-size", "12px");
-  	anglet.setAttributeNS(null, "font-family", "Helvetica");
-  	anglet.setAttributeNS(null, "fill", "rgba(192,192,192,1)");  
-  	anglet.setAttributeNS(null, "text-anchor", "middle");  
+function DirectionBearing(x, y, displayText) {
+  	var bearing = document.createElementNS(svgNS, "text");
+  	bearing.setAttributeNS(null, "x", x);
+  	bearing.setAttributeNS(null, "y", y);
+  	bearing.setAttributeNS(null, "font-size", "12px");
+  	bearing.setAttributeNS(null, "font-family", "Helvetica");
+  	bearing.setAttributeNS(null, "fill", baseTextColor);  
+  	bearing.setAttributeNS(null, "text-anchor", "middle");  
   	var textNode = document.createTextNode(displayText);
-  	anglet.appendChild(textNode);
-  	svg.appendChild(anglet);
+  	bearing.appendChild(textNode);
+  	svg.appendChild(bearing);
 }
 
 var polypointer = document.createElementNS(svgNS, "polygon"); // wind direction arrow
@@ -464,142 +473,9 @@ var polypointer = document.createElementNS(svgNS, "polygon"); // wind direction 
 	polypointer.setAttributeNS(null, "fill", "rgba(0,127,255,1)");// arch blue
 	polypointer.setAttributeNS(null, "transform", "rotate("+ angle +", 70, 70)");
 	svg.appendChild(polypointer);
-				
-} else {
-
-var svgNS = "http://www.w3.org/2000/svg";
-
-var svg = document.getElementById("compass");
-
-var angle = "<?php echo $wind["direction"];?>";
-angle = angle || 0;
-
-var tenminAvD = "<?php echo $wind["direction_10m_avg"];?>";
-tenminAvD = tenminAvD || 0;
-
-var cardinal = "<?php echo $wind["cardinal"];?>";
-cardinal = cardinal || 0;
-
-    
-	DirectionAngle(70, 58, angle + "°"); // Direction in degrees
-	DirectionCardinal(70, 74, cardinal); // Direction in text
-	
-	CardinalNorth(66.75, 29, "N");
-	CardinalDirection(111, 73, "E");
-	CardinalDirection(67, 116, "S");
-	CardinalDirection(23, 73, "W");
-		
-var polygon3 = document.createElementNS(svgNS, "polygon"); // 10 minute avarage direction arrow
-	polygon3.setAttributeNS(null, "points", "70,43 73,32 70,35 67,32");
-	polygon3.setAttributeNS(null, "fill", "rgba(46,139,87,1)"); // earth green
-	polygon3.setAttributeNS(null, "transform", "rotate("+ tenminAvD +", 70, 70)");
-	svg.appendChild(polygon3);
-
-for (var i = 0; i < 360; i += 2) {
-  // draw degree lines
-  var s = "rgba(230, 232, 239, 1)"; // silver
-  if (i == 0 || i % 30 == 0) {
-    w = 1;
-    s = "rgba(255,99,71,1)"; // tomato
-    y2 = 17;
-  } else {
-    w = 0.75;
-    y2 = 17;
-  }
-  
-var ticks = document.createElementNS(svgNS, "line");
-	ticks.setAttributeNS(null, "x1", 70);
-	ticks.setAttributeNS(null, "y1", 10);
-	ticks.setAttributeNS(null, "x2", 70);
-	ticks.setAttributeNS(null, "y2", y2);
-	ticks.setAttributeNS(null, "stroke", s);
-	ticks.setAttributeNS(null, "stroke-width", w);
-	ticks.setAttributeNS(null, "stroke-linecap", "round");
-	ticks.setAttributeNS(null, "transform", "rotate(" + i + ", 70, 70)");
-	svg.appendChild(ticks);
-
-  // draw degree value every 30 degrees
-  if (i % 30 == 0) {
-    var t1 = document.createElementNS(svgNS, "text");
-    if (i > 100) {
-      t1.setAttributeNS(null, "x", 62.50);
-    } else if (i > 0) {
-      t1.setAttributeNS(null, "x", 65);
-    } else {
-      t1.setAttributeNS(null, "x", 67.75);
-    }
-    t1.setAttributeNS(null, "y", 7);
-    t1.setAttributeNS(null, "font-size", "8px");
-    t1.setAttributeNS(null, "font-family", "Helvetica");
-    t1.setAttributeNS(null, "fill", "rgba(147, 147, 147, 1)");
-    t1.setAttributeNS(null, "style", "letter-spacing: 1.0");
-    t1.setAttributeNS(null, "transform", "rotate(" + i + ", 70, 70)");
-    var textNode = document.createTextNode(i);
-    t1.appendChild(textNode);
-    svg.appendChild(t1);
-  }
-}
-
-function CardinalNorth(x, y, displayText) {
-	var direction = document.createElementNS(svgNS, "text");
-  	direction.setAttributeNS(null, "x", x);
-  	direction.setAttributeNS(null, "y", y);
-  	direction.setAttributeNS(null, "font-size", "9px");
-  	direction.setAttributeNS(null, "font-weight", "bold");
-  	direction.setAttributeNS(null, "font-family", "Helvetica");
-  	direction.setAttributeNS(null, "fill", "red");
-	var textNode = document.createTextNode(displayText);
-  	direction.appendChild(textNode);
-  	svg.appendChild(direction);
-}
-
-function CardinalDirection(x, y, displayText) {
-  	var direction = document.createElementNS(svgNS, "text");
-  	direction.setAttributeNS(null, "x", x);
-  	direction.setAttributeNS(null, "y", y);
-  	direction.setAttributeNS(null, "font-size", "8px");
-  	direction.setAttributeNS(null, "font-family", "Helvetica");
-  	direction.setAttributeNS(null, "fill", "silver");
-  	var textNode = document.createTextNode(displayText);
-  	direction.appendChild(textNode);
-  	svg.appendChild(direction);
-}
-
-function DirectionAngle(x, y, displayText) {
-  	var anglen = document.createElementNS(svgNS, "text");
-  	anglen.setAttributeNS(null, "x", x);
-  	anglen.setAttributeNS(null, "y", y);
-  	anglen.setAttributeNS(null, "font-size", "12px");
-  	anglen.setAttributeNS(null, "font-family", "Helvetica");
-  	anglen.setAttributeNS(null, "fill", "silver");  
-  	anglen.setAttributeNS(null, "text-anchor", "middle");  
-  	var textNode = document.createTextNode(displayText);
-  	anglen.appendChild(textNode);
-  	svg.appendChild(anglen);
-}
-
-function DirectionCardinal(x, y, displayText) {
-  	var anglet = document.createElementNS(svgNS, "text");
-  	anglet.setAttributeNS(null, "x", x);
-  	anglet.setAttributeNS(null, "y", y);
-  	anglet.setAttributeNS(null, "font-size", "12px");
-  	anglet.setAttributeNS(null, "font-family", "Helvetica");
-  	anglet.setAttributeNS(null, "fill", "silver");  
-  	anglet.setAttributeNS(null, "text-anchor", "middle");  
-  	var textNode = document.createTextNode(displayText);
-  	anglet.appendChild(textNode);
-  	svg.appendChild(anglet);
-}
- 
-var polypointer = document.createElementNS(svgNS, "polygon"); // wind direction arrow
-	polypointer.setAttributeNS(null, "points", "70,22 75,2 70,8 65,2");
-	polypointer.setAttributeNS(null, "fill", "rgba(0,127,255,1)"); // arch blue
-	polypointer.setAttributeNS(null, "transform", "rotate("+ angle +", 70, 70)");
-	svg.appendChild(polypointer);
-   
-}
 
 </script>
+
 
 </div>
 </html>

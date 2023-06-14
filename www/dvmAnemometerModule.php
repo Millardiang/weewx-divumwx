@@ -436,11 +436,24 @@ if ($theme === "dark") { echo
 }
 ?>
 
+<script>
+            
+    var theme = "<?php echo $theme;?>";
+
+    if (theme === 'dark') {
+    var baseTextColor = "silver";
+    } else {
+    var baseTextColor = "#2d3a4b";
+    }
+
+</script>
+
 <div class="anemometer"></div>
    
      <script>
 
     var ordinal = "<?php echo $wind["cardinal"];?>";
+    ordinal = ordinal || "North";
  
     var current_direction = "<?php echo $wind["direction"];?>";  
     current_direction = current_direction || 0;
@@ -448,7 +461,7 @@ if ($theme === "dark") { echo
     var current_wind_speed = "<?php echo number_format($wind["speed"],1);?>";
     current_wind_speed = current_wind_speed || 0;
 
-    var current_wind_gust = "<?php echo $wind["gust"];?>";
+    var current_wind_gust = "<?php echo number_format($wind["gust"],1);?>";
     current_wind_gust = current_wind_gust || 0;
 
     var gust_max = "<?php echo $wind["gust_max"];?>";
@@ -466,17 +479,15 @@ if ($theme === "dark") { echo
                 .attr("width", 310)
                 .attr("height", 150);
 
-      const padding = 1.215;
-
       var anglePercentage = d3.scale.linear()
         .domain([0, 200])
-        .range([-135 * Math.PI/180, -135 * Math.PI/180 + 200 * Math.PI/180 + padding]);
+        .range([-135 * Math.PI/180, +135 * Math.PI/180]);
 
         // windy.com color scale
 
       var color = d3.scale.ordinal()
         .range([
-        "#ffffff", // Cat 3
+        "#FFF9E3", // Cat 3 eggshell in place of white
         "#f1ff6c", // Cat 2
         "#c1fc77", // Cat 1
         "#45698d",
@@ -521,23 +532,31 @@ if ($theme === "dark") { echo
         .attr("d", arc)
         .style("fill", function(d){return color(d[2]);})
         .attr("transform", "translate(154.5,73.5)");
-
-      if (theme === "dark") {
              
              svg.append("text") // current wind speed text output
               .attr("x", 155)
               .attr("y", 127)
-              .style("fill", "silver")
+              .style("fill", baseTextColor)
               .style("font-family", "Helvetica")
               .style("font-size", "11px")
               .style("text-anchor", "middle")
               .style("font-weight", "normal")
           .text(current_wind_speed + " " + units);
+
+          svg.append("text") // current wind gust speed text output
+              .attr("x", 155)
+              .attr("y", 142.5)
+              .style("fill", "rgba(46,139,87,1)")
+              .style("font-family", "Helvetica")
+              .style("font-size", "10px")
+              .style("text-anchor", "middle")
+              .style("font-weight", "normal")
+          .text("Gusting @ "+ current_wind_gust + " " + units);
 
             svg.append("text") // Bearing text output
               .attr("x", 45)
               .attr("y", 55)
-              .style("fill", "silver")
+              .style("fill", baseTextColor)
               .style("font-family", "Helvetica")
               .style("font-size", "12px")
               .style("text-anchor", "middle")
@@ -547,7 +566,7 @@ if ($theme === "dark") { echo
           svg.append("text") // Cardinal text output
               .attr("x", 265)
               .attr("y", 55)
-              .style("fill", "silver")
+              .style("fill", baseTextColor)
               .style("font-family", "Helvetica")
               .style("font-size", "12px")
               .style("text-anchor", "middle")
@@ -557,7 +576,7 @@ if ($theme === "dark") { echo
           svg.append("text") // Bearing text output
               .attr("x", 45)
               .attr("y", 80)
-              .style("fill", "silver")
+              .style("fill", baseTextColor)
               .style("font-family", "Helvetica")
               .style("font-size", "24px")
               .style("text-anchor", "middle")
@@ -567,67 +586,13 @@ if ($theme === "dark") { echo
           svg.append("text") // Cardinal text output
               .attr("x", 265)
               .attr("y", 80)
-              .style("fill", "silver")
+              .style("fill", baseTextColor)
               .style("font-family", "Helvetica")
               .style("font-size", "24px")
               .style("text-anchor", "middle")
               .style("font-weight", "normal")
           .text(ordinal);
-          
-        } else {
-        
-        svg.append("text") // current wind speed text output
-              .attr("x", 155)
-              .attr("y", 127)
-              .style("fill", "#2d3a4b")
-              .style("font-family", "Helvetica")
-              .style("font-size", "11px")
-              .style("text-anchor", "middle")
-              .style("font-weight", "normal")
-          .text(current_wind_speed + " " + units);
-
-          svg.append("text") // Bearing text output
-              .attr("x", 45)
-              .attr("y", 55)
-              .style("fill", "#2d3a4b")
-              .style("font-family", "Helvetica")
-              .style("font-size", "12px")
-              .style("text-anchor", "middle")
-              .style("font-weight", "normal")
-          .text("Bearing");
-
-          svg.append("text") // Cardinal text output
-              .attr("x", 265)
-              .attr("y", 55)
-              .style("fill", "#2d3a4b")
-              .style("font-family", "Helvetica")
-              .style("font-size", "12px")
-              .style("text-anchor", "middle")
-              .style("font-weight", "normal")
-          .text("Ordinal");
-
-          svg.append("text") // Bearing text output
-              .attr("x", 45)
-              .attr("y", 80)
-              .style("fill", "#2d3a4b")
-              .style("font-family", "Helvetica")
-              .style("font-size", "24px")
-              .style("text-anchor", "middle")
-              .style("font-weight", "normal")
-          .text(current_direction+"°");
-
-          svg.append("text") // Cardinal text output
-              .attr("x", 265)
-              .attr("y", 80)
-              .style("fill", "#2d3a4b")
-              .style("font-family", "Helvetica")
-              .style("font-size", "24px")
-              .style("text-anchor", "middle")
-              .style("font-weight", "normal")
-          .text(ordinal);
-
-        }
-        
+                  
         var gauge = iopctrl.arcslider()
                 .radius(52.5)
                 .events(false)
@@ -747,17 +712,15 @@ if ($theme === "dark") { echo
                 .attr("width", 310)
                 .attr("height", 150);
 
-      const padding = 2.44;
-
       var anglePercentage = d3.scale.linear()
         .domain([0, 130])
-        .range([-135 * Math.PI/180, -135 * Math.PI/180 + 130 * Math.PI/180 + padding]);
+        .range([-135 * Math.PI/180, +135 * Math.PI/180]);
 
         // windy.com color scale
 
       var color = d3.scale.ordinal()
         .range([
-        "#ffffff", // Cat 3
+        "#FFF9E3", // Cat 3 eggshell in place of white
         "#f1ff6c", // Cat 2
         "#c1fc77", // Cat 1
         "#45698d",
@@ -802,13 +765,11 @@ if ($theme === "dark") { echo
         .attr("d", arc)
         .style("fill", function(d){return color(d[2]);})
         .attr("transform", "translate(154.5,73.5)");
-                
-             if (theme == "dark") {
              
              svg.append("text") // current wind speed text output
               .attr("x", 155)
               .attr("y", 127)
-              .style("fill", "silver")
+              .style("fill", baseTextColor)
               .style("font-family", "Helvetica")
               .style("font-size", "11px")
               .style("text-anchor", "middle")
@@ -818,7 +779,7 @@ if ($theme === "dark") { echo
             svg.append("text") // Bearing text output
               .attr("x", 45)
               .attr("y", 55)
-              .style("fill", "silver")
+              .style("fill", baseTextColor)
               .style("font-family", "Helvetica")
               .style("font-size", "12px")
               .style("text-anchor", "middle")
@@ -828,7 +789,7 @@ if ($theme === "dark") { echo
           svg.append("text") // Cardinal text output
               .attr("x", 265)
               .attr("y", 55)
-              .style("fill", "silver")
+              .style("fill", baseTextColor)
               .style("font-family", "Helvetica")
               .style("font-size", "12px")
               .style("text-anchor", "middle")
@@ -838,7 +799,7 @@ if ($theme === "dark") { echo
           svg.append("text") // Bearing text output
               .attr("x", 45)
               .attr("y", 80)
-              .style("fill", "silver")
+              .style("fill", baseTextColor)
               .style("font-family", "Helvetica")
               .style("font-size", "24px")
               .style("text-anchor", "middle")
@@ -848,67 +809,13 @@ if ($theme === "dark") { echo
           svg.append("text") // Cardinal text output
               .attr("x", 265)
               .attr("y", 80)
-              .style("fill", "silver")
+              .style("fill", baseTextColor)
               .style("font-family", "Helvetica")
               .style("font-size", "24px")
               .style("text-anchor", "middle")
               .style("font-weight", "normal")
           .text(ordinal);
-          
-        } else {
-        
-        svg.append("text") // current wind speed text output
-              .attr("x", 155)
-              .attr("y", 127)
-              .style("fill", "#2d3a4b")
-              .style("font-family", "Helvetica")
-              .style("font-size", "11px")
-              .style("text-anchor", "middle")
-              .style("font-weight", "normal")
-          .text(current_wind_speed + " " + units);
-
-          svg.append("text") // Bearing text output
-              .attr("x", 45)
-              .attr("y", 55)
-              .style("fill", "#2d3a4b")
-              .style("font-family", "Helvetica")
-              .style("font-size", "12px")
-              .style("text-anchor", "middle")
-              .style("font-weight", "normal")
-          .text("Bearing");
-
-          svg.append("text") // Cardinal text output
-              .attr("x", 265)
-              .attr("y", 55)
-              .style("fill", "#2d3a4b")
-              .style("font-family", "Helvetica")
-              .style("font-size", "12px")
-              .style("text-anchor", "middle")
-              .style("font-weight", "normal")
-          .text("Ordinal");
-
-          svg.append("text") // Bearing text output
-              .attr("x", 45)
-              .attr("y", 80)
-              .style("fill", "#2d3a4b")
-              .style("font-family", "Helvetica")
-              .style("font-size", "24px")
-              .style("text-anchor", "middle")
-              .style("font-weight", "normal")
-          .text(current_direction+"°");
-
-          svg.append("text") // Cardinal text output
-              .attr("x", 265)
-              .attr("y", 80)
-              .style("fill", "#2d3a4b")
-              .style("font-family", "Helvetica")
-              .style("font-size", "24px")
-              .style("text-anchor", "middle")
-              .style("font-weight", "normal")
-          .text(ordinal);
-        }
-         
-                                                                      
+                                                         
         var gauge = iopctrl.arcslider()
                 .radius(52.5)
                 .events(false)
@@ -1026,17 +933,15 @@ if ($theme === "dark") { echo
                 .attr("width", 310)
                 .attr("height", 150);
 
-        const padding = 3.66;
-
         var anglePercentage = d3.scale.linear()
         .domain([0, 60])
-        .range([-135 * Math.PI/180, -135 * Math.PI/180 + 60 * Math.PI/180 + padding]);
+        .range([-135 * Math.PI/180, +135 * Math.PI/180]);
 
         // windy.com color scale
 
       var color = d3.scale.ordinal()
         .range([
-        "#ffffff", // Cat 3
+        "#FFF9E3", // Cat 3 eggshell in place of white
         "#f1ff6c", // Cat 2
         "#c1fc77", // Cat 1
         "#45698d",
@@ -1081,14 +986,11 @@ if ($theme === "dark") { echo
         .attr("d", arc)
         .style("fill", function(d){return color(d[2]);})
         .attr("transform", "translate(154.5,73.5)");
-                
-           
-            if (theme == "dark") {
-             
+            
              svg.append("text") // current wind speed text output
               .attr("x", 155)
               .attr("y", 127)
-              .style("fill", "silver")
+              .style("fill", baseTextColor)
               .style("font-family", "Helvetica")
               .style("font-size", "11px")
               .style("text-anchor", "middle")
@@ -1098,7 +1000,7 @@ if ($theme === "dark") { echo
             svg.append("text") // Bearing text output
               .attr("x", 45)
               .attr("y", 55)
-              .style("fill", "silver")
+              .style("fill", baseTextColor)
               .style("font-family", "Helvetica")
               .style("font-size", "12px")
               .style("text-anchor", "middle")
@@ -1108,7 +1010,7 @@ if ($theme === "dark") { echo
           svg.append("text") // Cardinal text output
               .attr("x", 265)
               .attr("y", 55)
-              .style("fill", "silver")
+              .style("fill", baseTextColor)
               .style("font-family", "Helvetica")
               .style("font-size", "12px")
               .style("text-anchor", "middle")
@@ -1118,7 +1020,7 @@ if ($theme === "dark") { echo
           svg.append("text") // Bearing text output
               .attr("x", 45)
               .attr("y", 80)
-              .style("fill", "silver")
+              .style("fill", baseTextColor)
               .style("font-family", "Helvetica")
               .style("font-size", "24px")
               .style("text-anchor", "middle")
@@ -1128,66 +1030,13 @@ if ($theme === "dark") { echo
           svg.append("text") // Cardinal text output
               .attr("x", 265)
               .attr("y", 80)
-              .style("fill", "silver")
+              .style("fill", baseTextColor)
               .style("font-family", "Helvetica")
               .style("font-size", "24px")
               .style("text-anchor", "middle")
               .style("font-weight", "normal")
           .text(ordinal);
-          
-        } else {
-        
-        svg.append("text") // current wind speed text output
-              .attr("x", 155)
-              .attr("y", 127)
-              .style("fill", "#2d3a4b")
-              .style("font-family", "Helvetica")
-              .style("font-size", "11px")
-              .style("text-anchor", "middle")
-              .style("font-weight", "normal")
-          .text(current_wind_speed + " " + units);
-
-          svg.append("text") // Bearing text output
-              .attr("x", 45)
-              .attr("y", 55)
-              .style("fill", "#2d3a4b")
-              .style("font-family", "Helvetica")
-              .style("font-size", "12px")
-              .style("text-anchor", "middle")
-              .style("font-weight", "normal")
-          .text("Bearing");
-
-          svg.append("text") // Cardinal text output
-              .attr("x", 265)
-              .attr("y", 55)
-              .style("fill", "#2d3a4b")
-              .style("font-family", "Helvetica")
-              .style("font-size", "12px")
-              .style("text-anchor", "middle")
-              .style("font-weight", "normal")
-          .text("Ordinal");
-
-          svg.append("text") // Bearing text output
-              .attr("x", 45)
-              .attr("y", 80)
-              .style("fill", "#2d3a4b")
-              .style("font-family", "Helvetica")
-              .style("font-size", "24px")
-              .style("text-anchor", "middle")
-              .style("font-weight", "normal")
-          .text(current_direction+"°");
-
-          svg.append("text") // Cardinal text output
-              .attr("x", 265)
-              .attr("y", 80)
-              .style("fill", "#2d3a4b")
-              .style("font-family", "Helvetica")
-              .style("font-size", "24px")
-              .style("text-anchor", "middle")
-              .style("font-weight", "normal")
-          .text(ordinal);
-        }     
-
+    
         var gauge = iopctrl.arcslider()
                 .radius(52.5)
                 .events(false)
@@ -1303,17 +1152,15 @@ if ($theme === "dark") { echo
                 .attr("width", 310)
                 .attr("height", 150);
 
-      const padding = 1.215;
-
       var anglePercentage = d3.scale.linear()
         .domain([0, 110])
-        .range([-135 * Math.PI/180, -135 * Math.PI/180 + 110 * Math.PI/180 + padding]);
+        .range([-135 * Math.PI/180, +135 * Math.PI/180]);
 
         // windy.com color scale
 
       var color = d3.scale.ordinal()
         .range([
-        "#ffffff", // Cat 3
+        "#FFF9E3", // Cat 3 eggshell in place of white
         "#f1ff6c", // Cat 2
         "#c1fc77", // Cat 1
         "#45698d",
@@ -1378,13 +1225,11 @@ if ($theme === "dark") { echo
           .attr("d", arc)
           .style("fill", "rgba(46,139,87,0.75)") // earth green
           .attr("transform", "translate(154.5,73.5)"); 
-           
-            if (theme == "dark") {
-             
+
              svg.append("text") // current wind speed text output
               .attr("x", 155)
               .attr("y", 127)
-              .style("fill", "silver")
+              .style("fill", baseTextColor)
               .style("font-family", "Helvetica")
               .style("font-size", "11px")
               .style("text-anchor", "middle")
@@ -1394,7 +1239,7 @@ if ($theme === "dark") { echo
             svg.append("text") // Bearing text output
               .attr("x", 45)
               .attr("y", 55)
-              .style("fill", "silver")
+              .style("fill", baseTextColor)
               .style("font-family", "Helvetica")
               .style("font-size", "12px")
               .style("text-anchor", "middle")
@@ -1404,7 +1249,7 @@ if ($theme === "dark") { echo
           svg.append("text") // Cardinal text output
               .attr("x", 265)
               .attr("y", 55)
-              .style("fill", "silver")
+              .style("fill", baseTextColor)
               .style("font-family", "Helvetica")
               .style("font-size", "12px")
               .style("text-anchor", "middle")
@@ -1414,7 +1259,7 @@ if ($theme === "dark") { echo
           svg.append("text") // Bearing text output
               .attr("x", 45)
               .attr("y", 80)
-              .style("fill", "silver")
+              .style("fill", baseTextColor)
               .style("font-family", "Helvetica")
               .style("font-size", "24px")
               .style("text-anchor", "middle")
@@ -1424,66 +1269,13 @@ if ($theme === "dark") { echo
           svg.append("text") // Cardinal text output
               .attr("x", 265)
               .attr("y", 80)
-              .style("fill", "silver")
+              .style("fill", baseTextColor)
               .style("font-family", "Helvetica")
               .style("font-size", "24px")
               .style("text-anchor", "middle")
               .style("font-weight", "normal")
           .text(ordinal);
-          
-        } else {
-        
-        svg.append("text") // current wind speed text output
-              .attr("x", 155)
-              .attr("y", 127)
-              .style("fill", "#2d3a4b")
-              .style("font-family", "Helvetica")
-              .style("font-size", "11px")
-              .style("text-anchor", "middle")
-              .style("font-weight", "normal")
-          .text(current_wind_speed + " " + units);
-
-          svg.append("text") // Bearing text output
-              .attr("x", 45)
-              .attr("y", 55)
-              .style("fill", "#2d3a4b")
-              .style("font-family", "Helvetica")
-              .style("font-size", "12px")
-              .style("text-anchor", "middle")
-              .style("font-weight", "normal")
-          .text("Bearing");
-
-          svg.append("text") // Cardinal text output
-              .attr("x", 265)
-              .attr("y", 55)
-              .style("fill", "#2d3a4b")
-              .style("font-family", "Helvetica")
-              .style("font-size", "12px")
-              .style("text-anchor", "middle")
-              .style("font-weight", "normal")
-          .text("Ordinal");
-
-          svg.append("text") // Bearing text output
-              .attr("x", 45)
-              .attr("y", 80)
-              .style("fill", "#2d3a4b")
-              .style("font-family", "Helvetica")
-              .style("font-size", "24px")
-              .style("text-anchor", "middle")
-              .style("font-weight", "normal")
-          .text(current_direction+"°");
-
-          svg.append("text") // Cardinal text output
-              .attr("x", 265)
-              .attr("y", 80)
-              .style("fill", "#2d3a4b")
-              .style("font-family", "Helvetica")
-              .style("font-size", "24px")
-              .style("text-anchor", "middle")
-              .style("font-weight", "normal")
-          .text(ordinal);
-        }     
-
+     
         var gauge = iopctrl.arcslider()
                 .radius(52.5)
                 .events(false)
