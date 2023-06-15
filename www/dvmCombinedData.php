@@ -3,7 +3,8 @@ include ('fixedSettings.php');
 include ('dvmShared.php');
 include('common.php');
 error_reporting(0);
-
+$os = shell_exec('lsb_release -d');
+$os_version = str_replace('Description:',' ',$os);
 $jsonS = 'jsondata/dvmSensorData.json';
 $jsonS = file_get_contents($jsonS);
 $sdata = json_decode($jsonS, true);
