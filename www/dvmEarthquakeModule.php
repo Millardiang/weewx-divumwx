@@ -24,6 +24,7 @@ $eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $l
 
     <div class="chartforecast2">
         <span class="yearpopup"><a alt="Earthquakes Worldwide" title="Earthquakes Worldwide" href="dvmEarthquakePopup.php" data-lity><?php echo $chartinfo;?> Worldwide Earthquakes</a></span>
+ 	<span class="yearpopup"><a alt="Earthquakes Worldwide Map" title="Earthquakes Worldwide Map" href="dvmEarthquakeMapPopup.php" data-lity><?php echo $chartinfo;?>World Earthquake Map</a></span>
     </div>
     <span class='moduletitle2'><?php echo $lang['earthquakeModule']; ?></valuetitleunit></span>
 
