@@ -1,0 +1,2067 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+        <meta name="author" content="Tom Keffer <tkeffer@gmail.com>">
+      
+      
+        <link rel="canonical" href="https://www.weewx.com/custom/custom_reports/">
+      
+      
+        <link rel="prev" href="../">
+      
+      
+        <link rel="next" href="../cheetah/">
+      
+      <link rel="icon" href="../../images/favicon.png">
+      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-9.0.12">
+    
+    
+      
+        <title>Customizing reports - weewx documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.0d440cfe.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.2505c338.min.css">
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans:300,300i,400,400i,700,700i%7CInconsolata+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Noto Sans";--md-code-font:"Inconsolata Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../css/weewx_ui.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="white">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#customizing-reports" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="weewx documentation" class="md-header__button md-logo" aria-label="weewx documentation" data-md-component="logo">
+      
+  <img src="../../images/logo-weewx.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            weewx documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Customizing reports
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="white"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6zm0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4zM7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+            </label>
+          
+        
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3Z"/></svg>
+            </label>
+          
+        
+      </form>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7 0-.24-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91 1.61 0 2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08Z"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/weewx/weewx" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    WeeWX GitHub Repository
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="weewx documentation" class="md-nav__button md-logo" aria-label="weewx documentation" data-md-component="logo">
+      
+  <img src="../../images/logo-weewx.png" alt="logo">
+
+    </a>
+    weewx documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/weewx/weewx" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    WeeWX GitHub Repository
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" >
+      
+      
+        
+          
+            
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        
+        
+        <div class="md-nav__link md-nav__link--index ">
+          <a href="../../quickstarts/">Quick starts</a>
+          
+            <label for="__nav_1">
+              <span class="md-nav__icon md-icon"></span>
+            </label>
+          
+        </div>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_1">
+          <span class="md-nav__icon md-icon"></span>
+          Quick starts
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quickstarts/debian/" class="md-nav__link">
+        Debian
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quickstarts/redhat/" class="md-nav__link">
+        RedHat
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quickstarts/suse/" class="md-nav__link">
+        SuSE
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quickstarts/pip/" class="md-nav__link">
+        pip
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quickstarts/v5-upgrade/" class="md-nav__link">
+        Migrating to V5
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+      
+      
+        
+          
+            
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        
+        
+        <div class="md-nav__link md-nav__link--index ">
+          <a href="../../usersguide/">User's guide</a>
+          
+            <label for="__nav_2">
+              <span class="md-nav__icon md-icon"></span>
+            </label>
+          
+        </div>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          User's guide
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/system-requirements/" class="md-nav__link">
+        System requirements
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/installing-weewx/" class="md-nav__link">
+        Installing WeeWX
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/where/" class="md-nav__link">
+        Where to find things
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/running-weewx/" class="md-nav__link">
+        Running WeeWX
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/webserver-integration/" class="md-nav__link">
+        Web server integration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/backing-up-weewx/" class="md-nav__link">
+        Backup & restore
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/mysql-mariadb-config/" class="md-nav__link">
+        Configuring MySQL
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/troubleshooting-guide/" class="md-nav__link">
+        Troubleshooting
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10" >
+      
+      
+        
+          
+            
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        
+        
+        <div class="md-nav__link md-nav__link--index ">
+          <a href="../../usersguide/weewx-config-file/">Reference: options</a>
+          
+            <label for="__nav_2_10">
+              <span class="md-nav__icon md-icon"></span>
+            </label>
+          
+        </div>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_10_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_2_10">
+          <span class="md-nav__icon md-icon"></span>
+          Reference: options
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/weewx-config-file/general/" class="md-nav__link">
+        General options
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/weewx-config-file/stations-config/" class="md-nav__link">
+        [Station]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/weewx-config-file/stdrestful-config/" class="md-nav__link">
+        [StdRESTful]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/weewx-config-file/stdreport-config/" class="md-nav__link">
+        [StdReport]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/weewx-config-file/stdconvert-config/" class="md-nav__link">
+        [StdConvert]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/weewx-config-file/stdcalibrate-config/" class="md-nav__link">
+        [StdCalibrate]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/weewx-config-file/stdqc-config/" class="md-nav__link">
+        [StdQC]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/weewx-config-file/stdwxcalculate-config/" class="md-nav__link">
+        [StdWXCalculate]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/weewx-config-file/stdarchive/" class="md-nav__link">
+        [StdArchive]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/weewx-config-file/stdtimesynch/" class="md-nav__link">
+        [StdTimeSynch]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/weewx-config-file/data-bindings/" class="md-nav__link">
+        [DataBindings]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/weewx-config-file/databases/" class="md-nav__link">
+        [Databases]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/weewx-config-file/databasetypes/" class="md-nav__link">
+        [DatabaseTypes]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/weewx-config-file/engine/" class="md-nav__link">
+        [Engine]
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+      
+      
+        
+          
+            
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        
+        
+        <div class="md-nav__link md-nav__link--index ">
+          <a href="../">Customization guide</a>
+          
+            <label for="__nav_3">
+              <span class="md-nav__icon md-icon"></span>
+            </label>
+          
+        </div>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Customization guide
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Customizing reports
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Customizing reports
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#how-options-work" class="md-nav__link">
+    How options work
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#processing-order" class="md-nav__link">
+    Processing order
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changing-languages" class="md-nav__link">
+    Changing languages
+  </a>
+  
+    <nav class="md-nav" aria-label="Changing languages">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#internationalized-skins" class="md-nav__link">
+    Internationalized skins
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changing-date-and-time-formats" class="md-nav__link">
+    Changing date and time formats
+  </a>
+  
+    <nav class="md-nav" aria-label="Changing date and time formats">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#date-and-time-formats-in-images" class="md-nav__link">
+    Date and time formats in images
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#date-and-time-formats-for-tags" class="md-nav__link">
+    Date and time formats for tags
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changing-unit-systems" class="md-nav__link">
+    Changing unit systems
+  </a>
+  
+    <nav class="md-nav" aria-label="Changing unit systems">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mixed-units" class="md-nav__link">
+    Mixed units
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multiple-unit-systems" class="md-nav__link">
+    Multiple unit systems
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changing-labels" class="md-nav__link">
+    Changing labels
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scheduling-report-generation" class="md-nav__link">
+    Scheduling report generation
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cheetah/" class="md-nav__link">
+        The Cheetah generator
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../image_generator/" class="md-nav__link">
+        The Image generator
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../multiple_bindings/" class="md-nav__link">
+        Multiple data bindings
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../localization/" class="md-nav__link">
+        Localization
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../service_engine/" class="md-nav__link">
+        Customizing the service engine
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../database/" class="md-nav__link">
+        Customizing the database
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../units/" class="md-nav__link">
+        Customizing units
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../derived/" class="md-nav__link">
+        Derived types
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../drivers/" class="md-nav__link">
+        Custom drivers
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../extensions/" class="md-nav__link">
+        Extensions
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../options_ref/" class="md-nav__link">
+        Reference: options
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../appendix/" class="md-nav__link">
+        Appendix
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+      
+      
+        
+          
+            
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        
+        
+        <div class="md-nav__link md-nav__link--index ">
+          <a href="../../utilities/">Utilities</a>
+          
+            <label for="__nav_4">
+              <span class="md-nav__icon md-icon"></span>
+            </label>
+          
+        </div>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Utilities
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" >
+      
+      
+        
+          
+            
+          
+        
+          
+        
+          
+        
+      
+      
+        
+        
+        <div class="md-nav__link md-nav__link--index ">
+          <a href="../../weectl/">weectl</a>
+          
+            <label for="__nav_4_2">
+              <span class="md-nav__icon md-icon"></span>
+            </label>
+          
+        </div>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_4_2">
+          <span class="md-nav__icon md-icon"></span>
+          weectl
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../weectl/station/" class="md-nav__link">
+        weectl station
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../weectl/extension/" class="md-nav__link">
+        weectl extension
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../utilities/utilities.htm#wee_database_utility" class="md-nav__link">
+        wee_database
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../utilities/utilities.htm#wee_debug_utility" class="md-nav__link">
+        wee_debug
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../utilities/utilities.htm#wee_device_utility" class="md-nav__link">
+        wee_device
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../utilities/utilities.htm#wee_import_utility" class="md-nav__link">
+        wee_import
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../utilities/utilities.htm#wee_reports_utility" class="md-nav__link">
+        wee_reports
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../utilities/utilities.htm#weewxd" class="md-nav__link">
+        weewxd
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../upgrading.htm" class="md-nav__link">
+        Upgrade guide
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../hardware.htm" class="md-nav__link">
+        Hardware guide
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../devnotes/" class="md-nav__link">
+        Notes for developers
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../hardware.htm" class="md-nav__link">
+        Hardware comparison
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changes/" class="md-nav__link">
+        Change log
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../support/" class="md-nav__link">
+        Support
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#how-options-work" class="md-nav__link">
+    How options work
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#processing-order" class="md-nav__link">
+    Processing order
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changing-languages" class="md-nav__link">
+    Changing languages
+  </a>
+  
+    <nav class="md-nav" aria-label="Changing languages">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#internationalized-skins" class="md-nav__link">
+    Internationalized skins
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changing-date-and-time-formats" class="md-nav__link">
+    Changing date and time formats
+  </a>
+  
+    <nav class="md-nav" aria-label="Changing date and time formats">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#date-and-time-formats-in-images" class="md-nav__link">
+    Date and time formats in images
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#date-and-time-formats-for-tags" class="md-nav__link">
+    Date and time formats for tags
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changing-unit-systems" class="md-nav__link">
+    Changing unit systems
+  </a>
+  
+    <nav class="md-nav" aria-label="Changing unit systems">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mixed-units" class="md-nav__link">
+    Mixed units
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multiple-unit-systems" class="md-nav__link">
+    Multiple unit systems
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changing-labels" class="md-nav__link">
+    Changing labels
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scheduling-report-generation" class="md-nav__link">
+    Scheduling report generation
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="customizing-reports">Customizing reports<a class="headerlink" href="#customizing-reports" title="Permanent link">&para;</a></h1>
+<p>There are two general mechanisms for customizing reports: change options in one or more configuration files, or change the template files. The former is generally easier, but occasionally the latter is necessary.</p>
+<h2 id="how-options-work">How options work<a class="headerlink" href="#how-options-work" title="Permanent link">&para;</a></h2>
+<p>Options are used to specify how reports will look and what they will contain. For example, they control which units to use, how to format dates and times, which data should be in each plot, the colors of plot elements, <em>etc</em>.</p>
+<p>For a complete listing of the report options, see the section <a href="../options_ref"><em>Reference: report options</em></a>.</p>
+<p>Options are read from three different types of <em>configuration files:</em></p>
+<table class="indent">
+    <caption>Configuration files</caption>
+    <thead>
+    <tr class="first_row">
+        <td>File</td>
+        <td>Use</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td class="code">weewx.conf</td>
+        <td>This is the application configuration file.  It contains general configuration information, such which drivers and services to load, as well as which
+            reports to run.  Report options can also be specified in this file.
+        </td>
+    </tr>
+    <tr>
+        <td class="code">skin.conf</td>
+        <td>This is the skin configuration file.  It contains information specific to a <em>skin</em>, in particular, which template files to process, and
+            which plots to generate. Typically this file is supplied by the skin author.
+        </td>
+    </tr>
+    <tr>
+        <td class="code">en.conf<br/>de.conf<br/>fr.conf<br/><em>etc.</em></td>
+        <td>These are internationalization files.  They contain language and locale information for a specific <em>skin</em>.</td>
+    </tr>
+    </tbody>
+</table>
+
+<p>Configuration files are read and processed using the Python utility <a href="https://configobj.readthedocs.io">ConfigObj</a>, using a format similar to the MS-DOS <a href="https://en.wikipedia.org/wiki/INI_file">"INI" format</a>. Here's a simple example:</p>
+<div class="highlight"><pre><span></span><code><span class="k">[Section1]</span>
+<span class="w">    </span><span class="c1"># A comment</span>
+<span class="w">    </span><span class="na">key1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">value1</span>
+<span class="w">    </span><span class="k">[[SubSectionA]]</span>
+<span class="w">        </span><span class="na">key2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">value2</span>
+<span class="k">[Section2]</span>
+<span class="w">    </span><span class="na">key3</span><span class="o">=</span><span class="s">value3</span>
+</code></pre></div>
+<p>This example uses two sections at root level (sections <code>Section1</code> and <code>Section2</code>), and one sub-section (<code>SubSectionA</code>), which is nested under <code>Section1</code>. The option <code>key1</code> is nested under <code>Section1</code>, option <code>key3</code> is nested under <code>Section2</code>, while option <code>key2</code> is nested under sub-section <code>SubSectionA</code>.</p>
+<p>Note that while this example indents sub-sections and options, this is strictly for readability — this isn't Python! It's the number of brackets that counts in determining nesting, not the indentation! It would torture your readers, but the above example could be written</p>
+<div class="highlight"><pre><span></span><code><span class="w">      </span><span class="k">[Section1]</span>
+<span class="c1"># A comment</span>
+<span class="na">key1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">value1</span>
+<span class="k">[[SubSectionA]]</span>
+<span class="na">key2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">value2</span>
+<span class="k">[Section2]</span>
+<span class="na">key3</span><span class="o">=</span><span class="s">value3</span>
+</code></pre></div>
+<p>Configuration files take advantage of ConfigObj's ability to organize options hierarchically into <em>stanzas</em>. For example, the <code>[Labels]</code> stanza contains the text that should be displayed for each observation. The <code>[Units]</code> stanza contains other stanzas, each of which contains parameters that control the display of units.</p>
+<h2 id="processing-order">Processing order<a class="headerlink" href="#processing-order" title="Permanent link">&para;</a></h2>
+<p>Configuration files and their sections are processed in a specific order. Generally, the values from the skin configuration file (<code>skin.conf</code>) are processed first, then options in the WeeWX configuration file (nominally <code>weewx.conf</code>) are applied last. This order allows skin authors to specify the basic look and feel of a report, while ensuring that users of the skin have the final say.</p>
+<p>To illustrate the processing order, here are the steps for the skin <em>Seasons</em>:</p>
+<ul>
+<li>First, a set of options defined in the Python module <code>weewx.defaults</code> serve as the starting point.</li>
+<li>Next, options from the configuration file for <em>Seasons</em>, located in <code>skins/Seasons/skin.conf</code>, are merged.</li>
+<li>Next, any options that apply to all skins, specified in the <code>[StdReport] / [[Defaults]]</code> section of the WeeWX configuration file, are merged.</li>
+<li>Finally, any skin-specific options, specified in the <code>[StdReport] / [[Seasons]]</code> section of the WeeWX configuration, are merged. These options have the final say.</li>
+</ul>
+<p>At all four steps, if a language specification is encountered (option <code>lang</code>), then the corresponding language file will be read and merged. If a unit specification (option <code>unit_system</code>) is encountered, then the appropriate unit groups are set. For example, if <code>unit_system=metricwx</code>, then the unit for <code>group_pressure</code> will be set to <code>mbar</code>, etc.</p>
+<p>The result is the following option hierarchy, listed in order of increasing precedence.</p>
+<table class="indent">
+    <caption>Option hierarchy, lowest to highest</caption>
+    <thead>
+    <tr class="first_row">
+        <td>File</td>
+        <td>Example</td>
+        <td>Comments</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td class="code">weewx/defaults.py</td>
+        <td class="code">
+            [Units]<br/> &nbsp;&nbsp;[[Labels]]<br/> &nbsp;&nbsp;&nbsp;&nbsp;mbar=" mbar"
+        </td>
+        <td>
+            These are the hard-coded default values for every option. They are used when an option is not
+            specified anywhere else. These should not be modified unless you propose a change to the WeeWX code;
+            any changes made here will be lost when the software is updated.
+        </td>
+    </tr>
+    <tr>
+        <td class="code">skin.conf</td>
+        <td class="code">
+            [Units]<br/> &nbsp;&nbsp;[[Labels]]<br/> &nbsp;&nbsp;&nbsp;&nbsp;mbar=" hPa"
+        </td>
+        <td>
+            Supplied by the skin author, the skin configuration file, <span class="code">skin.conf</span>,
+            contains options that define the baseline behavior of the skin. In this example, for whatever
+            reasons, the skin author has decided that the label for units in millibars should be <span
+            class="code">" hPa"</span> (which is equivalent).
+        </td>
+    </tr>
+    <tr>
+        <td class="code">weewx.conf</td>
+        <td class="code">
+            [StdReport]<br/> &nbsp;&nbsp;[[Defaults]]<br/> &nbsp;&nbsp;&nbsp;&nbsp;[[[Labels]]]<br/> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[[[Generic]]]]<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rain=Rainfall
+        </td>
+        <td>
+            Options specified under <span class="code">[[Defaults]]</span> apply to <em>all</em> reports. This
+            example indicates that the label <span class="example_text">Rainfall</span> should be used for the
+            observation <span class="code">rain</span>, in all reports.
+        </td>
+    </tr>
+    <tr>
+        <td class="code">weewx.conf</td>
+        <td class="code">
+            [StdReport]<br/> &nbsp;&nbsp;[[SeasonsReport]]<br/> &nbsp;&nbsp;&nbsp;&nbsp;[[[Labels]]]<br/> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[[[Generic]]]]<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inTemp=Kitchen&nbsp;temperature
+        </td>
+        <td>
+            Highest precedence. Has the final say. Options specified here apply to a <em>single</em> report.
+            This example indicates that the label <span class="example_text">Kitchen temperature</span> should
+            be used for the observation <span class="code">inTemp</span>, but only for the report <em>SeasonsReport</em>.
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When specifying options, you must pay attention to the number of brackets! In the table above, there are two different nesting depths used: one for <code>weewx.conf</code>, and one for <code>weewx/defaults.py</code> and <code>skin.conf</code>. This is because the stanzas defined in <code>weewx.conf</code> start two levels down in the hierarchy <code>[StdReport]</code>, whereas the stanzas defined in <code>skin.conf</code> and <code>defaults.py</code> are at the root level. Therefore, options specified in <code>weewx.conf</code> must use two extra sets of brackets.</p>
+</div>
+<p>Other skins are processed in a similar manner although, of course, their name will be something other than <em>Seasons</em>.</p>
+<p>Although it is possible to modify the options at any level, as the user of a skin, it is usually best to keep your modifications in the WeeWX configuration file (<code>weewx.conf</code>) if you can. That way you can apply any fixes or changes when the skin author updates the skin, and your customizations will not be overwritten.</p>
+<p>If you are a skin author, then you should provide the skin configuration file (<code>skin.conf</code>), and put in it only the options necessary to make the skin render the way you intend it. Any options that are likely to be localized for a specific language (in particular, text), should be put in the appropriate language file.</p>
+<h2 id="changing-languages">Changing languages<a class="headerlink" href="#changing-languages" title="Permanent link">&para;</a></h2>
+<p>By default, the skins that come with WeeWX are set up for the English language, but suppose you wish to switch to another language. How you do so will depend on whether the skin you are using has been <em>internationalized</em> and, if so, whether it offers your local language.</p>
+<h3 id="internationalized-skins">Internationalized skins<a class="headerlink" href="#internationalized-skins" title="Permanent link">&para;</a></h3>
+<p>All the skins included with WeeWX have been internationalized, so if you're working with one of them, this is the section you want. Next, you need to check whether there is a <em>localization</em> file for your particular language. To check, look in the contents of subdirectory <code>lang</code> in the skin's directory. For example, if you used a package installer and are using the <em>Seasons</em> skin, you will want to look in <code>/etc/weewx/skins/Seasons/lang</code>. Inside, you will see something like this:</p>
+<div class="highlight"><pre><span></span><code>ls<span class="w"> </span>-l<span class="w"> </span>/etc/weewx/skins/Seasons/lang
+total<span class="w"> </span><span class="m">136</span>
+-rw-rw-r--<span class="w"> </span><span class="m">1</span><span class="w"> </span>tkeffer<span class="w"> </span>tkeffer<span class="w">  </span><span class="m">9447</span><span class="w"> </span>Jul<span class="w">  </span><span class="m">1</span><span class="w"> </span><span class="m">11</span>:11<span class="w"> </span>cn.conf
+-rw-rw-r--<span class="w"> </span><span class="m">1</span><span class="w"> </span>tkeffer<span class="w"> </span>tkeffer<span class="w">  </span><span class="m">9844</span><span class="w"> </span>Mar<span class="w"> </span><span class="m">13</span><span class="w"> </span><span class="m">12</span>:31<span class="w"> </span>cz.conf
+-rw-rw-r--<span class="w"> </span><span class="m">1</span><span class="w"> </span>tkeffer<span class="w"> </span>tkeffer<span class="w">  </span><span class="m">9745</span><span class="w"> </span>Mar<span class="w"> </span><span class="m">13</span><span class="w"> </span><span class="m">12</span>:31<span class="w"> </span>de.conf
+-rw-rw-r--<span class="w"> </span><span class="m">1</span><span class="w"> </span>tkeffer<span class="w"> </span>tkeffer<span class="w">  </span><span class="m">9459</span><span class="w"> </span>Mar<span class="w"> </span><span class="m">13</span><span class="w"> </span><span class="m">12</span>:31<span class="w"> </span>en.conf
+-rw-rw-r--<span class="w"> </span><span class="m">1</span><span class="w"> </span>tkeffer<span class="w"> </span>tkeffer<span class="w"> </span><span class="m">10702</span><span class="w"> </span>Mar<span class="w"> </span><span class="m">13</span><span class="w"> </span><span class="m">12</span>:31<span class="w"> </span>es.conf
+-rw-rw-r--<span class="w"> </span><span class="m">1</span><span class="w"> </span>tkeffer<span class="w"> </span>tkeffer<span class="w"> </span><span class="m">10673</span><span class="w"> </span>May<span class="w"> </span><span class="m">31</span><span class="w"> </span><span class="m">07</span>:50<span class="w"> </span>fr.conf
+-rw-rw-r--<span class="w"> </span><span class="m">1</span><span class="w"> </span>tkeffer<span class="w"> </span>tkeffer<span class="w"> </span><span class="m">11838</span><span class="w"> </span>Mar<span class="w"> </span><span class="m">13</span><span class="w"> </span><span class="m">12</span>:31<span class="w"> </span>gr.conf
+-rw-rw-r--<span class="w"> </span><span class="m">1</span><span class="w"> </span>tkeffer<span class="w"> </span>tkeffer<span class="w">  </span><span class="m">9947</span><span class="w"> </span>Mar<span class="w"> </span><span class="m">13</span><span class="w"> </span><span class="m">12</span>:31<span class="w"> </span>it.conf
+-rw-rw-r--<span class="w"> </span><span class="m">1</span><span class="w"> </span>tkeffer<span class="w"> </span>tkeffer<span class="w">  </span><span class="m">9548</span><span class="w"> </span>Mar<span class="w"> </span><span class="m">13</span><span class="w"> </span><span class="m">12</span>:31<span class="w"> </span>nl.conf
+-rw-rw-r--<span class="w"> </span><span class="m">1</span><span class="w"> </span>tkeffer<span class="w"> </span>tkeffer<span class="w"> </span><span class="m">10722</span><span class="w"> </span>Apr<span class="w"> </span><span class="m">15</span><span class="w"> </span><span class="m">14</span>:52<span class="w"> </span>no.conf
+-rw-rw-r--<span class="w"> </span><span class="m">1</span><span class="w"> </span>tkeffer<span class="w"> </span>tkeffer<span class="w"> </span><span class="m">15356</span><span class="w"> </span>Mar<span class="w"> </span><span class="m">13</span><span class="w"> </span><span class="m">12</span>:31<span class="w"> </span>th.conf
+</code></pre></div>
+<p>This means that the <em>Seasons</em> skin has been localized for the following languages:</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Language</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>cn.conf</td>
+<td>Traditional Chinese</td>
+</tr>
+<tr>
+<td>cz.conf</td>
+<td>Czeck</td>
+</tr>
+<tr>
+<td>de.conf</td>
+<td>German</td>
+</tr>
+<tr>
+<td>en.conf</td>
+<td>English</td>
+</tr>
+<tr>
+<td>es.conf</td>
+<td>Spanish</td>
+</tr>
+<tr>
+<td>fr.conf</td>
+<td>French</td>
+</tr>
+<tr>
+<td>it.conf</td>
+<td>Italian</td>
+</tr>
+<tr>
+<td>gr.conf</td>
+<td>Greek</td>
+</tr>
+<tr>
+<td>nl.conf</td>
+<td>Dutch</td>
+</tr>
+<tr>
+<td>th.conf</td>
+<td>Thai</td>
+</tr>
+</tbody>
+</table>
+<p>If you want to use the <em>Seasons</em> skin and are working with one of these languages, then you are in luck: you can simply override the <code>lang</code> option. For example, to change the language displayed by the <em>Seasons</em> skin from English to German, edit <code>weewx.conf</code>, and change the highlighted line:</p>
+<div class="highlight"><pre><span></span><code><span class="k">[StdReport]</span>
+<span class="w">    </span><span class="na">...</span>
+<span class="w">    </span><span class="k">[[SeasonsReport]]</span>
+<span class="w">        </span><span class="c1"># The SeasonsReport uses the &#39;Seasons&#39; skin, which contains the</span>
+<span class="w">        </span><span class="c1"># images, templates and plots for the report.</span>
+<span class="w">        </span><span class="na">skin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">Seasons</span>
+<span class="w">        </span><span class="na">enable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">true</span>
+<span class="hll"><span class="w">        </span><span class="na">lang</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">de</span>
+</span></code></pre></div>
+<p>By contrast, if the skin has been internationalized, but there is no localization file for your language, then you will have to supply one. See the section <a href="../localization/#internationalized-missing-language"><em>Internationalized, but your language is missing</em></a>.</p>
+<h2 id="changing-date-and-time-formats">Changing date and time formats<a class="headerlink" href="#changing-date-and-time-formats" title="Permanent link">&para;</a></h2>
+<p>Date and time formats are specified using the same format strings used by <a href="https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior">strftime()</a>. For example, <code>%Y</code> indicates the 4-digit year, and <code>%H:%M</code> indicates the time in hours:minutes. The default values for date and time formats are generally <code>%x %X</code>, which indicates "use the format for the locale of the computer".</p>
+<p>Since date formats default to the locale of the computer, a date might appear with the format of "month/day/year". What if you prefer dates to have the format "year.month.day"? How do you indicate 24-hour time format versus 12-hour?</p>
+<p>Dates and times generally appear in two places: in plots and in tags.</p>
+<h3 id="date-and-time-formats-in-images">Date and time formats in images<a class="headerlink" href="#date-and-time-formats-in-images" title="Permanent link">&para;</a></h3>
+<p>Most plots have a label on the horizontal axis that indicates when the plot was generated. By default, the format for this label uses the locale of the computer on which WeeWX is running, but you can modify the format by specifying the option <code>bottom_label_format</code>.</p>
+<p>For example, this would result in a date/time string such as "2021.12.13 12:45" no matter what the computer's locale:</p>
+<div class="highlight"><pre><span></span><code><span class="k">[StdReport]</span>
+<span class="w">    </span><span class="na">...</span>
+<span class="w">    </span><span class="k">[[Defaults]]</span>
+<span class="w">        </span><span class="k">[[[ImageGenerator]]]</span>
+<span class="w">            </span><span class="k">[[[[day_images]]]]</span>
+<span class="w">                </span><span class="na">bottom_label_format</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">%Y.%m.%d %H:%M</span>
+<span class="w">            </span><span class="k">[[[[week_images]]]]</span>
+<span class="w">                </span><span class="na">bottom_label_format</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">%Y.%m.%d %H:%M</span>
+<span class="w">            </span><span class="k">[[[[month_images]]]]</span>
+<span class="w">                </span><span class="na">bottom_label_format</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">%Y.%m.%d %H:%M</span>
+<span class="w">            </span><span class="k">[[[[year_images]]]]</span>
+<span class="w">                </span><span class="na">bottom_label_format</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">%Y.%m.%d %H:%M</span>
+</code></pre></div>
+<h3 id="date-and-time-formats-for-tags">Date and time formats for tags<a class="headerlink" href="#date-and-time-formats-for-tags" title="Permanent link">&para;</a></h3>
+<p>Each aggregation period has a format for the times associated with that period. These formats are defined in the <code>TimeFormats</code> section. The default formats use the date and/or time for the computer of the locale on which WeeWX is running.</p>
+<p>For example, this would result in a date/time string such as "2021.12.13 12:45" no matter what the computer's locale:</p>
+<div class="highlight"><pre><span></span><code><span class="k">[StdReport]</span>
+<span class="w">    </span><span class="na">...</span>
+<span class="w">    </span><span class="k">[[Defaults]]</span>
+<span class="w">        </span><span class="k">[[[Units]]]</span>
+<span class="w">            </span><span class="k">[[[[TimeFormats]]]]</span>
+<span class="w">                </span><span class="na">hour</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="s">%H:%M</span>
+<span class="w">                </span><span class="na">day</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="s">%Y.%m.%d</span>
+<span class="w">                </span><span class="na">week</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="s">%Y.%m.%d (%A)</span>
+<span class="w">                </span><span class="na">month</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="s">%Y.%m.%d %H:%M</span>
+<span class="w">                </span><span class="na">year</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="s">%Y.%m.%d %H:%M</span>
+<span class="w">                </span><span class="na">rainyear</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="s">%Y.%m.%d %H:%M</span>
+<span class="w">                </span><span class="na">current</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="s">%Y.%m.%d %H:%M</span>
+<span class="w">                </span><span class="na">ephem_day</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="s">%H:%M</span>
+<span class="w">                </span><span class="na">ephem_year</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="s">%Y.%m.%d %H:%M</span>
+</code></pre></div>
+<h2 id="changing-unit-systems">Changing unit systems<a class="headerlink" href="#changing-unit-systems" title="Permanent link">&para;</a></h2>
+<p>Each <em>unit system</em> is a set of units. For example, the <code>METRIC</code> unit system uses centimeters for rain, kilometers per hour for wind speed, and degree Celsius for temperature. The option <a href="../../usersguide/weewx-config-file/stdreport-config#unit_system">unit_system</a> controls which unit system will be used in your reports. The available choices are <code>US</code>, <code>METRIC</code>, or <code>METRICWX</code>. The option is case-insensitive. See <a href="../appendix#units"><em>Appendix: Units</em></a> for the units defined in each of these unit systems.</p>
+<p>By default, WeeWX uses <code>US</code> (US Customary) system. Suppose you would rather use the <code>METRICWX</code> system for all your reports? Then change this</p>
+<div class="highlight"><pre><span></span><code><span class="k">[StdReport]</span>
+<span class="w">    </span><span class="na">...</span>
+<span class="w">    </span><span class="k">[[Defaults]]</span>
+
+<span class="w">        </span><span class="c1"># Which unit system to use for all reports. Choices are &#39;us&#39;, &#39;metric&#39;, or &#39;metricwx&#39;.</span>
+<span class="w">        </span><span class="c1"># You can override this for individual reports.</span>
+<span class="hll"><span class="w">        </span><span class="na">unit_system</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">us</span>
+</span></code></pre></div>
+<p>to this</p>
+<div class="highlight"><pre><span></span><code><span class="k">[StdReport]</span>
+<span class="w">    </span><span class="na">...</span>
+<span class="w">    </span><span class="k">[[Defaults]]</span>
+
+<span class="w">        </span><span class="c1"># Which unit system to use for all reports. Choices are &#39;us&#39;, &#39;metric&#39;, or &#39;metricwx&#39;.</span>
+<span class="w">        </span><span class="c1"># You can override this for individual reports.</span>
+<span class="hll"><span class="w">        </span><span class="na">unit_system</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">metricwx</span>
+</span></code></pre></div>
+<h3 id="mixed-units">Mixed units<a class="headerlink" href="#mixed-units" title="Permanent link">&para;</a></h3>
+<p>However, what if you want a mix? For example, suppose you generally want US Customary units, but you want barometric pressures to be in millibars? This can be done by <em>overriding</em> the appropriate unit group.</p>
+<div class="highlight"><pre><span></span><code><span class="k">[StdReport]</span>
+<span class="w">    </span><span class="na">...</span>
+<span class="w">    </span><span class="k">[[Defaults]]</span>
+
+<span class="w">        </span><span class="c1"># Which unit system to use for all reports. Choices are &#39;us&#39;, &#39;metric&#39;, or &#39;metricwx&#39;.</span>
+<span class="w">        </span><span class="c1"># You can override this for individual reports.</span>
+<span class="w">        </span><span class="na">unit_system</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">us</span>
+
+<span class="w">        </span><span class="c1"># Override the units used for pressure:</span>
+<span class="w">        </span><span class="k">[[[Units]]]</span>
+<span class="w">            </span><span class="k">[[[[Groups]]]]</span>
+<span class="hll"><span class="w">                </span><span class="na">group_pressure</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">mbar</span>
+</span></code></pre></div>
+<p>This says that you generally want the US systems of units for all reports, but want pressure to be reported in <em>millibars</em>. Other units can be overridden in a similar manner.</p>
+<h3 id="multiple-unit-systems">Multiple unit systems<a class="headerlink" href="#multiple-unit-systems" title="Permanent link">&para;</a></h3>
+<p>Another example. Suppose we want to generate <em>two</em> reports, one in the <code>US</code> system, the other using the <code>METRICWX</code> system. The first, call it <em>SeasonsUSReport</em>, will go in the regular directory <code>HTML_ROOT</code>. However, the latter, call it <em>SeasonsMetricReport</em>, will go in a subdirectory, <code>HTML_ROOT/metric</code>. Here's how you would do it</p>
+<div class="highlight"><pre><span></span><code><span class="k">[StdReport]</span>
+
+<span class="w">    </span><span class="c1"># Where the skins reside, relative to WEEWX_ROOT</span>
+<span class="w">    </span><span class="na">SKIN_ROOT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">skins</span>
+
+<span class="w">    </span><span class="c1"># Where the generated reports should go, relative to WEEWX_ROOT</span>
+<span class="w">    </span><span class="na">HTML_ROOT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">public_html</span>
+
+<span class="w">    </span><span class="c1"># The database binding indicates which data should be used in reports.</span>
+<span class="w">    </span><span class="na">data_binding</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">wx_binding</span>
+
+<span class="w">    </span><span class="k">[[SeasonsUSReport]]</span>
+<span class="w">        </span><span class="na">skin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">Seasons</span>
+<span class="w">        </span><span class="na">unit_system</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">us</span>
+<span class="w">        </span><span class="na">enable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">true</span>
+
+<span class="w">    </span><span class="k">[[SeasonsMetricReport]]</span>
+<span class="w">        </span><span class="na">skin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">Seasons</span>
+<span class="w">        </span><span class="na">unit_system</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">metricwx</span>
+<span class="w">        </span><span class="na">HTML_ROOT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">public_html/metric</span>
+<span class="w">        </span><span class="na">enable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">true</span>
+</code></pre></div>
+<p>Note how both reports use the same <em>skin</em> (that is, skin <em>Seasons</em>), but different unit systems, and different destinations. The first, <em>SeasonsUSReport</em> sets option unit_system to <code>us</code>, and uses the default destination. By contrast, the second, <em>SeasonsMetricReport</em>, uses unit system <code>metricwx</code>, and a different destination, <code>public_html/metric</code>.</p>
+<h2 id="changing-labels">Changing labels<a class="headerlink" href="#changing-labels" title="Permanent link">&para;</a></h2>
+<p>Every observation type is associated with a default <em>label</em>. For example, in the English language, the default label for observation type <code>outTemp</code> is generally "Outside Temperature". You can change this label by <em>overriding</em> the default. How you do so will depend on whether the skin you are using has been <em>internationalized</em> and, if so, whether it offers your local language.</p>
+<p>Let's look at an example. If you take a look inside the file <code>skins/Seasons/lang/en.conf</code>, you will see it contains what looks like a big configuration file. Among other things, it has two entries that look like this:</p>
+<div class="highlight"><pre><span></span><code><span class="na">...</span>
+<span class="k">[Labels]</span>
+<span class="w">    </span><span class="na">...</span>
+<span class="w">    </span><span class="k">[[Generic]]</span>
+<span class="w">        </span><span class="na">...</span>
+<span class="w">        </span><span class="na">inTemp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">Inside Temperature</span>
+<span class="w">        </span><span class="na">outTemp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">Outside Temperature</span>
+<span class="w">        </span><span class="na">...</span>
+</code></pre></div>
+<p>This tells the report generators that when it comes time to label the observation variables <code>inTemp</code> and <code>outTemp</code>, use the strings "Inside Temperature" and "Outside Temperature", respectively.</p>
+<p>However, let's say that we have actually located our outside temperature sensor in the barn, and wish to label it accordingly. We need to <em>override</em> the label that comes in the localization file. We could just change the localization file <code>en.conf</code>, but then if the author of the skin came out with a new version, our change could get lost. Better to override the default by making the change in <code>weewx.conf</code>. To do this, make the following changes in <code>weewx.conf</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="k">[[SeasonsReport]]</span>
+<span class="w">        </span><span class="c1"># The SeasonsReport uses the &#39;Seasons&#39; skin, which contains the</span>
+<span class="w">        </span><span class="c1"># images, templates and plots for the report.</span>
+<span class="w">        </span><span class="na">skin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">Seasons</span>
+<span class="w">        </span><span class="na">lang</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">en</span>
+<span class="w">        </span><span class="na">unit_system</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">US</span>
+<span class="w">        </span><span class="na">enable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">true</span>
+<span class="w">        </span><span class="k">[[[Labels]]]</span>
+<span class="w">            </span><span class="k">[[[[Generic]]]]</span>
+<span class="w">                </span><span class="na">outTemp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">Barn Temperature</span>
+</code></pre></div>
+<p>This will cause the default label Outside Temperature to be replaced with the new label "Barn Temperature" everywhere in your report. The label for type <code>inTemp</code> will be untouched.</p>
+<h2 id="scheduling-report-generation">Scheduling report generation<a class="headerlink" href="#scheduling-report-generation" title="Permanent link">&para;</a></h2>
+<p>See the separate document <a href="../../report_scheduling/"><em>Scheduling report generation</em></a> for how to control when reports are run.</p>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+          <a href="#" class="md-top md-icon" data-md-component="top" hidden>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+            Back to top
+          </a>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright © 2009-2023 Thomas Keffer and Matthew Wall, all rights reserved
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.indexes", "navigation.top", "toc.follow", "search.highlight", "search.share", "search.suggest"], "search": "../../assets/javascripts/workers/search.db81ec45.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.4b2c34cd.min.js"></script>
+      
+    
+  </body>
+</html>

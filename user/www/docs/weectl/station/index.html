@@ -1,0 +1,2166 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+        <meta name="author" content="Tom Keffer <tkeffer@gmail.com>">
+      
+      
+        <link rel="canonical" href="https://www.weewx.com/weectl/station/">
+      
+      
+        <link rel="prev" href="../">
+      
+      
+        <link rel="next" href="../extension/">
+      
+      <link rel="icon" href="../../images/favicon.png">
+      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-9.0.12">
+    
+    
+      
+        <title>weectl station - weewx documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.0d440cfe.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.2505c338.min.css">
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans:300,300i,400,400i,700,700i%7CInconsolata+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Noto Sans";--md-code-font:"Inconsolata Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../css/weewx_ui.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="white">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#weectl-station" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="weewx documentation" class="md-header__button md-logo" aria-label="weewx documentation" data-md-component="logo">
+      
+  <img src="../../images/logo-weewx.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            weewx documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              weectl station
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="white"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6zm0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4zM7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+            </label>
+          
+        
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3Z"/></svg>
+            </label>
+          
+        
+      </form>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7 0-.24-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91 1.61 0 2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08Z"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/weewx/weewx" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    WeeWX GitHub Repository
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="weewx documentation" class="md-nav__button md-logo" aria-label="weewx documentation" data-md-component="logo">
+      
+  <img src="../../images/logo-weewx.png" alt="logo">
+
+    </a>
+    weewx documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/weewx/weewx" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    WeeWX GitHub Repository
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" >
+      
+      
+        
+          
+            
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        
+        
+        <div class="md-nav__link md-nav__link--index ">
+          <a href="../../quickstarts/">Quick starts</a>
+          
+            <label for="__nav_1">
+              <span class="md-nav__icon md-icon"></span>
+            </label>
+          
+        </div>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_1">
+          <span class="md-nav__icon md-icon"></span>
+          Quick starts
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quickstarts/debian/" class="md-nav__link">
+        Debian
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quickstarts/redhat/" class="md-nav__link">
+        RedHat
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quickstarts/suse/" class="md-nav__link">
+        SuSE
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quickstarts/pip/" class="md-nav__link">
+        pip
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quickstarts/v5-upgrade/" class="md-nav__link">
+        Migrating to V5
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+      
+      
+        
+          
+            
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        
+        
+        <div class="md-nav__link md-nav__link--index ">
+          <a href="../../usersguide/">User's guide</a>
+          
+            <label for="__nav_2">
+              <span class="md-nav__icon md-icon"></span>
+            </label>
+          
+        </div>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          User's guide
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/system-requirements/" class="md-nav__link">
+        System requirements
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/installing-weewx/" class="md-nav__link">
+        Installing WeeWX
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/where/" class="md-nav__link">
+        Where to find things
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/running-weewx/" class="md-nav__link">
+        Running WeeWX
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/webserver-integration/" class="md-nav__link">
+        Web server integration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/backing-up-weewx/" class="md-nav__link">
+        Backup & restore
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/mysql-mariadb-config/" class="md-nav__link">
+        Configuring MySQL
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/troubleshooting-guide/" class="md-nav__link">
+        Troubleshooting
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10" >
+      
+      
+        
+          
+            
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        
+        
+        <div class="md-nav__link md-nav__link--index ">
+          <a href="../../usersguide/weewx-config-file/">Reference: options</a>
+          
+            <label for="__nav_2_10">
+              <span class="md-nav__icon md-icon"></span>
+            </label>
+          
+        </div>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_10_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_2_10">
+          <span class="md-nav__icon md-icon"></span>
+          Reference: options
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/weewx-config-file/general/" class="md-nav__link">
+        General options
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/weewx-config-file/stations-config/" class="md-nav__link">
+        [Station]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/weewx-config-file/stdrestful-config/" class="md-nav__link">
+        [StdRESTful]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/weewx-config-file/stdreport-config/" class="md-nav__link">
+        [StdReport]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/weewx-config-file/stdconvert-config/" class="md-nav__link">
+        [StdConvert]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/weewx-config-file/stdcalibrate-config/" class="md-nav__link">
+        [StdCalibrate]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/weewx-config-file/stdqc-config/" class="md-nav__link">
+        [StdQC]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/weewx-config-file/stdwxcalculate-config/" class="md-nav__link">
+        [StdWXCalculate]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/weewx-config-file/stdarchive/" class="md-nav__link">
+        [StdArchive]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/weewx-config-file/stdtimesynch/" class="md-nav__link">
+        [StdTimeSynch]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/weewx-config-file/data-bindings/" class="md-nav__link">
+        [DataBindings]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/weewx-config-file/databases/" class="md-nav__link">
+        [Databases]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/weewx-config-file/databasetypes/" class="md-nav__link">
+        [DatabaseTypes]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usersguide/weewx-config-file/engine/" class="md-nav__link">
+        [Engine]
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+      
+      
+        
+          
+            
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        
+        
+        <div class="md-nav__link md-nav__link--index ">
+          <a href="../../custom/">Customization guide</a>
+          
+            <label for="__nav_3">
+              <span class="md-nav__icon md-icon"></span>
+            </label>
+          
+        </div>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Customization guide
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../custom/custom_reports/" class="md-nav__link">
+        Customizing reports
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../custom/cheetah/" class="md-nav__link">
+        The Cheetah generator
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../custom/image_generator/" class="md-nav__link">
+        The Image generator
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../custom/multiple_bindings/" class="md-nav__link">
+        Multiple data bindings
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../custom/localization/" class="md-nav__link">
+        Localization
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../custom/service_engine/" class="md-nav__link">
+        Customizing the service engine
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../custom/database/" class="md-nav__link">
+        Customizing the database
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../custom/units/" class="md-nav__link">
+        Customizing units
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../custom/derived/" class="md-nav__link">
+        Derived types
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../custom/drivers/" class="md-nav__link">
+        Custom drivers
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../custom/extensions/" class="md-nav__link">
+        Extensions
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../custom/options_ref/" class="md-nav__link">
+        Reference: options
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../custom/appendix/" class="md-nav__link">
+        Appendix
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+      
+      
+        
+          
+            
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        
+        
+        <div class="md-nav__link md-nav__link--index ">
+          <a href="../../utilities/">Utilities</a>
+          
+            <label for="__nav_4">
+              <span class="md-nav__icon md-icon"></span>
+            </label>
+          
+        </div>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Utilities
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" checked>
+      
+      
+        
+          
+            
+          
+        
+          
+        
+          
+        
+      
+      
+        
+        
+        <div class="md-nav__link md-nav__link--index ">
+          <a href="../">weectl</a>
+          
+            <label for="__nav_4_2">
+              <span class="md-nav__icon md-icon"></span>
+            </label>
+          
+        </div>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="true">
+        <label class="md-nav__title" for="__nav_4_2">
+          <span class="md-nav__icon md-icon"></span>
+          weectl
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          weectl station
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        weectl station
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#weectl-station_1" class="md-nav__link">
+    weectl station
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#weectl-station-create" class="md-nav__link">
+    weectl station create
+  </a>
+  
+    <nav class="md-nav" aria-label="weectl station create">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#options" class="md-nav__link">
+    Options
+  </a>
+  
+    <nav class="md-nav" aria-label="Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#-config" class="md-nav__link">
+    --config
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-driver" class="md-nav__link">
+    --driver
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-location" class="md-nav__link">
+    --location
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-altitude" class="md-nav__link">
+    --altitude
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-latitude" class="md-nav__link">
+    --latitude
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-longitude" class="md-nav__link">
+    --longitude
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-register" class="md-nav__link">
+    --register
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-station-url" class="md-nav__link">
+    --station-url
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-units" class="md-nav__link">
+    --units
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-no-prompt" class="md-nav__link">
+    --no-prompt
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-dry-run" class="md-nav__link">
+    --dry-run
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#root-options" class="md-nav__link">
+    root options
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#weectl-station-reconfigure" class="md-nav__link">
+    weectl station reconfigure
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#weectl-station-upgrade" class="md-nav__link">
+    weectl station upgrade
+  </a>
+  
+    <nav class="md-nav" aria-label="weectl station upgrade">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#-config_1" class="md-nav__link">
+    --config
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-what" class="md-nav__link">
+    --what
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#root-options_1" class="md-nav__link">
+    root options
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../extension/" class="md-nav__link">
+        weectl extension
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../utilities/utilities.htm#wee_database_utility" class="md-nav__link">
+        wee_database
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../utilities/utilities.htm#wee_debug_utility" class="md-nav__link">
+        wee_debug
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../utilities/utilities.htm#wee_device_utility" class="md-nav__link">
+        wee_device
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../utilities/utilities.htm#wee_import_utility" class="md-nav__link">
+        wee_import
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../utilities/utilities.htm#wee_reports_utility" class="md-nav__link">
+        wee_reports
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../utilities/utilities.htm#weewxd" class="md-nav__link">
+        weewxd
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../upgrading.htm" class="md-nav__link">
+        Upgrade guide
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../hardware.htm" class="md-nav__link">
+        Hardware guide
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../devnotes/" class="md-nav__link">
+        Notes for developers
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../hardware.htm" class="md-nav__link">
+        Hardware comparison
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changes/" class="md-nav__link">
+        Change log
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../support/" class="md-nav__link">
+        Support
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#weectl-station_1" class="md-nav__link">
+    weectl station
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#weectl-station-create" class="md-nav__link">
+    weectl station create
+  </a>
+  
+    <nav class="md-nav" aria-label="weectl station create">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#options" class="md-nav__link">
+    Options
+  </a>
+  
+    <nav class="md-nav" aria-label="Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#-config" class="md-nav__link">
+    --config
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-driver" class="md-nav__link">
+    --driver
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-location" class="md-nav__link">
+    --location
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-altitude" class="md-nav__link">
+    --altitude
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-latitude" class="md-nav__link">
+    --latitude
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-longitude" class="md-nav__link">
+    --longitude
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-register" class="md-nav__link">
+    --register
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-station-url" class="md-nav__link">
+    --station-url
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-units" class="md-nav__link">
+    --units
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-no-prompt" class="md-nav__link">
+    --no-prompt
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-dry-run" class="md-nav__link">
+    --dry-run
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#root-options" class="md-nav__link">
+    root options
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#weectl-station-reconfigure" class="md-nav__link">
+    weectl station reconfigure
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#weectl-station-upgrade" class="md-nav__link">
+    weectl station upgrade
+  </a>
+  
+    <nav class="md-nav" aria-label="weectl station upgrade">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#-config_1" class="md-nav__link">
+    --config
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-what" class="md-nav__link">
+    --what
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#root-options_1" class="md-nav__link">
+    root options
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="weectl-station">weectl station<a class="headerlink" href="#weectl-station" title="Permanent link">&para;</a></h1>
+<h2 id="weectl-station_1"><code>weectl station</code><a class="headerlink" href="#weectl-station_1" title="Permanent link">&para;</a></h2>
+<p>The subcommand <code>weectl station</code> manages user data. Running <code>weectl station --help</code> will give you
+more information about its four actions <code>create</code>, <code>reconfigure</code>, <code>upgrade</code>, and <code>upgrade-skins</code>:</p>
+<div class="highlight"><pre><span></span><code>% weectl station --help
+usage: weectl station create [--config=CONFIG-PATH] \
+                             [--dist-config=DIST-CONFIG-PATH]] \
+                             [--driver=DRIVER] \
+                             [--location=LOCATION] \
+                             [--altitude=ALTITUDE,{foot|meter}] \
+                             [--latitude=LATITUDE] [--longitude=LONGITUDE] \
+                             [--register={y,n} [--station-url=STATION_URL]] \
+                             [--units={us,metricwx,metric}] \
+                             [--skin-root=SKIN_ROOT] \
+                             [--sqlite-root=SQLITE_ROOT] \
+                             [--html-root=HTML_ROOT] \
+                             [--user-root=USER_ROOT] \
+                             [--docs-root=DOCS_ROOT] \
+                             [--examples-root=EXAMPLES_ROOT] \
+                             [--no-prompt] \
+                             [--dry-run]
+
+       weectl station reconfigure [--config=CONFIG-PATH] \ 
+                                  [--driver=DRIVER] \
+                                  [--location=LOCATION] \
+                                  [--altitude=ALTITUDE,{foot|meter}] \
+                                  [--latitude=LATITUDE] [--longitude=LONGITUDE] \
+                                  [--register={y,n} [--station-url=STATION_URL]] \
+                                  [--units={us,metricwx,metric}] \
+                                  [--skin-root=SKIN_ROOT] \
+                                  [--sqlite-root=SQLITE_ROOT] \
+                                  [--html-root=HTML_ROOT] \
+                                  [--no-prompt] \
+                                  [--no-backup] \
+                                  [--dry-run]
+
+       weectl station upgrade [--config=CONFIG-PATH] \
+                              [--dist-config=DIST-CONFIG-PATH]] \
+                              [--docs-root=DOCS_ROOT] \
+                              [--examples-root=EXAMPLES_ROOT] \
+                              [--skin-root=SKIN_ROOT] \
+                              [--what [{config,docs,examples,util,skins} ... ] \
+                              [--no-prompt] \
+                              [--no-backup] \
+                              [--dry-run]
+
+Manages the user data area, including the configuration file and skins
+
+optional arguments:
+  -h, --help            show this help message and exit
+
+Which action to take:
+  {create,reconfigure,upgrade}
+    create              Create a user data area, including a configuration
+                        file.
+    reconfigure         Reconfigure a station configuration file.
+    upgrade             Upgrade any combination of the configuration file,
+                        docs, examples, daemon utility files, and skins.
+</code></pre></div>
+<p>In the documentation that follows,  the exact output will depend on
+your operating system and username. What is shown below is for Linux and user <code>tkeffer</code>.</p>
+<h2 id="weectl-station-create"><code>weectl station create</code><a class="headerlink" href="#weectl-station-create" title="Permanent link">&para;</a></h2>
+<p>This action will create a new area for user data. When done, the area will include</p>
+<ul>
+<li>A configuration file, <code>weewx.conf</code>;</li>
+<li>Documentation;</li>
+<li>Examples;</li>
+<li>Daemon utility files; and</li>
+<li>Skins.</li>
+</ul>
+<p><code>weectl station create</code> is most useful when installing using pip, which only installs the
+WeeWX software, not the user data to go along with it. To do the latter, you must use this action.</p>
+<p>By contrast, package installers create the necessary user data as part of their one-step approach.
+Nevertheless, you may want to create a second user data area, perhaps to support a second
+instrument &mdash; in that case, this action may be useful.</p>
+<p>Running <code>weectl station create --help</code> will show its options.</p>
+<div class="highlight"><pre><span></span><code>% weectl station create --help
+usage: weectl station create [--config=CONFIG-PATH] \
+                             [--driver=DRIVER] \
+                             [--location=LOCATION] \
+                             [--altitude=ALTITUDE,{foot|meter}] \
+                             [--latitude=LATITUDE] [--longitude=LONGITUDE] \
+                             [--register={y,n} [--station-url=STATION_URL]] \
+                             [--units={us,metricwx,metric}] \
+                             [--skin-root=SKIN_ROOT] \
+                             [--sqlite-root=SQLITE_ROOT] \
+                             [--html-root=HTML_ROOT] \
+                             [--user-root=USER_ROOT] \
+                             [--docs-root=DOCS_ROOT] \
+                             [--examples-root=EXAMPLES_ROOT] \
+                             [--no-prompt] \
+                             [--dry-run]
+
+Create a new user data area, including a configuration file. In what follows,
+WEEWX_ROOT is the directory that contains the configuration file. For
+example, if &quot;--config=/home/tkeffer/weewx-data/weewx.conf&quot;, then WEEWX_ROOT
+will be &quot;/home/tkeffer/weewx-data&quot;.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --config CONFIG-PATH  Path to configuration file. It must not already exist.
+                        Default is &quot;/home/tkeffer/weewx-data/weewx.conf&quot;.
+  --driver DRIVER       Driver to use. Default is &quot;weewx.drivers.simulator&quot;.
+  --location LOCATION   A description of the station. This will be used for
+                        report titles. Default is &quot;WeeWX&quot;.
+  --altitude ALTITUDE,{foot|meter}
+                        The station altitude in either feet or meters. For
+                        example, &quot;750,foot&quot; or &quot;320,meter&quot;. Default is &quot;0,
+                        foot&quot;.
+  --latitude LATITUDE   The station latitude in decimal degrees. Default is
+                        &quot;0.00&quot;.
+  --longitude LONGITUDE
+                        The station longitude in decimal degrees. Default is
+                        &quot;0.00&quot;.
+  --register {y,n}      Register this station in the weewx registry? Default
+                        is &quot;n&quot; (do not register).
+  --station-url STATION_URL
+                        Unique URL to be used if registering the station.
+                        Required if the station is to be registered.
+  --units {us,metricwx,metric}
+                        Set display units to us, metricwx, or metric. Default
+                        is &quot;us&quot;.
+  --skin-root SKIN_ROOT
+                        Where to put the skins, relatve to WEEWX_ROOT. Default
+                        is &quot;skins&quot;.
+  --sqlite-root SQLITE_ROOT
+                        Where to put the SQLite database, relative to
+                        WEEWX_ROOT. Default is &quot;archive&quot;.
+  --html-root HTML_ROOT
+                        Where to put the generated HTML and images, relative
+                        to WEEWX_ROOT. Default is &quot;public_html&quot;.
+  --user-root USER_ROOT
+                        Where to put the &quot;user&quot; directory, relative to
+                        WEEWX_ROOT. Default is &quot;bin/user&quot;
+  --docs-root DOCS_ROOT
+                        Where to put the documentation, relative to
+                        WEEWX_ROOT. Default is &quot;docs&quot;.
+  --examples-root EXAMPLES_ROOT
+                        Where to put the examples, relative to WEEWX_ROOT.
+                        Default is &quot;examples&quot;.
+  --no-prompt           Do not prompt. Use default values.
+  --dry-run             Print what would happen, but do not actually do it.
+</code></pre></div>
+<h3 id="options">Options<a class="headerlink" href="#options" title="Permanent link">&para;</a></h3>
+<h4 id="-config"><code>--config</code><a class="headerlink" href="#-config" title="Permanent link">&para;</a></h4>
+<p>Path to the configuration file to be created. The directory of the path will become the value for
+<code>WEEWX_ROOT</code> in the configuration file. Default is <code>~/weewx-data/weewx.conf</code>.</p>
+<h4 id="-driver"><code>--driver</code><a class="headerlink" href="#-driver" title="Permanent link">&para;</a></h4>
+<p>Which driver to use. Default is <code>simulator</code>.</p>
+<h4 id="-location"><code>--location</code><a class="headerlink" href="#-location" title="Permanent link">&para;</a></h4>
+<p>A description of your station, such as <code>--location="A small town in Rongovia"</code></p>
+<h4 id="-altitude"><code>--altitude</code><a class="headerlink" href="#-altitude" title="Permanent link">&para;</a></h4>
+<p>The altitude of your station, along with the unit it is measured in. For example, 
+<code>--altitude=50,meter</code>. Note that the unit is measured in the singular (<code>foot</code>, not <code>feet</code>).</p>
+<h4 id="-latitude"><code>--latitude</code><a class="headerlink" href="#-latitude" title="Permanent link">&para;</a></h4>
+<p>The station latitude in decimal degrees. Negative for the southern hemisphere.</p>
+<h4 id="-longitude"><code>--longitude</code><a class="headerlink" href="#-longitude" title="Permanent link">&para;</a></h4>
+<p>The station longitude in decimal degrees. Negative for the western hemisphere.</p>
+<h4 id="-register"><code>--register</code><a class="headerlink" href="#-register" title="Permanent link">&para;</a></h4>
+<p>Whether to include the station in the WeeWX registry and <a href="https://weewx.com/stations.html">map</a>.
+If you set <code>--register</code>, you must also specify a unique URL for your station with
+option <code>--station-url</code>.</p>
+<h4 id="-station-url"><code>--station-url</code><a class="headerlink" href="#-station-url" title="Permanent link">&para;</a></h4>
+<p>A unique URL for your station. Example: <code>--station-url=https://www.wunderground.com/dashboard/pws/KNDPETE15</code>.</p>
+<h4 id="-units"><code>--units</code><a class="headerlink" href="#-units" title="Permanent link">&para;</a></h4>
+<p>What units to use for your reports. Choices are <code>us</code>, <code>metricwx</code>, or <code>metric</code>. See the Appendix 
+<a href="../../custom/appendix/#units"><em>Units</em></a> for details.</p>
+<h4 id="-no-prompt"><code>--no-prompt</code><a class="headerlink" href="#-no-prompt" title="Permanent link">&para;</a></h4>
+<p>Generally, the utility will prompt for values unless <code>--no-prompt</code> has been set. With 
+<code>--no-prompt</code>, the values to be used are the default values, replaced with whatever options have 
+been set on the command line. For example,</p>
+<div class="highlight"><pre><span></span><code>weectl<span class="w"> </span>station<span class="w"> </span>create<span class="w"> </span>--driver<span class="o">=</span><span class="s1">&#39;weewx.drivers.vantage&#39;</span><span class="w"> </span>--no-prompt
+</code></pre></div>
+<p>will cause the defaults to be used for all values except <code>--driver</code>, which will use the Vantage
+driver.</p>
+<h4 id="-dry-run"><code>--dry-run</code><a class="headerlink" href="#-dry-run" title="Permanent link">&para;</a></h4>
+<p>With option <code>--dry-run</code> you can test what <code>weect station create</code> will do without actually
+touching storage. It will print out the steps, but not actually write anything.</p>
+<h4 id="root-options">root options<a class="headerlink" href="#root-options" title="Permanent link">&para;</a></h4>
+<p>"Root options" include</p>
+<p><code>--skin-root</code><br/>
+<code>--sqlite-root</code><br/>
+<code>--html-root</code><br/>
+<code>--user-root</code><br/>
+<code>--docs-root</code><br/>
+<code>--examples-root</code></p>
+<p>All of these root options are <em>relative to <code>WEEWX_ROOT</code></em>. Of course, like any other path, if the
+option starts with a slash (<code>/</code>), it becomes an absolute path. So, for example,</p>
+<div class="highlight"><pre><span></span><code>--html-root<span class="o">=</span>/var/www/html/
+</code></pre></div>
+<p>will cause HTML files to be put in the traditional system WWW directory <code>/var/www/html/</code>.</p>
+<h2 id="weectl-station-reconfigure"><code>weectl station reconfigure</code><a class="headerlink" href="#weectl-station-reconfigure" title="Permanent link">&para;</a></h2>
+<p>This action will reconfigure your configuration file <code>weewx.conf</code>. Unless option <code>--no-prompt</code> has been specified, it will prompt you with your old settings, and give you a chance to change them. </p>
+<p>Running <code>weectl station reconfigure --help</code> will show you its options.</p>
+<div class="highlight"><pre><span></span><code>% weectl station reconfigure  --help
+usage: weectl station reconfigure [--config=CONFIG-PATH] \ 
+                                  [--driver=DRIVER] \
+                                  [--location=LOCATION] \
+                                  [--altitude=ALTITUDE,{foot|meter}] \
+                                  [--latitude=LATITUDE] [--longitude=LONGITUDE] \
+                                  [--register={y,n} [--station-url=STATION_URL]] \
+                                  [--units={us,metricwx,metric}] \
+                                  [--skin-root=SKIN_ROOT] \
+                                  [--sqlite-root=SQLITE_ROOT] \
+                                  [--html-root=HTML_ROOT] \
+                                  [--no-prompt] \
+                                  [--no-backup] \
+                                  [--dry-run]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --config CONFIG-PATH  Path to configuration file. Default is
+                        &quot;/home/tkeffer/weewx-data/weewx.conf&quot;
+  --driver DRIVER       Driver to use. Default is &quot;weewx.drivers.simulator&quot;.
+  --location LOCATION   A description of the station. This will be used for
+                        report titles. Default is &quot;WeeWX&quot;.
+  --altitude ALTITUDE,{foot|meter}
+                        The station altitude in either feet or meters. For
+                        example, &quot;750,foot&quot; or &quot;320,meter&quot;. Default is &quot;0,
+                        foot&quot;.
+  --latitude LATITUDE   The station latitude in decimal degrees. Default is
+                        &quot;0.00&quot;.
+  --longitude LONGITUDE
+                        The station longitude in decimal degrees. Default is
+                        &quot;0.00&quot;.
+  --register {y,n}      Register this station in the weewx registry? Default
+                        is &quot;n&quot; (do not register).
+  --station-url STATION_URL
+                        Unique URL to be used if registering the station.
+                        Required if the station is to be registered.
+  --units {us,metricwx,metric}
+                        Set display units to us, metricwx, or metric. Default
+                        is &quot;us&quot;.
+  --skin-root SKIN_ROOT
+                        Where to put the skins, relatve to WEEWX_ROOT. Default
+                        is &quot;skins&quot;.
+  --sqlite-root SQLITE_ROOT
+                        Where to put the SQLite database, relative to
+                        WEEWX_ROOT. Default is &quot;archive&quot;.
+  --html-root HTML_ROOT
+                        Where to put the generated HTML and images, relative
+                        to WEEWX_ROOT. Default is &quot;public_html&quot;.
+  --no-prompt           Do not prompt. Use default values.
+  --no-backup           Do not backup the old configuration file.
+  --dry-run             Print what would happen, but do not actually do it.
+</code></pre></div>
+<p>When used with the <code>--no-prompt</code> option, <code>weectl station reconfigure</code> will modify specific parameters with no interaction. For example, this would set the station altitude to 35 feet:</p>
+<div class="highlight"><pre><span></span><code>weectl<span class="w"> </span>station<span class="w"> </span>reconfigure<span class="w"> </span>--altitude<span class="o">=</span><span class="m">35</span>,foot<span class="w"> </span>--no-prompt
+</code></pre></div>
+<p>This would change the driver to a user-installed netatmo driver:</p>
+<div class="highlight"><pre><span></span><code>weectl<span class="w"> </span>station<span class="w"> </span>reconfigure<span class="w"> </span>--driver<span class="o">=</span>user.netatmo<span class="w"> </span>--no-prompt
+</code></pre></div>
+<p>Other options are as under <a href="#weectl-station-create"><code>weectl station create</code></a> above.</p>
+<h2 id="weectl-station-upgrade"><code>weectl station upgrade</code><a class="headerlink" href="#weectl-station-upgrade" title="Permanent link">&para;</a></h2>
+<p>This action can upgrade any combination of your configuration file, documentation, examples,
+daemon utility files, and skins.</p>
+<p>Running <code>weectl station upgrade --help</code> will show you its options.</p>
+<div class="highlight"><pre><span></span><code>% weectl station upgrade --help
+usage: weectl station upgrade [--config=CONFIG-PATH] \
+                              [--dist-config=DIST-CONFIG-PATH]] \
+                              [--docs-root=DOCS_ROOT] \
+                              [--examples-root=EXAMPLES_ROOT] \
+                              [--skin-root=SKIN_ROOT] \
+                              [--what [{config,docs,examples,util,skins} ... ] \
+                              [--no-prompt] \
+                              [--no-backup] \
+                              [--dry-run]
+
+Upgrade an existing user data area, including any combination of the
+configuration file, docs, examples, daemon utility files, and skins. In what
+follows, WEEWX_ROOT is the directory that contains the configuration
+file. For example, if &quot;--config=/home/tkeffer/weewx-data/weewx.conf&quot;, then
+WEEWX_ROOT will be &quot;/home/tkeffer/weewx-data&quot;.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --config CONFIG-PATH  Path to configuration file. Default is
+                        &quot;/home/tkeffer/weewx-data/weewx.conf&quot;
+  --dist-config DIST-CONFIG-PATH
+                        Use configuration file DIST-CONFIG-PATH as the new
+                        configuration file. Default is to retrieve it from
+                        package resources. The average user is unlikely to
+                        need this option.
+  --docs-root DOCS_ROOT
+                        Where to put the new documentation, relative to
+                        WEEWX_ROOT. Default is &quot;docs&quot;.
+  --examples-root EXAMPLES_ROOT
+                        Where to put the new examples, relative to WEEWX_ROOT.
+                        Default is &quot;examples&quot;.
+  --skin-root SKIN_ROOT
+                        Where to put the skins, relative to WEEWX_ROOT.
+                        Default is &quot;skins&quot;.
+  --what {config,docs,examples,util,skins} [{config,docs,examples,util,skins} ...]
+                        What to upgrade. Default is to upgrade the
+                        configuration file, documentation, examples, and
+                        daemon utility files.
+  --no-prompt           Do not prompt. Use default values.
+  --no-backup           Do not backup the old configuration file.
+  --dry-run             Print what would happen, but do not actually do it.
+</code></pre></div>
+<h4 id="-config_1"><code>--config</code><a class="headerlink" href="#-config_1" title="Permanent link">&para;</a></h4>
+<p>Path to the configuration file to be updated. The directory of the path will become the value for
+<code>WEEWX_ROOT</code> in the configuration file. Default is <code>~/weewx-data/weewx.conf</code>.</p>
+<h4 id="-what"><code>--what</code><a class="headerlink" href="#-what" title="Permanent link">&para;</a></h4>
+<p>By default, <code>weectl station upgrade</code> will upgrade the configuration file, documentation, examples,
+and daemon utility files. However, you can customize exactly what gets upgraded. </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code>--what</code> option does not take an equal sign (<code>=</code>). Just list the desired things to be
+upgraded, without commas between.</p>
+</div>
+<p>For example, to upgrade the configuration file and skins only, you would specify</p>
+<div class="highlight"><pre><span></span><code>weectl station upgrade --what config skins
+</code></pre></div>
+<h4 id="root-options_1">root options<a class="headerlink" href="#root-options_1" title="Permanent link">&para;</a></h4>
+<p>"Root options" include</p>
+<p><code>--skin-root</code><br/>
+<code>--docs-root</code><br/>
+<code>--examples-root</code></p>
+<p>All of these root options are <em>relative to <code>WEEWX_ROOT</code></em>. Of course, like any other path, if the
+option starts with a slash (<code>/</code>), it becomes an absolute path. So, for example,</p>
+<div class="highlight"><pre><span></span><code>--docs-root<span class="o">=</span>/usr/local/doc/weewx
+</code></pre></div>
+<p>will cause documentation files to be put in <code>/usr/local/doc/weewx</code>.</p>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+          <a href="#" class="md-top md-icon" data-md-component="top" hidden>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+            Back to top
+          </a>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright © 2009-2023 Thomas Keffer and Matthew Wall, all rights reserved
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.indexes", "navigation.top", "toc.follow", "search.highlight", "search.share", "search.suggest"], "search": "../../assets/javascripts/workers/search.db81ec45.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.4b2c34cd.min.js"></script>
+      
+    
+  </body>
+</html>
