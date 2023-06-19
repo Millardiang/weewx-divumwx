@@ -1,0 +1,128 @@
+<h1 id="installation-guide">Installation Guide</h1>
+<p><strong>The installer now defaults to overwrite mode, userSettings.php will not be overwritten as it does not exist in the package. However, it is essential that any customisations you may have been made are backed up before running the install.</strong></p>
+<p>IMPORTANT. If you are making a completley clean install of WeeWX and DivumWX Template it is strongly recommended that you allow the WeeWX database to establish itself for 24hours before attempting installing the template.</p>
+<p>This installation guide assumes that you are already reasonably familiar with WeeWX and that it is already installed on your computer along with a webserver, php and curl.</p>
+<p>If you have not already done so, you must update your WeeWX installation to version 4.6.0 or later. This is required to facillitate nested copying during the skin install process. Follow the various installation type links on this page <a href="http://weewx.com/docs/usersguide.htm#installation_methods">http://weewx.com/docs/usersguide.htm#installation_methods</a> for instructions on updating. This version of DivumWX is compatible with WeeWX 4.9.1/Python3.x.</p>
+<p>If you have not already done so update your WeeWX database to the wview_extended.schema (standard from WeeWX 4 onwards). Follow the directions in the section <em>Adding a new type to the database</em> (<a href="https://www.weewx.com/docs/customizing.htm#add_archive_type">https://www.weewx.com/docs/customizing.htm#add_archive_type</a>), except skip step #1 and in step #2, specify <em>schemas.wview_extended.schema</em> as the schema. </p>
+<p>If you are carrying out a fresh install of WeeWX, my own personal preference is to use the setup.py method (<a href="http://www.weewx.com/docs/setup.htm">http://www.weewx.com/docs/setup.htm</a>). However, this increases the chances of requiring more path edits in the configuration files. Alternatively use one of the dedicated packaged installs (<a href="http://weewx.com/docs/debian.htm">http://weewx.com/docs/debian.htm</a>, <a href="http://weewx.com/docs/redhat.htm">http://weewx.com/docs/redhat.htm</a>, <a href="http://weewx.com/docs/suse.htm">http://weewx.com/docs/suse.htm</a> or <a href="http://weewx.com/docs/macos.htm">http://weewx.com/docs/macos.htm</a>).</p>
+<ul>
+<li>Please familiarise yourself with the location of your WeeWX system files in<a href="http://weewx.com/docs/cluding">http://weewx.com/docs/cluding</a> your bin/user folder, skins folder and weewx.conf file. If you are unsure where to find these, please refer to the installation processes here: - <a href="http://www.weewx.com/docs/setup.htm">http://www.weewx.com/docs/setup.htm</a> which shows various WeeWX installation scenarios.</li>
+</ul>
+<p>IMPORTANT. Installing PHP; please make sure you install all the PHP modules appropriate for your version of PHP. Failure to due so may mean that forecasts and current conditions fail to update. This is an example for PHP8.0 modules on a Debian based distribution: -</p>
+<pre><code>sudo apt install php8.1
+sudo apt install php8.1-cli php8.1-fpm php8.1-sqlite3 php8.1-zip php8.1-gd  php8.1-mbstring php8.1-curl php8.1-xml php8.1-bcmath
+sudo apt install libapache2-mod-php8.1
+sudo a2enmod php8.1
+sudo<span class="hljs-keyword"> system</span>ctl restart apache2
+</code></pre><ul>
+<li><p>Install Ephem (<a href="https://rhodesmill.org/pyephem/">https://rhodesmill.org/pyephem/</a>). It is important that you install the latest version as versions prior to 4.1.3 are missing crucial libraries in the install package. It is also important that any previous versions are removed before hand. From the command line (if your version of Python is 2.x, use pip2 and python2 instead): -</p>
+<pre><code>  sudo pip3 <span class="hljs-keyword">uninstall</span> pyephem
+  sudo apt <span class="hljs-keyword">purge</span> python3-ephem
+  sudo pip3 <span class="hljs-keyword">install</span> ephem
+</code></pre></li>
+</ul>
+<p>Once completed, make sure you save weewx.conf</p>
+<ul>
+<li><p>Install SortedContainers</p>
+<pre><code>  sudo pip3 <span class="hljs-keyword">install</span> sortedcontainers
+</code></pre></li>
+<li><p>If you have have the CRT extension (Cumulus Real-Time) extension installed, unless you require it for another purpose, you can remove it now. (sudo ./wee_extension --uninstall crt)</p>
+</li>
+<li><p>This install process assumes that your are using one of the officially documented WeeWX installs and a typical Apache2 web server configuration of /var/www/html. In this instance, at the end of the installation process your path to thw DivumWX skin will be /var/www/html/weewx/divumwx. If your installation deviates from this, you will need to adjust the paths in your weewx.conf file after the installation process has taken place.</p>
+</li>
+<li><p>I am very gratefully to Jerry Dietrich for writing a new installer specially for Weather34. This installer copies everything to the correct places and automatically configures the correct web server ownerships, permissions and groups etc. The whole process is very fast and your skin will be up and running in no time. By using the supplied configuration files, setup.py, packaged or MacOS installed versions of WeeWX can be catered for.</p>
+</li>
+<li><p>Go to <a href="https://steepleian.github.io/weewx-Weather34/divumwx_settings_txt.html">https://steepleian.github.io/weewx-Weather34/divumwx_settings_txt.html</a> to complete the pre-install web services settings which which generates &#39;services.txt&#39; in your default Download folder. </p>
+</li>
+</ul>
+<p>IMPORTANT if you have previously used the weewx-Weather34 template, you must backup ALL of your previous files INCLUDING MOST IMPORTANTLY YOUR WEEWX DATABASE. DOUBLE CHECK BEFORE YOY PROCEED TO THE NEXT STAGE.</p>
+<pre><code>* From the <span class="hljs-keyword">command</span> <span class="hljs-built_in">line</span>: - 
+
+    Download weewx-divumwx-alpha.zip from http<span class="hljs-variable">s:</span>//github.<span class="hljs-keyword">com</span>/Millardiang/weewx-divumwx/archive/refs/heads/alpha.zip/ into your Download folder alongside the services.txt <span class="hljs-keyword">file</span>
+    <span class="hljs-keyword">cd</span> [path_to_your_Download_folder]
+    unzip weewx-divumwx-alpha.zip
+    <span class="hljs-keyword">cd</span> weewx-divumwx-alpha
+
+    (This stage can <span class="hljs-keyword">be</span> skipped <span class="hljs-keyword">if</span> you have never run Weather34)
+    sudo <span class="hljs-keyword">python</span> w34_uninstaller.<span class="hljs-keyword">py</span> <span class="hljs-built_in">or</span> sudo <span class="hljs-keyword">python3</span> w34_uninstaller.<span class="hljs-keyword">py</span> (<span class="hljs-keyword">if</span> you are running Python3)
+
+    Install DivumWX: -
+
+    sudo <span class="hljs-keyword">python</span> dvm_installer.<span class="hljs-keyword">py</span> <span class="hljs-built_in">or</span> sudo <span class="hljs-keyword">python3</span> dvm_installer.<span class="hljs-keyword">py</span> (<span class="hljs-keyword">if</span> you are running Python3)
+
+        You will <span class="hljs-keyword">be</span> prompted <span class="hljs-keyword">for</span> the config <span class="hljs-keyword">file</span> <span class="hljs-keyword">for</span> your WeeWX install <span class="hljs-built_in">type</span>.
+        Select packaged <span class="hljs-keyword">if</span> your WeeWX was installed by Debian, RedHat <span class="hljs-built_in">or</span> Suse methods [default option]
+        <span class="hljs-built_in">or</span>
+        Select setup_py. <span class="hljs-keyword">if</span> your WeeWX was installed by setup.<span class="hljs-keyword">py</span> method
+        <span class="hljs-built_in">or</span>
+        Select macos <span class="hljs-keyword">if</span> your WeeWX was installed by MacOS method
+        <span class="hljs-built_in">or</span>
+        Select archsetup <span class="hljs-keyword">if</span> your WeeWX <span class="hljs-keyword">for</span> <span class="hljs-keyword">an</span> ArchLinux OS 
+</code></pre><ul>
+<li><p>Restart WeeWX and from command line run: -</p>
+<pre><code>  sudo python3 ./<span class="hljs-string">[YOUR OWN PATH TO]</span>/wee_reports
+</code></pre></li>
+</ul>
+<p>This will allow some of the required variable data to be generated immediately without having to wait for the next report generation interval.</p>
+<ul>
+<li><p>You can now test that the template is working by opening it up in your browser. Initially you will see random demo data. Click on the menu button at the top-left corner and select settings. This will open up a web form in which you apply your own settings. The default password is &#39;12345&#39;. Please change this to your own unique password for your own protection. Pay particular attention to the location of the w34realtime.txt file being generated on a loop cycle by weeWX. The default location is “/[html_root]/weewx/w34weather/serverdata/w34realtime.txt” (for example /var/www/html/weewx/w34weather/serverdata/w34realtime.txt). IMPORTANT the unit codes that you select for the Weather Underground and DarkSky forecast APIs must be identical to those that you select in the pre-install settings process. Failure to do so will possibly produce some bizzare data.</p>
+</li>
+<li><p>Using a RAM Disk for dvmRealtime.txt. The default location is hard-coded but can be changed: -</p>
+<p>  Edit the [DivumWXRealtime] stanza in weewx.conf</p>
+<pre><code>      [DivumWXRealTime]
+
+              realtime_path_only = /[your path to your ram disk] # <span class="hljs-keyword">no</span> trailing /
+
+  <span class="hljs-keyword">Edit</span> <span class="hljs-keyword">line</span> 33 <span class="hljs-keyword">in</span> divumwx/fixedSettings.php
+
+          <span class="hljs-variable">$livedata</span> = <span class="hljs-string">"/[your path to ram disk]/dvmRealtime.txt"</span>;
+</code></pre><p>These edited settings may not be persistent after an update / re-install so you may need to re-edit the above files.</p>
+</li>
+<li><p>Automatic database backup module. </p>
+<p>  Open your weewx.conf file and find the [[Services]] section in the [Engine] stanza. Find the line that starts with process_services. At the end of that line add:-</p>
+<pre><code>      ,user<span class="hljs-selector-class">.dvm_db_backup</span><span class="hljs-selector-class">.DVM_DB_Backup</span>
+</code></pre><p> Then at the end of the file add this stanza: -</p>
+<pre><code>      [DVM_DB_Backup]
+
+          <span class="hljs-comment"># database path(s) seperated by , rename this/these database(s) to match your own</span>
+              databases = <span class="hljs-regexp">/home/</span>weewx<span class="hljs-regexp">/archive/</span>weewx.sdb,<span class="hljs-regexp">/home/</span>weewx<span class="hljs-regexp">/archive/</span>another.sdb
+
+          <span class="hljs-comment"># backup path(s) comma seperated </span>
+              backups = [your_backup_path]<span class="hljs-regexp">/weewx_backup.sdb,[your_backup_path]/</span>home<span class="hljs-regexp">/pi/</span>another_backup.sdb
+
+          <span class="hljs-comment"># set the daily time to backup comma seperated for multiple databases</span>
+          <span class="hljs-comment"># the time must be set an to archive time so it runs immediately after the archive interval processes are complete</span>
+              backup_times = <span class="hljs-number">00</span>:<span class="hljs-number">00</span>,<span class="hljs-number">00</span>:<span class="hljs-number">00</span>
+</code></pre></li>
+<li><p>Save and restart WeeWX</p>
+</li>
+<li><p>Any problems, please raise an Issue in this repository attaching a debug report (see here for details <a href="http://www.weewx.com/docs/utilities.htm#wee_debug_utility">http://www.weewx.com/docs/utilities.htm#wee_debug_utility</a>), your skin.conf files and a syslog tail report covering at least two archive cycles from startup.</p>
+</li>
+</ul>
+<h1 id="sample-markdown">Sample Markdown</h1>
+<p>This is some basic, sample markdown.</p>
+<h2 id="second-heading">Second Heading</h2>
+<ul>
+<li>Unordered lists, and:<ol>
+<li>One</li>
+<li>Two</li>
+<li>Three</li>
+</ol>
+</li>
+<li>More</li>
+</ul>
+<blockquote>
+<p>Blockquote</p>
+</blockquote>
+<p>And <strong>bold</strong>, <em>italics</em>, and even <em>italics and later <strong>bold</strong></em>. Even <del>strikethrough</del>. <a href="https://markdowntohtml.com">A link</a> to somewhere.</p>
+<p>And code highlighting:</p>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> foo = <span class="hljs-string">'bar'</span>;
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">baz</span><span class="hljs-params">(s)</span> </span>{
+   <span class="hljs-keyword">return</span> foo + <span class="hljs-string">':'</span> + s;
+}
+</code></pre>
+<p>Or inline code like <code>var foo = &#39;bar&#39;;</code>.</p>
+<p>Or an image of bears</p>
+<p><img src="http://placebear.com/200/200" alt="bears"></p>
+<p>The end ...</p>

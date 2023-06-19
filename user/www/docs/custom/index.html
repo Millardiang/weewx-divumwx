@@ -1,0 +1,1995 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+        <meta name="author" content="Tom Keffer <tkeffer@gmail.com>">
+      
+      
+        <link rel="canonical" href="https://www.weewx.com/custom/">
+      
+      
+        <link rel="prev" href="../usersguide/weewx-config-file/engine/">
+      
+      
+        <link rel="next" href="custom_reports/">
+      
+      <link rel="icon" href="../images/favicon.png">
+      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-9.0.12">
+    
+    
+      
+        <title>Introduction - weewx documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.0d440cfe.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.2505c338.min.css">
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans:300,300i,400,400i,700,700i%7CInconsolata+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Noto Sans";--md-code-font:"Inconsolata Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../css/weewx_ui.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="white">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#the-customization-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="weewx documentation" class="md-header__button md-logo" aria-label="weewx documentation" data-md-component="logo">
+      
+  <img src="../images/logo-weewx.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            weewx documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Introduction
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="white"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6zm0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4zM7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+            </label>
+          
+        
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3Z"/></svg>
+            </label>
+          
+        
+      </form>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7 0-.24-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91 1.61 0 2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08Z"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/weewx/weewx" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    WeeWX GitHub Repository
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="weewx documentation" class="md-nav__button md-logo" aria-label="weewx documentation" data-md-component="logo">
+      
+  <img src="../images/logo-weewx.png" alt="logo">
+
+    </a>
+    weewx documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/weewx/weewx" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    WeeWX GitHub Repository
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" >
+      
+      
+        
+          
+            
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        
+        
+        <div class="md-nav__link md-nav__link--index ">
+          <a href="../quickstarts/">Quick starts</a>
+          
+            <label for="__nav_1">
+              <span class="md-nav__icon md-icon"></span>
+            </label>
+          
+        </div>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_1">
+          <span class="md-nav__icon md-icon"></span>
+          Quick starts
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstarts/debian/" class="md-nav__link">
+        Debian
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstarts/redhat/" class="md-nav__link">
+        RedHat
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstarts/suse/" class="md-nav__link">
+        SuSE
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstarts/pip/" class="md-nav__link">
+        pip
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstarts/v5-upgrade/" class="md-nav__link">
+        Migrating to V5
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+      
+      
+        
+          
+            
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        
+        
+        <div class="md-nav__link md-nav__link--index ">
+          <a href="../usersguide/">User's guide</a>
+          
+            <label for="__nav_2">
+              <span class="md-nav__icon md-icon"></span>
+            </label>
+          
+        </div>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          User's guide
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usersguide/system-requirements/" class="md-nav__link">
+        System requirements
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usersguide/installing-weewx/" class="md-nav__link">
+        Installing WeeWX
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usersguide/where/" class="md-nav__link">
+        Where to find things
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usersguide/running-weewx/" class="md-nav__link">
+        Running WeeWX
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usersguide/webserver-integration/" class="md-nav__link">
+        Web server integration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usersguide/backing-up-weewx/" class="md-nav__link">
+        Backup & restore
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usersguide/mysql-mariadb-config/" class="md-nav__link">
+        Configuring MySQL
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usersguide/troubleshooting-guide/" class="md-nav__link">
+        Troubleshooting
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10" >
+      
+      
+        
+          
+            
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        
+        
+        <div class="md-nav__link md-nav__link--index ">
+          <a href="../usersguide/weewx-config-file/">Reference: options</a>
+          
+            <label for="__nav_2_10">
+              <span class="md-nav__icon md-icon"></span>
+            </label>
+          
+        </div>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_10_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_2_10">
+          <span class="md-nav__icon md-icon"></span>
+          Reference: options
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usersguide/weewx-config-file/general/" class="md-nav__link">
+        General options
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usersguide/weewx-config-file/stations-config/" class="md-nav__link">
+        [Station]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usersguide/weewx-config-file/stdrestful-config/" class="md-nav__link">
+        [StdRESTful]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usersguide/weewx-config-file/stdreport-config/" class="md-nav__link">
+        [StdReport]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usersguide/weewx-config-file/stdconvert-config/" class="md-nav__link">
+        [StdConvert]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usersguide/weewx-config-file/stdcalibrate-config/" class="md-nav__link">
+        [StdCalibrate]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usersguide/weewx-config-file/stdqc-config/" class="md-nav__link">
+        [StdQC]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usersguide/weewx-config-file/stdwxcalculate-config/" class="md-nav__link">
+        [StdWXCalculate]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usersguide/weewx-config-file/stdarchive/" class="md-nav__link">
+        [StdArchive]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usersguide/weewx-config-file/stdtimesynch/" class="md-nav__link">
+        [StdTimeSynch]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usersguide/weewx-config-file/data-bindings/" class="md-nav__link">
+        [DataBindings]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usersguide/weewx-config-file/databases/" class="md-nav__link">
+        [Databases]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usersguide/weewx-config-file/databasetypes/" class="md-nav__link">
+        [DatabaseTypes]
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usersguide/weewx-config-file/engine/" class="md-nav__link">
+        [Engine]
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+      
+      
+        
+          
+            
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        
+        
+        <div class="md-nav__link md-nav__link--index md-nav__link--active">
+          <a href="./">Customization guide</a>
+          
+            <label for="__nav_3">
+              <span class="md-nav__icon md-icon"></span>
+            </label>
+          
+        </div>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Customization guide
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="custom_reports/" class="md-nav__link">
+        Customizing reports
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="cheetah/" class="md-nav__link">
+        The Cheetah generator
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="image_generator/" class="md-nav__link">
+        The Image generator
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="multiple_bindings/" class="md-nav__link">
+        Multiple data bindings
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="localization/" class="md-nav__link">
+        Localization
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="service_engine/" class="md-nav__link">
+        Customizing the service engine
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="database/" class="md-nav__link">
+        Customizing the database
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="units/" class="md-nav__link">
+        Customizing units
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="derived/" class="md-nav__link">
+        Derived types
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="drivers/" class="md-nav__link">
+        Custom drivers
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="extensions/" class="md-nav__link">
+        Extensions
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="options_ref/" class="md-nav__link">
+        Reference: options
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="appendix/" class="md-nav__link">
+        Appendix
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+      
+      
+        
+          
+            
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        
+        
+        <div class="md-nav__link md-nav__link--index ">
+          <a href="../utilities/">Utilities</a>
+          
+            <label for="__nav_4">
+              <span class="md-nav__icon md-icon"></span>
+            </label>
+          
+        </div>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Utilities
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" >
+      
+      
+        
+          
+            
+          
+        
+          
+        
+          
+        
+      
+      
+        
+        
+        <div class="md-nav__link md-nav__link--index ">
+          <a href="../weectl/">weectl</a>
+          
+            <label for="__nav_4_2">
+              <span class="md-nav__icon md-icon"></span>
+            </label>
+          
+        </div>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_4_2">
+          <span class="md-nav__icon md-icon"></span>
+          weectl
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../weectl/station/" class="md-nav__link">
+        weectl station
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../weectl/extension/" class="md-nav__link">
+        weectl extension
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utilities/utilities.htm#wee_database_utility" class="md-nav__link">
+        wee_database
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utilities/utilities.htm#wee_debug_utility" class="md-nav__link">
+        wee_debug
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utilities/utilities.htm#wee_device_utility" class="md-nav__link">
+        wee_device
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utilities/utilities.htm#wee_import_utility" class="md-nav__link">
+        wee_import
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utilities/utilities.htm#wee_reports_utility" class="md-nav__link">
+        wee_reports
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utilities/utilities.htm#weewxd" class="md-nav__link">
+        weewxd
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../upgrading.htm" class="md-nav__link">
+        Upgrade guide
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hardware.htm" class="md-nav__link">
+        Hardware guide
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../devnotes/" class="md-nav__link">
+        Notes for developers
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hardware.htm" class="md-nav__link">
+        Hardware comparison
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../changes/" class="md-nav__link">
+        Change log
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../support/" class="md-nav__link">
+        Support
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overall-system-architecture" class="md-nav__link">
+    Overall system architecture
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-architecture" class="md-nav__link">
+    Data architecture
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loop-packets-vs-archive-records" class="md-nav__link">
+    LOOP packets vs. archive records
+  </a>
+  
+    <nav class="md-nav" aria-label="LOOP packets vs. archive records">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#loop-packets" class="md-nav__link">
+    LOOP packets
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#archive-records" class="md-nav__link">
+    Archive records
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-to-customize" class="md-nav__link">
+    What to customize
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#do-i-need-to-restart-weewx" class="md-nav__link">
+    Do I need to restart WeeWX?
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-utility-wee_reports" class="md-nav__link">
+    The utility wee_reports
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-weewx-service-architecture" class="md-nav__link">
+    The WeeWX service architecture
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-standard-reporting-service-stdreport" class="md-nav__link">
+    The standard reporting service StdReport
+  </a>
+  
+    <nav class="md-nav" aria-label="The standard reporting service StdReport">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reports" class="md-nav__link">
+    Reports
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skins" class="md-nav__link">
+    Skins
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#generators" class="md-nav__link">
+    Generators
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#templates" class="md-nav__link">
+    Templates
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-database" class="md-nav__link">
+    The database
+  </a>
+  
+    <nav class="md-nav" aria-label="The database">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#structure" class="md-nav__link">
+    Structure
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#binding-names" class="md-nav__link">
+    Binding names
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#programming-interface" class="md-nav__link">
+    Programming interface
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#units" class="md-nav__link">
+    Units
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="the-customization-guide">The Customization Guide<a class="headerlink" href="#the-customization-guide" title="Permanent link">&para;</a></h1>
+<p>Version: 5.0</p>
+<p>This document covers the customization of WeeWX. It assumes that you have read, and are reasonably familiar with, the <a href="../usersguide/">Users Guide</a>.</p>
+<p>The introduction contains an overview of the architecture. If you are only interested in customizing the generated reports you can probably skip the introduction and proceed directly to the section <a href="custom_reports"><em>Customizing reports</em></a>. With this approach you can easily add new plot images, change the titles of images, change the units used in the reports, and so on.</p>
+<p>However, if your goal is a specialized application, such as adding alarms, RSS feeds, <em>etc.</em>, then it would be worth your while to read about the internal architecture.</p>
+<p>Most of the guide applies to any hardware, but the exact data types are hardware-specific. See the <a href="../hardware.htm"><em>WeeWX Hardware Guide</em></a> for details of how different observation types are handled by different types hardware.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>WeeWX is still an experimental system and, as such, its internal design is subject to change. Future upgrades may break any customizations you have done, particularly if they involve the API (skin customizations tend to be more stable).</p>
+</div>
+<h2 id="overall-system-architecture">Overall system architecture<a class="headerlink" href="#overall-system-architecture" title="Permanent link">&para;</a></h2>
+<p>Below is a brief overview of the WeeWX system architecture, which is covered in much more detail in the rest of this document.</p>
+<table>
+<thead>
+<tr>
+<th><img alt="The WeeWX pipeline" src="../images/pipeline.png" /></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A typical WeeWX pipeline. The actual pipeline depends on what extensions are in use. Data, in the form of LOOP packets and archive records, flows from top to bottom.</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>A WeeWX process normally handles the monitoring of one station — <em>e.g.</em> a weather station. The process is configured using options in a configuration file, typically called <code>weewx.conf</code>.</li>
+<li>A WeeWX process has at most one "driver" to communicate with the station hardware and receive "high resolution" (<em>i.e.</em> every few seconds) measurement data in the form of LOOP packets. The driver is single-threaded and blocking, so no more than one driver can run in a WeeWX process.</li>
+<li>LOOP packets may contain arbitrary data from the station/driver in the form of a Python dictionary. Each LOOP packet must contain a time stamp and a unit system, in addition to any number of observations, such as temperature or humidity. For extensive types, such as rain, the packet contains the total amount of rain that fell during the observation period.</li>
+<li>WeeWX then compiles these LOOP packets into regularly spaced "archive records." For most types, the archive record contains the average value seen in all of the LOOP packets over the archive interval (typically 5 minutes). For extensive types, such as rain, it is the sum of all values over the archive interval.</li>
+<li>Internally, the WeeWX engine uses a <em>pipeline</em> architecture, consisting of many <em>services</em>. Services bind to events of interest, such as new LOOP packets, or new archive records. Events are then run down the pipeline in order — services at the top of the pipeline act on the data before services farther down the pipe.</li>
+<li>Services can do things such as check the data quality, apply corrections, or save data to a database. Users can easily add new services.</li>
+<li>WeeWX includes an ability to customize behavior by installing <em>extensions</em>. Extensions may consist of one or more drivers, services, and/or skins, all in an easy-to-install package.</li>
+</ul>
+<h2 id="data-architecture">Data architecture<a class="headerlink" href="#data-architecture" title="Permanent link">&para;</a></h2>
+<p>WeeWX is data-driven. When the sensors spit out some data, WeeWX does something. The "something" might be to print out the data, or to generate an HTML report, or to use FTP to copy a report to a web server, or to perform some calculations using the data.</p>
+<p>A driver is Python code that communicates with the hardware. The driver reads data from a serial port or a device on the USB or a network interface. It handles any decoding of raw bits and bytes, and puts the resulting data into LOOP packets. The drivers for some kinds of hardware (most notably, Davis Vantage) are capable of emitting archive records as well.</p>
+<p>In addition to the primary observation types such as temperature, humidity, or solar radiation, there are also many useful dependent types, such as wind chill, heat index, or ET, which are calculated from the primary data. The firmware in some weather stations are capable of doing many of these calculations on their own. For the rest, should you choose to do so, the WeeWX service <a href="../usersguide/weewx-config-file/stdwxcalculate-config">StdWXCalculate</a> can fill in the gaps. Sometimes the firmware simply does it wrong, and you may choose to have WeeWX do the calculation, despite the type's presence in LOOP packets.</p>
+<h2 id="loop-packets-vs-archive-records">LOOP packets <em>vs.</em> archive records<a class="headerlink" href="#loop-packets-vs-archive-records" title="Permanent link">&para;</a></h2>
+<p>Generally, there are two types of data that flow through WeeWX: LOOP packets, and archive records. Both are represented as Python dictionaries.</p>
+<h3 id="loop-packets">LOOP packets<a class="headerlink" href="#loop-packets" title="Permanent link">&para;</a></h3>
+<p>LOOP packets are the raw data generated by the device driver. They get their name from the Davis Instruments documentation. For some devices they are generated at rigid intervals, such as every 2 seconds for the Davis Vantage series, for others, irregularly, every 20 or 30 seconds or so. LOOP packets may or may not contain all the data types an instrument is capable of measuring. For example, a packet may contain only temperature data, another only barometric data, <em>etc</em>. These kinds of packet are called <em>partial record packets</em>. By contrast, other types of hardware (notably the Vantage series) include every data type in every LOOP packet.</p>
+<p>In summary, LOOP packets can be highly irregular in time and in what they contain, but they come in frequently.</p>
+<h3 id="archive-records">Archive records<a class="headerlink" href="#archive-records" title="Permanent link">&para;</a></h3>
+<p>By contrast, archive records are highly regular. They are generated at regular intervals (typically every 5 to 30 minutes), and all contain the same data types. They represent an <em>aggregation</em> of the LOOP packets over the archive interval. The exact kind of aggregation depends on the data type. For example, for temperature, it's generally the average temperature over the interval. For rain, it's the sum of rain over the interval. For battery status it's the last value in the interval.</p>
+<p>Some hardware is capable of generating their own archive records (the Davis Vantage and Oregon Scientific WMR200, for example), but for hardware that cannot, WeeWX generates them.</p>
+<p>It is the archive data that is put in the SQL database, although, occasionally, the LOOP packets can be useful (such as for the Weather Underground's "Rapidfire" mode).</p>
+<h2 id="what-to-customize">What to customize<a class="headerlink" href="#what-to-customize" title="Permanent link">&para;</a></h2>
+<p>For configuration changes, such as which skins to use, or enabling posts to the Weather Underground, simply modify the WeeWX configuration file <code>weewx.conf</code>. Any changes you make will be preserved during an upgrade.</p>
+<p>Customization of reports may require changes to a skin configuration file <code>skin.conf</code> or template files ending in <code>.tmpl</code> or <code>.inc</code>. Anything in the skins subdirectory is also preserved across upgrades.</p>
+<p>You may choose to install one of the many <a href="https://github.com/weewx/weewx/wiki#extensions-to-weewx">third-party extensions</a> that are available for WeeWX. These are typically installed in either the skins or user subdirectories, both of which are preserved across upgrades.</p>
+<p>More advanced customizations may require new Python code or modifications of example code. These should be placed in the user directory, where they will be preserved across upgrades. For example, if you wish to modify one of the examples that comes with WeeWX, copy it from the examples directory to the user directory, then modify it there. This way, your modifications will not be touched if you upgrade.</p>
+<p>For code that must run before anything else in WeeWX runs (for example, to set up an environment), put it in the file <code>extensions.py</code> in the user directory. It is always run before the WeeWX engine starts up. Because it is in the <code>user</code> subdirectory, it is preserved between upgrades.</p>
+<h2 id="do-i-need-to-restart-weewx">Do I need to restart WeeWX?<a class="headerlink" href="#do-i-need-to-restart-weewx" title="Permanent link">&para;</a></h2>
+<p>If you make a change in <code>weewx.conf</code>, you will need to restart <code>weewxd</code>.</p>
+<p>If you modify Python code in the <code>user</code> directory or elsewhere, you will need to restart <code>weewxd</code>.</p>
+<p>If you install an extension, you will need to restart <code>weewxd</code>.</p>
+<p>If you make a change to a template or to a <code>skin.conf</code> file, then you do not need to restart <code>weewxd</code>. The change will be adopted at the next reporting cycle, typically at the end of an archive interval.</p>
+<h2 id="the-utility-wee_reports">The utility <code>wee_reports</code><a class="headerlink" href="#the-utility-wee_reports" title="Permanent link">&para;</a></h2>
+<p>If you make changes, how do you know what the results will look like? You could just run <code>weewxd</code> and wait until the next reporting cycle kicks off but, depending on your archive interval, that could be a 30 minute wait or more.</p>
+<p>The utility <code>wee_reports</code> allows you to run a report whenever you like. To use it, just run it from a command line, with the location of your configuration file <code>weewx.conf</code> as the first argument. Optionally, if you include a unix epoch timestamp as a second argument, then the report will use that as the "Current" time; otherwise, the time of the last record in the archive database will be used. Here is an example, using 1 May 2014 00:00 PDT as the "Current" time.</p>
+<div class="highlight"><pre><span></span><code>wee_reports<span class="w"> </span>weewx.conf<span class="w"> </span><span class="m">1398927600</span>
+</code></pre></div>
+<p>For more information about <code>wee_reports</code>, see the <a href="../../utilities/utilities.htm#wee_reports_utility">Utilities Guide</a></p>
+<h2 id="the-weewx-service-architecture">The WeeWX service architecture<a class="headerlink" href="#the-weewx-service-architecture" title="Permanent link">&para;</a></h2>
+<p>At a high-level, WeeWX consists of an engine class called <code>StdEngine</code>. It is responsible for loading <em>services</em>, then arranging for them to be called when key events occur, such as the arrival of LOOP or archive data. The default install of WeeWX includes the following services:</p>
+<table id='default_services' class="indent">
+    <caption>The standard WeeWX services</caption>
+    <tbody>
+    <tr class="first_row">
+        <td>Service</td>
+        <td>Function</td>
+    </tr>
+    <tr>
+        <td class="code first_col">weewx.engine.StdTimeSynch</td>
+        <td>Arrange to have the clock on the station synchronized at regular intervals.
+        </td>
+    </tr>
+    <tr>
+        <td class="code first_col">weewx.engine.StdConvert</td>
+        <td>Converts the units of the input to a target unit system (such as US or Metric).
+        </td>
+    </tr>
+    <tr>
+        <td class="code first_col">weewx.engine.StdCalibrate</td>
+        <td>Adjust new LOOP and archive packets using calibration expressions.
+        </td>
+    </tr>
+    <tr>
+        <td class="code first_col">weewx.engine.StdQC</td>
+        <td>Check quality of incoming data, making sure values fall within a specified range.
+        </td>
+    </tr>
+    <tr>
+        <td class="code first_col">weewx.wxservices.StdWXCalculate</td>
+        <td>Decide which derived observation types need to be calculated.
+        </td>
+    </tr>
+    <tr>
+        <td class="code first_col">weewx.wxxtypes.StdWXXTypes<br/>weewx.wxxtypes.StdPressureCooker<br/>weewx.wxxtypes.StdRainRater<br/>weewx.wxxtypes.StdDelta</td>
+        <td>Calculate derived variables, such as <span class="code">ET</span>, <span class="code">dewpoint</span>, or <span class="code">rainRate</span>.
+        </td>
+    </tr>
+    <tr>
+        <td class="code first_col">weewx.engine.StdArchive</td>
+        <td>Archive any new data to the SQL databases.</td>
+    </tr>
+    <tr>
+        <td class="code first_col">weewx.restx.StdStationRegistry<br/> weewx.restx.StdWunderground<br/>
+            weewx.restx.StdPWSweather<br/> weewx.restx.StdCWOP<br/> weewx.restx.StdWOW<br/>weewx.restx.StdAWEKAS
+        </td>
+        <td>Various <a href="https://en.wikipedia.org/wiki/Representational_State_Transfer"> RESTful services</a>
+            (simple stateless client-server protocols), such as the Weather Underground, CWOP, etc. Each
+            launches its own, independent thread, which manages the post.
+        </td>
+    </tr>
+    <tr>
+        <td class="code first_col">weewx.engine.StdPrint</td>
+        <td>Print out new LOOP and archive packets on the console.
+        </td>
+    </tr>
+    <tr>
+        <td class="code first_col">weewx.engine.StdReport</td>
+        <td>Launch a new thread to do report processing after a new archive record arrives. Reports do things
+            such as generate HTML or CSV files, generate images, or transfer files using FTP/rsync.
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<p>It is easy to extend old services or to add new ones. The source distribution includes an example new service called MyAlarm, which sends an email when an arbitrary expression evaluates True. These advanced topics are covered later in the section <em><a href="service_engine">Customizing the WeeWX service engine</a></em>.</p>
+<h2 id="the-standard-reporting-service-stdreport">The standard reporting service <code>StdReport</code><a class="headerlink" href="#the-standard-reporting-service-stdreport" title="Permanent link">&para;</a></h2>
+<p>For the moment, let us focus on the last service, <code>weewx.engine.StdReport</code>, the standard service for creating reports. This will be what most users will want to customize, even if it means just changing a few options.</p>
+<h3 id="reports">Reports<a class="headerlink" href="#reports" title="Permanent link">&para;</a></h3>
+<p>The standard reporting service, <code>StdReport</code>, runs zero or more <em>reports</em>. The specific reports which get run are set in the configuration file <code>weewx.conf</code>, in section <code>[StdReport]</code>.</p>
+<p>The default distribution of WeeWX includes six reports:</p>
+<table class="indent">
+    <tbody>
+    <tr class="first_row">
+        <td>Report</td>
+        <td>Default functionality</td>
+    </tr>
+    <tr>
+        <td class="code first_col">SeasonsReport</td>
+        <td>Introduced with WeeWX V3.9, this report generates a single HTML file with day, week, month and year
+            "to-date" summaries, as well as the plot images to go along with them. Buttons select which time
+            scale the user wants. It also generates HTML files with more details on celestial bodies and
+            statistics. Also generates NOAA monthly and yearly summaries.
+        </td>
+    </tr>
+    <tr>
+        <td class="code first_col">SmartphoneReport</td>
+        <td>A simple report that generates an HTML file, which allows "drill down" to show more detail about
+            observations. Suitable for smaller devices, such as smartphones.
+        </td>
+    </tr>
+    <tr>
+        <td class="code first_col">MobileReport</td>
+        <td>A super simple HTML file that just shows the basics. Suitable for low-powered or
+            bandwidth-constrained devices.
+        </td>
+    </tr>
+    <tr>
+        <td class="code first_col">StandardReport</td>
+        <td>This is an older report that has been used for many years in WeeWX. It generates day, week, month
+            and year "to-date" summaries in HTML, as well as the plot images to go along with them. Also
+            generates NOAA monthly and yearly summaries. It typically loads faster than the
+            <em>SeasonsReport</em>.
+        </td>
+    </tr>
+    <tr>
+        <td class="code first_col">FTP</td>
+        <td>Transfer everything in the <span class="symcode">HTML_ROOT</span> directory to a remote server using
+            ftp.
+        </td>
+    </tr>
+    <tr>
+        <td class="code first_col">RSYNC</td>
+        <td>Transfer everything in the <span class="symcode">HTML_ROOT</span> directory to a remote server using
+            the utility <a href="https://man7.org/linux/man-pages/man1/rsync.1.html">rsync</a>.
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<p>Note that the FTP and RSYNC "reports" are a funny kind of report in that it they do not actually generate anything. Instead, they use the reporting service engine to transfer files and folders to a remote server.</p>
+<h3 id="skins">Skins<a class="headerlink" href="#skins" title="Permanent link">&para;</a></h3>
+<p>Each report has a <em>skin</em> associated with it. For most reports, the relationship with the skin is an obvious one: the skin contains the templates, any auxiliary files such as background GIFs or CSS style sheets, files with localization data, and a <em>skin configuration file</em>, <code>skin.conf</code>. If you will, the skin controls the <em>look and feel</em> of the report. Note that more than one report can use the same skin. For example, you might want to run a report that uses US Customary units, then run another report against the same skin, but using metric units and put the results in a different place. All this is possible by either overriding configuration options in the WeeWX configuration file or the skin configuration file.</p>
+<p>Like all reports, the FTP and RSYNC "reports" also use a skin, and include a skin configuration file, although they are quite minimal.</p>
+<p>Skins live in their own directory called <code>skins</code>, whose location is referred to as <em><code>SKIN_ROOT</code></em>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The symbol <em><code>SKIN_ROOT</code></em> is a symbolic name to the location of the directory where your skins are located. It is not to be taken literally. Consult the section <a href="../usersguide/where"><em>Where to find things</em></a> in the User's Guide for its exact location, dependent on how you installed WeeWX and what operating system you are using</p>
+</div>
+<h3 id="generators">Generators<a class="headerlink" href="#generators" title="Permanent link">&para;</a></h3>
+<p>To create their output, skins rely on one or more <em>generators</em>, which are what do the actual work, such as creating HTML files or plot images. Generators can also copy files around or FTP/rsync them to remote locations. The default install of WeeWX includes the following generators:</p>
+<table class="indent">
+    <tbody>
+    <tr class="first_row">
+        <td>Generator</td>
+        <td>Function</td>
+    </tr>
+    <tr>
+        <td class="code first_col">weewx.cheetahgenerator.CheetahGenerator</td>
+        <td>Generates files from templates, using the Cheetah template engine. Used to generate HTML and text
+            files.
+        </td>
+    </tr>
+    <tr>
+        <td class="code first_col">weewx.imagegenerator.ImageGenerator</td>
+        <td>Generates graph plots.</td>
+    </tr>
+    <tr>
+        <td class="code first_col">weewx.reportengine.FtpGenerator</td>
+        <td>Uploads data to a remote server using FTP.</td>
+    </tr>
+    <tr>
+        <td class="code first_col">weewx.reportengine.RsyncGenerator</td>
+        <td>Uploads data to a remote server using rsync.</td>
+    </tr>
+    <tr>
+        <td class="code first_col">weewx.reportengine.CopyGenerator</td>
+        <td>Copies files locally.</td>
+    </tr>
+    </tbody>
+</table>
+
+<p>Note that the three generators <code>FtpGenerator</code>, <code>RsyncGenerator</code>, and <code>CopyGenerator</code> do not actually generate anything having to do with the presentation layer. Instead, they just move files around.</p>
+<p>Which generators are to be run for a given skin is specified in the skin's configuration file <code>skin.conf</code>, in section <a href="options_ref/#generators_section">[Generators]</a>.</p>
+<h3 id="templates">Templates<a class="headerlink" href="#templates" title="Permanent link">&para;</a></h3>
+<p>A template is a text file that is processed by a <em>template engine</em> to create a new file. WeeWX uses the <a href="https://cheetahtemplate.org/">Cheetah</a> template engine. The generator <code>weewx.cheetahgenerator.CheetahGenerator</code> is responsible for running Cheetah at appropriate times.</p>
+<p>A template may be used to generate HTML, XML, CSV, Javascript, or any other type of text file. A template typically contains variables that are replaced when creating the new file. Templates may also contain simple programming logic.</p>
+<p>Each template file lives in the skin directory of the skin that uses it. By convention, a template file ends with the <code>.tmpl</code> extension. There are also template files that end with the <code>.inc</code> extension. These templates are included in other templates.</p>
+<h2 id="the-database">The database<a class="headerlink" href="#the-database" title="Permanent link">&para;</a></h2>
+<p>WeeWX uses a single database to store and retrieve the records it needs. It can be implemented by using either <a href="https://www.sqlite.org/">SQLite</a>, an open-source, lightweight SQL database, or <a href="https://www.mysql.com/">MySQL</a>, an open-source, full-featured database server.</p>
+<h3 id="structure">Structure<a class="headerlink" href="#structure" title="Permanent link">&para;</a></h3>
+<p>Inside this database are several tables. The most important is the <em>archive table</em>, a big flat table, holding one record for each archive interval, keyed by <code>dateTime</code>, the time at the end of the archive interval. It looks something like this:</p>
+<table class="indent fixed_width">
+    <caption>
+        Structure of the <span class="code">archive</span> database table
+    </caption>
+    <tr class="code first_row">
+        <td>dateTime</td>
+        <td>usUnits</td>
+        <td>interval</td>
+        <td>barometer</td>
+        <td>pressure</td>
+        <td>altimeter</td>
+        <td>inTemp</td>
+        <td>outTemp</td>
+        <td>...</td>
+    </tr>
+
+    <tr class="code">
+        <td>1413937800</td>
+        <td>1</td>
+        <td>5</td>
+        <td>29.938</td>
+        <td><em>null</em></td>
+        <td><em>null</em></td>
+        <td>71.2</td>
+        <td>56.0</td>
+        <td>...</td>
+    </tr>
+    <tr class="code">
+        <td>1413938100</td>
+        <td>1</td>
+        <td>5</td>
+        <td>29.941</td>
+        <td><em>null</em></td>
+        <td><em>null</em></td>
+        <td>71.2</td>
+        <td>55.9</td>
+        <td>...</td>
+    </tr>
+    <tr class="code">
+        <td>...</td>
+        <td>...</td>
+        <td>...</td>
+        <td>...</td>
+        <td>...</td>
+        <td>...</td>
+        <td>...</td>
+        <td>...</td>
+        <td>...</td>
+    </tr>
+</table>
+
+<p>The first three columns are <em>required.</em> Here's what they mean:</p>
+<table class="indent">
+    <tr class="first_row">
+        <td>Name</td>
+        <td>Meaning</td>
+    </tr>
+    <tr>
+        <td class="first_col code">dateTime</td>
+        <td>The time at the end of the archive interval in <a href="https://en.wikipedia.org/wiki/Unix_time">unix
+            epoch time</a>. This is the <em>primary key</em> in the database. It must be unique, and it cannot
+            be null.
+        </td>
+    </tr>
+    <tr>
+        <td class="first_col code">usUnits</td>
+        <td>The unit system the record is in. It cannot be null. See the <em><a href="appendix/#units">Appendix:
+            Units</a></em> for how these systems are encoded.
+        </td>
+    </tr>
+    <tr>
+        <td class="first_col code">interval</td>
+        <td>The length of the archive interval in <em>minutes</em>. It cannot be null.
+        </td>
+    </tr>
+</table>
+
+<p>In addition to the main archive table, there are a number of smaller tables inside the database, one for each observation type, which hold <em>daily summaries</em> of the type, such as the minimum and maximum value seen during the day, and at what time. These tables have names such as <code>archive_day_outTemp</code> or <code>archive_day_barometer</code>. They are there to optimize certain types of queries &mdash; their existence is generally transparent to the user. For more details, see the section <a href="../devnotes#Daily_summaries"><em>Daily summaries</em></a> in the document <em>Developer's Notes</em>.</p>
+<h3 id="binding-names">Binding names<a class="headerlink" href="#binding-names" title="Permanent link">&para;</a></h3>
+<p>While most users will only need the one weather database that comes with WeeWX, the reporting engine allows you to use multiple databases in the same report. For example, if you have installed the <a href="https://github.com/weewx/weewx/wiki/cmon">cmon</a> computer monitoring package, which uses its own database, you may want to include some statistics or graphs about your server in your reports, using that database.</p>
+<p>An additional complication is that WeeWX can use more than one database implementation: SQLite or MySQL. Making users specify in the templates not only which database to use, but also which implementation, would be unreasonable.</p>
+<p>The solution, like so many other problems in computer science, is to introduce another level of indirection, a <em>database binding</em>. Rather than specify which database to use, you specify which <em>binding</em>. Bindings do not change with the database implementation, so, for example, you know that <code>wx_binding</code> will always point to the weather database, no matter if its implementation is a sqlite database or a MySQL database. Bindings are listed in section <a href="../usersguide/weewx-config-file/data-bindings/">[DataBindings]</a> in <code>weewx.conf</code>.</p>
+<p>The standard weather database binding that WeeWX uses is <code>wx_binding</code>. This is the binding that you will be using most of the time and, indeed, it is the default. You rarely have to specify it explicitly.</p>
+<h3 id="programming-interface">Programming interface<a class="headerlink" href="#programming-interface" title="Permanent link">&para;</a></h3>
+<p>WeeWX includes a module called <code>weedb</code> that provides a single interface for many of the differences between database implementations such as SQLite and MySQL. However, it is not uncommon to make direct SQL queries within services or search list extensions. In such cases, the SQL should be generic so that it will work with every type of database.</p>
+<p>The database manager class provides methods to create, open, and query a database. These are the canonical forms for obtaining a database manager.</p>
+<p>If you are opening a database from within a WeeWX service:</p>
+<div class="highlight"><pre><span></span><code><span class="n">db_manager</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">db_binder</span><span class="o">.</span><span class="n">get_manager</span><span class="p">(</span><span class="n">data_binding</span><span class="o">=</span><span class="s1">&#39;name_of_binding&#39;</span><span class="p">,</span> <span class="n">initialize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+ <span class="c1"># Sample query:</span>
+<span class="n">db_manager</span><span class="o">.</span><span class="n">getSql</span><span class="p">(</span><span class="s2">&quot;SELECT SUM(rain) FROM </span><span class="si">%s</span><span class="s2"> &quot;</span>\\
+    <span class="s2">&quot;WHERE dateTime&gt;? AND dateTime&lt;=?&quot;</span> <span class="o">%</span> <span class="n">db_manager</span><span class="o">.</span><span class="n">table_name</span><span class="p">,</span> <span class="p">(</span><span class="n">start_ts</span><span class="p">,</span> <span class="n">stop_ts</span><span class="p">))</span>
+</code></pre></div>
+<p>If you are opening a database from within a WeeWX search list extension, you will be passed in a function <code>db_lookup()</code> as a parameter, which can then be used to bind to a database. By default, it returns a manager bound to <code>wx_binding</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">wx_manager</span>    <span class="o">=</span> <span class="n">db_lookup</span><span class="p">()</span>                                    <span class="c1"># Get default binding</span>
+<span class="n">other_manager</span> <span class="o">=</span> <span class="n">db_lookup</span><span class="p">(</span><span class="n">data_binding</span><span class="o">=</span><span class="s1">&#39;some_other_binding&#39;</span><span class="p">)</span>   <span class="c1"># Get an explicit binding</span>
+
+ <span class="c1"># Sample queries:</span>
+<span class="n">wx_manager</span><span class="o">.</span><span class="n">getSql</span><span class="p">(</span><span class="s2">&quot;SELECT SUM(rain) FROM </span><span class="si">%s</span><span class="s2"> &quot;</span>\\
+    <span class="s2">&quot;WHERE dateTime&gt;? AND dateTime&lt;=?&quot;</span> <span class="o">%</span> <span class="n">wx_manager</span><span class="o">.</span><span class="n">table_name</span><span class="p">,</span> <span class="p">(</span><span class="n">start_ts</span><span class="p">,</span> <span class="n">stop_ts</span><span class="p">))</span>
+<span class="n">other_manager</span><span class="o">.</span><span class="n">getSql</span><span class="p">(</span><span class="s2">&quot;SELECT SUM(power) FROM </span><span class="si">%s</span><span class="s2">&quot;</span>\\
+    <span class="s2">&quot;WHERE dateTime&gt;? AND dateTime&lt;=?&quot;</span> <span class="o">%</span> <span class="n">other_manager</span><span class="o">.</span><span class="n">table_name</span><span class="p">,</span> <span class="p">(</span><span class="n">start_ts</span><span class="p">,</span> <span class="n">stop_ts</span><span class="p">))</span>
+</code></pre></div>
+<p>If opening a database from somewhere other than a service, and there is no <code>DBBinder</code> available:</p>
+<div class="highlight"><pre><span></span><code><span class="n">db_manager</span> <span class="o">=</span> <span class="n">weewx</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">open_manager_with_config</span><span class="p">(</span><span class="n">config_dict</span><span class="p">,</span> <span class="n">data_binding</span><span class="o">=</span><span class="s1">&#39;name_of_binding&#39;</span><span class="p">)</span>
+
+ <span class="c1"># Sample query:</span>
+<span class="n">db_manager</span><span class="o">.</span><span class="n">getSql</span><span class="p">(</span><span class="s2">&quot;SELECT SUM(rain) FROM </span><span class="si">%s</span><span class="s2"> &quot;</span>\\
+    <span class="s2">&quot;WHERE dateTime&gt;? AND dateTime&lt;=?&quot;</span> <span class="o">%</span> <span class="n">db_manager</span><span class="o">.</span><span class="n">table_name</span><span class="p">,</span> <span class="p">(</span><span class="n">start_ts</span><span class="p">,</span> <span class="n">stop_ts</span><span class="p">))</span>
+</code></pre></div>
+<p>The <code>DBBinder</code> caches managers, and thus database connections. It cannot be shared between threads.</p>
+<h2 id="units">Units<a class="headerlink" href="#units" title="Permanent link">&para;</a></h2>
+<p>The unit architecture in WeeWX is designed to make basic unit conversions and display of units easy. It is not designed to provide dimensional analysis, arbitrary conversions, and indications of compatibility.</p>
+<p>The <em>driver</em> reads observations from an instrument and converts them, as necessary, into a standard set of units. The actual units used by each instrument vary widely; some instruments use Metric units, others use US Customary units, and many use a mixture. The driver can emit measurements in any unit system, but it must use the same unit system for all values in a LOOP packet or archive record. </p>
+<p>By default, and to maintain compatibility with wview, the default database units are US Customary, although this can be changed.</p>
+<p>Note that whatever unit system is used in the database, data can be <em>displayed</em> using any unit system. So, in practice, it does not matter what unit system is used in the database.</p>
+<p>Each <em>observation type</em>, such as <code>outTemp</code> or <code>pressure</code>, is associated with a <em>unit group</em>, such as <code>group_temperature</code> or <code>group_pressure</code>. Each unit group is associated with a <em>unit type</em> such as <code>degree_F</code> or <code>mbar</code>. The reporting service uses this architecture to convert observations into a target unit system, to be displayed in your reports.</p>
+<p>With this architecture one can easily create reports with, say, wind measured in knots, rain measured in mm, and temperatures in degree Celsius. Or one can create a single set of templates, but display data in different unit systems with only a few stanzas in a configuration file.</p>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+          <a href="#" class="md-top md-icon" data-md-component="top" hidden>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+            Back to top
+          </a>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright © 2009-2023 Thomas Keffer and Matthew Wall, all rights reserved
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.instant", "navigation.tracking", "navigation.indexes", "navigation.top", "toc.follow", "search.highlight", "search.share", "search.suggest"], "search": "../assets/javascripts/workers/search.db81ec45.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.4b2c34cd.min.js"></script>
+      
+    
+  </body>
+</html>
