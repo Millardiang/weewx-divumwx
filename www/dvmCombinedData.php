@@ -286,7 +286,11 @@ explode(" ", file_get_contents($livedata)));
     $lightning["year_strike_count"] = $sdata["year.lightning_strike_count.sum"];
     $lightning["last_time"] = $adata["lightning"]["lightning last time"]["at"];
     $lightning["alltime_strike_count"] = $sdata["alltime.lightning_strike_count.sum"];
-    $lightning["last_distance"] = $sdata["current.lightning_distance.formatted"];
+    $lightning["last_distance"] = $weewxrt[57];    
+    if ($lightning["last_distance"] == 'N/A' || $lightning["last_distance"] == '0' || $lightning["last_distance"] == 'NULL')
+    {
+        $lightning["last_distance"] = $sdata["current.lightning_distance.formatted"];
+    }
     $lightning["now_energy"] = $weewxrt[59];
     $lightning["now_strike_count"] = $weewxrt[60];
     $lightning["now_noise_count"] = $weewxrt[61];
