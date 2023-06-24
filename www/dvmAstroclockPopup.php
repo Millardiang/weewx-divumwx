@@ -48,7 +48,7 @@ echo "<body style='background-color:#292E35'>";
     <meta charset="utf-8">
     <title>Astroclock</title>
 <meta name="viewport" content="width = device-width, initial-scale = 1, shrink-to-fit = yes">
-<link rel="stylesheet" href="css/astroclock.css">
+<!--link rel="stylesheet" href="css/astroclock.css"-->
 </head>
 <script src="js/two.js"></script>
 
@@ -57,28 +57,17 @@ echo "<body style='background-color:#292E35'>";
     font-family: 'AstroDotBasic';
     src: url('css/fonts/AstroDotBasic.ttf') format('truetype');
 }
+body {
+  position: absolute;
+  overflow: hidden;
+}
 </style>
 
 <body>
 
-<!--svg Sun Ring --> 
-<svg width="780" height="500" style="position:relative; top: 25px; left: -130px; border:0px solid #007FFF;"> 
-  <defs>
-    <linearGradient id="grad1" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="rgba(255,255,0,1)" /> <!--yellow-->
-      <stop offset="50%" stop-color="rgba(255,0,0,1)" />  <!--red-->
-      <stop offset="100%" stop-color="rgba(0,0,255,1)" /> <!--blue-->
-    </linearGradient>
-  </defs>
-  <g fill="none">
-    <circle cx="250" cy="250" r="185" stroke="url(#grad1)" stroke-width="15" />
-  </g>
-</svg>
-<div id="astroclock" width="780" height="500" style="position:relative; top: -225px; left: -520px; border:0px solid #007FFF;">
+<div id="astroclock" width="780" height="500" style="position:relative; top: 25px; left: 0px; border:0px solid #007FFF;">
 
 <script>
-
-// The svg sun ring is started before anything else !
 
 // refresh the page every 60 seconds
 window.setInterval('refresh()', 60000); 	
@@ -233,6 +222,27 @@ var params = { width: canvasWidth,
 			   autostart: true,
 			   type: Two.Types.svg };
 var two = new Two(params).appendTo(skynet);
+
+const colors = ['rgba(255,255,0,1)','rgba(255,0,0,1)','rgba(0,0,255,1)'];
+
+let colorIndex = 0;
+
+let x1 = 0;
+let y1 = 0;
+let x2 = 0;
+let y2 = 1;
+var Rad = 185;
+
+let gradient = two.makeLinearGradient(x1, y1, x2, y2,
+  new Two.Stop(0, colors[0]),
+  new Two.Stop(0.5, colors[1]),
+  new Two.Stop(1.0, colors[2])
+);
+
+const circ = two.makeCircle(0, 0, Rad);
+circ.stroke = gradient;
+circ.linewidth = 15;
+circ.noFill();
 
 // Define clock elements
 const radius = Math.min(two.width, two.height) * 0.30;
