@@ -1,3 +1,3 @@
 <?php
-$templateversion = "DVM-<maxblue>Alpha build 0.5.2</maxblue>";
+$templateversion = "DVM-<maxblue>Alpha build 0.5.3</maxblue>";
 ?>
