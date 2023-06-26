@@ -48,16 +48,13 @@ $darkminutes = 60 - $lightmins;
 $darkminutes = ($darkminutes < 10) ? '0' .$darkminutes : $darkminutes;
 
 if (round($sun_alt,2) >= 0) { 
-$sun_elevation = round($sun_alt,2)."&deg;<div class=sunabovedivumwx>&nbsp;</div>";
+$sun_elevation = round($sun_alt,2)."°<div class=sunabovedivumwx> </div>";
 } else if (round($sun_alt,2) < 0) { 
-$sun_elevation = round($sun_alt,2)."&deg;<div class=sunbelowdivumwx>&nbsp;</div>"; 
+$sun_elevation = round($sun_alt,2)."°<div class=sunbelowdivumwx> </div>"; 
 }?>
 <div class="chartforecast2">
-      <span class="yearpopup"><a alt="Orrery" title="Orrery" href="dvmOrreryPopup.php" data-lity><?php echo $info;?> Orrery</a></span>
+      <span class="yearpopup"><a alt="Orrery" title="Orrery" href="dvmOrreyPopup.php" data-lity><?php echo $info;?> Orrery</a></span>
       <span class="yearpopup"><a alt="Astroclock" title="Astroclock" href="dvmAstroclockPopup.php" data-lity><?php echo $info;?> Astroclock</a></span>
-      <span class="yearpopup"><a alt="Solar Path" title="Solar Path" href="dvmSolarpathModulePopup.php" data-lity><?php echo $info;?> Solar Path</a></span>
-      <span class="yearpopup"><a alt="Star Maps" title="Star Maps" href="dvmStarMapModulePopup.php" data-lity><?php echo $info;?> Star Maps</a></span>
-      <span class="yearpopup"><a alt="noise" title="noise" href="noise.php" data-lity><?php echo $info;?> noise</a></span>
 </div>
 
 <span class="moduletitle2"><?php echo $lang['solarDialModule'];?></span>
