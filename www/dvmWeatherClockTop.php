@@ -1,222 +1,169 @@
 <?php
+//###################################################################################################################
+//	weewx-Weather34 Template maintained by Ian Millard (Steepleian)                                 				#
+//	                                                                                                				#
+//  Contains original code by Ian Millard and collaborators															#
+//  © claydonsweather.org.uk original CSS/SVG/PHP 2020-2021                                                         #
+// 	                                                                                                				#
+// 	Issues for weewx-Weather34 template should be addressed to https://github.com/steepleian/weewx-Weather34/issues #                                                                                              
+// 	                                                                                                				#
+//###################################################################################################################
+include_once('userSettings.php');
+include_once('common.php');
 include('dvmCombinedData.php');
+
 date_default_timezone_set($TZ);
 
-if ($theme === "dark") {
-    echo '<style>
 
-.stationclock {
-  position: relative;
-  margin-top: 23.5px; 
-  margin-left: 1.75px;
+if ($theme === "dark")
+{
+    echo '<style>.dot {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid;
+  color: rgba(230, 232, 239, .2);
 }
-.digitalclock {
-  position: relative;
-  font-family: "Helvetica";
-  font-size: 15px;
-  color: white;
-  margin-top: -43px; 
-  margin-left: 49px;
+.clock .hand {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -100%);
+  transform-origin: center bottom;
+  border-radius: 40px;
 }
-.analog-hours {
-    stroke-width: 3.5;
-    stroke: rgba(170,170,170,1);
-    stroke-linecap: round;
+.clock .s-hand {
+  height: 20px;
+  width: 1px;
+  background-color: #ff7c39;
+  z-index: 5;
 }
-.analog-minutes {
-    stroke-width: 2;
-    stroke: rgba(170,170,170,1);
-    stroke-linecap: round;
+.clock .m-hand {
+  height: 19px;
+  width: 2px;
+  background-color: rgba(170,170,170,1);
+  z-index: 4;
 }
-.analog-seconds {
-    stroke-width: 1;
-    stroke: #ff7c39;
-    stroke-linecap: round;
+.clock .h-hand {
+  height: 16px;
+  width: 3.5px;
+  background-color: rgba(170,170,170,1);
+  z-index: 3;
+}
+.clock .center {
+  background-color: #ff7c39;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 6;
 }
     </style>';
-
-} else {
-
-    echo '<style>
- 
-.stationclock {
-  position: relative;
-  margin-top: 23.5px; 
-  margin-left: 1.75px;
 }
-.digitalclock {
-  position: relative;
-  font-family: "Helvetica";
-  font-size: 15px;
-  color: #2d3a4b;
-  margin-top: -43px; 
-  margin-left: 49px;
+else if ($theme === "light")
+{
+    echo '<style>.dot {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px #e6e8ef solid;
 }
-.analog-hours {
-    stroke-width: 3.5;
-    stroke: rgba(170,170,170,1);
-    stroke-linecap: round;
+.clock .hand {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -100%);
+  transform-origin: center bottom;
+  border-radius: 40px;
 }
-.analog-minutes {
-    stroke-width: 2;
-    stroke: rgba(170,170,170,1);
-    stroke-linecap: round;
+.clock .s-hand {
+  height: 20px;
+  width: 1px;
+  background-color: #ff7c39;
+  z-index: 5;
 }
-.analog-seconds {
-    stroke-width: 1;
-    stroke: #ff7c39;
-    stroke-linecap: round;
+.clock .m-hand {
+  height: 19px;
+  width: 2px;
+  background-color: rgba(170,170,170,1);
+  z-index: 4;
 }
+.clock .h-hand {
+  height: 16px;
+  width: 3.5px;
+  background-color: rgba(170,170,170,1);
+  z-index: 3;
+}
+.clock .center {
+  background-color: #ff7c39;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 6;
     </style>';
 }
 ?>
       
-<script src="js/d3.4.2.2.min.js"></script>
 
-<div class="stationclock"></div>
-<div class="digitalclock"></div>
+<div class="calendar34" style="padding-top: 10px" ><svg id="weather34clock icon" width="60pt" height="60pt" viewBox="0 0 720 720" version="12-10-21" ></svg>
+</div><span id="theTime"></span></div>
 
-<script>
+<div class="clock"  width="48" height="48" style="position:relative; top: 27px; left: 5px;">
+	<div class="dot"></div>
+	<div class="s-hand hand"></div>
+	<div class="m-hand hand"></div>
+	<div class="h-hand hand"></div>
+	<div class="center"></div>
+</div>
 
-var theme = "<?php echo $theme;?>";
 
-if (theme === 'dark') {
 
-    var ringColor = "rgba(230, 232, 239, 0.2)";
-    var dateColor = "silver";
+  <script>
+  $(document).ready(function() {
+	
+	setInterval(function(){
+		getTime();
+	}, 50);
+	
+	function getTime() {
+			
+	var now = new Date();
+	
+	var yourTimeZoneFrom = <?php echo $UTC_offset?>;
+	
+	var tzDifference = yourTimeZoneFrom * 60 + now.getTimezoneOffset();
+	var offset = tzDifference * 60 * 1000;
+	
+	var now2 = new Date(new Date().getTime() + offset);
+		
+		var s = now2.getSeconds() + (now2.getMilliseconds() / 1000);
+		var m = now2.getMinutes();
+		var h = hour12();
+		
+		$(".s-hand").css("transform", "translate(-50%, -100%) rotate(" + s * 6 + "deg)");
+		$(".m-hand").css("transform", "translate(-50%, -100%) rotate(" + m * 6 + "deg)");
+		$(".h-hand").css("transform", "translate(-50%, -100%) rotate(" + (h * 30 + m * 0.5) + "deg)");
+		
+		function hour12() {
+			var hour = now2.getHours();
 
-} else {
+			if(hour >= 12) {
+				hour = hour - 12;
+			}
 
-    var ringColor = "#e7e9ef";
-    var dateColor = "#2d3a4b";
-
-}
-</script>
-
-<script>
-
-var date = "<?php echo date('l d M Y');?>";
-
-var svg = d3.select(".stationclock")
-    .append("svg")
-    .attr("width", 226)
-    .attr("height", 55);
-
- svg.append("circle")
-    .style("stroke", ringColor)
-    .style("stroke-width", 2)
-    .style("fill", "none")    
-    .attr("r", 23)
-    .attr("cx", 27.5)
-    .attr("cy", 27.5);
-
-var analogContent = svg
-    .append('g')
-    .attr('class','analog-content')
-    .attr("transform", "translate(27.5,27.5)");
-
-var hourScale = d3.scaleLinear()
-    .range([0,360])
-    .domain([0,12]);
-
-var minuteScale = d3.scaleLinear()
-    .range([0,360])
-    .domain([0,60]);
-
-var secondScale = d3.scaleLinear()
-    .range([0,360])
-    .domain([0,60]);
-
-var handData = [
-
-    {'label':'hours', 'scale':hourScale, 'length': -13},
-    {'label':'minutes', 'scale':minuteScale, 'length': -18},
-    {'label':'seconds', 'scale':secondScale, 'length': -19}
-]
-
-var analogHands = analogContent.selectAll('.hands')
-    analogHands.data(handData)
-    .enter()
-    .append('g')
-    .attr('class',function(d){ return'hands analog-' + d.label;})
-    .append('line')
-    .attr('x1', 0)
-    .attr('y1', 0)
-    .attr('x2', 0)
-    .attr('y2',function(d){return d.length})
-
-function update() {
-var time = new Date();
-handData[0].value = (time.getHours() % 12) + (time.getMinutes() + time.getSeconds() / 60) / 60;
-handData[1].value = (time.getMinutes() % 60) + time.getSeconds() / 60;
-handData[2].value = time.getSeconds() + time.getMilliseconds() / 1000;
-d3.selectAll('.hands').data(handData) 
-.attr('transform',function(d){return 'rotate('+ d.scale(d.value) +')';});    
-}
-setInterval(update, 1);
-
-svg.append("circle")
-    .style("fill", "#ff7c39")
-    .attr("r", 2.5)    
-    .attr("cx", 27.5)
-    .attr("cy", 27.5);
-
-svg.append("text")
-    .attr("x", 138)
-    .attr("y", 15)
-    .style("fill", dateColor)
-    .style("font-family", "Helvetica")
-    .style("font-size", "12.25px")
-    .style("text-anchor", "middle")
-    .style("font-weight", "normal")
-    .text(date);
-
-if (theme === 'dark') {
-
-svg.append("rect")
-    .attr("x", 86)
-    .attr("y", 22)
-    .attr("rx", 1)
-    .attr("height", 20.5)
-    .attr("width", 103)
-    .style("fill", "rgba(46,139,87,1)");
-
-} else {
-
-svg.append("rect")
-    .attr("x", 86)
-    .attr("y", 22)
-    .attr("rx", 1)
-    .style("stroke", "#999999")
-    .attr("height", 20.5)
-    .attr("width", 103)
-    .style("fill", "none");
-
-svg.append("rect")
-    .attr("x", 86)
-    .attr("y", 22)
-    .attr("rx", 1)
-    .attr("height", 20.5)
-    .attr("width", 103)
-    .style("fill", "rgba(230,232,239,1)");
-}
-
-function clock() {
-
-var time = new Date(),
-hours = time.getHours(),
-minutes = time.getMinutes(),
-seconds = time.getSeconds();
-
-document.querySelectorAll('.digitalclock')[0].innerHTML = skynet(hours) + ":" + skynet(minutes) + ":" + skynet(seconds);
+			if(hour == 0) {
+				h = 12;
+			}
+			return hour;
+		}
+	}
+});
   
-  function skynet(standIn) {
-    if (standIn < 10) {
-      standIn = '0' + standIn
-    }
-    return standIn;
-  }
-}
-setInterval(clock, 1000);
-    
 </script>
