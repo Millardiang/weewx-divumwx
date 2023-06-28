@@ -1,8 +1,6 @@
 <?php
 $themelayout = "5"; //4, 5, tablet
 $TZ = "Europe/London";
-$theme = isset($theme) ? $theme : "dark";
-$theme1 = $theme; 
 $extralinks   = "yes";
 $languages   = "yes";
 $dateFormat   = "d-m-Y"; //m-d-Y, Y-m-d
