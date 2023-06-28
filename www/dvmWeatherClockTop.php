@@ -11,7 +11,7 @@ if ($theme === "dark") {
   margin-top: 23.5px; 
   margin-left: 1.75px;
 }
-.digitalclock {
+#digitalclock {
   position: relative;
   font-family: "Helvetica";
   font-size: 15px;
@@ -45,7 +45,7 @@ if ($theme === "dark") {
   margin-top: 23.5px; 
   margin-left: 1.75px;
 }
-.digitalclock {
+#digitalclock {
   position: relative;
   font-family: "Helvetica";
   font-size: 15px;
@@ -71,11 +71,18 @@ if ($theme === "dark") {
     </style>';
 }
 ?>
+
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Weather Clock</title>
+</head>
+<body>
       
 <script src="js/d3.4.2.2.min.js"></script>
 
 <div class="stationtime"></div>
-<div class="digitalclock"></div>
 
 <script>
 
@@ -83,7 +90,7 @@ var theme = "<?php echo $theme;?>";
 
 if (theme === 'dark') {
 
-    var ringColor = "rgba(230, 232, 239, 0.2)";
+    var ringColor = "rgba(230,232,239,0.2)";
     var dateColor = "silver";
 
 } else {
@@ -148,18 +155,23 @@ var analogHands = analogContent.selectAll('.hands')
     .attr('y2',function(d){return d.length})
 
 function update() {
+
 var now = new Date();
-var yourTimeZoneFrom = <?php echo $UTC_offset?>;
+var yourTimeZoneFrom = "<?php echo $UTC_offset;?>";
 var tzDifference = yourTimeZoneFrom * 60 + now.getTimezoneOffset();
 var offset = tzDifference * 60 * 1000;
 var now2 = new Date(new Date().getTime() + offset);
+
 handData[0].value = (now2.getHours() % 12) + (now2.getMinutes() + now2.getSeconds() / 60) / 60;
 handData[1].value = (now2.getMinutes() % 60) + now2.getSeconds() / 60;
 handData[2].value = now2.getSeconds() + now2.getMilliseconds() / 1000;
+
 d3.selectAll('.hands').data(handData) 
 .attr('transform',function(d){return 'rotate('+ d.scale(d.value) +')';});    
 }
 setInterval(update, 1);
+
+update();
 
 svg.append("circle")
     .style("fill", "#ff7c39")
@@ -185,25 +197,38 @@ svg.append("rect")
     .attr("width", 103)
     .style("fill", "rgba(46,139,87,1)");
 
+</script>
+
+<div id="digitalclock"></div>
+<script type ="text/javascript">
+
 function clock() {
+
 var now = new Date();
 var yourTimeZoneFrom = <?php echo $UTC_offset?>;
 var tzDifference = yourTimeZoneFrom * 60 + now.getTimezoneOffset();
 var offset = tzDifference * 60 * 1000;
 var now2 = new Date(new Date().getTime() + offset);
+
 var hours = now2.getHours();
 var minutes = now2.getMinutes();
 var seconds = now2.getSeconds();
 
-document.querySelectorAll('.digitalclock')[0].innerHTML = skynet(hours) + ":" + skynet(minutes) + ":" + skynet(seconds);
-  
-  function skynet(standIn) {
-    if (standIn < 10) {
-      standIn = '0' + standIn
+var digitalclock = document.getElementById('digitalclock').innerHTML = skynet(hours) + ":" + skynet(minutes) + ":" + skynet(seconds);
+
+  function skynet(tiktok) {
+    if (tiktok < 10) {
+      tiktok = '0' + tiktok;
     }
-    return standIn;
-  }
+    return tiktok;
+  }     
 }
 setInterval(clock, 1000);
 
+clock();
+
 </script>
+
+</body>
+</html>
+
