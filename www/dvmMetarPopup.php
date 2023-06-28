@@ -1,7 +1,7 @@
 <?php 
 include('fixedSettings.php');
-include('dvmCombinedData.php');
-error_reporting(0);
+include('dvmCombinedData.php')
+;error_reporting(0); 
 $result = date_sun_info(time(), $lat, $lon);
 $suns2 =date('G.i', $result['sunset']);
 $sunrs2 =date('G.i', $result['sunrise']);
@@ -13,10 +13,11 @@ $metartime       = $parsed_json->{'data'}[0]->{'observed'};
 $metarraw       = $parsed_json->{'data'}[0]->{'raw_text'};
 $metarstationid       = $parsed_json->{'data'}[0]->{'icao'};
 $metarstationname       = $parsed_json->{'data'}[0]->{'station'}->{'name'};
+
 $metarlat = $parsed_json->{'data'}[0]->{'station'}->{'geometry'}->{'coordinates'}[1];
 $metat34lon = $parsed_json->{'data'}[0]->{'station'}->{'geometry'}->{'coordinates'}[0];
 $airport1dist = round(distance($lat, $lon, $metarlat, $metat34lon));
-$metarpressurehg       = $parsed_json->{'data'}[0]->{'barometer'}->{'hg'};	
+$metarpressurehg       = $parsed_json->{'data'}[0]->{'barometer'}->{'hg'};  
 $metarpressuremb       = $parsed_json->{'data'}[0]->{'barometer'}->{'mb'};
 $metarconditions         = $parsed_json->{'data'}[0]->{'conditions'}[0]->{'code'};
 $metarconditionstext         = $parsed_json->{'data'}[0]->{'conditions'}[0]->{'text'};
@@ -35,7 +36,7 @@ $metarwindspeedkts          = $parsed_json->{'data'}[0]->{'wind'}->{'speed_kts'}
 $metarwindspeedms          = number_format($metarwindspeedmph*0.44704,1);
 $metarraininches          = $parsed_json->{'data'}[0]->{'rain_in'};
 $metarrainmm          = number_format($metarraininches*25.4,2) ;
-$metarvisibility=str_replace(',', '', $metarvisibility);
+$metarvisibility      =str_replace(',', '', $metarvisibility);
 $metarvismiles        = number_format($metarvisibility*0.000621371,1) ;
 $metarviskm        = number_format($metarvisibility*0.00099999969062399994,1) ;
 // start the divumwx icon output and descriptions
@@ -43,84 +44,84 @@ if($metarconditions =='-SHRA'){
 if ($now >$suns2 ){$sky_icon='40n.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='40n.svg';} 
 else $sky_icon='40d.svg'; 
-$sky_desc='Light Rain <br />Showers';
+$sky_desc='Light Rain <br>Showers';
 }
 //rain 
 else if($metarconditions =='SHRA'){
 if ($now >$suns2 ){$sky_icon='40n.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='40n.svg';} 
 else $sky_icon='40d.svg'; 
-$sky_desc='Light Rain <br />Showers';
+$sky_desc='Light Rain <br>Showers';
 }
 //rain heavy
 else if($metarconditions =='+SHRA'){
 if ($now >$suns2 ){$sky_icon='41n.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='41n.svg';} 
 else $sky_icon='41d.svg'; 
-$sky_desc='Heavy Rain <br />Showers';
+$sky_desc='Heavy Rain <br>Showers';
 }
 //rain light
 else if($metarconditions=='-RA'){
 if ($now >$suns2 ){$sky_icon='40n.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='40n.svg';} 
 else $sky_icon='40d.svg'; 
-$sky_desc='Light Rain <br />Showers';
+$sky_desc='Light Rain <br>Showers';
 }
 //rain moderate
 else if($metarconditions=='+RA'){
 if ($now >$suns2 ){$sky_icon='05n.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='05n.svg';} 
 else $sky_icon='05d.svg'; 
-$sky_desc='Moderate Rain <br />Showers';
+$sky_desc='Moderate Rain <br>Showers';
 }
 //rain
 else if($metarconditions=='RA'){
 if ($now >$suns2 ){$sky_icon='46.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='46.svg';} 
 else $sky_icon='46.svg'; 
-$sky_desc='Light Rain <br />Showers';
+$sky_desc='Light Rain <br>Showers';
 }
 //rain squalls
 else if($metarconditions=='SQ'){
 if ($now >$suns2 ){$sky_icon='10w.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='10w.svg';} 
 else $sky_icon='10w.svg'; 
-$sky_desc='Rain Squall<br />Showers';
+$sky_desc='Rain Squall<br>Showers';
 }
 //snow light
 else if($metarconditions=='-SN'){
 if ($now >$suns2 ){$sky_icon='49.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='49.svg';} 
 else $sky_icon='49.svg'; 
-$sky_desc='Light Snow <br />Showers';
+$sky_desc='Light Snow <br>Showers';
 }
 //snow moderate
 else if($metarconditions=='+SN'){
 if ($now >$suns2 ){$sky_icon='13.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='13.svg';} 
 else $sky_icon='13.svg'; 
-$sky_desc='Moderate Snow <br />Showers';
+$sky_desc='Moderate Snow <br>Showers';
 }
 //snow
 else if($metarconditions=='SN'){
 if ($now >$suns2 ){$sky_icon='13.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='13.svg';} 
 else $sky_icon='13.svg'; 
-$sky_desc='Snow Showers <br />';
+$sky_desc='Snow Showers <br>';
 }
 //snow grains
 else if($metarconditions=='SG'){
 if ($now >$suns2 ){$sky_icon='13.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='13.svg';} 
 else $sky_icon='13.svg'; 
-$sky_desc='Snow Grains <br />';
+$sky_desc='Snow Grains <br>';
 }
 //snow grains
 else if($metarconditions=='SNINCR'){
 if ($now >$suns2 ){$sky_icon='13.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='13.svg';} 
 else $sky_icon='13.svg'; 
-$sky_desc='Snow Showers <br />';
+$sky_desc='Snow Showers <br>';
 }
 //sleet
 else if($metarconditions=='IP'){
@@ -134,56 +135,56 @@ else if($metarconditions=='HZ'){
 if ($now >$suns2 ){$sky_icon='hazyn.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='hazyn.svg';} 
 else $sky_icon='hazyd.svg'; 
-$sky_desc='Hazy <br />Conditions';
+$sky_desc='Hazy <br>Conditions';
 }
 //Batches Fog
 else if($metarconditions=='BCFG'){
 if ($now >$suns2 ){$sky_icon='15.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='15.svg';} 
 else $sky_icon='15.svg'; 
-$sky_desc='Foggy <br />Conditions';
+$sky_desc='Foggy <br>Conditions';
 }
 //Fog
 else if($metarconditions=='FG'){
 if ($now >$suns2 ){$sky_icon='15.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='15.svg';} 
 else $sky_icon='15.svg'; 
-$sky_desc='Foggy <br />Conditions';
+$sky_desc='Foggy <br>Conditions';
 }
 //Fog-NIGHT
 else if($metarconditions=='NFG'){
 if ($now >$suns2 ){$sky_icon='15.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='15.svg';} 
 else $sky_icon='15.svg'; 
-$sky_desc='Foggy <br />Conditions';
+$sky_desc='Foggy <br>Conditions';
 }
 //Mist-Night
 else if($metarconditions=='BR'){
 if ($now >$suns2 ){$sky_icon='15.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='15.svg';} 
 else $sky_icon='15.svg'; 
-$sky_desc='Misty <br />Conditions';
+$sky_desc='Misty <br>Conditions';
 }
 //Mist
 else if($metarconditions=='NBR'){
 if ($now >$suns2 ){$sky_icon='15.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='15.svg';} 
 else $sky_icon='15.svg'; 
-$sky_desc='Misty <br />Conditions';
+$sky_desc='Misty <br>Conditions';
 }
 //Hail
 else if($metarconditions=='GR'){
 if ($now >$suns2 ){$sky_icon='12.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='12.svg';} 
 else $sky_icon='12.svg'; 
-$sky_desc='Hail and Rain <br />Conditions';
+$sky_desc='Hail and Rain <br>Conditions';
 }
 //Hail GS
 else if($metarconditions=='GS'){
 if ($now >$suns2 ){$sky_icon='12.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='12.svg';} 
 else $sky_icon='12.svg'; 
-$sky_desc='Hail <br />Conditions';
+$sky_desc='Hail <br>Conditions';
 }
 //ICE CYSTALS
 else if($metarconditions=='IC'){
@@ -197,91 +198,91 @@ else if($metarconditions=='PL'){
 if ($now >$suns2 ){$sky_icon='13.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='13.svg';} 
 else $sky_icon='13.svg'; 
-$sky_desc='Ice Pellets <br />';
+$sky_desc='Ice Pellets <br>';
 }
 //Thunderstorms
 else if($metarconditions=='TS'){
 if ($now >$suns2 ){$sky_icon='22.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='22.svg';} 
 else $sky_icon='22.svg'; 
-$sky_desc='Thunderstorm <br />Conditions';
+$sky_desc='Thunderstorm <br>Conditions';
 }
 //Thunderstorms
 else if($metarconditions=='-TS'){
 if ($now >$suns2 ){$sky_icon='22.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='22.svg';} 
 else $sky_icon='22.svg'; 
-$sky_desc='Thunderstorm <br />Conditions';
+$sky_desc='Thunderstorm <br>Conditions';
 }
 //Thunderstorms
 else if($metarconditions=='+TS'){
 if ($now >$suns2 ){$sky_icon='11.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='11.svg';} 
 else $sky_icon='11.svg'; 
-$sky_desc='Heavy <br />Thunderstorms';
+$sky_desc='Heavy <br>Thunderstorms';
 }
 //Thunderstorms
 else if($metarconditions=='TSRA'){
 if ($now >$suns2 ){$sky_icon='22.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='22.svg';} 
 else $sky_icon='22.svg'; 
-$sky_desc='Thunderstorm <br />Conditions';
+$sky_desc='Thunderstorm <br>Conditions';
 }
 //Scattered Thunderstorms
 else if($metarconditions=='SCTTSRA'){
 if ($now >$suns2 ){$sky_icon='30.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='30.svg';} 
 else $sky_icon='30.svg'; 
-$sky_desc='Scattered <br />Thunderstorms';
+$sky_desc='Scattered <br>Thunderstorms';
 }
 //Scattered Thunderstorms
 else if($metarconditions=='NTSRA'){
 if ($now >$suns2 ){$sky_icon='30.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='30.svg';} 
 else $sky_icon='30.svg'; 
-$sky_desc='Scattered <br />Thunderstorms';
+$sky_desc='Scattered <br>Thunderstorms';
 }
 //Dust
 else if($metarconditions=='DS'){
 if ($now >$suns2 ){$sky_icon='hazyn.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='hazyn.svg';} 
 else $sky_icon='hazyd.svg'; 
-$sky_desc='Dust Storm <br />Conditions';
+$sky_desc='Dust Storm <br>Conditions';
 }
 //Widespread Dust
 else if($metarconditions=='DU'){
 if ($now >$suns2 ){$sky_icon='hazyn.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='hazyn.svg';} 
 else $sky_icon='hazyd.svg'; 
-$sky_desc='Widespread Dust <br />Conditions';
+$sky_desc='Widespread Dust <br>Conditions';
 }
 //Dust-Sand Whirls
 else if($metarconditions=='PO'){
 if ($now >$suns2 ){$sky_icon='hazyn.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='hazyn.svg';} 
 else $sky_icon='hazyd.svg'; 
-$sky_desc='Dust-Sand Whirls <br />Conditions';
+$sky_desc='Dust-Sand Whirls <br>Conditions';
 }
 //Sand
 else if($metarconditions=='SA'){
 if ($now >$suns2 ){$sky_icon='hazyn.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='hazyn.svg';} 
 else $sky_icon='hazyd.svg'; 
-$sky_desc='Dust-Sand <br />Conditions';
+$sky_desc='Dust-Sand <br>Conditions';
 }
 //Sandstorm
 else if($metarconditions=='SS'){
 if ($now >$suns2 ){$sky_icon='hazyn.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='hazyn.svg';} 
 else $sky_icon='hazyd.svg'; 
-$sky_desc='Sandstorm <br />Conditions';
+$sky_desc='Sandstorm <br>Conditions';
 }
 //Volcanic Ash
 else if($metarconditions=='VA'){
 if ($now >$suns2 ){$sky_icon='volcanoe.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='volcanoe.svg';} 
 else $sky_icon='volcanoe.svg'; 
-$sky_desc='Volcanic Ash <br />Conditions';
+$sky_desc='Volcanic Ash <br>Conditions';
 }
 
 //+FC
@@ -289,7 +290,7 @@ else if($metarconditions=='+FC'){
 if ($now >$suns2 ){$sky_icon='nsvrtsa.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='nsvrtsa.svg';} 
 else $sky_icon='nsvrtsat.svg'; 
-$sky_desc='Tornado <br /> Water Sprout';
+$sky_desc='Tornado <br> Water Sprout';
 }
 //2nd part clouds
 //clear
@@ -297,49 +298,49 @@ else if ($metarclouds=='SKC') {
 if ($now >$suns2 ){$sky_icon='01n.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='01n.svg';} 
 else $sky_icon='01d.svg'; 
-$sky_desc='Clear <br />Conditions';
+$sky_desc='Clear <br>Conditions';
 }
 //clear
 else if($metarclouds=='CLR'){
 if ($now >$suns2 ){$sky_icon='01n.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='01n.svg';} 
 else $sky_icon='01d.svg'; 
-$sky_desc='Clear <br />Conditions';
+$sky_desc='Clear <br>Conditions';
 }
 //clear
 else if($metarclouds=='CAVOK'){
 if ($now >$suns2 ){$sky_icon='01n.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='01n.svg';} 
 else $sky_icon='01d.svg'; 
-$sky_desc='Clear <br />Conditions';
+$sky_desc='Clear <br>Conditions';
 }
 //few
 else if($metarclouds=='FEW'){
 if ($now >$suns2 ){$sky_icon='03n.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='03n.svg';} 
 else $sky_icon='03d.svg'; 
-$sky_desc='Partly Cloudy <br />Conditions';
+$sky_desc='Partly Cloudy <br>Conditions';
 }
 //scattered clouds
 else if($metarclouds=='SCT'){
 if ($now >$suns2 ){$sky_icon='02n.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='02n.svg';} 
-else $sky_icon='02d.svg'; 	
-$sky_desc='Mostly Scattered <br />Clouds';
+else $sky_icon='02d.svg';   
+$sky_desc='Mostly Scattered <br>Clouds';
 }
 //mostly cloudy
-else if($metarclouds=='BKN'){		
+else if($metarclouds=='BKN'){   
 if ($now >$suns2 ){$sky_icon='03n.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='03n.svg';} 
-else $sky_icon='03d.svg'; 	
-$sky_desc='Mostly Cloudy <br />Conditions';
+else $sky_icon='03d.svg';   
+$sky_desc='Mostly Cloudy <br>Conditions';
 }
 //overcast
 else if($metarclouds=='OVC'){
 if ($now >$suns2 ){$sky_icon='04.svg';} 
 else if ($now <$sunrs2 ){$sky_icon='04.svg';} 
 else $sky_icon='04.svg'; 
-$sky_desc='Overcast <br />Conditions';
+$sky_desc='Overcast <br>Conditions';
 }
 //overcast
 else if($metarclouds=='OVX'){
@@ -350,17 +351,11 @@ $sky_desc='Overcast Conditions';
 }
 //offline
 else{
-	$sky_icon='offline.svg';
-	$sky_desc='Data Offline';
+  $sky_icon='offline.svg';
+  $sky_desc='Data Offline';
 };
- 
-
 ?>
-
-
-
 <?php
-
 if($theme==="light"){$background="white";$text="black";}
 else if($theme==="dark"){$background="rgba(33, 34, 39, .8)";$text="white";}
 $iconset = "icon2";
@@ -377,7 +372,7 @@ html,body
   {
     font-size:13px;
     font-family: "weathertext2", Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;	
+    -webkit-font-smoothing: antialiased;  
     -moz-osx-font-smoothing: grayscale;
     background-color:<?php echo $background; ?>;
   }
@@ -414,7 +409,7 @@ a:active {
   font-size:0.8em;
   -webkit-border-radius:4px;
   border-radius:4px;
-  background:0;-webkit-font-smoothing: antialiased;	-moz-osx-font-smoothing: grayscale;
+  background:0;-webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
 }
 .grid > article img {
   max-width: 100%;
@@ -511,7 +506,7 @@ stationid{font-size:1.4em;font-family:weathertext2;color:#009bb4}
 .pressure{position:absolute;float:left;margin-top:60px;text-align:left;}
 </style>
 
-<div class="divumwxdarkbrowser" url="<?php echo $metarstationname;?> Conditions"></div>
+<div class="divumwxdarkbrowser" url="<?php echo "Dresden City Airport";?> Conditions"></div>
   
 <main class="grid">
 
@@ -519,37 +514,37 @@ stationid{font-size:1.4em;font-family:weathertext2;color:#009bb4}
   <div class=actualt style="background:teal;color:white;">&nbsp;&nbsp Current Conditions </div>
   <div class="iconcondition"><?php echo "<img rel='prefetch' src='css/svg/".$sky_icon."' width='60px'>";?></div>
   <div class="icontext"><?php  echo $sky_desc; ?> </div>
-<br /><br /><br />
+<br><br><br>
 <div class="pressure">
-<blue>Pressure</blue> <br />
+<blue>Pressure</blue> <br>
 <?php
 if ($pressureunit == 'mb' || $pressureunit == 'hPa' || $pressureunit == 'kPa' ) {
-	echo $metarpressuremb ," (".$pressureunit.")";
+  echo $metarpressuremb ," (".$pressureunit.")";
 } else {
-	echo $metarpressurehg ," (inHG)";
+  echo $metarpressurehg ," (inHG)";
 }
 ?> - 
 <?php
 if ($pressureunit == 'mb' || $pressureunit == 'hPa' || $pressureunit == 'kPa') {
-	echo $metarpressurehg ," (inHG)";
+  echo $metarpressurehg ," (inHG)";
 } else {
-	echo $metarpressuremb ," (mb)";
+  echo $metarpressuremb ," (mb)";
 }
 ?>
-<blue><br />Visibility</blue> <br />
+<blue><br>Visibility</blue> <br>
 <?php
 if ($distanceunit == 'mi') {
-	echo $metarvismiles  ," (miles)";
+  echo $metarvismiles  ," (miles)";
     echo $metarcloudbasefeet;
 } else {
-	echo $metarviskm ," (km)";
+  echo $metarviskm ," (km)";
 }
 ?> - 
 <?php
 if ($distanceunit =='mi') {
-	echo $metarviskm  ," (km)";
+  echo $metarviskm  ," (km)";
 } else {
-	echo $metarvismiles ," (miles)";
+  echo $metarvismiles ," (miles)";
 }
 ?>
 </div>
@@ -560,45 +555,45 @@ if ($distanceunit =='mi') {
 
  <div class="metartempcontainer1"><?php
  if ($tempunit == 'C') {
-	if ($metartemperaturec >30) {echo '<div class=metartemptoday30>'.$metartemperaturec."<smalluvunit> &nbsp;&deg;C";}
-	else if ($metartemperaturec >25) {echo '<div class=metartemptoday25>'.$metartemperaturec."<smalluvunit> &nbsp;&deg;C";}
-	else if ($metartemperaturec >20) {echo '<div class=metartemptoday20>'.$metartemperaturec."<smalluvunit> &nbsp;&deg;C";}
-	else if ($metartemperaturec >10) {echo '<div class=metartemptoday10>'.$metartemperaturec."<smalluvunit> &nbsp;&deg;C";}
-	else if ($metartemperaturec >5) {echo '<div class=metartemptoday5>'.$metartemperaturec."<smalluvunit> &nbsp;&deg;C";}
-	else if ($metartemperaturec >-50) {echo '<div class=metartemptoday0>'.$metartemperaturec."<smalluvunit> &nbsp;&deg;C";}
-	else if ($metartemperaturec =='') {echo '<div class=metartemptoday0>'.$metartemperaturec."<smalluvunit> N/A";}
+  if ($metartemperaturec >30) {echo '<div class=metartemptoday30>'.$metartemperaturec."<smalluvunit> &nbsp;&deg;C";}
+  else if ($metartemperaturec >25) {echo '<div class=metartemptoday25>'.$metartemperaturec."<smalluvunit> &nbsp;&deg;C";}
+  else if ($metartemperaturec >20) {echo '<div class=metartemptoday20>'.$metartemperaturec."<smalluvunit> &nbsp;&deg;C";}
+  else if ($metartemperaturec >10) {echo '<div class=metartemptoday10>'.$metartemperaturec."<smalluvunit> &nbsp;&deg;C";}
+  else if ($metartemperaturec >5) {echo '<div class=metartemptoday5>'.$metartemperaturec."<smalluvunit> &nbsp;&deg;C";}
+  else if ($metartemperaturec >-50) {echo '<div class=metartemptoday0>'.$metartemperaturec."<smalluvunit> &nbsp;&deg;C";}
+  else if ($metartemperaturec =='') {echo '<div class=metartemptoday0>'.$metartemperaturec."<smalluvunit> N/A";}
  } else {
-	 if ($metartemperaturef >86) {echo '<div class=metartemptoday30>'.$metartemperaturef."<smalluvunit> &nbsp;&deg;F";}
-	else if ($metartemperaturef >77) {echo '<div class=metartemptoday25>'.$metartemperaturef."<smalluvunit> &nbsp;&deg;F";}
-	else if ($metartemperaturef >68) {echo '<div class=metartemptoday20>'.$metartemperaturef."<smalluvunit> &nbsp;&deg;F";}
-	else if ($metartemperaturef >50) {echo '<div class=metartemptoday10>'.$metartemperaturef."<smalluvunit> &nbsp;&deg;F";}
-	else if ($metartemperaturef >41) {echo '<div class=metartemptoday5>'.$metartemperaturef."<smalluvunit> &nbsp;&deg;F";}
-	else if ($metartemperaturef >-50) {echo '<div class=metartemptoday0>'.$metartemperaturef."<smalluvunit> &nbsp;&deg;F";}
-	else if ($metartemperaturef =='') {echo '<div class=metartemptoday0>'.$metartemperaturef."<smalluvunit> N/A";}
+   if ($metartemperaturef >86) {echo '<div class=metartemptoday30>'.$metartemperaturef."<smalluvunit> &nbsp;&deg;F";}
+  else if ($metartemperaturef >77) {echo '<div class=metartemptoday25>'.$metartemperaturef."<smalluvunit> &nbsp;&deg;F";}
+  else if ($metartemperaturef >68) {echo '<div class=metartemptoday20>'.$metartemperaturef."<smalluvunit> &nbsp;&deg;F";}
+  else if ($metartemperaturef >50) {echo '<div class=metartemptoday10>'.$metartemperaturef."<smalluvunit> &nbsp;&deg;F";}
+  else if ($metartemperaturef >41) {echo '<div class=metartemptoday5>'.$metartemperaturef."<smalluvunit> &nbsp;&deg;F";}
+  else if ($metartemperaturef >-50) {echo '<div class=metartemptoday0>'.$metartemperaturef."<smalluvunit> &nbsp;&deg;F";}
+  else if ($metartemperaturef =='') {echo '<div class=metartemptoday0>'.$metartemperaturef."<smalluvunit> N/A";}
  }
 ?></smalluvunit></div></div>
 <div class="tword"><?php if ($tempunit == 'F') {echo $metartemperaturec."&deg;C";} else if ($tempunit == 'C'){echo $metartemperaturef."&deg;F";}?></div>
 </div>
-	 
+   
 <div class="lotemp">
 
 <div class="metardewcontainer1"><?php
 if ($tempunit == 'C') {
-	if ($metardewpointc >30) {echo '<div class=metardewtoday30>'.$metardewpointc."<smalluvunit> &nbsp;&deg;C";}
-	else if ($metardewpointc >25) {echo '<div class=metardewtoday25>'.$metardewpointc."<smalluvunit> &nbsp;&deg;C";}
-	else if ($metardewpointc >20) {echo '<div class=metardewtoday20>'.$metardewpointc."<smalluvunit> &nbsp;&deg;C";}
-	else if ($metardewpointc >10) {echo '<div class=metardewtoday10>'.$metardewpointc."<smalluvunit> &nbsp;&deg;C";}
-	else if ($metardewpointc >5) {echo '<div class=metardewtoday5>'.$metardewpointc."<smalluvunit> &nbsp;&deg;C";}
-	else if ($metardewpointc >-50) {echo '<div class=metardewtoday0>'.$metardewpointc."<smalluvunit> &nbsp;&deg;C";}
-	else if ($metardewpointc=='') {echo '<div class=metartemptoday0>'.$metardewpointc."<smalluvunit> N/A";}
+  if ($metardewpointc >30) {echo '<div class=metardewtoday30>'.$metardewpointc."<smalluvunit> &nbsp;&deg;C";}
+  else if ($metardewpointc >25) {echo '<div class=metardewtoday25>'.$metardewpointc."<smalluvunit> &nbsp;&deg;C";}
+  else if ($metardewpointc >20) {echo '<div class=metardewtoday20>'.$metardewpointc."<smalluvunit> &nbsp;&deg;C";}
+  else if ($metardewpointc >10) {echo '<div class=metardewtoday10>'.$metardewpointc."<smalluvunit> &nbsp;&deg;C";}
+  else if ($metardewpointc >5) {echo '<div class=metardewtoday5>'.$metardewpointc."<smalluvunit> &nbsp;&deg;C";}
+  else if ($metardewpointc >-50) {echo '<div class=metardewtoday0>'.$metardewpointc."<smalluvunit> &nbsp;&deg;C";}
+  else if ($metardewpointc=='') {echo '<div class=metartemptoday0>'.$metardewpointc."<smalluvunit> N/A";}
 } else {
-	if ($metardewpointf>86) {echo '<div class=metartemptoday30>'.$metardewpointf."<smalluvunit> &nbsp;&deg;F";}
-	else if ($metardewpointf>77) {echo '<div class=metartemptoday25>'.$metardewpointf."<smalluvunit> &nbsp;&deg;F";}
-	else if ($metardewpointf>68) {echo '<div class=metartemptoday20>'.$metardewpointf."<smalluvunit> &nbsp;&deg;F";}
-	else if ($metardewpointf>50) {echo '<div class=metartemptoday10>'.$metardewpointf."<smalluvunit> &nbsp;&deg;F";}
-	else if ($metardewpointf>41) {echo '<div class=metartemptoday5>'.$metardewpointf."<smalluvunit> &nbsp;&deg;F";}
-	else if ($metardewpointf>-50) {echo '<div class=metartemptoday0>'.$metardewpointf."<smalluvunit> &nbsp;&deg;F";}
-	else if ($metardewpointf=='') {echo '<div class=metartemptoday0>'.$metardewpointf."<smalluvunit> N/A";}
+  if ($metardewpointf>86) {echo '<div class=metartemptoday30>'.$metardewpointf."<smalluvunit> &nbsp;&deg;F";}
+  else if ($metardewpointf>77) {echo '<div class=metartemptoday25>'.$metardewpointf."<smalluvunit> &nbsp;&deg;F";}
+  else if ($metardewpointf>68) {echo '<div class=metartemptoday20>'.$metardewpointf."<smalluvunit> &nbsp;&deg;F";}
+  else if ($metardewpointf>50) {echo '<div class=metartemptoday10>'.$metardewpointf."<smalluvunit> &nbsp;&deg;F";}
+  else if ($metardewpointf>41) {echo '<div class=metartemptoday5>'.$metardewpointf."<smalluvunit> &nbsp;&deg;F";}
+  else if ($metardewpointf>-50) {echo '<div class=metartemptoday0>'.$metardewpointf."<smalluvunit> &nbsp;&deg;F";}
+  else if ($metardewpointf=='') {echo '<div class=metartemptoday0>'.$metardewpointf."<smalluvunit> N/A";}
 }
 ?></smalluvunit></div></div> 
  <div class="dewword">Dewpoint</div>
@@ -620,46 +615,46 @@ else if ($metarhumidity=='') {echo '<div class=metarhumtoday0-35><smalluvunit> N
    <?php
 //set windspeed variables
 if ($windunit == 'km/h') {
-	$metarwind1 = 'kmh';
-	$metarwind2 = 'kts';
-	$metarwind3 = 'mph';
-	$metarwind4 = 'ms';
+  $metarwind1 = 'kmh';
+  $metarwind2 = 'kts';
+  $metarwind3 = 'mph';
+  $metarwind4 = 'ms';
 } else if ($windunit == 'mph') {
-	$metarwind1 = 'mph';
-	$metarwind2 = 'kts';
-	$metarwind3 = 'kmh';
-	$metarwind4 = 'ms';
+  $metarwind1 = 'mph';
+  $metarwind2 = 'kts';
+  $metarwind3 = 'kmh';
+  $metarwind4 = 'ms';
 } else if ($windunit == 'kts') {
-	$metarwind1 = 'kts';
-	$metarwind2 = 'mph';
-	$metarwind3 = 'kmh';
-	$metarwind4 = 'ms';
+  $metarwind1 = 'kts';
+  $metarwind2 = 'mph';
+  $metarwind3 = 'kmh';
+  $metarwind4 = 'ms';
 } else {
-	$metarwind1 = 'ms';
-	$metarwind2 = 'mph';
-	$metarwind3 = 'kmh';
-	$metarwind4 = 'kts';
+  $metarwind1 = 'ms';
+  $metarwind2 = 'mph';
+  $metarwind3 = 'kmh';
+  $metarwind4 = 'kts';
 }
-	if ($metarwindspeedkmh >=50) {$metarkmh = '<div class=metarwindtoday30>'.$metarwindspeedkmh."<smalluvunit> &nbsp;km/h";}
-	else if ($metarwindspeedkmh >=40) {$metarkmh = '<div class=metarwindtoday25>'.$metarwindspeedkmh."<smalluvunit>&nbsp; km/h";}
-	else if ($metarwindspeedkmh >=30) {$metarkmh = '<div class=metarwindtoday20>'.$metarwindspeedkmh."<smalluvunit>&nbsp; km/h";}
-	else if ($metarwindspeedkmh >0) {$metarkmh = '<div class=metarwindtoday10>'.$metarwindspeedkmh."<smalluvunit>&nbsp; km/h";}
-	else {$metarkmh = '<div class=metarwindtoday10>'.'0'."<smalluvunit>&nbsp; km/h";}
-	if ($metarwindspeedmph >=31.06) {$metarmph = '<div class=metarwindtoday30>'.$metarwindspeedmph."<smalluvunit> &nbsp;mph";}
-	else if ($metarwindspeedmph >=24.85) {$metarmph = '<div class=metarwindtoday25>'.$metarwindspeedmph."<smalluvunit> &nbsp;mph";}
-	else if ($metarwindspeedmph >=18.6) {$metarmph = '<div class=metarwindtoday20>'.$metarwindspeedmph."<smalluvunit> &nbsp;mph";}
-	else if ($metarwindspeedmph >0) {$metarmph = '<div class=metarwindtoday10>'.$metarwindspeedmph."<smalluvunit> &nbsp;mph";}
-	else {$metarmph = '<div class=metarwindtoday10>'.'0'."<smalluvunit> &nbsp;mph";}
-	if ($metarwindspeedkts >=26.9) {$metarkts = '<div class=metarwindtoday30>'.$metarwindspeedkts."<smalluvunit> &nbsp;kts";}
-	else if ($metarwindspeedkts >=21.5) {$metarkts = '<div class=metarwindtoday25>'.$metarwindspeedkts."<smalluvunit> &nbsp;kts";}
-	else if ($metarwindspeedkts >=16.19) {$metarkts = '<div class=metarwindtoday20>'.$metarwindspeedkts."<smalluvunit> &nbsp;kts";}
-	else if ($metarwindspeedkts >0) {$metarkts = '<div class=metarwindtoday10>'.$metarwindspeedkts."<smalluvunit> &nbsp;kts";}
-	else {$metarkts = '<div class=metarwindtoday10>'.'0'."<smalluvunit> &nbsp;kts";}
-	if ($metarwindspeedms >=13.8) {$metarms = '<div class=metarwindtoday30>'.$metarwindspeedms."<smalluvunit> &nbsp;m/s";}
-	else if ($metarwindspeedms >=11.1) {$metarms = '<div class=metarwindtoday25>'.$metarwindspeedms."<smalluvunit> &nbsp;m/s";}
-	else if ($metarwindspeedms >=8.3) {$metarms = '<div class=metarwindtoday20>'.$metarwindspeedms."<smalluvunit> &nbsp;m/s";}
-	else if ($metarwindspeedms >0) {$metarms = '<div class=metarwindtoday10>'.$metarwindspeedms."<smalluvunit> &nbsp;m/s";}
-	else {$metarms = '<div class=metarwindtoday10>'.'0'."<smalluvunit> &nbsp;m/s";}
+  if ($metarwindspeedkmh >=50) {$metarkmh = '<div class=metarwindtoday30>'.$metarwindspeedkmh."<smalluvunit> &nbsp;km/h";}
+  else if ($metarwindspeedkmh >=40) {$metarkmh = '<div class=metarwindtoday25>'.$metarwindspeedkmh."<smalluvunit>&nbsp; km/h";}
+  else if ($metarwindspeedkmh >=30) {$metarkmh = '<div class=metarwindtoday20>'.$metarwindspeedkmh."<smalluvunit>&nbsp; km/h";}
+  else if ($metarwindspeedkmh >0) {$metarkmh = '<div class=metarwindtoday10>'.$metarwindspeedkmh."<smalluvunit>&nbsp; km/h";}
+  else {$metarkmh = '<div class=metarwindtoday10>'.'0'."<smalluvunit>&nbsp; km/h";}
+  if ($metarwindspeedmph >=31.06) {$metarmph = '<div class=metarwindtoday30>'.$metarwindspeedmph."<smalluvunit> &nbsp;mph";}
+  else if ($metarwindspeedmph >=24.85) {$metarmph = '<div class=metarwindtoday25>'.$metarwindspeedmph."<smalluvunit> &nbsp;mph";}
+  else if ($metarwindspeedmph >=18.6) {$metarmph = '<div class=metarwindtoday20>'.$metarwindspeedmph."<smalluvunit> &nbsp;mph";}
+  else if ($metarwindspeedmph >0) {$metarmph = '<div class=metarwindtoday10>'.$metarwindspeedmph."<smalluvunit> &nbsp;mph";}
+  else {$metarmph = '<div class=metarwindtoday10>'.'0'."<smalluvunit> &nbsp;mph";}
+  if ($metarwindspeedkts >=26.9) {$metarkts = '<div class=metarwindtoday30>'.$metarwindspeedkts."<smalluvunit> &nbsp;kts";}
+  else if ($metarwindspeedkts >=21.5) {$metarkts = '<div class=metarwindtoday25>'.$metarwindspeedkts."<smalluvunit> &nbsp;kts";}
+  else if ($metarwindspeedkts >=16.19) {$metarkts = '<div class=metarwindtoday20>'.$metarwindspeedkts."<smalluvunit> &nbsp;kts";}
+  else if ($metarwindspeedkts >0) {$metarkts = '<div class=metarwindtoday10>'.$metarwindspeedkts."<smalluvunit> &nbsp;kts";}
+  else {$metarkts = '<div class=metarwindtoday10>'.'0'."<smalluvunit> &nbsp;kts";}
+  if ($metarwindspeedms >=13.8) {$metarms = '<div class=metarwindtoday30>'.$metarwindspeedms."<smalluvunit> &nbsp;m/s";}
+  else if ($metarwindspeedms >=11.1) {$metarms = '<div class=metarwindtoday25>'.$metarwindspeedms."<smalluvunit> &nbsp;m/s";}
+  else if ($metarwindspeedms >=8.3) {$metarms = '<div class=metarwindtoday20>'.$metarwindspeedms."<smalluvunit> &nbsp;m/s";}
+  else if ($metarwindspeedms >0) {$metarms = '<div class=metarwindtoday10>'.$metarwindspeedms."<smalluvunit> &nbsp;m/s";}
+  else {$metarms = '<div class=metarwindtoday10>'.'0'."<smalluvunit> &nbsp;m/s";}
 $metarspot1 = 'metar'.$metarwind1;
 $metarspot2 = 'metar'.$metarwind2;
 $metarspot3 = 'metar'.$metarwind3;
@@ -698,7 +693,6 @@ echo $$metarspot4;
 </div>
 </div>
 
-
 <style>
 .wrap {
   position: relative;
@@ -719,6 +713,20 @@ echo $$metarspot4;
   </svg>
 </div>
 </div>
+
+ <script>
+            
+    var theme = "<?php echo $theme;?>";
+
+    if (theme === 'dark') {
+    var baseTextColor = "silver";
+    var ringColor = "rgba(59,60,63,1)";
+    } else {
+    var baseTextColor = "#2d3a4b";
+    var ringColor = "rgba(230,232,239,1)";
+    }
+
+</script>
  
 <script>
 
@@ -728,62 +736,58 @@ var svg = document.getElementById("Metarcompass");
 
 var theme = "<?php echo $theme;?>";
 
-	if (theme == 'dark') {
+  var angle = "<?php echo $metarwindir;?>";
+  angle = angle || 0;
+   
+  var Bearing = "<?php echo $metarwindir;?>";
+  Bearing = Bearing || 0;
     
-
-	var angle = "<?php echo $metarwindir;?>";
-	angle = angle || 0;
-
-		
-	var Bearing = "<?php echo $metarwindir;?>";
-	Bearing = Bearing || 0;
-		
-	// Bearing	
-	if (Bearing <= 11.25) { 
-		Bearing = "North";
-		} else if (Bearing <= 33.75) {
-		Bearing = "NNE";
-		} else if (Bearing <= 56.25) {
-		Bearing = "NE";
-		} else if (Bearing <= 78.75) {
-		Bearing = "ENE";
-		} else if (Bearing <= 101.25) {
-		Bearing = "East";
-		} else if (Bearing <= 123.75) { 
-		Bearing = "ESE";
-		} else if (Bearing <= 146.25) { 
-		Bearing = "SE";
-		} else if (Bearing <= 168.75) {
-		Bearing = "SSE";
-		} else if (Bearing <= 191.25) {
-		Bearing = "South";
-		} else if (Bearing <= 213.75) {
-		Bearing = "SSW";
-		} else if (Bearing <= 236.25) { 
-		Bearing = "SW";
-		} else if (Bearing <= 281.25) {
-		Bearing = "West";
-		} else if (Bearing <= 303.75) { 
-		Bearing = "WNW";
-		} else if (Bearing <= 326.25) {
-		Bearing = "NW";
-		} else if (Bearing <= 348.75) {
-		Bearing = "NWN";
-		} else { Bearing = "North"; }
-	
-	DirectionBearing(70, 80, Bearing); // Bearing
+  // Bearing  
+  if (Bearing <= 11.25) { 
+    Bearing = "North";
+    } else if (Bearing <= 33.75) {
+    Bearing = "NNE";
+    } else if (Bearing <= 56.25) {
+    Bearing = "NE";
+    } else if (Bearing <= 78.75) {
+    Bearing = "ENE";
+    } else if (Bearing <= 101.25) {
+    Bearing = "East";
+    } else if (Bearing <= 123.75) { 
+    Bearing = "ESE";
+    } else if (Bearing <= 146.25) { 
+    Bearing = "SE";
+    } else if (Bearing <= 168.75) {
+    Bearing = "SSE";
+    } else if (Bearing <= 191.25) {
+    Bearing = "South";
+    } else if (Bearing <= 213.75) {
+    Bearing = "SSW";
+    } else if (Bearing <= 236.25) { 
+    Bearing = "SW";
+    } else if (Bearing <= 281.25) {
+    Bearing = "West";
+    } else if (Bearing <= 303.75) { 
+    Bearing = "WNW";
+    } else if (Bearing <= 326.25) {
+    Bearing = "NW";
+    } else if (Bearing <= 348.75) {
+    Bearing = "NWN";
+    } else { Bearing = "North"; }
+  
+  DirectionBearing(70, 80, Bearing); // Bearing
     
-	DirectionAngle(70, 65, angle + "°"); // Direction in degrees
+  DirectionAngle(70, 65, angle + "°"); // Direction in degrees
 
-	CardinalNorth(66.75, 29, "N");
-	CardinalDirection(111, 72.75, "E");
-	CardinalDirection(67, 116, "S");
-	CardinalDirection(23, 72.75, "W");
+  CardinalNorth(66.75, 29, "N");
+  CardinalDirection(111, 72.75, "E");
+  CardinalDirection(67, 116, "S");
+  CardinalDirection(23, 72.75, "W");
 
 
 for (var i = 0; i < 360; i += 2) {
   // draw degree lines
-  var s = "rgba(59, 60, 63, 1)"; // dark grey
+  var s = ringColor; // dark grey
   if (i == 0 || i % 30 == 0) {
     w = 1;
     s = "rgba(255, 99, 71, 1)"; // tomato
@@ -794,15 +798,15 @@ for (var i = 0; i < 360; i += 2) {
   }
   
 var ticks = document.createElementNS(svgNS, "line");
-	ticks.setAttributeNS(null, "x1", 70);
-	ticks.setAttributeNS(null, "y1", 10);
-	ticks.setAttributeNS(null, "x2", 70);
-	ticks.setAttributeNS(null, "y2", y2);
-	ticks.setAttributeNS(null, "stroke", s);
-	ticks.setAttributeNS(null, "stroke-width", w);
-	ticks.setAttributeNS(null, "stroke-linecap", "round");
-	ticks.setAttributeNS(null, "transform", "rotate(" + i + ", 70, 70)");
-	svg.appendChild(ticks);
+  ticks.setAttributeNS(null, "x1", 70);
+  ticks.setAttributeNS(null, "y1", 10);
+  ticks.setAttributeNS(null, "x2", 70);
+  ticks.setAttributeNS(null, "y2", y2);
+  ticks.setAttributeNS(null, "stroke", s);
+  ticks.setAttributeNS(null, "stroke-width", w);
+  ticks.setAttributeNS(null, "stroke-linecap", "round");
+  ticks.setAttributeNS(null, "transform", "rotate(" + i + ", 70, 70)");
+  svg.appendChild(ticks);
 
   // draw degree value every 30 degrees
   if (i % 30 == 0) {
@@ -827,227 +831,68 @@ var ticks = document.createElementNS(svgNS, "line");
 }
 
 function CardinalNorth(x, y, displayText) {
-	var direction = document.createElementNS(svgNS, "text");
-  	direction.setAttributeNS(null, "x", x);
-  	direction.setAttributeNS(null, "y", y);
-  	direction.setAttributeNS(null, "font-size", "9px");
-  	direction.setAttributeNS(null, "font-weight", "bold");
-  	direction.setAttributeNS(null, "font-family", "Helvetica");
-  	direction.setAttributeNS(null, "fill", "red");
-	var textNode = document.createTextNode(displayText);
-  	direction.appendChild(textNode);
-  	svg.appendChild(direction);
+  var direction = document.createElementNS(svgNS, "text");
+    direction.setAttributeNS(null, "x", x);
+    direction.setAttributeNS(null, "y", y);
+    direction.setAttributeNS(null, "font-size", "9px");
+    direction.setAttributeNS(null, "font-weight", "bold");
+    direction.setAttributeNS(null, "font-family", "Helvetica");
+    direction.setAttributeNS(null, "fill", "red");
+  var textNode = document.createTextNode(displayText);
+    direction.appendChild(textNode);
+    svg.appendChild(direction);
 }
 
 function CardinalDirection(x, y, displayText) {
-	var direction = document.createElementNS(svgNS, "text");
-  	direction.setAttributeNS(null, "x", x);
-  	direction.setAttributeNS(null, "y", y);
-  	direction.setAttributeNS(null, "font-size", "8px");
-  	direction.setAttributeNS(null, "font-family", "Helvetica");
-  	direction.setAttributeNS(null, "fill", "rgba(192,192,192,1)");
-	var textNode = document.createTextNode(displayText);
-  	direction.appendChild(textNode);
-  	svg.appendChild(direction);
+  var direction = document.createElementNS(svgNS, "text");
+    direction.setAttributeNS(null, "x", x);
+    direction.setAttributeNS(null, "y", y);
+    direction.setAttributeNS(null, "font-size", "8px");
+    direction.setAttributeNS(null, "font-family", "Helvetica");
+    direction.setAttributeNS(null, "fill", baseTextColor);
+  var textNode = document.createTextNode(displayText);
+    direction.appendChild(textNode);
+    svg.appendChild(direction);
 }
 
 function DirectionAngle(x, y, displayText) {
-  	var anglen = document.createElementNS(svgNS, "text");
-  	anglen.setAttributeNS(null, "x", x);
-  	anglen.setAttributeNS(null, "y", y);
-  	anglen.setAttributeNS(null, "font-size", "12px");
-  	anglen.setAttributeNS(null, "font-family", "Helvetica");
-  	anglen.setAttributeNS(null, "fill", "rgba(192,192,192,1)");  
-  	anglen.setAttributeNS(null, "text-anchor", "middle");  
-  	var textNode = document.createTextNode(displayText);
-  	anglen.appendChild(textNode);
-  	svg.appendChild(anglen);
+    var anglen = document.createElementNS(svgNS, "text");
+    anglen.setAttributeNS(null, "x", x);
+    anglen.setAttributeNS(null, "y", y);
+    anglen.setAttributeNS(null, "font-size", "12px");
+    anglen.setAttributeNS(null, "font-family", "Helvetica");
+    anglen.setAttributeNS(null, "fill", baseTextColor);  
+    anglen.setAttributeNS(null, "text-anchor", "middle");  
+    var textNode = document.createTextNode(displayText);
+    anglen.appendChild(textNode);
+    svg.appendChild(anglen);
 }
 
 function DirectionBearing(x, y, displayText) {
-  	var bearing = document.createElementNS(svgNS, "text");
-  	bearing.setAttributeNS(null, "x", x);
-  	bearing.setAttributeNS(null, "y", y);
-  	bearing.setAttributeNS(null, "font-size", "12px");
-  	bearing.setAttributeNS(null, "font-family", "Helvetica");
-  	bearing.setAttributeNS(null, "fill", "rgba(192,192,192,1)");  
-  	bearing.setAttributeNS(null, "text-anchor", "middle");  
-  	var textNode = document.createTextNode(displayText);
-  	bearing.appendChild(textNode);
-  	svg.appendChild(bearing);
+    var bearing = document.createElementNS(svgNS, "text");
+    bearing.setAttributeNS(null, "x", x);
+    bearing.setAttributeNS(null, "y", y);
+    bearing.setAttributeNS(null, "font-size", "12px");
+    bearing.setAttributeNS(null, "font-family", "Helvetica");
+    bearing.setAttributeNS(null, "fill", baseTextColor);  
+    bearing.setAttributeNS(null, "text-anchor", "middle");  
+    var textNode = document.createTextNode(displayText);
+    bearing.appendChild(textNode);
+    svg.appendChild(bearing);
 }
 
 var polypointer = document.createElementNS(svgNS, "polygon"); // wind direction arrow
-	polypointer.setAttributeNS(null, "points", "70,22 75,2 70,8 65,2");
-	polypointer.setAttributeNS(null, "fill", "rgba(0,127,255,1)"); // arch blue
-	polypointer.setAttributeNS(null, "transform", "rotate("+ angle +", 70, 70)");
-	svg.appendChild(polypointer);
-
-} else {
-
-var svgNS = "http://www.w3.org/2000/svg";
-
-var svg = document.getElementById("Metarcompass");
-
-
-	var angle = "<?php echo $metarwindir;?>";
-	angle = angle || 0;
-	
-	var Bearing = "<?php echo $metarwindir;?>";
-	Bearing = Bearing || 0;
-		
-	// Bearing	
-	if (Bearing <= 11.25) { 
-		Bearing = "North";
-		} else if (Bearing <= 33.75) {
-		Bearing = "NNE";
-		} else if (Bearing <= 56.25) {
-		Bearing = "NE";
-		} else if (Bearing <= 78.75) {
-		Bearing = "ENE";
-		} else if (Bearing <= 101.25) {
-		Bearing = "East";
-		} else if (Bearing <= 123.75) { 
-		Bearing = "ESE";
-		} else if (Bearing <= 146.25) { 
-		Bearing = "SE";
-		} else if (Bearing <= 168.75) {
-		Bearing = "SSE";
-		} else if (Bearing <= 191.25) {
-		Bearing = "South";
-		} else if (Bearing <= 213.75) {
-		Bearing = "SSW";
-		} else if (Bearing <= 236.25) { 
-		Bearing = "SW";
-		} else if (Bearing <= 281.25) {
-		Bearing = "West";
-		} else if (Bearing <= 303.75) { 
-		Bearing = "WNW";
-		} else if (Bearing <= 326.25) {
-		Bearing = "NW";
-		} else if (Bearing <= 348.75) {
-		Bearing = "NWN";
-		} else { Bearing = "North"; }
-	
-	DirectionBearing(70, 80, Bearing); // Bearing
-    
-	DirectionAngle(70, 65, angle + "°"); // Direction in degrees
-	
-	CardinalNorth(66.75, 29, "N");
-	CardinalDirection(111, 73, "E");
-	CardinalDirection(67, 116, "S");
-	CardinalDirection(23, 73, "W");
-
-for (var i = 0; i < 360; i += 2) {
-  // draw degree lines
-  var s = "rgba(230, 232, 239, 1)"; // silver
-  if (i == 0 || i % 30 == 0) {
-    w = 1;
-    s = "rgba(255,99,71,1)"; // tomato
-    y2 = 17;
-  } else {
-    w = 0.75;
-    y2 = 17;
-  }
-  
-var ticks = document.createElementNS(svgNS, "line");
-	ticks.setAttributeNS(null, "x1", 70);
-	ticks.setAttributeNS(null, "y1", 10);
-	ticks.setAttributeNS(null, "x2", 70);
-	ticks.setAttributeNS(null, "y2", y2);
-	ticks.setAttributeNS(null, "stroke", s);
-	ticks.setAttributeNS(null, "stroke-width", w);
-	ticks.setAttributeNS(null, "stroke-linecap", "round");
-	ticks.setAttributeNS(null, "transform", "rotate(" + i + ", 70, 70)");
-	svg.appendChild(ticks);
-  
-  // draw degree value every 30 degrees
-  if (i % 30 == 0) {
-    var t1 = document.createElementNS(svgNS, "text");
-    if (i > 100) {
-      t1.setAttributeNS(null, "x", 62.50);
-    } else if (i > 0) {
-      t1.setAttributeNS(null, "x", 65);
-    } else {
-      t1.setAttributeNS(null, "x", 67.75);
-    }
-    t1.setAttributeNS(null, "y", 7);
-    t1.setAttributeNS(null, "font-size", "8px");
-    t1.setAttributeNS(null, "font-family", "Helvetica");
-    t1.setAttributeNS(null, "fill", "rgba(147, 147, 147, 1)");
-    t1.setAttributeNS(null, "style", "letter-spacing: 1.0");
-    t1.setAttributeNS(null, "transform", "rotate(" + i + ", 70, 70)");
-    var textNode = document.createTextNode(i);
-    t1.appendChild(textNode);
-    svg.appendChild(t1);
-  }
-}
-
-function CardinalNorth(x, y, displayText) {
-	var direction = document.createElementNS(svgNS, "text");
-  	direction.setAttributeNS(null, "x", x);
-  	direction.setAttributeNS(null, "y", y);
-  	direction.setAttributeNS(null, "font-size", "9px");
-  	direction.setAttributeNS(null, "font-weight", "bold");
-  	direction.setAttributeNS(null, "font-family", "Helvetica");
-  	direction.setAttributeNS(null, "fill", "red");
-	var textNode = document.createTextNode(displayText);
-  	direction.appendChild(textNode);
-  	svg.appendChild(direction);
-}
-
-function CardinalDirection(x, y, displayText) {
-  	var direction = document.createElementNS(svgNS, "text");
-  	direction.setAttributeNS(null, "x", x);
-  	direction.setAttributeNS(null, "y", y);
-  	direction.setAttributeNS(null, "font-size", "8px");
-  	direction.setAttributeNS(null, "font-family", "Helvetica");
-  	direction.setAttributeNS(null, "fill", "silver");
-  	var textNode = document.createTextNode(displayText);
-  	direction.appendChild(textNode);
-  	svg.appendChild(direction);
-}
-
-function DirectionAngle(x, y, displayText) {
-  	var anglen = document.createElementNS(svgNS, "text");
-  	anglen.setAttributeNS(null, "x", x);
-  	anglen.setAttributeNS(null, "y", y);
-  	anglen.setAttributeNS(null, "font-size", "12px");
-  	anglen.setAttributeNS(null, "font-family", "Helvetica");
-  	anglen.setAttributeNS(null, "fill", "silver");  
-  	anglen.setAttributeNS(null, "text-anchor", "middle");  
-  	var textNode = document.createTextNode(displayText);
-  	anglen.appendChild(textNode);
-  	svg.appendChild(anglen);
-}
-
-function DirectionBearing(x, y, displayText) {
-  	var bearing = document.createElementNS(svgNS, "text");
-  	bearing.setAttributeNS(null, "x", x);
-  	bearing.setAttributeNS(null, "y", y);
-  	bearing.setAttributeNS(null, "font-size", "12px");
-  	bearing.setAttributeNS(null, "font-family", "Helvetica");
-  	bearing.setAttributeNS(null, "fill", "silver");  
-  	bearing.setAttributeNS(null, "text-anchor", "middle");  
-  	var textNode = document.createTextNode(displayText);
-  	bearing.appendChild(textNode);
-  	svg.appendChild(bearing);
-}
-
-var polypointer = document.createElementNS(svgNS, "polygon"); // wind direction arrow
-	polypointer.setAttributeNS(null, "points", "70,22 75,2 70,8 65,2");
-	polypointer.setAttributeNS(null, "fill", "rgba(0,127,255,1)"); // arch blue
-	polypointer.setAttributeNS(null, "transform", "rotate("+ angle +", 70, 70)");
-	svg.appendChild(polypointer);
-   
-}
+  polypointer.setAttributeNS(null, "points", "70,22 75,2 70,8 65,2");
+  polypointer.setAttributeNS(null, "fill", "rgba(0,127,255,1)"); // arch blue
+  polypointer.setAttributeNS(null, "transform", "rotate("+ angle +", 70, 70)");
+  svg.appendChild(polypointer);
 
 </script>
   </article> 
  
   <article>
   <div class=actualt style="background:teal;color:white;">&nbsp;&nbsp Airport Data </div>   
-  <stationid><?php echo $metarstationid ; ?></stationid><br />
+  <stationid><?php echo $metarstationid ; ?></stationid><br>
   <div class="lotemp">
    <?php
 
@@ -1079,15 +924,15 @@ $date = strtotime($date) + 60 * 60 * $UTC; echo date('jS M H:i',$date);
   <article>
   <div class=actualt style="background:teal;color:white;">&nbsp;&nbsp API  Info</div>  
   <div class="lotemp">
-  <?php echo $info?> Data Provided by </span><a href="https://www.checkwx.com/weather/<?php echo $icao1;?>" title="https://www.checkwx.com/weather/<?php echo $icao1;?>" target="_blank" ><br /><img src=img/checkwx.svg width=130px alt="https://www.checkwx.com/weather/<?php echo $icao1;?>"></a></span></div>
+  <?php echo $info?> Data Provided by </span><a href="https://www.checkwx.com/weather/<?php echo $icao1;?>" title="https://www.checkwx.com/weather/<?php echo $icao1;?>" target="_blank" ><br><img src=img/checkwx.svg width=130px alt="https://www.checkwx.com/weather/<?php echo $icao1;?>"></a></span></div>
   </article> 
   
   
   <article>
   <div class=actualt style="background:teal;color:white;">&nbsp;&nbsp &copy; Info</div>  
   <div class="lotemp">
-   <br /><br />
-  <?php echo $info?> Guide Info provided  by <a href="https://en.wikipedia.org/wiki/METAR" title="https://en.wikipedia.org/wiki/METAR" target="_blank" style="font-size:9px;">Metar-Wikipedia </a>
+   <br><br>
+  <?php echo $info?> Guide Info provided  by <a href="https://en.wikipedia.org/wiki/METAR" title="https://en.wikipedia.org/wiki/METAR" target="_blank" style="font-size:9px;">Metar-Wikipedia </a>  
   </div></article> 
    
 </main>

@@ -2,7 +2,17 @@
 include('dvmCombinedData.php');
 date_default_timezone_set($TZ);
 ?>
+<script>
+            
+    var theme = "<?php echo $theme;?>";
 
+    if (theme === 'dark') {
+    var baseTextColor = "silver";
+    } else {
+    var baseTextColor = "#2d3a4b";
+    }
+
+</script>
 <?php
 
 //check for any strikes to set last_time correctly
@@ -230,7 +240,7 @@ else
             	.style("font-size", "9px")
             	.style("text-anchor", "left")
             	.style("font-weight", "normal")
-				.text("Distance @");
+				.text("Last Distance");
 					
 	svg.append("text") // Last Bearing
              	.attr("x", 110)
@@ -306,7 +316,7 @@ else
             	.style("font-size", "9px")
             	.style("text-anchor", "left")
             	.style("font-weight", "normal")
-				.text("Distance @");
+				.text("Last Distance");
 				
 		}
         
@@ -345,7 +355,7 @@ else
 				.text(Strikes_this_year);
 				
 	svg.append("text") // Last Distance
-             	.attr("x", 161)
+             	.attr("x", 168)
             	.attr("y", 46)
             	.style("fill", "#ff964f")
             	.style("font-family", "Helvetica")
@@ -397,7 +407,7 @@ else
 				.text(Strikes_this_year);
 				
 	svg.append("text") // Last Distance
-             	.attr("x", 161)
+             	.attr("x", 168)
             	.attr("y", 52)
             	.style("fill", "#ff964f")
             	.style("font-family", "Helvetica")
