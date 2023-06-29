@@ -120,50 +120,5 @@ var refreshId;$(document).ready(function(){aqidata()});function aqidata(){$.ajax
 			
 
 </script>
-<?php 
-$position1 = "dvmWeatherClockTop.php";//fixed position
-if ($position1 == "dvmWeatherClockTop.php") { ?>
-<script>
-var clockID;
-var yourTimeZoneFrom=<?php echo $UTC_offset; ?>;
-var d=new Date();
-var weekdays=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-var months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-var tzDifference=yourTimeZoneFrom*60+d.getTimezoneOffset();
-var offset=tzDifference*60*1000;
-function UpdateClock(){
-  var e=new Date(new Date().getTime()+offset);
-  var c=e.getHours()<?php if ($clockformat == "12") {
-      echo "% 12 || 12";
-  } else {
-      echo "% 24 || 00";
-  } ?>;
-  <?php if ($clockformat == "12") {
-      echo "if(e.getHours()<12){amorpm=' am'}else{amorpm=' pm'}";
-  } else {
-      echo "amorpm='';";
-  } ?>
-  var a=e.getMinutes();
-  var g=e.getSeconds();
-  var f=e.getFullYear();
-  var h=months[e.getMonth()];
-  var b=e.getDate();
-  var i=weekdays[e.getDay()];
-  if(a<10){
-    a="0"+a
-  }
-  if(g<10){
-    g="0"+g
-  }
-  if(c<10){
-    c="0"+c
-  }
-  document.getElementById("theTime").innerHTML="<div class='weatherclockdvm'> "+i+" "+b+" "+h+" "+f+"<div class='orangeclock'>"+c+":"+a+":"+g+amorpm
-}
-function StartClock(){clockID=setInterval(UpdateClock,500)}
-function KillClock(){clearTimeout(clockID)}
-window.onload=function(){StartClock()};
-</script>
-<?php } ?>
 
 <!-- end updater.php -->
