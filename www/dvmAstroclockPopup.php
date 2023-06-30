@@ -1,7 +1,6 @@
 <?php
-
 /*
-Astronomical clock
+Astronomical clock coded in D3.js
  
 This clock has been translated from an old lua script,
 coded by a good friend of mine named Paramvir Likhari.
@@ -22,7 +21,6 @@ The sun and moon should animate with a one second tick
 to show you how the Kaleidoscope sun works.
 The moon animation is not quite so elaborate but
 fits nicely in the sun at the moment of a new moon.
-(the duration is about an hour or so)
 
 I would be eternally grateful for any help with these functions.
 I hope you like the clock enjoy the nice graphics.
@@ -31,14 +29,13 @@ I am also open to suggestions to improve the code in any way.
 
 Cheers Sean 
 
-Created by Sean Balfour in Dresden March 2022
+Created by Sean Balfour in Dresden June 2023
 contact: seanbalfourdresden@googlemail.com
 
 */
 include('dvmCombinedData.php');
 date_default_timezone_set($TZ);
 error_reporting(0);
-header('Content-type: text/html; charset = utf-8');
 echo "<body style='background-color:#292E35'>";
 ?>
 
@@ -50,37 +47,58 @@ echo "<body style='background-color:#292E35'>";
 <meta name="viewport" content="width = device-width, initial-scale = 1, shrink-to-fit = yes">
 <!--link rel="stylesheet" href="css/astroclock.css"-->
 </head>
-<script src="js/two.js"></script>
+
+<script src='js/d3.4.2.2.min.js'></script> 
 
 <style>
+.clockpos {
+    margin-top: 0px; 
+    margin-left: 0px;
+}
 @font-face {
     font-family: 'AstroDotBasic';
     src: url('css/fonts/AstroDotBasic.ttf') format('truetype');
 }
 body {
-  position: absolute;
-  overflow: hidden;
+    overflow: hidden;
+}
+.analog-hours {
+    stroke-width: 5;
+    stroke: #32CD32;
+    stroke-linecap: round;
+}
+.analog-minutes {
+    stroke-width: 4;
+    stroke: #00FFFF;
+    stroke-linecap: round;
+}
+.analog-seconds {
+    stroke-width: 2.5;
+    stroke: #FF00FF;
+    stroke-linecap: round;
 }
 </style>
 
 <body>
 
-<div id="astroclock" width="780" height="500" style="position:relative; top: 25px; left: 0px; border:0px solid #007FFF;">
+<div class="clockpos">
+<div class="astroclock"></div>
+</div>
 
 <script>
 
-// refresh the page every 60 seconds
-window.setInterval('refresh()', 60000); 	
+// refresh the script every 60 seconds
+window.setInterval('refresh()', 60000);     
     function refresh() {
         window.location.reload();
     }
- 
-    var eclipticWidth = 0.75;
+
+var eclipticWidth = 0.75;
     
-    var color_M1 = "rgba(41,46,53,1)";
-	var color_M = "rgba(255,255,255,1)";
-		
-	
+var color_M1 = "rgba(41,46,53,1)";
+var color_M = "rgba(255,255,255,1)";
+        
+    
 function toDegrees(x) {
   return x * (180.0 / Math.PI);
 }
@@ -92,863 +110,1072 @@ function toRadians(x) {
 function toDegRad(x, f) { 
   return toRadians(x * f); 
 }
-		
-	var hour_sun = <?php echo $alm["hour_sun"];?>; // correct value
-		
-	var hourSun = toDegrees(hour_sun); // convert to degrees
-	 
-	var sun_Ra = <?php echo $alm["sun_right_ascension"];?>; // correct value
-			             
-    var hour_moon = <?php echo $alm["hour_moon"];?>; // correct value
-        
-    var hourMoon = toDegrees(hour_moon); // convert to degress
-    
-    var hours_arc = <?php echo $alm["hour_sun"];?>; // correct value
 
-	var lmst = (hourSun / 15.0) + (sun_Ra / 15.0); // correct value 
-  
-    var Lha = (lmst * 15.0) - 90.0; // correct value
-            
-    var hourAries = toRadians(Lha); // correct value
-    
-    // split some time strings and get them ready to be used as Radians angles
+var hour_sun = <?php echo $alm["hour_sun"];?>;       
+var hourSun = toDegrees(hour_sun);    
+var sun_Ra = <?php echo $alm["sun_right_ascension"];?>;                        
+var hour_moon = <?php echo $alm["hour_moon"];?>;        
+var hourMoon = toDegrees(hour_moon);    
+var hours_arc = <?php echo $alm["hour_sun"];?>;
+var lmst = (hourSun / 15.0) + (sun_Ra / 15.0);  
+var Lha = (lmst * 15.0) - 90.0;            
+var hourAries = toRadians(Lha);
        
-    var sr = "<?php echo $alm["sunrise"];?>"; // string
+let sr = "<?php echo $alm["sunrise"];?>";
     
-	let srarr = sr.split(":");
-	let srhour = parseInt(srarr[0]);
-	let srmin = parseInt(srarr[1]);
-	var srmins = 360.0 / 60.0 * srmin;
-	var sunrise = (360.0 / 24.0 * srhour + srmins / 24.0);
+    let srarr = sr.split(":");
+    let srhour = parseInt(srarr[0]);
+    let srmin = parseInt(srarr[1]);
+    var srmins = 360.0 / 60.0 * srmin;
+    var sunrise = (360.0 / 24.0 * srhour + srmins / 24.0);
     
-    let smt = "<?php echo $alm["sun_meridian_transit"];?>"; // string
+let smt = "<?php echo $alm["sun_meridian_transit"];?>";
 
-	let smtarr = smt.split(":");
-	let smthour = parseInt(smtarr[0]);
-	let smtmin = parseInt(smtarr[1]);
-	var smtmins = 360.0 / 60.0 * smtmin;
-	var sun_meridian_transit = (360.0 / 24.0 * smthour + smtmins / 24.0);
-	
-	let ss = "<?php echo $alm["sunset"];?>"; // string
-	
-	let ssarr = ss.split(":");
-	let sshour = parseInt(ssarr[0]);
-	let ssmin = parseInt(ssarr[1]);
-	var ssmins = 360.0 / 60.0 * ssmin;
-	var sunset = (360.0 / 24.0 * sshour + ssmins / 24.0);
-	
-	let mr = "<?php echo $alm["moonrise"];?>"; // string
-	
-	let mrarr = mr.split(":");
-	let mrhour = parseInt(mrarr[0]);
-	let mrmin = parseInt(mrarr[1]);
-	var mrmins = 360.0 / 60.0 * mrmin;
-	var moonrise = (360.0 / 24.0 * mrhour + mrmins / 24.0);
-	
-	let mmt = "<?php echo $alm["moon_meridian_transit"];?>"; // string
-	
-	let mmtarr = mmt.split(":");
-	let mmthour = parseInt(mmtarr[0]);
-	let mmtmin = parseInt(mmtarr[1]);
-	var mmtmins = 360.0 / 60.0 * mmtmin;
-	var moon_meridian_transit = (360.0 / 24.0 * mmthour + mmtmins / 24.0);
-	
-	let ms = "<?php echo $alm["moonset"];?>"; // string
-	
-	let msarr = ms.split(":");
-	let mshour = parseInt(msarr[0]);
-	let msmin = parseInt(msarr[1]);
-	var msmins = 360.0 / 60.0 * msmin;
-	var moonset = (360.0 / 24.0 * mshour + msmins / 24.0);
-	
-	let ctr = "<?php echo $alm["civil_twilight_begin"];?>"; // string
-	
-	let ctrarr = ctr.split(":");
-	let ctrhour = parseInt(ctrarr[0]);
-	let ctrmin = parseInt(ctrarr[1]);
-	var ctrmins = 360.0 / 60.0 * ctrmin;
-	var civil_twilight_rise = (360.0 / 24.0 * ctrhour + ctrmins / 24.0);
-	
-	let cts = "<?php echo $alm["civil_twilight_end"];?>"; // string
-	
-	let ctsarr = cts.split(":");
-	let ctshour = parseInt(ctsarr[0]);
-	let ctsmin = parseInt(ctsarr[1]);
-	var ctsmins = 360.0 / 60.0 * ctsmin;
-	var civil_twilight_set = (360.0 / 24.0 * ctshour + ctsmins / 24.0);
-	
-	let ntr = "<?php echo $alm["nautical_twilight_begin"];?>"; // string
-	
-	let ntrarr = ntr.split(":");
-	let ntrhour = parseInt(ntrarr[0]);
-	let ntrmin = parseInt(ntrarr[1]);
-	var ntrmins = 360.0 / 60.0 * ntrmin;
-	var nautical_twilight_rise = (360.0 / 24.0 * ntrhour + ntrmins / 24.0);
-	
-	let nts = "<?php echo $alm["nautical_twilight_end"];?>"; // string
-	
-	let ntsarr = nts.split(":");
-	let ntshour = parseInt(ntsarr[0]);
-	let ntsmin = parseInt(ntsarr[1]);
-	var ntsmins = 360.0 / 60.0 * ntsmin;
-	var nautical_twilight_set = (360.0 / 24.0 * ntshour + ntsmins / 24.0);
-	
-    let atr = "<?php echo $alm["astronomical_twilight_begin"];?>"; // string
-	
-	let atrarr = atr.split(":");
-	let atrhour = parseInt(atrarr[0]);
-	let atrmin = parseInt(atrarr[1]);
-	var atrmins = 360.0 / 60.0 * atrmin;
-	var astro_twilight_rise = (360.0 / 24.0 * atrhour + atrmins / 24.0);
-	
-	let ats = "<?php echo $alm["astronomical_twilight_end"];?>"; // string
-	
-	let atsarr = ats.split(":");
-	let atshour = parseInt(atsarr[0]);
-	let atsmin = parseInt(atsarr[1]);
-	var atsmins = 360.0 / 60.0 * atsmin;
-	var astro_twilight_set = (360.0 / 24.0 * atshour + atsmins / 24.0);
-	
-		     
-var canvasWidth = 780;
-var canvasHeight = 500;
-
-// Create an instance of Two.js
-var skynet = document.getElementById("astroclock");
-
-var params = { width: canvasWidth, 
-			   height: canvasHeight,
-			   fullscreen: false,
-			   autostart: true,
-			   type: Two.Types.svg };
-var two = new Two(params).appendTo(skynet);
-
-const colors = ['rgba(255,255,0,1)','rgba(255,0,0,1)','rgba(0,0,255,1)'];
-
-let colorIndex = 0;
-
-let x1 = 0;
-let y1 = 0;
-let x2 = 0;
-let y2 = 1;
-var Rad = 185;
-
-let gradient = two.makeLinearGradient(x1, y1, x2, y2,
-  new Two.Stop(0, colors[0]),
-  new Two.Stop(0.5, colors[1]),
-  new Two.Stop(1.0, colors[2])
-);
-
-const circ = two.makeCircle(0, 0, Rad);
-circ.stroke = gradient;
-circ.linewidth = 15;
-circ.noFill();
-
-// Define clock elements
-const radius = Math.min(two.width, two.height) * 0.30;
-	const styles = {
-  	size: radius * 0.08,
-  	weight: "bold",
-  	family: "Helvetica",
-  	fill: "rgba(255,255,0,1)", // yellow
-  	opacity: 1.0
-};
-
-// the first two rings after the svg sun ring
-var blueRing = two.makeCircle(0, 0, 174);
-blueRing.noFill();
-blueRing.linewidth = 8;
-blueRing.stroke = "rgba(42,86,147,1)"; // sky blue
-
-// clock numbers background ring
-var clockRing2 = two.makeCircle(0, 0, 154);
-clockRing2.noFill();
-clockRing2.linewidth = 32;
-clockRing2.stroke = "rgba(9,70,62,1)"; // green
-
-var clockRing = two.makeCircle(0, 0, 171);
-clockRing.noFill();
-clockRing.linewidth = 1.50;
-clockRing.stroke = "rgba(255,99,71,1)"; // tomato
-
-
-// loop Ticks outer Ring // gray
-for (let i = 0; i < 120; i++) {
-
-  var x = - 165.5 * Math.sin(i / 120 * Math.PI * 2);
-  var y = + 165.5 * Math.cos(i / 120 * Math.PI * 2);
-  var Ogx = x - 3 * Math.sin(i / 120 * Math.PI * 2);
-  var Ogy = y + 3 * Math.cos(i / 120 * Math.PI * 2);
-  
-  var ticks1 = two.makeLine(x, y, Ogx, Ogy);
-  
-  ticks1.noFill();
-  ticks1.stroke = "#888"; // gray
-  ticks1.linewidth = 1.5;
-  ticks1.cap = "round";
-}
-
-// loop Ticks inner Ring // gray
-for (let i = 0; i < 120; i++) {
-
-  var x = - 142.5 * Math.sin(i / 120 * Math.PI * 2);
-  var y = + 142.5 * Math.cos(i / 120 * Math.PI * 2);
-  var Igx = x - 3 * Math.sin(i / 120 * Math.PI * 2);
-  var Igy = y + 3 * Math.cos(i / 120 * Math.PI * 2);
-  
-  var ticks2 = two.makeLine(x, y, Igx, Igy);
-  
-  ticks2.noFill();
-  ticks2.stroke = "#888"; // gray
-  ticks2.linewidth = 1.5;
-  ticks2.cap = "round";
-}
-
-// loop hourly Ticks outer Ring // Red
-for (let i = 0; i < 24; i++) {
-
-  var x = - 165.5 * Math.sin(i / 24 * Math.PI * 2);
-  var y = + 165.5 * Math.cos(i / 24 * Math.PI * 2);
-  var Ox = x - 3 * Math.sin(i / 24 * Math.PI * 2);
-  var Oy = y + 3 * Math.cos(i / 24 * Math.PI * 2);
-  
-  var ticks3 = two.makeLine(x, y, Ox, Oy);
-  
-  ticks3.noFill();
-  ticks3.stroke = "rgba(255,0,0,1)"; // red
-  ticks3.linewidth = 2.5;
-  ticks3.cap = "round";
-}
-
-// loop hourly Ticks inner Ring // Red
-for (let i = 0; i < 24; i++) {
-
-  var x = - 142.5 * Math.sin(i / 24 * Math.PI * 2);
-  var y = + 142.5 * Math.cos(i / 24 * Math.PI * 2);
-  var Ix = x - 3 * Math.sin(i / 24 * Math.PI * 2);
-  var Iy = y + 3 * Math.cos(i / 24 * Math.PI * 2);
-  
-  var ticks4 = two.makeLine(x, y, Ix, Iy);
-  
-  ticks4.noFill();
-  ticks4.stroke = "rgba(255,0,0,1)"; // red
-  ticks4.linewidth = 2.5;
-  ticks4.cap = "round";
-}
-
-// loop to create the clock numbers
-for (let i = 0; i < 24; i++) {
-
-  const x = - 155 * Math.sin(i / 24 * Math.PI * 2);
-  const y = + 155 * Math.cos(i / 24 * Math.PI * 2);
-  const number = new Two.Text(i === 0 ? 0 : i, x, y, styles);
-
-  number.position.set(x, y + 1);
-  two.add(number);
-
-}
-
- // various rise and set markers coverted to Radians
-function Markers() {
-
-var x = - 177 * Math.sin(toRadians(sunrise));
-var y = + 177 * Math.cos(toRadians(sunrise));
-
-var srx = x - 17 * Math.sin(toRadians(sunrise));
-var sry = y + 17 * Math.cos(toRadians(sunrise));
-var srise = two.makeLine(x, y, srx, sry);
-
-	srise.noFill();
-    srise.stroke = "rgba(255,99,71,1)"; // tomato
-    srise.linewidth = 2.5;
-    srise.cap = "round"; 
-
- 
-var x = - 177 * Math.sin(toRadians(sun_meridian_transit));
-var y = + 177 * Math.cos(toRadians(sun_meridian_transit));
-
-var smtx = x - 17 * Math.sin(toRadians(sun_meridian_transit));
-var smty = y + 17 * Math.cos(toRadians(sun_meridian_transit));
-var sm_t = two.makeLine(x, y, smtx, smty);
-
-	sm_t.noFill();
-    sm_t.stroke = "rgba(255,99,71,1)"; // tomato
-    sm_t.linewidth = 2.5;
-    sm_t.cap = "round";
-
-
-var x = - 177 * Math.sin(toRadians(sunset));
-var y = + 177 * Math.cos(toRadians(sunset));
-
-var ssx = x - 17 * Math.sin(toRadians(sunset));
-var ssy = y + 17 * Math.cos(toRadians(sunset));
-var sset = two.makeLine(x, y, ssx, ssy);
-
-	sset.noFill();
-    sset.stroke = "rgba(255,99,71,1)"; // tomato
-    sset.linewidth = 2.5;
-    sset.cap = "round";
+    let smtarr = smt.split(":");
+    let smthour = parseInt(smtarr[0]);
+    let smtmin = parseInt(smtarr[1]);
+    var smtmins = 360.0 / 60.0 * smtmin;
+    var sun_meridian_transit = (360.0 / 24.0 * smthour + smtmins / 24.0);
     
-var x = - 177 * Math.sin(toRadians(moonrise || 0));
-var y = + 177 * Math.cos(toRadians(moonrise || 0));
-
-var mrx = x - 17 * Math.sin(toRadians(moonrise || 0));
-var mry = y + 17 * Math.cos(toRadians(moonrise || 0));
-var mrise = two.makeLine(x, y, mrx, mry);
-
-	mrise.noFill();
-    mrise.stroke = "rgba(255,255,255,1)"; // white
-    mrise.linewidth = 2.5;
-    mrise.cap = "round";   
-
-var x = - 177 * Math.sin(toRadians(moon_meridian_transit || 0));
-var y = + 177 * Math.cos(toRadians(moon_meridian_transit || 0));
-
-var mmtx = x - 17 * Math.sin(toRadians(moon_meridian_transit || 0));
-var mmty = y + 17 * Math.cos(toRadians(moon_meridian_transit || 0));
-var mm_t = two.makeLine(x, y, mmtx, mmty);
-
-	mm_t.noFill();
-    mm_t.stroke = "rgba(255,255,255,1)"; // white
-    mm_t.linewidth = 2.5;
-    mm_t.cap = "round";
+let ss = "<?php echo $alm["sunset"];?>";
     
-var x = - 177 * Math.sin(toRadians(moonset || 0));
-var y = + 177 * Math.cos(toRadians(moonset || 0));
-
-var msx = x - 17 * Math.sin(toRadians(moonset || 0));
-var msy = y + 17 * Math.cos(toRadians(moonset || 0));
-var mset = two.makeLine(x, y, msx, msy);
-
-	mset.noFill();
-    mset.stroke = "rgba(255,255,255,1)"; // white
-    mset.linewidth = 2.5;
-    mset.cap = "round";
+    let ssarr = ss.split(":");
+    let sshour = parseInt(ssarr[0]);
+    let ssmin = parseInt(ssarr[1]);
+    var ssmins = 360.0 / 60.0 * ssmin;
+    var sunset = (360.0 / 24.0 * sshour + ssmins / 24.0);
     
-var x = - 177 * Math.sin(toRadians(civil_twilight_rise));
-var y = + 177 * Math.cos(toRadians(civil_twilight_rise));
-
-var ctrx = x - 17 * Math.sin(toRadians(civil_twilight_rise));
-var ctry = y + 17 * Math.cos(toRadians(civil_twilight_rise));
-var ctrise = two.makeLine(x, y, ctrx, ctry);
-
-	ctrise.noFill();
-    ctrise.stroke = "rgba(74,227,82,1)"; // lime
-    ctrise.linewidth = 2.5;
-    ctrise.cap = "round";
+let mr = "<?php echo $alm["moonrise"];?>";
     
-var x = - 177 * Math.sin(toRadians(civil_twilight_set));
-var y = + 177 * Math.cos(toRadians(civil_twilight_set));
-
-var ctsx = x - 17 * Math.sin(toRadians(civil_twilight_set));
-var ctsy = y + 17 * Math.cos(toRadians(civil_twilight_set));
-var ctset = two.makeLine(x, y, ctsx, ctsy);
-
-	ctset.noFill();
-    ctset.stroke = "rgba(74,227,82,1)"; // lime
-    ctset.linewidth = 2.5;
-    ctset.cap = "round";
+    let mrarr = mr.split(":");
+    let mrhour = parseInt(mrarr[0]);
+    let mrmin = parseInt(mrarr[1]);
+    var mrmins = 360.0 / 60.0 * mrmin;
+    var moonrise = (360.0 / 24.0 * mrhour + mrmins / 24.0);
     
-var x = - 177 * Math.sin(toRadians(nautical_twilight_rise));
-var y = + 177 * Math.cos(toRadians(nautical_twilight_rise));
-
-var ntrx = x - 17 * Math.sin(toRadians(nautical_twilight_rise));
-var ntry = y + 17 * Math.cos(toRadians(nautical_twilight_rise));
-var ntrise = two.makeLine(x, y, ntrx, ntry);
-
-	ntrise.noFill();
-    ntrise.stroke = "rgba(74,227,82,1)"; // lime
-    ntrise.linewidth = 2.5;
-    ntrise.cap = "round";
+let mmt = "<?php echo $alm["moon_meridian_transit"];?>";
     
-var x = - 177 * Math.sin(toRadians(nautical_twilight_set));
-var y = + 177 * Math.cos(toRadians(nautical_twilight_set));
-
-var ntsx = x - 17 * Math.sin(toRadians(nautical_twilight_set));
-var ntsy = y + 17 * Math.cos(toRadians(nautical_twilight_set));
-var ntset = two.makeLine(x, y, ntsx, ntsy);
-
-	ntset.noFill();
-    ntset.stroke = "rgba(74,227,82,1)"; // lime
-    ntset.linewidth = 2.5;
-    ntset.cap = "round";
+    let mmtarr = mmt.split(":");
+    let mmthour = parseInt(mmtarr[0]);
+    let mmtmin = parseInt(mmtarr[1]);
+    var mmtmins = 360.0 / 60.0 * mmtmin;
+    var moon_meridian_transit = (360.0 / 24.0 * mmthour + mmtmins / 24.0);
     
-var x = - 177 * Math.sin(toRadians(astro_twilight_rise || 0));
-var y = + 177 * Math.cos(toRadians(astro_twilight_rise || 0));
-
-var atrx = x - 17 * Math.sin(toRadians(astro_twilight_rise || 0));
-var atry = y + 17 * Math.cos(toRadians(astro_twilight_rise || 0));
-var atrise = two.makeLine(x, y, atrx, atry);
-
-	atrise.noFill();
-    atrise.stroke = "rgba(74,227,82,1)"; // lime
-    atrise.linewidth = 2.5;
-    atrise.cap = "round";
+let ms = "<?php echo $alm["moonset"];?>";
     
-var x = - 177 * Math.sin(toRadians(astro_twilight_set || 0));
-var y = + 177 * Math.cos(toRadians(astro_twilight_set || 0));
-
-var atsx = x - 17 * Math.sin(toRadians(astro_twilight_set || 0));
-var atsy = y + 17 * Math.cos(toRadians(astro_twilight_set || 0));
-var atset = two.makeLine(x, y, atsx, atsy);
-
-	atset.noFill();
-    atset.stroke = "rgba(74,227,82,1)"; // lime
-    atset.linewidth = 2.5;
-    atset.cap = "round";      
+    let msarr = ms.split(":");
+    let mshour = parseInt(msarr[0]);
+    let msmin = parseInt(msarr[1]);
+    var msmins = 360.0 / 60.0 * msmin;
+    var moonset = (360.0 / 24.0 * mshour + msmins / 24.0);
     
-}
-
-Markers();
-
-// define clock hands and group together
-var x = - 144 * Math.sin(Math.PI * 2);
-var y = + 144 * Math.cos(Math.PI * 2);
-// hour
-var hx = x - 39 * Math.sin(Math.PI * 2);
-var hy = y + 39 * Math.cos(Math.PI * 2);
-// minute
-var mx = x - 39 * Math.sin(Math.PI * 2);
-var my = y + 39 * Math.cos(Math.PI * 2);
-// second
-var sx = x - 39 * Math.sin(Math.PI * 2);
-var sy = y + 39 * Math.cos(Math.PI * 2);
-
-const hands = {
-  
-  hour: new Two.Line(x, y, hx, hy),
-  minute: new Two.Line(x, y, mx, my),
-  second: new Two.Line(x, y, sx, sy)
-};
-
-hands.hour.noFill();
-hands.hour.stroke = "rgba(74,227,82,1)"; // Lime green
-hands.hour.linewidth = 5;
-hands.hour.cap = "round";
-
-hands.minute.noFill();
-hands.minute.stroke = "rgba(0,255,255,1)"; // Aqua
-hands.minute.linewidth = 4;
-hands.minute.cap = "round";
-
-hands.second.noFill();
-hands.second.stroke = "rgba(255,0,255,1)"; // Cyan
-hands.second.linewidth = 2.5;
-hands.second.cap = "round";
-
-two.add(hands.hour, hands.minute, hands.second);
-
-two.bind("resize", resize);
-two.bind("update", update);
-
-resize();
-
-function resize() {
-  two.scene.position.set(two.width / 2 - 140, two.height / 2);
-}
-
-// Create the clock and get it rolling
-function update(frameCount, timeDelta) {
-
-  // 24 hour clock with a sweeping second hand
-  const now = new Date();
-  
-  const ms = now.getMilliseconds(); 
-  const S = 2 * Math.PI * (now.getSeconds() * 1000 + ms) / 1000 / 60 - Math.PI; // make it sweep
-  const M = 2 * Math.PI * (now.getMinutes() + now.getSeconds() / 60) / 60 - Math.PI;  
-  const H = 2 * Math.PI * (now.getHours() + 12 + (now.getMinutes() + now.getSeconds() / 60) / 60) / 24 - Math.PI;
-
-  hands.hour.rotation += H - hands.hour.rotation;
-  hands.minute.rotation += M - hands.minute.rotation;
-  hands.second.rotation += S - hands.second.rotation;
-   
-}
-
-// create the sky
-var skyRing = two.makeCircle(0, 0, 71.5);
-skyRing.fill = "rgba(42,86,147,1)";
-skyRing.linewidth = 137;
-skyRing.stroke = "rgba(42,86,147,1)"; // sky blue
-
-// -- create wire frame with arc segments, this was a nightmare ! --
-
-var arcj = two.makeArcSegment(0, -560, 430, 430, 0.674, 0.468);
-arcj.closed = false;
-arcj.rotation = 1;
-arcj.noFill();
-arcj.linewidth = 0.5;
-arcj.stroke = "rgba(137,142,143,1)";
-
-var arcr = two.makeArcSegment(0, -564, 450, 450, 0.730, 0.412);
-arcr.closed = false;
-arcr.rotation = 1;
-arcr.noFill();
-arcr.linewidth = 0.5;
-arcr.stroke = "rgba(137,142,143,1)";
-
-var arce = two.makeArcSegment(0, -579, 480, 480, 0.758, 0.381);
-arce.closed = false;
-arce.rotation = 1;
-arce.noFill();
-arce.linewidth = 0.5;
-arce.stroke = "rgba(137,142,143,1)";
-
-var arcee = two.makeArcSegment(0, -572.5, 490, 490, 0.782, 0.359);
-arcee.closed = false;
-arcee.rotation = 1;
-arcee.noFill();
-arcee.linewidth = 0.5;
-arcee.stroke = "rgba(137,142,143,1)";
-
-var arca = two.makeArcSegment(0, 420, 480, 480, 1.280, 0.715);
-arca.closed = false;
-arca.rotation = 10;
-arca.noFill();
-arca.linewidth = 0.5;
-arca.stroke = "rgba(137,142,143,1)";
-
-var arcn = two.makeArcSegment(0, 180, 230, 230, 1.650, 0.340);
-arcn.closed = false;
-arcn.rotation = 10;
-arcn.noFill();
-arcn.linewidth = 0.5;
-arcn.stroke = "rgba(137,142,143,1)";
-
-var arcu = two.makeArcSegment(0, 142, 180, 180, 1.860, 0.130);
-arcu.closed = false;
-arcu.rotation = 10;
-arcu.noFill();
-arcu.linewidth = 0.5;
-arcu.stroke = "rgba(137,142,143,1)";
-
-var arcy = two.makeArcSegment(0, -140, 140, 140, 1.610, -0.470);
-arcy.closed = false;
-arcy.rotation = 1;
-arcy.noFill();
-arcy.linewidth = 0.5;
-arcy.stroke = "rgba(137,142,143,1)";
-
-var arcq = two.makeArcSegment(30, -136.5, 140, 140, 1.830, -0.260);
-arcq.closed = false;
-arcq.rotation = 1;
-arcq.noFill();
-arcq.linewidth = 0.5;
-arcq.stroke = "rgba(137,142,143,1)";
-
-var arcp = two.makeArcSegment(-30, -136.5, 140, 140, 1.400, -0.690);
-arcp.closed = false;
-arcp.rotation = 1;
-arcp.noFill();
-arcp.linewidth = 0.5;
-arcp.stroke = "rgba(137,142,143,1)";
-
-var arcl = two.makeArcSegment(60, -126.5, 140, 140, 2.060, -0.030);
-arcl.closed = false;
-arcl.rotation = 1;
-arcl.noFill();
-arcl.linewidth = 0.5;
-arcl.stroke = "rgba(137,142,143,1)";
-
-var arcg = two.makeArcSegment(-60, -126.5, 140, 140, 1.170, -0.910);
-arcg.closed = false;
-arcg.rotation = 1;
-arcg.noFill();
-arcg.linewidth = 0.5;
-arcg.stroke = "rgba(137,142,143,1)";
-
-var arck = two.makeArcSegment(90, -106.5, 140, 140, 2.320, 0.230);
-arck.closed = false;
-arck.rotation = 1;
-arck.noFill();
-arck.linewidth = 0.5;
-arck.stroke = "rgba(137,142,143,1)";
-
-var arch = two.makeArcSegment(-90, -106.5, 140, 140, 0.910, -1.170);
-arch.closed = false;
-arch.rotation = 1;
-arch.noFill();
-arch.linewidth = 0.5;
-arch.stroke = "rgba(137,142,143,1)";
-
-var arcx = two.makeArcSegment(275, -120.5, 300, 300, 2.197, 1.932);
-arcx.closed = false;
-arcx.rotation = 1;
-arcx.noFill();
-arcx.linewidth = 0.5;
-arcx.stroke = "rgba(137,142,143,1)";
-
-var arcz = two.makeArcSegment(-275, -120.5, 300, 300, -0.720, -1.058);
-arcz.closed = false;
-arcz.rotation = 1;
-arcz.noFill();
-arcz.linewidth = 0.5;
-arcz.stroke = "rgba(137,142,143,1)";
-
-// create both vertical and horizontal lines inside the wire frame
-var vline = two.makeLine(0, -139, 0, -61);
-vline.noFill();
-vline.linewidth = 0.5;
-vline.stroke = "rgba(137,142,143,1)";
-
-var hline = two.makeLine(-121, -70, 121, -70);
-hline.noFill();
-hline.linewidth = 0.5;
-hline.stroke = "rgba(137,142,143,1)";
-
-// -- end wire frame --
-
-// create the filled arc segments under the horizon
-var arcf = two.makeArcSegment(0, 110, 140, 0, 2.160, -0.170);
-arcf.closed = false;
-arcf.rotation = 10;
-arcf.fill = "rgba(41,46,53,1)"; // dark color
-arcf.linewidth = 1;
-arcf.stroke = "rgba(41,46,53,1)";
-
-var arcs = two.makeArcSegment(0, -1.5, 140, 0, 1.720, -0.580);
-arcs.closed = false;
-arcs.rotation = 1;
-arcs.fill = "rgba(41,46,53,1)";
-arcs.linewidth = 1;
-arcs.stroke = "rgba(41,46,53,1)"; // dark color
-
-// create the main horizion arc, this sits on top of the filled arc segments
-var horizion = two.makeArcSegment(0, 110, 140, 140, 2.160, -0.170);
-horizion.closed = false;
-horizion.rotation = 10;
-horizion.noFill();
-horizion.linewidth = 1;
-horizion.stroke = "rgba(255,99,71,1)"; // tomato
-
-// create the ring of Cancer this is the first ring past the clock numbers
-var CancerR = two.makeCircle(0, 0, 140);
-CancerR.noFill();
-CancerR.linewidth = 1.25;
-CancerR.stroke = "rgba(255,99,71,1)"; // tomato
-
-// create the three arcs under the horizon, these are the twilight markers
-var arci = two.makeArcSegment(0, 100, 120, 120, 2.360, -0.370);
-arci.closed = false;
-arci.rotation = 10;
-arci.noFill();
-arci.linewidth = 0.5;
-arci.stroke = "rgba(137,142,143,1)";
-
-var arct = two.makeArcSegment(0, 90, 100, 100, 2.640, -0.650);
-arct.closed = false;
-arct.rotation = 10;
-arct.noFill();
-arct.linewidth = 0.5;
-arct.stroke = "rgba(137,142,143,1)";
-
-var arcd = two.makeArcSegment(0, 80, 80, 80, 3.110, -1.120);
-arcd.closed = false;
-arcd.rotation = 10;
-arcd.noFill();
-arcd.linewidth = 0.5;
-arcd.stroke = "rgba(137,142,143,1)";
-
-
-// create the earth and fill it with a dark color
-var Earth = two.makeCircle(0, 0, 60);
-Earth.fill = "rgba(41,46,53,1)";
-Earth.linewidth = 1.25;
-Earth.stroke = "rgba(41,46,53,1)"; // dark color
-
-
-// create the Equator ring 
-var Equator = two.makeCircle(0, 0, 92);
-Equator.noFill();
-Equator.linewidth = 1.5;
-Equator.stroke = "rgba(255,99,71,1)"; // tomato
-
-// create the ring of Capricorn
-var CapricornR = two.makeCircle(0, 0, 60);
-CapricornR.noFill();
-CapricornR.linewidth = 1.25;
-CapricornR.stroke = "rgba(255,99,71,1)"; // tomato
-
-
-// zodiac symbols to the right of the clock
-
-const styles2 = {
-  size: 20,
-  weight: "normal",
-  family: "AstroDotBasic",
-  fill: "rgba(46,139,87,1)", // earth green
-  opacity: 1.0 
-};
+let ctr = "<?php echo $alm["civil_twilight_begin"];?>";
+    
+    let ctrarr = ctr.split(":");
+    let ctrhour = parseInt(ctrarr[0]);
+    let ctrmin = parseInt(ctrarr[1]);
+    var ctrmins = 360.0 / 60.0 * ctrmin;
+    var civil_twilight_rise = (360.0 / 24.0 * ctrhour + ctrmins / 24.0);
+    
+let cts = "<?php echo $alm["civil_twilight_end"];?>";
+    
+    let ctsarr = cts.split(":");
+    let ctshour = parseInt(ctsarr[0]);
+    let ctsmin = parseInt(ctsarr[1]);
+    var ctsmins = 360.0 / 60.0 * ctsmin;
+    var civil_twilight_set = (360.0 / 24.0 * ctshour + ctsmins / 24.0);
+    
+let ntr = "<?php echo $alm["nautical_twilight_begin"];?>";
+    
+    let ntrarr = ntr.split(":");
+    let ntrhour = parseInt(ntrarr[0]);
+    let ntrmin = parseInt(ntrarr[1]);
+    var ntrmins = 360.0 / 60.0 * ntrmin;
+    var nautical_twilight_rise = (360.0 / 24.0 * ntrhour + ntrmins / 24.0);
+    
+let nts = "<?php echo $alm["nautical_twilight_end"];?>";
+    
+    let ntsarr = nts.split(":");
+    let ntshour = parseInt(ntsarr[0]);
+    let ntsmin = parseInt(ntsarr[1]);
+    var ntsmins = 360.0 / 60.0 * ntsmin;
+    var nautical_twilight_set = (360.0 / 24.0 * ntshour + ntsmins / 24.0);
+    
+let atr = "<?php echo $alm["astronomical_twilight_begin"];?>";
+    
+    let atrarr = atr.split(":");
+    let atrhour = parseInt(atrarr[0]);
+    let atrmin = parseInt(atrarr[1]);
+    var atrmins = 360.0 / 60.0 * atrmin;
+    var astro_twilight_rise = (360.0 / 24.0 * atrhour + atrmins / 24.0);
+    
+let ats = "<?php echo $alm["astronomical_twilight_end"];?>";
+    
+    let atsarr = ats.split(":");
+    let atshour = parseInt(atsarr[0]);
+    let atsmin = parseInt(atsarr[1]);
+    var atsmins = 360.0 / 60.0 * atsmin;
+    var astro_twilight_set = (360.0 / 24.0 * atshour + atsmins / 24.0);
+     
+var svg = d3.select(".astroclock")
+    .append("svg")
+    //.style("background", "#292E35") // box background to be commented out
+    .attr("width", 780)
+    .attr("height", 500);
 
 var aries = "a";
-var Aries = new Two.Text(aries, 240, -110, styles2);
-		
-var taurus = "b";
-var Taurus = new Two.Text(taurus, 240, -90, styles2);
-		
-var gemini = "c";
-var Gemini = new Two.Text(gemini, 240, -70, styles2);
-		
-var cancer = "d";
-var Cancer = new Two.Text(cancer, 240, -50, styles2);
-		
-var leo = "e";
-var Leo = new Two.Text(leo, 240, -30, styles2);
-		
-var virgo = "f";
-var Virgo = new Two.Text(virgo, 240, -10, styles2);
-		
-var libra = "g";
-var Libra = new Two.Text(libra, 240, 10, styles2);
-		
-var scorpio = "h";
-var Scorpio = new Two.Text(scorpio, 240, 30, styles2);
-		
-var sagittarius = "i";
-var Sagittarius = new Two.Text(sagittarius, 240, 50, styles2);
-		
-var capricorn = "j";
-var Capricorn = new Two.Text(capricorn, 240, 70, styles2);
-		
-var aquarius = "k";
-var Aquarius = new Two.Text(aquarius, 240, 90, styles2);
-		
-var pisces = "l";
-var Pisces = new Two.Text(pisces, 240, 110, styles2);
-		
-two.scene.add(Aries, Taurus, Gemini, Cancer, Leo, Virgo, Libra, Scorpio, Sagittarius, Capricorn, Aquarius, Pisces);
+svg.append("text")
+    .attr("x", 500)
+    .attr("y", 171)
+    .style("fill", "rgba(46,139,87,1)")
+    .style("font-family", "AstroDotBasic")
+    .style("font-size", "20px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text(aries);
 
-// Data output Text
+var taurus = "b";
+svg.append("text")
+    .attr("x", 500)
+    .attr("y", 191)
+    .style("fill", "rgba(46,139,87,1)")
+    .style("font-family", "AstroDotBasic")
+    .style("font-size", "20px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text(taurus);
+
+var gemini = "c";
+svg.append("text")
+    .attr("x", 500)
+    .attr("y", 211)
+    .style("fill", "rgba(46,139,87,1)")
+    .style("font-family", "AstroDotBasic")
+    .style("font-size", "20px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text(gemini);
+
+var cancer = "d";
+svg.append("text")
+    .attr("x", 500)
+    .attr("y", 231)
+    .style("fill", "rgba(46,139,87,1)")
+    .style("font-family", "AstroDotBasic")
+    .style("font-size", "20px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text(cancer);
+
+var leo = "e";
+svg.append("text")
+    .attr("x", 500)
+    .attr("y", 251)
+    .style("fill", "rgba(46,139,87,1)")
+    .style("font-family", "AstroDotBasic")
+    .style("font-size", "20px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text(leo);
+
+var virgo = "f";
+svg.append("text")
+    .attr("x", 500)
+    .attr("y", 271)
+    .style("fill", "rgba(46,139,87,1)")
+    .style("font-family", "AstroDotBasic")
+    .style("font-size", "20px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text(virgo);
+
+var libra = "g";
+svg.append("text")
+    .attr("x", 500)
+    .attr("y", 291)
+    .style("fill", "rgba(46,139,87,1)")
+    .style("font-family", "AstroDotBasic")
+    .style("font-size", "20px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text(libra);
+
+var scorpio = "h";
+svg.append("text")
+    .attr("x", 500)
+    .attr("y", 311)
+    .style("fill", "rgba(46,139,87,1)")
+    .style("font-family", "AstroDotBasic")
+    .style("font-size", "20px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text(scorpio);
+
+var sagittarius = "i";
+svg.append("text")
+    .attr("x", 500)
+    .attr("y", 331)
+    .style("fill", "rgba(46,139,87,1)")
+    .style("font-family", "AstroDotBasic")
+    .style("font-size", "20px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text(sagittarius);
+
+var capricorn = "j";
+svg.append("text")
+    .attr("x", 500)
+    .attr("y", 351)
+    .style("fill", "rgba(46,139,87,1)")
+    .style("font-family", "AstroDotBasic")
+    .style("font-size", "20px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text(capricorn);
+
+var aquarius = "k";
+svg.append("text")
+    .attr("x", 500)
+    .attr("y", 371)
+    .style("fill", "rgba(46,139,87,1)")
+    .style("font-family", "AstroDotBasic")
+    .style("font-size", "20px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text(aquarius);
+
+var pisces = "l";
+svg.append("text")
+    .attr("x", 500)
+    .attr("y", 391)
+    .style("fill", "rgba(46,139,87,1)")
+    .style("font-family", "AstroDotBasic")
+    .style("font-size", "20px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text(pisces);
 
 var Title = "Astronomical Clock";
-var title = new Two.Text(Title, 260, - 111);
-  	title.size = 14;
-  	title.weight = "bold";
-  	title.family = "Helvetica";
-  	title.fill = "rgba(255,99,71,1)"; // tomato
-  	title.alignment = "left";
-  	
-var Sub_Title = "Based on the Orloj in the City of Prague";
-var subt = new Two.Text(Sub_Title, 260, - 93);
-  	subt.size = 14;
-  	subt.weight = "normal";
-  	subt.family = "Helvetica";
-  	subt.fill = "rgba(46,139,87,1)"; // earth green
-  	subt.alignment = "left";
+svg.append("text")
+    .attr("x", 520)
+    .attr("y", 168)
+    .style("fill", "rgba(255,99,71,1)")
+    .style("font-family", "Helvetica")
+    .style("font-size", "14px")
+    .style("text-anchor", "left")
+    .style("font-weight", "bold")
+    .text(Title);
 
-var underline = two.makeLine(260, - 79, 506,  - 79);
-	underline.noFill();
-  	underline.stroke = "rgba(0,127,255,1)"; // arch blue
-  	underline.linewidth = 1.75;
-  	underline.cap = "round";
-  	  	
+var Title = "Based on the Orloj in the City of Prague";
+svg.append("text")
+    .attr("x", 520)
+    .attr("y", 186)
+    .style("fill", "rgba(46,139,87,1)")
+    .style("font-family", "Helvetica")
+    .style("font-size", "14px")
+    .style("text-anchor", "left")
+    .style("font-weight", "normal")
+    .text(Title);
+
+svg.append("line")
+    .attr("x1", 520)
+    .attr("x2", 766)
+    .attr("y1", 196)
+    .attr("y2", 196)
+    .style("stroke", "rgba(0,127,255,1)")
+    .style("stroke-width", 1.75)
+    .style("stroke-linecap", "round");
+
 var Delta = "Location: <?php echo $stationlocation;?>";
-var loc = new Two.Text(Delta, 260, - 63);
-  	loc.size = 14;
-  	loc.weight = "normal";
-  	loc.family = "Helvetica";
-  	loc.fill = "#FFA54F"; // tan
-  	loc.alignment = "left";
+svg.append("text")
+    .attr("x", 520)
+    .attr("y", 216)
+    .style("fill", "#FFA54F")
+    .style("font-family", "Helvetica")
+    .style("font-size", "14px")
+    .style("text-anchor", "left")
+    .style("font-weight", "normal")
+    .text(Delta);
 
 var Latitude = "Latitude: <?php echo $lat;?>°";
-var lat = new Two.Text(Latitude, 260, - 47);
-  	lat.size = 14;
-  	lat.weight = "normal";
-  	lat.family = "Helvetica";
-  	lat.fill = "rgba(0,127,255,1)"; // arch blue
-  	lat.alignment = "left";  	
+svg.append("text")
+    .attr("x", 520)
+    .attr("y", 232)
+    .style("fill", "rgba(0,127,255,1)")
+    .style("font-family", "Helvetica")
+    .style("font-size", "14px")
+    .style("text-anchor", "left")
+    .style("font-weight", "normal")
+    .text(Latitude);
 
 var Longitude = "Longitude: <?php echo $lon;?>°";
-var lon = new Two.Text(Longitude, 260, - 31);
-  	lon.size = 14;
-  	lon.weight = "normal";
-  	lon.family = "Helvetica";
-  	lon.fill = "rgba(0,127,255,1)"; // arch blue
-  	lon.alignment = "left";
+svg.append("text")
+    .attr("x", 520)
+    .attr("y", 248)
+    .style("fill", "rgba(0,127,255,1)")
+    .style("font-family", "Helvetica")
+    .style("font-size", "14px")
+    .style("text-anchor", "left")
+    .style("font-weight", "normal")
+    .text(Longitude);
 
 var Elevation = "Elevation: <?php echo $elevation;?> m";
-var elev = new Two.Text(Elevation, 260, - 15);
-  	elev.size = 14;
-  	elev.weight = "normal";
-  	elev.family = "Helvetica";
-  	elev.fill = "rgba(0,127,255,1)"; // arch blue
-  	elev.alignment = "left";
+svg.append("text")
+    .attr("x", 520)
+    .attr("y", 264)
+    .style("fill", "rgba(0,127,255,1)")
+    .style("font-family", "Helvetica")
+    .style("font-size", "14px")
+    .style("text-anchor", "left")
+    .style("font-weight", "normal")
+    .text(Elevation);
 
 var Equinox = "Equinox: <?php echo $alm["next_equinox"];?>";
-var equinox = new Two.Text(Equinox, 260, 1);
-  	equinox.size = 14;
-  	equinox.weight = "normal";
-  	equinox.family = "Helvetica";
-  	equinox.fill = "#FFA54F"; // tan
-  	equinox.alignment = "left";
+svg.append("text")
+    .attr("x", 520)
+    .attr("y", 280)
+    .style("fill", "#FFA54F")
+    .style("font-family", "Helvetica")
+    .style("font-size", "14px")
+    .style("text-anchor", "left")
+    .style("font-weight", "normal")
+    .text(Equinox);
 
 var Solstice = "Solstice: <?php echo $alm["next_solstice"];?>";
-var solstice = new Two.Text(Solstice, 260, 17);
-  	solstice.size = 14;
-  	solstice.weight = "normal";
-  	solstice.family = "Helvetica";
-  	solstice.fill = "rgba(255,99,71,1)"; // tomato
-  	solstice.alignment = "left";
+svg.append("text")
+    .attr("x", 520)
+    .attr("y", 296)
+    .style("fill", "rgba(255,99,71,1)")
+    .style("font-family", "Helvetica")
+    .style("font-size", "14px")
+    .style("text-anchor", "left")
+    .style("font-weight", "normal")
+    .text(Solstice);
 
 var Luminance = "Luminance: <?php echo $alm["luminance"];?> %";
-var lum = new Two.Text(Luminance, 260, 33);
-  	lum.size = 14;
-  	lum.weight = "normal";
-  	lum.family = "Helvetica";
-  	lum.fill = "rgba(255,255,255,1)"; // white
-  	lum.alignment = "left";
-  	
+svg.append("text")
+    .attr("x", 520)
+    .attr("y", 312)
+    .style("fill", "white")
+    .style("font-family", "Helvetica")
+    .style("font-size", "14px")
+    .style("text-anchor", "left")
+    .style("font-weight", "normal")
+    .text(Luminance);
+
 var Moonphase = "Moon phase: <?php echo $alm["moonphase"];?>";
-var mph = new Two.Text(Moonphase, 260, 48);
-  	mph.size = 14;
-  	mph.weight = "normal";
-  	mph.family = "Helvetica";
-  	mph.fill = "rgba(255,255,255,1)"; // white
-  	mph.alignment = "left";
-  	
+svg.append("text")
+    .attr("x", 520)
+    .attr("y", 326.75)
+    .style("fill", "white")
+    .style("font-family", "Helvetica")
+    .style("font-size", "14px")
+    .style("text-anchor", "left")
+    .style("font-weight", "normal")
+    .text(Moonphase);
+
 var MoonAge = "Moon age: <?php echo $alm["moon_age"];?> Days old";
-var mage = new Two.Text(MoonAge, 260, 64); // 64
-  	mage.size = 14;
-  	mage.weight = "normal";
-  	mage.family = "Helvetica";
-  	mage.fill = "rgba(255,255,255,1)"; // white
-  	mage.alignment = "left";   	
-  	
+svg.append("text")
+    .attr("x", 520)
+    .attr("y", 342.75)
+    .style("fill", "white")
+    .style("font-family", "Helvetica")
+    .style("font-size", "14px")
+    .style("text-anchor", "left")
+    .style("font-weight", "normal")
+    .text(MoonAge);
+
 var Hmoon = "Moon azimuth: <?php echo $alm["moon_azimuth"];?>°";
-var hmoon = new Two.Text(Hmoon, 260, 80); // 80
-  	hmoon.size = 14;
-  	hmoon.weight = "normal";
-  	hmoon.family = "Helvetica";
-  	hmoon.fill = "rgba(255,255,255,1)"; // white
-  	hmoon.alignment = "left";
+svg.append("text")
+    .attr("x", 520)
+    .attr("y", 358.75)
+    .style("fill", "white")
+    .style("font-family", "Helvetica")
+    .style("font-size", "14px")
+    .style("text-anchor", "left")
+    .style("font-weight", "normal")
+    .text(Hmoon);
 
 var Hsun = "Sun azimuth: <?php echo $alm["sun_azimuth"];?>°";
-var hsun = new Two.Text(Hsun, 260, 96); // 96
-  	hsun.size = 14;
-  	hsun.weight = "normal";
-  	hsun.family = "Helvetica";
-  	hsun.fill = "rgba(255,99,71,1)"; // tomato
-  	hsun.alignment = "left";
+svg.append("text")
+    .attr("x", 520)
+    .attr("y", 374.75)
+    .style("fill", "rgba(255,99,71,1)")
+    .style("font-family", "Helvetica")
+    .style("font-size", "14px")
+    .style("text-anchor", "left")
+    .style("font-weight", "normal")
+    .text(Hsun);
 
 var LST = "Hand of Aries: <?php echo $alm["sidereal_time"];?>°";
-var lst = new Two.Text(LST, 260, 112); // 112
-  	lst.size = 14;
-  	lst.weight = "normal";
-  	lst.family = "Helvetica";
-  	lst.fill = "rgba(0,127,255,1)"; // arch blue
-  	lst.alignment = "left";
+svg.append("text")
+    .attr("x", 520)
+    .attr("y", 390.75)
+    .style("fill", "rgba(0,127,255,1)")
+    .style("font-family", "Helvetica")
+    .style("font-size", "14px")
+    .style("text-anchor", "left")
+    .style("font-weight", "normal")
+    .text(LST);
 
-var PB = "Powered by Two.js";
-var pb = new Two.Text(PB, 260, 135); 
-  	pb.size = 14;
-  	pb.weight = "normal";
-  	pb.family = "Helvetica";
-  	pb.fill = "rgba(46,139,87,1)"; // earth green
-  	pb.alignment = "left";
-	
-	two.scene.add(title, subt, underline, loc, lat, lon, elev, equinox, solstice, lum, mph, mage, hmoon, hsun, lst, pb);
-		
-// visibility function for variation of the sun Kaleidoscope during the night time
-	function Visibility(V) {
+var PB = "Powered by D3.js";
+svg.append("text")
+    .attr("x", 520)
+    .attr("y", 414)
+    .style("fill", "rgba(46,139,87,1)")
+    .style("font-family", "Helvetica")
+    .style("font-size", "14px")
+    .style("text-anchor", "left")
+    .style("font-weight", "normal")
+    .text(PB);
+
+ svg.append("circle")
+    .attr("fill", "rgba(42,86,147,1)")    
+    .attr("r", 140)
+    .attr("cx", 260)
+    .attr("cy", 275);
+
+var arc = d3.arc().innerRadius(100).outerRadius(100);
+var sector = svg.append("path")
+    .attr("fill", "none")
+    .attr("stroke-width", 0.5)
+    .attr("stroke", "rgba(137,142,143,1)")
+    .attr("d", arc({ startAngle: - 15 * Math.PI / 180, endAngle: + 15 * Math.PI / 180 }))
+    .attr("transform", "translate(260,42) rotate(180)");    
+
+var arc = d3.arc().innerRadius(165).outerRadius(165);
+var sector = svg.append("path")
+    .attr("fill", "none")
+    .attr("stroke-width", 0.5)
+    .attr("stroke", "rgba(137,142,143,1)")
+    .attr("d", arc({ startAngle: - 20 * Math.PI / 180, endAngle: + 20 * Math.PI / 180 }))
+    .attr("transform", "translate(260,-8.5) rotate(180)");
+
+var arc = d3.arc().innerRadius(242.5).outerRadius(242.5);
+var sector = svg.append("path")
+    .attr("fill", "none")
+    .attr("stroke-width", 0.5)
+    .attr("stroke", "rgba(137,142,143,1)")
+    .attr("d", arc({ startAngle: - 18 * Math.PI / 180, endAngle: + 18 * Math.PI / 180 }))
+    .attr("transform", "translate(260,-72.5) rotate(180)");
+
+var arc = d3.arc().innerRadius(388).outerRadius(388);
+var sector = svg.append("path")
+    .attr("fill", "none")
+    .attr("stroke-width", 0.5)
+    .attr("stroke", "rgba(137,142,143,1)")
+    .attr("d", arc({ startAngle: - 14 * Math.PI / 180, endAngle: + 14 * Math.PI / 180 }))
+    .attr("transform", "translate(260,-205) rotate(180)");
+
+var arc = d3.arc().innerRadius(770).outerRadius(770);
+var sector = svg.append("path")
+    .attr("fill", "none")
+    .attr("stroke-width", 0.5)
+    .attr("stroke", "rgba(137,142,143,1)")
+    .attr("d", arc({ startAngle: - 8.1 * Math.PI / 180, endAngle: + 8.1 * Math.PI / 180 }))
+    .attr("transform", "translate(260,-575) rotate(180)");
+
+svg.append("line")
+    .attr("x1", 139)
+    .attr("x2", 381)
+    .attr("y1", 207.5)
+    .attr("y2", 207.5)
+    .style("stroke", "rgba(137,142,143,1)")
+    .style("stroke-width", 0.5)
+    .style("stroke-linecap", "round");
+
+svg.append("line")
+    .attr("x1", 260)
+    .attr("x2", 260)
+    .attr("y1", 136)
+    .attr("y2", 215)
+    .style("stroke", "rgba(137,142,143,1)")
+    .style("stroke-width", 0.5)
+    .style("stroke-linecap", "round");
+
+var arc = d3.arc().innerRadius(770).outerRadius(770);
+var sector = svg.append("path")
+    .attr("fill", "none")
+    .attr("stroke-width", 0.5)
+    .attr("stroke", "rgba(137,142,143,1)")
+    .attr("d", arc({ startAngle: - 9.85 * Math.PI / 180, endAngle: + 9.85 * Math.PI / 180 }))
+    .attr("transform", "translate(260,989.5)");
+
+var arc = d3.arc().innerRadius(388).outerRadius(388);
+var sector = svg.append("path")
+    .attr("fill", "none")
+    .attr("stroke-width", 0.5)
+    .attr("stroke", "rgba(137,142,143,1)")
+    .attr("d", arc({ startAngle: - 20.9 * Math.PI / 180, endAngle: + 20.9 * Math.PI / 180 }))
+    .attr("transform", "translate(260,620)");
+
+var arc = d3.arc().innerRadius(242.5).outerRadius(242.5);
+var sector = svg.append("path")
+    .attr("fill", "none")
+    .attr("stroke-width", 0.5)
+    .attr("stroke", "rgba(137,142,143,1)")
+    .attr("d", arc({ startAngle: - 35 * Math.PI / 180, endAngle: + 35 * Math.PI / 180 }))
+    .attr("transform", "translate(260,487.5)");
+
+var arc = d3.arc().innerRadius(142).outerRadius(142);
+var sector = svg.append("path")
+    .attr("fill", "none")
+    .attr("stroke-width", 0.5)
+    .attr("stroke", "rgba(137,142,143,1)")
+    .attr("d", arc({ startAngle: - 73 * Math.PI / 180, endAngle: + 73 * Math.PI / 180 }))
+    .attr("transform", "translate(260,205) rotate(180)");
+
+var arc = d3.arc().innerRadius(145.5).outerRadius(145.5);
+var sector = svg.append("path")
+    .attr("fill", "none")
+    .attr("stroke-width", 0.5)
+    .attr("stroke", "rgba(137,142,143,1)")
+    .attr("d", arc({ startAngle: - 90 * Math.PI / 180, endAngle: + 51 * Math.PI / 180 }))
+    .attr("transform", "translate(235.5,208) rotate(180)");
+
+var arc = d3.arc().innerRadius(145.5).outerRadius(145.5);
+var sector = svg.append("path")
+    .attr("fill", "none")
+    .attr("stroke-width", 0.5)
+    .attr("stroke", "rgba(137,142,143,1)")
+    .attr("d", arc({ startAngle: - 51 * Math.PI / 180, endAngle: + 90 * Math.PI / 180 }))
+    .attr("transform", "translate(284.5,208) rotate(180)");
+
+var arc = d3.arc().innerRadius(142).outerRadius(142);
+var sector = svg.append("path")
+    .attr("fill", "none")
+    .attr("stroke-width", 0.5)
+    .attr("stroke", "rgba(137,142,143,1)")
+    .attr("d", arc({ startAngle: - 35.5 * Math.PI / 180, endAngle: + 104.6 * Math.PI / 180 }))
+    .attr("transform", "translate(303,208) rotate(180)");
+
+var arc = d3.arc().innerRadius(142).outerRadius(142);
+var sector = svg.append("path")
+    .attr("fill", "none")
+    .attr("stroke-width", 0.5)
+    .attr("stroke", "rgba(137,142,143,1)")
+    .attr("d", arc({ startAngle: - 23 * Math.PI / 180, endAngle: + 21 * Math.PI / 180 }))
+    .attr("transform", "translate(320,208) rotate(270)");
+
+var arc = d3.arc().innerRadius(162).outerRadius(162);
+var sector = svg.append("path")
+    .attr("fill", "none")
+    .attr("stroke-width", 0.5)
+    .attr("stroke", "rgba(137,142,143,1)")
+    .attr("d", arc({ startAngle: - 18 * Math.PI / 180, endAngle: + 23 * Math.PI / 180 }))
+    .attr("transform", "translate(356,208) rotate(270)");
+
+var arc = d3.arc().innerRadius(220).outerRadius(220);
+var sector = svg.append("path")
+    .attr("fill", "none")
+    .attr("stroke-width", 0.5)
+    .attr("stroke", "rgba(137,142,143,1)")
+    .attr("d", arc({ startAngle: - 8 * Math.PI / 180, endAngle: + 17.7 * Math.PI / 180 }))
+    .attr("transform", "translate(430,208) rotate(270)");
+
+var arc = d3.arc().innerRadius(280).outerRadius(280);
+var sector = svg.append("path")
+    .attr("fill", "none")
+    .attr("stroke-width", 0.5)
+    .attr("stroke", "rgba(137,142,143,1)")
+    .attr("d", arc({ startAngle: - 4 * Math.PI / 180, endAngle: + 14.6 * Math.PI / 180 }))
+    .attr("transform", "translate(503,208) rotate(270)");
+
+var arc = d3.arc().innerRadius(350).outerRadius(350);
+var sector = svg.append("path")
+    .attr("fill", "none")
+    .attr("stroke-width", 0.5)
+    .attr("stroke", "rgba(137,142,143,1)")
+    .attr("d", arc({ startAngle: - 2.1 * Math.PI / 180, endAngle: + 12 * Math.PI / 180 }))
+    .attr("transform", "translate(585,208) rotate(270)");
+
+var arc = d3.arc().innerRadius(650).outerRadius(650);
+var sector = svg.append("path")
+    .attr("fill", "none")
+    .attr("stroke-width", 0.5)
+    .attr("stroke", "rgba(137,142,143,1)")
+    .attr("d", arc({ startAngle: - 0.75 * Math.PI / 180, endAngle: + 6.5 * Math.PI / 180 }))
+    .attr("transform", "translate(897.5,208) rotate(270)");
+
+var arc = d3.arc().innerRadius(142).outerRadius(142);
+var sector = svg.append("path")
+    .attr("fill", "none")
+    .attr("stroke-width", 0.5)
+    .attr("stroke", "rgba(137,142,143,1)")
+    .attr("d", arc({ startAngle: - 14.5 * Math.PI / 180, endAngle: + 27 * Math.PI / 180 }))
+    .attr("transform", "translate(216.5,208) rotate(90)");
+
+var arc = d3.arc().innerRadius(142).outerRadius(142);
+var sector = svg.append("path")
+    .attr("fill", "none")
+    .attr("stroke-width", 0.5)
+    .attr("stroke", "rgba(137,142,143,1)")
+    .attr("d", arc({ startAngle: - 21 * Math.PI / 180, endAngle: + 23 * Math.PI / 180 }))
+    .attr("transform", "translate(199.5,208) rotate(90)");
+
+var arc = d3.arc().innerRadius(162).outerRadius(162);
+var sector = svg.append("path")
+    .attr("fill", "none")
+    .attr("stroke-width", 0.5)
+    .attr("stroke", "rgba(137,142,143,1)")
+    .attr("d", arc({ startAngle: - 22 * Math.PI / 180, endAngle: + 18 * Math.PI / 180 }))
+    .attr("transform", "translate(164,208) rotate(90)");
+
+var arc = d3.arc().innerRadius(220).outerRadius(220);
+var sector = svg.append("path")
+    .attr("fill", "none")
+    .attr("stroke-width", 0.5)
+    .attr("stroke", "rgba(137,142,143,1)")
+    .attr("d", arc({ startAngle: - 17.5 * Math.PI / 180, endAngle: + 8 * Math.PI / 180 }))
+    .attr("transform", "translate(90.5,208) rotate(90)");
+
+var arc = d3.arc().innerRadius(280).outerRadius(280);
+var sector = svg.append("path")
+    .attr("fill", "none")
+    .attr("stroke-width", 0.5)
+    .attr("stroke", "rgba(137,142,143,1)")
+    .attr("d", arc({ startAngle: - 14.5 * Math.PI / 180, endAngle: + 4 * Math.PI / 180 }))
+    .attr("transform", "translate(17.5,208) rotate(90)");
+
+var arc = d3.arc().innerRadius(350).outerRadius(350);
+var sector = svg.append("path")
+    .attr("fill", "none")
+    .attr("stroke-width", 0.5)
+    .attr("stroke", "rgba(137,142,143,1)")
+    .attr("d", arc({ startAngle: - 11.7 * Math.PI / 180, endAngle: + 2.1 * Math.PI / 180 }))
+    .attr("transform", "translate(-65,208) rotate(90)");
+
+var arc = d3.arc().innerRadius(650).outerRadius(650);
+var sector = svg.append("path")
+    .attr("fill", "none")
+    .attr("stroke-width", 0.5)
+    .attr("stroke", "rgba(137,142,143,1)")
+    .attr("d", arc({ startAngle: - 6.5 * Math.PI / 180, endAngle: + 0.75 * Math.PI / 180 }))
+    .attr("transform", "translate(-377.5,208) rotate(90)");
+
+var arc = d3.arc().innerRadius(0).outerRadius(140);
+var sector = svg.append("path")
+    .attr("fill", "rgba(41,46,53,1)")
+    .attr("stroke-width", 1)
+    .attr("stroke", "rgba(41,46,53,1)")
+    .attr("d", arc({ startAngle: - 66 * Math.PI / 180, endAngle: + 66 * Math.PI / 180 }))
+    .attr("transform", "translate(260,387)");
+
+var arc = d3.arc().innerRadius(0).outerRadius(142);
+var sector = svg.append("path")
+    .attr("fill", "rgba(41,46,53,1)")
+    .attr("stroke-width", 1)
+    .attr("stroke", "rgba(41,46,53,1)")
+    .attr("d", arc({ startAngle: - 66 * Math.PI / 180, endAngle: + 66 * Math.PI / 180 }))
+    .attr("transform", "translate(260,273) rotate(180)");
+
+var arc = d3.arc().innerRadius(120).outerRadius(120);
+var sector = svg.append("path")
+    .attr("fill", "none")
+    .attr("stroke-width", 0.5)
+    .attr("stroke", "rgba(137,142,143,1)")
+    .attr("d", arc({ startAngle: - 87 * Math.PI / 180, endAngle: + 87 * Math.PI / 180 }))
+    .attr("transform", "translate(260,375)");
+
+var arc = d3.arc().innerRadius(100).outerRadius(100);
+var sector = svg.append("path")
+    .attr("fill", "none")
+    .attr("stroke-width", 0.5)
+    .attr("stroke", "rgba(137,142,143,1)")
+    .attr("d", arc({ startAngle: - 114 * Math.PI / 180, endAngle: + 114 * Math.PI / 180 }))
+    .attr("transform", "translate(260,365)");
+
+var arc = d3.arc().innerRadius(80).outerRadius(80);
+var sector = svg.append("path")
+    .attr("fill", "none")
+    .attr("stroke-width", 0.5)
+    .attr("stroke", "rgba(137,142,143,1)")
+    .attr("d", arc({ startAngle: - 155 * Math.PI / 180, endAngle: + 155 * Math.PI / 180 }))
+    .attr("transform", "translate(260,355)");
+
+var sunRing = svg.append("defs");
+
+var gRing = sunRing.append("linearGradient")
+    .attr("id","colorBleed")
+    .attr("x1","0")
+    .attr("y1","0")
+    .attr("x2","0")
+    .attr("y2","1"); 
+
+gRing.append('stop')
+    .attr('stop-color', "rgba(255,255,0,1)")
+    .attr('offset', '0%');
+
+gRing.append('stop')
+    .attr('stop-color', "rgba(255,0,0,1)")
+    .attr('offset', '50%');
+
+gRing.append('stop')
+    .attr('stop-color', "rgba(0,0,255,1)")
+    .attr('offset', '100%');
+
+svg.append("circle")
+    .attr("stroke", "url(#colorBleed)")    
+    .style('stroke-width', "15")
+    .style('fill', "none")
+    .attr("r", 185)
+    .attr("cx", 260)
+    .attr("cy", 275);
+  
+svg.append("circle")
+    .attr("stroke", "rgba(42,86,147,1)")    
+    .style('stroke-width', "8")
+    .style('fill', "none")
+    .attr("r", 174)
+    .attr("cx", 260)
+    .attr("cy", 275);
+
+svg.append("circle")
+    .attr("stroke", "rgba(9,70,62,1)")    
+    .style('stroke-width', "32")
+    .style('fill', "none")
+    .attr("r", 154)
+    .attr("cx", 260)
+    .attr("cy", 275);
+
+svg.append("circle")
+    .attr("stroke", "rgba(255,99,71,1)")    
+    .style('stroke-width', "1.5")
+    .style('fill', "none")
+    .attr("r", 171)
+    .attr("cx", 260)
+    .attr("cy", 275);
+
+svg.append("circle.tropic-of-cancer")
+    svg.append("circle")
+    .attr("class", "tropic-of-cancer")
+    .attr("stroke", "rgba(255,99,71,1)")    
+    .style('stroke-width', "1.5")
+    .style('fill', "none")
+    .attr("r", 140)
+    .attr("cx", 260)
+    .attr("cy", 275);
+
+svg.append("circle.tropic-of-capricorn")
+    svg.append("circle")
+    .attr("class", "tropic-of-capricorn")
+    .attr("stroke", "rgba(255,99,71,1)")    
+    .style('stroke-width', "1.5")
+    .style('fill', "none")
+    .attr("r", 92)
+    .attr("cx", 260)
+    .attr("cy", 275);
+
+var arc = d3.arc().innerRadius(140).outerRadius(140);
+var sector = svg.append("path")
+    .attr("fill", "none")
+    .attr("stroke-width", 1)
+    .attr("stroke", "rgba(255,99,71,1)")
+    .attr("d", arc({ startAngle: - 66 * Math.PI / 180, endAngle: + 66 * Math.PI / 180 }))
+    .attr("transform", "translate(260,385)");
+
+svg.append("circle.earth-background")
+    svg.append("circle")
+    .attr("class", "earth-background")   
+    .style('fill', "rgba(41,46,53,1)")
+    .attr("r", 60)
+    .attr("cx", 260)
+    .attr("cy", 275);
+
+svg.append("circle.earth")
+    svg.append("circle")
+    .attr("class", "earth")
+    .attr("stroke", "rgba(255,99,71,1)")    
+    .style('stroke-width', "1.5")
+    .style('fill', "none")
+    .attr("r", 60)
+    .attr("cx", 260)
+    .attr("cy", 275);
+
+var clockCenter = svg
+    .append('g')
+    .attr('class','clock-center')
+    .attr("transform", "translate(260,275)");
+
+var Axis = clockCenter
+    .append('g')
+    .attr('class','Axis');
+
+Axis.selectAll("text.numbers")
+    .data(d3.range(24))
+    .enter().append("text")
+    .attr("class", "numbers")
+    .attr("x", function(d, i){return (155.5) * Math.cos(i * 0.2616 + 45.552)})
+    .attr("y", function(d, i){return (155.5) * Math.sin(i * 0.2616 + 45.552)})
+    .attr("alignment-baseline", "middle")
+    .attr("text-anchor", "middle")
+    .style("fill", "yellow")
+    .style("font-family", "Helvetica")     
+    .style("font-size", "12px")
+    .style("font-weight", "bold")
+    .attr("transform", function(d, i){return "translate(0, 1.0)";})
+    .text(function(d, i){return (i % 1) ? '' : d ;});
+
+Axis.selectAll("line.Sticksin")
+    .data(d3.range(120))
+    .enter().append("line")
+    .attr("class", "Sticksin")
+    .attr("x1", function(d, i){return (142.5) * Math.cos(i / 120 * Math.PI * 2)})
+    .attr("y1", function(d, i){return (142.5) * Math.sin(i / 120 * Math.PI * 2)})
+    .attr("x2", function(d, i){return (145.5) * Math.cos(i / 120 * Math.PI * 2)})
+    .attr("y2", function(d, i){return (145.5) * Math.sin(i / 120 * Math.PI * 2)})
+    .style("stroke-width", "1.5px")
+    .style("stroke", "#888")
+    .style("stroke-linecap", "round")
+    .attr("transform", function(d, i){return "translate(0, 0)";});
+
+Axis.selectAll("line.Sticksout")
+    .data(d3.range(120))
+    .enter().append("line")
+    .attr("class", "Sticksout")
+    .attr("x1", function(d, i){return (168.5) * Math.cos(i / 120 * Math.PI * 2)})
+    .attr("y1", function(d, i){return (168.5) * Math.sin(i / 120 * Math.PI * 2)})
+    .attr("x2", function(d, i){return (165.5) * Math.cos(i / 120 * Math.PI * 2)})
+    .attr("y2", function(d, i){return (165.5) * Math.sin(i / 120 * Math.PI * 2)})
+    .style("stroke-width", "1.5px")
+    .style("stroke", "#888")
+    .style("stroke-linecap", "round")
+    .attr("transform", function(d, i){return "translate(0, 0)";});
+
+Axis.selectAll("line.ticksout")
+    .data(d3.range(24))
+    .enter().append("line")
+    .attr("class", "ticksout")
+    .attr("x1", function(d, i){return (165.5) * Math.cos(i / 24 * Math.PI * 2)})
+    .attr("y1", function(d, i){return (165.5) * Math.sin(i / 24 * Math.PI * 2)})
+    .attr("x2", function(d, i){return (168.5) * Math.cos(i / 24 * Math.PI * 2)})
+    .attr("y2", function(d, i){return (168.5) * Math.sin(i / 24 * Math.PI * 2)})
+    .style("stroke-width", "2.5px")
+    .style("stroke", "red")
+    .style("stroke-linecap", "round")
+    .attr("transform", function(d, i){return "translate(0, 0)";});
+
+Axis.selectAll("line.ticksin")
+    .data(d3.range(24))
+    .enter().append("line")
+    .attr("class", "ticksin")
+    .attr("x1", function(d, i){return (142.5) * Math.cos(i / 24 * Math.PI * 2)})
+    .attr("y1", function(d, i){return (142.5) * Math.sin(i / 24 * Math.PI * 2)})
+    .attr("x2", function(d, i){return (145.5) * Math.cos(i / 24 * Math.PI * 2)})
+    .attr("y2", function(d, i){return (145.5) * Math.sin(i / 24 * Math.PI * 2)})
+    .style("stroke-width", "2.5px")
+    .style("stroke", "red")
+    .style("stroke-linecap", "round")
+    .attr("transform", function(d, i){return "translate(0, 0)";});
+
+Axis.selectAll("line.sunrise")
+    .data(d3.range(24))
+    .enter().append("line")
+    .attr("class", "sunrise")
+    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(sunrise))})
+    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(sunrise))})
+    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(sunrise))})
+    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(sunrise))})
+    .style("stroke-width", "2.5px")
+    .style("stroke", "rgba(255,99,71,1)")
+    .style("stroke-linecap", "round")
+    .attr("transform", function(d, i){return "translate(0, 0)";});
+
+Axis.selectAll("line.sun_meridian_transit")
+    .data(d3.range(24))
+    .enter().append("line")
+    .attr("class", "sun_meridian_transit")
+    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(sun_meridian_transit))})
+    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(sun_meridian_transit))})
+    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(sun_meridian_transit))})
+    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(sun_meridian_transit))})
+    .style("stroke-width", "2.5px")
+    .style("stroke", "rgba(255,99,71,1)")
+    .style("stroke-linecap", "round")
+    .attr("transform", function(d, i){return "translate(0, 0)";});
+
+Axis.selectAll("line.sunset")
+    .data(d3.range(24))
+    .enter().append("line")
+    .attr("class", "sunset")
+    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(sunset))})
+    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(sunset))})
+    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(sunset))})
+    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(sunset))})
+    .style("stroke-width", "2.5px")
+    .style("stroke", "rgba(255,99,71,1)")
+    .style("stroke-linecap", "round")
+    .attr("transform", function(d, i){return "translate(0, 0)";});
+
+Axis.selectAll("line.moonrise")
+    .data(d3.range(24))
+    .enter().append("line")
+    .attr("class", "moonrise")
+    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(moonrise || 0))})
+    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(moonrise || 0))})
+    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(moonrise || 0))})
+    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(moonrise || 0))})
+    .style("stroke-width", "2.5px")
+    .style("stroke", "rgba(255,255,255,1)")
+    .style("stroke-linecap", "round")
+    .attr("transform", function(d, i){return "translate(0, 0)";});
+
+Axis.selectAll("line.moon_meridian_transit")
+    .data(d3.range(24))
+    .enter().append("line")
+    .attr("class", "moon_meridian_transit")
+    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(moon_meridian_transit || 0))})
+    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(moon_meridian_transit || 0))})
+    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(moon_meridian_transit || 0))})
+    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(moon_meridian_transit || 0))})
+    .style("stroke-width", "2.5px")
+    .style("stroke", "rgba(255,255,255,1)")
+    .style("stroke-linecap", "round")
+    .attr("transform", function(d, i){return "translate(0, 0)";});
+
+Axis.selectAll("line.moonset")
+    .data(d3.range(24))
+    .enter().append("line")
+    .attr("class", "moonset")
+    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(moonset || 0))})
+    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(moonset || 0))})
+    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(moonset || 0))})
+    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(moonset || 0))})
+    .style("stroke-width", "2.5px")
+    .style("stroke", "rgba(255,255,255,1)")
+    .style("stroke-linecap", "round")
+    .attr("transform", function(d, i){return "translate(0, 0)";});
+
+Axis.selectAll("line.civil_twilight_rise")
+    .data(d3.range(24))
+    .enter().append("line")
+    .attr("class", "civil_twilight_rise")
+    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(civil_twilight_rise))})
+    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(civil_twilight_rise))})
+    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(civil_twilight_rise))})
+    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(civil_twilight_rise))})
+    .style("stroke-width", "2.5px")
+    .style("stroke", "rgba(74,227,82,1)")
+    .style("stroke-linecap", "round")
+    .attr("transform", function(d, i){return "translate(0, 0)";});
+
+Axis.selectAll("line.civil_twilight_set")
+    .data(d3.range(24))
+    .enter().append("line")
+    .attr("class", "civil_twilight_set")
+    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(civil_twilight_set))})
+    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(civil_twilight_set))})
+    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(civil_twilight_set))})
+    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(civil_twilight_set))})
+    .style("stroke-width", "2.5px")
+    .style("stroke", "rgba(74,227,82,1)")
+    .style("stroke-linecap", "round")
+    .attr("transform", function(d, i){return "translate(0, 0)";});
+
+Axis.selectAll("line.nautical_twilight_rise")
+    .data(d3.range(24))
+    .enter().append("line")
+    .attr("class", "nautical_twilight_rise")
+    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(nautical_twilight_rise))})
+    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(nautical_twilight_rise))})
+    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(nautical_twilight_rise))})
+    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(nautical_twilight_rise))})
+    .style("stroke-width", "2.5px")
+    .style("stroke", "rgba(74,227,82,1)")
+    .style("stroke-linecap", "round")
+    .attr("transform", function(d, i){return "translate(0, 0)";});
+
+Axis.selectAll("line.nautical_twilight_set")
+    .data(d3.range(24))
+    .enter().append("line")
+    .attr("class", "nautical_twilight_set")
+    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(nautical_twilight_set))})
+    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(nautical_twilight_set))})
+    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(nautical_twilight_set))})
+    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(nautical_twilight_set))})
+    .style("stroke-width", "2.5px")
+    .style("stroke", "rgba(74,227,82,1)")
+    .style("stroke-linecap", "round")
+    .attr("transform", function(d, i){return "translate(0, 0)";});
+
+Axis.selectAll("line.astro_twilight_rise")
+    .data(d3.range(24))
+    .enter().append("line")
+    .attr("class", "astro_twilight_rise")
+    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(astro_twilight_rise || 0))})
+    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(astro_twilight_rise || 0))})
+    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(astro_twilight_rise || 0))})
+    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(astro_twilight_rise || 0))})
+    .style("stroke-width", "2.5px")
+    .style("stroke", "rgba(74,227,82,1)")
+    .style("stroke-linecap", "round")
+    .attr("transform", function(d, i){return "translate(0, 0)";});
+
+Axis.selectAll("line.astro_twilight_set")
+    .data(d3.range(24))
+    .enter().append("line")
+    .attr("class", "astro_twilight_set")
+    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(astro_twilight_set || 0))})
+    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(astro_twilight_set || 0))})
+    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(astro_twilight_set || 0))})
+    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(astro_twilight_set || 0))})
+    .style("stroke-width", "2.5px")
+    .style("stroke", "rgba(74,227,82,1)")
+    .style("stroke-linecap", "round")
+    .attr("transform", function(d, i){return "translate(0, 0)";});
+
+var analogContent = svg
+    .append('g')
+    .attr('class','analog-content')
+    .attr("transform", "translate(260,275)");
+
+var hourScale = d3.scaleLinear()
+    .range([0,360])
+    .domain([0,24]);
+
+var minuteScale = d3.scaleLinear()
+    .range([0,360])
+    .domain([0,60]);
+
+var secondScale = d3.scaleLinear()
+    .range([0,360])
+    .domain([0,60]);
+
+var handData = [
+    {'label':'hours','scale':hourScale},
+    {'label':'minutes','scale':minuteScale},
+    {'label':'seconds','scale':secondScale}
+]
+
+var analogHands = analogContent.selectAll('.hands')
+    analogHands.data(handData)
+    .enter()
+    .append('g')
+    .attr('class',function(d){ return'hands analog-' + d.label;})
+    .append('line')
+    .attr('x1', function(d){return - 144 * Math.sin(Math.PI)})
+    .attr('y1', function(d){return + 144 * Math.cos(Math.PI)})
+    .attr('x2', function(d){return - 184 * Math.sin(Math.PI)})
+    .attr('y2', function(d){return + 184 * Math.cos(Math.PI)})
+
+function update() {
+
+var now = new Date();
+var yourTimeZoneFrom = <?php echo $UTC_offset?>;
+var tzDifference = yourTimeZoneFrom * 60 + now.getTimezoneOffset();
+var offset = tzDifference * 60 * 1000;
+var now2 = new Date(new Date().getTime() + offset);
+
+handData[0].value = (now2.getHours() % 24) + 12 + (now2.getMinutes() + now2.getSeconds() / 60) / 60;
+handData[1].value = (now2.getMinutes() % 60) + now2.getSeconds() / 60;
+handData[2].value = now2.getSeconds() + now2.getMilliseconds() / 1000;
+d3.selectAll('.hands').data(handData) 
+.attr('transform',function(d){return 'rotate('+ d.scale(d.value) +')';});   
+}
+setInterval(update, 1);
+update();
+
+function Visibility(V) {
   
   if (V) {
     // coefficient
@@ -965,16 +1192,13 @@ var pb = new Two.Text(PB, 260, 135);
       a3 * Math.cos(3 * V) +
       a4 * Math.cos(4 * V) +
       a5 * Math.cos(5 * V);
-
-    return retV;
   }
-  return;
+  return retV;
 }
 
-// function to calculate the moon phase shape
-    function phase(t, phaze) {
-	
-  var T = t - 2 * Math.PI * Math.floor(t / (2 * Math.PI));
+function phase(t, phaze) {
+    
+var T = t - 2 * Math.PI * Math.floor(t / (2 * Math.PI));
 
   if (T < Math.PI) {
     phaze = Math.cos(t);
@@ -982,71 +1206,70 @@ var pb = new Two.Text(PB, 260, 135);
   return phaze;
 }
 
-// define some things for the Astro clock (dont't delete anything here !!)
-	var clockRadius = 140;
+var xc = 260;
+var yc = 275;
 
-	// center of the clock
-	var xc = 0;
-	var yc = 0;
-	
-	const MoonRings = true;
-	const MoonMutatis = true;
-	const Kaleidoscope = true;
-	const SunMutatis = true;
-	
-	var MoonMov = 8;
-	var Velocity = 100;
-			    
-    const time = new Date();
-   
-	const mins = time.getMinutes();
-	const secs = time.getSeconds();
-		
-	var K_Sun = 2 * Math.PI * (mins + secs / 60) / 60;
-	var R_Moon = 2 * Math.PI * (mins - secs / 60) / 60;	       
-/*	
- create and draw the ecliptic ring and turn it using hourAries
- the markers on this ring are in two parts, the first part is built into
- the eclipticRing function, the second part is
- the DayMarks function also turned using hourAries
-*/ 
-   
+const MoonRings = true;
+const MoonMutatis = true;
+const Kaleidoscope = true;
+const SunMutatis = true;
+    
+var MoonMov = 8;
+var Velocity = 100;
+
+var tiktok = new Date();
+var mins = tiktok.getMinutes();
+var secs = tiktok.getSeconds();
+      
+var K_Sun = 2 * Math.PI * (mins + secs / 60) / 60;
+var R_Moon = 2 * Math.PI * (mins - secs / 60) / 60; 
+
+var clockRadius = 140;
+
 function EclipticRing() {
 
-    var Rd = 0.28467 * clockRadius;
-    var Re = 0.71533 * clockRadius;
+var Rd = 0.28467 * clockRadius;
+var Re = 0.71533 * clockRadius;
 
-    var xe = xc + (Rd * Math.sin(hourAries));
-    var ye = yc - (Rd * Math.cos(hourAries));
+var xe = xc + (Rd * Math.sin(hourAries));
+var ye = yc - (Rd * Math.cos(hourAries));
 
-    var arcb = two.makeCircle(xe, ye, 0.48 * (Re + eclipticWidth * Re), 0, 180 / Math.PI);
-    arcb.noFill();
-    arcb.linewidth = 35;
-    arcb.stroke = "rgba(20,22,276,0.60)"; // blue
+svg.append("circle")
+    .attr("stroke", "rgba(20,22,276,0.60)")    
+    .style('stroke-width', 34)
+    .style('fill', "none")
+    .attr("r", 0.48 * (Re + eclipticWidth * Re))
+    .attr("cx", xe)
+    .attr("cy", ye);
 
-    var arc1 = two.makeCircle(xe, ye, Re, 0, 180 / Math.PI);
-    arc1.noFill();
-    arc1.linewidth = 2.5;
-    arc1.stroke = "rgba(255,255,0,0.75)"; // yellow
+svg.append("circle")
+    .attr("stroke", "rgba(255,255,0,0.75)")    
+    .style('stroke-width', 2.5)
+    .style('fill', "none")
+    .attr("r", Re)
+    .attr("cx", xe)
+    .attr("cy", ye);
 
-    var arc2 = two.makeCircle(xe, ye, eclipticWidth * 1.25 * Re, 0, 180 / Math.PI);
-    arc2.noFill();
-    arc2.linewidth = 1.5;
-    arc2.stroke = "rgba(255,255,0,1)"; // yellow
+svg.append("circle")
+    .attr("stroke", "rgba(255,255,0,1)")    
+    .style('stroke-width', 1.5)
+    .style('fill', "none")
+    .attr("r", eclipticWidth * 1.25 * Re)
+    .attr("cx", xe)
+    .attr("cy", ye);
 
-    var arc3 = two.makeCircle(xe, ye, eclipticWidth * Re * 0.9, 0, 180 / Math.PI);
-    arc3.noFill();
-    arc3.linewidth = 3.0;
-    arc3.stroke = "rgba(255,255,0,0.75)"; // yellow
-    
-    // -- Zodiac Marker lines * 12 --
-    
-    var Lep = Re - Re * eclipticWidth;
-      	
-    var a = 0.2735 * clockRadius;
-    var b = 2.51284;
+svg.append("circle")
+    .attr("stroke", "rgba(255,255,0,0.75)")    
+    .style('stroke-width', 3.0)
+    .style('fill', "none")
+    .attr("r", eclipticWidth * Re * 0.9)
+    .attr("cx", xe)
+    .attr("cy", ye);
 
-  
+// the 12 Zodiac Marker lines
+
+var Lep = Re - Re * eclipticWidth;   
+
 let i = 0;
     while (i < 60) {
 
@@ -1054,42 +1277,45 @@ let i = 0;
         var d = toDegRad(i,f);
         var sd = Math.sin(d);
         var a = 0.285 * clockRadius;
-        var Re = a * (Math.sqrt((b * b) - (sd * sd)) + Math.cos(d));
+        var b = 2.51284;
+        var Ret = a * (Math.sqrt((b * b) - (sd * sd)) + Math.cos(d));
+        
         var Lep1 = Lep + 9;
 
         var factA = hourAries + d;
         var sinfactA = Math.sin(factA);
         var cosfactA = Math.cos(factA);
-        var xa = xc + Re * sinfactA;
-        var ya = yc - Re * cosfactA;
-        var xb = xc + (Re - Lep1) * sinfactA;
-        var yb = yc - (Re - Lep1) * cosfactA;
-      
-        var linez = two.makeLine(xa, ya, xb, yb);
-  
-        linez.noFill();
-        linez.stroke = "rgb(255,255,0,0.75)"; // yellow
-        linez.linewidth = 1.5;
-        linez.cap = "round";
+        var xa = xc + Ret * sinfactA;
+        var ya = yc - Ret * cosfactA;
+        var xb = xc + (Ret - Lep1) * sinfactA;
+        var yb = yc - (Ret - Lep1) * cosfactA;
+
+svg.append("line")
+    .attr("x1", xa)
+    .attr("x2", xb)
+    .attr("y1", ya)
+    .attr("y2", yb)
+    .style("stroke", "rgb(255,255,0,0.75)")
+    .style("stroke-width", 1.5)
+    .style("stroke-linecap", "round");
                        
         i = i + 2.5;
       }     
     }
-      
+  
 EclipticRing();
-
-// second part of the ecliptic ring the day markers * 60
+ 
 function DayMarks() {
 
-  var Rd = 0.28467 * clockRadius;
-  var Re = 0.71533 * clockRadius;
+var Rd = 0.28467 * clockRadius;
+var Re = 0.71533 * clockRadius;
 
-  var xe = xc + Rd * Math.sin(hourAries);
-  var ye = yc - Rd * Math.cos(hourAries);
+var xe = xc + Rd * Math.sin(hourAries);
+var ye = yc - Rd * Math.cos(hourAries);
 
-    var Lep = Re - Re * eclipticWidth;
-    var a = 0.283 * clockRadius;
-    var b = 2.51284;
+var Lep = Re - Re * eclipticWidth;
+var a = 0.283 * clockRadius;
+var b = 2.51284;
 
 
 let i = 0;
@@ -1097,23 +1323,25 @@ let i = 0;
         var f = 6;       
         var d = toDegRad(i, f);
         var sd = Math.sin(d);        
-        var Re = a * (Math.sqrt((b * b) - (sd * sd)) + Math.cos(d));
+        var Ret = a * (Math.sqrt((b * b) - (sd * sd)) + Math.cos(d));
         var Lep2 = 5;
 
         var factA = hourAries + d;
         var sinfactA = Math.sin(factA);
         var cosfactA = Math.cos(factA);
-        var xg = xc + Re * sinfactA;
-        var yg = yc - Re * cosfactA;
-        var xh = xc + (Re - Lep2) * sinfactA;
-        var yh = yc - (Re - Lep2) * cosfactA;
+        var xg = xc + Ret * sinfactA;
+        var yg = yc - Ret * cosfactA;
+        var xh = xc + (Ret - Lep2) * sinfactA;
+        var yh = yc - (Ret - Lep2) * cosfactA;
     
-        var linex = two.makeLine(xg, yg, xh, yh);
-  
-        linex.noFill();
-        linex.stroke = "rgb(255,255,0,0.75)"; // yellow
-        linex.linewidth = 1;
-        linex.cap = "round";
+svg.append("line")
+    .attr("x1", xg)
+    .attr("x2", xh)
+    .attr("y1", yg)
+    .attr("y2", yh)
+    .style("stroke", "rgb(255,255,0,0.75)")
+    .style("stroke-width", 1.0)
+    .style("stroke-linecap", "round");
         
         i = i + 0.5;
       }  
@@ -1121,938 +1349,976 @@ let i = 0;
 
 DayMarks();
 
-// create and draw the 12 zodiac symbols inside the ecliptic ring
-
 function zodiacAries() {
 
-	var Rd = 0.28467 * clockRadius;
-  	var Re = 0.71533 * clockRadius;
+var Rd = 0.28467 * clockRadius;
+var Re = 0.71533 * clockRadius;
 
-  	var xe = xc + Rd * Math.sin(hourAries);
-  	var ye = yc - Rd * Math.cos(hourAries);
-  		
-  		var Lep = Re - Re * eclipticWidth;
-  		var a  = 0.275 * clockRadius;
-		var b = 2.51284;
-		 
-	        //  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')	       
-	  var ast = [ "", "c", "", "", "", "", "", "", "", "", "", "", "" ];
-
-	  
+var xe = xc + Rd * Math.sin(hourAries);
+var ye = yc - Rd * Math.cos(hourAries);
+        
+var Lep = Re - Re * eclipticWidth;
+var a  = 0.275 * clockRadius;
+var b = 2.51284;
+         
+//  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')         
+var Array = [ "", "c", "", "", "", "", "", "", "", "", "", "", "" ];
+      
 let i = 1;
     while (i < 30) {
-        	
-        var f = 12           
+
+        var f = 12;          
         var d  = toDegRad(i,f);
-        var sd = Math.sin(d);        
-        var Re = (a * (Math.sqrt((b * b) - (sd * sd)) + Math.cos(d))) - 3.9;
-        		
+        var sd = Math.sin(d);
+
+        var Ret = (a * (Math.sqrt((b * b) - (sd * sd)) + Math.cos(d))) - 3.9;
+                
         var factA = hourAries + d;
         var sinfactA = Math.sin(factA);
         var cosfactA = Math.cos(factA);
-        var xd = xc + Re * sinfactA;
-        var yd = yc - Re * cosfactA;
-        var xf = xc + (Re - Lep) * sinfactA;
-        var yf = yc - (Re - Lep) * cosfactA;
-        var sign = ast[Math.floor(i % ast.length)];
-        var zodiac = two.makeText(sign, (xd + xf) / 2, (yd + yf) / 2);
+        var xd = xc + Ret * sinfactA;
+        var yd = yc - Ret * cosfactA;
+        var xf = xc + (Ret - Lep) * sinfactA;
+        var yf = yc - (Ret - Lep) * cosfactA;
+        var sign = Array[Math.floor(i % Array.length)];
 
-        zodiac.family = "AstroDotBasic";
-        zodiac.weight = "bold";
-		zodiac.size = "20";
-		zodiac.fill = "rgb(255,255,0,1)";
-		zodiac.noStroke = "rgb(255,255,0,1)"; // yellow
-		
-		i = i + 2.54;
-	}
-		
-	two.scene.add(zodiac); 
+svg.append("text")    
+    .attr("x", (xd + xf) / 2)
+    .attr("y", (yd + yf) / 2)
+    .style("fill", "rgb(255,255,0,1)")
+    .style("font-family", "AstroDotBasic")
+    .style("font-size", "20px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "bold")
+    .style("dominant-baseline", "central")
+    .text(sign);
+            
+        i = i + 2.54;
+    }
 }
 
 zodiacAries();
 
 function zodiacTaurus() {
 
-	var Rd = 0.28467 * clockRadius;
-  	var Re = 0.71533 * clockRadius;
+var Rd = 0.28467 * clockRadius;
+var Re = 0.71533 * clockRadius;
 
-  	var xe = xc + Rd * Math.sin(hourAries);
-  	var ye = yc - Rd * Math.cos(hourAries);
-  		
-  		var Lep = Re - Re * eclipticWidth;
-  		var a  = 0.275 * clockRadius;
-		var b = 2.51284;
-		 
-	        //  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')
-
-	  var ast = [ "", "", "d", "", "", "", "", "", "", "", "", "", "" ];
-	  
+var xe = xc + Rd * Math.sin(hourAries);
+var ye = yc - Rd * Math.cos(hourAries);
+        
+var Lep = Re - Re * eclipticWidth;
+var a  = 0.275 * clockRadius;
+var b = 2.51284;
+         
+//  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')
+var Array = [ "", "", "d", "", "", "", "", "", "", "", "", "", "" ];
+      
 let i = 1;
     while (i < 30) {
-    	
-        var f = 12           
+        
+        var f = 12;           
         var d  = toDegRad(i,f);
         var sd = Math.sin(d);        
-        var Re = (a * (Math.sqrt((b * b) - (sd * sd)) + Math.cos(d))) - 3.9;
-        		
+        var Ret = (a * (Math.sqrt((b * b) - (sd * sd)) + Math.cos(d))) - 3.9;
+                
         var factA = hourAries + d;
         var sinfactA = Math.sin(factA);
         var cosfactA = Math.cos(factA);
-        var xd = xc + Re * sinfactA;
-        var yd = yc - Re * cosfactA;
-        var xf = xc + (Re - Lep) * sinfactA;
-        var yf = yc - (Re - Lep) * cosfactA;
-        var sign = ast[Math.floor(i % ast.length)];
-        var zodiac = two.makeText(sign, (xd + xf) / 2, (yd + yf) / 2);
+        var xd = xc + Ret * sinfactA;
+        var yd = yc - Ret * cosfactA;
+        var xf = xc + (Ret - Lep) * sinfactA;
+        var yf = yc - (Ret - Lep) * cosfactA;
+        var sign = Array[Math.floor(i % Array.length)];
 
-        zodiac.family = "AstroDotBasic";
-        zodiac.weight = "bold";
-		zodiac.size = "20";
-		zodiac.fill = "rgb(255,255,0,1)";
-		zodiac.noStroke = "rgb(255,255,0,1)"; // yellow
-		
-		i = i + 2.54;
-	}
-		
-	two.scene.add(zodiac); 
+svg.append("text")
+    .attr("x", (xd + xf) / 2)
+    .attr("y", (yd + yf) / 2)
+    .style("fill", "rgb(255,255,0,1)")
+    .style("font-family", "AstroDotBasic")
+    .style("font-size", "20px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "bold")
+    .style("dominant-baseline", "central")
+    .text(sign);
+        
+        i = i + 2.54;
+    }         
 }
 
 zodiacTaurus();
 
 function zodiacGemini() {
 
-	var Rd = 0.28467 * clockRadius;
-  	var Re = 0.71533 * clockRadius;
+var Rd = 0.28467 * clockRadius;
+var Re = 0.71533 * clockRadius;
 
-  	var xe = xc + Rd * Math.sin(hourAries);
-  	var ye = yc - Rd * Math.cos(hourAries);
-  		
-  		var Lep = Re - Re * eclipticWidth;
-  		var a  = 0.275 * clockRadius;
-		var b = 2.51284;
-		 
-	        //  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')
-
-	  var ast = [ "", "", "e", "", "", "", "", "", "", "", "", "" ];
-	  
+var xe = xc + Rd * Math.sin(hourAries);
+var ye = yc - Rd * Math.cos(hourAries);
+        
+var Lep = Re - Re * eclipticWidth;
+var a  = 0.275 * clockRadius;
+var b = 2.51284;
+         
+//  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')
+var Array = [ "", "", "e", "", "", "", "", "", "", "", "", "" ];
+      
 let i = 1;
     while (i < 30) {
-    	
-        var f = 12           
+        
+        var f = 12;           
         var d  = toDegRad(i,f);
         var sd = Math.sin(d);        
-        var Re = (a * (Math.sqrt((b * b) - (sd * sd)) + Math.cos(d))) - 3.9;
-        		
+        var Ret = (a * (Math.sqrt((b * b) - (sd * sd)) + Math.cos(d))) -3.9;
+                
         var factA = hourAries + d;
         var sinfactA = Math.sin(factA);
         var cosfactA = Math.cos(factA);
-        var xd = xc + Re * sinfactA;
-        var yd = yc - Re * cosfactA;
-        var xf = xc + (Re - Lep) * sinfactA;
-        var yf = yc - (Re - Lep) * cosfactA;
-        var sign = ast[Math.floor(i % ast.length)];
-        var zodiac = two.makeText(sign, (xd + xf) / 2, (yd + yf) / 2);
+        var xd = xc + Ret * sinfactA;
+        var yd = yc - Ret * cosfactA;
+        var xf = xc + (Ret - Lep) * sinfactA;
+        var yf = yc - (Ret - Lep) * cosfactA;
+        var sign = Array[Math.floor(i % Array.length)];
 
-        zodiac.family = "AstroDotBasic";
-        zodiac.weight = "bold";
-		zodiac.size = "20";
-		zodiac.fill = "rgb(255,255,0,1)";
-		zodiac.noStroke = "rgb(255,255,0,1)"; // yellow
-		
-		i = i + 2.54;
-	}
-		
-	two.scene.add(zodiac); 
+svg.append("text")
+    .attr("x", (xd + xf) / 2)
+    .attr("y", (yd + yf) / 2)
+    .style("fill", "rgb(255,255,0,1)")
+    .style("font-family", "AstroDotBasic")
+    .style("font-size", "20px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "bold")
+    .style("dominant-baseline", "central")
+    .text(sign);
+        
+        i = i + 2.54;
+    }         
 }
 
 zodiacGemini();
 
 function zodiacCancer() {
 
-	var Rd = 0.28467 * clockRadius;
-  	var Re = 0.71533 * clockRadius;
+var Rd = 0.28467 * clockRadius;
+var Re = 0.71533 * clockRadius;
 
-  	var xe = xc + Rd * Math.sin(hourAries);
-  	var ye = yc - Rd * Math.cos(hourAries);
-  		
-  		var Lep = Re - Re * eclipticWidth;
-  		var a  = 0.275 * clockRadius;
-		var b = 2.51284;
-		 
-	        //  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')
-
-	  var ast = [ "", "", "", "b", "", "", "", "", "", "", "", "" ];
-	  
+var xe = xc + Rd * Math.sin(hourAries);
+var ye = yc - Rd * Math.cos(hourAries);
+        
+var Lep = Re - Re * eclipticWidth;
+var a  = 0.275 * clockRadius;
+var b = 2.51284;
+         
+//  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')
+var Array = [ "", "", "", "b", "", "", "", "", "", "", "", "" ];
+      
 let i = 1;
     while (i < 30) {
-    	
-        var f = 12           
+        
+        var f = 12;           
         var d  = toDegRad(i,f);
         var sd = Math.sin(d);        
-        var Re = (a * (Math.sqrt((b * b) - (sd * sd)) + Math.cos(d))) - 3.9;
-        		
+        var Ret = (a * (Math.sqrt((b * b) - (sd * sd)) + Math.cos(d))) - 3.9;
+                
         var factA = hourAries + d;
         var sinfactA = Math.sin(factA);
         var cosfactA = Math.cos(factA);
-        var xd = xc + Re * sinfactA;
-        var yd = yc - Re * cosfactA;
-        var xf = xc + (Re - Lep) * sinfactA;
-        var yf = yc - (Re - Lep) * cosfactA;
-        var sign = ast[Math.floor(i % ast.length)];
-        var zodiac = two.makeText(sign, (xd + xf) / 2, (yd + yf) / 2);
+        var xd = xc + Ret * sinfactA;
+        var yd = yc - Ret * cosfactA;
+        var xf = xc + (Ret - Lep) * sinfactA;
+        var yf = yc - (Ret - Lep) * cosfactA;
+        var sign = Array[Math.floor(i % Array.length)];
 
-        zodiac.family = "AstroDotBasic";
-        zodiac.weight = "bold";
-		zodiac.size = "20";
-		zodiac.fill = "rgb(255,255,0,1)";
-		zodiac.noStroke = "rgb(255,255,0,1)"; // yellow
-		
-		i = i + 2.54;
-	}
-		
-	two.scene.add(zodiac); 
+svg.append("text")
+    .attr("x", (xd + xf) / 2)
+    .attr("y", (yd + yf) / 2)
+    .style("fill", "rgb(255,255,0,1)")
+    .style("font-family", "AstroDotBasic")
+    .style("font-size", "20px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "bold")
+    .style("dominant-baseline", "central")
+    .text(sign);
+        
+        i = i + 2.54;
+    }        
 }
 
 zodiacCancer();
 
 function zodiacLeo() {
 
-	var Rd = 0.28467 * clockRadius;
-  	var Re = 0.71533 * clockRadius;
+var Rd = 0.28467 * clockRadius;
+var Re = 0.71533 * clockRadius;
 
-  	var xe = xc + Rd * Math.sin(hourAries);
-  	var ye = yc - Rd * Math.cos(hourAries);
-  		
-  		var Lep = Re - Re * eclipticWidth;
-  		var a  = 0.275 * clockRadius;
-		var b = 2.51284;
-		 
-	        //  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')
-
-	  var ast = [ "", "", "", "", "", "", "a", "", "", "", "", "", "" ];
-	  
+var xe = xc + Rd * Math.sin(hourAries);
+var ye = yc - Rd * Math.cos(hourAries);
+        
+var Lep = Re - Re * eclipticWidth;
+var a  = 0.275 * clockRadius;
+var b = 2.51284;
+         
+//  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')
+var Array = [ "", "", "", "", "", "", "a", "", "", "", "", "", "" ];
+      
 let i = 1;
     while (i < 30) {
-    	
-        var f = 12           
+        
+        var f = 12;           
         var d  = toDegRad(i,f);
         var sd = Math.sin(d);        
-        var Re = (a * (Math.sqrt((b * b) - (sd * sd)) + Math.cos(d))) - 3.9;
-        		
+        var Ret = (a * (Math.sqrt((b * b) - (sd * sd)) + Math.cos(d))) - 3.9;
+                
         var factA = hourAries + d;
         var sinfactA = Math.sin(factA);
         var cosfactA = Math.cos(factA);
-        var xd = xc + Re * sinfactA;
-        var yd = yc - Re * cosfactA;
-        var xf = xc + (Re - Lep) * sinfactA;
-        var yf = yc - (Re - Lep) * cosfactA;
-        var sign = ast[Math.floor(i % ast.length)];
-        var zodiac = two.makeText(sign, (xd + xf) / 2, (yd + yf) / 2);
+        var xd = xc + Ret * sinfactA;
+        var yd = yc - Ret * cosfactA;
+        var xf = xc + (Ret - Lep) * sinfactA;
+        var yf = yc - (Ret - Lep) * cosfactA;
+        var sign = Array[Math.floor(i % Array.length)];
 
-        zodiac.family = "AstroDotBasic";
-        zodiac.weight = "bold";
-		zodiac.size = "20";
-		zodiac.fill = "rgb(255,255,0,1)";
-		zodiac.noStroke = "rgb(255,255,0,1)"; // yellow
-		
-		i = i + 2.54;
-	}
-		
-	two.scene.add(zodiac); 
+svg.append("text")
+    .attr("x", (xd + xf) / 2)
+    .attr("y", (yd + yf) / 2)
+    .style("fill", "rgb(255,255,0,1)")
+    .style("font-family", "AstroDotBasic")
+    .style("font-size", "20px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "bold")
+    .style("dominant-baseline", "central")
+    .text(sign);
+        
+        i = i + 2.54;
+    }        
 }
 
 zodiacLeo();
 
 function zodiacVirgo() {
 
-	var Rd = 0.28467 * clockRadius;
-  	var Re = 0.71533 * clockRadius;
+var Rd = 0.28467 * clockRadius;
+var Re = 0.71533 * clockRadius;
 
-  	var xe = xc + Rd * Math.sin(hourAries);
-  	var ye = yc - Rd * Math.cos(hourAries);
-  		
-  		var Lep = Re - Re * eclipticWidth;
-  		var a  = 0.275 * clockRadius;
-		var b = 2.51284;
-		 
-	        //  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')
-
-	  var ast = [ "", "", "", "", "", "", "", "", "l", "", "", "" ];
-	  
+var xe = xc + Rd * Math.sin(hourAries);
+var ye = yc - Rd * Math.cos(hourAries);
+        
+var Lep = Re - Re * eclipticWidth;
+var a  = 0.275 * clockRadius;
+var b = 2.51284;
+         
+//  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')
+var Array = [ "", "", "", "", "", "", "", "", "l", "", "", "" ];
+      
 let i = 1;
     while (i < 30) {
-    	
-        var f = 12           
+        
+        var f = 12;           
         var d  = toDegRad(i,f);
         var sd = Math.sin(d);        
-        var Re = (a * (Math.sqrt((b * b) - (sd * sd)) + Math.cos(d))) - 3.9;
-        		
+        var Ret = (a * (Math.sqrt((b * b) - (sd * sd)) + Math.cos(d))) - 3.9;
+                
         var factA = hourAries + d;
         var sinfactA = Math.sin(factA);
         var cosfactA = Math.cos(factA);
-        var xd = xc + Re * sinfactA;
-        var yd = yc - Re * cosfactA;
-        var xf = xc + (Re - Lep) * sinfactA;
-        var yf = yc - (Re - Lep) * cosfactA;
-        var sign = ast[Math.floor(i % ast.length)];
-        var zodiac = two.makeText(sign, (xd + xf) / 2, (yd + yf) / 2);
+        var xd = xc + Ret * sinfactA;
+        var yd = yc - Ret * cosfactA;
+        var xf = xc + (Ret - Lep) * sinfactA;
+        var yf = yc - (Ret - Lep) * cosfactA;
+        var sign = Array[Math.floor(i % Array.length)];
 
-        zodiac.family = "AstroDotBasic";
-        zodiac.weight = "bold";
-		zodiac.size = "20";
-		zodiac.fill = "rgb(255,255,0,1)";
-		zodiac.noStroke = "rgb(255,255,0,1)"; // yellow
-		
-		i = i + 2.54;
-	}
-		
-	two.scene.add(zodiac); 
+svg.append("text")
+    .attr("x", (xd + xf) / 2)
+    .attr("y", (yd + yf) / 2)
+    .style("fill", "rgb(255,255,0,1)")
+    .style("font-family", "AstroDotBasic")
+    .style("font-size", "20px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "bold")
+    .style("dominant-baseline", "central")
+    .text(sign);
+        
+        i = i + 2.54;
+    }         
 }
 
 zodiacVirgo();
 
 function zodiacLibra() {
 
-	var Rd = 0.28467 * clockRadius;
-  	var Re = 0.71533 * clockRadius;
+var Rd = 0.28467 * clockRadius;
+var Re = 0.71533 * clockRadius;
 
-  	var xe = xc + Rd * Math.sin(hourAries);
-  	var ye = yc - Rd * Math.cos(hourAries);
-  		
-  		var Lep = Re - Re * eclipticWidth;
-  		var a  = 0.275 * clockRadius;
-		var b = 2.51284;
-		 
-	        //  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')
-
-	  var ast = [ "", "", "", "", "", "", "", "", "", "", "", "k", "" ];
-	  
+var xe = xc + Rd * Math.sin(hourAries);
+var ye = yc - Rd * Math.cos(hourAries);
+        
+var Lep = Re - Re * eclipticWidth;
+var a  = 0.275 * clockRadius;
+var b = 2.51284;
+         
+//  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')
+var Array = [ "", "", "", "", "", "", "", "", "", "", "", "k", "" ];
+      
 let i = 1;
     while (i < 30) {
-    	
-        var f = 12           
+        
+        var f = 12;           
         var d  = toDegRad(i,f);
         var sd = Math.sin(d);        
-        var Re = (a * (Math.sqrt((b * b) - (sd * sd)) + Math.cos(d))) - 3.9;
-        		
+        var Ret = (a * (Math.sqrt((b * b) - (sd * sd)) + Math.cos(d))) - 3.9;
+                
         var factA = hourAries + d;
         var sinfactA = Math.sin(factA);
         var cosfactA = Math.cos(factA);
-        var xd = xc + Re * sinfactA;
-        var yd = yc - Re * cosfactA;
-        var xf = xc + (Re - Lep) * sinfactA;
-        var yf = yc - (Re - Lep) * cosfactA;
-        var sign = ast[Math.floor(i % ast.length)];
-        var zodiac = two.makeText(sign, (xd + xf) / 2, (yd + yf) / 2);
+        var xd = xc + Ret * sinfactA;
+        var yd = yc - Ret * cosfactA;
+        var xf = xc + (Ret - Lep) * sinfactA;
+        var yf = yc - (Ret - Lep) * cosfactA;
+        var sign = Array[Math.floor(i % Array.length)];
 
-        zodiac.family = "AstroDotBasic";
-        zodiac.weight = "bold";
-		zodiac.size = "20";
-		zodiac.fill = "rgb(255,255,0,1)";
-		zodiac.noStroke = "rgb(255,255,0,1)"; // yellow
-		
-		i = i + 2.54;
-	}
-		
-	two.scene.add(zodiac); 
+svg.append("text")
+    .attr("x", (xd + xf) / 2)
+    .attr("y", (yd + yf) / 2)
+    .style("fill", "rgb(255,255,0,1)")
+    .style("font-family", "AstroDotBasic")
+    .style("font-size", "20px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "bold")
+    .style("dominant-baseline", "central")
+    .text(sign);
+        
+        i = i + 2.54;
+    }        
 }
 
 zodiacLibra();
 
 function zodiacScorpio() {
 
-	var Rd = 0.28467 * clockRadius;
-  	var Re = 0.71533 * clockRadius;
+var Rd = 0.28467 * clockRadius;
+var Re = 0.71533 * clockRadius;
 
-  	var xe = xc + Rd * Math.sin(hourAries);
-  	var ye = yc - Rd * Math.cos(hourAries);
-  		
-  		var Lep = Re - Re * eclipticWidth;
-  		var a  = 0.275 * clockRadius;
-		var b = 2.51284;
-		 
-	        //  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')
-
-	  var ast = [ "", "", "", "", "", "", "", "", "", "", "f", "", "" ];
-	  
+var xe = xc + Rd * Math.sin(hourAries);
+var ye = yc - Rd * Math.cos(hourAries);
+        
+var Lep = Re - Re * eclipticWidth;
+var a  = 0.275 * clockRadius;
+var b = 2.51284;
+         
+//  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')
+var Array = [ "", "", "", "", "", "", "", "", "", "", "f", "", "" ];
+      
 let i = 1;
     while (i < 30) {
-    	
-        var f = 12           
+        
+        var f = 12;           
         var d  = toDegRad(i,f);
         var sd = Math.sin(d);        
-        var Re = (a * (Math.sqrt((b * b) - (sd * sd)) + Math.cos(d))) - 3.9;
-        		
+        var Ret = (a * (Math.sqrt((b * b) - (sd * sd)) + Math.cos(d))) - 3.9;
+                
         var factA = hourAries + d;
         var sinfactA = Math.sin(factA);
         var cosfactA = Math.cos(factA);
-        var xd = xc + Re * sinfactA;
-        var yd = yc - Re * cosfactA;
-        var xf = xc + (Re - Lep) * sinfactA;
-        var yf = yc - (Re - Lep) * cosfactA;
-        var sign = ast[Math.floor(i % ast.length)];
-        var zodiac = two.makeText(sign, (xd + xf) / 2, (yd + yf) / 2);
+        var xd = xc + Ret * sinfactA;
+        var yd = yc - Ret * cosfactA;
+        var xf = xc + (Ret - Lep) * sinfactA;
+        var yf = yc - (Ret - Lep) * cosfactA;
+        var sign = Array[Math.floor(i % Array.length)];
 
-        zodiac.family = "AstroDotBasic";
-        zodiac.weight = "bold";
-		zodiac.size = "20";
-		zodiac.fill = "rgb(255,255,0,1)";
-		zodiac.noStroke = "rgb(255,255,0,1)"; // yellow
-		
-		i = i + 2.54;
-	}
-		
-	two.scene.add(zodiac); 
+svg.append("text")
+    .attr("x", (xd + xf) / 2)
+    .attr("y", (yd + yf) / 2)
+    .style("fill", "rgb(255,255,0,1)")
+    .style("font-family", "AstroDotBasic")
+    .style("font-size", "20px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "bold")
+    .style("dominant-baseline", "central")
+    .text(sign);
+        
+        i = i + 2.54;
+    }        
 }
 
 zodiacScorpio();
 
 function zodiacSagittarius() {
 
-	var Rd = 0.28467 * clockRadius;
-  	var Re = 0.71533 * clockRadius;
+var Rd = 0.28467 * clockRadius;
+var Re = 0.71533 * clockRadius;
 
-  	var xe = xc + Rd * Math.sin(hourAries);
-  	var ye = yc - Rd * Math.cos(hourAries);
-  		
-  		var Lep = Re - Re * eclipticWidth;
-  		var a  = 0.275 * clockRadius;
-		var b = 2.51284;
-		 
-	        //  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')
-
-	  var ast = [ "", "", "", "", "", "", "", "", "", "", "g" ];
-	  
+var xe = xc + Rd * Math.sin(hourAries);
+var ye = yc - Rd * Math.cos(hourAries);
+        
+var Lep = Re - Re * eclipticWidth;
+var a  = 0.275 * clockRadius;
+var b = 2.51284;
+         
+//  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')
+var Array = [ "", "", "", "", "", "", "", "", "", "", "g" ];
+      
 let i = 1;
     while (i < 30) {
-    	
-        var f = 12           
+        
+        var f = 12;           
         var d  = toDegRad(i,f);
         var sd = Math.sin(d);        
-        var Re = (a * (Math.sqrt((b * b) - (sd * sd)) + Math.cos(d))) - 3.9;
-        		
+        var Ret = (a * (Math.sqrt((b * b) - (sd * sd)) + Math.cos(d))) - 3.9;
+                
         var factA = hourAries + d;
         var sinfactA = Math.sin(factA);
         var cosfactA = Math.cos(factA);
-        var xd = xc + Re * sinfactA;
-        var yd = yc - Re * cosfactA;
-        var xf = xc + (Re - Lep) * sinfactA;
-        var yf = yc - (Re - Lep) * cosfactA;
-        var sign = ast[Math.floor(i % ast.length)];
-        var zodiac = two.makeText(sign, (xd + xf) / 2, (yd + yf) / 2);
+        var xd = xc + Ret * sinfactA;
+        var yd = yc - Ret * cosfactA;
+        var xf = xc + (Ret - Lep) * sinfactA;
+        var yf = yc - (Ret - Lep) * cosfactA;
+        var sign = Array[Math.floor(i % Array.length)];
 
-        zodiac.family = "AstroDotBasic";
-        zodiac.weight = "bold";
-		zodiac.size = "20";
-		zodiac.fill = "rgb(255,255,0,1)";
-		zodiac.noStroke = "rgb(255,255,0,1)"; // yellow
-		
-		i = i + 2.54;
-	}
-		
-	two.scene.add(zodiac); 
+svg.append("text")
+    .attr("x", (xd + xf) / 2)
+    .attr("y", (yd + yf) / 2)
+    .style("fill", "rgb(255,255,0,1)")
+    .style("font-family", "AstroDotBasic")
+    .style("font-size", "20px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "bold")
+    .style("dominant-baseline", "central")
+    .text(sign);
+        
+        i = i + 2.54;
+    }         
 }
 
 zodiacSagittarius();
 
 function zodiacCapricorn() {
 
-	var Rd = 0.28467 * clockRadius;
-  	var Re = 0.71533 * clockRadius;
+var Rd = 0.28467 * clockRadius;
+var Re = 0.71533 * clockRadius;
 
-  	var xe = xc + Rd * Math.sin(hourAries);
-  	var ye = yc - Rd * Math.cos(hourAries);
-  		
-  		var Lep = Re - Re * eclipticWidth;
-  		var a  = 0.275 * clockRadius;
-		var b = 2.51284;
-		 
-	        //  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')
-
-	  var ast = [  "", "", "", "", "h", "", "", "", "", "", "", "", "", "" ];
-	  
+var xe = xc + Rd * Math.sin(hourAries);
+var ye = yc - Rd * Math.cos(hourAries);
+        
+var Lep = Re - Re * eclipticWidth;
+var a  = 0.275 * clockRadius;
+var b = 2.51284;
+         
+//  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')
+var Array = [ "", "", "", "", "h", "", "", "", "", "", "", "", "", "" ];
+      
 let i = 1;
     while (i < 30) {
-    	
-        var f = 12           
+        
+        var f = 12;          
         var d  = toDegRad(i,f);
         var sd = Math.sin(d);        
-        var Re = (a * (Math.sqrt((b * b) - (sd * sd)) + Math.cos(d))) - 3.9;
-        		
+        var Ret = (a * (Math.sqrt((b * b) - (sd * sd)) + Math.cos(d))) - 3.9;
+                
         var factA = hourAries + d;
         var sinfactA = Math.sin(factA);
         var cosfactA = Math.cos(factA);
-        var xd = xc + Re * sinfactA;
-        var yd = yc - Re * cosfactA;
-        var xf = xc + (Re - Lep) * sinfactA;
-        var yf = yc - (Re - Lep) * cosfactA;
-        var sign = ast[Math.floor(i % ast.length)];
-        var zodiac = two.makeText(sign, (xd + xf) / 2, (yd + yf) / 2);
+        var xd = xc + Ret * sinfactA;
+        var yd = yc - Ret * cosfactA;
+        var xf = xc + (Ret - Lep) * sinfactA;
+        var yf = yc - (Ret - Lep) * cosfactA;
+        var sign = Array[Math.floor(i % Array.length)];
 
-        zodiac.family = "AstroDotBasic";
-        zodiac.weight = "bold";
-		zodiac.size = "20";
-		zodiac.fill = "rgb(255,255,0,1)";
-		zodiac.noStroke = "rgb(255,255,0,1)"; // yellow
-		
-		i = i + 2.54;
-	}
-		
-	two.scene.add(zodiac); 
+svg.append("text")
+    .attr("x", (xd + xf) / 2)
+    .attr("y", (yd + yf) / 2)
+    .style("fill", "rgb(255,255,0,1)")
+    .style("font-family", "AstroDotBasic")
+    .style("font-size", "20px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "bold")
+    .style("dominant-baseline", "central")
+    .text(sign);
+        
+        i = i + 2.54;
+    }         
 }
 
 zodiacCapricorn();
 
 function zodiacAquarius() {
 
-	var Rd = 0.28467 * clockRadius;
-  	var Re = 0.71533 * clockRadius;
+var Rd = 0.28467 * clockRadius;
+var Re = 0.71533 * clockRadius;
 
-  	var xe = xc + Rd * Math.sin(hourAries);
-  	var ye = yc - Rd * Math.cos(hourAries);
-  		
-  		var Lep = Re - Re * eclipticWidth;
-  		var a  = 0.275 * clockRadius;
-		var b = 2.51284;
-		 
-	        //  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')
-
-	  var ast = [  "", "", "i", "", "", "", "", "", "", "", "", "", "", "" ];
-	  
+var xe = xc + Rd * Math.sin(hourAries);
+var ye = yc - Rd * Math.cos(hourAries);
+        
+var Lep = Re - Re * eclipticWidth;
+var a  = 0.275 * clockRadius;
+var b = 2.51284;
+         
+//  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')
+var Array = [ "", "", "i", "", "", "", "", "", "", "", "", "", "", "" ];
+      
 let i = 1;
     while (i < 30) {
-    	
-        var f = 12           
+        
+        var f = 12;           
         var d  = toDegRad(i,f);
         var sd = Math.sin(d);        
-        var Re = (a * (Math.sqrt((b * b) - (sd * sd)) + Math.cos(d))) - 3.9;
-        		
+        var Ret = (a * (Math.sqrt((b * b) - (sd * sd)) + Math.cos(d))) - 3.9;
+                
         var factA = hourAries + d;
         var sinfactA = Math.sin(factA);
         var cosfactA = Math.cos(factA);
-        var xd = xc + Re * sinfactA;
-        var yd = yc - Re * cosfactA;
-        var xf = xc + (Re - Lep) * sinfactA;
-        var yf = yc - (Re - Lep) * cosfactA;
-        var sign = ast[Math.floor(i % ast.length)];
-        var zodiac = two.makeText(sign, (xd + xf) / 2, (yd + yf) / 2);
+        var xd = xc + Ret * sinfactA;
+        var yd = yc - Ret * cosfactA;
+        var xf = xc + (Ret - Lep) * sinfactA;
+        var yf = yc - (Ret - Lep) * cosfactA;
+        var sign = Array[Math.floor(i % Array.length)];
 
-        zodiac.family = "AstroDotBasic";
-        zodiac.weight = "bold";
-		zodiac.size = "20";
-		zodiac.fill = "rgb(255,255,0,1)";
-		zodiac.noStroke = "rgb(255,255,0,1)"; // yellow
-		
-		i = i + 2.54;
-	}
-		
-	two.scene.add(zodiac); 
+svg.append("text")
+    .attr("x", (xd + xf) / 2)
+    .attr("y", (yd + yf) / 2)
+    .style("fill", "rgb(255,255,0,1)")
+    .style("font-family", "AstroDotBasic")
+    .style("font-size", "20px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "bold")
+    .style("dominant-baseline", "central")
+    .text(sign);
+        
+        i = i + 2.54;
+    }        
 }
 
 zodiacAquarius();
 
 function zodiacPisces() {
 
-	var Rd = 0.28467 * clockRadius;
-  	var Re = 0.71533 * clockRadius;
+var Rd = 0.28467 * clockRadius;
+var Re = 0.71533 * clockRadius;
 
-  	var xe = xc + Rd * Math.sin(hourAries);
-  	var ye = yc - Rd * Math.cos(hourAries);
-  		
-  		var Lep = Re - Re * eclipticWidth;
-  		var a  = 0.275 * clockRadius;
-		var b = 2.51284;
-		 
-	        //  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')
-
-	  var ast = [  "", "", "", "", "", "", "", "", "", "", "", "", "", "j" ];
-	  
+var xe = xc + Rd * Math.sin(hourAries);
+var ye = yc - Rd * Math.cos(hourAries);
+        
+var Lep = Re - Re * eclipticWidth;
+var a  = 0.275 * clockRadius;
+var b = 2.51284;
+         
+//  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')
+var Array = [ "", "", "", "", "", "", "", "", "", "", "", "", "", "j" ];
+      
 let i = 1;
     while (i < 30) {
-    	
-        var f = 12           
+        
+        var f = 12;           
         var d  = toDegRad(i,f);
         var sd = Math.sin(d);        
-        var Re = (a * (Math.sqrt((b * b) - (sd * sd)) + Math.cos(d))) - 3.9;
-        		
+        var Ret = (a * (Math.sqrt((b * b) - (sd * sd)) + Math.cos(d))) - 3.9;
+                
         var factA = hourAries + d;
         var sinfactA = Math.sin(factA);
         var cosfactA = Math.cos(factA);
-        var xd = xc + Re * sinfactA;
-        var yd = yc - Re * cosfactA;
-        var xf = xc + (Re - Lep) * sinfactA;
-        var yf = yc - (Re - Lep) * cosfactA;
-        var sign = ast[Math.floor(i % ast.length)];
-        var zodiac = two.makeText(sign, (xd + xf) / 2, (yd + yf) / 2);
+        var xd = xc + Ret * sinfactA;
+        var yd = yc - Ret * cosfactA;
+        var xf = xc + (Ret - Lep) * sinfactA;
+        var yf = yc - (Ret - Lep) * cosfactA;
+        var sign = Array[Math.floor(i % Array.length)];
 
-        zodiac.family = "AstroDotBasic";
-        zodiac.weight = "bold";
-		zodiac.size = "20";
-		zodiac.fill = "rgb(255,255,0,1)";
-		zodiac.noStroke = "rgb(255,255,0,1)"; // yellow
-		
-		i = i + 2.54;
-	}
-		
-	two.scene.add(zodiac); 
+svg.append("text")
+    .attr("x", (xd + xf) / 2)
+    .attr("y", (yd + yf) / 2)
+    .style("fill", "rgb(255,255,0,1)")
+    .style("font-family", "AstroDotBasic")
+    .style("font-size", "20px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "bold")
+    .style("dominant-baseline", "central")
+    .text(sign);
+        
+        i = i + 2.54;
+    }        
 }
 
 zodiacPisces();
 
-// create and draw the blue cross onto the ecliptic ring and turn it using hourAries
 function AriesHand() {
 
-  var ariesHourFactor = hourAries + Math.PI / 2;
-  var sinAriesHand = Math.sin(ariesHourFactor) * clockRadius;
-  var cosAriesHand = Math.cos(ariesHourFactor) * clockRadius;
-  var xa = xc + 0.87 * sinAriesHand;
-  var ya = yc - 0.87 * cosAriesHand;
-  var Xa = xc - 0.654 * sinAriesHand;
-  var Ya = yc + 0.654 * cosAriesHand;
-   
-  var line1 = two.makeLine(xa, ya, Xa, Ya); // spring equinox/Aries hand one end, autumn equinox the other end
+var ariesHourFactor = hourAries + Math.PI / 2;
+var sinAriesHand = Math.sin(ariesHourFactor) * clockRadius;
+var cosAriesHand = Math.cos(ariesHourFactor) * clockRadius;
+var xa = xc + 0.87 * sinAriesHand;
+var ya = yc - 0.87 * cosAriesHand;
+var Xa = xc - 0.654 * sinAriesHand;
+var Ya = yc + 0.654 * cosAriesHand;
 
-  line1.noFill();
-  line1.stroke = "rgba(0,127,255,1)"; // arch blue
-  line1.linewidth = 3;
-  line1.cap = "round";
+svg.append("line")
+    .attr("x1", xa)
+    .attr("x2", Xa)
+    .attr("y1", ya)
+    .attr("y2", Ya)
+    .style("stroke", "rgba(0,127,255,1)")
+    .style("stroke-width", 3.0)
+    .style("stroke-linecap", "round");
 
-  var dot1 = two.makeCircle(Xa, Ya, 4, 0, Math.PI * 2); // autumn equinox dot
-  dot1.fill = "rgba(255,99,71,1)";
-  dot1.linewidth = 1;
-  dot1.stroke = "rgba(255,99,71,1)"; // tomato
+svg.append("circle")
+    .style('fill', "rgba(255,99,71,1)")
+    .attr("r", 4)
+    .attr("cx", Xa)
+    .attr("cy", Ya);
 
-  var dot2 = two.makeCircle(xa, ya, 4.5, 0, Math.PI * 2); // dot on the end of Aries hand
-  dot2.fill = "rgba(255,99,71,1)";
-  dot2.linewidth = 1;
-  dot2.stroke = "rgba(255,99,71,1)"; // tomato
-  
-  var ariesHourFactor = hourAries - 0.011 + Math.PI / 270;
-  var sinAriesHand = Math.sin(ariesHourFactor) * clockRadius;
-  var cosAriesHand = Math.cos(ariesHourFactor) * clockRadius;
-  var xa = xc + sinAriesHand;
-  var ya = yc - cosAriesHand;
-  var Xa = xc - 0.43 * sinAriesHand;
-  var Ya = yc + 0.43 * cosAriesHand;
-  
-  var line2 = two.makeLine(xa, ya, Xa, Ya); // summer solstice one end, winter solstice the other end
+svg.append("circle")
+    .style('fill', "rgba(255,99,71,1)")
+    .attr("r", 4.5)
+    .attr("cx", xa)
+    .attr("cy", ya);
 
-  line2.noFill();
-  line2.stroke = "rgba(0,127,255,1)"; // arch blue
-  line2.linewidth = 3;
-  line2.cap = "round";
+var ariesHourFactor = hourAries - 0.011 + Math.PI / 270;
+var sinAriesHand = Math.sin(ariesHourFactor) * clockRadius;
+var cosAriesHand = Math.cos(ariesHourFactor) * clockRadius;
+var xa = xc + sinAriesHand;
+var ya = yc - cosAriesHand;
+var Xa = xc - 0.43 * sinAriesHand;
+var Ya = yc + 0.43 * cosAriesHand;
 
-  var dot3 = two.makeCircle(Xa, Ya, 4, 0, Math.PI * 2); // winter solstice dot
-  dot3.fill = "rgba(255,99,71,1)";
-  dot3.linewidth = 1;
-  dot3.stroke = "rgba(255,99,71,1)"; // tomato
+svg.append("line")
+    .attr("x1", xa)
+    .attr("x2", Xa)
+    .attr("y1", ya)
+    .attr("y2", Ya)
+    .style("stroke", "rgba(0,127,255,1)")
+    .style("stroke-width", 3.0)
+    .style("stroke-linecap", "round");
 
-  var dot4 = two.makeCircle(xa, ya, 4, 0, Math.PI * 2); // summer solstice dot
-  dot4.fill = "rgba(255,99,71,1)";
-  dot4.linewidth = 1;
-  dot4.stroke = "rgba(255,99,71,1)"; // tomato
+svg.append("circle")
+    .style('fill', "rgba(255,99,71,1)")
+    .attr("r", 4)
+    .attr("cx", Xa)
+    .attr("cy", Ya); 
+    
+svg.append("circle")
+    .style('fill', "rgba(255,99,71,1)")
+    .attr("r", 4)
+    .attr("cx", xa)
+    .attr("cy", ya);  
 }
 
 AriesHand();
 
-/* create and draw the sun needle and the sun */
 function SunNeedle() {
 
-    var as = 0.28467 * clockRadius;
-    var bs = 2.51284;
-    var ds = - hourAries + hours_arc;
-    var sds = Math.sin(ds);
-    var Rs = as * (Math.sqrt(bs * bs - sds * sds) + Math.cos(ds));
-    		
-	var Xs = xc - 0.17 * clockRadius * Math.sin(hours_arc);
-	var Ys = yc + 0.17 * clockRadius * Math.cos(hours_arc);
-  
-    var line3 = two.makeLine(xc, yc, Xs, Ys);
-  
-    line3.noFill();
-    line3.stroke = "rgba(255,255,0,1)"; // yellow
-    line3.linewidth = 3;
-    line3.cap = "round";
+var as = 0.28467 * clockRadius;
+var bs = 2.51284;
+var ds = - hourAries + hours_arc;
+var sds = Math.sin(ds);
+var Rs = as * (Math.sqrt(bs * bs - sds * sds) + Math.cos(ds));
+            
+var Xs = xc - 0.17 * clockRadius * Math.sin(hours_arc);
+var Ys = yc + 0.17 * clockRadius * Math.cos(hours_arc);
 
-				
-	var spots = two.makeCircle(Xs, Ys, 3, 0, Math.PI * 2);
-	spots.fill = "rgba(255,255,0,1)";
-    spots.linewidth = 1;
-    spots.stroke = "rgba(255,255,0,1)"; // yellow
-			
-	var Xs = xc + 1.31 * clockRadius * Math.sin(hours_arc);
-	var Ys = yc - 1.31 * clockRadius * Math.cos(hours_arc);
+svg.append("line")
+    .attr("x1", xc)
+    .attr("x2", Xs)
+    .attr("y1", yc)
+    .attr("y2", Ys)
+    .style("stroke", "rgba(255,255,0,1)")
+    .style("stroke-width", 3.0)
+    .style("stroke-linecap", "round");
 
-	var line4 = two.makeLine(xc, yc, Xs, Ys);
-  
-    line4.noFill();
-    line4.stroke = "rgba(255,255,0,1)"; // yellow
-    line4.linewidth = 3;
-    line4.cap = "round";
-        
-    var Xs = xc + Rs * Math.sin(hours_arc);
-	var Ys = yc - Rs * Math.cos(hours_arc);
-				            
-    var layers = {
-  	background: two.makeGroup()
-};
+svg.append("circle")
+    .style('fill', "rgba(255,255,0,1)")
+    .attr("r", 3)
+    .attr("cx", Xs)
+    .attr("cy", Ys);
 
-	var Rad = 38;
-	var glow = new Two.Circle(Xs, Ys, Rad);
-	glow.fill = "rgba(255, 85, 85, 1.0)"; // sunset red
-	glow.fill = new Two.RadialGradient(0.5, 0.5, 0.5, [
-  	new Two.Stop(0.15, "rgba(255, 85, 85, 0.80)"), // sunset red
-  	new Two.Stop(1.00, "rgba(255, 85, 85, 0.0)") // sunset red
-]);
-	glow.noStroke();
+var Xs = xc + 1.31 * clockRadius * Math.sin(hours_arc);
+var Ys = yc - 1.31 * clockRadius * Math.cos(hours_arc);
 
-	layers.background.add(glow);
+svg.append("line")
+    .attr("x1", xc)
+    .attr("x2", Xs)
+    .attr("y1", yc)
+    .attr("y2", Ys)
+    .style("stroke", "rgba(255,255,0,1)")
+    .style("stroke-width", 3.0)
+    .style("stroke-linecap", "round");
 
-           
-    // -- sun Visibility variation during the day and night    
-    if (SunMutatis == true) {
-	var Alpha_S = Visibility(hours_arc + Math.PI);
-	} else {
-	  Alpha_S = 1;
-	}
-	
-		var opacity = Alpha_S; // night time alpha variation
-		
-	// create the rings and kaleidoscope for the sun
-	if (Kaleidoscope == true) { // all this should have a one second tick to animate it
+var Xs = xc + Rs * Math.sin(hours_arc);
+var Ys = yc - Rs * Math.cos(hours_arc);
+
+var sunRed = svg.append("defs");
+
+var sRing = sunRed.append("radialGradient")
+    .attr("id","sunsetRed");
+
+sRing.append('stop')
+    .attr('stop-color', "rgba(255, 85, 85, 1.0)")
+    .attr('offset', '0');
+
+sRing.append('stop')
+    .attr('stop-color', "rgba(255, 85, 85, 0.5)")
+    .attr('offset', '0.5');
+
+sRing.append('stop')
+    .attr('stop-color', "rgba(255, 85, 85, 0)")
+    .attr('offset', '1');
+
+svg.append("circle")
+    .style('fill', "url(#sunsetRed)")
+    .attr("r", 38)
+    .attr("cx", Xs)
+    .attr("cy", Ys);
+
+if (SunMutatis == true) {
+    var Alpha_S = Visibility(hours_arc + Math.PI);
+    } else {
+      Alpha_S = 1;
+    }
     
-    	var RmS = 7 * (1 - Alpha_S);
+var opacity = Alpha_S;
+      
+if (Kaleidoscope == true) {
+    
+var RmS = 7 * (1 - Alpha_S);
 
-		// -- Draw inner and outer rings --
-		
-		var outR = two.makeCircle(Xs, Ys, 30, 0, 2 * Math.PI); // static size
-		outR.stroke = "rgba(255,255,0,0.80)";
-  		outR.linewidth = 2;
-  		outR.noFill();
-		
-		var innR = two.makeCircle(Xs, Ys, 22 + RmS, 0, 2 * Math.PI); // ring size variation at night time
-		innR.stroke = "rgba(255,255,0,0.80)";
-  		innR.linewidth = 2;
-  		innR.noFill();
+svg.append("circle")
+    .attr("stroke", "rgba(255,255,0,0.80)")
+    .attr("stroke-width", 2)    
+    .style('fill', "none")
+    .attr("r", 30)
+    .attr("cx", Xs)
+    .attr("cy", Ys);
 
-		// -- color fill between the two rings --
-		 
-		var colF = two.makeCircle(Xs, Ys, 0.5 * (30 + 22 + RmS), 0, 2 * Math.PI); // size variation at night time
-		colF.stroke = "rgba(255,255,0,0.20)";
-  		colF.linewidth = 30 - 22 - RmS; // width variation at night time
-  		colF.noFill();
-  		 		     		  		
-		let i = 0;
+svg.append("circle")
+    .attr("stroke", "rgba(255,255,0,0.80)")
+    .attr("stroke-width", 2)    
+    .style('fill', "none")
+    .attr("r", 22 + RmS)
+    .attr("cx", Xs)
+    .attr("cy", Ys);
 
-		while (i <= 11) {
+svg.append("circle")
+    .attr("stroke", "rgba(255,255,0,0.20)")
+    .attr("stroke-width", 30 - 22 - RmS)    
+    .style('fill', "none")
+    .attr("r", 0.5 * (30 + 22 + RmS))
+    .attr("cx", Xs)
+    .attr("cy", Ys);
+   
+let i = 0;
+    while (i <= 11) {
 
-			var xzx = Xs + 30 * Math.sin(hourAries + i * Math.PI / 6 - K_Sun);
-			var yzx = Ys - 30 * Math.cos(hourAries + i * Math.PI / 6 - K_Sun);
-			var Xzx = Xs + (22 + RmS) * Math.sin(hourAries + i * Math.PI / 6 + Velocity * K_Sun);
-			var Yzx = Ys - (22 + RmS) * Math.cos(hourAries + i * Math.PI / 6 + Velocity * K_Sun);
+var xzx = Xs + 30 * Math.sin(hourAries + i * Math.PI / 6 - K_Sun);
+var yzx = Ys - 30 * Math.cos(hourAries + i * Math.PI / 6 - K_Sun);
+var Xzx = Xs + (22 + RmS) * Math.sin(hourAries + i * Math.PI / 6 + Velocity * K_Sun);
+var Yzx = Ys - (22 + RmS) * Math.cos(hourAries + i * Math.PI / 6 + Velocity * K_Sun);
 
-			var strokes = two.makeLine(xzx ,yzx ,Xzx ,Yzx);
-						 			
-			strokes.stroke = "rgba(255,255,0,"+opacity+")";
-    		strokes.linewidth = 1.5;
-    		strokes.cap = "round";
-    		strokes.noFill();
+svg.append("line")
+    .attr("x1", xzx)
+    .attr("x2", Xzx)
+    .attr("y1", yzx)
+    .attr("y2", Yzx)
+    .style("stroke", "rgba(255,255,0," + opacity + ")")
+    .style("stroke-width", 1.5)
+    .style("stroke-linecap", "round");
 
-			i = i + 1;
-		}
-	}
-	
-	// sun center spots
-	var suns = two.makeCircle(Xs, Ys, 10, 0, 2 * Math.PI);
-	suns.stroke = "rgba(255,255,0,"+opacity+")"; // night time alpha variation
-	suns.linewidth = 0.001;
-	suns.fill = "rgba(255,255,0,"+opacity+")";
-	
-	var suns = two.makeCircle(Xs, Ys, 3.25, 0, 2 * Math.PI);
-	suns.stroke = "rgba(255,255,0,1)";
-	suns.linewidth = 1;
-	suns.fill = "rgba(255,255,0,1)";
- 	
-} // -- end sun --
+    i = i + 1;
+  }
+}
+
+svg.append("circle")  
+    .style('fill', "rgba(255,255,0," + opacity + ")")
+    .attr("r", 10)
+    .attr("cx", Xs)
+    .attr("cy", Ys);
+
+svg.append("circle")   
+    .style('fill', "rgba(255,255,0,1)")
+    .attr("r", 3.25)
+    .attr("cx", Xs)
+    .attr("cy", Ys);
+}  
 
 SunNeedle();
 
-
-/* create and draw the moon needle and the moon */
 function MoonNeedle() {
   
-  	var hour_MD = toRadians(hourMoon);
+var hour_MD = toRadians(hourMoon);
 
-    var am = 0.28467 * clockRadius;
-    var bm = 2.51284;
-    var dm = hourAries - hour_MD;
-    var mdm = Math.sin(dm);
-    var Rm = am * (Math.sqrt(bm * bm - mdm * mdm) + Math.cos(dm));
-		
-	var Xm = xc - 0.17 * clockRadius * Math.sin(hour_MD);
-	var Ym = yc + 0.17 * clockRadius * Math.cos(hour_MD);
+var am = 0.28467 * clockRadius;
+var bm = 2.51284;
+var dm = hourAries - hour_MD;
+var mdm = Math.sin(dm);
+var Rm = am * (Math.sqrt(bm * bm - mdm * mdm) + Math.cos(dm));
+        
+var Xm = xc - 0.17 * clockRadius * Math.sin(hour_MD);
+var Ym = yc + 0.17 * clockRadius * Math.cos(hour_MD);
+
+svg.append("line")
+    .attr("x1", xc)
+    .attr("x2", Xm)
+    .attr("y1", yc)
+    .attr("y2", Ym)
+    .style("stroke", "rgba(255,0,0,1)")
+    .style("stroke-width", 3.0)
+    .style("stroke-linecap", "round");
+
+svg.append("circle")
+    .style('fill', "rgba(255,0,0,1)")
+    .attr("r", 3)
+    .attr("cx", Xm)
+    .attr("cy", Ym);
+
+var Xm = xc + 1.31 * clockRadius * Math.sin(hour_MD);
+var Ym = yc - 1.31 * clockRadius * Math.cos(hour_MD);
+
+svg.append("line")
+    .attr("x1", xc)
+    .attr("x2", Xm)
+    .attr("y1", yc)
+    .attr("y2", Ym)
+    .style("stroke", "rgba(255,0,0,1)")
+    .style("stroke-width", 3.0)
+    .style("stroke-linecap", "round");
+
+var Xm = xc + Rm * Math.sin(hour_MD);
+var Ym = yc - Rm * Math.cos(hour_MD);
  
-    var line4 = two.makeLine(xc, yc, Xm, Ym); // short end of the needle 
-  
-    line4.noFill();
-    line4.stroke = "rgba(255,0,0,1)"; // red
-    line4.linewidth = 3;
-    line4.cap = "round";
-				
-	var spotm = two.makeCircle(Xm, Ym, 3, 0, Math.PI * 2);
-	spotm.fill = "rgba(255,0,0,1)";
-    spotm.linewidth = 1;
-    spotm.stroke = "rgba(255,0,0,1)"; // red	
-		
-	var Xm = xc + 1.31 * clockRadius * Math.sin(hour_MD);
-	var Ym = yc - 1.31 * clockRadius * Math.cos(hour_MD);
-  
-	var line5 = two.makeLine(xc, yc, Xm, Ym); // long end of the needle
-  
-    line5.noFill();
-    line5.stroke = "rgba(255,0,0,1)"; // red
-    line5.linewidth = 3;
-    line5.cap = "round";
-    
-    var Xm = xc + Rm * Math.sin(hour_MD);
-	var Ym = yc - Rm * Math.cos(hour_MD);
-		
-	var moonD = two.makeCircle(Xm, Ym, 10, 0, 2 * Math.PI);
-	moonD.stroke = "rgba(41,46,53,1)"; // "rgba(41,46,53,1)"
-  	moonD.linewidth = 1;
-  	moonD.fill = "rgba(41,46,53,1)"; // -- moon background dark --
-	 	
-  	// -- moon Visibility --
-  	          
-	if (MoonMutatis == true) {
-  		var Alpha_M = 1;
-  		//color_M1;	 		  		  
-	} else {	
-  	 var V = hours_arc - hour_MD;
-  		Alpha_M = Visibility(V);
-   		//color_M;
-	}
- 	
-// draw the moonphase shape + rotation calculation
- 	if (MoonMutatis == true) {
-  
- 	const Rmo = 10.55;
-  	var temp = - hour_MD + hours_arc;
-
-  	var amp_Right = Rmo * phase(temp + Math.PI, 1);
-  	var amp_Left = Rmo * phase(temp, -1);
-
-  	var Rot = hour_MD + Math.PI;
-
-  	var Xf = Xm + Math.sin(Rot) * Rmo;
-  	var Yf = Ym - Math.cos(Rot) * Rmo;
-
-  	var path0 = two.makePath(Xf, Yf);
-  	
-  let i = 0;
-  
-  	while (i < 2 * Math.PI) {
-    	if (i <= Math.PI) {
-      	var Rx = Math.sin(i) * amp_Right;
-    } else {
-      	var Rx = - Math.sin(i) * amp_Left;
+svg.append("circle")
+    .style('fill', "rgba(41,46,53,1)")
+    .attr("r", 10)
+    .attr("cx", Xm)
+    .attr("cy", Ym);
+                           
+if (MoonMutatis == true) {
+    var Alpha_M = 1;
+    //color_M1;                   
+    } else {    
+     var V = hours_arc - hour_MD;
+    Alpha_M = Visibility(V);
+    //color_M;
     }
 
-    	var Ry = Math.cos(i) * Rmo;
+if (MoonMutatis == true) {
+  
+const Rmo = 10.55;
+var temp = - hour_MD + hours_arc;
 
-    	var Xg = Xm - Rx * Math.cos(Rot) + Ry * Math.sin(Rot);
-    	var Yg = Ym - Rx * Math.sin(Rot) - Ry * Math.cos(Rot);
+var amp_Right = Rmo * phase(temp + Math.PI, 1);
+var amp_Left = Rmo * phase(temp, -1);
 
-    	var path = two.makeLine(Xg, Yg, Xm, Ym);
+var Rot = hour_MD + Math.PI;
 
-    	//path.closed = true;
-    	path.stroke = color_M;
-  		path.linewidth = 1;
-  		path.fill = color_M;
+var Xf = Xm + Math.sin(Rot) * Rmo;
+var Yf = Ym - Math.cos(Rot) * Rmo;
 
+var path = d3.path();
+path.moveTo(Xf,Yf);
+   
+let i = 0; 
+    while (i < 2 * Math.PI) {
+    if (i <= Math.PI) {
+    var Rx = Math.sin(i) * amp_Right;
+    } else {
+    Rx = - Math.sin(i) * amp_Left;
+    }
 
-     	i = i + Math.PI / 64;
-  	}		
+var Ry = Math.cos(i) * Rmo;
+
+var Xg = Xm - Rx * Math.cos(Rot) + Ry * Math.sin(Rot);
+var Yg = Ym - Rx * Math.sin(Rot) - Ry * Math.cos(Rot);
+
+svg.append("line")
+    .attr("x1", Xg)
+    .attr("x2", Xm)
+    .attr("y1", Yg)
+    .attr("y2", Ym)
+    .style("stroke", color_M)
+    .style("stroke-width", 1)
+    .style('fill', "none")
+    .style("stroke-linecap", "round");
+
+        i = i + Math.PI / 64;
+    }    
 }
-	
-	// Variation of the Day
-	
- 	if (MoonMutatis == true) {
-  		var D = 0.5 + 0.5 * Visibility(hours_arc);
- 	} else {
-  		D = 1;	  	
+
+if (MoonMutatis == true) {
+    var D = 0.5 + 0.5 * Visibility(hours_arc);
+    } else {
+    D = 1;      
 }
-  	
-	if (MoonRings == true) { // all this should have a one second tick to animate it
-	 
-  	var RmL = MoonMov * Alpha_M;
-		var RmB = 12;
-		var Rms = 12 - 7 * D;
+    
+if (MoonRings == true) {
+     
+var RmL = MoonMov * Alpha_M;
+var RmB = 12;
+var Rms = 12 - 7 * D;
 
-	    // color fill between the two rings
-  		var colF = two.makeCircle(Xm, Ym, 0.5 * (RmB + Rms) + RmL, 0, 2 * Math.PI); // with size variation
-  		colF.stroke = "rgba(255,255,255,0.10)"; // white
-  		colF.linewidth = RmB - Rms;
-  		colF.noFill();
+svg.append("circle")
+    .attr("stroke", "rgba(255,255,255,0.10)")    
+    .style('stroke-width', RmB - Rms)
+    .style('fill', "none")
+    .attr("r", 0.5 * (RmB + Rms) + RmL)
+    .attr("cx", Xm)
+    .attr("cy", Ym);
 
-  		// Draw outer ring
-  		var outR = two.makeCircle(Xm, Ym, RmB + RmL, 0, 2 * Math.PI); // with size variation
-  		outR.stroke = "rgba(255,255,255,1.0)"; // white
-  		outR.linewidth = 1.5;
-  		outR.noFill();
+svg.append("circle")
+    .attr("stroke", "rgba(255,255,255,1.0)")    
+    .style('stroke-width', 1.5)
+    .style('fill', "none")
+    .attr("r", RmB + RmL)
+    .attr("cx", Xm)
+    .attr("cy", Ym);
 
-  		// Draw inner ring
-  		var innR = two.makeCircle(Xm, Ym, Rms + RmL, 0, 2 * Math.PI); // with size variation
-  		innR.stroke = "rgba(255,255,255,1.0)"; // white
-  		innR.linewidth = 1.5;
-  		innR.noFill();
+svg.append("circle")
+    .attr("stroke", "rgba(255,255,255,1.0)")    
+    .style('stroke-width', 1.5)
+    .style('fill', "none")
+    .attr("r", Rms + RmL)
+    .attr("cx", Xm)
+    .attr("cy", Ym);
 
-	let i = 0;
+let i = 0;
+    while (i <= 11) {
 
-  		while (i <= 11) {
+var xzz = Xm + (Rms + RmL) * Math.sin(hourAries + i * Math.PI / 6 - 2 * Velocity * R_Moon);
+var yzz = Ym - (Rms + RmL) * Math.cos(hourAries + i * Math.PI / 6 - 2 * Velocity * R_Moon);
+var Xzz = Xm + (RmB + RmL) * Math.sin(hourAries + i * Math.PI / 6 - 2 * Velocity * R_Moon);
+var Yzz = Ym - (RmB + RmL) * Math.cos(hourAries + i * Math.PI / 6 - 2 * Velocity * R_Moon);
 
-			var xzz = Xm + (Rms + RmL) * Math.sin(hourAries + i * Math.PI / 6 - 2 * Velocity * R_Moon);
-			var yzz = Ym - (Rms + RmL) * Math.cos(hourAries + i * Math.PI / 6 - 2 * Velocity * R_Moon);
-			var Xzz = Xm + (RmB + RmL) * Math.sin(hourAries + i * Math.PI / 6 - 2 * Velocity * R_Moon);
-			var Yzz = Ym - (RmB + RmL) * Math.cos(hourAries + i * Math.PI / 6 - 2 * Velocity * R_Moon);
+svg.append("line")
+    .attr("x1", xzz)
+    .attr("x2", Xzz)
+    .attr("y1", yzz)
+    .attr("y2", Yzz)
+    .style("stroke", "rgba(255,255,255,1.0)")
+    .style("stroke-width", 1.5)
+    .style("stroke-linecap", "round");
 
-			var Mstrokes = two.makeLine(xzz, yzz, Xzz, Yzz);
-			Mstrokes.stroke = "rgba(255,255,255,1.0)"; // white
-      		Mstrokes.linewidth = 1.5;
-      		Mstrokes.cap = "round";
-      		Mstrokes.noFill();
-
-			i = i + 1;
-  		}
-	}
+        i = i + 1;
+      }
+   }
 }
-        
-	
+
 MoonNeedle();
 
-// -- this covers the center of the blue cross and the needles, it must be last ! --
-var Ringf = two.makeCircle(0, 0, 12);
-Ringf.fill = "rgba(41,46,53,1)";
-Ringf.linewidth = 1;
-Ringf.stroke = "rgb(41,46,53,1)"; // dark cover
+svg.append("circle")
+    .style('fill', "rgba(41,46,53,1)")
+    .attr("r", 12)
+    .attr("cx", xc)
+    .attr("cy", yc);
 
-var Ringb = two.makeCircle(0, 0, 12);
-Ringb.noFill();
-Ringb.linewidth = 3;
-Ringb.stroke = "rgba(0,127,255,1)"; // arch blue ring
+svg.append("circle")
+    .attr("stroke", "rgba(0,127,255,1)")    
+    .style('stroke-width', 3)
+    .style('fill', "none")
+    .attr("r", 12)
+    .attr("cx", xc)
+    .attr("cy", yc);
 
-var center = two.makeCircle(0, 0, 4); // center point
-center.fill = "rgba(255,99,71,1)";
-center.linewidth = 1;
-center.stroke = "rgba(255,99,71,1)"; // tomato
-
-
-
-// now it's showtime :-)
-two.update();
+svg.append("circle")
+    .style('fill', "rgba(255,99,71,1)")
+    .attr("r", 4)
+    .attr("cx", xc)
+    .attr("cy", yc);
 
 </script>
-</div>
 
 </body>
 </html>
