@@ -1,217 +1,207 @@
-from zipfile import ZipFile
-import distutils.file_util
-import distutils.dir_util
-import traceback
-import platform
-import time
-import sys
-import os
-import re
+{"zip_file":"",
+"copy_paths":"/home/pi/weewx-data/bin/user/,user,/home/pi/weewx-data/skins/,skins,/var/www/html/divumwx/,www",
+"weewx_config_file":"/home/pi/weewx-data/weewx.conf",
+"www_path":"/var/www/html/divumwx/",
+"over_write":"True",
+"delete_extracted_files":"False",
+"extract_to_path":".",
+"uid_gid":"pi,pi",
+"config_entries0":'''StdReport=
+                        'DivumWXReport': {
+                        'skin': 'DivumWX',
+                        'HTML_ROOT': '/var/www/html/divumwx/',
+			'Units': {
+                            'Groups': {
+                                'group_altitude': 'meter',
+                                'group_degree_day': 'degree_C_day',
+                                'group_pressure': 'hPa',
+                                'group_rain': 'mm',
+                                'group_rainrate': 'mm_per_hour',
+                                'group_speed': 'meter_per_second',
+                                'group_speed2': 'meter_per_second2',
+                                'group_temperature': 'degree_C'
+                            }},
+                        }''', 
+"config_entries1":'''StdReport=
+                    'dvmHighcharts': {
+                     	'HTML_ROOT': '/var/www/html/divumwx/dvmhighcharts',
+                        'skin': 'dvmHighcharts',
+                        'enable': 'true',
+                        'CheetahGenerator': {
+                            'ToDate': {
+                                'YearJSON': {
+                                    'stale_age': '600'
+                                }
+                            }
+                        },
+                        'Units': {
+                            'StringFormats': {
+                                'centibar': '%.0f',
+                                'cm': '%.2f',
+                                'cm_per_hour': '%.2f',
+                                'degree_C': '%.1f',
+                                'degree_F': '%.1f',
+                                'degree_compass': '%.0f',
+                                'foot': '%.0f',
+                                'hPa': '%.1f',
+                                'inHg': '%.3f',
+                                'inch': '%.2f',
+                                'inch_per_hour': '%.2f',
+                                'km_per_hour': '%.0f',
+                                'km_per_hour2': '%.1f',
+                                'knot': '%.0f',
+                                'knot2': '%.1f',
+                                'mbar': '%.1f',
+                                'meter': '%.0f',
+                                'meter_per_second': '%.1f',
+                                'meter_per_second2': '%.1f',
+                                'mile_per_hour': '%.0f',
+                                'mile_per_hour2': '%.1f',
+                                'mm': '%.1f',
+                                'mmHg': '%.1f',
+                                'mm_per_hour': '%.1f',
+                                'percent': '%.0f',
+                                'uv_index': '%.1f',
+                                'volt': '%.1f',
+                                'watt_per_meter_squared': '%.0f',
+                                'NONE': 'N/A'
+                            },
+                            'Labels': {
+                                'centibar': 'cb',
+                                'cm': 'cm',
+                                'cm_per_hour': 'cm/hr',
+                                'degree_C': '\u00B0 C',
+                                'degree_F': '\u00B0 F',
+                                'degree_compass': '\u00B0',
+                                'foot': 'feet',
+                                'hPa': 'hPa',
+                                'inHg': 'inHg',
+                                'inch': 'in',
+                                'inch_per_hour': 'in/hr',
+                                'km_per_hour': 'km/hr',
+                                'km_per_hour2': 'km/hr',
+                                'knot': 'knots',
+                                'knot2': 'knots',
+                                'mbar': 'mbar',
+                                'meter': 'meters',
+                                'meter_per_second': 'm/s',
+                                'meter_per_second2': 'm/s',
+                                'mile_per_hour': 'mph',
+                                'mile_per_hour2': 'mph',
+                                'mm': 'mm',
+                                'mmHg': 'mmHg',
+                                'mm_per_hour': 'mm/hr',
+                                'percent': '%',
+                                'uv_index': 'Index',
+                                'volt': 'V',
+                                'watt_per_meter_squared': 'W/m\u00B2',
+                                'NONE':      ''
+                            }
+                        },
+                        'Extras': {
+                            'numYears':'5',
+                            'MinRange': {
+                                'outTemp': [10, 'degree_C'],
+                                'windchill': [10, 'degree_C'],
+                                'barometer': [20, 'hPa'],
+                                'windSpeed': '10',
+                                'rain': [5, 'mm'],
+                                'radiation': '500',
+                                'UV': '16'
+                            },
+                            'WindRose': {
+                                'title': 'Wind Rose',
+                                'source': 'windSpeed',
+                                'period': [3600, 86400, 604800, 'month', 'year'],
+                                'aggregate_type': '',
+                                'aggregate_interval': '',
+                                'petals': '16',
+                                'petal_colors': ['aqua', '0x0099FF', '0x0033FF', '0x009900', '0x00CC00', '0x33FF33', '0xCCFF00'],
+                                'speedfactor': ['0.0', '0.1', '0.2', '0.3', '0.5', '0.7', '1.0'],
+                                'legend_title': 'True',
+                                'band_percent': 'True',
+                                'bullseye_percent': 'True',
+                                'precision': '1',
+                                'bullseye_size': '20',
+                                'bullseye_color': '0xFFFACD',
+                                'calm_limit': '0.1'
+                            }
+                        }
+                    }''',
 
-services_file = "../services.txt"
-class dvm_installer:
-    def change_permissions_recursive(self, path_list, uid_gid):
-        import grp,pwd
-        uid = pwd.getpwnam(uid_gid[0]).pw_uid
-        gid = grp.getgrnam(uid_gid[1]).gr_gid
-        for p in path_list:
-            os.chmod(p, 0o755)
-            os.chown(p, uid, gid)
-            for root, dirs, files in os.walk(p, topdown=False):
-                for directory in [os.path.join(root,d) for d in dirs]:
-                    os.chmod(directory, 0o755)
-                    os.chown(directory, uid, gid)
-                    if "json_day" in directory:
-                        os.chmod(directory, 0o777)
-                for filename in [os.path.join(root, f) for f in files]:
-                    os.chmod(filename, (0o777 if "dvm_reports" in filename else 0o755))
-                    os.chown(filename, uid, gid)
-    
-    def find_replace(self, d, k, v, do_overwrite, append = False, delete = False):
-        found = k in d
-        if found:
-            if do_overwrite or v not in d[k]:
-                if delete:
-                    del d[k]
-                elif append:
-                    if not v in d[k]:
-                        if d[k][-1] == ",":
-                            d[k] += " " + v
-                        else:
-                            d[k] += ", " + v
-                else:
-                    d[k] = eval(v)
-            else:
-                print("Config entry " + k + " already exists and over_write is set to False")
-        else:
-            for value in d.values():
-                if isinstance(value, dict):
-                    found = self.find_replace(value, k, v, do_overwrite, append, delete)
-                if found: break
-        return found
-    
-    def __init__(self, conf_file):
-        conf_files = {}
-        try:
-            ver = platform.python_version()
-            try:
-                response = raw_input("!!! THIS INSTALL IS USING PYTHON VERSION " + ver + " IS THIS CORRECT? (Yes/No) ").strip()
-            except:
-                response = input("!!! THIS INSTALL IS USING PYTHON VERSION " + ver + " IS THIS CORRECT? (Yes/No) ").strip()
-            if not response.upper().startswith("Y"):
-                print("User terminated install due to Python Version " + ver) 
-                sys.exit(1)
-            print ("Install will continue with Python Version " + ver + "\n")
-            try:
-                import ephem
-                print("PYTHON EPHEM VERSION " + ephem.__version__ + " INSTALLED") 
-            except:
-                print("!!!NO VALID PYTHON EPHEM FOUND INSTALL CANNOT CONTINUE. PLEASE READ INSTALL README!!!") 
-                sys.exit(1)
-            try:
-                import sortedcontainers
-                print("PYTHON SORTED CONTAINERS VERSION " + sortedcontainers.__version__ + " INSTALLED") 
-            except:
-                print("!!!NO VALID PYTHON SORTED CONTAINERS FOUND INSTALL CANNOT CONTINUE. PLEASE READ INSTALL README!!!") 
-                sys.exit(1)
-            try:
-                php = os.system('php --version')
-                #print("!!!PHP NOT INSTALLED!!!" if php !=0 else "PHP INSTALLED " + php)
-            except:
-                print("!!!PHP NOT INSTALLED!!!")
-            try:
-                with open(services_file) as infile:
-                    pass
-            except:
-                print("Cannot find " + services_file + " file INSTALL ABORTED")
-                sys.exit(1)
-            from configobj import ConfigObj
-            if conf_file == None:
-                file_count = 1
-                files = [f for f in os.listdir('.') if os.path.isfile(f) and f.endswith(".conf")]
-                for f in files:
-                    with open(f) as infile:
-                        try:
-                            d = eval(re.sub(".*\"##.*\n",'', infile.read()).replace("\n", "").replace("\t", ""))
-                            if os.path.isdir(list(d["copy_paths"].split(","))[0]):
-                                conf_files[file_count] = f   
-                                file_count += 1   
-                        except Exception as e:
-                            pass
-                if len(conf_files) == 1:
-                    conf_file = conf_files[1]
-                else:
-                    if file_count > 1:
-                        print("\nList of found dvm_installer conf files to install that have existing weewx paths") 
-                        for f in range(len(conf_files)):
-                            print(str(f+1) + " -> " + conf_files[f+1])
-                        response = 0
-                        while response == 0 or response > len(conf_files):
-                            try:
-                                response = int(raw_input("Enter the NUMBER of the installer config file ").strip())
-                            except:
-                                response = int(input("Enter the NUMBER of the installer config file ").strip())
-                        conf_file = conf_files[response]
-                    else:
-                        print("!!! NO VALID DVM_INSTALLER CONFIG FILE. INSTALL ABORTED!!!")
-                        sys.exit(1)
-            print("dvm_installer Config file " + conf_file + " was chosen.")
-            try:
-                response = raw_input("IS THIS CORRECT? (Yes/No) ").strip()
-            except:
-                response = input("IS THIS CORRECT? (Yes/No) ").strip()
-            if not response.upper().startswith("Y"):
-                print("User terminated") 
-                sys.exit(1)
-            with open(conf_file) as infile:
-                d = eval(re.sub(".*\"##.*\n",'', infile.read()).replace("\n", "").replace("\t", ""))
-            copy_list = list(d["copy_paths"].split(","))
-            weewx_config_file = d["weewx_config_file"]
-            locations = {copy_list[i+1]:copy_list[i] for i in range(0, len(copy_list), 2)}
-            config_data = ConfigObj(weewx_config_file, encoding='utf8', list_values=False,write_empty_values=True)
-            www_path = locations["www"].split('divumwx')[0][:-1]
-            if www_path != config_data['StdReport'].get('HTML_ROOT'):
-                print("!!! WEEWX HTML ROOT  " + config_data['StdReport'].get('HTML_ROOT') + "  DOES NOT MATCH DVM_INSTALLER www PATH.  " + www_path + "  INSTALL ABORTED!!!") 
-                sys.exit(1)
-            with open(services_file) as infile:
-                d.update(eval(re.sub(".*\"##.*\n",'', infile.read()).replace("\n", "").replace("\t", "")))
-            do_overwrite = True if d["over_write"] == "True" else False
-            extract_path = d["extract_to_path"]
-            if extract_path == None or len(extract_path) == 0:
-                extract_path = "temp"
-            zip_file = d["zip_file"]
-            if len(zip_file) > 0:
-                with ZipFile(zip_file, 'r') as zip_file:
-                    if not os.path.exists(extract_path):
-                        os.makedirs(extract_path)
-                    else:
-                        if not do_overwrite:
-                            print ("Extract path exists and overwrite set to False")
-                            try:
-                                response = raw_input("Do you want to abort the install!!! (Yes/No) ").strip()
-                            except:
-                                response = input("Do you want to abort the install!!! (Yes/No) ").strip()
-                            if response.upper().startswith("Y"):
-                                return
-                    print('Extracting all the files to ' + extract_path)
-                    zip_file.extractall(extract_path)
-                    print('Files extracted')
-            try:
-                try:
-                    for i in range(0, len(copy_list), 2):
-                        distutils.dir_util.copy_tree(os.path.join(extract_path, copy_list[i+1].strip()), copy_list[i].strip(), update = do_overwrite)
-                except:
-                    for i in range(0, len(copy_list), 2):
-                        distutils.dir_util.copy_tree(os.path.join(extract_path, copy_list[i+1].strip()), copy_list[i].strip(), update = do_overwrite)
-                self.change_permissions_recursive([locations["www"]], d["uid_gid"].split(","))
-            except Exception as e: 
-                print(e)
-            if d["delete_extracted_files"] == "True":
-                if extract_path != os.getcwd():
-                    distutils.dir_util.remove_tree(extract_path)
-            distutils.file_util.copy_file(weewx_config_file, weewx_config_file + "." + str(int(time.time())))
-            print('Updating weewx config')
-            for i in d:
-                if i.startswith("config_entries"):
-                    if "delete" in i:
-                        key = d[i].split(":", 1)[1].strip()
-                        if not self.find_replace(config_data, key, None, do_overwrite, False, True):
-                            print("Delete key skipped because key " + key + " was not found")
-                    elif "append" in i:
-                        parts = d[i].split("=", 1)
-                        if not self.find_replace(config_data, parts[0].strip(), parts[1], do_overwrite, True):
-                            print("Append to key " + parts[0] + " skipped because key was not found")
-                    else:
-                        comments = ['#\n################################################################################\n']
-                        parts = d[i].split("=", 1)
-                        zpath = parts[0]
-                        parts = parts[1].split(":", 1)
-                        if "$" in parts[1]:
-                            if len(d['lat']) == 0 or len(d['lon']) == 0:
-                                d["lat"] = config_data['Station'].get('latitude')
-                                d["lon"] = config_data['Station'].get('longitude')
-                            for field in d['sub_fields'].split(","):
-                                parts[1] = parts[1].replace("$"+field, d[field])                                
-                        if "# " in parts[1].strip():
-                            parts1 = parts[1].split("{",)
-                            comments.append(parts1[0].replace('"',''))
-                            parts[1] = "{" + parts1[1]
-                        key = parts[0].replace("'", "").strip()
-                        status = self.find_replace(config_data, key, parts[1], do_overwrite)
-                        if not status or status and do_overwrite:
-                            if zpath == None or len(zpath) == 0:
-                                config_data[key] = eval(parts[1])
-                                config_data.comments[key] = comments
-                            else:
-                                config_data[zpath][key] = eval(parts[1])
-                                config_data[zpath].comments[key] = comments
-            if config_data['Engine']['Services'].get('data_services') == ',':
-                config_data['Engine']['Services']['data_services'] = '""'
-            config_data.write()
-            print('Done! Will Need To Restart Weewx For Changes To Be Active')
-        except Exception as e:
-            traceback.print_exc()
-            print (e)
-            
-if __name__ == '__main__':
-    dvm_installer(sys.argv[1] if len(sys.argv) > 1 else None)
+"config_entries2":'''StdReport=
+                        'LoopDataReport': {
+                        'skin': 'LoopData',
+                        'HTML_ROOT': '/var/www/html/divumwx/jsondata',
+                        'enable': 'True',
+			'Units': {
+                            'Extras': {
+                                    'loop_data_file': 'dvmSensorData.json',
+                                    'expiration_time': '4',
+                                    'page_update_pwd': 'foobar',
+                                    'googleAnalyticsId': '""',
+                                    'analytics_host': '""'
+                            }}
+                        }''',
+
+"config_entries5":'''=
+'LastNonZero' : {
+    		'algorithm':'simple'
+		}''',
+
+"config_entries6":'''=
+'LoopData' : {
+        'FileSpec': {
+		    'loop_data_dir':'/var/www/html/divumwx/jsondata',
+		    'filename':'dvmSensorData.json'
+             },
+        'LoopFrequency': {
+		    'seconds':'2'
+             },
+        'RsyncSpec': {
+        'enable':'false',
+        'remote_server':'www.foobar.com',
+        'remote_user':'root',
+        'remote_dir':'/home/weewx/sensor-data',
+        'compress':'false',
+        'log_success':'false',
+        'ssh_options':'-o ConnectTimeout=1',
+        'timeout':'1',
+        'skip_if_older_than':'3'
+        },
+
+        'Include': {
+		    'fields':'unit.label.barometer, current.barometer.formatted, trend.barometer.code, trend.barometer.desc, 24h.barometer.max.formatted, 24h.barometer.maxtime.raw, 24h.barometer.min.formatted, 24h.barometer.mintime.raw, day.barometer.max.formatted, day.barometer.maxtime.raw, day.barometer.min.formatted, day.barometer.mintime.raw, month.barometer.max.formatted, month.barometer.maxtime.raw, month.barometer.min.formatted, month.barometer.mintime.raw, year.barometer.max.formatted, year.barometer.maxtime.raw, year.barometer.min.formatted, year.barometer.mintime.raw, alltime.barometer.max.formatted, alltime.barometer.maxtime.raw, alltime.barometer.min.formatted, alltime.barometer.mintime.raw, current.cloudbase.formatted, current.dewpoint.formatted, trend.dewpoint.formatted, 24h.dewpoint.max.formatted, 24h.dewpoint.maxtime.raw, 24h.dewpoint.min.formatted, 24h.dewpoint.mintime.raw, day.dewpoint.max.formatted, day.dewpoint.maxtime.raw, day.dewpoint.min.formatted, day.dewpoint.mintime.raw, month.dewpoint.max.formatted, month.dewpoint.maxtime.raw, month.dewpoint.min.formatted, month.dewpoint.mintime.raw, year.dewpoint.max.formatted, year.dewpoint.maxtime.raw, year.dewpoint.min.formatted, year.dewpoint.mintime.raw, alltime.dewpoint.max.formatted, alltime.dewpoint.maxtime.raw, alltime.dewpoint.min.formatted, alltime.dewpoint.mintime.raw, current.outHumidity.formatted, trend.outHumidity.formatted, 24h.outHumidity.max.formatted, 24h.outHumidity.maxtime.raw, 24h.outHumidity.min.formatted, 24h.outHumidity.mintime.raw, day.outHumidity.max.formatted, day.outHumidity.maxtime.raw, day.outHumidity.min.formatted, day.outHumidity.mintime.raw, month.outHumidity.max.formatted, month.outHumidity.maxtime.raw, month.outHumidity.min.formatted, month.outHumidity.mintime.raw, year.outHumidity.max.formatted, year.outHumidity.maxtime.raw, year.outHumidity.min.formatted, year.outHumidity.mintime.raw, alltime.outHumidity.max.formatted, alltime.outHumidity.maxtime.raw, alltime.outHumidity.min.formatted, alltime.outHumidity.mintime.raw, current.inHumidity.formatted, trend.inHumidity.formatted, 24h.inHumidity.max.formatted, 24h.inHumidity.maxtime.raw, 24h.inHumidity.min.formatted, 24h.inHumidity.mintime.raw, day.inHumidity.max.formatted, day.inHumidity.maxtime.raw, day.inHumidity.min.formatted, day.inHumidity.mintime.raw, month.inHumidity.max.formatted, month.inHumidity.maxtime.raw, month.inHumidity.min.formatted, month.inHumidity.mintime.raw, year.inHumidity.max.formatted, year.inHumidity.maxtime.raw, year.inHumidity.min.formatted, year.inHumidity.mintime.raw, alltime.inHumidity.max.formatted, alltime.inHumidity.maxtime.raw, alltime.inHumidity.min.formatted, alltime.inHumidity.mintime.raw, current.luminosity.formatted, day.luminosity.formatted, current.cloudbase.formatted, current.maxSolarRad.formatted, day.maxSolarRad.max.formatted, day.maxSolarRad.maxtime.raw, 24h.maxSolarRad.max.formatted, 24h.maxSolarRad.maxtime.raw, month.maxSolarRad.max.formatted, month.maxSolarRad.maxtime.raw, year.maxSolarRad.max.formatted, year.maxSolarRad.maxtime.raw, alltime.maxSolarRad.max.formatted, alltime.maxSolarRad.maxtime.raw, unit.label.outTemp, current.inTemp.formatted, trend.inTemp.formatted, day.inTemp.max.formatted, day.inTemp.maxtime, day.inTemp.min.formatted, day.inTemp.mintime, current.outTemp.formatted, trend.outTemp.formatted, current.appTemp.formatted, current.heatindex.formatted, current.windchill.formatted, current.humidex.formatted, day.outTemp.avg.formatted, hour.outTemp.avg.formatted, 24h.outTemp.max.formatted, 24h.outTemp.maxtime.raw, 24h.outTemp.min.formatted, 24h.outTemp.mintime.raw, day.outTemp.max.formatted, day.outTemp.maxtime.raw, day.outTemp.min.formatted, day.outTemp.mintime.raw, month.outTemp.max.formatted, month.outTemp.maxtime.raw, month.outTemp.min.formatted, month.outTemp.mintime.raw, year.outTemp.max.formatted, year.outTemp.maxtime.raw, year.outTemp.min.formatted, year.outTemp.mintime.raw, alltime.outTemp.max.formatted, alltime.outTemp.maxtime.raw, alltime.outTemp.min.formatted, alltime.outTemp.mintime.raw, current.UV.formatted, day.UV.max.formatted, day.UV.maxtime.raw, 24h.UV.max.formatted, 24h.UV.maxtime.raw, month.UV.max.formatted, month.UV.maxtime.raw, year.UV.max.formatted, year.UV.maxtime.raw, alltime.UV.max.formatted, alltime.UV.maxtime.raw, current.beaufort.formatted, unit.label.windSpeed, day.windSpeed.avg.formatted, current.windDir.formatted, current.windDir.ordinal_compass, 10m.windDir.avg.formatted, hour.windDir.avg.formatted, day.windDir.avg.formatted, current.windSpeed.formatted, 10m.windSpeed.max.formatted,  hour.windSpeed.max.formatted, 10m.windSpeed.avg.formatted, 10m.windGust.avg.formatted, current.windGust.formatted, 10m.windGust.max.formatted, hour.windGust.max.formatted, day.windSpeed.max.formatted, day.windSpeed.maxtime.raw, day.windGust.max.formatted, day.windGust.maxtime.raw, 24h.windSpeed.max.formatted, 24h.windSpeed.maxtime.raw, 24h.windGust.max.formatted, 24h.windGust.maxtime.raw, month.windSpeed.max.formatted, month.windSpeed.maxtime.raw, month.windGust.max.formatted, month.windGust.maxtime.raw, year.windSpeed.max.formatted, year.windSpeed.maxtime.raw, year.windGust.max.formatted, year.windGust.maxtime.raw, alltime.windSpeed.max.formatted, alltime.windSpeed.maxtime.raw, alltime.windGust.max.formatted, alltime.windGust.maxtime.raw, day.windrun.sum.formatted, trend.windDir.formatted, unit.label.rain, unit.label.rainRate, current.rainRate.formatted, 24h.rainRate.max.formatted, 24h.rainRate.maxtime.raw, day.rainRate.max.formatted, day.rainRate.maxtime.raw, month.rainRate.max.formatted, month.rainRate.maxtime.raw, year.rainRate.max.formatted, year.rainRate.maxtime.raw, alltime.rainRate.max.formatted, alltime.rainRate.maxtime.raw, 10m.rain.sum.formatted, hour.rain.sum.formatted, day.rain.sum.formatted, 24h.rain.sum.formatted, month.rain.sum.formatted, year.rain.sum.formatted, alltime.rain.sum.formatted, current.lightning_strike_count, 2m.lightning_strike_count.sum, 10m.lightning_strike_count.sum, hour.lightning_strike_count.sum, day.lightning_strike_count.sum, month.lightning_strike_count.sum, year.lightning_strike_count.sum, alltime.lightning_strike_count.sum, current.lightning_distance.formatted'
+             },
+        'BarometerTrendDescriptions': {
+		    'RISING_VERY_RAPIDLY':'Rising Very Rapidly',
+		    'RISING_QUICKLY':'Rising Quickly',
+		    'RISING':'Rising',
+		    'RISING_SLOWLY':'Rising Slowly',
+            'STEADY':'Steady',
+            'FALLING_SLOWLY':'Falling Slowly',
+            'FALLING':'Falling',
+            'FALLING_QUICKLY':'Falling Quickly',
+            'FALLING_VERY_RAPIDLY':'Falling Very Rapidly'
+             }
+        }''', 
+
+"config_entries7":'''=
+'DivumWXRealTime' : {
+                'realtime_path_only':'',
+		'unit_system':'METRICWX',
+		'exclude_fields':'rain,lightningcount,lightning_strike_count,lightning_last_det_time',
+		'cache_enable':'True',
+		'cache_stale_time':'900',
+                'weewx_port':'25252',
+                'webserver_address':'', 
+                'weewxserver_address':'',
+                'weewx_file_transfer':'',
+		'HTML_ROOT':''
+		}''',
+
+       
+"config_entries_append":"process_services=user.divumwx.DivumWXRealTime",
+"config_entries2_append":"xtype_services=user.divumwx.LastNonZeroService",
+"config_entries3_append":"report_services=user.divumwx.LoopData"
+}
