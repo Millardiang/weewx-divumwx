@@ -12,13 +12,11 @@ error_reporting(0);
 
 $TZconf = $TZ; // PLEASE LEAVE it is fixed
 $UTC_offset = timezone_offset_get(timezone_open($TZ), new DateTime()) / 3600; // DO NOT CHANGE
-$api2 = "xxx"; // optional divum Underground api key developer key '1234567890'
 $rise_zenith = 90 + 40 / 60; // try 50/60 or something/60 until it matches correctly to your sunrise .this allows you to fine tune the sunrise
 $set_zenith = 90 + 36 / 60; // try 50/60 or something/60 until it matches correctly to your sunset .this allows you to fine tune the sunset
 $forecastlocation = $stationlocation; //
 $version = $livedataFormat; // template version and type of source: Clientraw, MeteoBridge, Cumulus, etc (for display only)
 $emailform = $email; // PLEASE LEAVE FIXED
-$timeFormatShort = "H:i"; // time format to use when showing times ('g:i a' for '5:34 pm'; 'H:i' for '09:28')
 $showFeelsLike = true; // whether to always show either the heat index (when temp > 80F/27C) or real feel (when temp between 50F/10C and 80F/27C) even when no concern
 $lightLeft = true; // shows amount of light/darkness left rather than total amount per day in the moon display
 
@@ -68,7 +66,6 @@ $copyrightcredit =
 
 $moonRefresh = 3600;
 
-$theme1 = $theme;
 
 
 ####################################################################################################
