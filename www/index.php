@@ -1,6 +1,6 @@
 <?php
 
-if (!file_exists("userSettings.php")) { 
+if (!file_exists("userSettings.php")) {
 copy("initial_userSettings.php", "userSettings.php");}
 include_once ('dvmCombinedData.php');
 include_once ('webserver_ip_address.php');
@@ -13,7 +13,7 @@ error_reporting(0);
 <html>
 
 <head>
-  
+
   <title><?php echo $stationlocation;?> Weather Station</title>
   <!--Google / Search Engine Tags -->
   <meta itemprop="image" content="img/divumMeta.png">
@@ -28,16 +28,16 @@ error_reporting(0);
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name=apple-mobile-web-app-title content="WEATHER STATION">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, viewport-fit=cover">
-  
 
-<link rel="apple-touch-icon" sizes="180x180" href="https://claydonsweather.org.uk/weewx/divumwx/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="https://claydonsweather.org.uk/weewx/divumwx/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="https://claydonsweather.org.uk/weewx/divumwx/favicon-16x16.png">
-<link rel="manifest" href="https://claydonsweather.org.uk/weewx/divumwx/site.webmanifest">
-<link rel="mask-icon" href="https://claydonsweather.org.uk/weewx/divumwx/safari-pinned-tab.svg" color="#5bbad5">
-<link rel="shortcut icon" href="https://claydonsweather.org.uk/weewx/divumwx/favicon.ico">
+
+<link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="./divumwx/favicon-16x16.png">
+<link rel="manifest" href="./site.webmanifest">
+<link rel="mask-icon" href="./safari-pinned-tab.svg" color="#5bbad5">
+<link rel="shortcut icon" href="./favicon.ico">
 <meta name="msapplication-TileColor" content="#da532c">
-<meta name="msapplication-config" content="https://claydonsweather.org.uk/weewx/divumwx/browserconfig.xml">
+<meta name="msapplication-config" content="./browserconfig.xml">
 <meta name="theme-color" content="#ffffff">
 
   <link rel="manifest" href="/site.webmanifest">
@@ -106,20 +106,20 @@ error_reporting(0);
     <div id="position5">
     </div>
   </div>
- 
+
   <!-- position 6--->
   <div class="divum-item">
     <div id="position6">
     </div>
   </div>
- 
+
   <!-- position 7--->
   <div class="divum-item">
     <div id="position7">
      </div>
    </div>
   </div>
- 
+
 <!-- position 8--->
 
 <div class="divum-container">
@@ -127,33 +127,33 @@ error_reporting(0);
     <div id="position8">
     </div>
   </div>
- 
+
   <!-- position 9--->
   <div class="divum-item">
     <div id="position9">
     </div>
   </div>
- 
+
   <!-- position 10--->
   <div class="divum-item">
     <div id="position10">
      </div>
     </div>
    </div>
-  
+
 <!-- position 11--->
-<div class="divum-container"> 
+<div class="divum-container">
   <div class="divum-item">
     <div id="position11">
     </div>
   </div>
- 
+
   <!--position 12-->
   <div class="divum-item">
     <div id="position12">
     </div>
   </div>
- 
+
   <!--position 13-->
   <div class="divum-item">
 
@@ -164,18 +164,18 @@ error_reporting(0);
 <?php
 if($themelayout == "4" || $themelayout == "5"){?>
 <!-- position 14--->
-<div class="divum-container"> 
+<div class="divum-container">
   <div class="divum-item">
     <div id="position14">
     </div>
   </div>
- 
+
   <!--position 15-->
   <div class="divum-item">
     <div id="position15">
     </div>
   </div>
- 
+
   <!--position 16-->
   <div class="divum-item">
     <div id="position16">
@@ -190,18 +190,18 @@ if($themelayout == "4" || $themelayout == "5"){?>
 if($themelayout == "5"){?>
 
 <!-- position 17--->
-<div class="divum-container"> 
+<div class="divum-container">
   <div class="divum-item">
     <div id="position17">
     </div>
   </div>
- 
+
   <!--position 18-->
   <div class="divum-item">
     <div id="position18">
     </div>
   </div>
- 
+
   <!--position 19-->
   <div class="divum-item">
     <div id="position19">
@@ -225,7 +225,7 @@ include_once ('dvmFooter.php');
 <!--end of footer area -->
 
 <div class="menuadmin">
-  
+
   <!-- Top Bar -->
   <header class="menuadmin__header">
     <div class="menutoolbar">
@@ -247,7 +247,7 @@ include_once ('dvmFooter.php');
       </div>
     </div>
   </header>
-<?php 
+<?php
 include_once ('dvmUpdater.php');
 include_once ('dvmSideMenu.php');
 ?>
