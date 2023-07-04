@@ -1,6 +1,6 @@
 <?php
 
-if (!file_exists("userSettings.php")) { 
+if (!file_exists("userSettings.php")) {
 copy("initial_userSettings.php", "userSettings.php");}
 include_once ('dvmCombinedData.php');
 include_once ('webserver_ip_address.php');
@@ -13,8 +13,8 @@ error_reporting(0);
 <html>
 
 <head>
-  
-    <title><?php echo $stationlocation;?> Weather Station</title>
+
+  <title><?php echo $stationlocation;?> Weather Station</title>
   <!--Google / Search Engine Tags -->
   <meta itemprop="image" content="img/divumMeta.png">
   <meta itemprop="name" content="Private Weather Station <?php echo $stationlocation;?>">
@@ -28,16 +28,16 @@ error_reporting(0);
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name=apple-mobile-web-app-title content="WEATHER STATION">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, viewport-fit=cover">
-  
 
-<link rel="apple-touch-icon" sizes="180x180" href="https://claydonsweather.org.uk/weewx/divumwx/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="https://claydonsweather.org.uk/weewx/divumwx/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="https://claydonsweather.org.uk/weewx/divumwx/favicon-16x16.png">
-<link rel="manifest" href="https://claydonsweather.org.uk/weewx/divumwx/site.webmanifest">
-<link rel="mask-icon" href="https://claydonsweather.org.uk/weewx/divumwx/safari-pinned-tab.svg" color="#5bbad5">
-<link rel="shortcut icon" href="https://claydonsweather.org.uk/weewx/divumwx/favicon.ico">
+
+<link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="./divumwx/favicon-16x16.png">
+<link rel="manifest" href="./site.webmanifest">
+<link rel="mask-icon" href="./safari-pinned-tab.svg" color="#5bbad5">
+<link rel="shortcut icon" href="./favicon.ico">
 <meta name="msapplication-TileColor" content="#da532c">
-<meta name="msapplication-config" content="https://claydonsweather.org.uk/weewx/divumwx/browserconfig.xml">
+<meta name="msapplication-config" content="./browserconfig.xml">
 <meta name="theme-color" content="#ffffff">
 
   <link rel="manifest" href="/site.webmanifest">
