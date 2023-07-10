@@ -11,7 +11,7 @@ $advisoryzone = "uk"; //uk, na, eu, au, rw (= UK, North America, Europe, Austral
 $airqual["in_use"] = "yes"; // yes, no
 $airqual["zone"] = "uk"; //uk, us, ei, ci, au, (= UK DAQI, US EPS, Europe EAQI, Europe CAQI, Australia)
 $airqual["source"] = "weewx";  //purple, weewx, sds
-$lightning["source"] = '0'; // use 'Boltek' or '0'
+$lightning["source"] = 0; // use 0 for Boltek or 1 for other devices
 $position2 = "dvmAirqualityTop.php";
 $position3 = "dvmLightningTop.php";
 $position5 = "dvmTemperatureModule.php";
