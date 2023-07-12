@@ -94,7 +94,7 @@ if ($units != 'ca')
 
 if ($extralinks == 'yes')
 { ?>
-      <li class="header sub">LINKS <img class="menuimg" src="img/arrowiconlink.svg" alt=""/>
+      <li class="header sub">LINKS <img class="menuimg" src="img/arrowiconlinkS.svg" alt=""/>
         <ul>
           <?php if ($linkWU == 'yes')
     { ?>
@@ -103,7 +103,7 @@ if ($extralinks == 'yes')
          ?>
               <a href="<?php echo ($linkWUNew == 'yes' || empty($linkWUNew) ? 'https://www.wunderground.com/dashboard/pws/' : 'https://www.wunderground.com/personal-weather-station/dashboard?id=') . $id; ?>" title="<?php echo $id; ?> on weather Underground" target="_blank">
                 <img class="menuimg" src="img/wulogo.svg" style="width:30px" alt=""/>
-                <?php echo $id; ?> on WU
+                <?php echo $WUSid; ?> on WU
               </a>
             </li>
           <?php
@@ -330,60 +330,39 @@ if (!empty($webcamurl) && $webcamurl != ' ' && $webcamurl != 'Null' && $webcamur
       <?php
 } ?>
       <!--languages-->
-      <?php if ($languages == "yes")
+      <?php if ($sbLang == "yes")
 { ?>
-        <li class="header"><?php echo $lang["language"]; ?></li>
-        <li class="flagstop">
-          <a href="index.php?lang=en"><img src="img/flags/en.svg" title="English" class="flags" alt="en"/></a> 
-          <a href="index.php?lang=dk"><img src="img/flags/dk.svg" title="Danish" class="flags" alt="dk"/></a> 
-          <a href="index.php?lang=gr"><img src="img/flags/gr.svg" title="Greek" class="flags" alt="gr"/></a> 
-          <a href="index.php?lang=it"><img src="img/flags/it.svg" title="Italian" class="flags" alt="it"/></a> 
-          <a href="index.php?lang=fr"><img src="img/flags/fr.svg" title="French" class="flags" alt="fr"/></a> 
-        </li>
-
-        <li class="flagsmiddle">
-          <a href="index.php?lang=dl"><img src="img/flags/dl.svg" title="German" class="flags" alt="dl"/></a> 
-          <a href="index.php?lang=nl"><img src="img/flags/nl.svg" title="Dutch" class="flags" alt="nl"/></a> 
-          <a href="index.php?lang=cat"><img src="img/flags/cat.svg" title="Catalan" class="flags" alt="cat"/></a> 
-          <a href="index.php?lang=sp"><img src="img/flags/sp.svg" title="Spanish" class="flags" alt="sp"/></a> 
-          <a href="index.php?lang=tr"><img src="img/flags/tr.svg" title="Turkish" class="flags" alt="tr"/></a> 
-        </li>
-
-        <li class="flagsbottom">
-          <a href="index.php?lang=hu"><img src="img/flags/hu.svg" title="Hungary" class="flags" alt="hu"/></a> 
-          <a href="index.php?lang=pl"><img src="img/flags/pl.svg" title="Polish" class="flags" alt="pl"/></a> 
-          <a href="index.php?lang=sp"><img src="img/flags/ar.svg" title="Argentina" class="flags" alt="ar"/></a> 
-          <a href="index.php?lang=dl"><img src="img/flags/ch.svg" title="Switzerland" class="flags" alt="ch"/></a> 
-          <a href="index.php?lang=no"><img src="img/flags/no.svg" title="Norwegian" class="flags" alt="no"/></a> 
-        </li>
-      <?php
+      <li class="header"><?php echo $lang["language"]; ?> SELECT</li>
+      <li class="flagstop">
+        <a href="index.php?lang=en">English</a><br />
+        <a href="index.php?lang=dk">Danish</a><br />
+        <a href="index.php?lang=gr">Greek</a><br />
+        <a href="index.php?lang=it">Italian</a><br />
+        <a href="index.php?lang=fr">French</a><br />
+        <a href="index.php?lang=de">German</a><br />
+        <a href="index.php?lang=nl">Dutch</a><br />
+        <a href="index.php?lang=cat">Catalan</a><br />
+        <a href="index.php?lang=sp">Spanish</a><br />
+        <a href="index.php?lang=tr">Turkish</a><br />
+        <a href="index.php?lang=hu">Hungary</a><br />
+        <a href="index.php?lang=pl">Polish</a><br />
+        <a href="index.php?lang=no">Norwegian</a><br />
+      </li><br /><br />
+    <?php
 } ?>
-      <!--credits | download info-->
-      <?php // please do not remove this and if so no support is given and your domain will be blacklisted from support it is not much to ask //
- ?>
-      <li>
-        <a href="https://www.chrisalemany.ca/2021/02/24/installing-the-divumwx-skin-on-weewx-with-remote-web-server-2021-edition/" title="remote setup" target="_blank">
-          <menumarkerbluegrey></menumarkerbluegrey> Remote Setup Guide
-        </a>
-      </li>
-      <li>
-        <a href="https://github.com/Millardiang/weewx-divumwx/" title="weewx-DivumWX on Github" target="_blank">
-          <menumarkerbluegrey></menumarkerbluegrey> Private Download weewx-DivumWX template
-        </a>
-      </li>
-      <li>
-        <a href="https://steepleian.github.io/weewx-Weather34/" title="Web Services Setup Page" target="_blank">
-          <menumarkerbluegrey></menumarkerbluegrey> Web Services Setup Page
-        </a>
-      </li>
-      <li>
-        <a href="mailto://steepleian@gmail.com" title="Email Steepleian for Support" target="_blank">
-          <menumarkerbluegrey></menumarkerbluegrey> Maintained by Ian Millard (Steepleian)
-        </a>
-      </li>
-      
-      <!-- USA WeatherFinder -->
-      <?php if (!empty($USAWeatherFinder))
+    <li class="header">MISC</li>
+    <li><a href="https://www.chrisalemany.ca/2021/02/24/installing-the-divumwx-skin-on-weewx-with-remote-web-server-2021-edition/" title="remote setup" target="_blank"><menumarkerbluegrey></menumarkerbluegrey> Remote Setup Guide</a></li>
+    <li><a href="https://github.com/Millardiang/weewx-divumwx/" title="weewx-DivumWX on Github" target="_blank"><menumarkerbluegrey></menumarkerbluegrey> Download weewx-DivumWX template</a></li>
+    <li><a href="https://steepleian.github.io/weewx-Weather34/" title="Web Services Setup Page" target="_blank"><menumarkerbluegrey></menumarkerbluegrey> Web Services Setup Page</a></li>
+
+    <li class="header"> The DivumWX Team</li>
+    <li class="flagstop">
+      <a href="mailto://steepleian@gmail.com" title="Email Steepleian for Support" target="_blank"> Ian Millard (Steepleian)</a><br />
+      <a href="#">Steven Sheeley (Rayvenhaus)</a><br />
+      <a href="#">Sean Balfour</a><br />
+    </li><br /><br />
+    <!-- USA WeatherFinder -->
+    <?php if (!empty($USAWeatherFinder))
 { ?>
         <li>
           <a href="https://usaweatherfinder.com/index.php?a=stats&u=<?php echo $USAWeatherFinder; ?>" title="<?php echo $USAWeatherFinder; ?>'s Weather Finder" target="_blank">
