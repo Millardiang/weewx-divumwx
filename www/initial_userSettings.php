@@ -2,7 +2,7 @@
 $themelayout = "5"; //4, 5, tablet
 $TZ = "Europe/London";
 $extralinks = "yes";
-$languages = "yes";
+$sbLang = "yes";
 $dateFormat = "d-m-Y"; //m-d-Y, Y-m-d
 $timeFormat = "H:i:s"; //g:i:s, g:i:s a
 $timeFormatShort = "H:i"; //g:i, g:i a
@@ -11,7 +11,7 @@ $advisoryzone = "uk"; //uk, na, eu, au, rw (= UK, North America, Europe, Austral
 $airqual["in_use"] = "yes"; // yes, no
 $airqual["zone"] = "uk"; //uk, us, ei, ci, au, (= UK DAQI, US EPS, Europe EAQI, Europe CAQI, Australia)
 $airqual["source"] = "weewx";  //purple, weewx, sds
-$lightning["source"] = 0; // use 0 for Boltek or 1 for other devices
+$lightningSource = 1; // 0 = Boltek, 1 = all
 $position2 = "dvmAirqualityTop.php";
 $position3 = "dvmLightningTop.php";
 $position5 = "dvmTemperatureModule.php";
@@ -30,7 +30,7 @@ $position17 = "dvmEarthDaylightModule.php";
 $position18 = "dvmSolarDialModule.php";
 $position19 = "dvmMoonPhaseModule.php";
 $webcamurl = "";
-$videoWeatherCamURL  = "";
+$videoWeatherCamURL = "";
 $email = "";
 $twitter = "";
 $since = "2021";
@@ -43,8 +43,8 @@ $notifyWind = "yes";
 $notifyEarthquake = "yes";
 $notifyMagnitude = 3;
 $linkWU = "yes";
-$linkWUNew = "yes";
-$id = "IYOURWUKWY";
+$linkWUNewDash = "yes";
+$WUid = "IYOURWUKWY";
 $linkCWOPID = "";
 $linkFindUID = "";
 $linkNOAA = "yes";
