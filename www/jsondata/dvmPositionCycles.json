@@ -17,7 +17,6 @@
 "dvmSolarUvLuxModule.php":{"cycle": "60000"},
 "dvmPollenModule.php":{"cycle": "60000"},
 "dvmTemperatureModule.php":{"cycle": "60000"},
-"dvmPollenModule.php":{"cycle": "60000"},
 "dvmTemperatureYearTop.php":{"cycle": "3600000"},
 "dvmWeatherClockTop.php":{"cycle": "86400000"},
 "dvmWebcamModule.php":{"cycle": "60000"},
