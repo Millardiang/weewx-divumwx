@@ -32,7 +32,7 @@ error_reporting(0);
 
 <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="./divumwx/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
 <link rel="manifest" href="./site.webmanifest">
 <link rel="mask-icon" href="./safari-pinned-tab.svg" color="#5bbad5">
 <link rel="shortcut icon" href="./favicon.ico">
@@ -40,7 +40,7 @@ error_reporting(0);
 <meta name="msapplication-config" content="./browserconfig.xml">
 <meta name="theme-color" content="#ffffff">
 
-  <link rel="manifest" href="/site.webmanifest">
+  <link rel="manifest" href="./site.webmanifest">
   <link href="css/main.<?php echo $theme;?>.css?version=<?php echo filemtime('css/main.' . $theme . '.css');?>" rel="stylesheet prefetch">
 
   <script>
