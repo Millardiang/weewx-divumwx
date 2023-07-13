@@ -1,7 +1,9 @@
 <?php 
 
 error_reporting(0);
-$copyYear = 2015;$curYear = date('Y');$copyrightcredit='&copy; divumwx.com original CSS/SVG/PHP '.$copyYear . (($copyYear != $curYear) ? '-' . $curYear : 'Copyright');
+$copyYear = 2015;
+$curYear = date('Y');
+$copyrightcredit='&copy; divumwx.com original CSS/SVG/PHP '.$copyYear . (($copyYear != $curYear) ? '-' . $curYear : 'Copyright');
 // Speed
 function ktsTokmh(&$wind, $field){
 	if(!isset($wind[$field])) return;

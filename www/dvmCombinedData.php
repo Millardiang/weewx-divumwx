@@ -110,40 +110,25 @@ explode(" ", file_get_contents($livedata)));
     $alm["neptune_hlongitude"] = $adata["almanac"]["neptune hlongitude"]["value"];
     $alm["pluto_hlongitude"] = $adata["almanac"]["pluto hlongitude"]["value"];
 
-    if ($adata["almanac"]["moon rise"]["at"] == '--')
-    {
+    if ($adata["almanac"]["moon rise"]["at"] == '--'){
         $alm["moonrise"] = 'In Transit';
     }
-    
-    if ($alm['luminance'] > 99.9)
-    {
+    if ($alm['luminance'] > 99.9){
         $alm['luminance'] = 100;
     }
-
-    if (strtotime(date("G.i")) >= strtotime($alm["civil_twilight_begin"]) && strtotime(date("G.i")) < strtotime($alm["civil_twilight_end"]))
-    {
+    if (strtotime(date("G.i")) >= strtotime($alm["civil_twilight_begin"]) && strtotime(date("G.i")) < strtotime($alm["civil_twilight_end"])){
         $dayPartCivil = "day";
-    }
-    else
-    {
+    }else{
         $dayPartCivil = "night";
     }
-
-    if (strtotime(date("G.i")) >= strtotime($alm["nautical_twilight_begin"]) && strtotime(date("G.i")) < strtotime($alm["nautical_twilight_end"]))
-    {
+    if (strtotime(date("G.i")) >= strtotime($alm["nautical_twilight_begin"]) && strtotime(date("G.i")) < strtotime($alm["nautical_twilight_end"])){
         $dayPartNautical = "day";
-    }
-    else
-    {
+    }else{
         $dayPartNautical = "night";
     }
-
-    if (strtotime(date("G.i")) >= strtotime($alm["sunrise"]) && strtotime(date("G.i")) < strtotime($alm["sunset"]))
-    {
+    if (strtotime(date("G.i")) >= strtotime($alm["sunrise"]) && strtotime(date("G.i")) < strtotime($alm["sunset"])){
         $dayPartNatural = "day";
-    }
-    else
-    {
+    }else{
         $dayPartNatural = "night";
     }
 
