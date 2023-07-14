@@ -157,7 +157,7 @@ else if($temp["indoor_now_feels"] <=18)echo "<div class='divumwxindoormild'>Mild
 
 <?php 
 
-if($airqual["in_use"]== 'yes'){?>
+if($aqInUse == 'yes'){?>
 <article> 
    <div class=actualt>Air Quality</div>        
    

@@ -5,24 +5,24 @@ include('dvmCombinedData.php');
 $airqual["pm_units"] = "μg/㎥";
 
 
-if ($airqual["source"] == "purple") {
+if ($aqSource == "purple") {
 $json_string = file_get_contents("jsondata/pu.txt");
 $parsed_json = json_decode($json_string, true);
 $airqual["pm25"] = $parsed_json["sensor"]["stats"]["pm2.5"];
 $airqual["city"] = $parsed_json["sensor"]["name"];
 
 }
-else if ($airqual["source"] == "weewx") {
+else if ($aqSource == "weewx") {
 $airqual["pm25"] = $air["current.pm2_5"];
 $airqual["city"] = $stationlocation;
 }
-else if ($airqual["source"] == "waqi") {
+else if ($aqSource == "waqi") {
 $json_string = file_get_contents("jsondata/aq.txt");
 $parsed_json = json_decode($json_string, true);
 $airqual["pm25"] = $parsed_json['data']['iaqi']['pm25']['v'];
 $airqual["city"] = $parsed["data"]["city"]["name"];
 }
-else if ($airqual["source"] == "sds"){
+else if ($aqSource == "sds"){
 $json_string = file_get_contents("jsondata/aqiJson.txt");
 $parsed_json = json_decode($json_string, true);
 $airqual["pm25"] = round($parsed_json['pm25'],1);
@@ -30,7 +30,7 @@ $airqual["city"] = $stationlocation;
 }
 
 //Europe EAQI
-if ($airqual["zone"] == "ei"){
+if ($aqZone == "ei"){
  
 if ($airqual["pm25"] < 11 ){
 $airqual["image25"] = "./css/aqi/goodair.svg?ver=1.4";
@@ -68,7 +68,7 @@ $airqual["text"] = "Extremely Poor Air Quality";
 }
 
 //Europe CAQI
-if ($airqual["zone"] == "ci"){
+if ($aqZone == "ci"){
  
 if ($airqual["pm25"] < 16 ){
 $airqual["image25"] = "./css/aqi/goodair.svg?ver=1.4";
@@ -105,7 +105,7 @@ $airqual["text"] = "Very High Air Pollution";
 }
 
 //UK
-if ($airqual["zone"] == "uk"){
+if ($aqZone == "uk"){
 
 if ($airqual["pm25"] < 12 ){
 $airqual["image25"] = "./css/aqi/goodair.svg?ver=1.4";
@@ -171,7 +171,7 @@ $airqual["text"] = "Very High Pollution";
 }
 
 //USA & WAQI
-if ($airqual["zone"] == "us"){
+if ($aqZone == "us"){
 
 function pm25_to_aqi($pm25){
 	if ($pm25 > 500.5) {
@@ -253,7 +253,7 @@ $airqual["text"] = "Hazardous Air Quality";
 }
 
 //Australia
-if ($airqual["zone"] == "au"){
+if ($aqZone == "au"){
 $airqual["aqi25"] = round($airqual["pm25"]*4, 0);
 if ($airqual["aqi25"] < 34 ){
 $airqual["image25"] = "./css/aqi/goodair.svg?ver=1.4";
