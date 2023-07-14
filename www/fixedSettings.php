@@ -187,20 +187,20 @@ else if ($advisoryzone == "na") {
     $advisory = "dvmAdvisoryNaPopup.php";
 }
 
-if ($airqual["zone"] == "uk") {
+if ($aqZone == "uk") {
     $airqual["subtitle"] = " - UK DAQI";
 }
-else if ($airqual["zone"] == "ei") {
+else if ($aqZone == "ei") {
     $airqual["subtitle"] = " - Europe EAQI";
 }
 
-else if ($airqual["zone"] == "ci") {
+else if ($aqZone == "ci") {
     $airqual["subtitle"] = " - Europe CAQI";
 }
-else if ($airqual["zone"] == "au") {
+else if ($aqZone == "au") {
     $airqual["subtitle"] = " - Australian AQI";
 } 
-else if ($airqual["zone"] == "us") {
+else if ($aqZone == "us") {
     $airqual["subtitle"] = " - USA EPA";
 }
 

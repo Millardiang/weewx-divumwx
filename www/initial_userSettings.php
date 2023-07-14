@@ -8,9 +8,9 @@ $timeFormat = "H:i:s"; //g:i:s, g:i:s a
 $timeFormatShort = "H:i"; //g:i, g:i a
 $clockformat = "24"; //12, 24
 $advisoryzone = "uk"; //uk, na, eu, au, rw (= UK, North America, Europe, Australia, Rest of World)
-$airqual["in_use"] = "yes"; // yes, no
-$airqual["zone"] = "uk"; //uk, us, ei, ci, au, (= UK DAQI, US EPS, Europe EAQI, Europe CAQI, Australia)
-$airqual["source"] = "weewx";  //purple, weewx, sds
+$aqInUse = "yes"; // yes, no
+$aqZone = "uk";//uk, us, ei, ci, au, (= UK DAQI, US EPS, Europe EAQI, Europe CAQI, Australia)
+$aqSource = "weewx"; //purple, weewx, sds
 $lightningSource = 1; // 0 = Boltek, 1 = all
 $position2 = "dvmAirqualityTop.php";
 $position3 = "dvmLightningTop.php";
