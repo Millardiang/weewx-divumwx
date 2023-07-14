@@ -1,19 +1,17 @@
 <?php
-
-if (!file_exists("userSettings.php")) {
-copy("initial_userSettings.php", "userSettings.php");}
-include_once ('dvmCombinedData.php');
-include_once ('webserver_ip_address.php');
-date_default_timezone_set($TZ);
-header('Content-type: text/html; charset=utf-8');
-error_reporting(0);
+  if (!file_exists("userSettings.php")) {
+    copy("initial_userSettings.php", "userSettings.php");
+  }
+  include_once ('dvmCombinedData.php');
+  include_once ('webserver_ip_address.php');
+  date_default_timezone_set($TZ);
+  header('Content-type: text/html; charset=utf-8');
+  error_reporting(0);
 ?>
 
 <!DOCTYPE html>
 <html>
-
 <head>
-
   <title><?php echo $stationlocation;?> Weather Station</title>
   <!--Google / Search Engine Tags -->
   <meta itemprop="image" content="img/divumMeta.png">
@@ -29,18 +27,16 @@ error_reporting(0);
   <meta name=apple-mobile-web-app-title content="WEATHER STATION">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, viewport-fit=cover">
 
-
-<link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="./divumwx/favicon-16x16.png">
-<link rel="manifest" href="./site.webmanifest">
-<link rel="mask-icon" href="./safari-pinned-tab.svg" color="#5bbad5">
-<link rel="shortcut icon" href="./favicon.ico">
-<meta name="msapplication-TileColor" content="#da532c">
-<meta name="msapplication-config" content="./browserconfig.xml">
-<meta name="theme-color" content="#ffffff">
-
-  <link rel="manifest" href="/site.webmanifest">
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
+  <link rel="manifest" href="./site.webmanifest">
+  <link rel="mask-icon" href="./safari-pinned-tab.svg" color="#5bbad5">
+  <link rel="shortcut icon" href="./favicon.ico">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="msapplication-config" content="./browserconfig.xml">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="manifest" href="./site.webmanifest">
   <link href="css/main.<?php echo $theme;?>.css?version=<?php echo filemtime('css/main.' . $theme . '.css');?>" rel="stylesheet prefetch">
 
   <script>
@@ -57,11 +53,11 @@ error_reporting(0);
     }
   </script>
 </head>
-
-<!-- begin top layout-->
+<!-- Top Grid Area-->
 <div class="divum2-container">
+  <!-- Row 1 -->
   <div class="container divumwxbox-toparea">
-    <!-- position 1 --->
+    <!-- position 1 - Fixed Position --->
     <div class="divumwxbox clock">
     <div class="divumbox-top-border">
       <div class="title"><?php echo $info;?><?php echo $lang['timeTop'];?></div>
@@ -86,7 +82,7 @@ error_reporting(0);
       </div>
     </div>
    </div>
-    <!-- position 4--->
+    <!-- position 4 - Fixed Position --->
     <div class="divumwxbox alert">
      <div class="divumbox-top-border">
       <div class="title"><?php echo $info;?><?php echo $lang['advisoriesTop'];?></div>
@@ -97,83 +93,70 @@ error_reporting(0);
    </div>
  </div>
 </div>
-<!--begin outside station data-->
-
-<!-- position 5--->
+<!--Main Grid Area-->
+<!-- Row 2 -->
 <div class="divum-container">
+  <!-- position 5--->
   <div class="divum-item">
     <div id="position5">
     </div>
   </div>
- 
   <!-- position 6--->
   <div class="divum-item">
     <div id="position6">
     </div>
   </div>
- 
   <!-- position 7--->
   <div class="divum-item">
     <div id="position7">
      </div>
    </div>
   </div>
- 
-<!-- position 8--->
-
 <div class="divum-container">
+<!-- Row 3 -->
+  <!-- position 8--->
   <div class="divum-item">
     <div id="position8">
     </div>
   </div>
- 
   <!-- position 9--->
   <div class="divum-item">
     <div id="position9">
     </div>
   </div>
- 
   <!-- position 10--->
   <div class="divum-item">
     <div id="position10">
      </div>
     </div>
    </div>
-  
-<!-- position 11--->
-<div class="divum-container"> 
+<div class="divum-container">
+<!-- Row 4 -->
+  <!-- position 11--->
   <div class="divum-item">
     <div id="position11">
     </div>
   </div>
- 
   <!--position 12-->
   <div class="divum-item">
     <div id="position12">
     </div>
   </div>
- 
   <!--position 13-->
   <div class="divum-item">
-
     <div id="position13">
       </div>
      </div>
    </div>
 
-<!--end outdoor data-->
 
 <!--End Main Grid area-->
-
 <!--footer area -->
 <?php
-
 include_once ('dvmFooter.php');
-
 ?>
-
-<!--end of footer area --> <div class="menuadmin">
-  
+<!--end of footer area -->
+<div class="menuadmin">
   <!-- Top Bar -->
   <header class="menuadmin__header">
     <div class="menutoolbar">
@@ -182,22 +165,16 @@ include_once ('dvmFooter.php');
       </div>
       <div class="menutoolbar__center">
         <button class="menubutton menubutton--primary">
-          <menutoptitle><?php echo strtoupper($stationlocation); ?>  WEATHER STATION</menutoptitle>
+          <menutoptitle><?php echo ($stationlocation); ?>  Weather Station  <img src="./img/flags/<?php echo $flag?>.svg" width="20"></menutoptitle>
         </button>
       </div>
       <div class="menutoolbar__right">
-        <menuuptime>
-          <?php echo "Operational Since " . $divum["since"]; ?>
-        </menuuptime>
-
-            <a href="index.php" title="Select Full Dashboard Mode"><topbarbutton>D</topbarbutton></a>
-
+            <a href="index.php" title="Select Dashboard Mode"><topbarbutton>D</topbarbutton></a>
       </div>
     </div>
   </header>
-<?php 
-include_once ('dvmUpdater.php');
-include_once ('dvmSideMenu.php');
+<?php
+  include_once ('dvmUpdater.php');
+  include_once ('dvmSideMenu.php');
 ?>
-
 </html>
