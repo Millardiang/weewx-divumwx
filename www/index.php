@@ -211,9 +211,6 @@ include_once ('dvmFooter.php');
         </button>
       </div>
       <div class="menutoolbar__right">
-        <menuuptime>
-          <?php echo "System Operational Since " . $divum["since"]; ?>
-        </menuuptime>
             <a href="dvmIndexTablet.php" title="Select Tablet Mode"><topbarbutton>T</topbarbutton></a>
       </div>
     </div>
