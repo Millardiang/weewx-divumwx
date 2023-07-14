@@ -38,7 +38,7 @@ else if ($pollen["weed_index"]=="5"){$pollen["weed_risk"]="Very High";$pollen["w
 
 <div class="chartforecast2">
 
-       <span class="yearpopup"><a alt="pollen" title="Pollen Data" href="dvmMenuPollenData.php" data-lity><?php echo $menucharticonpage;?> Pollen Data</a></span>
+       <!--span class="yearpopup"><a alt="pollen" title="Pollen Data" href="dvmMenuPollenData.php" data-lity><?php echo $menucharticonpage;?> Pollen Data</a></span-->
     </div>
     <span class='moduletitle2'><?php echo $lang['PollenModule'];?></span>
 
