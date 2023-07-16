@@ -91,6 +91,7 @@
     {
         "time": "$current.dateTime.format("%a, %d %b %Y %H:%M:%S %Z")",
         "generator": "$station.version"
+        
     },
     "lightning":
     {
@@ -156,7 +157,7 @@
         ## If extended almanac information is available, do extra calculations.
 #if $almanac.hasExtras
   #set $sun_altitude = $almanac.sun.alt
-  #set $moonDays = int(round(($current.dateTime.raw - $almanac.previous_new_moon.raw)/86400,0))
+  #set $moonDays = ($current.dateTime.raw - $almanac.previous_new_moon.raw)/86400
   #if $sun_altitude < 0
     #set $sun_None="<i>(Always down)</i>"
     #set $daylight_str = "00:00"
@@ -233,15 +234,15 @@
         "moon phase number": {"value": $moonphase_no},
         "moon fullness": {"value": "$almanac.moon.moon_fullness"},
         "moon age": {"value": $moonDays},
-        "mercury hlongitude": {"value": $almanac.mercury.hlong},
-        "venus hlongitude": {"value": $almanac.venus.hlong},
-        "earth hlongitude": {"value": $almanac.sun.hlong},
-        "mars hlongitude": {"value": $almanac.mars.hlong},
-        "jupiter hlongitude": {"value": $almanac.jupiter.hlong},
-        "saturn hlongitude": {"value": $almanac.saturn.hlong},
-        "uranus hlongitude": {"value": $almanac.uranus.hlong},
-        "neptune hlongitude": {"value": $almanac.neptune.hlong},
-        "pluto hlongitude": {"value": $almanac.pluto.hlong},        
+        "mercury hlongitude": {"value": $almanac.mercury.hlongitude.raw},
+        "venus hlongitude": {"value": $almanac.venus.hlongitude.raw},
+        "earth hlongitude": {"value": $almanac.sun.hlongitude.raw},
+        "mars hlongitude": {"value": $almanac.mars.hlongitude.raw},
+        "jupiter hlongitude": {"value": $almanac.jupiter.hlongitude.raw},
+        "saturn hlongitude": {"value": $almanac.saturn.hlongitude.raw},
+        "uranus hlongitude": {"value": $almanac.uranus.hlongitude.raw},
+        "neptune hlongitude": {"value": $almanac.neptune.hlongitude.raw},
+        "pluto hlongitude": {"value": $almanac.pluto.hlongitude.raw},        
         #end if
         ## Last value can't end with a comma
         "void_end": null

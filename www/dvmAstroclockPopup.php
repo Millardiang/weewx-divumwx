@@ -1,51 +1,33 @@
 <?php
+
 /*
 Astronomical clock coded in D3.js
  
 This clock has been translated from an old lua script,
 coded by a good friend of mine named Paramvir Likhari.
-
-Based on the Orloj clock which can be found in the City of Prague,
+Based on the Orloj Astronomical clock which can be found in the City of Prague,
 it acts like a precision instrument when fed with the correct data.
 This is the proper way to display the sun and moon going around a circle.
-
 The sun posision is spot on, the moon is accurate to within 3-4 arc minutes
-which is extremely good !
+which is extremely good.
 The data has been pre-calculated using the python-ephem library
-and parsed using json.
 
-I have a small TODO.
-
-No.1
-The sun and moon should animate with a one second tick
-to show you how the Kaleidoscope sun works.
-The moon animation is not quite so elaborate but
-fits nicely in the sun at the moment of a new moon.
-
-I would be eternally grateful for any help with these functions.
-I hope you like the clock enjoy the nice graphics.
-
-I am also open to suggestions to improve the code in any way.
-
-Cheers Sean 
-
-Created by Sean Balfour in Dresden June 2023
+Created by Sean Balfour in Dresden July 2023
 contact: seanbalfourdresden@googlemail.com
 
+Cheers Sean 
 */
+
 include('dvmCombinedData.php');
-date_default_timezone_set($TZ);
-error_reporting(0);
 echo "<body style='background-color:#292E35'>";
 ?>
 
 <!doctype html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title>Astroclock</title>
-<meta name="viewport" content="width = device-width, initial-scale = 1, shrink-to-fit = yes">
-<!--link rel="stylesheet" href="css/astroclock.css"-->
+<head>
+<meta charset="utf-8">
+<title>Astronomical Clock</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes">
 </head>
 
 <script src='js/d3.4.2.2.min.js'></script> 
@@ -86,19 +68,13 @@ body {
 </div>
 
 <script>
-
+    
 // refresh the script every 60 seconds
 window.setInterval('refresh()', 60000);     
     function refresh() {
         window.location.reload();
     }
-
-var eclipticWidth = 0.75;
-    
-var color_M1 = "rgba(41,46,53,1)";
-var color_M = "rgba(255,255,255,1)";
         
-    
 function toDegrees(x) {
   return x * (180.0 / Math.PI);
 }
@@ -219,7 +195,6 @@ let ats = "<?php echo $alm["astronomical_twilight_end"];?>";
      
 var svg = d3.select(".astroclock")
     .append("svg")
-    //.style("background", "#292E35") // box background to be commented out
     .attr("width", 780)
     .attr("height", 500);
 
@@ -366,16 +341,37 @@ svg.append("text")
     .style("font-weight", "bold")
     .text(Title);
 
-var Title = "Based on the Orloj in the City of Prague";
-svg.append("text")
+var data = ["Based on the "+"-"+"Orloj"+"-"+" in the City of Prague"];
+
+var text = svg.selectAll(null)
+    .data(data)
+    .enter() 
+    .append("text")
     .attr("x", 520)
-    .attr("y", 186)
+    .attr("y", function(d, i) {
+    return 186 + i * 186
+    })
+
     .style("fill", "rgba(46,139,87,1)")
     .style("font-family", "Helvetica")
     .style("font-size", "14px")
     .style("text-anchor", "left")
     .style("font-weight", "normal")
-    .text(Title);
+    .text(function(d) {
+    return d.split("-")[0]
+    })
+
+    .append("tspan")
+    .style("fill", "rgba(0,127,255,1)")
+    .text(function(d) {
+    return d.split("-")[1]
+    })
+
+    .append("tspan")
+    .style("fill", "rgba(46,139,87,1)")
+    .text(function(d) {
+    return d.split("-")[2]
+    })
 
 svg.append("line")
     .attr("x1", 520)
@@ -452,7 +448,7 @@ svg.append("text")
     .style("font-weight", "normal")
     .text(Solstice);
 
-var Luminance = "Luminance: <?php echo $alm["luminance"];?> %";
+var Luminance = "Luminance: <?php echo number_format($alm["luminance"],2);?> %";
 svg.append("text")
     .attr("x", 520)
     .attr("y", 312)
@@ -474,7 +470,7 @@ svg.append("text")
     .style("font-weight", "normal")
     .text(Moonphase);
 
-var MoonAge = "Moon age: <?php echo $alm["moon_age"];?> Days old";
+var MoonAge = "Moon cycle: <?php echo number_format($alm["moon_age"],2);?> Days old";
 svg.append("text")
     .attr("x", 520)
     .attr("y", 342.75)
@@ -578,8 +574,8 @@ var sector = svg.append("path")
 svg.append("line")
     .attr("x1", 139)
     .attr("x2", 381)
-    .attr("y1", 207.5)
-    .attr("y2", 207.5)
+    .attr("y1", 205.5)
+    .attr("y2", 205.5)
     .style("stroke", "rgba(137,142,143,1)")
     .style("stroke-width", 0.5)
     .style("stroke-linecap", "round");
@@ -630,16 +626,16 @@ var sector = svg.append("path")
     .attr("fill", "none")
     .attr("stroke-width", 0.5)
     .attr("stroke", "rgba(137,142,143,1)")
-    .attr("d", arc({ startAngle: - 90 * Math.PI / 180, endAngle: + 51 * Math.PI / 180 }))
-    .attr("transform", "translate(235.5,208) rotate(180)");
+    .attr("d", arc({ startAngle: - 91 * Math.PI / 180, endAngle: + 51 * Math.PI / 180 }))
+    .attr("transform", "translate(233.5,208) rotate(180)");
 
 var arc = d3.arc().innerRadius(145.5).outerRadius(145.5);
 var sector = svg.append("path")
     .attr("fill", "none")
     .attr("stroke-width", 0.5)
     .attr("stroke", "rgba(137,142,143,1)")
-    .attr("d", arc({ startAngle: - 51 * Math.PI / 180, endAngle: + 90 * Math.PI / 180 }))
-    .attr("transform", "translate(284.5,208) rotate(180)");
+    .attr("d", arc({ startAngle: - 51 * Math.PI / 180, endAngle: + 91 * Math.PI / 180 }))
+    .attr("transform", "translate(286.5,208) rotate(180)");
 
 var arc = d3.arc().innerRadius(142).outerRadius(142);
 var sector = svg.append("path")
@@ -774,7 +770,7 @@ var sector = svg.append("path")
     .attr("fill", "none")
     .attr("stroke-width", 0.5)
     .attr("stroke", "rgba(137,142,143,1)")
-    .attr("d", arc({ startAngle: - 87 * Math.PI / 180, endAngle: + 87 * Math.PI / 180 }))
+    .attr("d", arc({ startAngle: - 78 * Math.PI / 180, endAngle: + 78 * Math.PI / 180 }))
     .attr("transform", "translate(260,375)");
 
 var arc = d3.arc().innerRadius(100).outerRadius(100);
@@ -782,7 +778,7 @@ var sector = svg.append("path")
     .attr("fill", "none")
     .attr("stroke-width", 0.5)
     .attr("stroke", "rgba(137,142,143,1)")
-    .attr("d", arc({ startAngle: - 114 * Math.PI / 180, endAngle: + 114 * Math.PI / 180 }))
+    .attr("d", arc({ startAngle: - 95 * Math.PI / 180, endAngle: + 95 * Math.PI / 180 }))
     .attr("transform", "translate(260,365)");
 
 var arc = d3.arc().innerRadius(80).outerRadius(80);
@@ -790,7 +786,7 @@ var sector = svg.append("path")
     .attr("fill", "none")
     .attr("stroke-width", 0.5)
     .attr("stroke", "rgba(137,142,143,1)")
-    .attr("d", arc({ startAngle: - 155 * Math.PI / 180, endAngle: + 155 * Math.PI / 180 }))
+    .attr("d", arc({ startAngle: - 121 * Math.PI / 180, endAngle: + 121 * Math.PI / 180 }))
     .attr("transform", "translate(260,355)");
 
 var sunRing = svg.append("defs");
@@ -832,9 +828,9 @@ svg.append("circle")
 
 svg.append("circle")
     .attr("stroke", "rgba(9,70,62,1)")    
-    .style('stroke-width', "32")
+    .style('stroke-width', "31")
     .style('fill', "none")
-    .attr("r", 154)
+    .attr("r", 155)
     .attr("cx", 260)
     .attr("cy", 275);
 
@@ -871,7 +867,7 @@ var sector = svg.append("path")
     .attr("fill", "none")
     .attr("stroke-width", 1)
     .attr("stroke", "rgba(255,99,71,1)")
-    .attr("d", arc({ startAngle: - 66 * Math.PI / 180, endAngle: + 66 * Math.PI / 180 }))
+    .attr("d", arc({ startAngle: - 67 * Math.PI / 180, endAngle: + 67 * Math.PI / 180 }))
     .attr("transform", "translate(260,385)");
 
 svg.append("circle.earth-background")
@@ -1217,13 +1213,7 @@ const SunMutatis = true;
 var MoonMov = 8;
 var Velocity = 100;
 
-var tiktok = new Date();
-var mins = tiktok.getMinutes();
-var secs = tiktok.getSeconds();
-      
-var K_Sun = 2 * Math.PI * (mins + secs / 60) / 60;
-var R_Moon = 2 * Math.PI * (mins - secs / 60) / 60; 
-
+var eclipticWidth = 0.75;
 var clockRadius = 140;
 
 function EclipticRing() {
@@ -1265,8 +1255,6 @@ svg.append("circle")
     .attr("r", eclipticWidth * Re * 0.9)
     .attr("cx", xe)
     .attr("cy", ye);
-
-// the 12 Zodiac Marker lines
 
 var Lep = Re - Re * eclipticWidth;   
 
@@ -1317,9 +1305,9 @@ var Lep = Re - Re * eclipticWidth;
 var a = 0.283 * clockRadius;
 var b = 2.51284;
 
-
 let i = 0;
     while (i < 60) {
+        
         var f = 6;       
         var d = toDegRad(i, f);
         var sd = Math.sin(d);        
@@ -1360,8 +1348,7 @@ var ye = yc - Rd * Math.cos(hourAries);
 var Lep = Re - Re * eclipticWidth;
 var a  = 0.275 * clockRadius;
 var b = 2.51284;
-         
-//  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')         
+                
 var Array = [ "", "c", "", "", "", "", "", "", "", "", "", "", "" ];
       
 let i = 1;
@@ -1370,7 +1357,6 @@ let i = 1;
         var f = 12;          
         var d  = toDegRad(i,f);
         var sd = Math.sin(d);
-
         var Ret = (a * (Math.sqrt((b * b) - (sd * sd)) + Math.cos(d))) - 3.9;
                 
         var factA = hourAries + d;
@@ -1411,7 +1397,6 @@ var Lep = Re - Re * eclipticWidth;
 var a  = 0.275 * clockRadius;
 var b = 2.51284;
          
-//  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')
 var Array = [ "", "", "d", "", "", "", "", "", "", "", "", "", "" ];
       
 let i = 1;
@@ -1460,7 +1445,6 @@ var Lep = Re - Re * eclipticWidth;
 var a  = 0.275 * clockRadius;
 var b = 2.51284;
          
-//  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')
 var Array = [ "", "", "e", "", "", "", "", "", "", "", "", "" ];
       
 let i = 1;
@@ -1509,7 +1493,6 @@ var Lep = Re - Re * eclipticWidth;
 var a  = 0.275 * clockRadius;
 var b = 2.51284;
          
-//  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')
 var Array = [ "", "", "", "b", "", "", "", "", "", "", "", "" ];
       
 let i = 1;
@@ -1558,7 +1541,6 @@ var Lep = Re - Re * eclipticWidth;
 var a  = 0.275 * clockRadius;
 var b = 2.51284;
          
-//  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')
 var Array = [ "", "", "", "", "", "", "a", "", "", "", "", "", "" ];
       
 let i = 1;
@@ -1607,7 +1589,6 @@ var Lep = Re - Re * eclipticWidth;
 var a  = 0.275 * clockRadius;
 var b = 2.51284;
          
-//  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')
 var Array = [ "", "", "", "", "", "", "", "", "l", "", "", "" ];
       
 let i = 1;
@@ -1656,7 +1637,6 @@ var Lep = Re - Re * eclipticWidth;
 var a  = 0.275 * clockRadius;
 var b = 2.51284;
          
-//  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')
 var Array = [ "", "", "", "", "", "", "", "", "", "", "", "k", "" ];
       
 let i = 1;
@@ -1705,7 +1685,6 @@ var Lep = Re - Re * eclipticWidth;
 var a  = 0.275 * clockRadius;
 var b = 2.51284;
          
-//  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')
 var Array = [ "", "", "", "", "", "", "", "", "", "", "f", "", "" ];
       
 let i = 1;
@@ -1754,7 +1733,6 @@ var Lep = Re - Re * eclipticWidth;
 var a  = 0.275 * clockRadius;
 var b = 2.51284;
          
-//  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')
 var Array = [ "", "", "", "", "", "", "", "", "", "", "g" ];
       
 let i = 1;
@@ -1803,7 +1781,6 @@ var Lep = Re - Re * eclipticWidth;
 var a  = 0.275 * clockRadius;
 var b = 2.51284;
          
-//  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')
 var Array = [ "", "", "", "", "h", "", "", "", "", "", "", "", "", "" ];
       
 let i = 1;
@@ -1852,7 +1829,6 @@ var Lep = Re - Re * eclipticWidth;
 var a  = 0.275 * clockRadius;
 var b = 2.51284;
          
-//  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')
 var Array = [ "", "", "i", "", "", "", "", "", "", "", "", "", "", "" ];
       
 let i = 1;
@@ -1900,8 +1876,7 @@ var ye = yc - Rd * Math.cos(hourAries);
 var Lep = Re - Re * eclipticWidth;
 var a  = 0.275 * clockRadius;
 var b = 2.51284;
-         
-//  ('Ar','Ta','Ge','Ca','Le','Vi','Li','Sc','Sa','Cap','Aq','Pi')
+
 var Array = [ "", "", "", "", "", "", "", "", "", "", "", "", "", "j" ];
       
 let i = 1;
@@ -2065,16 +2040,21 @@ svg.append("circle")
     .attr("cx", Xs)
     .attr("cy", Ys);
 
+var Alpha_S;
+
 if (SunMutatis == true) {
-    var Alpha_S = Visibility(hours_arc + Math.PI);
+
+    Alpha_S = Visibility(hours_arc + Math.PI);
+
     } else {
-      Alpha_S = 1;
-    }
+
+    Alpha_S = 1;
+}
     
 var opacity = Alpha_S;
       
 if (Kaleidoscope == true) {
-    
+   
 var RmS = 7 * (1 - Alpha_S);
 
 svg.append("circle")
@@ -2100,26 +2080,39 @@ svg.append("circle")
     .attr("r", 0.5 * (30 + 22 + RmS))
     .attr("cx", Xs)
     .attr("cy", Ys);
-   
-let i = 0;
-    while (i <= 11) {
 
-var xzx = Xs + 30 * Math.sin(hourAries + i * Math.PI / 6 - K_Sun);
-var yzx = Ys - 30 * Math.cos(hourAries + i * Math.PI / 6 - K_Sun);
-var Xzx = Xs + (22 + RmS) * Math.sin(hourAries + i * Math.PI / 6 + Velocity * K_Sun);
-var Yzx = Ys - (22 + RmS) * Math.cos(hourAries + i * Math.PI / 6 + Velocity * K_Sun);
+var kaleidoscope = svg
+    .append('g')
+    .attr('class','sun-center')
+    .attr("transform", "translate(0,0)");
 
-svg.append("line")
-    .attr("x1", xzx)
-    .attr("x2", Xzx)
-    .attr("y1", yzx)
-    .attr("y2", Yzx)
+var Axis_k = kaleidoscope
+    .append('g')
+    .attr('class','Axis_k');
+
+function update_sun() {
+var sun_tiktok = new Date();
+var sun_mins = sun_tiktok.getMinutes();
+var sun_secs = sun_tiktok.getSeconds();   
+var K_Sun = 2 * Math.PI * (sun_mins + sun_secs / 60) / 60;
+
+d3.selectAll("line.sunscope").remove()
+
+Axis_k.selectAll("line.sunscope")
+    .data(d3.range(12))
+    .enter().append("line")
+    .attr("class", "sunscope")
+    .attr("x1", function(d, i){return Xs + 30 * Math.sin(hourAries + i * Math.PI / 6 - K_Sun)})
+    .attr("y1", function(d, i){return Ys - 30 * Math.cos(hourAries + i * Math.PI / 6 - K_Sun)})
+    .attr("x2", function(d, i){return Xs + (22 + RmS) * Math.sin(hourAries + i * Math.PI / 6 + Velocity * K_Sun)})
+    .attr("y2", function(d, i){return Ys - (22 + RmS) * Math.cos(hourAries + i * Math.PI / 6 + Velocity * K_Sun)})
+    .style("stroke-width", "1.5")
     .style("stroke", "rgba(255,255,0," + opacity + ")")
-    .style("stroke-width", 1.5)
-    .style("stroke-linecap", "round");
-
-    i = i + 1;
-  }
+    .style("stroke-linecap", "round")
+    .attr("transform", function(d, i){return "translate(0, 0)";});
+    }
+    setInterval(update_sun, 1000);
+    update_sun();
 }
 
 svg.append("circle")  
@@ -2179,68 +2172,89 @@ svg.append("line")
 
 var Xm = xc + Rm * Math.sin(hour_MD);
 var Ym = yc - Rm * Math.cos(hour_MD);
- 
+  
+var Alpha_M, color_M; 
+
+if (MoonMutatis == true) {
+
+    Alpha_M = 1;
+    color_M = "rgba(41,46,53," + Alpha_M + ")";
+
 svg.append("circle")
-    .style('fill', "rgba(41,46,53,1)")
-    .attr("r", 10)
+    .style('fill', color_M)
+    .attr("r", 10.55)
     .attr("cx", Xm)
     .attr("cy", Ym);
-                           
-if (MoonMutatis == true) {
-    var Alpha_M = 1;
-    //color_M1;                   
-    } else {    
-     var V = hours_arc - hour_MD;
+
+    } else {
+
+    var V = hours_arc - hour_MD;
     Alpha_M = Visibility(V);
-    //color_M;
-    }
+    color_M = "rgba(255,255,255," + Alpha_M + ")";
+
+svg.append("circle")
+    .style('fill', color_M)
+    .attr("r", 10.55)
+    .attr("cx", Xm)
+    .attr("cy", Ym);
+}
 
 if (MoonMutatis == true) {
   
-const Rmo = 10.55;
+var Rmo = 10.55;
 var temp = - hour_MD + hours_arc;
 
 var amp_Right = Rmo * phase(temp + Math.PI, 1);
-var amp_Left = Rmo * phase(temp, -1);
+var amp_Left = Rmo * phase(temp, - 1);
 
 var Rot = hour_MD + Math.PI;
 
 var Xf = Xm + Math.sin(Rot) * Rmo;
 var Yf = Ym - Math.cos(Rot) * Rmo;
 
-var path = d3.path();
-path.moveTo(Xf,Yf);
+var path = d3.path()
+path.moveTo(Xf, Yf)
    
 let i = 0; 
+
+    var Rx, Ry, Xg, Yg;
+
     while (i < 2 * Math.PI) {
+
     if (i <= Math.PI) {
-    var Rx = Math.sin(i) * amp_Right;
+
+    Rx = Math.sin(i) * amp_Right;
+
     } else {
+
     Rx = - Math.sin(i) * amp_Left;
-    }
-
-var Ry = Math.cos(i) * Rmo;
-
-var Xg = Xm - Rx * Math.cos(Rot) + Ry * Math.sin(Rot);
-var Yg = Ym - Rx * Math.sin(Rot) - Ry * Math.cos(Rot);
-
-svg.append("line")
-    .attr("x1", Xg)
-    .attr("x2", Xm)
-    .attr("y1", Yg)
-    .attr("y2", Ym)
-    .style("stroke", color_M)
-    .style("stroke-width", 1)
-    .style('fill', "none")
-    .style("stroke-linecap", "round");
-
-        i = i + Math.PI / 64;
-    }    
 }
 
+    Ry = Math.cos(i) * Rmo;
+
+    Xg = Xm - Rx * Math.cos(Rot) + Ry * Math.sin(Rot);
+    Yg = Ym - Rx * Math.sin(Rot) - Ry * Math.cos(Rot);
+
+path.lineTo(Xg, Yg)
+
+        i = i + Math.PI / 64;
+    }
+
+path.closePath();
+
+svg.append("path")
+    .attr("d", path)
+    .style('fill', "rgba(255,255,255,1.0)");
+}
+
+var D;
+
 if (MoonMutatis == true) {
-    var D = 0.5 + 0.5 * Visibility(hours_arc);
+
+    D = 0.5 + 0.5 * Visibility(hours_arc);
+
     } else {
+
     D = 1;      
 }
     
@@ -2251,7 +2265,7 @@ var RmB = 12;
 var Rms = 12 - 7 * D;
 
 svg.append("circle")
-    .attr("stroke", "rgba(255,255,255,0.10)")    
+    .attr("stroke", "rgba(255,255,255,0.1)")    
     .style('stroke-width', RmB - Rms)
     .style('fill', "none")
     .attr("r", 0.5 * (RmB + Rms) + RmL)
@@ -2274,25 +2288,38 @@ svg.append("circle")
     .attr("cx", Xm)
     .attr("cy", Ym);
 
-let i = 0;
-    while (i <= 11) {
+var moonscope = svg
+    .append('g')
+    .attr('class','moon-center')
+    .attr("transform", "translate(0,0)");
 
-var xzz = Xm + (Rms + RmL) * Math.sin(hourAries + i * Math.PI / 6 - 2 * Velocity * R_Moon);
-var yzz = Ym - (Rms + RmL) * Math.cos(hourAries + i * Math.PI / 6 - 2 * Velocity * R_Moon);
-var Xzz = Xm + (RmB + RmL) * Math.sin(hourAries + i * Math.PI / 6 - 2 * Velocity * R_Moon);
-var Yzz = Ym - (RmB + RmL) * Math.cos(hourAries + i * Math.PI / 6 - 2 * Velocity * R_Moon);
+var Axis_M = moonscope
+    .append('g')
+    .attr('class','Axis_M');
 
-svg.append("line")
-    .attr("x1", xzz)
-    .attr("x2", Xzz)
-    .attr("y1", yzz)
-    .attr("y2", Yzz)
+function update_moon() {
+var moon_tiktok = new Date();
+var moon_mins = moon_tiktok.getMinutes();
+var moon_secs = moon_tiktok.getSeconds();   
+var R_Moon = 2 * Math.PI * (moon_mins + moon_secs / 60) / 60;
+
+d3.selectAll("line.moonscope").remove()
+
+Axis_M.selectAll("line.moonscope")
+    .data(d3.range(12))
+    .enter().append("line")
+    .attr("class", "moonscope")
+    .attr("x1", function(d, i){return Xm + (Rms + RmL) * Math.sin(hourAries + i * Math.PI / 6 - 2 * Velocity * R_Moon)})
+    .attr("y1", function(d, i){return Ym - (Rms + RmL) * Math.cos(hourAries + i * Math.PI / 6 - 2 * Velocity * R_Moon)})
+    .attr("x2", function(d, i){return Xm + (RmB + RmL) * Math.sin(hourAries + i * Math.PI / 6 - 2 * Velocity * R_Moon)})
+    .attr("y2", function(d, i){return Ym - (RmB + RmL) * Math.cos(hourAries + i * Math.PI / 6 - 2 * Velocity * R_Moon)})
+    .style("stroke-width", "1.5")
     .style("stroke", "rgba(255,255,255,1.0)")
-    .style("stroke-width", 1.5)
-    .style("stroke-linecap", "round");
-
-        i = i + 1;
-      }
+    .style("stroke-linecap", "round")
+    .attr("transform", function(d, i){return "translate(0, 0)";});
+    }
+    setInterval(update_moon, 1000);
+    update_moon();
    }
 }
 
@@ -2319,6 +2346,5 @@ svg.append("circle")
     .attr("cy", yc);
 
 </script>
-
 </body>
 </html>
