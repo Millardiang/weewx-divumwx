@@ -1,3 +1,4 @@
+<?php
 #####################################################################################################################
 # index.php                                                                                                         #
 #                                                                                                                   #
@@ -10,7 +11,7 @@
 # Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
 #                                                                                                                   #
 #####################################################################################################################
-<?php
+
   if (!file_exists("userSettings.php")) {
     copy("initial_userSettings.php", "userSettings.php");
   }
@@ -20,8 +21,8 @@
   header('Content-type: text/html; charset=utf-8');
   error_reporting(0);
 ?>
-
 <!DOCTYPE html>
+
 <html>
 <head>
   <title><?php echo $stationlocation;?> Weather Station</title>
