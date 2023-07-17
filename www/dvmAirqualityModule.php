@@ -580,10 +580,12 @@ else {$airqual["text"] = $airqual["text10"];
 </style>
 
 <script>
-	if (theme == 'dark') {
-var cityTextFill = "silver";}
-else
-{var cityTextFill = "rgba(85,85,85,1)";}
+    var theme = "<?php echo $theme; ?>";
+    if (theme == 'dark') {
+        var cityTextFill = "silver";
+    }else{
+	var cityTextFill = "rgba(85,85,85,1)";
+    }
 </script>
 
 <div class="aqi"></div>
