@@ -1,13 +1,13 @@
 <?php
 include('dvmCombinedData.php');
 $airqual["pm_units"] = "μg/㎥";
-$$aqSource = "weewx";
+$aqSource = "weewx";
 //PM10 is particulate matter 10 micrometers or less in diameter, PM25 is particulate matter 2.5 micrometers or less in diameter.
 //PM2.5 is generally described as fine particles. By way of comparison, a human hair is about 100 micrometres, so roughly
 //40 fine particles could be placed on its width.
 
 //PurpleAir Sensor source
-if ($$aqSource == "purple") {
+if ($aqSource == "purple") {
 $json_string = file_get_contents("jsondata/pu.txt");
 $parsed_json = json_decode($json_string, true);
 $airqual["pm25"] = $parsed_json["sensor"]["stats"]["pm2.5_24hour"];
@@ -15,13 +15,13 @@ $airqual["pm10"] = $parsed_json["sensor"]["pm10.0"];
 $airqual["city"] = $parsed_json["sensor"]["name"].$airqual["subtitle"];
 }
 //WSeeWX Source
-else if ($$aqSource == "weewx") {
+else if ($aqSource == "weewx") {
 $airqual["pm25"] = $air["24h.rollingavg.pm2_5"];
 $airqual["pm10"] = $air["24h.rollingavg.pm10_0"];
 $airqual["city"] = $stationlocation.$airqual["subtitle"];
 }
 //WAQI Source
-else if ($$aqSource == "waqi") {
+else if ($aqSource == "waqi") {
 $json_string = file_get_contents("jsondata/aq.txt");
 $parsed_json = json_decode($json_string, true);
 $airqual["pm25"] = $parsed_json["data"]["iaqi"]["pm25"]["v"];
@@ -29,7 +29,7 @@ $airqual["pm10"] = $parsed_json["data"]["iaqi"]["pm10"]["v"];
 $airqual["city"] = $parsed["data"]["city"]["name"].$airqual["subtitle"];
 }
 //SDS Source
-else if ($$aqSource == "sds"){
+else if ($aqSource == "sds"){
 $json_string = file_get_contents("jsondata/aqiJson.txt");
 $parsed_json = json_decode($json_string, true);
 $airqual["pm25"] = round($parsed_json['pm25'],1);
@@ -38,7 +38,7 @@ $airqual["city"] = $stationlocation.$airqual["subtitle"];
 }
 
 //Europe EAQI
-if ($$aqZone == "ei"){
+if ($aqZone == "ei"){
 	if ($airqual["pm25"] < 11 ){
 		$airqual["image25"] = "./css/aqi/goodair.svg?ver=1.4";
 		$airqual["color25"] = "#51F0E6";
@@ -112,7 +112,7 @@ if ($$aqZone == "ei"){
 }
 
 //Europe CAQI
-if ($$aqZone == "ci"){
+if ($aqZone == "ci"){
 	if ($airqual["pm25"] < 16 ){
 		$airqual["image25"] = "./css/aqi/goodair.svg?ver=1.4";
 		$airqual["color25"] = "#7ABC6A";
@@ -180,7 +180,7 @@ if ($$aqZone == "ci"){
 }
 
 //UK AQI
-if ($$aqZone == "uk"){
+if ($aqZone == "uk"){
 	if ($airqual["pm25"] < 12 ){
 		$airqual["image25"] = "./css/aqi/goodair.svg?ver=1.4";
 		$airqual["color25"] = "#CCFFCC";
@@ -325,7 +325,7 @@ if ($$aqZone == "uk"){
 }
 
 //USA & WAQI
-if ($$aqZone == "us"){
+if ($aqZone == "us"){
 
 function pm25_to_aqi($pm25){
 	if ($pm25 > 500.5) {
@@ -468,7 +468,7 @@ if ($airqual["aqi10"] < 55 ){
 }
 
 //Australia AQI
-if ($$aqZone == "au"){
+if ($aqZone == "au"){
 	$airqual["aqi25"] = round($airqual["pm25"]*4, 0);
 	if ($airqual["aqi25"] < 34 ){
 		$airqual["image25"] = "./css/aqi/goodair.svg?ver=1.4";
@@ -580,10 +580,12 @@ else {$airqual["text"] = $airqual["text10"];
 </style>
 
 <script>
-	if (theme == 'dark') {
-var cityTextFill = "silver";}
-else
-{var cityTextFill = "rgba(85,85,85,1)";}
+    var theme = "<?php echo $theme; ?>";
+    if (theme == 'dark') {
+        var cityTextFill = "silver";
+    }else{
+	var cityTextFill = "rgba(85,85,85,1)";
+    }
 </script>
 
 <div class="aqi"></div>
