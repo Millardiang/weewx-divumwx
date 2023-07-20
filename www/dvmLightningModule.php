@@ -22,7 +22,7 @@ if (empty ($lightning["alltime_strike_count"])) {
 } else {
 	$lightning['last_time'] =  date('jS M H:i',$lightning['last_time']);
 }
-if ($lightningSource == 0) {
+if ($lightningSource == "Boltek") {
 	$lightninglivedata = 'jsondata/NSDRealtime.txt';
 	$file_live = file_get_contents($lightninglivedata);
 	$lightningBolt = explode( ',',$file_live);
@@ -323,7 +323,7 @@ else
 					.style("text-anchor", "left")
 					.style("font-weight", "normal")
 					.text(Last_distance+" "+(Unit));
-	if (source == 0) {
+	if (source == "Boltek") {
 		svg.append("text") // Last Bearing
 					.attr("x", 130)
 					.attr("y", 135)

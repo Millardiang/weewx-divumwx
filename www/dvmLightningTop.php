@@ -23,7 +23,7 @@ if (empty ($lightning["alltime_strike_count"])) {
 	$lightning['last_time'] =  date('jS M H:i',$lightning['last_time']);
 }
 
-if ($lightningSource == 0) {
+if ($lightningSource == "Boltek") {
 	$lightninglivedata = 'jsondata/NSDRealtime.txt';
 	$file_live = file_get_contents($lightninglivedata);
 	$lightningBolt = explode( ',',$file_live);
@@ -171,7 +171,7 @@ if ($lightningSource == 0) {
 			.style('fill', "none")
 			.style("stroke-width", "0.5px")
 			.style('stroke', '#6CA6CD');
-    if (source == 0) {
+    if (source == "Boltek") {
 		svg.append("text") // Last hour
 			.attr("x", 73)
 			.attr("y", 15)
@@ -299,7 +299,7 @@ if ($lightningSource == 0) {
 			.style("font-weight", "normal")
 			.text("Last Distance");
 	}
-    if (source == 0) {
+    if (source == "Boltek") {
 		svg.append("text") // Last hour
 			.attr("x", 73)
 			.attr("y", 43)
