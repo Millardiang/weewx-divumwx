@@ -19,8 +19,8 @@
       <div class="hardwarelogo2">
         <?php echo '<a href="https://https://claydonsweather.org.uk/" title="https://claydonsweather.org.uk/" target="_blank"><br><img src="img/divumLogo.svg" width="40px" alt="https://https://claydonsweather.org.uk/" class="homeweatherstationlogo" ><divumwx>Copyright © 2022-' . date('Y') . '<br>Team DivumWX<br>All rights reserved</divumwx></a>';?>
       </div>
-      <div class="footertext"><?php echo "System Operational Since " . $divum["since"]; ?></div>
-      <div class="footertext"><?php echo $info;?> (<value><?php echo $templateversion;?></value>) <?php echo "WeeWX";?>-(<value><maxred><?php echo $divum["swversion"];?></value>) OS- <yellow><?php echo " " . $weatherhardware . "". $os_version;?></value></div>
+      <div class="footertext"><red><?php echo "Never base important decisions that could result in harm to people or property on this weather information." ?></red></div>
+      <div class="footertext"><?php echo "Operational Since " . $divum["since"]." - "; $info;?> (<value><?php echo $templateversion;?></value>) <?php echo " - WeeWX";?>-(<value><maxred><?php echo $divum["swversion"];?></value>)  - OS- <yellow><?php echo " " . $weatherhardware . "". $os_version;?></value></div>
       <div class="footertext"><a href="https://www.aerisweather.com/"><img src="img/aerisweather-attribution-h-<?php echo $theme;?>.png" width="75px"></a><br /><a href="https://developer.yr.no/featured-products/forecast/">    Meteogram Data by <img src="img/yr.svg" width="14px"></a><br /><a href="https://bas.dev/work/meteocons">     Animated Icons by <img src="img/bm.svg" width="14px"></a>
     </div>
   </div>
