@@ -1,4 +1,17 @@
-  <link href="css/dvm.css?version=<?php echo filemtime('css/dvm.css');?>" rel="stylesheet prefetch">
+<?php
+#####################################################################################################################                                                                                                        #
+#                                                                                                                   #
+# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
+#                                                                                                                   #
+# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
+#                                                                                                                   #
+# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
+#                                                                                                                   #
+# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
+#                                                                                                                   #
+#####################################################################################################################
+?>
+<link href="css/dvm.css?version=<?php echo filemtime('css/dvm.css');?>" rel="stylesheet prefetch">
 
 <?php
 include "dvmCombinedData.php";
@@ -272,7 +285,7 @@ switch ($favcolor)
 <main class="grid_FT">
 <articlegraph_FT style="height:15px">  
   <div class="lotemp">
-   <?php echo $info ?> CSS/SVG/PHP scripts by claydonsweather.org.uk &copy; 2021-<?php echo date('Y'); ?>  -  <a href="https://www.aerisweather.com/support/docs/api/reference/endpoints/alerts/" title="AerisWeather" target="_blank">Data © <?php echo date('Y'); ?>AerisWeather</a></span>
+   <?php echo $info ?> CSS/SVG/PHP scripts by claydonsweather.org.uk © 2021-<?php echo date('Y'); ?>  -  <a href="https://www.aerisweather.com/support/docs/api/reference/endpoints/alerts/" title="AerisWeather" target="_blank">Data © <?php echo date('Y'); ?>AerisWeather</a></span>
   </div>   
     
      
