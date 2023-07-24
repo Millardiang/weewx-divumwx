@@ -1,16 +1,17 @@
 <?php
-//###################################################################################################################
-//	weewx-divumwx Template maintained by Ian Millard (Steepleian)                                 				#
-//	                                                                                                				#
-//                #
-//  © divumwx.com original CSS/SVG/PHP 2015-2019                                                                  #
-// 	                                                                                                				#
-//  Contains original code by Ian Millard and collaborators															#
-//  © claydonsweather.org.uk original CSS/SVG/PHP 2020-2021                                                         #
-// 	                                                                                                				#
-// 	Issues for weewx-divumwx template should be addressed to https://github.com/steepleian/weewx-divumwx/issues #                                                                                              #
-// 	                                                                                                				#
-//###################################################################################################################
+#####################################################################################################################                                                                                                        #
+#                                                                                                                   #
+# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
+#                                                                                                                   #
+# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
+#                                                                                                                   #
+# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
+#                                                                                                                   #
+# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
+#                                                                                                                   #
+#####################################################################################################################
+?>
+<?php
 include_once ('dvmCombinedData.php');
 include_once ('common.php');
 include_once ('webserver_ip_address.php');
@@ -226,7 +227,7 @@ $paddingtop = $percentage;
 <!--<a alt="weekly Feels" title="weekly Feels" href="<?php echo $chartsource; ?>/<?php echo $theme1; ?>-charts.html?chart='tempderivedplot'&span='weekly'&temp='<?php echo $divum['temp_units']; ?>'&pressure='<?php echo $divum['barometer_units']; ?>'&wind='<?php echo $divum['wind_units']; ?>'&rain='<?php echo $divum['rain_units'] ?>" data-lity > <?php echo '| Feels'; ?> </a></span>-->
 <!--<a alt="weekly humidity" title="weekly humidity" href="<?php echo $chartsource; ?>/<?php echo $theme1; ?>-charts.html?chart='humidityplot'&span='weekly'&temp='<?php echo $divum['temp_units']; ?>'&pressure='<?php echo $divum['barometer_units']; ?>'&wind='<?php echo $divum['wind_units']; ?>'&rain='<?php echo $divum['rain_units'] ?>" data-lity > <?php echo '| Hum'; ?> </a></span>-->
       </div>
-<span class='moduletitle'> <?php echo $lang['Temperature']; ?> (<valuetitleunit>&deg;<?php echo $divum["temp_units"]; ?></valuetitleunit>) </span><br /></span>
+<span class='moduletitle'> <?php echo $lang['Temperature']; ?> (<valuetitleunit>°<?php echo $divum["temp_units"]; ?></valuetitleunit>) </span><br /></span>
 <div id="temperature"></div>
   <!--end Top Row 1 Box 1-->
   
@@ -243,7 +244,7 @@ $paddingtop = $percentage;
 <!--<a alt="weekly Feels" title="weekly Feels" href="<?php echo $chartsource; ?>/<?php echo $theme1; ?>-charts.html?chart='tempderivedplot'&span='weekly'&temp='<?php echo $divum['temp_units']; ?>'&pressure='<?php echo $divum['barometer_units']; ?>'&wind='<?php echo $divum['wind_units']; ?>'&rain='<?php echo $divum['rain_units'] ?>" data-lity > <?php echo '| Feels'; ?> </a></span>-->
 <!--<a alt="weekly humidity" title="weekly humidity" href="<?php echo $chartsource; ?>/<?php echo $theme1; ?>-charts.html?chart='humidityplot'&span='weekly'&temp='<?php echo $divum['temp_units']; ?>'&pressure='<?php echo $divum['barometer_units']; ?>'&wind='<?php echo $divum['wind_units']; ?>'&rain='<?php echo $divum['rain_units'] ?>" data-lity > <?php echo '| Hum'; ?> </a></span>-->
       </div>
-<span class='moduletitle'> <?php echo $lang['Temperature']; ?> (<valuetitleunit>&deg;<?php echo $divum["temp_units"]; ?></valuetitleunit>) </span><br /></span>
+<span class='moduletitle'> <?php echo $lang['Temperature']; ?> (<valuetitleunit>°<?php echo $divum["temp_units"]; ?></valuetitleunit>) </span><br /></span>
   <div id="temperature"></div><br></div></div>
   <!--end Top Row 1 Box 2-->
   <!--Bottom Row 3 Box 8-->
@@ -576,10 +577,10 @@ else if ($weatherhardware == 'Weatherflow Air-Sky')
 }
 else echo '<a href="https://divumwx.com/homeweatherstation/" title="https://divumwx.com/homeweatherstation/" target="_blank"><br><img src="img/divumwxlogo.svg" width="40px" alt="https://divumwx.com/homeweatherstation/" class="homeweatherstationlogo" ><divumwx>designed by divumwx 2015-' . date('Y') . '</divumwx></a>'; ?> </div>
 <div class=footertext>
-&nbsp;<?php echo $info ?>&nbsp;(<value><?php echo $templateversion ?></value>)&nbsp;
-<?php echo "WeeWX"; ?>-(<value><maxred><?php echo $divum["swversion"]; ?></value>)&nbsp;
-<?php echo $info . "&nbsp;" . $weatherhardware; ?></div> 
-<div class=footertext><a href="https://github.com/steepleian/weewx-divumwx"><?php echo $github; ?>&nbsp; WeeWX Version Repository at https://github.com/steepleian/weewx-divumwx &nbsp; <img src="img/flags/<?php echo $flag; ?>.svg" width="20px" ></a></div>
+ <?php echo $info ?> (<value><?php echo $templateversion ?></value>) 
+<?php echo "WeeWX"; ?>-(<value><maxred><?php echo $divum["swversion"]; ?></value>) 
+<?php echo $info . " " . $weatherhardware; ?></div> 
+<div class=footertext><a href="https://github.com/steepleian/weewx-divumwx"><?php echo $github; ?>  WeeWX Version Repository at https://github.com/steepleian/weewx-divumwx   <img src="img/flags/<?php echo $flag; ?>.svg" width="20px" ></a></div>
   <div class=footertext><a href="https://hjelp.yr.no/hc/en-us/articles/203786121-divum-symbols-on-Yr">divum Symbols by <img src="img/yr.svg" width="14px" ></a></div>
 
 </div></div>

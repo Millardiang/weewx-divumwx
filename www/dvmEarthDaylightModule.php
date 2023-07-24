@@ -1,3 +1,16 @@
+<?php
+#####################################################################################################################
+#                                                                                                                   #
+# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
+#                                                                                                                   #
+# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
+#                                                                                                                   #
+# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
+#                                                                                                                   #
+# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
+#                                                                                                                   #
+#####################################################################################################################
+?>
 <style>
 .earthmodulepos {
   position: absolute;
@@ -29,9 +42,9 @@ $darkminutes = 60 - $lightmins;
 $darkminutes = ($darkminutes < 10) ? '0' .$darkminutes : $darkminutes;
 
 if (round($sun_alt,2) >= 0) { 
-$sun_elevation = round($sun_alt,2)."&deg;<div class=sunabovedivumwx>&nbsp;</div>";
+$sun_elevation = round($sun_alt,2)."°<div class=sunabovedivumwx> </div>";
 } else if (round($sun_alt,2) < 0) { 
-$sun_elevation = round($sun_alt,2)."&deg;<div class=sunbelowdivumwx>&nbsp;</div>"; 
+$sun_elevation = round($sun_alt,2)."°<div class=sunbelowdivumwx> </div>"; 
 }?>
 
    <div class="chartforecast2">

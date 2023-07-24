@@ -1,4 +1,16 @@
 <?php
+#####################################################################################################################
+#                                                                                                                   #
+# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
+#                                                                                                                   #
+# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
+#                                                                                                                   #
+# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
+#                                                                                                                   #
+# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
+#                                                                                                                   #
+#####################################################################################################################
+?><?php
 //Used to clear IDE errors
 $stationlocation = "";
 include('dvmCombinedData.php');
@@ -53,7 +65,7 @@ $eqalert6='<svg id="i-activity" viewBox="0 0 32 32" width="28" height="28" fill=
 for ($j = 0;$j < 50;$j++)
 {
     echo "<article>";
-    echo "<div class=actualt>&nbsp;&nbsp Occurance $eventdate[$j] </div> ";
+    echo "<div class=actualt> &nbsp Occurance $eventdate[$j] </div> ";
     if ($magnitude[$j] >= 7)
     {
         echo "<div class=mag9-10>", $magnitude[$j], "";
@@ -81,19 +93,19 @@ for ($j = 0;$j < 50;$j++)
     echo '<span style="font-size:8px;">';
     if ($magnitude[$j] <= 4.2)
     {
-        echo "<div style='position:relative; top:8px;'>&nbsp;&nbsp;Minor</div></span>";
+        echo "<div style='position:relative; top:8px;'>  Minor</div></span>";
     }
     else if ($magnitude[$j] <= 5)
     {
-        echo "<div style='position:relative; top:8px;'>&nbsp;&nbsp;Moderate</div></span>";
+        echo "<div style='position:relative; top:8px;'>  Moderate</div></span>";
     }
     else if ($magnitude[$j] <= 6)
     {
-        echo "<div style='position:relative; top:8px;'>&nbsp;&nbsp;Strong</div></span>";
+        echo "<div style='position:relative; top:8px;'>  Strong</div></span>";
     }
     else if ($magnitude[$j] <= 10)
     {
-        echo "<div style='position:relative; top:8px;'>&nbsp;&nbsp;Very Strong</div></span>";
+        echo "<div style='position:relative; top:8px;'>  Very Strong</div></span>";
     }
     echo "<div></div>";
     echo '<div class="hitempy">';
@@ -145,7 +157,7 @@ for ($j = 0;$j < 50;$j++)
 } ?>
 
   <article>
-   <div class=actualt>&nbsp;&nbsp &copy; Information</div>
+   <div class=actualt> &nbsp © Information</div>
    <span style="font-size:8px;">  
    
   <br>

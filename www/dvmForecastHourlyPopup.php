@@ -1,6 +1,17 @@
 <?php
+#####################################################################################################################
+#                                                                                                                   #
+# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
+#                                                                                                                   #
+# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
+#                                                                                                                   #
+# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
+#                                                                                                                   #
+# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
+#                                                                                                                   #
+#####################################################################################################################
+?><?php
 
-//include_once ('fixedSettings.php');
 include ('dvmCombinedData.php');
 $iconset = "icon2";
 if ($theme === "dark")
@@ -111,43 +122,43 @@ for ($k = 0;$k < 12;$k++)
     //temp
     if ($tempunit == 'F' && $forecastTempHigh[$k] < 44.6)
     {
-        echo "<bluet>" . $forecastTime[$k] . "h&nbsp;&nbsp;   " . number_format($forecastTempHigh[$k], 0);
+        echo "<bluet>" . $forecastTime[$k] . "h     " . number_format($forecastTempHigh[$k], 0);
     }
     else if ($tempunit == 'F' && $forecastTempHigh[$k] > 80.6)
     {
-        echo "<redt>" . $forecastTime[$k] . "h&nbsp;&nbsp;   " . number_format($forecastTempHigh[$k], 0);
+        echo "<redt>" . $forecastTime[$k] . "h     " . number_format($forecastTempHigh[$k], 0);
     }
     else if ($tempunit == 'F' && $forecastTempHigh[$k] > 64.4)
     {
-        echo "<oranget>" . $forecastTime[$k] . "h&nbsp;&nbsp;   " . number_format($forecastTempHigh[$k], 0);
+        echo "<oranget>" . $forecastTime[$k] . "h     " . number_format($forecastTempHigh[$k], 0);
     }
     else if ($tempunit == 'F' && $forecastTempHigh[$k] > 55)
     {
-        echo "<yellowt>" . $forecastTime[$k] . "h&nbsp;&nbsp;   " . number_format($forecastTempHigh[$k], 0);
+        echo "<yellowt>" . $forecastTime[$k] . "h     " . number_format($forecastTempHigh[$k], 0);
     }
     else if ($tempunit == 'F' && $forecastTempHigh[$k] >= 44.6)
     {
-        echo "<greent>" . $forecastTime[$k] . "h&nbsp;&nbsp;   " . number_format($forecastTempHigh[$k], 0);
+        echo "<greent>" . $forecastTime[$k] . "h     " . number_format($forecastTempHigh[$k], 0);
     }
     else if ($forecastTempHigh[$k] < 7)
     {
-        echo "<bluet>" . $forecastTime[$k] . "h&nbsp;&nbsp;   " . number_format($forecastTempHigh[$k], 0);
+        echo "<bluet>" . $forecastTime[$k] . "h     " . number_format($forecastTempHigh[$k], 0);
     }
     else if ($forecastTempHigh[$k] > 27)
     {
-        echo "<redt>" . $forecastTime[$k] . "h&nbsp;&nbsp;   " . number_format($forecastTempHigh[$k], 0);
+        echo "<redt>" . $forecastTime[$k] . "h     " . number_format($forecastTempHigh[$k], 0);
     }
     else if ($forecastTempHigh[$k] > 19)
     {
-        echo "<oranget>" . $forecastTime[$k] . "h&nbsp;&nbsp;   " . number_format($forecastTempHigh[$k], 0);
+        echo "<oranget>" . $forecastTime[$k] . "h     " . number_format($forecastTempHigh[$k], 0);
     }
     else if ($forecastTempHigh[$k] > 12.7)
     {
-        echo "<yellowt>" . $forecastTime[$k] . "h&nbsp;&nbsp;   " . number_format($forecastTempHigh[$k], 0);
+        echo "<yellowt>" . $forecastTime[$k] . "h     " . number_format($forecastTempHigh[$k], 0);
     }
     else if ($forecastTempHigh[$k] >= 7)
     {
-        echo "<greent>" . $forecastTime[$k] . "h&nbsp;&nbsp;   " . number_format($forecastTempHigh[$k], 0);
+        echo "<greent>" . $forecastTime[$k] . "h     " . number_format($forecastTempHigh[$k], 0);
     }
     echo "°" . $tempunit . "</actualtn>";
 
@@ -238,17 +249,17 @@ for ($k = 0;$k < 12;$k++)
     //snow
     if ($forecastacumm[$k] > 0)
     {
-        echo '&nbsp;' . $snowflakesvg[$k] . '<valuer>Snow  <bluer>' . $forecastacumm[$k] . 'cm</bluer>';
+        echo ' ' . $snowflakesvg[$k] . '<valuer>Snow  <bluer>' . $forecastacumm[$k] . 'cm</bluer>';
     }
     //rain
     else if ($forecastPrecipType[$k] = 'rain' && $rainunit == 'in')
     {
-        echo '&nbsp;' . $rainsvg . '<valuer>Rain <bluer>' . number_format($forecastprecipIntensity[$k], 1) . '&nbsp;' . $rainunit . '&nbsp;' . $forecastPrecipProb[$k] . '%</bluer>';
+        echo ' ' . $rainsvg . '<valuer>Rain <bluer>' . number_format($forecastprecipIntensity[$k], 1) . ' ' . $rainunit . ' ' . $forecastPrecipProb[$k] . '%</bluer>';
     }
     //mm
     else if ($forecastPrecipType[$k] = 'rain')
     {
-        echo '&nbsp;' . $rainsvg . '<valuer>Rain <bluer>' . number_format($forecastprecipIntensity[$k], 1) . '&nbsp;' . $rainunit . '&nbsp;' . $forecastPrecipProb[$k] . '%</bluer>';
+        echo ' ' . $rainsvg . '<valuer>Rain <bluer>' . number_format($forecastprecipIntensity[$k], 1) . ' ' . $rainunit . ' ' . $forecastPrecipProb[$k] . '%</bluer>';
     }
     echo "</div>";
     //wind/gusts
@@ -256,14 +267,14 @@ for ($k = 0;$k < 12;$k++)
     {
         echo "<wind>Gust <orangeu>";
         echo $forecastWinddircardinal[$k];
-        echo "</orangeu>&nbsp;<redu>" . number_format($forecastWindGust[$k] * 1.625, 0) , "&nbsp;<wuunits>" . $windunit;
+        echo "</orangeu> <redu>" . number_format($forecastWindGust[$k] * 1.625, 0) , " <wuunits>" . $windunit;
         echo '</wuunits></redu></wind>';
     }
     else if ($windunit == 'mph' && $forecastWindGust[$k] >= 25)
     {
         echo "<wind>Gust <orangeu>";
         echo $forecastWinddircardinal[$k];
-        echo "</orangeu>&nbsp;<orangeu>" . number_format($forecastWindGust[$k] * 1.625, 0) , "&nbsp;<wuunits>" . $windunit;
+        echo "</orangeu> <orangeu>" . number_format($forecastWindGust[$k] * 1.625, 0) , " <wuunits>" . $windunit;
         echo '</wuunits></orangeu></wind>';
     }
     //kts
@@ -271,42 +282,42 @@ for ($k = 0;$k < 12;$k++)
     {
         echo "<wind>Gust <orangeu>";
         echo $forecastWinddircardinal[$k];
-        echo "</orangeu>&nbsp;<redu>" . number_format($forecastWindGust[$k] * 1.625 * 0.868976, 0) , "&nbsp;<wuunits>" . $windunit;
+        echo "</orangeu> <redu>" . number_format($forecastWindGust[$k] * 1.625 * 0.868976, 0) , " <wuunits>" . $windunit;
         echo '</wuunits></redu></wind>';
     }
     else if ($windunit == 'kts' && $forecastWindGust[$k] >= 25)
     {
         echo "<wind>Gust <orangeu>";
         echo $forecastWinddircardinal[$k];
-        echo "</orangeu>&nbsp;<orangeu>" . number_format($forecastWindGust[$k] * 1.625 * 0.868976, 0) , "&nbsp;<wuunits>" . $windunit;
+        echo "</orangeu> <orangeu>" . number_format($forecastWindGust[$k] * 1.625 * 0.868976, 0) , " <wuunits>" . $windunit;
         echo '</wuunits></orangeu></wind>';
     }
     else if ($windunit == 'kts' && $forecastWindGust[$k] >= 0)
     {
         echo "<wind>Wind <orangeu>";
         echo $forecastWinddircardinal[$k];
-        echo "</orangeu>&nbsp;<blueu>" . number_format($forecastWindGust[$k] * 0.868976, 0) , "&nbsp;<wuunits>" . $windunit;
+        echo "</orangeu> <blueu>" . number_format($forecastWindGust[$k] * 0.868976, 0) , " <wuunits>" . $windunit;
         echo '</wuunits></blueu></wind>';
     }
     else if ($forecastWindGust[$k] >= 30)
     {
         echo "<wind>Gust <orangeu>";
         echo $forecastWinddircardinal[$k];
-        echo "</orangeu>&nbsp;<redu>" . number_format($forecastWindGust[$k] * 1.625, 0) , "&nbsp;<wuunits>" . $windunit;
+        echo "</orangeu> <redu>" . number_format($forecastWindGust[$k] * 1.625, 0) , " <wuunits>" . $windunit;
         echo '</wuunits></redu></wind>';
     }
     else if ($forecastWindGust[$k] >= 25)
     {
         echo "<wind>Gust <orangeu>";
         echo $forecastWinddircardinal[$k];
-        echo "</orangeu>&nbsp;<orangeu>" . number_format($forecastWindGust[$k] * 1.625, 0) , "&nbsp;<wuunits>" . $windunit;
+        echo "</orangeu> <orangeu>" . number_format($forecastWindGust[$k] * 1.625, 0) , " <wuunits>" . $windunit;
         echo '</wuunits></orangeu></wind>';
     }
     else if ($forecastWindGust[$k] < 25)
     {
         echo "<wind> Wind <orangeu>";
         echo $forecastWinddircardinal[$k];
-        echo "</orangeu>&nbsp;<blueu>" . number_format($forecastWindGust[$k], 0) , "&nbsp;<wuunits>" . $windunit;
+        echo "</orangeu> <blueu>" . number_format($forecastWindGust[$k], 0) , " <wuunits>" . $windunit;
         echo '</wuunits></blueu></wind>';
     }
 

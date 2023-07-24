@@ -1,3 +1,16 @@
+<?php
+#####################################################################################################################
+#                                                                                                                   #
+# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
+#                                                                                                                   #
+# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
+#                                                                                                                   #
+# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
+#                                                                                                                   #
+# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
+#                                                                                                                   #
+#####################################################################################################################
+?>
 <style>
 .moduletitle4 {
   position: relative;
@@ -38,7 +51,7 @@ $jsonfile="jsondata/awd.txt";if(!file_exists($jsonfile)) {return;}
       <span class="yearpopup"><a alt="Advisories" title="Advisories" href="<?php echo $advisory;?>" . data-lity> <?php echo $menucharticonpage;?> Advisories</a></span>
         <span class="yearpopup"><a alt="Meteogram I" title="Meteogram" href="dvmMeteogramPopup.php" data-lity><?php echo $menucharticonpage;?> Meteogram</a></span>
     </div>
-    <span class='moduletitle4'><?php echo $lang['forecastModule'];?> (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span>
+    <span class='moduletitle4'><?php echo $lang['forecastModule'];?> (<valuetitleunit>°<?php echo $temp["units"];?></valuetitleunit>)</span>
 
 
 <div class="updatedtime1"><?php $forecastime=filemtime('jsondata/awd.txt');
@@ -149,7 +162,7 @@ for ($k=0;$k<=2;$k++)
 	else if ($forecastdayPrecipType='rain' && $rainunit=='in'){echo '<precip>'.$rainsvg.' <aeristempwindhome><span><oblue> '. number_format($forecastdayprecipIntensity,2).'</oblue> <valuewindunit>'.$rainunit.'</valuewindunit></aeriswindhome></span></precip>';}
 	else if ($forecastdayPrecipType='rain' && $rainunit=='mm'){echo '<precip>'.$rainsvg.' <aeristempwindhome><span><oblue> '. number_format($forecastdayprecipIntensity,2).'</oblue> <valuewindunit>'.$rainunit.'</valuewindunit></aeriswindhome></span></precip>';}
 	//uvi
-if ($forecastdaynight=='D'){echo '<br><wuuvicon>&#9788;</wuuvicon> <aeristemplohome><uv>UVI <uvspan>';if ($forecastdayUV>=10){echo "<purpleu>".$forecastdayUV. '</purpleu><greyu> '.$forecastdayUVdesc;}else  if ($forecastdayUV>=7){echo "<redu>".$forecastdayUV. '</redu><greyu> '.$forecastdayUVdesc;}else if ($forecastdayUV>5){ echo "<orangeu>".$forecastdayUV. '</orangeu><greyu> '.$forecastdayUVdesc;}else if ($forecastdayUV>2){  echo "<yellowu>".$forecastdayUV. '</yellowu><greyu> '.$forecastdayUVdesc;}else if ($forecastdayUV>=0){ echo "<greenu>".$forecastdayUV. '</greenu><greyu> '.$forecastdayUVdesc;}echo '</uvspan></uv>';}
+if ($forecastdaynight=='D'){echo '<br><wuuvicon>☼</wuuvicon> <aeristemplohome><uv>UVI <uvspan>';if ($forecastdayUV>=10){echo "<purpleu>".$forecastdayUV. '</purpleu><greyu> '.$forecastdayUVdesc;}else  if ($forecastdayUV>=7){echo "<redu>".$forecastdayUV. '</redu><greyu> '.$forecastdayUVdesc;}else if ($forecastdayUV>5){ echo "<orangeu>".$forecastdayUV. '</orangeu><greyu> '.$forecastdayUVdesc;}else if ($forecastdayUV>2){  echo "<yellowu>".$forecastdayUV. '</yellowu><greyu> '.$forecastdayUVdesc;}else if ($forecastdayUV>=0){ echo "<greenu>".$forecastdayUV. '</greenu><greyu> '.$forecastdayUVdesc;}echo '</uvspan></uv>';}
 else if ($forecastdaynight=='N'){echo '<br><blueu>'.$humidity.' <aeristemplohome><uv>Hum <uvspan>'.$forecastHumidity. '</blueu>';}
 	//lightning
 	echo '<thunder>'.$forecastthunder;echo '</aeristemplohome></div>';
