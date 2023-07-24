@@ -1,17 +1,30 @@
 <?php
+#####################################################################################################################                                                                                                        #
+#                                                                                                                   #
+# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
+#                                                                                                                   #
+# Copyright (C) 2023 Sean Balfour. All rights reserved                                 #
+#                                                                                                                   #
+# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
+#                                                                                                                   #
+# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
+#                                                                                                                   #
+#####################################################################################################################
+?><?php
 include('dvmCombinedData.php');
 date_default_timezone_set($TZ);
-error_reporting(0);
-header('Content-type: text/html; charset=utf-8');
 echo "<body style='background-color:#292E35'>";
 ?>
 
 <!DOCTYPE html>
 <html>
+<head>
 <meta charset="utf-8">
+<title>Orrery</title>
+</head>
 <style>
 
-  .noise {
+  .orrery {
     position: relative; 
     margin-top: -275px; 
     margin-left: -10px;
@@ -27,7 +40,7 @@ echo "<body style='background-color:#292E35'>";
 <script src="js/two.js"></script>
 <script src="js/d3.4.2.2.min.js"></script>
 <div id="particlemap" width="280" height="280" style="position: relative; top: 140px; left: 110px;"></div>
-<div class="noise"></div>
+<div class="orrery"></div>
 
 <script>
 
@@ -57,7 +70,7 @@ var jdy = (jd - jd2000) / 365;  // Julian years since the year 2000 midnight
 var jday = (jd - jd2000); // Julian days since the year 2000 midnight
 var jsec = (jd - jd2000) * 86400; // Julian seconds since the year 2000 midnight
 
-var svg = d3.select(".noise")
+var svg = d3.select(".orrery")
     .append("svg")
     //.style("background", "#292E35")
     .attr("width", 780)
@@ -426,7 +439,7 @@ svg.append("circle")
 
 svg.append("text")  
     .attr("x", 510)
-    .attr("y", 110)
+    .attr("y", 136)
     .attr("text-anchor", "left")
     .style("font-size", "14px")
     .style("font-family", "Helvetica")
@@ -436,7 +449,7 @@ svg.append("text")
 
 svg.append("text")  
     .attr("x", 510)
-    .attr("y", 127)
+    .attr("y", 152)
     .attr("text-anchor", "left")
     .style("font-size", "14px")
     .style("font-family", "Helvetica")
@@ -447,17 +460,17 @@ svg.append("text")
 svg.append("line")
     .attr("x1", 510)
     .attr("x2", 670)
-    .attr("y1", 134)
-    .attr("y2", 134)
+    .attr("y1", 159)
+    .attr("y2", 159)
     .style("stroke", "#007FFF")
     .style("stroke-width", "2px")
     .style("stroke-linecap", "round");
 
 svg.append("text")  
     .attr("x", 510)
-    .attr("y", 152)
+    .attr("y", 175)
     .attr("text-anchor", "left")
-    .style("font-size", "12px")
+    .style("font-size", "14px")
     .style("font-family", "Helvetica")
     .style("font-weight", "normal")
     .style("fill", "#FFA54F")
@@ -465,9 +478,9 @@ svg.append("text")
 
 svg.append("text")  
     .attr("x", 510)
-    .attr("y", 166)
+    .attr("y", 190)
     .attr("text-anchor", "left")
-    .style("font-size", "12px")
+    .style("font-size", "14px")
     .style("font-family", "Helvetica")
     .style("font-weight", "normal")
     .style("fill", "#FFA54F")
@@ -475,9 +488,9 @@ svg.append("text")
 
 svg.append("text")  
     .attr("x", 510)
-    .attr("y", 180)
+    .attr("y", 205)
     .attr("text-anchor", "left")
-    .style("font-size", "12px")
+    .style("font-size", "14px")
     .style("font-family", "Helvetica")
     .style("font-weight", "normal")
     .style("fill", "#FFA54F")
@@ -485,9 +498,9 @@ svg.append("text")
 
 svg.append("text")  
     .attr("x", 510)
-    .attr("y", 194)
+    .attr("y", 220)
     .attr("text-anchor", "left")
-    .style("font-size", "12px")
+    .style("font-size", "14px")
     .style("font-family", "Helvetica")
     .style("font-weight", "normal")
     .style("fill", "#FFA54F")
@@ -495,9 +508,9 @@ svg.append("text")
 
 svg.append("text")  
     .attr("x", 510)
-    .attr("y", 210)
+    .attr("y", 235)
     .attr("text-anchor", "left")
-    .style("font-size", "12px")
+    .style("font-size", "14px")
     .style("font-family", "Helvetica")
     .style("font-weight", "normal")
     .style("fill", "#2E8B57")
@@ -505,18 +518,18 @@ svg.append("text")
 
 svg.append("line")
     .attr("x1", 510)
-    .attr("x2", 723)
-    .attr("y1", 217)
-    .attr("y2", 217)
+    .attr("x2", 757)
+    .attr("y1", 242)
+    .attr("y2", 242)
     .style("stroke", "#007FFF")
     .style("stroke-width", "2px")
     .style("stroke-linecap", "round");
 
 svg.append("text")  
     .attr("x", 510)
-    .attr("y", 233)
+    .attr("y", 261)
     .attr("text-anchor", "left")
-    .style("font-size", "12px")
+    .style("font-size", "14px")
     .style("font-family", "Helvetica")
     .style("font-weight", "normal")
     .style("fill", "#F618CC")
@@ -524,9 +537,9 @@ svg.append("text")
 
 svg.append("text")  
     .attr("x", 510)
-    .attr("y", 247)
+    .attr("y", 277)
     .attr("text-anchor", "left")
-    .style("font-size", "12px")
+    .style("font-size", "14px")
     .style("font-family", "Helvetica")
     .style("font-weight", "normal")
     .style("fill", "#2E8B57")
@@ -534,9 +547,9 @@ svg.append("text")
 
 svg.append("text")  
     .attr("x", 510)
-    .attr("y", 261)
+    .attr("y", 292)
     .attr("text-anchor", "left")
-    .style("font-size", "12px")
+    .style("font-size", "14px")
     .style("font-family", "Helvetica")
     .style("font-weight", "normal")
     .style("fill", "#007FFF")
@@ -544,9 +557,9 @@ svg.append("text")
 
 svg.append("text")  
     .attr("x", 510)
-    .attr("y", 276)
+    .attr("y", 307)
     .attr("text-anchor", "left")
-    .style("font-size", "12px")
+    .style("font-size", "14px")
     .style("font-family", "Helvetica")
     .style("font-weight", "normal")
     .style("fill", "white")
@@ -554,9 +567,9 @@ svg.append("text")
 
 svg.append("text")  
     .attr("x", 510)
-    .attr("y", 291)
+    .attr("y", 322)
     .attr("text-anchor", "left")
-    .style("font-size", "12px")
+    .style("font-size", "14px")
     .style("font-family", "Helvetica")
     .style("font-weight", "normal")
     .style("fill", "#FF0000")
@@ -564,9 +577,9 @@ svg.append("text")
 
 svg.append("text")  
     .attr("x", 510)
-    .attr("y", 305)
+    .attr("y", 337)
     .attr("text-anchor", "left")
-    .style("font-size", "12px")
+    .style("font-size", "14px")
     .style("font-family", "Helvetica")
     .style("font-weight", "normal")
     .style("fill", "#BE688B")
@@ -574,9 +587,9 @@ svg.append("text")
 
 svg.append("text")  
     .attr("x", 510)
-    .attr("y", 320)
+    .attr("y", 352.5)
     .attr("text-anchor", "left")
-    .style("font-size", "12px")
+    .style("font-size", "14px")
     .style("font-family", "Helvetica")
     .style("font-weight", "normal")
     .style("fill", "#FFA54F")
@@ -584,9 +597,9 @@ svg.append("text")
 
 svg.append("text")  
     .attr("x", 510)
-    .attr("y", 335)
+    .attr("y", 368)
     .attr("text-anchor", "left")
-    .style("font-size", "12px")
+    .style("font-size", "14px")
     .style("font-family", "Helvetica")
     .style("font-weight", "normal")
     .style("fill", "#F67F40")
@@ -594,9 +607,9 @@ svg.append("text")
 
 svg.append("text")  
     .attr("x", 510)
-    .attr("y", 350)
+    .attr("y", 384)
     .attr("text-anchor", "left")
-    .style("font-size", "12px")
+    .style("font-size", "14px")
     .style("font-family", "Helvetica")
     .style("font-weight", "normal")
     .style("fill", "#5FC6C6")
@@ -604,9 +617,9 @@ svg.append("text")
 
 svg.append("text")  
     .attr("x", 510)
-    .attr("y", 365)
+    .attr("y", 399)
     .attr("text-anchor", "left")
-    .style("font-size", "12px")
+    .style("font-size", "14px")
     .style("font-family", "Helvetica")
     .style("font-weight", "normal")
     .style("fill", "#B6F131")
@@ -614,9 +627,9 @@ svg.append("text")
 
 svg.append("text")  
     .attr("x", 510)
-    .attr("y", 400)
+    .attr("y", 425)
     .attr("text-anchor", "left")
-    .style("font-size", "12px")
+    .style("font-size", "14px")
     .style("font-family", "Helvetica")
     .style("font-weight", "normal")
     .style("fill", "#2E8B57")
@@ -768,13 +781,13 @@ two.bind("update", function(frameCount, timeDelta) {
     // Move each circle a bit to the left/right and up/down
     
     let cir = circs[i];
-    let xDelt = cir.vel * (cir.target.x - cir.x);
-    let yDelt = cir.vel * (cir.target.y - cir.y);
+    let xDelta = cir.vel * (cir.target.x - cir.x);
+    let yDelta = cir.vel * (cir.target.y - cir.y);
 
-    xDelt += (randBetween(-5, 5) / 50);
-    yDelt += (randBetween(-5, 5) / 50);
+    xDelta += (randBetween(-5, 5) / 50);
+    yDelta += (randBetween(-5, 5) / 50);
 
-    cir.c.translation.set(cir.c.translation.x + xDelt,  cir.c.translation.y + yDelt);
+    cir.c.translation.set(cir.c.translation.x + xDelta,  cir.c.translation.y + yDelta);
   }    
  
   for (var i = 0, l = circs.length; i < l; i++) {
