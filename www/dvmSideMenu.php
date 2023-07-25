@@ -1,4 +1,17 @@
- <!-- Side Menu -->
+<?php
+#####################################################################################################################                                                                                                        #
+#                                                                                                                   #
+# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
+#                                                                                                                   #
+# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
+#                                                                                                                   #
+# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
+#                                                                                                                   #
+# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
+#                                                                                                                   #
+#####################################################################################################################
+?>
+<!-- Side Menu -->
  <input type="checkbox" class="sidebarmenu" id="sidebarmenu"/>
   <label for="sidebarmenu" class="sidebarIconToggle">
     <div class="menuspinner menucross part-1"></div>
@@ -24,36 +37,36 @@
         echo '<li>
           <a href="./?units=default"><menumarkerred></menumarkerred> Default Units';
             if ($tempunit == 'F'){
-              echo '<topbarimperialf>&deg;F</topbarimperialf>';
+              echo '<topbarimperialf>°F</topbarimperialf>';
             }else{
-              echo '<topbarmetricc>&deg;C</topbarmetricc>';
+              echo '<topbarmetricc>°C</topbarmetricc>';
             }?></a>
         </li>
       <?php
       }
       if ($units != 'us'){
         echo '<li>
-          <a href="./?units=us"><menumarkerorange></menumarkerorange> Imperial <topbarimperialf>&deg;F</topbarimperialf></a>
+          <a href="./?units=us"><menumarkerorange></menumarkerorange> Imperial <topbarimperialf>°F</topbarimperialf></a>
         </li>';
       }
       if ($units != 'metric'){
         echo '<li>
-          <a href="./?units=metric"><menumarkerblue></menumarkerblue> Metric <topbarmetricc>&deg;C</topbarmetricc></a>
+          <a href="./?units=metric"><menumarkerblue></menumarkerblue> Metric <topbarmetricc>°C</topbarmetricc></a>
         </li>';
       }
       if ($units != 'uk'){
         echo '<li>
-          <a href="./?units=uk"><menumarkeryellow></menumarkeryellow> UK (MPH) <topbarmetricc>&deg;C</topbarmetricc></a>
+          <a href="./?units=uk"><menumarkeryellow></menumarkeryellow> UK (MPH) <topbarmetricc>°C</topbarmetricc></a>
         </li>';
       }
       if ($units != 'scandinavia'){
         echo '<li>
-          <a href="./?units=scandinavia"><menumarkerred></menumarkerred> M/S <topbarmetricc>&deg;C</topbarmetricc></a>
+          <a href="./?units=scandinavia"><menumarkerred></menumarkerred> M/S <topbarmetricc>°C</topbarmetricc></a>
         </li>';
       }
       if ($units != 'ca'){
         echo '<li>
-          <a href="./?units=ca"><menumarkerred></menumarkerred> CA (kPa) <topbarmetricc>&deg;C</topbarmetricc></a>
+          <a href="./?units=ca"><menumarkerred></menumarkerred> CA (kPa) <topbarmetricc>°C</topbarmetricc></a>
         </li>';
       }
       if ($extralinks == 'yes') {
