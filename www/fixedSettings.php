@@ -1,24 +1,25 @@
 <?php
+#####################################################################################################################                                                                                                        #
+#                                                                                                                   #
+# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
+#                                                                                                                   #
+# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
+#                                                                                                                   #
+# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
+#                                                                                                                   #
+# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
+#                                                                                                                   #
+#####################################################################################################################
+?>
+<?php
 include ('userSettings.php');
 include ('dvmVersion.php');
 error_reporting(0);
-
-###########################################################################
-# THE SETTINGS BELOW MUST BE LEFT UNTOUCHED UNLESS YOU REALLY NEED  #######
-# TO MAKE THE CHANGES HERE TO MAKE IT WORK ON YOUR SERVER// ###############
-# TAKE THE TIME TO STUDY THEM DONT TAKE IT FOR GRANTED      ###############
-# USE THE EASY SETUP PANEL TO MAKE CHANGES IN THE TEMPLATE  ###############
-###########################################################################
-
 $TZconf = $TZ; // PLEASE LEAVE it is fixed
 $UTC_offset = timezone_offset_get(timezone_open($TZ), new DateTime()) / 3600; // DO NOT CHANGE
-$rise_zenith = 90 + 40 / 60; // try 50/60 or something/60 until it matches correctly to your sunrise .this allows you to fine tune the sunrise
-$set_zenith = 90 + 36 / 60; // try 50/60 or something/60 until it matches correctly to your sunset .this allows you to fine tune the sunset
 $forecastlocation = $stationlocation; //
 $version = $livedataFormat; // template version and type of source: Clientraw, MeteoBridge, Cumulus, etc (for display only)
 $emailform = $email; // PLEASE LEAVE FIXED
-$showFeelsLike = true; // whether to always show either the heat index (when temp > 80F/27C) or real feel (when temp between 50F/10C and 80F/27C) even when no concern
-$lightLeft = true; // shows amount of light/darkness left rather than total amount per day in the moon display
 
 $theme = isset($theme) ? $theme : "dark";
 $theme1 = $theme;
@@ -26,15 +27,9 @@ $theme1 = $theme;
 $charttheme = $theme;
 $livedata = "serverdata/dvmRealtime.txt";
 $chartsource =  "dvmhighcharts"; 
-####################################################################################################
-// Refresh Data Main Page  //																	   #
-// Automatic refresh times (in seconds) of each panel on the main dashboard						   #
-####################################################################################################
 // Updater timing cycles
-
 $json_string = file_get_contents("jsondata/dvmPositionCycles.json");
 $parsed_json = json_decode($json_string, true);
-
 $cycles1 = "8640000";
 $cycles2 = $parsed_json[$position2]["cycle"];
 $cycles3 = $parsed_json[$position3]["cycle"];
@@ -57,32 +52,20 @@ $cycles19 = $parsed_json[$position19]["cycle"];
 $cycles20 = $parsed_json[$position20]["cycle"];
 
 
-$copyYear = 2023;
+//$copyYear = 2023;
 $curYear = date("Y");
 $copyrightcredit =
-    "&copy; DivumWX Team " .
+    "© DivumWX Team " .
     $copyYear .
     ($copyYear != $curYear ? "-" . $curYear : "Copyright");
 
-$moonRefresh = 3600;
-
-
-
-####################################################################################################
-// Probably won't have to change anything past this line IF SO BE VER VERY CAREFUL!!!!!!		   #
-####################################################################################################
+//$moonRefresh = 3600;
 $scriptcredits =
     "Original CSS/SVG ICONS/PHP scripts by <a href='https://divumwx.com' title='divumwx.com' target='_blank'>divumwx.com 2015 - " .
     date("Y") .
-    ""; // for modules
-$creditsEnabled = "true"; // for chart pages only
+    ""; 
 
 $chartsource = "dvmhighcharts";
-$creditsURL = ""; // for chart pages only
-
-
-
-
 $software = "WeeWX <span>Hardware</span> Users";
 $designedfor = "<br>For WeeWX Users";
 
