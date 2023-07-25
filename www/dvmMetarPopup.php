@@ -1,5 +1,17 @@
+<?php
+#####################################################################################################################                                                                                                        #
+#                                                                                                                   #
+# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
+#                                                                                                                   #
+# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
+#                                                                                                                   #
+# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
+#                                                                                                                   #
+# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
+#                                                                                                                   #
+#####################################################################################################################
+?>
 <?php 
-include('fixedSettings.php');
 include('dvmCombinedData.php')
 ;error_reporting(0); 
 $result = date_sun_info(time(), $lat, $lon);
@@ -511,7 +523,7 @@ stationid{font-size:1.4em;font-family:weathertext2;color:#009bb4}
 <main class="grid">
 
  <article>
-  <div class=actualt style="background:teal;color:white;">&nbsp;&nbsp Current Conditions </div>
+  <div class=actualt style="background:teal;color:white;"> &nbsp Current Conditions </div>
   <div class="iconcondition"><?php echo "<img rel='prefetch' src='css/svg/".$sky_icon."' width='60px'>";?></div>
   <div class="icontext"><?php  echo $sky_desc; ?> </div>
 <br><br><br>
@@ -551,67 +563,67 @@ if ($distanceunit =='mi') {
   </article> 
   
   <article>       
-<div class=actualt style="background:teal;color:white;">&nbsp;&nbsp Temperature </div>   
+<div class=actualt style="background:teal;color:white;"> &nbsp Temperature </div>   
 
  <div class="metartempcontainer1"><?php
  if ($tempunit == 'C') {
-  if ($metartemperaturec >30) {echo '<div class=metartemptoday30>'.$metartemperaturec."<smalluvunit> &nbsp;&deg;C";}
-  else if ($metartemperaturec >25) {echo '<div class=metartemptoday25>'.$metartemperaturec."<smalluvunit> &nbsp;&deg;C";}
-  else if ($metartemperaturec >20) {echo '<div class=metartemptoday20>'.$metartemperaturec."<smalluvunit> &nbsp;&deg;C";}
-  else if ($metartemperaturec >10) {echo '<div class=metartemptoday10>'.$metartemperaturec."<smalluvunit> &nbsp;&deg;C";}
-  else if ($metartemperaturec >5) {echo '<div class=metartemptoday5>'.$metartemperaturec."<smalluvunit> &nbsp;&deg;C";}
-  else if ($metartemperaturec >-50) {echo '<div class=metartemptoday0>'.$metartemperaturec."<smalluvunit> &nbsp;&deg;C";}
+  if ($metartemperaturec >30) {echo '<div class=metartemptoday30>'.$metartemperaturec."<smalluvunit>  °C";}
+  else if ($metartemperaturec >25) {echo '<div class=metartemptoday25>'.$metartemperaturec."<smalluvunit>  °C";}
+  else if ($metartemperaturec >20) {echo '<div class=metartemptoday20>'.$metartemperaturec."<smalluvunit>  °C";}
+  else if ($metartemperaturec >10) {echo '<div class=metartemptoday10>'.$metartemperaturec."<smalluvunit>  °C";}
+  else if ($metartemperaturec >5) {echo '<div class=metartemptoday5>'.$metartemperaturec."<smalluvunit>  °C";}
+  else if ($metartemperaturec >-50) {echo '<div class=metartemptoday0>'.$metartemperaturec."<smalluvunit>  °C";}
   else if ($metartemperaturec =='') {echo '<div class=metartemptoday0>'.$metartemperaturec."<smalluvunit> N/A";}
  } else {
-   if ($metartemperaturef >86) {echo '<div class=metartemptoday30>'.$metartemperaturef."<smalluvunit> &nbsp;&deg;F";}
-  else if ($metartemperaturef >77) {echo '<div class=metartemptoday25>'.$metartemperaturef."<smalluvunit> &nbsp;&deg;F";}
-  else if ($metartemperaturef >68) {echo '<div class=metartemptoday20>'.$metartemperaturef."<smalluvunit> &nbsp;&deg;F";}
-  else if ($metartemperaturef >50) {echo '<div class=metartemptoday10>'.$metartemperaturef."<smalluvunit> &nbsp;&deg;F";}
-  else if ($metartemperaturef >41) {echo '<div class=metartemptoday5>'.$metartemperaturef."<smalluvunit> &nbsp;&deg;F";}
-  else if ($metartemperaturef >-50) {echo '<div class=metartemptoday0>'.$metartemperaturef."<smalluvunit> &nbsp;&deg;F";}
+   if ($metartemperaturef >86) {echo '<div class=metartemptoday30>'.$metartemperaturef."<smalluvunit>  °F";}
+  else if ($metartemperaturef >77) {echo '<div class=metartemptoday25>'.$metartemperaturef."<smalluvunit>  °F";}
+  else if ($metartemperaturef >68) {echo '<div class=metartemptoday20>'.$metartemperaturef."<smalluvunit>  °F";}
+  else if ($metartemperaturef >50) {echo '<div class=metartemptoday10>'.$metartemperaturef."<smalluvunit>  °F";}
+  else if ($metartemperaturef >41) {echo '<div class=metartemptoday5>'.$metartemperaturef."<smalluvunit>  °F";}
+  else if ($metartemperaturef >-50) {echo '<div class=metartemptoday0>'.$metartemperaturef."<smalluvunit>  °F";}
   else if ($metartemperaturef =='') {echo '<div class=metartemptoday0>'.$metartemperaturef."<smalluvunit> N/A";}
  }
 ?></smalluvunit></div></div>
-<div class="tword"><?php if ($tempunit == 'F') {echo $metartemperaturec."&deg;C";} else if ($tempunit == 'C'){echo $metartemperaturef."&deg;F";}?></div>
+<div class="tword"><?php if ($tempunit == 'F') {echo $metartemperaturec."°C";} else if ($tempunit == 'C'){echo $metartemperaturef."°F";}?></div>
 </div>
    
 <div class="lotemp">
 
 <div class="metardewcontainer1"><?php
 if ($tempunit == 'C') {
-  if ($metardewpointc >30) {echo '<div class=metardewtoday30>'.$metardewpointc."<smalluvunit> &nbsp;&deg;C";}
-  else if ($metardewpointc >25) {echo '<div class=metardewtoday25>'.$metardewpointc."<smalluvunit> &nbsp;&deg;C";}
-  else if ($metardewpointc >20) {echo '<div class=metardewtoday20>'.$metardewpointc."<smalluvunit> &nbsp;&deg;C";}
-  else if ($metardewpointc >10) {echo '<div class=metardewtoday10>'.$metardewpointc."<smalluvunit> &nbsp;&deg;C";}
-  else if ($metardewpointc >5) {echo '<div class=metardewtoday5>'.$metardewpointc."<smalluvunit> &nbsp;&deg;C";}
-  else if ($metardewpointc >-50) {echo '<div class=metardewtoday0>'.$metardewpointc."<smalluvunit> &nbsp;&deg;C";}
+  if ($metardewpointc >30) {echo '<div class=metardewtoday30>'.$metardewpointc."<smalluvunit>  °C";}
+  else if ($metardewpointc >25) {echo '<div class=metardewtoday25>'.$metardewpointc."<smalluvunit>  °C";}
+  else if ($metardewpointc >20) {echo '<div class=metardewtoday20>'.$metardewpointc."<smalluvunit>  °C";}
+  else if ($metardewpointc >10) {echo '<div class=metardewtoday10>'.$metardewpointc."<smalluvunit>  °C";}
+  else if ($metardewpointc >5) {echo '<div class=metardewtoday5>'.$metardewpointc."<smalluvunit>  °C";}
+  else if ($metardewpointc >-50) {echo '<div class=metardewtoday0>'.$metardewpointc."<smalluvunit>  °C";}
   else if ($metardewpointc=='') {echo '<div class=metartemptoday0>'.$metardewpointc."<smalluvunit> N/A";}
 } else {
-  if ($metardewpointf>86) {echo '<div class=metartemptoday30>'.$metardewpointf."<smalluvunit> &nbsp;&deg;F";}
-  else if ($metardewpointf>77) {echo '<div class=metartemptoday25>'.$metardewpointf."<smalluvunit> &nbsp;&deg;F";}
-  else if ($metardewpointf>68) {echo '<div class=metartemptoday20>'.$metardewpointf."<smalluvunit> &nbsp;&deg;F";}
-  else if ($metardewpointf>50) {echo '<div class=metartemptoday10>'.$metardewpointf."<smalluvunit> &nbsp;&deg;F";}
-  else if ($metardewpointf>41) {echo '<div class=metartemptoday5>'.$metardewpointf."<smalluvunit> &nbsp;&deg;F";}
-  else if ($metardewpointf>-50) {echo '<div class=metartemptoday0>'.$metardewpointf."<smalluvunit> &nbsp;&deg;F";}
+  if ($metardewpointf>86) {echo '<div class=metartemptoday30>'.$metardewpointf."<smalluvunit>  °F";}
+  else if ($metardewpointf>77) {echo '<div class=metartemptoday25>'.$metardewpointf."<smalluvunit>  °F";}
+  else if ($metardewpointf>68) {echo '<div class=metartemptoday20>'.$metardewpointf."<smalluvunit>  °F";}
+  else if ($metardewpointf>50) {echo '<div class=metartemptoday10>'.$metardewpointf."<smalluvunit>  °F";}
+  else if ($metardewpointf>41) {echo '<div class=metartemptoday5>'.$metardewpointf."<smalluvunit>  °F";}
+  else if ($metardewpointf>-50) {echo '<div class=metartemptoday0>'.$metardewpointf."<smalluvunit>  °F";}
   else if ($metardewpointf=='') {echo '<div class=metartemptoday0>'.$metardewpointf."<smalluvunit> N/A";}
 }
 ?></smalluvunit></div></div> 
  <div class="dewword">Dewpoint</div>
 
  <div class="metarhumcontainer1"><?php 
-if ($metarhumidity >85) {echo '<div class=metarhumtoday85-100>'.$metarhumidity ."<smalluvunit> &nbsp;%";}
-else if ($metarhumidity >70) {echo '<div class=metarhumtoday70-85>'.$metarhumidity ."<smalluvunit> &nbsp;%";}
-else if ($metarhumidity  >35) {echo '<div class=metarhumtoday35-70>'.$metarhumidity ."<smalluvunit> &nbsp;%";}
-else if ($metarhumidity >=0) {echo '<div class=metarhumtoday0-35>'.$metarhumidity ."<smalluvunit> &nbsp;%";}
+if ($metarhumidity >85) {echo '<div class=metarhumtoday85-100>'.$metarhumidity ."<smalluvunit>  %";}
+else if ($metarhumidity >70) {echo '<div class=metarhumtoday70-85>'.$metarhumidity ."<smalluvunit>  %";}
+else if ($metarhumidity  >35) {echo '<div class=metarhumtoday35-70>'.$metarhumidity ."<smalluvunit>  %";}
+else if ($metarhumidity >=0) {echo '<div class=metarhumtoday0-35>'.$metarhumidity ."<smalluvunit>  %";}
 else if ($metarhumidity=='') {echo '<div class=metarhumtoday0-35><smalluvunit> N/A';}
 ?></smalluvunit></div></div> 
-<div class="humword">&nbsp;Humidity</div>
+<div class="humword"> Humidity</div>
 </div>
   
 </article>  
    
   <article>
-  <div class=actualw style="background:teal;color:white;">&nbsp;&nbsp Wind Speed</div>   
+  <div class=actualw style="background:teal;color:white;"> &nbsp Wind Speed</div>   
    <?php
 //set windspeed variables
 if ($windunit == 'km/h') {
@@ -635,26 +647,26 @@ if ($windunit == 'km/h') {
   $metarwind3 = 'kmh';
   $metarwind4 = 'kts';
 }
-  if ($metarwindspeedkmh >=50) {$metarkmh = '<div class=metarwindtoday30>'.$metarwindspeedkmh."<smalluvunit> &nbsp;km/h";}
-  else if ($metarwindspeedkmh >=40) {$metarkmh = '<div class=metarwindtoday25>'.$metarwindspeedkmh."<smalluvunit>&nbsp; km/h";}
-  else if ($metarwindspeedkmh >=30) {$metarkmh = '<div class=metarwindtoday20>'.$metarwindspeedkmh."<smalluvunit>&nbsp; km/h";}
-  else if ($metarwindspeedkmh >0) {$metarkmh = '<div class=metarwindtoday10>'.$metarwindspeedkmh."<smalluvunit>&nbsp; km/h";}
-  else {$metarkmh = '<div class=metarwindtoday10>'.'0'."<smalluvunit>&nbsp; km/h";}
-  if ($metarwindspeedmph >=31.06) {$metarmph = '<div class=metarwindtoday30>'.$metarwindspeedmph."<smalluvunit> &nbsp;mph";}
-  else if ($metarwindspeedmph >=24.85) {$metarmph = '<div class=metarwindtoday25>'.$metarwindspeedmph."<smalluvunit> &nbsp;mph";}
-  else if ($metarwindspeedmph >=18.6) {$metarmph = '<div class=metarwindtoday20>'.$metarwindspeedmph."<smalluvunit> &nbsp;mph";}
-  else if ($metarwindspeedmph >0) {$metarmph = '<div class=metarwindtoday10>'.$metarwindspeedmph."<smalluvunit> &nbsp;mph";}
-  else {$metarmph = '<div class=metarwindtoday10>'.'0'."<smalluvunit> &nbsp;mph";}
-  if ($metarwindspeedkts >=26.9) {$metarkts = '<div class=metarwindtoday30>'.$metarwindspeedkts."<smalluvunit> &nbsp;kts";}
-  else if ($metarwindspeedkts >=21.5) {$metarkts = '<div class=metarwindtoday25>'.$metarwindspeedkts."<smalluvunit> &nbsp;kts";}
-  else if ($metarwindspeedkts >=16.19) {$metarkts = '<div class=metarwindtoday20>'.$metarwindspeedkts."<smalluvunit> &nbsp;kts";}
-  else if ($metarwindspeedkts >0) {$metarkts = '<div class=metarwindtoday10>'.$metarwindspeedkts."<smalluvunit> &nbsp;kts";}
-  else {$metarkts = '<div class=metarwindtoday10>'.'0'."<smalluvunit> &nbsp;kts";}
-  if ($metarwindspeedms >=13.8) {$metarms = '<div class=metarwindtoday30>'.$metarwindspeedms."<smalluvunit> &nbsp;m/s";}
-  else if ($metarwindspeedms >=11.1) {$metarms = '<div class=metarwindtoday25>'.$metarwindspeedms."<smalluvunit> &nbsp;m/s";}
-  else if ($metarwindspeedms >=8.3) {$metarms = '<div class=metarwindtoday20>'.$metarwindspeedms."<smalluvunit> &nbsp;m/s";}
-  else if ($metarwindspeedms >0) {$metarms = '<div class=metarwindtoday10>'.$metarwindspeedms."<smalluvunit> &nbsp;m/s";}
-  else {$metarms = '<div class=metarwindtoday10>'.'0'."<smalluvunit> &nbsp;m/s";}
+  if ($metarwindspeedkmh >=50) {$metarkmh = '<div class=metarwindtoday30>'.$metarwindspeedkmh."<smalluvunit>  km/h";}
+  else if ($metarwindspeedkmh >=40) {$metarkmh = '<div class=metarwindtoday25>'.$metarwindspeedkmh."<smalluvunit>  km/h";}
+  else if ($metarwindspeedkmh >=30) {$metarkmh = '<div class=metarwindtoday20>'.$metarwindspeedkmh."<smalluvunit>  km/h";}
+  else if ($metarwindspeedkmh >0) {$metarkmh = '<div class=metarwindtoday10>'.$metarwindspeedkmh."<smalluvunit>  km/h";}
+  else {$metarkmh = '<div class=metarwindtoday10>'.'0'."<smalluvunit>  km/h";}
+  if ($metarwindspeedmph >=31.06) {$metarmph = '<div class=metarwindtoday30>'.$metarwindspeedmph."<smalluvunit>  mph";}
+  else if ($metarwindspeedmph >=24.85) {$metarmph = '<div class=metarwindtoday25>'.$metarwindspeedmph."<smalluvunit>  mph";}
+  else if ($metarwindspeedmph >=18.6) {$metarmph = '<div class=metarwindtoday20>'.$metarwindspeedmph."<smalluvunit>  mph";}
+  else if ($metarwindspeedmph >0) {$metarmph = '<div class=metarwindtoday10>'.$metarwindspeedmph."<smalluvunit>  mph";}
+  else {$metarmph = '<div class=metarwindtoday10>'.'0'."<smalluvunit>  mph";}
+  if ($metarwindspeedkts >=26.9) {$metarkts = '<div class=metarwindtoday30>'.$metarwindspeedkts."<smalluvunit>  kts";}
+  else if ($metarwindspeedkts >=21.5) {$metarkts = '<div class=metarwindtoday25>'.$metarwindspeedkts."<smalluvunit>  kts";}
+  else if ($metarwindspeedkts >=16.19) {$metarkts = '<div class=metarwindtoday20>'.$metarwindspeedkts."<smalluvunit>  kts";}
+  else if ($metarwindspeedkts >0) {$metarkts = '<div class=metarwindtoday10>'.$metarwindspeedkts."<smalluvunit>  kts";}
+  else {$metarkts = '<div class=metarwindtoday10>'.'0'."<smalluvunit>  kts";}
+  if ($metarwindspeedms >=13.8) {$metarms = '<div class=metarwindtoday30>'.$metarwindspeedms."<smalluvunit>  m/s";}
+  else if ($metarwindspeedms >=11.1) {$metarms = '<div class=metarwindtoday25>'.$metarwindspeedms."<smalluvunit>  m/s";}
+  else if ($metarwindspeedms >=8.3) {$metarms = '<div class=metarwindtoday20>'.$metarwindspeedms."<smalluvunit>  m/s";}
+  else if ($metarwindspeedms >0) {$metarms = '<div class=metarwindtoday10>'.$metarwindspeedms."<smalluvunit>  m/s";}
+  else {$metarms = '<div class=metarwindtoday10>'.'0'."<smalluvunit>  m/s";}
 $metarspot1 = 'metar'.$metarwind1;
 $metarspot2 = 'metar'.$metarwind2;
 $metarspot3 = 'metar'.$metarwind3;
@@ -689,7 +701,7 @@ echo $$metarspot4;
 </article>
 
 <article>
-<div class=actualw style="background:teal;color:white;">&nbsp;&nbsp Wind Direction</div> 
+<div class=actualw style="background:teal;color:white;"> &nbsp Wind Direction</div> 
 </div>
 </div>
 
@@ -891,7 +903,7 @@ var polypointer = document.createElementNS(svgNS, "polygon"); // wind direction 
   </article> 
  
   <article>
-  <div class=actualt style="background:teal;color:white;">&nbsp;&nbsp Airport Data </div>   
+  <div class=actualt style="background:teal;color:white;"> &nbsp Airport Data </div>   
   <stationid><?php echo $metarstationid ; ?></stationid><br>
   <div class="lotemp">
    <?php
@@ -916,20 +928,20 @@ $date = strtotime($date) + 60 * 60 * $UTC; echo date('jS M H:i',$date);
   </article> 
   
   <article>
-  <div class=actualt style="background:teal;color:white;">&nbsp;&nbsp Raw Metar Info</div>  
+  <div class=actualt style="background:teal;color:white;"> &nbsp Raw Metar Info</div>  
   <div class="lotemp">
   <?php echo $info?> Raw METAR is the most common format in the world for the transmission of observational weather data. It is highly standardized through the International Civil Aviation Organization (ICAO), which allows it to be understood throughout most of the world.</span></div>
   </article> 
   
   <article>
-  <div class=actualt style="background:teal;color:white;">&nbsp;&nbsp API  Info</div>  
+  <div class=actualt style="background:teal;color:white;"> &nbsp API  Info</div>  
   <div class="lotemp">
   <?php echo $info?> Data Provided by </span><a href="https://www.checkwx.com/weather/<?php echo $icao1;?>" title="https://www.checkwx.com/weather/<?php echo $icao1;?>" target="_blank" ><br><img src=img/checkwx.svg width=130px alt="https://www.checkwx.com/weather/<?php echo $icao1;?>"></a></span></div>
   </article> 
   
   
   <article>
-  <div class=actualt style="background:teal;color:white;">&nbsp;&nbsp &copy; Info</div>  
+  <div class=actualt style="background:teal;color:white;"> &nbsp © Info</div>  
   <div class="lotemp">
    <br><br>
   <?php echo $info?> Guide Info provided  by <a href="https://en.wikipedia.org/wiki/METAR" title="https://en.wikipedia.org/wiki/METAR" target="_blank" style="font-size:9px;">Metar-Wikipedia </a>  

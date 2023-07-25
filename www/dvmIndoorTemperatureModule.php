@@ -1,3 +1,16 @@
+<?php
+#####################################################################################################################                                                                                                        #
+#                                                                                                                   #
+# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
+#                                                                                                                   #
+# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
+#                                                                                                                   #
+# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
+#                                                                                                                   #
+# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
+#                                                                                                                   #
+#####################################################################################################################
+?>
 <?php 
 include('dvmCombinedData.php');
 if($temp["units"]== "C"){
@@ -7,7 +20,7 @@ $temp["indoor_now_feels"] = ($temp["indoor_now_feels"]-32)/9*5;}
 <div class="chartforecast">
        <span class="yearpopup"><a alt="Home Indoors" title="Home Indoors" href="dvmHomeIndoorPopup.php" data-lity><?php echo $info;?> Home Indoors</a></span>
     </div>
-    <span class='moduletitle'><?php echo $lang['indoorTempModule'];?> (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span> </span>
+    <span class='moduletitle'><?php echo $lang['indoorTempModule'];?> (<valuetitleunit>°<?php echo $temp["units"];?></valuetitleunit>)</span> </span>
 
 <?php
 if(anyToC($temp["indoor_now"])<=-10){$indoorcolor = "#8781bd";}
@@ -43,16 +56,16 @@ else if(anyToC($temp["indoor_now_feels"])<100){$feelscolor = "#e26870";}
  
 <div class="tempindoorconverter">
 <?php
-if($temp["units"]=='F' &&  anyToC($temp["indoor_now"])>=30){echo "<div class=tempconvertercirclered><tred>".anyToC($temp["indoor_now"])."</tred>&deg;<smalltempunit2>C" ;}
-else if($temp["units"]=='F' &&  anyToC($temp["indoor_now"])>=25){echo "<div class=tempconvertercircleorange><torange>".anyToC($temp["indoor_now"])."</torange>&deg;<smalltempunit2>C" ;}
-else if($temp["units"]=='F' && anyToC($temp["indoor_now"])>=18){echo "<div class=tempconvertercircleyellow>".anyToC($temp["indoor_now"])."&deg;<smalltempunit2>C" ;}
-else if($temp["units"]=='F' &&  anyToC($temp["indoor_now"])>=10){echo "<div class=tempconvertercirclegreen>".anyToC($temp["indoor_now"])."&deg;<smalltempunit2>C" ;}
-else if($temp["units"]=='F' && anyToC($temp["indoor_now"])<10){echo "<div class=tempconvertercircleblue>".anyToC($temp["indoor_now"])."&deg;<smalltempunit2>C" ;}
-else if($temp["units"]=='C' &&  anyToC($temp["indoor_now"])>=30){echo "<div class=tempconvertercirclered><tred>".anyToF($temp["indoor_now"])."</tred>&deg;<smalltempunit2>F" ;}
-else if($temp["units"]=='C' &&  anyToC($temp["indoor_now"])>=25){echo "<div class=tempconvertercircleorange><torange>".anyToF($temp["indoor_now"])."</torange>&deg;<smalltempunit2>F" ;}
-else if($temp["units"]=='C' &&  anyToC($temp["indoor_now"])>=18){echo "<div class=tempconvertercircleyellow>".anyToF($temp["indoor_now"])."&deg;<smalltempunit2>F" ;}
-else if($temp["units"]=='C' &&  anyToC($temp["indoor_now"])>=10){echo "<div class=tempconvertercirclegreen>".anyToF($temp["indoor_now"])."&deg;<smalltempunit2>F" ;}
-else if($temp["units"]=='C' && anyToC($temp["indoor_now"])<10){echo "<div class=tempconvertercircleblue>".anyToF($temp["indoor_now"])."&deg;<smalltempunit2>F" ;}
+if($temp["units"]=='F' &&  anyToC($temp["indoor_now"])>=30){echo "<div class=tempconvertercirclered><tred>".anyToC($temp["indoor_now"])."</tred>°<smalltempunit2>C" ;}
+else if($temp["units"]=='F' &&  anyToC($temp["indoor_now"])>=25){echo "<div class=tempconvertercircleorange><torange>".anyToC($temp["indoor_now"])."</torange>°<smalltempunit2>C" ;}
+else if($temp["units"]=='F' && anyToC($temp["indoor_now"])>=18){echo "<div class=tempconvertercircleyellow>".anyToC($temp["indoor_now"])."°<smalltempunit2>C" ;}
+else if($temp["units"]=='F' &&  anyToC($temp["indoor_now"])>=10){echo "<div class=tempconvertercirclegreen>".anyToC($temp["indoor_now"])."°<smalltempunit2>C" ;}
+else if($temp["units"]=='F' && anyToC($temp["indoor_now"])<10){echo "<div class=tempconvertercircleblue>".anyToC($temp["indoor_now"])."°<smalltempunit2>C" ;}
+else if($temp["units"]=='C' &&  anyToC($temp["indoor_now"])>=30){echo "<div class=tempconvertercirclered><tred>".anyToF($temp["indoor_now"])."</tred>°<smalltempunit2>F" ;}
+else if($temp["units"]=='C' &&  anyToC($temp["indoor_now"])>=25){echo "<div class=tempconvertercircleorange><torange>".anyToF($temp["indoor_now"])."</torange>°<smalltempunit2>F" ;}
+else if($temp["units"]=='C' &&  anyToC($temp["indoor_now"])>=18){echo "<div class=tempconvertercircleyellow>".anyToF($temp["indoor_now"])."°<smalltempunit2>F" ;}
+else if($temp["units"]=='C' &&  anyToC($temp["indoor_now"])>=10){echo "<div class=tempconvertercirclegreen>".anyToF($temp["indoor_now"])."°<smalltempunit2>F" ;}
+else if($temp["units"]=='C' && anyToC($temp["indoor_now"])<10){echo "<div class=tempconvertercircleblue>".anyToF($temp["indoor_now"])."°<smalltempunit2>F" ;}
 ?></smalltempunit2></div></div>
 
 

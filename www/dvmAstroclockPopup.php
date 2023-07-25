@@ -35,7 +35,7 @@ include('dvmCombinedData.php');
 echo "<body style='background-color:#292E35'>";
 ?>
 
-<!doctype html>
+<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
@@ -87,7 +87,7 @@ window.setInterval('refresh()', 60000);
     function refresh() {
         window.location.reload();
     }
-        
+       
 function toDegrees(x) {
   return x * (180.0 / Math.PI);
 }
@@ -362,7 +362,7 @@ var text = svg.selectAll(null)
     .append("text")
     .attr("x", 520)
     .attr("y", function(d, i) {
-    return 186 + i * 186
+    return 186 + i * 186;
     })
 
     .style("fill", "rgba(46,139,87,1)")
@@ -371,20 +371,20 @@ var text = svg.selectAll(null)
     .style("text-anchor", "left")
     .style("font-weight", "normal")
     .text(function(d) {
-    return d.split("-")[0]
+    return d.split("-")[0];
     })
 
     .append("tspan")
     .style("fill", "rgba(0,127,255,1)")
     .text(function(d) {
-    return d.split("-")[1]
+    return d.split("-")[1];
     })
 
     .append("tspan")
     .style("fill", "rgba(46,139,87,1)")
     .text(function(d) {
-    return d.split("-")[2]
-    })
+    return d.split("-")[2];
+    });
 
 svg.append("line")
     .attr("x1", 520)
@@ -428,7 +428,7 @@ svg.append("text")
     .style("font-weight", "normal")
     .text(Longitude);
 
-var Elevation = "Elevation: <?php echo $elevation;?> m";
+var Elevation = "Elevation: <?php echo $elevation;?>m";
 svg.append("text")
     .attr("x", 520)
     .attr("y", 264)
@@ -768,7 +768,7 @@ var sector = svg.append("path")
     .attr("stroke-width", 1)
     .attr("stroke", "rgba(41,46,53,1)")
     .attr("d", arc({ startAngle: - 66 * Math.PI / 180, endAngle: + 66 * Math.PI / 180 }))
-    .attr("transform", "translate(260,387)");
+    .attr("transform", "translate(260,386)");
 
 var arc = d3.arc().innerRadius(0).outerRadius(142);
 var sector = svg.append("path")
@@ -855,7 +855,7 @@ svg.append("circle")
     .attr("cx", 260)
     .attr("cy", 275);
 
-svg.append("circle.tropic-of-cancer")
+svg.append("circle.tropic-of-cancer");
     svg.append("circle")
     .attr("class", "tropic-of-cancer")
     .attr("stroke", "rgba(255,99,71,1)")    
@@ -865,7 +865,7 @@ svg.append("circle.tropic-of-cancer")
     .attr("cx", 260)
     .attr("cy", 275);
 
-svg.append("circle.tropic-of-capricorn")
+svg.append("circle.tropic-of-capricorn");
     svg.append("circle")
     .attr("class", "tropic-of-capricorn")
     .attr("stroke", "rgba(255,99,71,1)")    
@@ -883,7 +883,7 @@ var sector = svg.append("path")
     .attr("d", arc({ startAngle: - 67 * Math.PI / 180, endAngle: + 67 * Math.PI / 180 }))
     .attr("transform", "translate(260,385)");
 
-svg.append("circle.earth-background")
+svg.append("circle.earth-background");
     svg.append("circle")
     .attr("class", "earth-background")   
     .style('fill', "rgba(41,46,53,1)")
@@ -891,7 +891,7 @@ svg.append("circle.earth-background")
     .attr("cx", 260)
     .attr("cy", 275);
 
-svg.append("circle.earth")
+svg.append("circle.earth");
     svg.append("circle")
     .attr("class", "earth")
     .attr("stroke", "rgba(255,99,71,1)")    
@@ -914,14 +914,15 @@ Axis.selectAll("text.numbers")
     .data(d3.range(24))
     .enter().append("text")
     .attr("class", "numbers")
-    .attr("x", function(d, i){return (155.5) * Math.cos(i * 0.2616 + 45.552)})
-    .attr("y", function(d, i){return (155.5) * Math.sin(i * 0.2616 + 45.552)})
+    .attr("x", function(d, i){return (155.5) * Math.cos(i * 0.2616 + 45.552);})
+    .attr("y", function(d, i){return (155.5) * Math.sin(i * 0.2616 + 45.552);})
     .attr("alignment-baseline", "middle")
     .attr("text-anchor", "middle")
     .style("fill", "yellow")
     .style("font-family", "Helvetica")     
     .style("font-size", "12px")
     .style("font-weight", "bold")
+    .style("dominant-baseline", "central")
     .attr("transform", function(d, i){return "translate(0, 1.0)";})
     .text(function(d, i){return (i % 1) ? '' : d ;});
 
@@ -929,10 +930,10 @@ Axis.selectAll("line.Sticksin")
     .data(d3.range(120))
     .enter().append("line")
     .attr("class", "Sticksin")
-    .attr("x1", function(d, i){return (142.5) * Math.cos(i / 120 * Math.PI * 2)})
-    .attr("y1", function(d, i){return (142.5) * Math.sin(i / 120 * Math.PI * 2)})
-    .attr("x2", function(d, i){return (145.5) * Math.cos(i / 120 * Math.PI * 2)})
-    .attr("y2", function(d, i){return (145.5) * Math.sin(i / 120 * Math.PI * 2)})
+    .attr("x1", function(d, i){return (142.5) * Math.cos(i / 120 * Math.PI * 2);})
+    .attr("y1", function(d, i){return (142.5) * Math.sin(i / 120 * Math.PI * 2);})
+    .attr("x2", function(d, i){return (145.5) * Math.cos(i / 120 * Math.PI * 2);})
+    .attr("y2", function(d, i){return (145.5) * Math.sin(i / 120 * Math.PI * 2);})
     .style("stroke-width", "1.5px")
     .style("stroke", "#888")
     .style("stroke-linecap", "round")
@@ -942,10 +943,10 @@ Axis.selectAll("line.Sticksout")
     .data(d3.range(120))
     .enter().append("line")
     .attr("class", "Sticksout")
-    .attr("x1", function(d, i){return (168.5) * Math.cos(i / 120 * Math.PI * 2)})
-    .attr("y1", function(d, i){return (168.5) * Math.sin(i / 120 * Math.PI * 2)})
-    .attr("x2", function(d, i){return (165.5) * Math.cos(i / 120 * Math.PI * 2)})
-    .attr("y2", function(d, i){return (165.5) * Math.sin(i / 120 * Math.PI * 2)})
+    .attr("x1", function(d, i){return (168.5) * Math.cos(i / 120 * Math.PI * 2);})
+    .attr("y1", function(d, i){return (168.5) * Math.sin(i / 120 * Math.PI * 2);})
+    .attr("x2", function(d, i){return (165.5) * Math.cos(i / 120 * Math.PI * 2);})
+    .attr("y2", function(d, i){return (165.5) * Math.sin(i / 120 * Math.PI * 2);})
     .style("stroke-width", "1.5px")
     .style("stroke", "#888")
     .style("stroke-linecap", "round")
@@ -955,10 +956,10 @@ Axis.selectAll("line.ticksout")
     .data(d3.range(24))
     .enter().append("line")
     .attr("class", "ticksout")
-    .attr("x1", function(d, i){return (165.5) * Math.cos(i / 24 * Math.PI * 2)})
-    .attr("y1", function(d, i){return (165.5) * Math.sin(i / 24 * Math.PI * 2)})
-    .attr("x2", function(d, i){return (168.5) * Math.cos(i / 24 * Math.PI * 2)})
-    .attr("y2", function(d, i){return (168.5) * Math.sin(i / 24 * Math.PI * 2)})
+    .attr("x1", function(d, i){return (165.5) * Math.cos(i / 24 * Math.PI * 2);})
+    .attr("y1", function(d, i){return (165.5) * Math.sin(i / 24 * Math.PI * 2);})
+    .attr("x2", function(d, i){return (168.5) * Math.cos(i / 24 * Math.PI * 2);})
+    .attr("y2", function(d, i){return (168.5) * Math.sin(i / 24 * Math.PI * 2);})
     .style("stroke-width", "2.5px")
     .style("stroke", "red")
     .style("stroke-linecap", "round")
@@ -968,10 +969,10 @@ Axis.selectAll("line.ticksin")
     .data(d3.range(24))
     .enter().append("line")
     .attr("class", "ticksin")
-    .attr("x1", function(d, i){return (142.5) * Math.cos(i / 24 * Math.PI * 2)})
-    .attr("y1", function(d, i){return (142.5) * Math.sin(i / 24 * Math.PI * 2)})
-    .attr("x2", function(d, i){return (145.5) * Math.cos(i / 24 * Math.PI * 2)})
-    .attr("y2", function(d, i){return (145.5) * Math.sin(i / 24 * Math.PI * 2)})
+    .attr("x1", function(d, i){return (142.5) * Math.cos(i / 24 * Math.PI * 2);})
+    .attr("y1", function(d, i){return (142.5) * Math.sin(i / 24 * Math.PI * 2);})
+    .attr("x2", function(d, i){return (145.5) * Math.cos(i / 24 * Math.PI * 2);})
+    .attr("y2", function(d, i){return (145.5) * Math.sin(i / 24 * Math.PI * 2);})
     .style("stroke-width", "2.5px")
     .style("stroke", "red")
     .style("stroke-linecap", "round")
@@ -981,10 +982,10 @@ Axis.selectAll("line.sunrise")
     .data(d3.range(24))
     .enter().append("line")
     .attr("class", "sunrise")
-    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(sunrise))})
-    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(sunrise))})
-    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(sunrise))})
-    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(sunrise))})
+    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(sunrise));})
+    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(sunrise));})
+    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(sunrise));})
+    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(sunrise));})
     .style("stroke-width", "2.5px")
     .style("stroke", "rgba(255,99,71,1)")
     .style("stroke-linecap", "round")
@@ -994,10 +995,10 @@ Axis.selectAll("line.sun_meridian_transit")
     .data(d3.range(24))
     .enter().append("line")
     .attr("class", "sun_meridian_transit")
-    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(sun_meridian_transit))})
-    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(sun_meridian_transit))})
-    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(sun_meridian_transit))})
-    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(sun_meridian_transit))})
+    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(sun_meridian_transit));})
+    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(sun_meridian_transit));})
+    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(sun_meridian_transit));})
+    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(sun_meridian_transit));})
     .style("stroke-width", "2.5px")
     .style("stroke", "rgba(255,99,71,1)")
     .style("stroke-linecap", "round")
@@ -1007,10 +1008,10 @@ Axis.selectAll("line.sunset")
     .data(d3.range(24))
     .enter().append("line")
     .attr("class", "sunset")
-    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(sunset))})
-    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(sunset))})
-    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(sunset))})
-    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(sunset))})
+    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(sunset));})
+    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(sunset));})
+    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(sunset));})
+    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(sunset));})
     .style("stroke-width", "2.5px")
     .style("stroke", "rgba(255,99,71,1)")
     .style("stroke-linecap", "round")
@@ -1020,10 +1021,10 @@ Axis.selectAll("line.moonrise")
     .data(d3.range(24))
     .enter().append("line")
     .attr("class", "moonrise")
-    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(moonrise || 0))})
-    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(moonrise || 0))})
-    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(moonrise || 0))})
-    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(moonrise || 0))})
+    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(moonrise || 0));})
+    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(moonrise || 0));})
+    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(moonrise || 0));})
+    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(moonrise || 0));})
     .style("stroke-width", "2.5px")
     .style("stroke", "rgba(255,255,255,1)")
     .style("stroke-linecap", "round")
@@ -1033,10 +1034,10 @@ Axis.selectAll("line.moon_meridian_transit")
     .data(d3.range(24))
     .enter().append("line")
     .attr("class", "moon_meridian_transit")
-    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(moon_meridian_transit || 0))})
-    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(moon_meridian_transit || 0))})
-    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(moon_meridian_transit || 0))})
-    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(moon_meridian_transit || 0))})
+    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(moon_meridian_transit || 0));})
+    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(moon_meridian_transit || 0));})
+    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(moon_meridian_transit || 0));})
+    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(moon_meridian_transit || 0));})
     .style("stroke-width", "2.5px")
     .style("stroke", "rgba(255,255,255,1)")
     .style("stroke-linecap", "round")
@@ -1046,10 +1047,10 @@ Axis.selectAll("line.moonset")
     .data(d3.range(24))
     .enter().append("line")
     .attr("class", "moonset")
-    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(moonset || 0))})
-    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(moonset || 0))})
-    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(moonset || 0))})
-    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(moonset || 0))})
+    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(moonset || 0));})
+    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(moonset || 0));})
+    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(moonset || 0));})
+    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(moonset || 0));})
     .style("stroke-width", "2.5px")
     .style("stroke", "rgba(255,255,255,1)")
     .style("stroke-linecap", "round")
@@ -1059,10 +1060,10 @@ Axis.selectAll("line.civil_twilight_rise")
     .data(d3.range(24))
     .enter().append("line")
     .attr("class", "civil_twilight_rise")
-    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(civil_twilight_rise))})
-    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(civil_twilight_rise))})
-    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(civil_twilight_rise))})
-    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(civil_twilight_rise))})
+    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(civil_twilight_rise));})
+    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(civil_twilight_rise));})
+    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(civil_twilight_rise));})
+    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(civil_twilight_rise));})
     .style("stroke-width", "2.5px")
     .style("stroke", "rgba(74,227,82,1)")
     .style("stroke-linecap", "round")
@@ -1072,10 +1073,10 @@ Axis.selectAll("line.civil_twilight_set")
     .data(d3.range(24))
     .enter().append("line")
     .attr("class", "civil_twilight_set")
-    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(civil_twilight_set))})
-    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(civil_twilight_set))})
-    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(civil_twilight_set))})
-    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(civil_twilight_set))})
+    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(civil_twilight_set));})
+    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(civil_twilight_set));})
+    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(civil_twilight_set));})
+    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(civil_twilight_set));})
     .style("stroke-width", "2.5px")
     .style("stroke", "rgba(74,227,82,1)")
     .style("stroke-linecap", "round")
@@ -1085,10 +1086,10 @@ Axis.selectAll("line.nautical_twilight_rise")
     .data(d3.range(24))
     .enter().append("line")
     .attr("class", "nautical_twilight_rise")
-    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(nautical_twilight_rise))})
-    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(nautical_twilight_rise))})
-    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(nautical_twilight_rise))})
-    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(nautical_twilight_rise))})
+    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(nautical_twilight_rise));})
+    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(nautical_twilight_rise));})
+    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(nautical_twilight_rise));})
+    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(nautical_twilight_rise));})
     .style("stroke-width", "2.5px")
     .style("stroke", "rgba(74,227,82,1)")
     .style("stroke-linecap", "round")
@@ -1098,10 +1099,10 @@ Axis.selectAll("line.nautical_twilight_set")
     .data(d3.range(24))
     .enter().append("line")
     .attr("class", "nautical_twilight_set")
-    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(nautical_twilight_set))})
-    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(nautical_twilight_set))})
-    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(nautical_twilight_set))})
-    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(nautical_twilight_set))})
+    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(nautical_twilight_set));})
+    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(nautical_twilight_set));})
+    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(nautical_twilight_set));})
+    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(nautical_twilight_set));})
     .style("stroke-width", "2.5px")
     .style("stroke", "rgba(74,227,82,1)")
     .style("stroke-linecap", "round")
@@ -1111,10 +1112,10 @@ Axis.selectAll("line.astro_twilight_rise")
     .data(d3.range(24))
     .enter().append("line")
     .attr("class", "astro_twilight_rise")
-    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(astro_twilight_rise || 0))})
-    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(astro_twilight_rise || 0))})
-    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(astro_twilight_rise || 0))})
-    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(astro_twilight_rise || 0))})
+    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(astro_twilight_rise || 0));})
+    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(astro_twilight_rise || 0));})
+    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(astro_twilight_rise || 0));})
+    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(astro_twilight_rise || 0));})
     .style("stroke-width", "2.5px")
     .style("stroke", "rgba(74,227,82,1)")
     .style("stroke-linecap", "round")
@@ -1124,10 +1125,10 @@ Axis.selectAll("line.astro_twilight_set")
     .data(d3.range(24))
     .enter().append("line")
     .attr("class", "astro_twilight_set")
-    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(astro_twilight_set || 0))})
-    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(astro_twilight_set || 0))})
-    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(astro_twilight_set || 0))})
-    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(astro_twilight_set || 0))})
+    .attr("x1", function(d, i){return - 177 * Math.sin(toRadians(astro_twilight_set || 0));})
+    .attr("y1", function(d, i){return + 177 * Math.cos(toRadians(astro_twilight_set || 0));})
+    .attr("x2", function(d, i){return - 194 * Math.sin(toRadians(astro_twilight_set || 0));})
+    .attr("y2", function(d, i){return + 194 * Math.cos(toRadians(astro_twilight_set || 0));})
     .style("stroke-width", "2.5px")
     .style("stroke", "rgba(74,227,82,1)")
     .style("stroke-linecap", "round")
@@ -1154,18 +1155,18 @@ var handData = [
     {'label':'hours','scale':hourScale},
     {'label':'minutes','scale':minuteScale},
     {'label':'seconds','scale':secondScale}
-]
+];
 
-var analogHands = analogContent.selectAll('.hands')
+var analogHands = analogContent.selectAll('.hands');
     analogHands.data(handData)
     .enter()
     .append('g')
     .attr('class',function(d){ return'hands analog-' + d.label;})
     .append('line')
-    .attr('x1', function(d){return - 144 * Math.sin(Math.PI)})
-    .attr('y1', function(d){return + 144 * Math.cos(Math.PI)})
-    .attr('x2', function(d){return - 184 * Math.sin(Math.PI)})
-    .attr('y2', function(d){return + 184 * Math.cos(Math.PI)})
+    .attr('x1', function(d){return - 144 * Math.sin(Math.PI);})
+    .attr('y1', function(d){return + 144 * Math.cos(Math.PI);})
+    .attr('x2', function(d){return - 184 * Math.sin(Math.PI);})
+    .attr('y2', function(d){return + 184 * Math.cos(Math.PI);});
 
 function update() {
 
@@ -1218,10 +1219,10 @@ var T = t - 2 * Math.PI * Math.floor(t / (2 * Math.PI));
 var xc = 260;
 var yc = 275;
 
-const MoonRings = true;
-const MoonMutatis = true;
-const Kaleidoscope = true;
-const SunMutatis = true;
+var MoonRings = true;
+var MoonMutatis = true;
+var Kaleidoscope = true;
+var SunMutatis = true;
     
 var MoonMov = 8;
 var Velocity = 100;
@@ -1391,7 +1392,7 @@ svg.append("text")
     .style("font-weight", "bold")
     .style("dominant-baseline", "central")
     .text(sign);
-            
+          
         i = i + 2.54;
     }
 }
@@ -1957,13 +1958,13 @@ svg.append("circle")
     .attr("cx", xa)
     .attr("cy", ya);
 
-var ariesHourFactor = hourAries - 0.011 + Math.PI / 270;
-var sinAriesHand = Math.sin(ariesHourFactor) * clockRadius;
-var cosAriesHand = Math.cos(ariesHourFactor) * clockRadius;
-var xa = xc + sinAriesHand;
-var ya = yc - cosAriesHand;
-var Xa = xc - 0.43 * sinAriesHand;
-var Ya = yc + 0.43 * cosAriesHand;
+ariesHourFactor = hourAries - 0.011 + Math.PI / 270;
+sinAriesHand = Math.sin(ariesHourFactor) * clockRadius;
+cosAriesHand = Math.cos(ariesHourFactor) * clockRadius;
+xa = xc + sinAriesHand;
+ya = yc - cosAriesHand;
+Xa = xc - 0.43 * sinAriesHand;
+Ya = yc + 0.43 * cosAriesHand;
 
 svg.append("line")
     .attr("x1", xa)
@@ -2015,8 +2016,8 @@ svg.append("circle")
     .attr("cx", Xs)
     .attr("cy", Ys);
 
-var Xs = xc + 1.31 * clockRadius * Math.sin(hours_arc);
-var Ys = yc - 1.31 * clockRadius * Math.cos(hours_arc);
+Xs = xc + 1.31 * clockRadius * Math.sin(hours_arc);
+Ys = yc - 1.31 * clockRadius * Math.cos(hours_arc);
 
 svg.append("line")
     .attr("x1", xc)
@@ -2027,8 +2028,8 @@ svg.append("line")
     .style("stroke-width", 3.0)
     .style("stroke-linecap", "round");
 
-var Xs = xc + Rs * Math.sin(hours_arc);
-var Ys = yc - Rs * Math.cos(hours_arc);
+Xs = xc + Rs * Math.sin(hours_arc);
+Ys = yc - Rs * Math.cos(hours_arc);
 
 var sunRed = svg.append("defs");
 
@@ -2109,16 +2110,16 @@ var sun_mins = sun_tiktok.getMinutes();
 var sun_secs = sun_tiktok.getSeconds();   
 var K_Sun = 2 * Math.PI * (sun_mins + sun_secs / 60) / 60;
 
-d3.selectAll("line.sunscope").remove()
+d3.selectAll("line.sunscope").remove();
 
 Axis_k.selectAll("line.sunscope")
     .data(d3.range(12))
     .enter().append("line")
     .attr("class", "sunscope")
-    .attr("x1", function(d, i){return Xs + 30 * Math.sin(hourAries + i * Math.PI / 6 - K_Sun)})
-    .attr("y1", function(d, i){return Ys - 30 * Math.cos(hourAries + i * Math.PI / 6 - K_Sun)})
-    .attr("x2", function(d, i){return Xs + (22 + RmS) * Math.sin(hourAries + i * Math.PI / 6 + Velocity * K_Sun)})
-    .attr("y2", function(d, i){return Ys - (22 + RmS) * Math.cos(hourAries + i * Math.PI / 6 + Velocity * K_Sun)})
+    .attr("x1", function(d, i){return Xs + 30 * Math.sin(hourAries + i * Math.PI / 6 - K_Sun);})
+    .attr("y1", function(d, i){return Ys - 30 * Math.cos(hourAries + i * Math.PI / 6 - K_Sun);})
+    .attr("x2", function(d, i){return Xs + (22 + RmS) * Math.sin(hourAries + i * Math.PI / 6 + Velocity * K_Sun);})
+    .attr("y2", function(d, i){return Ys - (22 + RmS) * Math.cos(hourAries + i * Math.PI / 6 + Velocity * K_Sun);})
     .style("stroke-width", "1.5")
     .style("stroke", "rgba(255,255,0," + opacity + ")")
     .style("stroke-linecap", "round")
@@ -2130,7 +2131,7 @@ Axis_k.selectAll("line.sunscope")
 
 svg.append("circle")  
     .style('fill', "rgba(255,255,0," + opacity + ")")
-    .attr("r", 10)
+    .attr("r", 10.55)
     .attr("cx", Xs)
     .attr("cy", Ys);
 
@@ -2171,8 +2172,8 @@ svg.append("circle")
     .attr("cx", Xm)
     .attr("cy", Ym);
 
-var Xm = xc + 1.31 * clockRadius * Math.sin(hour_MD);
-var Ym = yc - 1.31 * clockRadius * Math.cos(hour_MD);
+Xm = xc + 1.31 * clockRadius * Math.sin(hour_MD);
+Ym = yc - 1.31 * clockRadius * Math.cos(hour_MD);
 
 svg.append("line")
     .attr("x1", xc)
@@ -2183,8 +2184,8 @@ svg.append("line")
     .style("stroke-width", 3.0)
     .style("stroke-linecap", "round");
 
-var Xm = xc + Rm * Math.sin(hour_MD);
-var Ym = yc - Rm * Math.cos(hour_MD);
+Xm = xc + Rm * Math.sin(hour_MD);
+Ym = yc - Rm * Math.cos(hour_MD);
   
 var Alpha_M, color_M; 
 
@@ -2225,8 +2226,8 @@ var Rot = hour_MD + Math.PI;
 var Xf = Xm + Math.sin(Rot) * Rmo;
 var Yf = Ym - Math.cos(Rot) * Rmo;
 
-var path = d3.path()
-path.moveTo(Xf, Yf)
+var path = d3.path();
+path.moveTo(Xf, Yf);
    
 let i = 0; 
 
@@ -2248,7 +2249,7 @@ let i = 0;
     Xg = Xm - Rx * Math.cos(Rot) + Ry * Math.sin(Rot);
     Yg = Ym - Rx * Math.sin(Rot) - Ry * Math.cos(Rot);
 
-path.lineTo(Xg, Yg)
+path.lineTo(Xg, Yg);
 
         i = i + Math.PI / 64;
     }
@@ -2316,16 +2317,16 @@ var moon_mins = moon_tiktok.getMinutes();
 var moon_secs = moon_tiktok.getSeconds();   
 var R_Moon = 2 * Math.PI * (moon_mins + moon_secs / 60) / 60;
 
-d3.selectAll("line.moonscope").remove()
+d3.selectAll("line.moonscope").remove();
 
 Axis_M.selectAll("line.moonscope")
     .data(d3.range(12))
     .enter().append("line")
     .attr("class", "moonscope")
-    .attr("x1", function(d, i){return Xm + (Rms + RmL) * Math.sin(hourAries + i * Math.PI / 6 - 2 * Velocity * R_Moon)})
-    .attr("y1", function(d, i){return Ym - (Rms + RmL) * Math.cos(hourAries + i * Math.PI / 6 - 2 * Velocity * R_Moon)})
-    .attr("x2", function(d, i){return Xm + (RmB + RmL) * Math.sin(hourAries + i * Math.PI / 6 - 2 * Velocity * R_Moon)})
-    .attr("y2", function(d, i){return Ym - (RmB + RmL) * Math.cos(hourAries + i * Math.PI / 6 - 2 * Velocity * R_Moon)})
+    .attr("x1", function(d, i){return Xm + (Rms + RmL) * Math.sin(hourAries + i * Math.PI / 6 - 2 * Velocity * R_Moon);})
+    .attr("y1", function(d, i){return Ym - (Rms + RmL) * Math.cos(hourAries + i * Math.PI / 6 - 2 * Velocity * R_Moon);})
+    .attr("x2", function(d, i){return Xm + (RmB + RmL) * Math.sin(hourAries + i * Math.PI / 6 - 2 * Velocity * R_Moon);})
+    .attr("y2", function(d, i){return Ym - (RmB + RmL) * Math.cos(hourAries + i * Math.PI / 6 - 2 * Velocity * R_Moon);})
     .style("stroke-width", "1.5")
     .style("stroke", "rgba(255,255,255,1.0)")
     .style("stroke-linecap", "round")
@@ -2333,7 +2334,7 @@ Axis_M.selectAll("line.moonscope")
     }
     setInterval(update_moon, 1000);
     update_moon();
-   }
+  }
 }
 
 MoonNeedle();

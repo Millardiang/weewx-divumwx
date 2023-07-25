@@ -10,7 +10,8 @@
 # Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
 #                                                                                                                   #
 #####################################################################################################################
-?><?php
+?>
+<?php
 include('dvmCombinedData.php');
 date_default_timezone_set($TZ);
 echo "<body style='background-color:#292E35'>";

@@ -1,3 +1,16 @@
+<?php
+#####################################################################################################################                                                                                                        #
+#                                                                                                                   #
+# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
+#                                                                                                                   #
+# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
+#                                                                                                                   #
+# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
+#                                                                                                                   #
+# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
+#                                                                                                                   #
+#####################################################################################################################
+?>
 <!DOCTYPE html>
 <title>divumwx current conditions</title>
 <style>
@@ -23,7 +36,8 @@
 .chartforecast4:hover {
   color: #90b12a
 }
-</style><?php
+</style>
+<?php
 
 include('dvmCombinedData.php');
 
@@ -120,7 +134,7 @@ else if(anyToC($temp["outside_now"])<100){$tempcolor = "#e26870";}
     <div class="chartforecast4">
       <span class="yearpopup"><a alt="temp charts" title="temp charts" href="dvmMenuTemperaturePopup.php" data-lity><?php echo $menucharticonpage;?> Temperature Almanac and Derived Charts</a></span>
     </div>    
-    <span class='moduletitle4'><?php echo $lang['temperatureModule'];?> (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span>
+    <span class='moduletitle4'><?php echo $lang['temperatureModule'];?> (<valuetitleunit>°<?php echo $temp["units"];?></valuetitleunit>)</span>
 
 <div class="updatedtime1"><?php if(file_exists($livedata)&&time()- filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>';else echo $online." ".$divum["time"];?></div>
 
@@ -573,19 +587,19 @@ border-radius: 2px;
 <div class="tempconverter3">
 <?php
  //Temp
-     if(anyToC($temp["outside_now"])<-10){echo "<div class=tempconvertercircleminus10>".(($temp["units"]=='F')?anyToC($temp["outside_now"])."&deg;<smalltempunit2>C":anyToF($temp["outside_now"])."&deg;<smalltempunit2>F");}
-else if(anyToC($temp["outside_now"])<-5) {echo "<div class=tempconvertercircleminus5>".(($temp["units"]=='F')?anyToC($temp["outside_now"])."&deg;<smalltempunit2>C":anyToF($temp["outside_now"])."&deg;<smalltempunit2>F");}
-else if(anyToC($temp["outside_now"])<0)  {echo "<div class=tempconvertercircleminus>".(($temp["units"]=='F')?anyToC($temp["outside_now"])."&deg;<smalltempunit2>C":anyToF($temp["outside_now"])."&deg;<smalltempunit2>F");}
-else if(anyToC($temp["outside_now"])<5)  {echo "<div class=tempconvertercircle0-5>".(($temp["units"]=='F')?anyToC($temp["outside_now"])."&deg;<smalltempunit2>C":anyToF($temp["outside_now"])."&deg;<smalltempunit2>F");}
-else if(anyToC($temp["outside_now"])<10) {echo "<div class=tempconvertercircle6-10>".(($temp["units"]=='F')?anyToC($temp["outside_now"])."&deg;<smalltempunit2>C":anyToF($temp["outside_now"])."&deg;<smalltempunit2>F");}
-else if(anyToC($temp["outside_now"])<15) {echo "<div class=tempconvertercircle11-15>".(($temp["units"]=='F')?anyToC($temp["outside_now"])."&deg;<smalltempunit2>C":anyToF($temp["outside_now"])."&deg;<smalltempunit2>F");}
-else if(anyToC($temp["outside_now"])<20) {echo "<div class=tempconvertercircle16-20>".(($temp["units"]=='F')?anyToC($temp["outside_now"])."&deg;<smalltempunit2>C":anyToF($temp["outside_now"])."&deg;<smalltempunit2>F");}
-else if(anyToC($temp["outside_now"])<25) {echo "<div class=tempconvertercircle21-25>".(($temp["units"]=='F')?anyToC($temp["outside_now"])."&deg;<smalltempunit2>C":anyToF($temp["outside_now"])."&deg;<smalltempunit2>F");}
-else if(anyToC($temp["outside_now"])<30) {echo "<div class=tempconvertercircle26-30>".(($temp["units"]=='F')?anyToC($temp["outside_now"])."&deg;<smalltempunit2>C":anyToF($temp["outside_now"])."&deg;<smalltempunit2>F");}
-else if(anyToC($temp["outside_now"])<35) {echo "<div class=tempconvertercircle31-35>".(($temp["units"]=='F')?anyToC($temp["outside_now"])."&deg;<smalltempunit2>C":anyToF($temp["outside_now"])."&deg;<smalltempunit2>F");}
-else if(anyToC($temp["outside_now"])<40) {echo "<div class=tempconvertercircle36-40>".(($temp["units"]=='F')?anyToC($temp["outside_now"])."&deg;<smalltempunit2>C":anyToF($temp["outside_now"])."&deg;<smalltempunit2>F");}
-else if(anyToC($temp["outside_now"])<45) {echo "<div class=tempconvertercircle41-45>".(($temp["units"]=='F')?anyToC($temp["outside_now"])."&deg;<smalltempunit2>C":anyToF($temp["outside_now"])."&deg;<smalltempunit2>F");}
-else if(anyToC($temp["outside_now"])<100){echo "<div class=tempconvertercircle50>".(($temp["units"]=='F')?anyToC($temp["outside_now"])."&deg;<smalltempunit2>C":anyToF($temp["outside_now"])."&deg;<smalltempunit2>F");}
+     if(anyToC($temp["outside_now"])<-10){echo "<div class=tempconvertercircleminus10>".(($temp["units"]=='F')?anyToC($temp["outside_now"])."°<smalltempunit2>C":anyToF($temp["outside_now"])."°<smalltempunit2>F");}
+else if(anyToC($temp["outside_now"])<-5) {echo "<div class=tempconvertercircleminus5>".(($temp["units"]=='F')?anyToC($temp["outside_now"])."°<smalltempunit2>C":anyToF($temp["outside_now"])."°<smalltempunit2>F");}
+else if(anyToC($temp["outside_now"])<0)  {echo "<div class=tempconvertercircleminus>".(($temp["units"]=='F')?anyToC($temp["outside_now"])."°<smalltempunit2>C":anyToF($temp["outside_now"])."°<smalltempunit2>F");}
+else if(anyToC($temp["outside_now"])<5)  {echo "<div class=tempconvertercircle0-5>".(($temp["units"]=='F')?anyToC($temp["outside_now"])."°<smalltempunit2>C":anyToF($temp["outside_now"])."°<smalltempunit2>F");}
+else if(anyToC($temp["outside_now"])<10) {echo "<div class=tempconvertercircle6-10>".(($temp["units"]=='F')?anyToC($temp["outside_now"])."°<smalltempunit2>C":anyToF($temp["outside_now"])."°<smalltempunit2>F");}
+else if(anyToC($temp["outside_now"])<15) {echo "<div class=tempconvertercircle11-15>".(($temp["units"]=='F')?anyToC($temp["outside_now"])."°<smalltempunit2>C":anyToF($temp["outside_now"])."°<smalltempunit2>F");}
+else if(anyToC($temp["outside_now"])<20) {echo "<div class=tempconvertercircle16-20>".(($temp["units"]=='F')?anyToC($temp["outside_now"])."°<smalltempunit2>C":anyToF($temp["outside_now"])."°<smalltempunit2>F");}
+else if(anyToC($temp["outside_now"])<25) {echo "<div class=tempconvertercircle21-25>".(($temp["units"]=='F')?anyToC($temp["outside_now"])."°<smalltempunit2>C":anyToF($temp["outside_now"])."°<smalltempunit2>F");}
+else if(anyToC($temp["outside_now"])<30) {echo "<div class=tempconvertercircle26-30>".(($temp["units"]=='F')?anyToC($temp["outside_now"])."°<smalltempunit2>C":anyToF($temp["outside_now"])."°<smalltempunit2>F");}
+else if(anyToC($temp["outside_now"])<35) {echo "<div class=tempconvertercircle31-35>".(($temp["units"]=='F')?anyToC($temp["outside_now"])."°<smalltempunit2>C":anyToF($temp["outside_now"])."°<smalltempunit2>F");}
+else if(anyToC($temp["outside_now"])<40) {echo "<div class=tempconvertercircle36-40>".(($temp["units"]=='F')?anyToC($temp["outside_now"])."°<smalltempunit2>C":anyToF($temp["outside_now"])."°<smalltempunit2>F");}
+else if(anyToC($temp["outside_now"])<45) {echo "<div class=tempconvertercircle41-45>".(($temp["units"]=='F')?anyToC($temp["outside_now"])."°<smalltempunit2>C":anyToF($temp["outside_now"])."°<smalltempunit2>F");}
+else if(anyToC($temp["outside_now"])<100){echo "<div class=tempconvertercircle50>".(($temp["units"]=='F')?anyToC($temp["outside_now"])."°<smalltempunit2>C":anyToF($temp["outside_now"])."°<smalltempunit2>F");}
 ?></smalltempunit2></div></div>
 
 <div class="divTable temperature">
@@ -599,12 +613,12 @@ else if(anyToC($temp["outside_now"])<100){echo "<div class=tempconvertercircle50
 <div class="divTableBody">
 <div class="divTableRow">
 <div class="divTableCell"><?php 
-if ($temp["outside_day_max"]<10){echo " ".$temp["outside_day_max"]."&deg;".$temp["units"]."\n";?> | <?php echo $temp["outside_day_min"]."&deg;".$temp["units"];}else if ($temp["outside_day_max"]>=10){echo $temp["outside_day_max"]."&deg;".$temp["units"]."\n";?> | <?php echo $temp["outside_day_min"]."&deg;".$temp["units"];}?>
+if ($temp["outside_day_max"]<10){echo " ".$temp["outside_day_max"]."°".$temp["units"]."\n";?> | <?php echo $temp["outside_day_min"]."°".$temp["units"];}else if ($temp["outside_day_max"]>=10){echo $temp["outside_day_max"]."°".$temp["units"]."\n";?> | <?php echo $temp["outside_day_min"]."°".$temp["units"];}?>
 </div>
 
-<div class="divTableCell" style="border-left: 5px solid <?php echo $apptempcolor; ?>; padding: 1px 1px;"><?php echo $temp["apptemp"]."&deg;".$temp["units"];?></div>
+<div class="divTableCell" style="border-left: 5px solid <?php echo $apptempcolor; ?>; padding: 1px 1px;"><?php echo $temp["apptemp"]."°".$temp["units"];?></div>
 <div class="divTableCell" style="border-left: 5px solid <?php echo $avgtempcolor; ?>;"><?php //avg today
-     echo $temp["outside_day_avg"]."&deg;".$temp["units"];?></div>
+     echo $temp["outside_day_avg"]."°".$temp["units"];?></div>
 </div>
 </div>
   <div class="divTableHeading">
@@ -616,14 +630,14 @@ if ($temp["outside_day_max"]<10){echo " ".$temp["outside_day_max"]."&deg;".$tem
 </div>
   <div class="divTableBody">
 <div class="divTableRow">
-<div class="divTableCell"><?php echo $temp["outside_trend"].'&deg;' ?><smalltempunit2><?php echo $temp["units"];?></smalltempunit2><?php 
+<div class="divTableCell"><?php echo $temp["outside_trend"].'°' ?><smalltempunit2><?php echo $temp["units"];?></smalltempunit2><?php 
 if($temp["outside_trend"]>0){echo ' '.$risingsymbol;}else if($temp["outside_trend"]<0){echo ' '.$fallingsymbol;}else{ echo ' '.$steadysymbol;}?></div>
 
 <div class="divTableCell" style="border-left: 5px solid <?php echo $humidcolor; ?>;"><?php echo $humid["now"]; ?><smalltempunit2>%</smalltempunit2><?php //humidity trend
 if($humid["trend"]>0){echo ' '.$risingsymbol;}else if($humid["trend"]<0){echo ' '.$fallingsymbol;}else{ echo '';}?></div>
 
 <div class="divTableCell" style="border-left: 5px solid <?php echo $dewcolor; ?>;"><?php //dewpoint
-echo " ".$dew["now"].'&deg;<smalltempunit2>'.$temp["units"];?><?php //dewpoint trend
+echo " ".$dew["now"].'°<smalltempunit2>'.$temp["units"];?><?php //dewpoint trend
 if($dew["trend"]>0){echo ' '.$risingsymbol;}else if($dew["trend"]<0){echo ' '.$fallingsymbol;}else{ echo '';}?></div>
 </div>
 </div>
@@ -637,12 +651,12 @@ if($dew["trend"]>0){echo ' '.$risingsymbol;}else if($dew["trend"]<0){echo ' '.
 </div>
     <div class="divTableBody">
 <div class="divTableRow">
-<div class="divTableCell" style="border-left: 5px solid <?php echo $indoorcolor; ?>;"><?php echo " ".$hometemp." ".$temp["indoor_now"]. "&deg;" .$temp["units"];?></div>
+<div class="divTableCell" style="border-left: 5px solid <?php echo $indoorcolor; ?>;"><?php echo " ".$hometemp." ".$temp["indoor_now"]. "°" .$temp["units"];?></div>
 
 <!--?php if($temp["indoor_trend"]>0){echo ' '.$risingsymbol;}else if($temp["indoor_trend"]<0){echo ' '.$fallingsymbol;}else{ echo '';}?-->
 
-<div class="divTableCell" style="border-left: 5px solid <?php echo $heatcolor; ?>;"><?php echo $temp["heatindex"]."&deg;".$temp["units"];?></div>
-<div class="divTableCell" style="border-left: 5px solid <?php echo $chillcolor; ?>;"><?php echo $temp["windchill"]."&deg;".$temp["units"];?></div>
+<div class="divTableCell" style="border-left: 5px solid <?php echo $heatcolor; ?>;"><?php echo $temp["heatindex"]."°".$temp["units"];?></div>
+<div class="divTableCell" style="border-left: 5px solid <?php echo $chillcolor; ?>;"><?php echo $temp["windchill"]."°".$temp["units"];?></div>
 
 </div>
 </div>
