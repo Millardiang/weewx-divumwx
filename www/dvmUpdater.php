@@ -114,14 +114,6 @@ var b=setInterval(function(){c.load("<?php echo $position18; ?>")},<?php echo $c
 (function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position19").show()}});var c=a("#position19");c.load("<?php echo $position19; ?>");
 var b=setInterval(function(){c.load("<?php echo $position19; ?>")},<?php echo $cycles19; ?>)})})(jQuery); // 60 seconds
 
-//update the moonphase and earth image
-var refreshId;$(document).ready(function(){moonearthimage()});function moonearthimage(){$.ajax({cache:true,success:function(a){$("#moonearthimage").html(a);<?php if (
-    $moonRefresh > 0
-) {
-    echo "setTimeout(moonearthimage, 3600000)";
-} ?>},
-	type:"GET",url:"dvmGetMoonEarth.php"})};
-
 //update the AQI data
 var refreshId;$(document).ready(function(){aqidata()});function aqidata(){$.ajax({cache:true,success:function(a){$("#aqidata").html(a);<?php if (
     $aqiRefresh > 0
