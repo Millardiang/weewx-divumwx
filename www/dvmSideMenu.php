@@ -70,7 +70,8 @@
         </li>';
       }
       if ($extralinks == 'yes') {
-        echo '<li class="header sub">LINKS <img class="menuimg" src="img/arrowiconlinkS.svg" alt=""/>';
+        echo '<li class="header sub">LINKS <img class="menuimg" src="img/arrowiconlink.svg
+" alt=""/>';
         echo '<ul>';
         if ($linkWU == 'yes') {
             echo '<li>
