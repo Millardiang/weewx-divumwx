@@ -1,29 +1,47 @@
-# $Id: divumwx.py mofied for DivumWX by Ian Millard based on crt.py by mwall $
-# DivumWX WebServices added by Jerry Dietrich
-# Copyright 2013-2016 Matthew Wall
+##############################################################################
+#
+# divumwx.py is a collection of WeeWX Services, assembled by Ian Millard,
+# which generate realtime data in various formats used by the weewx-Divumwx
+# skin template.
+# 
+# The services are listed below.
+#
+##############################################################################
+# crt.py
+# Copyright 2013-2020 Matthew Wall
+# Distributed under terms of the GPLv3
+# thanks to gary roderick for significant contributions to this code
+#
+##############################################################################
+#
+# lastnonzero.py
+#
+# Copyright (c) 2020 Tom Keffer <tkeffer@gmail.com>
+#
+# See the file LICENSE.txt for your full rights.
+#
+##############################################################################
+#
+# loopdata.py
+#
+# Copyright (C)2022 by John A Kline (john@johnkline.com)
+# Distributed under the terms of the GNU Public License (GPLv3)
+#
+# LoopData is a WeeWX service that generates a json file (loop-data.txt)
+# containing values for the observations in the loop packet; along with
+# today's high, low, sum, average and weighted averages for each observation
+# in the packet.
+#
+##############################################################################
+#
+# WebServices added by Jerry Dietrich and Ian Millard
+#
+##############################################################################
+# 
+# Other adaptations by Ian Millard
+#
+##############################################################################
 
-"""Emit loop data to file in DivumWX realtime format.
-Put this file in bin/user , then add this to your weewx.conf:
-[Engine]
-    [[Services]]
-        archive_services = ..., user.divumwx.DivumWXRealTime
-        report_services = ...., user.divumwx.SensorData
-        xtype_services = ...., user.divumwx.LastNonZeroService
-If no unit_system is specified, the units will be those of the database.
-Units and other parameters may be specified:
-[DivumWXRealTime]
-    unit_system = (US | METRIC | METRICWX)
-    wind_units = (meter_per_second | mile_per_hour | km_per_hour | knot)
-    temperature_units = (degree_C | degree_F)
-    pressure_units = (hPa | hPa | inHg)
-    rain_units = (mm | inch)
-    cloudbase_units = (foot | meter)
-Note that most of the code in this file is to calculate/lookup data that
-are not directly provided by weewx in a LOOP packet.
-"""
-
-# FIXME: consider in-memory caching so that database queries are not
-#        necessary after the first invocation
 
 import math
 import os
