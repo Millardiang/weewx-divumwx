@@ -22,7 +22,7 @@
     <ul class="divumwxsidebarMenuInner">
       <br/><br/><br/>
       <li class="header">ADMIN</li>
-        <li><a href="index.php" title="WEATHERSTATION HOME PAGE"><menumarkergreen></menumarkergreen> Home</a></li>
+        <li><a href="./admin/index.php" title="DvM Admin"><menumarkergreen></menumarkergreen> DvM Admin</a></li>
       <li class="header">UI THEME</li>
       <li>
         <a href="<?php echo ($theme == 'dark') ? '?theme=light' : '?theme=dark'; ?>">
@@ -70,8 +70,7 @@
         </li>';
       }
       if ($extralinks == 'yes') {
-        echo '<li class="header sub">LINKS <img class="menuimg" src="img/arrowiconlink.svg
-" alt=""/>';
+        echo '<li class="header sub">LINKS <img class="menuimg" src="img/arrowiconlink.svg" alt=""/>';
         echo '<ul>';
         if ($linkWU == 'yes') {
             echo '<li>
@@ -81,8 +80,7 @@
                 </a>
             </li>';
         }
-      }
-      if (!empty($linkCWOPID)){
+            if (!empty($linkCWOPID)){
           echo '<li>
                     <a href="https://weather.gladstonefamily.net/site/' . $linkCWOPID . '" title="' . $linkCWOPID . ' on CWOP" target="_blank">
                       <img class="menuimg" src="img/arrowiconlink.svg" alt=""/>
@@ -202,8 +200,9 @@
                     </a>
                   </li>';
       }
-      echo '</ul>
-              <li class="header">EXTRAS</li>';
+      echo '</ul>';
+      }
+      echo '<li class="header">EXTRAS</li>';
       if ($weatherflowoption == "yes") {
           echo '<li>
                     <a href="https://tempestwx.com/map/' . $lat . '/' . $lon . '/' . $weatherflowmapzoom . '" data-lity title="see your weather station on the official WeatherFlow map">
