@@ -9,7 +9,7 @@ This installation guide assumes that you are already reasonably familiar with We
 
 If you have not already done so, you must update your WeeWX installation to version 4.6.0 or later. This is required to facillitate nested copying during the skin install process. Follow the various installation type links on this page http://weewx.com/docs/usersguide.htm#installation_methods for instructions on updating. This version of DivumWX is compatible with WeeWX 4.9.1/Python3.x. It is not compatible with Python2 versions.
 
-DivumWX is also compatible WeeWX 5.x.x, however 'setup.py' install method is no longer possible with this version. The 'pip install' method has replaced setup.py. A dvm_installer configuration file for the 'pip install' method will be forthcoming. 
+DivumWX is also compatible WeeWX 5.x.x, however 'setup.py' install method is no longer possible with this version. The 'pip install' method has replaced setup.py. A dvm_installer configuration file for the 'pip install' method will be forthcoming. In the meantime if you wish to use DivumWX with a pip installation 0f WeeWX 5.x.x, it is possible to install manually.
 
 If you have not already done so update your WeeWX database to the wview_extended.schema (standard from WeeWX 4 onwards). Follow the directions in the section *Adding a new type to the database* (https://www.weewx.com/docs/customizing.htm#add_archive_type), except skip step #1 and in step #2, specify *schemas.wview_extended.schema* as the schema. 
 
