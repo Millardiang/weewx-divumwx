@@ -55,7 +55,7 @@ $cycles20 = $parsed_json[$position20]["cycle"];
 //$copyYear = 2023;
 $curYear = date("Y");
 $copyrightcredit =
-    "© DivumWX Team " .
+    "&copy; DivumWX Team " .
     $copyYear .
     ($copyYear != $curYear ? "-" . $curYear : "Copyright");
 
