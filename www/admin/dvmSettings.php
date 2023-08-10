@@ -16,6 +16,9 @@ if (isset($_SESSION['login_time']) && (time() - $_SESSION['login_time'] > 3600))
 	header("Location: index.php");
 	exit;
 }
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 $_SESSION['login_time'] = time();
 require_once './admCommon.php';
 $usrSettingsFile = '../userSettings.php';
@@ -65,7 +68,16 @@ $otherRowOptions = [
 				flex: 0 1 300px;
 				height: 35px;
 			}
+			#notificationContainer {
+				max-height: 30px;
+				overflow: hidden;
+				transition: max-height 0.3s ease;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
 		</style>
+		<script src="assets/js/bootstrap-validate.js"></script>
 		<script>
 			function addOptionsToSelect(selectId, flag) {
 				fetch('assets/countries.json')
@@ -128,7 +140,7 @@ $otherRowOptions = [
 					<div class="menu">
 						<div class="menu-header">Navigation</div>
 						<div class="menu-item">
-							<a href="../../index.php" class="menu-link">
+							<a href="../index.php" class="menu-link">
 								<span class="menu-icon"><i class="bi bi-rocket-takeoff"></i></span>
 								<span class="menu-text">Return to Website</span>
 							</a>
@@ -241,6 +253,40 @@ $otherRowOptions = [
 										<p>Misc System Settings</p>
 										<div class="card">
 											<div class="list-group list-group-flush">
+												<div class="list-group-item d-flex align-items-center">
+													<div class="flex-1 text-break">
+														<div>Block Your IP from Site Visits count?</div>
+														<div class="text-inverse text-opacity-50 d-flex align-items-center">
+															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php $stripLocaltxt = ($stripLocal == 1) ? "Yes" : "No"; echo $stripLocaltxt; ?></span>
+														</div>
+													</div>
+													<div>
+														<div class="form-check">
+															<input class="newElement form-check-input" type="radio" name="newstripLocal" id="newstripLocalYes"<?php echo ($stripLocal == '1') ? 'checked' : ''; ?> value="1">
+															<label class="form-check-label" for="newstripLocalYes">
+																Yes
+															</label>
+														</div>
+														<div class="form-check">
+															<input class="newElement form-check-input" type="radio" name="newstripLocal" id="newstripLocalNo"<?php echo ($stripLocal == '0') ? 'checked' : ''; ?> value="0">
+															<label class="form-check-label" for="newstripLocalNo">
+																No
+															</label>
+														</div>
+													</div>
+												</div>
+												<div class="list-group-item d-flex align-items-center">
+													<div class="col-4">
+														<div>Your Local IP</div>
+														<div>
+															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php echo $localIP; ?></span>
+														</div>
+													</div>
+													<div class="input-group justify-content-end">
+														<input type="text" id="newlocalIP" name="newlocalIP" class="newElement form-control someInput" placeholder="Enter your Local IP Address" onblur="validateAndAlert(this.value)">
+														&nbsp;<div id="notificationContainer"></div>
+													</div>
+												</div>
 												<div class="list-group-item d-flex align-items-center">
 													<div class="col-4">
 														<div>Date Format</div>
@@ -1218,22 +1264,21 @@ $otherRowOptions = [
 						<button type="button" class="btn-close" data-bs-dismiss="toast"></button>
 					</div>
 					<div class="toast-body">
-						New userSettings.php successfully created and an archive file of the previous version created.
+						There has been an error creating the userSettings.php file. Please check the log file.
+					</div>
+				</div>
+				<div class="toast fade mb-3 hide" data-autohide="false" data-bs-delay="5000" id="success">
+						<div class="toast-header">
+							<i class="fas fa-info-circle text-muted me-2"></i>
+							<strong class="me-auto">Another Toast</strong>
+							<button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+						</div>
+						<div class="toast-body">
+							New userSettings.php successfully created and an archive file of the previous version created.
+						</div>
 					</div>
 				</div>
 			</div>
-			<div class="toast fade mb-3 hide" data-autohide="false" data-bs-delay="5000" id="success">
-					<div class="toast-header">
-						<i class="fas fa-info-circle text-muted me-2"></i>
-						<strong class="me-auto">Another Toast</strong>
-						<button type="button" class="btn-close" data-bs-dismiss="toast"></button>
-					</div>
-					<div class="toast-body">
-						New userSettings.php successfully created and an archive file of the previous version created.
-					</div>
-				</div>
-			</div>
-
 			<div class="modal fade" id="timeFormatModal">
 				<div class="modal-dialog modal-xl">
 					<div class="modal-content">
@@ -1500,6 +1545,30 @@ $otherRowOptions = [
 				});
 			});
 		</script>
-
+		<script>
+			function ValidateIPaddress(ip) {
+			    const pattern = /^(((1?[1-9]?|10|2[0-4])\d|25[0-5])($|\.(?!$))){4}$/;
+				return pattern.test(ip)
+			}
+			function validateAndAlert(ip) {
+				var container = document.getElementById('notificationContainer');
+				container.innerHTML = '';
+				if (ip === '') {
+                	return;
+            	}
+				if (ValidateIPaddress(ip)) {
+					console.log("IP Address valid")
+				} else {
+					var alertDiv = document.createElement('div');
+					alertDiv.classList.add('alert', 'alert-dark', 'mt-3');
+					alertDiv.textContent = 'Invalid IP address';
+					container.appendChild(alertDiv);
+				}
+			}
+			document.getElementById('newlocalIP').addEventListener('input', function() {
+            	var container = document.getElementById('notificationContainer');
+            	container.innerHTML = '';
+        	});
+		</script>
 	</body>
 </html>

@@ -66,7 +66,7 @@ require_once './admCommon.php';
 				<div class="menu">
 					<div class="menu-header">Navigation</div>
 					<div class="menu-item">
-						<a href="../../index.php" class="menu-link">
+						<a href="../index.php" class="menu-link">
 							<span class="menu-icon"><i class="bi bi-rocket-takeoff"></i></span>
 							<span class="menu-text">Return to Website</span>
 						</a>
