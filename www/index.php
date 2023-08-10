@@ -11,7 +11,8 @@
 # Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
 #                                                                                                                   #
 #####################################################################################################################
-
+?>
+<?php
   if (!file_exists("userSettings.php")) {
     copy("initial_userSettings.php", "userSettings.php");
   }
@@ -234,9 +235,9 @@ include_once ('dvmFooter.php');
       </div>
     </div>
   </header>
-    <?php
-      include_once ('dvmUpdater.php');
-      include_once ('dvmSideMenu.php');
+<?php
+  include_once ('dvmUpdater.php');
+  include_once ('dvmSideMenu.php');
       //Add visits by country to admin database. No personal info is kept by this, ip is discarded
       $geoplugin = new geoPlugin();
       $geoplugin->locate($_SERVER['REMOTE_ADDR']);
