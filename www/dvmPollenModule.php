@@ -31,21 +31,21 @@ else if ($pollen["grass_index"]==1){$pollen["grass_risk"]="Very Low";$pollen["gr
 else if ($pollen["grass_index"]==2){$pollen["grass_risk"]="Low";$pollen["grass_color"]="#59C239";}
 else if ($pollen["grass_index"]==3){$pollen["grass_risk"]="Medium";$pollen["grass_color"]="#F19E38";}
 else if ($pollen["grass_index"]==4){$pollen["grass_risk"]="High";$pollen["grass_color"]="#EA3323";}
-else if ($pollen["grass_index"]==5){$pollen["grass_risk"]="Very High";$pollen["grass_color"]="#781B14";}
+else if ($pollen["grass_index"]==5){$pollen["grass_risk"]="Very High";$pollen["grass_color"]="#720e9e";}
 
 if ($pollen["tree_index"]==0){$pollen["tree_risk"]="None";$pollen["tree_color"]="#cecece";}
 else if ($pollen["tree_index"]==1){$pollen["tree_risk"]="Very Low";$pollen["tree_color"]="#6AE456";}
 else if ($pollen["tree_index"]==2){$pollen["tree_risk"]="Low";$pollen["tree_color"]="#59C239";}
 else if ($pollen["tree_index"]==3){$pollen["tree_risk"]="Medium";$pollen["tree_color"]="#F19E38";}
 else if ($pollen["tree_index"]==4){$pollen["tree_risk"]="High";$pollen["tree_color"]="#EA3323";}
-else if ($pollen["tree_index"]==5){$pollen["tree_risk"]="Very High";$pollen["tree_color"]="#781B14";}
+else if ($pollen["tree_index"]==5){$pollen["tree_risk"]="Very High";$pollen["tree_color"]="#720e9e";}
 
 if ($pollen["weed_index"]==0){$pollen["weed_risk"]="None";$pollen["weed_color"]="#cecece";}
 else if ($pollen["weed_index"]==1){$pollen["weed_risk"]="Very Low";$pollen["weed_color"]="#6AE456";}
 else if ($pollen["weed_index"]==2){$pollen["weed_risk"]="Low";$pollen["weed_color"]="#59C239";}
 else if ($pollen["weed_index"]==3){$pollen["weed_risk"]="Medium";$pollen["weed_color"]="#F19E38";}
 else if ($pollen["weed_index"]==4){$pollen["weed_risk"]="High";$pollen["weed_color"]="#EA3323";}
-else if ($pollen["weed_index"]==5){$pollen["weed_risk"]="Very High";$pollen["weed_color"]="#781B14";}
+else if ($pollen["weed_index"]==5){$pollen["weed_risk"]="Very High";$pollen["weed_color"]="#720e9e";}
 
 ?>
 
