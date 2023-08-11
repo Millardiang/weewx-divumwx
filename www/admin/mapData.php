@@ -7,6 +7,7 @@
         $query->execute();
         $visits = $query->fetchAll(PDO::FETCH_ASSOC);
         $visitData = array();
+        $totalVisits = 0;
         foreach ($visits as $visit) {
             $country = $visit['countryName'];
             $region = $visit['regionName'];
@@ -33,6 +34,7 @@
                 }
                 $visitData[$country]['regions'][$region]['cities'][$city]['visit_count'] += $visit_count;
             }
+            $totalVisits += $visit_count;
         }
         $formattedData = array();
         foreach ($visitData as $country => $countryData) {
@@ -64,18 +66,8 @@
             $countryEntry['regions'] = $regions;
             $formattedData[] = $countryEntry;
         }
-        $query = $db->prepare("SELECT c.countryName, SUM(v.visit_count) AS total_visits FROM visits v JOIN countries c ON v.countryCode = c.countryCode GROUP BY c.countryName ORDER BY total_visits DESC LIMIT 10");
-        $query->execute();
-        $results = $query->fetchAll(PDO::FETCH_ASSOC);
-        $legendData = [];
-        foreach($results as $row){
-            $legendData[] = [
-                'name' => $row['countryName'],
-                'visit_count' => $row['total_visits']
-            ];
-        }
         $output = array(
-            'legend' => $legendData,
+            'total_visits' => $totalVisits,
             'data' => $formattedData
         );
         header('Content-Type: application/json');

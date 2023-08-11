@@ -18,6 +18,7 @@
   }
   include_once ('dvmCombinedData.php');
   include_once ('webserver_ip_address.php');
+  require_once ('admin/assets/classes/geoplugin.class.php');
   date_default_timezone_set($TZ);
   header('Content-type: text/html; charset=utf-8');
   error_reporting(0);
@@ -234,7 +235,6 @@ include_once ('dvmFooter.php');
       </div>
     </div>
   </header>
-</html>
 <?php
   include_once ('dvmUpdater.php');
   include_once ('dvmSideMenu.php');
@@ -247,7 +247,6 @@ include_once ('dvmFooter.php');
       $lat = $geoplugin->latitude;
       $long = $geoplugin->longitude;
       $adminDB = __DIR__ . DIRECTORY_SEPARATOR . 'admin' . DIRECTORY_SEPARATOR . 'db' . DIRECTORY_SEPARATOR . 'dvmAdmin.db3';
-      try {
           $db = new PDO("sqlite:" . $adminDB);
           $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
           $regionName = empty($regionName) ? "Unknown" : $regionName;
@@ -275,9 +274,5 @@ include_once ('dvmFooter.php');
               $insertStmt->execute();
           }
           $db = null;
-      } catch (PDOException $e) {
-          echo "Database error: " . $e->getMessage();
-          exit;
-      }
-
     ?>
+</html>
