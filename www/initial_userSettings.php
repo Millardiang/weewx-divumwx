@@ -14,17 +14,19 @@
 <?php
 $themelayout = "5"; //4, 5, tablet
 $TZ = "Europe/London";
+$stripLocal = 1;
+$localIP = "0.0.0.0";
 $extralinks = "yes";
 $sbLang = "yes";
-$dateFormat = "d-m-Y"; //m-d-Y, Y-m-d
-$timeFormat = "H:i:s"; //g:i:s, g:i:s a
-$timeFormatShort = "H:i"; //g:i, g:i a
-$clockformat = "24"; //12, 24
-$advisoryzone = "uk"; //uk, na, eu, au, rw (= UK, North America, Europe, Australia, Rest of World)
-$aqInUse = "yes"; // yes, no
-$aqZone = "uk";//uk, us, ei, ci, au, (= UK DAQI, US EPS, Europe EAQI, Europe CAQI, Australia)
-$aqSource = "weewx"; //purple, weewx, sds
-$lightningSource = 1; // 0 = Boltek, 1 = all
+$dateFormat = "d-m-Y";
+$timeFormat = "H:i:s";
+$timeFormatShort = "H:i";
+$clockformat = "24";
+$advisoryzone = "uk";
+$aqInUse = "yes";
+$aqZone = "uk";
+$aqSource = "weewx";
+$lightningSource = 1;
 $position2 = "dvmAirqualityTop.php";
 $position3 = "dvmLightningTop.php";
 $position5 = "dvmTemperatureModule.php";
@@ -55,14 +57,14 @@ $notifications = "yes";
 $notifyWind = "yes";
 $notifyEarthquake = "yes";
 $notifyMagnitude = 3;
-$linkWU = "no";
-$linkWUNewDash = "no";
-$WUid = "";
+$linkWU = "yes";
+$linkWUNewDash = "yes";
+$WUid = "IYOURWUKWY";
 $linkCWOPID = "";
 $linkFindUID = "";
-$linkNOAA = "";
-$linkMADIS = "";
-$linkMesoWest = "";
+$linkNOAA = "yes";
+$linkMADIS = "yes";
+$linkMesoWest = "yes";
 $linkWeatherCloudID = "";
 $linkWindyID = "";
 $linkAWEKASID = "";
