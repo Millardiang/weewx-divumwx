@@ -338,6 +338,7 @@ $lang['WindTop']                 = 'Month | Year Maximum Wind Speed';
 $lang['temperatureModule']       = 'Temperature';
 $lang['forecastModule']          = 'Forecast';
 $lang['currentModule']           = 'Current Conditions';
+$lang['actualModule']            = 'Summary of Actual Conditions';
 $lang['windModule']              = 'Wind Speed | Direction';
 $lang['barometerModule']         = 'Barometer';
 $lang['solarDialModule']         = 'Solar Dial';
