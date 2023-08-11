@@ -1,61 +1,49 @@
-<?php
-#####################################################################################################################                                                                                                        #
-#                                                                                                                   #
-# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
-#                                                                                                                   #
-# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
-#                                                                                                                   #
-# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
-#                                                                                                                   #
-# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
-#                                                                                                                   #
-#####################################################################################################################
-?>
 <?php 
-//include('fixedSettings.php');
 include('dvmCombinedData.php');
 error_reporting(0); 
 $result = date_sun_info(time(), $lat, $lon);
 $suns2 = date('G.i', $result['sunset']);
 $sunrs2 = date('G.i', $result['sunrise']);
 $now = date('G.i');
- //divumwx wxcheck API aviation metar script May 2018 
+ //divumwx wxcheck API
 $json_string = file_get_contents("jsondata/me.txt");
-$parsed_json = json_decode($json_string);
-$metartime = $parsed_json->{'data'}[0]->{'observed'};
-$metarraw = $parsed_json->{'data'}[0]->{'raw_text'};
-$metarstationid = $parsed_json->{'data'}[0]->{'icao'};
-$metarstationname = $parsed_json->{'data'}[0]->{'station'}->{'name'};
-
-$metarlat = $parsed_json->{'data'}[0]->{'station'}->{'geometry'}->{'coordinates'}[1];
-$metat34lon = $parsed_json->{'data'}[0]->{'station'}->{'geometry'}->{'coordinates'}[0];
-$airport1dist = round(distance($lat, $lon, $metarlat, $metat34lon));
-$metarpressurehg = $parsed_json->{'data'}[0]->{'barometer'}->{'hg'};  
-$metarpressuremb = $parsed_json->{'data'}[0]->{'barometer'}->{'mb'};
-$metarconditions = $parsed_json->{'data'}[0]->{'conditions'}[0]->{'code'};
-$metarconditionstext = $parsed_json->{'data'}[0]->{'conditions'}[0]->{'text'};
-$metarclouds = $parsed_json->{'data'}[0]->{'clouds'}[0]->{'code'};
-$metarcloudstext = $parsed_json->{'data'}[0]->{'clouds'}[0]->{'text'};
-$metardewpointc = $parsed_json->{'data'}[0]->{'dewpoint'}->{'celsius'};
-$metardewpointf = $parsed_json->{'data'}[0]->{'dewpoint'}->{'fahrenheit'};
-$metartemperaturec = $parsed_json->{'data'}[0]->{'temperature'}->{'celsius'};
-$metartemperaturef = $parsed_json->{'data'}[0]->{'temperature'}->{'fahrenheit'};
-$metarhumidity = $parsed_json->{'data'}[0]->{'humidity'}->{'percent'};
-$metarvisibility = $parsed_json->{'data'}[0]->{'visibility'}->{'meters'};
-$metarwindir = $parsed_json->{'data'}[0]->{'wind'}->{'degrees'};
-$metarwindspeedmph = $parsed_json->{'data'}[0]->{'wind'}->{'speed_mph'};
-$metarwindspeedkmh = number_format($metarwindspeedmph*1.60934,0);//kmh
-$metarwindspeedkts = $parsed_json->{'data'}[0]->{'wind'}->{'speed_kts'};
-$metarwindspeedms = number_format($metarwindspeedmph*0.44704,1);
-$metarraininches = $parsed_json->{'data'}[0]->{'rain_in'};
-$metarrainmm = number_format($metarraininches*25.4,2);
+$parsed_json = json_decode($json_string, true);
+$metartime = $parsed_json["data"][0]["observed"];
+$metarraw = $parsed_json["data"][0]["raw_text"];
+$metarstationid = $parsed_json["data"][0]["icao"];
+$metarstationname = $parsed_json["data"][0]["station"]["name"];
+$metarlat = $parsed_json["data"][0]["station"]["geometry"]["coordinates"][1];
+$metarlon = $parsed_json["data"][0]["station"]["geometry"]["coordinates"][0];
+$airport1dist = round(distance($lat, $lon, $metarlat, $metarlon));
+$metarpressurehg = $parsed_json["data"][0]["barometer"]["hg"];  
+$metarpressuremb = $parsed_json["data"][0]["barometer"]["mb"];
+$metarclouds = $parsed_json["data"][0]["clouds"][0]["code"];
+$metarcloudstext = $parsed_json["data"][0]["clouds"][0]["text"];
+$metardewpointc = $parsed_json["data"][0]["dewpoint"]["celsius"];
+$metardewpointf = $parsed_json["data"][0]["dewpoint"]["fahrenheit"];
+$metartemperaturec = $parsed_json["data"][0]["temperature"]["celsius"];
+$metartemperaturef = $parsed_json["data"][0]["temperature"]["fahrenheit"];
+$metarhumidity = $parsed_json["data"][0]["humidity"]["percent"];
+$metarvisibility = $parsed_json["data"][0]["visibility"]["meters"];
+$metarwindir = $parsed_json["data"][0]["wind"]["degrees"];
+$metarwindspeedmph = $parsed_json["data"][0]["wind"]["speed_mph"];
+$metarwindspeedkmh = $parsed_json["data"][0]["wind"]["speed_kph"]; // kmh
+$metarwindspeedkts = $parsed_json["data"][0]["wind"]["speed_kts"];
+$metarwindspeedms = $parsed_json["data"][0]["wind"]["speed_mps"]; // m/s
 $metarvisibility = str_replace(',', '', $metarvisibility);
-$metarvismiles = number_format($metarvisibility*0.000621371,1);
-$metarviskm = number_format($metarvisibility*0.00099999969062399994,1);
+$metarvismiles = $parsed_json["data"][0]["visibility"]["miles"]; // miles
+$metarviskm = number_format($metarvisibility / 1000,1); // km/h
 
 // start the divumwx icon output and descriptions
 if($metarconditions == '-SHRA'){
 if ($now >$suns2 ){$sky_icon = 'rain.svg';} 
+else if ($now <$sunrs2 ){$sky_icon = 'rain.svg';} 
+else $sky_icon = 'rain.svg'; 
+$sky_desc = 'Light Rain <br>Showers';
+}
+//rain 
+else if($metarconditions == 'SHRA'){
+if ($now >$suns2 ){$sky_icon =' rain.svg';} 
 else if ($now <$sunrs2 ){$sky_icon = 'rain.svg';} 
 else $sky_icon = 'rain.svg'; 
 $sky_desc = 'Light Rain <br>Showers';
@@ -291,7 +279,6 @@ else if ($now <$sunrs2 ){$sky_icon = 'dust-night.svg';}
 else $sky_icon = 'dust-day.svg'; 
 $sky_desc = 'Volcanic Ash <br>Conditions';
 }
-
 //+FC
 else if($metarconditions == '+FC'){
 if ($now >$suns2 ){$sky_icon = 'tornado.svg';} 
@@ -323,9 +310,9 @@ $sky_desc = 'Clear <br>Conditions';
 }
 //few
 else if($metarclouds == 'FEW'){
-if ($now >$suns2 ){$sky_icon = 'mostly-clear-night.svg';} 
-else if ($now <$sunrs2 ){$sky_icon = 'mostly-clear-night.svg';} 
-else $sky_icon = 'mostly-clear-day.svg'; 
+if ($now >$suns2 ){$sky_icon = 'partly-cloudy-night.svg';} 
+else if ($now <$sunrs2 ){$sky_icon = 'partly-cloudy-night.svg';} 
+else $sky_icon = 'partly-cloudy-day.svg'; 
 $sky_desc = 'Partly Cloudy <br>Conditions';
 }
 //scattered clouds
@@ -358,7 +345,7 @@ $sky_desc = 'Overcast Conditions';
 }
 //offline
 else{
-  $sky_icon = $offline;
+  $sky_icon = 'not-available.svg';
   $sky_desc = 'Data Offline';
 };
 ?>
@@ -513,7 +500,7 @@ stationid{font-size:1.4em;font-family:weathertext2;color:#009bb4}
 .pressure{position:absolute;float:left;margin-top:60px;text-align:left;}
 </style>
 
-<div class="divumwxdarkbrowser" url="<?php echo $stationlocation;?> City Airport Conditions"></div>
+<div class="divumwxdarkbrowser" url="<?php echo $metarstationid;?> <?php echo $metarstationname;?> Conditions"></div>
   
 <main class="grid">
 
@@ -916,10 +903,11 @@ echo "Metar: " .$metarraw."";?>
 </div>
 
 <style>
+  a { text-decoration: none; }
 .yricons {
   position: relative;
   margin-top: 20px;
-  margin-left: 25px;
+  margin-left: 40px;
 }
 </style>
 
@@ -937,14 +925,14 @@ $date = strtotime($date) + 60 * 60 * $UTC; echo date('jS M H:i',$date);
   <article>
   <div class=actualt style="background:teal;color:white;">&nbsp;&nbsp API  Info</div>  
   <div class="lotemp">
-  <?php echo $info?> Data Provided by </span><a href="https://www.checkwx.com/weather/<?php echo $icao1;?>" title="https://www.checkwx.com/weather/<?php echo $icao1;?>" target="_blank" ><br><img src=img/checkwx.svg width=130px alt="https://www.checkwx.com/weather/<?php echo $icao1;?>"></a></span> 
+  <?php echo $info?> Data Provided by </span><a href="https://www.checkwx.com/<?php echo $icao1;?>" title="https://www.checkwx.com/<?php echo $icao1;?>" target="_blank" ><br><img src=img/checkwx.svg width=130px alt="https://www.checkwx.com/<?php echo $icao1;?>"></a></span> 
   </article>  
   <article>
   <div class=actualt style="background:teal;color:white;">&nbsp;&nbsp &copy; Info</div>  
   <div class="lotemp">
    <br><br>
   <?php echo $info?> Guide Info provided by <a href="https://en.wikipedia.org/wiki/METAR" title="https://en.wikipedia.org/wiki/METAR" target="_blank" style="font-size:9px;">Metar-Wikipedia </a>
-   </span><br><div class="yricons"><?php echo $info?> Animated Icons by Yr.no <img src="img/bm.svg" width="14px"></div></span></div> 
+   </span><br><div class="yricons"><a href="https://bas.dev/work/meteocons" target="_blank">&nbsp;&nbsp; Animated Icons by <img src="img/bm.svg" width="14px"></a></div></span></div> 
   </div>
 </article> 
    
