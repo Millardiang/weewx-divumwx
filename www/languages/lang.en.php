@@ -351,5 +351,6 @@ $lang['moonPhaseModule']         = 'Current Moonphase';
 $lang['earthquakeModule']        = 'Earthquake';
 $lang['indoorTempModule']        = 'Inside Conditions';
 $lang['Anemometer']              = 'Anemometer';
+$lang['PollenModule']            = 'Pollen Risk Forecast';
 
 ?>
