@@ -150,7 +150,7 @@ Aurora scatter communications using specialised operating techniques allows comm
               
   </article> 
   <article>
-  <div class=actualt> &nbsp © Information</div>  
+  <div class=actualt> &copy; Information</div>  
   <?php echo $info ;?> Data Provided by <a href="https://www.swpc.noaa.gov/products/station-k-and-indices" title="https://www.swpc.noaa.gov/products/station-k-and-indices" target="_blank"><br>NATIONAL OCEANIC AND ATMOSPHERIC ADMINISTRATION</a> 
   
         <br>  <br> <br>     

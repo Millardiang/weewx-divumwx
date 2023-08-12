@@ -19,13 +19,11 @@ darkbrowser[url]:after{content:attr(url);font-size:14px;text-align:center;positi
 
 <body>
 <?php
-  echo '<div class="divumwx
-darkbrowser" url="Lightning strikes - Central England"></div>';
+  echo '<div class="divumwx darkbrowser" url="Lightning strikes - Central England"></div>';
   echo '<div class="roundcornerframe">';
   //echo '<div style=" background: #222328; webkit-border-radius: 0px; -moz-border-radius: 0px; border-radius: 0px; width: 84.5%; height: 85%; margin: 0 auto; overflow: hidden;">'; 
   echo '<iframe src="https://map.blitzortung.org/index.php?interactive=0&NavigationControl=0&FullScreenControl=0&Cookies=0&InfoDiv=1&MenuButtonDiv=1&ScaleControl=1&LinksCheckboxChecked=1&LinksRangeValue=10&MapStyle=1&MapStyleRangeValue=0&Advertisment=0#6.0/51.94/-0.987" width="791" height="470" frameborder="0"></iframe>';
   echo '</div>';
-  //https://skynetweather.com/html/divumwx
-/jsondata/stormForce.png
+  //https://skynetweather.com/html/divumwx/jsondata/stormForce.png
   ?>
 </body>

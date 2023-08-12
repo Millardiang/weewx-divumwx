@@ -1,4 +1,16 @@
 <?php
+#####################################################################################################################                                                                                                        #
+#                                                                                                                   #
+# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
+#                                                                                                                   #
+# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
+#                                                                                                                   #
+# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
+#                                                                                                                   #
+# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues #
+#                                                                                                                   #
+#####################################################################################################################
+
 session_start();
 if (isset($_GET['logout'])) {
     session_unset();
@@ -445,7 +457,7 @@ require_once './admCommon.php';
 											<li class="requirements leng">
 											<i class="fas fa-check text-success me-2"></i>
 											<i class="fas fa-times text-danger me-3"></i>
-											Your password must have at least 16 chars</li>
+											Your password must have at least 12 chars</li>
 											<li class="requirements big-letter">
 											<i class="fas fa-check text-success me-2"></i>
 											<i class="fas fa-times text-danger me-3"></i>
@@ -468,7 +480,7 @@ require_once './admCommon.php';
 								<input type="hidden" name="username" value="<?php echo $_SESSION['username']; ?>">
 								<input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>"><br />
 								<div class="text-md-center">
-									<button type="submit" id="submitBtn" class="btn" disabled>Submit</button>
+									<button type="submit" id="submitBtn" disabled>Submit</button>
 								</div>
 							</form>
 							<div class="alert alert-danger mt-3 d-none" role="alert" id="password-error"></div>
@@ -505,14 +517,6 @@ require_once './admCommon.php';
 
 			requirements.forEach((element) => element.classList.add("wrong"));
 
-			function updateSubmitButtonState() {
-				if (newPassword.value === verifyPassword.value) {
-					submitBtn.disabled = false;
-				} else {
-					submitBtn.disabled = true;
-				}
-			}
-
 			newPassword.addEventListener("focus", () => {
 				passwordAlert.classList.remove("d-none");
 				if (!newPassword.classList.contains("is-valid")) {
@@ -522,7 +526,7 @@ require_once './admCommon.php';
 
 			newPassword.addEventListener("input", () => {
 				let value = newPassword.value;
-				if (value.length < 16) {
+				if (value.length < 12) {
 					lengBoolean = false;
 				} else if (value.length > 15) {
 					lengBoolean = true;
@@ -604,11 +608,27 @@ require_once './admCommon.php';
 			});
 
 			verifyPassword.addEventListener("focus", () => {
-				updateSubmitButtonState();
+				if (verifyPassword.value === newPassword.value) {
+					verifyPassword.classList.add("is-valid");
+					verifyPassword.classList.remove("is-invalid");
+					submitBtn.disabled = false;
+				} else {
+					verifyPassword.classList.remove("is-valid");
+					verifyPassword.classList.add("is-invalid");
+					submitBtn.disabled = true;
+				}
 			});
 
 			verifyPassword.addEventListener("input", () => {
-				updateSubmitButtonState();
+				if (verifyPassword.value === newPassword.value) {
+					verifyPassword.classList.add("is-valid");
+					verifyPassword.classList.remove("is-invalid");
+					submitBtn.disabled = false;
+				} else {
+					verifyPassword.classList.remove("is-valid");
+					verifyPassword.classList.add("is-invalid");
+					submitBtn.disabled = true;
+				}
 			});
 
 			newPassword.addEventListener("blur", () => {
@@ -617,7 +637,7 @@ require_once './admCommon.php';
 		});
 	</script>
 	<script>
-		bootstrapValidate('#verifyPassword', 'matches:#newPassword:The passwords must match.');
+	//	bootstrapValidate('#verifyPassword', 'matches:#newPassword');
 	</script>
 	<script>
 		$(document).ready(function() {
