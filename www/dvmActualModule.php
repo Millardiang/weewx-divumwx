@@ -6,7 +6,7 @@ error_reporting(0);
 
 <!DOCTYPE html>
 <html>
-<title>summary actual conditions</title>
+<title>weather current conditions</title>
 
 <div class="chartforecast">
 <span class="yearpopup"><a alt="nearby metar station" title="nearby metar station" href="dvmMetarPopup.php" data-lity><?php echo $chartinfo;?><?php echo ' Nearby Metar';?>
@@ -49,7 +49,7 @@ else
 {
 $visibility = round($parsed_visibility['response'][0]['periods'][0]['visibilityKM'],0,PHP_ROUND_HALF_UP)."km";
 }
-$sky["cloud_cover"] = $sky["cloud_cover"]."%";
+
 if ($cloud_region[0] !== "Europe"){$sky["cloud_cover"] = $parsed_visibility['response'][0]['periods'][0]['sky'];}
  
 //current conditions using hardware values
@@ -132,6 +132,7 @@ else if($sky["cloud_cover"]<=62.5) {$sky["cloud_oktas"]="5 oktas";}
 else if($sky["cloud_cover"]<=75) {$sky["cloud_oktas"]="6 oktas";}
 else if($sky["cloud_cover"]<=87.5) {$sky["cloud_oktas"]="7 oktas";}
 else if($sky["cloud_cover"]<=100) {$sky["cloud_oktas"]="8 oktas";}
+$sky["cloud_cover"] = $sky["cloud_cover"]."%";
 
 if ($temp["units_label"] == "°C"){$current["temp_icon"] = "./img/meteocons/thermometer-celsius.svg";}
 else {$current["temp_icon"] = "./img/meteocons/thermometer-farenheit.svg";}
@@ -373,13 +374,10 @@ var text = svg.selectAll(null)
     .text(function(d) { return d.split("-")[1]; })
 
     .append("tspan")
-    .style("fill", baseTextColor)
-    .style("font-weight", "normal")
+    .style("fill", "#ff7c39")
+    .style("font-weight", "bold")
     .text(function(d) { return d.split("-")[2]; })
 
-    .append("tspan")
-    .style("fill", baseTextColor)
-    .text(function(d) { return d.split("-")[3]; });
 
 var data = ["Temperature "+"-"+"<?php echo $temp["outside_now"];?>"];
 
