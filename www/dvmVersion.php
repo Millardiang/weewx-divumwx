@@ -10,7 +10,6 @@
 # Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
 #                                                                                                                   #
 #####################################################################################################################
-?>
-<?php
-$templateversion = "DVM-<maxblue>build 0.6.6</maxblue>";
+
+$templateversion = "DVM-<maxblue>0.6.6</maxblue>alpha";
 ?>
