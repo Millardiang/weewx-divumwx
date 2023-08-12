@@ -157,7 +157,7 @@ for ($j = 0;$j < 50;$j++)
 } ?>
 
   <article>
-   <div class=actualt> &nbsp © Information</div>
+   <div class=actualt>  &copy; Information</div>
    <span style="font-size:8px;">  
    
   <br>

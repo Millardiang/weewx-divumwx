@@ -235,9 +235,9 @@ include_once ('dvmFooter.php');
       </div>
     </div>
   </header>
-<?php
-  include_once ('dvmUpdater.php');
-  include_once ('dvmSideMenu.php');
+    <?php
+      include_once ('dvmUpdater.php');
+      include_once ('dvmSideMenu.php');
       //Add visits by country to admin database. No personal info is kept by this, ip is discarded
       $geoplugin = new geoPlugin();
       $geoplugin->locate($_SERVER['REMOTE_ADDR']);
@@ -247,32 +247,31 @@ include_once ('dvmFooter.php');
       $lat = $geoplugin->latitude;
       $long = $geoplugin->longitude;
       $adminDB = __DIR__ . DIRECTORY_SEPARATOR . 'admin' . DIRECTORY_SEPARATOR . 'db' . DIRECTORY_SEPARATOR . 'dvmAdmin.db3';
-          $db = new PDO("sqlite:" . $adminDB);
-          $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-          $regionName = empty($regionName) ? "Unknown" : $regionName;
-          $cityCode = empty($cityCode) ? "Unknown" : $cityCode;
-          $query = $db->prepare("SELECT * FROM visits WHERE countryCode = :countryCode AND regionName = :regionName AND cityName = :cityName");
-          $query->bindValue(':countryCode', $countryCode, PDO::PARAM_STR);
-          $query->bindValue(':regionName', $regionName, PDO::PARAM_STR);
-          $query->bindValue(':cityName', $cityCode, PDO::PARAM_STR);
-          $query->execute();
-          $row = $query->fetch(PDO::FETCH_ASSOC);
-          if ($row) {
-              $updateStmt = $db->prepare("UPDATE visits SET visit_count = visit_count + 1 WHERE countryCode = :countryCode AND regionName = :regionName AND cityName = :cityName");
-              $updateStmt->bindValue(':countryCode', $countryCode, PDO::PARAM_STR);
-              $updateStmt->bindValue(':regionName', $regionName, PDO::PARAM_STR);
-              $updateStmt->bindValue(':cityName', $cityCode, PDO::PARAM_STR);
-              $updateStmt->execute();
-          } else {
-              // Entry does not exist, insert a new one with visit_count set to 1
-              $insertStmt = $db->prepare("INSERT INTO visits (countryCode, regionName, cityName, lat, long, visit_count) VALUES (:countryCode, :regionName, :cityName, :lat, :long, 1)");
-              $insertStmt->bindValue(':countryCode', $countryCode, PDO::PARAM_STR);
-              $insertStmt->bindValue(':regionName', $regionName, PDO::PARAM_STR);
-              $insertStmt->bindValue(':cityName', $cityCode, PDO::PARAM_STR);
-              $insertStmt->bindValue(':lat', $lat, PDO::PARAM_STR);
-              $insertStmt->bindValue(':long', $long, PDO::PARAM_STR);
-              $insertStmt->execute();
-          }
-          $db = null;
+      $db = new PDO("sqlite:" . $adminDB);
+      $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+      $regionName = empty($regionName) ? "Unknown" : $regionName;
+      $cityCode = empty($cityCode) ? "Unknown" : $cityCode;
+      $query = $db->prepare("SELECT * FROM visits WHERE countryCode = :countryCode AND regionName = :regionName AND cityName = :cityName");
+      $query->bindValue(':countryCode', $countryCode, PDO::PARAM_STR);
+      $query->bindValue(':regionName', $regionName, PDO::PARAM_STR);
+      $query->bindValue(':cityName', $cityCode, PDO::PARAM_STR);
+      $query->execute();
+      $row = $query->fetch(PDO::FETCH_ASSOC);
+      if ($row) {
+          $updateStmt = $db->prepare("UPDATE visits SET visit_count = visit_count + 1 WHERE countryCode = :countryCode AND regionName = :regionName AND cityName = :cityName");
+          $updateStmt->bindValue(':countryCode', $countryCode, PDO::PARAM_STR);
+          $updateStmt->bindValue(':regionName', $regionName, PDO::PARAM_STR);
+          $updateStmt->bindValue(':cityName', $cityCode, PDO::PARAM_STR);
+          $updateStmt->execute();
+      } else {
+          $insertStmt = $db->prepare("INSERT INTO visits (countryCode, regionName, cityName, lat, long, visit_count) VALUES (:countryCode, :regionName, :cityName, :lat, :long, 1)");
+          $insertStmt->bindValue(':countryCode', $countryCode, PDO::PARAM_STR);
+          $insertStmt->bindValue(':regionName', $regionName, PDO::PARAM_STR);
+          $insertStmt->bindValue(':cityName', $cityCode, PDO::PARAM_STR);
+          $insertStmt->bindValue(':lat', $lat, PDO::PARAM_STR);
+          $insertStmt->bindValue(':long', $long, PDO::PARAM_STR);
+          $insertStmt->execute();
+      }
+      $db = null;
     ?>
 </html>

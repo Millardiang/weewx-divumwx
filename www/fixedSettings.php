@@ -10,15 +10,13 @@
 # Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
 #                                                                                                                   #
 #####################################################################################################################
-?>
-<?php
+
 include ('userSettings.php');
 include ('dvmVersion.php');
 error_reporting(0);
 $TZconf = $TZ; // PLEASE LEAVE it is fixed
 $UTC_offset = timezone_offset_get(timezone_open($TZ), new DateTime()) / 3600; // DO NOT CHANGE
 $forecastlocation = $stationlocation; //
-$version = $livedataFormat; // template version and type of source: Clientraw, MeteoBridge, Cumulus, etc (for display only)
 $emailform = $email; // PLEASE LEAVE FIXED
 
 $theme = isset($theme) ? $theme : "dark";
