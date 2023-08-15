@@ -129,7 +129,8 @@ zh-CN
 		} else if ( ini_get('allow_url_fopen') ) {
 			
 			//fall back to fopen()
-			$response = file_get_contents($host, 'r');
+			//$response = file_get_contents($host, 'r');
+			$response = file_get_contents($host);
 			
 		} else {
 

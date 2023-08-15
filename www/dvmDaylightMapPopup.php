@@ -68,22 +68,22 @@ echo "<font color='white'>"."World Daylight Map"."</font>";
             </a>
             <span></span>
             <a class="js-skip" data-skip="60" href="#">
-                ›
+                &rsaquo;
             </a>
         </p-->
         <!--p class="curr-date">
             <a class="js-skip big-jump" data-skip="-43200" href="#">
-                «
+                &laquo;
             </a>
             <a class="js-skip" data-skip="-1440" href="#">
-                ‹
+                &lsaquo;
             </a>
             <span></span>
             <a class="js-skip" data-skip="1440" href="#">
-                ›
+                &rsaquo;
             </a>
             <a class="js-skip big-jump" data-skip="43200" href="#">
-                »
+                &raquo;
             </a>
         </p-->
     </div>
