@@ -867,7 +867,7 @@ class DivumWXRealTime(StdService):
     def handle_new_archive(self, event):
         if self.prev_archive_time + 50 < time.time():
             self.prev_archive_time = time.time()
-            do_rsync_transfer(self.webserver_addresses, os.path.join(self.remote_html_root, "dvmHighcharts", "json/"), os.path.join(self.config_dict['StdReport']['dvmHighcharts'].get('HTML_ROOT'), 'json/'), self.config_dict['StdReport']['RSYNC'].get('user', None), self.config_dict['StdReport']['RSYNC'].get('port',None))
+            do_rsync_transfer(self.webserver_addresses, os.path.join(self.remote_html_root, "dvmhighcharts", "json/"), os.path.join(self.config_dict['StdReport']['dvmHighcharts'].get('HTML_ROOT'), 'json/'), self.config_dict['StdReport']['RSYNC'].get('user', None), self.config_dict['StdReport']['RSYNC'].get('port',None))
             #do_rsync_transfer(self.webserver_addresses, os.path.join(self.remote_html_root, "serverdata/"), os.path.join(self.config_dict['StdReport']['DivumWXReport'].get('HTML_ROOT'), 'serverdata/') if len(self.webserver_addresses) == 0 else '/tmp/divumwx/serverdata/', self.config_dict['StdReport']['RSYNC'].get('user', None), self.config_dict['StdReport']['RSYNC'].get('port',None))
         if self.cc != None:
             self.cc.update_cloud_cover(event)

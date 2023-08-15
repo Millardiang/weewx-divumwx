@@ -380,7 +380,7 @@ explode(" ", file_get_contents($livedata)));
     $temp["apptemp"] = $sdata["current.appTemp.formatted"];
     $temp["heatindex"] = $sdata["current.appTemp.formatted"];
     $temp["windchill"] = $sdata["current.windchill.formatted"];
-    $temp["humidex"] = $sdata["current.windchill.formatted"];
+    $temp["humidex"] = $sdata["current.humidex.formatted"];
     $temp["outside_24h_max"] = $sdata["24h.outTemp.max.formatted"];
     $temp["outside_24h_maxtime"] = date('D j H:i:s',  $sdata["24h.outTemp.maxtime.raw"]);
     $temp["outside_24h_min"] = $sdata["24h.outTemp.min.formatted"];
