@@ -33,7 +33,7 @@ date_default_timezone_set($TZ);
 
 if (empty ($lightning["alltime_strike_count"])) {$lightning['last_time'] =  "None";} else {$lightning['last_time'] =  date('jS M H:i',$lightning['last_time']);}
 
-if ($lightning["source"] == 0) {
+if ($lightningSource == 0) {
 
 $lightninglivedata = 'jsondata/NSDRealtime.txt';
 $file_live = file_get_contents($lightninglivedata);
@@ -142,7 +142,7 @@ else
 <script>
 
 	var theme = "<?php echo $theme;?>";
-	var source = "<?php echo $lightning["source"];?>";
+	var source = "<?php echo $lightningSource;?>";
 
 	var month = "<?php echo date('F Y');?>";
 	var year = "<?php echo date('Y');?>";
