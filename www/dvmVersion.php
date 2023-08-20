@@ -11,5 +11,5 @@
 #                                                                                                                   #
 #####################################################################################################################
 
-$templateversion = "DVM-<maxblue>0.6.6</maxblue>alpha";
+$templateversion = "DVM-<maxblue>0.6.7</maxblue>alpha";
 ?>
