@@ -53,6 +53,7 @@ require_once './admCommon.php';
 	<script src="assets/js/vendor.min.js"></script>
 	<script src="assets/js/app.min.js"></script>
 	<script src="assets/js/bootstrap-validate.js"></script>
+	<script src="assets/js/statsUpdate.js"></script>
 	<style>
 		.legend {
 			background-color: #7a7a7a;
@@ -98,6 +99,19 @@ require_once './admCommon.php';
 		.valid-feedback,.invalid-feedback {
 			margin-left: calc(2em + 0.25rem + 1.5rem);
 		}
+		.memSmTxt {
+			font-size: 0.8em; /* You can adjust the em value as needed */
+		}
+		.mem-label {
+			display: inline-block;
+			width: 90px; /* Adjust this width as needed */
+			font-weight: bold;
+		}
+		.mem-value {
+			display: inline-block;
+			width: 70px; /* Adjust this width as needed */
+		}
+
 	</style>
 </head>
 <body class="theme-blue">
@@ -162,7 +176,7 @@ require_once './admCommon.php';
 					<div class="menu-item">
 						<a href="./dvmModFiles.php" class="menu-link">
 							<span class="menu-icon"><i class="bi bi-gear"></i></span>
-							<span class="menu-text">Module Information</span>
+							<span class="menu-text">Module Info</span>
 						</a>
 					</div>
 					<div class="menu-item">
@@ -190,37 +204,48 @@ require_once './admCommon.php';
 					<div class="card mb-3">
 						<!-- BEGIN card-body -->
 						<div class="card-body">
-							<div class="d-flex fw-bold small mb-3">
-								<span class="flex-grow-1">Server Stats</span>
-								<a href="#" data-toggle="card-expand" class="text-inverse text-opacity-50 text-decoration-none"><i class="bi bi-fullscreen"></i></a>
-							</div>
-							<div class="col-xl-12">
-								<div class="card-body d-flex align-items-center text-inverse m-5px bg-inverse bg-opacity-10">
-									<div class="flex-fill">
-										<pre id="cpuStats"></pre>
-										<pre id="memStats"></pre>
-										<pre id="taskStats"></pre>
-										<pre id="tempStats"></pre>
+							<div class="row">
+								<div class="col-xl-6">
+									<div class="small text-inverse text-opacity-50 mb-3"><b class="fw-bold">CPU Stats</b></div>
+									<div class="card border-theme bg-theme bg-opacity-25 mb-3">
+										<div class="card-header border-theme fw-bold small text-inverse"><span id="cpuUpdate">Updated: </span></div>
+										<div class="card-body">
+											<div class="memSmTxt" id="cpuContainer"></div>
+										</div>
+										<div class="card-arrow">
+											<div class="card-arrow-top-left"></div>
+											<div class="card-arrow-top-right"></div>
+											<div class="card-arrow-bottom-left"></div>
+											<div class="card-arrow-bottom-right"></div>
+										</div>
 									</div>
 								</div>
-								<div class="card-arrow">
-									<div class="card-arrow-top-left"></div>
-									<div class="card-arrow-top-right"></div>
-									<div class="card-arrow-bottom-left"></div>
-									<div class="card-arrow-bottom-right"></div>
+								<div class="col-xl-6">
+									<div class="small text-inverse text-opacity-50 mb-3"><b class="fw-bold">Memory Stats</b></div>
+									<div class="card border-theme bg-theme bg-opacity-25 mb-3">
+										<div class="card-header border-theme fw-bold small text-inverse"><span id="memUpdate">Updated: </span></div>
+										<div class="card-body">
+											<div class="memSmTxt" id="memContainer"></div>
+										</div>
+										<div class="card-arrow">
+											<div class="card-arrow-top-left"></div>
+											<div class="card-arrow-top-right"></div>
+											<div class="card-arrow-bottom-left"></div>
+											<div class="card-arrow-bottom-right"></div>
+										</div>
+									</div>
 								</div>
 							</div>
 						</div>
-						<!-- END card-body -->
-
-						<!-- BEGIN card-arrow -->
 						<div class="card-arrow">
 							<div class="card-arrow-top-left"></div>
 							<div class="card-arrow-top-right"></div>
 							<div class="card-arrow-bottom-left"></div>
 							<div class="card-arrow-bottom-right"></div>
 						</div>
-						<!-- END card-arrow -->
+						<div class="hljs-container">
+							<pre><code class="xml hljs language-xml" data-url="assets/data/ui-card/code-7.json"></code></pre>
+						</div>
 					</div>
 					<!-- END card -->
 				</div>
@@ -298,17 +323,25 @@ require_once './admCommon.php';
 					<div class="card mb-3">
 						<!-- BEGIN card-body -->
 						<div class="card-body">
-							<!-- BEGIN title -->
-							<div class="d-flex fw-bold small mb-3">
-								<span class="flex-grow-1">System Versions</span>
-								<a href="#" data-toggle="card-expand" class="text-inverse text-opacity-50 text-decoration-none"><i class="bi bi-fullscreen"></i></a>
+							<div class="col">
+								<div class="card border-theme bg-theme bg-opacity-25 mb-3">
+									<div class="card-header border-theme fw-bold small text-inverse">System Info</div>
+									<div class="card-body">
+										<div class="d-flex align-items-center">Current Divum Version: <?php echo $curVersion; ?>&nbsp;&nbsp;<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i></div>
+										<div>Current Released Version: 0.6.6</div>
+										<div class="memSmTxt" id="osSystem"></div>
+										<div class="memSmTxt" id="upTime"></div>
+										<div class="memSmTxt" id="rebootTime"></div>
+									</div>
+									<div class="card-arrow">
+										<div class="card-arrow-top-left"></div>
+										<div class="card-arrow-top-right"></div>
+										<div class="card-arrow-bottom-left"></div>
+										<div class="card-arrow-bottom-right"></div>
+									</div>
+								</div>
 							</div>
-							Current Divum Version: <?php echo $curVersion; ?><br />
-							Current Released Version: ?<br />
 						</div>
-						<!-- END card-body -->
-
-						<!-- BEGIN card-arrow -->
 						<div class="card-arrow">
 							<div class="card-arrow-top-left"></div>
 							<div class="card-arrow-top-right"></div>
@@ -528,7 +561,7 @@ require_once './admCommon.php';
 				let value = newPassword.value;
 				if (value.length < 12) {
 					lengBoolean = false;
-				} else if (value.length > 15) {
+				} else if (value.length > 11) {
 					lengBoolean = true;
 				}
 
@@ -635,9 +668,6 @@ require_once './admCommon.php';
 				passwordAlert.classList.add("d-none");
 			});
 		});
-	</script>
-	<script>
-	//	bootstrapValidate('#verifyPassword', 'matches:#newPassword');
 	</script>
 	<script>
 		$(document).ready(function() {

@@ -1,21 +1,10 @@
 <?php
-#####################################################################################################################                                                                                                        #
-#                                                                                                                   #
-# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
-#                                                                                                                   #
-# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
-#                                                                                                                   #
-# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
-#                                                                                                                   #
-# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
-#                                                                                                                   #
-#####################################################################################################################
-?>
-<?php
-$themelayout = "5"; //4, 5, tablet
+$themelayout = "5";
 $TZ = "Europe/London";
+$trkVisits = 0;
 $stripLocal = 1;
 $localIP = "0.0.0.0";
+$webSrvr = 0;
 $extralinks = "yes";
 $sbLang = "yes";
 $dateFormat = "d-m-Y";
@@ -50,7 +39,6 @@ $email = "";
 $twitter = "";
 $since = "2021";
 $defaultlanguage = "en";
-$password = "";
 $flag = "en";
 $manifestShortName = "MYWX";
 $notifications = "yes";

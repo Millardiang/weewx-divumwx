@@ -107,7 +107,7 @@ require_once './admCommon.php';
 					<div class="menu-item">
 						<a href="./dvmModFiles.php" class="menu-link">
 							<span class="menu-icon"><i class="bi bi-gear"></i></span>
-							<span class="menu-text">Module Information</span>
+							<span class="menu-text">Module Info</span>
 						</a>
 					</div>
 					<div class="menu-item">
