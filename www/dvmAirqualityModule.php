@@ -604,8 +604,8 @@ else
 
 <script>
 
-	var aqiA = "<?php echo $airqual["aqi25"];?>";
-	var aqiB = "<?php echo $airqual["aqi10"];?>";
+	var aqiA = "<?php echo round($airqual["aqi25"]);?>";
+	var aqiB = "<?php echo round($airqual["aqi10"]);?>";
 	var pmA = "<?php echo $airqual["pm25"];?>";
 	var pmB = "<?php echo $airqual["pm10"];?>";
       
