@@ -415,7 +415,7 @@ $airqual["priority25"] = 2;
 
 }
 else if ($airqual["aqi25"] < 151 ){
-$airqual["image25"] = "./css/aqi/uhsfhair.svg?ver=1.4";
+$airqual["image25"] = "./css/aqi/uhfsair.svg?ver=1.4";
 $airqual["color25"] = "#ff7e00";
 $airqual["text25"] = "Unhealthy for Sensitive Groups";
 $airqual["priority25"] = 3;
@@ -454,7 +454,7 @@ if ($airqual["aqi10"] < 55 ){
     $airqual["priority10"] = 2;
     }
     else if ($airqual["aqi10"] < 255 ){
-    $airqual["image10"] = "./css/aqi/uhsfhair.svg?ver=1.4";
+    $airqual["image10"] = "./css/aqi/uhfsair.svg?ver=1.4";
     $airqual["color10"] = "#ff7e00";
     $airqual["text10"] = "Unhealthy for Sensitive Groups";
     $airqual["priority10"] = 3;

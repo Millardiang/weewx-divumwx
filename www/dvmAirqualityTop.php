@@ -237,7 +237,7 @@ $airqual["text"] = "Moderate Air Quality";
 
 }
 else if ($airqual["aqi25"] < 151 ){
-$airqual["image25"] = "./css/aqi/uhsfhair.svg?ver=1.4";
+$airqual["image25"] = "./css/aqi/uhfsair.svg?ver=1.4";
 $airqual["color25"] = "#ff7e00";
 $airqual["text"] = "Unhealthy for Sensitive Groups";
 
