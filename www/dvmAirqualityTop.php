@@ -329,6 +329,7 @@ $airqual["qualColor"] = $airqual["color25"];
 
 </style>
 <script>
+var theme = "<?php echo $theme;?>";
 	if (theme == 'dark') {
 var cityTextFill = "silver";}
 else
@@ -353,9 +354,7 @@ else
         var colorQ = "<?php echo $airqual["color25"];?>";
 		
 	var imageA = "<?php echo $airqual["image25"];?>";
-
-	var theme = "<?php echo $theme;?>";
-	
+		
    	var svg = d3.select(".aqiTop")
     			.append("svg")
     			//.style("background", "#292E35")

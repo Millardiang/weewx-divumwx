@@ -593,6 +593,7 @@ else {$airqual["text"] = $airqual["text10"];
 </style>
 
 <script>
+var theme = "<?php echo $theme;?>";
 	if (theme == 'dark') {
 var cityTextFill = "silver";}
 else
