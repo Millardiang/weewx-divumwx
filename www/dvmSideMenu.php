@@ -73,157 +73,110 @@
         echo '<li class="header sub">LINKS <img class="menuimg" src="img/arrowiconlink.svg" alt=""/>';
         echo '<ul>';
         if ($linkWU == 'yes') {
-            echo '<li>
-                <a href="' . (($linkWUNewDash == 'yes' || empty($linkWUNewDash)) ? 'https://www.wunderground.com/dashboard/pws/' : 'https://www.wunderground.com/personal-weather-station/dashboard?id=') . $id . '" title="' . $id . ' on Weather Underground" target="_blank">
-                    <img class="menuimg" src="img/wulogo.svg" style="width:30px" alt=""/>
-                    ' . $WUSid . ' on WU
-                </a>
-            </li>';
+          echo '<li>
+                  <a href="' . (($linkWUNewDash == 'yes' || empty($linkWUNewDash)) ? 'https://www.wunderground.com/dashboard/pws/' : 'https://www.wunderground.com/personal-weather-station/dashboard?id=') . $WUid . '" title="' . $WUid . ' on Weather Underground" target="_blank"><img class="menuimg" src="img/wulogo.svg" style="width:30px" alt=""/>' . $WUid . ' on WU</a>
+                </li>';
         }
-            if (!empty($linkCWOPID)){
+        if (!empty($linkCWOPID)){
           echo '<li>
-                    <a href="https://weather.gladstonefamily.net/site/' . $linkCWOPID . '" title="' . $linkCWOPID . ' on CWOP" target="_blank">
-                      <img class="menuimg" src="img/arrowiconlink.svg" alt=""/>
-                      ' . $linkCWOPID . ' on CWOP
-                    </a>
-                  </li>';
-      }
-      if (!empty($linkFindUID)) {
+                  <a href="https://weather.gladstonefamily.net/site/' . $linkCWOPID . '" title="' . $linkCWOPID . ' on CWOP" target="_blank"><img class="menuimg" src="img/arrowiconlink.svg" alt=""/>' . $linkCWOPID . ' on CWOP</a>
+                </li>';
+        }
+        if (!empty($linkFindUID)) {
           echo '<li>
-                    <a href="http://www.findu.com/cgi-bin/wxpage.cgi?call=' . $linkFindUID . '&last=48" title="' . $linkFindUID . ' on Findu.com" target="_blank">
-                      <img class="menuimg" src="img/arrowiconlink.svg" alt=""/>
-                      ' . $linkFindUID . ' on FindU.com
-                    </a>
-                  </li>';
-      }
-      if (($linkNOAA == 'yes') && (!empty($linkCWOPID) && (empty($linkNOAAID)))) {
+                  <a href="http://www.findu.com/cgi-bin/wxpage.cgi?call=' . $linkFindUID . '&last=48" title="' . $linkFindUID . ' on Findu.com" target="_blank"><img class="menuimg" src="img/arrowiconlink.svg" alt=""/>' . $linkFindUID . ' on FindU.com</a>
+                </li>';
+        }
+        if (($linkNOAA == 'yes') && (!empty($linkCWOPID) && (empty($linkNOAAID)))) {
           echo '<li>
-                    <a href="https://www.wrh.noaa.gov/mesowest/getobext.php?wfo=lox&sid=' . $linkCWOPID . '" title="' . $linkCWOPID . ' on NOAA Meso West" target="_blank">
-                      <img class="menuimg" src="img/noaa.svg" style="max-width:30px" alt=""/>
-                      ' . $linkCWOPID . ' on NOAA
-                    </a>
-                  </li>';
-      }
-      if ($linkNOAA == 'yes' && !empty($linkNOAAID)) {
+                  <a href="https://www.wrh.noaa.gov/mesowest/getobext.php?wfo=lox&sid=' . $linkCWOPID . '" title="' . $linkCWOPID . ' on NOAA Meso West" target="_blank"><img class="menuimg" src="img/noaa.svg" style="max-width:30px" alt=""/>' . $linkCWOPID . ' on NOAA</a>
+                </li>';
+        }
+        if ($linkNOAA == 'yes' && !empty($linkNOAAID)) {
           echo '<li>
-                    <a href="https://www.wrh.noaa.gov/mesowest/getobext.php?wfo=lox&sid=' . $linkNOAAID . '" title="' . $linkNOAAID . ' on NOAA Meso West" target="_blank">
-                      <img class="menuimg" src="img/noaa.svg" style="max-width:30px" alt=""/>
-                      ' . $linkNOAAID . ' on NOAA
-                    </a>
-                  </li>';
-      }
-      if ($linkMADIS == 'yes' && !empty($linkCWOPID)) {
+                  <a href="https://www.wrh.noaa.gov/mesowest/getobext.php?wfo=lox&sid=' . $linkNOAAID . '" title="' . $linkNOAAID . ' on NOAA Meso West" target="_blank"><img class="menuimg" src="img/noaa.svg" style="max-width:30px" alt=""/>' . $linkNOAAID . ' on NOAA</a>
+                </li>';
+        }
+        if ($linkMADIS == 'yes' && !empty($linkCWOPID)) {
           echo '<li>
-                    <a href="https://madis-data.ncep.noaa.gov/MadisSurface/?CenterLAT=' . $lat . '&CenterLON=' . $lon . '&Zoom=11.00&StationID=' . $linkCWOPID . '" title="' . $linkCWOPID . ' on MADIS Map" target="_blank">
-                      <img class="menuimg" src="img/noaa.svg" style="max-width:30px" alt=""/>
-                      ' . $linkCWOPID . ' on NOAA MADIS Map
-                    </a>
-                  </li>';
-      }
-      if (($linkMesoWest == 'yes') && (!empty($linkCWOPID) && (empty($linkMesoWestID)))) {
+                  <a href="https://madis-data.ncep.noaa.gov/MadisSurface/?CenterLAT=' . $lat . '&CenterLON=' . $lon . '&Zoom=11.00&StationID=' . $linkCWOPID . '" title="' . $linkCWOPID . ' on MADIS Map" target="_blank"><img class="menuimg" src="img/noaa.svg" style="max-width:30px" alt=""/>' . $linkCWOPID . ' on NOAA MADIS Map</a>
+                </li>';
+        }
+        if (($linkMesoWest == 'yes') && (!empty($linkCWOPID) && (empty($linkMesoWestID)))) {
           echo '<li>
-                    <a href="https://mesowest.utah.edu/cgi-bin/droman/meso_base.cgi?stn=' . $linkCWOPID . '" title="' . $linkCWOPID . ' on Meso West" target="_blank">
-                      <img class="menuimg" src="img/mesowest.svg" alt=""/>
-                      ' . $linkCWOPID . ' on Meso West
-                    </a>
-                  </li>';
-      }
-      if ($linkMesoWest == 'yes' && !empty($linkMesoWestID)) {
+                  <a href="https://mesowest.utah.edu/cgi-bin/droman/meso_base.cgi?stn=' . $linkCWOPID . '" title="' . $linkCWOPID . ' on Meso West" target="_blank"><img class="menuimg" src="img/mesowest.svg" alt=""/>' . $linkCWOPID . ' on Meso West</a>
+                </li>';
+        }
+        if ($linkMesoWest == 'yes' && !empty($linkMesoWestID)) {
           echo '<li>
-                    <a href="https://mesowest.utah.edu/cgi-bin/droman/meso_base.cgi?stn=' . $linkMesoWestID . '" title="' . $linkMesoWestID . ' on Meso West" target="_blank">
-                      <img class="menuimg" src="img/mesowest.svg" alt=""/>
-                      ' . $linkMesoWestID . ' on Meso West
-                    </a>
-                  </li>';
-      }
-      if (!empty($linkWeatherCloudID)) {
+                  <a href="https://mesowest.utah.edu/cgi-bin/droman/meso_base.cgi?stn=' . $linkMesoWestID . '" title="' . $linkMesoWestID . ' on Meso West" target="_blank"><img class="menuimg" src="img/mesowest.svg" alt=""/>' . $linkMesoWestID . ' on Meso West</a>
+                </li>';
+        }
+        if (!empty($linkWeatherCloudID)) {
           echo '<li>
-                    <a href="https://app.weathercloud.net/' . $linkWeatherCloudID . '" title="View on WeatherCloud" target="_blank">
-                      <img class="menuimg" src="img/weathercloud.svg" style="width:21px" alt=""/>
-                      View on WeatherCloud
-                    </a>
-                  </li>';
-      }
-      if (!empty($linkWindyID)) {
+                  <a href="https://app.weathercloud.net/' . $linkWeatherCloudID . '" title="View on WeatherCloud" target="_blank"><img class="menuimg" src="img/weathercloud.svg" style="width:21px" alt=""/>View on WeatherCloud</a>
+                </li>';
+        }
+        if (!empty($linkWindyID)) {
           echo '<li>
-                    <a href="https://www.windy.com/station/pws-' . $linkWindyID . '?' . $lat . ',' . $lon . ',8" title="View on Windy.com" target="_blank">
-                      <img class="menuimg" src="img/windy.svg" style="width:21px" alt=""/>
-                      View on Windy.com
-                    </a>
-                  </li>';
-      }
-      if (!empty($linkAWEKASID)) {
+                  <a href="https://www.windy.com/station/pws-' . $linkWindyID . '?' . $lat . ',' . $lon . ',8" title="View on Windy.com" target="_blank"><img class="menuimg" src="img/windy.svg" style="width:21px" alt=""/>View on Windy.com</a>
+                </li>';
+        }
+        if (!empty($linkAWEKASID)) {
           echo '<li>
-                    <a href="https://www.awekas.at/en/instrument.php?id=' . $linkAWEKASID . '" title="View on AWEKAS" target="_blank">
-                      <img class="menuimg" src="img/awekas.svg" alt=""/>
-                      View on AWEKAS
-                    </a>
-                  </li>';
-      }
-      if (!empty($linkAmbientWeatherID)) {
+                  <a href="https://www.awekas.at/en/instrument.php?id=' . $linkAWEKASID . '" title="View on AWEKAS" target="_blank"><img class="menuimg" src="img/awekas.svg" alt=""/>View on AWEKAS</a>
+               </li>';
+        }
+        if (!empty($linkAmbientWeatherID)) {
           echo '<li>
-                    <a href="https://dashboard.ambientweather.net/devices/public/' . $linkAmbientWeatherID . '" title="Ambient weather" target= "_blank">
-                      <img class="menuimg" src="img/ambientweather.svg" alt=""/>
-                      View on Ambient weather
-                    </a>
-                  </li>';
-      }
-      if (!empty($linkPWSWeatherID)) {
+                    <a href="https://dashboard.ambientweather.net/devices/public/' . $linkAmbientWeatherID . '" title="Ambient weather" target= "_blank"><img class="menuimg" src="img/ambientweather.svg" alt=""/>View on Ambient weather</a>
+                </li>';
+        }
+        if (!empty($linkPWSWeatherID)) {
           echo '<li>
-                    <a href="https://www.pwsweather.com/obs/' . $linkPWSWeatherID . '.html" title="PWS Weather" target="_blank">
-                      <img style="background-color:white" class="menuimg" src="img/pwslogo.svg" alt=""/>
-                      View on PWS Weather
-                    </a>
-                  </li>';
-      }
-      if (!empty($linkMetOfficeID)) {
+                  <a href="https://www.pwsweather.com/obs/' . $linkPWSWeatherID . '.html" title="PWS Weather" target="_blank"><img style="background-color:white" class="menuimg" src="img/pwslogo.svg" alt=""/>View on PWS Weather</a>
+                </li>';
+        }
+        if (!empty($linkMetOfficeID)) {
           echo '<li>
-                    <a href="http://wow.metoffice.gov.uk/observations/details?site_id=' . $linkMetOfficeID . '" title="MetOffice/WoW" target="_blank">
-                      <img class="menuimg" src="img/metoffice.svg" alt=""/>
-                      View on MetOffice/WoW
-                    </a>
-                  </li>';
-      }
-      if (!empty($linkCustom1Title)) {
+                    <a href="http://wow.metoffice.gov.uk/observations/details?site_id=' . $linkMetOfficeID . '" title="MetOffice/WoW" target="_blank"><img class="menuimg" src="img/metoffice.svg" alt=""/>View on MetOffice/WoW</a>
+                </li>';
+        }
+        if (!empty($linkCustom1Title)) {
           echo '<li>
-                    <a href="' . $linkCustom1URL . '" title="' . $linkCustom1Title . '" target="_blank">
+                  <a href="' . $linkCustom1URL . '" title="' . $linkCustom1Title . '" target="_blank">
                       <img class="menuimg" src="img/arrowiconlink.svg" alt=""/>
                       ' . $linkCustom1Title . '
                     </a>
                   </li>';
-      }
-      if (!empty($linkCustom2Title) && !empty($linkCustom2URL)) {
+        }
+        if (!empty($linkCustom2Title) && !empty($linkCustom2URL)) {
           echo '<li>
-                    <a href="' . $linkCustom2URL . '" title="' . $linkCustom2Title . '" target="_blank">
-                      <img class="menuimg" src="img/arrowiconlink.svg" alt=""/>
-                      ' . $linkCustom2Title . '
-                    </a>
-                  </li>';
-      }
-      echo '</ul>';
+                  <a href="' . $linkCustom2URL . '" title="' . $linkCustom2Title . '" target="_blank"><img class="menuimg" src="img/arrowiconlink.svg" alt=""/>' . $linkCustom2Title . '</a>
+                </li>';
+        }
+        echo '</ul>';
       }
       echo '<li class="header">EXTRAS</li>';
       if ($weatherflowoption == "yes") {
           echo '<li>
-                    <a href="https://tempestwx.com/map/' . $lat . '/' . $lon . '/' . $weatherflowmapzoom . '" data-lity title="see your weather station on the official WeatherFlow map">
-                      <menumarkerblue></menumarkerblue> WeatherFlow Map
-                    </a>
-                  </li>';
+                  <a href="https://tempestwx.com/map/' . $lat . '/' . $lon . '/' . $weatherflowmapzoom . '" data-lity title="see your weather station on the official WeatherFlow map"><menumarkerblue></menumarkerblue> WeatherFlow Map</a>
+                </li>';
       }
       if (!empty($webcamurl) && $webcamurl != ' ' && $webcamurl != 'Null' && $webcamurl != 'null') {
-          echo '<li><!--webcam-->
-                    <a href="cam.php" data-lity title="Weather Station Webcam"><menumarkeryellow></menumarkeryellow> Web Cam</a>
-                  </li>';
+          echo '<li>
+                  <a href="cam.php" data-lity title="Weather Station Webcam"><menumarkeryellow></menumarkeryellow> Web Cam</a>
+                </li>';
       }
-      echo '<li><!--contact info-->
-                <a href="bio.php" data-lity title="Weather Station Owner Contact Card Info"><menumarkerorange></menumarkerorange> Contact Card</a>
-              </li>
-              <li><!--hardware info-->
-                <a href="stationinfo.php" data-lity title="Weather Station Hardware Info"><menumarkerred></menumarkerred> Hardware Info</a>
-              </li>';
+      echo '<li>
+              <a href="bio.php" data-lity title="Weather Station Owner Contact Card Info"><menumarkerorange></menumarkerorange> Contact Card</a>
+            </li>
+            <li>
+              <a href="stationinfo.php" data-lity title="Weather Station Hardware Info"><menumarkerred></menumarkerred> Hardware Info</a>
+            </li>';
       if (!empty($extraLinkTitle) && !empty($extraLinkURL) && !empty($extraLinkColor)) {
           echo '<li>
-                    <a href="' . $extraLinkURL . '" title="' . $extraLinkTitle . '" target="_blank">';
+                  <a href="' . $extraLinkURL . '" title="' . $extraLinkTitle . '" target="_blank">';
           if ($extraLinkColor == 'white') {
               echo '<menumarkerlight></menumarkerlight>';
           } else if ($extraLinkColor == 'red') {
@@ -260,12 +213,15 @@
                 </li><br /><br />';
       }
       echo '<li class="header">MISC</li>
-            <li><a href="https://www.chrisalemany.ca/2021/02/24/installing-the-divumwx-skin-on-weewx-with-remote-web-server-2021-edition/" title="Remote Setup" target="_blank">
-                  <menumarkerbluegrey></menumarkerbluegrey> Remote Setup Guide</a></li>
-            <li><a href="https://claydonsweather.org.uk/team_divumwx/" title="weewx-DivumWX on Github" target="_blank">
-                  <menumarkerbluegrey></menumarkerbluegrey> Download DivumWX template</a></li>
-            <li><a href="https://steepleian.github.io/weewx-Weather34/" title="Web Services Setup Page" target="_blank">
-                  <menumarkerbluegrey></menumarkerbluegrey> Web Services Setup Page</a></li>
+            <li>
+              <a href="https://www.chrisalemany.ca/2021/02/24/installing-the-divumwx-skin-on-weewx-with-remote-web-server-2021-edition/" title="Remote Setup" target="_blank"><menumarkerbluegrey></menumarkerbluegrey> Remote Setup Guide</a>
+            </li>
+            <li>
+              <a href="https://claydonsweather.org.uk/team_divumwx/" title="weewx-DivumWX on Github" target="_blank"><menumarkerbluegrey></menumarkerbluegrey> Download DivumWX template</a>
+            </li>
+            <li>
+              <a href="https://steepleian.github.io/weewx-Weather34/" title="Web Services Setup Page" target="_blank"><menumarkerbluegrey></menumarkerbluegrey> Web Services Setup Page</a>
+            </li>
             <li class="header">The DivumWX Team</li>
             <li class="flagstop">
               <a href="mailto:steepleian@gmail.com" title="Email Steepleian for Support" target="_blank">Ian Millard (Steepleian)</a><br />
@@ -274,10 +230,8 @@
             </li><br /><br />';
       if (!empty($USAWeatherFinder)) {
           echo '<li>
-                    <a href="https://usaweatherfinder.com/index.php?a=stats&u=' . $USAWeatherFinder . '" title="' . $USAWeatherFinder . '\'s Weather Finder" target="_blank">
-                      <img src="https://usaweatherfinder.com/button.php?u=' . $USAWeatherFinder . '" alt="USA Weather Finder" border="0" />
-                    </a>
-                  </li>';
+                    <a href="https://usaweatherfinder.com/index.php?a=stats&u=' . $USAWeatherFinder . '" title="' . $USAWeatherFinder . '\'s Weather Finder" target="_blank"><img src="https://usaweatherfinder.com/button.php?u=' . $USAWeatherFinder . '" alt="USA Weather Finder" border="0" /></a>
+                </li>';
       }
       ?>
     </ul>
