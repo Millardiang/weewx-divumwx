@@ -74,7 +74,7 @@
         echo '<ul>';
         if ($linkWU == 'yes') {
             echo '<li>
-                <a href="' . (($linkWUNew == 'yes' || empty($linkWUNew)) ? 'https://www.wunderground.com/dashboard/pws/' : 'https://www.wunderground.com/personal-weather-station/dashboard?id=') . $id . '" title="' . $id . ' on Weather Underground" target="_blank">
+                <a href="' . (($linkWUNew == 'yes' || empty($linkWUNew)) ? 'https://www.wunderground.com/dashboard/pws/' : 'https://www.wunderground.com/personal-weather-station/dashboard?id=') . $WUSid . '" title="' . $WUSid . ' on Weather Underground" target="_blank">
                     <img class="menuimg" src="img/wulogo.svg" style="width:30px" alt=""/>
                     ' . $WUSid . ' on WU
                 </a>
