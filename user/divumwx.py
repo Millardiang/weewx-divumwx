@@ -390,7 +390,7 @@ def do_file_transfer(mode, rpath, conn, address, lpath, user, port):
 def do_rsync_transfer(webserver_addresses, rpath, lpath, user, port):
     if len(webserver_addresses) > 0:
         for web_address in webserver_addresses:
-            threading.Thread(target=do_file_transfer, args=("rsync", rpath, None, socket.gethostbyname(web_address), lpath, user, port)).start()
+            threading.Thread(target=do_file_transfer, args=("rsync -at", rpath, None, socket.gethostbyname(web_address), lpath, user, port)).start()
              
 class ZambrettiForecast():
     DEFAULT_FORECAST_BINDING = 'forecast_binding'
