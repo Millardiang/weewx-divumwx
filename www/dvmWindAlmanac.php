@@ -385,7 +385,7 @@ Max Recorded <br><blue><?php echo $wind["gust_alltime_maxtime"];?></blue></div>
     
   <articlegraph> 
   <!--<div class=actualt>12 Monthly Wind (<?php echo $wind["units"]?>)</div> //--> 
-  <iframe  src="dvmhighcharts/<?php echo $theme1?>-charts.html?chart='windsmallplot'&span='yearly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>" frameborder="0" scrolling="no" width="100%" height="100%"></iframe>
+  <iframe  src="dvmhighcharts/<?php echo $theme?>-charts.html?chart='windsmallplot'&span='yearly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>" frameborder="0" scrolling="no" width="100%" height="100%"></iframe>
    
   </articlegraph> 
   

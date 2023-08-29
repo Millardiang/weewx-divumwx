@@ -86,12 +86,12 @@ body {
   
   <div id="Tab2" class="tabcontent">
   
-  <iframe width="100%" height="92%" scrolling="no" src="<?php echo $chartsource;?>/<?php echo $theme1;?>-charts.html?chart='windplot'&span='yearly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>"frameborder="0"></iframe>
+  <iframe width="100%" height="92%" scrolling="no" src="<?php echo $chartsource;?>/<?php echo $theme;?>-charts.html?chart='windplot'&span='yearly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>"frameborder="0"></iframe>
 </div>
 
 <div id="Tab3" class="tabcontent">
   
-  <iframe width="100%" height="92%" scrolling="no" src="<?php echo $chartsource;?>/<?php echo $theme1;?>-charts.html?chart='windallplot'&span='yearly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>"frameborder="0"></iframe>
+  <iframe width="100%" height="92%" scrolling="no" src="<?php echo $chartsource;?>/<?php echo $theme;?>-charts.html?chart='windallplot'&span='yearly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>"frameborder="0"></iframe>
 </div>
 </div>
   
@@ -99,13 +99,13 @@ body {
   
   <div id="Tab4" class="tabcontent">
   
-  <iframe width="100%" height="92%" scrolling="no" src="<?php echo $chartsource;?>/<?php echo $theme1;?>-charts.html?chart='windbarbplot'&span='weekly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>" frameborder="0"></iframe>
+  <iframe width="100%" height="92%" scrolling="no" src="<?php echo $chartsource;?>/<?php echo $theme;?>-charts.html?chart='windbarbplot'&span='weekly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>" frameborder="0"></iframe>
   
 </div>
   
   <div id="Tab5" class="tabcontent">
   
-  <iframe width="100%" height="92%" scrolling="no" src="<?php echo $chartsource;?>/<?php echo $theme1;?>-charts.html?chart='windroseplot'&span='weekly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>" frameborder="0"></iframe>
+  <iframe width="100%" height="92%" scrolling="no" src="<?php echo $chartsource;?>/<?php echo $theme;?>-charts.html?chart='windroseplot'&span='weekly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>" frameborder="0"></iframe>
 </div>
   
   
