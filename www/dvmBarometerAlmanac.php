@@ -136,7 +136,7 @@ if ($barom["alltime_min"] >= 0) { echo "<div class='temperaturetoday0'>",$barom[
 </main>
 <main class="grid1">
 <articlegraph> 
-<iframe  src="dvmhighcharts/<?php echo $theme1;?>-charts.html?chart='barsmallplot'&span='yearly'&temp='<?php echo $temp["units"];?>'&pressure='<?php echo $barom["units"];?>'&wind='<?php echo $wind["units"];?>'&rain='<?php echo $rain["units"];?>" frameborder="0" scrolling="no" width="100%" height="100%"></iframe>
+<iframe  src="dvmhighcharts/<?php echo $theme;?>-charts.html?chart='barsmallplot'&span='yearly'&temp='<?php echo $temp["units"];?>'&pressure='<?php echo $barom["units"];?>'&wind='<?php echo $wind["units"];?>'&rain='<?php echo $rain["units"];?>" frameborder="0" scrolling="no" width="100%" height="100%"></iframe>
    
 </articlegraph> 
   

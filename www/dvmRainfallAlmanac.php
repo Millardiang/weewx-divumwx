@@ -121,7 +121,7 @@ elseif($rain["units"] =='in'){ echo number_format($rain["alltime_total"]*25.4000
  <main class="grid1">
     <articlegraph> 
    
-  <iframe  src="dvmhighcharts/<?php echo $theme1;?>-charts.html?chart='rainsmallplot'&span='yearly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units'];?>" frameborder="0" scrolling="no" width="100%"  height="100%"></iframe>
+  <iframe  src="dvmhighcharts/<?php echo $theme;?>-charts.html?chart='rainsmallplot'&span='yearly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units'];?>" frameborder="0" scrolling="no" width="100%"  height="100%"></iframe>
    
   </articlegraph> 
   
