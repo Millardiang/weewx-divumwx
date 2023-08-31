@@ -217,7 +217,7 @@
               <a href="https://www.chrisalemany.ca/2021/02/24/installing-the-divumwx-skin-on-weewx-with-remote-web-server-2021-edition/" title="Remote Setup" target="_blank"><menumarkerbluegrey></menumarkerbluegrey> Remote Setup Guide</a>
             </li>
             <li>
-              <a href="https://claydonsweather.org.uk/team_divumwx/" title="weewx-DivumWX on Github" target="_blank"><menumarkerbluegrey></menumarkerbluegrey> Download DivumWX template</a>
+              <a href="team_divumwx/index.html" title="weewx-DivumWX on Github" target="_blank"><menumarkerbluegrey></menumarkerbluegrey> Download DivumWX template</a>
             </li>
             <li>
               <a href="https://steepleian.github.io/weewx-Weather34/" title="Web Services Setup Page" target="_blank"><menumarkerbluegrey></menumarkerbluegrey> Web Services Setup Page</a>
