@@ -10,6 +10,9 @@
 # Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
 #                                                                                                                   #
 #####################################################################################################################
+include('dvmCombinedData.php');
+if($theme === "light"){ echo "<body style='background-color:#FFFFFF'>";}
+else if($theme === "dark"){ echo "<body style='background-color:#292E35'>";}
 ?>
 <style>
   body {

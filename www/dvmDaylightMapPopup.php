@@ -31,15 +31,15 @@
 #####################################################################################################################
 ?>
 <?php 
-include('fixedSettings.php');
-include('shared.php');
+include('dvmCombinedData.php');
 error_reporting(0);
 date_default_timezone_set($TZ);
 header('Content-type: text/html; charset=utf-8');
-echo "<body style='background-color:#292E35'>";
+if($theme === "light"){ echo "<body style='background-color:#FFFFFF'>";}
+else if($theme === "dark"){ echo "<body style='background-color:#292E35'>";}
 ?>
 
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
   <meta charset="UTF-8">
@@ -52,7 +52,8 @@ echo "<body style='background-color:#292E35'>";
 <body>
 <div style="position:relative; top: 30px; left: 0px;">
 <?php
-echo "<font color='white'>"."World Daylight Map"."</font>";
+if($theme === "light"){echo "<font color='black'>"."World Daylight Map"."</font>";}
+else if($theme === "dark"){echo "<font color='silver'>"."World Daylight Map"."</font>";}
 ?>
 </div>
 <!-- partial:index.partial.html -->
@@ -64,7 +65,7 @@ echo "<font color='white'>"."World Daylight Map"."</font>";
     <div class="controls">
         <!--p class="curr-time">
             <a class="js-skip" data-skip="-60" href="#">
-                ‹
+                &lsaquo;
             </a>
             <span></span>
             <a class="js-skip" data-skip="60" href="#">
