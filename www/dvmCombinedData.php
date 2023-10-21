@@ -27,7 +27,6 @@ $jsonA = 'jsondata/dvmSkyData.json';
 $jsonA = file_get_contents($jsonA);
 $adata = json_decode($jsonA, true);
 
-
 $weewxrt = array_map(function ($v)
 {
     if ($v == 'NULL')
@@ -52,6 +51,7 @@ explode(" ", file_get_contents($livedata)));
         
     $recordDate = mktime(substr($weewxrt[1], 0, 2) , substr($weewxrt[1], 3, 2) , substr($weewxrt[1], 6, 2) , substr($weewxrt[0], 3, 2) , substr($weewxrt[0], 0, 2) , $year);
     $stationlocation = $adata["info"]["location"];
+    $hardware = $adata["info"]["hardware"];
     $lat = $adata["info"]["latitude"];
     $lon = $adata["info"]["longitude"];
     $absLat = abs($lat);
@@ -285,11 +285,7 @@ explode(" ", file_get_contents($livedata)));
     $lightning["year_strike_count"] = $sdata["year.lightning_strike_count.sum"];
     $lightning["last_time"] = $adata["lightning"]["lightning last time"]["at"];
     $lightning["alltime_strike_count"] = $sdata["alltime.lightning_strike_count.sum"];
-    $lightning["last_distance"] = $weewxrt[57];    
-    if ($lightning["last_distance"] == 'N/A' || $lightning["last_distance"] == '0' || $lightning["last_distance"] == 'NULL')
-    {
-        $lightning["last_distance"] = $sdata["current.lightning_distance.formatted"];
-    }
+    $lightning["last_distance"] = $adata["lightning"]["lightning last distance"]["value"];
     $lightning["now_energy"] = $weewxrt[59];
     $lightning["now_strike_count"] = $weewxrt[60];
     $lightning["now_noise_count"] = $weewxrt[61];
@@ -317,6 +313,7 @@ explode(" ", file_get_contents($livedata)));
     {
         $rain["units"] = "cm";
     }
+
     else if($rain["units"] == " in")
     {
         $rain["units"] = "in";
@@ -342,7 +339,10 @@ explode(" ", file_get_contents($livedata)));
     $rain["alltime_rate_max"] = $sdata["alltime.rainRate.max.formatted"];
     $rain["alltime_rate_maxtime"] = date('j M Y', $sdata["alltime.rainRate.maxtime.raw"]);
     $rain["alltime_total"] = $sdata["alltime.rain.sum.formatted"];
-
+    if($hardware == "Vantage")
+    {
+    $rain["storm_rain"] = $weewxrt[64];
+    }
     //sky
     $sky["lux"] = round($sdata["current.maxSolarRad.formatted"] / 0.00809399477, 0 ,PHP_ROUND_HALF_UP);
     $sky["day_lux_max"] = round($sdata["day.maxSolarRad.formatted"] / 0.00809399477, 0 ,PHP_ROUND_HALF_UP);
@@ -452,6 +452,9 @@ explode(" ", file_get_contents($livedata)));
     {
         $wind["units"] = "kts";
     }
+
+//echo $sdata["unit.label.windSpeed"]; 
+
     $wind["speed_avg"] = $sdata["day.windSpeed.avg.formatted"];
     $wind["direction"] = $sdata["current.windDir.formatted"];
     $wind["direction_10m_avg"] = $sdata["10m.windDir.avg.formatted"];

@@ -1,6 +1,5 @@
 <?php
-#####################################################################################################################                                                                                                        #
-#                                                                                                                   #
+#####################################################################################################################                                                                                 #                                                                                                                   #
 # weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
 #                                                                                                                   #
 # Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
@@ -13,43 +12,19 @@
 ?>
 <?php  
 include('dvmCombinedData.php');
-
 header('Content-type: text/html; charset = utf-8');
 ?>
 
-    <div class="chartforecast2">
-      <span class="yearpopup"><a alt="rain charts" title="rain charts" href="dvmMenuRainfall.php" data-lity><?php echo $menucharticonpage;?> Rainfall Almanac and Charts</a></span>
-      
+<div class="chartforecast2">
+<span class="yearpopup"><a alt="rain charts" title="rain charts" href="dvmMenuRainfall.php" data-lity><?php echo $menucharticonpage;?> Rainfall Almanac and Charts</a></span>     
 </div>
-    <span class='moduletitle2'><?php echo $lang['rainfallModule'], " (<valuetitleunit>" . $rain["units"];?></valuetitleunit>)</span>
-
-
+<span class='moduletitle2'><?php echo $lang['rainfallModule'], " (<valuetitleunit>" . $rain["units"];?></valuetitleunit>)</span>
 <div class="updatedtime1"><span><?php if (file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?></div>
-  
-<div class="yearbox"><div class="heatcircle-content">
-<?php  //rain year
-echo "  <valuetextheading1>".date('Y')."</valuetextheading1> <br><div class=tempconverter1><div class=rainmodulehome><raiblue>";if($rain["year_total"]>=1000){echo number_format($rain["year_total"],1);} else if ($rain["year_total"]<1000){echo number_format($rain["year_total"],1);} echo " </raiblue><smallrainunit2>".$rain["units"];?>
-<smallrainunit2></div></div></div>
-<div class="heatcircle10"><div class="heatcircle-content">
-<?php  //rain month
-echo "    <valuetextheading1>".date('F')."</valuetextheading1> <br><div class=tempconverter1><div class=rainmodulehome><raiblue>".number_format($rain["month_total"],1)." </raiblue><smallrainunit2>".$rain["units"];?>
-</smallrainunit2></div></div></div></div>
-<div class="lasthour"><div class="heatcircle-content">
-<?php  //rain last hour
-echo "   <valuetextheading1>Last Hour</valuetextheading1><br><div class=tempconverter1><div class=rainmodulehome><raiblue>".number_format($rain["last_hour"],2)." </raiblue><smallrainunit2>".$rain["units"];?>
-</smallrainunit2></div></div></div></div>
-<div class="last24"><div class="heatcircle-content">
-<?php  //rain last 24 hours
-echo "   <valuetextheading1>Last 24hr</valuetextheading1><br><div class=tempconverter1><div class=rainmodulehome><raiblue>".number_format($rain["last_24hour"],1)." </raiblue><smallrainunit2>".$rain["units"];?>
-</smallrainunit2></div></div></div></div></div>
 <div class="rainconverter">
 <?php if ($rain["units"] =='in'){echo "<div class=rainconvertercircle>".number_format($rain["day"]*25.400013716,1)." <smallrainunit>mm";} else if ($rain["units"] =='mm'){echo "<div class=rainconvertercircle>".number_format($rain["day"]*0.0393701,2)." <smallrainunit>in";}?></span>
-</div></div></div></div>
-<div class="rainrateextra">
-<?php echo "<div class=rainratemodulehome><rainratetextheading> Rate </rainratetextheading><raiblue>"; if ($rain["rate"]>100){echo number_format($rain["rate"],1);} else echo number_format($rain["rate"],2); echo" </raiblue><smallrainunit2>".$divum["rain_units"];?>
-</smallrainunit2></div></div></div></div>
+</div></div>
 
-
+<!DOCTYPE html>
 <html>
 
 <script src="js/d3.min.js"></script>
@@ -59,11 +34,14 @@ echo "   <valuetextheading1>Last 24hr</valuetextheading1><br><div class=tempco
   margin-top: -5px;
   margin-left: -160px;
 }
+.stormRain {
+  margin-top: -152.5px;
+  margin-left: 130px;
+}
 </style>
 
 <div class="rainposs">
 <div id="raingaugex"></div>
-<div id="svg"></div>
 </div>
 		
 	<script>
@@ -505,10 +483,332 @@ svg.append("text")
 	.style("font-weight", "600")
 	.style("fill", "rgba(30, 32, 36, 1)");
 }			
-</script>                             
+</script>
 
+<div class="stormRain"></div>
+<script>            
+    var theme = "<?php echo $theme;?>";
 
-<div id="raindrops" width="300" height="150" style="position: relative; top: -155px; left: 0px;"></div>
+    if (theme === 'dark') {
+    var boxColor = "#38383c";
+    var baseTextColor = "silver";
+    } else {
+    var boxColor = "#e6e8ef";
+    var baseTextColor = "#2d3a4b";
+    }
+</script>
+
+<script>
+// script to display rain data
+var svg = d3.select(".stormRain")
+    .append("svg")
+    //.style("background", "#292E35") // box background to be commented out
+    .attr("width", 180)
+    .attr("height", 150);
+
+var stormRain = 0.0; //  php echo the stormRain in place of the fake value here 
+var units = "<?php echo $rain["units"];?>";
+var rainRate = <?php echo number_format($rain["rate"],2);?>;
+var lastHour = <?php echo number_format($rain["last_hour"],2);?>;
+var last24Hours = <?php echo number_format($rain["last_24hour"],2);?>;
+var rainMonth = <?php echo number_format($rain["month_total"],2);?>; 
+var rainYear = <?php echo number_format($rain["year_total"],2);?>;
+var month = "<?php echo date('F');?>"; 
+var year = <?php echo date('Y');?>;
+
+if (stormRain > 0) {  
+
+svg.append("rect") // stormRain box
+    .attr("x", 17 )
+    .attr("y", 127)
+    .attr("rx", 1.25)
+    .style("stroke", boxColor)
+    .attr("width", 63)
+    .attr("height", 17)
+    .style("fill", "none");
+
+svg.append("text") // Title text above box
+    .attr("x", 48)
+    .attr("y", 122)
+    .style("fill", baseTextColor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "10px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text("Storm Rain");
+
+// storm Rain text output with two different colors on the same line
+var data = [d3.format(".2f")(stormRain) +" "+"-"+ units]; 
+
+var text = svg.selectAll(null)
+    .data(data)
+    .enter() 
+    .append("text")
+    .attr("x", 48)
+    .attr("y", function(d, i) {return 138.5 + i * 138.5;})
+
+    .style("fill", "#327682")
+    .style("font-family", "Helvetica")
+    .style("font-size", "9.75px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text(function(d) {return d.split("-")[0];})
+
+    .append("tspan")
+    .style("fill", baseTextColor)
+    .text(function(d) {return d.split("-")[1];});
+
+} else {}
+
+if (stormRain > 0) {
+
+svg.append("rect") // rain Rate box
+    .attr("x", 93 )
+    .attr("y", 127)
+    .attr("rx", 1.25)
+    .style("stroke", boxColor)
+    .attr("width", 63)
+    .attr("height", 17)
+    .style("fill", "none");
+
+svg.append("text") // rain Rate Title text above box
+    .attr("x", 123)
+    .attr("y", 122)
+    .style("fill", baseTextColor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "10px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text("Rain Rate");
+
+// rainRate text output with two different colors on the same line
+var data = [d3.format(".2f")(rainRate) +" "+"-"+ units]; 
+
+var text = svg.selectAll(null)
+    .data(data)
+    .enter() 
+    .append("text")
+    .attr("x", 123)
+    .attr("y", function(d, i) {return 138.5 + i * 138.5;})
+
+    .style("fill", "#327682")
+    .style("font-family", "Helvetica")
+    .style("font-size", "9.75px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text(function(d) {return d.split("-")[0];})
+
+    .append("tspan")
+    .style("fill", baseTextColor)
+    .text(function(d) {return d.split("-")[1];});
+
+} else {
+
+svg.append("rect") // rain Rate box
+    .attr("x", 55 )
+    .attr("y", 127)
+    .attr("rx", 1.25)
+    .style("stroke", boxColor)
+    .attr("width", 63)
+    .attr("height", 17)
+    .style("fill", "none");
+
+svg.append("text") // rain Rate Title text above box
+    .attr("x", 87)
+    .attr("y", 122)
+    .style("fill", baseTextColor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "10px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text("Rain Rate");
+
+// rainRate text output with two different colors on the same line
+var data = [d3.format(".2f")(rainRate) +" "+"-"+ units]; 
+
+var text = svg.selectAll(null)
+    .data(data)
+    .enter() 
+    .append("text")
+    .attr("x", 87)
+    .attr("y", function(d, i) {return 138.5 + i * 138.5;})
+
+    .style("fill", "#327682")
+    .style("font-family", "Helvetica")
+    .style("font-size", "9.75px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text(function(d) {return d.split("-")[0];})
+
+    .append("tspan")
+    .style("fill", baseTextColor)
+    .text(function(d) {return d.split("-")[1];});
+
+}
+
+svg.append("rect") // last hour box
+    .attr("x", 17 )
+    .attr("y", 88)
+    .attr("rx", 1.25)
+    .style("stroke", boxColor)
+    .attr("width", 63)
+    .attr("height", 17)
+    .style("fill", "none");
+
+svg.append("text") // last hour Title text above box
+    .attr("x", 48)
+    .attr("y", 83)
+    .style("fill", baseTextColor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "10px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text("Last Hour");
+
+// lastHour text output with two different colors on the same line
+var data = [d3.format(".2f")(lastHour) +" "+"-"+ units]; 
+
+var text = svg.selectAll(null)
+    .data(data)
+    .enter() 
+    .append("text")
+    .attr("x", 48)
+    .attr("y", function(d, i) {return 100 + i * 100;})
+
+    .style("fill", "#327682")
+    .style("font-family", "Helvetica")
+    .style("font-size", "9.75px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text(function(d) {return d.split("-")[0];})
+
+    .append("tspan")
+    .style("fill", baseTextColor)
+    .text(function(d) {return d.split("-")[1];});
+
+svg.append("rect") // last 24hr box
+    .attr("x", 93 )
+    .attr("y", 88)
+    .attr("rx", 1.25)
+    .style("stroke", boxColor)
+    .attr("width", 63)
+    .attr("height", 17)
+    .style("fill", "none");
+
+svg.append("text") // last 24hr Title text above box
+    .attr("x", 123)
+    .attr("y", 83)
+    .style("fill", baseTextColor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "10px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text("Last 24hr");
+
+// last 24 Hours text output with two different colors on the same line
+var data = [d3.format(".2f")(last24Hours) +" "+"-"+ units]; 
+
+var text = svg.selectAll(null)
+    .data(data)
+    .enter() 
+    .append("text")
+    .attr("x", 123)
+    .attr("y", function(d, i) {return 100 + i * 100;})
+
+    .style("fill", "#327682")
+    .style("font-family", "Helvetica")
+    .style("font-size", "9.75px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text(function(d) {return d.split("-")[0];})
+
+    .append("tspan")
+    .style("fill", baseTextColor)
+    .text(function(d) {return d.split("-")[1];});
+
+svg.append("rect") // rain year box
+    .attr("x", 17 )
+    .attr("y", 48)
+    .attr("rx", 1.25)
+    .style("stroke", boxColor)
+    .attr("width", 63)
+    .attr("height", 17)
+    .style("fill", "none");
+
+svg.append("text") // year Title text above box
+    .attr("x", 48)
+    .attr("y", 43)
+    .style("fill", baseTextColor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "10px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text(year);
+
+// rain Year text output with two different colors on the same line
+var data = [d3.format(".2f")(rainYear) +" "+"-"+ units]; 
+
+var text = svg.selectAll(null)
+    .data(data)
+    .enter() 
+    .append("text")
+    .attr("x", 48)
+    .attr("y", function(d, i) {return 60.5 + i * 60.5;})
+
+    .style("fill", "#327682")
+    .style("font-family", "Helvetica")
+    .style("font-size", "9.75px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text(function(d) {return d.split("-")[0];})
+
+    .append("tspan")
+    .style("fill", baseTextColor)
+    .text(function(d) {return d.split("-")[1];});
+
+svg.append("rect") // rain month box
+    .attr("x", 93 )
+    .attr("y", 48)
+    .attr("rx", 1.25)
+    .style("stroke", boxColor)
+    .attr("width", 63)
+    .attr("height", 17)
+    .style("fill", "none");
+
+svg.append("text") // month Title text above box
+    .attr("x", 123)
+    .attr("y", 43)
+    .style("fill", baseTextColor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "10px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text(month);
+
+// rain Month text output with two different colors on the same line
+var data = [d3.format(".2f")(rainMonth) +" "+"-"+ units]; 
+
+var text = svg.selectAll(null)
+    .data(data)
+    .enter() 
+    .append("text")
+    .attr("x", 123)
+    .attr("y", function(d, i) {return 60.5 + i * 60.5;})
+
+    .style("fill", "#327682")
+    .style("font-family", "Helvetica")
+    .style("font-size", "9.75px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text(function(d) {return d.split("-")[0];})
+
+    .append("tspan")
+    .style("fill", baseTextColor)
+    .text(function(d) {return d.split("-")[1];});
+
+</script>
+
+<div id="raindrops" width="300" height="150" style="position: relative; top: -159px; left: 0px;"></div>
 
 <script>
 
