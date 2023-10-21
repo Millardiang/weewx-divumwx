@@ -506,7 +506,7 @@ var svg = d3.select(".stormRain")
     .attr("width", 180)
     .attr("height", 150);
 
-var stormRain = 0.0; //  php echo the stormRain in place of the fake value here 
+var stormRain = <?php echo number_format($rain["storm_rain"],2);?>; //  php echo the stormRain in place of the fake value here 
 var units = "<?php echo $rain["units"];?>";
 var rainRate = <?php echo number_format($rain["rate"],2);?>;
 var lastHour = <?php echo number_format($rain["last_hour"],2);?>;
