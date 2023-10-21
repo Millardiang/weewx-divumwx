@@ -339,10 +339,8 @@ explode(" ", file_get_contents($livedata)));
     $rain["alltime_rate_max"] = $sdata["alltime.rainRate.max.formatted"];
     $rain["alltime_rate_maxtime"] = date('j M Y', $sdata["alltime.rainRate.maxtime.raw"]);
     $rain["alltime_total"] = $sdata["alltime.rain.sum.formatted"];
-    if($hardware == "Vantage")
-    {
     $rain["storm_rain"] = $weewxrt[63];
-    }
+
     //sky
     $sky["lux"] = round($sdata["current.maxSolarRad.formatted"] / 0.00809399477, 0 ,PHP_ROUND_HALF_UP);
     $sky["day_lux_max"] = round($sdata["day.maxSolarRad.formatted"] / 0.00809399477, 0 ,PHP_ROUND_HALF_UP);
