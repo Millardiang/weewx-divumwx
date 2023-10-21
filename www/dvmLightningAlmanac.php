@@ -145,19 +145,10 @@ if (empty ($lightning["yesterday_strike_count"])) {$lightning["yesterday_strike_
     <?php echo "<div class='lightning'>",$lightning["alltime_strike_count"]. "</value>"?></div>
 </article> </main>
  <main class="grid1">
-        <articlegraph>
-<iframe src="<?php echo $chartsource;?>/dark-charts.html?chart='strikesmallplot'&span='yearly'&temp='<?php echo $temp["units"];?>'&pressure='<?php echo $barom["units"];?>'&wind='<?php echo $wind["units"];?>'&rain='<?php echo $rain["units"];?>" frameborder="0" scrolling="no" width="100%"  height="100%"></iframe>
-    </articlegraph>
+        <articlegraph style="height:360px">
+<iframe width="100%" height="100%" scrolling="no" src="dvmhighcharts/lightningYear.php" frameborder="0"></iframe>
+</articlegraph>
 
-<articlegraph style="height:30px">  
-  <div class="lotemp">
-  <?php echo $info?> 
-<a href="https://highcharts.com" title="https://highcharts.com" target="_blank" style="font-size:8px; height: 100%;"> Charts rendered and compiled using Highcharts </a></span>
-  </div>   
-    
-  <div class="lotemp">
-   </div>
-   
-  </articlegraph> 
+
   
 </main>

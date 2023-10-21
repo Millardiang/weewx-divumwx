@@ -16,7 +16,7 @@
 ##                                                                           #
 ## Year observation plots JSON data file template                            #
 ##                                                                           #
-## Version: 0.2.1                                     Date: 16 May 2017      #
+## Version: DivumWX                                   Date: 16 May 2017      #
 ##                                                                           #
 ##############################################################################
 [{
@@ -73,43 +73,17 @@
 "windAverage": $windSpeedAvg_json, 
 "units": "$unit.label.windSpeed"#slurp
 }, 
-"winddirplot": {"windDir": $windDir_json, 
+"winddirplot": {
+"windDir": $windDir_json, 
 "units": "$unit.label.windDir"#slurp
 }, 
 "rainplot": {
 "rainsum": $rainSum_json, 
 "units": "$unit.label.rain"#slurp
 },
-"lightningplot": {
-#if $distanceMax_json is not None
-"distanceMax": $distanceMax_json, 
-#end if
-#if $distanceAvg_json is not None
-"distanceAvg": $distanceAvg_json, 
-#end if
-#if $strikeCount_json is not None
-"strikeCount": $strikeCount_json, 
-#end if
-#if $noiseCount_json is not None
-"noiseCount": $noiseCount_json, 
-#end if
-#if $disturberCount_json is not None
-"disturberCount": $disturberCount_json, 
-#end if
-#if $energyMax_json is not None
-"energyMax": $energyMax_json, 
-#end if
-#if $energyAvg_json is not None
-"energyAvg": $energyAvg_json, 
-#end if
-#if $lightningSum_json is not None
-"lightningsum": $lightningSum_json,
-#end if
-"units": "$unit.label.rain"#slurp
-}, 
 "radiationplot": {
 "radiationmax": $radiationMax_json, 
-"radiationaverage": $radiationAvg_json, 
+"radiationaverage": $radiationAvg_json,
 #if $uvaWmMax_json is not None
 "uvaWmMax": $uvaWmMax_json, 
 #end if
@@ -181,5 +155,17 @@
 #if $pm10_0Avg_json is not None
 "pm10_0Avg": $pm10_0Avg_json 
 #end if
+},
+##
+#set $min_sh = $year.lightning_distance.series(aggregate_type='min', aggregate_interval=86400, time_unit='unix_epoch_ms').round(1)
+#set $max_sh = $year.lightning_distance.series(aggregate_type='max', aggregate_interval=86400, time_unit='unix_epoch_ms').round(1)
+#set $min_sh_mile = $year.lightning_distance.series(aggregate_type='min', aggregate_interval=86400, time_unit='unix_epoch_ms').mile.round(1)
+#set $max_sh_mile = $year.lightning_distance.series(aggregate_type='max', aggregate_interval=86400, time_unit='unix_epoch_ms').mile.round(1)
+##
+"strikeplot": {"series":
+{"lightning_strike_count": $year.lightning_strike_count.series(aggregate_type='sum', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+"lightning_distance_minmax": $jsonize($zip($min_sh.start.raw, $min_sh.data.raw, $max_sh.data.raw)),
+"lightning_distance_minmax_mile": $jsonize($zip($min_sh_mile.start.raw, $min_sh_mile.data.raw, $max_sh_mile.data.raw))},
+"units": "Strikes"#slurp
 }
 }]
