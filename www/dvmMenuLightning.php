@@ -74,33 +74,14 @@ body {
 <body>
 
 <button class="tablink" onclick="openPage('Tab1', this, 'rgba(194, 102, 58)')" id="defaultOpen">Lightning Almanac</button>
-<button class="tablink" onclick="openPage('Tab2', this, 'rgba(194, 102, 58)')">Yearly Lightning</button>
-<button class="tablink" onclick="openPage('Tab3', this, 'rgba(194, 102, 58)')">Monthly Lightning</button>  
-<button class="tablink" onclick="openPage('Tab4', this, 'rgba(194, 102, 58)')">Weekly Lightning</button>  
-<button class="tablink" onclick="openPage('Tab5', this, 'rgba(194, 102, 58)')">Strikes in Central England</button>  
+<button class="tablink" onclick="openPage('Tab2', this, 'rgba(194, 102, 58)')">Strikes in Central England</button>  
 
   <div id="Tab1" class="tabcontent">
   
-  <iframe width="100%" height="92%" scrolling="no" src="dvmLightningAlmanac.php" frameborder="0"></iframe>
-</div>
+  <iframe width="100%" height="92%" scrolling="no" src="dvmLightningAlmanac.php" frameborder="0"></iframe></div>
+  
   
   <div id="Tab2" class="tabcontent">
-  
-  <iframe width="100%" height="92%" scrolling="no" src="<?php echo $chartsource;?>/<?php echo $theme;?>-charts.html?chart='lightningplot'&span='yearly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>
-" frameborder="0"></iframe>
-</div>
- 
-  <div id="Tab3" class="tabcontent">
-  
-  <iframe width="100%" height="92%" scrolling="no" src="<?php echo $chartsource;?>/<?php echo $theme;?>-charts.html?chart='lightningmonthplot'&span='weekly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>
-" frameborder="0"></iframe>
-  </div>
-<div id="Tab4" class="tabcontent">
-  
-  <iframe width="100%" height="92%" scrolling="no" src="<?php echo $chartsource;?>/<?php echo $theme;?>-charts.html?chart='lightningplot'&span='weekly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>
-" frameborder="0"></iframe>
-  </div>
-  <div id="Tab5" class="tabcontent">
   
   <iframe width="100%" height="92%" scrolling="no" src="dvmLightningUKPopup.php" frameborder="0"></iframe>
 </div>
