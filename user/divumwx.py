@@ -41,8 +41,12 @@
 # Other adaptations by Ian Millard
 #
 ##############################################################################
+"""
+divumwx.py
 
+A WeeWX extension for the weewx-DivumWX dashboard template.
 
+"""
 import math
 import os
 import re
@@ -105,7 +109,7 @@ except ImportError:
     def logerr(msg):
         logmsg(syslog.LOG_ERR, msg)
 
-VERSION = "0.0.1"
+DIVUMWX_VERSION = "0.0.1"
 
 REQUIRED_WEEWX = "4.6.0"
 if StrictVersion(weewx.__version__) < StrictVersion(REQUIRED_WEEWX):
@@ -1200,12 +1204,15 @@ class DivumWXRealTime(StdService):
         fields.append(self.format(data, 'appTemp', 1))                # 55 *
         fields.append(self.format(data, 'sunshine_hours', 1))         # 56 *
         fields.append(self.format(data, 'maxSolarRad', 1))            # 57
-        fields.append(self.format(data, 'lightning_distance'))        # 58 *
+        fields.append(self.format(data, 'lightning_distance', 1))     # 58 *
         fields.append(self.format(data, 'lightning_energy'))          # 59 *
         fields.append(self.format(data, 'lightning_strike_count'))    # 60 *
         fields.append(self.format(data, 'lightning_noise_count'))     # 61 *
         fields.append(self.format(data, 'lightning_disturber_count')) # 62 *
         fields.append(self.format(data, '10min_avg_gust', 1))         # 63 *
+        fields.append(self.format(data, 'stormRain', r_dp))           # 64 *
+        fields.append(self.format(data, 'stormStart'))                # 65 *
+
         return ' '.join(fields)
       
       
