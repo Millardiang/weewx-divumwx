@@ -175,31 +175,44 @@ explode(" ", file_get_contents($livedata)));
         $barom["units"] = "mbar";
     }
     $barom["now"] = $sdata["current.barometer.formatted"];
+    $barom["now_kpa"] = $sdata["current.barometer.formatted"]/10;
     $barom["max"] = $sdata["day.barometer.max.formatted"];
+    $barom["max_kpa"] = $sdata["day.barometer.max.formatted"]/10;
     $barom["maxtime"] = date('H:i', $sdata["day.barometer.maxtime.raw"]); 
     $barom["min"] = $sdata["day.barometer.min.formatted"];
+    $barom["min_kpa"] = $sdata["day.barometer.min.formatted"]/10;
     $barom["mintime"] = date('H:i',$sdata["day.barometer.mintime.raw"]); 
     $barom["trend_code"] = $sdata["trend.barometer.code"];
     $barom["trend_desc"] = $sdata["trend.barometer.desc"];
     $barom["24h_max"] = $sdata["24h.barometer.max.formatted"];
+    $barom["24h_max_kpa"] = $sdata["24h.barometer.max.formatted"]/10;
     $barom["24h_maxtime"] = date('D j H:i:s',$sdata["24h.barometer.maxtime.raw"]);
     $barom["24h_min"] = $sdata["24h.barometer.min.formatted"];
+    $barom["24h_min_kpa"] = $sdata["24h.barometer.min.formatted"]/10;
     $barom["24h_mintime"] = date('D j H:i:s',$sdata["24h.barometer.mintime.raw"]);
     $barom["day_max"] = $sdata["day.barometer.max.formatted"];
+    $barom["day_max_kpa"] = $sdata["day.barometer.max.formatted"]/10;
     $barom["day_maxtime"] = date('H:i:s',$sdata["day.barometer.maxtime.raw"]);
     $barom["day_min"] = $sdata["day.barometer.min.formatted"];
+    $barom["day_min_kpa"] = $sdata["day.barometer.max.formatted"]/10;
     $barom["day_mintime"] = date('H:i:s',$sdata["day.barometer.mintime.raw"]);
     $barom["month_max"] = $sdata["month.barometer.max.formatted"];
+    $barom["month_max_kpa"] = $sdata["month.barometer.max.formatted"]/10;
     $barom["month_maxtime"] = date('D j H:i:s',$sdata["month.barometer.maxtime.raw"]);
     $barom["month_min"] = $sdata["month.barometer.min.formatted"];
+    $barom["month_min_kpa"] = $sdata["month.barometer.min.formatted"]/10;
     $barom["month_mintime"] = date('D j H:i:s',$sdata["month.barometer.mintime.raw"]);
     $barom["year_max"] = $sdata["year.barometer.max.formatted"];
+    $barom["year_max_kpa"] = $sdata["year.barometer.max.formatted"]/10;
     $barom["year_maxtime"] = date('j M H:i:s',$sdata["year.barometer.maxtime.raw"]);
     $barom["year_min"] = $sdata["year.barometer.min.formatted"];
+    $barom["year_min_kpa"] = $sdata["year.barometer.min.formatted"]/10;
     $barom["year_mintime"] = date('j M H:i:s',$sdata["year.barometer.mintime.raw"]);
     $barom["alltime_max"] = $sdata["alltime.barometer.max.formatted"];
+    $barom["alltime_max_kpa"] = $sdata["alltime.barometer.max.formatted"]/10;
     $barom["alltime_maxtime"] = date('j M Y',$sdata["alltime.barometer.maxtime.raw"]);
     $barom["alltime_min"] = $sdata["alltime.barometer.min.formatted"];
+    $barom["alltime_min_kpa"] = $sdata["alltime.barometer.min.formatted"]/10;
     $barom["alltime_mintime"] = date('j M Y',$sdata["alltime.barometer.mintime.raw"]);
     
 
@@ -319,10 +332,13 @@ explode(" ", file_get_contents($livedata)));
         $rain["units"] = "in";
     }
     $rain["rate"] = $sdata["current.rainRate.formatted"];
+    $rain["current"] = $adata["rain"]["current rain"]["current"];
     $rain["total"] = $sdata["day.rain.sum.formatted"];
     $rain["last_hour"] = $sdata["hour.rain.sum.formatted"];
     $rain["last_10min"] = $sdata["10m.rain.sum.formatted"];
     $rain["last_24hour"] = $sdata["24h.rain.sum.formatted"];
+    $rain["since_rain_time"] = $adata["rain"]["since rain time"]["since"];
+    $rain["since_no_rain_time"] = $adata["rain"]["since no rain time"]["since"];
     $rain["day"] = $sdata["day.rain.sum.formatted"];
     $rain["24h_rate_max"] = $sdata["24h.rainRate.max.formatted"];
     $rain["24h_rate_maxtime"] = date('D j H:i:s', $sdata["24h.rainRate.maxtime.raw"]);
@@ -340,8 +356,6 @@ explode(" ", file_get_contents($livedata)));
     $rain["alltime_rate_maxtime"] = date('j M Y', $sdata["alltime.rainRate.maxtime.raw"]);
     $rain["alltime_total"] = $sdata["alltime.rain.sum.formatted"];
     $rain["storm_rain"] = $weewxrt[63];
-
-    //sky
     $sky["lux"] = round($sdata["current.maxSolarRad.formatted"] / 0.00809399477, 0 ,PHP_ROUND_HALF_UP);
     $sky["day_lux_max"] = round($sdata["day.maxSolarRad.formatted"] / 0.00809399477, 0 ,PHP_ROUND_HALF_UP);
     $sky["cloud_base"] = $sdata["current.cloudbase.formatted"];
@@ -606,12 +620,12 @@ if ($rainunit != $rain["units"])
 // Convert pressure units if necessary
 if ($pressureunit != $barom["units"])
 {
-    if (($pressureunit == 'hPa' && $barom["units"] == 'mb') || ($pressureunit == 'mb' && $barom["units"] == 'hPa') || ($pressureunit == 'kPa' && $barom["units"] == 'mb') || ($pressureunit == 'mb' && $barom["units"] == 'kPa') || ($pressureunit == 'kPa' && $barom["units"] == 'hPa') || ($pressureunit == 'hPa' && $barom["units"] == 'kPa'))
+    if (($pressureunit == 'hPa' && $barom["units"] == 'mbar') || ($pressureunit == 'mbar' && $barom["units"] == 'hPa') || ($pressureunit == 'kPa' && $barom["units"] == 'mbar') || ($pressureunit == 'mb' && $barom["units"] == 'kPa') || ($pressureunit == 'kPa' && $barom["units"] == 'hPa') || ($pressureunit == 'hPa' && $barom["units"] == 'kPa'))
     {
-        // 1 mb = 1 hPa so just change the unit being displayed
+        // 1 mbar = 1 hPa so just change the unit being displayed
         $barom["units"] = $pressureunit;
     }
-    else if ($pressureunit == "inHg" && ($barom["units"] == 'mb' || $barom["units"] == 'hPa' || $barom["units"] == 'kPa'))
+    else if ($pressureunit == "inHg" && ($barom["units"] == 'mbar' || $barom["units"] == 'hPa' || $barom["units"] == 'kPa'))
     {
         mbToin($barom, "now", ($barom["units"] == 'kPa' ? 1000 : 1));
         mbToin($barom, "max", ($barom["units"] == 'kPa' ? 1000 : 1));
@@ -630,7 +644,7 @@ if ($pressureunit != $barom["units"])
         $barom["units"] = $pressureunit;
 
     }
-    else if (($pressureunit == "mb" || $pressureunit == 'hPa' || $pressureunit == 'kPa') && $barom["units"] == 'inHg')
+    else if (($pressureunit == "mbar" || $pressureunit == 'hPa' || $pressureunit == 'kPa') && $barom["units"] == 'inHg')
     {
         inTomb($barom, "now", ($pressureunit == 'kPa' ? 1000 : 1));
         inTomb($barom, "max", ($pressureunit == 'kPa' ? 1000 : 1));
