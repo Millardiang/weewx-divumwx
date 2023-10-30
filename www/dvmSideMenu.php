@@ -56,12 +56,12 @@
       }
       if ($units != 'uk'){
         echo '<li>
-          <a href="./?units=uk"><menumarkeryellow></menumarkeryellow> UK (MPH) <topbarmetricc>°C</topbarmetricc></a>
+          <a href="./?units=uk"><menumarkeryellow></menumarkeryellow> UK (mph) <topbarmetricc>°C</topbarmetricc></a>
         </li>';
       }
       if ($units != 'scandinavia'){
         echo '<li>
-          <a href="./?units=scandinavia"><menumarkerred></menumarkerred> M/S <topbarmetricc>°C</topbarmetricc></a>
+          <a href="./?units=scandinavia"><menumarkerred></menumarkerred> Scandinavia (m/s) <topbarmetricc>°C</topbarmetricc></a>
         </li>';
       }
       if ($units != 'ca'){
