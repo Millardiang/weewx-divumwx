@@ -46,7 +46,7 @@
       }
       if ($units != 'us'){
         echo '<li>
-          <a href="./?units=us"><menumarkerorange></menumarkerorange> Imperial <topbarimperialf>°F</topbarimperialf></a>
+          <a href="./?units=us"><menumarkerorange></menumarkerorange> US Customary <topbarimperialf>°F</topbarimperialf></a>
         </li>';
       }
       if ($units != 'metric'){
@@ -66,7 +66,7 @@
       }
       if ($units != 'ca'){
         echo '<li>
-          <a href="./?units=ca"><menumarkerred></menumarkerred> CA (kPa) <topbarmetricc>°C</topbarmetricc></a>
+          <a href="./?units=ca"><menumarkerred></menumarkerred> Canada (kPa) <topbarmetricc>°C</topbarmetricc></a>
         </li>';
       }
       if ($extralinks == 'yes') {
