@@ -620,7 +620,7 @@ if ($rainunit != $rain["units"])
 // Convert pressure units if necessary
 if ($pressureunit != $barom["units"])
 {
-    if (($pressureunit == 'hPa' && $barom["units"] == 'mbar') || ($pressureunit == 'mbar' && $barom["units"] == 'hPa') || ($pressureunit == 'kPa' && $barom["units"] == 'mbar') || ($pressureunit == 'mb' && $barom["units"] == 'kPa') || ($pressureunit == 'kPa' && $barom["units"] == 'hPa') || ($pressureunit == 'hPa' && $barom["units"] == 'kPa'))
+    if (($pressureunit == 'hPa' && $barom["units"] == 'mbar') || ($pressureunit == 'mbar' && $barom["units"] == 'hPa') || ($pressureunit == 'kPa' && $barom["units"] == 'mbar') || ($pressureunit == 'mbar' && $barom["units"] == 'kPa') || ($pressureunit == 'kPa' && $barom["units"] == 'hPa') || ($pressureunit == 'hPa' && $barom["units"] == 'kPa'))
     {
         // 1 mbar = 1 hPa so just change the unit being displayed
         $barom["units"] = $pressureunit;
