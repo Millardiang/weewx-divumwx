@@ -5,6 +5,21 @@
 ## If you do this, you should also change the 'Content-Type' metadata below.
 #encoding UTF-8
 ##
+##      stormRain settings
+      #set $rain24hour = round($span(hour_delta=24).rain.sum.raw,1)
+      #set $rain48hour = round($span(hour_delta=48).rain.sum.raw,1)
+      #set $rain72hour = round($span(hour_delta=72).rain.sum.raw,1)
+      #set $rain96hour = round($span(hour_delta=96).rain.sum.raw,1)
+      #set $rain120hour = round($span(hour_delta=120).rain.sum.raw,1)
+      #set $rain144hour = round($span(hour_delta=144).rain.sum.raw,1)
+      #set $rain168hour = round($span(hour_delta=168).rain.sum.raw,1)
+      #set $rain192hour = round($span(hour_delta=192).rain.sum.raw,1)
+      #set $rain216hour = round($span(hour_delta=216).rain.sum.raw,1)
+      #set $rain240hour = round($span(hour_delta=240).rain.sum.raw,1)
+      #set $rainTimeSince = $time_since('rain>0').raw
+     
+      #set $rainTimeSinceNone = $time_since('rain=0').raw
+      
 ##
 ##		Calculate length of daylight
 	  #set $daylength = time.strftime('%H:%M', time.gmtime(int($almanac.sun.set.raw -  $almanac.sun.rise.raw)))
@@ -247,5 +262,41 @@
         #end if
         ## Last value can't end with a comma
         "void_end": null
+    },
+    
+        "rain":
+    {
+        #if $current.rain.has_data
+        "current rain": {"current": $current.rain.raw},
+        "24hour rain": {"24hour": $rain24hour},
+        "48hour rain": {"48hour": $rain48hour},
+        "72hour rain": {"72hour": $rain72hour},
+        "96hour rain": {"96hour": $rain96hour},
+        "120hour rain": {"120hour": $rain120hour},
+        "144hour rain": {"144hour": $rain144hour},
+        "168hour rain": {"168hour": $rain168hour},
+        "192hour rain": {"192hour": $rain192hour},
+        "216hour rain": {"216hour": $rain216hour},
+        "240hour rain": {"240hour": $rain240hour},
+        "since rain time": {"since": $rainTimeSince},
+        "since no rain time": {"since": $rainTimeSinceNone},
+       
+        #end if 
+        ## Last value can't end with a comma
+        "void_end": null
+
+    },
+    
+            "barometer_kpa":
+    {
+        #if $current.barometer.has_data
+        "current barometer kpa": {"current": $current.barometer.kPa.raw},
+        #end if 
+        ## Last value can't end with a comma
+        "void_end": null
+
     }
+
+
+
 }

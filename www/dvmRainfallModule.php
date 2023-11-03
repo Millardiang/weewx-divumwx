@@ -1,5 +1,5 @@
 <?php
-#####################################################################################################################                                                                                 #                                                                                                                   #
+#####################################################################################################################                                                                                                                                                                                                  #
 # weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
 #                                                                                                                   #
 # Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
@@ -506,7 +506,7 @@ var svg = d3.select(".stormRain")
     .attr("width", 180)
     .attr("height", 150);
 
-var stormRain = <?php echo $rain["storm_rain"];?>; // 
+var stormRain = <?php echo $rain["storm_rain"];?>; //  php echo the stormRain in place of the fake value here 
 var units = "<?php echo $rain["units"];?>";
 var rainRate = <?php echo number_format($rain["rate"],2);?>;
 var lastHour = <?php echo number_format($rain["last_hour"],2);?>;
