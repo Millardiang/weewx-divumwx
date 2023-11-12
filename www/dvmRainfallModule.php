@@ -13,6 +13,14 @@
 <?php  
 include('dvmCombinedData.php');
 header('Content-type: text/html; charset = utf-8');
+/*if($hardware != "Vantage")
+{ 
+$myfile = fopen("/var/www/html/divumwx/serverdata/aqidata.txt", "w") or die("Unable to open file!");
+$txt = "stormrain = $rain["storm_rain"]";
+fwrite($myfile, $txt);
+fclose($myfile);
+}
+*/
 ?>
 
 <div class="chartforecast2">
@@ -21,7 +29,7 @@ header('Content-type: text/html; charset = utf-8');
 <span class='moduletitle2'><?php echo $lang['rainfallModule'], " (<valuetitleunit>" . $rain["units"];?></valuetitleunit>)</span>
 <div class="updatedtime1"><span><?php if (file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?></div>
 <div class="rainconverter">
-<?php if ($rain["units"] =='in'){echo "<div class=rainconvertercircle>".number_format($rain["day"]*25.400013716,1)." <smallrainunit>mm";} else if ($rain["units"] =='mm'){echo "<div class=rainconvertercircle>".number_format($rain["day"]*0.0393701,2)." <smallrainunit>in";}?></span>
+<?php if ($rain["units"] =='in'){echo "<div class=rainconvertercircle>".number_format($rain["day"]*25.400013716,1)." <smallrainunit>mm";$rain["storm_rain"]=$rain["storm_rain"]*0.0393701;} else if ($rain["units"] =='mm'){echo "<div class=rainconvertercircle>".number_format($rain["day"]*0.0393701,2)." <smallrainunit>in";$rain["storm_rain"]=$rain["storm_rain"]*1;}?></span>
 </div></div>
 
 <!DOCTYPE html>

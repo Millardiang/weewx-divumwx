@@ -77,6 +77,8 @@ import weewx.wxformulas
 import weeutil.weeutil
 import weedb
 from weewx.engine import StdService
+import weewx.units
+
 
 try:
     # Test for new-style weewx logging by trying to import weeutil.logger

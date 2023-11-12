@@ -336,16 +336,7 @@ explode(" ", file_get_contents($livedata)));
     $rain["total"] = $sdata["day.rain.sum.formatted"];
     $rain["last_hour"] = $sdata["hour.rain.sum.formatted"];
     $rain["last_10min"] = $sdata["10m.rain.sum.formatted"];
-    $rain["last_24hour"] = $adata["rain"]["24hour rain"]["24hour"];
-    $rain["last_48hour"] = $adata["rain"]["48hour rain"]["48hour"];
-    $rain["last_72hour"] = $adata["rain"]["72hour rain"]["72hour"];
-    $rain["last_96hour"] = $adata["rain"]["96hour rain"]["96hour"];
-    $rain["last_120hour"] = $adata["rain"]["120hour rain"]["120hour"];
-    $rain["last_144hour"] = $adata["rain"]["144hour rain"]["144hour"];
-    $rain["last_168hour"] = $adata["rain"]["168hour rain"]["168hour"];
-    $rain["last_192hour"] = $adata["rain"]["192hour rain"]["192hour"];
-    $rain["last_216hour"] = $adata["rain"]["216hour rain"]["216hour"];
-    $rain["last_240hour"] = $adata["rain"]["240hour rain"]["240hour"];
+    $rain["last_24hour"] = $sdata["24h.rain.sum.formatted"];
     $rain["since_rain_time"] = $adata["rain"]["since rain time"]["since"];
     $rain["since_no_rain_time"] = $adata["rain"]["since no rain time"]["since"];
     $rain["day"] = $sdata["day.rain.sum.formatted"];
@@ -364,18 +355,9 @@ explode(" ", file_get_contents($livedata)));
     $rain["alltime_rate_max"] = $sdata["alltime.rainRate.max.formatted"];
     $rain["alltime_rate_maxtime"] = date('j M Y', $sdata["alltime.rainRate.maxtime.raw"]);
     $rain["alltime_total"] = $sdata["alltime.rain.sum.formatted"];
-    if($rain["last_24hour"]>0 && $rain["last_48hour"]>0 && $rain["last_72hour"]>0 && $rain["last_96hour"]>0 && $rain["last_120hour"]>0 && $rain["last_144hour"]>0 && $rain["last_168hour"]>0 && $rain["last_192hour"]>0 && $rain["last_216hour"]>0 && $rain["last_240hour"]>0){$rain["storm_rain"] = $rain["last_240hour"];}
-    else if($rain["last_24hour"]>0 && $rain["last_48hour"]>0 && $rain["last_72hour"]>0 && $rain["last_96hour"]>0 && $rain["last_120hour"]>0 && $rain["last_144hour"]>0 && $rain["last_168hour"]>0 && $rain["last_192hour"]>0 && $rain["last_216hour"]>0){$rain["storm_rain"] = $rain["last_216hour"];}
-    else if($rain["last_24hour"]>0 && $rain["last_48hour"]>0 && $rain["last_72hour"]>0 && $rain["last_96hour"]>0 && $rain["last_120hour"]>0 && $rain["last_144hour"]>0 && $rain["last_168hour"]>0 && $rain["last_192hour"]>0){$rain["storm_rain"] = $rain["last_192hour"];}
-    else if($rain["last_24hour"]>0 && $rain["last_48hour"]>0 && $rain["last_72hour"]>0 && $rain["last_96hour"]>0 && $rain["last_120hour"]>0 && $rain["last_144hour"]>0 && $rain["last_168hour"]>0){$rain["storm_rain"] = $rain["last_168hour"];}
-    else if($rain["last_24hour"]>0 && $rain["last_48hour"]>0 && $rain["last_72hour"]>0 && $rain["last_96hour"]>0 && $rain["last_120hour"]>0 && $rain["last_144hour"]>0){$rain["storm_rain"] = $rain["last_144hour"];}
-    else if($rain["last_24hour"]>0 && $rain["last_48hour"]>0 && $rain["last_72hour"]>0 && $rain["last_96hour"]>0 && $rain["last_120hour"]>0){$rain["storm_rain"] = $rain["last_120hour"];}
-    else if($rain["last_24hour"]>0 && $rain["last_48hour"]>0 && $rain["last_72hour"]>0 && $rain["last_96hour"]>0){$rain["storm_rain"] = $rain["last_96hour"];}
-    else if($rain["last_24hour"]>0 && $rain["last_48hour"]>0 && $rain["last_72hour"]>0){$rain["storm_rain"] = $rain["last_72hour"];}
-    else if($rain["last_24hour"]>0 && $rain["last_48hour"]>0){$rain["storm_rain"] = $rain["last_48hour"];}
-    else if($rain["last_24hour"]>0){$rain["storm_rain"] = $rain["last_24hour"];}
-    else if($rain["last_24hour"]==0){$rain["storm_rain"] = 0;}
-    else if ($hardware!=="Vantage"){$rain["storm_rain"]=$weewxrt[63];}
+    $rain["storm_rain"] = $adata["rain"]["storm rain"]["value"];
+    $rain["storm_rain_start"] = $weewxrt[66];
+   
     $sky["lux"] = round($sdata["current.maxSolarRad.formatted"] / 0.00809399477, 0 ,PHP_ROUND_HALF_UP);
     $sky["day_lux_max"] = round($sdata["day.maxSolarRad.formatted"] / 0.00809399477, 0 ,PHP_ROUND_HALF_UP);
     $sky["cloud_base"] = $sdata["current.cloudbase.formatted"];
