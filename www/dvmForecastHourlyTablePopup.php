@@ -10,8 +10,6 @@
 # Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
 #                                                                                                                   #
 #####################################################################################################################
-?>
-<?php
 
 include ('dvmCombinedData.php');
 $iconset = "icon2";
