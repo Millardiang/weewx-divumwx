@@ -471,6 +471,7 @@ explode(" ", file_get_contents($livedata)));
 
     $wind["speed_avg"] = $sdata["day.windSpeed.avg.formatted"];
     $wind["direction"] = $sdata["current.windDir.formatted"];
+    $wind["direction_and_symbol"] = $sdata["current.windDir"];
     $wind["direction_10m_avg"] = $sdata["10m.windDir.avg.formatted"];
     $wind["cardinal"] = $sdata["current.windDir.ordinal_compass"];
     $wind["direction_avg"] = $sdata["day.windDir.avg.formatted"];    
