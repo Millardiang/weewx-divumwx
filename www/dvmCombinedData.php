@@ -470,8 +470,8 @@ explode(" ", file_get_contents($livedata)));
 //echo $sdata["unit.label.windSpeed"]; 
 
     $wind["speed_avg"] = $sdata["day.windSpeed.avg.formatted"];
-    $wind["direction"] = $sdata["current.windDir.formatted"];
     $wind["direction_and_symbol"] = $sdata["current.windDir"];
+    $wind["direction"] = $sdata["current.windDir.formatted"];
     $wind["direction_10m_avg"] = $sdata["10m.windDir.avg.formatted"];
     $wind["cardinal"] = $sdata["current.windDir.ordinal_compass"];
     $wind["direction_avg"] = $sdata["day.windDir.avg.formatted"];    
@@ -685,11 +685,12 @@ if ($windunit != $wind["units"])
     {
         ktsTomph($wind, "speed_avg");
         ktsTomph($wind, "speed");
-        ktsTomph($wind, "gust_10min");     
+        ktsTomph($wind, "gust_10m_max");     
         ktsTomph($wind, "gust");
         ktsTomph($wind, "gust_60min");
         ktsTomph($wind, "speed_max");
         ktsTomph($wind, "gust_max");
+        ktsTomph($wind, "speed_10m_avg");
         ktsTomph($wind, "speed_15min_avg");
         ktsTomph($wind, "speed_30min_avg");
         ktsTomph($wind, "speed_maxtime");
@@ -705,11 +706,12 @@ if ($windunit != $wind["units"])
     {
         kmhTomph($wind, "speed_avg");
         kmhTomph($wind, "speed");
-        kmhTomph($wind, "gust_10min");     
+        kmhTomph($wind, "gust_10m_max");     
         kmhTomph($wind, "gust");
         kmhTomph($wind, "gust_60min");
         kmhTomph($wind, "speed_max");
         kmhTomph($wind, "gust_max");
+        kmhTomph($wind, "speed_10m_avg");
         kmhTomph($wind, "speed_15min_avg");
         kmhTomph($wind, "speed_30min_avg");
         kmhTomph($wind, "speed_maxtime");
@@ -725,11 +727,12 @@ if ($windunit != $wind["units"])
     {
         msTomph($wind, "speed_avg");
         msTomph($wind, "speed");
-        msTomph($wind, "gust_10min");     
+        msTomph($wind, "gust_10m_max");     
         msTomph($wind, "gust");
         msTomph($wind, "gust_60min");
         msTomph($wind, "speed_max");
         msTomph($wind, "gust_max");
+        msTomph($wind, "speed_10m_avg");
         msTomph($wind, "speed_15min_avg");
         msTomph($wind, "speed_30min_avg");
         msTomph($wind, "speed_maxtime");
@@ -745,11 +748,12 @@ if ($windunit != $wind["units"])
     {
         ktsTokmh($wind, "speed_avg");
         ktsTokmh($wind, "speed");
-        ktsTokmh($wind, "gust_10min");     
+        ktsTokmh($wind, "gust_10m_max");     
         ktsTokmh($wind, "gust");
         ktsTokmh($wind, "gust_60min");
         ktsTokmh($wind, "speed_max");
         ktsTokmh($wind, "gust_max");
+        ktsTokmh($wind, "speed_10m_avg");
         ktsTokmh($wind, "speed_15min_avg");
         ktsTokmh($wind, "speed_30min_avg");
         ktsTokmh($wind, "speed_maxtime");
@@ -765,11 +769,12 @@ if ($windunit != $wind["units"])
     {
         mphTokmh($wind, "speed_avg");
         mphTokmh($wind, "speed");
-        mphTokmh($wind, "gust_10min");     
+        mphTokmh($wind, "gust_10m_max");     
         mphTokmh($wind, "gust");
         mphTokmh($wind, "gust_60min");
         mphTokmh($wind, "speed_max");
         mphTokmh($wind, "gust_max");
+        mphTokmh($wind, "speed_10m_avg");
         mphTokmh($wind, "speed_15min_avg");
         mphTokmh($wind, "speed_30min_avg");
         mphTokmh($wind, "speed_maxtime");
@@ -786,11 +791,12 @@ if ($windunit != $wind["units"])
     {
         msTokmh($wind, "speed_avg");
         msTokmh($wind, "speed");
-        msTokmh($wind, "gust_10min");     
+        msTokmh($wind, "gust_10m_max");     
         msTokmh($wind, "gust");
         msTokmh($wind, "gust_60min");
         msTokmh($wind, "speed_max");
         msTokmh($wind, "gust_max");
+        msTokmh($wind, "speed_10m_avg");
         msTokmh($wind, "speed_15min_avg");
         msTokmh($wind, "speed_30min_avg");
         msTokmh($wind, "speed_maxtime");
@@ -806,11 +812,12 @@ if ($windunit != $wind["units"])
     {
         ktsToms($wind, "speed_avg");
         ktsToms($wind, "speed");
-        ktsToms($wind, "gust_10min");     
+        ktsToms($wind, "gust_10m_max");     
         ktsToms($wind, "gust");
         ktsToms($wind, "gust_60min");
         ktsToms($wind, "speed_max");
         ktsToms($wind, "gust_max");
+        ktsToms($wind, "speed_10m_avg");
         ktsToms($wind, "speed_15min_avg");
         ktsToms($wind, "speed_30min_avg");
         ktsToms($wind, "speed_maxtime");
@@ -826,11 +833,12 @@ if ($windunit != $wind["units"])
     {
         mphToms($wind, "speed_avg");
         mphToms($wind, "speed");
-        mphToms($wind, "gust_10min");     
+        mphToms($wind, "gust_10m_max");     
         mphToms($wind, "gust");
         mphToms($wind, "gust_60min");
         mphToms($wind, "speed_max");
         mphToms($wind, "gust_max");
+        mphToms($wind, "speed_10m_avg");
         mphToms($wind, "speed_15min_avg");
         mphToms($wind, "speed_30min_avg");
         mphToms($wind, "speed_maxtime");
@@ -846,11 +854,12 @@ if ($windunit != $wind["units"])
     {
         kmhToms($wind, "speed_avg");
         kmhToms($wind, "speed");
-        kmhToms($wind, "gust_10min");     
+        kmhToms($wind, "gust_10m_max");     
         kmhToms($wind, "gust");
         kmhToms($wind, "gust_60min");
         kmhToms($wind, "speed_max");
         kmhToms($wind, "gust_max");
+        kmhToms($wind, "speed_10m_avg");
         kmhToms($wind, "speed_15min_avg");
         kmhToms($wind, "speed_30min_avg");
         kmhToms($wind, "speed_maxtime");
@@ -866,11 +875,12 @@ if ($windunit != $wind["units"])
     {
         msTokts($wind, "speed_avg");
         msTokts($wind, "speed");
-        msTokts($wind, "gust_10min");     
+        msTokts($wind, "gust_10m_max");     
         msTokts($wind, "gust");
         msTokts($wind, "gust_60min");
         msTokts($wind, "speed_max");
         msTokts($wind, "gust_max");
+        msTokts($wind, "speed_10m_avg");
         msTokts($wind, "speed_15min_avg");
         msTokts($wind, "speed_30min_avg");
         msTokts($wind, "speed_maxtime");
@@ -887,11 +897,12 @@ if ($windunit != $wind["units"])
     {
         mphTokts($wind, "speed_avg");
         mphTokts($wind, "speed");
-        mphTokts($wind, "gust_10min");     
+        mphTokts($wind, "gust_10m_max");     
         mphTokts($wind, "gust");
         mphTokts($wind, "gust_60min");
         mphTokts($wind, "speed_max");
         mphTokts($wind, "gust_max");
+        mphTokts($wind, "speed_10m_avg");
         mphTokts($wind, "speed_15min_avg");
         mphTokts($wind, "speed_30min_avg");
         mphTokts($wind, "speed_maxtime");
@@ -907,11 +918,12 @@ if ($windunit != $wind["units"])
     {
         kmhTokts($wind, "speed_avg");
         kmhTokts($wind, "speed");
-        kmhTokts($wind, "gust_10min");     
+        kmhTokts($wind, "gust_10m_max");     
         kmhTokts($wind, "gust");
         kmhTokts($wind, "gust_60min");
         kmhTokts($wind, "speed_max");
         kmhTokts($wind, "gust_max");
+        kmhTokts($wind, "speed_10m_avg");
         kmhTokts($wind, "speed_15min_avg");
         kmhTokts($wind, "speed_30min_avg");
         kmhTokts($wind, "speed_maxtime");
@@ -931,11 +943,11 @@ if ($wind["units"] == 'mph')
 }
 else if ($wind["units"] == 'km/h')
 {
-    $toKnots = 0.5399568;
+    $toKnots = 0.539957;
 }
 else if ($wind["units"] == 'm/s')
 {
-    $toKnots = 1.943844;
+    $toKnots = 1.94384;
 }
 else
 {
