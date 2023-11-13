@@ -1,15 +1,4 @@
 <?php
-#####################################################################################################################
-#                                                                                                                   #
-# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
-#                                                                                                                   #
-# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
-#                                                                                                                   #
-# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
-#                                                                                                                   #
-# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
-#                                                                                                                   #
-#####################################################################################################################
 
 include ('dvmCombinedData.php');
 $iconset = "icon2";
@@ -101,8 +90,13 @@ for ($k = 0;$k < 14;$k++)
     {
         $forecastTempHigh[$k] = $forecastTempLow[$k];
     }
+    if ($windunit == 'kts') {
+    $forecastWindSpeedMax[$k] = $parsed_json['response'][0]['periods'][$k]['windSpeedMaxKTS'];
+    $forecastWindSpeedMin[$k] = $parsed_json['response'][0]['periods'][$k]['windSpeedMinKTS'];
+    } else {
     $forecastWindSpeedMax[$k] = $parsed_json['response'][0]['periods'][$k]['windSpeedMaxKPH'];
     $forecastWindSpeedMin[$k] = $parsed_json['response'][0]['periods'][$k]['windSpeedMinKPH'];
+    }
     $forecastWinddircardinal[$k] = $parsed_json['response'][0]['periods'][$k]['windDir'];
     $forecastprecipIntensity[$k] = $parsed_json['response'][0]['periods'][$k]['precipMM'];
     $forecastPrecipProb[$k] = $parsed_json['response'][0]['periods'][$k]['pop'];
@@ -281,7 +275,7 @@ for ($k = 0;$k < 14;$k++)
 <td><span style="font-size: 11px;";><?php echo $colorTempHigh[$k]; ?><?php echo $forecastTempHigh[$k] . "&deg" . $tempunit; ?></span></td>
 <td><span style="font-size: 11px; ";><?php echo $forecastPrecip[$k]; ?>
 </td>
-<td><span style="font-size: 11px; ";><redt><?php echo $forecastWindSpeedMin[$k] . "-" . $forecastWindSpeedMax[$k]; ?><small><?php echo $windunit; ?></small></span></td>
+<td><span style="font-size: 11px; ";><redt><?php echo $forecastWindSpeedMin[$k] . "-" . $forecastWindSpeedMax[$k]; ?> <small><?php echo $windunit; ?></small></span></td>
 <td><?php echo $forecastWinddircardinal[$k]; ?></td>
 <td><span style="font-size: 11px; ";><?php echo $colorUV[$k]; ?><?php echo $forecastUV[$k]; ?></span></td>
 <td><span style="font-size: 11px;";><?php echo $colorHumidity[$k]; ?><?php echo $forecasthumidity[$k]; ?><small> %</small></span></td>
