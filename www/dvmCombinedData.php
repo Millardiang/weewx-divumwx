@@ -485,8 +485,7 @@ explode(" ", file_get_contents($livedata)));
     $wind["wind_run"] = $sdata["day.windrun.sum.formatted"];
     $wind["speed_10m_avg"] = $sdata["10m.windSpeed.avg.formatted"];
     $wind["speed_10m_max"] = $sdata["10m.windSpeed.max.formatted"];
-    $wind["speed_10m_max"] =   $sdata["24h.windSpeed.max.formatted"];
-    $wind["gust_10m_max"] =   $sdata["24h.windGust.max.formatted"];
+    $wind["gust_10m_max"] =   $sdata["10m.windGust.max.formatted"];
     $wind["speed_24h_maxtime"] = date('D j H:i:s',  $sdata["24h.windSpeed.maxtime.raw"]);
     $wind["gust_24h_max"] = $sdata["24h.windGust.max.formatted"];
     $wind["gust_24h_maxtime"] = date('D j H:i:s',  $sdata["24h.windGust.maxtime.raw"]);
@@ -514,6 +513,7 @@ if ($tempunit != $temp["units"])
     {
         fToC($temp, "indoor_now");
         fToC($temp, "outside_now");
+        fToC($temp, "outside_day_avg_60mn");
         fToC($temp, "outside_day_avg");
         fToC($temp, "apptemp");
         fToC($temp, "windchill");
@@ -548,6 +548,7 @@ if ($tempunit != $temp["units"])
     {
         cToF($temp, "indoor_now");
         cToF($temp, "outside_now");
+        cToF($temp, "outside_day_avg_60mn");
         cToF($temp, "outside_day_avg");
         cToF($temp, "apptemp");
         cToF($temp, "windchill");
@@ -587,6 +588,7 @@ if ($rainunit != $rain["units"])
     {
         inTomm($rain, "rate");
         inTomm($rain, "total");
+        inTomm($rain, "last_10min");
         inTomm($rain, "last_hour");
         inTomm($rain, "last_3hour");
         inTomm($rain, "last_24hour");
