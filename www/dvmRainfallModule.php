@@ -9,8 +9,7 @@
 # Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
 #                                                                                                                   #
 #####################################################################################################################
-?>
-<?php  
+
 include('dvmCombinedData.php');
 header('Content-type: text/html; charset = utf-8');
 /*if($hardware != "Vantage")
@@ -555,7 +554,7 @@ var text = svg.selectAll(null)
     .attr("x", 48)
     .attr("y", function(d, i) {return 138.5 + i * 138.5;})
 
-    .style("fill", "#327682")
+    .style("fill", "#377df7")
     .style("font-family", "Helvetica")
     .style("font-size", "9.75px")
     .style("text-anchor", "middle")
@@ -599,7 +598,7 @@ var text = svg.selectAll(null)
     .attr("x", 123)
     .attr("y", function(d, i) {return 138.5 + i * 138.5;})
 
-    .style("fill", "#327682")
+    .style("fill", "#377df7")
     .style("font-family", "Helvetica")
     .style("font-size", "9.75px")
     .style("text-anchor", "middle")
@@ -641,7 +640,7 @@ var text = svg.selectAll(null)
     .attr("x", 87)
     .attr("y", function(d, i) {return 138.5 + i * 138.5;})
 
-    .style("fill", "#327682")
+    .style("fill", "#377df7")
     .style("font-family", "Helvetica")
     .style("font-size", "9.75px")
     .style("text-anchor", "middle")
@@ -683,7 +682,7 @@ var text = svg.selectAll(null)
     .attr("x", 48)
     .attr("y", function(d, i) {return 100 + i * 100;})
 
-    .style("fill", "#327682")
+    .style("fill", "#377df7")
     .style("font-family", "Helvetica")
     .style("font-size", "9.75px")
     .style("text-anchor", "middle")
@@ -723,7 +722,7 @@ var text = svg.selectAll(null)
     .attr("x", 123)
     .attr("y", function(d, i) {return 100 + i * 100;})
 
-    .style("fill", "#327682")
+    .style("fill", "#377df7")
     .style("font-family", "Helvetica")
     .style("font-size", "9.75px")
     .style("text-anchor", "middle")
@@ -763,7 +762,7 @@ var text = svg.selectAll(null)
     .attr("x", 48)
     .attr("y", function(d, i) {return 60.5 + i * 60.5;})
 
-    .style("fill", "#327682")
+    .style("fill", "#377df7")
     .style("font-family", "Helvetica")
     .style("font-size", "9.75px")
     .style("text-anchor", "middle")
@@ -803,7 +802,7 @@ var text = svg.selectAll(null)
     .attr("x", 123)
     .attr("y", function(d, i) {return 60.5 + i * 60.5;})
 
-    .style("fill", "#327682")
+    .style("fill", "#377df7")
     .style("font-family", "Helvetica")
     .style("font-size", "9.75px")
     .style("text-anchor", "middle")
