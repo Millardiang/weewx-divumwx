@@ -486,7 +486,7 @@ explode(" ", file_get_contents($livedata)));
     $wind["speed_10m_avg"] = $sdata["10m.windSpeed.avg.formatted"];
     $wind["speed_10m_max"] = $sdata["10m.windSpeed.max.formatted"];
     $wind["speed_10m_max"] =   $sdata["24h.windSpeed.max.formatted"];
-    $wind["gust_10m_max"] =   $sdata["24h.windGust.max.formatted"];
+    $wind["gust_10m_max"] =   $sdata["10m.windGust.max.formatted"];
     $wind["speed_24h_maxtime"] = date('D j H:i:s',  $sdata["24h.windSpeed.maxtime.raw"]);
     $wind["gust_24h_max"] = $sdata["24h.windGust.max.formatted"];
     $wind["gust_24h_maxtime"] = date('D j H:i:s',  $sdata["24h.windGust.maxtime.raw"]);
