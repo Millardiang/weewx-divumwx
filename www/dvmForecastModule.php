@@ -34,9 +34,10 @@ $jsonfile="jsondata/awd.txt";if(!file_exists($jsonfile)) {return;}
 
 ?>
     <div class="chartforecast4">
-      <span class="yearpopup"><a alt="Forecast Menu" title="Forecast Menu" href="dvmMenuForecastPopup.php" data-lity><?php echo $menucharticonpage;?> Forecasts</a></span>
+        <span class="yearpopup"><a alt="Forecast Menu" title="Forecast Menu" href="dvmMenuForecastPopup.php" data-lity><?php echo $menucharticonpage;?> Forecasts</a></span>
         <span class="yearpopup"><a alt="Meteogram" title="Meteogram" href="dvmMeteogramPopup.php" data-lity><?php echo $menucharticonpage;?> Meteogram</a></span>
-    </div>
+        <span class="yearpopup"><a alt="Advisories" title="Advisories" href="<?php echo $advisory;?>" . data-lity> <?php echo $menucharticonpage;?> Advisories</a></span>
+</div>
     <span class='moduletitle4'><?php echo $lang['forecastModule'];?> (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span>
 
 
