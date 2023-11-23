@@ -10,6 +10,73 @@
 # Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
 #                                                                                                                   #
 #####################################################################################################################
+# WeeWX Runtime Live data array description
+#    $weewxrt[0] = date
+#    $weewxrt[1] = time
+#    $weewxrt[2] = outTemp
+#    $weewxrt[3] = outHumidity
+#    $weewxrt[4] = dewpoint
+#    $weewxrt[5] = windSpeed_avg
+#    $weewxrt[6] = windSpeed
+#    $weewxrt[7] = windDir
+#    $weewxrt[8] = rainRate
+#    $weewxrt[9] = dayRain
+#    $weewxrt[10] = barometer
+#    $weewxrt[11] = windDir_compass
+#    $weewxrt[12] = windDir_beaufort
+#    $weewxrt[13] = units_wind
+#    $weewxrt[14] = units_temperature
+#    $weewxrt[15] = units_pressure
+#    $weewxrt[16] = units_rain
+#    $weewxrt[17] = windrun
+#    $weewxrt[18] = pressure_trend
+#    $weewxrt[19] = rain_month
+#    $weewxrt[20] = rain_year
+#    $weewxrt[21] = rain_yesterday
+#    $weewxrt[22] = inTemp
+#    $weewxrt[23] = inHumidity
+#    $weewxrt[24] = windchill
+#    $weewxrt[25] = temperature_trend
+#    $weewxrt[26] = outTemp_max
+#    $weewxrt[27] = outTemp_max_time
+#    $weewxrt[28] = outTemp_min
+#    $weewxrt[29] = outTemp_min_time
+#    $weewxrt[30] = windSpeed_max
+#    $weewxrt[31] = windSpeed_max_time
+#    $weewxrt[32] = windGust_max
+#    $weewxrt[33] = windGust_max_time
+#    $weewxrt[34] = pressure_max
+#    $weewxrt[35] = pressure_max_time
+#    $weewxrt[36] = pressure_min
+#    $weewxrt[37] = pressure_min_time
+#    $weewxrt[38] = weewx_version
+#    $weewxrt[39] = 0
+#    $weewxrt[40] = 10min_high_gust
+#    $weewxrt[41] = heatindex
+#    $weewxrt[42] = humidex
+#    $weewxrt[43] = UV
+#    $weewxrt[44] = ET_today
+#    $weewxrt[45] = radiation
+#    $weewxrt[46] = 10min_avg_wind_bearing
+#    $weewxrt[47] = rain_hour
+#    $weewxrt[48] = zambretti_code
+#    $weewxrt[49] = is_daylight
+#    $weewxrt[50] = lost_sensor_contact
+#    $weewxrt[51] = avh_wind_dir
+#    $weewxrt[52] = cloudbase
+#    $weewxrt[53] = units_cloudbase
+#    $weewxrt[54] = appTemp
+#    $weewxrt[55] = sunshine_hours
+#    $weewxrt[56] = maxSolarRad
+#    $weewxrt[57] = lightning_distance
+#    $weewxrt[58] = lightning_energy
+#    $weewxrt[59] = lightning_strike_count
+#    $weewxrt[60] = lightning_noise_count
+#    $weewxrt[61] = lightning_disturbance_count
+#    $weewxrt[62] = 10min_avg_gust
+#    $weewxrt[63] = stormRain
+#.   $weewxrt[64] = windGust
+################################################
 
 include ('fixedSettings.php');
 include ('dvmShared.php');
@@ -18,9 +85,9 @@ include('common.php');
 error_reporting(0);
 $os = shell_exec('lsb_release -d');
 $os_version = str_replace('Description:',' ',$os);
-$jsonS = 'jsondata/dvmSensorData.json';
-$jsonS = file_get_contents($jsonS);
-$sdata = json_decode($jsonS, true);
+//$jsonS = 'jsondata/dvmSensorData.json';
+//$jsonS = file_get_contents($jsonS);
+//$sdata = json_decode($jsonS, true);
 
 $jsonA = 'jsondata/dvmSkyData.json';
 $jsonA = file_get_contents($jsonA);
@@ -153,7 +220,7 @@ explode(" ", file_get_contents($livedata)));
     $air["24h.rollingavg.pm10_0"] = $adata["airquality"]["pm10 rolling 24hr"]["value"];
 
 //barometer
-    $barom["units"] = $sdata["unit.label.barometer"];
+    $barom["units"] = $adata["barometer"]["barometer units"]["value"];
     if ($barom["units"] == " inHg"){
         $barom["units"] = "inHg";
     }
@@ -173,130 +240,121 @@ explode(" ", file_get_contents($livedata)));
     {
         $barom["units"] = "mbar";
     }
-    $barom["now"] = $sdata["current.barometer.formatted"];
-    $barom["now_kpa"] = $sdata["current.barometer.formatted"]/10;
-    $barom["max"] = $sdata["day.barometer.max.formatted"];
-    $barom["max_kpa"] = $sdata["day.barometer.max.formatted"]/10;
-    $barom["maxtime"] = date('H:i', $sdata["day.barometer.maxtime.raw"]); 
-    $barom["min"] = $sdata["day.barometer.min.formatted"];
-    $barom["min_kpa"] = $sdata["day.barometer.min.formatted"]/10;
-    $barom["mintime"] = date('H:i',$sdata["day.barometer.mintime.raw"]); 
-    $barom["trend_code"] = $sdata["trend.barometer.code"];
-    $barom["trend_desc"] = $sdata["trend.barometer.desc"];
-    $barom["24h_max"] = $sdata["24h.barometer.max.formatted"];
-    $barom["24h_max_kpa"] = $sdata["24h.barometer.max.formatted"]/10;
-    $barom["24h_maxtime"] = date('D j H:i:s',$sdata["24h.barometer.maxtime.raw"]);
-    $barom["24h_min"] = $sdata["24h.barometer.min.formatted"];
-    $barom["24h_min_kpa"] = $sdata["24h.barometer.min.formatted"]/10;
-    $barom["24h_mintime"] = date('D j H:i:s',$sdata["24h.barometer.mintime.raw"]);
-    $barom["day_max"] = $sdata["day.barometer.max.formatted"];
-    $barom["day_max_kpa"] = $sdata["day.barometer.max.formatted"]/10;
-    $barom["day_maxtime"] = date('H:i:s',$sdata["day.barometer.maxtime.raw"]);
-    $barom["day_min"] = $sdata["day.barometer.min.formatted"];
-    $barom["day_min_kpa"] = $sdata["day.barometer.max.formatted"]/10;
-    $barom["day_mintime"] = date('H:i:s',$sdata["day.barometer.mintime.raw"]);
-    $barom["month_max"] = $sdata["month.barometer.max.formatted"];
-    $barom["month_max_kpa"] = $sdata["month.barometer.max.formatted"]/10;
-    $barom["month_maxtime"] = date('D j H:i:s',$sdata["month.barometer.maxtime.raw"]);
-    $barom["month_min"] = $sdata["month.barometer.min.formatted"];
-    $barom["month_min_kpa"] = $sdata["month.barometer.min.formatted"]/10;
-    $barom["month_mintime"] = date('D j H:i:s',$sdata["month.barometer.mintime.raw"]);
-    $barom["year_max"] = $sdata["year.barometer.max.formatted"];
-    $barom["year_max_kpa"] = $sdata["year.barometer.max.formatted"]/10;
-    $barom["year_maxtime"] = date('j M H:i:s',$sdata["year.barometer.maxtime.raw"]);
-    $barom["year_min"] = $sdata["year.barometer.min.formatted"];
-    $barom["year_min_kpa"] = $sdata["year.barometer.min.formatted"]/10;
-    $barom["year_mintime"] = date('j M H:i:s',$sdata["year.barometer.mintime.raw"]);
-    $barom["alltime_max"] = $sdata["alltime.barometer.max.formatted"];
-    $barom["alltime_max_kpa"] = $sdata["alltime.barometer.max.formatted"]/10;
-    $barom["alltime_maxtime"] = date('j M Y',$sdata["alltime.barometer.maxtime.raw"]);
-    $barom["alltime_min"] = $sdata["alltime.barometer.min.formatted"];
-    $barom["alltime_min_kpa"] = $sdata["alltime.barometer.min.formatted"]/10;
-    $barom["alltime_mintime"] = date('j M Y',$sdata["alltime.barometer.mintime.raw"]);
-    
+    $barom["now"] = $weewxrt[10];
+    $barom["max"] = $adata["barometer"]["day barometer max"]["value"];
+    $barom["maxtime"] = $adata["barometer"]["day barometer maxtime"]["at"]; 
+    $barom["min"] = $adata["barometer"]["day barometer min"]["value"];
+    $barom["mintime"] = $adata["barometer"]["day barometer mintime"]["at"]; 
+    $barom["trend_code"] = round($adata["barometer"]["trend barometer code"]["value"],0);
+    if($barom["trend_code"]>3){$barom["trend_desc"]="Rising Very Rapidly";$barom["trend_code"]=4;}
+    else if($barom["trend_code"]>2){$barom["trend_desc"]="Rising Quickly";$barom["trend_code"]=3;}
+    else if($barom["trend_code"]>1){$barom["trend_desc"]="Rising";$barom["trend_code"]=2;}
+    else if($barom["trend_code"]>0){$barom["trend_desc"]="Rising Slowly";$barom["trend_code"]=1;}
+    else if($barom["trend_code"]==0){$barom["trend_desc"]="Steady";$barom["trend_code"]=0;}
+    else if($barom["trend_code"]<0){$barom["trend_desc"]="Falling Slowly";$barom["trend_code"]=-1;}
+    else if($barom["trend_code"]<-1){$barom["trend_desc"]="Falling";$barom["trend_code"]=-2;}
+    else if($barom["trend_code"]<-2){$barom["trend_desc"]="Falling Quickly";$barom["trend_code"]=-3;}
+    else if($barom["trend_code"]<-3){$barom["trend_desc"]="Falling Very Rapidly";$barom["trend_code"]=-4;}
+    $barom["24h_max"] = $adata["barometer"]["yesterday barometer max"]["value"];
+    $barom["24h_maxtime"] = $adata["barometer"]["yesterday barometer maxtime"]["at"];
+    $barom["24h_min"] = $adata["barometer"]["yesterday barometer min"]["value"];
+    $barom["24h_mintime"] = $adata["barometer"]["yesterday barometer mintime"]["at"];
+    $barom["month_maxtime"] =$adata["barometer"]["month barometer maxtime"]["at"];
+    $barom["month_min"] = $adata["barometer"]["month barometer min"]["value"];
+    $barom["month_mintime"] = $adata["barometer"]["month barometer mintime"]["at"];
+    $barom["year_max"] = $adata["barometer"]["year barometer max"]["value"];
+    $barom["year_maxtime"] = $adata["barometer"]["year barometer maxtime"]["at"];
+    $barom["year_min"] = $adata["barometer"]["year barometer min"]["value"];
+    $barom["year_mintime"] = $adata["barometer"]["year barometer mintime"]["at"];
+    $barom["alltime_max"] = $adata["barometer"]["alltime barometer max"]["value"];
+    $barom["alltime_maxtime"] = $adata["barometer"]["alltime barometer maxtime"]["at"];
+    $barom["alltime_min"] = $adata["barometer"]["alltime barometer min"]["value"];
+    $barom["alltime_mintime"] = $adata["barometer"]["alltime barometer mintime"]["at"];
 
-    //dewpoint
-    $dew["now"] = $sdata["current.dewpoint.formatted"];
-    $dew["trend"] = $sdata["trend.dewpoint.formatted"];
-    $dew["day_max"] = $sdata["day.dewpoint.max.formatted"];
-    $dew["day_maxtime"] = date('H:i:s', $sdata["day.dewpoint.maxtime.raw"]);
-    $dew["day_min"] = $sdata["day.dewpoint.min.formatted"];
-    $dew["day_mintime"] = date('H:i:s', $sdata["day.dewpoint.min.formatted"]);
-    $dew["24h_max"] = $sdata["24h.dewpoint.max.formatted"];
-    $dew["24h_maxtime"] = date('D j H:i:s', $sdata["24h.dewpoint.maxtime.raw"]);
-    $dew["24h_min"] = $sdata["24h.dewpoint.min.formatted"];
-    $dew["24h_mintime"] = date('D j H:i:s', $sdata["24h.dewpoint.mintime.raw"]);
-    $dew["month_max"] = $sdata["month.dewpoint.max.formatted"];
-    $dew["month_maxtime"] = date('D j H:i:s', $sdata["month.dewpoint.maxtime.raw"]);
-    $dew["month_min"] = $sdata["month.dewpoint.min.formatted"];
-    $dew["month_mintime"] = date('D j H:i:s', $sdata["month.dewpoint.mintime.raw"]);
-    $dew["year_max"] = $sdata["year.dewpoint.max.formatted"];
-    $dew["year_maxtime"] = date('j M H:i:s', $sdata["year.dewpoint.maxtime.raw"]);
-    $dew["year_min"] = $sdata["alltime.dewpoint.min.formatted"];
-    $dew["year_mintime"] = date('j M H:i:s', $sdata["alltime.dewpoint.mintime.raw"]);
-    $dew["alltime_max"] = $sdata["alltime.dewpoint.max.formatted"];
-    $dew["alltime_maxtime"] = date('j M Y', $sdata["alltime.dewpoint.maxtime.raw"]);
-    $dew["alltime_min"] = $sdata["alltime.dewpoint.min.formatted"];
-    $dew["alltime_mintime"] = date('j M Y', $sdata["alltime.dewpoint.mintime.raw"]);
+        //dewpoint
+    $dew["now"] = $weewxrt[4];
+    $dew["trend"] = $adata["dewpoint"]["trend dewpoint"]["value"];
+    $dew["day_max"] = $adata["dewpoint"]["day dewpoint max"]["value"];
+    $dew["day_maxtime"] = $adata["dewpoint"]["day dewpoint maxtime"]["value"];
+    $dew["day_min"] = $adata["dewpoint"]["day dewpoint min"]["value"];
+    $dew["day_mintime"] = $adata["dewpoint"]["day dewpoint mintime"]["value"];
+    $dew["24h_max"] = $adata["dewpoint"]["yesterday dewpoint max"]["value"];
+    $dew["24h_maxtime"] = $adata["dewpoint"]["yesterday dewpoint maxtime"]["value"];
+    $dew["24h_min"] = $adata["dewpoint"]["yesterday dewpoint min"]["value"];
+    $dew["24h_mintime"] = $adata["dewpoint"]["yesterday dewpoint mintime"]["value"];
+    $dew["month_max"] = $adata["dewpoint"]["month dewpoint max"]["value"];
+    $dew["month_maxtime"] = $adata["dewpoint"]["month dewpoint maxtime"]["value"];
+    $dew["month_min"] = $adata["dewpoint"]["month dewpoint min"]["value"];
+    $dew["month_mintime"] = $adata["dewpoint"]["month dewpoint mintime"]["value"];
+    $dew["year_max"] = $adata["dewpoint"]["year dewpoint max"]["value"];
+    $dew["year_maxtime"] = $adata["dewpoint"]["year dewpoint maxtime"]["value"];
+    $dew["year_min"] = $adata["dewpoint"]["year dewpoint min"]["value"];
+    $dew["year_mintime"] = $adata["dewpoint"]["year dewpoint min"]["value"];
+    $dew["alltime_max"] = $adata["dewpoint"]["alltime dewpoint max"]["value"];
+    $dew["alltime_maxtime"] = $adata["dewpoint"]["alltime dewpoint maxtime"]["value"];
+    $dew["alltime_min"] = $adata["dewpoint"]["alltime dewpoint min"]["value"];
+    $dew["alltime_mintime"] = $adata["dewpoint"]["alltime dewpoint mintime"]["value"];
 
     //humidity
-    $humid["now"] = $sdata ["current.outHumidity.formatted"];
-    $humid["trend"] =  $sdata ["trend.outHumidity.formatted"];
-    $humid["day_max"] = $sdata["day.outHumidity.max.formatted"];
-    $humid["day_maxtime"] = date('H:i:s', $sdata["day.outHumidity.maxtime.raw"]);
-    $humid["day_min"] = $sdata["day.outHumidity.min.formatted"];
-    $humid["day_mintime"] = date('H:i:s', $sdata["day.outHumidity.mintime.raw"]);
-    $humid["24h_max"] = $sdata["24h.outHumidity.max.formatted"];
-    $humid["24h_maxtime"] = date('D j H:i:s', $sdata["24h.outHumidity.maxtime.raw"]);
-    $humid["24h_min"] = $sdata["24h.outHumidity.min.formatted"];
-    $humid["24h_mintime"] = date('D j H:i:s', $sdata["24h.outHumidity.mintime.raw"]);
-    $humid["month_max"] = $sdata["month.outHumidity.max.formatted"];
-    $humid["month_maxtime"] = date('D j H:i:s', $sdata["month.outHumidity.maxtime.raw"]);
-    $humid["month_min"] = $sdata["month.outHumidity.min.formatted"];
-    $humid["month_mintime"] = date('D j H:i:s', $sdata["month.outHumidity.mintime.raw"]);
-    $humid["year_max"] = $sdata['year.outHumidity.max.formatted'];
-    $humid["year_maxtime"] = date('j M H:i:s',$sdata['year.outHumidity.maxtime.raw']);
-    $humid["year_min"] = $sdata['year.outHumidity.min.formatted'];
-    $humid["year_mintime"] = date('j M H:i:s',$sdata['year.outHumidity.mintime.raw']);
-    $humid["alltime_max"] = $sdata['alltime.outHumidity.max.formatted'];
-    $humid["alltime_maxtime"] = date('j M Y' ,$sdata['alltime.outHumidity.maxtime.raw']);
-    $humid["alltime_min"] = $sdata['alltime.outHumidity.min.formatted'];
-    $humid["alltime_mintime"] = date('j M Y', $sdata['alltime.outHumidity.mintime.raw']);
-    $humid["indoors_trend"] = $sdata ["trend.inHumidity.formatted"];
-    $humid["indoors_now"] = $sdata ["current.inHumidity.formatted"];
-    $humid["indoors_day_max"] = $sdata["day.inHumidity.max.formatted"];
-    $humid["indoors_day_maxtime"] = date('H:i:s', $sdata["day.inHumidity.maxtime.raw"]);
-    $humid["indoors_day_min"] = $sdata["day.inHumidity.min.formatted"];
-    $humid["indoors_day_mintime"] = date('H:i:s', $sdata["day.inHumidity.mintime.raw"]);
-    $humid["indoors_24h_max"] = $sdata["24h.inHumidity.max.formatted"];
-    $humid["indoors_24h_maxtime"] = date('D j H:i:s', $sdata["24h.inHumidity.maxtime.raw"]);
-    $humid["indoors_24h_min"] = $sdata["24h.inHumidity.min.formatted"];
-    $humid["indoors_24h_mintime"] = date('D j H:i:s', $sdata["24h.inHumidity.mintime.raw"]);
-    $humid["indoors_month_max"] = $sdata["month.inHumidity.max.formatted"];
-    $humid["indoors_month_maxtime"] = date('D j H:i:s', $sdata["month.inHumidity.maxtime.raw"]);
-    $humid["indoors_month_min"] = $sdata["month.inHumidity.min.formatted"];
-    $humid["indoors_month_mintime"] = date('D j H:i:s', $sdata["month.inHumidity.mintime.raw"]);
-    $humid["indoors_year_max"] = $sdata["year.inHumidity.max.formatted"];
-    $humid["indoors_year_maxtime"] = date('j M H:i:s',$sdata['year.inHumidity.maxtime.raw']);
-    $humid["indoors_year_min"] = $sdata["year.inHumidity.min.formatted"];
-    $humid["indoors_year_mintime"] = date('j M H:i:s', $sdata['year.inHumidity.mintime.raw']);
-    $humid["indoors_alltime_max"] = $sdata["alltime.inHumidity.max.formatted"];
-    $humid["indoors_alltime_maxtime"] = date('j M Y', $sdata["alltime.inHumidity.maxtime.raw"]);
-    $humid["indoors_alltime_min"] = $sdata["alltime.inHumidity.min.formatted"];
-    $humid["indoors_alltime_mintime"] = date('j M Y', $sdata ["alltime.outHumidity.mintime.raw"]);
+    $humid["now"] = $weewxrt[3];
+    $humid["trend"] =  $adata["humidity"]["trend outHumidity"]["value"];
+    $humid["day_max"] = $adata["humidity"]["day outHumidity max"]["value"];
+    $humid["day_maxtime"] = $adata["humidity"]["day outHumidity maxtime"]["value"];
+    $humid["day_min"] = $adata["humidity"]["day outHumidity min"]["value"];
+    $humid["day_mintime"] = $adata["humidity"]["day outHumidity mintime"]["value"];
+    $humid["24h_max"] = $adata["humidity"]["day outHumidity mintime"]["value"];
+    $humid["24h_maxtime"] = $adata["humidity"]["yesterday outHumidity maxtime"]["value"];
+    $humid["24h_min"] = $adata["humidity"]["yesterday outHumidity min"]["value"];
+    $humid["24h_mintime"] = $adata["humidity"]["yesterday outHumidity mintime"]["value"];
+    $humid["month_max"] = $adata["humidity"]["month outHumidity max"]["value"];
+    $humid["month_maxtime"] = $adata["humidity"]["month outHumidity maxtime"]["value"];
+    $humid["month_min"] = $adata["humidity"]["month outHumidity min"]["value"];
+    $humid["month_mintime"] = $adata["humidity"]["month outHumidity mintime"]["value"];
+    $humid["year_max"] = $adata["humidity"]["year outHumidity max"]["value"];
+    $humid["year_maxtime"] = $adata["humidity"]["year outHumidity maxtime"]["value"];
+    $humid["year_min"] = $adata["humidity"]["year outHumidity min"]["value"];
+    $humid["year_mintime"] = $adata["humidity"]["year outHumidity mintime"]["value"];
+    $humid["alltime_max"] = $adata["humidity"]["alltime outHumidity max"]["value"];
+    $humid["alltime_maxtime"] = $adata["humidity"]["alltime outHumidity maxtime"]["value"];
+    $humid["alltime_min"] = $adata["humidity"]["alltime outHumidity min"]["value"];
+    $humid["alltime_mintime"] = $adata["humidity"]["alltime outHumidity mintime"]["value"];
+    $humid["indoors_trend"] = round($adata["humidity"]["trend inHumidity"]["value"],1);
+    $humid["indoors_now"] = $weewxrt[23];
+    $humid["indoors_day_max"] = $adata["humidity"]["day inHumidity max"]["value"];
+    $humid["indoors_day_maxtime"] = $adata["humidity"]["day inHumidity maxtime"]["value"];
+    $humid["indoors_day_min"] = $adata["humidity"]["day inHumidity min"]["value"];
+    $humid["indoors_day_mintime"] = $adata["humidity"]["day inHumidity mintime"]["value"];
+    $humid["indoors_24h_max"] = $adata["humidity"]["yesterday inHumidity max"]["value"];
+    $humid["indoors_24h_maxtime"] = $adata["humidity"]["yesterday inHumidity maxtime"]["value"];
+    $humid["indoors_24h_min"] = $adata["humidity"]["yesterday inHumidity min"]["value"];
+    $humid["indoors_24h_mintime"] = $adata["humidity"]["yesterday inHumidity mintime"]["value"];
+    $humid["indoors_month_max"] = $adata["humidity"]["month inHumidity max"]["value"];
+    $humid["indoors_month_maxtime"] = $adata["humidity"]["month inHumidity maxtime"]["value"];
+    $humid["indoors_month_min"] = $adata["humidity"]["month inHumidity min"]["value"];
+    $humid["indoors_month_mintime"] = $adata["humidity"]["month inHumidity mintime"]["value"];
+    $humid["indoors_year_max"] = $adata["humidity"]["year inHumidity max"]["value"];
+    $humid["indoors_year_maxtime"] = $adata["humidity"]["year inHumidity maxtime"]["value"];
+    $humid["indoors_year_min"] = $adata["humidity"]["year inHumidity min"]["value"];
+    $humid["indoors_year_mintime"] = $adata["humidity"]["year inHumidity mintime"]["value"];
+    $humid["indoors_year_mintime"] = $adata["humidity"]["alltime inHumidity mintime"]["value"];
+    $humid["indoors_alltime_max"] = $adata["humidity"]["alltime inHumidity max"]["value"];
+    $humid["indoors_alltime_maxtime"] = $adata["humidity"]["alltime inHumidity maxtime"]["value"];
+    $humid["indoors_alltime_min"] = $adata["humidity"]["alltime inHumidity min"]["value"];
+    $humid["indoors_alltime_mintime"] = $adata["humidity"]["alltime inHumidity mintime"]["value"];
+
+
+
 
     //lightning
     $lightning["last_strike_time"] = $adata["lightning"]["lightning strike last time"]["value"];
-    $lightning["current_strike_count"] = $sdata["current.lightning_strike_count"]; 
-    $lightning["2m_strike_count"] = $sdata["2m.lightning_strike_count.sum"]; 
-    $lightning["10m_strike_count"] = $sdata["10m.lightning_strike_count.sum"]; 
+    $lightning["current_strike_count"] = $adata["lightning"]["lightning current"]["value"]; 
     $lightning["hour_strike_count"] = $adata["lightning"]["lightning last hour"]["value"]; 
-    $lightning["24h_strike_count"] = $sdata["24h.lightning_strike_count.sum"]; 
-    $lightning["day_strike_count"] = $sdata["day.lightning_strike_count.sum"];
-    $lightning["month_strike_count"] = $sdata["month.lightning_strike_count.sum"];
-    $lightning["year_strike_count"] = $sdata["year.lightning_strike_count.sum"];
+    //$lightning["24h_strike_count"] = $sdata["24h.lightning_strike_count.sum"]; 
+    $lightning["day_strike_count"] = $adata["lightning"]["lightning day"]["value"];
+    $lightning["month_strike_count"] = $adata["lightning"]["lightning month"]["value"];
+    $lightning["year_strike_count"] = $adata["lightning"]["lightning year"]["value"];
     $lightning["last_time"] = $adata["lightning"]["lightning last time"]["at"];
-    $lightning["alltime_strike_count"] = $sdata["alltime.lightning_strike_count.sum"];
+    $lightning["alltime_strike_count"] = $adata["lightning"]["lightning alltime"]["value"];
     $lightning["last_distance"] = $adata["lightning"]["lightning last distance"]["value"];
     $lightning["now_energy"] = $weewxrt[59];
     $lightning["now_strike_count"] = $weewxrt[60];
@@ -315,8 +373,8 @@ explode(" ", file_get_contents($livedata)));
         $lightning["time_ago"] = time() - strtotime("20" . $parts1[2] . $parts1[1] . $parts1[0] . " " . $parts[1]);
     }
 
-    //rainfall
-    $rain["units"] = $sdata["unit.label.rain"];
+//rainfall
+    $rain["units"] = $weewxrt[16];
     if($rain["units"] == " mm")
     {
         $rain["units"] = "mm";
@@ -330,36 +388,34 @@ explode(" ", file_get_contents($livedata)));
     {
         $rain["units"] = "in";
     }
-    $rain["rate"] = $sdata["current.rainRate.formatted"];
-    $rain["current"] = $adata["rain"]["current rain"]["current"];
-    $rain["total"] = $sdata["day.rain.sum.formatted"];
-    $rain["last_hour"] = $sdata["hour.rain.sum.formatted"];
-    $rain["last_10min"] = $sdata["10m.rain.sum.formatted"];
-    $rain["last_24hour"] = $sdata["24h.rain.sum.formatted"];
-    $rain["since_rain_time"] = $adata["rain"]["since rain time"]["since"];
-    $rain["since_no_rain_time"] = $adata["rain"]["since no rain time"]["since"];
-    $rain["day"] = $sdata["day.rain.sum.formatted"];
-    $rain["24h_rate_max"] = $sdata["24h.rainRate.max.formatted"];
-    $rain["24h_rate_maxtime"] = date('D j H:i:s', $sdata["24h.rainRate.maxtime.raw"]);
-    $rain["24h_total"] = $sdata["24h.rain.sum.formatted"];
-    $rain["day_rate_max"] = $sdata["day.rainRate.max.formatted"];
-    $rain["day_rate_maxtime"] = date('H:i:s', $sdata["day.rainRate.maxtime.raw"]);
-    $rain["day_total"] = $sdata["day.rain.sum.formatted"];
-    $rain["month_rate_max"] = $sdata["month.rainRate.max.formatted"];
-    $rain["month_rate_maxtime"] = date('D j H:i:s', $sdata["month.rainRate.maxtime.raw"]);
-    $rain["month_total"] = $sdata["month.rain.sum.formatted"];
-    $rain["year_rate_max"] = $sdata["year.rainRate.max.formatted"];
-    $rain["year_rate_maxtime"] = date('j M H:i:s', $sdata["year.rainRate.maxtime.raw"]);
-    $rain["year_total"] = $sdata["year.rain.sum.formatted"];
-    $rain["alltime_rate_max"] = $sdata["alltime.rainRate.max.formatted"];
-    $rain["alltime_rate_maxtime"] = date('j M Y', $sdata["alltime.rainRate.maxtime.raw"]);
-    $rain["alltime_total"] = $sdata["alltime.rain.sum.formatted"];
+    $rain["rate"] = $weewxrt[8];
+    $rain["current"] = $weewxrt[9];
+    $rain["total"] = $weewxrt[9];
+    $rain["last_hour"] = $adata["rain"]["hour rain"]["value"];
+    $rain["last_10min"] = $adata["rain"]["10min rain sum"]["value"];
+    $rain["last_24hour"] = $adata["rain"]["24hr rain"]["value"];
+    $rain["day"] = $adata["rain"]["day rain"]["value"];
+    $rain["24h_rate_max"] = $adata["rain"]["24hr rainRate Max"]["value"];
+    $rain["24h_rate_maxtime"] = $adata["rain"]["24hr rainRate Max Time"]["value"];
+    $rain["24h_total"] = $adata["rain"]["24hr rain"]["value"];
+    $rain["day_rate_max"] = $adata["rain"]["day rainRate Max"]["value"];
+    $rain["day_rate_maxtime"] = $adata["rain"]["day rainRate Max Time"]["value"];
+    $rain["day_total"] = $adata["rain"]["day rain"]["value"];
+    $rain["month_rate_max"] = $adata["rain"]["month rainRate Max"]["value"];
+    $rain["month_rate_maxtime"] = $adata["rain"]["month rainRate Max Time"]["value"];
+    $rain["month_total"] = $adata["rain"]["month rain"]["value"];
+    $rain["year_rate_max"] = $adata["rain"]["year rainRate Max"]["value"];
+    $rain["year_rate_maxtime"] = $adata["rain"]["year rainRate Max Time"]["value"];
+    $rain["year_total"] = $adata["rain"]["year rain"]["value"];
+    $rain["alltime_rate_max"] = $adata["rain"]["alltime rainRate Max"]["value"];
+    $rain["alltime_rate_maxtime"] = $adata["rain"]["alltime rainRate Max Time"]["value"];
+    $rain["alltime_total"] = round($adata["rain"]["alltime rain"]["value"],1);
     $rain["storm_rain"] = $adata["rain"]["storm rain"]["value"];
-    $rain["storm_rain_start"] = $weewxrt[66];
-   
-    $sky["lux"] = round($sdata["current.maxSolarRad.formatted"] / 0.00809399477, 0 ,PHP_ROUND_HALF_UP);
-    $sky["day_lux_max"] = round($sdata["day.maxSolarRad.formatted"] / 0.00809399477, 0 ,PHP_ROUND_HALF_UP);
-    $sky["cloud_base"] = $sdata["current.cloudbase.formatted"];
+
+    //sky
+    $sky["lux"] = round($weewxrt[45] / 0.00809399477, 0 ,PHP_ROUND_HALF_UP);
+    $sky["day_lux_max"] = round($adata["solar"]["max solar day"]["value"]/ 0.00809399477, 0 ,PHP_ROUND_HALF_UP);
+    $sky["cloud_base"] = $weewxrt[52];
     $sky["cloud_cover"] = round($adata['cloudcover']['cloud cover']['value'],0);
 
     //solar
@@ -376,7 +432,7 @@ explode(" ", file_get_contents($livedata)));
     $solar["alltime_maxtime"] = $adata["solar"]["max solar alltime"]["at"];
 
     //temperature
-    $temp["units"] = $sdata["unit.label.outTemp"];
+    $temp["units"] = $adata["temp"]["temp units"]["value"];
     if($temp["units"] == "°C"){
         $temp["units"] = "C";
     }
@@ -384,41 +440,40 @@ explode(" ", file_get_contents($livedata)));
     {
         $temp["units"] = "F";
     }
-    $temp["indoor_now"] = $sdata["current.inTemp.formatted"];
-    $temp["indoor_trend"] = $sdata["trend.inTemp.formatted"];
-    $temp["indoor_day_max"] = $sdata["day.inTemp.max.formatted"];
-    $temp["indoor_day_min"] = $sdata["day.inTemp.min.formatted"];
-    $temp["outside_now"] = $sdata["current.outTemp.formatted"];
-    $temp["outside_trend"] = $sdata["trend.outTemp.formatted"];
-    $temp["apptemp"] = $sdata["current.appTemp.formatted"];
-    $temp["heatindex"] = $sdata["current.appTemp.formatted"];
-    $temp["windchill"] = $sdata["current.windchill.formatted"];
-    $temp["humidex"] = $sdata["current.humidex.formatted"];
-    $temp["outside_24h_max"] = $sdata["24h.outTemp.max.formatted"];
-    $temp["outside_day_avg_60mn"] = $sdata["hour.outTemp.avg.formatted"];
-    $temp["outside_24h_maxtime"] = date('D j H:i:s',  $sdata["24h.outTemp.maxtime.raw"]);
-    $temp["outside_24h_min"] = $sdata["24h.outTemp.min.formatted"];
-    $temp["outside_24h_mintime"] = date('D j H:i:s',  $sdata["24h.outTemp.mintime.raw"]);
-    $temp["outside_day_max"] = $sdata["day.outTemp.max.formatted"];
-    $temp["outside_day_maxtime"] = date('H:i:s', $sdata["day.outTemp.maxtime.raw"]);
-    $temp["outside_day_min"] = $sdata["day.outTemp.min.formatted"];
-    $temp["outside_day_mintime"] = date('H:i:s', $sdata["month.outTemp.mintime.raw"]);
-    $temp["outside_day_avg"] = $sdata["day.outTemp.avg.formatted"];
-    $temp["outside_day_avg_60mn"] = $sdata["hour.outTemp.avg.formatted"];
-    $temp["outside_month_max"] = $sdata["month.outTemp.max.formatted"];
-    $temp["outside_month_maxtime"] = date('D j H:i:s', $sdata["month.outTemp.maxtime.raw"]);
-    $temp["outside_month_min"] = $sdata["month.outTemp.min.formatted"];
-    $temp["outside_month_mintime"] = date('D j H:i:s', $sdata["month.outTemp.mintime.raw"]);
-    $temp["outside_year_max"] = $sdata["year.outTemp.max.formatted"];
-    $temp["outside_year_maxtime"] = date('j M H:i:s', $sdata["year.outTemp.maxtime.raw"]);
-    $temp["outside_year_maxtime2"] = date('j M', $sdata["year.outTemp.maxtime.raw"]);
-    $temp["outside_year_min"] = $sdata["year.outTemp.min.formatted"];
-    $temp["outside_year_mintime"] = date('j M H:i:s', $sdata["year.outTemp.mintime.raw"]);
-    $temp["outside_year_mintime2"] = date('j M', $sdata["year.outTemp.mintime.raw"]);
-    $temp["outside_alltime_max"] = $sdata["alltime.outTemp.max.formatted"];
-    $temp["outside_alltime_maxtime"] = date('j M Y',  $sdata["alltime.outTemp.maxtime.raw"]);
-    $temp["outside_alltime_min"] = $sdata["alltime.outTemp.min.formatted"];
-    $temp["outside_alltime_mintime"] = date('j M Y',  $sdata["alltime.outTemp.mintime.raw"]);
+    $temp["indoor_now"] = round($weewxrt[22],1);
+    $temp["indoor_trend"] = $adata["temp"]["trend inTemp"]["value"];
+    //$temp["indoor_day_max"] = $sdata["day.inTemp.max.formatted"];
+    //$temp["indoor_day_min"] = $sdata["day.inTemp.min.formatted"];
+    $temp["outside_now"] = round($weewxrt[2],1);
+    $temp["outside_trend"] = round($adata["temp"]["trend outTemp"]["value"],1);
+    $temp["apptemp"] = $weewxrt[54];
+    $temp["heatindex"] = $weewxrt[41];
+    $temp["windchill"] = round($adata["temp"]["windchill"]["value"],1);
+    $temp["humidex"] = $weewxrt[42];
+    $temp["outside_24h_max"] = $adata["temp"]["24hr outTemp max"]["value"];
+    $temp["outside_day_avg_60mn"] = $adata["temp"]["60min outTemp avg"]["value"];
+    $temp["outside_24h_maxtime"] =  $adata["temp"]["60min outTemp avg"]["value"];
+    $temp["outside_24h_min"] = $adata["temp"]["24hr outTemp min"]["value"];
+    $temp["outside_24h_mintime"] =  $adata["temp"]["24hr outTemp mintime"]["value"];
+    $temp["outside_day_avg"] = $adata["temp"]["day outTemp avg"]["value"];
+    $temp["outside_day_max"] = $adata["temp"]["day outTemp max"]["value"];
+    $temp["outside_day_maxtime"] = $adata["day.outTemp.maxtime.raw"];
+    $temp["outside_day_min"] = round($adata["temp"]["day outTemp min"]["value"],1);
+    $temp["outside_day_mintime"] = $adata["temp"]["day outTemp mintime"]["value"];
+    $temp["outside_month_max"] = $adata["month.outTemp.max.formatted"];
+    $temp["outside_month_maxtime"] = $adata["temp"]["month outTemp max"]["value"];
+    $temp["outside_month_min"] = $adata["temp"]["day outTemp min"]["value"];
+    $temp["outside_month_mintime"] = $adata["temp"]["month outTemp mintime"]["value"];
+    $temp["outside_year_max"] = $adata["temp"]["year outTemp max"]["value"];
+    $temp["outside_year_maxtime"] = $adata["temp"]["year outTemp maxtime"]["value"];
+    $temp["outside_year_maxtime2"] = $adata["year.outTemp.maxtime.raw"];
+    $temp["outside_year_min"] = $adata["temp"]["year outTemp min"]["value"];
+    $temp["outside_year_mintime"] = $adata["temp"]["year outTemp mintime"]["value"];
+    $temp["outside_year_mintime2"] = $adata["temp"]["year outTemp mintime"]["value"];
+    $temp["outside_alltime_max"] = $adata["temp"]["alltime outTemp max"]["value"];
+    $temp["outside_alltime_maxtime"] = $adata["temp"]["alltime outTemp maxtime"]["value"];
+    $temp["outside_alltime_min"] = $adata["temp"]["alltime outTemp min"]["value"];
+    $temp["outside_alltime_mintime"] = $adata["temp"]["alltime outTemp mintime"]["value"];
     $Temp = $temp["indoor_now"];
     $Humidity = $humid["indoors_now"];
     $T = $Temp*9/5+32;
@@ -437,20 +492,20 @@ explode(" ", file_get_contents($livedata)));
       $temp["indoor_now_feels"] = number_format($HI, 1);
 
     //uv
-    $uv["now"] = $sdata["current.UV.formatted"];
-    $uv["day_max"] = $sdata["day.UV.max.formatted"];
-    $uv["day_maxtime"] = date('H:i:s', $sdata["day.UV.maxtime.raw"]);
-    $uv["24h_max"] = $sdata["24h.UV.max.formatted"];
-    $uv["24h_maxtime"] = date('D j H:i:s',  $sdata["24h.UV.maxtime.raw"]);
-    $uv["month_max"] = $sdata["month.UV.max.formatted"];
-    $uv["month_maxtime"] = date('D j H:i:s', $sdata["month.UV.maxtime.raw"]);
-    $uv["year_max"] = $sdata["year.UV.max.formatted"];
-    $uv["year_maxtime"] = date('j M H:i:s', $sdata["year.UV.maxtime.raw"]);
-    $uv["alltime_max"] = $sdata["alltime.UV.max.formatted"];
-    $uv["alltime_maxtime"] = date('j M Y',  $sdata["alltime.UV.maxtime.raw"]);
+    $uv["now"] = $weewxrt[43];
+    $uv["day_max"] = $adata["uv"]["day uv max"]["value"];
+    $uv["day_maxtime"] = $adata["uv"]["day uv maxtime"]["value"];
+    $uv["24h_max"] = $adata["uv"]["yesterday uv max"]["value"];
+    $uv["24h_maxtime"] = $adata["uv"]["yesterday uv maxtime"]["value"];
+    $uv["month_max"] = $adata["uv"]["month uv max"]["value"];
+    $uv["month_maxtime"] = $adata["uv"]["month uv maxtime"]["value"];
+    $uv["year_max"] = $adata["uv"]["year uv max"]["value"];
+    $uv["year_maxtime"] = $adata["uv"]["year uv maxtime"]["value"];
+    $uv["alltime_max"] = $adata["uv"]["alltime uv max"]["value"];
+    $uv["alltime_maxtime"] = $adata["uv"]["alltime uv maxtime"]["value"];
 
     //wind
-    $wind["units"] = $sdata["unit.label.windSpeed"]; // m/s or mph or km/h or kts
+    $wind["units"] = $adata["wind"]["wind units"]["value"]; // m/s or mph or km/h or kts
     if ($wind["units"] == " m/s"){
         $wind["units"] = "m/s";
     }
@@ -466,45 +521,41 @@ explode(" ", file_get_contents($livedata)));
     {
         $wind["units"] = "kts";
     }
-
-//echo $sdata["unit.label.windSpeed"]; 
-
-    $wind["speed_avg"] = $sdata["day.windSpeed.avg.formatted"];
-    $wind["direction"] = $sdata["current.windDir.formatted"];
-    $wind["direction_and_symbol"] = $sdata["current.windDir"];
-    $wind["direction_10m_avg"] = $sdata["10m.windDir.avg.formatted"];
-    $wind["cardinal"] = $sdata["current.windDir.ordinal_compass"];
-    $wind["direction_avg"] = $sdata["day.windDir.avg.formatted"];    
-    $wind["speed"] = $sdata["current.windSpeed.formatted"];
-    $wind["gust"] = $sdata["current.windGust.formatted"];
-    $wind["speed_bft"] = $sdata["current.beaufort.formatted"];
-    $wind["speed_max"] = $sdata["day.windSpeed.max.formatted"];
-    $wind["speed_maxtime"] = date('H:i:s', $sdata["day.windSpeed.maxtime.raw"]);
-    $wind["gust_max"] = $sdata["day.windGust.max.formatted"];
-    $wind["gust_maxtime"] = date('H:i:s', $sdata["day.windGust.maxtime.raw"]);
-    $wind["wind_run"] = $sdata["day.windrun.sum.formatted"];
-    $wind["speed_10m_avg"] = $sdata["10m.windSpeed.avg.formatted"];
-    $wind["speed_10m_max"] = $sdata["10m.windSpeed.max.formatted"];
-    $wind["speed_10m_max"] =   $sdata["24h.windSpeed.max.formatted"];
-    $wind["gust_10m_max"] =   $sdata["10m.windGust.max.formatted"];
-    $wind["speed_24h_maxtime"] = date('D j H:i:s',  $sdata["24h.windSpeed.maxtime.raw"]);
-    $wind["gust_24h_max"] = $sdata["24h.windGust.max.formatted"];
-    $wind["gust_24h_maxtime"] = date('D j H:i:s',  $sdata["24h.windGust.maxtime.raw"]);
-    $wind["speed_month_max"] = $sdata["month.windSpeed.max.formatted"];
-    $wind["speed_month_maxtime"] = date('D j H:i:s', $sdata["month.windSpeed.maxtime.raw"]);
-    $wind["gust_month_maxtime2"] = date('D j', $sdata["month.windGust.maxtime.raw"]);
-    $wind["gust_month_max"] = $sdata["month.windGust.max.formatted"];
-    $wind["gust_month_maxtime"] = date('D j H:i:s', $sdata["month.windGust.maxtime.raw"]);
-    $wind["speed_year_max"] = $sdata["year.windSpeed.max.formatted"];
-    $wind["speed_year_maxtime"] = date('j M H:i:s', $sdata["year.windSpeed.maxtime.raw"]);
-    $wind["gust_year_max"] = $sdata["year.windGust.max.formatted"];
-    $wind["gust_year_maxtime"] = date('j M H:i:s',  $sdata["year.windGust.maxtime.raw"]);
-    $wind["gust_year_maxtime2"] = date('j M', $sdata["year.windGust.maxtime.raw"]);
-    $wind["speed_alltime_max"] = $sdata["alltime.windSpeed.max.formatted"];
-    $wind["speed_alltime_maxtime"] = date('j M Y',  $sdata["alltime.windSpeed.maxtime.raw"]);
-    $wind["gust_alltime_max"] = $sdata["alltime.windGust.max.formatted"];
-    $wind["gust_alltime_maxtime"] = date('j M Y',  $sdata["alltime.windGust.maxtime.raw"]);
-    $wind["direction_trend"] = $sdata["trend.windDir.formatted"];
+    $wind["direction"] = $weewxrt[7];
+    $wind["direction_10m_avg"] = $adata["wind"]["10min windDir avg"]["value"];
+    $wind["cardinal"] = $weewxrt[11];
+    $wind["direction_avg"] = $adata["wind"]["10min windDir avg"]["value"];    
+    $wind["speed"] = $weewxrt[6];
+    $wind["gust"] = $weewxrt[64];
+    $wind["speed_bft"] = $weewxrt[12];
+    $wind["speed_max"] =  $adata["wind"]["day windSpeed max"]["value"];
+    $wind["speed_maxtime"] = $adata["wind"]["day windSpeed maxtime"]["at"];
+    $wind["gust_max"] = $adata["wind"]["day windGust max"]["value"];
+    $wind["gust_maxtime"] = $adata["wind"]["day windGust maxtime"]["at"];
+    $wind["wind_run"] = $weewxrt[17];
+    $wind["speed_10m_avg"] = $adata["wind"]["10min windSpeed avg"]["value"];
+    $wind["speed_10m_max"] = $adata["wind"]["10min windSpeed max"]["value"];
+    $wind["gust_10m_max"] =   $adata["wind"]["10min windGust max"]["value"];
+    $wind["speed_24h_max"] = $adata["wind"]["yesterday windSpeed max"]["value"];
+    $wind["speed_24h_maxtime"] = $adata["wind"]["yesterday windSpeed maxtime"]["at"];
+    $wind["gust_24h_max"] = $adata["wind"]["yesterday windGust max"]["value"];
+    $wind["gust_24h_maxtime"] = $adata["wind"]["yesterday windGust maxtime"]["at"];
+    $wind["speed_month_max"] = $adata["wind"]["month windSpeed max"]["value"];
+    $wind["speed_month_maxtime"] = $adata["wind"]["month windSpeed maxtime"]["at"];
+    $wind["speed_month_maxtime2"] = $adata["wind"]["month windSpeed maxtime"]["at"];
+    $wind["gust_month_max"] = $adata["wind"]["month windGust max"]["value"];
+    $wind["gust_month_maxtime"] = $adata["wind"]["month windGust maxtime"]["at"];
+    $wind["speed_year_max"] = $adata["wind"]["year windSpeed max"]["value"];
+    $wind["speed_year_maxtime"] = $adata["wind"]["year windSpeed maxtime"]["at"];
+    $wind["gust_year_max"] = $adata["wind"]["year windGust max"]["value"];
+    $wind["gust_year_maxtime"] = $adata["wind"]["year windGust maxtime"]["at"];
+    $wind["gust_year_maxtime2"] = $adata["year.windGust.maxtime.raw"];
+    $wind["speed_alltime_max"] = $adata["wind"]["alltime windSpeed max"]["value"];
+    $wind["speed_alltime_maxtime"] = $adata["wind"]["alltime windSpeed maxtime"]["at"];
+    $wind["gust_alltime_max"] = $adata["wind"]["alltime windGust max"]["value"];
+    $wind["gust_alltime_maxtime"] = $adata["wind"]["alltime windGust maxtime"]["at"];
+    $wind["direction_trend"] = $adata["wind"]["wind direction trend"]["value"];
+    $wind["direction_trend_ordinal"] = $adata["wind"]["wind direction trend ordinal"]["value"];
 
 
 // Convert temperatures if necessary
@@ -522,6 +573,8 @@ if ($tempunit != $temp["units"])
         fToC($temp, "outside_day_avg_60mn");
         fToC($temp, "outside_day_max");
         fToC($temp, "outside_day_min");
+        fToC($temp, "outside_24h_max");
+        fToC($temp, "outside_24h_min");
         fToC($temp, "outside_month_max");
         fToC($temp, "outside_month_min");
         fToC($temp, "outside_year_max");
@@ -532,6 +585,8 @@ if ($tempunit != $temp["units"])
         fToC($temp, "outside_alltime_min");
         fToC($dew, "day_max");
         fToC($dew, "day_min");
+        fToC($dew, "24h_max");
+        fToC($dew, "24h_min");
         fToC($dew, "alltime_max");
         fToC($dew, "alltime_min");
         fToC($dew, "month_max");
@@ -565,8 +620,12 @@ if ($tempunit != $temp["units"])
         cToF($temp, "outside_year_min");
         cToF($temp, "outside_day_max");
         cToF($temp, "outside_day_min");
+        cToF($temp, "outside_24h_max");
+        cToF($temp, "outside_24h_min");
         cToF($dew, "day_max");
         cToF($dew, "day_min");
+        cToF($dew, "24h_max");
+        cToF($dew, "24h_min");
         cToF($dew, "alltime_max");
         cToF($dew, "alltime_min");
         cToF($dew, "month_max");
@@ -1124,8 +1183,7 @@ function convert_uptime($uptime)
 
 
 
-//
-//  Why are these in here still? Check necessity and validitity of this area
+
 //
 //lunar and solar eclipse /meteor shpwers advisory 2018-2019-2020
 $eclipse_default = " <noalert>No Current Weather <spanyellow><ored>Alerts " . $alert . "</ored></spanyellow></noalert>";

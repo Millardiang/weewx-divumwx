@@ -99,7 +99,15 @@
         
         "lightning last distance": {"value": "$alltime.lightning_distance.lastnonzero.format(add_label=False, $localize=False)"},
         "lightning last time": {"at": "$alltime.lightning_last_det_time.lastnonzero.raw"},
+        "lightning current": {"value": "$current.lightning_strike_count"},
+        "lightning energy": {"value": "$current.lightning_energy"},
+        "lightning noise": {"value": "$current.lightning_noise_count"},
+        "lightning disturbance": {"value": "$current.lightning_disturbance_count"}, 
         "lightning last hour": {"value": "$hour.lightning_strike_count.sum"},
+        "lightning day": {"value": "$day.lightning_strike_count.sum"},
+        "lightning month": {"value": "$month.lightning_strike_count.sum"},
+        "lightning year": {"value": "$year.lightning_strike_count.sum"},
+        "lightning alltime": {"value": "$alltime.lightning_strike_count.sum"},
         ## Last value can't end with a comma
         "void_end": null
     },
@@ -252,27 +260,261 @@
         "rain":
     {
         #if $current.rain.has_data
-        "current rain": {"current": $current.rain.raw},
-        
+        "current rain": {"value": $current.rain.raw},
+        "hour rain": {"value": $span($hour_delta=1).rain.sum.raw},
+        "10min rain sum": {"value": $span($time_delta=600).rain.sum.raw},
+        "24hr rain": {"value": $span($hour_delta=24).rain.sum.raw},
+        "24hr rainRate Max": {"value": $span($hour_delta=24).rainRate.max.raw},
+        "24hr rainRate Max Time": {"value": $span($hour_delta=24).rainRate.maxtime.raw},
+        "day rain": {"value": $day.rain.sum.raw},
+        "day rainRate Max": {"value": $day.rainRate.max.raw},
+        "day rainRate Max Time": {"value": $day.rainRate.maxtime.raw},
+        "month rain": {"value": $month.rain.sum.raw},
+        "month rainRate Max": {"value": $month.rainRate.max.raw},
+        "month rainRate Max Time": {"value": $month.rainRate.maxtime.raw},
+        "year rain": {"value": $year.rain.sum.raw},
+        "year rainRate Max": {"value": $year.rainRate.max.raw},
+        "year rainRate Max Time": {"value": $year.rainRate.maxtime.raw},
+        "alltime rain": {"value": $alltime.rain.sum.raw},
+        "alltime rainRate Max": {"value": $alltime.rainRate.max.raw},
+        "alltime rainRate Max Time": {"value": $alltime.rainRate.maxtime.raw},
         "storm rain": {"value": $current.hail.raw},
-        
-       
         #end if 
         ## Last value can't end with a comma
         "void_end": null
 
     },
     
-            "barometer_kpa":
+            "barometer":
     {
         #if $current.barometer.has_data
-        "current barometer kpa": {"current": $current.barometer.kPa.raw},
+        "barometer units": {"value": "$unit.label.barometer"},
+        "current barometer": {"value": $current.barometer.format(add_label=False)},
+        "trend barometer code": {"value": $trend.barometer.format(add_label=False)},
+        "yesterday barometer max": {"value": $day($days_ago=1).barometer.max.format(add_label=False)},
+        "yesterday barometer maxtime": {"at": "$day($days_ago=1).barometer.maxtime"},
+        "yesterday barometer min": {"value": $day($days_ago=1).barometer.min.format(add_label=False)},
+        "yesterday barometer mintime": {"at": "$day($days_ago=1).barometer.mintime"},
+        "day barometer max": {"value": $day.barometer.max.format(add_label=False)},
+        "day barometer maxtime": {"at": "$day.barometer.maxtime"},
+        "day barometer min": {"value": $day.barometer.min.format(add_label=False)},
+        "day barometer mintime": {"at": "$day.barometer.mintime"},
+        "month barometer max": {"value": $month.barometer.max.format(add_label=False)},
+        "month barometer maxtime": {"at": "$month.barometer.maxtime"},
+        "month barometer min": {"value": $month.barometer.min.format(add_label=False)},
+        "month barometer mintime": {"at": "$month.barometer.mintime"},
+        "year barometer max": {"value": $year.barometer.max.format(add_label=False)},
+        "year barometer maxtime": {"at": "$year.barometer.maxtime"},
+        "year barometer min": {"value": $year.barometer.min.format(add_label=False)},
+        "year barometer mintime": {"at": "$year.barometer.mintime"},
+        "alltime barometer max": {"value": $alltime.barometer.max.format(add_label=False)},
+        "alltime barometer maxtime": {"at": "$alltime.barometer.maxtime"},
+        "alltime barometer min": {"value": $alltime.barometer.min.format(add_label=False)},
+        "alltime barometer mintime": {"at": "$alltime.barometer.mintime"},
         #end if 
         ## Last value can't end with a comma
         "void_end": null
 
-    }
+    },    
 
+
+            "wind":
+    {
+        #if $current.windSpeed.has_data
+        "wind units": {"value": "$unit.label.windSpeed"},
+        "windSpeed": {"value": $current.windSpeed.format(add_label=False)},
+        "wind bft": {"value": $current.windSpeed.beaufort.format(add_label=False)},
+        "windGust": {"value": $current.windGust.format(add_label=False)},
+        "wind direction": {"value": "$current.windDir.format(add_label=False)"},
+        "wind direction ordinal": {"value": "$current.windDir.ordinal_compass"},
+        "wind direction trend": {"value": "$trend.windDir.formatted"},
+        "wind direction trend": {"value": "$trend.windDir.formatted"},
+        "wind direction trend ordinal": {"value": "$trend.windDir.ordinal_compass"},
+        "yesterday windSpeed avg": {"value": $day($days_ago=1).windSpeed.avg.format(add_label=False)},
+        "yesterday windSpeed max": {"value": $day($days_ago=1).windSpeed.max.format(add_label=False)},
+        "yesterday windSpeed maxtime": {"at": "$day($days_ago=1).windSpeed.maxtime"},
+        "yesterday windGust avg": {"value": $day($days_ago=1).windGust.avg.format(add_label=False)},
+        "yesterday windGust max": {"value": $day($days_ago=1).windGust.max.format(add_label=False)},
+        "yesterday windGust maxtime": {"at": "$day($days_ago=1).windGust.maxtime"},
+        "yesterday winrun": {"value": $day($days_ago=1).windrun.sum.format(add_label=False)},
+​       "10min windSpeed max": {"value": $span($time_delta=600).windSpeed.max.format(add_label=False)},
+        "10min windSpeed maxtime": {"at": "$span($time_delta=600).windSpeed.maxtime"},
+        "10min windSpeed avg": {"value": $span($time_delta=600).windSpeed.avg.format(add_label=False)},
+        "10min windGust max": {"value": $span($time_delta=600).windGust.max.format(add_label=False)},
+        "10min windGust maxtime": {"at": "$span($time_delta=600).windGust.maxtime"},
+        "10min windDir avg": {"value": "$span($time_delta=600).windDir.avg.format(add_label=False)"},
+        "day windSpeed avg": {"value": $day.windSpeed.avg.format(add_label=False)},
+        "day windSpeed max": {"value": $day.windSpeed.max.format(add_label=False)},
+        "day windSpeed maxtime": {"at": "$day.windSpeed.maxtime"},
+        "day windGust avg": {"value": $day.windGust.avg.format(add_label=False)},
+        "day windGust max": {"value": $day.windGust.max.format(add_label=False)},
+        "day windGust maxtime": {"at": "$day.windGust.maxtime"},
+        "day winrun": {"value": $day.windrun.sum.format(add_label=False)},
+        "month windSpeed avg": {"value": $month.windSpeed.avg.format(add_label=False)},
+        "month windSpeed max": {"value": $month.windSpeed.max.format(add_label=False)},
+        "month windSpeed maxtime": {"at": "$month.windSpeed.maxtime"},
+        "month windGust avg": {"value": $month.windGust.avg.format(add_label=False)},
+        "month windGust max": {"value": $month.windGust.max.format(add_label=False)},
+        "month windGust maxtime": {"at": "$month.windGust.maxtime"},
+        "month winrun": {"value": $month.windrun.sum.format(add_label=False)},
+        "year windSpeed avg": {"value": $year.windSpeed.avg.format(add_label=False)},
+        "year windSpeed max": {"value": $year.windSpeed.max.format(add_label=False)},
+        "year windSpeed maxtime": {"at": "$year.windSpeed.maxtime"},
+        "year windGust avg": {"value": $year.windGust.avg.format(add_label=False)},
+        "year windGust max": {"value": $year.windGust.max.format(add_label=False)},
+        "year windGust maxtime": {"at": "$year.windGust.maxtime"},
+        "year winrun": {"value": $year.windrun.sum.format(add_label=False)},
+        "alltime windSpeed avg": {"value": $alltime.windSpeed.avg.format(add_label=False)},
+        "alltime windSpeed max": {"value": $alltime.windSpeed.max.format(add_label=False)},
+        "alltime windSpeed maxtime": {"at": "$alltime.windSpeed.maxtime"},
+        "alltime windGust avg": {"value": $alltime.windGust.avg.format(add_label=False)},
+        "alltime windGust max": {"value": $alltime.windGust.max.format(add_label=False)},
+        "alltime windGust maxtime": {"at": "$alltime.windGust.maxtime"},
+        "alltime winrun": {"value": $alltime.windrun.sum.format(add_label=False)},
+        #end if 
+        ## Last value can't end with a comma
+        "void_end": null
+
+    },
+    
+            "temp":
+    {
+        #if $current.outTemp.has_data
+        "temp units": {"value": "$unit.label.outTemp"},
+        "60min outTemp avg": {"value": $span($time_delta=3600).outTemp.avg.format(add_label=False)},
+        "trend outTemp": {"value": $trend.outTemp.raw},
+        "trend inTemp": {"value": $trend.inTemp.raw},        
+        "day outTemp": {"value": $trend.outTemp.raw},
+        "24hr outTemp max": {"value": $day($days_ago=1).outTemp.max.format(add_label=False)},
+        "24hr outTemp maxtime": {"value": $day($days_ago=1).outTemp.maxtime.raw},
+        "24hr outTemp min": {"value": $day($days_ago=1).outTemp.min.format(add_label=False)},
+        "24hr outTemp mintime": {"value": $day($days_ago=1).outTemp.mintime.raw},
+        "day outTemp avg": {"value": $day.outTemp.avg.format(add_label=False)},
+        "day outTemp max": {"value": $day.outTemp.max.format(add_label=False)},
+        "day outTemp maxtime": {"value": $day.outTemp.maxtime.raw},       
+        "day outTemp min": {"value": $day.outTemp.min.format(add_label=False)},
+        "day outTemp mintime": {"value": $day.outTemp.mintime.raw},       
+        "month outTemp max": {"value": $month.outTemp.max.format(add_label=False)},
+        "month outTemp maxtime": {"value": $month.outTemp.maxtime.raw},       
+        "month outTemp min": {"value": $month.outTemp.min.format(add_label=False)},
+        "month outTemp mintime": {"value": $month.outTemp.mintime.raw},       
+        "year outTemp max": {"value": $year.outTemp.max.format(add_label=False)},
+        "year outTemp maxtime": {"value": $year.outTemp.maxtime.raw},       
+        "year outTemp min": {"value": $year.outTemp.min.format(add_label=False)},
+        "year outTemp mintime": {"value": $year.outTemp.mintime.raw},       
+        "alltime outTemp max": {"value": $alltime.outTemp.max.format(add_label=False)},
+        "alltime outTemp maxtime": {"value": $alltime.outTemp.maxtime.raw},       
+        "alltime outTemp min": {"value": $alltime.outTemp.min.format(add_label=False)},
+        "alltime outTemp mintime": {"value": $alltime.outTemp.mintime.raw},       
+        "windchill": {"value": $current.windchill.raw},
+        #end if 
+        ## Last value can't end with a comma
+        "void_end": null
+
+    },
+    
+            "dewpoint":
+    {
+    #if $current.dewpoint.has_data
+    "current dewpoint": {"value": $current.dewpoint.format(add_label=False)},
+    "trend dewpoint": {"value": $trend.dewpoint.format(add_label=False)},
+    "day dewpoint max": {"value": $day.dewpoint.max.format(add_label=False)},
+    "day dewpoint maxtime": {"value": $day.dewpoint.maxtime.raw},
+    "day dewpoint min": {"value": $day.dewpoint.min.format(add_label=False)},
+    "day dewpoint mintime": {"value": $day.dewpoint.mintime.raw},
+    "yesterday dewpoint max": {"value": $day($days_ago=1).dewpoint.max.format(add_label=False)},
+    "yesterday dewpoint maxtime": {"value": $day($days_ago=1).dewpoint.maxtime.raw},
+    "yesterday dewpoint min": {"value": $day($days_ago=1).dewpoint.min.format(add_label=False)},
+    "yesterday dewpoint mintime": {"value": $day($days_ago=1).dewpoint.mintime.raw},
+    "month dewpoint max": {"value": $month.dewpoint.max.format(add_label=False)},
+    "month dewpoint maxtime": {"value": $month.dewpoint.maxtime.raw},
+    "month dewpoint min": {"value": $month.dewpoint.min.format(add_label=False)},
+    "month dewpoint mintime": {"value": $month.dewpoint.mintime.raw},
+    "year dewpoint max": {"value": $year.dewpoint.max.format(add_label=False)},
+    "year dewpoint maxtime": {"value": $year.dewpoint.maxtime.raw},
+    "year dewpoint min": {"value": $year.dewpoint.min.format(add_label=False)},
+    "year dewpoint mintime": {"value": $year.dewpoint.mintime.raw},    
+    "alltime dewpoint max": {"value": $alltime.dewpoint.max.format(add_label=False)},
+    "alltime dewpoint maxtime": {"value": $alltime.dewpoint.maxtime.raw},
+    "alltime dewpoint min": {"value": $alltime.dewpoint.min.format(add_label=False)},
+    "alltime dewpoint mintime": {"value": $alltime.dewpoint.mintime.raw},
+     #end if 
+     ## Last value can't end with a comma
+     "void_end": null
+
+    },
+    
+            "humidity":
+    {
+    #if $current.outHumidity.has_data
+    "current outHumidity": {"value": $current.outHumidity.format(add_label=False)},
+    "trend outHumidity": {"value": $trend.outHumidity.format(add_label=False)},
+    "day outHumidity max": {"value": $day.outHumidity.max.format(add_label=False)},
+    "day outHumidity maxtime": {"value": $day.outHumidity.maxtime.raw},
+    "day outHumidity min": {"value": $day.outHumidity.min.format(add_label=False)},
+    "day outHumidity mintime": {"value": $day.outHumidity.mintime.raw},
+    "yesterday outHumidity max": {"value": $day($days_ago=1).outHumidity.max.format(add_label=False)},
+    "yesterday outHumidity maxtime": {"value": $day($days_ago=1).outHumidity.maxtime.raw},
+    "yesterday outHumidity min": {"value": $day($days_ago=1).outHumidity.min.format(add_label=False)},
+    "yesterday outHumidity mintime": {"value": $day($days_ago=1).outHumidity.mintime.raw},
+    "month outHumidity max": {"value": $month.outHumidity.max.format(add_label=False)},
+    "month outHumidity maxtime": {"value": $month.outHumidity.maxtime.raw},
+    "month outHumidity min": {"value": $month.outHumidity.min.format(add_label=False)},
+    "month outHumidity mintime": {"value": $month.outHumidity.mintime.raw},
+    "year outHumidity max": {"value": $year.outHumidity.max.format(add_label=False)},
+    "year outHumidity maxtime": {"value": $year.outHumidity.maxtime.raw},
+    "year outHumidity min": {"value": $year.outHumidity.min.format(add_label=False)},
+    "year outHumidity mintime": {"value": $year.outHumidity.mintime.raw},    
+    "alltime outHumidity max": {"value": $alltime.outHumidity.max.format(add_label=False)},
+    "alltime outHumidity maxtime": {"value": $alltime.outHumidity.maxtime.raw},
+    "alltime outHumidity min": {"value": $alltime.outHumidity.min.format(add_label=False)},
+    "alltime outHumidity mintime": {"value": $alltime.outHumidity.mintime.raw},
+    "current inHumidity": {"value": $current.inHumidity.format(add_label=False)},
+    "trend inHumidity": {"value": $trend.inHumidity.format(add_label=False)},
+    "day inHumidity max": {"value": $day.inHumidity.max.format(add_label=False)},
+    "day inHumidity maxtime": {"value": $day.inHumidity.maxtime.raw},
+    "day inHumidity min": {"value": $day.inHumidity.min.format(add_label=False)},
+    "day inHumidity mintime": {"value": $day.inHumidity.mintime.raw},
+    "yesterday inHumidity max": {"value": $day($days_ago=1).inHumidity.max.format(add_label=False)},
+    "yesterday inHumidity maxtime": {"value": $day($days_ago=1).inHumidity.maxtime.raw},
+    "yesterday inHumidity min": {"value": $day($days_ago=1).inHumidity.min.format(add_label=False)},
+    "yesterday inHumidity mintime": {"value": $day($days_ago=1).inHumidity.mintime.raw},
+    "month inHumidity max": {"value": $month.inHumidity.max.format(add_label=False)},
+    "month inHumidity maxtime": {"value": $month.inHumidity.maxtime.raw},
+    "month inHumidity min": {"value": $month.inHumidity.min.format(add_label=False)},
+    "month inHumidity mintime": {"value": $month.inHumidity.mintime.raw},
+    "year inHumidity max": {"value": $year.inHumidity.max.format(add_label=False)},
+    "year inHumidity maxtime": {"value": $year.inHumidity.maxtime.raw},
+    "year inHumidity min": {"value": $year.inHumidity.min.format(add_label=False)},
+    "year inHumidity mintime": {"value": $year.inHumidity.mintime.raw},    
+    "alltime inHumidity max": {"value": $alltime.inHumidity.max.format(add_label=False)},
+    "alltime inHumidity maxtime": {"value": $alltime.inHumidity.maxtime.raw},
+    "alltime inHumidity min": {"value": $alltime.inHumidity.min.format(add_label=False)},
+    "alltime inHumidity mintime": {"value": $alltime.inHumidity.mintime.raw},    
+     #end if 
+     ## Last value can't end with a comma
+     "void_end": null
+
+    },
+    
+            "uv": 
+    {
+    #if $current.UV.has_data
+    "day uv max": {"value": $day.UV.max.format(add_label=False)},
+    "day uv maxtime": {"value": $day.UV.maxtime.raw},
+    "yesterday uv max": {"value": $day($days_ago=1).UV.max.format(add_label=False)},
+    "yesterday uv maxtime": {"value": $day($days_ago=1).UV.maxtime.raw},
+    "month uv max": {"value": $month.UV.max.format(add_label=False)},
+    "month uv maxtime": {"value": $month.UV.maxtime.raw},
+    "year uv max": {"value": $year.UV.max.format(add_label=False)},
+    "year uv maxtime": {"value": $year.UV.maxtime.raw},
+    "alltime uv max": {"value": $alltime.UV.max.format(add_label=False)},
+    "alltime uv maxtime": {"value": $alltime.UV.maxtime.raw},
+     #end if 
+     ## Last value can't end with a comma
+     "void_end": null
+
+    }        
 
 
 }
