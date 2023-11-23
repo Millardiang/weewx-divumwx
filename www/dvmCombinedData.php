@@ -522,6 +522,7 @@ explode(" ", file_get_contents($livedata)));
         $wind["units"] = "kts";
     }
     $wind["direction"] = $weewxrt[7];
+    $wind["direction_and_symbol"] = $wind["direction"]."°"; 
     $wind["direction_10m_avg"] = $adata["wind"]["10min windDir avg"]["value"];
     $wind["cardinal"] = $weewxrt[11];
     $wind["direction_avg"] = $adata["wind"]["10min windDir avg"]["value"];    
