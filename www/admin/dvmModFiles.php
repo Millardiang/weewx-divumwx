@@ -33,6 +33,7 @@ if (!isset($_SESSION['csrf_token'])) {
 }
 $_SESSION['login_time'] = time();
 require_once './admCommon.php';
+require_once './admVersion.php';
 ?>
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
@@ -68,7 +69,7 @@ require_once './admCommon.php';
 					<span class="brand-img">
 						<span class="brand-img-text text-theme">DvM</span>
 					</span>
-					<span class="brand-text">DivumWX Module File Information</span>
+					<span class="brand-text">Module File Info</span>
 				</a>
 			</div>
 			<div class="menu"></div>
@@ -244,7 +245,7 @@ require_once './admCommon.php';
 						</tbody>
 					</table>
 				</div>
-			</div>
+			</div>DivumWX Admin Dashboard - v<?php echo $admVersion?>;
 		</div>
 		<!-- END #content -->
 		<!-- BEGIN #modalModImage -->
