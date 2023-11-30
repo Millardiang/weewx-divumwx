@@ -101,7 +101,7 @@ Max Recorded <blue><?php echo $wind["gust_maxtime"];?></blue></div>
 </article>
 
  <article>
-   <div class=actualt>Max 24h </div>
+   <div class=actualt>Max Yesterday </div>
    <?php
 	// wind yesterday km/h
 	if ($wind["units"]=='km/h' && number_format($wind["gust_24h_max"]*3.5999988862317131577,1)>=60)  {

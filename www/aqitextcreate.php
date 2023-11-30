@@ -1,6 +1,6 @@
- <?php
+  <?php
 
-$json = "/var/www/html/weewx/divumwx/jsondata/aqi.json";
+$json = "http://aqipi/aqi.json";
 
 
 $jsonobj = file_get_contents($json);
@@ -11,7 +11,7 @@ $pm25 = $arr["pm25"];
 $pm10 = $arr["pm10"];
  
   
-$myfile = fopen("/var/www/html/weewx/divumwx/serverdata/aqidata.txt", "w") or die("Unable to open file!");
+$myfile = fopen("/var/www/html/divumwx/serverdata/aqidata.txt", "w") or die("Unable to open file!");
 $txt = "pm25 = $pm25\n";
 fwrite($myfile, $txt);
 $txt = "pm10 = $pm10";

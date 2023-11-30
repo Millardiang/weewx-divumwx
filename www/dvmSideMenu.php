@@ -69,6 +69,11 @@
           <a href="./?units=ca"><menumarkerred></menumarkerred> Canada (kPa) <topbarmetricc>°C</topbarmetricc></a>
         </li>';
       }
+       if ($units != 'kts'){
+        echo '<li>
+          <a href="./?units=kts"><menumarkerred></menumarkerred> Metar (kts) <topbarmetricc>°C</topbarmetricc></a>
+        </li>';
+      }
       if ($extralinks == 'yes') {
         echo '<li class="header sub">LINKS <img class="menuimg" src="img/arrowiconlink.svg" alt=""/>';
         echo '<ul>';

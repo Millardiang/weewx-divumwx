@@ -10,7 +10,8 @@
 # Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
 #                                                                                                                   #
 #####################################################################################################################
-
+?>
+<?php
 include('dvmCombinedData.php');
 
 if ($theme === "dark") {
