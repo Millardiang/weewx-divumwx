@@ -1,0 +1,65 @@
+{
+    "TimestampEpoch": 1697207452689,
+    "StationLat": 51.067289202735,
+    "StationLon": 13.7673459652933,
+    "SoftwareVersion": "1.9.6.8317",
+    "DetectorModel": "LD-250",
+    "AntennaAlignment": 0,
+    "StrikeCount": 742202,
+    "StormCount": 0,
+    "StrikeData": [
+        {
+            "time": 52526,
+            "millis": 1697200526000,
+            "dist": 709,
+            "bng": 108.5,
+            "lat": 48.67266323079946,
+            "lon": 22.91658872459457,
+            "type": -1,
+            "polarity": -1,
+            "compoundType": 3,
+            "correlated": false,
+            "NMEAChecksum": 255
+        },
+        {
+            "time": 52534,
+            "millis": 1697200534000,
+            "dist": 696,
+            "bng": 125,
+            "lat": 47.219868943262824,
+            "lon": 21.301267925623595,
+            "type": -1,
+            "polarity": -1,
+            "compoundType": 3,
+            "correlated": false,
+            "NMEAChecksum": 255
+        },
+        {
+            "time": 52542,
+            "millis": 1697200542000,
+            "dist": 516,
+            "bng": 110.4,
+            "lat": 49.255415904725595,
+            "lon": 20.418710561952793,
+            "type": -1,
+            "polarity": -1,
+            "compoundType": 3,
+            "correlated": false,
+            "NMEAChecksum": 255
+        },
+        {
+            "time": 52552,
+            "millis": 1697200552000,
+            "dist": 643,
+            "bng": 121.80000000000001,
+            "lat": 47.78068314578815,
+            "lon": 21.066907853809013,
+            "type": -1,
+            "polarity": -1,
+            "compoundType": 3,
+            "correlated": false,
+            "NMEAChecksum": 255
+        }
+    ],
+    "StormData": []
+}

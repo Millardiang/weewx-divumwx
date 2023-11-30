@@ -61,7 +61,7 @@ if ($theme === "dark") {
 </article> 
 
  <article> 
-  <div class=actualt>24h </div>        
+  <div class=actualt>Yesterday </div>        
    <div class="temperaturecontainer">
 	
             <?php
