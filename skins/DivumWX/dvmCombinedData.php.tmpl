@@ -265,9 +265,9 @@ if ($barom["units"] == " inHg"){
     }
 $barom["now"] = $weewxrt[10];
 $barom["max"] = $day.barometer.max.format(add_label=False);
-$barom["maxtime"] = date('H:i',"$day($days_ago=1).barometer.maxtime.raw");
+$barom["maxtime"] = date('H:i',"$day.barometer.maxtime.raw");
 $barom["min"] = $day.barometer.min.format(add_label=False);
-$barom["mintime"] = date('H:i',"$day($days_ago=1).barometer.mintime.raw");
+$barom["mintime"] = date('H:i',"$day.barometer.mintime.raw");
 $barom["trend_code"] = round($trend.barometer.raw,0);
 if($barom["trend_code"]>3){$barom["trend_desc"]="Rising Very Rapidly";$barom["trend_code"]=4;}
 else if($barom["trend_code"]>2){$barom["trend_desc"]="Rising Quickly";$barom["trend_code"]=3;}
@@ -446,10 +446,10 @@ $rain["current"] = $weewxrt[9];
 $rain["total"] = $weewxrt[9];
 $rain["last_hour"] = $span($hour_delta=1).rain.sum.raw;
 $rain["last_10min"] = $span($time_delta=600).rain.sum.raw;
-$rain["last_24hour"] = $day($days_ago=1).rain.sum.raw;
+$rain["last_24hour"] = round($day($days_ago=1).rain.sum.raw,1);
 $rain["24h_rate_max"] = $day($days_ago=1).rainRate.max.raw;
 $rain["24h_rate_maxtime"] = $day($days_ago=1).rainRate.maxtime.raw;
-$rain["24h_total"] = $day($days_ago=1).rain.sum.raw;
+$rain["24h_total"] = round($day($days_ago=1).rain.sum.raw,1);
 $rain["day"] = round($day.rain.sum.raw, 1);
 $rain["day_rate_max"] = $day.rainRate.max.raw;
 $rain["day_rate_maxtime"] = $day.rainRate.maxtime.raw;
