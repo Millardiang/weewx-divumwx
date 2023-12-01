@@ -582,9 +582,9 @@ $wind["units"] = "kts";
 }
 $wind["direction"] = $weewxrt[7];
 $wind["direction_and_symbol"] = $wind["direction"]."\u00B0"; 
-$wind["direction_10m_avg"] = $adata["wind"]["10min windDir avg"]["value"];
+$wind["direction_10m_avg"] =  "$span($time_delta=600).windDir.avg.format(add_label=False)";
 $wind["cardinal"] = $weewxrt[11];
-$wind["direction_avg"] = "$span($time_delta=600).windDir.avg.format(add_label=False)";    
+$wind["direction_avg"] = "$day.windDir.avg.format(add_label=False)";    
 $wind["speed"] = $weewxrt[6];
 $wind["gust"] = $weewxrt[64];
 $wind["speed_bft"] = $weewxrt[12];
@@ -593,7 +593,7 @@ $wind["speed_maxtime"] = "$day.windSpeed.maxtime";
 $wind["gust_max"] = $day.windGust.max.format(add_label=False);
 $wind["gust_maxtime"] = "$day.windGust.maxtime";
 $wind["wind_run"] = $weewxrt[17];
-$wind["speed_10m_avg"] = "$span($time_delta=600).windDir.avg.format(add_label=False)";
+$wind["speed_10m_avg"] = $span($time_delta=600).windSpeed.avg.format(add_label=False);
 $wind["speed_10m_max"] = $span($time_delta=600).windSpeed.max.format(add_label=False);
 $wind["gust_10m_max"] =   $span($time_delta=600).windGust.max.format(add_label=False);
 $wind["speed_24h_max"] = $day($days_ago=1).windSpeed.max.format(add_label=False);
@@ -618,9 +618,10 @@ $wind["direction_trend"] = "$trend.windDir.formatted";
 $wind["direction_trend_ordinal"] = "$trend.windDir.ordinal_compass";
 #end if
 
-// Convert temperatures if necessary
+// inclusion to convert between unit systems
 include('dvmUnitConversions.php');
 
+// meteor shower data inclusion
 include('dvmMeteorShowers.php');
 
 $firerisk = number_format((((110 - 1.373 * $divum["humidity"]) - 0.54 * (10.20 - $divum["temp"])) * (124 * pow(10, (-0.0142 * $divum["humidity"])))) / 60, 0);
