@@ -1,5 +1,5 @@
 <?php
-#####################################################################################################################                                                                                                                                                                                                  #
+#####################################################################################################################                                                                                 #                                                                                                                   #
 # weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
 #                                                                                                                   #
 # Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
@@ -12,15 +12,6 @@
 ?>
 <?php  
 include('dvmCombinedData.php');
-header('Content-type: text/html; charset = utf-8');
-/*if($hardware != "Vantage")
-{ 
-$myfile = fopen("/var/www/html/divumwx/serverdata/aqidata.txt", "w") or die("Unable to open file!");
-$txt = "stormrain = $rain["storm_rain"]";
-fwrite($myfile, $txt);
-fclose($myfile);
-}
-*/
 ?>
 
 <div class="chartforecast2">
@@ -29,13 +20,12 @@ fclose($myfile);
 <span class='moduletitle2'><?php echo $lang['rainfallModule'], " (<valuetitleunit>" . $rain["units"];?></valuetitleunit>)</span>
 <div class="updatedtime1"><span><?php if (file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?></div>
 <div class="rainconverter">
-<?php if ($rain["units"] =='in'){echo "<div class=rainconvertercircle>".number_format($rain["day"]*25.400013716,1)." <smallrainunit>mm";$rain["storm_rain"]=$rain["storm_rain"]*0.0393701;} else if ($rain["units"] =='mm'){echo "<div class=rainconvertercircle>".number_format($rain["day"]*0.0393701,2)." <smallrainunit>in";$rain["storm_rain"]=$rain["storm_rain"]*1;}?></span>
+<?php if ($rain["units"] =='in'){echo "<div class=rainconvertercircle>".number_format($rain["day"]*25.400013716,1)." <smallrainunit>mm";} else if ($rain["units"] =='mm'){echo "<div class=rainconvertercircle>".number_format($rain["day"]*0.0393701,2)." <smallrainunit>in";}?></span>
 </div></div>
 
 <!DOCTYPE html>
-<html>
-
 <script src="js/d3.min.js"></script>
+
 
 <style>
 .rainposs {
@@ -494,16 +484,16 @@ svg.append("text")
 </script>
 
 <div class="stormRain"></div>
-<script>            
-    var theme = "<?php echo $theme;?>";
 
+<script>            
+var theme = "<?php echo $theme;?>";
     if (theme === 'dark') {
-    var boxColor = "#38383c";
-    var baseTextColor = "silver";
-    } else {
-    var boxColor = "#e6e8ef";
-    var baseTextColor = "#2d3a4b";
-    }
+        var boxColor = "#38383c";
+        var baseTextColor = "silver";
+} else {
+        boxColor = "#e6e8ef";
+        baseTextColor = "#2d3a4b";
+}
 </script>
 
 <script>
@@ -514,19 +504,25 @@ var svg = d3.select(".stormRain")
     .attr("width", 180)
     .attr("height", 150);
 
-var stormRain = <?php echo $rain["storm_rain"];?>; //  php echo the stormRain in place of the fake value here 
 var units = "<?php echo $rain["units"];?>";
-var rainRate = <?php echo number_format($rain["rate"],2);?>;
-var lastHour = <?php echo number_format($rain["last_hour"],2);?>;
-var last24Hours = <?php echo number_format($rain["last_24hour"],2);?>;
-var rainMonth = <?php echo number_format($rain["month_total"],2);?>; 
-var rainYear = <?php echo number_format($rain["year_total"],2);?>;
+
+if (units == 'in') {
+var stormRain = <?php echo $rain["storm_rain"]/25.4;?>;    
+} else {
+    stormRain = <?php echo $rain["storm_rain"];?>;
+}
+ 
+var rainRate = <?php echo $rain["rate"];?>;
+var lastHour = <?php echo $rain["last_hour"];?>;
+var last24Hours = <?php echo $rain["last_24hour"];?>;
+var rainMonth = <?php echo $rain["month_total"];?>; 
+var rainYear = <?php echo $rain["year_total"];?>;
 var month = "<?php echo date('F');?>"; 
 var year = <?php echo date('Y');?>;
 
-if (stormRain > 0) {  
+if (stormRain > 0.0) {
 
-svg.append("rect") // stormRain box
+svg.append("rect") // stormRain box    
     .attr("x", 17 )
     .attr("y", 127)
     .attr("rx", 1.25)
@@ -555,7 +551,7 @@ var text = svg.selectAll(null)
     .attr("x", 48)
     .attr("y", function(d, i) {return 138.5 + i * 138.5;})
 
-    .style("fill", "#5799aa")
+    .style("fill", "#007FFF")
     .style("font-family", "Helvetica")
     .style("font-size", "9.75px")
     .style("text-anchor", "middle")
@@ -568,7 +564,7 @@ var text = svg.selectAll(null)
 
 } else {}
 
-if (stormRain > 0) {
+if (stormRain > 0.0) {
 
 svg.append("rect") // rain Rate box
     .attr("x", 93 )
@@ -599,7 +595,7 @@ var text = svg.selectAll(null)
     .attr("x", 123)
     .attr("y", function(d, i) {return 138.5 + i * 138.5;})
 
-    .style("fill", "#5799aa")
+    .style("fill", "#007FFF")
     .style("font-family", "Helvetica")
     .style("font-size", "9.75px")
     .style("text-anchor", "middle")
@@ -641,7 +637,7 @@ var text = svg.selectAll(null)
     .attr("x", 87)
     .attr("y", function(d, i) {return 138.5 + i * 138.5;})
 
-    .style("fill", "#5799aa")
+    .style("fill", "#007FFF")
     .style("font-family", "Helvetica")
     .style("font-size", "9.75px")
     .style("text-anchor", "middle")
@@ -683,7 +679,7 @@ var text = svg.selectAll(null)
     .attr("x", 48)
     .attr("y", function(d, i) {return 100 + i * 100;})
 
-    .style("fill", "#5799aa")
+    .style("fill", "#007FFF")
     .style("font-family", "Helvetica")
     .style("font-size", "9.75px")
     .style("text-anchor", "middle")
@@ -723,7 +719,7 @@ var text = svg.selectAll(null)
     .attr("x", 123)
     .attr("y", function(d, i) {return 100 + i * 100;})
 
-    .style("fill", "#5799aa")
+    .style("fill", "#007FFF")
     .style("font-family", "Helvetica")
     .style("font-size", "9.75px")
     .style("text-anchor", "middle")
@@ -763,12 +759,13 @@ var text = svg.selectAll(null)
     .attr("x", 48)
     .attr("y", function(d, i) {return 60.5 + i * 60.5;})
 
-    .style("fill", "#5799aa")
+    .style("fill", "#007FFF")
     .style("font-family", "Helvetica")
     .style("font-size", "9.75px")
     .style("text-anchor", "middle")
     .style("font-weight", "normal")
     .text(function(d) {return d.split("-")[0];})
+
 
     .append("tspan")
     .style("fill", baseTextColor)
@@ -803,7 +800,7 @@ var text = svg.selectAll(null)
     .attr("x", 123)
     .attr("y", function(d, i) {return 60.5 + i * 60.5;})
 
-    .style("fill", "#5799aa")
+    .style("fill", "#007FFF")
     .style("font-family", "Helvetica")
     .style("font-size", "9.75px")
     .style("text-anchor", "middle")
@@ -814,13 +811,15 @@ var text = svg.selectAll(null)
     .style("fill", baseTextColor)
     .text(function(d) {return d.split("-")[1];});
 
+   
+
 </script>
 
 <div id="raindrops" width="300" height="150" style="position: relative; top: -159px; left: 0px;"></div>
 
 <script>
 
-var raining = "<?php echo $rain["rate"];?>";
+var raining = <?php echo $rain["rate"];?>;
 
 if ( raining > 0 ) {
   
