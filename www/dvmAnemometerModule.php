@@ -1,5 +1,5 @@
 <?php
-#####################################################################################################################                                                                                                        #
+#####################################################################################################################                                                                                
 #                                                                                                                   #
 # weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
 #                                                                                                                   #
@@ -10,20 +10,16 @@
 # Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
 #                                                                                                                   #
 #####################################################################################################################
-
 include('dvmCombinedData.php');
 header('Content-type: text/html; charset=utf-8');
 ?>
 <meta http-equiv="Content-Type: text/html; charset=UTF-8"/>
 
-   <div class="chartforecast2">
-      <span class="yearpopup"><a alt="wind charts" title="wind charts" href="dvmMenuWind.php" data-lity><?php echo $menucharticonpage;?> Wind Almanac and Charts</a></span>
-    </div>
-    <span class='moduletitle2'><?php echo $lang['Anemometer'], " (<valuetitleunit>", $wind["units"];?></valuetitleunit>)</span>
-  
-
+<div class="chartforecast2">
+<span class="yearpopup"><a alt="wind charts" title="wind charts" href="dvmMenuWind.php" data-lity><?php echo $menucharticonpage;?> Wind Almanac and Charts</a></span>
+</div>
+<span class='moduletitle2'><?php echo $lang['Anemometer'], " (<valuetitleunit>", $wind["units"];?></valuetitleunit>)</span>
 <div class="updatedtime2"><span><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?></div><br />
-
 <div class="windspeedtrend1">
 <?php echo "<valuetext>Max "."<max><value><maxred>".number_format($wind["gust_max"],1)."</maxred></max></span>"."<supmb> ".$wind["units"]."</supmb><br> ".$lang['Gust']." (".$wind["gust_maxtime"].")</valuetext>";?></div>
 <div class="windconverter">
@@ -456,22 +452,16 @@ if ($theme === "dark") { echo
     var ordinal = "<?php echo $wind["cardinal"];?>";
     ordinal = ordinal || "North";
  
-    var current_direction = "<?php echo $wind["direction_and_symbol"];?>";  
+    var current_direction = "<?php echo $wind["direction"];?>\u00B0";  
     current_direction = current_direction || 0;
 
-    var current_wind_speed = "<?php echo number_format($wind["speed"],1);?>";
+    var current_wind_speed = "<?php echo $wind["speed"];?>";
     current_wind_speed = current_wind_speed || 0;
 
     // Windy.com color scale
 var wind_speed_color = current_wind_speed;
 
-if ((wind_speed_color >= 175) && (wind_speed_color <= 200)) {
-    wind_speed_color = '#FFF9E3';
-} else if ((wind_speed_color >= 155) && (wind_speed_color <= 175)) {
-    wind_speed_color = '#f1ff6c';
-} else if ((wind_speed_color >= 120) && (wind_speed_color <= 155)) {
-    wind_speed_color = '#c1fc77';
-} else if ((wind_speed_color >= 100) && (wind_speed_color <= 120)) {
+ if ((wind_speed_color >= 100) && (wind_speed_color <= 120)) {
     wind_speed_color = '#45698d';
 } else if ((wind_speed_color >= 90) && (wind_speed_color <= 100)) {
     wind_speed_color = '#754a92';
@@ -494,19 +484,13 @@ if ((wind_speed_color >= 175) && (wind_speed_color <= 200)) {
 } else if ((wind_speed_color >= 0) && (wind_speed_color <= 5)) {
     wind_speed_color = '#85a3aa'; }
 
-    var current_wind_gust = "<?php echo number_format($wind["gust"],1);?>";
+    var current_wind_gust = "<?php echo $wind["gust"];?>";
     current_wind_gust = current_wind_gust || 0;
 
 // Windy.com color scale
 var wind_gust_color = current_wind_gust;
 
-if ((wind_gust_color >= 175) && (wind_gust_color <= 200)) {
-    wind_gust_color = '#FFF9E3';
-} else if ((wind_gust_color >= 155) && (wind_gust_color <= 175)) {
-    wind_gust_color = '#f1ff6c';
-} else if ((wind_gust_color >= 120) && (wind_gust_color <= 155)) {
-    wind_gust_color = '#c1fc77';
-} else if ((wind_gust_color >= 100) && (wind_gust_color <= 120)) {
+ if ((wind_gust_color >= 100) && (wind_gust_color <= 120)) {
     wind_gust_color = '#45698d';
 } else if ((wind_gust_color >= 90) && (wind_gust_color <= 100)) {
     wind_gust_color = '#754a92';
@@ -543,16 +527,16 @@ if ((wind_gust_color >= 175) && (wind_gust_color <= 200)) {
                 .attr("height", 150);
 
       var anglePercentage = d3.scale.linear()
-        .domain([0, 200])
+        .domain([0, 120])
         .range([-135 * Math.PI/180, +135 * Math.PI/180]);
 
         // windy.com color scale
 
       var color = d3.scale.ordinal()
         .range([
-        "#FFF9E3", // Cat 3 eggshell in place of white
-        "#f1ff6c", // Cat 2
-        "#c1fc77", // Cat 1
+        //"#FFF9E3", // Cat 3 eggshell in place of white
+        //"#f1ff6c", // Cat 2
+        //"#c1fc77", // Cat 1
         "#45698d",
         "#754a92",
         "#af5088",
@@ -566,9 +550,9 @@ if ((wind_gust_color >= 175) && (wind_gust_color <= 200)) {
         "#85a3aa"]);
 
          windy = [ // 0 - 200 km/h
-          [175, 200, 1],
-          [155, 175, 2],
-          [120, 155, 3],
+          //[175, 200, 1],
+          //[155, 175, 2],
+          //[120, 155, 3],
           [100, 120, 4],
           [90, 100, 5],
           [75, 90, 6],
@@ -683,7 +667,7 @@ if ((wind_gust_color >= 175) && (wind_gust_color <= 200)) {
                 .tickSize(7, 7, 10)
                 .tickPadding(3)
                 .scale(d3.scale.linear()
-                        .domain([0, 200]) // min max text scale current wind speed
+                        .domain([0, 120]) // min max text scale current wind speed
                         .range([- 3 * Math.PI / 4, 3 * Math.PI / 4]));
                                                                                                                      
         svg.append("g")
@@ -716,7 +700,7 @@ if ((wind_gust_color >= 175) && (wind_gust_color <= 200)) {
                 .tickSize(7, 7, 10)
                 .tickPadding(3)
                 .scale(d3.scale.linear()
-                        .domain([0, 200]) // min max text scale current wind gust
+                        .domain([0, 120]) // min max text scale current wind gust
                         .range([- 3 * Math.PI / 4, 3 * Math.PI / 4]));
                                                 
         svg.append("g")
@@ -749,7 +733,7 @@ if ((wind_gust_color >= 175) && (wind_gust_color <= 200)) {
                 .tickSize(7, 7, 10)
                 .tickPadding(3)
                 .scale(d3.scale.linear()
-                        .domain([0, 200]) // min max text scale max gust
+                        .domain([0, 120]) // min max text scale max gust
                         .range([- 3 * Math.PI / 4, 3 * Math.PI / 4]));
                                                
         svg.append("g")
@@ -768,7 +752,7 @@ if ((wind_gust_color >= 175) && (wind_gust_color <= 200)) {
                 .attr("height", 150);
 
       var anglePercentage = d3.scale.linear()
-        .domain([0, 130])
+        .domain([0, 70])
         .range([-135 * Math.PI/180, +135 * Math.PI/180]);
 
         // windy.com color scale
@@ -791,10 +775,10 @@ if ((wind_gust_color >= 175) && (wind_gust_color <= 200)) {
         "#85a3aa"]);
 
          windy = [ // 0 - 130 mph
-            [110, 130, 1],
-            [95, 110, 2],
-            [72, 95, 3],
-            [63, 72, 4],
+            //[110, 130, 1],
+            //[95, 110, 2],
+            //[72, 95, 3],
+            [63, 70, 4],
             [54, 63, 5],
             [46, 54, 6],
             [38, 46, 7],
@@ -908,7 +892,7 @@ if ((wind_gust_color >= 175) && (wind_gust_color <= 200)) {
                 .tickSize(7, 7, 10)
                 .tickPadding(3)
                 .scale(d3.scale.linear()
-                        .domain([0, 130]) // min max text scale current wind speed
+                        .domain([0, 70]) // min max text scale current wind speed
                         .range([- 3 * Math.PI / 4, 3 * Math.PI / 4]));
                                                                                                      
         svg.append("g")
@@ -941,7 +925,7 @@ if ((wind_gust_color >= 175) && (wind_gust_color <= 200)) {
                 .tickSize(7, 7, 10)
                 .tickPadding(3)
                 .scale(d3.scale.linear()
-                        .domain([0, 130]) // min max text scale current wind gust
+                        .domain([0, 70]) // min max text scale current wind gust
                         .range([- 3 * Math.PI / 4, 3 * Math.PI / 4]));
                                                 
         svg.append("g")
@@ -974,7 +958,7 @@ if ((wind_gust_color >= 175) && (wind_gust_color <= 200)) {
                 .tickSize(7, 7, 10)
                 .tickPadding(3)
                 .scale(d3.scale.linear()
-                        .domain([0, 130]) // min max text scale max gust
+                        .domain([0, 70]) // min max text scale max gust
                         .range([- 3 * Math.PI / 4, 3 * Math.PI / 4]));
                                                 
         svg.append("g")
@@ -992,7 +976,7 @@ if ((wind_gust_color >= 175) && (wind_gust_color <= 200)) {
                 .attr("height", 150);
 
         var anglePercentage = d3.scale.linear()
-        .domain([0, 60])
+        .domain([0, 30])
         .range([-135 * Math.PI/180, +135 * Math.PI/180]);
 
         // windy.com color scale
@@ -1015,10 +999,10 @@ if ((wind_gust_color >= 175) && (wind_gust_color <= 200)) {
         "#85a3aa"]);
 
          windy = [ // 0 - 60 m/s
-            [49.1744, 60.0000, 1],
-            [42.4688, 49.1744, 2],
-            [32.1869, 42.4688, 3],
-            [28.1635, 32.1869, 4],
+            //[49.1744, 60.0000, 1],
+            //[42.4688, 49.1744, 2],
+            //[32.1869, 42.4688, 3],
+            [28.1635, 30.0000, 4],
             [24.1402, 28.1635, 5],
             [20.5638, 24.1402, 6],
             [16.9875, 20.5638, 7],
@@ -1132,7 +1116,7 @@ if ((wind_gust_color >= 175) && (wind_gust_color <= 200)) {
                 .tickSize(7, 7, 10)
                 .tickPadding(3)
                 .scale(d3.scale.linear()
-                        .domain([0, 60]) // min max text scale current wind speed
+                        .domain([0, 30]) // min max text scale current wind speed
                         .range([- 3 * Math.PI / 4, 3 * Math.PI / 4]));
 
         svg.append("g")
@@ -1164,7 +1148,7 @@ if ((wind_gust_color >= 175) && (wind_gust_color <= 200)) {
                 .tickSize(7, 7, 10)
                 .tickPadding(3)
                 .scale(d3.scale.linear()
-                        .domain([0, 60]) // min max text scale current wind gust
+                        .domain([0, 30]) // min max text scale current wind gust
                         .range([- 3 * Math.PI / 4, 3 * Math.PI / 4]));
 
         svg.append("g")
@@ -1196,7 +1180,7 @@ if ((wind_gust_color >= 175) && (wind_gust_color <= 200)) {
                 .tickSize(7, 7, 10)
                 .tickPadding(3)
                 .scale(d3.scale.linear()
-                        .domain([0, 60]) // min max text scale max gust
+                        .domain([0, 30]) // min max text scale max gust
                         .range([- 3 * Math.PI / 4, 3 * Math.PI / 4]));
                                                 
         svg.append("g")
@@ -1214,15 +1198,15 @@ if ((wind_gust_color >= 175) && (wind_gust_color <= 200)) {
                 .attr("height", 150);
 
       var anglePercentage = d3.scale.linear()
-        .domain([0, 110])
+        .domain([0, 80])
         .range([-135 * Math.PI/180, +135 * Math.PI/180]);
 
         // windy.com color scale
 
       var color = d3.scale.ordinal()
         .range([
-        "#FFF9E3", // Cat 3 eggshell in place of white
-        "#f1ff6c", // Cat 2
+        //"#FFF9E3", // Cat 3 eggshell in place of white
+        //"#f1ff6c", // Cat 2
         "#c1fc77", // Cat 1
         "#45698d",
         "#754a92",
@@ -1237,9 +1221,9 @@ if ((wind_gust_color >= 175) && (wind_gust_color <= 200)) {
         "#85a3aa"]);
 
          windy = [ // 0 - 110 knots
-          [94.4924, 110.000, 1],
-          [83.6933, 94.4924, 2],
-          [64.7948, 83.6933, 3],
+          //[94.4924, 110.000, 1],
+          //[83.6933, 94.4924, 2],
+          [64.7948, 80.0000, 3],
           [53.9957, 64.7948, 4],
           [48.5961, 53.9957, 5],
           [40.4968, 48.5961, 6],
@@ -1354,7 +1338,7 @@ if ((wind_gust_color >= 175) && (wind_gust_color <= 200)) {
                 .tickSize(7, 7, 10)
                 .tickPadding(3)
                 .scale(d3.scale.linear()
-                        .domain([0, 110]) // min max text scale current wind speed
+                        .domain([0, 80]) // min max text scale current wind speed
                         .range([- 3 * Math.PI / 4, 3 * Math.PI / 4]));
 
         svg.append("g")
@@ -1386,7 +1370,7 @@ if ((wind_gust_color >= 175) && (wind_gust_color <= 200)) {
                 .tickSize(7, 7, 10)
                 .tickPadding(3)
                 .scale(d3.scale.linear()
-                        .domain([0, 110]) // min max text scale current wind gust
+                        .domain([0, 80]) // min max text scale current wind gust
                         .range([- 3 * Math.PI / 4, 3 * Math.PI / 4]));
 
         svg.append("g")
@@ -1418,7 +1402,7 @@ if ((wind_gust_color >= 175) && (wind_gust_color <= 200)) {
                 .tickSize(7, 7, 10)
                 .tickPadding(3)
                 .scale(d3.scale.linear()
-                        .domain([0, 110]) // min max text scale max gust
+                        .domain([0, 80]) // min max text scale max gust
                         .range([- 3 * Math.PI / 4, 3 * Math.PI / 4]));
                                                 
         svg.append("g")
