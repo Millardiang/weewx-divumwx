@@ -33,6 +33,7 @@ if (!isset($_SESSION['csrf_token'])) {
 }
 $_SESSION['login_time'] = time();
 require_once './admCommon.php';
+require_once './admVersion.php';
 ?>
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
@@ -100,16 +101,16 @@ require_once './admCommon.php';
 			margin-left: calc(2em + 0.25rem + 1.5rem);
 		}
 		.memSmTxt {
-			font-size: 0.8em; /* You can adjust the em value as needed */
+			font-size: 0.8em;
 		}
 		.mem-label {
 			display: inline-block;
-			width: 90px; /* Adjust this width as needed */
+			width: 90px;
 			font-weight: bold;
 		}
 		.mem-value {
 			display: inline-block;
-			width: 70px; /* Adjust this width as needed */
+			width: 70px;
 		}
 
 	</style>
@@ -137,7 +138,7 @@ require_once './admCommon.php';
 					<span class="brand-img">
 						<span class="brand-img-text text-theme">DvM</span>
 					</span>
-					<span class="brand-text">DivumWX Admin Dashboard</span>
+					<span class="brand-text">Admin Dashboard</span>
 				</a>
 			</div>
 			<div class="menu"></div>
@@ -442,7 +443,7 @@ require_once './admCommon.php';
 							<!-- END title -->
 							<!-- BEGIN map -->
 							<div class="ratio ratio-21x9 mb-3">
-								<div id="world-map" class="jvectormap-without-padding"></div>
+
 							</div>
 							<!-- END map -->
 						</div>
@@ -454,7 +455,7 @@ require_once './admCommon.php';
 						</div>
 					</div>
 				</div>
-			</div>
+			</div>DivumWX Admin Dashboard - v<?php echo $admVersion;?>
 		</div>
 		<div class="toasts-container" role="alert" aria-live="assertive" aria-atomic="true">
 			<div class="toast fade mb-3 hide" data-autohide="false" data-bs-delay="5000" id="success">
