@@ -1,25 +1,16 @@
-<?php
-#####################################################################################################################                                                                                
-#                                                                                                                   #
-# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
-#                                                                                                                   #
-# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
-#                                                                                                                   #
-# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
-#                                                                                                                   #
-# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
-#                                                                                                                   #
-#####################################################################################################################
+<?php 
 include('dvmCombinedData.php');
-header('Content-type: text/html; charset=utf-8');
 ?>
 <meta http-equiv="Content-Type: text/html; charset=UTF-8"/>
 
-<div class="chartforecast2">
-<span class="yearpopup"><a alt="wind charts" title="wind charts" href="dvmMenuWind.php" data-lity><?php echo $menucharticonpage;?> Wind Almanac and Charts</a></span>
-</div>
-<span class='moduletitle2'><?php echo $lang['Anemometer'], " (<valuetitleunit>", $wind["units"];?></valuetitleunit>)</span>
+   <div class="chartforecast2">
+      <span class="yearpopup"><a alt="wind charts" title="wind charts" href="dvmMenuWind.php" data-lity><?php echo $menucharticonpage;?> Wind Almanac and Charts</a></span>
+    </div>
+    <span class='moduletitle2'><?php echo $lang['Anemometer'], " (<valuetitleunit>", $wind["units"];?></valuetitleunit>)</span>
+  
+
 <div class="updatedtime2"><span><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?></div><br />
+
 <div class="windspeedtrend1">
 <?php echo "<valuetext>Max "."<max><value><maxred>".number_format($wind["gust_max"],1)."</maxred></max></span>"."<supmb> ".$wind["units"]."</supmb><br> ".$lang['Gust']." (".$wind["gust_maxtime"].")</valuetext>";?></div>
 <div class="windconverter">
@@ -139,8 +130,8 @@ if ($wind["speed_bft"] == 0) {
   echo "Hurricane Force ";
 }
 ?>
-</div>
 
+</div>
 <style>
 
 .moduletitle2 {
@@ -452,10 +443,10 @@ if ($theme === "dark") { echo
     var ordinal = "<?php echo $wind["cardinal"];?>";
     ordinal = ordinal || "North";
  
-    var current_direction = "<?php echo $wind["direction"];?>\u00B0";  
+    var current_direction = "<?php echo $wind["direction"];?>";  
     current_direction = current_direction || 0;
 
-    var current_wind_speed = "<?php echo $wind["speed"];?>";
+    var current_wind_speed = "<?php echo number_format($wind["speed"],1);?>";
     current_wind_speed = current_wind_speed || 0;
 
     // Windy.com color scale
@@ -484,7 +475,7 @@ var wind_speed_color = current_wind_speed;
 } else if ((wind_speed_color >= 0) && (wind_speed_color <= 5)) {
     wind_speed_color = '#85a3aa'; }
 
-    var current_wind_gust = "<?php echo $wind["gust"];?>";
+    var current_wind_gust = "<?php echo number_format($wind["gust"],1);?>";
     current_wind_gust = current_wind_gust || 0;
 
 // Windy.com color scale
@@ -628,7 +619,7 @@ var wind_gust_color = current_wind_gust;
               .style("font-size", "24px")
               .style("text-anchor", "middle")
               .style("font-weight", "normal")
-          .text(current_direction);
+          .text(current_direction + "\u00B0");
 
           svg.append("text") // Cardinal text output
               .attr("x", 265)
@@ -759,9 +750,9 @@ var wind_gust_color = current_wind_gust;
 
       var color = d3.scale.ordinal()
         .range([
-        "#FFF9E3", // Cat 3 eggshell in place of white
-        "#f1ff6c", // Cat 2
-        "#c1fc77", // Cat 1
+        //"#FFF9E3", // Cat 3 eggshell in place of white
+        //"#f1ff6c", // Cat 2
+        //"#c1fc77", // Cat 1
         "#45698d",
         "#754a92",
         "#af5088",
@@ -853,7 +844,7 @@ var wind_gust_color = current_wind_gust;
               .style("font-size", "24px")
               .style("text-anchor", "middle")
               .style("font-weight", "normal")
-          .text(current_direction);
+          .text(current_direction + "\u00B0");
 
           svg.append("text") // Cardinal text output
               .attr("x", 265)
@@ -983,9 +974,9 @@ var wind_gust_color = current_wind_gust;
 
       var color = d3.scale.ordinal()
         .range([
-        "#FFF9E3", // Cat 3 eggshell in place of white
-        "#f1ff6c", // Cat 2
-        "#c1fc77", // Cat 1
+        //"#FFF9E3", // Cat 3 eggshell in place of white
+        //"#f1ff6c", // Cat 2
+        //"#c1fc77", // Cat 1
         "#45698d",
         "#754a92",
         "#af5088",
@@ -1077,7 +1068,7 @@ var wind_gust_color = current_wind_gust;
               .style("font-size", "24px")
               .style("text-anchor", "middle")
               .style("font-weight", "normal")
-          .text(current_direction);
+          .text(current_direction + "\u00B0");
 
           svg.append("text") // Cardinal text output
               .attr("x", 265)
@@ -1299,7 +1290,7 @@ var wind_gust_color = current_wind_gust;
               .style("font-size", "24px")
               .style("text-anchor", "middle")
               .style("font-weight", "normal")
-          .text(current_direction);
+          .text(current_direction + "\u00B0");
 
           svg.append("text") // Cardinal text output
               .attr("x", 265)
