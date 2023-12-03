@@ -11,5 +11,8 @@
 #                                                                                                                   #
 #####################################################################################################################
 
-$templateversion = "DVM-<maxblue>0.6.7</maxblue>alpha";
+$templateversion = "DVM-<maxblue>0.8.1-</maxblue>alpha";
+$os = shell_exec('lsb_release -d');
+$os_version = str_replace('Description:',' ',$os);
+//echo $os_version;
 ?>

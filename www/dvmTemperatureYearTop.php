@@ -1,5 +1,5 @@
 <?php
-#####################################################################################################################                                                                                                        #
+#####################################################################################################################                                                                                 
 #                                                                                                                   #
 # weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
 #                                                                                                                   #
@@ -12,6 +12,8 @@
 #####################################################################################################################
 ?>
 <?php include('dvmCombinedData.php');
+
+$image["image"] = "img/meteocons/thermometer.svg";
 
 if(anyToC($temp["outside_year_max"])<=-10){$tempcolormax = "#8781bd";}
 else if(anyToC($temp["outside_year_max"])<=0){$tempcolormax = "#487ea9";}
@@ -54,7 +56,7 @@ else if(anyToC($temp["outside_year_min"])<100){$tempcolormin = "#e26870";}
 	<script>
 
 	var theme = "<?php echo $theme;?>";
-	
+	var image = "<?php echo $image["image"];?>";
 	var mincolor = "<?php echo $tempcolormin;?>";	
 	var maxcolor = "<?php echo $tempcolormax;?>"; 	
 	var units = "<?php echo $temp["units"];?>";	
@@ -87,63 +89,6 @@ if (theme === 'dark') {
 			.style("stroke-width", 1.0)
 			.style('fill', "none");
 
-			var arc = d3.svg.arc() // top arc
-    			.innerRadius(4.35)
-    			.outerRadius(4.35)
-    			.startAngle(-90 * (Math.PI/180))
-    			.endAngle(+90 * (Math.PI/180))    			
-    	svg.append("path")
-    			.attr("d", arc)
-    			.style("stroke", "#999999")
-  				.style("fill", "#999999")
-    			.attr("transform", "translate(115.65,9)");
-
-  		svg.append("line") // left horizontal line
-    			.attr("x1", 111.25)
-    			.attr("x2", 111.25)
-    			.attr("y1", 9)
-    			.attr("y2", 45)
-    			.style("stroke", "#999999")
-    			.style("stroke-width", "1.0");
-
-    	svg.append("line") // left horizontal line
-    			.attr("x1", 120.1)
-    			.attr("x2", 120.1)
-    			.attr("y1", 9)
-    			.attr("y2", 45)
-    			.style("stroke", "#999999")
-    			.style("stroke-width", "1.0");
-
-var data = d3.range(0, 20);
-// color fill (blended)
-var colors = d3.scale.linear()
-    	.domain([20, 15, 10, 5, 0])
-    	.range([ 
-      "#8781bd",
-      "#3b9cac", 
-      "#e6a141", 
-      "#9aba2f",  
-      "#e26870"
-      ]);
-    
-var rects = svg.selectAll(".rects.two")
-  		.data(data)
-  		.enter()
-  		.append("rect")
-  		.attr("class", "two")
-  		.attr("y", (d,i) => 10.5 + i * 1.7)
-  		.attr("height", 5)
-  		.attr("x", 111.25)
-  		.attr("width", 9)
-  		.attr("fill", d => colors(d));
-
-  svg.append("circle")
-			.attr("cx", 115.75)			
-			.attr("cy", 47.5)
-			.attr("r", 9)
-			.style('stroke', "#3b9cac")
-			.style('fill', "#3b9cac");
-
 } else {
 
 svg.append("circle")
@@ -162,62 +107,15 @@ svg.append("circle")
 			.style("stroke-width", 1.0)
 			.style('fill', "none");
 					
-			var arc = d3.svg.arc() // top arc
-    			.innerRadius(4.35)
-    			.outerRadius(4.35)
-    			.startAngle(-90 * (Math.PI/180))
-    			.endAngle(+90 * (Math.PI/180))    			
-    	svg.append("path")
-    			.attr("d", arc)
-    			.style("stroke", "black")
-  				.style("fill", "black")
-    			.attr("transform", "translate(115.75,9)");
+}
 
-  		svg.append("line") // left horizontal line
-    			.attr("x1", 111.25)
-    			.attr("x2", 111.25)
-    			.attr("y1", 9)
-    			.attr("y2", 45)
-    			.style("stroke", "black")
-    			.style("stroke-width", "1.0");
+		svg.append('image') // image output
+			.attr('xlink:href', image)
+			.attr('width', 80)
+			.attr('height', 80)
+			.attr('x', 76)
+			.attr('y', -8);	
 
-    	svg.append("line") // left horizontal line
-    			.attr("x1", 120.1)
-    			.attr("x2", 120.1)
-    			.attr("y1", 9)
-    			.attr("y2", 45)
-    			.style("stroke", "black")
-    			.style("stroke-width", "1.0");
-
-var data = d3.range(0, 20);
-// color fill (blended)
-var colors = d3.scale.linear()
-    	.domain([20, 15, 10, 5, 0])
-    	.range([ 
-      "#8781bd",
-      "#3b9cac", 
-      "#e6a141",  
-      "#9aba2f",  
-      "#e26870"]);
-    
-var rects = svg.selectAll(".rects.two")
-  		.data(data)
-  		.enter()
-  		.append("rect")
-  		.attr("class", "two")
-  		.attr("y", (d,i) => 10.5 + i * 1.7)
-  		.attr("height", 5)
-  		.attr("x", 111.25)
-  		.attr("width", 9)
-  		.attr("fill", d => colors(d));
-
-  svg.append("circle")
-			.attr("cx", 115.75)			
-			.attr("cy", 47.5)
-			.attr("r", 8)
-			.style('stroke', "#3b9cac")
-			.style('fill', "#3b9cac");
-}	
 			// min temp circle			
 		svg.append("circle")
 			.attr("cx", 50)			
@@ -237,13 +135,13 @@ var rects = svg.selectAll(".rects.two")
 				// min temp text	
 		svg.append("text")		
 			.attr("x", 50)
-			.attr("y", 35)
+			.attr("y", 34)
 			.style("fill", "black")
 			.style("font-family", "Helvetica")
-			.style("font-size", "15px")
+			.style("font-size", "12px")
 			.style("text-anchor", "middle")
 			.style("font-weight", "bold")
-			.text(d3.format(".1f")(mintemp)+"°"+units);
+			.text(d3.format(".1f")(mintemp) + "°" + units);
 			
 		// min date text	
 		svg.append("text")		
@@ -279,13 +177,13 @@ var rects = svg.selectAll(".rects.two")
 		// max temp text	
 		svg.append("text")		
 			.attr("x", 180)
-			.attr("y", 35)
+			.attr("y", 34)
 			.style("fill", "black")
 			.style("font-family", "Helvetica")
-			.style("font-size", "15px")
+			.style("font-size", "12px")
 			.style("text-anchor", "middle")
 			.style("font-weight", "bold")
-			.text(d3.format(".1f")(maxtemp)+"°"+units);
+			.text(d3.format(".1f")(maxtemp) + "°" + units);
 			
 		// max date text	
 		svg.append("text")		

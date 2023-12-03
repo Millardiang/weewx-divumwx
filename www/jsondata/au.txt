@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+	<channel>
+		<title>Weather Warnings for Victoria. Issued by the Australian Bureau of Meteorology</title>
+		<link>http://www.bom.gov.au/fwo/IDZ00059.warnings_vic.xml</link>
+		<atom:link href="http://www.bom.gov.au/fwo/IDZ00059.warnings_vic.xml" rel="self" type="application/rss+xml" />
+		<description>Current weather warnings for Victoria, Australia including strong wind, gale, storm force and hurricane force wind warnings; tsunami; damaging waves; abnormally high tides; tropical cyclones; severe thunderstorms; severe weather; fire weather; flood; frost; driving; bushwalking; sheep graziers and other agricultural warnings.</description>
+		<language>en-au</language>
+		<copyright>Copyright: (C) Copyright Commonwealth of Australia 2010, Bureau of Meteorology (ABN 92637 533532), see http://www.bom.gov.au/other/copyright.shtml for terms and conditions of reuse.</copyright>
+		<webMaster>webops@bom.gov.au (Help desk)</webMaster>
+		<pubDate>Thu, 30 Nov 2023 20:58:34 GMT</pubDate>
+		<lastBuildDate>Thu, 30 Nov 2023 20:58:34 GMT</lastBuildDate>
+		<generator>Australian Bureau of Meteorology</generator>
+		<ttl>10</ttl>
+		<image>
+			<url>http://www.bom.gov.au/images/bom_logo_inline.gif</url>
+			<title>Weather Warnings for Victoria. Issued by the Australian Bureau of Meteorology</title>
+			<link>http://www.bom.gov.au/fwo/IDZ00059.warnings_vic.xml</link>
+		</image>
+		<item>
+			<title>01/05:10 EDT Marine Wind Warning Summary for Victoria</title>
+			<link>http://www.bom.gov.au/vic/warnings/marinewind.shtml</link>
+			<pubDate>Thu, 30 Nov 2023 18:10:12 GMT</pubDate>
+			<guid isPermaLink="false">http://www.bom.gov.au/vic/warnings/marinewind.shtml</guid>
+		</item>
+		<item>
+			<title>01/05:17 EDT Cancellation of Warning to Sheep Graziers
+for West and South Gippsland and East Gippsland forecast districts</title>
+			<link>http://www.bom.gov.au/vic/warnings/sheep.shtml</link>
+			<pubDate>Thu, 30 Nov 2023 18:17:37 GMT</pubDate>
+			<guid isPermaLink="false">http://www.bom.gov.au/vic/warnings/sheep.shtml</guid>
+		</item>
+		<item>
+			<title>30/11:51 EDT Final Flood Watch for Gippsland, parts of North East, South West and Central Victoria</title>
+			<link>http://www.bom.gov.au/cgi-bin/wrap_fwo.pl?IDV35010.html</link>
+			<pubDate>Thu, 30 Nov 2023 00:51:46 GMT</pubDate>
+			<guid isPermaLink="false">http://www.bom.gov.au/cgi-bin/wrap_fwo.pl?IDV35010.html</guid>
+		</item>
+		<item>
+			<title>01/06:53 EDT Flood Warning Summary for Victoria</title>
+			<link>http://www.bom.gov.au/vic/warnings/flood/summary.shtml</link>
+			<pubDate>Thu, 30 Nov 2023 19:53:59 GMT</pubDate>
+			<guid isPermaLink="false">http://www.bom.gov.au/vic/warnings/flood/summary.shtml</guid>
+		</item>
+		<item>
+			<title>30/16:55 EDT Major Flood Warning for the Genoa River and Moderate Flood Warning for the Cann River</title>
+			<link>http://www.bom.gov.au/vic/warnings/flood/cannandgenoa.shtml</link>
+			<pubDate>Thu, 30 Nov 2023 05:55:24 GMT</pubDate>
+			<guid isPermaLink="false">http://www.bom.gov.au/vic/warnings/flood/cannandgenoa.shtml</guid>
+		</item>
+		<item>
+			<title>30/20:55 EDT Major Flood Warning for the Buchan River and Moderate Flood Warning for the Snowy River</title>
+			<link>http://www.bom.gov.au/vic/warnings/flood/snowyriver.shtml</link>
+			<pubDate>Thu, 30 Nov 2023 09:55:26 GMT</pubDate>
+			<guid isPermaLink="false">http://www.bom.gov.au/vic/warnings/flood/snowyriver.shtml</guid>
+		</item>
+		<item>
+			<title>30/11:49 EDT Initial Minor Flood Warning for the Tambo River</title>
+			<link>http://www.bom.gov.au/vic/warnings/flood/tamboriver.shtml</link>
+			<pubDate>Thu, 30 Nov 2023 00:49:53 GMT</pubDate>
+			<guid isPermaLink="false">http://www.bom.gov.au/vic/warnings/flood/tamboriver.shtml</guid>
+		</item>
+		<item>
+			<title>01/06:52 EDT Moderate Flood Warning for the Mitchell River</title>
+			<link>http://www.bom.gov.au/vic/warnings/flood/mitchellriver.shtml</link>
+			<pubDate>Thu, 30 Nov 2023 19:52:56 GMT</pubDate>
+			<guid isPermaLink="false">http://www.bom.gov.au/vic/warnings/flood/mitchellriver.shtml</guid>
+		</item>
+		<item>
+			<title>01/05:23 EDT Major Flood Warning for the Avon River</title>
+			<link>http://www.bom.gov.au/vic/warnings/flood/avonriver.shtml</link>
+			<pubDate>Thu, 30 Nov 2023 18:23:35 GMT</pubDate>
+			<guid isPermaLink="false">http://www.bom.gov.au/vic/warnings/flood/avonriver.shtml</guid>
+		</item>
+		<item>
+			<title>01/06:12 EDT Moderate Flood Warning for the Macalister River</title>
+			<link>http://www.bom.gov.au/vic/warnings/flood/macalisterriver.shtml</link>
+			<pubDate>Thu, 30 Nov 2023 19:12:10 GMT</pubDate>
+			<guid isPermaLink="false">http://www.bom.gov.au/vic/warnings/flood/macalisterriver.shtml</guid>
+		</item>
+		<item>
+			<title>30/22:17 EDT Major Flood Warning for the Thomson River</title>
+			<link>http://www.bom.gov.au/vic/warnings/flood/thomsonriver.shtml</link>
+			<pubDate>Thu, 30 Nov 2023 11:17:22 GMT</pubDate>
+			<guid isPermaLink="false">http://www.bom.gov.au/vic/warnings/flood/thomsonriver.shtml</guid>
+		</item>
+		<item>
+			<title>30/17:20 EDT Initial Minor Flood Warning for the Traralgon Creek</title>
+			<link>http://www.bom.gov.au/vic/warnings/flood/traralgon.shtml</link>
+			<pubDate>Thu, 30 Nov 2023 06:20:18 GMT</pubDate>
+			<guid isPermaLink="false">http://www.bom.gov.au/vic/warnings/flood/traralgon.shtml</guid>
+		</item>
+	</channel>
+</rss>

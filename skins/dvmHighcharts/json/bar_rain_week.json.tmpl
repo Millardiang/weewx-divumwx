@@ -23,33 +23,23 @@
 "_version": "bar_rain_week.json.tmpl version 1.0.0",
 "utcoffset": $utcOffset,
 "timespan": {"start": $weekPlotStart, "stop": $weekPlotEnd},
-##
 "rainplot": {
 "rain": $rainWeekjson,
 "rainRate": $rainRateWeekjson,
 "units": "$unit.label.rain"#slurp
 },
-##
 "barometerplot": {
 "barometer": $barometerWeekjson,
 "units": "$unit.label.barometer"#slurp
 },
 ##
-"lightningplot": {
-#if $strikeCountWeek_json is not None
-"strikeCountWeek": $strikeCountWeek_json,
-#end if
-#if $noiseCountWeek_json is not None
-"noiseCountWeek": $noiseCountWeek_json,
-#end if
-#if $disturberCountWeek_json is not None
-"disturberCountWeek": $disturberCountWeek_json,
-#end if
-#if $distanceWeek_json is not None
-"distanceWeek": $distanceWeek_json,
-#end if
-#if $energyWeek_json is not None
-"energyWeek": $energyWeek_json
-#end if
+"strikeplot": {"series":
+{"lightning_strike_count": {"name": "Strikes", "data": $week.lightning_strike_count.series(aggregate_type='sum', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json}},
+"units": "Strikes"#slurp
+},
+##
+"distanceplot": {"series":
+{"lightning_distance_max": {"name": "Distance", "data": $week.lightning_distance.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json}},
+"units": "km"#slurp
 }
 }]

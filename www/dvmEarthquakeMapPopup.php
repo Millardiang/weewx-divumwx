@@ -1,7 +1,8 @@
 <?php
 include('dvmCombinedData.php');
 date_default_timezone_set($TZ);
-echo "<body style='background-color:#292E35'>";
+if($theme === "light"){ echo "<body style='background-color:#FFFFFF'>";}
+else if($theme === "dark"){ echo "<body style='background-color:#292E35'>";}
 ?>
 
 <!DOCTYPE html>

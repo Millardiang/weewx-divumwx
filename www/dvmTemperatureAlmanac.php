@@ -10,10 +10,44 @@
 # Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
 #                                                                                                                   #
 #####################################################################################################################
-?>
-<?php
 
 include('dvmCombinedData.php');
+
+if($humid["day_max"]<30){$t[4]="Blue";}
+else if($humid["day_max"]<60){$t[4]="Green";}
+else if($humid["day_max"]<100){$t[4]="Red";}
+if($humid["day_min"]<30){$t[5]="Blue";}
+else if($humid["day_min"]<60){$t[5]="Green";}
+else if($humid["day_min"]<100){$t[5]="Red";}
+
+if($humid["24h_max"]<30){$d[4]="Blue";}
+else if($humid["24h_max"]<60){$d[4]="Green";}
+else if($humid["24h_max"]<100){$d[4]="Red";}
+if($humid["24h_min"]<30){$d[5]="Blue";}
+else if($humid["24h_min"]<60){$d[5]="Green";}
+else if($humid["24h_min"]<100){$d[5]="Red";}
+
+if($humid["month_max"]<30){$m[4]="Blue";}
+else if($humid["month_max"]<60){$m[4]="Green";}
+else if($humid["month_max"]<100){$m[4]="Red";}
+if($humid["month_min"]<30){$m[5]="Blue";}
+else if($humid["month_min"]<60){$m[5]="Green";}
+else if($humid["month_min"]<100){$m[5]="Red";}
+
+if($humid["year_max"]<30){$y[4]="Blue";}
+else if($humid["year_max"]<60){$y[4]="Green";}
+else if($humid["year_max"]<100){$y[4]="Red";}
+if($humid["year_min"]<30){$y[5]="Blue";}
+else if($humid["year_min"]<60){$y[5]="Green";}
+else if($humid["year_min"]<100){$y[5]="Red";}
+
+if($humid["alltime_max"]<30){$a[4]="Blue";}
+else if($humid["alltime_max"]<60){$a[4]="Green";}
+else if($humid["alltime_max"]<100){$a[4]="Red";}
+if($humid["alltime_min"]<30){$a[5]="Blue";}
+else if($humid["alltime_min"]<60){$a[5]="Green";}
+else if($humid["alltime_min"]<100){$a[5]="Red";}
+
 if ($theme === "dark") {
     echo '<style>@font-face{font-family: weathertext2; src: url(css/fonts/verbatim-regular.woff) format("woff"), url(fonts/verbatim-regular.woff2) format("woff2"), url(fonts/verbatim-regular.ttf) format("truetype");}html,body{font-size: 13px; font-family: "weathertext2", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; background: rgba(40, 45, 52,.4);}.grid{display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); grid-gap: 5px; align-items: stretch; color: #f5f7fc; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;}.grid > article{border: 1px solid #212428; box-shadow: 2px 2px 6px 0px rgba(0, 0, 0, 0.3); padding: 4px; font-size: 0.8em; -webkit-border-radius: 4px; border-radius: 4px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;}.grid1{display: grid; grid-template-columns: repeat(auto-fill, minmax(100%, 1fr)); grid-gap: 5px; color: #f5f7fc;}.grid1 > articlegraph{border: 1px solid rgba(245, 247, 252, 0.02); box-shadow: 2px 2px 6px 0px rgba(0, 0, 0, 0.6); padding: 5px; font-size: 0.8em; -webkit-border-radius: 4px; border-radius: 4px; background: 0; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; height: 225px;}/* unvisited link */a:link{color: white;}/* visited link */a:visited{color: white;}/* mouse over link */a:hover{color: white;}/* selected link */a:active{color: white;}.divumwxdarkbrowser{position: relative; background: 0; width: 97%; height: 30px; margin: auto; margin-top: -5px; margin-left: 0px; border-top-left-radius: 5px; border-top-right-radius: 5px; padding-top: 10px;}.divumwxdarkbrowser[url]:after{content: attr(url); color: white; font-size: 14px; text-align: center; position: absolute; left: 0; right: 0; top: 0; padding: 4px 15px; margin: 11px 10px 0 auto; font-family: arial; height: 20px;}blue{color: #01a4b4;}orange{color: #009bb4;}orange1{position: relative; color: #009bb4; margin: 0 auto; text-align: center; margin-left: 5%; font-size: 1.1rem;}green{color: #aaa;}red{color: #f37867;}red6{color: #d65b4a;}value{color: #fff;}yellow{color: #cc0;}purple{color: #916392;}.temperaturecontainer1{position: relative; left: 0px; margin-top: 0px;}.temperaturecontainer2{position: relative; left: 0px; margin-top: 0px;}.temperaturetoday0,.temperaturetoday10,.temperaturetoday18,.temperaturetoday24,.temperaturetoday30{font-family: weathertext2, Arial, Helvetica, system; width: 5rem; height: 1.5rem; -webkit-border-radius: 3px; -moz-border-radius: 3px; -o-border-radius: 3px; display: flex; font-size: 0.9rem; padding-top: 2px; color: #fff; border-bottom: 7px solid #555555; align-items: center; justify-content: center; border-radius: 3px; margin-bottom: 10px;}.temperaturecaution,.temperaturetrend,.temperaturetrend1{position: absolute; font-size: 1rem;}.temperaturetoday0{background: rgba(68, 166, 181, 1);}.temperaturetoday10{background: rgba(144, 177, 42, 1);}.temperaturetoday18{background: rgba(230, 161, 65, 1);}.temperaturetoday24{background: rgba(255, 124, 57, 1);}.temperaturetoday30{background: rgba(211, 93, 78, 1);}.temperaturetrend{margin-left: 67px; margin-top: -38px; z-index: 1; color: white; font-size: 0.65rem; width: 70px; text-align: center;}.temperaturetrend1{margin-left: 67px; margin-top: -38px; z-index: 1; color: #fff; font-size: 0.65rem; width: 70px; text-align: center;}smalluvunit{font-size: 0.65rem; font-family: Arial, Helvetica, system;}.dvmconvertrain{position: relative; font-size: 0.5em; top: 10px; color: #c0c0c0; margin-left: 5px;}.hitempy{position: relative; background: rgba(61, 64, 66, 0.5); color: #aaa; width: 40px; padding: 1px; -webit-border-radius: 2px; border-radius: 2px; margin-top: -40px; margin-left: 130px; padding-left: 3px; line-height: 11px; font-size: 8px;}.actualt{position: relative; left: 0px; -webkit-border-radius: 3px; -moz-border-radius: 3px; -o-border-radius: 3px; border-radius: 3px; background: #555555; padding: 5px; font-family: Arial, Helvetica, sans-serif; width: max-content; height: 0.8em; font-size: 0.8rem; padding-top: 2px; color: white; align-items: center; justify-content: center; margin-bottom: 10px; top: 0; text-align: center;}
     </style>';
@@ -21,147 +55,150 @@ if ($theme === "dark") {
     echo '<style>@font-face{font-family: weathertext2; src: url(css/fonts/verbatim-regular.woff) format("woff"), url(fonts/verbatim-regular.woff2) format("woff2"), url(fonts/verbatim-regular.ttf) format("truetype");}html,body{font-size: 13px; font-family: "weathertext2", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; background-color: white;}.grid{display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); grid-gap: 5px; align-items: stretch; color: #f5f7fc; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;}.grid > article{border: 1px solid rgba(245, 247, 252, 0.02); box-shadow: 2px 2px 6px 0px rgba(0, 0, 0, 0.6); padding: 4px; font-size: 0.8em; -webkit-border-radius: 4px; border-radius: 4px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;}.grid1{display: grid; grid-template-columns: repeat(auto-fill, minmax(100%, 1fr)); grid-gap: 5px; color: black;}.grid1 > articlegraph{border: 1px solid rgba(245, 247, 252, 0.02); box-shadow: 2px 2px 6px 0px rgba(0, 0, 0, 0.6); padding: 4px; font-size: 0.8em; -webkit-border-radius: 4px; border-radius: 4px; background: 0; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; height: 225px;}/* unvisited link */a:link{color: black;}/* visited link */a:visited{color: black;}/* mouse over link */a:hover{color: black;}/* selected link */a:active{color: black;}.divumwxdarkbrowser{position: relative; background: 0; width: 97%; height: 30px; margin: auto; margin-top: -5px; margin-left: 0px; border-top-left-radius: 5px; border-top-right-radius: 5px; padding-top: 10px;}.divumwxdarkbrowser[url]:after{content: attr(url); color: black; font-size: 14px; text-align: center; position: absolute; left: 0; right: 0; top: 0; padding: 4px 15px; margin: 11px 10px 0 auto; font-family: arial; height: 20px;}blue{color: #01a4b4;}orange{color: #009bb4;}orange1{position: relative; color: #009bb4; margin: 0 auto; text-align: center; margin-left: 5%; font-size: 1.1rem;}green{color: #aaa;}red{color: #f37867;}red6{color: #d65b4a;}value{color: #fff;}yellow{color: #cc0;}purple{color: #916392;}.temperaturecontainer1{position: relative; left: 0px; margin-top: 0px;}.temperaturecontainer2{position: relative; left: 0px; margin-top: 0px;}.temperaturetoday0,.temperaturetoday10,.temperaturetoday18,.temperaturetoday24,.temperaturetoday30{font-family: weathertext2, Arial, Helvetica, system; width: 5rem; height: 1.5rem; -webkit-border-radius: 3px; -moz-border-radius: 3px; -o-border-radius: 3px; display: flex; font-size: 0.9rem; padding-top: 2px; color: #fff; border-bottom: 7px solid #555555; align-items: center; justify-content: center; border-radius: 3px; margin-bottom: 10px;}.temperaturecaution,.temperaturetrend,.temperaturetrend1{position: absolute; font-size: 1rem;}.temperaturetoday0{background: rgba(68, 166, 181, 1);}.temperaturetoday10{background: rgba(144, 177, 42, 1);}.temperaturetoday18{background: rgba(230, 161, 65, 1);}.temperaturetoday24{background: rgba(255, 124, 57, 1);}.temperaturetoday30{background: rgba(211, 93, 78, 1);}.temperaturetrend{margin-left: 67px; margin-top: -38px; z-index: 1; color: black; font-size: 0.65rem; width: 70px; text-align: center;}.temperaturetrend1{margin-left: 67px; margin-top: -38px; z-index: 1; color: #fff; font-size: 0.65rem; width: 70px; text-align: center;}smalluvunit{font-size: 0.65rem; font-family: Arial, Helvetica, system;}.dvmconvertrain{position: relative; font-size: 0.5em; top: 10px; color: #c0c0c0; margin-left: 5px;}.hitempy{position: relative; background: rgba(61, 64, 66, 0.5); color: #aaa; width: 40px; padding: 1px; -webit-border-radius: 2px; border-radius: 2px; margin-top: -40px; margin-left: 130px; padding-left: 3px; line-height: 11px; font-size: 8px;}.actualt{position: relative; left: 0px; -webkit-border-radius: 3px; -moz-border-radius: 3px; -o-border-radius: 3px; border-radius: 3px; background: #555555; padding: 5px; font-family: Arial, Helvetica, sans-serif; width: max-content; height: 0.8em; font-size: 0.8rem; padding-top: 2px; color: white; align-items: center; justify-content: center; margin-bottom: 10px; top: 0; text-align: center;}
     </style>';
 }
- ?>
+
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>divumwx Temperature Almanac Information</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+            
 <main class="grid">
   <article>
    <div class=actualt> Today </div>
    <div class="temperaturecontainer1">
 
-			  <?php
-	////temp max today
-	if ($temp["outside_day_max"]>=-50)  {
-	echo "<div class='temperaturetoday24'>",$temp["outside_day_max"] . "</value>";}
-	echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>"
-	?> </div>
+        <?php
+
+  ////temp max today
+  
+  echo "<div class='temperaturetoday24' style='background:$t[0];'>",$temp["outside_day_max"] . "</value>";
+  echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>";
+  ?> </div>
 
     <div class="temperaturetrend"><span style='color:rgba(255, 124, 57, 1.000)'><b>Temp Max</b></span><br><?php echo $temp["outside_day_maxtime"];?></span></div>
-	</div>	
+  </div>  
 <div class="temperaturecontainer2">
  <?php
-	//temp min today
-	if ($temp["outside_day_min"]>=-50)  {
-	echo "<div class='temperaturetoday0'>",$temp["outside_day_min"] . "</value>";}
+  //temp min today
+  
+  echo "<div class='temperaturetoday0' style='background:$t[1];'>",$temp["outside_day_min"] . "</value>";
 
-	echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>"
-	?>  </div>
+  echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>";
+  ?>  </div>
 <div class="temperaturetrend"><span style='color:rgba(68, 166, 181, 1.000)'><b>Temp Min</b></span><br><?php echo $temp["outside_day_mintime"];?></span></div>
 </div>  
   
    <div class="temperaturecontainer1">
 
-			  <?php
-	////dew max today
-	if ($tempunit=='C' && $dew["day_max"]>=-50)  {
-	echo "<div class='temperaturetoday24'>",$dew["day_max"] . "</value>";}
-	echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>"
-	?> </div>
+        <?php
+  ////dew max today
+  
+  echo "<div class='temperaturetoday24'style='background:$t[2];'>",$dew["day_max"] . "</value>";
+  echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>";
+  ?> </div>
 
     <div class="temperaturetrend"><span style='color:rgba(255, 124, 57, 1.000)'><b>Dew Max</b></span><br><?php echo $dew["day_maxtime"];?></span></div>
-	</div>
+  </div>
 <div class="temperaturecontainer2">
  <?php
-	//dew min today
-	if ($dew["day_min"]>=-50)  {
-	echo "<div class='temperaturetoday0'>",$dew["day_min"] . "</value>";}
+  //dew min today
+  
+  echo "<div class='temperaturetoday0' style='background:$t[3];'>",$dew["day_min"] . "</value>";
 
-	echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>"
-	?>  </div>
+  echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>";
+  ?>  </div>
 <div class="temperaturetrend"><span style='color:rgba(68, 166, 181, 1.000)'><b>Dew Min</b></span><br><?php echo $dew["day_mintime"];?></span></div>
 </div>
 <div class="temperaturecontainer1">
 
-			  <?php
-	////humidity max today
-	if ($humid["day_max"]>=-50)  {
-	echo "<div class='temperaturetoday24'>",$humid["day_max"] . "</value>";}
-	echo "<smalluvunit>%</smalluvunit>"
-	?> </div>
+        <?php
+  ////humidity max today
+  
+  echo "<div class='temperaturetoday24' style='background:$t[4];'>",$humid["day_max"] . "</value>";
+  echo "<smalluvunit>%</smalluvunit>";
+  ?> </div>
 
     <div class="temperaturetrend"><span style='color:rgba(255, 124, 57, 1.000)'><b>Hum Max</b></span><br><?php echo $humid["day_maxtime"];?></span></div>
-</div>		
+</div>    
 <div class="temperaturecontainer2">
  <?php
-	//humidity min today
-	if ($humid["day_min"]>=-50)  {
-	echo "<div class='temperaturetoday0'>",$humid["day_min"] . "</value>";}
+  //humidity min today
+  
+  echo "<div class='temperaturetoday0' style='background:$t[5];'>",$humid["day_min"] . "</value>";
 
-	echo "<smalluvunit>%</smalluvunit>"
-	?>  </div>
+  echo "<smalluvunit>%</smalluvunit>";
+  ?>  </div>
 <div class="temperaturetrend"><span style='color:rgba(68, 166, 181, 1.000)'><b>Hum Min</b></span><br><?php echo $humid["day_mintime"];?></span></div>
 </div>  
 </article>
 
  <article>
-   <div class=actualt> 24h </div>
+   <div class=actualt> Yesterday </div>
    <div class="temperaturecontainer1">
 
-			  <?php
-	////temp max yesterday
-	if ($tempunit=='C' && $temp["outside_24h_max"]>=-50)  {
-	echo "<div class='temperaturetoday24'>",$temp["outside_24h_max"] . "</value>";}
-	echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>"
-	?> </div>
+        <?php
+  ////temp max yesterday
+  
+  echo "<div class='temperaturetoday24' style='background:$d[0];'>",$temp["outside_24h_max"] . "</value>";
+  echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>";
+  ?> </div>
 
     <div class="temperaturetrend"><span style='color:rgba(255, 124, 57, 1.000)'><b>Temp Max</b></span><br><?php echo $temp["outside_24h_maxtime"];?></span></div>
-	</div>
+  </div>
 <div class="temperaturecontainer2">
  <?php
-	//temp min yesterday
-	if ($temp["outside_24h_min"]>=-50)  {
-	echo "<div class='temperaturetoday0'>",$temp["outside_24h_min"] . "</value>";}
+  //temp min yesterday
+  
+  echo "<div class='temperaturetoday0' style='background:$d[1];'>",$temp["outside_24h_min"] . "</value>";
 
-	echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>"
-	?>  </div>
+  echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>";
+  ?>  </div>
 <div class="temperaturetrend"><span style='color:rgba(68, 166, 181, 1.000)'><b>Temp Min</b></span><br><?php echo $temp["outside_24h_mintime"];?></span></div>
   </div>
   
    <div class="temperaturecontainer1">
 
-			  <?php
-	////dew max yesterday
-	if ($tempunit=='C' && $dew["24h_max"]>=-50)  {
-	echo "<div class='temperaturetoday24'>",$dew["24h_max"] . "</value>";}
-	echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>"
-	?> </div>
+        <?php
+  ////dew max yesterday
+  
+  echo "<div class='temperaturetoday24' style='background:$d[2];'>",$dew["24h_max"] . "</value>";
+  echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>";
+  ?> </div>
 
     <div class="temperaturetrend"><span style='color:rgba(255, 124, 57, 1.000)'><b>Dew Max</b></span><br><?php echo $dew["24h_maxtime"];?></span></div>
-	</div>
+  </div>
 <div class="temperaturecontainer2">
  <?php
-	//dew min yesterday
-	if ($dew["24h_min"]>=-50)  {
-	echo "<div class='temperaturetoday0'>",$dew["24h_min"] . "</value>";}
+  //dew min yesterday
+  
+  echo "<div class='temperaturetoday0' style='background:$d[3];'>",$dew["24h_min"] . "</value>";
 
-	echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>"
-	?>  </div>
+  echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>";
+  ?>  </div>
 <div class="temperaturetrend"><span style='color:rgba(68, 166, 181, 1.000)'><b>Dew Min</b></span><br><?php echo $dew["24h_mintime"];?></span></div>
 </div>
 <div class="temperaturecontainer1">
 
-			  <?php
-	////humidity max yesterday
-	if ($humid["24h_max"]>=-50)  {
-	echo "<div class='temperaturetoday24'>",$humid["24h_max"] . "</value>";}
-	echo "<smalluvunit>%</smalluvunit>"
-	?> </div>
+        <?php
+  ////humidity max yesterday
+  
+  echo "<div class='temperaturetoday24' style='background:$d[4];'>",$humid["24h_max"] . "</value>";
+  echo "<smalluvunit>%</smalluvunit>";
+  ?> </div>
 
     <div class="temperaturetrend"><span style='color:rgba(255, 124, 57, 1.000)'><b>Hum Max</b></span><br><?php echo $humid["24h_maxtime"];?></span></div>
-	</div>	
+  </div>  
 <div class="temperaturecontainer2">
  <?php
-	//humidity min yesterday
-	if ($humid["24h_min"]>=-50)  {
-	echo "<div class='temperaturetoday0'>",$humid["24h_min"] . "</value>";}
+  //humidity min yesterday
+  
+  echo "<div class='temperaturetoday0' style='background:$d[5];'>",$humid["24h_min"] . "</value>";
 
-	echo "<smalluvunit>%</smalluvunit>"
-	?>  </div>
+  echo "<smalluvunit>%</smalluvunit>";
+  ?>  </div>
 <div class="temperaturetrend"><span style='color:rgba(68, 166, 181, 1.000)'><b>Hum Min</b></span><br><?php echo $humid["24h_mintime"];?></span></div>
 </div>
 </article>
@@ -171,66 +208,67 @@ if ($theme === "dark") {
   <div class=actualt> <?php echo date('F Y')?> </div>
    <div class="temperaturecontainer1">
 
-			  <?php
-	////temp max month
-	if ($tempunit=='C' && $temp["outside_month_max"]>=-50)  {
-	echo "<div class='temperaturetoday24'>",$temp["outside_month_max"] . "</value>";}
-	echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>"
-	?> </div>
+        <?php
+
+  ////temp max today
+  
+  echo "<div class='temperaturetoday24' style='background:$m[0];'>",$temp["outside_month_max"] . "</value>";
+  echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>";
+  ?> </div>
 
     <div class="temperaturetrend"><span style='color:rgba(255, 124, 57, 1.000)'><b>Temp Max</b></span><br><?php echo $temp["outside_month_maxtime"];?></span></div>
-	</div>
+  </div>  
 <div class="temperaturecontainer2">
  <?php
-	//temp min month
-	if ($temp["outside_month_min"]>=-50)  {
-	echo "<div class='temperaturetoday0'>",$temp["outside_month_min"] . "</value>";}
+  //temp min today
+  
+  echo "<div class='temperaturetoday0' style='background:$m[1];'>",$temp["outside_month_min"] . "</value>";
 
-	echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>"
-	?>  </div>
+  echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>";
+  ?>  </div>
 <div class="temperaturetrend"><span style='color:rgba(68, 166, 181, 1.000)'><b>Temp Min</b></span><br><?php echo $temp["outside_month_mintime"];?></span></div>
-  </div>
+</div>  
   
    <div class="temperaturecontainer1">
 
-			  <?php
-	////dew max month
-	if ($tempunit=='C' && $dew["month_max"]>=-50)  {
-	echo "<div class='temperaturetoday24'>",$dew["month_max"] . "</value>";}
-	echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>"
-	?> </div>
+        <?php
+  ////dew max month
+  
+  echo "<div class='temperaturetoday24' style='background:$m[2];'>",$dew["month_max"] . "</value>";
+  echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>";
+  ?> </div>
 
     <div class="temperaturetrend"><span style='color:rgba(255, 124, 57, 1.000)'><b>Dew Max</b></span><br><?php echo $dew["month_maxtime"];?></span></div>
-	</div>
+  </div>
 <div class="temperaturecontainer2">
  <?php
-	//dew min month
-	if ($dew["month_min"]>=-50)  {
-	echo "<div class='temperaturetoday0'>",$dew["month_min"] . "</value>";}
+  //dew min month
+  
+  echo "<div class='temperaturetoday0' style='background:$m[3];'>",$dew["month_min"] . "</value>";
 
-	echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>"
-	?>  </div>
+  echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>";
+  ?>  </div>
 <div class="temperaturetrend"><span style='color:rgba(68, 166, 181, 1.000)'><b>Dew Min</b></span><br><?php echo $dew["month_mintime"];?></span></div>
 </div>
 <div class="temperaturecontainer1">
 
-			  <?php
-	////humidity max month
-	if ($humid["month_max"]>=-50)  {
-	echo "<div class='temperaturetoday24'>",$humid["month_max"] . "</value>";}
-	echo "<smalluvunit>%</smalluvunit>"
-	?> </div>
+        <?php
+  ////humidity max month
+  
+  echo "<div class='temperaturetoday24' style='background:$m[4];'>",$humid["month_max"] . "</value>";
+  echo "<smalluvunit>%</smalluvunit>";
+  ?> </div>
 
     <div class="temperaturetrend"><span style='color:rgba(255, 124, 57, 1.000)'><b>Hum Max</b></span><br><?php echo $humid["month_maxtime"];?></span></div>
-	</div>	
+  </div>  
 <div class="temperaturecontainer2">
  <?php
-	//humidity min month
-	if ($humid["month_min"]>=-50)  {
-	echo "<div class='temperaturetoday0'>",$humid["month_min"] . "</value>";}
+  //humidity min month
+ 
+  echo "<div class='temperaturetoday0' style='background:$m[5];'>",$humid["month_min"] . "</value>";
 
-	echo "<smalluvunit>%</smalluvunit>"
-	?>  </div>
+  echo "<smalluvunit>%</smalluvunit>";
+  ?>  </div>
 <div class="temperaturetrend"><span style='color:rgba(68, 166, 181, 1.000)'><b>Hum Min</b></span><br><?php echo $humid["month_mintime"];?></span></div>
 </div>
 </article>
@@ -240,66 +278,66 @@ if ($theme === "dark") {
    <div class=actualt> <?php echo date('Y')?> </div>
    <div class="temperaturecontainer1">
 
-			  <?php
-	////temp max year
-	if ($tempunit=='C' && $temp["outside_year_max"]>=-50)  {
-	echo "<div class='temperaturetoday24'>",$temp["outside_year_max"] . "</value>";}
-	echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>"
-	?> </div>
+        <?php
+  ////temp max year
+  
+  echo "<div class='temperaturetoday24' style='background:$y[0];'>",$temp["outside_year_max"] . "</value>";
+  echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>";
+  ?> </div>
 
     <div class="temperaturetrend"><span style='color:rgba(255, 124, 57, 1.000)'><b>Temp Max</b></span><br><?php echo $temp["outside_year_maxtime"];?></span></div>
-	</div>
+  </div>
 <div class="temperaturecontainer2">
  <?php
-	//temp min year
-	if ($temp["outside_year_min"]>=-50)  {
-	echo "<div class='temperaturetoday0'>",$temp["outside_year_min"] . "</value>";}
+  //temp min year
+  
+  echo "<div class='temperaturetoday0' style='background:$y[1];'>",$temp["outside_year_min"] . "</value>";
 
-	echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>"
-	?>  </div>
+  echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>";
+  ?>  </div>
 <div class="temperaturetrend"><span style='color:rgba(68, 166, 181, 1.000)'><b>Temp Min</b></span><br><?php echo $temp["outside_year_mintime"];?></span></div>
   </div>
   
    <div class="temperaturecontainer1">
 
-			  <?php
-	////dew max year
-	if ($tempunit=='C' && $dew["year_max"]>=-50)  {
-	echo "<div class='temperaturetoday24'>",$dew["year_max"] . "</value>";}
-	echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>"
-	?> </div>
+        <?php
+  ////dew max year
+  
+  echo "<div class='temperaturetoday24' style='background:$y[2];'>",$dew["year_max"] . "</value>";
+  echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>";
+  ?> </div>
 
     <div class="temperaturetrend"><span style='color:rgba(255, 124, 57, 1.000)'><b>Dew Max</b></span><br><?php echo $dew["year_maxtime"];?></span></div>
-	</div>
+  </div>
 <div class="temperaturecontainer2">
  <?php
-	//dew min year
-	if ($dew["year_min"]>=-50)  {
-	echo "<div class='temperaturetoday0'>",$dew["year_min"] . "</value>";}
+  //dew min year
+  
+  echo "<div class='temperaturetoday0' style='background:$y[3];'>",$dew["year_min"] . "</value>";
 
-	echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>"
-	?>  </div>
+  echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>";
+  ?>  </div>
 <div class="temperaturetrend"><span style='color:rgba(68, 166, 181, 1.000)'><b>Dew Min</b></span><br><?php echo $dew["year_mintime"];?></span></div>
 </div>
 <div class="temperaturecontainer1">
 
-			  <?php
-	////humidity max year
-	if ($humid["year_max"]>=-50)  {
-	echo "<div class='temperaturetoday24'>",$humid["year_max"] . "</value>";}
-	echo "<smalluvunit>%</smalluvunit>"
-	?> </div>
+        <?php
+  ////humidity max year
+  
+  echo "<div class='temperaturetoday24' style='background:$y[4];'>",$humid["year_max"] . "</value>";
+  echo "<smalluvunit>%</smalluvunit>";
+  ?> </div>
 
     <div class="temperaturetrend"><span style='color:rgba(255, 124, 57, 1.000)'><b>Hum Max</b></span><br><?php echo $humid["year_maxtime"];?></span></div>
-	</div>	
+  </div>  
 <div class="temperaturecontainer2">
  <?php
-	//humidity min year
-	if ($humid["year_min"]>=-50)  {
-	echo "<div class='temperaturetoday0'>",$humid["year_min"] . "</value>";}
+  //humidity min year
+  
+  echo "<div class='temperaturetoday0' style='background:$y[5];'>",$humid["year_min"] . "</value>";
 
-	echo "<smalluvunit>%</smalluvunit>"
-	?>  </div>
+  echo "<smalluvunit>%</smalluvunit>";
+  ?>  </div>
 <div class="temperaturetrend"><span style='color:rgba(68, 166, 181, 1.000)'><b>Hum Min</b></span><br><?php echo $humid["year_mintime"];?></span></div>
 </div>
 </article>
@@ -309,81 +347,73 @@ if ($theme === "dark") {
    <div class=actualt> All-Time </div>
    <div class="temperaturecontainer1">
 
-			  <?php
-	////temp max all
-	if ($tempunit=='C' && $temp["outside_alltime_max"]>=-50)  {
-	echo "<div class='temperaturetoday24'>",$temp["outside_alltime_max"] . "</value>";}
-	echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>"
-	?> </div>
+        <?php
+  ////temp max all
+  
+  echo "<div class='temperaturetoday24' style='background:$a[0];'>",$temp["outside_alltime_max"] . "</value>";
+  echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>";
+  ?> </div>
 
     <div class="temperaturetrend"><span style='color:rgba(255, 124, 57, 1.000)'><b>Temp Max</b></span><br><?php echo $temp["outside_alltime_maxtime"];?></span></div>
-	</div>
+  </div>
 <div class="temperaturecontainer2">
  <?php
-	//temp min all
-	if ($temp["outside_alltime_min"]>=-50)  {
-	echo "<div class='temperaturetoday0'>",$temp["outside_alltime_min"] . "</value>";}
+  //temp min all
+  
+  echo "<div class='temperaturetoday0' style='background:$a[1];'>",$temp["outside_alltime_min"] . "</value>";
 
-	echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>"
-	?>  </div>
+  echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>";
+  ?>  </div>
 <div class="temperaturetrend"><span style='color:rgba(68, 166, 181, 1.000)'><b>Temp Min</b></span><br><?php echo $temp["outside_alltime_mintime"];?></span></div>
   </div>
   
    <div class="temperaturecontainer1">
 
-			  <?php
-	////dew max all
-	if ($tempunit=='C' && $dew["alltime_max"]>=-50)  {
-	echo "<div class='temperaturetoday24'>",$dew["alltime_max"] . "</value>";}
-	echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>"
-	?> </div>
+        <?php
+  ////dew max all
+  
+  echo "<div class='temperaturetoday24' style='background:$a[2];'>",$dew["alltime_max"] . "</value>";
+  echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>";
+  ?> </div>
 
     <div class="temperaturetrend"><span style='color:rgba(255, 124, 57, 1.000)'><b>Dew Max</b></span><br><?php echo $dew["alltime_maxtime"];?></span></div>
-	</div>
+  </div>
 <div class="temperaturecontainer2">
  <?php
-	//dew min all
-	if ($dew["alltime_min"]>=-50)  {
-	echo "<div class='temperaturetoday0'>",$dew["alltime_min"] . "</value>";}
+  //dew min all
+  
+  echo "<div class='temperaturetoday0' style='background:$a[3];'>",$dew["alltime_min"] . "</value>";
 
-	echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>"
-	?>  </div>
+  echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>";
+  ?>  </div>
 <div class="temperaturetrend"><span style='color:rgba(68, 166, 181, 1.000)'><b>Dew Min</b></span><br><?php echo $dew["alltime_mintime"];?></span></div>
 </div>
 <div class="temperaturecontainer1">
 
-			  <?php
-	////humidity max all
-	if ($humid["alltime_max"]>=-50)  {
-	echo "<div class='temperaturetoday24'>",$humid["alltime_max"] . "</value>";}
-	echo "<smalluvunit>%</smalluvunit>"
-	?> </div>
+        <?php
+  ////humidity max all
+  
+  echo "<div class='temperaturetoday24' style='background:$a[4];'>",$humid["alltime_max"] . "</value>";
+  echo "<smalluvunit>%</smalluvunit>";
+  ?> </div>
 
     <div class="temperaturetrend"><span style='color:rgba(255, 124, 57, 1.000)'><b>Hum Max</b></span><br><?php echo $humid["alltime_maxtime"];?></span></div>
-	</div>	
+  </div>  
 <div class="temperaturecontainer2">
  <?php
-	//humidity min all
-	if ($humid["alltime_min"]>=-50)  {
-	echo "<div class='temperaturetoday0'>",$humid["alltime_min"] . "</value>";}
+  //humidity min all
+  
+  echo "<div class='temperaturetoday0' style='background:$a[5];'>",$humid["alltime_min"] . "</value>";
 
-	echo "<smalluvunit>%</smalluvunit>"
-	?>  </div>
+  echo "<smalluvunit>%</smalluvunit>";
+  ?>  </div>
 <div class="temperaturetrend"><span style='color:rgba(68, 166, 181, 1.000)'><b>Hum Min</b></span><br><?php echo $humid["alltime_mintime"];?></span></div>
 </div>
 </article>
 </article>   
   </main>
   <main class="grid1">
-  <articlegraph> 
-     <iframe  src="dvmhighcharts/<?php echo $theme1?>-charts.html?chart='tempsmallplot'&span='yearly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['rain_units']?>" frameborder="0" scrolling="no" width="99.5%" height="100%"></iframe>   
+<articlegraph style="margin-top: 5px;"> 
+     <iframe  src="dvmhighcharts/<?php echo $theme?>-charts.html?chart='tempsmallplot'&span='yearly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['rain_units']?>"frameborder="0" scrolling="no" width="99.5%" height="100%"></iframe>   
   </articlegraph> 
-<!--<articlegraph style="height:15px">  
- 
-  
-    
-  <div class="lotemp">
-    </a></div>
-   
-  </articlegraph>//--> 
    </main>

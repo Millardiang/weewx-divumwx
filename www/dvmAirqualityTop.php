@@ -13,17 +13,13 @@
 ?>
 <?php
 include('dvmCombinedData.php');
-
-
 $airqual["pm_units"] = "μg/㎥";
-
 
 if ($aqSource == "purple") {
 $json_string = file_get_contents("jsondata/pu.txt");
 $parsed_json = json_decode($json_string, true);
 $airqual["pm25"] = $parsed_json["sensor"]["stats"]["pm2.5"];
 $airqual["city"] = $parsed_json["sensor"]["name"];
-
 }
 else if ($aqSource == "weewx") {
 $airqual["pm25"] = $air["current.pm2_5"];
@@ -267,7 +263,7 @@ $airqual["text"] = "Hazardous Air Quality";
 
 //Australia
 if ($aqZone == "au"){
-$airqual["aqi25"] = round($airqual["pm25"]*4, 0);
+$airqual["aqi25"] = round($airqual["pm25"]*4,0);
 if ($airqual["aqi25"] < 34 ){
 $airqual["image25"] = "./css/aqi/goodair.svg?ver=1.4";
 $airqual["color25"] = "#32ADD3";
@@ -343,7 +339,7 @@ else
 
 	var city = "<?php echo $airqual["city"];?>";
 
-        var aqiA = "<?php echo $airqual["aqi25"];?>";
+    var aqiA = "<?php echo number_format($airqual["aqi25"],0);?>";
 
 	var pmA = "<?php echo $airqual["pm25"];?>";
       	
@@ -351,19 +347,25 @@ else
 	  	
 	var colorA = "<?php echo $airqual["color25"];?>";
 
-        var colorQ = "<?php echo $airqual["color25"];?>";
+    var colorQ = "<?php echo $airqual["color25"];?>";
 		
 	var imageA = "<?php echo $airqual["image25"];?>";
-		
+
+	var theme = "<?php echo $theme;?>";
+	
    	var svg = d3.select(".aqiTop")
     			.append("svg")
     			//.style("background", "#292E35")
     			.attr("width", 230)
     			.attr("height", 60);
 
-	
-	
-
+    		svg.append("circle")
+			.attr("cx", 50)			
+			.attr("cy", 30)
+			.attr("r", 27.5)
+			.style('stroke', "#999999")
+			.style("stroke-width", 1.0)
+			.style('fill', "none");
 	
             svg.append("text") // City text output
              	.attr("x", 150)
@@ -374,9 +376,7 @@ else
             	.style("text-anchor", "middle")
             	.style("font-weight", "normal")   				
    				.text(city);
-   				
-	
-	  				                 				   				
+   					  				                 				   				
    			 svg.append("line") // horizontal lozenge pm 2.5
     			.attr("x1", 120)
     			.attr("x2", 180)
@@ -394,8 +394,7 @@ else
             	.style("font-size", "10px")
             	.style("text-anchor", "middle")
             	.style("font-weight", "bold")
-   				.text(d3.format(".1f")(pmA)+" "+"μg/m³");
-   				
+   				.text(d3.format(".1f")(pmA)+" "+"μg/m³");   				
    				               
       		// begin pm 2.5          	
 			svg.append("circle")

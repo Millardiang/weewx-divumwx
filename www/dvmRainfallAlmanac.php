@@ -35,12 +35,7 @@ if ($theme === "dark") {
      <div class=actualt>Rainfall Today</div>
     <?php // rain today
 echo "<div class='rainfalltoday1'>",$rain["day"] . "</value>";echo "<smalluvunit>".$rain["units"]."</smalluvunit>";?>
-<div class='dvmconvertrain'>
-<?php //convert rain
-if($rain["units"] =='mm'){ echo number_format($rain["day"]*0.0393701,2)."<smalluvunit>in</smalluvunit>";}
-elseif($rain["units"] =='in'){ echo number_format($rain["day"]*25.400013716,2)."<smalluvunit>mm</smalluvunit>";}
-?>
-<div></div>
+</div>
 
 <div class="hitempy"><?php echo $raininfo . "Last Hour<br><blue> ", $rain["last_hour"]."</blue> " .$rain["units"];?></div>
 </article>
@@ -49,12 +44,7 @@ elseif($rain["units"] =='in'){ echo number_format($rain["day"]*25.400013716,2)."
         <div class=actualt>Rainfall 24h</div>
     <?php // rain yesterday
 echo "<div class='rainfalltoday1'>",$rain["24h_total"] . "</value>";echo "<smalluvunit>".$rain["units"]."</smalluvunit>";?>
-<div class='dvmconvertrain'>
-<?php //convert rain
-if($rain["units"] =='mm'){ echo number_format($rain["24h_total"]*0.0393701,2)."<smalluvunit>in</smalluvunit>";}
-elseif($rain["units"] =='in'){ echo number_format($rain["24h_total"]*25.400013716,2)."<smalluvunit>mm</smalluvunit>";}
-?>
-<div></div>
+</div>
 
 <div class="hitempy"><?php echo $raininfo;?>Last 24 Hours<br/><blue><?php echo $rain["last_24hour"];?></blue> <?php echo $rain["units"];?></div>
 </article>
@@ -64,12 +54,7 @@ elseif($rain["units"] =='in'){ echo number_format($rain["24h_total"]*25.40001371
     <div class=actualt>Rainfall <?php echo date('M Y');?> </div>
     <?php // rain month
 echo "<div class='rainfalltoday1'>",$rain["month_total"] . "</value>";echo "<smalluvunit>".$rain["units"]."</smalluvunit>";?>
-<div class='dvmconvertrain'>
-<?php //convert rain
-if($rain["units"] =='mm'){ echo number_format($rain["month_total"]*0.0393701,2)."<smalluvunit>in</smalluvunit>";}
-elseif($rain["units"] =='in'){ echo number_format($rain["month_total"]*25.400013716,2)."<smalluvunit>mm</smalluvunit>";}
-?>
-<div></div>
+</div>
 
 <div class="hitempy">
     <?php echo $raininfo;?>Last Rainfall<br/>
@@ -82,12 +67,7 @@ elseif($rain["units"] =='in'){ echo number_format($rain["month_total"]*25.400013
      <div class=actualt>Rainfall <?php echo date("Y");?> </div>
     <?php // rain year
 echo "<div class='rainfalltoday1'>",$rain["year_total"] . "</value>";echo "<smalluvunit>".$rain["units"]."</smalluvunit>";?>
-<div class='dvmconvertrain'>
-<?php //convert rain
-if($rain["units"] =='mm'){ echo number_format($rain["year_total"]*0.0393701,2)."<smalluvunit>in</smalluvunit>";}
-elseif($rain["units"] =='in'){ echo number_format($rain["year_total"]*25.400013716,2)."<smalluvunit>mm</smalluvunit>";}
-?>
-<div></div>
+</div>
 
 <div class="hitempy"><?php echo $raininfo;?><!--<blue>Rainfall</blue>-->Since<br/>
     <blue>Jan <?php echo date('Y');?></blue>
@@ -101,19 +81,9 @@ elseif($rain["units"] =='in'){ echo number_format($rain["year_total"]*25.4000137
  // rain alltime
 else {echo "<div class='rainfalltoday1'>",$rain["alltime_total"] . "</value>";
 echo "<smalluvunit>".$rain["units"]."</smalluvunit>";}?>
-<div class='dvmconvertrain'>
-<?php //convert rain
-if ($rain["alltime_total"]==''){echo '';}
-else{
-if($rain["units"] =='mm'){ echo number_format($rain["alltime_total"]*0.0393701,2)." <smalluvunit>in</smalluvunit>";}
-elseif($rain["units"] =='in'){ echo number_format($rain["alltime_total"]*25.400013716,2,'.','')."<smalluvunit>mm</smalluvunit>";}
-}
-?>
-<div></div>
-
-<div class="hitempy"><?php echo $raininfo;?><!--<blue>Rainfall</blue>-->Since<br/>
-    <blue><?php echo $divum['rainStartTime'];?></blue>
 </div>
+
+
 </article> </main>
 
 
@@ -121,7 +91,7 @@ elseif($rain["units"] =='in'){ echo number_format($rain["alltime_total"]*25.4000
  <main class="grid1">
     <articlegraph> 
    
-  <iframe  src="dvmhighcharts/<?php echo $theme1;?>-charts.html?chart='rainsmallplot'&span='yearly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units'];?>" frameborder="0" scrolling="no" width="100%"  height="100%"></iframe>
+  <iframe  src="dvmhighcharts/<?php echo $theme;?>-charts.html?chart='rainsmallplot'&span='yearly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units'];?>" frameborder="0" scrolling="no" width="100%"  height="100%"></iframe>
    
   </articlegraph> 
   

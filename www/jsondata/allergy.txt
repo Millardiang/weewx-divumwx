@@ -1,0 +1,1 @@
+{"data":{"timelines":[{"timestep":"1h","endTime":"2023-07-30T22:00:00Z","startTime":"2023-07-30T21:00:00Z","intervals":[{"startTime":"2023-07-30T21:00:00Z","values":{"grassIndex":0,"treeIndex":0,"weedIndex":0}},{"startTime":"2023-07-30T22:00:00Z","values":{"grassIndex":2,"treeIndex":2,"weedIndex":4}}]}]}}

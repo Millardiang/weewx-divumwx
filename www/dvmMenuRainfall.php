@@ -66,7 +66,8 @@ body {
 #Tab1 {background-color: <?php echo $background ?>;}
 #Tab2 {background-color: <?php echo $background ?>;}
 #Tab3 {background-color: <?php echo $background ?>;}
-#Tab4 {background-color: <?php echo $background ?>;} 
+#Tab4 {background-color: <?php echo $background ?>;}
+#Tab5 {background-color: <?php echo $background ?>;}
     
 </style>
 </head>
@@ -76,6 +77,7 @@ body {
 <button class="tablink" onclick="openPage('Tab2', this, 'rgba(194, 102, 58)')">Yearly Rain</button>
 <button class="tablink" onclick="openPage('Tab3', this, 'rgba(194, 102, 58)')">Monthly Rain</button>  
 <button class="tablink" onclick="openPage('Tab4', this, 'rgba(194, 102, 58)')">Weekly Rain</button>  
+<button class="tablink" onclick="openPage('Tab5', this, 'rgba(194, 102, 58)')">Storm Rain</button>  
 
   <div id="Tab1" class="tabcontent">
   
@@ -84,20 +86,24 @@ body {
   
   <div id="Tab2" class="tabcontent">
   
-  <iframe width="100%" height="92%" scrolling="no" src="<?php echo $chartsource;?>/<?php echo $theme1;?>-charts.html?chart='rainplot'&span='yearly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>
+  <iframe width="100%" height="92%" scrolling="no" src="<?php echo $chartsource;?>/<?php echo $theme;?>-charts.html?chart='rainplot'&span='yearly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>
 " frameborder="0"></iframe>
 </div>
  
   <div id="Tab3" class="tabcontent">
   
-  <iframe width="100%" height="92%" scrolling="no" src="<?php echo $chartsource;?>/<?php echo $theme1;?>-charts.html?chart='rainmonthplot'&span='weekly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>
+  <iframe width="100%" height="92%" scrolling="no" src="<?php echo $chartsource;?>/<?php echo $theme;?>-charts.html?chart='rainmonthplot'&span='weekly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>
 " frameborder="0"></iframe>
   </div>
 <div id="Tab4" class="tabcontent">
   
-  <iframe width="100%" height="92%" scrolling="no" src="<?php echo $chartsource;?>/<?php echo $theme1;?>-charts.html?chart='rainplot'&span='weekly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>
+  <iframe width="100%" height="92%" scrolling="no" src="<?php echo $chartsource;?>/<?php echo $theme;?>-charts.html?chart='rainplot'&span='weekly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>
 " frameborder="0"></iframe>
   </div>
+<div id="Tab5" class="tabcontent">
+  
+  <iframe width="100%" height="100%" scrolling="no" src="dvmStormRain.php" frameborder="0"></iframe>
+</div>
 <script>
 function openPage(pageName,elmnt,color) {
   var i, tabcontent, tablinks;

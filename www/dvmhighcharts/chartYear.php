@@ -1,0 +1,83 @@
+<?php  
+include('dvmCombinedData.php');
+header('Content-type: text/html; charset = utf-8');
+$theme = "dark";
+?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+
+
+<!--
+Version: 0.3.0                                    Date: 20 September 2020
+
+Revision History
+    20 September 2020   v0.3.0
+        - version number change only
+    4 September 2018    v0.2.2
+        - version number change only
+    4 May 2017          v0.2.0
+        - changed default path for theme.js and plots.js
+    22 November 2016    v0.1.0
+        - initial implementation
+-->
+
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Example Highcharts graphs for weewx</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
+    <script src="https://code.highcharts.com/stock/highcharts-more.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+    <script src="scripts/<?php echo $theme;?>-theme.js" type="text/javascript"></script>
+    <script src="scripts/extraPlots.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        window.onload = function() {
+
+            yearly();
+
+         }
+    </script>
+  </head>
+    <body>
+    <style>
+    body {
+        background-color: #292E35;
+        font-family: Arial;
+        font-size: 14px;
+        color: silver;
+    }
+        a { 
+  /*text-decoration: none;*/
+  color: yellow; 
+}
+    </style>
+    <!--h1>Example Highcharts graphs for WeeWX</h1-->
+    <div style="width:800px;">
+        <!--p>The following graphs are examples of weekly and yearly graphs of WeeWX observations. The graph data is generated in JSON format using the Highcharts for WeeWX extension and the graphs are rendered using Javascript and the Highcharts charting tool. You may view the HTML used to render the graph by viewing the source of this page.</p>
+        <p style="text-align: center"><a id="seven_days" href="?graph=w">Seven Days</a>&nbsp;&nbsp;<a id="calendar_year" href="?graph=y">Calendar Year</a>&nbsp;&nbsp;</p>
+        <h3><span id="plottitle">Last Seven Days</span></h3>
+        <p><span id="plotdesc">These graphs plot the recorded weather observations at this station over the last seven days. The time period displayed by the graph can be changed by using the zoom buttons, the navigation scrollbar or by clicking and dragging on the graph itself.</span></p>
+        <!--div id="temperatureplot" style="width:99%; height:435px;"></div>
+        <br>
+        <div id="windchillplot" style="width:99%; height:435px;"></div>
+        <br>
+        <div id="humidityplot" style="width:99%; height:435px;"></div>
+        <br>
+        <div id="barometerplot" style="width:99%; height:435px;"></div>
+        <br>
+        <div id="windplot" style="width:99%; height:435px;"></div>
+        <br>
+        <div id="winddirplot" style="width:99%; height:435px;"></div>
+        <br>
+        <div id="rainplot" style="width:99%; height:435px;"></div>
+        <br>
+        <div id="radiationplot" style="width:99%; height:435px;"></div>
+        <br>
+        <div id="uvplot" style="width:99%; height:435px;"></div-->
+        <br-->
+        <div id="strikeplot" style="width:99%; height:435px;"></div>
+        <!--br>
+        <div id="distanceplot" style="width:99%; height:435px;"></div-->
+    </div>
+  </body> 
+</html>
