@@ -33,6 +33,7 @@ if (!isset($_SESSION['csrf_token'])) {
 }
 $_SESSION['login_time'] = time();
 require_once './admCommon.php';
+require_once './admVersion.php';
 $usrSettingsFile = '../userSettings.php';
 $usrSettings = ldusrSettings($usrSettingsFile);
 extract($usrSettings);
@@ -113,7 +114,6 @@ $otherRowOptions = [
 				});
 			}
 		</script>
-
 	</head>
 	<body class="theme-blue">
 		<!-- BEGIN #app -->
@@ -138,7 +138,7 @@ $otherRowOptions = [
 						<span class="brand-img">
 							<span class="brand-img-text text-theme">DvM</span>
 						</span>
-						<span class="brand-text">DivumWX System Settings</span>
+						<span class="brand-text">System Settings</span>
 					</a>
 				</div>
 				<div class="menu"></div>
@@ -148,7 +148,7 @@ $otherRowOptions = [
 			<div id="sidebar" class="app-sidebar">
 				<!-- BEGIN scrollbar -->
 				<div class="app-sidebar-content" data-scrollbar="true" data-height="100%">
-					<!-- BEGIN menu -->tablet-alt
+					<!-- BEGIN menu -->
 					<div class="menu">
 						<div class="menu-header">Navigation</div>
 						<div class="menu-item">
@@ -267,6 +267,59 @@ $otherRowOptions = [
 											<div class="list-group list-group-flush">
 												<div class="list-group-item d-flex align-items-center">
 													<div class="flex-1 text-break">
+														<div>Allow anonymous site visitation mapping by City/Country?</div>
+														<div class="text-inverse text-opacity-50 d-flex align-items-center">
+															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php $trkVisitstxt = ($trkVisits == 1) ? "Yes" : "No"; echo $trkVisitstxt; ?></span>
+														</div>
+													</div>
+													<div>
+														<div class="form-check">
+															<input class="newElement form-check-input" type="radio" name="newtrkVisits" id="newtrkVisitsYes"<?php echo ($trkVisits == '1') ? 'checked' : ''; ?> value="1">
+															<label class="form-check-label" for="newtrkVisitsYes">
+																Yes
+															</label>
+														</div>
+														<div class="form-check">
+															<input class="newElement form-check-input" type="radio" name="newtrkVisits" id="newtrkVisitsNo"<?php echo ($trkVisits == '0') ? 'checked' : ''; ?> value="0">
+															<label class="form-check-label" for="newtrkVisitsNo">
+																No
+															</label>
+														</div>
+													</div>
+												</div>
+												<div class="list-group-item d-flex align-items-center">
+													<div class="flex-1 text-break">
+														<div>Which web server are you running?</div>
+														<div class="row mb-n3">
+															<div class="col-xl-6">
+															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary">
+																<?php
+																	switch ($webSrvr) {
+																		case '0':
+																			$webSrvrType = 'Apache';
+																			break;
+																		case '1':
+																			$webSrvrType = 'Nginx';
+																			break;
+																		case '2':
+																			$webSrvrType = 'All others';
+																			break;
+																	}
+																echo $webSrvrType;?></span>
+															</div>
+															<div class="col-xl-6">
+																<select name="webSrvr" id="newwebSrvr" name="newwebSrvr" class="newElement form-select form-select-sm">
+																	<option value=""> Select Web Server type </option>
+																	<option value="0" <?php if($webSrvr === '0') echo 'selected'; ?>>Apache</option>
+																	<option value="1" <?php if($webSrvr === '1') echo 'selected'; ?>>Nginx</option>
+																	<option value="2" <?php if($webSrvr === '2') echo 'selected'; ?>>All others</option>
+																</select><br />
+															</div>
+														</div>
+													</div>
+												</div>
+												<div class="list-group-item d-flex align-items-center">
+													<div class="flex-1 text-break">
 														<div>Block Your IP from Site Visits count?</div>
 														<div class="text-inverse text-opacity-50 d-flex align-items-center">
 															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php $stripLocaltxt = ($stripLocal == 1) ? "Yes" : "No"; echo $stripLocaltxt; ?></span>
@@ -299,6 +352,7 @@ $otherRowOptions = [
 														&nbsp;<div id="notificationContainer"></div>
 													</div>
 												</div>
+
 												<div class="list-group-item d-flex align-items-center">
 													<div class="col-4">
 														<div>Date Format</div>
@@ -1253,7 +1307,7 @@ $otherRowOptions = [
 										</nav>
 									</nav>
 								</div>
-							</div>
+							</div>DivumWX Admin Dashboard - v<?php echo $admVersion?>;
 						</div>
 					</div>
 				</div>
