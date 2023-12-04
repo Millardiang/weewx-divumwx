@@ -445,7 +445,7 @@ Bearing = Bearing || "North";
   windGust(182, 77, windgust);
   unitsRight(182.25, 93, units);
         
-	DirectionAngle(70, 58, angle + "°"); // Direction in degrees
+	DirectionAngle(70, 58, angle + "\u00B0"); // Direction in degrees
 
 	CardinalNorth(66.75, 29, "N");
 	CardinalDirection(111, 72.75, "E");
