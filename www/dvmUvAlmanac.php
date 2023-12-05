@@ -66,16 +66,16 @@ if ($theme === "dark") {
 	
             <?php
 	// UV INDEX
-	if ($uv["24h_max"]>=10)  {
-	echo "<div class='uvtoday11'>",$uv["24h_max"] . "</value>";} 	
-	else if ($uv["24h_max"]>=8)  {
-	echo "<div class='uvtoday9-10'>",$uv["24h_max"] . "</value>";}
-	else if ($uv["24h_max"]>=5)  {
-	echo "<div class='uvtoday6-8'>",$uv["24h_max"] . "</value>";}
-	else if ($uv["24h_max"]>=3)  {
-	echo "<div class='uvtoday4-5'>",$uv["24h_max"] . "</value>";} 		
-	else if ($uv["24h_max"]>=-0) {
-	echo "<div class='uvtoday1'>",$uv["24h_max"] . "</value>";}		
+	if ($uv["yesterday_max"]>=10)  {
+	echo "<div class='uvtoday11'>",$uv["yesterday_max"] . "</value>";} 	
+	else if ($uv["yesterday_max"]>=8)  {
+	echo "<div class='uvtoday9-10'>",$uv["yesterday_max"] . "</value>";}
+	else if ($uv["yesterday_max"]>=5)  {
+	echo "<div class='uvtoday6-8'>",$uv["yesterday_max"] . "</value>";}
+	else if ($uv["yesterday_max"]>=3)  {
+	echo "<div class='uvtoday4-5'>",$uv["yesterday_max"] . "</value>";} 		
+	else if ($uv["yesterday_max"]>=-0) {
+	echo "<div class='uvtoday1'>",$uv["yesterday_max"] . "</value>";}		
 	echo "<smalluvunit> UVI</smalluvunit>"
 ?>
 

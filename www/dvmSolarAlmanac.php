@@ -61,30 +61,30 @@ if ($theme === "dark") {
 </article>  
 
  <article> 
-  <div class=actualt>24h </div>        
+  <div class=actualt>Yesterday </div>        
    <div class="temperaturecontainer">
 	
              <?php
              // Solar 24h
-             if ($solar["24h_max"] >= 1000) {
+             if ($solar["yesterday_max"] >= 1000) {
                  echo "<div class='uvtoday9-10'>",
-                     $solar["24h_max"] . "</value>";
-             } elseif ($solar["24h_max"] >= 500) {
+                     $solar["yesterday_max"] . "</value>";
+             } elseif ($solar["yesterday_max"] >= 500) {
                  echo "<div class='uvtoday6-8'>",
-                     $solar["24h_max"] . "</value>";
-             } elseif ($solar["24h_max"] >= 300) {
+                     $solar["yesterday_max"] . "</value>";
+             } elseif ($solar["yesterday_max"] >= 300) {
                  echo "<div class='uvtoday4-5'>",
-                     $solar["24h_max"] . "</value>";
-             } elseif ($solar["24h_max"] >= -0) {
+                     $solar["yesterday_max"] . "</value>";
+             } elseif ($solar["yesterday_max"] >= -0) {
                  echo "<div class='uvtoday1'>",
-                     $solar["24h_max"] . "</value>";
+                     $solar["yesterday_max"] . "</value>";
              }
              echo "<smalluvunit> W/m<sup>2</sup></smalluvunit>";
              ?>
 
 </div>
 
-<div class="higust">Maximum Recorded <br><blue><?php echo $solar["24h_maxtime"]; ?></blue></div>
+<div class="higust">Maximum Recorded <br><blue><?php echo $solar["yesterday_maxtime"]; ?></blue></div>
 
 
 
