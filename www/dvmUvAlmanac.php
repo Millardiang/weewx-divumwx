@@ -81,7 +81,7 @@ if ($theme === "dark") {
 
 </div>
 
-<div class="higust">Maximum Recorded<br><blue><?php echo $uv["24h_maxtime"];?></blue></div>
+<div class="higust">Maximum Recorded<br><blue><?php echo $uv["yesterday_maxtime"];?></blue></div>
 
 
 
