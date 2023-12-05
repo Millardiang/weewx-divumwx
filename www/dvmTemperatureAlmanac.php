@@ -142,21 +142,21 @@ if ($theme === "dark") {
         <?php
   ////temp max yesterday
   
-  echo "<div class='temperaturetoday24' style='background:$d[0];'>",$temp["outside_24h_max"] . "</value>";
+  echo "<div class='temperaturetoday24' style='background:$d[0];'>",$temp["outside_yesterday_max"] . "</value>";
   echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>";
   ?> </div>
 
-    <div class="temperaturetrend"><span style='color:rgba(255, 124, 57, 1.000)'><b>Temp Max</b></span><br><?php echo $temp["outside_24h_maxtime"];?></span></div>
+    <div class="temperaturetrend"><span style='color:rgba(255, 124, 57, 1.000)'><b>Temp Max</b></span><br><?php echo $temp["outside_yesterday_maxtime"];?></span></div>
   </div>
 <div class="temperaturecontainer2">
  <?php
   //temp min yesterday
   
-  echo "<div class='temperaturetoday0' style='background:$d[1];'>",$temp["outside_24h_min"] . "</value>";
+  echo "<div class='temperaturetoday0' style='background:$d[1];'>",$temp["outside_yesterday_min"] . "</value>";
 
   echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>";
   ?>  </div>
-<div class="temperaturetrend"><span style='color:rgba(68, 166, 181, 1.000)'><b>Temp Min</b></span><br><?php echo $temp["outside_24h_mintime"];?></span></div>
+<div class="temperaturetrend"><span style='color:rgba(68, 166, 181, 1.000)'><b>Temp Min</b></span><br><?php echo $temp["outside_yesterday_mintime"];?></span></div>
   </div>
   
    <div class="temperaturecontainer1">
@@ -164,42 +164,42 @@ if ($theme === "dark") {
         <?php
   ////dew max yesterday
   
-  echo "<div class='temperaturetoday24' style='background:$d[2];'>",$dew["24h_max"] . "</value>";
+  echo "<div class='temperaturetoday24' style='background:$d[2];'>",$dew["yesterday_max"] . "</value>";
   echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>";
   ?> </div>
 
-    <div class="temperaturetrend"><span style='color:rgba(255, 124, 57, 1.000)'><b>Dew Max</b></span><br><?php echo $dew["24h_maxtime"];?></span></div>
+    <div class="temperaturetrend"><span style='color:rgba(255, 124, 57, 1.000)'><b>Dew Max</b></span><br><?php echo $dew["yesterday_maxtime"];?></span></div>
   </div>
 <div class="temperaturecontainer2">
  <?php
   //dew min yesterday
   
-  echo "<div class='temperaturetoday0' style='background:$d[3];'>",$dew["24h_min"] . "</value>";
+  echo "<div class='temperaturetoday0' style='background:$d[3];'>",$dew["yesterday_min"] . "</value>";
 
   echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>";
   ?>  </div>
-<div class="temperaturetrend"><span style='color:rgba(68, 166, 181, 1.000)'><b>Dew Min</b></span><br><?php echo $dew["24h_mintime"];?></span></div>
+<div class="temperaturetrend"><span style='color:rgba(68, 166, 181, 1.000)'><b>Dew Min</b></span><br><?php echo $dew["yesterday_mintime"];?></span></div>
 </div>
 <div class="temperaturecontainer1">
 
         <?php
   ////humidity max yesterday
   
-  echo "<div class='temperaturetoday24' style='background:$d[4];'>",$humid["24h_max"] . "</value>";
+  echo "<div class='temperaturetoday24' style='background:$d[4];'>",$humid["yesterday_max"] . "</value>";
   echo "<smalluvunit>%</smalluvunit>";
   ?> </div>
 
-    <div class="temperaturetrend"><span style='color:rgba(255, 124, 57, 1.000)'><b>Hum Max</b></span><br><?php echo $humid["24h_maxtime"];?></span></div>
+    <div class="temperaturetrend"><span style='color:rgba(255, 124, 57, 1.000)'><b>Hum Max</b></span><br><?php echo $humid["yesterday_maxtime"];?></span></div>
   </div>  
 <div class="temperaturecontainer2">
  <?php
   //humidity min yesterday
   
-  echo "<div class='temperaturetoday0' style='background:$d[5];'>",$humid["24h_min"] . "</value>";
+  echo "<div class='temperaturetoday0' style='background:$d[5];'>",$humid["yesterday_min"] . "</value>";
 
   echo "<smalluvunit>%</smalluvunit>";
   ?>  </div>
-<div class="temperaturetrend"><span style='color:rgba(68, 166, 181, 1.000)'><b>Hum Min</b></span><br><?php echo $humid["24h_mintime"];?></span></div>
+<div class="temperaturetrend"><span style='color:rgba(68, 166, 181, 1.000)'><b>Hum Min</b></span><br><?php echo $humid["yesterday_mintime"];?></span></div>
 </div>
 </article>
 

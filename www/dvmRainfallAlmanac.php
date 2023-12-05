@@ -41,12 +41,12 @@ echo "<div class='rainfalltoday1'>",$rain["day"] . "</value>";echo "<smalluvunit
 </article>
 
  <article>
-        <div class=actualt>Rainfall 24h</div>
+        <div class=actualt>Rainfall Yesterday</div>
     <?php // rain yesterday
-echo "<div class='rainfalltoday1'>",$rain["24h_total"] . "</value>";echo "<smalluvunit>".$rain["units"]."</smalluvunit>";?>
+echo "<div class='rainfalltoday1'>",$rain["yesterday"] . "</value>";echo "<smalluvunit>".$rain["units"]."</smalluvunit>";?>
 </div>
 
-<div class="hitempy"><?php echo $raininfo;?>Last 24 Hours<br/><blue><?php echo $rain["last_24hour"];?></blue> <?php echo $rain["units"];?></div>
+<div class="hitempy"><?php echo $raininfo;?> Yesterday<br/><blue><?php echo $rain["yesterday"];?></blue> <?php echo $rain["units"];?></div>
 </article>
 
 
