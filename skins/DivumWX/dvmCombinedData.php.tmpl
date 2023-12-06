@@ -566,7 +566,7 @@ else if ($wind["units"] == " kts")
 {
 $wind["units"] = "kts";
 }
-$wind["direction"] = $weewxrt[7]; 
+$wind["direction"] = str_pad($weewxrt[7], 3, '0', STR_PAD_LEFT); 
 $wind["direction_10m_avg"] = "$span($time_delta=600).windDir.avg.format(add_label=False)";
 $wind["cardinal"] = $weewxrt[11];    
 $wind["speed"] = $weewxrt[6];
