@@ -61,7 +61,7 @@ if ($theme === "dark") {
 </article> 
 
  <article> 
-  <div class=actualt>24h </div>        
+  <div class=actualt>Yesterday </div>        
    <div class="temperaturecontainer">
 	
             <?php
@@ -171,7 +171,7 @@ if ($theme === "dark") {
  <main class="grid1">
   <articlegraph> 
   <!--<div class=actualt>Today <span style="color:#ff9350">UV-INDEX</div>  //-->
-  <iframe  src="dvmhighcharts/<?php echo $theme1;?>-charts.html?chart='uvsmallplot'&span='yearly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>" frameborder="0" scrolling="no" width="100%" height="100%"></iframe>
+  <iframe  src="dvmhighcharts/<?php echo $theme;?>-charts.html?chart='uvsmallplot'&span='yearly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>" frameborder="0" scrolling="no" width="100%" height="100%"></iframe>
  
   </articlegraph> 
      <articlegraph style="height:30px">  

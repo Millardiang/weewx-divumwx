@@ -46,7 +46,7 @@
       }
       if ($units != 'us'){
         echo '<li>
-          <a href="./?units=us"><menumarkerorange></menumarkerorange> Imperial <topbarimperialf>°F</topbarimperialf></a>
+          <a href="./?units=us"><menumarkerorange></menumarkerorange> US Customary <topbarimperialf>°F</topbarimperialf></a>
         </li>';
       }
       if ($units != 'metric'){
@@ -56,17 +56,22 @@
       }
       if ($units != 'uk'){
         echo '<li>
-          <a href="./?units=uk"><menumarkeryellow></menumarkeryellow> UK (MPH) <topbarmetricc>°C</topbarmetricc></a>
+          <a href="./?units=uk"><menumarkeryellow></menumarkeryellow> UK (mph) <topbarmetricc>°C</topbarmetricc></a>
         </li>';
       }
       if ($units != 'scandinavia'){
         echo '<li>
-          <a href="./?units=scandinavia"><menumarkerred></menumarkerred> M/S <topbarmetricc>°C</topbarmetricc></a>
+          <a href="./?units=scandinavia"><menumarkerred></menumarkerred> Scandinavia (m/s) <topbarmetricc>°C</topbarmetricc></a>
         </li>';
       }
       if ($units != 'ca'){
         echo '<li>
-          <a href="./?units=ca"><menumarkerred></menumarkerred> CA (kPa) <topbarmetricc>°C</topbarmetricc></a>
+          <a href="./?units=ca"><menumarkerred></menumarkerred> Canada (kPa) <topbarmetricc>°C</topbarmetricc></a>
+        </li>';
+      }
+       if ($units != 'kts'){
+        echo '<li>
+          <a href="./?units=kts"><menumarkerred></menumarkerred> Metar (kts) <topbarmetricc>°C</topbarmetricc></a>
         </li>';
       }
       if ($extralinks == 'yes') {
@@ -217,7 +222,7 @@
               <a href="https://www.chrisalemany.ca/2021/02/24/installing-the-divumwx-skin-on-weewx-with-remote-web-server-2021-edition/" title="Remote Setup" target="_blank"><menumarkerbluegrey></menumarkerbluegrey> Remote Setup Guide</a>
             </li>
             <li>
-              <a href="https://claydonsweather.org.uk/team_divumwx/" title="weewx-DivumWX on Github" target="_blank"><menumarkerbluegrey></menumarkerbluegrey> Download DivumWX template</a>
+              <a href="team_divumwx/index.html" title="weewx-DivumWX on Github" target="_blank"><menumarkerbluegrey></menumarkerbluegrey> Download DivumWX template</a>
             </li>
             <li>
               <a href="https://steepleian.github.io/weewx-Weather34/" title="Web Services Setup Page" target="_blank"><menumarkerbluegrey></menumarkerbluegrey> Web Services Setup Page</a>

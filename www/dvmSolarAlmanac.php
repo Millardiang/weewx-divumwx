@@ -182,7 +182,7 @@ if ($theme === "dark") {
  <main class="grid1">
   
   <articlegraph> 
-     <iframe  src="dvmhighcharts/<?php echo $theme1; ?>-charts.html?chart='radsmallplot'&span='yearly'&temp='<?php echo $temp[
+     <iframe  src="dvmhighcharts/<?php echo $theme; ?>-charts.html?chart='radsmallplot'&span='yearly'&temp='<?php echo $temp[
     "units"
 ]; ?>'&pressure='<?php echo $barom[
     "units"

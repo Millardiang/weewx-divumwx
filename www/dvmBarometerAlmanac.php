@@ -49,7 +49,7 @@ $barom["alltime_min"] = $barom["alltime_min"] * 0.1;
 ?>
 <main class="grid">
 <article>
-<div class=actualt> Barometer Today </div>
+<div class=actualt> Today </div>
 <div class="temperaturecontainer1">
 
 <?php
@@ -66,7 +66,7 @@ if ($barom["min"] >= 0) { echo "<div class='temperaturetoday0'>",$barom["min"] .
 </article>
 
 <article>
-<div class=actualt> Barometer 24h </div>
+<div class=actualt> Yesterday </div>
 <div class="temperaturecontainer1">
 
 <?php
@@ -85,7 +85,7 @@ if ($barom["24h_min"] >= 0) { echo "<div class='temperaturetoday0'>",$barom["24h
 </article>
 
 <article>
-<div class=actualt> Barometer <?php echo date("F Y");?> </div>
+<div class=actualt> <?php echo date("F Y");?> </div>
 <div class="temperaturecontainer1">
 <?php
 //pressure max month
@@ -101,7 +101,7 @@ if ($barom["month_min"] >= 0) { echo "<div class='temperaturetoday0'>",$barom["m
 </article>
 
 <article>
-<div class=actualt> Barometer <?php echo date("Y");?> </div>
+<div class=actualt> <?php echo date("Y");?> </div>
 <div class="temperaturecontainer1">
 
 <?php
@@ -119,7 +119,7 @@ if ($barom["year_min"] >= 0) { echo "<div class='temperaturetoday0'>",$barom["ye
 </article>
 
 <article>
-<div class=actualt> Barometer All-Time </div>
+<div class=actualt> All-Time </div>
 <div class="temperaturecontainer1">
 <?php
 //pressure max alltime
@@ -136,7 +136,7 @@ if ($barom["alltime_min"] >= 0) { echo "<div class='temperaturetoday0'>",$barom[
 </main>
 <main class="grid1">
 <articlegraph> 
-<iframe  src="dvmhighcharts/<?php echo $theme1;?>-charts.html?chart='barsmallplot'&span='yearly'&temp='<?php echo $temp["units"];?>'&pressure='<?php echo $barom["units"];?>'&wind='<?php echo $wind["units"];?>'&rain='<?php echo $rain["units"];?>" frameborder="0" scrolling="no" width="100%" height="100%"></iframe>
+<iframe  src="dvmhighcharts/<?php echo $theme;?>-charts.html?chart='barsmallplot'&span='yearly'&temp='<?php echo $temp["units"];?>'&pressure='<?php echo $barom["units"];?>'&wind='<?php echo $wind["units"];?>'&rain='<?php echo $rain["units"];?>" frameborder="0" scrolling="no" width="100%" height="100%"></iframe>
    
 </articlegraph> 
   

@@ -34,7 +34,7 @@ $highlight-color-20: $neutral-color-10;
 $data-label-color: #B0B0B3;
 
 // Fonts
-$font-family: 'Unica One', Arial, Helvetica, sans-serif;
+$font-family: 'Arial';
 $title-font-size: 20px;
 
 // Tooltip
@@ -140,8 +140,8 @@ $scrollbar-track-border: #404043;
 <script src="https://code.highcharts.com/modules/data.js"></script>
 <script src="https://code.highcharts.com/modules/exporting.js"></script>
 <script src="https://code.highcharts.com/modules/accessibility.js"></script>
-<script src="scripts/dark-theme.js"></script>
-<link href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+/*<script src="scripts/dark-theme.js"></script>
+<link href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">*/
 
 <figure class="highcharts-figure">
   <div id="container">

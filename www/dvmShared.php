@@ -92,6 +92,20 @@ function anyWtoms($wind, $field){
 	if($wind["units"]=='mph') return number_format(0.44704*$field,1);
 }
 
+function anyWtokmh($wind, $field){
+	if($wind["units"]=='kmh')  return $field;
+	if($wind["units"]=='kts') return number_format(1.852*$field,1);
+	if($wind["units"]=='ms') return number_format(3.6*$field,1);
+	if($wind["units"]=='mph') return number_format(1.60934*$field,1);
+}
+
+function anyWtokts($wind, $field){
+	if($wind["units"]=='kts')  return $field;
+	if($wind["units"]=='kmh') return number_format(0.539957*$field,1);
+	if($wind["units"]=='ms') return number_format(1.94384*$field,1);
+	if($wind["units"]=='mph') return number_format(0.868976*$field,1);
+}
+
 // Temperature
 function cToF(&$temp, $field){
 	if(!isset($temp[$field])) return;

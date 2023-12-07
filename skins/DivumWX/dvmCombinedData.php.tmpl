@@ -1,0 +1,610 @@
+#errorCatcher Echo
+##
+## Specifying an encoding of UTF-8 is usually safe, but if your text is 
+## actually in Latin-1, then you should replace the string "UTF-8" with "latin-1"
+## If you do this, you should also change the 'Content-Type' metadata below.
+#encoding UTF-8
+##      
+##
+##Calculate length of daylight
+#set $daylength = time.strftime('%H:%M', time.gmtime(int($almanac.sun.set.raw -  $almanac.sun.rise.raw)))
+##Truncate station uptime decimals
+#set $stationuptime = $alltime.outTemp.firsttime   
+#if $almanac.moon_phase.lower() == "New".lower()
+#set $moonphase_no = "0"
+#else if $almanac.moon_phase.lower() == "Waxing Crescent".lower()
+#set $moonphase_no = "1"
+#else if $almanac.moon_phase.lower() == "First Quarter".lower()
+#set $moonphase_no = "2"
+#else if $almanac.moon_phase.lower() == "Waxing Gibbous".lower()
+#set $moonphase_no = "3"
+#else if $almanac.moon_phase.lower() == "Full".lower()
+#set $moonphase_no = "4"
+#else if $almanac.moon_phase.lower() == "Waning Gibbous".lower()
+#set $moonphase_no = "5"
+#else if $almanac.moon_phase.lower() == "Last Quarter".lower()
+#set $moonphase_no = "6"
+#else if $almanac.moon_phase.lower() == "Waning Crescent".lower()
+#set $moonphase_no = "7"
+#end if         
+#import datetime
+#set $now = datetime.datetime.now()
+#set $nowHour = $now.hour
+#set $sunrise_hour = datetime.datetime.fromtimestamp($almanac.sunrise.raw).strftime('%H')
+#set $sunset_hour = datetime.datetime.fromtimestamp($almanac.sunset.raw).strftime('%H')
+##if $sunrise_hour <= $nowHour < $sunset_hour ## This works but to keep it inline with JavaScript the below works too
+#if int($sunrise_hour) <= int($nowHour) and int($nowHour) < int($sunset_hour)
+#set $bodyTheme = "light"
+#else
+## Night time, use dark mode
+#set $bodyTheme = "dark"
+#end if  
+#set $mlsc = "N/A"
+#if $varExists('month.lightning_strike_count') and $month.lightning_strike_count.sum is not None 
+#set $mlsc = $month.lightning_strike_count.sum 
+#end if
+#set $ylsc = "N/A"
+#if $varExists('year.lightning_strike_count') and $year.lightning_strike_count.sum is not None 
+#set $ylsc = $year.lightning_strike_count.sum 
+#end if
+#set $dysc = "N/A"
+#if $varExists('day.lightning_strike_count') and $day.lightning_strike_count.sum is not None 
+#set $dysc = $day.lightning_strike_count.sum 
+#end if
+#set $atsc = "N/A"
+#if $varExists('day.lightning_strike_count') and $day.lightning_strike_count.sum is not None
+#set $atsc = $alltime.lightning_strike_count.sum
+#end if
+#set $ydsc = "N/A"
+#if $varExists('day.lightning_strike_count') and $day.lightning_strike_count.sum is not None
+#set $ydsc = $yesterday.lightning_strike_count.sum
+#end if
+#set $ldlt = "N/A"
+#if $varExists('year.lightning_distance.lasttime') and $year.lightning_distance.lasttime is not None  
+#set $ldlt = $year.lightning_distance.lasttime
+#end if
+#import time
+#set almost_end = $rainyear.end.raw - 1
+#set almost_end_tt = $time.localtime($almost_end)
+<?php
+include ('fixedSettings.php');
+include ('dvmShared.php');
+include('common.php');
+error_reporting(0);
+$weewxrt = array_map(function ($v)
+{
+if ($v == 'NULL')
+{
+    return null;
+}
+    return $v;
+},
+explode(" ", file_get_contents($livedata)));
+    
+//general
+$sundial_time = date("M d Y H:i:s",filemtime('serverdata/dvmRealtime.txt'));        
+$stationlocation = "$station.location";
+$hardware = "$station.hardware";
+$lat = $station.stn_info.latitude_f;
+$lon = $station.stn_info.longitude_f;
+$absLat = abs($lat);
+$absLon = abs($lon);
+if ($lat >= "0"){$NS = "North";}
+else {$NS = "South";}
+if ($lon >= "0") {$EW = "East";}
+else {$EW = "West";}
+$elevation = $station.altitude.meter.raw;
+$url = "$station.station_url";
+$divum["date"] = date($dateFormat, $divum["datetime"]);
+$divum["time"] = date($timeFormat, $divum["datetime"]);
+$divum["swversion"] = "$station.version";
+$divum["build"] = $weewxrt[38];
+$divum["since"] = "$alltime.outTemp.firsttime.format("%d %b %Y %H:%M")";
+$stationUptime = "$station.uptime.long_form";
+
+//almanac
+## If extended almanac information is available, do extra calculations.
+#if $almanac.hasExtras
+#set $sun_altitude = $almanac.sun.alt
+#set $moonDays = ($current.dateTime.raw - $almanac.previous_new_moon.raw)/86400
+#if $sun_altitude < 0
+#set $sun_None="<i>(Always down)</i>"
+#set $daylight_str = "00:00"
+#else
+#set $sun_None="<i>(Always up)</i>"
+#set $daylight_str = "24:00"
+#end if
+#set $sunrise_ts = $almanac.sun.rise.raw
+#set $sunset_ts = $almanac.sun.set.raw
+#if $sunrise_ts and $sunset_ts
+#set $now = $current.dateTime.raw
+#set $today_daylight = $sunset_ts - $sunrise_ts
+#set $seconds = $today_daylight
+#set $hours = $seconds //3600
+#set $seconds %= 3600
+#set $minutes = $seconds//60
+#set $seconds %= 60
+#set $daylight_str = "%d hours, %d minutes, %d seconds" % ($hours, $minutes, $seconds)
+#set $yesterday = $now - 24*3600
+#set $yesterday_daylight = $almanac($almanac_time=$yesterday).sun.set.raw - $almanac($almanac_time=$yesterday).sun.rise.raw
+#set $difference = $today_daylight - $yesterday_daylight
+#if $difference
+#set $delta = abs($difference)
+#set $amt_str = "%s%d seconds" % (str(int($delta) // 60) + ' minutes, ' if ($delta // 60) > 0 else '', $delta % 60 if ($delta // 60) > 0 else $delta)
+#if $difference > 0
+#set $delta_str = "%s more than yesterday" % $amt_str
+#else
+#set $delta_str = "%s less than yesterday" % $amt_str
+#end if
+##set $daylight_str = "%s<br/>%s" % ($daylight_str, $delta_str)
+#end if
+#end if
+#end if
+#if $almanac.hasExtras
+$alm["sun_altitude"] = round($almanac.sun.alt,2);
+if ($alm["sun_altitude"] < 0)
+{
+$alm["sun_None"] = "<i>(Always down)</i>";
+$alm["daylight_str"] = "00:00";
+}
+else
+{
+$alm["sun_None"] = "<i>(Always up)</i>";
+$alm["daylight_str"] = "24:00";
+}
+$alm["sun_azimuth"] = $almanac.sun.az;
+$alm["moon_azimuth"] = $almanac.moon.az;
+$alm["sunrise"] = "$almanac.sun.rise.format(format_string="%H:%M")";
+$alm["sunset"] = "$almanac.sun.set.format(format_string="%H:%M")";
+$alm["sunrise_date"] = "$almanac.sun.set.format("%b %d %Y %H:%M:%S")";
+$alm["sunset_date"] = "$almanac.sun.set.format("%b %d %Y %H:%M:%S")";
+$alm["sun_right_ascension"] = $almanac.sun.ra;
+$alm["next_equinox"] = "$almanac.next_equinox";
+$alm["next_solstice"] = "$almanac.next_solstice";
+$alm["sidereal_time"] = $almanac.sidereal_time;
+$alm["civil_twilight_begin"] = "$almanac(horizon=-6).sun(use_center=1).rise.format(format_string="%H:%M")";
+$alm["civil_twilight_end"] = "$almanac(horizon=-6).sun(use_center=1).set.format(format_string="%H:%M")";
+$alm["nautical_twilight_begin"] = "$almanac(horizon=-12).sun(use_center=1).rise.format(format_string="%H:%M")";
+$alm["nautical_twilight_end"] = "$almanac(horizon=-12).sun(use_center=1).set.format(format_string="%H:%M")";
+$alm["astronomical_twilight_begin"] = "$almanac(horizon=-18).sun(use_center=1).rise.format(format_string="%H:%M")";
+$alm["astronomical_twilight_end"] = "$almanac(horizon=-18).sun(use_center=1).set.format(format_string="%H:%M")";
+$alm["sun_meridian_transit"] = "$almanac.sun.transit.format(format_string="%H:%M")";
+$alm["moon_meridian_transit"] = "$almanac.moon.transit.format(format_string="%H:%M")";
+$alm["moonphase"] = "$almanac.moon_phase";
+$alm["moonphase_number"] = $moonphase_no;
+$alm["moon_age"] = $moonDays;
+$alm["hour_sun"] = $(almanac.sun.ha % 360.0);
+$alm["hour_moon"] = $(almanac.moon.ha % 360.0);
+$alm["luminance"] = round($almanac.moon.moon_fullness,2);
+$alm["fullmoon"] = "$almanac.next_full_moon.format("%d %b %H:%M")";
+$alm["newmoon"] = "$almanac.next_new_moon.format("%d %b %H:%M")";   
+$alm["daylight"] = "$daylength";
+$alm["moonrise"] = "$almanac.moon.rise.format(format_string="%H:%M")";
+$alm["moonset"] = "$almanac.moon.set.format(format_string="%H:%M")";
+$alm["mercury_hlongitude"] = $almanac.mercury.hlongitude.raw;
+$alm["venus_hlongitude"] = $almanac.venus.hlongitude.raw;
+$alm["earth_hlongitude"] = $almanac.sun.hlongitude.raw;
+$alm["mars_hlongitude"] = $almanac.mars.hlongitude.raw;
+$alm["jupiter_hlongitude"] = $almanac.jupiter.hlongitude.raw;
+$alm["saturn_hlongitude"] = $almanac.saturn.hlongitude.raw;
+$alm["uranus_hlongitude"] = $almanac.uranus.hlongitude.raw;
+$alm["neptune_hlongitude"] = $almanac.neptune.hlongitude.raw;
+$alm["pluto_hlongitude"] = $almanac.pluto.hlongitude.raw;
+#end if
+
+//night or day?
+if (strtotime(date("G.i")) >= strtotime($alm["civil_twilight_begin"]) && strtotime(date("G.i")) < strtotime($alm["civil_twilight_end"])){
+    $dayPartCivil = "day";
+}else{
+    $dayPartCivil = "night";
+}
+if (strtotime(date("G.i")) >= strtotime($alm["nautical_twilight_begin"]) && strtotime(date("G.i")) < strtotime($alm["nautical_twilight_end"])){
+    $dayPartNautical = "day";
+}else{
+    $dayPartNautical = "night";
+}
+if (strtotime(date("G.i")) >= strtotime($alm["sunrise"]) && strtotime(date("G.i")) < strtotime($alm["sunset"])){
+    $dayPartNatural = "day";
+}else{
+    $dayPartNatural = "night";
+}
+
+//air quality
+$air["pm_units"] = "μg/m<sup><b>3</b></sup>";
+#if $current.pm2_5.has_data
+$air["current.pm2_5"] = $current.pm2_5.format(add_label=False, format_string="%.1f");
+$air["24h.rollingavg.pm2_5"] = $current.pm2_5.format(add_label=False, format_string="%.1f");
+#end if
+#if $current.pm10_0.has_data
+$air["current.pm10_0"] = $current.pm10_0.format(add_label=False, format_string="%.1f");
+$air["24h.rollingavg.pm10_0"] = $current.pm10_0.format(add_label=False, format_string="%.1f");
+#end if
+
+//barometer
+#if $current.barometer.has_data
+$barom["units"] = "$unit.label.barometer";
+if ($barom["units"] == " inHg"){
+    $barom["units"] = "inHg";
+}
+else if ($barom["units"] == " hPa")
+{
+    $barom["units"] = "hPa";
+}
+else if ($barom["units"] == " kPa")
+{
+    $barom["units"] = "kPa";
+}
+else if ($barom["units"] == " mmHg")
+{
+    $barom["units"] = "mmHg";
+}
+else if ($barom["units"] == " mbar")
+{
+    $barom["units"] = "mbar";
+}
+$barom["now"] = $weewxrt[10];
+$barom["max"] = $day.barometer.max.format(add_label=False);
+$barom["maxtime"] = date('H:i',"$day.barometer.maxtime.raw");
+$barom["min"] = $day.barometer.min.format(add_label=False);
+$barom["mintime"] = date('H:i',"$day.barometer.mintime.raw");
+$barom["trend_code"] = round($trend.barometer.raw,0);
+if($barom["trend_code"]>3){$barom["trend_desc"]="Rising Very Rapidly";$barom["trend_code"]=4;}
+else if($barom["trend_code"]>2){$barom["trend_desc"]="Rising Quickly";$barom["trend_code"]=3;}
+else if($barom["trend_code"]>1){$barom["trend_desc"]="Rising";$barom["trend_code"]=2;}
+else if($barom["trend_code"]>0){$barom["trend_desc"]="Rising Slowly";$barom["trend_code"]=1;}
+else if($barom["trend_code"]==0){$barom["trend_desc"]="Steady";$barom["trend_code"]=0;}
+else if($barom["trend_code"]<0){$barom["trend_desc"]="Falling Slowly";$barom["trend_code"]=-1;}
+else if($barom["trend_code"]<-1){$barom["trend_desc"]="Falling";$barom["trend_code"]=-2;}
+else if($barom["trend_code"]<-2){$barom["trend_desc"]="Falling Quickly";$barom["trend_code"]=-3;}
+else if($barom["trend_code"]<-3){$barom["trend_desc"]="Falling Very Rapidly";$barom["trend_code"]=-4;}
+
+$barom["24h_max"] = $day($days_ago=1).barometer.max.format(add_label=False);
+$barom["24h_maxtime"] = date('H:i',$day($days_ago=1).barometer.maxtime.raw);
+$barom["24h_min"] = $day($days_ago=1).barometer.min.format(add_label=False);
+$barom["24h_mintime"] = date('H:i',$day($days_ago=1).barometer.mintime.raw);
+$barom["month_max"] = $month.barometer.max.format(add_label=False);
+$barom["month_maxtime"] = date('j M H:i',$month.barometer.maxtime.raw);
+$barom["month_min"] = $month.barometer.min.format(add_label=False);
+$barom["month_mintime"] = date('j M H:i',$month.barometer.mintime.raw);
+$barom["year_max"] = $year.barometer.max.format(add_label=False);
+$barom["year_maxtime"] = date('j M H:i',$year.barometer.maxtime.raw);
+$barom["year_min"] = $year.barometer.min.format(add_label=False);
+$barom["year_mintime"] = date('j M H:i',$year.barometer.mintime.raw);
+$barom["alltime_max"] = $alltime.barometer.max.format(add_label=False);
+$barom["alltime_maxtime"] = date('j M Y H:i',$alltime.barometer.maxtime.raw);
+$barom["alltime_min"] = $alltime.barometer.min.format(add_label=False);
+$barom["alltime_mintime"] = date('j M Y H:i',$alltime.barometer.mintime.raw);
+#end if
+
+//colors
+//temperature almanac
+//day
+$t[0] = "$colorize($day.outTemp.max)";
+$t[1] = "$colorize($day.outTemp.min)";
+$t[2] = "$colorize($day.dewpoint.max)";
+$t[3] = "$colorize($day.dewpoint.min)";
+
+//yesterday
+$d[0] = "$colorize($day($days_ago=1).outTemp.max)";
+$d[1] = "$colorize($day($days_ago=1).outTemp.min)";
+$d[2] = "$colorize($day($days_ago=1).dewpoint.max)";
+$d[3] = "$colorize($day($days_ago=1).dewpoint.min)";
+
+//month
+$m[0] = "$colorize($month.outTemp.max)";
+$m[1] = "$colorize($month.outTemp.min)";
+$m[2] = "$colorize($month.dewpoint.max)";
+$m[3] = "$colorize($month.dewpoint.min)";
+
+//year
+$y[0] = "$colorize($year.outTemp.max)";
+$y[1] = "$colorize($year.outTemp.min)";
+$y[2] = "$colorize($year.dewpoint.max)";
+$y[3] = "$colorize($year.dewpoint.min)";
+
+//alltime
+$a[0] = "$colorize($alltime.outTemp.max)";
+$a[1] = "$colorize($alltime.outTemp.min)";
+$a[2] = "$colorize($alltime.dewpoint.max)";
+$a[3] = "$colorize($alltime.dewpoint.min)";
+
+//current conditions
+$color["outTemp_60min_avg"] = "$colorize($hour($hours_ago=1).outTemp.avg)";
+$color["windSpeed_10min_avg"] = "$colorize($span($time_delta=600).windSpeed.avg)";
+$color["windGust_10min_max"] = "$colorize($span($time_delta=600).windGust.max)";
+
+//dewpoint
+$dew["now"] = $weewxrt[4];
+$dew["trend"] = $trend.dewpoint.format(add_label=False);
+$dew["day_max"] = $day.dewpoint.max.format(add_label=False);
+$dew["day_maxtime"] = date('H:i',$day.dewpoint.maxtime.raw);
+$dew["day_min"] = $day.dewpoint.min.format(add_label=False);
+$dew["day_mintime"] = date('H:i',$day.dewpoint.mintime.raw);
+$dew["24h_max"] = $day($days_ago=1).dewpoint.max.format(add_label=False);
+$dew["24h_maxtime"] = date('H:i',$day($days_ago=1).dewpoint.maxtime.raw);
+$dew["24h_min"] = $day($days_ago=1).dewpoint.min.format(add_label=False);
+$dew["24h_mintime"] = date('H:i',$day($days_ago=1).dewpoint.mintime.raw);
+$dew["month_max"] = $month.dewpoint.max.format(add_label=False);
+$dew["month_maxtime"] = date('D j H:i',$month.dewpoint.maxtime.raw);
+$dew["month_min"] = $month.dewpoint.min.format(add_label=False);
+$dew["month_mintime"] = date('D j H:i',$month.dewpoint.mintime.raw);
+$dew["year_max"] = $year.dewpoint.max.format(add_label=False);
+$dew["year_maxtime"] = date('D j M H:i',$year.dewpoint.maxtime.raw);
+$dew["year_min"] = $year.dewpoint.min.format(add_label=False); 
+$dew["year_mintime"] = date('D j M H:i',$year.dewpoint.mintime.raw); 
+$dew["alltime_max"] = $alltime.dewpoint.max.format(add_label=False);
+$dew["alltime_maxtime"] = date('j M Y H:i',$alltime.dewpoint.maxtime.raw);
+$dew["alltime_min"] = $alltime.dewpoint.min.format(add_label=False);
+$dew["alltime_mintime"] = date('j M Y H:i',$alltime.dewpoint.mintime.raw);
+    
+//humidity
+$humid["now"] = $weewxrt[3];
+$humid["trend"] = $trend.outHumidity.format(add_label=False);
+$humid["day_max"] = $day.outHumidity.max.format(add_label=False);
+$humid["day_maxtime"] = date('H:i',$day.outHumidity.maxtime.raw);
+$humid["day_min"] = $day.outHumidity.min.format(add_label=False);
+$humid["day_mintime"] = date('H:i',$day.outHumidity.mintime.raw);
+$humid["24h_max"] = $day($days_ago=1).outHumidity.max.format(add_label=False);
+$humid["24h_maxtime"] = date('H:i',$day($days_ago=1).outHumidity.maxtime.raw);
+$humid["24h_min"] = $day($days_ago=1).outHumidity.min.format(add_label=False);
+$humid["24h_mintime"] = date('H:i',$day($days_ago=1).outHumidity.mintime.raw);
+$humid["month_max"] = $month.outHumidity.max.format(add_label=False);
+$humid["month_maxtime"] = date('D j H:i',$month.outHumidity.maxtime.raw);
+$humid["month_min"] = $month.outHumidity.min.format(add_label=False);
+$humid["month_mintime"] = date('D j H:i',$month.outHumidity.mintime.raw);
+$humid["year_max"] = $year.outHumidity.max.format(add_label=False);
+$humid["year_maxtime"] = date('D j M H:i',$year.outHumidity.maxtime.raw);
+$humid["year_min"] = $year.outHumidity.min.format(add_label=False);
+$humid["year_mintime"] = date('D j M H:i',$year.outHumidity.mintime.raw);
+$humid["alltime_max"] = $alltime.outHumidity.max.format(add_label=False);
+$humid["alltime_maxtime"] = date('j M Y H:i',$alltime.outHumidity.maxtime.raw);
+$humid["alltime_min"] = $alltime.outHumidity.min.format(add_label=False);
+$humid["alltime_mintime"] = date('j M Y H:i',$alltime.outHumidity.mintime.raw);
+$humid["indoors_now"] = $weewxrt[23];
+$humid["indoors_trend"] = round($trend.inHumidity.format(add_label=False),1);
+$humid["indoors_day_max"] = $day.inHumidity.max.format(add_label=False);
+$humid["indoors_day_maxtime"] = date('H:i',$day.inHumidity.maxtime.raw);
+$humid["indoors_day_min"] = $day.inHumidity.min.format(add_label=False);
+$humid["indoors_day_mintime"] = date('H:i',$day.inHumidity.mintime.raw);
+$humid["indoors_24h_max"] = $day($days_ago=1).inHumidity.max.format(add_label=False);
+$humid["indoors_24h_maxtime"] = date('H:i',$day($days_ago=1).inHumidity.maxtime.raw);
+$humid["indoors_24h_min"] = $day($days_ago=1).inHumidity.min.format(add_label=False);
+$humid["indoors_24h_mintime"] = date('H:i',$day($days_ago=1).inHumidity.mintime.raw);
+$humid["indoors_month_max"] = $month.inHumidity.max.format(add_label=False);
+$humid["indoors_month_maxtime"] = date('D j H:i',$month.inHumidity.maxtime.raw);
+$humid["indoors_month_min"] = $month.inHumidity.min.format(add_label=False);
+$humid["indoors_month_mintime"] = date('D j H:i',$month.inHumidity.mintime.raw);
+$humid["indoors_year_max"] = $year.inHumidity.max.format(add_label=False);
+$humid["indoors_year_maxtime"] = date('D j M H:i',$year.inHumidity.maxtime.raw);
+$humid["indoors_year_min"] = $year.inHumidity.min.format(add_label=False);
+$humid["indoors_year_mintime"] = date('D j H:i',$year.inHumidity.mintime.raw);
+$humid["indoors_alltime_max"] = $alltime.inHumidity.max.format(add_label=False);
+$humid["indoors_alltime_maxtime"] = date('j M Y H:i',$alltime.inHumidity.maxtime.raw);
+$humid["indoors_alltime_min"] = $alltime.inHumidity.min.format(add_label=False);
+$humid["indoors_alltime_mintime"] = date('j M Y H:i',$alltime.inHumidity.mintime.raw);
+
+//lightning
+$lightning["last_strike_time"] = "$alltime.lightning_last_det_time.lastnonzero.raw";
+$lightning["current_strike_count"] = "$current.lightning_strike_count"; 
+$lightning["hour_strike_count"] ="$hour.lightning_strike_count.sum";  
+$lightning["today_strike_count"] = "$day.lightning_strike_count.sum";
+$lightning["month_strike_count"] = "$month.lightning_strike_count.sum";
+$lightning["year_strike_count"] = "$year.lightning_strike_count.sum";
+$lightning["last_time"] = "$alltime.lightning_last_det_time.lastnonzero.raw";
+$lightning["alltime_strike_count"] = "$alltime.lightning_strike_count.sum";
+$lightning["last_distance"] = "$alltime.lightning_distance.lastnonzero.format(add_label=False, $localize=False)";
+$lightning["now_energy"] = $weewxrt[59];
+$lightning["now_strike_count"] = $weewxrt[60];
+$lightning["now_noise_count"] = $weewxrt[61];
+$lightning["now_disturber_count"] = $weewxrt[62];
+if (trim($lightning["last_time"]) == 'N/A' || $lightning["last_time"] == '0' || $lightning["last_time"] == 'NULL')
+{
+$lightning["time_ago"] = 0;
+$lightning['last_time'] = time();
+$lightning["last_distance"] = "0";
+}
+else
+{
+$parts = explode(" ", $lightning["last_time"]);
+$parts1 = explode("/", $parts[0]);
+$lightning["time_ago"] = time() - strtotime("20" . $parts1[2] . $parts1[1] . $parts1[0] . " " . $parts[1]);
+}
+
+//rainfall
+#if $current.rain.has_data
+$rain["units"] = "$unit.label.rain";
+if($rain["units"] == " mm")
+{
+$rain["units"] = "mm";
+}
+else if($rain["units"] == " cm")
+{
+$rain["units"] = "cm";
+}
+else if($rain["units"] == " in")
+{
+$rain["units"] = "in";
+}
+$rain["rate"] = $weewxrt[8];
+$rain["current"] = $weewxrt[9];
+$rain["total"] = $weewxrt[9];
+$rain["last_hour"] = $span($hour_delta=1).rain.sum.raw;
+$rain["last_10min"] = $span($time_delta=600).rain.sum.raw;
+$rain["last_24hour"] = round($day($days_ago=1).rain.sum.raw,1);
+$rain["24h_rate_max"] = $day($days_ago=1).rainRate.max.raw;
+$rain["24h_rate_maxtime"] = $day($days_ago=1).rainRate.maxtime.raw;
+$rain["24h_total"] = round($day($days_ago=1).rain.sum.raw,1);
+$rain["day"] = round($day.rain.sum.raw,1);
+$rain["day_rate_max"] = $day.rainRate.max.raw;
+$rain["day_rate_maxtime"] = $day.rainRate.maxtime.raw;
+$rain["day_total"] = $day.rain.sum.raw;
+$rain["month_rate_max"] = $month.rainRate.max.raw;
+$rain["month_rate_maxtime"] = $month.rainRate.maxtime.raw;
+$rain["month_total"] = round($month.rain.sum.raw,1);
+$rain["year_rate_max"] = $year.rainRate.max.raw;
+$rain["year_rate_maxtime"] = $year.rainRate.maxtime.raw;
+$rain["year_total"] = round($year.rain.sum.raw,1);
+$rain["alltime_rate_max"] = $alltime.rainRate.max.raw;
+$rain["alltime_rate_maxtime"] = $alltime.rainRate.maxtime.raw;
+$rain["alltime_total"] = round($alltime.rain.sum.raw,1);
+$rain["storm_rain"] = $current.hail.raw;
+#end if
+
+//sky
+$sky["lux"] = round($weewxrt[45]/0.00809399477,0,PHP_ROUND_HALF_UP);
+$sky["day_lux_max"] = round($day.radiation.max.format($localize=False,add_label=False)/0.00809399477,0,PHP_ROUND_HALF_UP);
+$sky["cloud_base"] = $weewxrt[52];
+$sky["cloud_cover"] = round($current.signal8.format($localize=False,add_label=False),0);
+
+//solar
+#if $current.radiation.has_data
+$solar["now"] = $current.radiation.format($localize=False,add_label=False);
+$solar["day_max"] = $day.radiation.max.format($localize=False,add_label=False);
+$solar["day_maxtime"] = date('H:i',$day.radiation.maxtime.raw);
+$solar["24h_max"] = $day($days_ago=1).radiation.max.format($localize=False,add_label=False);
+$solar["24h_maxtime"] = date('H:i',$day($days_ago=1).radiation.maxtime.raw);
+$solar["month_max"] = $month.radiation.max.format($localize=False,add_label=False);
+$solar["month_maxtime"] = date('D j H:i',$month.radiation.maxtime.raw);
+$solar["year_max"] = $year.radiation.max.format($localize=False,add_label=False);
+$solar["year_maxtime"] = date('D j M H:i',$year.radiation.maxtime.raw);
+$solar["alltime_max"] = $alltime.radiation.max.format($localize=False,add_label=False);
+$solar["alltime_maxtime"] = date('j M Y H:i',$alltime.radiation.maxtime.raw);
+#end if
+
+//temperature
+$temp["units"] = "$unit.label.outTemp";
+if($temp["units"] == "°C")
+{
+$temp["units"] = "C";
+}
+else if($temp["units"] == "°F")
+{
+$temp["units"] = "F";
+}
+$temp["indoor_now"] = $weewxrt[22];
+$temp["indoor_trend"] = round($trend.inTemp.raw,1);
+$temp["indoor_day_max"] = $day.inTemp.max.format(add_label=False);
+$temp["indoor_day_min"] = $day.inTemp.min.format(add_label=False);
+$temp["outside_now"] = $weewxrt[2];
+$temp["outside_trend"] = round($trend.outTemp.raw,1);
+$temp["apptemp"] = $weewxrt[54];
+$temp["heatindex"] = $weewxrt[41];
+$temp["windchill"] = round($weewxrt[24],1);
+$temp["humidex"] = $weewxrt[42];
+$temp["outside_24h_max"] = $day($days_ago=1).outTemp.max.format(add_label=False);
+$temp["outside_day_avg_60mn"] = $span($time_delta=3600).outTemp.avg.format(add_label=False);
+$temp["outside_24h_maxtime"] = date('H:i',$day($days_ago=1).outTemp.maxtime.raw);
+$temp["outside_24h_min"] = $day($days_ago=1).outTemp.min.format(add_label=False);
+$temp["outside_24h_mintime"] = date('H:i',$day($days_ago=1).outTemp.mintime.raw);
+$temp["outside_day_avg"] = $day.outTemp.avg.format(add_label=False);
+$temp["outside_day_max"] = $day.outTemp.max.format(add_label=False);
+$temp["outside_day_maxtime"] = date('H:i',$day.outTemp.maxtime.raw);
+$temp["outside_day_min"] = $day.outTemp.min.format(add_label=False);
+$temp["outside_day_mintime"] = date('H:i',$day.outTemp.mintime.raw);
+$temp["outside_month_max"] = $month.outTemp.max.format(add_label=False);
+$temp["outside_month_maxtime"] = date('D j H:i',$month.outTemp.maxtime.raw);
+$temp["outside_month_min"] = $month.outTemp.min.format(add_label=False);
+$temp["outside_month_mintime"] = date('D j H:i',$month.outTemp.mintime.raw);
+$temp["outside_year_max"] = $year.outTemp.max.format(add_label=False);
+$temp["outside_year_maxtime"] = date('D j M H:i',$year.outTemp.maxtime.raw);
+$temp["outside_year_maxtime2"] = date('M',$year.outTemp.maxtime.raw);
+$temp["outside_year_min"] = $year.outTemp.min.format(add_label=False);
+$temp["outside_year_mintime"] = date('D j M H:i',$year.outTemp.mintime.raw);
+$temp["outside_year_mintime2"] = date('M',$year.outTemp.mintime.raw);
+$temp["outside_alltime_max"] = $alltime.outTemp.max.format(add_label=False);
+$temp["outside_alltime_maxtime"] = date('j M Y H:i',$alltime.outTemp.maxtime.raw);
+$temp["outside_alltime_min"] = $alltime.outTemp.min.format(add_label=False);
+$temp["outside_alltime_mintime"] = date('j M Y H:i',$alltime.outTemp.mintime.raw);
+$Temp = $temp["indoor_now"];
+$Humidity = $humid["indoors_now"];
+$T = $Temp*9/5+32;
+$RH = $Humidity;
+$HI = 0;
+if($T<=40.0){$HI=$T;}
+else {$HI=-42.379+(2.04901523*$T)+(10.14333127*$RH)-(0.22475541*$T*$RH)-(0.00683783*$T*$T)-(0.05481717*$RH*$RH)+(0.00122874*$T*$T*$RH)+(0.00085282*$T*$RH*$RH)-(0.00000199*$T*$T*$RH*$RH);}
+if ($RH<13&&$T>=80&&$T<=112){$adjust=((13-$RH)/4)*sqrt(17-abs($T-95)/17);$HI=$HI-$adjust;}
+else if ($RH>85&&$T>=80&&$T<=87){$adjust=(($RH-85)/10)*((87-$T)/5);$HI=$HI+$adjust;}
+else if ($T<80){$HI=0.5*($T+61.0+(($T-68.0)*1.2)+($RH*0.094));}
+$temp["indoor_now_feels"] = number_format($HI, 1);
+
+//uv
+$uv["now"] = $weewxrt[43];
+$uv["day_max"] = $day.UV.max.format(add_label=False);
+$uv["day_maxtime"] = date('H:i',$day.UV.maxtime.raw);
+$uv["24h_max"] = $day($days_ago=1).UV.max.format(add_label=False);
+$uv["24h_maxtime"] = date('H:i',$day($days_ago=1).UV.maxtime.raw);
+$uv["month_max"] = $month.UV.max.format(add_label=False);
+$uv["month_maxtime"] = date('D j H:i',$month.UV.maxtime.raw);
+$uv["year_max"] = $year.UV.max.format(add_label=False);
+$uv["year_maxtime"] = date('D j M H:i',$year.UV.maxtime.raw);
+$uv["alltime_max"] = $alltime.UV.max.format(add_label=False);
+$uv["alltime_maxtime"] = date('j M Y H:i',$alltime.UV.maxtime.raw);
+
+//wind
+#if $current.windSpeed.has_data
+$wind["units"] = "$unit.label.windSpeed"; // m/s or mph or km/h or kts
+if ($wind["units"] == " m/s")
+{
+$wind["units"] = "m/s";
+}
+else if ($wind["units"] == " mph")
+{
+$wind["units"] = "mph";
+}
+else if ($wind["units"] == " km/h")
+{
+$wind["units"] = "km/h";
+}
+else if ($wind["units"] == " kts")
+{
+$wind["units"] = "kts";
+}
+$wind["direction"] = $weewxrt[7]; 
+$wind["direction_10m_avg"] = "$span($time_delta=600).windDir.avg.format(add_label=False)";
+$wind["cardinal"] = $weewxrt[11];    
+$wind["speed"] = $weewxrt[6];
+$wind["gust"] = $weewxrt[64];
+$wind["speed_bft"] = $weewxrt[12];
+$wind["speed_max"] = $day.windSpeed.max.format(add_label=False);
+$wind["speed_maxtime"] = date('H:i',$day.windSpeed.maxtime.raw);
+$wind["gust_max"] = $day.windGust.max.format(add_label=False);
+$wind["gust_maxtime"] = date('H:i',$day.windGust.maxtime.raw);
+$wind["wind_run"] = $weewxrt[17];
+$wind["speed_10m_avg"] = $span($time_delta=600).windSpeed.avg.format(add_label=False);
+$wind["speed_10m_max"] = $span($time_delta=600).windSpeed.max.format(add_label=False);
+$wind["gust_10m_max"] = $span($time_delta=600).windGust.max.format(add_label=False);
+$wind["speed_24h_max"] = $day($days_ago=1).windSpeed.max.format(add_label=False);
+$wind["speed_24h_maxtime"] = date('H:i',$day($days_ago=1).windSpeed.maxtime.raw);
+$wind["gust_24h_max"] = $day($days_ago=1).windGust.max.format(add_label=False);
+$wind["gust_24h_maxtime"] = date('H:i',$day($days_ago=1).windGust.maxtime.raw);
+$wind["speed_month_max"] = $month.windSpeed.max.format(add_label=False);
+$wind["speed_month_maxtime"] = date('M',$month.windSpeed.maxtime.raw);
+$wind["gust_month_max"] = $month.windGust.max.format(add_label=False);
+$wind["gust_month_maxtime"] = date('D j M H:i',$month.windGust.maxtime.raw);
+$wind["speed_year_max"] = $year.windSpeed.max.format(add_label=False);
+$wind["speed_year_maxtime"] = "$year.windSpeed.maxtime";
+$wind["gust_year_max"] = $year.windGust.max.format(add_label=False);
+$wind["gust_year_maxtime"] = date('D j M H:i',$year.windGust.maxtime.raw);
+$wind["speed_alltime_max"] = $alltime.windSpeed.max.format(add_label=False);
+$wind["speed_alltime_maxtime"] = "$alltime.windSpeed.maxtime";
+$wind["gust_alltime_max"] = $alltime.windGust.max.format(add_label=False);
+$wind["gust_alltime_maxtime"] = date('D j M Y H:i',$alltime.windGust.maxtime.raw);
+$wind["direction_trend"] = "$trend.windDir.formatted";
+$wind["direction_trend_ordinal"] = "$trend.windDir.ordinal_compass";
+#end if
+
+//Convert temperatures if necessary
+include('dvmUnitConversions.php');
+include('dvmMeteorShowers.php');
+
+$firerisk = number_format((((110-1.373*$divum["humidity"])-0.54*(10.20-$divum["temp"]))*(124*pow(10,(-0.0142*$divum["humidity"]))))/60,0);
+
+//wetbulb
+$Tc = ($divum['temp']);
+$P = $divum['barometer'];
+$RH = $divum['humidity'];
+$Tdc = (($Tc-(14.55+0.114*$Tc)*(1-(0.01*$RH))-pow((2.5+0.007*$Tc)*(1-(0.01*$RH)),3)-(15.9+0.117*$Tc)*pow(1-(0.01*$RH),14)));
+$E = (6.11*pow(10,(7.5*$Tdc/(237.7+$Tdc))));
+$wetbulbcalc = (((0.00066*$P)*$Tc)+((4098*$E)/pow(($Tdc+237.7),2)*$Tdc))/((0.00066*$P)+(4098*$E)/pow(($Tdc+237.7),2));
+$wetbulbx = number_format($wetbulbcalc,1);
+?>

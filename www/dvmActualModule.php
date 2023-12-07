@@ -13,7 +13,7 @@ error_reporting(0);
 <?php if (filesize('jsondata/me.txt') < 160) { echo " " , $offline;} else echo "";?></a></span>
 <span class="monthpopup"><a href="dvmWindyRadarPopup.php" title="Windy.com Radar" alt="Windy.com Radar" data-lity><?php echo $chartinfo;?> Radar</a></span>
 <span class="monthpopup"><a href="dvmWindyWindPopup.php" title="Windy.com Wind Map" alt="Windy.com Wind Map" data-lity><?php echo $chartinfo;?> Wind Map</a></span>
-<span class="todaypopup"><a alt="cloud cover" title="cloud cover" href="<?php echo $chartsource;?>/<?php echo $theme1;?>-charts.html?chart='cloudcoverplot'&span='weekly'&temp='<?php 
+<span class="todaypopup"><a alt="cloud cover" title="cloud cover" href="<?php echo $chartsource;?>/<?php echo $theme;?>-charts.html?chart='cloudcoverplot'&span='weekly'&temp='<?php 
 echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units'];?>" data-lity><?php echo $menucharticonpage;?> Cloud Cover</a></span>
 </div>
 <span class='moduletitle'><?php echo $lang['actualModule'];?></span>

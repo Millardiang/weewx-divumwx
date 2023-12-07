@@ -10,8 +10,6 @@
 # Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
 #                                                                                                                   #
 #####################################################################################################################
-?>
-<?php
 
 include('dvmCombinedData.php'); 
 
@@ -36,7 +34,6 @@ if ($theme === "dark") {
 <article>
    <div class=actualt>Max Today </div>
    <?php
-	//if ($wind["units"]=='kts'){$wind["units"]="kn";}
 	// wind day km/h
 	if ($wind["units"]=='km/h' && $wind["gust_max"]>=60)  {
 	echo "<div class='windtoday60'>",$wind["gust_max"] . "</value>";}
@@ -62,15 +59,15 @@ if ($theme === "dark") {
 	echo "<div class='windtoday'>",$wind["gust_max"] . "</value>";}
 
 	//kts
-	if ($wind["units"]=='kn' && $wind["gust_max"]>=32.40)  {
+	if ($wind["units"]=='kts' && $wind["gust_max"]>=32.40)  {
 	echo "<div class='windtoday60'>",$wind["gust_max"] . "</value>";}
-	else if ($wind["units"]=='kn' && $wind["gust_max"]>=21.60)  {
+	else if ($wind["units"]=='kts' && $wind["gust_max"]>=21.60)  {
 	echo "<div class='windtoday40'>",$wind["gust_max"] . "</value>";}
-	else if ($wind["units"]=='kn' && $wind["gust_max"]>=16.20)  {
+	else if ($wind["units"]=='kts' && $wind["gust_max"]>=16.20)  {
 	echo "<div class='windtoday30'>",$wind["gust_max"] . "</value>";}
-	else if ($wind["units"]=='kn' && $wind["gust_max"]>=5.40)  {
+	else if ($wind["units"]=='kts' && $wind["gust_max"]>=5.40)  {
 	echo "<div class='windtoday10'>",$wind["gust_max"] . "</value>";}
-	else if ($wind["units"]=='kn' && $wind["gust_max"]>=-0) {
+	else if ($wind["units"]=='kts' && $wind["gust_max"]>=-0) {
 	echo "<div class='windtoday'>",$wind["gust_max"] . "</value>";}
 
 	//ms
@@ -94,7 +91,7 @@ if ($theme === "dark") {
 if($wind["units"] =='km/h'){echo number_format($wind["gust_max"]*0.621371,1)." <smalluvunit>mph</smalluvunit";}
 if($wind["units"] =='mph'){ echo number_format($wind["gust_max"]*1.60934,1)."<smalluvunit>km/h</smalluvunit>";}
 if($wind["units"] =='m/s'){ echo number_format($wind["gust_max"]*3.5999988862317131577,1)."<smalluvunit>km/h</smalluvunit>";}
-if($wind["units"] =='kn'){ echo number_format($wind["gust_max"]*1.8519994254280931489,1)."<smalluvunit>km/h</smalluvunit>";}
+if($wind["units"] =='kts'){ echo number_format($wind["gust_max"]*1.8519994254280931489,1)."<smalluvunit>km/h</smalluvunit>";}
 ?>
 </div>
 
@@ -104,42 +101,42 @@ Max Recorded <blue><?php echo $wind["gust_maxtime"];?></blue></div>
 </article>
 
  <article>
-   <div class=actualt>Max 24h </div>
+   <div class=actualt>Max Yesterday </div>
    <?php
 	// wind yesterday km/h
-	if ($wind["units"]=='km/h' && number_format($wind["gust_24h_max"]*3.5999988862317131577,1)>=60)  {
-	echo "<div class='windtoday60'>",number_format($wind["gust_24h_max"]*3.5999988862317131577,1) . "</value>";}
-	else if ($wind["units"]=='km/h' && number_format($wind["gust_24h_max"]*3.5999988862317131577,1)>=40)  {
-	echo "<div class='windtoday40'>",number_format($wind["gust_24h_max"]*3.5999988862317131577,1) . "</value>";}
-	else if ($wind["units"]=='km/h' && number_format($wind["gust_24h_max"]*3.5999988862317131577,1)>=30)  {
-	echo "<div class='windtoday30'>",number_format($wind["gust_24h_max"]*3.5999988862317131577,1) . "</value>";}
-	else if ($wind["units"]=='km/h' && number_format($wind["gust_24h_max"]*3.5999988862317131577,1)>=10)  {
-	echo "<div class='windtoday10'>",number_format($wind["gust_24h_max"]*3.5999988862317131577,1) . "</value>";}
-	else if ($wind["units"]=='km/h' && number_format($wind["gust_24h_max"]*3.5999988862317131577,1)>=-0) {
-	echo "<div class='windtoday'>",number_format($wind["gust_24h_max"]*3.5999988862317131577,1) . "</value>";}
+	if ($wind["units"]=='km/h' && number_format($wind["gust_24h_max"],1)>=60)  {
+	echo "<div class='windtoday60'>",number_format($wind["gust_24h_max"],1) . "</value>";}
+	else if ($wind["units"]=='km/h' && number_format($wind["gust_24h_max"],1)>=40)  {
+	echo "<div class='windtoday40'>",number_format($wind["gust_24h_max"],1) . "</value>";}
+	else if ($wind["units"]=='km/h' && number_format($wind["gust_24h_max"],1)>=30)  {
+	echo "<div class='windtoday30'>",number_format($wind["gust_24h_max"],1) . "</value>";}
+	else if ($wind["units"]=='km/h' && number_format($wind["gust_24h_max"],1)>=10)  {
+	echo "<div class='windtoday10'>",number_format($wind["gust_24h_max"],1) . "</value>";}
+	else if ($wind["units"]=='km/h' && number_format($wind["gust_24h_max"],1)>=-0) {
+	echo "<div class='windtoday'>",number_format($wind["gust_24h_max"],1) . "</value>";}
 
 	//mph
-	if ($wind["units"]=='mph' && number_format($wind["gust_24h_max"]*2.23694,1)>=37.2)  {
-	echo "<div class='windtoday60'>",number_format($wind["gust_24h_max"]*2.23694,1) . "</value>";}
-	else if ($wind["units"]=='mph' && number_format($wind["gust_24h_max"]*2.23694,1)>=24.85)  {
-	echo "<div class='windtoday40'>",number_format($wind["gust_24h_max"]*2.23694,1) . "</value>";}
-	else if ($wind["units"]=='mph' && number_format($wind["gust_24h_max"]*2.23694,1)>=18.64)  {
-	echo "<div class='windtoday30'>",number_format($wind["gust_24h_max"]*2.23694,1) . "</value>";}
-	else if ($wind["units"]=='mph' && number_format($wind["gust_24h_max"]*2.23694,1)>=6.2)  {
-	echo "<div class='windtoday10'>",number_format($wind["gust_24h_max"]*2.23694,1) . "</value>";}
-	else if ($wind["units"]=='mph' && number_format($wind["gust_24h_max"]*2.23694,1)>=-0) {
-	echo "<div class='windtoday'>",number_format($wind["gust_24h_max"]*2.23694,1) . "</value>";}
+	if ($wind["units"]=='mph' && number_format($wind["gust_24h_max"],1)>=37.2)  {
+	echo "<div class='windtoday60'>",number_format($wind["gust_24h_max"],1) . "</value>";}
+	else if ($wind["units"]=='mph' && number_format($wind["gust_24h_max"],1)>=24.85)  {
+	echo "<div class='windtoday40'>",number_format($wind["gust_24h_max"],1) . "</value>";}
+	else if ($wind["units"]=='mph' && number_format($wind["gust_24h_max"],1)>=18.64)  {
+	echo "<div class='windtoday30'>",number_format($wind["gust_24h_max"],1) . "</value>";}
+	else if ($wind["units"]=='mph' && number_format($wind["gust_24h_max"],1)>=6.2)  {
+	echo "<div class='windtoday10'>",number_format($wind["gust_24h_max"],1) . "</value>";}
+	else if ($wind["units"]=='mph' && number_format($wind["gust_24h_max"],1)>=-0) {
+	echo "<div class='windtoday'>",number_format($wind["gust_24h_max"],1) . "</value>";}
 	
 	//kts
-	if ($wind["units"]=='kn' && $wind["gust_24h_max"]>=32.40)  {
+	if ($wind["units"]=='kts' && $wind["gust_24h_max"]>=32.40)  {
 	echo "<div class='windtoday60'>",$wind["gust_24h_max"] . "</value>";}
-	else if ($wind["units"]=='kn' && $wind["gust_24h_max"]>=21.60)  {
+	else if ($wind["units"]=='kts' && $wind["gust_24h_max"]>=21.60)  {
 	echo "<div class='windtoday40'>",$wind["gust_24h_max"] . "</value>";}
-	else if ($wind["units"]=='kn' && $wind["gust_24h_max"]>=16.20)  {
+	else if ($wind["units"]=='kts' && $wind["gust_24h_max"]>=16.20)  {
 	echo "<div class='windtoday30'>",$wind["gust_24h_max"] . "</value>";}
-	else if ($wind["units"]=='kn' && $wind["gust_24h_max"]>=5.40)  {
+	else if ($wind["units"]=='kts' && $wind["gust_24h_max"]>=5.40)  {
 	echo "<div class='windtoday10'>",$wind["gust_24h_max"] . "</value>";}
-	else if ($wind["units"]=='kn' && $wind["gust_y24h_max"]>=-0) {
+	else if ($wind["units"]=='kts' && $wind["gust_y24h_max"]>=-0) {
 	echo "<div class='windtoday'>",$wind["gust_24h_max"] . "</value>";}
 
 	//ms
@@ -159,10 +156,10 @@ Max Recorded <blue><?php echo $wind["gust_maxtime"];?></blue></div>
 <div></div>
 <div class='dvmconvertrain'>
 <?php //convert rain
-if($wind["units"] =='km/h'){echo number_format($wind["gust_24h_max"]*2.23694,1)." <smalluvunit>mph</smalluvunit";}
-if($wind["units"] =='mph'){ echo number_format($wind["gust_24h_max"]*3.5999988862317131577,1)."<smalluvunit>km/h</smalluvunit>";}
+if($wind["units"] =='km/h'){echo number_format($wind["gust_24h_max"]*0.621371,1)." <smalluvunit>mph</smalluvunit";}
+if($wind["units"] =='mph'){ echo number_format($wind["gust_24h_max"]*1.60934,1)."<smalluvunit>km/h</smalluvunit>";}
 if($wind["units"] =='m/s'){ echo number_format($wind["gust_24h_max"]*3.5999988862317131577,1)."<smalluvunit>km/h</smalluvunit>";}
-if($wind["units"] =='kn'){ echo number_format($wind["gust_24h_max"]*1.8519994254280931489,1)."<smalluvunit>km/h</smalluvunit>";}
+if($wind["units"] =='kts'){ echo number_format($wind["gust_24h_max"]*1.8519994254280931489,1)."<smalluvunit>km/h</smalluvunit>";}
 ?>
 </div>
 
@@ -177,39 +174,39 @@ Max Recorded <br><blue><?php echo $wind["gust_24h_maxtime"];?></blue></div>
   <div class=actualt>Max <?php echo date('F Y')?> </div>
     <?php
 	// wind month km/h
-	if ($wind["units"]=='km/h' && number_format($wind["gust_month_max"]*3.5999988862317131577,1)>=60)  {
-	echo "<div class='windtoday60'>",number_format($wind["gust_month_max"]*3.5999988862317131577,1) . "</value>";}
-	else if ($wind["units"]=='km/h' && number_format($wind["gust_month_max"]*3.5999988862317131577,1)>=40)  {
-	echo "<div class='windtoday40'>",number_format($wind["gust_month_max"]*3.5999988862317131577,1) . "</value>";}
-	else if ($wind["units"]=='km/h' && number_format($wind["gust_month_max"]*3.5999988862317131577,1)>=30)  {
-	echo "<div class='windtoday30'>",number_format($wind["gust_month_max"]*3.5999988862317131577,1) . "</value>";}
-	else if ($wind["units"]=='km/h' && number_format($wind["gust_month_max"]*3.5999988862317131577,1)>=10)  {
-	echo "<div class='windtoday10'>",number_format($wind["gust_month_max"]*3.5999988862317131577,1) . "</value>";}
-	else if ($wind["units"]=='km/h' && number_format($wind["gust_month_max"]*3.5999988862317131577,1)>=-0) {
-	echo "<div class='windtoday'>",number_format($wind["gust_month_max"]*3.5999988862317131577,1) . "</value>";}
+	if ($wind["units"]=='km/h' && number_format($wind["gust_month_max"],1)>=60)  {
+	echo "<div class='windtoday60'>",number_format($wind["gust_month_max"],1) . "</value>";}
+	else if ($wind["units"]=='km/h' && number_format($wind["gust_month_max"],1)>=40)  {
+	echo "<div class='windtoday40'>",number_format($wind["gust_month_max"],1) . "</value>";}
+	else if ($wind["units"]=='km/h' && number_format($wind["gust_month_max"],1)>=30)  {
+	echo "<div class='windtoday30'>",number_format($wind["gust_month_max"],1) . "</value>";}
+	else if ($wind["units"]=='km/h' && number_format($wind["gust_month_max"],1)>=10)  {
+	echo "<div class='windtoday10'>",number_format($wind["gust_month_max"],1) . "</value>";}
+	else if ($wind["units"]=='km/h' && number_format($wind["gust_month_max"],1)>=-0) {
+	echo "<div class='windtoday'>",number_format($wind["gust_month_max"],1) . "</value>";}
 
 	//mph
-	if ($wind["units"]=='mph' && number_format($wind["gust_month_max"]*2.23694,1)>=37.2)  {
-	echo "<div class='windtoday60'>",number_format($wind["gust_month_max"]*2.23694,1) . "</value>";}
-	else if ($wind["units"]=='mph' && number_format($wind["gust_month_max"]*2.23694,1)>=24.85)  {
-	echo "<div class='windtoday40'>",number_format($wind["gust_month_max"]*2.23694,1) . "</value>";}
-	else if ($wind["units"]=='mph' && number_format($wind["gust_month_max"]*2.23694,1)>=18.64)  {
-	echo "<div class='windtoday30'>",number_format($wind["gust_month_max"]*2.23694,1) . "</value>";}
-	else if ($wind["units"]=='mph' && number_format($wind["gust_month_max"]*2.23694,1)>=6.2)  {
-	echo "<div class='windtoday10'>",number_format($wind["gust_month_max"]*2.23694,1) . "</value>";}
-	else if ($wind["units"]=='mph' && number_format($wind["gust_month_max"]*2.23694,1)>=-0) {
-	echo "<div class='windtoday'>",number_format($wind["gust_month_max"]*2.23694,1) . "</value>";}
+	if ($wind["units"]=='mph' && number_format($wind["gust_month_max"],1)>=37.2)  {
+	echo "<div class='windtoday60'>",number_format($wind["gust_month_max"],1) . "</value>";}
+	else if ($wind["units"]=='mph' && number_format($wind["gust_month_max"],1)>=24.85)  {
+	echo "<div class='windtoday40'>",number_format($wind["gust_month_max"],1) . "</value>";}
+	else if ($wind["units"]=='mph' && number_format($wind["gust_month_max"],1)>=18.64)  {
+	echo "<div class='windtoday30'>",number_format($wind["gust_month_max"],1) . "</value>";}
+	else if ($wind["units"]=='mph' && number_format($wind["gust_month_max"],1)>=6.2)  {
+	echo "<div class='windtoday10'>",number_format($wind["gust_month_max"],1) . "</value>";}
+	else if ($wind["units"]=='mph' && number_format($wind["gust_month_max"],1)>=-0) {
+	echo "<div class='windtoday'>",number_format($wind["gust_month_max"],1) . "</value>";}
 
 	//kts
-	if ($wind["units"]=='kn' && $wind["gust_month_max"]>=32.40)  {
+	if ($wind["units"]=='kts' && $wind["gust_month_max"]>=32.40)  {
 	echo "<div class='windtoday60'>",$wind["gust_month_max"] . "</value>";}
-	else if ($wind["units"]=='kn' && $wind["gust_month_max"]>=21.60)  {
+	else if ($wind["units"]=='kts' && $wind["gust_month_max"]>=21.60)  {
 	echo "<div class='windtoday40'>",$wind["gust_month_max"] . "</value>";}
-	else if ($wind["units"]=='kn' && $wind["gust_month_max"]>=16.20)  {
+	else if ($wind["units"]=='kts' && $wind["gust_month_max"]>=16.20)  {
 	echo "<div class='windtoday30'>",$wind["gust_month_max"] . "</value>";}
-	else if ($wind["units"]=='kn' && $wind["gust_month_max"]>=5.40)  {
+	else if ($wind["units"]=='kts' && $wind["gust_month_max"]>=5.40)  {
 	echo "<div class='windtoday10'>",$wind["gust_month_max"] . "</value>";}
-	else if ($wind["units"]=='kn' && $wind["gust_month_max"]>=-0) {
+	else if ($wind["units"]=='kts' && $wind["gust_month_max"]>=-0) {
 	echo "<div class='windtoday'>",$wind["gust_month_max"] . "</value>";}
 
 	//ms
@@ -229,10 +226,10 @@ Max Recorded <br><blue><?php echo $wind["gust_24h_maxtime"];?></blue></div>
 <div></div>
 <div class='dvmconvertrain'>
 <?php //convert rain
-if($wind["units"] =='km/h'){echo number_format($wind["gust_month_max"]*2.23694,1)." <smalluvunit>mph</smalluvunit";}
-if($wind["units"] =='mph'){ echo number_format($wind["gust_month_max"]*3.5999988862317131577,1)."<smalluvunit>km/h</smalluvunit>";}
+if($wind["units"] =='km/h'){echo number_format($wind["gust_month_max"]*0.621371,1)." <smalluvunit>mph</smalluvunit";}
+if($wind["units"] =='mph'){ echo number_format($wind["gust_month_max"]*1.60934,1)."<smalluvunit>km/h</smalluvunit>";}
 if($wind["units"] =='m/s'){ echo number_format($wind["gust_month_max"]*3.5999988862317131577,1)."<smalluvunit>km/h</smalluvunit>";}
-if($wind["units"] =='kn'){ echo number_format($wind["gust_month_max"]*1.8519994254280931489,1)."<smalluvunit>km/h</smalluvunit>";}
+if($wind["units"] =='kts'){ echo number_format($wind["gust_month_max"]*1.8519994254280931489,1)."<smalluvunit>km/h</smalluvunit>";}
 ?>
 </div>
 
@@ -246,39 +243,39 @@ Max Recorded <br><blue><?php echo $wind["gust_month_maxtime"];?></blue></div>
    <div class=actualt>Max <?php echo date('Y')?> </div>
    <?php
 	// wind year km/h
-	if ($wind["units"]=='km/h' && number_format($wind["gust_year_max"]*3.5999988862317131577,1)>=60)  {
-	echo "<div class='windtoday60'>",number_format($wind["gust_year_max"]*3.5999988862317131577,1) . "</value>";}
-	else if ($wind["units"]=='km/h' && number_format($wind["gust_year_max"]*3.5999988862317131577,1)>=40)  {
-	echo "<div class='windtoday40'>",number_format($wind["gust_year_max"]*3.5999988862317131577,1) . "</value>";}
-	else if ($wind["units"]=='km/h' && number_format($wind["gust_year_max"]*3.5999988862317131577,1)>=30)  {
-	echo "<div class='windtoday30'>",number_format($wind["gust_year_max"]*3.5999988862317131577,1) . "</value>";}
-	else if ($wind["units"]=='km/h' && number_format($wind["gust_year_max"]*3.5999988862317131577,1)>=10)  {
-	echo "<div class='windtoday10'>",number_format($wind["gust_year_max"]*3.5999988862317131577,1) . "</value>";}
-	else if ($wind["units"]=='km/h' && number_format($wind["gust_year_max"]*3.5999988862317131577,1)>=-0) {
-	echo "<div class='windtoday'>",number_format($wind["gust_year_max"]*3.5999988862317131577,1) . "</value>";}
+	if ($wind["units"]=='km/h' && number_format($wind["gust_year_max"],1)>=60)  {
+	echo "<div class='windtoday60'>",number_format($wind["gust_year_max"],1) . "</value>";}
+	else if ($wind["units"]=='km/h' && number_format($wind["gust_year_max"],1)>=40)  {
+	echo "<div class='windtoday40'>",number_format($wind["gust_year_max"],1) . "</value>";}
+	else if ($wind["units"]=='km/h' && number_format($wind["gust_year_max"],1)>=30)  {
+	echo "<div class='windtoday30'>",number_format($wind["gust_year_max"],1) . "</value>";}
+	else if ($wind["units"]=='km/h' && number_format($wind["gust_year_max"],1)>=10)  {
+	echo "<div class='windtoday10'>",number_format($wind["gust_year_max"],1) . "</value>";}
+	else if ($wind["units"]=='km/h' && number_format($wind["gust_year_max"],1)>=-0) {
+	echo "<div class='windtoday'>",number_format($wind["gust_year_max"],1) . "</value>";}
 
 	//mph
-	if ($wind["units"]=='mph' && number_format($wind["gust_year_max"]*2.23694,1)>=37.2)  {
-	echo "<div class='windtoday60'>",number_format($wind["gust_year_max"]*2.23694,1) . "</value>";}
-	else if ($wind["units"]=='mph' && number_format($wind["gust_year_max"]*2.23694,1)>=24.85)  {
-	echo "<div class='windtoday40'>",number_format($wind["gust_year_max"]*2.23694,1) . "</value>";}
-	else if ($wind["units"]=='mph' && number_format($wind["gust_year_max"]*2.23694,1)>=18.64)  {
-	echo "<div class='windtoday30'>",number_format($wind["gust_year_max"]*2.23694,1) . "</value>";}
-	else if ($wind["units"]=='mph' && number_format($wind["gust_year_max"]*2.23694,1)>=6.2)  {
-	echo "<div class='windtoday10'>",number_format($wind["gust_year_max"]*2.23694,1) . "</value>";}
-	else if ($wind["units"]=='mph' && number_format($wind["gust_year_max"]*2.23694,1)>=-0) {
-	echo "<div class='windtoday'>",number_format($wind["gust_year_max"]*2.23694,1) . "</value>";}
+	if ($wind["units"]=='mph' && number_format($wind["gust_year_max"],1)>=37.2)  {
+	echo "<div class='windtoday60'>",number_format($wind["gust_year_max"],1) . "</value>";}
+	else if ($wind["units"]=='mph' && number_format($wind["gust_year_max"],1)>=24.85)  {
+	echo "<div class='windtoday40'>",number_format($wind["gust_year_max"],1) . "</value>";}
+	else if ($wind["units"]=='mph' && number_format($wind["gust_year_max"],1)>=18.64)  {
+	echo "<div class='windtoday30'>",number_format($wind["gust_year_max"],1) . "</value>";}
+	else if ($wind["units"]=='mph' && number_format($wind["gust_year_max"],1)>=6.2)  {
+	echo "<div class='windtoday10'>",number_format($wind["gust_year_max"],1) . "</value>";}
+	else if ($wind["units"]=='mph' && number_format($wind["gust_year_max"],1)>=-0) {
+	echo "<div class='windtoday'>",number_format($wind["gust_year_max"],1) . "</value>";}
 
 	//kts
-	if ($wind["units"]=='kn' && $wind["gust_year_max"]>=32.40)  {
+	if ($wind["units"]=='kts' && $wind["gust_year_max"]>=32.40)  {
 	echo "<div class='windtoday60'>",$wind["gust_year_max"] . "</value>";}
-	else if ($wind["units"]=='kn' && $wind["gust_year_max"]>=21.60)  {
+	else if ($wind["units"]=='kts' && $wind["gust_year_max"]>=21.60)  {
 	echo "<div class='windtoday40'>",$wind["gust_year_max"] . "</value>";}
-	else if ($wind["units"]=='kn' && $wind["gust_year_max"]>=16.20)  {
+	else if ($wind["units"]=='kts' && $wind["gust_year_max"]>=16.20)  {
 	echo "<div class='windtoday30'>",$wind["gust_year_max"] . "</value>";}
-	else if ($wind["units"]=='kn' && $wind["gust_year_max"]>=5.40)  {
+	else if ($wind["units"]=='kts' && $wind["gust_year_max"]>=5.40)  {
 	echo "<div class='windtoday10'>",$wind["gust_year_max"] . "</value>";}
-	else if ($wind["units"]=='kn' && $wind["gust_year_max"]>=-0) {
+	else if ($wind["units"]=='kts' && $wind["gust_year_max"]>=-0) {
 	echo "<div class='windtoday'>",$wind["gust_year_max"] . "</value>";}
 
 	//ms
@@ -298,10 +295,10 @@ Max Recorded <br><blue><?php echo $wind["gust_month_maxtime"];?></blue></div>
 <div></div>
 <div class='dvmconvertrain'>
 <?php //convert rain
-if($wind["units"] =='km/h'){echo number_format($wind["gust_year_max"]*2.23694,1)." <smalluvunit>mph</smalluvunit";}
-if($wind["units"] =='mph'){ echo number_format($wind["gust_year_max"]*3.5999988862317131577,1)."<smalluvunit>km/h</smalluvunit>";}
+if($wind["units"] =='km/h'){echo number_format($wind["gust_year_max"]*0.621371,1)." <smalluvunit>mph</smalluvunit";}
+if($wind["units"] =='mph'){ echo number_format($wind["gust_year_max"]*1.60934,1)."<smalluvunit>km/h</smalluvunit>";}
 if($wind["units"] =='m/s'){ echo number_format($wind["gust_year_max"]*3.5999988862317131577,1)."<smalluvunit>km/h</smalluvunit>";}
-if($wind["units"] =='kn'){ echo number_format($wind["gust_year_max"]*1.8519994254280931489,1)."<smalluvunit>km/h</smalluvunit>";}
+if($wind["units"] =='kts'){ echo number_format($wind["gust_year_max"]*1.8519994254280931489,1)."<smalluvunit>km/h</smalluvunit>";}
 ?>
 </div>
 
@@ -316,39 +313,39 @@ Max Recorded <br><blue><?php echo $wind["gust_year_maxtime"];?></blue></div>
    <div class=actualt>Max All-Time</div>
    <?php
 	// wind year km/h
-	if ($wind["units"]=='km/h' && number_format($wind["gust_alltime_max"]*3.5999988862317131577,1)>=60)  {
-	echo "<div class='windtoday60'>",number_format($wind["gust_alltime_max"]*3.5999988862317131577,1) . "</value>";}
-	else if ($wind["units"]=='km/h' && number_format($wind["gust_alltime_max"]*3.5999988862317131577,1)>=40)  {
-	echo "<div class='windtoday40'>",number_format($wind["gust_alltime_max"]*3.5999988862317131577,1) . "</value>";}
-	else if ($wind["units"]=='km/h' && number_format($wind["gust_alltime_max"]*3.5999988862317131577,1)>=30)  {
-	echo "<div class='windtoday30'>",number_format($wind["gust_alltime_max"]*3.5999988862317131577,1) . "</value>";}
-	else if ($wind["units"]=='km/h' && number_format($wind["gust_alltime_max"]*3.5999988862317131577,1)>=10)  {
-	echo "<div class='windtoday10'>",number_format($wind["gust_alltime_max"]*3.5999988862317131577,1) . "</value>";}
-	else if ($wind["units"]=='km/h' && number_format($wind["gust_alltime_max"]*3.5999988862317131577,1)>=-0) {
-	echo "<div class='windtoday'>",number_format($wind["gust_alltime_max"]*3.5999988862317131577,1) . "</value>";}
+	if ($wind["units"]=='km/h' && number_format($wind["gust_alltime_max"],1)>=60)  {
+	echo "<div class='windtoday60'>",number_format($wind["gust_alltime_max"],1) . "</value>";}
+	else if ($wind["units"]=='km/h' && number_format($wind["gust_alltime_max"],1)>=40)  {
+	echo "<div class='windtoday40'>",number_format($wind["gust_alltime_max"],1) . "</value>";}
+	else if ($wind["units"]=='km/h' && number_format($wind["gust_alltime_max"],1)>=30)  {
+	echo "<div class='windtoday30'>",number_format($wind["gust_alltime_max"],1) . "</value>";}
+	else if ($wind["units"]=='km/h' && number_format($wind["gust_alltime_max"],1)>=10)  {
+	echo "<div class='windtoday10'>",number_format($wind["gust_alltime_max"],1) . "</value>";}
+	else if ($wind["units"]=='km/h' && number_format($wind["gust_alltime_max"],1)>=-0) {
+	echo "<div class='windtoday'>",number_format($wind["gust_alltime_max"],1) . "</value>";}
 
 	//mph
-	if ($wind["units"]=='mph' && number_format($wind["gust_alltime_max"]*2.23694,1)>=37.2)  {
-	echo "<div class='windtoday60'>",number_format($wind["gust_alltime_max"]*2.23694,1) . "</value>";}
-	else if ($wind["units"]=='mph' && number_format($wind["gust_alltime_max"]*2.23694,1)>=24.85)  {
-	echo "<div class='windtoday40'>",number_format($wind["gust_alltime_max"]*2.23694,1) . "</value>";}
-	else if ($wind["units"]=='mph' && number_format($wind["gust_alltime_max"]*2.23694,1)>=18.64)  {
-	echo "<div class='windtoday30'>",number_format($wind["gust_alltime_max"]*2.23694,1) . "</value>";}
-	else if ($wind["units"]=='mph' && number_format($wind["gust_alltime_max"]*2.23694,1)>=6.2)  {
-	echo "<div class='windtoday10'>",number_format($wind["gust_alltime_max"]*2.23694,1) . "</value>";}
-	else if ($wind["units"]=='mph' && number_format($wind["gust_alltime_max"]*2.23694,1)>=-0) {
-	echo "<div class='windtoday'>",number_format($wind["gust_alltime_max"]*2.23694,1) . "</value>";}
+	if ($wind["units"]=='mph' && number_format($wind["gust_alltime_max"],1)>=37.2)  {
+	echo "<div class='windtoday60'>",number_format($wind["gust_alltime_max"],1) . "</value>";}
+	else if ($wind["units"]=='mph' && number_format($wind["gust_alltime_max"],1)>=24.85)  {
+	echo "<div class='windtoday40'>",number_format($wind["gust_alltime_max"],1) . "</value>";}
+	else if ($wind["units"]=='mph' && number_format($wind["gust_alltime_max"],1)>=18.64)  {
+	echo "<div class='windtoday30'>",number_format($wind["gust_alltime_max"],1) . "</value>";}
+	else if ($wind["units"]=='mph' && number_format($wind["gust_alltime_max"],1)>=6.2)  {
+	echo "<div class='windtoday10'>",number_format($wind["gust_alltime_max"],1) . "</value>";}
+	else if ($wind["units"]=='mph' && number_format($wind["gust_alltime_max"],1)>=-0) {
+	echo "<div class='windtoday'>",number_format($wind["gust_alltime_max"],1) . "</value>";}
 
 	//kts
-	if ($wind["units"]=='kn' && $wind["gust_alltime_max"]>=32.40)  {
+	if ($wind["units"]=='kts' && $wind["gust_alltime_max"]>=32.40)  {
 	echo "<div class='windtoday60'>",$wind["gust_alltime_max"] . "</value>";}
-	else if ($wind["units"]=='kn' && $wind["gust_alltime_max"]>=21.60)  {
+	else if ($wind["units"]=='kts' && $wind["gust_alltime_max"]>=21.60)  {
 	echo "<div class='windtoday40'>",$wind["gust_alltime_max"] . "</value>";}
-	else if ($wind["units"]=='kn' && $wind["gust_alltime_max"]>=16.20)  {
+	else if ($wind["units"]=='kts' && $wind["gust_alltime_max"]>=16.20)  {
 	echo "<div class='windtoday30'>",$wind["gust_alltime_max"] . "</value>";}
-	else if ($wind["units"]=='kn' && $wind["gust_alltime_max"]>=5.40)  {
+	else if ($wind["units"]=='kts' && $wind["gust_alltime_max"]>=5.40)  {
 	echo "<div class='windtoday10'>",$wind["gust_alltime_max"] . "</value>";}
-	else if ($wind["units"]=='kn' && $wind["gust_alltime_max"]>=-0) {
+	else if ($wind["units"]=='kts' && $wind["gust_alltime_max"]>=-0) {
 	echo "<div class='windtoday'>",$wind["gust_alltime_max"] . "</value>";}
 
 	//ms
@@ -368,10 +365,10 @@ Max Recorded <br><blue><?php echo $wind["gust_year_maxtime"];?></blue></div>
 <div></div>
 <div class='dvmconvertrain'>
 <?php //convert rain
-if($wind["units"] =='km/h'){echo number_format($wind["gust_alltime_max"]*2.23694,1)." <smalluvunit>mph</smalluvunit";}
-if($wind["units"] =='mph'){ echo number_format($wind["gust_alltime_max"]*3.5999988862317131577,1)."<smalluvunit>km/h</smalluvunit>";}
+if($wind["units"] =='km/h'){echo number_format($wind["gust_alltime_max"]*0.621371,1)." <smalluvunit>mph</smalluvunit";}
+if($wind["units"] =='mph'){ echo number_format($wind["gust_alltime_max"]*1.60934,1)."<smalluvunit>km/h</smalluvunit>";}
 if($wind["units"] =='m/s'){ echo number_format($wind["gust_alltime_max"]*3.5999988862317131577,1)."<smalluvunit>km/h</smalluvunit>";}
-if($wind["units"] =='kn'){ echo number_format($wind["gust_alltime_max"]*1.8519994254280931489,1)."<smalluvunit>km/h</smalluvunit>";}
+if($wind["units"] =='kts'){ echo number_format($wind["gust_alltime_max"]*1.8519994254280931489,1)."<smalluvunit>km/h</smalluvunit>";}
 ?>
 </div>
 
@@ -385,7 +382,7 @@ Max Recorded <br><blue><?php echo $wind["gust_alltime_maxtime"];?></blue></div>
     
   <articlegraph> 
   <!--<div class=actualt>12 Monthly Wind (<?php echo $wind["units"]?>)</div> //--> 
-  <iframe  src="dvmhighcharts/<?php echo $theme1?>-charts.html?chart='windsmallplot'&span='yearly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>" frameborder="0" scrolling="no" width="100%" height="100%"></iframe>
+  <iframe  src="dvmhighcharts/<?php echo $theme?>-charts.html?chart='windsmallplot'&span='yearly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>" frameborder="0" scrolling="no" width="100%" height="100%"></iframe>
    
   </articlegraph> 
   

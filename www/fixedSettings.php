@@ -96,7 +96,8 @@ if (
         $_GET["units"] == "ca" ||
         $_GET["units"] == "uk" ||
         $_GET["units"] == "metric" ||
-        $_GET["units"] == "scandinavia")
+        $_GET["units"] == "scandinavia" ||
+        $_GET["units"] == "kts")
 ) {
     SetCookie("units", $_GET["units"], time() + 15552000);
     $units = $_GET["units"];
@@ -152,6 +153,16 @@ if ($units == "uk") {
     $rainfallconv = "1";
     $pressureinterval = "0.5";
     $rainfallconvmm = "1";
+} elseif ($units == "kts") {
+    $windunit = "kts";
+    $tempunit = "C";
+    $rainunit = "mm";
+    $pressureunit = "hPa";
+    $distanceunit = "km"; 
+    $windconv = "0.5399570136727677";
+    $rainfallconv = "10";
+    $pressureinterval = "0.5";
+    $rainfallconvmm = "10";
 }
 
 if ($advisoryzone == "uk") {

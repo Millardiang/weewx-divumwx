@@ -119,10 +119,10 @@ svg.append("circle")
 			.attr("y", 33)
 			.style("fill", "black")
 			.style("font-family", "Helvetica")
-			.style("font-size", "11px")
+			.style("font-size", "9px")
 			.style("text-anchor", "middle")
 			.style("font-weight", "bold")
-			.text(rainM+" "+units);
+			.text(d3.format(".1f")(rainM) +" " + units);
 			
 		// max rainfall month text	
 		svg.append("text")		
@@ -159,10 +159,10 @@ svg.append("circle")
 			.attr("y", 33)
 			.style("fill", "black")
 			.style("font-family", "Helvetica")
-			.style("font-size", "11px")
+			.style("font-size", "9px")
 			.style("text-anchor", "middle")
 			.style("font-weight", "bold")
-			.text(rainY+" "+units);
+			.text(d3.format(".1f")(rainY) + " " + units);
 			
 		//  year text	
 		svg.append("text")		
