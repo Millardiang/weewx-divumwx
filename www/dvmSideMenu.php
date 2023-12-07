@@ -178,6 +178,9 @@
             </li>
             <li>
               <a href="stationinfo.php" data-lity title="Weather Station Hardware Info"><menumarkerred></menumarkerred> Hardware Info</a>
+            </li>
+            <li>
+              <a href="dvmMenuCheckVariable.php" data-lity title="Check Variables"><menumarkerorange></menumarkerorange> Variable Check Lists</a>
             </li>';
       if (!empty($extraLinkTitle) && !empty($extraLinkURL) && !empty($extraLinkColor)) {
           echo '<li>
