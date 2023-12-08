@@ -84,10 +84,10 @@ table.darkTable td, table.darkTable th {
 }
 table.darkTable tbody td {
   font-size: 11px;
-  color: #E6E6E6;
+  color: silver;
 }
 table.darkTable tr:nth-child(even) {
-  background: #888888;
+  background: #5D5D5D;
 }
 table.darkTable thead {
   background: #1F2225;
@@ -95,9 +95,9 @@ table.darkTable thead {
 }
 table.darkTable thead th {
   font-size: 14px;
-  font-weight: bold;
-  color: #E6E6E6;
-  text-align: center;
+  font-weight: normal;
+  color: silver;
+  text-align: left;
   border-left: 2px solid #4A4A4A;
 }
 table.darkTable thead th:first-child {
@@ -109,9 +109,9 @@ table.darkTable tfoot td {
 }
 </style>
 <table class="darkTable">
-<thead><tr><th colspan="3">Check List of Archive Generated PHP Variables</th></tr></thead>                              
-<thead><tr><th colspan="3">General Information Data Variables</th></tr></thead>
+<thead><tr><th colspan="3">Check List of dvmCombinedData.php.tmpl Generated PHP Variables</th></tr></thead>                              
 <thead><tr><th>Variable Description</th><th>Variable Name</th><th>Current Value</th></tr></thead>
+<thead><tr><th colspan="3">General Information Data Variables</th></tr></thead>
 <tbody>
 <tr><td>date/time dvmRealtime.txt file</td><td>$sundial_time</td><td><?php echo $sundial_time;?></td></tr>
 <tr><td>Station Location</td><td>$stationlocation</td><td><?php echo $stationlocation;?></td></tr>
@@ -131,8 +131,7 @@ table.darkTable tfoot td {
 <tr><td>Operational since</td><td>$divum["since"]</td><td><?php echo $divum["since"];?></td></tr>
 <tr><td>Station uptime</td><td>$stationUptime</td><td><?php echo $stationUptime;?></td></tr>
                               
-<thead><tr><th colspan="3">Air Quality Variables</th></tr></thead>
-<thead><tr><th>Variable Description</th><th>Variable Name</th><th>Current Value</th></tr></thead>                              
+<thead><tr><th colspan="3">Air Quality Variables</th></tr></thead>                              
 <tr><td>Air quality units</td><td>$air["pm_units"]</td><td><?php echo $air["pm_units"];?></td></tr>
 <tr><td>Current 2.5micron particles</td><td>$air["current.pm2_5"]</td><td><?php echo $air["current.pm2_5"];?></td></tr>
 <tr><td>Rolling 24hour 2.5micron particle average</td><td>$air["24h.rollingavg.pm2_5"]</td><td><?php echo $air["24h.rollingavg.pm2_5"];?></td></tr>
@@ -140,7 +139,6 @@ table.darkTable tfoot td {
 <tr><td>Rolling 24hour 10_0micron particle average</td><td>$air["24h.rollingavg.pm10_0"]</td><td><?php echo $air["24h.rollingavg.pm10_0"];?></td></tr>
                                                             
 <thead><tr><th colspan="3">Almanac Variables</th></tr></thead>
-<thead><tr><th>Variable Description</th><th>Variable Name</th><th>Current Value</th></tr></thead>
 <tr><td>Sun altitude</td><td>$alm["sun_altitude"]</td><td><?php echo $alm["sun_altitude"];?></td></tr>
 <tr><td>Sun always up or always down</td><td>$alm["sun_None"]</td><td><?php echo $alm["sun_None"];?></td></tr>
 <tr><td>00:00 or 24:00</td><td>$alm["daylight_str"]</td><td><?php echo $alm["daylight_str"];?></td></tr>
@@ -186,8 +184,7 @@ table.darkTable tfoot td {
 <tr><td>Neptune heliocentric mean longitude</td><td>$alm["neptune_hlongitude"]</td><td><?php echo $alm["neptune_hlongitude"];?></td></tr>
 <tr><td>Pluto heliocentric mean longitude</td><td>$alm["pluto_hlongitude"]</td><td><?php echo $alm["pluto_hlongitude"];?></td></tr>
                               
-<thead><tr><th colspan="3">Barometric Variables</th></tr></thead>
-<thead><tr><th>Variable Description</th><th>Variable Name</th><th>Current Value</th></tr></thead>                              
+<thead><tr><th colspan="3">Barometric Variables</th></tr></thead>                              
 <tr><td>Barometric units</td><td>$barom["units"]</td><td><?php echo $barom["units"];?></td></tr>
 <tr><td>Realtime barometer</td><td>$barom["now"]</td><td><?php echo $barom["now"];?></td></tr>
 <tr><td>Day maximum barometer</td><td>$barom["max"]</td><td><?php echo $barom["max"];?></td></tr>
@@ -213,8 +210,7 @@ table.darkTable tfoot td {
 <tr><td>Alltime minimum barometer</td><td>$barom["alltime_min"]</td><td><?php echo $barom["alltime_min"];?></td></tr>
 <tr><td>Alltime minimum barometer time</td><td>$barom["alltime_mintime"]</td><td><?php echo $barom["alltime_mintime"];?></td></tr>
                               
-<thead><tr><th colspan="3">Color Variables</th></tr></thead>
-<thead><tr><th>Variable Description</th><th>Variable Name</th><th>Current Value</th></tr></thead>                              
+<thead><tr><th colspan="3">Color Variables</th></tr></thead>                             
 <tr><td>Temperature 60min average</td><td>$color["outTemp_60min_avg"]</td><td><?php echo $color["outTemp_60min_avg"];?></td></tr>                                 
 <tr><td>Temperature day maximum</td><td>$t[0]</td><td><?php echo $t[0];?></td></tr>
 <tr><td>Temperature day minimum</td><td>$t[1]</td><td><?php echo $t[1];?></td></tr>
@@ -249,8 +245,7 @@ table.darkTable tfoot td {
 <tr><td>Wind speed 10min average</td><td>$color["windSpeed_10min_avg"]</td><td><?php echo $color["windSpeed_10min_avg"];?></td></tr>                                 
 <tr><td>Wind gust 10min maximum</td><td>$color["windGust_10min_max"]</td><td><?php echo $color["windGust_10min_max"];?></td></tr>                                 
 
-<thead><tr><th colspan="3">Dewpoint Variables</th></tr></thead>
-<thead><tr><th>Variable Description</th><th>Variable Name</th><th>Current Value</th></tr></thead>                              
+<thead><tr><th colspan="3">Dewpoint Variables</th></tr></thead>                              
 <tr><td>Dewpoint realtime</td><td>$dew["now"]</td><td><?php echo $dew["now"];?></td></tr>                                 
 <tr><td>Dewpoint day trend</td><td>$dew["trend"]</td><td><?php echo $dew["trend"];?></td></tr>                                 
 <tr><td>Dewpoint day maximum</td><td>$dew["day_max"]</td><td><?php echo $dew["day_max"];?></td></tr>                                 
@@ -274,8 +269,7 @@ table.darkTable tfoot td {
 <tr><td>Dewpoint alltime minimum</td><td>$dew["alltime_min"]</td><td><?php echo $dew["alltime_min"];?></td></tr>                                 
 <tr><td>Dewpoint alltime minimum time</td><td>$dew["alltime_mintime"]</td><td><?php echo $dew["alltime_mintime"];?></td></tr>                                 
 
-<thead><tr><th colspan="3">Humidity Variables</th></tr></thead>
-<thead><tr><th>Variable Description</th><th>Variable Name</th><th>Current Value</th></tr></thead> 
+<thead><tr><th colspan="3">Humidity Variables</th></tr></thead> 
 <tr><td>Humidity realtime</td><td>$humid["now"]</td><td><?php echo $humid["now"];?></td></tr>                                 
 <tr><td>Humidity day trend</td><td>$humid["trend"]</td><td><?php echo $humid["trend"];?></td></tr>                                 
 <tr><td>Humidity day maximum</td><td>$humid["day_max"]</td><td><?php echo $humid["day_max"];?></td></tr>                                 
@@ -322,7 +316,6 @@ table.darkTable tfoot td {
 <tr><td>Humidity indoors  alltime minimum time</td><td>$humid["indoors_alltime_mintime"]</td><td><?php echo $humid["indoors_alltime_mintime"];?></td></tr>                                 
 
 <thead><tr><th colspan="3">Lightning Variables</th></tr></thead>
-<thead><tr><th>Variable Description</th><th>Variable Name</th><th>Current Value</th></tr></thead> 
 <tr><td>Lightning last strike time</td><td>$lightning["last_strike_time"]</td><td><?php echo $lightning["last_strike_time"];?></td></tr>                                 
 <tr><td>Lightning last strike time</td><td>$lightning["last_time"]</td><td><?php echo $lightning["last_time"];?></td></tr>                                 
 <tr><td>Lightning last strike time ago</td><td>$lightning["time_ago"]</td><td><?php echo $lightning["time_ago"];?></td></tr>                                 
@@ -334,8 +327,7 @@ table.darkTable tfoot td {
 <tr><td>Lightning year strike count</td><td>$lightning["year_strike_count"]</td><td><?php echo $lightning["year_strike_count"];?></td></tr>                                 
 <tr><td>Lightning alltime strike count</td><td>$lightning["alltime_strike_count"]</td><td><?php echo $lightning["alltime_strike_count"];?></td></tr>                                 
 
-<thead><tr><th colspan="3">Rain Variables</th></tr></thead>
-<thead><tr><th>Variable Description</th><th>Variable Name</th><th>Current Value</th></tr></thead> 
+<thead><tr><th colspan="3">Rain Variables</th></tr></thead> 
 <tr><td>Rain units</td><td>$rain["units"]</td><td><?php echo $rain["units"];?></td></tr>                                 
 <tr><td>Rain realtime</td><td>$rain["current"]</td><td><?php echo $rain["current"];?></td></tr>                                 
 <tr><td>Rain rate</td><td>$rain["rate"]</td><td><?php echo $rain["rate"];?></td></tr>                                 
@@ -363,14 +355,12 @@ table.darkTable tfoot td {
 <tr><td>Storm Rain</td><td>$rain["storm_rain"]</td><td><?php echo $rain["storm_rain"];?></td></tr>                                 
 
 <thead><tr><th colspan="3">Sky Variables</th></tr></thead>
-<thead><tr><th>Variable Description</th><th>Variable Name</th><th>Current Value</th></tr></thead> 
 <tr><td>Lux</td><td>$sky["lux"]</td><td><?php echo $sky["lux"];?></td></tr>                                 
 <tr><td>Lux day maximum</td><td>$sky["day_lux_max"]</td><td><?php echo $sky["day_lux_max"];?></td></tr>                                 
 <tr><td>Cloud base</td><td>$sky["cloud_base"]</td><td><?php echo $sky["cloud_base"];?></td></tr>                                 
 <tr><td>Cloud cover</td><td>$sky["cloud_cover"]</td><td><?php echo $sky["cloud_cover"];?></td></tr>                                 
 
 <thead><tr><th colspan="3">Solar Radiation Variables</th></tr></thead>
-<thead><tr><th>Variable Description</th><th>Variable Name</th><th>Current Value</th></tr></thead> 
 <tr><td>Solar radiation realtime</td><td>$solar["now"]</td><td><?php echo $solar["now"];?></td></tr>                                 
 <tr><td>Solar radiation day maximum</td><td>$solar["day_max"]</td><td><?php echo $solar["day_max"];?></td></tr>                                 
 <tr><td>Solar radiation day maximum</td><td>$solar["day_maxtime"]</td><td><?php echo $solar["day_maxtime"];?></td></tr>                                 
@@ -383,8 +373,7 @@ table.darkTable tfoot td {
 <tr><td>Solar radiation alltime maximum</td><td>$solar["alltime_max"]</td><td><?php echo $solar["alltime_max"];?></td></tr>                                 
 <tr><td>Solar radiation alltime maximum</td><td>$solar["alltime_maxtime"]</td><td><?php echo $solar["alltime_maxtime"];?></td></tr>                                 
 
-<thead><tr><th colspan="3">Temperature Variables</th></tr></thead>
-<thead><tr><th>Variable Description</th><th>Variable Name</th><th>Current Value</th></tr></thead> 
+<thead><tr><th colspan="3">Temperature Variables</th></tr></thead> 
 <tr><td>Temperature units</td><td>$temp["units"]</td><td><?php echo $temp["units"];?></td></tr>                                 
 <tr><td>Indoor temperature realtime</td><td>$temp["indoor_now"]</td><td><?php echo $temp["indoor_now"];?></td></tr>                                 
 <tr><td>Indoor temperature day trend</td><td>$temp["indoor_trend"]</td><td><?php echo $temp["indoor_trend"];?></td></tr>                                 
@@ -421,7 +410,6 @@ table.darkTable tfoot td {
 <tr><td>Outside temperature alltime minimum time</td><td>$temp["outside_alltime_mintime"]</td><td><?php echo $temp["outside_alltime_mintime"];?></td></tr>                                 
 
 <thead><tr><th colspan="3">UV Index Variables</th></tr></thead>
-<thead><tr><th>Variable Description</th><th>Variable Name</th><th>Current Value</th></tr></thead> 
 <tr><td>UVI realtime</td><td>$uv["now"]</td><td><?php echo $uv["now"];?></td></tr>                                 
 <tr><td>UVI day maximum</td><td>$uv["day_max"]</td><td><?php echo $uv["day_max"];?></td></tr>                                 
 <tr><td>UVI day maximum time</td><td>$uv["day_maxtime"]</td><td><?php echo $uv["day_maxtime"];?></td></tr>                                 
@@ -434,8 +422,7 @@ table.darkTable tfoot td {
 <tr><td>UVI alltime maximum</td><td>$uv["alltime_max"]</td><td><?php echo $uv["alltime_max"];?></td></tr>                                 
 <tr><td>UVI alltime maximum time</td><td>$uv["alltime_maxtime"]</td><td><?php echo $uv["alltime_maxtime"];?></td></tr>                                 
                                 
-<thead><tr><th colspan="3">Wind Variables</th></tr></thead>
-<thead><tr><th>Variable Description</th><th>Variable Name</th><th>Current Value</th></tr></thead> 
+<thead><tr><th colspan="3">Wind Variables</th></tr></thead> 
 <tr><td>Wind units</td><td>$wind["units"]</td><td><?php echo $wind["units"];?></td></tr>                                 
 <tr><td>Wind direction realtime</td><td>$wind["direction"]</td><td><?php echo $wind["direction"];?></td></tr>                                 
 <tr><td>Wind ordinal compass realtime</td><td>$wind["cardinal"]</td><td><?php echo $wind["cardinal"];?></td></tr>                                 

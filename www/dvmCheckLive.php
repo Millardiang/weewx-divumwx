@@ -40,10 +40,10 @@ table.darkTable td, table.darkTable th {
 }
 table.darkTable tbody td {
   font-size: 11px;
-  color: #E6E6E6;
+  color: silver;
 }
 table.darkTable tr:nth-child(even) {
-  background: #888888;
+  background: #5D5D5D;
 }
 table.darkTable thead {
   background: #1F2225;
@@ -51,8 +51,8 @@ table.darkTable thead {
 }
 table.darkTable thead th {
   font-size: 14px;
-  font-weight: bold;
-  color: #E6E6E6;
+  font-weight: normal;
+  color: silver;
   text-align: center;
   border-left: 2px solid #4A4A4A;
 }
@@ -119,7 +119,6 @@ table.darkTable tfoot td {
 <tr><td>Rain hour total</td><td>$weewxrt[47]</td><td><?php echo $weewxrt[47];?></td></tr>
 <tr><td>Zambretti code</td><td>$weewxrt[48]</td><td><?php echo $weewxrt[48];?></td></tr>
 <tr><td>Is it daylight</td><td>$weewxrt[49]</td><td><?php echo $weewxrt[49];?></td></tr>
-<tr><td>Lost sensor contact</td><td>$weewxrt[50]</td><td><?php echo $weewxrt[50];?></td></tr>
 <tr><td>Lost sensor contact</td><td>$weewxrt[50]</td><td><?php echo $weewxrt[50];?></td></tr>
 <tr><td>Wind direction day average</td><td>$weewxrt[51]</td><td><?php echo $weewxrt[51];?></td></tr>
 <tr><td>Cloud base</td><td>$weewxrt[52]</td><td><?php echo $weewxrt[52];?></td></tr>

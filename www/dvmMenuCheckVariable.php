@@ -71,8 +71,8 @@ body {
 </head>
 <body>
 
-<button class="tablink" onclick="openPage('Tab1', this, 'rgba(194, 102, 58)')" id="defaultOpen">Realtime</button>
-<button class="tablink" onclick="openPage('Tab2', this, 'rgba(194, 102, 58)')">Archive</button>
+<button class="tablink" onclick="openPage('Tab1', this, 'rgba(194, 102, 58)')" id="defaultOpen">Realtime Text Generated</button>
+<button class="tablink" onclick="openPage('Tab2', this, 'rgba(194, 102, 58)')">Combined Data Template Generated</button>
   
   <div id="Tab1" class="tabcontent">
   
