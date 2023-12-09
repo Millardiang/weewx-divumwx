@@ -63,9 +63,9 @@ $snow = $parsed_visibility['response'][0]['periods'][0]['snowIN'];
 }
 
 if ($windunit == 'mph') {
-$visibility = round($parsed_visibility['response'][0]['periods'][0]['visibilityMI'],0,PHP_ROUND_HALF_UP)." miles";
+$visibility = round($parsed_visibility['response'][0]['periods'][0]['visibilityMI'],0,PHP_ROUND_HALF_UP)."miles";
 } else {
-$visibility = round($parsed_visibility['response'][0]['periods'][0]['visibilityKM'],0,PHP_ROUND_HALF_UP)." km";
+$visibility = round($parsed_visibility['response'][0]['periods'][0]['visibilityKM'],0,PHP_ROUND_HALF_UP)."km";
 }
 if ($cloud_region[0] !== "Europe"){$sky["cloud_cover"] = $parsed_visibility['response'][0]['periods'][0]['sky'];}
         
@@ -283,7 +283,7 @@ var cloud_cover = "<?php echo $sky["cloud_cover"];?>";
 
 var cloud_oktas = "<?php echo $sky["cloud_oktas"];?>";
 
-var data = ["Cloud Cover " + "-" + cloud_cover + "-" + " % " + "-" + "(" + cloud_oktas + ")"];
+var data = ["Cloud Cover " + "-" + cloud_cover + "% " + "-" + "(" + cloud_oktas + ")"];
 
 var text = svg.selectAll(null)
     .data(data)
@@ -314,7 +314,7 @@ var text = svg.selectAll(null)
 
 var outside_day_avg_sixtyM = "<?php echo $temp["outside_day_avg_60mn"];?>";
 
-var data = ["Average " + "x" + "Temperature " + "x" + "last 60 minutes " + "x" + outside_day_avg_sixtyM + "x" + "\u00B0" + tempunits];
+var data = ["60min " + "x" + "Temperature " + "x" + "Average " + "x" + outside_day_avg_sixtyM + "\u00B0" + tempunits];
 
 var text = svg.selectAll(null)
     .data(data)
@@ -353,7 +353,7 @@ var text = svg.selectAll(null)
 
 var gust_tenM_max = <?php echo number_format($wind["gust_10m_max"],1);?>;
 
-var data = ["Max " + "-" + "Wind Gust " + "-" + "last 10 minutes " + "-" + d3.format(".1f")(gust_tenM_max) + "-" + " " + windunits];
+var data = ["10min " + "-" + "Wind Gust " + "-" + "Maximum " + "-" + d3.format(".1f")(gust_tenM_max) + windunits];
 
 var text = svg.selectAll(null)
     .data(data)
@@ -392,7 +392,7 @@ var text = svg.selectAll(null)
 
 var speed_tenM_avg = <?php echo number_format($wind["speed_10m_avg"],1);?>;
 
-var data = ["Average " + "-" + "Wind Speed " + "-" + "last 10 minutes " + "-" + d3.format(".1f")(speed_tenM_avg) + "-" + " " + windunits];
+var data = ["10min " + "-" + "Wind Speed " + "-" + "Average " + "-" + d3.format(".1f")(speed_tenM_avg)  + windunits];
 
 var text = svg.selectAll(null)
     .data(data)
@@ -432,7 +432,7 @@ var text = svg.selectAll(null)
 var direction_tenM_avg = "<?php echo $wind["direction_10m_avg"];?>";
 direction_tenM_avg = direction_tenM_avg || 0;
 
-var data = ["Average " + "x" + "Wind Dir " + "x" + "last 10 minutes " + "x" + bearing + "x" + " " + direction_tenM_avg + "\u00B0"];
+var data = ["10min " + "x" + "Wind Dir " + "x" + "Average " + "x" + bearing + "x" + " " + direction_tenM_avg + "\u00B0"];
 
 var text = svg.selectAll(null)
     .data(data)
@@ -469,7 +469,7 @@ var text = svg.selectAll(null)
 
 var rain_last_tenM = "<?php echo $rain["last_10min"];?>";
 
-var data = ["Rainfall " + "-" + "last 10 minutes " + "-" + d3.format(".1f")(rain_last_tenM) + " " + "-" + rainunits];
+var data = ["10min " + "-" + "Rainfall " + "-" + "Total " + "-" + d3.format(".1f")(rain_last_tenM) +rainunits];
 
 var text = svg.selectAll(null)
     .data(data)
@@ -478,28 +478,33 @@ var text = svg.selectAll(null)
     .attr("x", 155)
     .attr("y", function(d, i) { return 146.5 + i * 146.5; })
 
-    .style("fill", "#01a4b4")
+    .style("fill", baseTextColor)
     .style("font-family", "Helvetica") 
     .style("font-size", "11px")
     .style("text-anchor", "middle")
-    .style("font-weight", "bold")
+    .style("font-weight", "normal")
     .text(function(d) { return d.split("-")[0]; })
+
+    .append("tspan")
+    .style("fill", "#01a4b4")
+    .style("font-weight", "bold")
+    .text(function(d) { return d.split("-")[1]; })
 
     .append("tspan")
     .style("fill", baseTextColor)
     .style("font-weight", "normal")
-    .text(function(d) { return d.split("-")[1]; })
+    .text(function(d) { return d.split("-")[2]; })
 
     .append("tspan")
     .style("fill", "#01a4b4")
     .style("font-weight", "bold")
-    .text(function(d) { return d.split("-")[2]; })
+    .text(function(d) { return d.split("-")[3]; })
 
     .append("tspan")
     .style("fill", baseTextColor)
     .style("font-weight", "normal")
     .style("font-size", "9px")
-    .text(function(d) { return d.split("-")[3]; });
+    .text(function(d) { return d.split("-")[4]; });
 
 </script>
 </html>
