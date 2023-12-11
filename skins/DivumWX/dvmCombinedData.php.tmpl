@@ -99,7 +99,7 @@ $divum["date"] = date($dateFormat, $divum["datetime"]);
 $divum["time"] = date($timeFormat, $divum["datetime"]);
 $divum["swversion"] = "$station.version";
 $divum["build"] = $weewxrt[38];
-$divum["since"] = date('D M Y',$alltime.outTemp.firsttime.raw);
+$divum["since"] = "$alltime.outTemp.firsttime.format("%d %b %Y %H:%M")";
 $stationUptime = "$station.uptime.long_form";
 
 //almanac
