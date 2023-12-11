@@ -36,8 +36,8 @@ $barom["now"] = $barom["now"] * 0.1;
 $barom["trend"] = $barom["trend"] * 0.1;
 $barom["min"] = $barom["min"] * 0.1;
 $barom["max"] = $barom["max"] * 0.1;
-$barom["24h_max"] = $barom["24h_max"] * 0.1;
-$barom["24h_min"] = $barom["24h_min"] * 0.1;
+$barom["yesterday_max"] = $barom["yesterday_max"] * 0.1;
+$barom["yesterday_min"] = $barom["yesterday_min"] * 0.1;
 $barom["month_max"] = $barom["month_max"] * 0.1;
 $barom["month_min"] = $barom["month_min"] * 0.1;
 $barom["year_max"] = $barom["year_max"] * 0.1;
@@ -71,17 +71,17 @@ if ($barom["min"] >= 0) { echo "<div class='temperaturetoday0'>",$barom["min"] .
 
 <?php
 //pressure max yesterday
-if ($barom["24h_max"] >= 0) { echo "<div class='temperaturetoday24'>",$barom["24h_max"] . "</value>";} echo "<smalluvunit>" . $barom["units"] . "</smalluvunit>";?></div>
+if ($barom["24h_max"] >= 0) { echo "<div class='temperaturetoday24'>",$barom["yesterday_max"] . "</value>";} echo "<smalluvunit>" . $barom["units"] . "</smalluvunit>";?></div>
 
-<div class="temperaturetrend"><span style='color:rgba(255, 124, 57, 1.000)'><b>Max</b></span><br> <?php echo $barom["24h_maxtime"]; ?></span></div></div>
+<div class="temperaturetrend"><span style='color:rgba(255, 124, 57, 1.000)'><b>Max</b></span><br> <?php echo $barom["yesterday_maxtime"]; ?></span></div></div>
 
 
 <div class="temperaturecontainer2">
 <?php
 //pressure min yesterday
-if ($barom["24h_min"] >= 0) { echo "<div class='temperaturetoday0'>",$barom["24h_min"] . "</value>";} echo "<smalluvunit>" . $barom["units"] . "</smalluvunit>";?></div>
+if ($barom["24h_min"] >= 0) { echo "<div class='temperaturetoday0'>",$barom["yesterday_min"] . "</value>";} echo "<smalluvunit>" . $barom["units"] . "</smalluvunit>";?></div>
 
-<div class="temperaturetrend"><span style='color:rgba(68, 166, 181, 1.000)'><b>Min</b></span><br> <?php echo $barom["24h_mintime"];?></span></div>
+<div class="temperaturetrend"><span style='color:rgba(68, 166, 181, 1.000)'><b>Min</b></span><br> <?php echo $barom["yesterday_mintime"];?></span></div>
 </article>
 
 <article>
