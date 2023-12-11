@@ -6,7 +6,7 @@ $textColor = "White";
 ?>
 <meta http-equiv="Content-Type: text/html; charset=UTF-8"/>
 <style>
-maxred {
+maxGust {
  color: <?php echo $gustColorMax;?>;
 }
 </style>
@@ -20,7 +20,7 @@ maxred {
 <div class="updatedtime2"><span><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?></div><br />
 
 <div class="windspeedtrend1">
-<?php echo "<valuetext>Max "."<max><value><maxred>".number_format($wind["gust_max"],1)."</maxred></max></span>"."<supmb> ".$wind["units"]."</supmb><br> ".$lang['Gust']." (".$wind["gust_maxtime"].")</valuetext>";?></div>
+<?php echo "<valuetext>Max "."<max><value><maxGust>".number_format($wind["gust_max"],1)."</maxGust></max></span>"."<supmb> ".$wind["units"]."</supmb><br> ".$lang['Gust']." (".$wind["gust_maxtime"].")</valuetext>";?></div>
 
 <div class="windconverter">
 <?php
