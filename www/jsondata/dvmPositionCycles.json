@@ -2,6 +2,7 @@
 "dvmAirqualityModule.php": {"cycle": "60000"},
 "dvmBarometerModule.php":{"cycle": "60000"},
 "dvmCurrentModule.php":{"cycle": "60000"},
+"dvmCurrentModuleAlt.php":{"cycle": "60000"},
 "dvmEarthDaylightModule.php":{"cycle": "60000"},
 "dvmEarthquakeModule.php":{"cycle": "60000"},
 "dvmForecastModule.php":{"cycle": "60000"},
