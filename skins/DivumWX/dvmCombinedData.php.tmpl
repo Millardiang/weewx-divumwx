@@ -308,10 +308,54 @@ $a[1] = "$colorize($alltime.outTemp.min)";
 $a[2] = "$colorize($alltime.dewpoint.max)";
 $a[3] = "$colorize($alltime.dewpoint.min)";
 
-//current conditions
+//60min
 $color["outTemp_60min_avg"] = "$colorize($hour($hours_ago=1).outTemp.avg)";
+
+//wind speed color
+if($weewxrt[12] == 0){$color["windSpeed"]="#85a3aa";}
+else if($weewxrt[12] == 1){$color["windSpeed"]="#7e98bb";}
+else if($weewxrt[12] == 2){$color["windSpeed"]="#6e90d0";}
+else if($weewxrt[12] == 3){$color["windSpeed"]="#0f94a7";}
+else if($weewxrt[12] == 4){$color["windSpeed"]="#39a239";}
+else if($weewxrt[12] == 5){$color["windSpeed"]="#c2863e";}
+else if($weewxrt[12] == 6){$color["windSpeed"]="#c8420d";}
+else if($weewxrt[12] == 7){$color["windSpeed"]="#d20032";}
+else if($weewxrt[12] == 8){$color["windSpeed"]="#af5088";}
+else if($weewxrt[12] == 9){$color["windSpeed"]="#754a92";}
+else if($weewxrt[12] == 10){$color["windSpeed"]="#45698d";}
+else if($weewxrt[12] == 11){$color["windSpeed"]="#c1fc77";}
+else if($weewxrt[12] == 12){$color["windSpeed"]="#f1ff6c";}
+
+//wind gust color
+if($weewxrt[64] <= 1){$color["windGust"]="#85a3aa";}
+else if($weewxrt[64] <= 2){$color["windGust"]="#7e98bb";}
+else if($weewxrt[64] <= 3){$color["windGust"]="#6e90d0";}
+else if($weewxrt[64] <= 5){$color["windGust"]="#0f94a7";}
+else if($weewxrt[64] <= 8){$color["windGust"]="#39a239";}
+else if($weewxrt[64] <= 11){$color["windGust"]="#c2863e";}
+else if($weewxrt[64] <= 14){$color["windGust"]="#c8420d";}
+else if($weewxrt[64] <= 17){$color["windGust"]="#d20032";}
+else if($weewxrt[64] <= 21){$color["windGust"]="#af5088";}
+else if($weewxrt[64] <= 24){$color["windGust"]="#754a92";}
+else if($weewxrt[64] <= 28){$color["windGust"]="#45698d";}
+else if($weewxrt[64] <= 32){$color["windGust"]="#c1fc77";}
+else if($weewxrt[64] <= 100){$color["windGust"]="#f1ff6c";}
+
+
+$color["windSpeed_max"] = "$colorize($day.windSpeed.max)";
+$color["windGust_max"] = "$colorize($day.windGust.max)";
+$color["windSpeed_avg"] = "$colorize($day.windSpeed.avg)";
 $color["windSpeed_10min_avg"] = "$colorize($span($time_delta=600).windSpeed.avg)";
 $color["windGust_10min_max"] = "$colorize($span($time_delta=600).windGust.max)";
+$color["windSpeed_yesterday_max"] = "$colorize($day($days_ago=1).windSpeed.max)";
+$color["windGust_yesterday_max"] = "$colorize($day($days_ago=1).windGust.max)";
+$color["windSpeed_month_max"] = "$colorize($month.windSpeed.max)";
+$color["windGust_month_max"] = "$colorize($month.windGust.max)";
+$color["windSpeed_year_max"] = "$colorize($year.windSpeed.max)";
+$color["windGust_year_max"] = "$colorize($year.windGust.max)";
+$color["windSpeed_alltime_max"] = "$colorize($alltime.windSpeed.max)";
+$color["windGust_alltime_max"] = "$colorize($alltime.windGust.max)";
+
 
 //dewpoint
 $dew["now"] = $weewxrt[4];
@@ -566,7 +610,7 @@ else if ($wind["units"] == " kts")
 {
 $wind["units"] = "kts";
 }
-$wind["direction"] = str_pad($weewxrt[7], 3, '0', STR_PAD_LEFT); 
+$wind["direction"] = str_pad($weewxrt[7], 3, '0', STR_PAD_LEFT);
 $wind["direction_10m_avg"] = "$span($time_delta=600).windDir.avg.format(add_label=False)";
 $wind["cardinal"] = $weewxrt[11];    
 $wind["speed"] = $weewxrt[6];
@@ -598,6 +642,13 @@ $wind["gust_alltime_max"] = $alltime.windGust.max.format(add_label=False);
 $wind["gust_alltime_maxtime"] = date('D j M Y H:i',$alltime.windGust.maxtime.raw);
 $wind["direction_trend"] = "$trend.windDir.formatted";
 $wind["direction_trend_ordinal"] = "$trend.windDir.ordinal_compass";
+if($wind["direction_10m_avg"] == "N/A")
+{$wind["direction_10m_avg"] = "Calm";}
+if($wind["direction_trend"] == "N/A")
+{$wind["direction_trend"] = "Calm";}
+if($wind["direction_trend_ordinal"] == "N/A")
+{$wind["direction_trend_ordinal"] = "Calm";}
+
 #end if
 
 //Convert temperatures if necessary
