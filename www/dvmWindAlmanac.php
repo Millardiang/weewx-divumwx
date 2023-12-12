@@ -12,13 +12,11 @@
 #####################################################################################################################
 include('dvmCombinedData.php');
 $gustColorMax = $color["windGust_max"];
-echo $gustColorMax;
 $gustColorYesterdayMax = $color["windGust_yesterday_max"];
 $gustColorMonthMax = $color["windGust_month_max"];
 $gustColorYearMax = $color["windGust_year_max"];
 $gustColorAlltimeMax = $color["windGust_alltime_max"];
 $textColor = "White";
-echo $gustColorYearMax;
 ?>
 <meta http-equiv="Content-Type: text/html; charset=UTF-8"/>
 
