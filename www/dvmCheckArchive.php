@@ -7,12 +7,12 @@ if($humid["day_min"]<30){$t[5]="Blue";}
 else if($humid["day_min"]<60){$t[5]="Green";}
 else if($humid["day_min"]<100){$t[5]="Red";}
 
-if($humid["24h_max"]<30){$d[4]="Blue";}
-else if($humid["24h_max"]<60){$d[4]="Green";}
-else if($humid["24h_max"]<100){$d[4]="Red";}
-if($humid["24h_min"]<30){$d[5]="Blue";}
-else if($humid["24h_min"]<60){$d[5]="Green";}
-else if($humid["24h_min"]<100){$d[5]="Red";}
+if($humid["yesterday_max"]<30){$d[4]="Blue";}
+else if($humid["yesterday_max"]<60){$d[4]="Green";}
+else if($humid["yesterday_max"]<100){$d[4]="Red";}
+if($humid["yesterday_min"]<30){$d[5]="Blue";}
+else if($humid["yesterday_min"]<60){$d[5]="Green";}
+else if($humid["yesterday_min"]<100){$d[5]="Red";}
 
 if($humid["month_max"]<30){$m[4]="Blue";}
 else if($humid["month_max"]<60){$m[4]="Green";}
@@ -210,40 +210,77 @@ table.darkTable tfoot td {
 <tr><td>Alltime minimum barometer</td><td>$barom["alltime_min"]</td><td><?php echo $barom["alltime_min"];?></td></tr>
 <tr><td>Alltime minimum barometer time</td><td>$barom["alltime_mintime"]</td><td><?php echo $barom["alltime_mintime"];?></td></tr>
                               
-<thead><tr><th colspan="3">Color Variables</th></tr></thead>                             
-<tr><td>Temperature 60min average</td><td>$color["outTemp_60min_avg"]</td><td><?php echo $color["outTemp_60min_avg"];?></td></tr>                                 
-<tr><td>Temperature day maximum</td><td>$t[0]</td><td><?php echo $t[0];?></td></tr>
-<tr><td>Temperature day minimum</td><td>$t[1]</td><td><?php echo $t[1];?></td></tr>
-<tr><td>Dew day maximum</td><td>$t[2]</td><td><?php echo $t[2];?></td></tr>
-<tr><td>Dew day minimum</td><td>$t[3]</td><td><?php echo $t[3];?></td></tr>
-<tr><td>Humidity day maximum</td><td>$t[4]</td><td><?php echo $t[4];?></td></tr>
-<tr><td>Humidity day minimum</td><td>$t[5]</td><td><?php echo $t[5];?></td></tr>
-<tr><td>Temperature yesterday maximum</td><td>$d[0]</td><td><?php echo $d[0];?></td></tr>
-<tr><td>Temperature yesterday minimum</td><td>$d[1]</td><td><?php echo $d[1];?></td></tr>
-<tr><td>Dew yesterday maximum</td><td>$d[2]</td><td><?php echo $d[2];?></td></tr>
-<tr><td>Dew yesterday minimum</td><td>$d[3]</td><td><?php echo $d[3];?></td></tr>
-<tr><td>Humidity yesterday maximum</td><td>$d[4]</td><td><?php echo $d[4];?></td></tr>
-<tr><td>Humidity yesterday minimum</td><td>$d[5]</td><td><?php echo $d[5];?></td></tr>
-<tr><td>Temperature month maximum</td><td>$m[0]</td><td><?php echo $m[0];?></td></tr>
-<tr><td>Temperature month minimum</td><td>$m[1]</td><td><?php echo $m[1];?></td></tr>
-<tr><td>Dew month maximum</td><td>$m[2]</td><td><?php echo $m[2];?></td></tr>
-<tr><td>Dew month minimum</td><td>$m[3]</td><td><?php echo $m[3];?></td></tr>
-<tr><td>Humidity month maximum</td><td>$m[4]</td><td><?php echo $m[4];?></td></tr>
-<tr><td>Humidity month minimum</td><td>$m[5]</td><td><?php echo $m[5];?></td></tr>
-<tr><td>Temperature year maximum</td><td>$y[0]</td><td><?php echo $y[0];?></td></tr>
-<tr><td>Temperature year minimum</td><td>$y[1]</td><td><?php echo $y[1];?></td></tr>
-<tr><td>Dew year maximum</td><td>$y[2]</td><td><?php echo $y[2];?></td></tr>
-<tr><td>Dew year minimum</td><td>$y[3]</td><td><?php echo $y[3];?></td></tr>
-<tr><td>Humidity year maximum</td><td>$y[4]</td><td><?php echo $y[4];?></td></tr>
-<tr><td>Humidity year minimum</td><td>$y[5]</td><td><?php echo $y[5];?></td></tr>
-<tr><td>Temperature alltime maximum</td><td>$a[0]</td><td><?php echo $a[0];?></td></tr>
-<tr><td>Temperature alltime minimum</td><td>$a[1]</td><td><?php echo $a[1];?></td></tr>
-<tr><td>Dew alltime maximum</td><td>$a[2]</td><td><?php echo $a[2];?></td></tr>
-<tr><td>Dew alltime minimum</td><td>$a[3]</td><td><?php echo $a[3];?></td></tr>
-<tr><td>Humidity alltime maximum</td><td>$a[4]</td><td><?php echo $a[4];?></td></tr>
-<tr><td>Humidity alltime minimum</td><td>$a[5]</td><td><?php echo $a[5];?></td></tr>
-<tr><td>Wind speed 10min average</td><td>$color["windSpeed_10min_avg"]</td><td><?php echo $color["windSpeed_10min_avg"];?></td></tr>                                 
-<tr><td>Wind gust 10min maximum</td><td>$color["windGust_10min_max"]</td><td><?php echo $color["windGust_10min_max"];?></td></tr>                                 
+<thead><tr><th colspan="3">Color Variables</th></tr></thead>  
+<tr><td>Barometer day maximum color</td><td>$colorBarometerDayMax</td><td><?php echo $colorBarometerDayMax;?></td></tr>
+<tr><td>Barometer day minimum color</td><td>$colorBarometerDayMin</td><td><?php echo $colorBarometerDayMin;?></td></tr>
+<tr><td>Barometer yesterday maximum color</td><td>$colorBarometerYesterdayMax</td><td><?php echo $colorBarometerYesterdayMax;?></td></tr>
+<tr><td>Barometer yesterday minimum color</td><td>$colorBarometerYesterdayMin</td><td><?php echo $colorBarometerYesterdayMin;?></td></tr>
+<tr><td>Barometer month maximum color</td><td>$colorBarometerMonthMax</td><td><?php echo $colorBarometerAlltimeMin;?></td></tr>
+<tr><td>Barometer month minimum color</td><td>$colorBarometerMonthMin</td><td><?php echo $colorBarometerMonthMin;?></td></tr>
+<tr><td>Barometer year maximum color</td><td>$colorBarometerYearMax</td><td><?php echo $colorBarometerYearMax;?></td></tr>
+<tr><td>Barometer year minimum color</td><td>$colorBarometerYearMin</td><td><?php echo $colorBarometerYearMin;?></td></tr>
+<tr><td>Barometer alltime maximum color</td><td>$colorBarometerAlltimeMax</td><td><?php echo $colorBarometerAlltimeMax;?></td></tr>
+<tr><td>Barometer alltime minimum color</td><td>$colorBarometerAlltimeMin</td><td><?php echo $colorBarometerAlltimeMin;?></td></tr>
+<tr><td>Temperature 60min average color</td><td>$color["outTemp_60min_avg"]</td><td><?php echo $color["outTemp_60min_avg"];?></td></tr>                                 
+<tr><td>Temperature day maximum color</td><td>$t[0]</td><td><?php echo $t[0];?></td></tr>
+<<tr><td>Temperature day minimum color</td><td>$t[1]</td><td><?php echo $t[1];?></td></tr>
+<tr><td>Dew day maximum color</td><td>$t[2]</td><td><?php echo $t[2];?></td></tr>
+<tr><td>Dew day minimum color</td><td>$t[3]</td><td><?php echo $t[3];?></td></tr>
+<tr><td>Humidity day maximum color</td><td>$t[4]</td><td><?php echo $t[4];?></td></tr>
+<tr><td>Humidity day minimum color</td><td>$t[5]</td><td><?php echo $t[5];?></td></tr>
+<tr><td>Temperature yesterday maximum color</td><td>$d[0]</td><td><?php echo $d[0];?></td></tr>
+<tr><td>Temperature yesterday minimum color</td><td>$d[1]</td><td><?php echo $d[1];?></td></tr>
+<tr><td>Dew yesterday maximum color</td><td>$d[2]</td><td><?php echo $d[2];?></td></tr>
+<tr><td>Dew yesterday minimum color</td><td>$d[3]</td><td><?php echo $d[3];?></td></tr>
+<tr><td>Humidity yesterday maximum color</td><td>$d[4]</td><td><?php echo $d[4];?></td></tr>
+<tr><td>Humidity yesterday minimum color</td><td>$d[5]</td><td><?php echo $d[5];?></td></tr>
+<tr><td>Temperature month maximum color</td><td>$m[0]</td><td><?php echo $m[0];?></td></tr>
+<tr><td>Temperature month minimum color</td><td>$m[1]</td><td><?php echo $m[1];?></td></tr>
+<tr><td>Dew month maximum color</td><td>$m[2]</td><td><?php echo $m[2];?></td></tr>
+<tr><td>Dew month minimum color</td><td>$m[3]</td><td><?php echo $m[3];?></td></tr>
+<tr><td>Humidity month maximum color</td><td>$m[4]</td><td><?php echo $m[4];?></td></tr>
+<tr><td>Humidity month minimum color</td><td>$m[5]</td><td><?php echo $m[5];?></td></tr>
+<tr><td>Temperature year maximum color</td><td>$y[0]</td><td><?php echo $y[0];?></td></tr>
+<tr><td>Temperature year minimum color</td><td>$y[1]</td><td><?php echo $y[1];?></td></tr>
+<tr><td>Dew year maximum color</td><td>$y[2]</td><td><?php echo $y[2];?></td></tr>
+<tr><td>Dew year minimum color</td><td>$y[3]</td><td><?php echo $y[3];?></td></tr>
+<tr><td>Humidity year maximum color</td><td>$y[4]</td><td><?php echo $y[4];?></td></tr>
+<tr><td>Humidity year minimum color</td><td>$y[5]</td><td><?php echo $y[5];?></td></tr>
+<tr><td>Temperature alltime maximum color</td><td>$a[0]</td><td><?php echo $a[0];?></td></tr>
+<tr><td>Temperature alltime minimum color</td><td>$a[1]</td><td><?php echo $a[1];?></td></tr>
+<tr><td>Dew alltime maximum color</td><td>$a[2]</td><td><?php echo $a[2];?></td></tr>
+<tr><td>Dew alltime minimum color</td><td>$a[3]</td><td><?php echo $a[3];?></td></tr>
+<tr><td>Humidity alltime maximum color</td><td>$a[4]</td><td><?php echo $a[4];?></td></tr>
+<tr><td>Humidity alltime minimum color</td><td>$a[5]</td><td><?php echo $a[5];?></td></tr>
+<tr><td>Wind speed color</td><td>$color["windSpeed"]</td><td><?php echo $color["windSpeed"];?></td></tr>                                 
+<tr><td>Wind gust color</td><td>$color["windGust"]</td><td><?php echo $color["windGust"];?></td></tr>                                 
+<tr><td>Wind speed maximum color</td><td>$color["windSpeed_max"]</td><td><?php echo $color["windSpeed_max"];?></td></tr>                                 
+<tr><td>Wind speed average color</td><td>$color["windSpeed_avg"]</td><td><?php echo $color["windSpeed_avg"];?></td></tr> 
+<tr><td>Wind gust maximum color</td><td>$color["windGust_max"]</td><td><?php echo $color["windGust_max"];?></td></tr> 
+<tr><td>Wind speed 10min average color</td><td>$color["windSpeed_10min_avg"]</td><td><?php echo $color["windSpeed_10min_avg"];?></td></tr>                                 
+<tr><td>Wind gust 10min maximum color</td><td>$color["windGust_10min_max"]</td><td><?php echo $color["windGust_10min_max"];?></td></tr> 
+<tr><td>Wind speed yesterday maximum color</td><td>$color["windSpeed_yesterday_max"]</td><td><?php echo $color["windSpeed_yesterday_max"];?></td></tr>                                 
+<tr><td>Wind gust yesterday maximum color</td><td>$color["windGust_yesterday_max"]</td><td><?php echo $color["windGust_yesterday_max"];?></td></tr> 
+<tr><td>Wind speed month maximum color</td><td>$color["windSpeed_month_max"]</td><td><?php echo $color["windSpeed_month_max"];?></td></tr>                                 
+<tr><td>Wind gust month maximum color</td><td>$color["windGust_month_max"]</td><td><?php echo $color["windGust_month_max"];?></td></tr> 
+<tr><td>Wind speed year maximum color</td><td>$color["windSpeed_year_max"]</td><td><?php echo $color["windSpeed_year_max"];?></td></tr>                                 
+<tr><td>Wind gust year maximum color</td><td>$color["windGust_year_max"]</td><td><?php echo $color["windGust_year_max"];?></td></tr> 
+<tr><td>Wind speed alltime maximum color</td><td>$color["windSpeed_alltime_max"]</td><td><?php echo $color["windSpeed_alltime_max"];?></td></tr>                                 
+<tr><td>Wind gust alltime maximum color</td><td>$color["windGust_alltime_max"]</td><td><?php echo $color["windGust_alltime_max"];?></td></tr> 
+<tr><td>Rain rate color</td><td>$color["rainRate"]</td><td><?php echo $color["rainRate"];?></td></tr>
+<tr><td>Rain total color</td><td>$color["rain_sum"]</td><td><?php echo $color["rain_sum"];?></td></tr>
+<tr><td>Rain day total color</td><td>$colorRainDaySum</td><td><?php echo $colorRainDaySum;?></td></tr>
+<tr><td>Rain 24hr total color</td><td>$colorRain24hrSum</td><td><?php echo $colorRain24hrSum;?></td></tr>
+<tr><td>Rain yesterday total color</td><td>$colorRainYesterdaySum</td><td><?php echo $colorRainYesterdaySum;?></td></tr>
+<tr><td>Rain month total color</td><td>$colorRainMonthSum</td><td><?php echo $colorRainMonthSum;?></td></tr>
+<tr><td>Rain year total color</td><td>$colorRainYearSum</td><td><?php echo $colorRainYearSum;?></td></tr>
+<tr><td>Rain alltime total color</td><td>$colorRainAlltimeSum</td><td><?php echo $colorRainAlltimeSum;?></td></tr>
+<tr><td>Rain rate day maximum color</td><td>$colorRainRateDayMax</td><td><?php echo $colorRainRateDayMax;?></td></tr>
+<tr><td>Rain rate yesterday maximum color</td><td>$colorRainRateYesterdayMax</td><td><?php echo $colorRainRateYesterdayMax;?></td></tr>
+<tr><td>Rain rate 24hr maximum color</td><td>$colorRainRate24hrMax</td><td><?php echo $colorRainRate24hrMax;?></td></tr>
+<tr><td>Rain rate month maximum color</td><td>$colorRainRateMonthMax</td><td><?php echo $colorRainRateMonthMax;?></td></tr>
+<tr><td>Rain rate year maximum color</td><td>$colorRainRateYearMax</td><td><?php echo $colorRainRateYearMax;?></td></tr>
+<tr><td>Rain rate alltime maximum color</td><td>$colorRainRateAlltimeMax</td><td><?php echo $colorRainRateAlltimeMax;?></td></tr>
 
 <thead><tr><th colspan="3">Dewpoint Variables</th></tr></thead>                              
 <tr><td>Dewpoint realtime</td><td>$dew["now"]</td><td><?php echo $dew["now"];?></td></tr>                                 
@@ -352,7 +389,9 @@ table.darkTable tfoot td {
 <tr><td>Rain year total</td><td>$rain["year_total"]</td><td><?php echo $rain["year_total"];?></td></tr>                                 
 <tr><td>Rain alltime maximum rate</td><td>$rain["alltime_rate_max"]</td><td><?php echo $rain["alltime_rate_max"];?></td></tr>                                 
 <tr><td>Rain alltime maximum rate time</td><td>$rain["alltime_rate_maxtime"]</td><td><?php echo $rain["alltime_rate_maxtime"];?></td></tr>                                 
-<tr><td>Storm Rain</td><td>$rain["storm_rain"]</td><td><?php echo $rain["storm_rain"];?></td></tr>                                 
+<tr><td>Storm Rain</td><td>$rain["storm_rain"]</td><td><?php echo $rain["storm_rain"];?></td></tr>
+<tr><td>Rain intensity</td><td>$rain["intensity"]</td><td><?php echo $rain["intensity"];?></td></tr>                                 
+
 
 <thead><tr><th colspan="3">Sky Variables</th></tr></thead>
 <tr><td>Lux</td><td>$sky["lux"]</td><td><?php echo $sky["lux"];?></td></tr>                                 

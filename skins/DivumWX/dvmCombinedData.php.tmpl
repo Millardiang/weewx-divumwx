@@ -277,6 +277,17 @@ $barom["alltime_mintime"] = date('j M Y H:i',$alltime.barometer.mintime.raw);
 #end if
 
 //colors
+//barometer almanac
+$colorBarometerDayMax = "$colorize($day.barometer.max)";
+$colorBarometerDayMin = "$colorize($day.barometer.min)";
+$colorBarometerYesterdayMax = "$colorize($day($days_ago=1).barometer.max)";
+$colorBarometerYesterdayMin = "$colorize($day($days_ago=1).barometer.min)";
+$colorBarometerMonthMax = "$colorize($month.barometer.max)";
+$colorBarometerMonthMin = "$colorize($month.barometer.min)";
+$colorBarometerYearMax = "$colorize($year.barometer.max)";
+$colorBarometerYearMin = "$colorize($year.barometer.min)";
+$colorBarometerAlltimeMax = "$colorize($alltime.barometer.max)";
+$colorBarometerAlltimeMin = "$colorize($alltime.barometer.min)";
 //temperature almanac
 //day
 $t[0] = "$colorize($day.outTemp.max)";
@@ -325,7 +336,6 @@ else if($weewxrt[12] == 9){$color["windSpeed"]="#754a92";}
 else if($weewxrt[12] == 10){$color["windSpeed"]="#45698d";}
 else if($weewxrt[12] == 11){$color["windSpeed"]="#c1fc77";}
 else if($weewxrt[12] == 12){$color["windSpeed"]="#f1ff6c";}
-
 //wind gust color
 if($weewxrt[64] <= 1){$color["windGust"]="#85a3aa";}
 else if($weewxrt[64] <= 2){$color["windGust"]="#7e98bb";}
@@ -340,8 +350,6 @@ else if($weewxrt[64] <= 24){$color["windGust"]="#754a92";}
 else if($weewxrt[64] <= 28){$color["windGust"]="#45698d";}
 else if($weewxrt[64] <= 32){$color["windGust"]="#c1fc77";}
 else if($weewxrt[64] <= 100){$color["windGust"]="#f1ff6c";}
-
-
 $color["windSpeed_max"] = "$colorize($day.windSpeed.max)";
 $color["windGust_max"] = "$colorize($day.windGust.max)";
 $color["windSpeed_avg"] = "$colorize($day.windSpeed.avg)";
@@ -356,6 +364,31 @@ $color["windGust_year_max"] = "$colorize($year.windGust.max)";
 $color["windSpeed_alltime_max"] = "$colorize($alltime.windSpeed.max)";
 $color["windGust_alltime_max"] = "$colorize($alltime.windGust.max)";
 
+//rain color
+if($weewxrt[9] == 0){$color["rain_sum"]="#000000";}
+else if($weewxrt[9] < 2.5){$color["rain_sum"]="#1E90FF";}
+else if($weewxrt[9] < 10){$color["rain_sum"]="#126AD2";}
+else if($weewxrt[9] < 50){$color["rain_sum"]="#0643A5";}
+else if($weewxrt[9] >= 50){$color["rain_sum"]="#00308F";}
+if($weewxrt[8] == 0){$color["rainRate"]="#000000";}
+else if($weewxrt[8] < 2.5){$color["rainRate"]="#1E90FF";}
+else if($weewxrt[8] < 10){$color["rainRate"]="#126AD2";}
+else if($weewxrt[8] < 50){$color["rainRate"]="#0643A5";}
+else if($weewxrt[8] >= 50){$color["rainRate"]="#00308F";}
+
+$colorRainDaySum = "$colorize($day.rain.sum)";
+$colorRainYesterdaySum = "$colorize($day($days_ago=1).rain.sum)";
+$colorRain24hrSum = "$colorize($span($hour_delta=24).rain.sum)"; 
+$colorRainMonthSum = "$colorize($month.rain.sum)";
+$colorRainYearSum = "$colorize($year.rain.sum)";
+$colorRainAlltimeSum = "$colorize($alltime.rain.sum)";
+
+$colorRainRateDayMax = "$colorize($day.rainRate.max)";
+$colorRainRateYesterdayMax = "$colorize($day($days_ago=1).rainRate.max)";
+$colorRainRate24hrMax = "$colorize($span($hour_delta=24).rainRate.max)"; 
+$colorRainRateMonthMax = "$colorize($month.rainRate.max)";
+$colorRainRateYearMax = "$colorize($year.rainRate.max)";
+$colorRainRateAlltimeMax = "$colorize($alltime.rainRate.max)";
 
 //dewpoint
 $dew["now"] = $weewxrt[4];
@@ -495,6 +528,10 @@ $rain["alltime_rate_max"] = $alltime.rainRate.max.raw;
 $rain["alltime_rate_maxtime"] = $alltime.rainRate.maxtime.raw;
 $rain["alltime_total"] = round($alltime.rain.sum.raw,1);
 $rain["storm_rain"] = $current.hail.raw;
+if($weewxrt[8] < 2.5){$rain["intensity"]="Slight";}
+else if($weewxrt[8] < 10){$rain["intensity"]="Moderate";}
+else if($weewxrt[8] < 50){$rain["intensity"]="Heavy";}
+else if($weewxrt[8] >= 50){$rain["intensity"]="Violent";}
 #end if
 
 //sky
@@ -642,10 +679,8 @@ $wind["gust_alltime_max"] = $alltime.windGust.max.format(add_label=False);
 $wind["gust_alltime_maxtime"] = date('D j M Y H:i',$alltime.windGust.maxtime.raw);
 $wind["direction_trend"] = "$trend.windDir.formatted";
 $wind["direction_trend_ordinal"] = "$trend.windDir.ordinal_compass";
-if($wind["direction_10m_avg"] == "N/A")
-{$wind["direction_10m_avg"] = "Calm";}
-if($wind["direction_trend"] == "N/A")
-{$wind["direction_trend"] = "Calm";}
+if($wind["direction_10m_avg"] == "N/A"){$wind["direction_10m_avg"] = "Calm";}
+if($wind["direction_trend"] == "   N/A"){$wind["direction_trend"] = "Calm";}
 if($wind["direction_trend_ordinal"] == "N/A")
 {$wind["direction_trend_ordinal"] = "Calm";}
 
