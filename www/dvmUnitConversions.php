@@ -206,7 +206,7 @@ if ($windunit != $wind["units"])
         ktsTomph($wind, "gust_60min");
         ktsTomph($wind, "speed_max");
         ktsTomph($wind, "gust_max");
-        ktsTomph($wind, "gust_24h_max");
+        ktsTomph($wind, "gust_yesterday_max");
         ktsTomph($wind, "gust_month_max");
         ktsTomph($wind, "gust_year_max");       
         ktsTomph($wind, "gust_alltime_max");
@@ -231,7 +231,7 @@ if ($windunit != $wind["units"])
         kmhTomph($wind, "gust_60min");
         kmhTomph($wind, "speed_max");
         kmhTomph($wind, "gust_max");
-        kmhTomph($wind, "gust_24h_max");                
+        kmhTomph($wind, "gust_yesterday_max");                
         kmhTomph($wind, "gust_month_max");
         kmhTomph($wind, "gust_year_max");
         kmhTomph($wind, "gust_alltime_max");
@@ -256,7 +256,7 @@ if ($windunit != $wind["units"])
         msTomph($wind, "gust_60min");
         msTomph($wind, "speed_max");
         msTomph($wind, "gust_max");
-        msTomph($wind, "gust_24h_max");        
+        msTomph($wind, "gust_yesterday_max");        
         msTomph($wind, "gust_month_max");
         msTomph($wind, "gust_year_max");
         msTomph($wind, "gust_alltime_max");
@@ -281,7 +281,7 @@ if ($windunit != $wind["units"])
         ktsTokmh($wind, "gust_60min");
         ktsTokmh($wind, "speed_max");
         ktsTokmh($wind, "gust_max");
-        ktsTokmh($wind, "gust_24h_max");        
+        ktsTokmh($wind, "gust_yesterday_max");        
         ktsTokmh($wind, "gust_month_max");
         ktsTokmh($wind, "gust_year_max");
         ktsTokmh($wind, "gust_alltime_max");
@@ -306,7 +306,7 @@ if ($windunit != $wind["units"])
         mphTokmh($wind, "gust_60min");
         mphTokmh($wind, "speed_max");
         mphTokmh($wind, "gust_max");
-        mphTokmh($wind, "gust_24h_max");        
+        mphTokmh($wind, "gust_yesterday_max");        
         mphTokmh($wind, "gust_month_max");
         mphTokmh($wind, "gust_year_max");
         mphTokmh($wind, "gust_alltime_max");
@@ -332,7 +332,7 @@ if ($windunit != $wind["units"])
         msTokmh($wind, "gust_60min");
         msTokmh($wind, "speed_max");
         msTokmh($wind, "gust_max");
-        msTokmh($wind, "gust_24h_max");        
+        msTokmh($wind, "gust_yesterday_max");        
         msTokmh($wind, "gust_month_max");
         msTokmh($wind, "gust_year_max");
         msTokmh($wind, "gust_alltime_max");
@@ -357,7 +357,7 @@ if ($windunit != $wind["units"])
         ktsToms($wind, "gust_60min");
         ktsToms($wind, "speed_max");
         ktsToms($wind, "gust_max");
-        ktsToms($wind, "gust_24h_max");        
+        ktsToms($wind, "gust_yesterday_max");        
         ktsToms($wind, "gust_month_max");
         ktsToms($wind, "gust_year_max");
         ktsToms($wind, "gust_alltime_max");
@@ -382,7 +382,7 @@ if ($windunit != $wind["units"])
         mphToms($wind, "gust_60min");
         mphToms($wind, "speed_max");
         mphToms($wind, "gust_max");
-        mphToms($wind, "gust_24h_max");        
+        mphToms($wind, "gust_yesterday_max");        
         mphToms($wind, "gust_month_max");
         mphToms($wind, "gust_year_max");
         mphToms($wind, "gust_alltime_max");
@@ -407,7 +407,7 @@ if ($windunit != $wind["units"])
         kmhToms($wind, "gust_60min");
         kmhToms($wind, "speed_max");
         kmhToms($wind, "gust_max");
-        kmhToms($wind, "gust_24h_max");               
+        kmhToms($wind, "gust_yesterday_max");               
         kmhToms($wind, "gust_month_max");
         kmhToms($wind, "gust_year_max");
         kmhToms($wind, "gust_alltime_max");
@@ -432,7 +432,7 @@ if ($windunit != $wind["units"])
         msTokts($wind, "gust_60min");
         msTokts($wind, "speed_max");
         msTokts($wind, "gust_max");
-        msTokts($wind, "gust_24h_max");        
+        msTokts($wind, "gust_yesterday_max");        
         msTokts($wind, "gust_month_max");
         msTokts($wind, "gust_year_max");
         msTokts($wind, "gust_alltime_max");
@@ -458,7 +458,7 @@ if ($windunit != $wind["units"])
         mphTokts($wind, "gust_60min");
         mphTokts($wind, "speed_max");
         mphTokts($wind, "gust_max");
-        mphTokts($wind, "gust_24h_max");        
+        mphTokts($wind, "gust_yesterday_max");        
         mphTokts($wind, "gust_month_max");
         mphTokts($wind, "gust_year_max");
         mphTokts($wind, "gust_alltime_max");
@@ -483,7 +483,7 @@ if ($windunit != $wind["units"])
         kmhTokts($wind, "gust_60min");
         kmhTokts($wind, "speed_max");
         kmhTokts($wind, "gust_max");
-        kmhTokts($wind, "gust_24h_max");       
+        kmhTokts($wind, "gust_yesterday_max");       
         kmhTokts($wind, "gust_month_max");
         kmhTokts($wind, "gust_year_max");
         kmhTokts($wind, "gust_alltime_max");

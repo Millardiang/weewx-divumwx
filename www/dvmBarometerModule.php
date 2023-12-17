@@ -19,7 +19,8 @@ include('dvmCombinedData.php');
 </head>
 
 <div class="chartforecast2">
-<span class="yearpopup"><a alt="barometer charts" title="barometer charts" href="dvmMenuBarometer.php" data-lity><?php echo $menucharticonpage;?> Barometer Almanac and Charts</a></span>    
+<span class="yearpopup"><a alt="barometer charts" title="barometer charts" href="dvmMenuBarometer.php" data-lity><?php echo $menucharticonpage;?> Barometer Almanac and Charts</a></span>
+<!--span class="yearpopup"><a alt="altimeter" title="altimeter" href="dvmAltimeter.php" data-lity><?php echo $chartinfo;?> Altimeter</a></span-->    
 </div>    
 <span class='moduletitle2'><?php echo $lang['barometerModule'], " (<valuetitleunit>", $barom["units"];?></valuetitleunit>)</span>
 <div class="updatedtime2">
@@ -33,7 +34,7 @@ $barom["trend_code"]=$barom["trend_code"]*0.1;
 $barom["min"]=$barom["min"]*0.1; 
 $barom["max"]=$barom["max"]*0.1;}
 ?>
- 
+
 <div class="barometerconverter">
 <?php echo "<div class=barometerconvertercircleblue>";
 if ($barom["units"]=='mbar' OR $barom["units"]=="hPa"){echo number_format($barom["now"]*0.029529983071445,2),"<smallrainunit> inHg</smallrainunit>";
@@ -200,6 +201,63 @@ if ($theme === "dark") { echo
 	
 }
 ?>
+
+
+<script>
+// air density calculation
+var Bunits = "<?php echo $barom["units"];?>";
+if (Bunits === "hPa") {
+var P = <?php echo $barom["now"];?>;
+} else if (Bunits === "inHg") {
+P = <?php echo $barom["now"]*33.863889532610884;?>;
+} else if (Bunits === "kPa") {
+P = <?php echo $barom["now"]*10.0;?>; 
+} else if (Bunits === "mbar") {
+P = <?php echo $barom["now"];?>;
+}
+
+var Tunits = "<?php echo $temp["units"];?>";
+if (Tunits === "C") {
+var T = <?php echo $temp["outside_now"];?>;
+var Dp = <?php echo $dew["now"];?>;
+} else {
+T = <?php echo ($temp["outside_now"]-32)*5/9;?>; 
+Dp = <?php echo ($dew["now"]-32)*5/9;?>;    
+}
+
+var H = <?php echo $humid["now"];?>;
+
+VaporPressureRh(T, H);
+air_density(T, P, Dp, H);
+
+function VaporPressureRh(T, H) {
+    // (temp °C, humidity)
+    T = T;
+    var a = (17.67 * T) / (243.5 + T);
+    var E = (H / 100) * 6.112 * Math.exp(a);
+    //console.log('Rh ' + E); 
+    return E;
+}
+// air density kg/m³
+function air_density(T, P, Dp, H) {
+// (temp °C, pressure, dew point °C, humidity)
+T = T;
+P = P;
+Dp = Dp;
+let Es = VaporPressureRh(T, H),
+    Rv = 461.4964,
+    Rd = 287.0531,
+    tk = T + 273.15,
+    pv = Es * 100,
+    pd = (P - Es) * 100,
+    d = (pv / (Rv * tk) ) + (pd / (Rd * tk));
+    let B = d.toFixed(5);
+    //console.log('B ' + B);
+    return B;
+}
+
+</script>
+
 <div class="barometer"></div>
 
 <script>
@@ -220,6 +278,10 @@ if(trend_code == 0) {
 } else if(trend_code < 0) {
     trend_color = "#3b9cac";
 }
+
+var altitude = "<?php echo $elevation;?>"; 
+
+var air_density = air_density(T, P, Dp, H);
 
 var trend_desc = "<?php echo $barom["trend_desc"];?>";
    
@@ -251,19 +313,69 @@ var svg = d3.select(".barometer")
                 //.style("background", "#292E35")
                 .attr("width", 310)
                 .attr("height", 150);
-    
-    	if (units === "hPa") {
-      /*             
-            svg.append("text") // test
-                .attr("x", 5)
-                .attr("y", 120)
+
+            svg.append("text") // station altitude
+                .attr("x", 273)
+                .attr("y", 70)
                 .style("fill", baseTextColor)
                 .style("font-family", "Helvetica")
-                .style("font-size", "8px")
-                .style("text-anchor", "left")
+                .style("font-size", "9px")
+                .style("text-anchor", "middle")
                 .style("font-weight", "normal")
-                .text("Trend code Test  " + trend_code);
-   */
+                .text("Air Density");
+
+            var data = [air_density + "-" + " kg/m³"];
+
+            var text = svg.selectAll(null)
+                .data(data)
+                .enter() 
+                .append("text")
+                .attr("x", 273)
+                .attr("y", function(d, i) { return 79 + i * 79; })
+
+                .style("fill", "#007FFF")
+                .style("font-family", "Helvetica") 
+                .style("font-size", "9px")
+                .style("text-anchor", "middle")
+                .style("font-weight", "normal")
+                .text(function(d) { return d.split("-")[0]; })
+
+                .append("tspan")
+                .style("fill", baseTextColor)
+                .text(function(d) { return d.split("-")[1]; });
+    
+    	if (units === "hPa") {
+                   
+            svg.append("text") // station altitude
+                .attr("x", 35)
+                .attr("y", 70)
+                .style("fill", baseTextColor)
+                .style("font-family", "Helvetica")
+                .style("font-size", "9px")
+                .style("text-anchor", "middle")
+                .style("font-weight", "normal")
+                .text("Station Altitude");
+
+            var data = [d3.format(".2f")(altitude) + "-" + " m"];
+
+            var text = svg.selectAll(null)
+                .data(data)
+                .enter() 
+                .append("text")
+                .attr("x", 35)
+                .attr("y", function(d, i) { return 79 + i * 79; })
+
+                .style("fill", "#007FFF")
+                .style("font-family", "Helvetica") 
+                .style("font-size", "9px")
+                .style("text-anchor", "middle")
+                .style("font-weight", "normal")
+                .text(function(d) { return d.split("-")[0]; })
+
+                .append("tspan")
+                .style("fill", baseTextColor)
+                .text(function(d) { return d.split("-")[1]; });
+   
             svg.append("text") // maxtime pressure text output
                 .attr("x", 37)
                 .attr("y", 10)
@@ -337,7 +449,7 @@ var svg = d3.select(".barometer")
                 .text("Trend");
 
             svg.append("text") // Trend text output
-                .attr("x", 40)
+                .attr("x", 40.5)
                 .attr("y", 143)
                 .style("fill", trend_color)
                 .style("font-family", "Helvetica")
@@ -500,6 +612,36 @@ var svg = d3.select(".barometer")
         gauge.value(currentMax);
         
         } else if (units === "mbar") {
+
+            svg.append("text") // station altitude
+                .attr("x", 35)
+                .attr("y", 70)
+                .style("fill", baseTextColor)
+                .style("font-family", "Helvetica")
+                .style("font-size", "9px")
+                .style("text-anchor", "middle")
+                .style("font-weight", "normal")
+                .text("Station Altitude");
+
+            var data = [d3.format(".2f")(altitude) + "-" + " m"];
+
+            var text = svg.selectAll(null)
+                .data(data)
+                .enter() 
+                .append("text")
+                .attr("x", 35)
+                .attr("y", function(d, i) { return 79 + i * 79; })
+
+                .style("fill", "#007FFF")
+                .style("font-family", "Helvetica") 
+                .style("font-size", "9px")
+                .style("text-anchor", "middle")
+                .style("font-weight", "normal")
+                .text(function(d) { return d.split("-")[0]; })
+
+                .append("tspan")
+                .style("fill", baseTextColor)
+                .text(function(d) { return d.split("-")[1]; });
                                     
              svg.append("text") // maxtime pressure text output
                 .attr("x", 37)
@@ -574,7 +716,7 @@ var svg = d3.select(".barometer")
                 .text("Trend");
 
             svg.append("text") // Trend text output
-                .attr("x", 40)
+                .attr("x", 40.5)
                 .attr("y", 143)
                 .style("fill", trend_color)
                 .style("font-family", "Helvetica")
@@ -737,6 +879,36 @@ var svg = d3.select(".barometer")
         gauge.value(currentMax);
         
         } else if (units === "inHg") {
+
+            svg.append("text") // station altitude
+                .attr("x", 35)
+                .attr("y", 70)
+                .style("fill", baseTextColor)
+                .style("font-family", "Helvetica")
+                .style("font-size", "9px")
+                .style("text-anchor", "middle")
+                .style("font-weight", "normal")
+                .text("Station Altitude");
+
+            var data = [d3.format(".2f")(altitude*3.281) + "-" + " ft"];
+
+            var text = svg.selectAll(null)
+                .data(data)
+                .enter() 
+                .append("text")
+                .attr("x", 35)
+                .attr("y", function(d, i) { return 79 + i * 79; })
+
+                .style("fill", "#007FFF")
+                .style("font-family", "Helvetica") 
+                .style("font-size", "9px")
+                .style("text-anchor", "middle")
+                .style("font-weight", "normal")
+                .text(function(d) { return d.split("-")[0]; })
+
+                .append("tspan")
+                .style("fill", baseTextColor)
+                .text(function(d) { return d.split("-")[1]; });
                               
             svg.append("text") // maxtime pressure text output
                 .attr("x", 37)
@@ -811,7 +983,7 @@ var svg = d3.select(".barometer")
                 .text("Trend");
 
             svg.append("text") // Trend text output
-                .attr("x", 40)
+                .attr("x", 40.5)
                 .attr("y", 143)
                 .style("fill", trend_color)
                 .style("font-family", "Helvetica")
@@ -974,6 +1146,36 @@ var svg = d3.select(".barometer")
         gauge.value(currentMax);
                    
       } else {
+
+            svg.append("text") // station altitude
+                .attr("x", 35)
+                .attr("y", 70)
+                .style("fill", baseTextColor)
+                .style("font-family", "Helvetica")
+                .style("font-size", "9px")
+                .style("text-anchor", "middle")
+                .style("font-weight", "normal")
+                .text("Station Altitude");
+
+            var data = [d3.format(".2f")(altitude) + "-" + " m"];
+
+            var text = svg.selectAll(null)
+                .data(data)
+                .enter() 
+                .append("text")
+                .attr("x", 35)
+                .attr("y", function(d, i) { return 79 + i * 79; })
+
+                .style("fill", "#007FFF")
+                .style("font-family", "Helvetica") 
+                .style("font-size", "9px")
+                .style("text-anchor", "middle")
+                .style("font-weight", "normal")
+                .text(function(d) { return d.split("-")[0]; })
+
+                .append("tspan")
+                .style("fill", baseTextColor)
+                .text(function(d) { return d.split("-")[1]; });
                             
              svg.append("text") // maxtime pressure text output
                 .attr("x", 37)
@@ -1048,7 +1250,7 @@ var svg = d3.select(".barometer")
                 .text("Trend");
 
             svg.append("text") // Trend text output
-                .attr("x", 40)
+                .attr("x", 40.5)
                 .attr("y", 143)
                 .style("fill", trend_color)
                 .style("font-family", "Helvetica")
