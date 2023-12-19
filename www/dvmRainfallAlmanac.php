@@ -34,31 +34,31 @@ if ($theme === "dark") {
     <article>
      <div class=actualt>Rainfall Today</div>
     <?php // rain today
-echo "<div class='rainfalltoday1'>",$rain["day"] . "</value>";echo "<smalluvunit>".$rain["units"]."</smalluvunit>";?>
+echo "<div class='rainfalltoday1' style='background:$colorRainDaySum;'>",$rain["day"] . "</value>";echo "<smalluvunit>".$rain["units"]."</smalluvunit>";?>
 </div>
 
-<div class="hitempy"><?php echo $raininfo . "Last Hour<br><blue> ", $rain["last_hour"]."</blue> " .$rain["units"];?></div>
+<div class="hitempy"><?php echo $raininfo . "Last Hour<br> ", $rain["last_hour"]." ".$rain["units"];?></div>
 </article>
 
  <article>
         <div class=actualt>Rainfall Yesterday</div>
     <?php // rain yesterday
-echo "<div class='rainfalltoday1'>",$rain["yesterday"] . "</value>";echo "<smalluvunit>".$rain["units"]."</smalluvunit>";?>
+echo "<div class='rainfalltoday1' style='background:$colorRainYesterdaySum;'>",$rain["yesterday"] . "</value>";echo "<smalluvunit>".$rain["units"]."</smalluvunit>";?>
 </div>
 
-<div class="hitempy"><?php echo $raininfo;?> Yesterday<br/><blue><?php echo $rain["yesterday"];?></blue> <?php echo $rain["units"];?></div>
+<div class="hitempy"><?php echo $raininfo;?> Yesterday<br/><?php echo $rain["yesterday"];?> <?php echo $rain["units"];?></div>
 </article>
 
 
     <article>
     <div class=actualt>Rainfall <?php echo date('M Y');?> </div>
     <?php // rain month
-echo "<div class='rainfalltoday1'>",$rain["month_total"] . "</value>";echo "<smalluvunit>".$rain["units"]."</smalluvunit>";?>
+echo "<div class='rainfalltoday1' style='background:$colorRainMonthSum;'>",$rain["month_total"] . "</value>";echo "<smalluvunit>".$rain["units"]."</smalluvunit>";?>
 </div>
 
 <div class="hitempy">
     <?php echo $raininfo;?>Last Rainfall<br/>
-    <blue><?php echo $rain["last_time"];?></blue>
+    <?php echo $rain["last_rain"];?>
 </div>
 </article>
 
@@ -66,26 +66,28 @@ echo "<div class='rainfalltoday1'>",$rain["month_total"] . "</value>";echo "<sma
      <article>
      <div class=actualt>Rainfall <?php echo date("Y");?> </div>
     <?php // rain year
-echo "<div class='rainfalltoday1'>",$rain["year_total"] . "</value>";echo "<smalluvunit>".$rain["units"]."</smalluvunit>";?>
+echo "<div class='rainfalltoday1' style='background:$colorRainYearSum;'>",$rain["year_total"] . "</value>";echo "<smalluvunit>".$rain["units"]."</smalluvunit>";?>
 </div>
 
 <div class="hitempy"><?php echo $raininfo;?><!--<blue>Rainfall</blue>-->Since<br/>
-    <blue>Jan <?php echo date('Y');?></blue>
+    Jan <?php echo date('Y');?>
 </div>
 </article>
 
 <article>
  <div class=actualt> Rainfall All-Time </div>
     <?php
-    if ($rain["alltime_total"]==''){echo "<div class='rainfalltoday1'>N/A</value>";}
+    if ($rain["alltime_total"]==''){echo "<div class='rainfalltoday1' style='background:$colorRainAlltimeSum;'>N/A</value>";}
  // rain alltime
 else {echo "<div class='rainfalltoday1'>",$rain["alltime_total"] . "</value>";
 echo "<smalluvunit>".$rain["units"]."</smalluvunit>";}?>
 </div>
+<div class="hitempy"><?php echo $raininfo;?><Rainfall Since<br/>
+    <?php echo date('D j M H:i',$divum["since"]);?>
+</div>
 
 
 </article> </main>
-
 
 
  <main class="grid1">
