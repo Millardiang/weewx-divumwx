@@ -222,7 +222,7 @@
       }
       echo '<li class="header">MISC</li>
             <li>
-              <a href="https://www.chrisalemany.ca/2021/02/24/installing-the-divumwx-skin-on-weewx-with-remote-web-server-2021-edition/" title="Remote Setup" target="_blank"><menumarkerbluegrey></menumarkerbluegrey> Remote Setup Guide</a>
+              <a href="https://chrisalemany.ca/2021/02/24/installing-the-weather34-skin-on-weewx-with-remote-web-server-2021-edition/" title="Remote Setup" target="_blank"><menumarkerbluegrey></menumarkerbluegrey> Remote Setup Guide</a>
             </li>
             <li>
               <a href="team_divumwx/index.html" title="weewx-DivumWX on Github" target="_blank"><menumarkerbluegrey></menumarkerbluegrey> Download DivumWX template</a>
