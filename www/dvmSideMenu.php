@@ -170,7 +170,7 @@
       }
       if (!empty($webcamurl) && $webcamurl != ' ' && $webcamurl != 'Null' && $webcamurl != 'null') {
           echo '<li>
-                  <a href="cam.php" data-lity title="Weather Station Webcam"><menumarkeryellow></menumarkeryellow> Web Cam</a>
+                  <a href="dvmWebcamPopup.php" data-lity title="Weather Station Webcam"><menumarkeryellow></menumarkeryellow> Web Cam</a>
                 </li>';
       }
       echo '<li>
