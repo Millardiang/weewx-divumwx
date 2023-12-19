@@ -20,7 +20,13 @@ include('dvmCombinedData.php');
 <span class='moduletitle2'><?php echo $lang['rainfallModule'], " (<valuetitleunit>" . $rain["units"];?></valuetitleunit>)</span>
 <div class="updatedtime1"><span><?php if (file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?></div>
 <div class="rainconverter">
-<?php if ($rain["units"] =='in'){echo "<div class=rainconvertercircle>".number_format($rain["day"]*25.400013716,1)." <smallrainunit>mm";} else if ($rain["units"] =='mm'){echo "<div class=rainconvertercircle>".number_format($rain["day"]*0.0393701,2)." <smallrainunit>in";}?></span>
+<?php 
+if($theme == 'dark') {
+if ($rain["units"] =='in'){echo "<div class=rainconvertercircle style='color:$colorRainDaySum;'>".number_format($rain["day"]*25.400013716,1)." <smallrainunit>mm";} else if ($rain["units"] =='mm'){echo "<div class=rainconvertercircle style='color:$colorRainDaySum;'>".number_format($rain["day"]*0.0393701,2)." <smallrainunit>in";}
+} else {
+if ($rain["units"] =='in'){echo "<div class=rainconvertercircle style='background:$colorRainDaySum;'>".number_format($rain["day"]*25.400013716,1)." <smallrainunit>mm";} else if ($rain["units"] =='mm'){echo "<div class=rainconvertercircle style='background:$colorRainDaySum;'>".number_format($rain["day"]*0.0393701,2)." <smallrainunit>in";}
+}
+?></span>
 </div></div>
 
 <!DOCTYPE html>
@@ -55,7 +61,7 @@ include('dvmCombinedData.php');
 	maxRain = maxRain || 0;
 	
 	var minRain = 0.0;	
-	var rainColor = "rgba(59, 156, 172, 1)";
+	var rainColor = "<?php echo $colorRainDaySum;?>";
 	
 	var width = 105,
     height = 150;
@@ -273,7 +279,7 @@ svg.append("text")
 	maxRain = maxRain || 0;
 	
 	var minRain = 0.0;	
-	var rainColor = "rgba(59, 156, 172, 1)";
+	var rainColor = "<?php echo $colorRainDaySum;?>";
 	
 	var width = 105,
     height = 150;
@@ -511,10 +517,17 @@ var stormRain = <?php echo $rain["storm_rain"]/25.4;?>;
 } else {
     stormRain = <?php echo $rain["storm_rain"];?>;
 }
+
+var stormRainColor ="<?php echo $colorStormRain;?>";
+var rainRateColor = "<?php echo $colorRainRate;?>";
+var lastHourColor = "<?php echo $colorRain1hrSum;?>";
+var last24HoursColor = "<?php echo $colorRain24hrSum;?>"; 
+var rainMonthColor = "<?php echo $colorRainMonthSum;?>";
+var rainYearColor = "<?php echo $colorRainYearSum;?>";
  
 var rainRate = <?php echo $rain["rate"];?>;
 var lastHour = <?php echo $rain["last_hour"];?>;
-var last24Hours = <?php echo $rain["last_24hour"];?>;
+var last24Hours = <?php echo $rain["24h_total"];?>;
 var rainMonth = <?php echo $rain["month_total"];?>; 
 var rainYear = <?php echo $rain["year_total"];?>;
 var month = "<?php echo date('F');?>"; 
@@ -523,16 +536,25 @@ var year = <?php echo date('Y');?>;
 if (stormRain > 0.0) {
 
 svg.append("rect") // stormRain box    
-    .attr("x", 17 )
+    .attr("x", 12 )
     .attr("y", 127)
     .attr("rx", 1.25)
     .style("stroke", boxColor)
-    .attr("width", 63)
+    .attr("width", 68)
     .attr("height", 17)
     .style("fill", "none");
 
+svg.append("rect")
+    .attr("x", 12.75)
+    .attr("y", 128)
+    .attr("rx", 0.5)
+    .style("stroke", stormRainColor)
+    .attr("height", 15)
+    .attr("width", 3)
+    .style("fill", stormRainColor);
+
 svg.append("text") // Title text above box
-    .attr("x", 48)
+    .attr("x", 45.5)
     .attr("y", 122)
     .style("fill", baseTextColor)
     .style("font-family", "Helvetica")
@@ -551,7 +573,7 @@ var text = svg.selectAll(null)
     .attr("x", 48)
     .attr("y", function(d, i) {return 138.5 + i * 138.5;})
 
-    .style("fill", "#007FFF")
+    .style("fill", baseTextColor)
     .style("font-family", "Helvetica")
     .style("font-size", "9.75px")
     .style("text-anchor", "middle")
@@ -571,12 +593,21 @@ svg.append("rect") // rain Rate box
     .attr("y", 127)
     .attr("rx", 1.25)
     .style("stroke", boxColor)
-    .attr("width", 63)
+    .attr("width", 68)
     .attr("height", 17)
     .style("fill", "none");
 
+svg.append("rect")
+    .attr("x", 93.75)
+    .attr("y", 128)
+    .attr("rx", 0.5)
+    .style("stroke", rainRateColor)
+    .attr("height", 15)
+    .attr("width", 3)
+    .style("fill", rainRateColor);
+
 svg.append("text") // rain Rate Title text above box
-    .attr("x", 123)
+    .attr("x", 126)
     .attr("y", 122)
     .style("fill", baseTextColor)
     .style("font-family", "Helvetica")
@@ -592,10 +623,10 @@ var text = svg.selectAll(null)
     .data(data)
     .enter() 
     .append("text")
-    .attr("x", 123)
+    .attr("x", 128)
     .attr("y", function(d, i) {return 138.5 + i * 138.5;})
 
-    .style("fill", "#007FFF")
+    .style("fill", baseTextColor)
     .style("font-family", "Helvetica")
     .style("font-size", "9.75px")
     .style("text-anchor", "middle")
@@ -609,13 +640,22 @@ var text = svg.selectAll(null)
 } else {
 
 svg.append("rect") // rain Rate box
-    .attr("x", 55 )
+    .attr("x", 56 )
     .attr("y", 127)
     .attr("rx", 1.25)
     .style("stroke", boxColor)
     .attr("width", 63)
     .attr("height", 17)
     .style("fill", "none");
+
+svg.append("rect")
+    .attr("x", 56.75)
+    .attr("y", 128)
+    .attr("rx", 0.5)
+    .style("stroke", rainRateColor)
+    .attr("height", 15)
+    .attr("width", 3)
+    .style("fill", rainRateColor);
 
 svg.append("text") // rain Rate Title text above box
     .attr("x", 87)
@@ -626,7 +666,7 @@ svg.append("text") // rain Rate Title text above box
     .style("text-anchor", "middle")
     .style("font-weight", "normal")
     .text("Rain Rate");
-
+ 
 // rainRate text output with two different colors on the same line
 var data = [d3.format(".2f")(rainRate) +" "+"-"+ units]; 
 
@@ -634,10 +674,10 @@ var text = svg.selectAll(null)
     .data(data)
     .enter() 
     .append("text")
-    .attr("x", 87)
+    .attr("x", 89)
     .attr("y", function(d, i) {return 138.5 + i * 138.5;})
 
-    .style("fill", "#007FFF")
+    .style("fill", baseTextColor)
     .style("font-family", "Helvetica")
     .style("font-size", "9.75px")
     .style("text-anchor", "middle")
@@ -651,16 +691,25 @@ var text = svg.selectAll(null)
 }
 
 svg.append("rect") // last hour box
-    .attr("x", 17 )
+    .attr("x", 12 )
     .attr("y", 88)
     .attr("rx", 1.25)
     .style("stroke", boxColor)
-    .attr("width", 63)
+    .attr("width", 68)
     .attr("height", 17)
     .style("fill", "none");
 
+svg.append("rect")
+    .attr("x", 12.75)
+    .attr("y", 89)
+    .attr("rx", 0.5)
+    .style("stroke", lastHourColor)
+    .attr("height", 15)
+    .attr("width", 3)
+    .style("fill", lastHourColor);
+
 svg.append("text") // last hour Title text above box
-    .attr("x", 48)
+    .attr("x", 45.5)
     .attr("y", 83)
     .style("fill", baseTextColor)
     .style("font-family", "Helvetica")
@@ -679,7 +728,7 @@ var text = svg.selectAll(null)
     .attr("x", 48)
     .attr("y", function(d, i) {return 100 + i * 100;})
 
-    .style("fill", "#007FFF")
+    .style("fill", baseTextColor)
     .style("font-family", "Helvetica")
     .style("font-size", "9.75px")
     .style("text-anchor", "middle")
@@ -695,12 +744,21 @@ svg.append("rect") // last 24hr box
     .attr("y", 88)
     .attr("rx", 1.25)
     .style("stroke", boxColor)
-    .attr("width", 63)
+    .attr("width", 68)
     .attr("height", 17)
     .style("fill", "none");
 
+svg.append("rect")
+    .attr("x", 93.75)
+    .attr("y", 89)
+    .attr("rx", 0.5)
+    .style("stroke", last24HoursColor)
+    .attr("height", 15)
+    .attr("width", 3)
+    .style("fill", last24HoursColor);
+
 svg.append("text") // last 24hr Title text above box
-    .attr("x", 123)
+    .attr("x", 125.5)
     .attr("y", 83)
     .style("fill", baseTextColor)
     .style("font-family", "Helvetica")
@@ -716,10 +774,10 @@ var text = svg.selectAll(null)
     .data(data)
     .enter() 
     .append("text")
-    .attr("x", 123)
+    .attr("x", 128)
     .attr("y", function(d, i) {return 100 + i * 100;})
 
-    .style("fill", "#007FFF")
+    .style("fill", baseTextColor)
     .style("font-family", "Helvetica")
     .style("font-size", "9.75px")
     .style("text-anchor", "middle")
@@ -731,13 +789,22 @@ var text = svg.selectAll(null)
     .text(function(d) {return d.split("-")[1];});
 
 svg.append("rect") // rain year box
-    .attr("x", 17 )
+    .attr("x", 12 )
     .attr("y", 48)
     .attr("rx", 1.25)
     .style("stroke", boxColor)
-    .attr("width", 63)
+    .attr("width", 68)
     .attr("height", 17)
     .style("fill", "none");
+
+svg.append("rect")
+    .attr("x", 12.75)
+    .attr("y", 49)
+    .attr("rx", 0.5)
+    .style("stroke", rainYearColor)
+    .attr("height", 15)
+    .attr("width", 3)
+    .style("fill", rainYearColor);
 
 svg.append("text") // year Title text above box
     .attr("x", 48)
@@ -759,7 +826,7 @@ var text = svg.selectAll(null)
     .attr("x", 48)
     .attr("y", function(d, i) {return 60.5 + i * 60.5;})
 
-    .style("fill", "#007FFF")
+    .style("fill", baseTextColor)
     .style("font-family", "Helvetica")
     .style("font-size", "9.75px")
     .style("text-anchor", "middle")
@@ -776,12 +843,21 @@ svg.append("rect") // rain month box
     .attr("y", 48)
     .attr("rx", 1.25)
     .style("stroke", boxColor)
-    .attr("width", 63)
+    .attr("width", 68)
     .attr("height", 17)
     .style("fill", "none");
 
+svg.append("rect")
+    .attr("x", 93.75)
+    .attr("y", 49)
+    .attr("rx", 0.5)
+    .style("stroke", rainMonthColor)
+    .attr("height", 15)
+    .attr("width", 3)
+    .style("fill", rainMonthColor);
+
 svg.append("text") // month Title text above box
-    .attr("x", 123)
+    .attr("x", 126)
     .attr("y", 43)
     .style("fill", baseTextColor)
     .style("font-family", "Helvetica")
@@ -797,10 +873,10 @@ var text = svg.selectAll(null)
     .data(data)
     .enter() 
     .append("text")
-    .attr("x", 123)
+    .attr("x", 128)
     .attr("y", function(d, i) {return 60.5 + i * 60.5;})
 
-    .style("fill", "#007FFF")
+    .style("fill", baseTextColor)
     .style("font-family", "Helvetica")
     .style("font-size", "9.75px")
     .style("text-anchor", "middle")

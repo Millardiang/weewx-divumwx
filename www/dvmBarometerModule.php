@@ -11,6 +11,7 @@
 #                                                                                                                   #
 #####################################################################################################################
 include('dvmCombinedData.php');
+
 ?>
 <!DOCTYPE html>
 <head>
@@ -36,7 +37,7 @@ $barom["max"]=$barom["max"]*0.1;}
 ?>
 
 <div class="barometerconverter">
-<?php echo "<div class=barometerconvertercircleblue>";
+<?php echo "<div class=barometerconvertercircleblue style='$convertStyle $colorBarometerCurrent;'>";
 if ($barom["units"]=='mbar' OR $barom["units"]=="hPa"){echo number_format($barom["now"]*0.029529983071445,2),"<smallrainunit> inHg</smallrainunit>";
 } else if ($barom["units"]=="kPa") { echo number_format($barom["now"]*0.29529983071445,2),"<smallrainunit> inHg</smallrainunit>";
 } else if ($barom["units"]=='inHg') { echo round($barom["now"]*33.863886666667,1),"<smallrainunit> hPa</smallrainunit>";}?>
@@ -84,12 +85,12 @@ if ($theme === "dark") { echo
     
     '<style>
     
-    	.barometer {
-    		position: relative; 
-    		margin-top: -16px; 
-    		margin-left: -0px;
-    	}
-    		   	
+        .barometer {
+            position: relative; 
+            margin-top: -16px; 
+            margin-left: -0px;
+        }
+                
         .unselectable {
             -moz-user-select: -moz-none;
             -khtml-user-select: none;
@@ -115,9 +116,9 @@ if ($theme === "dark") { echo
         }
                 
         .gauge .arc, .gauge .cursor {
-        	stroke: rgba(59, 60, 63, 0);
-        	stroke-width: 2px;
-        	fill: rgba(59, 60, 63, 0);
+            stroke: rgba(59, 60, 63, 0);
+            stroke-width: 2px;
+            fill: rgba(59, 60, 63, 0);
         }
         .gauge .major {
             fill: rgba(147, 147, 147, 1);
@@ -134,22 +135,22 @@ if ($theme === "dark") { echo
         }
                 
          .gauge circle {
-        	stroke: rgba(59, 60, 63, 1);
-        	fill: rgba(59, 60, 63, 1);                
-		}				  
+            stroke: rgba(59, 60, 63, 1);
+            fill: rgba(59, 60, 63, 1);                
+        }                 
        
-	</style>';
-	
-	} else { echo
-	
+    </style>';
+    
+    } else { echo
+    
     '<style>
     
         .barometer {
-    		position: relative; 
-    		margin-top: -18px; 
-    		margin-left: -0px;
-    	}
-    	
+            position: relative; 
+            margin-top: -18px; 
+            margin-left: -0px;
+        }
+        
         .unselectable {
             -moz-user-select: -moz-none;
             -khtml-user-select: none;
@@ -174,9 +175,9 @@ if ($theme === "dark") { echo
             stroke-linecap: round; 
         }
         .gauge .arc, .gauge .cursor {
-        	stroke: rgba(59, 60, 63, 0);
-        	stroke-width: 2px;
-        	fill: rgba(59, 60, 63, 0);
+            stroke: rgba(59, 60, 63, 0);
+            stroke-width: 2px;
+            fill: rgba(59, 60, 63, 0);
         }
         .gauge .major {
             fill: rgba(147, 147, 147, 1);
@@ -193,12 +194,12 @@ if ($theme === "dark") { echo
         }
         
         .gauge circle {
-        	stroke: rgba(230, 232, 239, 1);
-        	fill: rgba(230, 232, 239, 1);                
-		}
-		       
-	</style>';
-	
+            stroke: rgba(230, 232, 239, 1);
+            fill: rgba(230, 232, 239, 1);                
+        }
+               
+    </style>';
+    
 }
 ?>
 
@@ -231,7 +232,7 @@ VaporPressureRh(T, H);
 air_density(T, P, Dp, H);
 
 function VaporPressureRh(T, H) {
-    // (temp °C, humidity)
+// (temp °C, humidity)
     T = T;
     var a = (17.67 * T) / (243.5 + T);
     var E = (H / 100) * 6.112 * Math.exp(a);
@@ -250,7 +251,7 @@ let Es = VaporPressureRh(T, H),
     tk = T + 273.15,
     pv = Es * 100,
     pd = (P - Es) * 100,
-    d = (pv / (Rv * tk) ) + (pd / (Rd * tk));
+    d = (pv / (Rv * tk)) + (pd / (Rd * tk));
     let B = d.toFixed(5);
     //console.log('B ' + B);
     return B;
@@ -274,10 +275,14 @@ var trend_code = "<?php echo $barom["trend_code"];?>";
 if(trend_code == 0) {
     var trend_color = "#90b12a";
 } else if (trend_code > 0 ) {
-    trend_color = "#ff7c39";
-} else if(trend_code < 0) {
     trend_color = "#3b9cac";
+} else if(trend_code < 0) {
+    trend_color = "#ff7c39";
 }
+
+var dayMaxColor = "<?php echo $colorBarometerDayMax;?>";
+var dayMinColor = "<?php echo $colorBarometerDayMin;?>";
+var currentPColor = "<?php echo $colorBarometerCurrent;?>";
 
 var altitude = "<?php echo $elevation;?>"; 
 
@@ -344,7 +349,7 @@ var svg = d3.select(".barometer")
                 .style("fill", baseTextColor)
                 .text(function(d) { return d.split("-")[1]; });
     
-    	if (units === "hPa") {
+        if (units === "hPa") {
                    
             svg.append("text") // station altitude
                 .attr("x", 35)
@@ -395,7 +400,7 @@ var svg = d3.select(".barometer")
                 .attr("x", 37)
                 .attr("y", function(d, i) { return 19 + i * 19; })
 
-                .style("fill", "#ff7c39")
+                .style("fill", dayMaxColor)
                 .style("font-family", "Helvetica") 
                 .style("font-size", "9px")
                 .style("text-anchor", "middle")
@@ -426,7 +431,7 @@ var svg = d3.select(".barometer")
                 .attr("x", 272)
                 .attr("y", function(d, i) { return 143 + i * 143; })
 
-                .style("fill", "#3b9cac")
+                .style("fill", dayMinColor)
                 .style("font-family", "Helvetica") 
                 .style("font-size", "9px")
                 .style("text-anchor", "middle")
@@ -465,14 +470,14 @@ var svg = d3.select(".barometer")
                 .attr('stroke-width', "0.75px")
                 .style("fill", "none")
                 .style("stroke-linecap", "round")
-                .attr('stroke', "#ff7c39");
+                .attr('stroke', trend_color);
               
             svg.append('polyline') // trend rising
                 .attr('points', "59.5 128.25 61 128 62 128 63 130")
                 .attr('stroke-width', "0.75px")
                 .style("fill", "none")
                 .style("stroke-linecap", "round")
-                .attr('stroke', "#ff7c39");         
+                .attr('stroke', trend_color);         
              
          } else if (trend_code < 0) {
               
@@ -481,14 +486,14 @@ var svg = d3.select(".barometer")
                 .attr('stroke-width', "0.75px")
                 .style("fill", "none")
                 .style("stroke-linecap", "round")
-                .attr('stroke', "#3b9cac");
+                .attr('stroke', trend_color);
                 
             svg.append('polyline') // trend falling
                 .attr('points', "59 133 62 133.25 62 133.25 63 131")
                 .attr('stroke-width', "0.75px")
                 .style("fill", "none")
                 .style("stroke-linecap", "round")
-                .attr('stroke', "#3b9cac");
+                .attr('stroke', trend_color);
                 
         } else if (trend_code == 0) {
         
@@ -497,19 +502,19 @@ var svg = d3.select(".barometer")
                 .attr('stroke-width', "0.75px")
                 .style("fill", "none")
                 .style("stroke-linecap", "round")
-                .attr('stroke', "#90b12a");        
+                .attr('stroke', trend_color);        
         }
         
              svg.append("text") // barometer now pressure text output
-             	.attr("x", 155)
-            	.attr("y", 132)
-            	.style("fill", baseTextColor)
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "11px")
-            	.style("text-anchor", "middle")
-            	.style("font-weight", "normal")
-   				.text(currentP + " " + units);
-   				                                                                              
+                .attr("x", 155)
+                .attr("y", 132)
+                .style("fill", currentPColor)
+                .style("font-family", "Helvetica")
+                .style("font-size", "11px")
+                .style("text-anchor", "middle")
+                .style("font-weight", "normal")
+                .text(currentP + " " + units);
+                                                                                              
         var gauge = iopctrl.arcslider()
                 .radius(52.5)
                 .events(false)
@@ -522,12 +527,12 @@ var svg = d3.select(".barometer")
                     .style('stroke', 'red')
                     .style("stroke-width", 0.5)
                     .style("stroke-linecap", "round");
-            		 
-            	g.append("circle")
-            		.attr("cx", 0) // center circle
-            		.attr("cy", 0)
-            		.attr("r", 5);
-            		             		             	            		            		 
+                     
+                g.append("circle")
+                    .attr("cx", 0) // center circle
+                    .attr("cy", 0)
+                    .attr("r", 5);
+                                                                                                 
             });
                                                                     
         gauge.axis().orient("out").tickFormat(d3.format("d"))
@@ -553,13 +558,13 @@ var svg = d3.select(".barometer")
                 .transitionDuration(0) // needle speed, a higher value makes it slower
                 .indicator(function(g, width) {
 
-    				g.append("line")
-            		 .attr("y1", - width - 7) // needle length
-            		 .attr("y2", - width + 0) // needle tail length
-            		 .style("stroke", "rgba(59, 156, 172, 1)")
-            		 .style("stroke-linecap", "round")
-            		 .style("stroke-width", 2);
-            		     		            		 
+                    g.append("line")
+                     .attr("y1", - width - 7) // needle length
+                     .attr("y2", - width + 0) // needle tail length
+                     .style("stroke", "rgba(59, 156, 172, 1)")
+                     .style("stroke-linecap", "round")
+                     .style("stroke-width", 2);
+                                                     
             });
                                               
         gauge.axis().orient("in").tickFormat(d3.format("d"))
@@ -585,13 +590,13 @@ var svg = d3.select(".barometer")
                 .transitionDuration(0) // needle speed, a higher value makes it slower
                 .indicator(function(g, width) {
 
-    				g.append("line")
-            		 .attr("y1", - width - 7) // needle length
-            		 .attr("y2", - width + 0) // needle tail length
-            		 .style("stroke", "rgba(255, 124, 57, 1)")
-            		 .style("stroke-linecap", "round")
-            		 .style("stroke-width", 2);            		             		 
-            	            		            		 
+                    g.append("line")
+                     .attr("y1", - width - 7) // needle length
+                     .attr("y2", - width + 0) // needle tail length
+                     .style("stroke", "rgba(255, 124, 57, 1)")
+                     .style("stroke-linecap", "round")
+                     .style("stroke-width", 2);                                      
+                                                         
             });
                                               
         gauge.axis().orient("in").tickFormat(d3.format("d"))
@@ -662,7 +667,7 @@ var svg = d3.select(".barometer")
                 .attr("x", 37)
                 .attr("y", function(d, i) { return 19 + i * 19; })
 
-                .style("fill", "#ff7c39")
+                .style("fill", dayMaxColor)
                 .style("font-family", "Helvetica") 
                 .style("font-size", "9px")
                 .style("text-anchor", "middle")
@@ -693,7 +698,7 @@ var svg = d3.select(".barometer")
                 .attr("x", 272)
                 .attr("y", function(d, i) { return 143 + i * 143; })
 
-                .style("fill", "#3b9cac")
+                .style("fill", dayMinColor)
                 .style("font-family", "Helvetica") 
                 .style("font-size", "9px")
                 .style("text-anchor", "middle")
@@ -732,14 +737,14 @@ var svg = d3.select(".barometer")
                 .attr('stroke-width', "0.75px")
                 .style("fill", "none")
                 .style("stroke-linecap", "round")
-                .attr('stroke', "#ff7c39");
+                .attr('stroke', trend_color);
               
             svg.append('polyline') // trend rising
                 .attr('points', "59.5 128.25 61 128 62 128 63 130")
                 .attr('stroke-width', "0.75px")
                 .style("fill", "none")
                 .style("stroke-linecap", "round")
-                .attr('stroke', "#ff7c39");         
+                .attr('stroke', trend_color);         
              
          } else if (trend_code < 0) {
               
@@ -748,14 +753,14 @@ var svg = d3.select(".barometer")
                 .attr('stroke-width', "0.75px")
                 .style("fill", "none")
                 .style("stroke-linecap", "round")
-                .attr('stroke', "#3b9cac");
+                .attr('stroke', trend_color);
                 
             svg.append('polyline') // trend falling
                 .attr('points', "59.5 133.5 61 133.5 62 133.5 63 131.5")
                 .attr('stroke-width', "0.75px")
                 .style("fill", "none")
                 .style("stroke-linecap", "round")
-                .attr('stroke', "#3b9cac");
+                .attr('stroke', trend_color);
                 
         } else if (trend_code == 0) {
         
@@ -764,19 +769,19 @@ var svg = d3.select(".barometer")
                 .attr('stroke-width', "0.75px")
                 .style("fill", "none")
                 .style("stroke-linecap", "round")
-                .attr('stroke', "#90b12a");        
+                .attr('stroke', trend_color);        
         }
         
              svg.append("text") // barometer now pressure text output
                 .attr("x", 155)
                 .attr("y", 132)
-                .style("fill", baseTextColor)
+                .style("fill", currentPColor)
                 .style("font-family", "Helvetica")
                 .style("font-size", "11px")
                 .style("text-anchor", "middle")
                 .style("font-weight", "normal")
                 .text(currentP + " " + units);
-   			                                                                               
+                                                                                           
         var gauge = iopctrl.arcslider()
                 .radius(52.5)
                 .events(false)
@@ -790,11 +795,11 @@ var svg = d3.select(".barometer")
                     .style("stroke-width", 0.5)
                     .style("stroke-linecap", "round");
 
-            		 g.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
-            		 .attr("r", 5);
-            		             		             	            		            		 
+                     g.append("circle")
+                     .attr("cx", 0) // center circle
+                     .attr("cy", 0)
+                     .attr("r", 5);
+                                                                                                 
             });
                                                                     
         gauge.axis().orient("out").tickFormat(d3.format("d"))
@@ -820,13 +825,13 @@ var svg = d3.select(".barometer")
                 .transitionDuration(0) // needle speed, a higher value makes it slower
                 .indicator(function(g, width) {
 
-    				g.append("line")
-            		 .attr("y1", - width - 7) // needle length
-            		 .attr("y2", - width + 0) // needle tail length
-            		 .style("stroke", "rgba(59, 156, 172, 1)")
-            		 .style("stroke-linecap", "round")
-            		 .style("stroke-width", 2);
-            		     		            		 
+                    g.append("line")
+                     .attr("y1", - width - 7) // needle length
+                     .attr("y2", - width + 0) // needle tail length
+                     .style("stroke", "rgba(59, 156, 172, 1)")
+                     .style("stroke-linecap", "round")
+                     .style("stroke-width", 2);
+                                                     
             });
                                               
         gauge.axis().orient("in").tickFormat(d3.format("d"))
@@ -852,13 +857,13 @@ var svg = d3.select(".barometer")
                 .transitionDuration(0) // needle speed, a higher value makes it slower
                 .indicator(function(g, width) {
 
-    				g.append("line")
-            		 .attr("y1", - width - 7) // needle length
-            		 .attr("y2", - width + 0) // needle tail length
-            		 .style("stroke", "rgba(255, 124, 57, 1)")
-            		 .style("stroke-linecap", "round")
-            		 .style("stroke-width", 2);            		             		 
-            	            		            		 
+                    g.append("line")
+                     .attr("y1", - width - 7) // needle length
+                     .attr("y2", - width + 0) // needle tail length
+                     .style("stroke", "rgba(255, 124, 57, 1)")
+                     .style("stroke-linecap", "round")
+                     .style("stroke-width", 2);                                      
+                                                         
             });
                                               
         gauge.axis().orient("in").tickFormat(d3.format("d"))
@@ -929,7 +934,7 @@ var svg = d3.select(".barometer")
                 .attr("x", 37)
                 .attr("y", function(d, i) { return 19 + i * 19; })
 
-                .style("fill", "#ff7c39")
+                .style("fill", dayMaxColor)
                 .style("font-family", "Helvetica") 
                 .style("font-size", "9px")
                 .style("text-anchor", "middle")
@@ -960,7 +965,7 @@ var svg = d3.select(".barometer")
                 .attr("x", 272)
                 .attr("y", function(d, i) { return 143 + i * 143; })
 
-                .style("fill", "#3b9cac")
+                .style("fill", dayMinColor)
                 .style("font-family", "Helvetica") 
                 .style("font-size", "9px")
                 .style("text-anchor", "middle")
@@ -999,14 +1004,14 @@ var svg = d3.select(".barometer")
                 .attr('stroke-width', "0.75px")
                 .style("fill", "none")
                 .style("stroke-linecap", "round")
-                .attr('stroke', "#ff7c39");
+                .attr('stroke', trend_color);
               
             svg.append('polyline') // trend rising
                 .attr('points', "59.5 128.25 61 128 62 128 63 130")
                 .attr('stroke-width', "0.75px")
                 .style("fill", "none")
                 .style("stroke-linecap", "round")
-                .attr('stroke', "#ff7c39");         
+                .attr('stroke', trend_color);         
              
          } else if (trend_code < 0) {
               
@@ -1015,14 +1020,14 @@ var svg = d3.select(".barometer")
                 .attr('stroke-width', "0.75px")
                 .style("fill", "none")
                 .style("stroke-linecap", "round")
-                .attr('stroke', "#3b9cac");
+                .attr('stroke', trend_color);
                 
             svg.append('polyline') // trend falling
                 .attr('points', "59.5 133.5 61 133.5 62 133.5 63 131.5")
                 .attr('stroke-width', "0.75px")
                 .style("fill", "none")
                 .style("stroke-linecap", "round")
-                .attr('stroke', "#3b9cac");
+                .attr('stroke', trend_color);
                 
         } else if (trend_code == 0) {
         
@@ -1031,13 +1036,13 @@ var svg = d3.select(".barometer")
                 .attr('stroke-width', "0.75px")
                 .style("fill", "none")
                 .style("stroke-linecap", "round")
-                .attr('stroke', "#90b12a");        
+                .attr('stroke', trend_color);        
         }
         
              svg.append("text") // barometer now pressure text output
                 .attr("x", 155)
                 .attr("y", 132)
-                .style("fill", baseTextColor)
+                .style("fill", currentPColor)
                 .style("font-family", "Helvetica")
                 .style("font-size", "11px")
                 .style("text-anchor", "middle")
@@ -1057,11 +1062,11 @@ var svg = d3.select(".barometer")
                     .style("stroke-width", 0.5)
                     .style("stroke-linecap", "round");
 
-            		 g.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
-            		 .attr("r", 5);
-            		 
+                     g.append("circle")
+                     .attr("cx", 0) // center circle
+                     .attr("cy", 0)
+                     .attr("r", 5);
+                     
             });
                    
         gauge.axis().orient("out")
@@ -1087,13 +1092,13 @@ var svg = d3.select(".barometer")
                 .transitionDuration(0) // needle speed, a higher value makes it slower
                 .indicator(function(g, width) {
 
-    				g.append("line")
-            		 .attr("y1", - width - 7) // needle length
-            		 .attr("y2", - width + 0) // needle tail length
-            		 .style("stroke", "rgba(59, 156, 172, 1)")
-            		 .style("stroke-linecap", "round")
-            		 .style("stroke-width", 2);
-            		 
+                    g.append("line")
+                     .attr("y1", - width - 7) // needle length
+                     .attr("y2", - width + 0) // needle tail length
+                     .style("stroke", "rgba(59, 156, 172, 1)")
+                     .style("stroke-linecap", "round")
+                     .style("stroke-width", 2);
+                     
             });
                    
         gauge.axis().orient("in")
@@ -1119,12 +1124,12 @@ var svg = d3.select(".barometer")
                 .transitionDuration(0) // needle speed, a higher value makes it slower
                 .indicator(function(g, width) {
 
-    				g.append("line")
-            		 .attr("y1", - width - 7) // needle length
-            		 .attr("y2", - width + 0) // needle tail length
-            		 .style("stroke", "rgba(255, 124, 57, 1)")
-            		 .style("stroke-linecap", "round")
-            		 .style("stroke-width", 2);            		 
+                    g.append("line")
+                     .attr("y1", - width - 7) // needle length
+                     .attr("y2", - width + 0) // needle tail length
+                     .style("stroke", "rgba(255, 124, 57, 1)")
+                     .style("stroke-linecap", "round")
+                     .style("stroke-width", 2);                  
 
             });
                    
@@ -1196,7 +1201,7 @@ var svg = d3.select(".barometer")
                 .attr("x", 37)
                 .attr("y", function(d, i) { return 19 + i * 19; })
 
-                .style("fill", "#ff7c39")
+                .style("fill", dayMaxColor)
                 .style("font-family", "Helvetica") 
                 .style("font-size", "9px")
                 .style("text-anchor", "middle")
@@ -1227,7 +1232,7 @@ var svg = d3.select(".barometer")
                 .attr("x", 272)
                 .attr("y", function(d, i) { return 143 + i * 143; })
 
-                .style("fill", "#3b9cac")
+                .style("fill", dayMinColor)
                 .style("font-family", "Helvetica") 
                 .style("font-size", "9px")
                 .style("text-anchor", "middle")
@@ -1266,14 +1271,14 @@ var svg = d3.select(".barometer")
                 .attr('stroke-width', "0.75px")
                 .style("fill", "none")
                 .style("stroke-linecap", "round")
-                .attr('stroke', "#ff7c39");
+                .attr('stroke', trend_color);
               
             svg.append('polyline') // trend rising
                 .attr('points', "59.5 128.25 61 128 62 128 63 130")
                 .attr('stroke-width', "0.75px")
                 .style("fill", "none")
                 .style("stroke-linecap", "round")
-                .attr('stroke', "#ff7c39");         
+                .attr('stroke', trend_color);         
              
          } else if (trend_code < 0) {
               
@@ -1282,14 +1287,14 @@ var svg = d3.select(".barometer")
                 .attr('stroke-width', "0.75px")
                 .style("fill", "none")
                 .style("stroke-linecap", "round")
-                .attr('stroke', "#3b9cac");
+                .attr('stroke', trend_color);
                 
             svg.append('polyline') // trend falling
                 .attr('points', "59.5 133.5 61 133.5 62 133.5 63 131.5")
                 .attr('stroke-width', "0.75px")
                 .style("fill", "none")
                 .style("stroke-linecap", "round")
-                .attr('stroke', "#3b9cac");
+                .attr('stroke', trend_color);
                 
         } else if (trend_code == 0) {
         
@@ -1298,13 +1303,13 @@ var svg = d3.select(".barometer")
                 .attr('stroke-width', "0.75px")
                 .style("fill", "none")
                 .style("stroke-linecap", "round")
-                .attr('stroke', "#90b12a");        
+                .attr('stroke', trend_color);        
         }
         
              svg.append("text") // barometer now pressure text output
                 .attr("x", 155)
                 .attr("y", 132)
-                .style("fill", baseTextColor)
+                .style("fill", currentPColor)
                 .style("font-family", "Helvetica")
                 .style("font-size", "11px")
                 .style("text-anchor", "middle")
@@ -1324,11 +1329,11 @@ var svg = d3.select(".barometer")
                     .style("stroke-width", 0.5)
                     .style("stroke-linecap", "round");
 
-            		 g.append("circle")
-            		 .attr("cx", 0) // center circle
-            		 .attr("cy", 0)
-            		 .attr("r", 5);
-            		             		             	            		            		 
+                     g.append("circle")
+                     .attr("cx", 0) // center circle
+                     .attr("cy", 0)
+                     .attr("r", 5);
+                                                                                                 
             });
                                                          
         gauge.axis().orient("out").tickFormat(d3.format("d"))
@@ -1353,13 +1358,13 @@ var svg = d3.select(".barometer")
                 .transitionDuration(0) // needle speed, a higher value makes it slower
                 .indicator(function(g, width) {
 
-    				g.append("line")
-            		 .attr("y1", - width - 7) // needle length
-            		 .attr("y2", - width + 0) // needle tail length
-            		 .style("stroke", "rgba(59, 156, 172, 1)")
-            		 .style("stroke-linecap", "round")
-            		 .style("stroke-width", 2);
-            		     		            		 
+                    g.append("line")
+                     .attr("y1", - width - 7) // needle length
+                     .attr("y2", - width + 0) // needle tail length
+                     .style("stroke", "rgba(59, 156, 172, 1)")
+                     .style("stroke-linecap", "round")
+                     .style("stroke-width", 2);
+                                                     
             });
                                               
         gauge.axis().orient("in").tickFormat(d3.format("d"))
@@ -1385,13 +1390,13 @@ var svg = d3.select(".barometer")
                 .transitionDuration(0) // needle speed, a higher value makes it slower
                 .indicator(function(g, width) {
 
-    				g.append("line")
-            		 .attr("y1", - width - 7) // needle length
-            		 .attr("y2", - width + 0) // needle tail length
-            		 .style("stroke", "rgba(255, 124, 57, 1)")
-            		 .style("stroke-linecap", "round")
-            		 .style("stroke-width", 2);            		             		 
-            	            		            		 
+                    g.append("line")
+                     .attr("y1", - width - 7) // needle length
+                     .attr("y2", - width + 0) // needle tail length
+                     .style("stroke", "rgba(255, 124, 57, 1)")
+                     .style("stroke-linecap", "round")
+                     .style("stroke-width", 2);                                      
+                                                         
             });
                                               
         gauge.axis().orient("in").tickFormat(d3.format("d"))

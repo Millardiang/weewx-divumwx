@@ -101,6 +101,9 @@ $divum["swversion"] = "$station.version";
 $divum["build"] = $weewxrt[38];
 $divum["since"] = "$alltime.outTemp.firsttime.raw";
 $stationUptime = "$station.uptime.long_form";
+$TS = time();
+if($theme == 'dark') {$convertStyle = "color:";}
+else {$convertStyle = "background:";}
 
 //almanac
 ## If extended almanac information is available, do extra calculations.
@@ -276,119 +279,6 @@ $barom["alltime_min"] = $alltime.barometer.min.format(add_label=False);
 $barom["alltime_mintime"] = date('j M Y H:i',$alltime.barometer.mintime.raw);
 #end if
 
-//colors
-//barometer almanac
-$colorBarometerDayMax = "$colorize($day.barometer.max)";
-$colorBarometerDayMin = "$colorize($day.barometer.min)";
-$colorBarometerYesterdayMax = "$colorize($day($days_ago=1).barometer.max)";
-$colorBarometerYesterdayMin = "$colorize($day($days_ago=1).barometer.min)";
-$colorBarometerMonthMax = "$colorize($month.barometer.max)";
-$colorBarometerMonthMin = "$colorize($month.barometer.min)";
-$colorBarometerYearMax = "$colorize($year.barometer.max)";
-$colorBarometerYearMin = "$colorize($year.barometer.min)";
-$colorBarometerAlltimeMax = "$colorize($alltime.barometer.max)";
-$colorBarometerAlltimeMin = "$colorize($alltime.barometer.min)";
-//temperature almanac
-//day
-$t[0] = "$colorize($day.outTemp.max)";
-$t[1] = "$colorize($day.outTemp.min)";
-$t[2] = "$colorize($day.dewpoint.max)";
-$t[3] = "$colorize($day.dewpoint.min)";
-
-//yesterday
-$d[0] = "$colorize($day($days_ago=1).outTemp.max)";
-$d[1] = "$colorize($day($days_ago=1).outTemp.min)";
-$d[2] = "$colorize($day($days_ago=1).dewpoint.max)";
-$d[3] = "$colorize($day($days_ago=1).dewpoint.min)";
-
-//month
-$m[0] = "$colorize($month.outTemp.max)";
-$m[1] = "$colorize($month.outTemp.min)";
-$m[2] = "$colorize($month.dewpoint.max)";
-$m[3] = "$colorize($month.dewpoint.min)";
-
-//year
-$y[0] = "$colorize($year.outTemp.max)";
-$y[1] = "$colorize($year.outTemp.min)";
-$y[2] = "$colorize($year.dewpoint.max)";
-$y[3] = "$colorize($year.dewpoint.min)";
-
-//alltime
-$a[0] = "$colorize($alltime.outTemp.max)";
-$a[1] = "$colorize($alltime.outTemp.min)";
-$a[2] = "$colorize($alltime.dewpoint.max)";
-$a[3] = "$colorize($alltime.dewpoint.min)";
-
-//60min
-$color["outTemp_60min_avg"] = "$colorize($hour($hours_ago=1).outTemp.avg)";
-
-//wind speed color
-if($weewxrt[12] == 0){$color["windSpeed"]="#85a3aa";}
-else if($weewxrt[12] == 1){$color["windSpeed"]="#7e98bb";}
-else if($weewxrt[12] == 2){$color["windSpeed"]="#6e90d0";}
-else if($weewxrt[12] == 3){$color["windSpeed"]="#0f94a7";}
-else if($weewxrt[12] == 4){$color["windSpeed"]="#39a239";}
-else if($weewxrt[12] == 5){$color["windSpeed"]="#c2863e";}
-else if($weewxrt[12] == 6){$color["windSpeed"]="#c8420d";}
-else if($weewxrt[12] == 7){$color["windSpeed"]="#d20032";}
-else if($weewxrt[12] == 8){$color["windSpeed"]="#af5088";}
-else if($weewxrt[12] == 9){$color["windSpeed"]="#754a92";}
-else if($weewxrt[12] == 10){$color["windSpeed"]="#45698d";}
-else if($weewxrt[12] == 11){$color["windSpeed"]="#c1fc77";}
-else if($weewxrt[12] == 12){$color["windSpeed"]="#f1ff6c";}
-//wind gust color
-if($weewxrt[64] <= 1){$color["windGust"]="#85a3aa";}
-else if($weewxrt[64] <= 2){$color["windGust"]="#7e98bb";}
-else if($weewxrt[64] <= 3){$color["windGust"]="#6e90d0";}
-else if($weewxrt[64] <= 5){$color["windGust"]="#0f94a7";}
-else if($weewxrt[64] <= 8){$color["windGust"]="#39a239";}
-else if($weewxrt[64] <= 11){$color["windGust"]="#c2863e";}
-else if($weewxrt[64] <= 14){$color["windGust"]="#c8420d";}
-else if($weewxrt[64] <= 17){$color["windGust"]="#d20032";}
-else if($weewxrt[64] <= 21){$color["windGust"]="#af5088";}
-else if($weewxrt[64] <= 24){$color["windGust"]="#754a92";}
-else if($weewxrt[64] <= 28){$color["windGust"]="#45698d";}
-else if($weewxrt[64] <= 32){$color["windGust"]="#c1fc77";}
-else if($weewxrt[64] <= 100){$color["windGust"]="#f1ff6c";}
-$color["windSpeed_max"] = "$colorize($day.windSpeed.max)";
-$color["windGust_max"] = "$colorize($day.windGust.max)";
-$color["windSpeed_avg"] = "$colorize($day.windSpeed.avg)";
-$color["windSpeed_10min_avg"] = "$colorize($span($time_delta=600).windSpeed.avg)";
-$color["windGust_10min_max"] = "$colorize($span($time_delta=600).windGust.max)";
-$color["windSpeed_yesterday_max"] = "$colorize($day($days_ago=1).windSpeed.max)";
-$color["windGust_yesterday_max"] = "$colorize($day($days_ago=1).windGust.max)";
-$color["windSpeed_month_max"] = "$colorize($month.windSpeed.max)";
-$color["windGust_month_max"] = "$colorize($month.windGust.max)";
-$color["windSpeed_year_max"] = "$colorize($year.windSpeed.max)";
-$color["windGust_year_max"] = "$colorize($year.windGust.max)";
-$color["windSpeed_alltime_max"] = "$colorize($alltime.windSpeed.max)";
-$color["windGust_alltime_max"] = "$colorize($alltime.windGust.max)";
-
-//rain color
-if($weewxrt[9] == 0){$color["rain_sum"]="#000000";}
-else if($weewxrt[9] < 2.5){$color["rain_sum"]="#1E90FF";}
-else if($weewxrt[9] < 10){$color["rain_sum"]="#126AD2";}
-else if($weewxrt[9] < 50){$color["rain_sum"]="#0643A5";}
-else if($weewxrt[9] >= 50){$color["rain_sum"]="#00308F";}
-if($weewxrt[8] == 0){$color["rainRate"]="#000000";}
-else if($weewxrt[8] < 2.5){$color["rainRate"]="#1E90FF";}
-else if($weewxrt[8] < 10){$color["rainRate"]="#126AD2";}
-else if($weewxrt[8] < 50){$color["rainRate"]="#0643A5";}
-else if($weewxrt[8] >= 50){$color["rainRate"]="#00308F";}
-
-$colorRainDaySum = "$colorize($day.rain.sum)";
-$colorRainYesterdaySum = "$colorize($day($days_ago=1).rain.sum)";
-$colorRain24hrSum = "$colorize($span($hour_delta=24).rain.sum)"; 
-$colorRainMonthSum = "$colorize($month.rain.sum)";
-$colorRainYearSum = "$colorize($year.rain.sum)";
-$colorRainAlltimeSum = "$colorize($alltime.rain.sum)";
-
-$colorRainRateDayMax = "$colorize($day.rainRate.max)";
-$colorRainRateYesterdayMax = "$colorize($day($days_ago=1).rainRate.max)";
-$colorRainRate24hrMax = "$colorize($span($hour_delta=24).rainRate.max)"; 
-$colorRainRateMonthMax = "$colorize($month.rainRate.max)";
-$colorRainRateYearMax = "$colorize($year.rainRate.max)";
-$colorRainRateAlltimeMax = "$colorize($alltime.rainRate.max)";
 
 //dewpoint
 $dew["now"] = $weewxrt[4];
@@ -502,10 +392,10 @@ else if($rain["units"] == " in")
 {
 $rain["units"] = "in";
 }
-$rain["rate"] = +round($weewxrt[8],1);
+$rain["rate"] = round($weewxrt[8],1);
 $rain["current"] = round($weewxrt[9],1);
-$rain["total"] = round($weewxrt[9],1);
-$rain["last_hour"] = $span($hour_delta=1).rain.sum.raw;
+$rain["total"] = round($day.rain.sum.raw,1);
+$rain["last_hour"] = round($span($hour_delta=1).rain.sum.raw,1);
 $rain["last_10min"] = $span($time_delta=600).rain.sum.raw;
 $rain["last_24hour"] = round($span($hour_delta=24).rain.sum.raw,1);
 $rain["24h_rate_max"] = $day($days_ago=1).rainRate.max.raw;
@@ -528,6 +418,7 @@ $rain["alltime_rate_max"] = $alltime.rainRate.max.raw;
 $rain["alltime_rate_maxtime"] = $alltime.rainRate.maxtime.raw;
 $rain["alltime_total"] = round($alltime.rain.sum.raw,1);
 $rain["storm_rain"] = $current.hail.raw;
+$rain["last_rain"] = date('D j M H:i',$time_at('rain>0').raw);
 if($weewxrt[8] < 2.5){$rain["intensity"]="Slight";}
 else if($weewxrt[8] < 10){$rain["intensity"]="Moderate";}
 else if($weewxrt[8] < 50){$rain["intensity"]="Heavy";}
@@ -683,8 +574,130 @@ if($wind["direction_10m_avg"] == "N/A"){$wind["direction_10m_avg"] = "Calm";}
 if($wind["direction_trend"] == "   N/A"){$wind["direction_trend"] = "Calm";}
 if($wind["direction_trend_ordinal"] == "N/A")
 {$wind["direction_trend_ordinal"] = "Calm";}
-
 #end if
+
+//colors
+//barometer almanac
+$colorBarometerCurrent = "$colorize($current.barometer)";
+$colorBarometerDayMax = "$colorize($day.barometer.max)";
+$colorBarometerDayMin = "$colorize($day.barometer.min)";
+$colorBarometerYesterdayMax = "$colorize($day($days_ago=1).barometer.max)";
+$colorBarometerYesterdayMin = "$colorize($day($days_ago=1).barometer.min)";
+$colorBarometerMonthMax = "$colorize($month.barometer.max)";
+$colorBarometerMonthMin = "$colorize($month.barometer.min)";
+$colorBarometerYearMax = "$colorize($year.barometer.max)";
+$colorBarometerYearMin = "$colorize($year.barometer.min)";
+$colorBarometerAlltimeMax = "$colorize($alltime.barometer.max)";
+$colorBarometerAlltimeMin = "$colorize($alltime.barometer.min)";
+//temperature almanac
+//day
+$t[0] = "$colorize($day.outTemp.max)";
+$t[1] = "$colorize($day.outTemp.min)";
+$t[2] = "$colorize($day.dewpoint.max)";
+$t[3] = "$colorize($day.dewpoint.min)";
+
+//yesterday
+$d[0] = "$colorize($day($days_ago=1).outTemp.max)";
+$d[1] = "$colorize($day($days_ago=1).outTemp.min)";
+$d[2] = "$colorize($day($days_ago=1).dewpoint.max)";
+$d[3] = "$colorize($day($days_ago=1).dewpoint.min)";
+
+//month
+$m[0] = "$colorize($month.outTemp.max)";
+$m[1] = "$colorize($month.outTemp.min)";
+$m[2] = "$colorize($month.dewpoint.max)";
+$m[3] = "$colorize($month.dewpoint.min)";
+
+//year
+$y[0] = "$colorize($year.outTemp.max)";
+$y[1] = "$colorize($year.outTemp.min)";
+$y[2] = "$colorize($year.dewpoint.max)";
+$y[3] = "$colorize($year.dewpoint.min)";
+
+//alltime
+$a[0] = "$colorize($alltime.outTemp.max)";
+$a[1] = "$colorize($alltime.outTemp.min)";
+$a[2] = "$colorize($alltime.dewpoint.max)";
+$a[3] = "$colorize($alltime.dewpoint.min)";
+
+//60min
+$color["outTemp_60min_avg"] = "$colorize($hour($hours_ago=1).outTemp.avg)";
+
+//wind speed color
+if($weewxrt[12] == 0){$color["windSpeed"]="#85a3aa";}
+else if($weewxrt[12] == 1){$color["windSpeed"]="#7e98bb";}
+else if($weewxrt[12] == 2){$color["windSpeed"]="#6e90d0";}
+else if($weewxrt[12] == 3){$color["windSpeed"]="#0f94a7";}
+else if($weewxrt[12] == 4){$color["windSpeed"]="#39a239";}
+else if($weewxrt[12] == 5){$color["windSpeed"]="#c2863e";}
+else if($weewxrt[12] == 6){$color["windSpeed"]="#c8420d";}
+else if($weewxrt[12] == 7){$color["windSpeed"]="#d20032";}
+else if($weewxrt[12] == 8){$color["windSpeed"]="#af5088";}
+else if($weewxrt[12] == 9){$color["windSpeed"]="#754a92";}
+else if($weewxrt[12] == 10){$color["windSpeed"]="#45698d";}
+else if($weewxrt[12] == 11){$color["windSpeed"]="#c1fc77";}
+else if($weewxrt[12] == 12){$color["windSpeed"]="#f1ff6c";}
+//wind gust color
+if($weewxrt[64] <= 1){$color["windGust"]="#85a3aa";}
+else if($weewxrt[64] <= 2){$color["windGust"]="#7e98bb";}
+else if($weewxrt[64] <= 3){$color["windGust"]="#6e90d0";}
+else if($weewxrt[64] <= 5){$color["windGust"]="#0f94a7";}
+else if($weewxrt[64] <= 8){$color["windGust"]="#39a239";}
+else if($weewxrt[64] <= 11){$color["windGust"]="#c2863e";}
+else if($weewxrt[64] <= 14){$color["windGust"]="#c8420d";}
+else if($weewxrt[64] <= 17){$color["windGust"]="#d20032";}
+else if($weewxrt[64] <= 21){$color["windGust"]="#af5088";}
+else if($weewxrt[64] <= 24){$color["windGust"]="#754a92";}
+else if($weewxrt[64] <= 28){$color["windGust"]="#45698d";}
+else if($weewxrt[64] <= 32){$color["windGust"]="#c1fc77";}
+else if($weewxrt[64] <= 100){$color["windGust"]="#f1ff6c";}
+$color["windSpeed_max"] = "$colorize($day.windSpeed.max)";
+$color["windGust_max"] = "$colorize($day.windGust.max)";
+$color["windSpeed_avg"] = "$colorize($day.windSpeed.avg)";
+$color["windSpeed_10min_avg"] = "$colorize($span($time_delta=600).windSpeed.avg)";
+$color["windGust_10min_max"] = "$colorize($span($time_delta=600).windGust.max)";
+$color["windSpeed_yesterday_max"] = "$colorize($day($days_ago=1).windSpeed.max)";
+$color["windGust_yesterday_max"] = "$colorize($day($days_ago=1).windGust.max)";
+$color["windSpeed_month_max"] = "$colorize($month.windSpeed.max)";
+$color["windGust_month_max"] = "$colorize($month.windGust.max)";
+$color["windSpeed_year_max"] = "$colorize($year.windSpeed.max)";
+$color["windGust_year_max"] = "$colorize($year.windGust.max)";
+$color["windSpeed_alltime_max"] = "$colorize($alltime.windSpeed.max)";
+$color["windGust_alltime_max"] = "$colorize($alltime.windGust.max)";
+
+//rain color
+if($weewxrt[63] == 0 && $theme == 'dark'){$colorRainSum ="#C0C0C0";}
+else if($weewxrt[63] == 0){$colorRainSum ="#3A3D40";}
+else if($weewxrt[63] > 0){$colorStormRain ="#83818e";}
+else if($weewxrt[63] > 1){$colorStormRain ="#615884";}
+else if($weewxrt[63] > 5){$colorStormRain ="#34758e";}
+else if($weewxrt[63] > 10){$colorStormRain ="#0b8c88";}
+else if($weewxrt[63] > 30){$colorStormRain ="#359f35";}
+else if($weewxrt[63] > 40){$colorStormRain ="#a79d51";}
+else if($weewxrt[63] > 80){$colorStormRain ="#9f7f3a";}
+else if($weewxrt[63] > 120){$colorStormRain ="#be4c07";}
+
+
+if($rain["total"] == 0 && $theme == 'dark'){$colorRainDaySum ="#C0C0C0";}
+else if($rain["total"] == 0){$colorRainDaySum ="#3A3D40";}
+else {$colorRainDaySum = "$colorize($day.rain.sum)";}
+$colorRainYesterdaySum = "$colorize($day($days_ago=1).rain.sum)";
+$colorRain1hrSum = "$colorize($span($hour_delta=1).rain.sum)";
+$colorRain24hrSum = "$colorize($span($hour_delta=24).rain.sum)"; 
+$colorRainMonthSum = "$colorize($month.rain.sum)";
+$colorRainYearSum = "$colorize($year.rain.sum)";
+$colorRainAlltimeSum = "$colorize($alltime.rain.sum)";
+
+if($rain["rate"] == 0 && $theme == 'dark'){$colorRainRate ="#C0C0C0";}
+else if($rain["rate"] == 0){$colorRainRate ="#3A3D40";}
+else {$colorRainRate = "$colorize($current.rainRate)";}
+$colorRainRateDayMax = "$colorize($day.rainRate.max)";
+$colorRainRateYesterdayMax = "$colorize($day($days_ago=1).rainRate.max)";
+$colorRainRate24hrMax = "$colorize($span($hour_delta=24).rainRate.max)"; 
+$colorRainRateMonthMax = "$colorize($month.rainRate.max)";
+$colorRainRateYearMax = "$colorize($year.rainRate.max)";
+$colorRainRateAlltimeMax = "$colorize($alltime.rainRate.max)";
+
 
 //Convert temperatures if necessary
 include('dvmUnitConversions.php');

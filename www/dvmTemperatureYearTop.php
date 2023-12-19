@@ -14,29 +14,6 @@
 <?php include('dvmCombinedData.php');
 
 $image["image"] = "img/meteocons/thermometer.svg";
-
-if(anyToC($temp["outside_year_max"])<=-10){$tempcolormax = "#8781bd";}
-else if(anyToC($temp["outside_year_max"])<=0){$tempcolormax = "#487ea9";}
-else if(anyToC($temp["outside_year_max"])<=5){$tempcolormax = "#3b9cac";}
-else if(anyToC($temp["outside_year_max"])<10){$tempcolormax = "#9aba2f";}
-else if(anyToC($temp["outside_year_max"])<20){$tempcolormax = "#e6a141";}
-else if(anyToC($temp["outside_year_max"])<25){$tempcolormax = "#ec5a34";}
-else if(anyToC($temp["outside_year_max"])<30){$tempcolormax = "#d05f2d";}
-else if(anyToC($temp["outside_year_max"])<35){$tempcolormax = "#d65b4a";}
-else if(anyToC($temp["outside_year_max"])<40){$tempcolormax = "#dc4953";}
-else if(anyToC($temp["outside_year_max"])<100){$tempcolormax = "#e26870";}
-
-if(anyToC($temp["outside_year_min"])<=-10){$tempcolormin = "#8781bd";}
-else if(anyToC($temp["outside_year_min"])<=0){$tempcolormin = "#487ea9";}
-else if(anyToC($temp["outside_year_min"])<=5){$tempcolormin = "#3b9cac";}
-else if(anyToC($temp["outside_year_min"])<10){$tempcolormin = "#9aba2f";}
-else if(anyToC($temp["outside_year_min"])<20){$tempcolormin = "#e6a141";}
-else if(anyToC($temp["outside_year_min"])<25){$tempcolormin = "#ec5a34";}
-else if(anyToC($temp["outside_year_min"])<30){$tempcolormin = "#d05f2d";}
-else if(anyToC($temp["outside_year_min"])<35){$tempcolormin = "#d65b4a";}
-else if(anyToC($temp["outside_year_min"])<40){$tempcolormin = "#dc4953";}
-else if(anyToC($temp["outside_year_min"])<100){$tempcolormin = "#e26870";}
-
 ?>
 
 <div class="title"><?php echo $info; echo $lang["TemperatureTop"]; ?></div>
@@ -57,8 +34,8 @@ else if(anyToC($temp["outside_year_min"])<100){$tempcolormin = "#e26870";}
 
 	var theme = "<?php echo $theme;?>";
 	var image = "<?php echo $image["image"];?>";
-	var mincolor = "<?php echo $tempcolormin;?>";	
-	var maxcolor = "<?php echo $tempcolormax;?>"; 	
+	var mincolor = "<?php echo $y[1];?>";	
+	var maxcolor = "<?php echo $y[0];?>"; 	
 	var units = "<?php echo $temp["units"];?>";	
 	var maxtemp = "<?php echo $temp["outside_year_max"];?>";	
 	var mintemp = "<?php echo $temp["outside_year_min"];?>";	
@@ -141,7 +118,7 @@ svg.append("circle")
 			.style("font-size", "12px")
 			.style("text-anchor", "middle")
 			.style("font-weight", "bold")
-			.text(d3.format(".1f")(mintemp) + "°" + units);
+			.text(d3.format(".1f")(mintemp) + "째" + units);
 			
 		// min date text	
 		svg.append("text")		
@@ -183,7 +160,7 @@ svg.append("circle")
 			.style("font-size", "12px")
 			.style("text-anchor", "middle")
 			.style("font-weight", "bold")
-			.text(d3.format(".1f")(maxtemp) + "°" + units);
+			.text(d3.format(".1f")(maxtemp) + "째" + units);
 			
 		// max date text	
 		svg.append("text")		
