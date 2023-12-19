@@ -174,7 +174,7 @@
                 </li>';
       }
       echo '<li>
-              <a href="bio.php" data-lity title="Weather Station Owner Contact Card Info"><menumarkerorange></menumarkerorange> Contact Card</a>
+              <a href="dvmBioPopup.php" data-lity title="Weather Station Owner Contact Card Info"><menumarkerorange></menumarkerorange> Contact Card</a>
             </li>
             <li>
               <a href="stationinfo.php" data-lity title="Weather Station Hardware Info"><menumarkerred></menumarkerred> Hardware Info</a>
