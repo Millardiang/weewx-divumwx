@@ -118,7 +118,7 @@ svg.append("circle")
 			.style("font-size", "12px")
 			.style("text-anchor", "middle")
 			.style("font-weight", "bold")
-			.text(d3.format(".1f")(mintemp) + "째" + units);
+			.text(d3.format(".1f")(mintemp) + "°" + units);
 			
 		// min date text	
 		svg.append("text")		
@@ -160,7 +160,7 @@ svg.append("circle")
 			.style("font-size", "12px")
 			.style("text-anchor", "middle")
 			.style("font-weight", "bold")
-			.text(d3.format(".1f")(maxtemp) + "째" + units);
+			.text(d3.format(".1f")(maxtemp) + "°" + units);
 			
 		// max date text	
 		svg.append("text")		
