@@ -589,39 +589,180 @@ $colorBarometerYearMax = "$colorize($year.barometer.max)";
 $colorBarometerYearMin = "$colorize($year.barometer.min)";
 $colorBarometerAlltimeMax = "$colorize($alltime.barometer.max)";
 $colorBarometerAlltimeMin = "$colorize($alltime.barometer.min)";
-//temperature almanac
+//temperature etc current
+
+if($weewxrt[2]<= -10){$colorOutTemp = "#8781bd";}
+else if($weewxrt[2]<=0){$colorOutTemp = "#487ea9";}
+else if($weewxrt[2]<=5){$colorOutTemp = "#3b9cac";}
+else if($weewxrt[2]<10){$colorOutTemp = "#9aba2f";}
+else if($weewxrt[2]<20){$colorOutTemp = "#e6a141";}
+else if($weewxrt[2]<25){$colorOutTemp = "#ec5a34";}
+else if($weewxrt[2]<30){$colorOutTemp = "#d05f2d";}
+else if($weewxrt[2]<35){$colorOutTemp = "#d65b4a";}
+else if($weewxrt[2]<40){$colorOutTemp = "#dc4953";}
+else if($weewxrt[2]<100){$colorOutTemp = "#e26870";}
+
+if($weewxrt[4]<= -10){$colorDewpoint = "#8781bd";}
+else if($weewxrt[4]<=0){$colorDewpoint = "#487ea9";}
+else if($weewxrt[4]<=5){$colorDewpoint = "#3b9cac";}
+else if($weewxrt[4]<10){$colorDewpoint = "#9aba2f";}
+else if($weewxrt[4]<20){$colorDewpoint = "#e6a141";}
+else if($weewxrt[4]<25){$colorDewpoint = "#ec5a34";}
+else if($weewxrt[4]<30){$colorDewpoint = "#d05f2d";}
+else if($weewxrt[4]<35){$colorDewpoint = "#d65b4a";}
+else if($weewxrt[4]<40){$colorDewpoint = "#dc4953";}
+else if($weewxrt[4]<100){$colorDewpoint = "#e26870";}
+
+if($weewxrt[24]<= -10){$colorWindchill = "#8781bd";}
+else if($weewxrt[24]<=0){$colorWindchill = "#487ea9";}
+else if($weewxrt[24]<=5){$colorWindchill = "#3b9cac";}
+else if($weewxrt[24]<10){$colorWindchill = "#9aba2f";}
+else if($weewxrt[24]<20){$colorWindchill = "#e6a141";}
+else if($weewxrt[24]<25){$colorWindchill = "#ec5a34";}
+else if($weewxrt[24]<30){$colorWindchill = "#d05f2d";}
+else if($weewxrt[24]<35){$colorWindchill = "#d65b4a";}
+else if($weewxrt[24]<40){$colorWindchill = "#dc4953";}
+else if($weewxrt[24]<100){$colorWindchill = "#e26870";}
+
+if($weewxrt[41]<= -10){$colorHeatindex = "#8781bd";}
+else if($weewxrt[41]<=0){$colorHeatindex = "#487ea9";}
+else if($weewxrt[41]<=5){$colorHeatindex = "#3b9cac";}
+else if($weewxrt[41]<10){$colorHeatindex = "#9aba2f";}
+else if($weewxrt[41]<20){$colorHeatindex = "#e6a141";}
+else if($weewxrt[41]<25){$colorHeatindex = "#ec5a34";}
+else if($weewxrt[41]<30){$colorHeatindex = "#d05f2d";}
+else if($weewxrt[41]<35){$colorHeatindex = "#d65b4a";}
+else if($weewxrt[41]<40){$colorHeatindex = "#dc4953";}
+else if($weewxrt[41]<100){$colorHeatindex = "#e26870";}
+
+if($weewxrt[42]<= -10){$colorHumidex = "#8781bd";}
+else if($weewxrt[42]<=0){$colorHumidex = "#487ea9";}
+else if($weewxrt[42]<=5){$colorHumidex = "#3b9cac";}
+else if($weewxrt[42]<10){$colorHumidex = "#9aba2f";}
+else if($weewxrt[42]<20){$colorHumidex = "#e6a141";}
+else if($weewxrt[42]<25){$colorHumidex = "#ec5a34";}
+else if($weewxrt[42]<30){$colorHumidex = "#d05f2d";}
+else if($weewxrt[42]<35){$colorHumidex = "#d65b4a";}
+else if($weewxrt[42]<40){$colorHumidex = "#dc4953";}
+else if($weewxrt[42]<100){$colorHumidex = "#e26870";}
+
+if($weewxrt[54]<= -10){$colorAppTemp = "#8781bd";}
+else if($weewxrt[54]<=0){$colorAppTemp = "#487ea9";}
+else if($weewxrt[54]<=5){$colorAppTemp = "#3b9cac";}
+else if($weewxrt[54]<10){$colorAppTemp = "#9aba2f";}
+else if($weewxrt[54]<20){$colorAppTemp = "#e6a141";}
+else if($weewxrt[54]<25){$colorAppTemp = "#ec5a34";}
+else if($weewxrt[54]<30){$colorAppTemp = "#d05f2d";}
+else if($weewxrt[54]<35){$colorAppTemp = "#d65b4a";}
+else if($weewxrt[54]<40){$colorAppTemp = "#dc4953";}
+else if($weewxrt[54]<100){$colorAppTemp = "#e26870";}
+
+$colorOutTempDayAvg = "$colorize($day.outTemp.avg)";
+
+//humidity
+if($humid["now"]<30){$colorHumidity="Blue";}
+else if($humid["now"]<60){$colorHumidity="Green";}
+else if($humid["now"]<100){$colorHumidity="Red";}
+
+if($humid["day_max"]<30){$colorHumidityDayMax="Blue";}
+else if($humid["day_max"]<60){$colorHumidityDayMax="Green";}
+else if($humid["day_max"]<100){$colorHumidityDayMax="Red";}
+if($humid["day_min"]<30){$colorHumidityDayMin="Blue";}
+else if($humid["day_min"]<60){$colorHumidityDayMin="Green";}
+else if($humid["day_min"]<100){$colorHumidityDayMin="Red";}
+
+if($humid["yesterday_max"]<30){$colorHumidityYesterdayMax="Blue";}
+else if($humid["yesterday_max"]<60){$colorHumidityYesterdayMax="Green";}
+else if($humid["yesterday_max"]<100){$colorHumidityYesterdayMax="Red";}
+if($humid["yesterday_min"]<30){$colorHumidityYesterdayMin="Blue";}
+else if($humid["yesterday_min"]<60){$colorHumidityYesterdayMin="Green";}
+else if($humid["yesterday_min"]<100){$colorHumidityYesterdayMin="Red";}
+
+if($humid["month_max"]<30){$colorHumidityMonthMax="Blue";}
+else if($humid["month_max"]<60){$colorHumidityMonthMax="Green";}
+else if($humid["month_max"]<100){$colorHumidityMonthMax="Red";}
+if($humid["month_min"]<30){$colorHumidityMonthMin="Blue";}
+else if($humid["month_min"]<60){$colorHumidityMonthMin="Green";}
+else if($humid["month_min"]<100){$colorHumidityMonthMin="Red";}
+
+if($humid["year_max"]<30){$colorHumidityYearMax="Blue";}
+else if($humid["year_max"]<60){$colorHumidityYearMax="Green";}
+else if($humid["year_max"]<100){$colorHumidityYearMax="Red";}
+if($humid["year_min"]<30){$colorHumidityYearMin="Blue";}
+else if($humid["year_min"]<60){$colorHumidityYearMin="Green";}
+else if($humid["year_min"]<100){$colorHumidityYearMin="Red";}
+
+if($humid["alltime_max"]<30){$colorHumidityAlltimeMax="Blue";}
+else if($humid["alltime_max"]<60){$colorHumidityAlltimeMax="Green";}
+else if($humid["alltime_max"]<100){$colorHumidityAlltimeMax="Red";}
+if($humid["alltime_min"]<30){$colorHumidityAlltimeMin="Blue";}
+else if($humid["alltime_min"]<60){$colorHumidityAlltimeMin="Green";}
+else if($humid["alltime_min"]<100){$colorHumidityAlltimeMin="Red";}
+
+/*//temperature almanac
 //day
-$t[0] = "$colorize($day.outTemp.max)";
-$t[1] = "$colorize($day.outTemp.min)";
-$t[2] = "$colorize($day.dewpoint.max)";
-$t[3] = "$colorize($day.dewpoint.min)";
+$colorOutTempDayMax = "$colorize($day.outTemp.max)";
+$colorOutTempDayMin = "$colorize($day.outTemp.min)";
+$colorDewpointDayMax = "$colorize($day.dewpoint.max)";
+$colorDewpointDayMin = "$colorize($day.dewpoint.min)";
 
 //yesterday
-$d[0] = "$colorize($day($days_ago=1).outTemp.max)";
-$d[1] = "$colorize($day($days_ago=1).outTemp.min)";
-$d[2] = "$colorize($day($days_ago=1).dewpoint.max)";
-$d[3] = "$colorize($day($days_ago=1).dewpoint.min)";
+$colorOutTempYesterdayMax = "$colorize($day($days_ago=1).outTemp.max)";
+$colorOutTempYesterdayMin = "$colorize($day($days_ago=1).outTemp.min)";
+$colorDewpointYesterdayMax = "$colorize($day($days_ago=1).dewpoint.max)";
+$colorDewpointYesterdayMin = "$colorize($day($days_ago=1).dewpoint.min)";
 
 //month
-$m[0] = "$colorize($month.outTemp.max)";
-$m[1] = "$colorize($month.outTemp.min)";
-$m[2] = "$colorize($month.dewpoint.max)";
-$m[3] = "$colorize($month.dewpoint.min)";
+$colorOutTempMonthMax = "$colorize($month.outTemp.max)";
+$colorOutTempMonthMin = "$colorize($month.outTemp.min)";
+$colorDewpointMonthMax = "$colorize($month.dewpoint.max)";
+$colorDewpointMonthMin = "$colorize($month.dewpoint.min)";
 
 //year
-$y[0] = "$colorize($year.outTemp.max)";
-$y[1] = "$colorize($year.outTemp.min)";
-$y[2] = "$colorize($year.dewpoint.max)";
-$y[3] = "$colorize($year.dewpoint.min)";
+$colorOutTempYearMax = "$colorize($year.outTemp.max)";
+$colorOutTempYearMin = "$colorize($year.outTemp.min)";
+$colorDewpointYearMax = "$colorize($year.dewpoint.max)";
+$colorDewpointYearMin = "$colorize($year.dewpoint.min)";
 
 //alltime
-$a[0] = "$colorize($alltime.outTemp.max)";
-$a[1] = "$colorize($alltime.outTemp.min)";
-$a[2] = "$colorize($alltime.dewpoint.max)";
-$a[3] = "$colorize($alltime.dewpoint.min)";
+$colorOutTempAlltimeMax = "$colorize($alltime.outTemp.max)";
+$colorOutTempAlltimeMin = "$colorize($alltime.outTemp.min)";
+$colorDewpointAlltimeMax = "$colorize($alltime.dewpoint.max)";
+$colorDewpointAlltimeMin = "$colorize($alltime.dewpoint.min)";
 
 //60min
 $color["outTemp_60min_avg"] = "$colorize($hour($hours_ago=1).outTemp.avg)";
+
+//indoors
+if($weewxrt[22]<= -10){$colorInTemp = "#8781bd";}
+else if($weewxrt[22]<=0){$colorInTemp = "#487ea9";}
+else if($weewxrt[22]<=5){$colorInTemp = "#3b9cac";}
+else if($weewxrt[22]<10){$colorInTemp = "#9aba2f";}
+else if($weewxrt[22]<20){$colorInTemp = "#e6a141";}
+else if($weewxrt[22]<25){$colorInTemp = "#ec5a34";}
+else if($weewxrt[22]<30){$colorInTemp = "#d05f2d";}
+else if($weewxrt[22]<35){$colorInTemp = "#d65b4a";}
+else if($weewxrt[22]<40){$colorInTemp = "#dc4953";}
+else if($weewxrt[22]<100){$colorInTemp = "#e26870";}
+
+
+// humidity in
+if($humid["indoors_now"]<30){$colorInHumidity="Blue";}
+else if($humid["indoors_now"]<60){$colorInHumidity="Green";}
+else if($humid["indoors_now"]<100){$colorInHumidity="Red";}
+
+// feels
+if($HI<= -10){$colorFeels = "#8781bd";}
+else if($HI<=0){$colorFeels = "#487ea9";}
+else if($HI<=5){$colorFeels = "#3b9cac";}
+else if($HI<10){$colorFeels = "#9aba2f";}
+else if($HI<20){$colorFeels = "#e6a141";}
+else if($HI<25){$colorFeels = "#ec5a34";}
+else if($HI<30){$colorFeels = "#d05f2d";}
+else if($HI<35){$colorFeels = "#d65b4a";}
+else if($HI<40){$colorFeels = "#dc4953";}
+else if($HI<100){$colorFeels = "#e26870";}
+
 
 //wind speed color
 if($weewxrt[12] == 0){$color["windSpeed"]="#85a3aa";}

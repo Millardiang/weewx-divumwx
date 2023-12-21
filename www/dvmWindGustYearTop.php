@@ -15,16 +15,6 @@
 
 $image["image"] = "img/meteocons/umbrella-wind-static.svg";
 
-if($wind["gust_year_max"]>=0){$colormax = "#487ea9";}
-else if($wind["gust_year_max"]>=5){$colormax = "#3b9cac";}
-else if($wind["gust_year_max"]>10){$colormax = "#9aba2f";}
-else if($wind["gust_year_max"]>20){$colormax = "#e6a141";}
-else if($wind["gust_year_max"]>25){$colormax = "#ec5a34";}
-else if($wind["gust_year_max"]>30){$colormax = "#d05f2d";}
-else if($wind["gust_year_max"]>35){$colormax = "#d65b4a";}
-else if($wind["gust_year_max"]>40){$colormax = "#dc4953";}
-else {$wind["gust_year_max"] = $colormax = "#e26870";}
-
 ?>
 
 <div class="title"><?php echo $info; echo $lang["WindTop"]; ?></div>
@@ -45,7 +35,8 @@ else {$wind["gust_year_max"] = $colormax = "#e26870";}
 
 	var theme = "<?php echo $theme;?>";
 	var image = "<?php echo $image["image"];?>";		
-	var maxcolor = "<?php echo $colormax;?>";	 	
+	var maxcolorM = "<?php echo $color["windGust_month_max"];?>";
+    var maxcolorY = "<?php echo $color["windGust_year_max"];?>";
 	var units = "<?php echo $wind["units"];?>";
 	var maxGustY = "<?php echo $wind["gust_year_max"];?>";	
 	var maxGustM = "<?php echo $wind["gust_month_max"];?>";
@@ -108,8 +99,8 @@ svg.append("circle")
 			.attr("cx", 50)			
 			.attr("cy", 30)
 			.attr("r", 25)
-			.style('stroke', maxcolor)
-			.style('fill', maxcolor);
+			.style('stroke', maxcolorM)
+			.style('fill', maxcolorM);
 			
 		svg.append("text")		
 			.attr("x", 50)
@@ -148,8 +139,8 @@ svg.append("circle")
 			.attr("cx", 180)			
 			.attr("cy", 30)
 			.attr("r", 25)
-			.style('stroke', maxcolor)
-			.style('fill', maxcolor);
+			.style('stroke', maxcolorY)
+			.style('fill', maxcolorY);
 			
 		svg.append("text")		
 			.attr("x", 180)

@@ -34,8 +34,8 @@ $image["image"] = "img/meteocons/thermometer.svg";
 
 	var theme = "<?php echo $theme;?>";
 	var image = "<?php echo $image["image"];?>";
-	var mincolor = "<?php echo $y[1];?>";	
-	var maxcolor = "<?php echo $y[0];?>"; 	
+	var mincolor = "<?php echo $colorOutTempYearMin;?>";	
+	var maxcolor = "<?php echo $colorOutTempYearMax;?>"; 	
 	var units = "<?php echo $temp["units"];?>";	
 	var maxtemp = "<?php echo $temp["outside_year_max"];?>";	
 	var mintemp = "<?php echo $temp["outside_year_min"];?>";	
@@ -118,7 +118,7 @@ svg.append("circle")
 			.style("font-size", "12px")
 			.style("text-anchor", "middle")
 			.style("font-weight", "bold")
-			.text(d3.format(".1f")(mintemp) + "째" + units);
+			.text(d3.format(".1f")(mintemp) + "°" + units);
 			
 		// min date text	
 		svg.append("text")		
@@ -160,7 +160,7 @@ svg.append("circle")
 			.style("font-size", "12px")
 			.style("text-anchor", "middle")
 			.style("font-weight", "bold")
-			.text(d3.format(".1f")(maxtemp) + "째" + units);
+			.text(d3.format(".1f")(maxtemp) + "°" + units);
 			
 		// max date text	
 		svg.append("text")		
