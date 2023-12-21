@@ -34,8 +34,8 @@ $image["image"] = "img/meteocons/thermometer.svg";
 
 	var theme = "<?php echo $theme;?>";
 	var image = "<?php echo $image["image"];?>";
-	var mincolor = "<?php echo $y[1];?>";	
-	var maxcolor = "<?php echo $y[0];?>"; 	
+	var mincolor = "<?php echo $colorOutTempYearMin;?>";	
+	var maxcolor = "<?php echo $colorOutTempYearMax;?>"; 	
 	var units = "<?php echo $temp["units"];?>";	
 	var maxtemp = "<?php echo $temp["outside_year_max"];?>";	
 	var mintemp = "<?php echo $temp["outside_year_min"];?>";	
