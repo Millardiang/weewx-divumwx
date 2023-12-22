@@ -505,6 +505,8 @@ if ($RH<13&&$T>=80&&$T<=112){$adjust=((13-$RH)/4)*sqrt(17-abs($T-95)/17);$HI=$HI
 else if ($RH>85&&$T>=80&&$T<=87){$adjust=(($RH-85)/10)*((87-$T)/5);$HI=$HI+$adjust;}
 else if ($T<80){$HI=0.5*($T+61.0+(($T-68.0)*1.2)+($RH*0.094));}
 $temp["indoor_now_feels"] = number_format($HI, 1);
+$temp["indoor_now_feels_degC"] = (number_format($HI, 1)-32)*5/9;
+
 
 //uv
 $uv["now"] = $weewxrt[43];
@@ -752,16 +754,16 @@ else if($humid["indoors_now"]<60){$colorInHumidity="Green";}
 else if($humid["indoors_now"]<100){$colorInHumidity="Red";}
 
 // feels
-if($HI<= -10){$colorFeels = "#8781bd";}
-else if($HI<=0){$colorFeels = "#487ea9";}
-else if($HI<=5){$colorFeels = "#3b9cac";}
-else if($HI<10){$colorFeels = "#9aba2f";}
-else if($HI<20){$colorFeels = "#e6a141";}
-else if($HI<25){$colorFeels = "#ec5a34";}
-else if($HI<30){$colorFeels = "#d05f2d";}
-else if($HI<35){$colorFeels = "#d65b4a";}
-else if($HI<40){$colorFeels = "#dc4953";}
-else if($HI<100){$colorFeels = "#e26870";}
+if($temp["indoor_now_feels_degC"]<= -10){$colorFeels = "#8781bd";}
+else if($temp["indoor_now_feels_degC"]<=0){$colorFeels = "#487ea9";}
+else if($temp["indoor_now_feels_degC"]<=5){$colorFeels = "#3b9cac";}
+else if($temp["indoor_now_feels_degC"]<10){$colorFeels = "#9aba2f";}
+else if($temp["indoor_now_feels_degC"]<20){$colorFeels = "#e6a141";}
+else if($temp["indoor_now_feels_degC"]<25){$colorFeels = "#ec5a34";}
+else if($temp["indoor_now_feels_degC"]<30){$colorFeels = "#d05f2d";}
+else if($temp["indoor_now_feels_degC"]<35){$colorFeels = "#d65b4a";}
+else if($temp["indoor_now_feels_degC"]<40){$colorFeels = "#dc4953";}
+else if($temp["indoor_now_feels_degC"]<100){$colorFeels = "#e26870";}
 
 
 //wind speed color
