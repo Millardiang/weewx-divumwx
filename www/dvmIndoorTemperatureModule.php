@@ -1,95 +1,31 @@
-<?php
-#####################################################################################################################
-#
-# Thermometer image based on an idea by David Banks
-#
-# Copyright (c) 2023 by David Banks (https://codepen.io/davidbanks/pen/LYBrNb)
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
-# documentation files (the "Software"), to deal in the Software without restriction, ncluding without limitation
-# the rights to use, copy, modify, merge, # publish, distribute, sublicense, and/or sell copies of the Software,
-# and to permit persons to whom the Software is furnished to do so,subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all copies or substantial portions
-# of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
-# TO THE WARRANTIES OF # # MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
-# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE # FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
-# CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN # # # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-# DEALINGS IN THE SOFTWARE.
-#
-#####################################################################################################################                                                                                                        #
-#                                                                                                                   #
-# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
-#                                                                                                                   #
-# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
-#                                                                                                                   #
-# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
-#                                                                                                                   #
-# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
-#                                                                                                                   #
-#####################################################################################################################
-?>
 <?php 
 include('dvmCombinedData.php');
 if($temp["units"] == "C"){
 $temp["indoor_now_feels"] = ($temp["indoor_now_feels"]-32)/9*5;}
 ?>
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<title>Indoor Temperature conditions</title>
+</head>
 
 <div class="chartforecast">
-       <span class="yearpopup"><a alt="Home Indoors" title="Home Indoors" href="dvmHomeIndoorPopup.php" data-lity><?php echo $info;?> Home Indoors</a></span>
-    </div>
-    <span class='moduletitle'><?php echo $lang['indoorTempModule'];?> (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span> </span>
-
-<?php
-if(anyToC($temp["indoor_now"])<=-10){$indoorcolor = "#8781bd";}
-else if(anyToC($temp["indoor_now"])<=0){$indoorcolor = "#487ea9";}
-else if(anyToC($temp["indoor_now"])<=5){$indoorcolor = "#3b9cac";}
-else if(anyToC($temp["indoor_now"])<10){$indoorcolor = "#9aba2f";}
-else if(anyToC($temp["indoor_now"])<20){$indoorcolor = "#e6a141";}
-else if(anyToC($temp["indoor_now"])<25){$indoorcolor = "#ec5a34";}
-else if(anyToC($temp["indoor_now"])<30){$indoorcolor = "#d05f2d";}
-else if(anyToC($temp["indoor_now"])<35){$indoorcolor = "#d65b4a";}
-else if(anyToC($temp["indoor_now"])<40){$indoorcolor = "#dc4953";}
-else if(anyToC($temp["indoor_now"])<100){$indoorcolor = "#e26870";}
-
-if($humid["indoors_now"]>90){$humidcolor = "#4e95a0";}
-else if($humid["indoors_now"]>70){$humidcolor = "#e6a141";}
-else if($humid["indoors_now"]>35){$humidcolor = "#90b12a";}
-else if($humid["indoors_now"]>25){$humidcolor = "#d05f2d";}
-else if($humid["indoors_now"]<=25){$humidcolor = "#d35d4e";}
-
-if(anyToC($temp["indoor_now_feels"])<=-10){$feelscolor = "#8781bd";}
-else if(anyToC($temp["indoor_now_feels"])<=0){$feelscolor = "#487ea9";}
-else if(anyToC($temp["indoor_now_feels"])<=5){$feelscolor = "#3b9cac";}
-else if(anyToC($temp["indoor_now_feels"])<10){$feelscolor = "#9aba2f";}
-else if(anyToC($temp["indoor_now_feels"])<20){$feelscolor = "#e6a141";}
-else if(anyToC($temp["indoor_now_feels"])<25){$feelscolor = "#ec5a34";}
-else if(anyToC($temp["indoor_now_feels"])<30){$feelscolor = "#d05f2d";}
-else if(anyToC($temp["indoor_now_feels"])<35){$feelscolor = "#d65b4a";}
-else if(anyToC($temp["indoor_now_feels"])<40){$feelscolor = "#dc4953";}
-else if(anyToC($temp["indoor_now_feels"])<100){$feelscolor = "#e26870";}
-?>
+<span class="yearpopup"><a alt="Indoor Chart" title="Indoor Chart" href="dvmMenuIndoorTemperaturePopup.php" data-lity><?php echo $menucharticonpage;?> Indoor Temp | Humidity Chart</a></span>
+<span class="yearpopup"><a alt="Home Indoors" title="Home Indoors" href="dvmHomeIndoorPopup.php" data-lity><?php echo $info;?> Home</a></span>       
+</div>
+<span class='moduletitle'><?php echo $lang['indoorTempModule'];?> (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span> </span>
 
 <div class="updatedtime1"><span><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?></div><br/>
- 
+<style>
+silver {
+	color: silver;
+}
+</style> 
 <div class="tempindoorconverter">
 <?php
-     if(anyToC($temp["indoor_now"])<-10){echo "<div class=tempconvertercircleminus10>".(($temp["units"]=='F')?anyToC($temp["indoor_now"])."&deg;<smalltempunit2>C":anyToF($temp["indoor_now"])."&deg;<smalltempunit2>F");}
-else if(anyToC($temp["indoor_now"])<-5) {echo "<div class=tempconvertercircleminus5>".(($temp["units"]=='F')?anyToC($temp["indoor_now"])."&deg;<smalltempunit2>C":anyToF($temp["indoor_now"])."&deg;<smalltempunit2>F");}
-else if(anyToC($temp["indoor_now"])<0)  {echo "<div class=tempconvertercircleminus>".(($temp["units"]=='F')?anyToC($temp["indoor_now"])."&deg;<smalltempunit2>C":anyToF($temp["indoor_now"])."&deg;<smalltempunit2>F");}
-else if(anyToC($temp["indoor_now"])<5)  {echo "<div class=tempconvertercircle0-5>".(($temp["units"]=='F')?anyToC($temp["indoor_now"])."&deg;<smalltempunit2>C":anyToF($temp["indoor_now"])."&deg;<smalltempunit2>F");}
-else if(anyToC($temp["indoor_now"])<10) {echo "<div class=tempconvertercircle6-10>".(($temp["units"]=='F')?anyToC($temp["indoor_now"])."&deg;<smalltempunit2>C":anyToF($temp["indoor_now"])."&deg;<smalltempunit2>F");}
-else if(anyToC($temp["indoor_now"])<15) {echo "<div class=tempconvertercircle11-15>".(($temp["units"]=='F')?anyToC($temp["indoor_now"])."&deg;<smalltempunit2>C":anyToF($temp["indoor_now"])."&deg;<smalltempunit2>F");}
-else if(anyToC($temp["indoor_now"])<20) {echo "<div class=tempconvertercircle16-20>".(($temp["units"]=='F')?anyToC($temp["indoor_now"])."&deg;<smalltempunit2>C":anyToF($temp["indoor_now"])."&deg;<smalltempunit2>F");}
-else if(anyToC($temp["indoor_now"])<25) {echo "<div class=tempconvertercircle21-25>".(($temp["units"]=='F')?anyToC($temp["indoor_now"])."&deg;<smalltempunit2>C":anyToF($temp["indoor_now"])."&deg;<smalltempunit2>F");}
-else if(anyToC($temp["indoor_now"])<30) {echo "<div class=tempconvertercircle26-30>".(($temp["units"]=='F')?anyToC($temp["indoor_now"])."&deg;<smalltempunit2>C":anyToF($temp["indoor_now"])."&deg;<smalltempunit2>F");}
-else if(anyToC($temp["indoor_now"])<35) {echo "<div class=tempconvertercircle31-35>".(($temp["units"]=='F')?anyToC($temp["indoor_now"])."&deg;<smalltempunit2>C":anyToF($temp["indoor_now"])."&deg;<smalltempunit2>F");}
-else if(anyToC($temp["indoor_now"])<40) {echo "<div class=tempconvertercircle36-40>".(($temp["units"]=='F')?anyToC($temp["indoor_now"])."&deg;<smalltempunit2>C":anyToF($temp["indoor_now"])."&deg;<smalltempunit2>F");}
-else if(anyToC($temp["indoor_now"])<45) {echo "<div class=tempconvertercircle41-45>".(($temp["units"]=='F')?anyToC($temp["indoor_now"])."&deg;<smalltempunit2>C":anyToF($temp["indoor_now"])."&deg;<smalltempunit2>F");}
-else if(anyToC($temp["indoor_now"])<100){echo "<div class=tempconvertercircle50>".(($temp["units"]=='F')?anyToC($temp["indoor_now"])."&deg;<smalltempunit2>C":anyToF($temp["indoor_now"])."&deg;<smalltempunit2>F");}
-?></smalltempunit2></div></div>
+  if ($temp["units"]=='C'){echo "<div class=tempconvertercircleminus10 style='$convertStyle $colorInTemp;'>".number_format(($temp["indoor_now"]*9/5)+32,1).'<silver>&deg<smalltempunit2>F</silver>';} else if ($temp["units"]=='F'){echo "<div class=tempconvertercircleminus10 style='$convertStyle $colorInTemp;'>".number_format(($temp["indoor_now"]-32)*5/9,1).'<silver>&deg<smalltempunit2>C</silver>';}
+?>
+</smalltempunit2></div></div>
 
 
 <style>
@@ -142,9 +78,9 @@ else if(anyToC($temp["indoor_now"])<100){echo "<div class=tempconvertercircle50>
 	var h_trend = "<?php echo $humid["indoors_trend"];?>";
 	h_trend = h_trend || 0; 
 		
-	var hcolor = "<?php echo $humidcolor;?>";
+	var hcolor = "<?php echo $colorInHumidity;?>";
 
-	var fcolor = "<?php echo $feelscolor;?>";
+	var fcolor = "<?php echo $colorFeels;?>";
 	
 	var units = "<?php echo $temp["units"];?>";
  
@@ -194,7 +130,7 @@ var svg = d3.select(".house")
     			.attr("d", arc)
     			.attr("fill", "#38383c")
     			.attr("transform", "translate(10,63.75)");
-    			
+
     			svg.append("line") //  roof left diagonal line
     			.attr("x1", 5)
     			.attr("x2", 83)
@@ -333,8 +269,6 @@ var svg = d3.select(".house")
 				.style("fill", "silver")
 				.text("Feels");
 				
-		if (units === 'C') {
-				
 			svg.append("text")	
 				.attr("x", 235)
 				.attr("y", 113)
@@ -343,22 +277,8 @@ var svg = d3.select(".house")
 				.style("font-family", "Helvetica")
 				.style("font-weight", "normal")
 				.style("fill", "silver")
-				.text(feels+"째C");
-				
-		} else {
-		
-			svg.append("text")	
-				.attr("x", 235)
-				.attr("y", 113)
-				.attr("text-anchor", "middle")
-				.style("font-size", "10px")
-				.style("font-family", "Helvetica")
-				.style("font-weight", "normal")
-				.style("fill", "silver")
-				.text(feels+"째F");
-				
-			}
-		
+				.text(feels + "\u00B0" + units);
+						
 				
 		if (h_trend > 0) {
     	
@@ -447,7 +367,7 @@ var svg = d3.select(".house")
 				.style("font-family", "Helvetica")
 				.style("font-weight", "normal")
 				.style("fill", "black")
-				.text(feels+"째C");
+				.text(feels+"\u00B0");
 				
 		} else {
 		
@@ -459,7 +379,7 @@ var svg = d3.select(".house")
 				.style("font-family", "Helvetica")
 				.style("font-weight", "normal")
 				.style("fill", "black")
-				.text(feels+"째F");
+				.text(feels+"°F");
 				
 			}
 				
@@ -597,22 +517,15 @@ var svg = d3.select(".house")
         
     var units = "<?php echo $temp["units"];?>";
 
-	if (units === "C") {
 	var maxTemp = "<?php echo number_format($temp["indoor_day_max"],1);?>";
 	maxTemp = maxTemp || 0;
 	var minTemp = "<?php echo number_format($temp["indoor_day_min"],1);?>";
 	minTemp = minTemp || 0;
-	} else {
-	var maxTemp = "<?php echo number_format(($temp["indoor_day_max"]*9/5)+32,1);?>";
-	maxTemp = maxTemp || 0;
-	var minTemp = "<?php echo number_format(($temp["indoor_day_min"]*9/5)+32,1);?>";
-	minTemp = minTemp || 0;
-	}
-    
+   
     var currentTemp = "<?php echo $temp["indoor_now"];?>";
     currentTemp = currentTemp || 0;
     
-    var mercuryColor = "<?php echo $indoorcolor;?>";
+    var mercuryColor = "<?php echo $colorInTemp;?>";
 
 var bottomY = height - 5,
     topY = 15,

@@ -36,7 +36,8 @@ $image["image"] = "img/meteocons/umbrella-rain.svg";
 
 	var theme = "<?php echo $theme;?>";
 	var image = "<?php echo $image["image"];?>";	
-	var color = "#487ea9";	 	
+	var colorM = "<?php echo $colorRainMonthSum;?>";
+    var colorY = "<?php echo $colorRainYearSum;?>"; 
 	var units = "<?php echo $rain["units"];?>";		
 	var rainY = "<?php echo $rain["year_total"];?>";	
 	var rainM = "<?php echo $rain["month_total"];?>";			
@@ -100,8 +101,8 @@ svg.append("circle")
 			.attr("cx", 50)			
 			.attr("cy", 30)
 			.attr("r", 25)
-			.style('stroke', color)
-			.style('fill', color);
+			.style('stroke', colorM)
+			.style('fill', colorM);
 			
 		svg.append("text")		
 			.attr("x", 50)
@@ -140,8 +141,8 @@ svg.append("circle")
 			.attr("cx", 180)			
 			.attr("cy", 30)
 			.attr("r", 25)
-			.style('stroke', color)
-			.style('fill', color);
+			.style('stroke', colorY)
+			.style('fill', colorY);
 			
 		svg.append("text")		
 			.attr("x", 180)
