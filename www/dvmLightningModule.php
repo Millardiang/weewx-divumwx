@@ -137,7 +137,7 @@ else
 	var month = "<?php echo date('F Y');?>";
 	var year = "<?php echo date('Y');?>";
 	var Strikes_last_hour = "<?php echo $lightning["hour_strike_count"];?>";
-	var day_strike_count = "<?php echo $lightning["day_strike_count"];?>";
+	var day_strike_count = "<?php echo $lightning["today_strike_count"];?>";
 	var Strikes_this_month = "<?php echo $lightning["month_strike_count"];?>";
 	var Strikes_this_year = "<?php echo $lightning["year_strike_count"];?>";
 	var Alltime_strikes = "<?php echo $lightning["alltime_strike_count"];?>";
