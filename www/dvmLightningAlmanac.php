@@ -122,7 +122,7 @@ if (empty ($lightning["yesterday_strike_count"])) {$lightning["yesterday_strike_
 <main class="grid">
 <article>
      <div class=actualt>Strikes Today</div>
-    <?php echo "<div class='lightning'>",$lightning["day_strike_count"]. "</value>"?></div>
+    <?php echo "<div class='lightning'>",$lightning["today_strike_count"]. "</value>"?></div>
 </article>
 
 <article>
