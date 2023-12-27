@@ -33,7 +33,7 @@ $forecastime = filemtime ('jsondata/uk.txt');
                         <p>divum Station Hardware</p>
                     </div>
                     <div class="card:image">
-                        <img src="img/designedfor-1.svg" alt="divumwx logo" title="divumwx logo">
+                        <img src="img/divumLogo.svg" alt="divumwx logo" title="divumwx logo">
                     </div>
                 </div>
                 <div class="card:content">
