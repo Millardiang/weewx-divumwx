@@ -70,6 +70,9 @@
 include ('fixedSettings.php');
 include ('dvmShared.php');
 include('common.php');
+$jsonR = 'jsondata/gauge-data.txt';
+$real = file_get_contents($jsonR);
+$realData = json_decode($real, true);
 error_reporting(0);
 $weewxrt = array_map(function ($v)
 {
@@ -245,7 +248,7 @@ else if ($barom["units"] == " mbar")
 {
     $barom["units"] = "mbar";
 }
-$barom["now"] = $weewxrt[10];
+$barom["now"] = $realData["barometer"]; //$weewxrt[10];
 $barom["max"] = $day.barometer.max.format(add_label=False);
 $barom["maxtime"] = date('H:i',"$day.barometer.maxtime.raw");
 $barom["min"] = $day.barometer.min.format(add_label=False);
@@ -351,11 +354,11 @@ $humid["indoors_alltime_min"] = $alltime.inHumidity.min.format(add_label=False);
 $humid["indoors_alltime_mintime"] = date('j M Y H:i',$alltime.inHumidity.mintime.raw);
 
 //lightning
-$lightning["yesterday_strike_count"] = "$day($days_ago=1).lightning_strike_count.sum";
 $lightning["last_strike_time"] = "$alltime.lightning_last_det_time.lastnonzero.raw";
 $lightning["current_strike_count"] = "$current.lightning_strike_count"; 
 $lightning["hour_strike_count"] ="$hour.lightning_strike_count.sum";  
 $lightning["today_strike_count"] = "$day.lightning_strike_count.sum";
+$lightning["yesterday_strike_count"] = "$day($days_ago=1).lightning_strike_count.sum";
 $lightning["month_strike_count"] = "$month.lightning_strike_count.sum";
 $lightning["year_strike_count"] = "$year.lightning_strike_count.sum";
 $lightning["last_time"] = "$alltime.lightning_last_det_time.lastnonzero.raw";
@@ -831,6 +834,14 @@ $colorRainRate24hrMax = "$colorize($span($hour_delta=24).rainRate.max)";
 $colorRainRateMonthMax = "$colorize($month.rainRate.max)";
 $colorRainRateYearMax = "$colorize($year.rainRate.max)";
 $colorRainRateAlltimeMax = "$colorize($alltime.rainRate.max)";
+
+
+$colorUVCurrent = "$colorize($current.UV)";
+$colorUVDayMax = "$colorize($day.UV.max)";
+$colorUVYesterdayMax = "$colorize($day($days_ago=1).UV.max)";
+$colorUVMonthMax = "$colorize($month.UV.max)";
+$colorUVYearMax = "$colorize($year.UV.max)";
+$colorUVAlltimeMax = "$colorize($alltime.UV.max)";
 
 
 //Convert temperatures if necessary
