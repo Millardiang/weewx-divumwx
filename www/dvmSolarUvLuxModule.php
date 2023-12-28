@@ -14,21 +14,6 @@
 <?php
 include('dvmCombinedData.php');
 date_default_timezone_set($TZ);
-//align colours with Total sky UV index (provided by CAMS) https://climate-adapt.eea.europa.eu/en/observatory/evidence/projections-and-tools/cams-uv-index-forecast
-if ($uv["now"]<1){$uv["color"]="grey";}
-else if ($uv["now"]<2){$uv["color"]="#379925";} // darker green
-else if ($uv["now"]<3){$uv["color"]="#8bbe09";} // lighter green
-else if ($uv["now"]<4){$uv["color"]="#fff306";} // lighter yellow
-else if ($uv["now"]<5){$uv["color"]="#ffce0b";} // darker yellow
-else if ($uv["now"]<6){$uv["color"]="#f1a40a";} // lighter orange
-else if ($uv["now"]<7){$uv["color"]="#e87408";} // mid orange
-else if ($uv["now"]<8){$uv["color"]="#de5404";} // darker orange
-else if ($uv["now"]<9){$uv["color"]="#dd1d0f";} // red
-else if ($uv["now"]<10){$uv["color"]="#de006f";} // magenta
-else if ($uv["now"]<11){$uv["color"]="#a44c92";} // lighter purple
-else if ($uv["now"]<13){$uv["color"]="##6e67a6";} // darker purple
-else if ($uv["now"]<15){$uv["color"]="#6cceff";} // lighter cyan
-else {$uv["color"]="#40d2ff";} // darker cyan
 ?>
 
     <div class="chartforecast2">
@@ -277,7 +262,7 @@ var bottomY = height + 10,
     bulbRadius = 25.5,
     tubeWidth = 35,
     tubeBorderWidth = 1,
-    uviColor = "<?php echo $uv["color"];?>",
+    uviColor = "<?php echo $colorUVCurrent;?>",
     tubeBorderColor = "#999999";
 
 var bulb_cy = bottomY - bulbRadius,
