@@ -351,6 +351,7 @@ $humid["indoors_alltime_min"] = $alltime.inHumidity.min.format(add_label=False);
 $humid["indoors_alltime_mintime"] = date('j M Y H:i',$alltime.inHumidity.mintime.raw);
 
 //lightning
+$lightning["yesterday_strike_count"] = "$day($days_ago=1).lightning_strike_count.sum";
 $lightning["last_strike_time"] = "$alltime.lightning_last_det_time.lastnonzero.raw";
 $lightning["current_strike_count"] = "$current.lightning_strike_count"; 
 $lightning["hour_strike_count"] ="$hour.lightning_strike_count.sum";  
