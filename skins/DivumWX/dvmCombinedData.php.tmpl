@@ -248,7 +248,7 @@ else if ($barom["units"] == " mbar")
 {
     $barom["units"] = "mbar";
 }
-$barom["now"] = $realData["barometer"]; //$weewxrt[10];
+$barom["now"] = $weewxrt[10]; //$realData["barometer"]; Removed for future.
 $barom["max"] = $day.barometer.max.format(add_label=False);
 $barom["maxtime"] = date('H:i',"$day.barometer.maxtime.raw");
 $barom["min"] = $day.barometer.min.format(add_label=False);
@@ -354,14 +354,14 @@ $humid["indoors_alltime_min"] = $alltime.inHumidity.min.format(add_label=False);
 $humid["indoors_alltime_mintime"] = date('j M Y H:i',$alltime.inHumidity.mintime.raw);
 
 //lightning
-$lightning["last_strike_time"] = "$alltime.lightning_last_det_time.lastnonzero.raw";
+$lightning["last_strike_time"] = "$year.lightning_distance.lasttime.raw";
 $lightning["current_strike_count"] = "$current.lightning_strike_count"; 
 $lightning["hour_strike_count"] ="$hour.lightning_strike_count.sum";  
 $lightning["today_strike_count"] = "$day.lightning_strike_count.sum";
 $lightning["yesterday_strike_count"] = "$day($days_ago=1).lightning_strike_count.sum";
 $lightning["month_strike_count"] = "$month.lightning_strike_count.sum";
 $lightning["year_strike_count"] = "$year.lightning_strike_count.sum";
-$lightning["last_time"] = "$alltime.lightning_last_det_time.lastnonzero.raw";
+$lightning["last_time"] = "$year.lightning_distance.lasttime.raw";
 $lightning["alltime_strike_count"] = "$alltime.lightning_strike_count.sum";
 $lightning["last_distance"] = "$alltime.lightning_distance.lastnonzero.format(add_label=False, $localize=False)";
 $lightning["now_energy"] = $weewxrt[59];
