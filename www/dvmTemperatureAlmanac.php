@@ -12,42 +12,7 @@
 #####################################################################################################################
 
 include('dvmCombinedData.php');
-/*
-if($humid["day_max"]<30){$t[4]="Blue";}
-else if($humid["day_max"]<60){$t[4]="Green";}
-else if($humid["day_max"]<100){$t[4]="Red";}
-if($humid["day_min"]<30){$t[5]="Blue";}
-else if($humid["day_min"]<60){$t[5]="Green";}
-else if($humid["day_min"]<100){$t[5]="Red";}
 
-if($humid["yesterday_max"]<30){$d[4]="Blue";}
-else if($humid["yesterday_max"]<60){$d[4]="Green";}
-else if($humid["yesterday_max"]<100){$d[4]="Red";}
-if($humid["yesterday_min"]<30){$d[5]="Blue";}
-else if($humid["yesterday_min"]<60){$d[5]="Green";}
-else if($humid["yesterday_min"]<100){$d[5]="Red";}
-
-if($humid["month_max"]<30){$m[4]="Blue";}
-else if($humid["month_max"]<60){$m[4]="Green";}
-else if($humid["month_max"]<100){$m[4]="Red";}
-if($humid["month_min"]<30){$m[5]="Blue";}
-else if($humid["month_min"]<60){$m[5]="Green";}
-else if($humid["month_min"]<100){$m[5]="Red";}
-
-if($humid["year_max"]<30){$y[4]="Blue";}
-else if($humid["year_max"]<60){$y[4]="Green";}
-else if($humid["year_max"]<100){$y[4]="Red";}
-if($humid["year_min"]<30){$y[5]="Blue";}
-else if($humid["year_min"]<60){$y[5]="Green";}
-else if($humid["year_min"]<100){$y[5]="Red";}
-
-if($humid["alltime_max"]<30){$a[4]="Blue";}
-else if($humid["alltime_max"]<60){$a[4]="Green";}
-else if($humid["alltime_max"]<100){$a[4]="Red";}
-if($humid["alltime_min"]<30){$a[5]="Blue";}
-else if($humid["alltime_min"]<60){$a[5]="Green";}
-else if($humid["alltime_min"]<100){$a[5]="Red";}
-*/
 
 if ($theme === "dark") {
     echo '<style>@font-face{font-family: weathertext2; src: url(css/fonts/verbatim-regular.woff) format("woff"), url(fonts/verbatim-regular.woff2) format("woff2"), url(fonts/verbatim-regular.ttf) format("truetype");}html,body{font-size: 13px; font-family: "weathertext2", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; background: rgba(40, 45, 52,.4);}.grid{display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); grid-gap: 5px; align-items: stretch; color: #f5f7fc; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;}.grid > article{border: 1px solid #212428; box-shadow: 2px 2px 6px 0px rgba(0, 0, 0, 0.3); padding: 4px; font-size: 0.8em; -webkit-border-radius: 4px; border-radius: 4px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;}.grid1{display: grid; grid-template-columns: repeat(auto-fill, minmax(100%, 1fr)); grid-gap: 5px; color: #f5f7fc;}.grid1 > articlegraph{border: 1px solid rgba(245, 247, 252, 0.02); box-shadow: 2px 2px 6px 0px rgba(0, 0, 0, 0.6); padding: 5px; font-size: 0.8em; -webkit-border-radius: 4px; border-radius: 4px; background: 0; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; height: 225px;}/* unvisited link */a:link{color: white;}/* visited link */a:visited{color: white;}/* mouse over link */a:hover{color: white;}/* selected link */a:active{color: white;}.divumwxdarkbrowser{position: relative; background: 0; width: 97%; height: 30px; margin: auto; margin-top: -5px; margin-left: 0px; border-top-left-radius: 5px; border-top-right-radius: 5px; padding-top: 10px;}.divumwxdarkbrowser[url]:after{content: attr(url); color: white; font-size: 14px; text-align: center; position: absolute; left: 0; right: 0; top: 0; padding: 4px 15px; margin: 11px 10px 0 auto; font-family: arial; height: 20px;}blue{color: #01a4b4;}orange{color: #009bb4;}orange1{position: relative; color: #009bb4; margin: 0 auto; text-align: center; margin-left: 5%; font-size: 1.1rem;}green{color: #aaa;}red{color: #f37867;}red6{color: #d65b4a;}value{color: #fff;}yellow{color: #cc0;}purple{color: #916392;}.temperaturecontainer1{position: relative; left: 0px; margin-top: 0px;}.temperaturecontainer2{position: relative; left: 0px; margin-top: 0px;}.temperaturetoday0,.temperaturetoday10,.temperaturetoday18,.temperaturetoday24,.temperaturetoday30{font-family: weathertext2, Arial, Helvetica, system; width: 5rem; height: 1.5rem; -webkit-border-radius: 3px; -moz-border-radius: 3px; -o-border-radius: 3px; display: flex; font-size: 0.9rem; padding-top: 2px; color: #fff; border-bottom: 7px solid #555555; align-items: center; justify-content: center; border-radius: 3px; margin-bottom: 10px;}.temperaturecaution,.temperaturetrend,.temperaturetrend1{position: absolute; font-size: 1rem;}.temperaturetoday0{background: rgba(68, 166, 181, 1);}.temperaturetoday10{background: rgba(144, 177, 42, 1);}.temperaturetoday18{background: rgba(230, 161, 65, 1);}.temperaturetoday24{background: rgba(255, 124, 57, 1);}.temperaturetoday30{background: rgba(211, 93, 78, 1);}.temperaturetrend{margin-left: 67px; margin-top: -38px; z-index: 1; color: white; font-size: 0.65rem; width: 70px; text-align: center;}.temperaturetrend1{margin-left: 67px; margin-top: -38px; z-index: 1; color: #fff; font-size: 0.65rem; width: 70px; text-align: center;}smalluvunit{font-size: 0.65rem; font-family: Arial, Helvetica, system;}.dvmconvertrain{position: relative; font-size: 0.5em; top: 10px; color: #c0c0c0; margin-left: 5px;}.hitempy{position: relative; background: rgba(61, 64, 66, 0.5); color: #aaa; width: 40px; padding: 1px; -webit-border-radius: 2px; border-radius: 2px; margin-top: -40px; margin-left: 130px; padding-left: 3px; line-height: 11px; font-size: 8px;}.actualt{position: relative; left: 0px; -webkit-border-radius: 3px; -moz-border-radius: 3px; -o-border-radius: 3px; border-radius: 3px; background: #555555; padding: 5px; font-family: Arial, Helvetica, sans-serif; width: max-content; height: 0.8em; font-size: 0.8rem; padding-top: 2px; color: white; align-items: center; justify-content: center; margin-bottom: 10px; top: 0; text-align: center;}
@@ -75,7 +40,7 @@ if ($theme === "dark") {
 
   ////temp max today
   
-  echo "<div class='temperaturetoday24' style='background:$colorOutTempMax;'>".$temp["outside_day_max"] . "</value>";
+  echo "<div class='temperaturetoday24' style='background:$colorOutTempDayMax;'>".$temp["outside_day_max"] . "</value>";
   echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>";
   ?> </div>
 
@@ -85,7 +50,7 @@ if ($theme === "dark") {
  <?php
   //temp min today
   
-  echo "<div class='temperaturetoday0' style='background:$colorOutTempMin;'>",$temp["outside_day_min"] . "</value>";
+  echo "<div class='temperaturetoday0' style='background:$colorOutTempDayMin;'>",$temp["outside_day_min"] . "</value>";
 
   echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>";
   ?>  </div>
@@ -97,7 +62,7 @@ if ($theme === "dark") {
         <?php
   ////dew max today
   
-  echo "<div class='temperaturetoday24'style='background:$colorDewpointMax;'>",$dew["day_max"] . "</value>";
+  echo "<div class='temperaturetoday24'style='background:$colorDewpointDayMax;'>",$dew["day_max"] . "</value>";
   echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>";
   ?> </div>
 
@@ -107,7 +72,7 @@ if ($theme === "dark") {
  <?php
   //dew min today
   
-  echo "<div class='temperaturetoday0' style='background:$colorDewpointMax;'>",$dew["day_min"] . "</value>";
+  echo "<div class='temperaturetoday0' style='background:$colorDewpointDayMax;'>",$dew["day_min"] . "</value>";
 
   echo "<smalluvunit>˚".$temp["units"]."</smalluvunit>";
   ?>  </div>
