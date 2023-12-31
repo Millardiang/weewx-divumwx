@@ -421,7 +421,7 @@ $rain["year_total"] = round($year.rain.sum.raw,1);
 $rain["alltime_rate_max"] = $alltime.rainRate.max.raw;
 $rain["alltime_rate_maxtime"] = $alltime.rainRate.maxtime.raw;
 $rain["alltime_total"] = round($alltime.rain.sum.raw,1);
-$rain["storm_rain"] = $current.hail.raw;
+$rain["storm_rain"] = $current.stormRain.raw;
 $rain["last_rain"] = date('D j M H:i',$time_at('rain>0').raw);
 if($weewxrt[8] < 2.5){$rain["intensity"]="Slight";}
 else if($weewxrt[8] < 10){$rain["intensity"]="Moderate";}
@@ -433,7 +433,7 @@ else if($weewxrt[8] >= 50){$rain["intensity"]="Violent";}
 $sky["lux"] = round($weewxrt[45]/0.00809399477,0,PHP_ROUND_HALF_UP);
 $sky["day_lux_max"] = round($day.radiation.max.format($localize=False,add_label=False)/0.00809399477,0,PHP_ROUND_HALF_UP);
 $sky["cloud_base"] = $weewxrt[52];
-$sky["cloud_cover"] = round($current.signal8.format($localize=False,add_label=False),0);
+//$sky["cloud_cover"] = round($current.signal8.format($localize=False,add_label=False),0);
 
 //solar
 #if $current.radiation.has_data
@@ -813,7 +813,7 @@ $color["windSpeed_alltime_max"] = "$colorize($alltime.windSpeed.max)";
 $color["windGust_alltime_max"] = "$colorize($alltime.windGust.max)";
 
 //rain color
-$colorStormRain ="$colorize($current.hail)";
+$colorStormRain ="$colorize($current.stormRain)";
 
 if($rain["total"] == 0 && $theme == 'dark'){$colorRainDaySum ="#C0C0C0";}
 else if($rain["total"] == 0){$colorRainDaySum ="#3A3D40";}
@@ -842,6 +842,14 @@ $colorUVYesterdayMax = "$colorize($day($days_ago=1).UV.max)";
 $colorUVMonthMax = "$colorize($month.UV.max)";
 $colorUVYearMax = "$colorize($year.UV.max)";
 $colorUVAlltimeMax = "$colorize($alltime.UV.max)";
+
+$colorRadiationCurrent = "$colorize($current.radiation)";
+$colorRadiationDayMax = "$colorize($day.radiation.max)";
+$colorRadiationYesterdayMax = "$colorize($day($days_ago=1).radiation.max)";
+$colorRadiationMonthMax = "$colorize($month.radiation.max)";
+$colorRadiationYearMax = "$colorize($year.radiation.max)";
+$colorRadiationAlltimeMax = "$colorize($alltime.radiation.max)";
+
 
 
 //Convert temperatures if necessary

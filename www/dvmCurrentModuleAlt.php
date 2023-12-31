@@ -59,6 +59,8 @@ $visibility = round($parsed_visibility['response'][0]['periods'][0]['visibilityM
 $visibility = round($parsed_visibility['response'][0]['periods'][0]['visibilityKM'],0,PHP_ROUND_HALF_UP)." km";
 }
 if ($cloud_region[0] !== "Europe"){$sky["cloud_cover"] = $parsed_visibility['response'][0]['periods'][0]['sky'];}
+
+$cloudsCoded = $parsed_visibility["response"][0]["periods"][0]["cloudsCoded"];
         
 //rain-divumwx
 if($rain["rate"] > 0 && $wind["speed_avg"] > 15){$current["image"] ="img/meteocons/umbrella-wind.svg";}
@@ -81,7 +83,7 @@ else if($snow > 0.0 && $dayPartNatural == "night"){$current["image"] ="img/meteo
 else if($snow > 0.0){$current["image"] ="img/meteocons/snow.svg";}
 
 //cloud-icon
-else if ($sky["cloud_cover"] < 7 && $sky["cloud_cover"] > 0) {
+/*else if ($sky["cloud_cover"] < 7 && $sky["cloud_cover"] > 0) {
 if ($dayPartNatural == "night" ){$current["image"] ="img/meteocons/clear-night.svg";} 
 else $current["image"] ="img/meteocons/clear-day.svg";
 } 
@@ -101,7 +103,27 @@ else if($sky["cloud_cover"] >= 95) {
 if ($dayPartNatural == "night" ){$current["image"] ="img/meteocons/overcast.svg";} 
 else $current["image"] = "img/meteocons/overcast.svg";
 }
-
+*/
+else if ($cloudsCoded=="CL") {
+if ($dayPartNatural == "night" ){$current["image"] ="img/meteocons/clear-night.svg";} 
+else $current["image"] ="img/meteocons/clear-day.svg";
+} 
+else if ($cloudsCoded=="FW") {
+if ($dayPartNatural == "night" ){$current["image"] = "img/meteocons/mostly-clear-night.svg";} 
+else $current["image"] ="img/meteocons/mostly-clear-day.svg";
+}
+else if ($cloudsCoded=="SC") {
+if ($dayPartNatural == "night" ){$current["image"] = "img/meteocons/partly-cloudy-night.svg";} 
+else $current["image"] = "img/meteocons/partly-cloudy-day.svg";
+}
+else if ($cloudsCoded=="BK") {
+if ($dayPartNatural == "night" ){$current["image"] = "img/meteocons/overcast-night.svg";} 
+else $current["image"] = "img/meteocons/overcast-day.svg";
+}
+else if($cloudsCoded=="OV") {
+if ($dayPartNatural == "night" ){$current["image"] ="img/meteocons/overcast.svg";} 
+else $current["image"] = "img/meteocons/overcast.svg";
+}
 //rain-divumwx
 if($rain["rate"] > 0 && $wind["speed_avg"] > 15){$sky["summary"] = "Rain Showers Windy";}
 else if($rain["rate"] >= 20){$sky["summary"] = "Flooding Possible";}
@@ -309,11 +331,11 @@ var text = svg.selectAll(null)
     .style("font-weight", "bold")
     .text(function(d) { return d.split("-")[2]; });
 
-var cloud_cover = "<?php echo $sky["cloud_cover"];?>";
+var cloud_cover = "<?php echo $cloudsCoded;?>";
 
 var cloud_oktas = "<?php echo $sky["cloud_oktas"];?>";
 
-var data = ["Cloud Cover " + "-" + cloud_cover + "-" + " % " + "-" + "(" + cloud_oktas + ")"];
+var data = ["Cloud Code " + "-" + cloud_cover];
 
 var text = svg.selectAll(null)
     .data(data)
