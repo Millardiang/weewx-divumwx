@@ -34,7 +34,7 @@ if ($theme === "dark") {
 <main class="grid">
   <article>  
    <div class=actualt>Current UV-INDEX</div>        
-   <div class="uvcontainer1"><?php echo "<div class='uvtoday11' style='background: $colorUVDayMax';>",number_format($uv["now"],1)."<smalluvunit>  UVI";?></smallrainunit></div></div>
+   <div class="uvcontainer1"><?php echo "<div class='uvtoday11' style='background: $colorUVCurrent';>",number_format($uv["now"],1)."<smalluvunit>  UVI";?></smallrainunit></div></div>
  </div>  
 <div class="uvcaution"><?php 
 if ($uv["now"]>10) {echo 'Extreme UVI<br>Avoid being outside during midday hours! Make sure you seek shade! Shirt, sunscreen and hat are a must! ';}
@@ -49,10 +49,7 @@ else if ($uv["now"]>=0) {echo 'You can safely enjoy being outside! ';}
   <article> 
   <div class=actualt>Current Solar Radiation </div>        
     <div class="solarcontainer1"><?php 
-if ($solar["now"]>=1000) {echo '<div class=solartoday1000>'.number_format($solar["now"],0)."<smalluvunit>  W/m<sup>2</sup>";}
-else if ($solar["now"]>=500) {echo '<div class=solartoday500>'.number_format($solar["now"],0)."<smalluvunit>  W/m<sup>2</sup>";}
-else if ($solar["now"]>=10) {echo '<div class=solartoday200>'.number_format($solar["now"],0)."<smalluvunit>  W/m<sup>2</sup>";}
-else if ($solar["now"]>=0) {echo '<div class=solartoday1>'.number_format($solar["now"],0)."<smalluvunit>  W/m<sup>2</sup>";}
+echo "<div class=solartoday1 style='background: $colorRadiationCurrent';>",number_format($solar["now"],0)."<smalluvunit>  W/m<sup>2</sup>";
 
 ?></smallrainunit></div></div>     
              <?php
