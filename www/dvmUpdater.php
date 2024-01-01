@@ -13,6 +13,7 @@
 ?>
 <!-- begin updater.php  14-Nov-2022 -->
 <?php
+$filepileRefresh = 60;
 include_once "userSettings.php";
 
 include_once "fixedSettings.php";
@@ -114,15 +115,13 @@ var b=setInterval(function(){c.load("<?php echo $position18; ?>")},<?php echo $c
 (function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position19").show()}});var c=a("#position19");c.load("<?php echo $position19; ?>");
 var b=setInterval(function(){c.load("<?php echo $position19; ?>")},<?php echo $cycles19; ?>)})})(jQuery); // 60 seconds
 
-//update the AQI data
-var refreshId;$(document).ready(function(){aqidata()});function aqidata(){$.ajax({cache:true,success:function(a){$("#aqidata").html(a);<?php if (
-    $aqiRefresh > 0
-) {
-    echo "setTimeout(aqidata, 60000)";
-} ?>},
-	type:"GET",url:"aqitextcreate.php"})};
-
-			
+//update the filepileTextData.txt
+var refreshId;$(document).ready(function(){stationcron()});function stationcron(){$.ajax({cache:false,
+  success:function(a){$("#blank")
+  .html(a);<?php if ($filepileRefresh >0) {
+  echo 'setTimeout(stationcron,' . 1000*$filepileRefresh.')';}?>},
+  contentType: "application/x-www-form-urlencoded;charset=ISO-8859-15",
+  type:"GET",url:"filepileTextCreate.php"})}; 
 
 </script>
 
