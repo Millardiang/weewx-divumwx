@@ -49,7 +49,7 @@ else if ($uv["now"]>=0) {echo 'You can safely enjoy being outside! ';}
   <article> 
   <div class=actualt>Current Solar Radiation </div>        
     <div class="solarcontainer1"><?php 
-echo "<div class=solartoday1 style='background: $colorRadiationCurrent';>",number_format($solar["now"],0)."<smalluvunit>  W/m<sup>2</sup>";
+echo "<div class=solartoday1  style='background: $colorSolarCurrent';>",number_format($solar["now"],0)."<smalluvunit>  W/m<sup>2</sup>";
 
 ?></smallrainunit></div></div>     
              <?php
@@ -107,10 +107,8 @@ echo "<div class=solartoday1 style='background: $colorRadiationCurrent';>",numbe
 $b="--";if($sky["lux"]==$b){$sky["lux"] = "N/A" ;}	?>		   
 
 <div class="solarcontainer1"><?php 
-if ($sky["lux"]>=100000) {echo '<div class=luxtoday1000>'.number_format($sky["lux"],0,'.','')."<smalluvunit>  Lux";}
-else if ($sky["lux"]>=50000) {echo '<div class=luxtoday500>'.number_format($sky["lux"],0,'.','')."<smalluvunit> &nbspLux";}
-else if ($sky["lux"]>=10) {echo '<div class=luxtoday200>'.number_format($sky["lux"],0,'.','')."<smalluvunit>  Lux";}
-else if ($sky["lux"]>=0) {echo '<div class=luxtoday1>'.number_format($sky["lux"],0,'.','')."<smalluvunit>  Lux";}
+
+echo "<div class=luxtoday1 style='background: $colorLuxCurrent';>",number_format($sky["lux"],0,'.','')."<smalluvunit>  Lux";
 
 ?></smallrainunit></div></div>  
 

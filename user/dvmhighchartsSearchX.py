@@ -734,7 +734,7 @@ class dvmhighcharts_solar_week(SearchList):
                                                        
         # Create cloudcover json
         try:
-                (time_start_vt, time_stop_vt, cloudcover_vt) = db_lookup().getSqlVectors(TimeSpan(_start_ts, timespan.stop), 'signal8')
+                (time_start_vt, time_stop_vt, cloudcover_vt) = db_lookup().getSqlVectors(TimeSpan(_start_ts, timespan.stop), 'cloud_cover')
                 cloudcoverRound = int(self.generator.skin_dict['Units']['StringFormats'].get(cloudcover_vt[1], "1f")[-2])
                 cloudcoverRound_vt =  [roundNone(x,cloudcoverRound) if x != None else 0 for x in cloudcover_vt[0]]
                 cloudcover_time_ms =  [time_stop_vt[0][0] if (x == 0) else time_stop_vt[0][x] - time_stop_vt[0][0] for x in range(len(time_stop_vt[0]))]

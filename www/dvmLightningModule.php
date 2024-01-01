@@ -143,7 +143,7 @@ else
 	var Strikes_this_month = "<?php echo $lightning["month_strike_count"];?>";
 	var Strikes_this_year = "<?php echo $lightning["year_strike_count"];?>";
 	var Alltime_strikes = "<?php echo $lightning["alltime_strike_count"];?>";
-	var Last_detected = "<?php echo ($lightning['last_time']);?>";
+	var Last_detected = "<?php echo $lightning["last_time"];?>";
 	var Last_distance = "<?php echo number_format($lightning["last_distance"],1);?>";
 	var Bearing = "<?php echo $lightning["bearing"];?>";
     var Bearingx = "<?php echo $lightning["bearingx"];?>";
@@ -220,7 +220,7 @@ else
                                         .style("font-size", "10px")
                                         .style("text-anchor", "left")
                                         .style("font-weight", "normal")
-                                        .text("Strikes Yesterday");
+                                        .text("Yesterday");
 		var data = ["Total "+month+" "+"-"+Strikes_this_month];
 		var text = svg.selectAll(null)
   					.data(data)
@@ -299,7 +299,7 @@ else
 					.style("font-weight", "normal")
 					.text(Strikes_last_hour);
                 svg.append("text") // Yesterday
-                                        .attr("x", 212)
+                                        .attr("x", 178)
                                         .attr("y", 69)
                                         .style("fill", "#ff964f")
                                         .style("font-family", "Helvetica")

@@ -263,6 +263,7 @@ else if($barom["trend_code"]<0){$barom["trend_desc"]="Falling Slowly";$barom["tr
 else if($barom["trend_code"]<-1){$barom["trend_desc"]="Falling";$barom["trend_code"]=-2;}
 else if($barom["trend_code"]<-2){$barom["trend_desc"]="Falling Quickly";$barom["trend_code"]=-3;}
 else if($barom["trend_code"]<-3){$barom["trend_desc"]="Falling Very Rapidly";$barom["trend_code"]=-4;}
+else if($barom["trend_code"]=="N/A"||$barom["trend_code"]==" N/A"||$barom["trend_code"]=="  N/A"||$barom["trend_code"]=="   N/A"){$barom["trend_desc"]="Steady";$barom["trend_code"]=0;}
 
 $barom["yesterday_max"] = $day($days_ago=1).barometer.max.format(add_label=False);
 $barom["yesterday_maxtime"] = date('H:i',$day($days_ago=1).barometer.maxtime.raw);
@@ -286,6 +287,7 @@ $barom["alltime_mintime"] = date('j M Y H:i',$alltime.barometer.mintime.raw);
 //dewpoint
 $dew["now"] = $weewxrt[4];
 $dew["trend"] = $trend.dewpoint.format(add_label=False);
+if($dew["trend"]=="N/A"||$dew["trend"]==" N/A"||$dew["trend"]=="  N/A"||$dew["trend"]=="   N/A"){$dew["trend"]=0;}
 $dew["day_max"] = $day.dewpoint.max.format(add_label=False);
 $dew["day_maxtime"] = date('H:i',$day.dewpoint.maxtime.raw);
 $dew["day_min"] = $day.dewpoint.min.format(add_label=False);
@@ -310,6 +312,7 @@ $dew["alltime_mintime"] = date('j M Y H:i',$alltime.dewpoint.mintime.raw);
 //humidity
 $humid["now"] = $weewxrt[3];
 $humid["trend"] = $trend.outHumidity.format(add_label=False);
+if($humid["trend"]=="N/A"||$humid["trend"]==" N/A"||$humid["trend"]=="  N/A"||$humid["trend"]=="   N/A"){$humid["trend"]=0;}
 $humid["day_max"] = $day.outHumidity.max.format(add_label=False);
 $humid["day_maxtime"] = date('H:i',$day.outHumidity.maxtime.raw);
 $humid["day_min"] = $day.outHumidity.min.format(add_label=False);
@@ -332,6 +335,7 @@ $humid["alltime_min"] = $alltime.outHumidity.min.format(add_label=False);
 $humid["alltime_mintime"] = date('j M Y H:i',$alltime.outHumidity.mintime.raw);
 $humid["indoors_now"] = $weewxrt[23];
 $humid["indoors_trend"] = round($trend.inHumidity.format(add_label=False),1);
+if($humid["indoors_trend"]=="N/A"||$humid["indoors_trend"]==" N/A"||$humid["indoors_trend"]=="  N/A"||$humid["indoors_trend"]=="   N/A"){$humid["indoors_trend"]=0;}
 $humid["indoors_day_max"] = $day.inHumidity.max.format(add_label=False);
 $humid["indoors_day_maxtime"] = date('H:i',$day.inHumidity.maxtime.raw);
 $humid["indoors_day_min"] = $day.inHumidity.min.format(add_label=False);
@@ -463,10 +467,12 @@ $temp["units"] = "F";
 }
 $temp["indoor_now"] = $weewxrt[22];
 $temp["indoor_trend"] = round($trend.inTemp.raw,1);
+if($temp["indoors_trend"]=="N/A"||$temp["indoors_trend"]==" N/A"||$temp["indoors_trend"]=="  N/A"||$temp["indoors_trend"]=="   N/A"){$temp["indoors_trend"]=0;}
 $temp["indoor_day_max"] = $day.inTemp.max.format(add_label=False);
 $temp["indoor_day_min"] = $day.inTemp.min.format(add_label=False);
 $temp["outside_now"] = $weewxrt[2];
 $temp["outside_trend"] = round($trend.outTemp.raw,1);
+if($temp["outside_trend"]=="N/A"||$temp["outside_trend"]==" N/A"||$temp["outside_trend"]=="  N/A"||$temp["outside_trend"]=="   N/A"){$temp["outside_trend"]=0;}
 $temp["apptemp"] = $weewxrt[54];
 $temp["heatindex"] = $weewxrt[41];
 $temp["windchill"] = round($weewxrt[24],1);
@@ -576,11 +582,11 @@ $wind["speed_alltime_maxtime"] = "$alltime.windSpeed.maxtime";
 $wind["gust_alltime_max"] = $alltime.windGust.max.format(add_label=False);
 $wind["gust_alltime_maxtime"] = date('D j M Y H:i',$alltime.windGust.maxtime.raw);
 $wind["direction_trend"] = "$trend.windDir.formatted";
+if($wind["direction_trend"]=="N/A"||$wind["direction_trend"]==" N/A"||$wind["direction_trend"]=="  N/A"||$wind["direction_trend"]=="   N/A"){$wind["direction_trend"]="000";}
 $wind["direction_trend_ordinal"] = "$trend.windDir.ordinal_compass";
-if($wind["direction_10m_avg"] == "N/A"){$wind["direction_10m_avg"] = "Calm";}
-if($wind["direction_trend"] == "   N/A"){$wind["direction_trend"] = "Calm";}
-if($wind["direction_trend_ordinal"] == "N/A")
-{$wind["direction_trend_ordinal"] = "Calm";}
+if($wind["direction_trend_ordinal"]=="N/A"||$wind["direction_trend_ordinal"]==" N/A"||$wind["direction_trend_ordinal"]=="  N/A"||$wind["direction_trend_ordinal"]=="   N/A"){$wind["direction_trend_ordinal"]="Calm";}
+if($wind["direction_10m_avg"]=="N/A"||$wind["direction_10m_avg"]==" N/A"||$wind["direction_10m_avg"]=="  N/A"||$wind["direction_10m_avg"]=="   N/A"){$wind["direction_10m_avg"]="Calm";}
+
 #end if
 
 //colors
@@ -844,14 +850,28 @@ $colorUVMonthMax = "$colorize($month.UV.max)";
 $colorUVYearMax = "$colorize($year.UV.max)";
 $colorUVAlltimeMax = "$colorize($alltime.UV.max)";
 
-$colorRadiationCurrent = "$colorize($current.radiation)";
-$colorRadiationDayMax = "$colorize($day.radiation.max)";
-$colorRadiationYesterdayMax = "$colorize($day($days_ago=1).radiation.max)";
-$colorRadiationMonthMax = "$colorize($month.radiation.max)";
-$colorRadiationYearMax = "$colorize($year.radiation.max)";
-$colorRadiationAlltimeMax = "$colorize($alltime.radiation.max)";
+$colorSolarCurrent = "$colorize($current.radiation)";
+$colorSolarDayMax = "$colorize($day.radiation.max)";
+$colorSolarYesterdayMax = "$colorize($day($days_ago=1).radiation.max)";
+$colorSolarMonthMax = "$colorize($month.radiation.max)";
+$colorSolarYearMax = "$colorize($year.radiation.max)";
+$colorSolarAlltimeMax = "$colorize($alltime.radiation.max)";
 
+if($sky["lux"] == 0){$colorLuxCurrent='grey';}
+else if($sky["lux"] < 16000){$colorLuxCurrent='#89C7E7';}
+else if($sky["lux"] < 32000){$colorLuxCurrent='#ADD8E5';}
+else if($sky["lux"] < 48000){$colorLuxCurrent='#C4EBF1';}
+else if($sky["lux"] < 64000){$colorLuxCurrent='#FFFFC2';}
+else if($sky["lux"] < 80000){$colorLuxCurrent='#FFF684';}
+else if($sky["lux"] > 80000){$colorLuxCurrent='#FFD301';}
 
+if($sky["day_lux_max"] == 0){$colorLuxDay='grey';}
+else if($sky["day_lux_max"] < 16000){$colorLuxDay='#89C7E7';}
+else if($sky["day_lux_max"] < 32000){$colorLuxDay='#ADD8E5';}
+else if($sky["day_lux_max"] < 48000){$colorLuxDay='#C4EBF1';}
+else if($sky["day_lux_max"] < 64000){$colorLuxDay='#FFFFC2';}
+else if($sky["day_lux_max"] < 80000){$colorLuxDay='#FFF684';}
+else if($sky["day_lux_max"] > 80000){$colorLuxDay='#FFD301';}
 
 //Convert temperatures if necessary
 include('dvmUnitConversions.php');

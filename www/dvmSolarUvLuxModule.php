@@ -87,7 +87,7 @@ var bottomY = height + 10,
     bulbRadius = 25.5,
     tubeWidth = 35,
     tubeBorderWidth = 1,
-    solarColor = "<?php echo $colorRadiationCurrent;?>",
+    solarColor = "<?php echo $colorSolarCurrent;?>",
     tubeBorderColor = "#999999";
 
 var bulb_cy = bottomY - bulbRadius,
@@ -433,7 +433,7 @@ var bottomY = height + 10,
     bulbRadius = 25.5,
     tubeWidth = 35,
     tubeBorderWidth = 1,
-    LuxColor = "rgba(255, 85, 85, 1)",
+    LuxColor = "<?php echo $colorLuxCurrent;?>",
     tubeBorderColor = "#999999";
 
 var bulb_cy = bottomY - bulbRadius,
