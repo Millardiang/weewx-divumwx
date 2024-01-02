@@ -13,10 +13,7 @@ Include a stanza like this in your weewx.conf file: -
     unit_system = US
     # Map from incoming names, to WeeWX names.
     [[label_map]]
-        cloudCover = cloud_cover
-        pm25 = pm2_5
-        pm10 = pm10_0
-
+        cloudCover = cloudcover
 ################################################################################
 
 You must also create a dummy file in your serverdata folder: -
