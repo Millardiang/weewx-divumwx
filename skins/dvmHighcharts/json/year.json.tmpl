@@ -169,6 +169,11 @@
 "units": "Strikes"#slurp
 },
 ##
+"airDensityplot": {"series":
+{"air_density": $year.AirDensity.series(aggregate_type='last', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(5).json},
+"units": "kg/m"#slurp
+}, 
+##
 "stormRainplot": {"series":
 {"storm_rain_mm": $year.stormRain.series(aggregate_type='last', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').mm.round(1).json,
 "storm_rain_inch": $year.stormRain.series(aggregate_type='last', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').inch.round(2).json},
