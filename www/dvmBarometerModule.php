@@ -21,7 +21,7 @@ include('dvmCombinedData.php');
 
 <div class="chartforecast2">
 <span class="yearpopup"><a alt="barometer charts" title="barometer charts" href="dvmMenuBarometer.php" data-lity><?php echo $menucharticonpage;?> Barometer Almanac and Charts</a></span>
-<!--span class="yearpopup"><a alt="altimeter" title="altimeter" href="dvmAltimeter.php" data-lity><?php echo $chartinfo;?> Altimeter</a></span-->    
+<span class="yearpopup"><a alt="air density" title="air density" href="dvmAirDensityAlmanac.php" data-lity><?php echo $chartinfo;?> Air Density Almanac</a></span>    
 </div>    
 <span class='moduletitle2'><?php echo $lang['barometerModule'], " (<valuetitleunit>", $barom["units"];?></valuetitleunit>)</span>
 <div class="updatedtime2">
@@ -203,62 +203,6 @@ if ($theme === "dark") { echo
 }
 ?>
 
-
-<script>
-// air density calculation
-var Bunits = "<?php echo $barom["units"];?>";
-if (Bunits === "hPa") {
-var P = <?php echo $barom["now"];?>;
-} else if (Bunits === "inHg") {
-P = <?php echo $barom["now"]*33.863889532610884;?>;
-} else if (Bunits === "kPa") {
-P = <?php echo $barom["now"]*10.0;?>; 
-} else if (Bunits === "mbar") {
-P = <?php echo $barom["now"];?>;
-}
-
-var Tunits = "<?php echo $temp["units"];?>";
-if (Tunits === "C") {
-var T = <?php echo $temp["outside_now"];?>;
-var Dp = <?php echo $dew["now"];?>;
-} else {
-T = <?php echo ($temp["outside_now"]-32)*5/9;?>; 
-Dp = <?php echo ($dew["now"]-32)*5/9;?>;    
-}
-
-var H = <?php echo $humid["now"];?>;
-
-VaporPressureRh(T, H);
-air_density(T, P, Dp, H);
-
-function VaporPressureRh(T, H) {
-// (temp °C, humidity)
-    T = T;
-    var a = (17.67 * T) / (243.5 + T);
-    var E = (H / 100) * 6.112 * Math.exp(a);
-    //console.log('Rh ' + E); 
-    return E;
-}
-// air density kg/m³
-function air_density(T, P, Dp, H) {
-// (temp °C, pressure, dew point °C, humidity)
-T = T;
-P = P;
-Dp = Dp;
-let Es = VaporPressureRh(T, H),
-    Rv = 461.4964,
-    Rd = 287.0531,
-    tk = T + 273.15,
-    pv = Es * 100,
-    pd = (P - Es) * 100,
-    d = (pv / (Rv * tk)) + (pd / (Rd * tk));
-    let B = d.toFixed(5);
-    //console.log('B ' + B);
-    return B;
-}
-
-</script>
-
 <div class="barometer"></div>
 
 <script>
@@ -286,7 +230,7 @@ var currentPColor = "<?php echo $colorBarometerCurrent;?>";
 
 var altitude = "<?php echo $elevation;?>"; 
 
-var air_density = air_density(T, P, Dp, H);
+var air_density = "<?php echo $air_density["now"];?>";
 
 var trend_desc = "<?php echo $barom["trend_desc"];?>";
    

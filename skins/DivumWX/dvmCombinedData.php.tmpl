@@ -108,6 +108,46 @@ $TS = time();
 if($theme == 'dark') {$convertStyle = "color:";}
 else {$convertStyle = "background:";}
 
+//air density
+$air_density["now"] = $current.AirDensity.format(add_label=False);
+$air_density["day_max"] = number_format($day.AirDensity.max.format(add_label=False),4);
+$air_density["day_min"] = number_format($day.AirDensity.min.format(add_label=False),4);
+$air_density["day_avg"] = number_format($day.AirDensity.avg.format(add_label=False),4);
+$air_density["day_maxtime"] = date('H:i',$day.AirDensity.maxtime.raw);
+$air_density["day_mintime"] = date('H:i',$day.AirDensity.mintime.raw);
+$air_density["yesterday_max"] = number_format($day($days_ago=1).AirDensity.max.format(add_label=False),4);
+$air_density["yesterday_min"] = number_format($day($days_ago=1).AirDensity.min.format(add_label=False),4);
+$air_density["yesterday_avg"] = number_format($day($days_ago=1).AirDensity.avg.format(add_label=False),4);
+$air_density["yesterday_maxtime"] = date('H:i',$day($days_ago=1).AirDensity.maxtime.raw);
+$air_density["yesterday_mintime"] = date('H:i',$day($days_ago=1).AirDensity.mintime.raw);
+$air_density["month_max"] = number_format($month.AirDensity.max.format(add_label=False),4);
+$air_density["month_min"] = number_format($month.AirDensity.min.format(add_label=False),4);
+$air_density["month_avg"] = number_format($month.AirDensity.avg.format(add_label=False),4);
+$air_density["month_maxtime"] = date('j M H:i',$month.AirDensity.maxtime.raw);
+$air_density["month_mintime"] = date('j M H:i',$month.AirDensity.mintime.raw);
+$air_density["year_max"] = number_format($year.AirDensity.max.format(add_label=False),4);
+$air_density["year_min"] = number_format($year.AirDensity.min.format(add_label=False),4);
+$air_density["year_avg"] = number_format($year.AirDensity.avg.format(add_label=False),4);
+$air_density["year_maxtime"] = date('j M H:i',$year.AirDensity.maxtime.raw);
+$air_density["year_mintime"] = date('j M H:i',$year.AirDensity.mintime.raw);
+$air_density["alltime_max"] = number_format($alltime.AirDensity.max.format(add_label=False),4);
+$air_density["alltime_min"] = number_format($alltime.AirDensity.min.format(add_label=False),4);
+$air_density["alltime_avg"] = number_format($alltime.AirDensity.avg.format(add_label=False),4);
+$air_density["alltime_maxtime"] = date('j M Y H:i',$alltime.AirDensity.maxtime.raw);
+$air_density["alltime_mintime"] = date('j M Y H:i',$alltime.AirDensity.mintime.raw);
+
+//air quality
+$air["pm_units"] = "μg/m<sup><b>3</b></sup>";
+#if $current.pm2_5.has_data
+$air["current.pm2_5"] = $current.pm2_5.format(add_label=False, format_string="%.1f");
+$air["24h.rollingavg.pm2_5"] = $current.pm2_5.format(add_label=False, format_string="%.1f");
+#end if
+#if $current.pm10_0.has_data
+$air["current.pm10_0"] = $current.pm10_0.format(add_label=False, format_string="%.1f");
+$air["24h.rollingavg.pm10_0"] = $current.pm10_0.format(add_label=False, format_string="%.1f");
+#end if
+
+
 //almanac
 ## If extended almanac information is available, do extra calculations.
 #if $almanac.hasExtras
@@ -215,16 +255,7 @@ if (strtotime(date("G.i")) >= strtotime($alm["sunrise"]) && strtotime(date("G.i"
     $dayPartNatural = "night";
 }
 
-//air quality
-$air["pm_units"] = "μg/m<sup><b>3</b></sup>";
-#if $current.pm2_5.has_data
-$air["current.pm2_5"] = $current.pm2_5.format(add_label=False, format_string="%.1f");
-$air["24h.rollingavg.pm2_5"] = $current.pm2_5.format(add_label=False, format_string="%.1f");
-#end if
-#if $current.pm10_0.has_data
-$air["current.pm10_0"] = $current.pm10_0.format(add_label=False, format_string="%.1f");
-$air["24h.rollingavg.pm10_0"] = $current.pm10_0.format(add_label=False, format_string="%.1f");
-#end if
+
 
 //barometer
 #if $current.barometer.has_data
@@ -590,6 +621,10 @@ if($wind["direction_10m_avg"]=="N/A"||$wind["direction_10m_avg"]==" N/A"||$wind[
 #end if
 
 //colors
+
+//air density
+$colorAirDensity = "#007fff";
+
 //barometer almanac
 $colorBarometerCurrent = "$colorize($current.barometer)";
 $colorBarometerDayMax = "$colorize($day.barometer.max)";
