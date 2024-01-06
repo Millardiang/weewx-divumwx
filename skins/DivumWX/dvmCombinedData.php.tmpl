@@ -85,6 +85,10 @@ if ($v == 'NULL')
 explode(" ", file_get_contents($livedata)));
     
 //general
+$region_city = explode("/", $TZ);
+$region = $region_city[0];
+$city = $region_city[1];
+$ukWeatherHealth = "https://app.powerbi.com/view?r=eyJrIjoiZGI5MTA1NTEtZmE4NC00NTk3LTg5NjQtZjMyNDQ5YTgyMjI2IiwidCI6ImVlNGUxNDk5LTRhMzUtNGIyZS1hZDQ3LTVmM2NmOWRlODY2NiIsImMiOjh9";
 $sundial_time = date("M d Y H:i:s",filemtime('serverdata/dvmRealtime.txt'));        
 $stationlocation = "$station.location";
 $hardware = "$station.hardware";
@@ -458,6 +462,7 @@ $rain["alltime_rate_max"] = $alltime.rainRate.max.raw;
 $rain["alltime_rate_maxtime"] = $alltime.rainRate.maxtime.raw;
 $rain["alltime_total"] = round($alltime.rain.sum.raw,1);
 $rain["storm_rain"] = $current.stormRain.raw;
+$rain["storm_rain_start"] = date('D j M H:i',($TS)-($time_since('stormRain=0').raw));
 $rain["last_rain"] = date('D j M H:i',$time_at('rain>0').raw);
 if($weewxrt[8] < 2.5){$rain["intensity"]="Slight";}
 else if($weewxrt[8] < 10){$rain["intensity"]="Moderate";}
