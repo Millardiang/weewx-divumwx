@@ -70,9 +70,11 @@
 include ('fixedSettings.php');
 include ('dvmShared.php');
 include('common.php');
+/* for future developments
 $jsonR = 'jsondata/gauge-data.txt';
 $real = file_get_contents($jsonR);
 $realData = json_decode($real, true);
+*/
 error_reporting(0);
 $weewxrt = array_map(function ($v)
 {
