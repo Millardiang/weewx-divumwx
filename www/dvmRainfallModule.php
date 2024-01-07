@@ -79,7 +79,6 @@ var bulb_cy = bottomY - bulbRadius,
 
 var svg = d3.select("#raingaugex")
     .append("svg")
-  //.style("background", "#292E35") // box background to be commented out
     .attr("width", width)
     .attr("height", height);
 
@@ -506,7 +505,6 @@ var theme = "<?php echo $theme;?>";
 // script to display rain data
 var svg = d3.select(".stormRain")
     .append("svg")
-    //.style("background", "#292E35") // box background to be commented out
     .attr("width", 180)
     .attr("height", 150);
 
@@ -541,10 +539,10 @@ svg.append("text") // storm start text
     .attr("y", 147)
     .style("fill", baseTextColor)
     .style("font-family", "Helvetica")
-    .style("font-size", "8px")
+    .style("font-size", "9px")
     .style("text-anchor", "middle")
     .style("font-weight", "normal")
-    .text("Storm Rain Started @ " + stormStart);
+    .text("Storm Rain started on " + stormStart);
 
 svg.append("rect") // stormRain box    
     .attr("x", 12 )

@@ -288,6 +288,7 @@ $barom["max"] = $day.barometer.max.format(add_label=False);
 $barom["maxtime"] = date('H:i',"$day.barometer.maxtime.raw");
 $barom["min"] = $day.barometer.min.format(add_label=False);
 $barom["mintime"] = date('H:i',"$day.barometer.mintime.raw");
+#if $trend.barometer.has_data
 $barom["trend_code"] = round($trend.barometer.raw,0);
 if($barom["trend_code"]>3){$barom["trend_desc"]="Rising Very Rapidly";$barom["trend_code"]=4;}
 else if($barom["trend_code"]>2){$barom["trend_desc"]="Rising Quickly";$barom["trend_code"]=3;}
@@ -298,8 +299,8 @@ else if($barom["trend_code"]<0){$barom["trend_desc"]="Falling Slowly";$barom["tr
 else if($barom["trend_code"]<-1){$barom["trend_desc"]="Falling";$barom["trend_code"]=-2;}
 else if($barom["trend_code"]<-2){$barom["trend_desc"]="Falling Quickly";$barom["trend_code"]=-3;}
 else if($barom["trend_code"]<-3){$barom["trend_desc"]="Falling Very Rapidly";$barom["trend_code"]=-4;}
-else if($barom["trend_code"]=="N/A"||$barom["trend_code"]==" N/A"||$barom["trend_code"]=="  N/A"||$barom["trend_code"]=="   N/A"){$barom["trend_desc"]="Steady";$barom["trend_code"]=0;}
-
+else if($barom["trend_code"]=="N/A"||$barom["trend_code"]==" N/A"||$barom["trend_code"]=="  N/A"||$barom["trend_code"]==    N/A){$barom["trend_desc"]="Steady";$barom["trend_code"]=0;}
+#end if
 $barom["yesterday_max"] = $day($days_ago=1).barometer.max.format(add_label=False);
 $barom["yesterday_maxtime"] = date('H:i',$day($days_ago=1).barometer.maxtime.raw);
 $barom["yesterday_min"] = $day($days_ago=1).barometer.min.format(add_label=False);
@@ -321,8 +322,9 @@ $barom["alltime_mintime"] = date('j M Y H:i',$alltime.barometer.mintime.raw);
 
 //dewpoint
 $dew["now"] = $weewxrt[4];
+#if $trend.dewpoint.has_data
 $dew["trend"] = $trend.dewpoint.format(add_label=False);
-if($dew["trend"]=="N/A"||$dew["trend"]==" N/A"||$dew["trend"]=="  N/A"||$dew["trend"]=="   N/A"){$dew["trend"]=0;}
+#end if
 $dew["day_max"] = $day.dewpoint.max.format(add_label=False);
 $dew["day_maxtime"] = date('H:i',$day.dewpoint.maxtime.raw);
 $dew["day_min"] = $day.dewpoint.min.format(add_label=False);
@@ -346,8 +348,9 @@ $dew["alltime_mintime"] = date('j M Y H:i',$alltime.dewpoint.mintime.raw);
     
 //humidity
 $humid["now"] = $weewxrt[3];
+#if $trend.outHumidity.has_data
 $humid["trend"] = $trend.outHumidity.format(add_label=False);
-if($humid["trend"]=="N/A"||$humid["trend"]==" N/A"||$humid["trend"]=="  N/A"||$humid["trend"]=="   N/A"){$humid["trend"]=0;}
+#end if
 $humid["day_max"] = $day.outHumidity.max.format(add_label=False);
 $humid["day_maxtime"] = date('H:i',$day.outHumidity.maxtime.raw);
 $humid["day_min"] = $day.outHumidity.min.format(add_label=False);
@@ -369,8 +372,9 @@ $humid["alltime_maxtime"] = date('j M Y H:i',$alltime.outHumidity.maxtime.raw);
 $humid["alltime_min"] = $alltime.outHumidity.min.format(add_label=False);
 $humid["alltime_mintime"] = date('j M Y H:i',$alltime.outHumidity.mintime.raw);
 $humid["indoors_now"] = $weewxrt[23];
+#if $trend.inHumidity.has_data
 $humid["indoors_trend"] = round($trend.inHumidity.format(add_label=False),1);
-if($humid["indoors_trend"]=="N/A"||$humid["indoors_trend"]==" N/A"||$humid["indoors_trend"]=="  N/A"||$humid["indoors_trend"]=="   N/A"){$humid["indoors_trend"]=0;}
+#end if
 $humid["indoors_day_max"] = $day.inHumidity.max.format(add_label=False);
 $humid["indoors_day_maxtime"] = date('H:i',$day.inHumidity.maxtime.raw);
 $humid["indoors_day_min"] = $day.inHumidity.min.format(add_label=False);
@@ -392,7 +396,6 @@ $humid["indoors_alltime_maxtime"] = date('j M Y H:i',$alltime.inHumidity.maxtime
 $humid["indoors_alltime_min"] = $alltime.inHumidity.min.format(add_label=False);
 $humid["indoors_alltime_mintime"] = date('j M Y H:i',$alltime.inHumidity.mintime.raw);
 
-//lightning
 //lightning
 $lightning["last_strike_time"] = "$alltime.lightning_last_det_time.lastnonzero.raw";
 $lightning["current_strike_count"] = "$current.lightning_strike_count"; 
@@ -462,7 +465,7 @@ $rain["alltime_rate_max"] = $alltime.rainRate.max.raw;
 $rain["alltime_rate_maxtime"] = $alltime.rainRate.maxtime.raw;
 $rain["alltime_total"] = round($alltime.rain.sum.raw,1);
 $rain["storm_rain"] = $current.stormRain.raw;
-$rain["storm_rain_start"] = date('D j M H:i',($TS)-($time_since('stormRain=0').raw));
+if($rain["storm_rain"] > 0 ){$rain["storm_rain_start"] = date('D j M H:i',($TS)-($time_since('stormRain=0').raw));}
 $rain["last_rain"] = date('D j M H:i',$time_at('rain>0').raw);
 if($weewxrt[8] < 2.5){$rain["intensity"]="Slight";}
 else if($weewxrt[8] < 10){$rain["intensity"]="Moderate";}
@@ -474,7 +477,7 @@ else if($weewxrt[8] >= 50){$rain["intensity"]="Violent";}
 $sky["lux"] = round($weewxrt[45]/0.00809399477,0,PHP_ROUND_HALF_UP);
 $sky["day_lux_max"] = round($day.radiation.max.format($localize=False,add_label=False)/0.00809399477,0,PHP_ROUND_HALF_UP);
 $sky["cloud_base"] = $weewxrt[52];
-//$sky["cloud_cover"] = round($current.signal8.format($localize=False,add_label=False),0);
+$sky["cloud_cover"] = $current.cloudcover.raw;
 
 //solar
 #if $current.radiation.has_data
@@ -502,13 +505,15 @@ else if($temp["units"] == "°F")
 $temp["units"] = "F";
 }
 $temp["indoor_now"] = $weewxrt[22];
+#if $trend.inTemp.has_data
 $temp["indoor_trend"] = round($trend.inTemp.raw,1);
-if($temp["indoors_trend"]=="N/A"||$temp["indoors_trend"]==" N/A"||$temp["indoors_trend"]=="  N/A"||$temp["indoors_trend"]=="   N/A"){$temp["indoors_trend"]=0;}
+#end if
 $temp["indoor_day_max"] = $day.inTemp.max.format(add_label=False);
 $temp["indoor_day_min"] = $day.inTemp.min.format(add_label=False);
 $temp["outside_now"] = $weewxrt[2];
+#if $trend.outTemp.has_data
 $temp["outside_trend"] = round($trend.outTemp.raw,1);
-if($temp["outside_trend"]=="N/A"||$temp["outside_trend"]==" N/A"||$temp["outside_trend"]=="  N/A"||$temp["outside_trend"]=="   N/A"){$temp["outside_trend"]=0;}
+#end if
 $temp["apptemp"] = $weewxrt[54];
 $temp["heatindex"] = $weewxrt[41];
 $temp["windchill"] = round($weewxrt[24],1);
@@ -617,11 +622,11 @@ $wind["speed_alltime_max"] = $alltime.windSpeed.max.format(add_label=False);
 $wind["speed_alltime_maxtime"] = "$alltime.windSpeed.maxtime";
 $wind["gust_alltime_max"] = $alltime.windGust.max.format(add_label=False);
 $wind["gust_alltime_maxtime"] = date('D j M Y H:i',$alltime.windGust.maxtime.raw);
-$wind["direction_trend"] = "$trend.windDir.formatted";
-if($wind["direction_trend"]=="N/A"||$wind["direction_trend"]==" N/A"||$wind["direction_trend"]=="  N/A"||$wind["direction_trend"]=="   N/A"){$wind["direction_trend"]="000";}
-$wind["direction_trend_ordinal"] = "$trend.windDir.ordinal_compass";
-if($wind["direction_trend_ordinal"]=="N/A"||$wind["direction_trend_ordinal"]==" N/A"||$wind["direction_trend_ordinal"]=="  N/A"||$wind["direction_trend_ordinal"]=="   N/A"){$wind["direction_trend_ordinal"]="Calm";}
-if($wind["direction_10m_avg"]=="N/A"||$wind["direction_10m_avg"]==" N/A"||$wind["direction_10m_avg"]=="  N/A"||$wind["direction_10m_avg"]=="   N/A"){$wind["direction_10m_avg"]="Calm";}
+//$wind["direction_trend"] = "$trend.windDir.formatted";
+//if($wind["direction_trend"]=="N/A"||$wind["direction_trend"]==" N/A"||$wind["direction_trend"]=="  N/A"||$wind["direction_trend"]=="   N/A"){$wind["direction_trend"]="000";}
+//$wind["direction_trend_ordinal"] = "$trend.windDir.ordinal_compass";
+//if($wind["direction_trend_ordinal"]=="N/A"||$wind["direction_trend_ordinal"]==" N/A"||$wind["direction_trend_ordinal"]=="  N/A"||$wind["direction_trend_ordinal"]=="   N/A"){$wind["direction_trend_ordinal"]="Calm";}
+//if($wind["direction_10m_avg"]=="N/A"||$wind["direction_10m_avg"]==" N/A"||$wind["direction_10m_avg"]=="  N/A"||$wind["direction_10m_avg"]=="   N/A"){$wind["direction_10m_avg"]="Calm";}
 
 #end if
 
