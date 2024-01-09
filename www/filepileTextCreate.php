@@ -23,7 +23,8 @@ filepileTextData.txt with permissions set to 0777 to make it writeable and execu
 */
 #
 # If you are importing and parsing aqi json data from an external device, you must un-comment
-# lines 32 to 36 and lines 38 to 41 and set the correct path to the source at line 10
+# lines 33 to 37 and lines 39 to 42 and set the correct path to the source at line 10
+# Configure arrays at lines 36 and 37 to your json data as required
 #
 include_once ('dvmUpdater.php');
 $json_cloud = file_get_contents("/var/www/html/divumwx/jsondata/awc.txt");
