@@ -79,6 +79,7 @@ var bulb_cy = bottomY - bulbRadius,
 
 var svg = d3.select("#raingaugex")
     .append("svg")
+  //.style("background", "#292E35") // box background to be commented out
     .attr("width", width)
     .attr("height", height);
 
@@ -505,6 +506,7 @@ var theme = "<?php echo $theme;?>";
 // script to display rain data
 var svg = d3.select(".stormRain")
     .append("svg")
+    //.style("background", "#292E35") // box background to be commented out
     .attr("width", 180)
     .attr("height", 150);
 
@@ -537,12 +539,12 @@ if (stormRain > 0.0) {
 svg.append("text") // storm start text
     .attr("x", 86)
     .attr("y", 147)
-    .style("fill", baseTextColor)
+    .style("fill", stormRainColor)
     .style("font-family", "Helvetica")
-    .style("font-size", "9px")
+    .style("font-size", "8px")
     .style("text-anchor", "middle")
     .style("font-weight", "normal")
-    .text("Storm Rain started on " + stormStart);
+    .text("Storm Rain Started on " + stormStart);
 
 svg.append("rect") // stormRain box    
     .attr("x", 12 )
@@ -645,59 +647,6 @@ var text = svg.selectAll(null)
     .append("tspan")
     .style("fill", baseTextColor)
     .text(function(d) {return d.split("-")[1];});
-
-} else {
-
-svg.append("rect") // rain Rate box
-    .attr("x", 56 )
-    .attr("y", 117)
-    .attr("rx", 1.25)
-    .style("stroke", boxColor)
-    .attr("width", 63)
-    .attr("height", 17)
-    .style("fill", "none");
-
-svg.append("rect")
-    .attr("x", 56.75)
-    .attr("y", 118)
-    .attr("rx", 0.5)
-    .style("stroke", rainRateColor)
-    .attr("height", 15)
-    .attr("width", 3)
-    .style("fill", rainRateColor);
-
-svg.append("text") // rain Rate Title text above box
-    .attr("x", 87)
-    .attr("y", 112)
-    .style("fill", baseTextColor)
-    .style("font-family", "Helvetica")
-    .style("font-size", "10px")
-    .style("text-anchor", "middle")
-    .style("font-weight", "normal")
-    .text("Rain Rate");
- 
-// rainRate text output with two different colors on the same line
-var data = [d3.format(".2f")(rainRate) +" "+"-"+ units]; 
-
-var text = svg.selectAll(null)
-    .data(data)
-    .enter() 
-    .append("text")
-    .attr("x", 89)
-    .attr("y", function(d, i) {return 128.5 + i * 128.5;})
-
-    .style("fill", baseTextColor)
-    .style("font-family", "Helvetica")
-    .style("font-size", "9.75px")
-    .style("text-anchor", "middle")
-    .style("font-weight", "normal")
-    .text(function(d) {return d.split("-")[0];})
-
-    .append("tspan")
-    .style("fill", baseTextColor)
-    .text(function(d) {return d.split("-")[1];});
-
-}
 
 svg.append("rect") // last hour box
     .attr("x", 12 )
@@ -896,7 +845,255 @@ var text = svg.selectAll(null)
     .style("fill", baseTextColor)
     .text(function(d) {return d.split("-")[1];});
 
-   
+} else {
+
+svg.append("rect") // rain Rate box
+    .attr("x", 56 )
+    .attr("y", 127)
+    .attr("rx", 1.25)
+    .style("stroke", boxColor)
+    .attr("width", 63)
+    .attr("height", 17)
+    .style("fill", "none");
+
+svg.append("rect")
+    .attr("x", 56.75)
+    .attr("y", 128)
+    .attr("rx", 0.5)
+    .style("stroke", rainRateColor)
+    .attr("height", 15)
+    .attr("width", 3)
+    .style("fill", rainRateColor);
+
+svg.append("text") // rain Rate Title text above box
+    .attr("x", 87)
+    .attr("y", 122)
+    .style("fill", baseTextColor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "10px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text("Rain Rate");
+ 
+// rainRate text output with two different colors on the same line
+var data = [d3.format(".2f")(rainRate) +" "+"-"+ units]; 
+
+var text = svg.selectAll(null)
+    .data(data)
+    .enter() 
+    .append("text")
+    .attr("x", 89)
+    .attr("y", function(d, i) {return 138.5 + i * 138.5;})
+
+    .style("fill", baseTextColor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "9.75px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text(function(d) {return d.split("-")[0];})
+
+    .append("tspan")
+    .style("fill", baseTextColor)
+    .text(function(d) {return d.split("-")[1];});
+
+svg.append("rect") // last hour box
+    .attr("x", 12 )
+    .attr("y", 88)
+    .attr("rx", 1.25)
+    .style("stroke", boxColor)
+    .attr("width", 68)
+    .attr("height", 17)
+    .style("fill", "none");
+
+svg.append("rect")
+    .attr("x", 12.75)
+    .attr("y", 89)
+    .attr("rx", 0.5)
+    .style("stroke", lastHourColor)
+    .attr("height", 15)
+    .attr("width", 3)
+    .style("fill", lastHourColor);
+
+svg.append("text") // last hour Title text above box
+    .attr("x", 45.5)
+    .attr("y", 83)
+    .style("fill", baseTextColor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "10px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text("Last Hour");
+
+// lastHour text output with two different colors on the same line
+var data = [d3.format(".2f")(lastHour) +" "+"-"+ units]; 
+
+var text = svg.selectAll(null)
+    .data(data)
+    .enter() 
+    .append("text")
+    .attr("x", 48)
+    .attr("y", function(d, i) {return 100 + i * 100;})
+
+    .style("fill", baseTextColor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "9.75px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text(function(d) {return d.split("-")[0];})
+
+    .append("tspan")
+    .style("fill", baseTextColor)
+    .text(function(d) {return d.split("-")[1];});
+
+svg.append("rect") // last 24hr box
+    .attr("x", 93 )
+    .attr("y", 88)
+    .attr("rx", 1.25)
+    .style("stroke", boxColor)
+    .attr("width", 68)
+    .attr("height", 17)
+    .style("fill", "none");
+
+svg.append("rect")
+    .attr("x", 93.75)
+    .attr("y", 89)
+    .attr("rx", 0.5)
+    .style("stroke", last24HoursColor)
+    .attr("height", 15)
+    .attr("width", 3)
+    .style("fill", last24HoursColor);
+
+svg.append("text") // last 24hr Title text above box
+    .attr("x", 125.5)
+    .attr("y", 83)
+    .style("fill", baseTextColor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "10px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text("Last 24hr");
+
+// last 24 Hours text output with two different colors on the same line
+var data = [d3.format(".2f")(last24Hours) +" "+"-"+ units]; 
+
+var text = svg.selectAll(null)
+    .data(data)
+    .enter() 
+    .append("text")
+    .attr("x", 128)
+    .attr("y", function(d, i) {return 100 + i * 100;})
+
+    .style("fill", baseTextColor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "9.75px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text(function(d) {return d.split("-")[0];})
+
+    .append("tspan")
+    .style("fill", baseTextColor)
+    .text(function(d) {return d.split("-")[1];});
+
+svg.append("rect") // rain year box
+    .attr("x", 12 )
+    .attr("y", 48)
+    .attr("rx", 1.25)
+    .style("stroke", boxColor)
+    .attr("width", 68)
+    .attr("height", 17)
+    .style("fill", "none");
+
+svg.append("rect")
+    .attr("x", 12.75)
+    .attr("y", 49)
+    .attr("rx", 0.5)
+    .style("stroke", rainYearColor)
+    .attr("height", 15)
+    .attr("width", 3)
+    .style("fill", rainYearColor);
+
+svg.append("text") // year Title text above box
+    .attr("x", 48)
+    .attr("y", 43)
+    .style("fill", baseTextColor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "10px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text(year);
+
+// rain Year text output with two different colors on the same line
+var data = [d3.format(".2f")(rainYear) +" "+"-"+ units]; 
+
+var text = svg.selectAll(null)
+    .data(data)
+    .enter() 
+    .append("text")
+    .attr("x", 48)
+    .attr("y", function(d, i) {return 60.5 + i * 60.5;})
+
+    .style("fill", baseTextColor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "9.75px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text(function(d) {return d.split("-")[0];})
+
+
+    .append("tspan")
+    .style("fill", baseTextColor)
+    .text(function(d) {return d.split("-")[1];});
+
+svg.append("rect") // rain month box
+    .attr("x", 93 )
+    .attr("y", 48)
+    .attr("rx", 1.25)
+    .style("stroke", boxColor)
+    .attr("width", 68)
+    .attr("height", 17)
+    .style("fill", "none");
+
+svg.append("rect")
+    .attr("x", 93.75)
+    .attr("y", 49)
+    .attr("rx", 0.5)
+    .style("stroke", rainMonthColor)
+    .attr("height", 15)
+    .attr("width", 3)
+    .style("fill", rainMonthColor);
+
+svg.append("text") // month Title text above box
+    .attr("x", 126)
+    .attr("y", 43)
+    .style("fill", baseTextColor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "10px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text(month);
+
+// rain Month text output with two different colors on the same line
+var data = [d3.format(".2f")(rainMonth) +" "+"-"+ units]; 
+
+var text = svg.selectAll(null)
+    .data(data)
+    .enter() 
+    .append("text")
+    .attr("x", 128)
+    .attr("y", function(d, i) {return 60.5 + i * 60.5;})
+
+    .style("fill", baseTextColor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "9.75px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text(function(d) {return d.split("-")[0];})
+
+    .append("tspan")
+    .style("fill", baseTextColor)
+    .text(function(d) {return d.split("-")[1];});
+
+}
 
 </script>
 

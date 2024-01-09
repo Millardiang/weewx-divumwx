@@ -115,7 +115,9 @@ if($theme == 'dark') {$convertStyle = "color:";}
 else {$convertStyle = "background:";}
 
 //air density
+#if $current.AirDensity.has_data
 $air_density["now"] = $current.AirDensity.format(add_label=False);
+if(is_numeric($air_density["now"]) != 1){$air_density["now"] = 0;}
 $air_density["day_max"] = number_format($day.AirDensity.max.format(add_label=False),4);
 $air_density["day_min"] = number_format($day.AirDensity.min.format(add_label=False),4);
 $air_density["day_avg"] = number_format($day.AirDensity.avg.format(add_label=False),4);
@@ -141,6 +143,7 @@ $air_density["alltime_min"] = number_format($alltime.AirDensity.min.format(add_l
 $air_density["alltime_avg"] = number_format($alltime.AirDensity.avg.format(add_label=False),4);
 $air_density["alltime_maxtime"] = date('j M Y H:i',$alltime.AirDensity.maxtime.raw);
 $air_density["alltime_mintime"] = date('j M Y H:i',$alltime.AirDensity.mintime.raw);
+#end if
 
 //air quality
 $air["pm_units"] = "μg/m<sup><b>3</b></sup>";
@@ -466,8 +469,11 @@ $rain["year_total"] = round($year.rain.sum.raw,1);
 $rain["alltime_rate_max"] = $alltime.rainRate.max.raw;
 $rain["alltime_rate_maxtime"] = $alltime.rainRate.maxtime.raw;
 $rain["alltime_total"] = round($alltime.rain.sum.raw,1);
+#if $current.stormRain.has_data
 $rain["storm_rain"] = $current.stormRain.raw;
+if(is_numeric($rain["storm_rain"]) != 1){$rain["storm_rain"] = 0;}
 if($rain["storm_rain"] > 0 ){$rain["storm_rain_start"] = date('D j M H:i',($TS)-($time_since('stormRain=0').raw));}
+#end if
 $rain["last_rain"] = date('D j M H:i',$time_at('rain>0').raw);
 if($weewxrt[8] < 2.5){$rain["intensity"]="Slight";}
 else if($weewxrt[8] < 10){$rain["intensity"]="Moderate";}
@@ -479,7 +485,10 @@ else if($weewxrt[8] >= 50){$rain["intensity"]="Violent";}
 $sky["lux"] = round($weewxrt[45]/0.00809399477,0,PHP_ROUND_HALF_UP);
 $sky["day_lux_max"] = round($day.radiation.max.format($localize=False,add_label=False)/0.00809399477,0,PHP_ROUND_HALF_UP);
 $sky["cloud_base"] = $weewxrt[52];
+#if $current.cloudcover.has_data
 $sky["cloud_cover"] = $current.cloudcover.raw;
+if(is_numeric($sky["cloud_cover"]) != 1){$sky["cloud_cover"] = 0;}
+#end if
 
 //solar
 #if $current.radiation.has_data
@@ -624,11 +633,6 @@ $wind["speed_alltime_max"] = $alltime.windSpeed.max.format(add_label=False);
 $wind["speed_alltime_maxtime"] = "$alltime.windSpeed.maxtime";
 $wind["gust_alltime_max"] = $alltime.windGust.max.format(add_label=False);
 $wind["gust_alltime_maxtime"] = date('D j M Y H:i',$alltime.windGust.maxtime.raw);
-//$wind["direction_trend"] = "$trend.windDir.formatted";
-//if($wind["direction_trend"]=="N/A"||$wind["direction_trend"]==" N/A"||$wind["direction_trend"]=="  N/A"||$wind["direction_trend"]=="   N/A"){$wind["direction_trend"]="000";}
-//$wind["direction_trend_ordinal"] = "$trend.windDir.ordinal_compass";
-//if($wind["direction_trend_ordinal"]=="N/A"||$wind["direction_trend_ordinal"]==" N/A"||$wind["direction_trend_ordinal"]=="  N/A"||$wind["direction_trend_ordinal"]=="   N/A"){$wind["direction_trend_ordinal"]="Calm";}
-//if($wind["direction_10m_avg"]=="N/A"||$wind["direction_10m_avg"]==" N/A"||$wind["direction_10m_avg"]=="  N/A"||$wind["direction_10m_avg"]=="   N/A"){$wind["direction_10m_avg"]="Calm";}
 
 #end if
 
