@@ -116,12 +116,9 @@ var b=setInterval(function(){c.load("<?php echo $position18; ?>")},<?php echo $c
 var b=setInterval(function(){c.load("<?php echo $position19; ?>")},<?php echo $cycles19; ?>)})})(jQuery); // 60 seconds
 
 //update the filepileTextData.txt
-var refreshId;$(document).ready(function(){stationcron()});function stationcron(){$.ajax({cache:false,
-  success:function(a){$("#blank")
-  .html(a);<?php if ($filepileRefresh >0) {
-  echo 'setTimeout(stationcron,' . 1000*$filepileRefresh.')';}?>},
-  contentType: "application/x-www-form-urlencoded;charset=ISO-8859-15",
-  type:"GET",url:"filepileTextCreate.php"})}; 
+(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#filepilecron").show()}});var c=a("#filepilecron");c.load("filepileTextCreate.php");
+var b=setInterval(function(){c.load("filepileTextCreate.php")},60000)})})(jQuery); // 60 seconds
+
 
 </script>
 
