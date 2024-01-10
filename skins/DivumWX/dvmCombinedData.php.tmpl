@@ -295,6 +295,7 @@ $barom["min"] = $day.barometer.min.format(add_label=False);
 $barom["mintime"] = date('H:i',"$day.barometer.mintime.raw");
 #if $trend.barometer.has_data
 $barom["trend_code"] = round($trend.barometer.raw,0);
+if(is_numeric($barom["trend_code"]) != 1){$barom["trend_code"] = 0;}
 if($barom["trend_code"]>3){$barom["trend_desc"]="Rising Very Rapidly";$barom["trend_code"]=4;}
 else if($barom["trend_code"]>2){$barom["trend_desc"]="Rising Quickly";$barom["trend_code"]=3;}
 else if($barom["trend_code"]>1){$barom["trend_desc"]="Rising";$barom["trend_code"]=2;}
@@ -329,6 +330,7 @@ $barom["alltime_mintime"] = date('j M Y H:i',$alltime.barometer.mintime.raw);
 $dew["now"] = $weewxrt[4];
 #if $trend.dewpoint.has_data
 $dew["trend"] = $trend.dewpoint.format(add_label=False);
+if(is_numeric($dew["trend"]) != 1){$dew["trend"] = 0;}
 #end if
 $dew["day_max"] = $day.dewpoint.max.format(add_label=False);
 $dew["day_maxtime"] = date('H:i',$day.dewpoint.maxtime.raw);
@@ -355,6 +357,7 @@ $dew["alltime_mintime"] = date('j M Y H:i',$alltime.dewpoint.mintime.raw);
 $humid["now"] = $weewxrt[3];
 #if $trend.outHumidity.has_data
 $humid["trend"] = $trend.outHumidity.format(add_label=False);
+if(is_numeric($humid["trend"]) != 1){$humid["trend"] = 0;}
 #end if
 $humid["day_max"] = $day.outHumidity.max.format(add_label=False);
 $humid["day_maxtime"] = date('H:i',$day.outHumidity.maxtime.raw);
@@ -379,6 +382,7 @@ $humid["alltime_mintime"] = date('j M Y H:i',$alltime.outHumidity.mintime.raw);
 $humid["indoors_now"] = $weewxrt[23];
 #if $trend.inHumidity.has_data
 $humid["indoors_trend"] = round($trend.inHumidity.format(add_label=False),1);
+if(is_numeric($humid["indoors_trend"]) != 1){$humid["indoors_trend"] = 0;}
 #end if
 $humid["indoors_day_max"] = $day.inHumidity.max.format(add_label=False);
 $humid["indoors_day_maxtime"] = date('H:i',$day.inHumidity.maxtime.raw);
@@ -518,12 +522,14 @@ $temp["units"] = "F";
 $temp["indoor_now"] = $weewxrt[22];
 #if $trend.inTemp.has_data
 $temp["indoor_trend"] = round($trend.inTemp.raw,1);
+if(is_numeric($temp["indoor_trend"]) != 1){$temp["indoor_trend"] = 0;}
 #end if
 $temp["indoor_day_max"] = $day.inTemp.max.format(add_label=False);
 $temp["indoor_day_min"] = $day.inTemp.min.format(add_label=False);
 $temp["outside_now"] = $weewxrt[2];
 #if $trend.outTemp.has_data
 $temp["outside_trend"] = round($trend.outTemp.raw,1);
+if(is_numeric($temp["outside_trend"]) != 1){$temp["outside_trend"] = 0;}
 #end if
 $temp["apptemp"] = $weewxrt[54];
 $temp["heatindex"] = $weewxrt[41];
