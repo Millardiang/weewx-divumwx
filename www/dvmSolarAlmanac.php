@@ -35,21 +35,8 @@ if ($theme === "dark") {
    <div class="temperaturecontainer">
 	
              <?php
-             // Solar Today
-             if ($solar["day_max"] >= 1000) {
-                 echo "<div class='uvtoday9-10'>",
-                     $solar["day_max"] . "</value>";
-             } elseif ($solar["day_max"] >= 500) {
-                 echo "<div class='uvtoday6-8'>",
-                     $solar["day_max"] . "</value>";
-             } elseif ($solar["day_max"] >= 300) {
-                 echo "<div class='uvtoday4-5'>",
-                     $solar["day_max"] . "</value>";
-             } elseif ($solar["day_max"] >= -0) {
-                 echo "<div class='uvtoday1'>",
-                     $solar["day_max"] . "</value>";
-             }
-             echo "<smalluvunit> W/m<sup>2</sup></smalluvunit>";
+             // Solar Today             
+             echo "<div class='uvtoday11' style='background: $colorRadiationDayMax';>",$solar["day_max"] . "</value><smalluvunit> W/m<sup>2</sup></smalluvunit>";
              ?>
 
 </div>
@@ -66,21 +53,8 @@ if ($theme === "dark") {
 	
              <?php
              // Solar 24h
-             if ($solar["yesterday_max"] >= 1000) {
-                 echo "<div class='uvtoday9-10'>",
-                     $solar["yesterday_max"] . "</value>";
-             } elseif ($solar["yesterday_max"] >= 500) {
-                 echo "<div class='uvtoday6-8'>",
-                     $solar["yesterday_max"] . "</value>";
-             } elseif ($solar["yesterday_max"] >= 300) {
-                 echo "<div class='uvtoday4-5'>",
-                     $solar["yesterday_max"] . "</value>";
-             } elseif ($solar["yesterday_max"] >= -0) {
-                 echo "<div class='uvtoday1'>",
-                     $solar["yesterday_max"] . "</value>";
-             }
-             echo "<smalluvunit> W/m<sup>2</sup></smalluvunit>";
-             ?>
+            echo "<div class='uvtoday11' style='background: $colorRadiationYesterdayMax';>",$solar["yesterday_max"] . "</value><smalluvunit> W/m<sup>2</sup></smalluvunit>";
+              ?>
 
 </div>
 
@@ -96,21 +70,8 @@ if ($theme === "dark") {
 	
              <?php
              // Solar month
-             if ($solar["month_max"] >= 1000) {
-                 echo "<div class='uvtoday9-10'>",
-                     $solar["month_max"] . "</value>";
-             } elseif ($solar["month_max"] >= 500) {
-                 echo "<div class='uvtoday6-8'>",
-                     $solar["month_max"] . "</value>";
-             } elseif ($solar["month_max"] >= 300) {
-                 echo "<div class='uvtoday4-5'>",
-                     $solar["month_max"] . "</value>";
-             } elseif ($solar["month_max"] >= -0) {
-                 echo "<div class='uvtoday1'>",
-                     $solar["month_max"] . "</value>";
-             }
-             echo "<smalluvunit> W/m<sup>2</sup></smalluvunit>";
-             ?>
+            echo "<div class='uvtoday11' style='background: $colorRadiationMonthMax';>",$solar["month_max"] . "</value><smalluvunit> W/m<sup>2</sup></smalluvunit>";
+              ?>
 
 </div>
 
@@ -128,21 +89,8 @@ if ($theme === "dark") {
 	
              <?php
              // Solar year
-             if ($solar["year_max"] >= 1000) {
-                 echo "<div class='uvtoday9-10'>",
-                     $solar["year_max"] . "</value>";
-             } elseif ($solar["year_max"] >= 500) {
-                 echo "<div class='uvtoday6-8'>",
-                     $solar["year_max"] . "</value>";
-             } elseif ($solar["year_max"] >= 300) {
-                 echo "<div class='uvtoday4-5'>",
-                     $solar["year_max"] . "</value>";
-             } elseif ($solar["year_max"] >= -0) {
-                 echo "<div class='uvtoday1'>",
-                     $solar["year_max"] . "</value>";
-             }
-             echo "<smalluvunit> W/m<sup>2</sup></smalluvunit>";
-             ?>
+            echo "<div class='uvtoday11' style='background: $colorRadiationYearMax';>",$solar["year_max"] . "</value><smalluvunit> W/m<sup>2</sup></smalluvunit>";
+              ?>
 
 </div>
 
@@ -157,21 +105,8 @@ if ($theme === "dark") {
 	
              <?php
              // Solar alltime
-             if ($solar["alltime_max"] >= 1000) {
-                 echo "<div class='uvtoday9-10'>",
-                     $solar["alltime_max"] . "</value>";
-             } elseif ($solar["alltime_max"] >= 500) {
-                 echo "<div class='uvtoday6-8'>",
-                     $solar["alltime_max"] . "</value>";
-             } elseif ($solar["alltime_max"] >= 300) {
-                 echo "<div class='uvtoday4-5'>",
-                     $solar["alltime_max"] . "</value>";
-             } elseif ($solar["alltime_max"] >= -0) {
-                 echo "<div class='uvtoday1'>",
-                     $solar["alltime_max"] . "</value>";
-             }
-             echo "<smalluvunit> W/m<sup>2</sup></smalluvunit>";
-             ?>
+            echo "<div class='uvtoday11' style='background: $colorRadiationAlltimeMax';>",$solar["alltime_max"] . "</value><smalluvunit> W/m<sup>2</sup></smalluvunit>";
+              ?>
 
 </div>
 

@@ -1,5 +1,5 @@
 <?php
-#####################################################################################################################                                                                                                        #
+#####################################################################################################################                                                                                 
 #                                                                                                                   #
 # weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
 #                                                                                                                   #
@@ -37,19 +37,9 @@ if ($theme === "dark") {
    <div class=actualt>Today </div>        
    <div class="temperaturecontainer">
 	
-             <?php
-	// UV INDEX
-	if ($uv["day_max"]>=10)  {
-	echo "<div class='uvtoday11'>",$uv["day_max"] . "</value>";} 	
-	else if ($uv["day_max"]>=8)  {
-	echo "<div class='uvtoday9-10'>",$uv["day_max"] . "</value>";}
-	else if ($uv["day_max"]>=5)  {
-	echo "<div class='uvtoday6-8'>",$uv["day_max"] . "</value>";}
-	else if ($uv["day_max"]>=3)  {
-	echo "<div class='uvtoday4-5'>",$uv["day_max"] . "</value>";} 		
-	else if ($uv["day_max"]>=-0) {
-	echo "<div class='uvtoday1'>",$uv["day_max"] . "</value>";}		
-	echo "<smalluvunit> UVI</smalluvunit>"
+<?php
+// UV INDEX
+echo "<div class='uvtoday11' style='background: $colorUVDayMax';>",$uv["day_max"] . "</value><smalluvunit> UVI</smalluvunit>"; 	
 ?>
 
 </div>
@@ -64,19 +54,9 @@ if ($theme === "dark") {
   <div class=actualt>Yesterday </div>        
    <div class="temperaturecontainer">
 	
-            <?php
-	// UV INDEX
-	if ($uv["yesterday_max"]>=10)  {
-	echo "<div class='uvtoday11'>",$uv["yesterday_max"] . "</value>";} 	
-	else if ($uv["yesterday_max"]>=8)  {
-	echo "<div class='uvtoday9-10'>",$uv["yesterday_max"] . "</value>";}
-	else if ($uv["yesterday_max"]>=5)  {
-	echo "<div class='uvtoday6-8'>",$uv["yesterday_max"] . "</value>";}
-	else if ($uv["yesterday_max"]>=3)  {
-	echo "<div class='uvtoday4-5'>",$uv["yesterday_max"] . "</value>";} 		
-	else if ($uv["yesterday_max"]>=-0) {
-	echo "<div class='uvtoday1'>",$uv["yesterday_max"] . "</value>";}		
-	echo "<smalluvunit> UVI</smalluvunit>"
+<?php
+// UV INDEX
+echo "<div class='uvtoday11' style='background: $colorUVYesterdayMax';>",$uv["yesterday_max"] . "</value><smalluvunit> UVI</smalluvunit>"; 	
 ?>
 
 </div>
@@ -93,19 +73,9 @@ if ($theme === "dark") {
   <div class=actualt><?php echo date('M Y')?> </div>        
    <div class="temperaturecontainer">
 	
-            <?php
-	// UV INDEX
-	if ($uv["month_max"]>=10)  {
-	echo "<div class='uvtoday11'>",$uv["month_max"] . "</value>";} 	
-	else if ($uv["month_max"]>=8)  {
-	echo "<div class='uvtoday9-10'>",$uv["month_max"] . "</value>";}
-	else if ($uv["month_max"]>=5)  {
-	echo "<div class='uvtoday6-8'>",$uv["month_max"] . "</value>";}
-	else if ($uv["month_max"]>=3)  {
-	echo "<div class='uvtoday4-5'>",$uv["month_max"] . "</value>";} 		
-	else if ($uv["month_max"]>=-0) {
-	echo "<div class='uvtoday1'>",$uv["month_max"] . "</value>";}		
-	echo "<smalluvunit> UVI</smalluvunit>"
+<?php
+// UV INDEX
+echo "<div class='uvtoday11' style='background: $colorUVMonthMax';>",$uv["month_max"] . "</value><smalluvunit> UVI</smalluvunit>"; 	
 ?>
 
 </div>
@@ -121,19 +91,9 @@ if ($theme === "dark") {
   <div class=actualt><?php echo date('Y')?> </div>        
    <div class="temperaturecontainer">
 	
-            <?php
-	// UV INDEX
-	if ($uv["year_max"]>=10)  {
-	echo "<div class='uvtoday11'>",$uv["year_max"] . "</value>";} 	
-	else if ($uv["year_max"]>=8)  {
-	echo "<div class='uvtoday9-10'>",$uv["year_max"] . "</value>";}
-	else if ($uv["year_max"]>=5)  {
-	echo "<div class='uvtoday6-8'>",$uv["year_max"] . "</value>";}
-	else if ($uv["year_max"]>=3)  {
-	echo "<div class='uvtoday4-5'>",$uv["year_max"] . "</value>";} 		
-	else if ($uv["year_max"]>=-0) {
-	echo "<div class='uvtoday1'>",$uv["year_max"] . "</value>";}		
-	echo "<smalluvunit> UVI</smalluvunit>"
+<?php
+// UV INDEX
+echo "<div class='uvtoday11' style='background: $colorUVYearMax';>",$uv["year_max"] . "</value><smalluvunit> UVI</smalluvunit>"; 	
 ?>
 
 </div>
@@ -146,19 +106,9 @@ if ($theme === "dark") {
   <div class=actualt><?php echo 'All-Time';?> </div>        
    <div class="temperaturecontainer">
 	
-            <?php
-	// UV INDEX
-	if ($uv["alltime_max"]>=10)  {
-	echo "<div class='uvtoday11'>",$uv["alltime_max"] . "</value>";} 	
-	else if ($uv["alltime_max"]>=8)  {
-	echo "<div class='uvtoday9-10'>",$uv["alltime_max"] . "</value>";}
-	else if ($uv["alltime_max"]>=5)  {
-	echo "<div class='uvtoday6-8'>",$uv["alltime_max"] . "</value>";}
-	else if ($uv["alltime_max"]>=3)  {
-	echo "<div class='uvtoday4-5'>",$uv["alltime_max"] . "</value>";} 		
-	else if ($uv["alltime_max"]>=-0) {
-	echo "<div class='uvtoday1'>",$uv["alltime_max"] . "</value>";}		
-	echo "<smalluvunit> UVI</smalluvunit>"
+<?php
+// UV INDEX
+echo "<div class='uvtoday11' style='background: $colorUVAlltimeMax';>",$uv["alltime_max"] . "</value><smalluvunit> UVI</smalluvunit>";
 ?>
 
 </div>
@@ -169,15 +119,24 @@ if ($theme === "dark") {
 </article>
 </main>
  <main class="grid1">
-  <articlegraph> 
+  <articlegraph style="margin-top: 5px;"> 
   <!--<div class=actualt>Today <span style="color:#ff9350">UV-INDEX</div>  //-->
   <iframe  src="dvmhighcharts/<?php echo $theme;?>-charts.html?chart='uvsmallplot'&span='yearly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>" frameborder="0" scrolling="no" width="100%" height="100%"></iframe>
+ </articlegraph>
+
+ <style>
+a {
+    text-decoration: none;
+}
+</style>
  
-  </articlegraph> 
-     <articlegraph style="height:30px">  
-  <div class="lotemp">
-  </div>
-   
-  </articlegraph> 
+  <articlegraph style="height:30px">  
+<div class="lotemp">
+<?php echo $info;?> 
+<a href="https://highcharts.com" title="https://highcharts.com" target="_blank" style="font-size:8px;"> Charts rendered and compiled using Highcharts </a></span></div>   
+    
+<div class="lotemp">
+</articlegraph>
   
 </main>
+</html>

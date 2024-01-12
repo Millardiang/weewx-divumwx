@@ -22,7 +22,7 @@ error_reporting(0);
 </head>
 
 <div class="chartforecast">
-<span class="yearpopup"><a alt="Airport Metar Station" title="Airport Metar Station" href="dvmMenuMetarPopup.php" data-lity><?php echo $chartinfo;?><?php echo ' Airport | Metar';?>
+<span class="yearpopup"><a alt="Airport Metar Station" title="Airport Metar Station" href="dvmMetarPopup.php" data-lity><?php echo $chartinfo;?><?php echo ' Airport | Metar';?>
 <?php if (filesize('jsondata/me.txt') < 160) { echo "&nbsp;" , $offline;} else echo "";?></a></span>
 <span class="monthpopup"><a href="dvmWindyRadarPopup.php" title="Windy.com Radar" alt="Windy.com Radar" data-lity><?php echo $chartinfo;?> Radar</a></span>
 <span class="monthpopup"><a href="dvmWindyWindPopup.php" title="Windy.com Wind Map" alt="Windy.com Wind Map" data-lity><?php echo $chartinfo;?> Wind Map</a></span>
@@ -58,7 +58,7 @@ $visibility = round($parsed_visibility['response'][0]['periods'][0]['visibilityM
 } else {
 $visibility = round($parsed_visibility['response'][0]['periods'][0]['visibilityKM'],0,PHP_ROUND_HALF_UP)." km";
 }
-if ($cloud_region[0] !== "Europe"){$sky["cloud_cover"] = $parsed_visibility['response'][0]['periods'][0]['sky'];}
+$sky["cloud_cover"] = $parsed_visibility['response'][0]['periods'][0]['sky'];
         
 //rain-divumwx
 if($rain["rate"] > 0 && $wind["speed_avg"] > 15){$current["image"] ="img/meteocons/umbrella-wind.svg";}

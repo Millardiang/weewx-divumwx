@@ -22,6 +22,12 @@
 #
 ##############################################################################
 #
+# airdensity.py
+#
+# Copyright (c) 2024 Sean Balfour <seanbalfourdresden@googlemail.com>
+#
+##############################################################################
+#
 # WebServices added by Jerry Dietrich and Ian Millard
 #
 ##############################################################################
@@ -66,6 +72,8 @@ import weeutil.weeutil
 import weedb
 from weewx.engine import StdService
 import weewx.units
+import weewx.xtypes
+from weewx.units import ValueTuple
 
 
 try:
@@ -385,7 +393,7 @@ def do_rsync_transfer(webserver_addresses, rpath, lpath, user, port):
     if len(webserver_addresses) > 0:
         for web_address in webserver_addresses:
             threading.Thread(target=do_file_transfer, args=("rsync", rpath, None, socket.gethostbyname(web_address), lpath, user, port)).start()
-             
+            
 class ZambrettiForecast():
     DEFAULT_FORECAST_BINDING = 'forecast_binding'
     DEFAULT_BINDING_DICT = {
@@ -438,7 +446,7 @@ class ZambrettiForecast():
     @staticmethod
     def alpha_to_number(x):
         return ord(x) - 64
-      
+     
 class ForecastData():    
     def __init__(self, config_dict, webserver_addresses):
         self.settings_dict = config_dict.get('DivumWXWebServices', {})
@@ -547,85 +555,6 @@ class SkyObject():
         except Exception as e:
             logdbg("SkyObject:calculate_sky_object " + str(e))
 
-
-class CloudCover():
-    def __init__(self, weewx_dict):
-        if weewx_dict.get('DivumWXCloudCover').get('enable').upper() != 'TRUE':
-            raise Exception("Not Enabled")
-        self.cloud_cover_percent = 0.0
-        try:
-            self.cloud_field = weewx_dict.get('DivumWXCloudCover').get('db_field')
-            thread = threading.Thread(target = self.calculate_cloud_cover, args = (weewx_dict.get('DivumWXCloudCover'),))
-            thread.daemon = True
-            thread.start()
-            logdbg("CloudCover service has started")
-        except Exception as err:
-            raise Exception(err)
-
-    def update_cloud_cover(self, event):
-        try:
-            event.record[self.cloud_field] = self.cloud_cover_percent
-            logdbg("CloudCover: Percent value is " + str(self.cloud_cover_percent))
-        except Exception as e:
-            logerr("CloudCover: Cannot read value: %s" % e)
-    
-    def calculate_cloud_cover(self, settings_dict):
-        try:
-            url1 = settings_dict.get('cc1_url')
-            parts = url1.split("=")
-            lat = parts[2].split("&")[0]
-            lon = parts[3].split("&")[0]
-            url2 = settings_dict.get('cc2_url')
-            file1 = "/tmp/divumwx/sat1.png"
-            file2 = "/tmp/divumwx/sat2.png"
-            time_interval = int(settings_dict.get('cc_interval', 600))
-            logdbg("CloudCover Url 1 " + url1)
-            logdbg("CloudCover Url 2 " + url2)
-            logdbg("CloudCover File 1 " + file1)
-            logdbg("CloudCover File 2 " + file2)
-            while True:
-                logdbg("CloudCover url1 exit code " + str(subprocess.call("wget -r -O " + "'" + file1 + "'" + " '" + url1 + "'", shell = True)))
-                os.chmod(file1, 0o666)
-                logdbg("CloudCover url2 exit code " + str(subprocess.call("wget -r -O " + "'" + file2 + "'" + " '" + url2 + "'", shell = True)))
-                os.chmod(file2, 0o666)
-                if os.stat(file1).st_size > 5000 and os.stat(file2).st_size > 5000:
-                    alt = weewx.almanac.Almanac(time.time(), float(lat), float(lon)).sun.alt
-                    pixarray = []
-                    if alt > 5:
-                        f = open(file1, 'rb')
-                        im = Image.open(f)
-                        xpos1 = 149
-                        xpos2 = 155
-                        ypos1 = 145
-                        ypos2 = 155
-                        min = 80
-                        max = 250
-                    else:
-                        f = open(file2, 'rb')
-                        im = Image.open(f)
-                        xpos1 = 148
-                        xpos2 = 152
-                        ypos1 = 148
-                        ypos2 = 152
-                        min = 100
-                        max = 250
-                    pix = im.convert('L').load()
-                    im.close()
-                    f.close()
-                    for y in range(ypos1,ypos2):
-                        for x in range(xpos1,xpos2):
-                            pixarray.append(pix[x,y])
-                    pixavg = sum(pixarray) / float(len(pixarray))
-                    self.cloud_cover_percent = (pixavg - min)*100 / (max - min)
-                    if self.cloud_cover_percent < 1:
-                        self.cloud_cover_percent = 1
-                    if self.cloud_cover_percent > 99:
-                        self.cloud_cover_percent = 99
-                    im = None
-                    pixarray = None
-                time.sleep(time_interval)
-        except Exception as e:
-            logdbg("CloudCover:calculate_cloud_cover " + str(e))
 
                
 class Webserver():
@@ -776,7 +705,7 @@ class DivumWXRealTime(StdService):
         # configure forecasting
         self.forecast = ZambrettiForecast(config_dict)
         loginf("zambretti forecast: %s" % self.forecast.is_installed())
-    
+   
         try:
             self.webserver_addresses = {}
             if len(self.webserver_addresses) == 0:
@@ -1665,3 +1594,147 @@ class TimeSince(SearchList):
             'time_since': time_since,
             'time_at': time_at,
         }]
+
+#
+#    Copyright (c) 2024 Sean Balfour <seanbalfourdresden@googlemail.com>
+#
+"""This example shows how to extend the XTypes system with a new type, AirDensity in kg/m³ 
+
+REQUIRES WeeWX V4.2 OR LATER!
+
+To use:
+    1. Stop weewx
+    2. Put the unitsExtra.py file in your user subdirectory. 
+    3. Put the airdensity.py file in your user subdirectory.
+
+    4. In weewx.conf, subsection [Engine][[Services]], 
+    add AirDensityService to the list
+    "xtype_services". For example, this means changing this
+
+        [Engine]
+            [[Services]]
+                xtype_services = weewx.wxxtypes.StdWXXTypes, weewx.wxxtypes.StdPressureCooker, weewx.wxxtypes.StdRainRater
+
+    to this:
+        [Engine]
+            [[Services]]
+                xtype_services = weewx.wxxtypes.StdWXXTypes, weewx.wxxtypes.StdPressureCooker, weewx.wxxtypes.StdRainRater, user.airdensity.AirDensityService
+
+
+    5. Add the following to your weewx.conf:
+
+    [[[[Groups]]]]
+                
+        group_density = kg/m³   # No Option simply 'kg/m³'
+
+     [[[[StringFormats]]]]
+                
+        kg/m³ = %.5f           
+
+#############################################
+
+    [AirDensity]
+        algorithm = simple  # in kg/m³
+
+#############################################
+
+you can call the value in your tmpl like this:
+
+// air density
+$air_density["air_density"] = $current.AirDensity.format(add_label=False);
+
+    6. Restart weewx
+
+
+import math
+import weewx
+import weewx.units
+import weewx.xtypes
+from weewx.engine import StdService
+from weewx.units import ValueTuple
+
+"""
+
+# Tell the unit system what group our new observation type, 'AirDensity', belongs to:
+weewx.units.obs_group_dict['AirDensity'] = "group_density"
+weewx.units.USUnits['group_density'] = 'kg/m³'
+weewx.units.MetricUnits['group_density'] = 'kg/m³'
+weewx.units.MetricWXUnits['group_density'] = 'kg/m³'
+weewx.units.default_unit_format_dict['kg/m³'] = '%.5f'
+weewx.units.conversionDict['kg/m³'] = {'kg/m³':  lambda x : x * 1.0}
+
+class AirDensity(weewx.xtypes.XType):
+
+    def __init__(self, algorithm='simple'):
+        # Save the algorithm to be used.
+        self.algorithm = algorithm.lower()
+
+    def get_scalar(self, obs_type, record, db_manager):
+        # We only know how to calculate 'AirDensity'. For everything else, raise an exception UnknownType
+        if obs_type != 'AirDensity':
+            raise weewx.UnknownType(obs_type)
+
+# pressure in hPa 
+        if 'barometer' not in record or record['barometer'] is None:
+            raise weewx.CannotCalculate(obs_type)
+        unit_and_group = weewx.units.getStandardUnitType(record['usUnits'], 'barometer')
+        outBarometer_vt = ValueTuple(record['barometer'], *unit_and_group)
+        outBarometer_hPa_vt = weewx.units.convert(outBarometer_vt, 'hPa')
+        outBarometer_hPa = outBarometer_hPa_vt[0]
+
+# out humidity in %
+        if 'outHumidity' not in record or record['outHumidity'] is None:
+            raise weewx.CannotCalculate(obs_type)
+        unit_and_group = weewx.units.getStandardUnitType(record['usUnits'], 'outHumidity')
+        outHumidity_vt = ValueTuple(record['outHumidity'], *unit_and_group)
+        outHumidity = outHumidity_vt[0]        
+
+# out temp in °C
+        if 'outTemp' not in record or record['outTemp'] is None:
+            raise weewx.CannotCalculate(obs_type)        
+        unit_and_group = weewx.units.getStandardUnitType(record['usUnits'], 'outTemp')
+        outTemp_vt = ValueTuple(record['outTemp'], *unit_and_group)
+        outTemp_C_vt = weewx.units.convert(outTemp_vt, 'degree_C')
+        outTemp_C = outTemp_C_vt[0]
+
+        if self.algorithm == 'simple':
+        # "Simple" algorithm.
+
+            # formula to get vapor pressure in °C
+            vpRH = (outHumidity / 100.0) * 6.112 * math.exp(17.67 * outTemp_C / (outTemp_C + 243.5))
+
+            # formula to get air density in kg/m³           
+            T = outTemp_C
+            P = outBarometer_hPa
+            Es = vpRH # vapor pressure in °C
+            Rv = 461.4964 # gas constant
+            Rd = 287.0531 # gas constant
+            tk = T + 273.15
+            pv = Es * 100.0
+            pd = (P - Es) * 100.0
+            Density = (pv / (Rv * tk)) + (pd / (Rd * tk))
+            Air_Density = ValueTuple(Density, 'kg/m³', 'group_density')
+
+        return Air_Density
+
+class AirDensityService(StdService):
+    """ WeeWX service whose job is to register the XTypes extension AirDensity with the
+    XType system.
+    """
+    def __init__(self, engine, config_dict):
+        super(AirDensityService, self).__init__(engine, config_dict)
+
+        # Get the desired algorithm. Default to "simple".
+        try:
+            algorithm = config_dict['AirDensity']['algorithm']
+        except KeyError:
+            algorithm = 'simple'
+
+        # Instantiate an instance of AirDensity:
+        self.ad = AirDensity(algorithm)
+        # Register it:
+        weewx.xtypes.xtypes.append(self.ad)
+
+    def shutDown(self):
+        # Remove the registered instance:
+        weewx.xtypes.xtypes.remove(self.ad)
