@@ -6,5 +6,5 @@
 #                                                                                                                   #
 # Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
 #####################################################################################################################
-    $admVersion = "0.8.9 beta";
+    $admVersion = "0.9.0.1 beta";
 ?>

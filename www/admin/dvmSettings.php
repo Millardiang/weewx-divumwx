@@ -1577,7 +1577,7 @@ $otherRowOptions = [
 						var originalValue = originalVariables[variableName];
 
 						// Display variables being compared
-						//console.log("Comparing '" + variableName + "' - Element value: " + elementValue + ", Original value: " + originalValue);
+						console.log("Comparing '" + variableName + "' - Element value: " + elementValue + ", Original value: " + originalValue);
 
 						var variableName = elementName.replace("new", "");
 						var originalValue = originalVariables[variableName];

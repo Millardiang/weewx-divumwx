@@ -11,6 +11,71 @@
 #                                                                                                                   #
 #####################################################################################################################
 
+function displaySidebar() {
+    ?>
+		<!-- BEGIN #sidebar -->
+		<div id="sidebar" class="app-sidebar">
+			<!-- BEGIN scrollbar -->
+			<div class="app-sidebar-content" data-scrollbar="true" data-height="100%">
+				<!-- BEGIN menu -->
+				<div class="menu">
+					<div class="menu-header">Navigation</div>
+					<div class="menu-item">
+						<a href="../index.php" class="menu-link">
+							<span class="menu-icon"><i class="bi bi-rocket-takeoff"></i></span>
+							<span class="menu-text">Return to Website</span>
+						</a>
+					</div>
+					<div class="menu-item">
+						<a href="./dvmDashboard.php" class="menu-link">
+							<span class="menu-icon"><i class="bi bi-house-door"></i></span>
+							<span class="menu-text">Home</span>
+						</a>
+					</div>
+					<div class="menu-item">
+						<a href="./dvmDBManager.php" class="menu-link">
+							<span class="menu-icon"><i class="bi bi-database"></i></span>
+							<span class="menu-text">Database Manager</span>
+						</a>
+					</div>
+					<div class="menu-item">
+						<a href="./dvmFilemanager.php" class="menu-link">
+							<span class="menu-icon"><i class="bi bi-folder"></i></span>
+							<span class="menu-text">File Manager</span>
+						</a>
+					</div>
+					<div class="menu-item">
+						<a href="./dvmSettings.php" class="menu-link">
+							<span class="menu-icon"><i class="bi bi-gear"></i></span>
+							<span class="menu-text">Settings</span>
+						</a>
+					</div>
+					<div class="menu-item">
+						<a href="./dvmSysInfo.php" class="menu-link">
+							<span class="menu-icon"><i class="bi bi-info-circle"></i></span>
+							<span class="menu-text">System Info</span>
+						</a>
+					</div>
+
+					<div class="menu-item">
+						<a href="./dvmModFiles.php" class="menu-link">
+							<span class="menu-icon"><i class="bi bi-list"></i></span>
+							<span class="menu-text">Module Info</span>
+						</a>
+					</div>
+					<div class="menu-item">
+						<a href="./dvmDashboard.php?logout=true" class="menu-link">
+							<span class="menu-icon"><i class="bi bi-box-arrow-right"></i></span>
+							<span class="menu-text">Logout</span>
+						</a>
+					</div>
+				</div>
+				<!-- END menu -->
+			</div>
+			<!-- END scrollbar -->
+            <?php
+}
+
 function ldusrSettings($usrSettingsFile) {
     include $usrSettingsFile;
     $allVars = get_defined_vars();
