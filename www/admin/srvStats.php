@@ -1,15 +1,18 @@
 <?php
-#####################################################################################################################
-#                                                                                                                   #
-# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
-#                                                                                                                   #
-# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
-#                                                                                                                   #
-# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
-#                                                                                                                   #
-# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues #
-#                                                                                                                   #
-#####################################################################################################################
+##############################################################################################
+#        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
+#       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    #
+#       (.  ___  :)||  |\   \  //  / |   (  ) : | \   \  //   |  |'  /    \:  | \   \  /     #
+#       |: \   ) |||:  | \\  \/. ./  (:  |  | . ) /\\  \/.    |  |: /'        |  \\  \/      #
+#       (| (___\ |||.  |  \.    //    \\ \__/ // |: \.        |   \//  /\'    |  /\.  \      #
+#       |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \     #
+#       (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|    #
+#                                                                                            #
+#     Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      #
+#      Distributed under terms of the GPLv3.  See the file LICENSE.txt for your rights.      #
+#    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
+#                    https://github.com/Millardiang/weewx-divumwx/issues                     #
+##############################################################################################
 
 $mpstatOutput = shell_exec("mpstat -P ALL");
 $lines = preg_split("/\r\n|\r|\n/", $mpstatOutput);
@@ -59,6 +62,7 @@ foreach ($osSystemLines as $line) {
     }
 }
 
+$system_locale = Locale::getDefault();
 $uptimeOutput = shell_exec("uptime -p");
 $reboot_duration = substr($uptimeOutput, 3);
 
@@ -81,9 +85,6 @@ $total_minutes = ($days * 24 * 60) + ($hours * 60) + $minutes;
 $current_timestamp = time();
 $reboot_timestamp = $current_timestamp - ($total_minutes * 60);
 $reboot_date_time = date("Y-m-d H:i:s", $reboot_timestamp);
-
-$system_locale = setlocale(LC_TIME, 0);
-setlocale(LC_TIME, $system_locale);
 
 $formatter = new IntlDateFormatter($system_locale, IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
 $localized_reboot_date_time = $formatter->format($reboot_timestamp);

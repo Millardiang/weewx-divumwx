@@ -48,7 +48,6 @@ require_once './admVersion.php';
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css" />
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css" />
-	<link href="assets/css/full.min.css" rel="stylesheet" />
 	<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
 	<script src="assets/js/vendor.min.js"></script>
@@ -143,53 +142,7 @@ require_once './admVersion.php';
 			</div>
 			<div class="menu"></div>
 		</div>
-		<!-- BEGIN #sidebar -->
-		<div id="sidebar" class="app-sidebar">
-			<!-- BEGIN scrollbar -->
-			<div class="app-sidebar-content" data-scrollbar="true" data-height="100%">
-				<!-- BEGIN menu -->
-				<div class="menu">
-					<div class="menu-header">Navigation</div>
-					<div class="menu-item">
-						<a href="../index.php" class="menu-link">
-							<span class="menu-icon"><i class="bi bi-rocket-takeoff"></i></span>
-							<span class="menu-text">Return to Website</span>
-						</a>
-					</div>
-					<div class="menu-item">
-						<a href="./dvmDashboard.php" class="menu-link">
-							<span class="menu-icon"><i class="bi bi-house-door"></i></span>
-							<span class="menu-text">Home</span>
-						</a>
-					</div>
-					<div class="menu-item">
-						<a href="./dvmFilemanager.php" class="menu-link">
-							<span class="menu-icon"><i class="bi bi-folder"></i></span>
-							<span class="menu-text">File Manager</span>
-						</a>
-					</div>
-					<div class="menu-item">
-						<a href="./dvmSettings.php" class="menu-link">
-							<span class="menu-icon"><i class="bi bi-gear"></i></span>
-							<span class="menu-text">Settings</span>
-						</a>
-					</div>
-					<div class="menu-item">
-						<a href="./dvmModFiles.php" class="menu-link">
-							<span class="menu-icon"><i class="bi bi-gear"></i></span>
-							<span class="menu-text">Module Info</span>
-						</a>
-					</div>
-					<div class="menu-item">
-						<a href="./dvmDashboard.php?logout=true" class="menu-link">
-							<span class="menu-icon"><i class="bi bi-box-arrow-right"></i></span>
-							<span class="menu-text">Logout</span>
-						</a>
-					</div>
-				</div>
-				<!-- END menu -->
-			</div>
-			<!-- END scrollbar -->
+		<?php displaySidebar(); ?>
 		</div>
 		<!-- END #sidebar -->
 		<!-- BEGIN mobile-sidebar-backdrop -->
