@@ -1662,6 +1662,8 @@ weewx.units.MetricUnits['group_density'] = 'kg/m³'
 weewx.units.MetricWXUnits['group_density'] = 'kg/m³'
 weewx.units.default_unit_format_dict['kg/m³'] = '%.5f'
 weewx.units.conversionDict['kg/m³'] = {'kg/m³':  lambda x : x * 1.0}
+weewx.units.default_unit_label_dict['kg/m³']  = ' kg/m³'
+
 
 class AirDensity(weewx.xtypes.XType):
 

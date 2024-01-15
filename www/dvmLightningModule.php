@@ -21,7 +21,7 @@ date_default_timezone_set($TZ);
 if (empty ($lightning["alltime_strike_count"])) {
 	$lightning['last_time'] =  "None";
 } else {
-	$lightning['last_time'] =  date('jS M H:i',$lightning['last_time']);
+	$lightning['last_time'] =  date('H:i jS M Y',$lightning['last_time']);
 }
 if ($lightningSource == 0) {
 	$lightninglivedata = 'jsondata/NSDRealtime.txt';
@@ -278,7 +278,7 @@ else
 					.style("font-size", "10px")
 					.style("text-anchor", "left")
 					.style("font-weight", "normal")
-					.text("Distance @");
+					.text("At a Distance of ");
 		// Begin color Text output
 		svg.append("text") // Strikes Today
 					.attr("x", 160)
@@ -335,7 +335,7 @@ else
 					.style("font-weight", "normal")
 					.text(Last_detected);
 		svg.append("text") // Last Distance
-					.attr("x", 187)
+					.attr("x", 204)
 					.attr("y", 134)
 					.style("fill", "#ff964f")
 					.style("font-family", "Helvetica")
