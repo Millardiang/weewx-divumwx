@@ -1625,11 +1625,11 @@ To use:
 
     [[[[Groups]]]]
                 
-        group_density = kg/m³   # No Option simply 'kg/m³'
+        group_density = kg_per_meter_cubed   # No Option simply 'kg_per_meter_cubed'
 
      [[[[StringFormats]]]]
                 
-        kg/m³ = %.5f           
+        kg_per_meter_cubed = %.5f           
 
 #############################################
 
@@ -1637,6 +1637,20 @@ To use:
         algorithm = simple  # in kg/m³
 
 #############################################
+
+    [StdWXCalculate]
+    
+        [[Calculations]]
+        
+            AirDensity = software
+
+
+you can call the value in your tmpl like this:
+
+// air density
+$air_density["air_density"] = $current.AirDensity.format(add_label=False);
+
+    6. Restart weewx
 
 you can call the value in your tmpl like this:
 
@@ -1657,11 +1671,12 @@ from weewx.units import ValueTuple
 
 # Tell the unit system what group our new observation type, 'AirDensity', belongs to:
 weewx.units.obs_group_dict['AirDensity'] = "group_density"
-weewx.units.USUnits['group_density'] = 'kg/m³'
-weewx.units.MetricUnits['group_density'] = 'kg/m³'
-weewx.units.MetricWXUnits['group_density'] = 'kg/m³'
-weewx.units.default_unit_format_dict['kg/m³'] = '%.5f'
-weewx.units.conversionDict['kg/m³'] = {'kg/m³':  lambda x : x * 1.0}
+weewx.units.USUnits['group_density'] = 'kg_per_meter_cubed'
+weewx.units.MetricUnits['group_density'] = 'kg_per_meter_cubed'
+weewx.units.MetricWXUnits['group_density'] = 'kg_per_meter_cubed'
+weewx.units.default_unit_format_dict['kg_per_meter_cubed'] = '%.5f'
+weewx.units.conversionDict['kg_per_meter_cubed'] = {'kg_per_meter_cubed':  lambda x : x * 1.0}
+weewx.units.default_unit_label_dict['kg_per_meter_cubed']  = ' kg/m³'
 
 class AirDensity(weewx.xtypes.XType):
 
@@ -1713,7 +1728,7 @@ class AirDensity(weewx.xtypes.XType):
             pv = Es * 100.0
             pd = (P - Es) * 100.0
             Density = (pv / (Rv * tk)) + (pd / (Rd * tk))
-            Air_Density = ValueTuple(Density, 'kg/m³', 'group_density')
+            Air_Density = ValueTuple(Density, 'kg_per_meter_cubed', 'group_density')
 
         return Air_Density
 
