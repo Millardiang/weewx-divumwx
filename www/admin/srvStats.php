@@ -89,8 +89,6 @@ $reboot_date_time = date("Y-m-d H:i:s", $reboot_timestamp);
 $formatter = new IntlDateFormatter($system_locale, IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
 $localized_reboot_date_time = $formatter->format($reboot_timestamp);
 
-
-
 $uptimeParts = explode(" ", trim($uptimeOutput));
 $sysUptime = implode(" ", array_slice($uptimeParts, 1));
 

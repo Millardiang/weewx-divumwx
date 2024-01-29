@@ -1,15 +1,18 @@
 <?php
-#####################################################################################################################                                                                                                        #
-#                                                                                                                   #
-# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
-#                                                                                                                   #
-# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
-#                                                                                                                   #
-# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
-#                                                                                                                   #
-# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues #
-#                                                                                                                   #
-#####################################################################################################################
+##############################################################################################
+#        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
+#       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    #
+#       (.  ___  :)||  |\   \  //  / |   (  ) : | \   \  //   |  |'  /    \:  | \   \  /     #
+#       |: \   ) |||:  | \\  \/. ./  (:  |  | . ) /\\  \/.    |  |: /'        |  \\  \/      #
+#       (| (___\ |||.  |  \.    //    \\ \__/ // |: \.        |   \//  /\'    |  /\.  \      #
+#       |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \     #
+#       (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|    #
+#                                                                                            #
+#     Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      #
+#      Distributed under terms of the GPLv3.  See the file LICENSE.txt for your rights.      #
+#    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
+#                    https://github.com/Millardiang/weewx-divumwx/issues                     #
+##############################################################################################
 
 session_start();
 if (isset($_GET['logout'])) {
@@ -145,18 +148,14 @@ require_once './admVersion.php';
 		<?php displaySidebar(); ?>
 		</div>
 		<!-- END #sidebar -->
-		<!-- BEGIN mobile-sidebar-backdrop -->
 		<button class="app-sidebar-mobile-backdrop" data-toggle-target=".app" data-toggle-class="app-sidebar-mobile-toggled"></button>
-		<!-- END mobile-sidebar-backdrop -->
 		<!-- BEGIN #content -->
 		<div id="content" class="app-content">
 			<!-- BEGIN row -->
 			<div class="row">
-				<!-- BEGIN col-3 -->
+				<!-- Device Info -->
 				<div class="col-xl-3 col-lg-6">
-					<!-- BEGIN card -->
 					<div class="card mb-3">
-						<!-- BEGIN card-body -->
 						<div class="card-body">
 							<div class="row">
 								<div class="col-xl-6">
@@ -203,79 +202,70 @@ require_once './admVersion.php';
 					</div>
 					<!-- END card -->
 				</div>
-				<!-- END col-3 -->
-
-				<!-- BEGIN col-3 -->
+				<!-- Box Two -->
 				<div class="col-xl-3 col-lg-6">
-					<!-- BEGIN card -->
 					<div class="card mb-3">
-						<!-- BEGIN card-body -->
 						<div class="card-body">
-							<!-- BEGIN title -->
-							<div class="d-flex fw-bold small mb-3">
-								<span class="flex-grow-1">BOX Two</span>
-								<a href="#" data-toggle="card-expand" class="text-inverse text-opacity-50 text-decoration-none"><i class="bi bi-fullscreen"></i></a>
+							<div class="card border-theme bg-theme bg-opacity-25 mb-3">
+								<div class="card-header border-theme fw-bold small text-inverse"><span id="memUpdate">Installed Software Versions</span></div>
+								<div class="card-body">
+									<div class="memSmTxt" id="memContainer">PHP Version: </div>
+								</div>
+								<div class="card-arrow">
+									<div class="card-arrow-top-left"></div>
+									<div class="card-arrow-top-right"></div>
+									<div class="card-arrow-bottom-left"></div>
+									<div class="card-arrow-bottom-right"></div>
+								</div>
 							</div>
-							<!-- END title -->
-							<div id="memoryChart" style="height: 200px;"></div>
 						</div>
-						<!-- END card-body -->
-
-						<!-- BEGIN card-arrow -->
 						<div class="card-arrow">
 							<div class="card-arrow-top-left"></div>
 							<div class="card-arrow-top-right"></div>
 							<div class="card-arrow-bottom-left"></div>
 							<div class="card-arrow-bottom-right"></div>
 						</div>
-						<!-- END card-arrow -->
 					</div>
-					<!-- END card -->
 				</div>
-				<!-- END col-3 -->
-
-				<!-- BEGIN col-3 -->
+				<!-- Box Three -->
 				<div class="col-xl-3 col-lg-6">
-					<!-- BEGIN card -->
 					<div class="card mb-3">
-						<!-- BEGIN card-body -->
 						<div class="card-body">
-							<!-- BEGIN title -->
-							<div class="d-flex fw-bold small mb-3">
-								<span class="flex-grow-1">BOX Three</span>
-								<a href="#" data-toggle="card-expand" class="text-inverse text-opacity-50 text-decoration-none"><i class="bi bi-fullscreen"></i></a>
+							<div class="card border-theme bg-theme bg-opacity-25 mb-3">
+								<div class="card-header border-theme fw-bold small text-inverse"><span id="memUpdate">Log FIles - Click to View</span></div>
+								<div class="card-body">
+									<div class="memSmTxt" id="memContainer">Web Server Log </div>
+									<div class="memSmTxt" id="memContainer">PHP Log </div>
+									<div class="memSmTxt" id="memContainer">SYSLog </div>
+								</div>
+								<div class="card-arrow">
+									<div class="card-arrow-top-left"></div>
+									<div class="card-arrow-top-right"></div>
+									<div class="card-arrow-bottom-left"></div>
+									<div class="card-arrow-bottom-right"></div>
+								</div>
 							</div>
-							<!-- END title -->
-							<div id="otherStats" style="height: 200px;"></div>
 						</div>
-						<!-- END card-body -->
-
-						<!-- BEGIN card-arrow -->
 						<div class="card-arrow">
 							<div class="card-arrow-top-left"></div>
 							<div class="card-arrow-top-right"></div>
 							<div class="card-arrow-bottom-left"></div>
 							<div class="card-arrow-bottom-right"></div>
 						</div>
-						<!-- END card-arrow -->
 					</div>
-					<!-- END card -->
 				</div>
-				<!-- END col-3 -->
-				<?php
-					$fileContents = file_get_contents('../dvmVersion.php');
-					$pattern = '/<maxblue>(.*?)<\/maxblue>/';
-					if (preg_match($pattern, $fileContents, $matches)) {
-						$curVersion = $matches[1];
-					} else {
-						$curVersion = "Version not found";
-					}
-				?>
-				<!-- BEGIN col-3 -->
+				<!-- System Info -->
 				<div class="col-xl-3 col-lg-6">
-					<!-- BEGIN card -->
+					<?php
+						$fileContents = file_get_contents('../dvmVersion.php');
+						$pattern = '/<maxblue>(.*?)<\/maxblue>/';
+						if (preg_match($pattern, $fileContents, $matches)) {
+							$curVersion = $matches[1];
+						} else {
+							$curVersion = "Version not found";
+						}
+					?>
 					<div class="card mb-3">
-						<!-- BEGIN card-body -->
 						<div class="card-body">
 							<div class="col">
 								<div class="card border-theme bg-theme bg-opacity-25 mb-3">
@@ -302,13 +292,9 @@ require_once './admVersion.php';
 							<div class="card-arrow-bottom-left"></div>
 							<div class="card-arrow-bottom-right"></div>
 						</div>
-						<!-- END card-arrow -->
 					</div>
-					<!-- END card -->
 				</div>
-				<!-- END col-3 -->
-
-				<!-- BEGIN col-6 -->
+				<!-- Site Visitors -->
 				<div class="col-xl-6">
 					<div class="card mb-3">
 						<div class="card-body">
@@ -380,9 +366,7 @@ require_once './admVersion.php';
 						</div>
 					</div>
 				</div>
-				<!-- END col-6 -->
-
-				<!-- BEGIN col-6 -->
+				<!-- Traffic Analytics -->
 				<div class="col-xl-6">
 					<!-- BEGIN card -->
 					<div class="card mb-3">
@@ -410,6 +394,7 @@ require_once './admVersion.php';
 				</div>
 			</div>DivumWX Admin Dashboard - v<?php echo $admVersion;?>
 		</div>
+		<!-- Toasts -->
 		<div class="toasts-container" role="alert" aria-live="assertive" aria-atomic="true">
 			<div class="toast fade mb-3 hide" data-autohide="false" data-bs-delay="5000" id="success">
 					<div class="toast-header">
@@ -423,6 +408,7 @@ require_once './admVersion.php';
 				</div>
 			</div>
 		</div>
+		<!-- Change Password Modal  -->
 		<div class="modal fade" id="updateDefaultPassword" data-bs-backdrop="static" data-bs-keyboard="false">
 			<div class="modal-dialog">
 				<div class="modal-content">
@@ -478,6 +464,7 @@ require_once './admVersion.php';
 		</div>
 		<a href="#" data-toggle="scroll-to-top" class="btn-scroll-top fade"><i class="fa fa-arrow-up"></i></a>
 	</div>
+	<!-- Force password change on use of default password -->
 	<?php
 		if ($_SESSION['initialLogin'] == 0){
 			echo '<script>
@@ -487,7 +474,7 @@ require_once './admVersion.php';
 			</script>';
 		};
 	?>
-	<script>
+	<script>// New Password change script
 		addEventListener("DOMContentLoaded", (event) => {
 			const passwordAlert = document.getElementById("password-alert");
 			const requirements = document.querySelectorAll(".requirements");
@@ -623,7 +610,7 @@ require_once './admVersion.php';
 			});
 		});
 	</script>
-	<script>
+	<script>// New Password change form
 		$(document).ready(function() {
 			$("#passwdForm").submit(function(event) {
 				event.preventDefault();
