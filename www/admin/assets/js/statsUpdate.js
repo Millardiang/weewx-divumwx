@@ -43,7 +43,7 @@ function displayStats(data) {
     var tableHTML = "<table><thead><tr><th class='small' style='width: 50px;'>CPU</th><th class='small' style='width: 50px;'>In Use</th><th class='small' style='width: 50px;'>Idle</th></tr></thead><tbody>";
 
     for (var cpu in data) {
-        if (data.hasOwnProperty(cpu) && cpu !== "timestamp" && cpu !== "memory") {
+        if (data.hasOwnProperty(cpu) && cpu !== "timestamp" && cpu !== "memory" && cpu !== "sysUptime" && cpu !== "osSystem" && cpu !== "rebootTime") {
             var stats = data[cpu];
             var inUse = parseFloat(stats.usr) + parseFloat(stats.nice) + parseFloat(stats.sys) + parseFloat(stats.iowait) + parseFloat(stats.irq) + parseFloat(stats.soft) + parseFloat(stats.steal) + parseFloat(stats.guest) + parseFloat(stats.gnice);
             var idle = parseFloat(stats.idle);
