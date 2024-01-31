@@ -15,16 +15,21 @@
 ##############################################################################################
 
 $mpstatOutput = shell_exec("mpstat -P ALL");
-$lines = preg_split("/\r\n|\r|\n/", $mpstatOutput);
+$lines = explode("\n", str_replace(["\r\n", "\r"], "\n", $mpstatOutput));
 $data = [];
 $headersToKeep = ['usr', 'nice', 'sys', 'iowait', 'irq', 'soft', 'steal', 'guest', 'gnice', 'idle'];
 
 $timestampLine = $lines[2];
-$timestampParts = preg_split('/\s+/', $timestampLine, -1, PREG_SPLIT_NO_EMPTY);
-$timestamp = $timestampParts[0]; // Assuming the timestamp is in the second item
+$timestampParts = explode(' ', trim(preg_replace('/\s+/', ' ', $timestampLine)));
+$timestamp = $timestampParts[0];
 
-for ($i = 4; $i <= 7; $i++) {
-    $stats = preg_split('/\s+/', $lines[$i], -1, PREG_SPLIT_NO_EMPTY);
+for ($i = 4; $i < count($lines); $i++) {
+    $stats = explode(' ', trim(preg_replace('/\s+/', ' ', $lines[$i])));
+
+    if (!isset($stats[1]) || !is_numeric($stats[1])) {
+        break;
+    }
+
     $cpu = intval($stats[1]);
     $dataStats = array_slice($stats, 2, 10);
     if (count($headersToKeep) === count($dataStats)) {
@@ -37,7 +42,7 @@ for ($i = 4; $i <= 7; $i++) {
 }
 
 $meminfoOutput = shell_exec("cat /proc/meminfo");
-$memLines = preg_split("/\r\n|\r|\n/", $meminfoOutput);
+$memLines = explode("\n", str_replace(["\r\n", "\r"], "\n", $meminfoOutput));
 
 $memoryData = [];
 $memoryKeys = ['MemTotal', 'MemFree', 'Buffers', 'Cached', 'SReclaimable', 'Shmem', 'SwapTotal', 'SwapFree'];
@@ -45,14 +50,14 @@ $memoryKeys = ['MemTotal', 'MemFree', 'Buffers', 'Cached', 'SReclaimable', 'Shme
 foreach ($memLines as $line) {
     foreach ($memoryKeys as $key) {
         if (strpos($line, $key) === 0) {
-            $parts = preg_split('/\s+/', $line, -1, PREG_SPLIT_NO_EMPTY);
+            $parts = explode(' ', trim(preg_replace('/\s+/', ' ', $line)));
             $memoryData[$key] = $parts[1];
         }
     }
 }
 
 $osSystemOutput = shell_exec("cat /etc/*release");
-$osSystemLines = preg_split("/\r\n|\r|\n/", $osSystemOutput);
+$osSystemLines = explode("\n", str_replace(["\r\n", "\r"], "\n", $osSystemOutput));
 
 $osSystem = "";
 foreach ($osSystemLines as $line) {
@@ -89,7 +94,7 @@ $reboot_date_time = date("Y-m-d H:i:s", $reboot_timestamp);
 $formatter = new IntlDateFormatter($system_locale, IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
 $localized_reboot_date_time = $formatter->format($reboot_timestamp);
 
-$uptimeParts = explode(" ", trim($uptimeOutput));
+$uptimeParts = explode(" ", trim(preg_replace('/\s+/', ' ', $uptimeOutput)));
 $sysUptime = implode(" ", array_slice($uptimeParts, 1));
 
 $data['timestamp'] = $timestamp;

@@ -93,5 +93,27 @@ function updateLastReboot(rebootTime) {
     osSystemContainer.textContent = "Last Rebooted: " + rebootTime;
 }
 
+
+function fetchAndUpdateSoftwareVersions() {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status === 200) {
+                var data = JSON.parse(xhr.responseText);
+
+                document.getElementById("webSrvr").textContent = "Web Server: " + data.webserver_name + " (" + data.webserver_version + ")";
+                document.getElementById("phpVer").textContent = "PHP Version: " + data.php_version;
+                document.getElementById("pyVer").textContent = "Python Version: " + data.python_version;
+                document.getElementById("pyEphmVer").textContent = "PyEphem Version: " + data.pyephem_version;
+            } else {
+                console.error("Error fetching software versions: " + xhr.statusText);
+            }
+        }
+    };
+    xhr.open("GET", "./softVer.php", true);
+    xhr.send();
+}
+
+fetchAndUpdateSoftwareVersions();
 fetchStats();
 setInterval(fetchStats, 1500);

@@ -33,9 +33,11 @@
 
             if ($query->execute()) {
                 echo "Password updated successfully.";
+                $_SESSION['initialLogin'] = $result[''];
             } else {
                 $errorInfo = $query->errorInfo();
                 echo "An error occurred while updating the password. Error: " . $errorInfo[2];
+                $_SESSION['initialLogin'] = $result['initialLoginError'];
             }
         } else {
             echo "Passwords do not match.";
