@@ -209,7 +209,10 @@ require_once './admVersion.php';
 							<div class="card border-theme bg-theme bg-opacity-25 mb-3">
 								<div class="card-header border-theme fw-bold small text-inverse"><span id="memUpdate">Installed Software Versions</span></div>
 								<div class="card-body">
-									<div class="memSmTxt" id="memContainer">PHP Version: </div>
+									<div class="memSmTxt"><span id="webSrvr">Web Server: </span></div>
+									<div class="memSmTxt"><span id="phpVer">PHP Version: </span></div>
+									<div class="memSmTxt"><span id="pyVer">Python Version: </span></div>
+									<div class="memSmTxt"><span id="pyEphmVer">PyEphem Version: </span></div>
 								</div>
 								<div class="card-arrow">
 									<div class="card-arrow-top-left"></div>
