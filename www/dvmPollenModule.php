@@ -1,17 +1,18 @@
 <?php
-#####################################################################################################################                                                                                                        #
-#                                                                                                                   #
-# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
-#                                                                                                                   #
-# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
-#                                                                                                                   #
-# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
-#                                                                                                                   #
-# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
-#                                                                                                                   #
-#####################################################################################################################
-?>
-<?php
+##############################################################################################
+#        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
+#       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    #
+#       (.  ___  :)||  |\   \  //  / |   (  ) : | \   \  //   |  |'  /    \:  | \   \  /     #
+#       |: \   ) |||:  | \\  \/. ./  (:  |  | . ) /\\  \/.    |  |: /'        |  \\  \/      #
+#       (| (___\ |||.  |  \.    //    \\ \__/ // |: \.        |   \//  /\'    |  /\.  \      #
+#       |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \     #
+#       (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|    #
+#                                                                                            #
+#     Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      #
+#      Distributed under terms of the GPLv3.  See the file LICENSE.txt for your rights.      #
+#    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
+#                    https://github.com/Millardiang/weewx-divumwx/issues                     #
+##############################################################################################
 include('dvmCombinedData.php');
 date_default_timezone_set($TZ);
 $json_string = file_get_contents('jsondata/allergy.txt');
@@ -22,17 +23,25 @@ $pollen["grass_index"] = $parsed_json["data"]["timelines"][0]["intervals"][1]["v
 $pollen["tree_index"] = $parsed_json["data"]["timelines"][0]["intervals"][1]["values"]["treeIndex"];
 $pollen["weed_index"] = $parsed_json["data"]["timelines"][0]["intervals"][1]["values"]["weedIndex"];
 
-if ($pollen["grass_index"]==2){$pollen["grass_risk"]="Low";$pollen["grass_color"]="#59C239";}
+if ($theme === "dark")
+{$pollen["grass_color"]= "#393d40";$pollen["tree_color"]= "#393d40";$pollen["weed_color"]= "#393d40";}
+else if ($theme === "light")
+{$pollen["grass_color"]= "#e9ebf1";$pollen["tree_color"]= "#e9ebf1";$pollen["weed_color"]= "#e9ebf1";}
+
+if ($pollen["grass_index"]<2){$pollen["grass_risk"]="Very Low";}
+else if ($pollen["grass_index"]==2){$pollen["grass_risk"]="Low";$pollen["grass_color"]="#59C239";}
 else if ($pollen["grass_index"]==3){$pollen["grass_risk"]="Moderate";$pollen["grass_color"]="#F19E38";}
 else if ($pollen["grass_index"]==4){$pollen["grass_risk"]="High";$pollen["grass_color"]="#EA3323";}
 else if ($pollen["grass_index"]==5){$pollen["grass_risk"]="Very High";$pollen["grass_color"]="#781B14";}
 
-if ($pollen["tree_index"]==2){$pollen["tree_risk"]="Low";$pollen["tree_color"]="#59C239";}
+if ($pollen["tree_index"]<2){$pollen["tree_risk"]="Very Low";}
+else if ($pollen["tree_index"]==2){$pollen["tree_risk"]="Low";$pollen["tree_color"]="#59C239";}
 else if ($pollen["tree_index"]==3){$pollen["tree_risk"]="Moderate";$pollen["tree_color"]="#F19E38";}
 else if ($pollen["tree_index"]==4){$pollen["tree_risk"]="High";$pollen["tree_color"]="#EA3323";}
 else if ($pollen["tree_index"]==5){$pollen["tree_risk"]="Very High";$pollen["tree_color"]="#781B14";}
 
-if ($pollen["weed_index"]==2){$pollen["weed_risk"]="Low";$pollen["weed_color"]="#59C239";}
+if ($pollen["weed_index"]<2){$pollen["weed_risk"]="Very Low";}
+else if ($pollen["weed_index"]==2){$pollen["weed_risk"]="Low";$pollen["weed_color"]="#59C239";}
 else if ($pollen["weed_index"]==3){$pollen["weed_risk"]="Moderate";$pollen["weed_color"]="#F19E38";}
 else if ($pollen["weed_index"]==4){$pollen["weed_risk"]="High";$pollen["weed_color"]="#EA3323";}
 else if ($pollen["weed_index"]==5){$pollen["weed_risk"]="Very High";$pollen["weed_color"]="#781B14";}
