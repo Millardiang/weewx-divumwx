@@ -10,8 +10,7 @@ $temp["indoor_now_feels"] = ($temp["indoor_now_feels"]-32)/9*5;}
 </head>
 
 <div class="chartforecast">
-<span class="yearpopup"><a alt="Indoor Chart" title="Indoor Chart" href="dvmMenuIndoorTemperaturePopup.php" data-lity><?php echo $menucharticonpage;?> Indoor Temp | Humidity Chart</a></span>
-<span class="yearpopup"><a alt="Home Indoors" title="Home Indoors" href="dvmHomeIndoorPopup.php" data-lity><?php echo $info;?> Home</a></span>       
+<span class="yearpopup"><a alt="Indoor Chart" title="Indoor Chart" href="dvmMenuIndoorTemperaturePopup.php" data-lity><?php echo $menucharticonpage;?> Indoor Temp | Humidity Chart</a></span>      
 </div>
 <span class='moduletitle'><?php echo $lang['indoorTempModule'];?> (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span> </span>
 
@@ -379,7 +378,7 @@ var svg = d3.select(".house")
 				.style("font-family", "Helvetica")
 				.style("font-weight", "normal")
 				.style("fill", "black")
-				.text(feels+"¡ÆF");
+				.text(feels+"ï¿½ï¿½F");
 				
 			}
 				

@@ -1,0 +1,104 @@
+<?php
+##############################################################################################
+#        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
+#       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    #
+#       (.  ___  :)||  |\   \  //  / |   (  ) : | \   \  //   |  |'  /    \:  | \   \  /     #
+#       |: \   ) |||:  | \\  \/. ./  (:  |  | . ) /\\  \/.    |  |: /'        |  \\  \/      #
+#       (| (___\ |||.  |  \.    //    \\ \__/ // |: \.        |   \//  /\'    |  /\.  \      #
+#       |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \     #
+#       (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|    #
+#                                                                                            #
+#     Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      #
+#      Distributed under terms of the GPLv3.  See the file LICENSE.txt for your rights.      #
+#    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
+#                    https://github.com/Millardiang/weewx-divumwx/issues                     #
+##############################################################################################
+?>
+<!DOCTYPE html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<?php
+
+include ('dvmCombinedData.php');
+
+date_default_timezone_set($TZ);
+if($theme==="light"){$background="white";$text="black";}
+else if($theme==="dark"){$background="rgba(34, 35, 40)";$text="white";}
+?>  
+  <style>
+* {box-sizing: border-box}
+
+/* Set height of body and the document to 100% */
+body {
+ overflow: hidden;
+  
+}
+body, html {
+  height: 100%;
+  margin: 0;
+  font-family: Arial;
+  
+}
+
+/* Style tab links */
+.tablink {
+  background-color: #555;
+  color: white;
+  float: left;
+  border: 2px solid <?php echo $background ;?>;
+  border-radius: 5px;
+  margin-top: 5px;
+  margin-left:5px;
+  outline: none;
+  cursor: pointer;
+  padding: 6px 6px;
+  font-size: 10px;
+  
+}
+
+.tablink:hover {
+  background-color: #777;
+}
+
+/* Style the tab content (and add height:100% for full page content) */
+.tabcontent {
+  color: white;
+  display: none;
+  padding: 0px 0px;
+  height: 570px;
+}
+
+#Tab1 {background-color: <?php echo $background ;?>;}   
+</style>
+</head>
+<body>
+<button class="tablink" onclick="openPage('Tab1', this, 'rgba(194, 102, 58)')" id="defaultOpen">Indoor Temperature | Humidity Chart</button>  
+ 
+  <div id="Tab1" class="tabcontent">
+  
+  <iframe width="100%" height="92%" scrolling="no" src="<?php echo $chartsource;?>/<?php echo $theme;?>-charts.html?chart='indoorplot'&span='yearly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>
+
+" frameborder="0"></iframe>
+</div>
+  
+<script>
+function openPage(pageName,elmnt,color) {
+  var i, tabcontent, tablinks;
+  tabcontent = document.getElementsByClassName("tabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+  tablinks = document.getElementsByClassName("tablink");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].style.backgroundColor = "";
+  }
+  document.getElementById(pageName).style.display = "block";
+  elmnt.style.backgroundColor = color;
+}
+
+// Get the element with id="defaultOpen" and click on it
+document.getElementById("defaultOpen").click();
+</script>
+   
+</body>
+</html> 
