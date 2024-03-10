@@ -50,85 +50,18 @@ require_once './admVersion.php';
 	<link href="assets/css/app.min.css" rel="stylesheet">
 </head>
 <body class="theme-blue">
-	<!-- BEGIN #app -->
 	<div id="app" class="app">
 		<div id="header" class="app-header">
-		<div class="desktop-toggler">
-				<button type="button" class="menu-toggler" data-toggle-class="app-sidebar-collapsed" data-dismiss-class="app-sidebar-toggled" data-toggle-target=".app">
-					<span class="bar"></span>
-					<span class="bar"></span>
-					<span class="bar"></span>
-				</button>
-			</div>
-			<div class="mobile-toggler">
-				<button type="button" class="menu-toggler" data-toggle-class="app-sidebar-mobile-toggled" data-toggle-target=".app">
-					<span class="bar"></span>
-					<span class="bar"></span>
-					<span class="bar"></span>
-				</button>
-			</div>
 			<div class="brand">
 				<a href="#" class="brand-logo">
 					<span class="brand-img">
 						<span class="brand-img-text text-theme">DvM</span>
 					</span>
-					<span class="brand-text">Module File Info</span>
+					<span class="brand-text">Admin Dashboard</span>
 				</a>
 			</div>
 			<div class="menu"></div>
-		</div>
-		<!-- BEGIN #sidebar -->
-		<div id="sidebar" class="app-sidebar">
-			<!-- BEGIN scrollbar -->
-			<div class="app-sidebar-content" data-scrollbar="true" data-height="100%">
-				<!-- BEGIN menu -->
-				<div class="menu">
-					<div class="menu-header">Navigation</div>
-					<div class="menu-item">
-						<a href="../index.php" class="menu-link">
-							<span class="menu-icon"><i class="bi bi-rocket-takeoff"></i></span>
-							<span class="menu-text">Return to Website</span>
-						</a>
-					</div>
-					<div class="menu-item">
-						<a href="dvmDashboard.php" class="menu-link">
-							<span class="menu-icon"><i class="bi bi-house-door"></i></span>
-							<span class="menu-text">Home</span>
-						</a>
-					</div>
-					<div class="menu-item">
-						<a href="dvmFilemanager.php" class="menu-link">
-							<span class="menu-icon"><i class="bi bi-folder"></i></span>
-							<span class="menu-text">File Manager</span>
-						</a>
-					</div>
-					<div class="menu-item">
-						<a href="dvmSettings.php" class="menu-link">
-							<span class="menu-icon"><i class="bi bi-gear"></i></span>
-							<span class="menu-text">Settings</span>
-						</a>
-					</div>
-					<div class="menu-item">
-						<a href="./dvmModFiles.php" class="menu-link">
-							<span class="menu-icon"><i class="bi bi-gear"></i></span>
-							<span class="menu-text">Module Info</span>
-						</a>
-					</div>
-					<div class="menu-item">
-						<a href="./dvmFileManager.php?logout=true" class="menu-link">
-							<span class="menu-icon"><i class="bi bi-box-arrow-right"></i></span>
-							<span class="menu-text">Logout</span>
-						</a>
-					</div>
-				</div>
-				<!-- END menu -->
-			</div>
-			<!-- END scrollbar -->
-		</div>
-		<!-- END #sidebar -->
-		<!-- BEGIN mobile-sidebar-backdrop -->
-		<button class="app-sidebar-mobile-backdrop" data-toggle-target=".app" data-toggle-class="app-sidebar-mobile-toggled"></button>
-		<!-- END mobile-sidebar-backdrop -->
+		<?php displaySidebar('modinfo'); ?>
 		<!-- BEGIN #content -->
 		<div id="content" class="app-content">
 			<div class="row">
@@ -152,7 +85,7 @@ require_once './admVersion.php';
 							<tr>
 								<td><small>Anemometer</small></td>
 								<td><small>dvmAnemometerModule.php</small></td>
-								<td><small>This module displays several data points related to wind. Current wind speed and direction with the speed displayed on a dial, bearing and ordinal direection as well as several other datapoints and a link to the wind almanac and charts. The module also displays, in the upper left corner, the last time the data was refreshed.</small></td>
+								<td><small>This module displays several data points related to wind. Current wind speed and direction with the speed displayed on a dial, bearing and ordinal direction as well as several other datapoints and a link to the wind almanac and charts. The module also displays, in the upper left corner, the last time the data was refreshed.</small></td>
 								<td class="align-middle text-center"><a href="#" data-bs-toggle="modal" data-bs-target="#modalMODImage" data-image-name="aqiMod.png"><img src="./assets/img/anemometerMod.png" width="25" height="25"></a></small></td>
 							</tr>
 							<tr>

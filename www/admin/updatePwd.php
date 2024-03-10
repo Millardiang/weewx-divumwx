@@ -43,4 +43,3 @@
             echo "Passwords do not match.";
         }
     }
-?>

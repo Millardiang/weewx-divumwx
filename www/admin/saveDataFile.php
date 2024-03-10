@@ -14,45 +14,63 @@
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
 
-$changesData = file_get_contents('php://input');
-$changes = json_decode($changesData, true);
+if (PHP_OS === 'Linux') {
+    $timezone = shell_exec('cat /etc/timezone');
+    date_default_timezone_set($timezone);
+} elseif (PHP_OS === 'Darwin') {
+    $timezone = shell_exec('systemsetup -gettimezone');
+    $timezone = str_replace('Time Zone: ', '', $timezone);
+    date_default_timezone_set($timezone);
+}
+
+$changedData = file_get_contents('php://input');
+$changes = json_decode($changedData, true);
 $parentDirectory = dirname(getcwd());
 $originalFile = $parentDirectory . DIRECTORY_SEPARATOR . 'userSettings.php';
 $backupFile = $originalFile . '.' . date('YdmHis');
 $new_permissions = 0766;
+$timezone = '';
 
 if (!file_exists($originalFile)) {
-    $response = "Unable to find original file.";
-    echo json_encode(['status' => $response]);
+    $status = 'fail';
+    $message = "Unable to find original userSettings.php file, aborting.";
+    echo json_encode(['status' => $status, 'message' => $message]);
     exit;
 }
 if (!rename($originalFile, $backupFile)) {
-    $response = "Unable to create backup file.";
-    echo json_encode(['status' => $response]);
+    $status = 'fail';
+    $message = "Unable to create backup userSettings.php file, aborting.";
+    echo json_encode(['status' => $status, 'message' => $message]);
     exit;
 }
 
 $originalContent = file_get_contents($backupFile);
 if ($originalContent === false) {
-    $response = "Unable to get original File contents for comparison.";
-    echo json_encode(['status' => $response]);
+    $status = 'fail';
+    $message = "Unable to get original userSettings.php ile contents for comparison, aborting.";
+    echo json_encode(['status' => $status, 'message' => $message]);
     exit;
 }
 
 foreach ($changes['updatedSettings'] as $variableName => $variableValue) {
-    $search = '/\$' . preg_quote($variableName, '/') . ' = "([^"]*)";/';
-    $replace = '$' . $variableName . ' = "' . $variableValue . '";';
-    $originalContent = str_replace($search, $replace, $originalContent);
+    $searchPattern = '/\$' . preg_quote($variableName, '/') . '\s*=\s*(?:"([^"]*)"|([^;]*));/';
+    preg_match($searchPattern, $originalContent, $matches);
+    $isStringValue = isset($matches[1]);
+    $formattedValue = $isStringValue ? '"' . $variableValue . '"' : $variableValue;
+    $replace = '$' . $variableName . ' = ' . $formattedValue . ';';
+    $originalContent = preg_replace($searchPattern, $replace, $originalContent);
 }
 if (file_put_contents($originalFile, $originalContent)) {
-    $response = "Server changes saved successfully";
+    $status = 'pass';
+    $message = "userSettings.php changes have been saved successfully and archive file has been created.";
 } else {
-    $response = "Server failed to save changes";
+    $status = 'fail';
+    $response = "Unable to write new userSettings.php, update aborted.";
 }
 if (!chmod($originalFile, $new_permissions)){
-    $response = "Unable Unable to change permissions on new settings file";
-    echo json_encode(['status' => $response]);
+    $status = 'fail';
+    $message = "Unable to change permissions on new settings file, aborting.";
+    echo json_encode(['status' => $status, 'message' => $message]);
     exit;
 }
-echo json_encode(['status' => $response]);
-?>
+echo json_encode(['status' => $status, 'message' => $message]);
