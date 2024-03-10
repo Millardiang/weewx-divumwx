@@ -95,4 +95,3 @@
         $db = null;
         exit;
     }
-?>

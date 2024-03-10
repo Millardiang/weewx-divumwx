@@ -1,108 +1,111 @@
 <?php
-##############################################################################################
-#        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
-#       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    #
-#       (.  ___  :)||  |\   \  //  / |   (  ) : | \   \  //   |  |'  /    \:  | \   \  /     #
-#       |: \   ) |||:  | \\  \/. ./  (:  |  | . ) /\\  \/.    |  |: /'        |  \\  \/      #
-#       (| (___\ |||.  |  \.    //    \\ \__/ // |: \.        |   \//  /\'    |  /\.  \      #
-#       |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \     #
-#       (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|    #
-#                                                                                            #
-#     Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      #
-#      Distributed under terms of the GPLv3.  See the file LICENSE.txt for your rights.      #
-#    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
-#                    https://github.com/Millardiang/weewx-divumwx/issues                     #
-##############################################################################################
+###############################################################################################
+#       _______   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___        #
+#      |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |      #
+#      (.  ___  :)||  |\   \  //  / |   (  ) : | \   \  //   |  |'  /    \:  | \   \  /       #
+#      |: \   ) |||:  | \\  \/. ./  (:  |  | . ) /\\  \/.    |  |: /'        |  \\  \/        #
+#      (| (___\ |||.  |  \.    //    \\ \__/ // |: \.        |   \//  /\'    |  /\.  \        #
+#      |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \       #
+#      (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|      #
+#                                                                                             #
+#      Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      #
+#       Distributed under terms of the GPLv3.  See the file LICENSE.txt for your rights.      #
+#     Issues for weewx-divumwx skin template are only addressed via the issues register at    #
+#                     https://github.com/Millardiang/weewx-divumwx/issues                     #
+###############################################################################################
 
-$mpstatOutput = shell_exec("mpstat -P ALL");
-$lines = explode("\n", str_replace(["\r\n", "\r"], "\n", $mpstatOutput));
-$data = [];
-$headersToKeep = ['usr', 'nice', 'sys', 'iowait', 'irq', 'soft', 'steal', 'guest', 'gnice', 'idle'];
-
-$timestampLine = $lines[2];
-$timestampParts = explode(' ', trim(preg_replace('/\s+/', ' ', $timestampLine)));
-$timestamp = $timestampParts[0];
-
-for ($i = 4; $i < count($lines); $i++) {
-    $stats = explode(' ', trim(preg_replace('/\s+/', ' ', $lines[$i])));
-
-    if (!isset($stats[1]) || !is_numeric($stats[1])) {
-        break;
-    }
-
-    $cpu = intval($stats[1]);
-    $dataStats = array_slice($stats, 2, 10);
-    if (count($headersToKeep) === count($dataStats)) {
-        $data[$cpu] = array_combine($headersToKeep, $dataStats);
+function determineTopCommand($osType) {
+    if (strpos($osType, 'LINUX') !== false) {
+        return 'top -bn1 | head -n 17';
+    } elseif (strpos($osType, 'DARWIN') !== false) {
+        return 'top -l 1 | head -n 10';
     } else {
-        echo "Error: Mismatch in header count and data count for CPU $cpu\n";
-        echo "Headers: " . implode(', ', $headersToKeep) . "\n";
-        echo "Data: " . implode(', ', $dataStats) . "\n";
+        echo json_encode(['error' => 'Unsupported OS: ' . $osType]);
+        exit;
     }
 }
 
-$meminfoOutput = shell_exec("cat /proc/meminfo");
-$memLines = explode("\n", str_replace(["\r\n", "\r"], "\n", $meminfoOutput));
+function executeTopCommand($topCommand) {
+    $output = shell_exec($topCommand);
+    if ($output === null || $output === '') {
+        echo json_encode(['error' => 'Command execution failed or returned no output']);
+        exit;
+    }
+    return $output;
+}
 
-$memoryData = [];
-$memoryKeys = ['MemTotal', 'MemFree', 'Buffers', 'Cached', 'SReclaimable', 'Shmem', 'SwapTotal', 'SwapFree'];
+$osType = strtoupper(php_uname('s'));
+$topCommand = determineTopCommand($osType);
+$output = executeTopCommand($topCommand);
+$stats = parseTopOutput($output, $osType);
+echo json_encode($stats);
 
-foreach ($memLines as $line) {
-    foreach ($memoryKeys as $key) {
-        if (strpos($line, $key) === 0) {
-            $parts = explode(' ', trim(preg_replace('/\s+/', ' ', $line)));
-            $memoryData[$key] = $parts[1];
+function parseTopOutput($output, $osType) {
+    $stats = [];
+    if (strpos(strtoupper($osType), 'LINUX') !== false) {
+        if (!preg_match('/Tasks:/', $output)) {
+            return ['error' => 'Unexpected output format for Linux'];
+        }
+        preg_match('/Tasks:\s+(\d+) total,\s+(\d+) running,\s+(\d+) sleeping,\s+(\d+) stopped,\s+(\d+) zombie/', $output, $tasksMatches);
+        $stats['tasks'] = [
+            'total' => $tasksMatches[1],
+            'running' => $tasksMatches[2],
+            'sleeping' => $tasksMatches[3],
+            'stopped' => $tasksMatches[4],
+            'zombie' => $tasksMatches[5]
+        ];
+        preg_match('/%Cpu\(s\):.*(\d+\.\d+) us,.*(\d+\.\d+) sy,.*(\d+\.\d+) ni,.*(\d+\.\d+) id/', $output, $cpuMatches);
+        $stats['cpu'] = [
+            'us' => $cpuMatches[1],
+            'sy' => $cpuMatches[2],
+            'id' => $cpuMatches[4]  // Notice the index is 4 here, corresponding to 'id' in the regex capture groups
+        ];
+        preg_match_all('/^\s*(\d+)\s+(\S+)\s+\d+\s+-?\d+\s+\d+\s+\d+\s+\d+\s+\S+\s+(\d+\.\d+)\s+(\d+\.\d+)\s+\S+\s+(.+)$/m', $output, $processMatches, PREG_SET_ORDER);
+        $processes = [];
+        foreach ($processMatches as $match) {
+            $processes[] = [
+                'PID' => $match[1],
+                'USER' => $match[2],
+                '%CPU' => $match[3],
+                '%MEM' => $match[4],
+                'COMMAND' => trim($match[5])
+            ];
+        }
+        $stats['processes'] = $processes;
+    } elseif (strpos(strtoupper($osType), 'DARWIN') !== false) {
+        if (!preg_match('/Processes:/', $output)) {
+            return ['error' => 'Unexpected output format for Darwin'];
+        }
+        if (preg_match('/Processes: (\d+) total, (\d+) running, (\d+) sleeping, (\d+) threads/', $output, $processMatches)) {
+            $stats['processes'] = [
+                'total' => $processMatches[1],
+                'running' => $processMatches[2],
+                'sleeping' => $processMatches[3],
+                'threads' => $processMatches[4]
+            ];
+        }
+        if (preg_match('/CPU usage: ([\d\.]+)% user, ([\d\.]+)% sys, ([\d\.]+)% idle/', $output, $cpuMatches)) {
+            $stats['cpu_usage'] = [
+                'user' => $cpuMatches[1],
+                'sys' => $cpuMatches[2],
+                'idle' => $cpuMatches[3]
+            ];
+        }
+        $processListPattern = '/\n\s*(\d+)\s+(\S+).+?([\d\.]+[KMG]?)\s+\S+\s+\S+\s+\d+\s+\d+\s+\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\d+\s+\S+\s+\S+\s+\S+\s+\S+\s+(\S+)\s+/';
+        if (preg_match_all($processListPattern, $output, $processMatches, PREG_SET_ORDER)) {
+            foreach ($processMatches as $match) {
+                $stats['processes_list'][] = [
+                    'PID' => $match[1],
+                    'COMMAND' => $match[2],
+                    '%CPU' => $match[3],
+                    'MEM' => $match[4],
+                    'USER' => $match[5]
+               ];
+            }
         }
     }
-}
-
-$osSystemOutput = shell_exec("cat /etc/*release");
-$osSystemLines = explode("\n", str_replace(["\r\n", "\r"], "\n", $osSystemOutput));
-
-$osSystem = "";
-foreach ($osSystemLines as $line) {
-    if (strpos($line, 'PRETTY_NAME=') === 0) {
-        $osSystem = trim(str_replace('PRETTY_NAME=', '', $line), '"');
-        break;
+    if (empty($stats)) {
+        return ['error' => 'Failed to parse output'];
     }
+    return $stats;
 }
-
-$system_locale = Locale::getDefault();
-$uptimeOutput = shell_exec("uptime -p");
-$reboot_duration = substr($uptimeOutput, 3);
-
-$uptime_parts = explode(", ", $reboot_duration);
-$days = 0;
-$hours = 0;
-$minutes = 0;
-
-foreach ($uptime_parts as $part) {
-    if (strpos($part, "day") !== false) {
-        $days = (int)substr($part, 0, -4);
-    } elseif (strpos($part, "hour") !== false) {
-        $hours = (int)substr($part, 0, -5);
-    } elseif (strpos($part, "minute") !== false) {
-        $minutes = (int)substr($part, 0, -7);
-    }
-}
-
-$total_minutes = ($days * 24 * 60) + ($hours * 60) + $minutes;
-$current_timestamp = time();
-$reboot_timestamp = $current_timestamp - ($total_minutes * 60);
-$reboot_date_time = date("Y-m-d H:i:s", $reboot_timestamp);
-
-$formatter = new IntlDateFormatter($system_locale, IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
-$localized_reboot_date_time = $formatter->format($reboot_timestamp);
-
-$uptimeParts = explode(" ", trim(preg_replace('/\s+/', ' ', $uptimeOutput)));
-$sysUptime = implode(" ", array_slice($uptimeParts, 1));
-
-$data['timestamp'] = $timestamp;
-$data['memory'] = $memoryData;
-$data['sysUptime'] = $sysUptime;
-$data['osSystem'] = $osSystem;
-$data['rebootTime'] = $reboot_date_time;
-
-header('Content-Type: application/json');
-echo json_encode($data);
-?>

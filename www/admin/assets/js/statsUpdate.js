@@ -38,22 +38,7 @@ function fetchStats() {
 }
 
 function displayStats(data) {
-    var cpuContainer = document.getElementById("cpuContainer");
     var memContainer = document.getElementById("memContainer");
-    var tableHTML = "<table><thead><tr><th class='small' style='width: 50px;'>CPU</th><th class='small' style='width: 50px;'>In Use</th><th class='small' style='width: 50px;'>Idle</th></tr></thead><tbody>";
-
-    for (var cpu in data) {
-        if (data.hasOwnProperty(cpu) && cpu !== "timestamp" && cpu !== "memory" && cpu !== "sysUptime" && cpu !== "osSystem" && cpu !== "rebootTime") {
-            var stats = data[cpu];
-            var inUse = parseFloat(stats.usr) + parseFloat(stats.nice) + parseFloat(stats.sys) + parseFloat(stats.iowait) + parseFloat(stats.irq) + parseFloat(stats.soft) + parseFloat(stats.steal) + parseFloat(stats.guest) + parseFloat(stats.gnice);
-            var idle = parseFloat(stats.idle);
-
-            tableHTML += "<tr><td>" + cpu + "</td><td>" + inUse.toFixed(2) + "%</td><td>" + idle.toFixed(2) + "%</td></tr>";
-        }
-    }
-    tableHTML += "</tbody></table>";
-    cpuContainer.innerHTML = tableHTML;
-
     var memData = data.memory;
     var totalMem = parseFloat(memData.MemTotal) / 1024;
     var totalMemFree = parseFloat(memData.MemFree) / 1024;
@@ -67,14 +52,12 @@ function displayStats(data) {
     memHTML += "<span class='mem-label'>Buffers:</span> <span class='mem-value'>" + (parseFloat(memData.Buffers) / 1024).toFixed(2) + " MB</span><br />";
     memHTML += "<span class='mem-label'>Cached Mem:</span> <span class='mem-value'>" + cachedMem.toFixed(2) + " MB</span><br />";
     memHTML += "<span class='mem-label'>Swap:</span> <span class='mem-value'>" + swap.toFixed(2) + " MB</span><br />";
-    memContainer.innerHTML = memHTML;
+    memContainer.innerText = memHTML;
 }
 
 function updateTimestamp(data) {
     var timestamp = data.timestamp;
-    var cpuUpdateElement = document.getElementById("cpuUpdate");
     var memUpdateElement = document.getElementById("memUpdate");
-    cpuUpdateElement.textContent = "Updated: " + timestamp;
     memUpdateElement.textContent = "Updated: " + timestamp;
 }
 
@@ -104,6 +87,7 @@ function fetchAndUpdateSoftwareVersions() {
                 document.getElementById("webSrvr").textContent = "Web Server: " + data.webserver_name + " (" + data.webserver_version + ")";
                 document.getElementById("phpVer").textContent = "PHP Version: " + data.php_version;
                 document.getElementById("pyVer").textContent = "Python Version: " + data.python_version;
+                document.getElementById("weewxVer").textContent = "Weewx Version: " + data.weewx_version;
                 document.getElementById("pyEphmVer").textContent = "PyEphem Version: " + data.pyephem_version;
             } else {
                 console.error("Error fetching software versions: " + xhr.statusText);
