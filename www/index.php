@@ -24,12 +24,6 @@
   error_reporting(0);
 ?>
 <!DOCTYPE html>
-<style>
-.headerflag {
-    margin-left: 270px;
-    margin-top: -14.5px;
-}
-</style>
 <html>
 <head>
   <title><?php echo $stationlocation;?> Weather Station</title>
@@ -58,6 +52,13 @@
   <meta name="theme-color" content="#ffffff">
   <link rel="manifest" href="./site.webmanifest">
   <link href="css/main.<?php echo $theme;?>.css?version=<?php echo filemtime('css/main.' . $theme . '.css');?>" rel="stylesheet prefetch">
+
+  <style>
+  .headerflag {
+    margin-left: 270px;
+    margin-top: -14.5px;
+  }
+  </style>
 
   <script>
     if ('serviceWorker' in navigator) {
@@ -227,7 +228,7 @@ include_once ('dvmFooter.php');
       </div>
       <div class="menutoolbar__center">
         <button class="menubutton menubutton--primary">
-          <menutoptitle><?php echo ($stationlocation); ?>  Weather Station  <div class="headerflag"><img src="./img/flags/<?php echo $flag?>.svg"  width="20px"></div></menutoptitle>
+          <menutoptitle style="display: inline-block; padding-right: 4ch;"><?php echo ($stationlocation); ?>  Weather Station</menutoptitle><div class="headerflag"><img src="./img/flags/<?php echo $flag?>.svg"  width="20px"></div>
         </button>
       </div>
       <div class="menutoolbar__right">

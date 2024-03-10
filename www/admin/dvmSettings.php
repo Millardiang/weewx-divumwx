@@ -71,135 +71,66 @@ $otherRowOptions = [
 ?>
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
-	<head>
-		<meta charset="utf-8">
-		<title>DivumWX | Settings</title>
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<meta name="description" content="">
-		<meta name="author" content="">
-		<link href="assets/css/vendor.min.css" rel="stylesheet">
-		<link href="assets/css/app.min.css" rel="stylesheet">
-		<style>
-			.input-group>input.someInput {
-				flex: 0 1 300px;
-				height: 35px;
-			}
-			#notificationContainer {
-				max-height: 30px;
-				overflow: hidden;
-				transition: max-height 0.3s ease;
-				display: flex;
-				justify-content: center;
-				align-items: center;
-			}
-		</style>
-		<script src="assets/js/bootstrap-validate.js"></script>
-		<script>
-			function addOptionsToSelect(selectId, flag) {
-				fetch('assets/countries.json')
-				.then(response => response.json())
-				.then(jsonData => {
-					const selectElement = document.getElementById(selectId);
-					for (const item of jsonData) {
-					const optionElement = document.createElement("option");
-					optionElement.value = item.code;
-					optionElement.text = item.name;
+<head>
+	<meta charset="utf-8">
+	<title>DivumWX | Settings</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="">
+	<meta name="author" content="">
+	<link href="assets/css/vendor.min.css" rel="stylesheet">
+	<link href="assets/css/app.min.css" rel="stylesheet">
+	<style>
+		.input-group>input.someInput {
+			flex: 0 1 300px;
+			height: 35px;
+		}
+		#notificationContainer {
+			max-height: 30px;
+			overflow: hidden;
+			transition: max-height 0.3s ease;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+	</style>
+	<script src="assets/js/bootstrap-validate.js"></script>
+	<script>//Add Selections to Select Fields
+		function addOptionsToSelect(selectId, flag) {
+			fetch('assets/countries.json')
+			.then(response => response.json())
+			.then(jsonData => {
+				const selectElement = document.getElementById(selectId);
+				for (const item of jsonData) {
+				const optionElement = document.createElement("option");
+				optionElement.value = item.code;
+				optionElement.text = item.name;
 
-					if (item.code === flag) {
-						optionElement.selected = true; // Set the option as selected
-					}
+				if (item.code === flag) {
+					optionElement.selected = true; // Set the option as selected
+				}
 
-					selectElement.appendChild(optionElement);
-					}
-				})
-				.catch(error => {
-					console.log('Error reading countries.json:', error);
-				});
-			}
-		</script>
-	</head>
-	<body class="theme-blue">
-		<!-- BEGIN #app -->
-		<div id="app" class="app">
-			<div id="header" class="app-header">
-				<div class="desktop-toggler">
-					<button type="button" class="menu-toggler" data-toggle-class="app-sidebar-collapsed" data-dismiss-class="app-sidebar-toggled" data-toggle-target=".app">
-						<span class="bar"></span>
-						<span class="bar"></span>
-						<span class="bar"></span>
-					</button>
-				</div>
-				<div class="mobile-toggler">
-					<button type="button" class="menu-toggler" data-toggle-class="app-sidebar-mobile-toggled" data-toggle-target=".app">
-						<span class="bar"></span>
-						<span class="bar"></span>
-						<span class="bar"></span>
-					</button>
-				</div>
-				<div class="brand">
-					<a href="#" class="brand-logo">
-						<span class="brand-img">
-							<span class="brand-img-text text-theme">DvM</span>
-						</span>
-						<span class="brand-text">System Settings</span>
-					</a>
-				</div>
-				<div class="menu"></div>
+				selectElement.appendChild(optionElement);
+				}
+			})
+			.catch(error => {
+				console.log('Error reading countries.json:', error);
+			});
+		}
+	</script>
+</head>
+<body class="theme-blue">
+	<div id="app" class="app">
+		<div id="header" class="app-header">
+			<div class="brand">
+				<a href="#" class="brand-logo">
+					<span class="brand-img">
+						<span class="brand-img-text text-theme">DvM</span>
+					</span>
+					<span class="brand-text">Admin Dashboard</span>
+				</a>
 			</div>
-			<!-- END #header -->
-			<!-- BEGIN #sidebar -->
-			<div id="sidebar" class="app-sidebar">
-				<!-- BEGIN scrollbar -->
-				<div class="app-sidebar-content" data-scrollbar="true" data-height="100%">
-					<!-- BEGIN menu -->
-					<div class="menu">
-						<div class="menu-header">Navigation</div>
-						<div class="menu-item">
-							<a href="../index.php" class="menu-link">
-								<span class="menu-icon"><i class="bi bi-rocket-takeoff"></i></span>
-								<span class="menu-text">Return to Website</span>
-							</a>
-						</div>
-						<div class="menu-item">
-							<a href="dvmDashboard.php" class="menu-link">
-								<span class="menu-icon"><i class="bi bi-house-door"></i></span>
-								<span class="menu-text">Home</span>
-							</a>
-						</div>
-						<div class="menu-item">
-							<a href="dvmFilemanager.php" class="menu-link">
-								<span class="menu-icon"><i class="bi bi-folder"></i></span>
-								<span class="menu-text">File Manager</span>
-							</a>
-						</div>
-						<div class="menu-item">
-							<a href="dvmSettings.php" class="menu-link">
-								<span class="menu-icon"><i class="bi bi-gear"></i></span>
-								<span class="menu-text">Settings</span>
-							</a>
-						</div>
-						<div class="menu-item">
-							<a href="./dvmModFiles.php" class="menu-link">
-								<span class="menu-icon"><i class="bi bi-gear"></i></span>
-								<span class="menu-text">Module Info</span>
-							</a>
-						</div>
-						<div class="menu-item">
-							<a href="./dvmSettings.php?logout=true" class="menu-link">
-								<span class="menu-icon"><i class="bi bi-box-arrow-right"></i></span>
-								<span class="menu-text">Logout</span>
-							</a>
-						</div>
-					</div>
-					<!-- END menu -->
-				</div>
-				<!-- END scrollbar -->
-			</div>
-			<!-- END #sidebar -->
-			<!-- BEGIN mobile-sidebar-backdrop -->
-			<button class="app-sidebar-mobile-backdrop" data-toggle-target=".app" data-toggle-class="app-sidebar-mobile-toggled"></button>
-			<!-- END mobile-sidebar-backdrop -->
-			<div id="content" class="app-content">
+			<div class="menu"></div>
+			<?php displaySidebar('settings'); ?>
 				<!-- BEGIN container -->
 				<div class="container">
 					<div class="row justify-content-center">
@@ -216,7 +147,7 @@ $otherRowOptions = [
 													<table class="table table-bordered mb-0">
 														<thead>
 															<tr>
-																<td colspan="12"><figure class="text-center">Use this area to determine which modules are positioned where on your site. As you can see below, the system uses a 12 column grid, divided into 6 rows. The top row consists of 4 boxes, or 'positions' each spanning 3 columns of the grid. The next 5 rows each consist of 3 boxes, or 'positions', each spanning 4 columns of the grid, as you can see in the layout below. The numbering starts from the upper left position, labeled 'Position 1' and proceeds to the right, first row positions 1 thru 4, second row positions 5 thru 7, third row, positions 8 thru 10, fourth row, positions 11 thru 13, fifth row, positions 14 thru 16, sixth row, positions 17 thru 19.<br />Position #1 and Position #4 are hardcoded and can not be changed. All the erst can be. Each position below lists the existing selected module and offers a dropdown selector for you to choose what you want displayed there. Click <a href="#modalEdit" data-bs-toggle="modal">here</a> for a list of the top modules and <a href="#modalEdit" data-bs-toggle="modal">here</a> for a list of the main modules.</figure></td>
+																<td colspan="12"><figure class="text-center">Use this area to determine which modules are positioned where on your site. As you can see below, the system uses a 12 column grid, divided into 6 rows. The top row consists of 4 boxes, or 'positions' each spanning 3 columns of the grid. The next 5 rows each consist of 3 boxes, or 'positions', each spanning 4 columns of the grid, as you can see in the layout below. The numbering starts from the upper left position, labeled 'Position 1' and proceeds to the right, first row positions 1 thru 4, second row positions 5 thru 7, third row, positions 8 thru 10, fourth row, positions 11 thru 13, fifth row, positions 14 thru 16, sixth row, positions 17 thru 19.<br />Position #1 and Position #4 are hardcoded and can not be changed. All the rest can be. Each position below lists the existing selected module and offers a dropdown selector for you to choose what you want displayed there. Click <a href="#modalEdit" data-bs-toggle="modal">here</a> for a list of the top modules and <a href="#modalEdit" data-bs-toggle="modal">here</a> for a list of the main modules.</figure></td>
 															</tr>
 														</thead>
 														<tr>
@@ -261,8 +192,6 @@ $otherRowOptions = [
 											</div>
 										</div>
 									</div>
-									<!-- END #modules -->
-									<!-- BEGIN #misc -->
 									<div id="misc" class="mb-5">
 										<h4><i class="fas fa-sun fa-fw text-theme"></i> Miscellaneous</h4>
 										<p>Misc System Settings</p>
@@ -270,10 +199,7 @@ $otherRowOptions = [
 											<div class="list-group list-group-flush">
 												<div class="list-group-item d-flex align-items-center">
 													<div class="flex-1 text-break">
-														<div>Allow anonymous site visitation mapping by City/Country?</div>
-														<div class="text-inverse text-opacity-50 d-flex align-items-center">
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php $trkVisitstxt = ($trkVisits == 1) ? "Yes" : "No"; echo $trkVisitstxt; ?></span>
-														</div>
+														<div>Enable anonymous site visitation tracking?</div>
 													</div>
 													<div>
 														<div class="form-check">
@@ -295,27 +221,14 @@ $otherRowOptions = [
 														<div>Which web server are you running?</div>
 														<div class="row mb-n3">
 															<div class="col-xl-6">
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary">
-																<?php
-																	switch ($webSrvr) {
-																		case '0':
-																			$webSrvrType = 'Apache';
-																			break;
-																		case '1':
-																			$webSrvrType = 'Nginx';
-																			break;
-																		case '2':
-																			$webSrvrType = 'All others';
-																			break;
-																	}
-																echo $webSrvrType;?></span>
 															</div>
 															<div class="col-xl-6">
-																<select name="webSrvr" id="newwebSrvr" name="newwebSrvr" class="newElement form-select form-select-sm">
+																<?php $intwebSrvr = (int)$webSrvr; ?>
+																<select id="newwebSrvr" name="newwebSrvr" class="newElement form-select form-select-sm">
 																	<option value=""> Select Web Server type </option>
-																	<option value="0" <?php if($webSrvr === '0') echo 'selected'; ?>>Apache</option>
-																	<option value="1" <?php if($webSrvr === '1') echo 'selected'; ?>>Nginx</option>
-																	<option value="2" <?php if($webSrvr === '2') echo 'selected'; ?>>All others</option>
+																	<option value="0" <?php if($intwebSrvr === 0) echo 'selected'; ?>>Apache</option>
+																	<option value="1" <?php if($intwebSrvr === 1) echo 'selected'; ?>>Nginx</option>
+																	<option value="2" <?php if($intwebSrvr === 2) echo 'selected'; ?>>All others</option>
 																</select><br />
 															</div>
 														</div>
@@ -324,9 +237,6 @@ $otherRowOptions = [
 												<div class="list-group-item d-flex align-items-center">
 													<div class="flex-1 text-break">
 														<div>Block Your IP from Site Visits count?</div>
-														<div class="text-inverse text-opacity-50 d-flex align-items-center">
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php $stripLocaltxt = ($stripLocal == 1) ? "Yes" : "No"; echo $stripLocaltxt; ?></span>
-														</div>
 													</div>
 													<div>
 														<div class="form-check">
@@ -346,12 +256,9 @@ $otherRowOptions = [
 												<div class="list-group-item d-flex align-items-center">
 													<div class="col-4">
 														<div>Your Local IP</div>
-														<div>
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php echo $localIP; ?></span>
-														</div>
 													</div>
 													<div class="input-group justify-content-end">
-														<input type="text" id="newlocalIP" name="newlocalIP" class="newElement form-control someInput" placeholder="Enter your Local IP Address" onblur="validateAndAlert(this.value)">
+														<input type="text" id="newlocalIP" name="newlocalIP" class="newElement form-control someInput" value="<?php echo $localIP; ?>" onblur="validateAndAlert(this.value)">
 														&nbsp;<div id="notificationContainer"></div>
 													</div>
 												</div>
@@ -359,42 +266,30 @@ $otherRowOptions = [
 												<div class="list-group-item d-flex align-items-center">
 													<div class="col-4">
 														<div>Date Format</div>
-														<div>
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php echo $dateFormat; ?></span>
-														</div>
 													</div>
 													<div class="input-group justify-content-end">
-														<input type="text" id="newdateFormat" name="newdateFormat" class="newElement form-control someInput" placeholder="Enter Date Format">
+														<input type="text" id="newdateFormat" name="newdateFormat" class="newElement form-control someInput" value="<?php echo $dateFormat; ?>">
 													</div>
 												</div>
 												<div class="list-group-item d-flex align-items-center">
 													<div class="col-4">
 														<div>Time Format</div>
-														<div>
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php echo $timeFormat; ?></span>
-														</div>
 													</div>
 													<div class="input-group justify-content-end">
-														<input type="text" id="newtimeFormat" name="newtimeFormat" class="newElement form-control someInput"  placeholder="Enter Time Format">
+														<input type="text" id="newtimeFormat" name="newtimeFormat" class="newElement form-control someInput"  value="<?php echo $timeFormat; ?>">
 													</div>
 												</div>
 												<div class="list-group-item d-flex align-items-center">
 													<div class="col-4">
 														<div>Short Time Format</div>
-														<div>
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php echo $timeFormatShort; ?></span>
-														</div>
 													</div>
 													<div class="input-group justify-content-end">
-														<input type="text" id="newtimeFormatShort" name="newtimeFormatShort" class="newElement form-control someInput" placeholder="Enter Short Time Format">
+														<input type="text" id="newtimeFormatShort" name="newtimeFormatShort" class="newElement form-control someInput" value="<?php echo $timeFormatShort; ?>">
 													</div>
 												</div>
 												<div class="list-group-item d-flex align-items-center">
 													<div class="flex-1 text-break">
 														<div>System Time Format (12hr/24hr)</div>
-														<div class="text-inverse text-opacity-50 d-flex align-items-center">
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php echo $clockformat; ?></span>
-														</div>
 													</div>
 													<div>
 														<div class="form-check">
@@ -416,53 +311,6 @@ $otherRowOptions = [
 														<div>System Default Language</div>
 														<div class="row mb-n3">
 															<div class="col-xl-6">
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Default Language:&nbsp;&nbsp;<span class="badge bg-secondary">
-																<?php
-																	switch ($defaultlanguage) {
-																		case 'cat':
-																			$dfLang = 'Catalan';
-																			break;
-																		case 'dk':
-																			$dfLang = 'Danish';
-																			break;
-																		case 'dl':
-																			$dfLang = 'German';
-																			break;
-																		case 'en':
-																			$dfLang = 'English';
-																			break;
-																		case 'fr':
-																			$dfLang = 'French';
-																			break;
-																		case 'gr':
-																			$dfLang = 'Greek';
-																			break;
-																		case 'hu':
-																			$dfLang = 'Hungarian';
-																			break;
-																		case 'it':
-																			$dfLang = 'Italian';
-																			break;
-																		case 'nl':
-																			$dfLang = 'Dutch';
-																			break;
-																		case 'no':
-																			$dfLang = 'Norwegian';
-																			break;
-																		case 'pl':
-																			$dfLang = 'Polish';
-																			break;
-																		case 'sp':
-																			$dfLang = 'Spanish';
-																			break;
-																		case 'sw':
-																			$dfLang = 'Swedish';
-																			break;
-																		case 'tr':
-																			$dfLang = 'Turkish';
-																			break;
-																	}
-																echo $dfLang;?></span>
 															</div>
 															<div class="col-xl-6">
 																<select class="newElement form-select form-select-sm" name="newdefaultlanguage" id="newdefaultlanguage">
@@ -489,9 +337,6 @@ $otherRowOptions = [
 												<div class="list-group-item d-flex align-items-center">
 													<div class="flex-1 text-break">
 														<div>Enable Sidebar Extra Links</div>
-														<div class="text-inverse text-opacity-50 d-flex align-items-center">
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php echo $extralinks; ?></span>
-														</div>
 													</div>
 													<div>
 														<div class="form-check">
@@ -511,9 +356,6 @@ $otherRowOptions = [
 												<div class="list-group-item d-flex align-items-center">
 													<div class="flex-1 text-break">
 														<div>Enable Sidebar Language Selection</div>
-														<div class="text-inverse text-opacity-50 d-flex align-items-center">
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php echo $sbLang; ?></span>
-														</div>
 													</div>
 													<div>
 														<div class="form-check">
@@ -535,26 +377,6 @@ $otherRowOptions = [
 														<div>Weather Advisory Zones</div>
 														<div class="row mb-n3">
 															<div class="col-xl-6">
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Advisory Zone:&nbsp;&nbsp;<span class="badge bg-secondary">
-																<?php
-																	switch ($advisoryzone) {
-																		case 'uk':
-																			$azName = 'United Kingdom';
-																			break;
-																		case 'na':
-																			$azName = 'North America';
-																			break;
-																		case 'eu':
-																			$azName = 'Europe';
-																			break;
-																		case 'au':
-																			$azName = 'Australia';
-																			break;
-																		case 'rw':
-																			$azName = 'Rest of the World';
-																			break;
-																	}
-																echo $azName;?></span>
 															</div>
 															<div class="col-xl-6">
 																<select class="newElement form-select form-select-sm" name="advisoryzone" id="advisoryzone">
@@ -572,9 +394,6 @@ $otherRowOptions = [
 												<div class="list-group-item d-flex align-items-center">
 												<div class="flex-1 text-break">
 														<div>Enable Air Quality System</div>
-														<div class="text-inverse text-opacity-50 d-flex align-items-center">
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php echo $aqInUse; ?></span>
-														</div>
 													</div>
 													<div>
 														<div class="form-check">
@@ -596,26 +415,6 @@ $otherRowOptions = [
 														<div>Air Quality Zone</div>
 														<div class="row mb-n3">
 															<div class="col-xl-6">
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary">
-																<?php
-																	switch ($aqZone) {
-																		case 'uk':
-																			$aqDisplayZone = 'United Kingdom DAQI';
-																			break;
-																		case 'us':
-																			$aqDisplayZone = 'United States EPS';
-																			break;
-																		case 'ei':
-																			$aqDisplayZone = 'Europe EAQI';
-																			break;
-																		case 'ci':
-																			$aqDisplayZone = 'Europe CAQI';
-																			break;
-																		case 'au':
-																			$aqDisplayZone = 'Australia';
-																			break;
-																	}
-																echo $aqDisplayZone;?></span>
 															</div>
 															<div class="col-xl-6">
 																<select name="aqZone" id="aqZone" class="newElement form-select form-select-sm">
@@ -633,9 +432,6 @@ $otherRowOptions = [
 												<div class="list-group-item d-flex align-items-center">
 													<div class="flex-1 text-break">
 														<div>Air Quality Source</div>
-														<div class="text-inverse text-opacity-50 d-flex align-items-center">
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php echo $aqSource; ?></span>
-														</div>
 													</div>
 													<div>
 														<div class="form-check">
@@ -663,23 +459,13 @@ $otherRowOptions = [
 														<div>Lightning Detector Source</div>
 														<div class="row mb-n3">
 															<div class="col-xl-6">
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary">
-																<?php
-																	switch ($lightningSource) {
-																		case '0':
-																			$lSource = 'Boltek';
-																			break;
-																		case '1':
-																			$lSource = 'All others';
-																			break;
-																	}
-																echo $lSource;?></span>
 															</div>
 															<div class="col-xl-6">
+																<?php $intlightningSource = (int)$lightningSource; ?>
 																<select name="lightningSource" id="newlightningSource" name="newlightningSource" class="newElement form-select form-select-sm">
 																	<option value=""> Select New Lightning Detector </option>
-																	<option value="0" <?php if($lightningSource === '0') echo 'selected'; ?>>Boltek Detector</option>
-																	<option value="1" <?php if($lightningSource === '1') echo 'selected'; ?>>All others</option>
+																	<option value="0" <?php if($intlightningSource === 0) echo 'selected'; ?>>Boltek Detector</option>
+																	<option value="1" <?php if($intlightningSource === 1) echo 'selected'; ?>>All others</option>
 																</select><br />
 															</div>
 														</div>
@@ -688,57 +474,37 @@ $otherRowOptions = [
 												<div class="list-group-item d-flex align-items-center">
 													<div class="col-4">
 														<div>Web Camera URL</div>
-														<?php
-															$curWebCamURL = (empty($videoWeatherCamURL)) ? "None" : $videoWeatherCamURL;
-														?>
-														<div>
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php echo $curWebCamURL; ?></span>
-														</div>
+															<?php $curWebCamURL = (empty($videoWeatherCamURL)) ? "Empty" : $videoWeatherCamURL; ?>
 													</div>
 													<div class="input-group justify-content-end">
-														<input type="text" name="newvideoWeatherCamURL" id="newvideoWeatherCamURL" class="newElement form-control someInput"  placeholder="Enter Web Cam URL">
+														<input type="text" name="newvideoWeatherCamURL" id="newvideoWeatherCamURL" class="newElement form-control someInput"  value="<?php echo $curWebCamURL; ?>">
 													</div>
 												</div>
 												<div class="list-group-item d-flex align-items-center">
 													<div class="col-4">
 														<div>Email address</div>
-														<?php
-															$curEmail = (empty($email)) ? "None" : $email;
-														?>
-														<div>
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php echo $curEmail; ?></span>
-														</div>
+															<?php $curEmail = (empty($email)) ? "Empty" : $email; ?>
 													</div>
 													<div class="input-group justify-content-end">
-														<input type="text" name="newemail" id="newemail" class="newElement form-control someInput"  placeholder="Enter Email Address">
+														<input type="text" name="newemail" id="newemail" class="newElement form-control someInput"  value="<?php echo $curEmail; ?>">
 													</div>
 												</div>
 												<div class="list-group-item d-flex align-items-center">
 													<div class="col-4">
-														<div>Twitter Account</div>
-														<?php
-															$curTwitter= (empty($twitter)) ? "None" : $twitter;
-														?>
-														<div>
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php echo $curTwitter; ?></span>
-														</div>
+														<div>X (Twitter) Account</div>
+															<?php $curtwitter= (empty($curtwitter)) ? "Empty" : $curtwitter; ?>
 													</div>
 													<div class="input-group justify-content-end">
-														<input type="text" id="newTwitter" name="newTwitter" class="newElement form-control someInput"  placeholder="Enter Twitter Account">
+														<input type="text" id="newtwitter" name="newtwitter" class="newElement form-control someInput"  value="<?php echo $curtwitter; ?>">
 													</div>
 												</div>
 												<div class="list-group-item d-flex align-items-center">
 													<div class="col-4">
 														<div>What year did your Weather Station Start Operating?</div>
-														<?php
-															$curSince = (empty($since)) ? "Empty" : $since;
-														?>
-														<div>
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php echo $curSince; ?></span>
-														</div>
+															<?php $curSince = (empty($since)) ? "Empty" : $since; ?>
 													</div>
 													<div class="input-group justify-content-end">
-														<input type="text" name="newsince" id="newsince" class="newElement form-control someInput"  placeholder="Enter New System Since Date">
+														<input type="text" name="newsince" id="newsince" class="newElement form-control someInput"  value="<?php echo $curSince; ?>">
 													</div>
 												</div>
 												<div class="list-group-item d-flex align-items-center">
@@ -746,18 +512,6 @@ $otherRowOptions = [
 													<div>System Location Country Flag</div>
 														<div class="row mb-n3">
 															<div class="col-xl-6">
-																<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Country Flag:&nbsp;&nbsp;<span class="badge bg-secondary">
-																<?php
-																	$jsonData = file_get_contents('assets/countries.json');
-																	$countries = json_decode($jsonData, true);
-																	foreach ($countries as $country) {
-																		if ($country['code'] === $flag) {
-																			$curFlag = $country['name'];
-																			break;
-																		}
-																	}
-																	echo $curFlag;
-																?></span>&nbsp;&nbsp;<img src="../../img/flags/<?php echo $country['code']?>.svg" width="50" height="20">
 															</div>
 															<div class="col-xl-6">
 																<select name="newflag" id="newFlag" class="newElement form-select form-select-sm">
@@ -774,23 +528,15 @@ $otherRowOptions = [
 												<div class="list-group-item d-flex align-items-center">
 													<div class="col-4">
 														<div>Enter a short abbreviation for the name of your weather station.</div>
-														<?php
-															$curShortName = (empty($manifestShortName)) ? "Empty" : $manifestShortName;
-														?>
-														<div>
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php echo $curShortName; ?></span>
-														</div>
+															<?php $curShortName = (empty($manifestShortName)) ? "Empty" : $manifestShortName; ?>
 													</div>
 													<div class="input-group justify-content-end">
-														<input type="text" name="newmanifestShortName" id="newmanifestShortName" class="newElement form-control someInput"  placeholder="Enter New System Short Name">
+														<input type="text" name="newmanifestShortName" id="newmanifestShortName" class="newElement form-control someInput"  value="<?php echo $curShortName; ?>">
 													</div>
 												</div>
 												<div class="list-group-item d-flex align-items-center">
 													<div class="flex-1 text-break">
 														<div>Enable System Notifications</div>
-														<div class="text-inverse text-opacity-50 d-flex align-items-center">
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php echo $notifications; ?></span>
-														</div>
 													</div>
 													<div>
 														<div class="form-check">
@@ -810,9 +556,6 @@ $otherRowOptions = [
 												<div class="list-group-item d-flex align-items-center">
 													<div class="flex-1 text-break">
 														<div>Enable Wind Notifications</div>
-														<div class="text-inverse text-opacity-50 d-flex align-items-center">
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php echo $notifyWind; ?></span>
-														</div>
 													</div>
 													<div>
 														<div class="form-check">
@@ -832,9 +575,6 @@ $otherRowOptions = [
 												<div class="list-group-item d-flex align-items-center">
 													<div class="flex-1 text-break">
 														<div>Enable Earthquake Notifications</div>
-														<div class="text-inverse text-opacity-50 d-flex align-items-center">
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php echo $notifyEarthquake; ?></span>
-														</div>
 													</div>
 													<div>
 														<div class="form-check">
@@ -854,9 +594,6 @@ $otherRowOptions = [
 												<div class="list-group-item d-flex align-items-center">
 													<div class="flex-1 text-break">
 														<div>Earthquake Notification Magnitude Selection</div>
-														<div class="text-inverse text-opacity-50 d-flex align-items-center">
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php echo $notifyMagnitude; ?></span>
-														</div>
 													</div>
 													<div>
 														<div class="form-control-range">
@@ -875,7 +612,6 @@ $otherRowOptions = [
 											</div>
 										</div>
 									</div>
-									<!-- Begin links -->
 									<div id="links" class="mb-5">
 										<h4><i class="fas fa-anchor fa-fw text-theme"></i> External Links</h4>
 										<p>Additional External Sidebar Links.</p>
@@ -884,9 +620,6 @@ $otherRowOptions = [
 												<div class="list-group-item d-flex align-items-center">
 													<div class="col-4">
 														<div>Link to Weather Underground</div>
-														<div>
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php echo $linkWU; ?></span>
-														</div>
 													</div>
 													<div class="input-group justify-content-end">
 													<div class="form-check">
@@ -906,9 +639,6 @@ $otherRowOptions = [
 												<div class="list-group-item d-flex align-items-center">
 													<div class="col-4">
 														<div>New Weather Underground Dashboard?</div>
-														<div>
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php echo $linkWUNewDash; ?></span>
-														</div>
 													</div>
 													<div class="input-group justify-content-end">
 													<div class="form-check">
@@ -928,34 +658,27 @@ $otherRowOptions = [
 												<div class="list-group-item d-flex align-items-center">
 													<div class="col-4">
 														<div>Weather Underground Station ID</div>
-														<div>
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php echo $WUid; ?></span>
-														</div>
 													</div>
 													<div class="input-group justify-content-end">
-														<input type="text" id="newWUid" name="newWUid" class="newElement form-control someInput"  placeholder="Enter new Weather Underground ID">
+														<input type="text" id="newWUid" name="newWUid" class="newElement form-control someInput"  value="<?php echo $WUid; ?>">
 													</div>
 												</div>
 												<div class="list-group-item d-flex align-items-center">
 													<div class="col-4">
 														<div>CWOP ID</div>
-														<div>
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php echo $linkCWOPID; ?></span>
-														</div>
+															<?php $curlinkCWOPID = (empty($curlinkCWOPID)) ? "Empty" : $curlinkCWOPID; ?>
 													</div>
 													<div class="input-group justify-content-end">
-														<input type="text" id="newCWOPID" name="newCWOPID" class="newElement form-control someInput"  placeholder="Enter new CWOPID">
+														<input type="text" id="newlinkCWOPID" name="newlinkCWOPID" class="newElement form-control someInput"  value="<?php echo $curlinkCWOPID; ?>">
 													</div>
 												</div>
 												<div class="list-group-item d-flex align-items-center">
 													<div class="col-4">
 														<div>FindU ID</div>
-														<div>
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php echo $linkFindUID; ?></span>
-														</div>
+															<?php $curlinkFindUID = (empty($curlinkFindUID)) ? "Empty" : $curlinkFindUID; ?>
 													</div>
 													<div class="input-group justify-content-end">
-														<input type="text" id="newlinkFindUID" name="newlinkFindUID" class="newElement form-control someInput"  placeholder="Enter new FindU ID">
+														<input type="text" id="newlinkFindUID" name="newlinkFindUID" class="newElement form-control someInput"  value="<?php echo $curlinkFindUID; ?>">
 													</div>
 												</div>
 												<div class="list-group-item d-flex align-items-center">
@@ -1027,175 +750,124 @@ $otherRowOptions = [
 												<div class="list-group-item d-flex align-items-center">
 													<div class="col-4">
 														<div>Weather Cloud ID</div>
-														<div>
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php echo $linkWeatherCloudID; ?></span>
-														</div>
+															<?php $curlinkWeatherCloudID = (empty($curlinkWeatherCloudID)) ? "Empty" : $curlinkWeatherCloudID; ?>
 													</div>
 													<div class="input-group justify-content-end">
-														<input type="text" id="newlinkWeatherCloudID" name="newlinkWeatherCloudID" class="newElement form-control someInput"  placeholder="Enter new Weathercloud ID">
+														<input type="text" id="newlinkWeatherCloudID" name="newlinkWeatherCloudID" class="newElement form-control someInput"  value="<?php echo $curlinkWeatherCloudID; ?>">
 													</div>
 												</div>
 												<div class="list-group-item d-flex align-items-center">
 													<div class="col-4">
 														<div>Windy ID</div>
-														<div>
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php echo $linkWindyID; ?></span>
-														</div>
+															<?php $curlinkWindyID = (empty($curlinkWindyID)) ? "Empty" : $curlinkWindyID; ?>
 													</div>
 													<div class="input-group justify-content-end">
-														<input type="text" id="newlinkWindyID" name="newlinkWindyID" class="newElement form-control someInput"  placeholder="Enter new Windy ID">
+														<input type="text" id="newlinkWindyID" name="newlinkWindyID" class="newElement form-control someInput"  value="<?php echo $curlinkWindyID; ?>">
 													</div>
 												</div>
 												<div class="list-group-item d-flex align-items-center">
 													<div class="col-4">
 														<div>AWEKAS ID</div>
-														<div>
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php echo $linkAWEKASID; ?></span>
-														</div>
+															<?php $curlinkAWEKASID = (empty($curlinkAWEKASID)) ? "Empty" : $curlinkAWEKASID; ?>
 													</div>
 													<div class="input-group justify-content-end">
-														<input type="text" id="newlinkAWEKASID" name="newlinkAWEKASID" class="newElement form-control someInput"  placeholder="Enter new AWEKAS ID">
+														<input type="text" id="newlinkAWEKASID" name="newlinkAWEKASID" class="newElement form-control someInput"  value="<?php echo $curlinkAWEKASID; ?>">
 													</div>
 												</div>
 												<div class="list-group-item d-flex align-items-center">
 													<div class="col-4">
 														<div>Ambient Weather ID</div>
-														<div>
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php echo $linkAmbientWeatherID; ?></span>
-														</div>
+															<?php $curlinkAmbientWeatherID = (empty($curlinkAmbientWeatherID)) ? "Empty" : $curlinkAmbientWeatherID; ?>
 													</div>
 													<div class="input-group justify-content-end">
-														<input type="text" id="newlinkAmbientWeatherID" name="newlinkAmbientWeatherID" class="newElement form-control someInput"  placeholder="Enter new Ambient Weather ID">
+														<input type="text" id="newlinkAmbientWeatherID" name="newlinkAmbientWeatherID" class="newElement form-control someInput"  value="<?php echo $curlinkAmbientWeatherID; ?>">
 													</div>
 												</div>
 												<div class="list-group-item d-flex align-items-center">
 													<div class="col-4">
 														<div>PWS Weather ID</div>
-														<div>
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php echo $linkPWSWeatherID; ?></span>
-														</div>
+															<?php $curlinkPWSWeatherID = (empty($curlinkPWSWeatherID)) ? "Empty" : $curlinkPWSWeatherID; ?>
 													</div>
 													<div class="input-group justify-content-end">
-														<input type="text" id="newlinkPWSWeatherID" name="newlinkPWSWeatherID" class="newElement form-control someInput"  placeholder="Enter new PWS Weather ID">
+														<input type="text" id="newlinkPWSWeatherID" name="newlinkPWSWeatherID" class="newElement form-control someInput"  value="<?php echo $curlinkPWSWeatherID; ?>">
 													</div>
 												</div>
 												<div class="list-group-item d-flex align-items-center">
 													<div class="col-4">
 														<div>MET Office ID</div>
-														<div>
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php echo $linkMetOfficeID; ?></span>
-														</div>
+															<?php $curlinkMetOfficeID = (empty($curlinkMetOfficeID)) ? "Empty" : $curlinkMetOfficeID; ?>
 													</div>
 													<div class="input-group justify-content-end">
-														<input type="text" id="newlinkMetID" name="newlinkMetID" class="newElement form-control someInput"  placeholder="Enter new MET Office ID">
+														<input type="text" id="newlinkMetOfficeID" name="newlinkMetOfficeID" class="newElement form-control someInput"  value="<?php echo $curlinkMetOfficeID; ?>">
 													</div>
 												</div>
 												<div class="list-group-item d-flex align-top">
 													<div class="col-4 align-top">
 														<div>Custom Link #1 Title</div>
-														<?php
-															$curCustom1Title = (empty($linkCustom1Title)) ? "None" : $linkCustom1Title;
-														?>
-														<div>
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:<br /><span class="badge bg-secondary"><?php echo $curCustom1Title; ?></span>
-														</div>
+															<?php $curlinkCustom1Title = (empty($curlinkCustom1Title)) ? "Empty" : $curlinkCustom1Title; ?>
 													</div>
 													<div class="input-group justify-content-end">
-														<input type="text" id="newlinkCustom1Title" name="newlinkCustom1Title" class="newElement form-control someInput"  placeholder="Enter new Custom Link #1 Title">
+														<input type="text" id="newlinkCustom1Title" name="newlinkCustom1Title" class="newElement form-control someInput"  value="<?php echo $curlinkCustom1Title; ?>">
 													</div>
 												</div>
 												<div class="list-group-item d-flex">
 													<div class="col-4">
-														<div>Custom Link #1 URL</div>
-														<?php
-															$curCustom1URL = (empty($linkCustom1URL)) ? "None" : $linkCustom1URL;
-														?>
-														<div>
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:<br /><span class="badge bg-secondary"><?php echo $curCustom1URL; ?></span>
-														</div>
+														<div>Custom Link #1 URL</div><?php $curlinkCustom1URL = (empty($curlinkCustom1URL)) ? "Empty" : $curlinkCustom1URL; ?>
 													</div>
 													<div class="input-group justify-content-end">
-														<input type="text" id="newlinkCustom1URL" name="newlinkCustom1URL" class="newElement form-control someInput"  placeholder="Enter new Custom Link #1 URL">
+														<input type="text" id="newlinkCustom1URL" name="newlinkCustom1URL" class="newElement form-control someInput"  value="<?php echo $linkCustom1URL; ?>">
 													</div>
 												</div>
 												<div class="list-group-item d-flex">
 													<div class="col-4">
 														<div>Custom Link #2 Title</div>
-														<?php
-															$curCustom2Title = (empty($linkCustom2Title)) ? "None" : $linkCustom2Title;
-														?>
-														<div>
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:<br /><span class="badge bg-secondary"><?php echo $curCustom2Title; ?></span>
-														</div>
+															<?php $curlinkCustom2Title = (empty($curlinkCustom2Title)) ? "Empty" : $curlinkCustom2Title; ?>
 													</div>
 													<div class="input-group justify-content-end">
-														<input type="text" id="newlinkCustom2Title" name="newlinkCustom2Title" class="newElement form-control someInput"  placeholder="Enter new Custom Link #2 Title">
+														<input type="text" id="newlinkCustom2Title" name="newlinkCustom2Title" class="newElement form-control someInput"  value="<?php echo $curlinkCustom2Title; ?>">
 													</div>
 												</div>
 												<div class="list-group-item d-flex">
 													<div class="col-4">
 														<div>Custom Link #2 URL</div>
-														<?php
-															$curCustom2URL = (empty($linkCustom2URL)) ? "None" : $linkCustom2URL;
-														?>
-														<div>
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:<br /><span class="badge bg-secondary"><?php echo $curCustom2URL; ?></span>
-														</div>
+															<?php $curlinkCustom2URL = (empty($curlinkCustom2URL)) ? "Empty" : $curlinkCustom2URL; ?>
 													</div>
 													<div class="input-group justify-content-end">
-														<input type="text" id="newlinkCustom2URL" name="newlinkCustom2URL" class="newElement form-control someInput"  placeholder="Enter new Custom Link #2 URL">
+														<input type="text" id="newlinkCustom2URL" name="newlinkCustom2URL" class="newElement form-control someInput"  value="<?php echo $curlinkCustom2URL; ?>">
 													</div>
 												</div>
 												<div class="list-group-item d-flex">
 													<div class="col-4">
 														<div>USA Weather Finder</div>
-														<?php
-															$curUSAWeatherFinder = (empty($USAWeatherFinder)) ? "None" : $USAWeatherFinder;
-														?>
-														<div>
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php echo $curUSAWeatherFinder; ?></span>
-														</div>
+															<?php $curUSAWeatherFinder = (empty($curUSAWeatherFinder)) ? "Empty" : $curUSAWeatherFinder; ?>
 													</div>
 													<div class="input-group justify-content-end">
-														<input type="text" id="newUSAWeatherFinder" name="newUSAWeatherFinder" class="newElement form-control someInput"  placeholder="Enter USA Weather Finder Username">
+														<input type="text" id="newUSAWeatherFinder" name="newUSAWeatherFinder" class="newElement form-control someInput"  value="<?php echo $curUSAWeatherFinder; ?>">
 													</div>
 												</div>
 												<div class="list-group-item d-flex">
 													<div class="col-4">
 														<div>Extra Link Title?</div>
-														<?php
-															$curextraLinkTitle = (empty($extraLinkTitle)) ? "None" : $extraLinkTitle;
-														?>
-														<div>
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php echo $curextraLinkTitle; ?></span>
-														</div>
+															<?php $curextraLinkTitle = (empty($curextraLinkTitle)) ? "Empty" : $curextraLinkTitle; ?>
 													</div>
 													<div class="input-group justify-content-end">
-														<input type="text" id="newextraLinkTitle" name="newextraLinkTitle" class="newElement form-control someInput"  placeholder="Enter new Extra Link Title">
+														<input type="text" id="newextraLinkTitle" name="newextraLinkTitle" class="newElement form-control someInput"  value="<?php echo $curextraLinkTitle; ?>">
 													</div>
 												</div>
 												<div class="list-group-item d-flex">
 													<div class="col-4">
 														<div>Extra Link URL</div>
-														<?php
-															$curextraLinkURL = (empty($extraLinkURL)) ? "None" : $extraLinkURL;
-														?>
-														<div>
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;<span class="badge bg-secondary"><?php echo $curextraLinkURL; ?></span>
-														</div>
+															<?php $curextraLinkURL = (empty($curextraLinkURL)) ? "Empty" : $curextraLinkURL; ?>
 													</div>
 													<div class="input-group justify-content-end">
-														<input type="text" id="newextraLinkURL" name="newextraLinkURL" class="newElement form-control someInput"  placeholder="Enter new Extra Link URL">
+														<input type="text" id="newextraLinkURL" name="newextraLinkURL" class="newElement form-control someInput"  value="<?php echo $curextraLinkURL; ?>">
 													</div>
 												</div>
 												<div class="list-group-item d-flex">
 													<div class="col-4">
 														<div>Extra Link Color</div>
-														<?php
-															$curextraLinkColor = (empty($extraLinkColor)) ? "None" : $extraLinkColor;
-														?>
+															<?php $curextraLinkColor = (empty($curextraLinkColor)) ? "Empty" : $curextraLinkColor; ?>
 														<div>
-															<i class="fa fa-circle fs-8px fa-fw text-success me-1"></i> Current Setting:&nbsp;&nbsp;
 															<?php
 																switch($curextraLinkColor){
 																	case 'white':
@@ -1221,20 +893,21 @@ $otherRowOptions = [
 																		echo '<span class="badge bg-orange\">Orange</span>';
 																		break;
 																	default:
-																	echo '<span class="badge bg-dark\">None</span>';
+																	echo '<span class="badge bg-dark\">Empty</span>';
 																}?>
 														</div>
 													</div>
 													<div class="input-group justify-content-end">
 													<select class="newElement form-select form-select-sm" mb-3 id="newextraLinkColor" name="newextraLinkColor">
 														<option selected>Select New Extra Link Color</option>
-														<option value="white" class="text-white bg-black">White</option>
-														<option value="red" class="text-red">Red</option>
-														<option value="grey" class="text-gray-100">Grey</option>
-														<option value="green" class="text-green">Green</option>
-														<option value="yellow" class="text-yellow">Yellow</option>
-														<option value="blue" class="text-blue">Blue</option>
-														<option value="Orange" class="text-orange">Orange</option>
+														<option value="white" <?php if($curextraLinkColor === 'white') echo 'selected'; ?> class="text-white bg-black">White</option>
+														<option value="red" <?php if($curextraLinkColor === 'red') echo 'selected'; ?> class="text-red">Red</option>
+														<option value="grey" <?php if($curextraLinkColor === 'grey') echo 'selected'; ?> class="text-gray-100">Grey</option>
+														<option value="green" <?php if($curextraLinkColor === 'green') echo 'selected'; ?> class="text-green">Green</option>
+														<option value="yellow" <?php if($curextraLinkColor === 'yellow') echo 'selected'; ?> class="text-yellow">Yellow</option>
+														<option value="blue" <?php if($curextraLinkColor === 'blue') echo 'selected'; ?> class="text-blue">Blue</option>
+														<option value="orange" <?php if($curextraLinkColor === 'orange') echo 'selected'; ?> class="text-orange">Orange</option>
+														<option value="Empty" <?php if($curextraLinkColor === 'Empty') echo 'selected'; ?> class="text-black">Empty</option>
 													</select><br />
 													</div>
 												</div>
@@ -1298,8 +971,10 @@ $otherRowOptions = [
 										</div>
 									</div>
 								</div>
+								<!-- Time Formal Modal -->
 								<div class="col-xl-2">
 									<nav id="sidebar-bootstrap" class="navbar navbar-sticky d-none d-xl-block">
+									Quick Menu
 										<nav class="nav">
 											<a href="#timeFormatModal" data-bs-toggle="modal" class="nav-link">PHP Time Strings</a>
 											<a class="nav-link" href="#modules" data-toggle="scroll-to">Modules</a>
@@ -1316,34 +991,44 @@ $otherRowOptions = [
 				</div>
 			</div>
 			<div class="toasts-container" role="alert" aria-live="assertive" aria-atomic="true">
+				<div class="toast fade mb-3 hide" data-autohide="false" data-bs-delay="5000" id="saving">
+					<div class="toast-header">
+						<i class="fas fa-exclamation-circle text-muted me-2"></i>
+						<strong class="me-auto">Settings Notification</strong>
+						<button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+					</div>
+					<div class="toast-body">
+						Saving new userSettings.php file.....
+					</div>
+				</div>
 				<div class="toast fade mb-3 hide" data-autohide="false" data-bs-delay="5000" id="not-needed">
-						<div class="toast-header">
-							<i class="fas fa-exclamation-circle text-muted me-2"></i>
-							<strong class="me-auto">Settings Notification</strong>
-							<button type="button" class="btn-close" data-bs-dismiss="toast"></button>
-						</div>
-						<div class="toast-body">
-							There have been no changes to the elements on this page, no save of the userSettings file will be done.
-						</div>
+					<div class="toast-header">
+						<i class="fas fa-exclamation-circle text-muted me-2"></i>
+						<strong class="me-auto">Settings Notification</strong>
+						<button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+					</div>
+					<div class="toast-body">
+						There have been no changes to the elements on this page, no save of the userSettings file will be done.
+					</div>
 				</div>
 				<div class="toast fade mb-3 hide" data-autohide="false" data-bs-delay="5000" id="fail">
 					<div class="toast-header">
 						<i class="fas fa-info-circle text-muted me-2"></i>
-						<strong class="me-auto">Another Toast</strong>
+						<strong class="me-auto">Failure</strong>
 						<button type="button" class="btn-close" data-bs-dismiss="toast"></button>
 					</div>
 					<div class="toast-body">
-						There has been an error creating the userSettings.php file. Please check the log file.
+						<!-- Success message will be set here -->
 					</div>
 				</div>
 				<div class="toast fade mb-3 hide" data-autohide="false" data-bs-delay="5000" id="success">
 						<div class="toast-header">
 							<i class="fas fa-info-circle text-muted me-2"></i>
-							<strong class="me-auto">Another Toast</strong>
+							<strong class="me-auto">Success</strong>
 							<button type="button" class="btn-close" data-bs-dismiss="toast"></button>
 						</div>
 						<div class="toast-body">
-							New userSettings.php successfully created and an archive file of the previous version created.
+							<!-- Success message will be set here -->
 						</div>
 					</div>
 				</div>
@@ -1506,115 +1191,14 @@ $otherRowOptions = [
 		</div>
 		<script src="assets/js/vendor.min.js"></script>
 		<script src="assets/js/app.min.js"></script>
-		<script>
+		<script>//Changes Magnitude label
 			const range = document.getElementById('newNotifyMagnitude');
 			const rangeLabel = document.getElementById('rangeLabel');
 			range.addEventListener('input', () => {
 				rangeLabel.innerText = `New Earthquake Magnitude Notification Setting: ${range.value}`;
 			});
 		</script>
-		<script>
-			document.addEventListener("DOMContentLoaded", function() {
-				var saveChangesLink = document.querySelector('a#saveChangesLink');
-				saveChangesLink.addEventListener("click", function(event) {
-					event.preventDefault();
-					var elements = document.getElementsByClassName("newElement");
-					var originalVariables = <?php echo json_encode($usrSettings); ?>;
-					var updatedSettings = {};
-					var changesCount = 0;
-					for (var i = 0; i < elements.length; i++) {
-						var element = elements[i];
-						var elementName = element.name;
-						var elementValue = null;
-
-						if (element.type === "radio") {
-							if (element.checked) {
-								elementValue = element.value;
-								if (elementValue === originalVariables[elementName.replace("new", "")]) {
-									elementValue = null;
-								}
-							} else {
-								elementValue = originalVariables[elementName.replace("new", "")];
-							}
-						} else if (element.type === "range") {
-							elementValue = element.value;
-							var variableName = elementName.replace("new", "");
-							var originalValue = originalVariables[variableName];
-							if (elementValue === originalValue.toString()) {
-								elementValue = null;
-							}
-						}else if (element.type === "select") {
-							var selectedIndex = element.selectedIndex;
-							if (selectedIndex !== -1) {
-								elementValue = element.options[selectedIndex].value;
-								if (elementValue === originalVariables[elementName.replace("new", "")]) {
-								elementValue = null;
-								}
-							} else {
-								elementValue = originalVariables[elementName.replace("new", "")];
-							}
-						} else if (element.type === "text") {
-							// Assuming the input field is a text input, change "text" to the appropriate type if needed
-							elementValue = element.value;
-							var variableName = elementName.replace("new", "");
-							var originalValue = originalVariables[variableName];
-							if (elementValue !== null && elementValue.trim() !== "" && elementValue !== originalValue) {
-								updatedSettings[variableName] = elementValue;
-								changesCount++;
-
-								console.log("Variable '" + variableName + "' changed: New value = " + elementValue);
-							}
-						} else if (element.type === "checkbox") {
-							elementValue = element.checked ? "checked" : "unchecked";
-							var variableName = elementName.replace("new", "");
-							var originalValue = originalVariables[variableName];
-
-							if (elementValue !== originalValue) {
-								updatedSettings[variableName] = elementValue;
-								changesCount++;
-								console.log("Variable '" + variableName + "' changed: New value = " + elementValue);
-							}
-						}
-
-						var variableName = elementName.replace("new", "");
-						var originalValue = originalVariables[variableName];
-
-						// Display variables being compared
-						console.log("Comparing '" + variableName + "' - Element value: " + elementValue + ", Original value: " + originalValue);
-
-						var variableName = elementName.replace("new", "");
-						var originalValue = originalVariables[variableName];
-						if (elementValue !== null && elementValue.trim() !== "" && elementValue !== originalValue) {
-							updatedSettings[variableName] = elementValue;
-							changesCount++;
-							console.log("Variable '" + variableName + "' changed: New value = " + elementValue);
-						}
-					}
-					console.log("Changes count = " + changesCount);
-
-					if (changesCount === 0) {
-						$('#toast-error').toast('show');
-					} else {
-						var mergedSettings = Object.assign({}, originalVariables, updatedSettings);
-						var xhr = new XMLHttpRequest();
-						xhr.open("POST", "saveDataFile.php");
-						xhr.setRequestHeader("Content-Type", "application/json");
-						xhr.onload = function() {
-							if (xhr.status === 200) {
-								var response = JSON.parse(xhr.responseText);
-								console.log(response.status);
-								$('#toast-success').toast('show');
-							} else {
-								console.log("Failed to save changes");
-								$('#toast-fail').toast('show');
-							}
-						};
-						xhr.send(JSON.stringify({ updatedSettings: mergedSettings }));
-					}
-				});
-			});
-		</script>
-		<script>
+		<script> //Validates IP Address input
 			function ValidateIPaddress(ip) {
 			    const pattern = /^(((1?[1-9]?|10|2[0-4])\d|25[0-5])($|\.(?!$))){4}$/;
 				return pattern.test(ip)
@@ -1626,7 +1210,7 @@ $otherRowOptions = [
                 	return;
             	}
 				if (ValidateIPaddress(ip)) {
-					console.log("IP Address valid")
+
 				} else {
 					var alertDiv = document.createElement('div');
 					alertDiv.classList.add('alert', 'alert-dark', 'mt-3');
@@ -1638,6 +1222,67 @@ $otherRowOptions = [
             	var container = document.getElementById('notificationContainer');
             	container.innerHTML = '';
         	});
+		</script>
+		<script> //Process form changes and saves them
+			document.addEventListener("DOMContentLoaded", function() {
+				var saveChangesLink = document.querySelector('a#saveChangesLink');
+				saveChangesLink.addEventListener("click", function(event) {
+					event.preventDefault();
+					var elements = document.getElementsByClassName("newElement");
+					var originalVariables = <?php echo json_encode($usrSettings); ?>;
+					var newSettings = {};
+
+					for (var i = 0; i < elements.length; i++) {
+						var element = elements[i];
+						var elementName = element.name.replace("new", "");
+						var elementValue = element.value;
+
+						if (elementName.includes("URL") && elementValue !== "Empty") {
+							elementValue = elementValue.replace(/[^a-zA-Z0-9-_.:/?&=]+/g, '');
+						}
+						if (element.type === "radio" && !element.checked) {
+							continue;
+						}
+						if (element.type === "select") {
+							elementValue = element.options[element.selectedIndex].value;
+						}
+						newSettings[elementName] = (elementValue === "Empty") ? "" : elementValue;
+					}
+
+					var changesCount = Object.keys(newSettings).reduce((count, key) => {
+						var elementValue = newSettings[key];
+						var newValue = (elementValue === "Empty") ? "" : elementValue;
+						newValue = (typeof originalVariables[key] === 'number' && newValue !== "") ? Number(newValue) : newValue;
+						if (newValue !== originalVariables[key]) {
+							count++;
+						}
+						return count;
+					}, 0);
+
+					if (changesCount === 0) {
+						$('#not-needed').toast('show');
+					} else {
+						$('#saving').toast('show');
+						var mergedSettings = Object.assign({}, originalVariables, newSettings);
+						var xhr = new XMLHttpRequest();
+						xhr.open("POST", "saveDataFile.php");
+						xhr.setRequestHeader("Content-Type", "application/json");
+						xhr.onload = function() {
+							var response = JSON.parse(xhr.responseText);
+							if (response.status === 'pass') {
+								$('#success').toast('show').find('.toast-body').text(response.message);
+							setTimeout(function() {
+										// Reload the page and navigate to the top
+										window.location.href = window.location.pathname + window.location.search + '#';
+									}, 5000);
+							} else {
+								$('#fail').toast('show').find('.toast-body').text(response.message);
+							}
+						};
+						xhr.send(JSON.stringify({ updatedSettings: mergedSettings }));
+					}
+				});
+			});
 		</script>
 	</body>
 </html>

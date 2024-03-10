@@ -14,7 +14,6 @@
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
 
-exec('python3 ./findConf.py');
 session_start();
 $inactive = 3600;
 if(isset($_SESSION['login_time']) && time() - $_SESSION['login_time'] > $inactive){
@@ -22,6 +21,8 @@ if(isset($_SESSION['login_time']) && time() - $_SESSION['login_time'] > $inactiv
     session_destroy();
 }
 $_SESSION['login_time'] = time();
+require_once './admCommon.php';
+$logger = new Logger('./db/dvmAdmin.db3', 'dvmAdmLog');
 ?>
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
@@ -93,6 +94,18 @@ $_SESSION['login_time'] = time();
 		#loginForm label {
 			color: #000; /* sets the label color to black */
 		}
+		.password-container {
+			position: relative;
+		}
+		.password-container i {
+			position: absolute;
+			right: 10px; /* Adjust as needed */
+			top: 50%;
+			transform: translateY(-50%);
+		}
+		#togglePassword {
+			color: black;
+		}
 		.alert-danger {
 			color: #721c24;
 			background-color: #f8d7da;
@@ -107,6 +120,7 @@ $_SESSION['login_time'] = time();
 		}
 	</style>
 </head>
+	<?php $logger->info('DvM Login Page Entered'); ?>
 	<body class="theme-blue">
 		<div id="app" class="app">
 			<div id="header" class="app-header">
@@ -129,7 +143,10 @@ $_SESSION['login_time'] = time();
 						<label for="username">Username:</label>
 						<input type="text" class="form-control login-input" name="username" id="username" placeholder="Enter your username">
 						<label for="password">Password:</label>
-						<input type="password" class="form-control login-input" name="password" id="password" placeholder="Enter your password">
+						<div class="password-container">
+							<input type="password" class="form-control login-input" name="password" id="password" placeholder="Enter your password">
+    						<i class="far fa-lg fa-fw me-2 fa-eye-slash" id="togglePassword" style="cursor: pointer;"></i>
+						</div>
 						<button type="submit" class="btn">Login</button>
 						<div id="errorMessage" class="alert alert-danger" role="alert" style="margin-top: 20px; text-align: center; display:none;">
 							You've entered the wrong login or password. Please try again in 10 seconds.
@@ -163,6 +180,13 @@ $_SESSION['login_time'] = time();
 							}
 						}
 					});
+				});
+				$('#togglePassword').click(function() {
+					const password = $('#password');
+					const type = password.attr('type') === 'password' ? 'text' : 'password';
+					password.attr('type', type);
+
+					$(this).toggleClass('fa-eye fa-eye-slash');
 				});
 			});
 		</script>
