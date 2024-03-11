@@ -849,7 +849,7 @@ require_once './admVersion.php';
 	</script>
 	<script>// Initialize the Memory Chart as a Radial Bar Chart
 		var memoryOptions = {
-			series: [60, 40], // Placeholder values for 'Used' and 'Free' memory percentages
+			series: [0, 0],
 			chart: {
 				id: 'memUsageChart',
 				height: 175,
@@ -884,7 +884,7 @@ require_once './admVersion.php';
 					}
 				}
 			},
-			labels: ['Used', 'Free'], // Adjusted labels for the memory chart
+			labels: ['Used', 'Free'],
 			legend: {
 				show: true,
 				position: 'bottom',
@@ -912,7 +912,6 @@ require_once './admVersion.php';
 					type: 'GET',
 					dataType: 'json',
 					success: function(data) {
-						// Update CPU chart
 						chart.updateSeries([
 							data.cpu.us,
 							data.cpu.sy,
