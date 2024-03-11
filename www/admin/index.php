@@ -22,6 +22,15 @@ if(isset($_SESSION['login_time']) && time() - $_SESSION['login_time'] > $inactiv
 }
 $_SESSION['login_time'] = time();
 require_once './admCommon.php';
+# Database updates as needed
+$pdo = new PDO('sqlite:./db/dvmAdmin.db3');
+if ($pdo) {
+	$sqlFilePath = './db3.sql';
+	executeSqlFile($pdo, $sqlFilePath);
+} else {
+	echo "Error: Unable to connect to the database, for updating.\n";
+	exit;
+}
 $logger = new Logger('./db/dvmAdmin.db3', 'dvmAdmLog');
 ?>
 <!DOCTYPE html>
