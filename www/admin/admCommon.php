@@ -17,6 +17,29 @@
 $loggingEnabled = true;
 $logDebugEnabled = false;
 
+function executeSqlFile($pdo, $filePath) {
+    if (!file_exists($filePath)) {
+        echo "Error: File '$filePath' does not exist.\n";
+        return;
+    }
+    $sqlCommands = file_get_contents($filePath);
+    if ($sqlCommands === false) {
+        echo "Error: Unable to read file '$filePath'.\n";
+        return;
+    }
+    $commands = explode(';', $sqlCommands);
+    foreach ($commands as $command) {
+        $trimmedCommand = trim($command);
+        if ($trimmedCommand) {
+            try {
+                $pdo->exec($trimmedCommand);
+            } catch (PDOException $e) {
+                echo "Error executing SQL command: " . $e->getMessage() . "\n";
+                return;
+            }
+        }
+    }
+}
 function displaySidebar($activePage) {
     ?>
     </div>
@@ -66,24 +89,6 @@ function ldusrSettings($usrSettingsFile) {
     unset($allVars['usrSettingsFile']);
     return $allVars;
 }
-function wrusrSettings($usrSettings, $usrSettingsFile) {
-    if (file_exists($usrSettingsFile)) {
-        $newFilename = $usrSettingsFile . '.' . date('YmdHis');
-        rename($usrSettingsFile, $newFilename);
-    }
-    $contents = "<?php\n";
-    foreach ($usrSettings as $name => $value) {
-        if (is_array($value)) {
-            foreach ($value as $subName => $subValue) {
-                $contents .= "\${$name}['$subName'] = '$subValue';\n";
-            }
-        } else {
-            $contents .= "\$$name = '$value';\n";
-        }
-    }
-    $contents .= "?>";
-    file_put_contents($usrSettingsFile, $contents);
-}
 function createDropdown($name, $options, $selectedOption = null, $currentPosition = null) {
     $dropdown = '<select name="new' . $name . '" class="newElement form-select form-select-sm" mb-3 id="new' . $name . '">';
     foreach ($options as $value => $text) {
@@ -120,7 +125,6 @@ function setLocalMachineTimezone() {
         date_default_timezone_set($timezone);
     }
 }
-setLocalMachineTimezone();
 function console_log($output, $with_script_tags = true) {
     $js_code = 'console.log(' . json_encode($output, JSON_HEX_TAG) .');';
         if ($with_script_tags) {
@@ -174,4 +178,6 @@ class Logger {
         $this->log('DEBUG', $message, $file, $line);
     }
 }
+
+setLocalMachineTimezone();
 ?>
