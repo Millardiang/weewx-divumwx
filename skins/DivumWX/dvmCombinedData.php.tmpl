@@ -113,6 +113,7 @@ $stationUptime = "$station.uptime.long_form";
 $TS = time();
 if($theme == 'dark') {$convertStyle = "color:";}
 else {$convertStyle = "background:";}
+$phpVersion = phpversion();
 
 //air density
 #if $current.AirDensity.has_data
@@ -487,7 +488,10 @@ else if($weewxrt[8] >= 50){$rain["intensity"]="Violent";}
 
 //sky
 $sky["lux"] = round($weewxrt[45]/0.00809399477,0,PHP_ROUND_HALF_UP);
-$sky["day_lux_max"] = round($day.radiation.max.format($localize=False,add_label=False)/0.00809399477,0,PHP_ROUND_HALF_UP);
+$sky["day_rad_max"] = "$day.radiation.max.format($localize=False,add_label=False)";
+if($sky["day_rad_max"] == "   N/A"){$sky["day_rad_max"]=0;}
+else{$sky["day_rad_max"] = $day.radiation.max.format($localize=False,add_label=False);}
+$sky["day_lux_max"] = round($sky["day_rad_max"]/0.00809399477,0,PHP_ROUND_HALF_UP);
 $sky["cloud_base"] = $weewxrt[52];
 #if $current.cloudcover.has_data
 $sky["cloud_cover"] = $current.cloudcover.raw;

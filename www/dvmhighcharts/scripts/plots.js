@@ -1681,9 +1681,9 @@ function plot_js(units, ptype, span, plt_div, dplots = false, cdates = false, re
 	    }
 	    else if (span[0] == "weekly"){
 	        if (compare_dates)
-	            options = create_chart_options(options, 'spline', 'Air Quality', null, [['PM 2.5', 'spline'], ['PM 10.0', 'spline'], ['PM 2.5', 'spline',,,,,1],['PM 10.0', 'spline',,,,,1]]);
+	            options = create_chart_options(options, 'spline', 'Air Quality | Weekly', null, [['PM 2.5', 'spline'], ['PM 10.0', 'spline'], ['PM 2.5', 'spline',,,,,1],['PM 10.0', 'spline',,,,,1]]);
 	        else
-	            options = create_chart_options(options, 'spline', 'PurpleAir Dresden Air Quality', null, [['PM 2.5', 'spline'],['PM 10.0', 'spline']]);
+	            options = create_chart_options(options, 'spline', 'Air Quality', null, [['PM 2.5', 'spline'],['PM 10.0', 'spline']]);
 	        options.series[0].data = reinflate_time(seriesData[0].aqplot.pm2_5Week);
 	        options.series[1].data = reinflate_time(seriesData[0].aqplot.pm10_0Week);
 	        if (compare_dates){

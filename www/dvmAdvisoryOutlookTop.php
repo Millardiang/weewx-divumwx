@@ -1,25 +1,26 @@
 <?php
-#####################################################################################################################                                                                                                        #
-#                                                                                                                   #
-# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
-#                                                                                                                   #
-# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
-#                                                                                                                   #
-# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
-#                                                                                                                   #
-# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
-#                                                                                                                   #
-#####################################################################################################################
-?>
-<?php include('dvmCombinedData.php');error_reporting(0);
+##############################################################################################
+#        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
+#       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    #
+#       (.  ___  :)||  |\   \  //  / |   (  ) : | \   \  //   |  |'  /    \:  | \   \  /     #
+#       |: \   ) |||:  | \\  \/. ./  (:  |  | . ) /\\  \/.    |  |: /'        |  \\  \/      #
+#       (| (___\ |||.  |  \.    //    \\ \__/ // |: \.        |   \//  /\'    |  /\.  \      #
+#       |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \     #
+#       (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|    #
+#                                                                                            #
+#     Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      #
+#      Distributed under terms of the GPLv3.  See the file LICENSE.txt for your rights.      #
+#    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
+#                    https://github.com/Millardiang/weewx-divumwx/issues                     #
+##############################################################################################
+include('dvmCombinedData.php');error_reporting(0);
 $json_string = file_get_contents("jsondata/awa.txt");
 $parsed_json = json_decode($json_string, true);
 
 $json_string2 = file_get_contents("jsondata/awp.txt");
 $parsed_json2 = json_decode($json_string2, true);
-$outlookmet = $parsed_json2["response"][0]["phrases"]["longMET"];
-$outlookusa = $parsed_json2["response"][0]["phrases"]["long"];
-
+if($temp["units"]=="F"){$outlookphrase=$parsed_json2["response"][0]["phrases"]["long"];}
+else if($temp["units"]=="C"){$outlookphrase=$parsed_json2["response"][0]["phrases"]["longMET"];}
 $json_icon = file_get_contents("jsondata/lookupTable.json");
 $parsed_icon = json_decode($json_icon, true); 
 
@@ -62,7 +63,7 @@ if ($alertlevel !== "none")
   
   //outlook
   else if ($alertlevel === "none")
-  {echo '<outlook-panel><p>'.$outlookmet.'</p></outlook-panel></div></div></div>';} 
+  {echo '<outlook-panel><p>'.$outlookphrase.'</p></outlook-panel></div></div></div>';} 
     
 } 
   
@@ -80,8 +81,8 @@ $code = $parsed_json["error"]["code"];
 <?php
 //aw alerts
 if ($code == "warn_no_data")
-  {if ($units == "us"){echo '<outlook-panel><p>'.$outlookusa.'</p></outlook-panel></div></div></div>';}
-  else {echo '<outlook-panel><p>'.$outlookmet.'</p></outlook-panel></div></div></div>';} 
+  {if ($units == "us"){echo '<outlook-panel><p>'.$outlookphrase.'</p></outlook-panel></div></div></div>';}
+  else {echo '<outlook-panel><p>'.$outlookphrase.'</p></outlook-panel></div></div></div>';} 
  }  
 else if ($code == "")
 {echo '<spanelightning><alertadvisory><a alt="Alerts" title="Alerts" href="' . $advisory . '" data-lity></alertadvisory><alertpos><alertvalue>'.$name.'<br> '.$alerttype.'</alertvalue></alertpos>
@@ -123,7 +124,7 @@ if ($alertlevel != "")
    </spanelightning></div></div></div>';}
 //outlook
   else if ($level === "")
-  {echo '<outlook-panel><p>'.$outlookmet.'</p></outlook-panel></div></div></div>';}   
+  {echo '<outlook-panel><p>'.$outlookphrase.'</p></outlook-panel></div></div></div>';}   
 
 }
 
@@ -150,7 +151,7 @@ if (strpos($alertlevel,'Yellow') !== false)
  
 //outlook
   else if ($alertlevel == "outlook")
-  {echo '<outlook-panel>'.$outlookmet.'</outlook-panel></div></div></div>';}  
+  {echo '<outlook-panel>'.$outlookphrase.'</outlook-panel></div></div></div>';}  
 
 }
 
@@ -164,9 +165,9 @@ else if($advisoryzone == "rw")
  
 //outlook
   
-  if ($units == "us"){echo '<outlook-panel><p>'.$outlookusa.'</p></outlook-panel></div></div></div>';}
+if ($units == "us"){echo '<outlook-panel><p>'.$outlookphrase.'</p></outlook-panel></div></div></div>';}
   
-  else if ($units !== "us"){echo '<outlook-panel><p>'.$outlookmet.'</p></outlook-panel></div></div></div>';}
+  else if ($units !== "us"){echo '<outlook-panel><p>'.$outlookphrase.'</p></outlook-panel></div></div></div>';}
 }
 
   //solar eclipse events and no alerts 
