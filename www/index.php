@@ -57,8 +57,11 @@
   .headerflag {
     margin-left: 270px;
     margin-top: -14.5px;
-  }
-  </style>
+  },
+#tablet {
+}
+</style>
+
 
   <script>
     if ('serviceWorker' in navigator) {
@@ -169,8 +172,7 @@
       </div>
      </div>
    </div>
-<?php
-if($themelayout == "4" || $themelayout == "5"){?>
+<div id="tablet"> 
 <div class="divum-container">
 <!-- Row 5 -->
   <!-- position 14--->
@@ -189,9 +191,7 @@ if($themelayout == "4" || $themelayout == "5"){?>
       </div>
      </div>
    </div>
-<?php
-}
-if($themelayout == "5"){?>
+      
 <div class="divum-container">
 <!-- Row 6 -->
   <!-- position 17--->
@@ -210,9 +210,7 @@ if($themelayout == "5"){?>
       </div>
      </div>
    </div>
-<?php
-}
-?>
+</div>
 <!--End Main Grid area-->
 <!--footer area -->
 <?php
@@ -228,14 +226,26 @@ include_once ('dvmFooter.php');
       </div>
       <div class="menutoolbar__center">
         <button class="menubutton menubutton--primary">
-          <menutoptitle style="display: inline-block; padding-right: 4ch;"><?php echo ($stationlocation); ?>  Weather Station</menutoptitle><div class="headerflag"><img src="./img/flags/<?php echo $flag?>.svg"  width="20px"></div>
+          <menutoptitle  style="font-size: 20px; font-weight: bold; text-transform: uppercase;"><?php echo $stationlocation; ?>  WEATHER STATION   <img src="./img/flags/<?php echo $flag?>.svg" width="20"></menutoptitle>
+            
         </button>
       </div>
       <div class="menutoolbar__right">
-            <a href="dvmIndexTablet.php" title="Select Tablet Mode"><topbarbutton>T</topbarbutton></a>
+            <topbarbutton style="width: 3.1em;" onclick="myFunction()">Mode</topbarbutton>
       </div>
     </div>
-  </header>
+
+    <script>
+function myFunction() {
+  var x = document.getElementById("tablet");
+  if (x.style.display === "none") {
+    x.style.display = "block";
+  } else {
+    x.style.display = "none";
+  }
+}
+</script>
+ </header>
     <?php
       include_once ('dvmUpdater.php');
       include_once ('dvmSideMenu.php');
@@ -277,4 +287,5 @@ include_once ('dvmFooter.php');
         $db = null;
       }
     ?>
+
 </html>
