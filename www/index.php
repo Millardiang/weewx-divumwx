@@ -1,18 +1,19 @@
 <?php
-#####################################################################################################################
-# index.php                                                                                                         #
-#                                                                                                                   #
-# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
-#                                                                                                                   #
-# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour                                                      #
-#                                                                                                                   #
-# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
-#                                                                                                                   #
-# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
-#                                                                                                                   #
-#####################################################################################################################
-?>
-<?php
+##############################################################################################
+#        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
+#       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    #
+#       (.  ___  :)||  |\   \  //  / |   (  ) : | \   \  //   |  |'  /    \:  | \   \  /     #
+#       |: \   ) |||:  | \\  \/. ./  (:  |  | . ) /\\  \/.    |  |: /'        |  \\  \/      #
+#       (| (___\ |||.  |  \.    //    \\ \__/ // |: \.        |   \//  /\'    |  /\.  \      #
+#       |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \     #
+#       (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|    #
+#                                                                                            #
+#     Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      #
+#      Distributed under terms of the GPLv3.  See the file LICENSE.txt for your rights.      #
+#    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
+#                    https://github.com/Millardiang/weewx-divumwx/issues                     #
+##############################################################################################
+
   if (!file_exists("userSettings.php")) {
     copy("initial_userSettings.php", "userSettings.php");
   }
@@ -231,19 +232,26 @@ include_once ('dvmFooter.php');
         </button>
       </div>
       <div class="menutoolbar__right">
-            <topbarbutton style="width: 3.1em;" onclick="myFunction()">Mode</topbarbutton>
+          <input type="button" style="background: rgba(39, 123, 70, .8); color: white; border-radius: 2px; border: 0px;" value="Tablet Mode" onclick="updateButton()"/>
       </div>
     </div>
 
     <script>
-function myFunction() {
+function updateButton() 
+          {
   var x = document.getElementById("tablet");
-  if (x.style.display === "none") {
+          const button = document.querySelector("input");
+          
+  if (x.style.display === "none" && button.value === "Dashboard Mode") {
     x.style.display = "block";
+  button.value = "Tablet Mode";
+   
   } else {
     x.style.display = "none";
+  button.value = "Dashboard Mode";
+    
   }
-}
+          }
 </script>
  </header>
     <?php
