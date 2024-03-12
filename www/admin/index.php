@@ -25,76 +25,11 @@ require_once './admCommon.php';
 # Database updates as needed
 $pdo = new PDO('sqlite:./db/dvmAdmin.db3');
 if ($pdo) {
-    $query = $pdo->query('SELECT dbVer FROM dvmDBver LIMIT 1');
-
-	function executeSqlFile($pdo, $filePath) {
-		$sql = file_get_contents($filePath);
-		if ($sql === false) {
-			throw new Exception("Could not read the SQL file: $filePath");
-		}
-		$pdo->beginTransaction();
-		$statements = array_filter(array_map('trim', explode(';', $sql)));
-		foreach ($statements as $statement) {
-			if (!empty($statement)) {
-				$result = $pdo->exec($statement);
-				if ($result === false) {
-					$pdo->rollBack();
-					$errorInfo = $pdo->errorInfo();
-					throw new Exception("Failed to execute SQL statement: $statement Error: " . $errorInfo[2]);
-				}
-			}
-		}
-		$pdo->commit();
-	}
-
-    if ($query) {
-        $row = $query->fetch(PDO::FETCH_ASSOC);
-        if ($row && isset($row['dbVer'])) {
-            $curDBVer = $row['dbVer'];
-
-            function versionCompare($ver1, $ver2) {
-                $a = explode('.', $ver1);
-                $b = explode('.', $ver2);
-                for ($i = 0; $i < max(count($a), count($b)); $i++) {
-                    $valA = $i < count($a) ? (int)$a[$i] : 0;
-                    $valB = $i < count($b) ? (int)$b[$i] : 0;
-                    if ($valA > $valB) return 1;
-                    if ($valA < $valB) return -1;
-                }
-                return 0;
-            }
-            $jsonString = file_get_contents('./db/dbVermap.json');
-            if ($jsonString === false) {
-                echo "Error: Unable to read version mapping file.\n";
-                exit;
-            }
-            $versionMap = json_decode($jsonString, true);
-            if ($versionMap === null) {
-                echo "Error: Unable to decode version mapping JSON.\n";
-                exit;
-            }
-            $comparisonResult = versionCompare($curDBVer, $locDBVer);
-            if ($comparisonResult == 1 && array_key_exists($locDBVer, $versionMap)) {
-                $sqlFilePath = $versionMap[$locDBVer];
-                if (file_exists($sqlFilePath)) {
-                    executeSqlFile($pdo, $sqlFilePath);
-                    echo "Database has been updated with the script for version $locDBVer.\n";
-                } else {
-                    echo "Error: SQL file for version $locDBVer does not exist.\n";
-                }
-            } else {
-                echo "No database update required.\n";
-            }
-        } else {
-            echo "Error: No valid data found in dvmDBver table.\n";
-			executeSqlFile($pdo, './db/dbmigration_1_0_1.sql');
-        }
-    } else {
-        echo "Error: Unable to execute query.\n";
-    }
+	$sqlFilePath = './db3.sql';
+	executeSqlFile($pdo, $sqlFilePath);
 } else {
-    echo "Error: Unable to connect to the database.\n";
-    exit;
+	echo "Error: Unable to connect to the database, for updating.\n";
+	exit;
 }
 $logger = new Logger('./db/dvmAdmin.db3', 'dvmAdmLog');
 ?>
