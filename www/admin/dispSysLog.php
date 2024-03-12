@@ -13,5 +13,11 @@
 #    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
-    $admVersion = "0.9.2.81 dev";
-    $locDBVer = "1.0.1";
+$syslogFile = '/var/log/syslog';
+
+if (file_exists($syslogFile) && is_readable($syslogFile)) {
+    $content = file_get_contents($syslogFile);
+    echo htmlspecialchars($content);
+} else {
+    echo 'Error: Syslog file is not accessible.';
+}
