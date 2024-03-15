@@ -32,7 +32,7 @@ try {
         die("User not found.\n");
     }
 
-    $stmt = $db->prepare("UPDATE users SET password = :password, initialLogin = 1 WHERE username = :username");
+    $stmt = $db->prepare("UPDATE users SET password = :password WHERE username = :username");
     $stmt->execute([':password' => $hashedPassword, ':username' => $username]);
 
     if ($stmt->rowCount()) {

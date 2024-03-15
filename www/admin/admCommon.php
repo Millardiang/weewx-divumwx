@@ -16,29 +16,50 @@
 
 $loggingEnabled = true;
 $logDebugEnabled = false;
+class dvmDB {
+    private static $instance = null;
+    private $pdo;
+    private function __construct() {
+        $this->pdo = new PDO('sqlite:./db/dvmAdmin.db3');
+        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    }
+    public static function getInstance() {
+        if (self::$instance === null) {
+            self::$instance = new dvmDB();
+        }
+        return self::$instance->pdo;
+    }
+}
 
 function executeSqlFile($pdo, $filePath) {
-    if (!file_exists($filePath)) {
-        echo "Error: File '$filePath' does not exist.\n";
-        return;
+    $sql = file_get_contents($filePath);
+    if ($sql === false) {
+        throw new Exception("Could not read the SQL file: $filePath");
     }
-    $sqlCommands = file_get_contents($filePath);
-    if ($sqlCommands === false) {
-        echo "Error: Unable to read file '$filePath'.\n";
-        return;
-    }
-    $commands = explode(';', $sqlCommands);
-    foreach ($commands as $command) {
-        $trimmedCommand = trim($command);
-        if ($trimmedCommand) {
-            try {
-                $pdo->exec($trimmedCommand);
-            } catch (PDOException $e) {
-                echo "Error executing SQL command: " . $e->getMessage() . "\n";
-                return;
+    $pdo->beginTransaction();
+    $statements = array_filter(array_map('trim', explode(';', $sql)));
+    foreach ($statements as $statement) {
+        if (!empty($statement)) {
+            $result = $pdo->exec($statement);
+            if ($result === false) {
+                $pdo->rollBack();
+                $errorInfo = $pdo->errorInfo();
+                throw new Exception("Failed to execute SQL statement: $statement Error: " . $errorInfo[2]);
             }
         }
     }
+    $pdo->commit();
+}
+function versionCompare($ver1, $ver2) {
+    $a = explode('.', $ver1);
+    $b = explode('.', $ver2);
+    for ($i = 0; $i < max(count($a), count($b)); $i++) {
+        $valA = $i < count($a) ? (int)$a[$i] : 0;
+        $valB = $i < count($b) ? (int)$b[$i] : 0;
+        if ($valA > $valB) return 1;
+        if ($valA < $valB) return -1;
+    }
+    return 0;
 }
 function displaySidebar($activePage) {
     ?>
@@ -132,7 +153,7 @@ function console_log($output, $with_script_tags = true) {
         }
     echo $js_code;
 }
-class Logger {
+class dvmLog {
     const TYPE_INFO = 'INFO';
     const TYPE_WARNING = 'WARNING';
     const TYPE_ERROR = 'ERROR';
@@ -140,9 +161,8 @@ class Logger {
     private $pdo;
     private $loggerName;
 
-    public function __construct($databasePath, $loggerName = 'defaultLogger') {
-        $this->pdo = new PDO('sqlite:' . $databasePath);
-        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    public function __construct($pdo, $loggerName = 'defaultLogger') {
+        $this->pdo = $pdo;
         $this->loggerName = $loggerName;
     }
 
