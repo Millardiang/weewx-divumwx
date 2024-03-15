@@ -24,7 +24,6 @@
     if(password_verify($password, $result['password'])){
         session_start();
         $_SESSION['username'] = $username;
-        $_SESSION['initialLogin'] = $result['initialLogin'];
         $_SESSION['login_time'] = time();
         echo 'Success';
     } else {
