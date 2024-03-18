@@ -232,7 +232,7 @@ include_once ('dvmFooter.php');
         </button>
       </div>
       <div class="menutoolbar__right">
-          <input type="button" style="background: rgba(39, 123, 70, .8); color: white; border-radius: 2px; border: 0px;" value="Tablet Mode" onclick="updateButton()"/>
+          <input type="button" style="background: rgba(39, 123, 70, .8); color: white; border-radius: 2px; border-color: rgba(39, 123, 70, .8);" value="Tablet Mode" onclick="updateButton()"/>
       </div>
     </div>
 
