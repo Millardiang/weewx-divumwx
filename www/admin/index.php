@@ -21,17 +21,64 @@ if(isset($_SESSION['login_time']) && time() - $_SESSION['login_time'] > $inactiv
     session_destroy();
 }
 $_SESSION['login_time'] = time();
+require_once './admVersion.php';
 require_once './admCommon.php';
-# Database updates as needed
-$pdo = new PDO('sqlite:./db/dvmAdmin.db3');
-if ($pdo) {
-	$sqlFilePath = './db3.sql';
-	executeSqlFile($pdo, $sqlFilePath);
-} else {
-	echo "Error: Unable to connect to the database, for updating.\n";
+$passwordEmpty = false;
+$pdo = dvmDB::getInstance();
+# Initial Login test based on no password set
+console_log('Testing for new setup');
+try {
+	$checkPasswordQuery = $pdo->prepare("SELECT password FROM users LIMIT 1");
+	$checkPasswordQuery->execute();
+	$passwordResult = $checkPasswordQuery->fetch(PDO::FETCH_ASSOC);
+	if ($passwordResult && $passwordResult['password'] === '') {
+		$passwordEmpty = true;
+	}
+} catch (PDOException $e) {
+	console_log('Database error: ' . $e->getMessage());
 	exit;
 }
-$logger = new Logger('./db/dvmAdmin.db3', 'dvmAdmLog');
+# Database updates as needed
+console_log('Checking DB Version');
+try {
+	$query = $pdo->query('SELECT dbVer FROM dvmDBver LIMIT 1');
+	$row = $query->fetch(PDO::FETCH_ASSOC);
+	if ($row && isset($row['dbVer'])) {
+		$curDBVer = $row['dbVer'];
+		$jsonString = file_get_contents('./db/dbVermap.json');
+		if ($jsonString === false) {
+			console_log('Error: Unable to read version mapping file.');
+			exit;
+		}
+		$versionMap = json_decode($jsonString, true);
+		if ($versionMap === null) {
+			console_log('Error: Unable to decode version mapping JSON.');
+			exit;
+		}
+		$comparisonResult = versionCompare($curDBVer, $locDBVer);
+		if ($comparisonResult == 1 && array_key_exists($locDBVer, $versionMap)) {
+			$sqlFilePath = $versionMap[$locDBVer];
+			if (file_exists($sqlFilePath)) {
+				executeSqlFile($pdo, $sqlFilePath);
+				console_log('Database has been updated with the script for version ' . $locDBVer);
+			} else {
+				console_log('Error: SQL file for version ' . $locDBVer . ' does not exist.');
+			}
+		}
+		console_log('DB Version check complete');
+	} else {
+		console_log('Error: No valid data found in dvmDBver table.');
+		executeSqlFile($pdo, './db/dbmigration_1_0_1.sql');
+	}
+} catch (PDOException $e) {
+    if (strpos($e->getMessage(), 'no such table') !== false) {
+        console_log('Error: The dbVer table is missing.');
+        executeSqlFile($pdo, $sqlFilePath);
+    } else {
+        console_log('Error: Database query failed: ' . $e->getMessage());
+    }
+}
+$logger = new dvmLog($pdo, 'dvmAdmLog');
 ?>
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
@@ -164,6 +211,22 @@ $logger = new Logger('./db/dvmAdmin.db3', 'dvmAdmLog');
 				</div>
 			</div>
 		</div>
+		<!-- No Password Modal -->
+		<div class="modal" tabindex="-1" role="dialog" id="passwordModal">
+			<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+				<div class="modal-content">
+				<div class="modal-header text-center">
+					<h5 class="modal-title">Password Setup Required</h5>
+				</div>
+				<div class="modal-body text-center">
+					<p>As this is your initial setup, the Admin password is empty. You must run the resetPassword.php script from the command line in the webserver <br /><span class="text-warning">DOCUMENTROOT/weewx/divumwx/admin or DOCUMENTROOT/divumwx/admin</span><br />directory and set the initial password. This is done to protect your dashboard on initial installation. The modal will cycle when closed until you do so.</p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary">Ok</button>
+				</div>
+				</div>
+			</div>
+		</div>
 		<script src="assets/js/vendor.min.js"></script>
 		<script src="assets/js/app.min.js"></script>
 		<script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
@@ -171,7 +234,6 @@ $logger = new Logger('./db/dvmAdmin.db3', 'dvmAdmLog');
 			$(document).ready(function() {
 				$('#loginForm').on('submit', function(event) {
 					event.preventDefault();
-
 					$.ajax({
 						url: 'admLogin.php',
 						type: 'post',
@@ -197,6 +259,18 @@ $logger = new Logger('./db/dvmAdmin.db3', 'dvmAdmLog');
 
 					$(this).toggleClass('fa-eye fa-eye-slash');
 				});
+				var passwordEmpty = <?php echo $passwordEmpty ? 'true' : 'false'; ?>;
+				if (passwordEmpty) {
+					var passwordModal = new bootstrap.Modal(document.getElementById('passwordModal'), {
+						backdrop: 'static',
+						keyboard: false
+					});
+					passwordModal.show();
+
+					$(".modal-footer .btn").click(function() {
+						window.location.reload();
+					});
+				}
 			});
 		</script>
 	</body>

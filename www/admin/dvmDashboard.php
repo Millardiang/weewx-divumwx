@@ -132,7 +132,14 @@ require_once './admVersion.php';
 			color: inherit;
 		    text-decoration: none;
 		}
-
+		#sysChart {
+			background-color: transparent;
+			width: 100%;
+			height: 100%;
+		}
+		#leftChart, #rightChart {
+			height: 100%; /* Take the full height of the parent */
+		}
 		td:nth-child(2), td:nth-child(3) {
 			text-align: center;
 		}
@@ -144,7 +151,6 @@ require_once './admVersion.php';
 			padding-right: 5px;
 			padding-bottom: 3px;
 		}
-
 	</style>
 </head>
 <body class="theme-blue">
@@ -176,8 +182,16 @@ require_once './admVersion.php';
 								<div class="col-xl-6 col-lg-6">
 									<div class="card border-theme bg-opacity-25 mb-4">
 										<div class="card-body">
-												<!-- CPU Usage Chart -->
-												<div id="cpuUsageChart"></div>
+												<div id="sysChart">
+													<div class="row h-100">
+														<div class="col-6" id="leftChart">
+															<!-- Left chart will be rendered here -->
+														</div>
+														<div class="col-6" id="rightChart">
+															<!-- Right chart will be rendered here -->
+														</div>
+													</div>
+												</div>
 											</div>
 											<div class="card-arrow">
 												<div class="card-arrow-top-left"></div>
@@ -185,18 +199,6 @@ require_once './admVersion.php';
 												<div class="card-arrow-bottom-left"></div>
 												<div class="card-arrow-bottom-right"></div>
 											</div>
-										</div>
-										<div class="card border-theme bg-opacity-25 mb-3">
-											<div class="card-body">
-												<!-- Memory Usage Chart-->
-												<div id="memUsageChart"></div>
-											<div class="card-arrow">
-												<div class="card-arrow-top-left"></div>
-												<div class="card-arrow-top-right"></div>
-												<div class="card-arrow-bottom-left"></div>
-												<div class="card-arrow-bottom-right"></div>
-											</div>
-										</div>
 									</div>
 								</div>
 								<div class="col-xl-6 col-lg-6">
@@ -380,10 +382,9 @@ require_once './admVersion.php';
 					<div class="card mb-3">
 						<div class="card-body">
 							<div class="d-flex fw-bold small mb-3">
-								<span class="flex-grow-1">TRAFFIC ANALYTICS</span>
+								<span class="flex-grow-1">Traffic Analytics</span>
 							</div>
 							<div class="ratio ratio-21x9 mb-3">
-
 							</div>
 						</div>
 						<div class="card-arrow">
@@ -516,16 +517,6 @@ require_once './admVersion.php';
 		</div>
 		<a href="#" data-toggle="scroll-to-top" class="btn-scroll-top fade"><i class="fa fa-arrow-up"></i></a>
 	</div>
-	<!--Force password change on use of default password-->
-	<?php
-		if ($_SESSION['initialLogin'] == 0){
-			echo '<script>
-				$(document).ready(function() {
-					$("#updateDefaultPassword").modal("show");
-				});
-			</script>';
-		};
-	?>
 	<script>// New Password change script
 		addEventListener("DOMContentLoaded", (event) => {
 			const passwordAlert = document.getElementById("password-alert");
@@ -687,7 +678,7 @@ require_once './admVersion.php';
 			});
 		});
 	</script>
-	<script>//Display log files
+	<script>//Display Log Files
 	$(document).ready(function(){
 		$('.memSmTxt a').on('click', function(event) {
 			event.preventDefault();
@@ -717,10 +708,10 @@ require_once './admVersion.php';
 		}
 	});
 	</script>
-	<script>
+	<script>// Get local DvM Version
 		 var locDvmVersion = "<?php echo $locDvmVer; ?>";
 	</script>
-	<script>//Fetch Software versions
+	<script>// Fetch Software versions
 		let locWeewxVersion = "";
 		document.addEventListener('DOMContentLoaded', (event) => {
 			getSoftwareVersions();
@@ -785,11 +776,11 @@ require_once './admVersion.php';
 		}
 
 	</script>
-	<script>// Initialize the CPU Chart as a Radial Bar Chart
-		var options = {
-			series: [44, 55, 67], // Initial dummy values, replace with actual data
+	<script>// Initialize the CPU & Memory Chart as a Radial Bar Charts
+		var optionsCpu = {
+			series: [99, 77, 66], // Initial dummy values for CPU
 			chart: {
-				id: 'cpuUsageChart',
+				id: 'leftChart',
 				height: 175,
 				type: 'radialBar',
 				animations: {
@@ -809,7 +800,6 @@ require_once './admVersion.php';
 						size: '40%',
 					},
 					track: {
-						background: '#f2f2f2',
 						strokeWidth: '97%',
 					},
 					dataLabels: {
@@ -843,15 +833,10 @@ require_once './admVersion.php';
 				}
 			},
 		};
-
-		var chart = new ApexCharts(document.querySelector("#cpuUsageChart"), options);
-		chart.render();
-	</script>
-	<script>// Initialize the Memory Chart as a Radial Bar Chart
-		var memoryOptions = {
-			series: [0, 0],
+		var optionsMemory = {
+			series: [92, 72, 52],
 			chart: {
-				id: 'memUsageChart',
+				id: 'rightChart',
 				height: 175,
 				type: 'radialBar',
 				animations: {
@@ -871,7 +856,6 @@ require_once './admVersion.php';
 						size: '40%',
 					},
 					track: {
-						background: '#f2f2f2',
 						strokeWidth: '97%',
 					},
 					dataLabels: {
@@ -884,14 +868,18 @@ require_once './admVersion.php';
 					}
 				}
 			},
-			labels: ['Used', 'Free'],
+			labels: ['Used', 'Free', 'Total'],
 			legend: {
 				show: true,
-				position: 'bottom',
-				horizontalAlign: 'center',
-				fontSize: '14px',
-				fontFamily: 'Helvetica, Arial',
-				fontWeight: 400,
+				position: 'left',
+				offsetX: 0,
+				offsetY: 0,
+				labels: {
+					useSeriesColors: true,
+				},
+				markers: {
+					size: 0
+				},
 				formatter: function(seriesName, opts) {
 					return seriesName + ": " + opts.w.globals.series[opts.seriesIndex] + '%';
 				},
@@ -900,8 +888,9 @@ require_once './admVersion.php';
 				}
 			},
 		};
-
-		var memoryChart = new ApexCharts(document.querySelector("#memUsageChart"), memoryOptions);
+		var cpuChart = new ApexCharts(document.querySelector("#leftChart"), optionsCpu);
+		cpuChart.render();
+		var memoryChart = new ApexCharts(document.querySelector("#rightChart"), optionsMemory);
 		memoryChart.render();
 	</script>
 	<script>// Fetch server stats and update the charts
@@ -926,7 +915,7 @@ require_once './admVersion.php';
 						let freePercentage = (freeMemory / totalMemory) * 100;
 
 						// Update Memory chart
-						memoryChart.updateSeries([
+							memoryChart.updateSeries([
 							usedPercentage.toFixed(1),
 							freePercentage.toFixed(1)
 						]);
