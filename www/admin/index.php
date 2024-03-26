@@ -219,7 +219,7 @@ $logger = new dvmLog($pdo, 'dvmAdmLog');
 					<h5 class="modal-title">Password Setup Required</h5>
 				</div>
 				<div class="modal-body text-center">
-					<p>As this is your initial setup, the Admin password is empty. You must run the resetPassword.php script from the command line in the webserver <br /><span class="text-warning">DOCUMENTROOT/weewx/divumwx/admin or DOCUMENTROOT/divumwx/admin</span><br />directory and set the initial password. This is done to protect your dashboard on initial installation. The modal will cycle when closed until you do so.</p>
+					<p>As this is your initial setup, the Admin password is empty. You must run the resetPassword.php script from the command line on the webserver <br /><span class="text-warning">in the DOCUMENTROOT/weewx/divumwx/admin or DOCUMENTROOT/divumwx/admin</span><br />directory and set the initial password. To do so, when you are in that directory, issue this command: <span class="badge text-bg-info">php ./resetPassword.php</span><br />This is done to protect your dashboard on initial installation. The modal will cycle when closed until you do so.</p>
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-primary">Ok</button>

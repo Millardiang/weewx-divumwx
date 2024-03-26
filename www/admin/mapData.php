@@ -18,7 +18,7 @@
         $adminDB = '.' . DIRECTORY_SEPARATOR . 'db' . DIRECTORY_SEPARATOR . 'dvmAdmin.db3';
         $db = new PDO("sqlite:" . $adminDB);
         $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $query = $db->prepare("SELECT v.*, c.countryName FROM visits v LEFT JOIN countries c ON v.countryCode = c.countryCode");
+        $query = $db->prepare("SELECT v.*, c.countryName FROM userVisits v LEFT JOIN countries c ON v.countryCode = c.countryCode");
         $query->execute();
         $visits = $query->fetchAll(PDO::FETCH_ASSOC);
         $visitData = array();

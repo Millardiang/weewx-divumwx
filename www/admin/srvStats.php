@@ -1,4 +1,18 @@
 <?php
+###############################################################################################
+#       _______   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___        #
+#      |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |      #
+#      (.  ___  :)||  |\   \  //  / |   (  ) : | \   \  //   |  |'  /    \:  | \   \  /       #
+#      |: \   ) |||:  | \\  \/. ./  (:  |  | . ) /\\  \/.    |  |: /'        |  \\  \/        #
+#      (| (___\ |||.  |  \.    //    \\ \__/ // |: \.        |   \//  /\'    |  /\.  \        #
+#      |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \       #
+#      (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|      #
+#                                                                                             #
+#      Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      #
+#       Distributed under terms of the GPLv3.  See the file LICENSE.txt for your rights.      #
+#     Issues for weewx-divumwx skin template are only addressed via the issues register at    #
+#                     https://github.com/Millardiang/weewx-divumwx/issues                     #
+###############################################################################################
 function determineTopCommand($osType) {
     if (strpos($osType, 'LINUX') !== false) {
         return 'top -bn1 | head -n 17';
@@ -71,20 +85,22 @@ function parseTopOutput($output, $osType) {
             'stopped' => $tasksMatches[4],
             'zombie' => $tasksMatches[5]
         ];
-        preg_match('/%Cpu\(s\):.*(\d+\.\d+) us,.*(\d+\.\d+) sy,.*(\d+\.\d+) ni,.*(\d+\.\d+) id/', $output, $cpuMatches);
+        preg_match('/%Cpu\(s\):\s+(\d+\.\d+) us,\s+(\d+\.\d+) sy,.*?(\d+\.\d+) id,/', $output, $cpuMatches);
         $stats['cpu'] = [
             'us' => $cpuMatches[1],
             'sy' => $cpuMatches[2],
-            'id' => $cpuMatches[4]
+            'id' => $cpuMatches[3]
         ];
         preg_match_all('/^\s*(\d+)\s+(\S+)\s+\d+\s+-?\d+\s+\d+\s+\d+\s+\d+\s+\S+\s+(\d+\.\d+)\s+(\d+\.\d+)\s+\S+\s+(.+)$/m', $output, $processMatches, PREG_SET_ORDER);
         $processes = [];
+        $index = 0; // Initialize process index
         foreach ($processMatches as $match) {
             $processes[] = [
+                'index' => $index++, // Assign and increment the process index
                 'PID' => $match[1],
                 'USER' => $match[2],
-                '%CPU' => $match[3],
-                '%MEM' => $match[4],
+                'CPU' => $match[3],
+                'MEM' => $match[4],
                 'COMMAND' => trim($match[5])
             ];
         }
