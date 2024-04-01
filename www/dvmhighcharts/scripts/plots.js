@@ -1694,7 +1694,7 @@ function plot_js(units, ptype, span, plt_div, dplots = false, cdates = false, re
 	    }
 	    options.yAxis[0].min = 0;
 	    options.yAxis[0].minorTickInterval = 1;
-	    options.yAxis[0].title.text = "(Î¼g/ãŽ¥)";
+	    options.yAxis[0].title.text = "(μg/㎥)";
 	    return options;
 	};
 	
