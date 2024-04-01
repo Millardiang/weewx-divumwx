@@ -13,5 +13,5 @@
 #    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
-    $admVersion = "0.9.2.81 dev";
-    $locDBVer = "1.0.1";
+    $admVersion = "0.9.2.87 dev";
+    $locDBVer = "1.0.2";

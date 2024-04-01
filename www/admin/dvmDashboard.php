@@ -56,7 +56,6 @@ require_once './admVersion.php';
 	<script src="assets/js/vendor.min.js"></script>
 	<script src="assets/js/app.min.js"></script>
 	<script src="assets/js/bootstrap-validate.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/apexcharts" crossorigin="anonymous"></script>
 	<style>
 		.legend {
 			background-color: #7a7a7a;
@@ -132,14 +131,6 @@ require_once './admVersion.php';
 			color: inherit;
 		    text-decoration: none;
 		}
-		#sysChart {
-			background-color: transparent;
-			width: 100%;
-			height: 100%;
-		}
-		#leftChart, #rightChart {
-			height: 100%; /* Take the full height of the parent */
-		}
 		td:nth-child(2), td:nth-child(3) {
 			text-align: center;
 		}
@@ -180,41 +171,124 @@ require_once './admVersion.php';
 						<div class="card-body">
 							<div class="row">
 								<div class="col-xl-6 col-lg-6">
-									<div class="card border-theme bg-opacity-25 mb-4">
+									<div class="card border-theme bg-opacity-25 mb-6">
 										<div class="card-body">
-												<div id="sysChart">
-													<div class="row h-100">
-														<div class="col-6" id="leftChart">
-															<!-- Left chart will be rendered here -->
-														</div>
-														<div class="col-6" id="rightChart">
-															<!-- Right chart will be rendered here -->
-														</div>
-													</div>
+											<div>
+												<div><span class="lead">Basic System Info</span><br />
+													<div>Tasks:<br /><span class="small">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Total: <span id="taskTotal">0</span>, Running: <span id="taskRunning">0</span>, Sleeping: <span id="taskSleeping">0</span>, Stopped: <span id="taskStopped">0</span>, Zombie: <span id="taskZombie">0</span></span></div>
+													<div>CPU Usage:<br /><span class="small">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;User: <span id="cpuUser">0</span>%, System: <span id="cpuSystem">0</span>%, Idle: <span id="cpuIdle">100</span>%</span></div>
+													<div>Memory Usage:<br /><span class="small">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Total: <span id="memTotal">0</span>MB, Used: <span id="memUsed">0</span>MB, Free: <span id="memFree">0</span>MB</span></div>
 												</div>
 											</div>
-											<div class="card-arrow">
-												<div class="card-arrow-top-left"></div>
-												<div class="card-arrow-top-right"></div>
-												<div class="card-arrow-bottom-left"></div>
-												<div class="card-arrow-bottom-right"></div>
+										</div>
+										<div class="card-arrow">
+											<div class="card-arrow-top-left"></div>
+											<div class="card-arrow-top-right"></div>
+											<div class="card-arrow-bottom-left"></div>
+											<div class="card-arrow-bottom-right"></div>
+										</div>
+									<div class="card-body">
+											<div>
+												<span class="lead">System Functions</span><br />
+												<button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#changePassword">Change Admin Password</button>
 											</div>
+										</div>
+										<div class="card-arrow">
+											<div class="card-arrow-top-left"></div>
+											<div class="card-arrow-top-right"></div>
+											<div class="card-arrow-bottom-left"></div>
+											<div class="card-arrow-bottom-right"></div>
+										</div>
 									</div>
 								</div>
 								<div class="col-xl-6 col-lg-6">
-									<div class="card border-theme bg-opacity-25 mb-4">
-										<div class="card-body">
-											<div class="card border-theme bg-opacity-25 mb-2">
-												<div class="card-header border-theme fw-bold small text-inverse"><span id="dispLogs">Top 10 Running Processes</span></div>
-												<div class="card-body">
-													<!-- Processes -->
-												</div>
-												<div class="card-arrow">
-													<div class="card-arrow-top-left"></div>
-													<div class="card-arrow-top-right"></div>
-													<div class="card-arrow-bottom-left"></div>
-													<div class="card-arrow-bottom-right"></div>
-												</div>
+									<div class="card border-theme bg-opacity-25 mb-6">
+										<div class="card-header border-theme lead"><span>Top 10 Running Processes</span></div>
+											<div class="card-body">
+											<table class="table table-hover table-sm mb-0">
+												<thead>
+													<tr>
+														<th scope="col">PID</th>
+														<th scope="col">USER</th>
+														<th scope="col">%CPU</th>
+														<th scope="col">%MEM</th>
+														<th scope="col">COMMAND</th>
+													</tr>
+												</thead>
+												<tbody>
+													<tr>
+														<th scope="row"><span id="proc0pid" name="proc0pid">Loading</span></th>
+														<td><span id="proc0user" name="proc0user">Loading</span></td>
+														<td><span id="proc0cpu" name="proc0cpu">Loading</span></td>
+														<td><span id="proc0mem" name="proc0mem">Loading</span></td>
+														<td><span id="proc0cmd" name="proc0cmd">Loading</span></td>
+													</tr>
+													<tr>
+														<th scope="row"><span id="proc1pid" name="proc1pid">Loading</span></th>
+														<td><span id="proc1user" name="proc1user">Loading</span></td>
+														<td><span id="proc1cpu" name="proc1cpu">Loading</span></td>
+														<td><span id="proc1mem" name="proc1mem">Loading</span></td>
+														<td><span id="proc1cmd" name="proc1cmd">Loading</span></td>
+													</tr>
+													<tr>
+														<th scope="row"><span id="proc2pid" name="proc2pid">Loading</span></th>
+														<td><span id="proc2user" name="proc2user">Loading</span></td>
+														<td><span id="proc2cpu" name="proc2cpu">Loading</span></td>
+														<td><span id="proc2mem" name="proc2mem">Loading</span></td>
+														<td><span id="proc2cmd" name="proc2cmd">Loading</span></td>
+													</tr>
+													<tr>
+														<th scope="row"><span id="proc3pid" name="proc0">Loading</span></th>
+														<td><span id="proc3user" name="proc0">Loading</span></td>
+														<td><span id="proc3cpu" name="proc0">Loading</span></td>
+														<td><span id="proc3mem" name="proc0">Loading</span></td>
+														<td><span id="proc3cmd" name="proc0">Loading</span></td>
+													</tr>
+													<tr>
+														<th scope="row"><span id="proc4pid" name="proc0">Loading</span></th>
+														<td><span id="proc4user" name="proc0">Loading</span></td>
+														<td><span id="proc4cpu" name="proc0">Loading</span></td>
+														<td><span id="proc4mem" name="proc0">Loading</span></td>
+														<td><span id="proc4cmd" name="proc0">Loading</span></td>
+													</tr>
+													<tr>
+														<th scope="row"><span id="proc5pid" name="proc0">Loading</span></th>
+														<td><span id="proc5user" name="proc0">Loading</span></td>
+														<td><span id="proc5cpu" name="proc0">Loading</span></td>
+														<td><span id="proc5mem" name="proc0">Loading</span></td>
+														<td><span id="proc5cmd" name="proc0">Loading</span></td>
+													</tr>
+													<tr>
+														<th scope="row"><span id="proc6pid" name="proc0">Loading</span></th>
+														<td><span id="proc6user" name="proc0">Loading</span></td>
+														<td><span id="proc6cpu" name="proc0">Loading</span></td>
+														<td><span id="proc6mem" name="proc0">Loading</span></td>
+														<td><span id="proc6cmd" name="proc0">Loading</span></td>
+													</tr>
+													<tr>
+														<th scope="row"><span id="proc7pid" name="proc0">Loading</span></th>
+														<td><span id="proc7user" name="proc0">Loading</span></td>
+														<td><span id="proc7cpu" name="proc0">Loading</span></td>
+														<td><span id="proc7mem" name="proc0">Loading</span></td>
+														<td><span id="proc7cmd" name="proc0">Loading</span></td>
+													</tr>
+													<tr>
+														<th scope="row"><span id="proc8pid" name="proc0">Loading</span></th>
+														<td><span id="proc8user" name="proc0">Loading</span></td>
+														<td><span id="proc8cpu" name="proc0">Loading</span></td>
+														<td><span id="proc8mem" name="proc0">Loading</span></td>
+														<td><span id="proc8cmd" name="proc0">Loading</span></td>
+													</tr>
+													<tr>
+														<th scope="row"><span id="proc9pid" name="proc0">Loading</span></th>
+														<td><span id="proc9user" name="proc0">Loading</span></td>
+														<td><span id="proc9cpu" name="proc0">Loading</span></td>
+														<td><span id="proc9mem" name="proc0">Loading</span></td>
+														<td><span id="proc9cmd" name="proc0">Loading</span></td>
+													</tr>
+
+												</tbody>
+											</table>
 											</div>
 										</div>
 										<div class="card-arrow">
@@ -226,7 +300,6 @@ require_once './admVersion.php';
 									</div>
 								</div>
 							</div>
-						</div>
 						<div class="card-arrow">
 							<div class="card-arrow-top-left"></div>
 							<div class="card-arrow-top-right"></div>
@@ -432,20 +505,23 @@ require_once './admVersion.php';
 			</div>
 		</div>
 		<!-- Change Password Modal  -->
-		<div class="modal fade" id="updateDefaultPassword" data-bs-backdrop="static" data-bs-keyboard="false">
+		<div class="modal fade" id="changePassword" data-bs-backdrop="static" data-bs-keyboard="false">
 			<div class="modal-dialog">
 				<div class="modal-content">
 					<div class="modal-header">
-						<h5 class="modal-title">Change Default Password</h5>
+						<h5 class="modal-title">Change Password</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
 						<div class="col-mb-6">
 							<form id="passwdForm">
 								<div class="logo-text">
 									<img src="./assets/img/divumLogo.svg" alt="Logo" class="logo">
-									<p class="text">This appears to be your first login to the DvM Dashboard, which indicates that you used the default password to login. <span class="text-warning">Retaining the default password is a huge security risk.</span> You must use the form below to change the password to your DvM Dashboard now.</p>
+									<p class="text">Please enter your existing password for verification, then enter the new password following the required specification and then re-enter the password and click submit.</p>
 								</div>
 								<div class="form-group justify-content-end">
+									<label for="oldPassword">Existing Password</label>
+									<input type="password" class="form-control someInput" name="oldPassword" id="oldPassword" placeholder="Enter existing password"  autocomplete="off" required>
 									<label for="newPassword">New Password:</label>
 									<input type="password" class="form-control someInput" name="newPassword" id="newPassword" placeholder="Enter new password"  autocomplete="off" required>
 									<div  class="alert px-4 py-3 mb-0 d-none" role="alert" data-mdb-color="warning" id="password-alert">
@@ -776,157 +852,44 @@ require_once './admVersion.php';
 		}
 
 	</script>
-	<script>// Initialize the CPU & Memory Chart as a Radial Bar Charts
-		var optionsCpu = {
-			series: [99, 77, 66], // Initial dummy values for CPU
-			chart: {
-				id: 'leftChart',
-				height: 175,
-				type: 'radialBar',
-				animations: {
-					enabled: true,
-					easing: 'linear',
-					dynamicAnimation: {
-						speed: 1000
-					}
-				},
-				toolbar: {
-					show: false
-				},
-			},
-			plotOptions: {
-				radialBar: {
-					hollow: {
-						size: '40%',
-					},
-					track: {
-						strokeWidth: '97%',
-					},
-					dataLabels: {
-						name: {
-							show: true,
-						},
-						value: {
-							show: true,
+<script>
+    $(document).ready(function() {
+        function fetchServerStats() {
+            $.ajax({
+                url: './srvStats.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+					document.getElementById('taskTotal').textContent = data.tasks.total;
+					document.getElementById('taskRunning').textContent = data.tasks.running;
+					document.getElementById('taskSleeping').textContent = data.tasks.sleeping;
+					document.getElementById('taskStopped').textContent = data.tasks.stopped;
+					document.getElementById('taskZombie').textContent = data.tasks.zombie;
+					document.getElementById('taskTotal').textContent = data.tasks.total;
+					document.getElementById('cpuUser').textContent = data.cpu.us;
+					document.getElementById('cpuSystem').textContent = data.cpu.sy;
+					document.getElementById('cpuIdle').textContent = data.cpu.id;
+					document.getElementById('memTotal').textContent = data.memory.total;
+					document.getElementById('memUsed').textContent = data.memory.used;
+					document.getElementById('memFree').textContent = data.memory.free;
+                    if (data.processes && Array.isArray(data.processes)) {
+                        for (let index = 0; index < 10; index++) {
+							document.getElementById('proc' + index + 'pid').textContent = data.processes[index].PID;
+							document.getElementById('proc' + index + 'user').textContent = data.processes[index].USER;
+							document.getElementById('proc' + index + 'cpu').textContent = data.processes[index].CPU;
+							document.getElementById('proc' + index + 'mem').textContent = data.processes[index].MEM;
+							document.getElementById('proc' + index + 'cmd').textContent = data.processes[index].COMMAND;
 						}
-					}
-				}
-			},
-			labels: ['us', 'sy', 'id'],
-			legend: {
-				show: true,
-				floating: true,
-				position: 'left',
-				offsetX: 0,
-				offsetY: 0,
-				labels: {
-					useSeriesColors: true,
-				},
-				markers: {
-					size: 0
-				},
-				formatter: function(seriesName, opts) {
-					return seriesName + ": " + opts.w.globals.series[opts.seriesIndex] + '%';
-				},
-				itemMargin: {
-					vertical: 3
-				}
-			},
-		};
-		var optionsMemory = {
-			series: [92, 72, 52],
-			chart: {
-				id: 'rightChart',
-				height: 175,
-				type: 'radialBar',
-				animations: {
-					enabled: true,
-					easing: 'linear',
-					dynamicAnimation: {
-						speed: 1000
-					}
-				},
-				toolbar: {
-					show: false
-				},
-			},
-			plotOptions: {
-				radialBar: {
-					hollow: {
-						size: '40%',
-					},
-					track: {
-						strokeWidth: '97%',
-					},
-					dataLabels: {
-						name: {
-							show: true,
-						},
-						value: {
-							show: true,
-						}
-					}
-				}
-			},
-			labels: ['Used', 'Free', 'Total'],
-			legend: {
-				show: true,
-				position: 'left',
-				offsetX: 0,
-				offsetY: 0,
-				labels: {
-					useSeriesColors: true,
-				},
-				markers: {
-					size: 0
-				},
-				formatter: function(seriesName, opts) {
-					return seriesName + ": " + opts.w.globals.series[opts.seriesIndex] + '%';
-				},
-				itemMargin: {
-					vertical: 5
-				}
-			},
-		};
-		var cpuChart = new ApexCharts(document.querySelector("#leftChart"), optionsCpu);
-		cpuChart.render();
-		var memoryChart = new ApexCharts(document.querySelector("#rightChart"), optionsMemory);
-		memoryChart.render();
-	</script>
-	<script>// Fetch server stats and update the charts
-		$(document).ready(function() {
-			function fetchServerStats() {
-				$.ajax({
-					url: './srvStats.php',
-					type: 'GET',
-					dataType: 'json',
-					success: function(data) {
-						chart.updateSeries([
-							data.cpu.us,
-							data.cpu.sy,
-							data.cpu.id
-						]);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', status, error);
+                }
+            });
+        }
+        setInterval(fetchServerStats, 1500); // Fetch every 1500 milliseconds
+    });
+</script>
 
-						// Calculate and update memory usage percentages
-						let totalMemory = parseFloat(data.memory.total);
-						let usedMemory = parseFloat(data.memory.used);
-						let freeMemory = parseFloat(data.memory.free);
-						let usedPercentage = (usedMemory / totalMemory) * 100;
-						let freePercentage = (freeMemory / totalMemory) * 100;
-
-						// Update Memory chart
-							memoryChart.updateSeries([
-							usedPercentage.toFixed(1),
-							freePercentage.toFixed(1)
-						]);
-					},
-					error: function(xhr, status, error) {
-						console.error('Error:', status, error);
-					}
-				});
-			}
-			setInterval(fetchServerStats, 1500); // Fetch every 1500 milliseconds
-		});
-	</script>
 </body>
 </html>
