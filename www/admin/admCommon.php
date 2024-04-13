@@ -20,8 +20,13 @@ class dvmDB {
     private static $instance = null;
     private $pdo;
     private function __construct() {
-        $this->pdo = new PDO('sqlite:./db/dvmAdmin.db3');
-        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        try {
+            $this->pdo = new PDO('sqlite:./db/dvmAdmin.db3');
+            $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        } catch (PDOException $e) {
+            error_log('Database Connection Error: ' . $e->getMessage());
+            die('Database Connection Error: Unable to connect to the database. Please contact the system administrator.');
+        }
     }
     public static function getInstance() {
         if (self::$instance === null) {
@@ -29,8 +34,13 @@ class dvmDB {
         }
         return self::$instance->pdo;
     }
+    private function __clone() {
+        user_error('Cloning is not allowed.', E_USER_ERROR);
+    }
+    private function __wakeup() {
+        user_error('Unserializing is not allowed.', E_USER_ERROR);
+    }
 }
-
 function executeSqlFile($pdo, $filePath) {
     $sql = file_get_contents($filePath);
     if ($sql === false) {
@@ -103,7 +113,6 @@ function displaySidebar($activePage) {
         </div>
     <?php
 }
-
 function ldusrSettings($usrSettingsFile) {
     include $usrSettingsFile;
     $allVars = get_defined_vars();
@@ -157,15 +166,12 @@ class dvmLog {
     const TYPE_INFO = 'INFO';
     const TYPE_WARNING = 'WARNING';
     const TYPE_ERROR = 'ERROR';
-
     private $pdo;
     private $loggerName;
-
     public function __construct($pdo, $loggerName = 'defaultLogger') {
         $this->pdo = $pdo;
         $this->loggerName = $loggerName;
     }
-
     private function log($type, $message, $file = 'N/A', $line = 'N/A') {
         global $loggingEnabled, $logDebugEnabled;
 
@@ -181,23 +187,18 @@ class dvmLog {
         $stmt = $this->pdo->prepare("INSERT INTO dvmAdminlog (timestamp, logger, level, message, file, line) VALUES (?, ?, ?, ?, ?, ?)");
         $stmt->execute([$timestamp, $this->loggerName, $type, $message, $file, $line]);
     }
-
     public function info($message, $file = 'N/A', $line = 'N/A') {
         $this->log(self::TYPE_INFO, $message, $file, $line);
     }
-
     public function warning($message, $file = 'N/A', $line = 'N/A') {
         $this->log(self::TYPE_WARNING, $message, $file, $line);
     }
-
     public function error($message, $file = 'N/A', $line = 'N/A') {
         $this->log(self::TYPE_ERROR, $message, $file, $line);
     }
-
     public function debug($message, $file = 'N/A', $line = 'N/A') {
         $this->log('DEBUG', $message, $file, $line);
     }
 }
-
 setLocalMachineTimezone();
 ?>

@@ -27,7 +27,7 @@ $changedData = file_get_contents('php://input');
 $changes = json_decode($changedData, true);
 $parentDirectory = dirname(getcwd());
 $originalFile = $parentDirectory . DIRECTORY_SEPARATOR . 'userSettings.php';
-$backupFile = $originalFile . '.' . date('YdmHis');
+$backupFile =    $parentDirectory . DIRECTORY_SEPARATOR . 'admin' . DIRECTORY_SEPARATOR . 'archives' . DIRECTORY_SEPARATOR . 'userSettings.php' . '.' . date('Y-d-m-His');
 $new_permissions = 0766;
 $timezone = '';
 
