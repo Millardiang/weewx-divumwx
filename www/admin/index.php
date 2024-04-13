@@ -13,7 +13,36 @@
 #    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
-
+// Check if the SQLite3 extension is loaded
+if (!extension_loaded('sqlite3')) {
+    // Use of 'die' to stop script execution and output HTML content
+    die('<!DOCTYPE html>
+		<html lang="en">
+			<head>
+				<meta charset="UTF-8">
+				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+				<title>Error</title>
+				<style>
+					body {
+						display: flex;
+						justify-content: center;
+						align-items: center;
+						height: 100vh;
+						margin: 0;
+						background-color: #f4f4f4;
+						font-family: Arial, sans-serif;
+					}
+					h3 {
+						text-align: center;
+						margin-top: 50px; /* Adjust this value to increase or decrease spacing */
+					}
+				</style>
+			</head>
+				<body>
+					<h3>Error: SQLite3 extension is not loaded.<br>You are unable to run the Admin Dashboard until the necessary dependencies are met.<br>Please make sure that the SQLite3 extension is loaded before loading the Admin Dashboard again.</h3>
+				</body>
+		</html>');
+}
 session_start();
 $inactive = 3600;
 if(isset($_SESSION['login_time']) && time() - $_SESSION['login_time'] > $inactive){
@@ -24,6 +53,7 @@ $_SESSION['login_time'] = time();
 require_once './admVersion.php';
 require_once './admCommon.php';
 $passwordEmpty = false;
+console_log('Setting up SQLite Instance');
 $pdo = dvmDB::getInstance();
 # Initial Login test based on no password set
 console_log('Testing for new setup');
@@ -33,6 +63,9 @@ try {
 	$passwordResult = $checkPasswordQuery->fetch(PDO::FETCH_ASSOC);
 	if ($passwordResult && $passwordResult['password'] === '') {
 		$passwordEmpty = true;
+		console_log('Password empty, new setup');
+	} else {
+		console_log('Password not empty');
 	}
 } catch (PDOException $e) {
 	console_log('Database error: ' . $e->getMessage());
@@ -79,6 +112,7 @@ try {
     }
 }
 $logger = new dvmLog($pdo, 'dvmAdmLog');
+console_log('DvM Logger class initialized')
 ?>
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">

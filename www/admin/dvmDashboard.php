@@ -317,7 +317,8 @@ require_once './admVersion.php';
 									<div class="memSmTxt"><a href="#" id="btnDisplaywebSrvrlog">Web Server Log</a></div>
 									<div class="memSmTxt"><a href="#" id="btnDisplaywebSrvrlog">Web Server Error Log</a></div>
 									<div class="memSmTxt"><a href="#" id="btnDisplayPHPlog">PHP Log</a></div>
-									<div class="memSmTxt"><a href="#" id="btnDisplaySyslog">Display Syslog</a></div>
+									<div><button type="button" class="btn btn-info" id="btnDisplaySyslog" data-bs-toggle="modal" data-bs-target="#displaysysLogModal">Display Syslog</button></div>
+									<div><button type="button" class="btn btn-info" id="btnDisplayWeewx" data-bs-toggle="modal" data-bs-target="#displayweewxLogModal">Display Weewx log</button></div>
 								</div>
 								<div class="card-arrow">
 									<div class="card-arrow-top-left"></div>
@@ -485,25 +486,6 @@ require_once './admVersion.php';
 				</div>
 			</div>
 		</div>
-		<div class="modal fade" id="sysLogmodal">
-			<div class="modal-dialog modal-xl">
-				<div class="modal-content">
-					<div class="modal-header">
-						<h5 class="modal-title">Current sysLog</h5>
-						<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-					</div>
-					<div class="modal-body">
-						<div class="col-mb-6">
-							<span class="close">&times;</span>
-							<pre id="syslogContent">Syslog content will be displayed here...</pre>
-						</div>
-					</div>
-					<div class="modal-footer">
-						<button type="button" class="btn btn-outline-default" data-bs-dismiss="modal">Close</button>
-					</div>
-				</div>
-			</div>
-		</div>
 		<!-- Change Password Modal  -->
 		<div class="modal fade" id="changePassword" data-bs-backdrop="static" data-bs-keyboard="false">
 			<div class="modal-dialog">
@@ -562,7 +544,7 @@ require_once './admVersion.php';
 			</div>
 		</div>
 		<!-- Display System News Modal  -->
-		<div class="modal fade" id="displaysysNewsModal" data-bs-backdrop="static" data-bs-keyboard="false">
+		<div class="modal fade" id="displaysysNewsModal">
 			<div class="modal-dialog modal-xl">
 				<div class="modal-content">
 					<div class="modal-header">
@@ -573,11 +555,14 @@ require_once './admVersion.php';
 							<pre id="sysNewsContent" class="custom-modal-content">Syslog content will be displayed here...</pre>
 						</div>
 					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-outline-default" data-bs-dismiss="modal">Close</button>
+					</div>
 				</div>
 			</div>
 		</div>
-		<!-- Display Syslog Modal  -->
-		<div class="modal fade" id="displaysysLogModal" data-bs-backdrop="static" data-bs-keyboard="false">
+		<!-- Display Syslog Modal -->
+		<div class="modal fade" id="displaysysLogModal">
 			<div class="modal-dialog modal-xl">
 				<div class="modal-content">
 					<div class="modal-header">
@@ -587,6 +572,28 @@ require_once './admVersion.php';
 						<div class="col-mb-6">
 							<pre id="syslogContent" class="custom-modal-content">Syslog content will be displayed here...</pre>
 						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-outline-default" data-bs-dismiss="modal">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Display WeewxLog Modal -->
+		<div class="modal fade" id="displayweewxLogModal">
+			<div class="modal-dialog modal-xl">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h4 class="modal-title">Current Weewx Log</h4>
+					</div>
+					<div class="modal-body">
+						<div class="col-mb-6">
+							<pre id="weewxLogContent" class="custom-modal-content">Weewx log content will be displayed here...</pre>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-outline-default" data-bs-dismiss="modal">Close</button>
 					</div>
 				</div>
 			</div>
@@ -755,34 +762,51 @@ require_once './admVersion.php';
 		});
 	</script>
 	<script>//Display Log Files
-	$(document).ready(function(){
-		$('.memSmTxt a').on('click', function(event) {
-			event.preventDefault();
-			var linkId = $(this).attr('id');
-			switch(linkId) {
-				case 'btnDisplaySyslog':
-					fetchSyslog();
-					$('#sysLogmodal').modal('show');
-					break;
-				// Add cases for other links with their respective IDs and functions
-				default:
-					console.log('Link clicked with no specific action defined.');
-			}
-		});
+		$(document).ready(function(){
+			$('#btnDisplayLog').on('click', function(event) {
+				event.preventDefault();
+				var linkId = $(this).attr('id');
+				switch(linkId) {
+					case 'btnDisplaySyslog':
+						fetchSyslog();
+						$('#sysLogmodal').modal('show');
+						break;
+					case 'btnDisplayWeewx':
+						fetchWeewxLog();
+						$('#weewxLogmodal').modal('show');
+						break;
 
-		function fetchSyslog() {
-			$.ajax({
-				url: 'dispSysLog.php',
-				method: 'GET',
-				success: function(data) {
-					$('#syslogContent').text(data);
-				},
-				error: function() {
-					$('#syslogContent').text('Error fetching syslog.');
+					// Add cases for other links with their respective IDs and functions
+					default:
+						console.log('Link clicked with no specific action defined.');
 				}
 			});
-		}
-	});
+
+			function fetchSyslog() {
+				$.ajax({
+					url: 'dispSysLog.php',
+					method: 'GET',
+					success: function(data) {
+						$('#syslogContent').text(data);
+					},
+					error: function() {
+						$('#syslogContent').text('Error fetching syslog.');
+					}
+				});
+			}
+			function fetchWeewxLog() {
+				$.ajax({
+					url: 'dispWeewxLog.php',
+					method: 'GET',
+					success: function(data) {
+						$('#weewxLogContent').text(data);
+					},
+					error: function() {
+						$('#weewxLogContent').text('Error fetching weewx log.');
+					}
+				});
+			}
+		});
 	</script>
 	<script>// Get local DvM Version
 		 var locDvmVersion = "<?php echo $locDvmVer; ?>";
@@ -852,44 +876,43 @@ require_once './admVersion.php';
 		}
 
 	</script>
-<script>
-    $(document).ready(function() {
-        function fetchServerStats() {
-            $.ajax({
-                url: './srvStats.php',
-                type: 'GET',
-                dataType: 'json',
-                success: function(data) {
-					document.getElementById('taskTotal').textContent = data.tasks.total;
-					document.getElementById('taskRunning').textContent = data.tasks.running;
-					document.getElementById('taskSleeping').textContent = data.tasks.sleeping;
-					document.getElementById('taskStopped').textContent = data.tasks.stopped;
-					document.getElementById('taskZombie').textContent = data.tasks.zombie;
-					document.getElementById('taskTotal').textContent = data.tasks.total;
-					document.getElementById('cpuUser').textContent = data.cpu.us;
-					document.getElementById('cpuSystem').textContent = data.cpu.sy;
-					document.getElementById('cpuIdle').textContent = data.cpu.id;
-					document.getElementById('memTotal').textContent = data.memory.total;
-					document.getElementById('memUsed').textContent = data.memory.used;
-					document.getElementById('memFree').textContent = data.memory.free;
-                    if (data.processes && Array.isArray(data.processes)) {
-                        for (let index = 0; index < 10; index++) {
-							document.getElementById('proc' + index + 'pid').textContent = data.processes[index].PID;
-							document.getElementById('proc' + index + 'user').textContent = data.processes[index].USER;
-							document.getElementById('proc' + index + 'cpu').textContent = data.processes[index].CPU;
-							document.getElementById('proc' + index + 'mem').textContent = data.processes[index].MEM;
-							document.getElementById('proc' + index + 'cmd').textContent = data.processes[index].COMMAND;
+	<script>
+		$(document).ready(function() {
+			function fetchServerStats() {
+				$.ajax({
+					url: './srvStats.php',
+					type: 'GET',
+					dataType: 'json',
+					success: function(data) {
+						document.getElementById('taskTotal').textContent = data.tasks.total;
+						document.getElementById('taskRunning').textContent = data.tasks.running;
+						document.getElementById('taskSleeping').textContent = data.tasks.sleeping;
+						document.getElementById('taskStopped').textContent = data.tasks.stopped;
+						document.getElementById('taskZombie').textContent = data.tasks.zombie;
+						document.getElementById('taskTotal').textContent = data.tasks.total;
+						document.getElementById('cpuUser').textContent = data.cpu.us;
+						document.getElementById('cpuSystem').textContent = data.cpu.sy;
+						document.getElementById('cpuIdle').textContent = data.cpu.id;
+						document.getElementById('memTotal').textContent = data.memory.total;
+						document.getElementById('memUsed').textContent = data.memory.used;
+						document.getElementById('memFree').textContent = data.memory.free;
+						if (data.processes && Array.isArray(data.processes)) {
+							for (let index = 0; index < 10; index++) {
+								document.getElementById('proc' + index + 'pid').textContent = data.processes[index].PID;
+								document.getElementById('proc' + index + 'user').textContent = data.processes[index].USER;
+								document.getElementById('proc' + index + 'cpu').textContent = data.processes[index].CPU;
+								document.getElementById('proc' + index + 'mem').textContent = data.processes[index].MEM;
+								document.getElementById('proc' + index + 'cmd').textContent = data.processes[index].COMMAND;
+							}
 						}
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error:', status, error);
-                }
-            });
-        }
-        setInterval(fetchServerStats, 1500); // Fetch every 1500 milliseconds
-    });
-</script>
-
+					},
+					error: function(xhr, status, error) {
+						console.error('Error:', status, error);
+					}
+				});
+			}
+			setInterval(fetchServerStats, 1500); // Fetch every 1500 milliseconds
+		});
+	</script>
 </body>
 </html>

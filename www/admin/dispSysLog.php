@@ -14,6 +14,7 @@
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
 $syslogFile = '/var/log/syslog';
+$weewxLogFile = '';
 
 if (file_exists($syslogFile) && is_readable($syslogFile)) {
     $content = file_get_contents($syslogFile);
