@@ -1,52 +1,66 @@
 <?php
-$themelayout = "5";
+##############################################################################################
+#        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
+#       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    #
+#       (.  ___  :)||  |\   \  //  / |   (  ) : | \   \  //   |  |'  /    \:  | \   \  /     #
+#       |: \   ) |||:  | \\  \/. ./  (:  |  | . ) /\\  \/.    |  |: /'        |  \\  \/      #
+#       (| (___\ |||.  |  \.    //    \\ \__/ // |: \.        |   \//  /\'    |  /\.  \      #
+#       |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \     #
+#       (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|    #
+#                                                                                            #
+#     Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      #
+#      Distributed under terms of the GPLv3.  See the file LICENSE.txt for your rights.      #
+#    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
+#                    https://github.com/Millardiang/weewx-divumwx/issues                     #
+##############################################################################################
+
 $TZ = "Europe/London";
-$trkVisits = 0;
-$stripLocal = 1;
-$localIP = "0.0.0.0";
-$webSrvr = 0;
 $extralinks = "yes";
 $sbLang = "yes";
-$dateFormat = "d-m-Y";
-$timeFormat = "H:i:s";
-$timeFormatShort = "H:i";
-$clockformat = "24";
-$advisoryzone = "uk";
-$aqInUse = "yes";
-$aqZone = "uk";
-$aqSource = "weewx";
-$lightningSource = 1;
+$dateFormat = "d-m-Y"; //m-d-Y, Y-m-d
+$timeFormat = "H:i:s"; //g:i:s, g:i:s a
+$timeFormatShort = "H:i"; //g:i, g:i a
+$clockformat = "24"; //12, 24
+$advisoryzone = "uk"; //uk, na, eu, au, rw (= UK, North America, Europe, Australia, Rest of World)
+$aqInUse = "yes"; // yes, no
+$aqZone = "ci";//uk, us, ei, ci, au, (= UK DAQI, US EPS, Europe EAQI, Europe CAQI, Australia)
+$aqSource = "weewx"; //purple, weewx, sds
+$lightningSource = "1"; // use 'Boltek' or '0'
 $position2 = "dvmAirqualityTop.php";
-$position3 = "dvmLightningTop.php";
+$position3 = "dvmWindGustYearTop.php";
+$position3a = "dvmLightningTop.php";
 $position5 = "dvmTemperatureModule.php";
 $position6 = "dvmForecastModule.php";
 $position7 = "dvmCurrentModule.php";
 $position8 = "dvmWindModule.php";
-$position9 = "dvmRainfallModule.php";
+$position9 = "dvmAnemometerModule.php";
 $position10 = "dvmBarometerModule.php";
-$position11 = "dvmIndoorTemperatureModule.php";
+$position11 = "dvmRainfallModule.php";
 $position12 = "dvmSolarUvLuxModule.php";
 $position13 = "dvmLightningModule.php";
-$position14 = "dvmAirqualityModule.php";
+$position16 = "dvmIndoorTemperatureModule.php";
 $position15 = "dvmWebcamModule.php";
-$position16 = "dvmEarthquakeModule.php";
+$position14 = "dvmEarthquakeModule.php";
 $position17 = "dvmEarthDaylightModule.php";
-$position18 = "dvmSolarDialModule.php";
+$position18 = "dvmPollenModule.php";
 $position19 = "dvmMoonPhaseModule.php";
-$webcamurl = "";
+$position20 = "dvmPollenModule.php";
+$webcamurl = "./img/picam.jpg";
+$webcamurl = "./img/picam.jpg";
 $videoWeatherCamURL = "";
 $email = "";
 $twitter = "";
 $since = "2021";
 $defaultlanguage = "en";
-$flag = "en";
+$password = "";
+$flag = "gb";
 $manifestShortName = "MYWX";
 $notifications = "yes";
 $notifyWind = "yes";
 $notifyEarthquake = "yes";
-$notifyMagnitude = 3;
+$notifyMagnitude = "3";
 $linkWU = "yes";
-$linkWUNewDash = "yes";
+$linkWUNew = "yes";
 $WUid = "IYOURWUKWY";
 $linkCWOPID = "";
 $linkFindUID = "";
@@ -59,7 +73,7 @@ $linkAWEKASID = "";
 $linkAmbientWeatherID = "";
 $linkPWSWeatherID = "";
 $linkMetOfficeID = "";
-$linkCustom1Title = "Services Config";
+$linkCustom1Title = "";
 $linkCustom1URL = "https://steepleian.github.io/weewx-divumwx-divumwx/divumwx_settings_txt.html";
 $linkCustom2Title = "";
 $linkCustom2URL = "";
