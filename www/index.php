@@ -14,8 +14,8 @@
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
 
-  if (!file_exists("userSettings.php")) {
-    copy("initial_userSettings.php", "userSettings.php");
+  if (!file_exists("./userSettings.php")) {
+    copy("./initial_userSettings.php", "./userSettings.php");
   }
   include_once ('dvmCombinedData.php');
   include_once ('webserver_ip_address.php');
