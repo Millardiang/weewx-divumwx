@@ -32,7 +32,7 @@
           
       <li class="header">ADMIN</li>
         <li><a href="./admin/index.php" title="DvM Admin"><menumarkergreen></menumarkergreen> DvM Admin</a></li>
-      <!--li class="header">UI THEME</li>
+      <li class="header">UI THEME</li>
       <li>
         <a href="<?php echo ($theme == 'dark') ? '?theme=light' : '?theme=dark'; ?>">
           <?php if ($theme == 'dark'){
@@ -40,7 +40,7 @@
           }else{
             echo '<menumarkerbluegrey></menumarkerbluegrey> Dark Theme';
           }?></a>
-      </li-->
+      </li>
       <li class="header">UNITS</li>
       <?php if ($units != Null && $units != 'default'){
         echo '<li>
@@ -58,12 +58,7 @@
           <a href="./?units=us"><menumarkerorange></menumarkerorange> US Customary <topbarimperialf>°F</topbarimperialf></a>
         </li>';
       }
-       if ($units != 'ushpa'){
-        echo '<li>
-          <a href="./?units=ushpa"><menumarkerorange></menumarkerorange> US (hPa) <topbarimperialf>°F</topbarimperialf></a>
-        </li>';
-      }
-     if ($units != 'metric'){
+      if ($units != 'metric'){
         echo '<li>
           <a href="./?units=metric"><menumarkerblue></menumarkerblue> Metric <topbarmetricc>°C</topbarmetricc></a>
         </li>';

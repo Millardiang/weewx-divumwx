@@ -19,10 +19,8 @@ $UTC_offset = timezone_offset_get(timezone_open($TZ), new DateTime()) / 3600; //
 $forecastlocation = $stationlocation; //
 $emailform = $email; // PLEASE LEAVE FIXED
 
-/*
 $theme = isset($theme) ? $theme : "dark";
 $theme1 = $theme;
-*/
 
 $charttheme = $theme;
 $livedata = "serverdata/dvmRealtime.txt";
@@ -95,7 +93,6 @@ if (
 } elseif (
     array_key_exists("units", $_GET) &&
     ($_GET["units"] == "us" ||
-        $_GET["units"] == "ushpa" ||
         $_GET["units"] == "ca" ||
         $_GET["units"] == "uk" ||
         $_GET["units"] == "metric" ||
@@ -151,16 +148,6 @@ if ($units == "uk") {
     $tempunit = "F";
     $rainunit = "in";
     $pressureunit = "inHg";
-    $distanceunit = "mi"; 
-    $windconv = "1";
-    $rainfallconv = "1";
-    $pressureinterval = "0.5";
-    $rainfallconvmm = "1";
-} elseif ($units == "ushpa") {
-    $windunit = "mph";
-    $tempunit = "F";
-    $rainunit = "in";
-    $pressureunit = "hPa";
     $distanceunit = "mi"; 
     $windconv = "1";
     $rainfallconv = "1";
