@@ -59,12 +59,7 @@
           <a href="./?units=us"><menumarkerorange></menumarkerorange> US Customary <topbarimperialf>°F</topbarimperialf></a>
         </li>';
       }
-       if ($units != 'ushpa'){
-        echo '<li>
-          <a href="./?units=ushpa"><menumarkerorange></menumarkerorange> US (hPa) <topbarimperialf>°F</topbarimperialf></a>
-        </li>';
-      }
-     if ($units != 'metric'){
+      if ($units != 'metric'){
         echo '<li>
           <a href="./?units=metric"><menumarkerblue></menumarkerblue> Metric <topbarmetricc>°C</topbarmetricc></a>
         </li>';
