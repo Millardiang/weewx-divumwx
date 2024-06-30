@@ -14,6 +14,28 @@
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
 
-$templateversion = "DVM - <maxblue>0.8.50</maxblue> - beta";
-$os = shell_exec('lsb_release -d');
-$os_version = str_replace('Description:',' ',$os);
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $newPassword = $_POST['password'];
+
+    if (empty($newPassword)) {
+        echo json_encode(['status' => 'error', 'message' => 'Password is required.']);
+        return;
+    }
+
+    $hash = password_hash($newPassword, PASSWORD_DEFAULT);
+
+    try {
+        $db = new PDO('sqlite:./admin/db/dvmAdmin.db3');
+        $sql = "UPDATE users SET password = :password WHERE id = 1";
+        $stmt = $db->prepare($sql);
+        $stmt->bindParam(':password', $hash, PDO::PARAM_STR);
+        if ($stmt->execute()) {
+            echo json_encode(['status' => 'success', 'message' => 'Password updated successfully.']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Failed to update password.']);
+        }
+    } catch (PDOException $e) {
+        echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+    }
+}
+?>

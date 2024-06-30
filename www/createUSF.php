@@ -14,6 +14,39 @@
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
 
-$templateversion = "DVM - <maxblue>0.8.50</maxblue> - beta";
-$os = shell_exec('lsb_release -d');
-$os_version = str_replace('Description:',' ',$os);
+$data = file_get_contents('php://input');
+$configArray = json_decode($data, true);
+$phpContent = "<?php\n";
+
+foreach ($configArray as $item) {
+    $key = $item['key'];
+    $value = $item['value'];
+    if (is_string($value)) {
+        $value = '"' . addslashes($value) . '"';
+    }
+    $phpContent .= "\$$key = $value;\n";
+}
+
+try {
+    // Attempt to write the file
+    if (file_put_contents('userSettings.php', $phpContent) === false) {
+        echo json_encode(["status" => "fail", "message" => "Error writing file"]);
+        exit;
+    }
+
+    // Retrieve the owner and group of the file
+    $ownerInfo = posix_getpwuid(fileowner('userSettings.php'));
+    $groupInfo = posix_getgrgid(filegroup('userSettings.php'));
+    $owner = $ownerInfo['name'];
+    $group = $groupInfo['name'];
+    $permissions = substr(sprintf('%o', fileperms('userSettings.php')), -4);
+
+    echo json_encode([
+        "status" => "success",
+        "owner" => $owner,
+        "group" => $group,
+        "permissions" => $permissions
+    ]);
+} catch (Exception $e) {
+    echo json_encode(["status" => "fail", "message" => "Exception occurred"]);
+}
