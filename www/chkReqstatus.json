@@ -1,0 +1,56 @@
+{
+    "weewx": {
+        "status": true,
+        "version": "5.0.2"
+    },
+    "php_version": {
+        "status": true,
+        "version": "8.3.2"
+    },
+    "php_modules": {
+        "intl": "Loaded",
+        "json": "Loaded",
+        "mysqli": "Loaded",
+        "pdo_sqlite": "Loaded",
+        "random": "Loaded",
+        "session": "Loaded",
+        "sqlite3": "Loaded"
+    },
+    "directories": {
+        ".\/admin": {
+            "status": true,
+            "perms": "0775",
+            "owner": "rayvenhaus",
+            "group": "rayvenhaus"
+        },
+        ".\/admin\/archives": {
+            "status": true,
+            "perms": "0775",
+            "owner": "rayvenhaus",
+            "group": "rayvenhaus"
+        },
+        ".\/admin\/assets": {
+            "status": true,
+            "perms": "0775",
+            "owner": "rayvenhaus",
+            "group": "rayvenhaus"
+        },
+        ".\/admin\/db": {
+            "status": true,
+            "perms": "0775",
+            "owner": "rayvenhaus",
+            "group": "rayvenhaus"
+        }
+    },
+    "running_user": "www-data",
+    "db_file": {
+        "status": true,
+        "perms": "0666",
+        "owner": "rayvenhaus",
+        "group": "rayvenhaus"
+    },
+    "db_connection": {
+        "status": true,
+        "message": "Database is accessible and permissions are correct."
+    }
+}
