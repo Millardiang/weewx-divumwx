@@ -118,7 +118,7 @@ include "solarSelect.php";
  <main class="grid1">
   
   <articlegraph> 
-     <iframe  src="charts/uviSmallCharts.php?chart='radsmallplot'&span='yearly'&temp='<?php echo $temp[
+     <iframe  src="dvmhighcharts/uviSmallCharts.php?chart='radsmallplot'&span='yearly'&temp='<?php echo $temp[
     "units"
 ]; ?>'&pressure='<?php echo $barom[
     "units"

@@ -581,7 +581,7 @@ else {$airqual["text"] = $airqual["text10"];
     <div class="chartforecast2">
       
 
-      <span class="yearpopup" style="background-colr: red" ><a alt="airquality charts" title="Airquality Charts" href="charts/dvmAirQualityWeekChart.php" data-lity><?php echo $menucharticonpage;?> Airquality Charts and Information</a></span>
+      <span class="yearpopup" style="background-colr: red" ><a alt="airquality charts" title="Airquality Charts" href="dvmhighcharts/dvmAirQualityWeekChart.php" data-lity><?php echo $menucharticonpage;?> Airquality Charts and Information</a></span>
       
 
     </div>

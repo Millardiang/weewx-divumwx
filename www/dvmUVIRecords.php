@@ -122,7 +122,7 @@ echo "<div class='uvtoday11' style='background: $colorUVAlltimeMax';>",$uv["allt
  <main class="grid1">
   <articlegraph style="margin-top: 5px;"> 
   <!--<div class=actualt>Today <span style="color:#ff9350">UV-INDEX</div>  //-->
-  <iframe  src="charts/uviSmallCharts.php?chart='uvsmallplot'&span='yearly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>" frameborder="0" scrolling="no" width="100%" height="100%"></iframe>
+  <iframe  src="dvmhighcharts/uviSmallCharts.php?chart='uvsmallplot'&span='yearly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>" frameborder="0" scrolling="no" width="100%" height="100%"></iframe>
  </articlegraph>
 
  <style>

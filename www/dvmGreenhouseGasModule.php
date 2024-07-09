@@ -29,7 +29,7 @@ $greenhouse["ammonia"] = $parsed_json["current"]["ammonia"];
 ?>
 
 <div class="chartforecast2">
-<span class="yearpopup"><a alt="airquality charts" title="Airquality Charts" href="charts/dvmAirQualityWeekChart.php" data-lity><?php echo $menucharticonpage;?> Airquality Charts and Information</a></span>
+<span class="yearpopup"><a alt="airquality charts" title="Airquality Charts" href="dvmhighcharts/dvmAirQualityWeekChart.php" data-lity><?php echo $menucharticonpage;?> Airquality Charts and Information</a></span>
 </div>
 <span class='moduletitle2'><?php echo $lang['Greenhouse'];?></span>
 

@@ -66,7 +66,7 @@ if (empty ($lightning["yesterday_strike_count"])) {$lightning["yesterday_strike_
 </main>
 <main class="grid1">
 <articlegraph style="height:450px; margin-top:5px;"> 
-<iframe width="100%" height="100%" scrolling="no" src="charts/dvmLightningYearChart.php" frameborder="0"></iframe>
+<iframe width="100%" height="100%" scrolling="no" src="dvmhighcharts/dvmLightningYearChart.php" frameborder="0"></iframe>
    
 </articlegraph>
 </main></main>
