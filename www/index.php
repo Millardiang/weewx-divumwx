@@ -211,7 +211,25 @@
       </div>
      </div>
    </div>
-</div>
+<div class="divum-container">
+<!-- Row 7 -->
+  <!-- position 20--->
+  <div class="divum-item">
+    <div id="position20">
+    </div>
+  </div>
+  <!--position 21-->
+  <div class="divum-item">
+    <div id="position21">
+    </div>
+  </div>
+  <!--position 22-->
+  <div class="divum-item">
+    <div id="position22">
+      </div>
+     </div>
+   </div>
+  </div>
 <!--End Main Grid area-->
 <!--footer area -->
 <?php
