@@ -127,7 +127,7 @@ echo "<div class='temperaturetoday0'>".$air_density["alltime_min"]."</value><sma
 </main>
 <main class="grid1">
 <articlegraph style="height:394px; margin-top:5px;"> 
-<iframe width="100%" height="100%" scrolling="no" src="charts/dvmAirDensityChart.php" frameborder="0"></iframe>
+<iframe width="100%" height="100%" scrolling="no" src="dvmhighcharts/dvmAirDensityChart.php" frameborder="0"></iframe>
    
 </articlegraph>
 </main></main>

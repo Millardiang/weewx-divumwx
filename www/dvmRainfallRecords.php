@@ -94,7 +94,7 @@ echo "<smalluvunit>".$rain["units"]."</smalluvunit>";}?>
  <main class="grid1">
     <articlegraph> 
    
-  <iframe  src="charts/smallCharts.php?chart='rainsmallplot'&span='yearly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units'];?>" frameborder="0" scrolling="no" width="100%"  height="100%"></iframe>
+  <iframe  src="dvmhighcharts/smallCharts.php?chart='rainsmallplot'&span='yearly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units'];?>" frameborder="0" scrolling="no" width="100%"  height="100%"></iframe>
    
   </articlegraph> 
   

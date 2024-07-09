@@ -137,7 +137,7 @@ if ($barom["alltime_min"] >= 0) { echo "<div class='temperaturetoday0' style='ba
 <a><b>Color Key: - </a><a style="color: #FF0000;">&#9632;&#9632;</b></a><a> Low Pressure, <a style="color:#E90076;"> &#9632;&#9632;</a><a> Normal Pressure, </a><a style="color: #377EF7;"> &#9632;&#9632;</a><a> High Pressure</a>
 </articlegraph>
 <articlegraph style="height:369px"> 
-<iframe  src="charts/baromSmallCharts.php?chart='barsmallplot'&span='yearly'&temp='<?php echo $temp["units"];?>'&pressure='<?php echo $barom["units"];?>'&wind='<?php echo $wind["units"];?>'&rain='<?php echo $rain["units"];?>" frameborder="0" scrolling="no" width="100%" height="100%"></iframe>
+<iframe  src="dvmhighcharts/baromSmallCharts.php?chart='barsmallplot'&span='yearly'&temp='<?php echo $temp["units"];?>'&pressure='<?php echo $barom["units"];?>'&wind='<?php echo $wind["units"];?>'&rain='<?php echo $rain["units"];?>" frameborder="0" scrolling="no" width="100%" height="100%"></iframe>
    
 </articlegraph> 
 </main></main>
