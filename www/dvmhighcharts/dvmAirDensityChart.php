@@ -32,7 +32,7 @@ $airDensity = json_encode($airDensityLast);
     <script src="https://code.highcharts.com/stock/highcharts-more.js"></script>
     <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
     <script src="https://code.highcharts.com/modules/export-data.js"></script>
-    <script src="scripts/dark-theme.js" type="text/javascript"></script>
+    <script src="scripts/brand-<?php echo $theme;?>.js" type="text/javascript"></script>
 </head>
 <body>
 
@@ -41,7 +41,7 @@ $airDensity = json_encode($airDensityLast);
     background-color: 'transparent',
 }
 #airDensity-chart {
-    width: 779px;
+    width: 100%;
     height: 345px;
 }
 </style>
@@ -63,16 +63,12 @@ Highcharts.chart('airDensity-chart', {
         timezoneOffset: - utcoffset
     },
     chart: {
+        type: 'spline',
         borderWidth: 0,
         marginRight: 10,
         marginLeft: 70,
-        plotBackgroundColor: {
-            linearGradient: { x1: 0, y1: 0, x2: 1, y2: 1 },
-            stops: [
-                [0, 'transparent'],
-                [1, 'transparent']
-            ]
-        },
+        backgroundColor: 'transparent',
+        plotBackgroundColor: 'transparent',
         spacing: [15, 20, 10, 0],
         zoomType: 'x'
     },

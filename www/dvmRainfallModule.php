@@ -15,7 +15,7 @@ include('dvmCombinedData.php');
 ?>
 
 <div class="chartforecast2">
-<span class="yearpopup"><a alt="rain charts" title="rain charts" href="dvmMenuRainfall.php" data-lity><?php echo $menucharticonpage;?> Rainfall Almanac and Charts</a></span>     
+<span class="yearpopup"><a alt="rain charts" title="rain charts" href="dvmRainfallRecords.php" data-lity><?php echo $menucharticonpage;?> Rainfall Almanac and Charts</a></span>     
 </div>
 <span class='moduletitle2'><?php echo $lang['rainfallModule'], " (<valuetitleunit>" . $rain["units"];?></valuetitleunit>)</span>
 <div class="updatedtime1"><span><?php if (file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?></div>
