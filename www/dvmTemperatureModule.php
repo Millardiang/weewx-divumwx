@@ -64,7 +64,7 @@
 <?php
 
 include('dvmCombinedData.php');
-
+$yearMonth = date("Y-m");
 if ($theme === "dark")
 {$bordercolor = "#393d40";}
 else if ($theme === "light")
@@ -74,7 +74,11 @@ else if ($theme === "light")
 ?>
 <div class="chartforecast4">
 <span class="yearpopup"><a alt="temp charts" title="temp charts" href="dvmTemperatureRecords.php" data-lity><?php echo $menucharticonpage;?> Temperature Records and Charts</a></span>
+<<<<<<< HEAD:www/dvmTemperatureModule(1).php
+<span class="yearpopup"><a alt="heat map" title="heat map" href="heatmaps/heatmap-<?php echo $yearMonth;?>.php" data-lity><?php echo $menucharticonpage;?> Heat Map</a></span>
+=======
 <span class="yearpopup"><a alt="heat map" title="heat map" href="dvmHeatMapPopup.php" data-lity><?php echo $menucharticonpage;?> Heat Map</a></span>
+>>>>>>> 05cf9b46c8090e15d2f1791b74d7d24935aab35a:www/dvmTemperatureModule.php
 </div>    
 <span class='moduletitle4'><?php echo $lang['temperatureModule'];?> (<valuetitleunit>°<?php echo $temp["units"];?></valuetitleunit>)</span>
 <div class="updatedtime1"><?php if(file_exists($livedata)&&time()- filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>';else echo $online." ".$divum["time"];?></div>
