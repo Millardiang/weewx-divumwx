@@ -219,7 +219,8 @@ function plot_js(units, ptype, span, plt_div, dplots = false, cdates = false, re
                             enabled: false,
 	                },
                     },
-	            series: {states: {hover: {halo: {size: 0,}}}, 
+	            series: {
+                    states: {hover: {halo: {size: 0,}}}, 
                             turboThreshold:5000,
 	            },
 	            scatter: {
@@ -250,22 +251,28 @@ function plot_js(units, ptype, span, plt_div, dplots = false, cdates = false, re
 	                    hover: {
 	                        lineWidth: 1,
 	                        lineWidthPlus: 1}}},
+
 	        },
+            navigator: {
+                enabled: false
+            },
+
+            exporting: {
+                enabled: false 
+            },
 	        rangeSelector: {},
                 exporting: {
+                    enabled: false,
                     buttons: {
                         contextButton: {enabled: false,},
-                        redButton:     {y: (plot_div=='plot_div2'?-100:0),},
-                        yellowButton:  {y: (plot_div=='plot_div2'?-100:0),},
-                        greenButton:   {y: (plot_div=='plot_div2'?-100:0),},
-                        toggle: {
-                            text: 'Select',
+                         toggle: {
+                            text: '',
                             x: -10,
                             menuItems:[]
                         }
-                    }
+                   }
                 },
-	        series: [{}],
+series: [{}],
 	        tooltip: {
 	            valueDecimals: 2,
 	            crosshairs: true,
@@ -286,6 +293,10 @@ function plot_js(units, ptype, span, plt_div, dplots = false, cdates = false, re
 	                week: '%e %b',
 	                month: '%b %y',
 	            },
+                scrollbar: {
+                    enabled: false
+                },
+
 	            lineWidth: 1,
 	            minorGridLineWidth: 0,
 	            minorTickLength: 2,
@@ -330,6 +341,9 @@ function plot_js(units, ptype, span, plt_div, dplots = false, cdates = false, re
 	                x: -4,
 	                y: 4,
 	            },
+                scrollbar: {
+                    enabled: false
+                },
 	            lineWidth: 1,
 	            minorGridLineWidth: 0,
 	            minorTickLength: 2,
@@ -647,8 +661,8 @@ function plot_js(units, ptype, span, plt_div, dplots = false, cdates = false, re
 
 	function setTempSmall(options) {
 	    options.chart.marginBottom = 35;
-	    options.yAxis[0].height = "175";
-	    $("#"+plot_div).css("height", 220);
+	    options.yAxis[0].height = 185;
+	    $("#"+plot_div).css("height", 230);
 	    return options
 	};
 	
@@ -982,8 +996,8 @@ function plot_js(units, ptype, span, plt_div, dplots = false, cdates = false, re
         }
 	function setWindSmall(options) {
 	    options.chart.marginBottom = 35;
-	    options.yAxis[0].height = "280";
-	    $("#"+plot_div).css("height", 325);
+	    options.yAxis[0].height = "320";
+	    $("#"+plot_div).css("height", 365);
 	    return options;
 	};
 	
@@ -1588,8 +1602,8 @@ function plot_js(units, ptype, span, plt_div, dplots = false, cdates = false, re
 	
 	function setUvSmall(options) {
 		options.chart.marginBottom = 35;
-	    options.yAxis[0].height = "255";
-	    $("#"+plot_div).css("height", 300);
+	    options.yAxis[0].height = "250";
+	    $("#"+plot_div).css("height", 295);
 	    return options
 	};
 	
@@ -1651,7 +1665,7 @@ function plot_js(units, ptype, span, plt_div, dplots = false, cdates = false, re
 	        }
 	    }
 	    options.yAxis[0].min = 0;
-	    options.yAxis[0].max = 20;
+	    options.yAxis[0].max = 16;
 	    options.yAxis[0].minorTickInterval = 1;
 	    options.yAxis[0].tickInterval = 4;
 	    options.yAxis[0].title.text = "(" + seriesData[0].uvplot.units + ")";

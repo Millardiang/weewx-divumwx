@@ -1,4 +1,18 @@
 <?php
+##############################################################################################
+#        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
+#       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    #
+#       (.  ___  :)||  |\   \  //  / |   (  ) : | \   \  //   |  |'  /    \:  | \   \  /     #
+#       |: \   ) |||:  | \\  \/. ./  (:  |  | . ) /\\  \/.    |  |: /'        |  \\  \/      #
+#       (| (___\ |||.  |  \.    //    \\ \__/ // |: \.        |   \//  /\'    |  /\.  \      #
+#       |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \     #
+#       (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|    #
+#                                                                                            #
+#     Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      #
+#      Distributed under terms of the GPLv3.  See the file LICENSE.txt for your rights.      #
+#    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
+#                    https://github.com/Millardiang/weewx-divumwx/issues                     #
+##############################################################################################
 #####################################################################################################################
 #
 # Thermometer image based on an idea by David Banks
@@ -20,16 +34,6 @@
 # DEALINGS IN THE SOFTWARE.
 #
 #####################################################################################################################                                                                                 
-#                                                                                                                   #
-# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
-#                                                                                                                   #
-# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
-#                                                                                                                   #
-# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
-#                                                                                                                   #
-# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
-#                                                                                                                   #
-#####################################################################################################################
 ?>
 <!DOCTYPE html>
 <title>divumwx current conditions</title>
@@ -69,7 +73,8 @@ else if ($theme === "light")
 
 ?>
 <div class="chartforecast4">
-<span class="yearpopup"><a alt="temp charts" title="temp charts" href="dvmMenuTemperaturePopup.php" data-lity><?php echo $menucharticonpage;?> Temperature Almanac and Derived Charts</a></span>
+<span class="yearpopup"><a alt="temp charts" title="temp charts" href="dvmTemperatureRecords.php" data-lity><?php echo $menucharticonpage;?> Temperature Records and Charts</a></span>
+<span class="yearpopup"><a alt="heat map" title="heat map" href="dvmHeatMapPopup.php" data-lity><?php echo $menucharticonpage;?> Heat Map</a></span>
 </div>    
 <span class='moduletitle4'><?php echo $lang['temperatureModule'];?> (<valuetitleunit>°<?php echo $temp["units"];?></valuetitleunit>)</span>
 <div class="updatedtime1"><?php if(file_exists($livedata)&&time()- filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>';else echo $online." ".$divum["time"];?></div>

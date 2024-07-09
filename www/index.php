@@ -13,16 +13,10 @@
 #    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
-session_start();
-if (!file_exists("userSettings.php")) {
-    if (isset($_SESSION['setupAttempted']) && $_SESSION['setupAttempted'] === true) {
-        echo "An error occurred. Please contact support.";
-        exit;
-    }
-    $_SESSION['canAccessSetup'] = true;
-    header("Location: dvmActSetup.php");
-    exit;
-}
+
+  if (!file_exists("./userSettings.php")) {
+    copy("./initial_userSettings.php", "./userSettings.php");
+  }
   include_once ('dvmCombinedData.php');
   include_once ('webserver_ip_address.php');
   require_once ('admin/assets/classes/geoplugin.class.php');
@@ -64,10 +58,9 @@ if (!file_exists("userSettings.php")) {
   .headerflag {
     margin-left: 270px;
     margin-top: -14.5px;
-  }
-  #tablet {
-    background: none;
-  }
+  },
+#tablet {
+}
 </style>
 
 
@@ -199,7 +192,7 @@ if (!file_exists("userSettings.php")) {
       </div>
      </div>
    </div>
-
+      
 <div class="divum-container">
 <!-- Row 6 -->
   <!-- position 17--->
@@ -218,7 +211,25 @@ if (!file_exists("userSettings.php")) {
       </div>
      </div>
    </div>
-</div>
+<div class="divum-container">
+<!-- Row 7 -->
+  <!-- position 20--->
+  <div class="divum-item">
+    <div id="position20">
+    </div>
+  </div>
+  <!--position 21-->
+  <div class="divum-item">
+    <div id="position21">
+    </div>
+  </div>
+  <!--position 22-->
+  <div class="divum-item">
+    <div id="position22">
+      </div>
+     </div>
+   </div>
+  </div>
 <!--End Main Grid area-->
 <!--footer area -->
 <?php
@@ -235,7 +246,7 @@ include_once ('dvmFooter.php');
       <div class="menutoolbar__center">
         <button class="menubutton menubutton--primary">
           <menutoptitle  style="font-size: 20px; font-weight: bold; text-transform: uppercase;"><?php echo $stationlocation; ?>  WEATHER STATION   <img src="./img/flags/<?php echo $flag?>.svg" width="20"></menutoptitle>
-
+            
         </button>
       </div>
       <div class="menutoolbar__right">
@@ -244,18 +255,22 @@ include_once ('dvmFooter.php');
     </div>
 
     <script>
-      function updateButton() {
-        var x = document.getElementById("tablet");
-                const button = document.querySelector("input");
-        if (x.style.display === "none" && button.value === "Dashboard Mode") {
-          x.style.display = "block";
-          button.value = "Tablet Mode";
-        } else {
-          x.style.display = "none";
-          button.value = "Dashboard Mode";
-        }
-      }
-    </script>
+function updateButton() 
+          {
+  var x = document.getElementById("tablet");
+          const button = document.querySelector("input");
+          
+  if (x.style.display === "none" && button.value === "Dashboard Mode") {
+    x.style.display = "block";
+  button.value = "Tablet Mode";
+   
+  } else {
+    x.style.display = "none";
+  button.value = "Dashboard Mode";
+    
+  }
+          }
+</script>
  </header>
     <?php
       include_once ('dvmUpdater.php');

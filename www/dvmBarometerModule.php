@@ -20,8 +20,7 @@ include('dvmCombinedData.php');
 </head>
 
 <div class="chartforecast2">
-<span class="yearpopup"><a alt="barometer charts" title="barometer charts" href="dvmMenuBarometer.php" data-lity><?php echo $menucharticonpage;?> Barometer Almanac and Charts</a></span>
-<span class="yearpopup"><a alt="air density" title="air density" href="dvmAirDensityAlmanac.php" data-lity><?php echo $chartinfo;?> Air Density Almanac</a></span>    
+<span class="yearpopup"><a alt="barometer charts" title="barometer charts" href="dvmBarometerRecords.php" data-lity><?php echo $menucharticonpage;?> Air Density | Barometer Records and Charts</a></span>   
 </div>    
 <span class='moduletitle2'><?php echo $lang['barometerModule'], " (<valuetitleunit>", $barom["units"];?></valuetitleunit>)</span>
 <div class="updatedtime2">

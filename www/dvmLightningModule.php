@@ -5,7 +5,7 @@ date_default_timezone_set($TZ);
 ?>
 
    <div class="chartforecast">
-       <span class="yearpopup"><a alt="aquinfo" title="Lightning Almanac" href="dvmMenuLightning.php" data-lity><?php echo $info;?> Lightning Almanac</a></span>
+       <span class="yearpopup"><a alt="aquinfo" title="Lightning Almanac" href="dvmLightningRecords.php" data-lity><?php echo $info;?> Lightning Records and Chart</a></span>
     </div>
     <span class='moduletitle'><?php echo $lang['lightningModule'];?></span>
 

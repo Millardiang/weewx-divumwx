@@ -1,0 +1,30 @@
+##errorCatcher Echo
+##
+################################################################################################
+##        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     ##
+##       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    ##
+##       (.  ___  :)||  |\   \  //  / |   (  ) : | \   \  //   |  |'  /    \:  | \   \  /     ##
+##       |: \   ) |||:  | \\  \/. ./  (:  |  | . ) /\\  \/.    |  |: /'        |  \\  \/      ##
+##       (| (___\ |||.  |  \.    //    \\ \__/ // |: \.        |   \//  /\'    |  /\.  \      ##
+##       |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \     ##
+##       (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|    ##
+##                                                                                            ##
+##     Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      ##
+##      Distributed under terms of the GPLv3.  See the file LICENSE.txt for your rights.      ##
+##    Issues for weewx-divumwx skin template are only addressed via the issues register at    ##
+##                    https://github.com/Millardiang/weewx-divumwx/issues                     ##
+################################################################################################
+##
+[{
+"_version": "solar.json.tmpl",
+"utcoffset": $utcOffset,
+##
+"solarplot": {"series":
+{"sunshine_time_5min": {"name": $week.sunshine_time.series(aggregate_type='last', aggregate_interval=300, time_series='start', time_unit='unix_epoch_ms').round(0).json},
+"sunshine_time_day": {"name": $week.sunshine_time.series(aggregate_type='sum', aggregate_interval='day', time_series='start', time_unit='unix_epoch_ms').round(0).json},
+"sunshine_time_day_hours": {"name": $week.sunshine_time_hours.series(aggregate_type='sum', aggregate_interval='day', time_series='start', time_unit='unix_epoch_ms').round(2).json},
+"threshold": {"name": $week.threshold.series(aggregate_type='last', aggregate_interval=300, time_series='start', time_unit='unix_epoch_ms').round(0).json},
+"radiation": {"name": $week.radiation.series(aggregate_type='last', aggregate_interval=300, time_series='start', time_unit='unix_epoch_ms').round(0).json}},
+"units": "W/m"#slurp
+}
+}]
