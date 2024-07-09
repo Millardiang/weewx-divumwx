@@ -10,7 +10,7 @@ $temp["indoor_now_feels"] = ($temp["indoor_now_feels"]-32)/9*5;}
 </head>
 
 <div class="chartforecast">
-<span class="yearpopup"><a alt="Indoor Chart" title="Indoor Chart" href="charts/tempCharts.php?chart='indoorplot'&span='yearly'&temp='<?php echo $temp["units"];?>'&pressure='<?php echo $barom["units"];?>'&wind='<?php echo $wind["units"];?>'&rain='<?php echo $rain["units"];?>" frameborder="0" scrolling="no" width="100%" height="100%" data-lity><?php echo $menucharticonpage;?> Indoor Temp | Humidity Chart</a></span>      
+<span class="yearpopup"><a alt="Indoor Chart" title="Indoor Chart" href="dvmhighcharts/tempCharts.php?chart='indoorplot'&span='yearly'&temp='<?php echo $temp["units"];?>'&pressure='<?php echo $barom["units"];?>'&wind='<?php echo $wind["units"];?>'&rain='<?php echo $rain["units"];?>" frameborder="0" scrolling="no" width="100%" height="100%" data-lity><?php echo $menucharticonpage;?> Indoor Temp | Humidity Chart</a></span>      
 </div>
 <span class='moduletitle'><?php echo $lang['indoorTempModule'];?> (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span> </span>
 
