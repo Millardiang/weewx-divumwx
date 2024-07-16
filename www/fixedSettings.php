@@ -1,18 +1,15 @@
 <?php
-##############################################################################################
-#        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
-#       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    #
-#       (.  ___  :)||  |\   \  //  / |   (  ) : | \   \  //   |  |'  /    \:  | \   \  /     #
-#       |: \   ) |||:  | \\  \/. ./  (:  |  | . ) /\\  \/.    |  |: /'        |  \\  \/      #
-#       (| (___\ |||.  |  \.    //    \\ \__/ // |: \.        |   \//  /\'    |  /\.  \      #
-#       |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \     #
-#       (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|    #
-#                                                                                            #
-#     Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      #
-#      Distributed under terms of the GPLv3.  See the file LICENSE.txt for your rights.      #
-#    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
-#                    https://github.com/Millardiang/weewx-divumwx/issues                     #
-##############################################################################################
+#####################################################################################################################                                                                                                        #
+#                                                                                                                   #
+# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
+#                                                                                                                   #
+# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
+#                                                                                                                   #
+# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
+#                                                                                                                   #
+# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
+#                                                                                                                   #
+#####################################################################################################################
 
 include ('userSettings.php');
 include ('dvmVersion.php');
@@ -51,6 +48,8 @@ $cycles17 = $parsed_json[$position17]["cycle"];
 $cycles18 = $parsed_json[$position18]["cycle"];
 $cycles19 = $parsed_json[$position19]["cycle"];
 $cycles20 = $parsed_json[$position20]["cycle"];
+$cycles21 = $parsed_json[$position21]["cycle"];
+$cycles22 = $parsed_json[$position22]["cycle"];
 
 
 //$copyYear = 2023;
@@ -96,6 +95,7 @@ if (
 } elseif (
     array_key_exists("units", $_GET) &&
     ($_GET["units"] == "us" ||
+        $_GET["units"] == "ushpa" ||
         $_GET["units"] == "ca" ||
         $_GET["units"] == "uk" ||
         $_GET["units"] == "metric" ||
@@ -151,6 +151,16 @@ if ($units == "uk") {
     $tempunit = "F";
     $rainunit = "in";
     $pressureunit = "inHg";
+    $distanceunit = "mi"; 
+    $windconv = "1";
+    $rainfallconv = "1";
+    $pressureinterval = "0.5";
+    $rainfallconvmm = "1";
+} elseif ($units == "ushpa") {
+    $windunit = "mph";
+    $tempunit = "F";
+    $rainunit = "in";
+    $pressureunit = "hPa";
     $distanceunit = "mi"; 
     $windconv = "1";
     $rainfallconv = "1";
