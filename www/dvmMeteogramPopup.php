@@ -17,7 +17,7 @@ include('dvmCombinedData.php');
 if ($theme === "dark")
 {$body = "#292E35";
 $pressure = "lightgreen";
-$text = "silver";
+$text = "white";
 $barb = "darkorange";
 $grid = "#666666";}
 else if ($theme === "light")
@@ -120,8 +120,9 @@ else
 <script src="https://code.highcharts.com/modules/data.js"></script>
 <script src="https://code.highcharts.com/modules/exporting.js"></script>
 <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+<script src="dvmhighcharts/scripts/brand-<?php echo $theme;?>.js"></script>
 <link href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
-
+<?php include('forecastSelect.php');?>
 <figure class="highcharts-figure">
   <div id="container">
     <div id="loading">

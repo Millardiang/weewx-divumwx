@@ -34,8 +34,8 @@ $jsonfile="jsondata/awd.txt";if(!file_exists($jsonfile)) {return;}
 
 ?>
     <div class="chartforecast4">
-      <span class="yearpopup"><a alt="Forecast Menu" title="Forecast Menu" href="dvmMenuForecastPopup.php" data-lity><?php echo $chartinfo;?> Forecasts</a></span>
-        <span class="yearpopup"><a alt="Meteogram" title="Meteogram" href="dvmMeteogramPopup.php" data-lity><?php echo $menucharticonpage;?> Meteogram</a></span>
+      <span class="yearpopup"><a alt="Forecast Menu" title="Forecast Menu" href="dvmForecastHourlyPopup.php" data-lity><?php echo $chartinfo;?> Forecasts and Meteogram</a></span>
+        <!--span class="yearpopup"><a alt="Meteogram" title="Meteogram" href="dvmMeteogramPopup.php" data-lity><?php echo $menucharticonpage;?> Meteogram</a></span-->
     <span class="yearpopup"><a alt="Advisories" title="Advisories" href="<?php echo $advisory;?>" . data-lity> <?php echo $chartinfo;?> Advisories</a></span>
     <?php if($city == "London"){ ?>
     <span class="yearpopup"><a alt="Weather Health" title="Weather Health" href="<?php echo $ukWeatherHealth;?>" . data-lity> <?php echo $chartinfo;?> Weather Health</a></span><?php } ?>
