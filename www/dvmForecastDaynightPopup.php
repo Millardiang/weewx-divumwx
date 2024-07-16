@@ -24,7 +24,7 @@ else if($theme==="light"){echo '<style>@font-face{font-family:weathertext2;src:u
 <?php
 $forecastime = filemtime('jsondata/awd.txt'); ?>
  
-  
+<?php include('forecastSelect.php');?>  
 <main class="grid">
   <?php
 $jsonIcon = 'jsondata/lookupTable.json';

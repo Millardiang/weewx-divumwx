@@ -32,6 +32,7 @@ $forecastime = filemtime('jsondata/awh.txt');
 $json = 'jsondata/awh.txt';
 $json = file_get_contents($json);
 $parsed_json = json_decode($json, true);
+include('forecastSelect.php');
 for ($k = 0;$k < 24;$k++)
 {
 

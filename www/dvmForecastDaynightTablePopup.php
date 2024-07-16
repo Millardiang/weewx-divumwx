@@ -32,6 +32,7 @@ $parsed_icon = json_decode($jsonIcon, true);
 $json = 'jsondata/awd.txt';
 $json = file_get_contents($json);
 $parsed_json = json_decode($json, true);
+include('forecastSelect.php');
 for ($k = 0;$k < 14;$k++)
 {
     $pngicon[$k] = $parsed_json['response'][0]['periods'][$k]['icon'];

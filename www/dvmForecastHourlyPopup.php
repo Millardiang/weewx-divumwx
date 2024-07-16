@@ -32,7 +32,7 @@ else if ($theme === "light")
 <?php
 $forecastime = filemtime('jsondata/awh.txt'); ?>
 
-  
+<?php include('forecastSelect.php');?> 
 <main class="grid">
   <?php
 $jsonIcon = 'jsondata/lookupTable.json';
