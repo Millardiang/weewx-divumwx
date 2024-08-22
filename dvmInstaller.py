@@ -1,20 +1,17 @@
-import subprocess
 import os
-import time
-from datetime import datetime
 import sys
-import readchar
+import subprocess
+import time
+import datetime
 import traceback
-import re
 import json
+import re
 import getpass
 import grp
 import pwd
-import distutils.file_util
-import distutils.dir_util
-import curses
+import distutils
+from datetime import datetime
 from zipfile import ZipFile
-from configobj import ConfigObj
 
 # Define ANSI codes
 reset = "\033[0m"
@@ -28,122 +25,51 @@ blue = "\033[34m"
 magenta = "\033[35m"
 cyan = "\033[36m"
 white = "\033[37m"
-bg_black = "\033[40m"
-bg_red = "\033[41m"
-bg_green = "\033[42m"
-bg_yellow = "\033[43m"
-bg_blue = "\033[44m"
-bg_magenta = "\033[45m"
-bg_cyan = "\033[46m"
-bg_white = "\033[47m"
 
-version = "3.5.21.000"
+os.system("clear")
+print(f"{white}DIS {blue}(DivumWX Installation Script) {white}starting.....{reset}")
+print(f"{yellow}Standby, importing and verifying required python modules...{reset}")
+
+version = "3.9.72.000"
 srvGenURL = 'https://www.divumwx.org/settingsGen/'
 
-def waitFKP():
-    print("Press any key to continue:")
-    key = readchar.readkey()
-
-def chkModules():
-    required_modules = [
-        "subprocess",
-        "os",
-        "time",
-        "datetime",
-        "sys",
-        "readchar",
-        "traceback",
-        "json",
-        "getpass",
-        "grp",
-        "pwd",
-        "distutils",
-        "zipfile",
-        "configobj",
-    ]
-
-    missing_modules = []
-    print(f"{white}DIS {blue}(DivumWX Installation Script) {white}starting.....{reset}")
-    print(f"{yellow}Standby, verifying required python modules...{reset}")
-    for module in required_modules:
+def modMissing(module_name):
+    print(f"{red}Module '{module_name}' is not installed.{reset}")
+    install = input(f"Do you want to install the missing module '{module_name}'? (y/n): ").strip().lower()
+    if install == 'y':
         try:
-            __import__(module)
-        except ImportError:
-            missing_modules.append(module)
-    if missing_modules:
-        print(f"Missing modules: {', '.join(missing_modules)}")
-        install = input("Do you want to install the missing modules? (y/n): ").strip().lower()
-        if install == 'y':
-            for module in missing_modules:
-                try:
-                    print(f"Installing '{module}'...")
-                    subprocess.check_call([sys.executable, "-m", "pip", "install", module])
-                    print(f"{green}Module {cyan}'{module}' {green}installed successfully.{reset}")
-                except subprocess.CalledProcessError as e:
-                    print(f"{red}Failed to install module {cyan}'{module}'{red}: {e}{reset}")
-            print(f"{green}Installation complete. Restarting script...{reset}")
+            print(f"Installing '{module_name}'...")
+            subprocess.check_call([sys.executable, "-m", "pip", "install", module_name])
+            print(f"{green}Module '{module_name}' installed successfully.{reset}")
+            print(f"{green}Restarting script...{reset}")
             os.execl(sys.executable, sys.executable, *sys.argv)
-        else:
-            print(f"{red}Missing modules were not installed. The script will not function properly, exiting.{reset}")
-            sys.exit()
+        except subprocess.CalledProcessError as e:
+            print(f"{red}Failed to install module '{module_name}': {e}{reset}")
+            sys.exit(1)
     else:
-        print(f"{white}Module verification status: {green}Passed{reset}")
-        print(f"{white}All necessary modules are present for proper script operation.{reset}")
-        waitFKP()
-
-def file_viewer(stdscr, file_path, banner_text, lines_per_page=20):
-    curses.curs_set(0)
-    stdscr.clear()
-    curses.start_color()
-
-    curses.init_pair(1, curses.COLOR_YELLOW, curses.COLOR_BLACK)
-    curses.init_pair(2, curses.COLOR_WHITE, curses.COLOR_BLACK)
-    curses.init_pair(3, curses.COLOR_RED, curses.COLOR_BLACK)
-    
-    try:
-        with open(file_path, 'r') as file:
-            lines = file.readlines()
-
-        total_lines = len(lines)
-        max_y, max_x = stdscr.getmaxyx()
-        lines_per_page = min(lines_per_page, max_y - 2)
-        current_line = 0
-
-        while True:
-            stdscr.clear()
-            stdscr.addstr(0, 0, banner_text[:max_x-1], curses.color_pair(1) | curses.A_BOLD | curses.A_UNDERLINE)
-
-            for i in range(lines_per_page):
-                line_number = current_line + i
-                if line_number < total_lines:
-                    stdscr.addstr(i + 1, 0, lines[line_number][:max_x-1], curses.color_pair(2))  # Use text color
-
-            stdscr.refresh()
-            key = stdscr.getch()
-            
-            if key == curses.KEY_DOWN or key == ord('j'):
-                if current_line + lines_per_page < total_lines:
-                    current_line += 1
-            elif key == curses.KEY_UP or key == ord('k'):
-                if current_line > 0:
-                    current_line -= 1
-            elif key == ord('q'):
-                break
-
-    except FileNotFoundError:
-        stdscr.addstr(0, 0, "Error: File not found. Press any key to exit.", curses.color_pair(3))
-        stdscr.refresh()
-        stdscr.getch()
-
-def viewFile(file_path, lines_per_page=20):
-    banner_text = "Installation Guide (Up/Down arrows to navigate, 'q' to quit)"
-    curses.wrapper(file_viewer, file_path, banner_text, lines_per_page)
+        print(f"{red}The module '{module_name}' was not installed. The script cannot continue and will exit.{reset}")
+        sys.exit(1)
+try:
+    import readchar
+except ImportError:
+    modMissing("readchar")
+    import readchar
+try:
+    import curses
+except ImportError:
+    modMissing("curses")
+    import curses
+try:
+    from configobj import ConfigObj
+except ImportError:
+    modMissing("configobj")
+    from configobj import ConfigObj
+print(f"{green}Python module import complete...{reset}")
 
 class DVMInstaller:
     def __init__(self, conf_file=None):
-        os.system("clear")
-        chkModules()
-        viewFile('./INSTALLATION_GUIDE.md', 40)
+        self.waitFKP()
+        self.viewFile('./INSTALLATION_GUIDE.md', 40)
         self.services_file = self.chkSvcFile()
         self.prnWelMsg()
         self.conf_files = {}
@@ -151,6 +77,153 @@ class DVMInstaller:
         self.chkVenv()
         conf_file = 'installData.json'
         self.run_installer(conf_file)
+
+    def waitFKP(self):
+        print("Press any key to continue:")
+        key = readchar.readkey()
+
+    def viewFile(self, file_path, lines_per_page=20):
+        banner_text = "Installation Guide (Up/Down arrows to navigate, 'q' to quit)"
+        curses.wrapper(self.file_viewer, file_path, banner_text, lines_per_page)
+
+    def file_viewer(self, stdscr, file_path, banner_text, lines_per_page=20):
+        curses.curs_set(0)
+        stdscr.clear()
+        curses.start_color()
+
+        curses.init_pair(1, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+        curses.init_pair(2, curses.COLOR_WHITE, curses.COLOR_BLACK)
+        curses.init_pair(3, curses.COLOR_RED, curses.COLOR_BLACK)
+        
+        try:
+            with open(file_path, 'r') as file:
+                lines = file.readlines()
+
+            total_lines = len(lines)
+            max_y, max_x = stdscr.getmaxyx()
+            lines_per_page = min(lines_per_page, max_y - 2)
+            current_line = 0
+
+            while True:
+                stdscr.clear()
+                stdscr.addstr(0, 0, banner_text[:max_x-1], curses.color_pair(1) | curses.A_BOLD | curses.A_UNDERLINE)
+
+                for i in range(lines_per_page):
+                    line_number = current_line + i
+                    if line_number < total_lines:
+                        stdscr.addstr(i + 1, 0, lines[line_number][:max_x-1], curses.color_pair(2))  # Use text color
+
+                stdscr.refresh()
+                key = stdscr.getch()
+                
+                if key == curses.KEY_DOWN or key == ord('j'):
+                    if current_line + lines_per_page < total_lines:
+                        current_line += 1
+                elif key == curses.KEY_UP or key == ord('k'):
+                    if current_line > 0:
+                        current_line -= 1
+                elif key == ord('q'):
+                    break
+
+        except FileNotFoundError:
+            stdscr.addstr(0, 0, "Error: File not found. Press any key to exit.", curses.color_pair(3))
+            stdscr.refresh()
+            stdscr.getch()
+
+    def websrvInfo(self):
+        webserver = None
+        process_owner = None
+
+        try:
+            apache_check = subprocess.run(["pgrep", "-a", "apache2"], capture_output=True, text=True)
+            if apache_check.stdout:
+                webserver = "Apache"
+                process_lines = apache_check.stdout.splitlines()
+                for line in process_lines:
+                    process_id = line.split()[0]
+                    user_info = subprocess.run(["ps", "-o", "user=", "-p", process_id], capture_output=True, text=True)
+                    actual_owner = user_info.stdout.strip()
+                    if actual_owner != "root":
+                        process_owner = actual_owner
+                        break
+        except Exception as e:
+            print(f"Error checking Apache: {e}")
+
+        if not webserver:
+            try:
+                nginx_check = subprocess.run(["pgrep", "-a", "nginx"], capture_output=True, text=True)
+                if nginx_check.stdout:
+                    webserver = "Nginx"
+                    process_lines = nginx_check.stdout.splitlines()
+                    for line in process_lines:
+                        process_id = line.split()[0]
+                        user_info = subprocess.run(["ps", "-o", "user=", "-p", process_id], capture_output=True, text=True)
+                        actual_owner = user_info.stdout.strip()
+                        if actual_owner != "root":
+                            process_owner = actual_owner
+                            break
+
+            except Exception as e:
+                print(f"Error checking Nginx: {e}")
+
+        return webserver, process_owner
+
+    def chkWebsrv(self, wsName, wsOwner):
+        try:
+            result = subprocess.run(
+                ["ps", "-u", wsOwner, "-o", "comm="],
+                capture_output=True,
+                text=True
+            )
+            if result.returncode == 0:
+                processes = result.stdout.splitlines()
+                if wsName in processes:
+                    print(f"{green}Web server '{wsName}' owned by '{wsOwner}' is running.{reset}")
+                    return True
+                else:
+                    print(f"{red}No process named '{wsName}' found for owner '{wsOwner}'.{reset}")
+                    return False
+            else:
+                print(f"{red}Failed to retrieve process list for owner '{wsOwner}'.{reset}")
+                return False
+        except Exception as e:
+            print(f"{red}An error occurred while validating the web server process: {e}{reset}")
+            return False
+
+    def setOwnership(self, ws_owner):
+        user = getpass.getuser()
+        base_path = f"/home/{user}/weewx-data"
+        public_html_path = os.path.join(base_path, "public_html")
+        
+        try:
+            print(f"{yellow}Attempting to change ownership of {base_path} and {public_html_path} to {user}:{ws_owner}{reset}")
+            os.system(f"sudo chown -R {user}:{ws_owner} {base_path}")
+            os.system(f"sudo chown -R {user}:{ws_owner} {public_html_path}")
+            print(f"{green}Successfully changed ownership of {base_path} and {public_html_path} to {user}:{ws_owner}{reset}\n")
+            print(f"{yellow}Attempting to change permissions of {base_path} and {public_html_path} to 0775{reset}")
+            os.system(f"sudo chmod -R 0775 {base_path}")
+            os.system(f"sudo chmod -R 0775 {public_html_path}")
+            print(f"{green}Successfully changed permissions of {base_path} and {public_html_path} to 0775{reset}\n")
+        except Exception as e:
+            print(f"{red}Error: {str(e)}{reset}")
+            print(f"{red}There was an error attempting to change ownership or permissions.{reset}")
+            print(f"{red}Your web pages will not be able to be displayed unless these commands are run successfully.{reset}")
+            chown_command_base = f"sudo chown -R {user}:{ws_owner} {base_path}"
+            chown_command_html = f"sudo chown -R {user}:{ws_owner} {public_html_path}"
+            chmod_command_base = f"sudo chmod -R 0775 {base_path}"
+            chmod_command_html = f"sudo chmod -R 0775 {public_html_path}"
+            print(f"\n{yellow}To manually attempt the changes, run the following commands:{reset}\n")
+            print(f"\nDirectory: {blue}{base_path}{reset}")
+            print(f"  - Change ownership to: {green}{user}:{ws_owner}{reset}")
+            print(f"  - Command: {cyan}{chown_command_base}{reset}")
+            print(f"  - Change permissions to: {green}0775{reset}")
+            print(f"  - Command: {cyan}{chmod_command_base}{reset}")
+            print(f"\nDirectory: {blue}{public_html_path}{reset}")
+            print(f"  - Change ownership to: {green}{user}:{ws_owner}{reset}")
+            print(f"  - Command: {cyan}{chown_command_html}{reset}")
+            print(f"  - Change permissions to: {green}0775{reset}")
+            print(f"  - Command: {cyan}{chmod_command_html}{reset}")
+            print(f"\n{red}IMPORTANT:{reset} Your web pages will not be displayed until the above commands are executed successfully.")
 
     def dirNotEmpty(self, path):
         return os.path.isdir(path) and bool(os.listdir(path))
@@ -186,7 +259,7 @@ class DVMInstaller:
         print(f" - {yellow}Error Handling{reset}: Provides comprehensive error messages and handles exceptions gracefully to aid in")
         print("     troubleshooting during installation.\n")
         print(f"{white}Let's get started!{reset}\n")
-        waitFKP()
+        self.waitFKP()
 
     def chgPermRecur(self, path_list, uid_gid):
         user, group = uid_gid
@@ -247,7 +320,6 @@ class DVMInstaller:
         except KeyError:
             print(f"Cannot find user or group information for {user}")
             sys.exit(1)
-
         print(f"\n{white}For the purposes of file permissions and ownership, we will be using the below listed user and group.{reset}")
         print(f"Detected user: {white}{user}{reset}")
         print(f"Detected group: {white}{group}{reset}")
@@ -363,8 +435,71 @@ class DVMInstaller:
                 if config_data['Engine']['Services'].get('data_services') == ',':
                     config_data['Engine']['Services']['data_services'] = '""'
 
+    def updDatabase(self):
+        print(f"{white}Updating weewx database with additional columns for DivumWX Skin{reset}")
+        print(f"{white}The following columns will be added to the database to support the DivumWX Skin:{reset}")
+        print(f"{cyan}AirDensity, stormRain, threshold, cloudcover, is_sunshine & sunshine_time{reset}")
+        columns = ["AirDensity", "stormRain", "threshold", "cloudcover", "is_sunshine", "sunshine_time"]
+        current_user = os.getenv("USER")
+        base_command = f"/home/{current_user}/weewx-venv/bin/weectl database add-column"
+
+        for column in columns:
+            try:
+                command = f"{base_command} {column} -y"
+                result = subprocess.run(command, shell=True, capture_output=True, text=True)
+
+                if result.returncode == 0:
+                    print(f"New column {column} of type REAL added to database.")
+                else:
+                    if "duplicate column name" in result.stderr:
+                        print(f"Column {column} already exists in the database.")
+                    else:
+                        print(f"Error occurred while adding column {column}: {result.stderr}")
+
+            except Exception as e:
+                print(f"An exception occurred: {e}")
+
+    def restartWeewx(self):
+        restart = input("Do you want to restart WeeWX to apply changes? (yes/no): ").strip().lower()
+        if restart in ['yes', 'y']:
+            try:
+                print("Attempting to restart WeeWX service...")
+                subprocess.check_call(["sudo", "systemctl", "restart", "weewx"])
+                print("WeeWX service restarted successfully.")
+            except subprocess.CalledProcessError as e:
+                print(f"Failed to restart WeeWX service: {e}")
+        else:
+            print("WeeWX service restart was not requested. Please remember to restart manually for changes to take effect.")
+
     def run_installer(self, conf_file):
         user_group = self.chkUgrp()
+        webserver, owner = self.websrvInfo()
+        if webserver:
+            print(f"{white}I think that you're running {yellow}{webserver}{white}, and it's run by {yellow}{owner}{white}, is this correct?{reset}")
+            wsIsCorrect = input("yes/no: ").strip().lower()
+            if wsIsCorrect in ['yes', 'y']:
+                wsName = webserver
+                wsOwner = owner
+                wsGroup = owner
+        else:
+            print(f"{red}I was unable to locate either Apache2 or Nginx running. Please enter the webserver name and the user and group that owns the process.{reset}")
+        while True:
+            wsName = input("Please enter the web server name (or 'q' to quit): ").strip()
+            if wsName.lower() == 'q':
+                print("Exiting script.")
+                sys.exit(0)
+            wsOwner = input("Please enter the web server owner (or 'q' to quit): ").strip()
+            if wsOwner.lower() == 'q':
+                print("Exiting script.")
+                sys.exit(0)
+            wsGroup = input("Please enter the web server group (or 'q' to quit): ").strip()
+            if wsGroup.lower() == 'q':
+                print("Exiting script.")
+                sys.exit(0)
+            if self.chkWebsrv(wsName, wsOwner):
+                break
+            else:
+                print(f"{red}The web server '{wsName}' owned by '{wsOwner}' is not running. Please check the details and try again.{reset}")
         try:
             with open(conf_file) as infile:
                 conf_content = infile.read()
@@ -374,7 +509,6 @@ class DVMInstaller:
                 services_content = infile.read()
                 services_content = re.sub(r'##.*\n', '', services_content).replace("\n", "").replace("\t", "")
                 d.update(json.loads(services_content))
-
             user_path = os.path.expanduser(d["user"])
             skins_path = os.path.expanduser(d["skins"])
             weewx_config_file = os.path.expanduser(d["weewx_config_file"])
@@ -517,16 +651,15 @@ class DVMInstaller:
             print(f"{yellow}1. Extract the necessary files from the specified zip file. {white}(If needed){reset}")
             print(f"{yellow}2. Copy the existing/extracted files to the appropriate directories.{reset}")
             print(f"{yellow}3. Apply the correct file and directory permissions.{reset}")
-            print(f"{yellow}4. Update the WeeWX configuration based on the provided settings.{reset}\n")
-            while True:
-                continue_install = input(f"{yellow}Do you want to start the installation process? (yes/no): {reset}").strip().lower()
-                if continue_install in ['yes', 'y']:
-                    break
-                elif continue_install in ['no', 'n']:
-                    print(f"{red}Installation aborted by user.{reset}")
-                    return
-                else:
-                    print(f"{red}Invalid input. Please enter 'yes' or 'no'.{reset}")
+            print(f"{yellow}4. Update the WeeWX configuration based on the provided settings.{reset}")
+            print(f"{yellow}5. Verify new directory and file user/group ownership settings for webserver access.{reset}")
+            print(f"{yellow}6. Add additional columns to weewx database to support DivumWX skin .{reset}\n")
+
+            continue_install = input(f"{yellow}Do you want to start the installation process? (yes/no): {reset}").strip().lower()
+            if continue_install not in ['yes', 'y']:
+                print(f"{red}Installation aborted by user.{reset}")
+                sys.exit(1)
+
             do_overwrite = d["over_write"] == "True"
             extract_path = d.get("extract_to_path", "temp")
             
@@ -553,7 +686,6 @@ class DVMInstaller:
                 if d.get("delete_extracted_files") == "True" and extract_path != os.getcwd():
                     distutils.dir_util.remove_tree(extract_path)
                     distutils.file_util.copy_file(weewx_config_file, weewx_config_file + f".{int(time.time())}")
-
             else:
                 try:
                     if os.path.exists("user"):
@@ -623,7 +755,7 @@ class DVMInstaller:
             print(f"{white}\n\nPerforming cleanup tasks.......{reset}")
             time.sleep(1)
             targets_and_texts = [
-                ("[[DivumWXReport]]", "\n\t# The DivumWXReport uses the 'DivumWX' skin, which contains the\n\t# images, templates and plots for the report.\n"),
+                ("[[DivumWXReport]]", "\n    # The DivumWXReport uses the 'DivumWX' skin, which contains the\n    # images, templates and plots for the report.\n"),
                 ("[[dvmHighcharts]]", "\n"),
                 ("[DivumWXWebServices]", "\n##############################################################################\n#\n"),
                 ("[DivumWXCloudCover]", "\n##############################################################################\n#\n"),
@@ -643,8 +775,11 @@ class DVMInstaller:
             time.sleep(2)
             with open(weewx_config_file, 'w') as file:
                 file.writelines(lines)
+            self.setOwnership(wsOwner)
+            self.updDatabase()
             print(f"{white}Done! WeeWX must be {yellow}restarted{white} for changes to become active{reset}")
-
+            self.restartWeewx()
+            
         except Exception as e:
             traceback.print_exc()
             print(e)
