@@ -41,12 +41,16 @@ divumwx.py
 A WeeWX extension for the weewx-DivumWX dashboard template.
 
 """
+from math import sin, cos, pi, asin
 import math
 import os
 import re
 import sys
+import syslog
 import json
 import time
+import datetime
+from datetime import datetime
 import weeutil.rsyncupload
 try: import xmltodict
 except: pass
@@ -69,11 +73,15 @@ import weewx.almanac
 import weewx.manager
 import weewx.wxformulas
 import weeutil.weeutil
+from weeutil.weeutil import to_float, to_bool
 import weedb
 from weewx.engine import StdService
+from weewx.wxengine import StdService
 import weewx.units
 import weewx.xtypes
 from weewx.units import ValueTuple
+from weewx.units import ValueTuple, ValueHelper
+from weewx.cheetahgenerator import SearchList
 
 
 try:
@@ -136,6 +144,7 @@ SPEED_TO_RUN = {'mile_per_hour': 'mile',
                 'meter_per_second': 'km',
                 'km_per_hour': 'km',
                 'knot': 'mile'}
+weewx.units.obs_group_dict['sunshine_time'] = 'group_interval'
 
 def _convert(from_v, from_units, to_units, group):
     """Given a value, units and unit group convert to different units."""
@@ -807,9 +816,9 @@ class DivumWXRealTime(StdService):
                     with open(self.cache_file, 'r') as in_file:
                         self.retainedLoopValues = eval(in_file.read())
                 else:
-                    loginf("Cache values not use since they are past the sell by date")	
+                    loginf("Cache values not use since they are past the sell by date") 
             except Exception as e:
-                logerr(str(e))	
+                logerr(str(e))  
         if self.cache_debug:
             logdbg("Event packet before: %s" % (event.packet,))
         # replace the values in the retained packet if they have a value other than None or the field is listed in excludeFields
@@ -823,7 +832,7 @@ class DivumWXRealTime(StdService):
             with open(self.cache_file, 'w') as out_file:
                 out_file.write(str(self.retainedLoopValues))
         except Exception as e:
-            logerr(str(e))	
+            logerr(str(e))  
         if self.chk_lightning_cnt and event.packet['lightning_strike_count'] == 0:
             event.packet['lightning_distance'] = None
             event.packet['lightning_energy'] = None
@@ -1218,10 +1227,6 @@ To use:
     5. Restart weewxd
 
 """
-from weewx.engine import StdService
-import weedb
-import weewx.xtypes
-import datetime
 
 class LastNonZero(weewx.xtypes.XType):
    
@@ -1317,11 +1322,6 @@ format:
 where 'key' is an observation name, and 'value' is its value.
 The value can be 'None'.
 """
-
-import weewx
-import weewx.units
-from weewx.wxengine import StdService
-from weeutil.weeutil import to_float, to_bool
 
 VERSION = "0.4"
 
@@ -1487,9 +1487,6 @@ You can then colorize backgrounds. For example, to colorize an HTML table cell:
 *******************************************************************************
 """
 
-import weewx.units
-from weewx.cheetahgenerator import SearchList
-
 class Colorize(SearchList):                                               # 1
 
     def __init__(self, generator):                                        # 2
@@ -1552,9 +1549,6 @@ would result in
     <p>It last rained 20 June 2020 (81 days, 1 hour, 35 minutes ago).</p>
 
 """
-from weewx.cheetahgenerator import SearchList
-
-from weewx.units import ValueTuple, ValueHelper
 
 VERSION = "0.4"
 
@@ -1659,14 +1653,6 @@ $air_density["air_density"] = $current.AirDensity.format(add_label=False);
 
     6. Restart weewx
 
-
-import math
-import weewx
-import weewx.units
-import weewx.xtypes
-from weewx.engine import StdService
-from weewx.units import ValueTuple
-
 """
 
 # Tell the unit system what group our new observation type, 'AirDensity', belongs to:
@@ -1716,7 +1702,8 @@ class AirDensity(weewx.xtypes.XType):
         # "Simple" algorithm.
 
             # formula to get vapor pressure in °C
-            vpRH = (outHumidity / 100.0) * 6.112 * math.exp(17.67 * outTemp_C / (outTemp_C + 243.5))
+            a = (17.67 * outTemp_C) / (outTemp_C + 243.5)
+            vpRH = (outHumidity / 100.0) * 6.112 * math.exp(a)
 
             # formula to get air density in kg/m³           
             T = outTemp_C
@@ -1753,3 +1740,105 @@ class AirDensityService(StdService):
     def shutDown(self):
         # Remove the registered instance:
         weewx.xtypes.xtypes.remove(self.ad)
+
+""" sunshine duration """
+
+weewx.units.obs_group_dict['sunshine_time'] = 'group_interval'
+
+class SunshineDuration(StdService):
+    def __init__(self, engine, config_dict):
+        # Pass the initialization information on to my superclass:
+        super(SunshineDuration, self).__init__(engine, config_dict)
+
+        # Start intercepting events:
+        self.bind(weewx.NEW_LOOP_PACKET, self.newLoopPacket)
+        self.bind(weewx.NEW_ARCHIVE_RECORD, self.newArchiveRecord)
+        self.lastdateTime = 0
+        self.LoopDuration = 0
+        self.sunshineSeconds = 0
+        self.lastThreshold = 0
+        self.firstArchive = True
+        self.cum_time = 0
+
+    def newLoopPacket(self, event):
+        """Gets called on a new loop packet event."""
+        radiation = event.packet.get('radiation')
+        if radiation is not None:
+            if self.lastdateTime == 0:
+                self.lastdateTime = event.packet.get('dateTime')
+            self.LoopDuration = event.packet.get('dateTime') - self.lastdateTime
+            self.lastdateTime = event.packet.get('dateTime')
+            threshold = self.sunshineThreshold(event.packet.get('dateTime'))
+            if radiation > threshold and threshold > 0:
+                self.sunshineSeconds += self.LoopDuration
+            self.cum_time += self.LoopDuration
+            self.lastThreshold = threshold
+            logdbg("Calculated LOOP sunshine_time = %f, based on radiation = %f, and threshold = %f" % (
+                self.LoopDuration, radiation, threshold))
+
+    def newArchiveRecord(self, event):
+        """Gets called on a new archive record event."""
+        radiation = event.record.get('radiation')
+        threshold = self.sunshineThreshold(event.record.get('dateTime'))
+        
+        if self.lastdateTime == 0 or self.firstArchive:  # LOOP packets not yet captured : missing archive record extracted from datalogger at start OR first archive record after weewx start
+            event.record['sunshine_time'] = 0.0
+            event.record['threshold'] = self.lastThreshold
+            if radiation is not None:
+                self.lastThreshold = threshold
+                if radiation > threshold and threshold > 0:
+                    event.record['sunshine_time'] = event.record['interval']
+                    event.record['is_sunshine'] = 1
+                    event.record['threshold'] = self.lastThreshold
+                else:
+                     event.record['is_sunshine'] = 0
+                     event.record['threshold'] = self.lastThreshold
+                if self.lastdateTime != 0:  # LOOP already started, this is the first regular archive after weewx start
+                    self.firstArchive = False
+                loginf("Estimated sunshine duration from archive record = %f min, radiation = %f, and threshold = %f" % (
+                    event.record['sunshine_time'], event.record['radiation'], self.lastThreshold))
+        else:
+            if radiation is not None:
+                if radiation > threshold and threshold > 0:
+                    event.record['is_sunshine'] = 1
+                    event.record['threshold'] = self.lastThreshold
+                else:
+                    event.record['is_sunshine'] = 0
+                    event.record['threshold'] = self.lastThreshold
+            if self.cum_time > 0:  # do not divide by zero!
+                event.record['sunshine_time'] = self.sunshineSeconds/self.cum_time * event.record['interval']
+            else: 
+                 event.record['sunshine_time'] = 0
+            loginf("Sunshine duration from loop packets = %f min" % (event.record['sunshine_time']))
+
+        self.sunshineSeconds = 0
+        self.cum_time = 0
+
+    def sunshineThreshold(self, mydatetime):
+        utcdate = datetime.utcfromtimestamp(mydatetime)
+        dayofyear = int(time.strftime("%j", time.gmtime(mydatetime)))
+        theta = 360 * dayofyear / 365
+        equatorialtime = 0.0172 + 0.4281 * cos((pi / 180) * theta) - 7.3515 * sin((pi / 180) * theta) - 3.3495 * cos(2 * (pi / 180) * theta) - 9.3619 * sin(2 * (pi / 180) * theta)
+
+        latitude = float(self.config_dict["Station"]["latitude"])
+        longitude = float(self.config_dict["Station"]["longitude"])
+        correctedtime = longitude * 4
+        declination = asin(0.006918 - 0.399912 * cos((pi / 180) * theta) + 0.070257 * sin((pi / 180) * theta) - 0.006758 * cos(2 * (pi / 180) * theta) + 0.000908 * sin(2 * (pi / 180) * theta)) * (180 / pi)
+        minutesday = utcdate.hour * 60 + utcdate.minute
+        solartime = (minutesday + correctedtime + equatorialtime) / 60
+        hourly_angle = (solartime - 12) * 15
+        sun_height = asin(sin((pi / 180) * latitude) * sin((pi / 180) * declination) + cos((pi / 180) * latitude) * cos((pi / 180) * declination) * cos((pi / 180) * hourly_angle)) * (180 / pi)
+        if sun_height > 3:
+            threshold = (0.73 + 0.06 * cos((pi / 180) * 360 * dayofyear / 365)) * 1080 * pow((sin(pi / 180 * sun_height)), 1.25) 
+        else :
+            threshold = 0
+        return threshold
+
+weewx.units.obs_group_dict['lightning_strike_count'] = "group_lightning"
+weewx.units.USUnits['group_lightning'] = 'lightning_strike_count'
+weewx.units.MetricUnits['group_lightning'] = 'lightning_strike_count'
+weewx.units.MetricWXUnits['group_lightning'] = 'lightning_strike_count'
+weewx.units.default_unit_label_dict['Strikes'] = ' Strikes'
+weewx.units.default_unit_format_dict['lightning_strike_count'] = '%.0f'
+weewx.units.conversionDict['lightning_strike_count'] = {'lightning_strike_count':  lambda x : x * 1.0}
+weewx.units.default_unit_label_dict['lightning_strike_count']  = ' Strikes'
