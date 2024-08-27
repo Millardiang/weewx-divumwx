@@ -4,6 +4,14 @@
 # * = New Addition
 # @ = Information
 
+## [0.8.50beta] - 4/7/2024
+@ - Far too many changes and fixed and additions to keep track of. We've completely revamped the code base
+	in preparation for the 1.0 release. Not every change has been tracked and we apologize for that.
+	Going forward, the CHANGE_LOG.md will be maintained.
+* - A completely new Admin dashboard as been created
+* - In addition to the revamped Python installer, there is now a new web-based initial setup for the 
+	userSettings.php file
+
 ## [0.4.0-alpha] - 8/2/2023
 @ - Removal of all historic w34 legacy code, new variable sets for DivumWX, updated CSS to match
 

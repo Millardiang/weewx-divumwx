@@ -14,6 +14,6 @@
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
 
-$templateversion = "DVM - <maxblue>0.8.50</maxblue> - beta";
+$templateversion = "DVM - <maxblue>0.9.99.000beta</maxblue> - beta";
 $os = shell_exec('lsb_release -d');
 $os_version = str_replace('Description:',' ',$os);
