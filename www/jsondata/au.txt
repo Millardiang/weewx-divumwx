@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+	<channel>
+		<title>Weather Warnings for Victoria. Issued by the Australian Bureau of Meteorology</title>
+		<link>http://www.bom.gov.au/fwo/IDZ00059.warnings_vic.xml</link>
+		<atom:link href="http://www.bom.gov.au/fwo/IDZ00059.warnings_vic.xml" rel="self" type="application/rss+xml" />
+		<description>Current weather warnings for Victoria, Australia including strong wind, gale, storm force and hurricane force wind warnings; tsunami; damaging waves; abnormally high tides; tropical cyclones; severe thunderstorms; severe weather; fire weather; flood; frost; driving; bushwalking; sheep graziers and other agricultural warnings.</description>
+		<language>en-au</language>
+		<copyright>Copyright: (C) Copyright Commonwealth of Australia 2010, Bureau of Meteorology (ABN 92637 533532), see http://www.bom.gov.au/other/copyright.shtml for terms and conditions of reuse.</copyright>
+		<webMaster>webops@bom.gov.au (Help desk)</webMaster>
+		<pubDate>Fri, 23 Aug 2024 12:41:39 GMT</pubDate>
+		<lastBuildDate>Fri, 23 Aug 2024 12:41:39 GMT</lastBuildDate>
+		<generator>Australian Bureau of Meteorology</generator>
+		<ttl>10</ttl>
+		<image>
+			<url>http://www.bom.gov.au/images/bom_logo_inline.gif</url>
+			<title>Weather Warnings for Victoria. Issued by the Australian Bureau of Meteorology</title>
+			<link>http://www.bom.gov.au/fwo/IDZ00059.warnings_vic.xml</link>
+		</image>
+		<item>
+			<title>23/22:04 EST Marine Wind Warning Summary for Victoria</title>
+			<link>http://www.bom.gov.au/vic/warnings/marinewind.shtml</link>
+			<pubDate>Fri, 23 Aug 2024 12:04:17 GMT</pubDate>
+			<guid isPermaLink="false">http://www.bom.gov.au/vic/warnings/marinewind.shtml</guid>
+		</item>
+		<item>
+			<title>23/16:49 EST 
+                Severe Weather Warning
+            
+for 
+                parts of Central, East Gippsland, North Central, North East, West and South Gippsland and South West Forecast Districts.
+                
+            </title>
+			<link>http://www.bom.gov.au/products/IDV21037.shtml</link>
+			<pubDate>Fri, 23 Aug 2024 06:49:06 GMT</pubDate>
+			<guid isPermaLink="false">http://www.bom.gov.au/products/IDV21037.shtml</guid>
+		</item>
+	</channel>
+</rss>

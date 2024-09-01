@@ -37,6 +37,7 @@ $distanceWeek = json_encode($distance);
     <script src="https://code.highcharts.com/stock/highcharts-more.js"></script>
     <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
     <script src="scripts/divumwx-<?php $theme;?>.js" type="text/javascript"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
 </head>
 <body>
 

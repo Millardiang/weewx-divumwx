@@ -12,7 +12,7 @@ $temp["indoor_now_feels"] = ($temp["indoor_now_feels"]-32)/9*5;}
 <div class="chartforecast">
 <span class="yearpopup"><a alt="Indoor Chart" title="Indoor Chart" href="dvmhighcharts/tempCharts.php?chart='indoorplot'&span='yearly'&temp='<?php echo $temp["units"];?>'&pressure='<?php echo $barom["units"];?>'&wind='<?php echo $wind["units"];?>'&rain='<?php echo $rain["units"];?>" frameborder="0" scrolling="no" width="100%" height="100%" data-lity><?php echo $menucharticonpage;?> Indoor Temp | Humidity Chart</a></span>      
 </div>
-<span class='moduletitle'><?php echo $lang['indoorTempModule'];?> (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span> </span>
+<span class='moduletitle' style="font-family: Helvetica;"><?php echo $lang['indoorTempModule'];?> (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span> </span>
 
 <div class="updatedtime1"><span><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?></div><br/>
 <style>
@@ -22,7 +22,7 @@ silver {
 </style> 
 <div class="tempindoorconverter">
 <?php
-  if ($temp["units"]=='C'){echo "<div class=tempconvertercircleminus10 style='$convertStyle $colorInTemp;'>".number_format(($temp["indoor_now"]*9/5)+32,1).'<silver>&deg<smalltempunit2>F</silver>';} else if ($temp["units"]=='F'){echo "<div class=tempconvertercircleminus10 style='$convertStyle $colorInTemp;'>".number_format(($temp["indoor_now"]-32)*5/9,1).'<silver>&deg<smalltempunit2>C</silver>';}
+  if ($temp["units"]=='C'){echo "<div class=tempconvertercircleminus10 style='$convertStyle $colorInTemp;'>".number_format(($temp["indoor_now"]*9/5)+32,1).'&deg<smalltempunit2>F';} else if ($temp["units"]=='F'){echo "<div class=tempconvertercircleminus10 style='$convertStyle $colorInTemp;'>".number_format(($temp["indoor_now"]-32)*5/9,1).'&deg<smalltempunit2>C';}
 ?>
 </smalltempunit2></div></div>
 
@@ -31,16 +31,16 @@ silver {
 
 .tempindoorconverter {
   margin-left: 251px;
-  margin-top: -20px
+  margin-top: -24px
 }
 
 .house {
   position: relative; 
-  margin-top: -21.5px; 
+  margin-top: -25.5px; 
   margin-left: 0px;
 }
 .idtemppos {
-  margin-top: -153px;
+  margin-top: -148px;
   margin-left: -135.5px;
 }
 </style>
@@ -541,6 +541,7 @@ var bulb_cy = bottomY - bulbRadius,
 
 var svg = d3.select(".idthermometer")
   .append("svg")
+  //.style("background", "#292E35")
   .attr("width", width)
   .attr("height", height);
 

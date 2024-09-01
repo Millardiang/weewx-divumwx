@@ -10,20 +10,6 @@
 # Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
 #                                                                                                                   #
 #####################################################################################################################
-?>
-<style>
-.earthmodulepos {
-  position: absolute;
-  top: 60px;
-  left: 110px
-}
-.earthpos {
-  position: absolute;
-  top: -14px;
-  left: -25px
-}
-</style>
-<?php
 include('dvmCombinedData.php');
 date_default_timezone_set($TZ);
 header('Content-type: text/html; charset=utf-8');
@@ -76,14 +62,14 @@ $sun_elevation = round($sun_alt,2)."°<div class=sunbelowdivumwx> </div>";
 
 <style>
 .earthmodulepos {
-  position: relative;
-top: 15px;
-left: 0px
+  position: absolute;
+top: 6px;
+left: 112.5px
 }
 .earthpos {
-  position: relative;
-top: -110px;
-left: -5px
+  position: absolute;
+top: -14px;
+left: 73.5px
 }
 </style>
 <html>

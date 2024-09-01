@@ -21,7 +21,7 @@ if ($theme === "dark") {
 
 .stationtime {
   position: relative;
-  margin-top: 23.5px; 
+  margin-top: 0px; 
   margin-left: 1.75px;
 }
 #digitalclock {
@@ -29,7 +29,7 @@ if ($theme === "dark") {
   font-family: "Helvetica";
   font-size: 15px;
   color: white;
-  margin-top: -43px; 
+  margin-top: -34px; 
   margin-left: 50px;
 }
 .analog-hours {
@@ -55,7 +55,7 @@ if ($theme === "dark") {
  
 .stationtime {
   position: relative;
-  margin-top: 23.5px; 
+  margin-top: 0px; 
   margin-left: 1.75px;
 }
 #digitalclock {
@@ -92,6 +92,8 @@ if ($theme === "dark") {
     <title>Weather Clock</title>
 </head>
 <body>
+<span class='moduletitle2'><?php echo $lang['timeTop']; ?></valuetitleunit></span>
+    
       
 <script src="js/d3.4.2.2.min.js"></script>
 
@@ -117,11 +119,12 @@ if (theme === 'dark') {
 
 <script>
 
-var date = "<?php echo date('l d M Y');?>";
+var date = "<?php echo date('l jS M Y');?>";
 
 var svg = d3.select(".stationtime")
     .append("svg")
     .attr("width", 226)
+    //.style("background", "#292e35")
     .attr("height", 55);
 
 svg.append("circle")

@@ -13,7 +13,6 @@
 #    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
-
 ?>
 <!-- Side Menu -->
  <input type="checkbox" class="sidebarmenu" id="sidebarmenu"/>

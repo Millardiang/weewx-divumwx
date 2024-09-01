@@ -35,7 +35,7 @@ error_reporting(0);
 </div>
 <span class='moduletitle'><?php echo $lang['currentModule'];?></span>
 
-<div class="updatedtimecurrent">
+<div class="updatedtime1">
 <?php $forecastime=filemtime('jsondata/awc.txt');$divumwxwuurl=file_get_contents("jsondata/awc.txt");if(filesize('jsondata/awc.txt')<10){echo $offline;}
 else echo $online,"";echo " ",  date($timeFormat,$forecastime);?>    
 </div></div>
@@ -168,7 +168,7 @@ else if(anyToC($temp["outside_day_avg_60mn"])<100){$tempcolor = "#e26870";}
 <style>
 .current {
     position: relative; 
-    margin-top: 5px; 
+    margin-top: 7.5px; 
     margin-left: 0px;
     }  
 </style>

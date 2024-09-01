@@ -58,6 +58,7 @@ if ($theme === "dark") {
     <script src="scripts/divumwx-<?php echo $theme;?>.js" type="text/javascript"></script>
     <script src="https://code.highcharts.com/highcharts.js"></script>
     <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
 
 <figure class="highcharts-figure">
     <div id="container"></div>
@@ -77,7 +78,9 @@ var dustYear = <?php echo $dustYear;?>;
 var utcoffset = <?php echo $utcoffset;?>;
 
 Highcharts.chart('container', {
-
+        time: {
+        timezoneOffset: - utcoffset
+    }, 
     title: {
         text: 'Air Quality 7 Day Chart',
         align: 'center'

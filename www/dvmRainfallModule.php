@@ -35,11 +35,11 @@ if ($rain["units"] =='in'){echo "<div class=rainconvertercircle style='backgroun
 
 <style>
 .rainposs {
-  margin-top: -5px;
+  margin-top: -3px;
   margin-left: -160px;
 }
 .stormRain {
-  margin-top: -152.5px;
+  margin-top: -149px;
   margin-left: 130px;
 }
 </style>
@@ -79,7 +79,7 @@ var bulb_cy = bottomY - bulbRadius,
 
 var svg = d3.select("#raingaugex")
     .append("svg")
-  //.style("background", "#292E35") // box background to be commented out
+    //.style("background", "#292E35")
     .attr("width", width)
     .attr("height", height);
 
@@ -506,7 +506,7 @@ var theme = "<?php echo $theme;?>";
 // script to display rain data
 var svg = d3.select(".stormRain")
     .append("svg")
-    //.style("background", "#292E35") // box background to be commented out
+    //.style("background", "#292E35")
     .attr("width", 180)
     .attr("height", 150);
 

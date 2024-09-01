@@ -9,6 +9,10 @@ $textColor = "White";
 maxGust {
  color: <?php echo $gustColorMax;?>;
 }
+.beaufortx {
+  position: absolute;
+  margin-top: -7px;
+}
 </style>
 
    <div class="chartforecast2">
@@ -54,6 +58,7 @@ echo ' <div class=divumwxwindrun>'.$windalert3.' &nbsp;<grey><valuetext1>',numbe
 <grey><divumwxwindrunspan></valuetext>
 <?php if ($wind["units"] == 'mph') echo 'mi'; else if ($wind["units"] == 'm/s') echo 'km'; else if ($wind["units"] == 'kts') echo 'mi';else echo 'km';?></divumwxwindrunspan>
 </div></div><br /><div class=windrun1><?php echo  $lang['Wind Run'];?></div>
+<div class=beaufortx>
 <?php // beaufort
 if ($wind["speed_bft"] >= 12) {
   echo '<div class=divumwxbeaufort12>' . $beaufort12 . "&nbsp;" . $wind["speed_bft"];
@@ -84,6 +89,7 @@ if ($wind["speed_bft"] >= 12) {
 }
 ?>
 <divumwxbftspan>BFT<divumwxbftspan></div>
+</div>  
 <div class="beaufort1">
 <?php
 if ($wind["speed_bft"] == 0) {
@@ -269,7 +275,7 @@ if ($theme === "dark") { echo
 
 <style>
 .vanilla-compass {
-  margin-top: -31px;
+  margin-top: -36px;
   margin-left: 0px;
 }
 .wrap {
@@ -308,7 +314,8 @@ if ($theme === "dark") { echo
 <!DOCTYPE html>
 <html>
 <div class="vanilla-compass">
-<svg id="vanilla-compass" width="300" height="140" viewBox="-80 0 300 140" xmlns="http://www.w3.org/2000/svg"></svg>  
+<svg id="vanilla-compass" width="300" height="140" viewBox="-80 0 300 140" xmlns="http://www.w3.org/2000/svg"></svg>
+<!--svg id="vanilla-compass" width="300" height="140" viewBox="-80 0 300 140" style="border:1px solid red" xmlns="http://www.w3.org/2000/svg"></svg-->  
 </div>
 
  <script>

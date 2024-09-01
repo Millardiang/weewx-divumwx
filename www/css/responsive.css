@@ -1,0 +1,134 @@
+/* Give the document some structure. */
+body {
+	margin: 0 auto;
+	max-width: 1596px;
+}
+
+/* Create a responsive, centered, three-column grid. */
+.card-container {
+	align-items: start;
+	display: grid;
+	grid-gap: 4px;
+	grid-template-columns: repeat(auto-fit, 315px);
+	justify-content: center;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+/* --- Optional styles (to make this pen look nice) --- */
+body {
+	font-family: sans-serif;
+    background-color: #151819;
+}
+
+footer {
+	text-align: center;
+    max-width: 1596px;
+    grid-column: 1 / -1;
+    border: solid #25282c 0px;
+    background-color: #25282c;
+    color: white;
+    border-radius: 5px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    height: auto;
+}
+.titlebar {
+  display: flex;
+  max-width: 1596px;
+  background-color: #25282c;
+  height: 50px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+}
+
+.titlebar > * {
+/*   flex-grow: 1; */
+}
+
+.titlebar h1 {
+  margin-left: 1rem;
+}
+
+.titlebar a {
+  text-decoration: none;
+  color: white;
+}
+
+.cardP, .cardE {
+  color: white;
+  text-align: center;
+  background-color: #1e2024; 
+  height: 195px;
+  border-top: solid #25282c 20px; 
+  border-radius: 5px;
+  border-bottom: solid #25282c 18px;
+
+}
+
+.alert {
+  padding: 8px;
+  background-color: #ff0000;
+  color: white;
+  border-radius: 5px;
+}
+
+.closebtn {
+  margin-left: 15px;
+  color: white;
+  font-weight: bold;
+  float: right;
+  font-size: 22px;
+  line-height: 20px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.closebtn:hover {
+  color: black;
+}
+.module {
+  width: 315px;
+  height: 195px;
+  text-align: center;
+  /*border: solid white 1px;*/
+}
+.clockOutlook {
+  position: absolute;
+  color: silver;
+  font-family: "Arial", sans-serif;
+  font-size: 13px;
+  padding-left: 9px;
+  padding-right: 9px;
+  padding-top: 12px;
+  margin-left: 15px;
+  width: 280px;
+  height: 80px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+	html {
+		background-color: #111;
+		color: #fff;
+	}
+}
+@media (min-width: 318px) {
+  .alert, .titlebar, footer { max-width: 318px; margin: auto; }
+}
+@media (min-width: 635px) {
+  .alert, .titlebar, footer { max-width: 635px; margin: auto; }
+}
+@media (min-width: 953px) {
+  .alert, .titlebar, footer { max-width: 953px; margin: auto; }
+}
+@media (min-width: 1272px) {
+  .alert, .titlebar, footer { max-width: 1272px; margin: auto; }
+}
+@media (min-width: 1596px) {
+  .alert, .titlebar, footer { max-width: 1596px; margin: auto; }
+}

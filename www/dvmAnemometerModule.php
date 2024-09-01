@@ -9,6 +9,10 @@ $textColor = "White";
 maxGust {
  color: <?php echo $gustColorMax;?>;
 }
+.beaufortx {
+  position: absolute;
+  margin-top: -7px;
+}
 </style>
 
 
@@ -56,6 +60,7 @@ echo ' <div class=divumwxwindrun>'.$windalert3.' &nbsp;<grey><valuetext1>',numbe
 <grey><divumwxwindrunspan></valuetext>
 <?php if ($wind["units"] == 'mph') echo 'mi'; else if ($wind["units"] == 'm/s') echo 'km'; else if ($wind["units"] == 'kts') echo 'mi';else echo 'km';?></divumwxwindrunspan>
 </div></div><br /><div class=windrun1><?php echo  $lang['Wind Run'];?></div>
+<div class=beaufortx>
 <?php // beaufort
 if ($wind["speed_bft"] >= 12) {
   echo '<div class=divumwxbeaufort12>' . $beaufort12 . "&nbsp;" . $wind["speed_bft"];
@@ -86,6 +91,7 @@ if ($wind["speed_bft"] >= 12) {
 }
 ?>
 <divumwxbftspan>BFT<divumwxbftspan></div>
+</div>
 <div class="beaufort1">
 <?php
 if ($wind["speed_bft"] == 0) {
@@ -229,7 +235,7 @@ if ($theme === "dark") { echo
     
       .anemometer {
         position: relative; 
-        margin-top: -35px; 
+        margin-top: -39px; 
         margin-left: -1px;
       }
 
@@ -357,7 +363,7 @@ if ($theme === "dark") { echo
     
         .anemometer {
         position: relative; 
-        margin-top: -35px; 
+        margin-top: -39px; 
         margin-left: -1px;
       }
       

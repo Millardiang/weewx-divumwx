@@ -28,10 +28,10 @@ else if ($uv["now"]>=0 ) {echo $uviclear,'<span>UVI</span> Low';}
 
        
 <style>
-.sunshineposx {margin-top: -2px; margin-left: -0px;}
-.solarposx {margin-top: -17px; margin-left: -210px;}
-.uvipos {margin-top: -155px; margin-left: 0px;}
-.luxpos {margin-top: -155px; margin-left: 210px;}
+.sunshineposx {margin-top: -3.5px; margin-left: -0px;}
+.solarposx {margin-top: -12px; margin-left: -210px;}
+.uvipos {margin-top: -149.5px; margin-left: 0px;}
+.luxpos {margin-top: -149.5px; margin-left: 210px;}
 </style>
 
 <div class="sunshineposx">
@@ -143,7 +143,7 @@ var bulb_cy = bottomY - bulbRadius,
 
 var svg = d3.select(".solarx")
     .append("svg")
-    //.style("background", "#292E35") // box background to be commented out
+    //.style("background", "#292E35")
     .attr("width", width)
     .attr("height", height);
 
@@ -344,7 +344,7 @@ var bulb_cy = bottomY - bulbRadius,
 
 var svg = d3.select(".uvi")
     .append("svg")
-    //.style("background", "#292E35") // box background to be commented out
+    //.style("background", "#292E35")
     .attr("width", width)
     .attr("height", height);
 
@@ -515,7 +515,7 @@ var bulb_cy = bottomY - bulbRadius,
 
 var svg = d3.select(".lux")
     .append("svg")
-    //.style("background", "#292E35") // box background to be commented out
+    //.style("background", "#292E35")
     .attr("width", width)
     .attr("height", height);
 

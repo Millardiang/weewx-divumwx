@@ -38,7 +38,10 @@ $greenhouse["ammonia"] = $parsed_json["current"]["ammonia"];
 <script src='js/d3.min.js'></script>    
       
 <style>
-.Gas {margin-top: -3px; margin-left: -0px;}
+.Gas {
+  position: relative;
+  margin-top: -3px; 
+  margin-left: -0px;}
 </style>
 
 <div class="Gas">
@@ -65,7 +68,7 @@ var innerColor = "rgb(230, 200, 200)";
 
 var svg = d3.select(".GreenhouseGas")
     .append("svg")
-    //.style("background", "#292E35") // box background to be commented out
+    //.style("background", "#292E35")
     .attr("width", 310)
     .attr("height", 151.5);
 

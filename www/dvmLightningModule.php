@@ -99,7 +99,7 @@ if ($wind["units"] == "mph"){
 
 .Strikes {
   position: relative;
-  margin-top: -1.5px;
+  margin-top: 3px;
   margin-left: 0px;
   z-index: auto;
 }
@@ -148,6 +148,7 @@ else
 	var Bearing = "<?php echo $lightning["bearing"];?>";
     var Bearingx = "<?php echo $lightning["bearingx"];?>";
     var Unit = "<?php echo $lightning["distunit"];?>";
+
 	var svg = d3.select(".Strikes")
     				.append("svg")
     				//.style("background", "#292E35")

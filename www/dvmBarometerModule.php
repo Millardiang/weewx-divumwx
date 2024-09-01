@@ -86,7 +86,7 @@ if ($theme === "dark") { echo
     
         .barometer {
             position: relative; 
-            margin-top: -16px; 
+            margin-top: -14px; 
             margin-left: -0px;
         }
                 
@@ -146,7 +146,7 @@ if ($theme === "dark") { echo
     
         .barometer {
             position: relative; 
-            margin-top: -18px; 
+            margin-top: -16px; 
             margin-left: -0px;
         }
         

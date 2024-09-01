@@ -14,7 +14,7 @@
 <?php
 include('dvmCombinedData.php');
 $airqual["pm_units"] = "μg/㎥";
-
+$aqSource = "openmeteo";
 if ($aqSource == "purple") {
 $json_string = file_get_contents("jsondata/pu.txt");
 $parsed_json = json_decode($json_string, true);
@@ -37,6 +37,13 @@ $parsed_json = json_decode($json_string, true);
 $airqual["pm25"] = round($parsed_json['pm25'],1);
 $airqual["city"] = $stationlocation;
 }
+else if ($aqSource == "openmeteo"){
+$json_string = file_get_contents("jsondata/airquality.txt");
+$parsed_json = json_decode($json_string, true);
+$airqual["pm25"] = round($parsed_json["current"]["pm2_5"],1);
+$airqual["city"] = $stationlocation;
+}
+
 
 //Europe EAQI
 if ($aqZone == "ei"){

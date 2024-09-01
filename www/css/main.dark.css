@@ -1,3 +1,52 @@
+:root {
+  --body-color: #151819;
+  --item-background: #1f2024;
+  --header-color: rgba(33, 34, 39, 0.8);
+  --text-color: #fff;
+  --menu-color: rgba(37, 41, 45, 0.7);
+  --border-right-bottom: #333;
+  --box-shadow: rgba(0, 0, 0, 0.3);
+  --top-box-border-gap: #151718;
+  --item-border: #26282c;
+  --footer-border: #191b1e;
+  --lightning-rain: #ff7c39;
+  --clock-text: #ffffff;
+  --offline: rgba(33, 34, 39, 0.8);
+  --online: #777777;
+  --designedby: #555555;
+  --active: #2c2d34;
+  --converter-border: 1px solid #e6e8ef;
+  --converter-text: silver;
+  --darkmatter: #34495e;
+  --darkermatter: #2c3e50;
+  --greenapple: #2ecc71;
+  --greyapple: #ecf0f1;
+}
+[data-theme="light"] {
+  --body-color: #ffffff;
+  --item-background: #ffffff;
+  --header-color: rgba(33, 34, 39, 0.8);
+  --text-color: #000000;
+  --menu-color: rgba(37, 41, 45, 0.7);
+  --border-right-bottom: #333;
+  --box-shadow: rgba(0, 0, 0, 0.3);
+  --top-box-border-gap: red;
+  --item-border: rgba(97, 106, 114, 0.1);
+  --footer-border: #191b1e;
+  --lightning-rain: #ff7c39;
+  --clock-text: #ffffff;
+  --offline: rgba(33, 34, 39, 0.8);
+  --online: #777777;
+  --designedby: #555555;
+  --active: #2c2d34;
+  --converter-border: 1px solid #e6e8ef;
+  --converter-text: #ffffff;
+  --darkmatter: #34495e;
+  --darkermatter: #2c3e50;
+  --greenapple: #2ecc71;
+  --greyapple: #ecf0f1;
+}
+
 @supports (-moz-appearance:none) {
   selector { property:value; }
   }
@@ -14,16 +63,115 @@
     content: ''
   }
   
-  .davisfooterlogo,
-  img {
-    image-rendering: auto;
-  }
-  
+.topnav {
+  overflow: hidden;
+  background-color: var(--item-border);
+  border-radius: 5px;
+  border-top: 5px solid var(--item-border);
+  border-bottom: 5px solid var(--item-border);
+}
+.topnav a {
+  float: none;
+  display: block;
+  color: var(--text-color);
+  text-align: center;
+  padding-right: 16px;
+  margin-top: -1px;
+  text-decoration: none;
+  font-size: 17px;
+}
+.topnav a.active {
+  background-color: teal;
+  color: var(--text-color);
+}
+.topnav .icon {
+  display: none;
+}
+.headerflag {
+  float: none;
+  font-weight: bold;
+  font-size: 20px;
+  text-transform: uppercase;
+  text-align: center;
+}  
   @font-face {
     font-family: system;
     font-style: normal;
     src: local("Arial")
   }
+  
+.theme-switch-wrapper {
+  display: flex;
+  align-items: center;
+  float: right;
+  margin-top: -22px;
+
+  em {
+    margin-left: 5px;
+    font-size: 1rem;
+  }
+}
+.theme-switch {
+  display: inline-block;
+  height: 17px;
+  position: relative;
+  width: 30px;
+  margin-left: -52px;
+}
+
+.theme-switch input {
+  display: none;
+}
+
+.slider {
+  background-color: #ccc;
+  bottom: 0;
+  cursor: pointer;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  transition: 0.4s;
+}
+
+.slider:before {
+  background-color: #fff;
+  bottom: 2px;
+  content: "";
+  height: 13px;
+  left: 2px;
+  position: absolute;
+  transition: 0.4s;
+  width: 13px;
+}
+
+input:checked + .slider {
+  background-color: #66bb6a;
+}
+
+input:checked + .slider:before {
+  transform: translateX(13px);
+}
+
+.slider.round {
+  border-radius: 17px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+.sidebarIconToggle {
+  cursor: pointer;
+  position: absolute;
+  z-index: 99;
+  top: 15px;
+  left: 15px;
+  height: 22px;
+  width: 22px;
+  margin-top: 8px;
+  margin-left: 10px;
+}
+
   
   .menu,
   .thearrow7:after {
@@ -902,7 +1050,7 @@
     font: .65em weathertext2;
     margin-left: 235px;
     padding: 0;
-    margin-top: -35px;
+    margin-top: -32px;
     color: silver;
     line-height: 10px
   }
@@ -1674,7 +1822,7 @@
   
   .gustspeedtrend1,
   .windspeedtrend1 {
-    margin-top: -14px;
+    margin-top: -17px;
     position: absolute
   }
   
@@ -1809,6 +1957,7 @@
       right: 40px
     }
   }
+
   
   @media screen and (max-width:640px) {
     .divum-container {
@@ -3882,7 +4031,7 @@
     cursor: pointer;
     position: absolute;
     z-index: 99;
-    top: 15px;
+    top: 5px;
     left: 15px;
     height: 22px;
     width: 22px
@@ -5010,7 +5159,7 @@
   
   .rainconverter,
   .tempconverter {
-    margin-top: 0px;
+    margin-top: -2px;
     margin-left: 237px
   }
   
@@ -5287,7 +5436,7 @@
   
   .windconverter {
     margin-left: 252px;
-    margin-top: -15px;
+    margin-top: -18px;
   }
   
   .windconvertercircleblue1,
@@ -5926,7 +6075,7 @@
   
   .daylightword {
     left: 105px;
-    top: -0px
+    top: -2px
   }
   
   .elevationword {
@@ -6357,7 +6506,7 @@
   .divumwxbeaufort6 {
     font-size: .7rem;
     position: absolute;
-    margin-top: 85px;
+    margin-top: 75px;
     margin-left: 20px;
     display: flex;
     align-items: center;
@@ -6395,7 +6544,7 @@
   
   .divumwxwindrun {
     font-size: .65rem;
-    margin-top: 105px;
+    margin-top: 100px;
     margin-left: 230px;
     display: flex;
     align-items: center;
@@ -6428,7 +6577,7 @@
   
   .beaufort1,
   .windrun1 {
-    margin-top: 102px;
+    margin-top: 95px;
     font-size: .65rem;
     width: 6.5rem;
     display: flex
@@ -6943,7 +7092,7 @@
   .tempconverter2,
   .tempconverter3 {
     position: absolute;
-    margin-top: 5px;
+    margin-top: 2px;
     font-size: 12px
   }
   
@@ -8456,7 +8605,7 @@
   .divumwxsunriseday {
     align-items: center;
     justify-content: center;
-    margin-left: -25px
+    margin-left: -18px
   }
   
   .divumwxsunsetday {
@@ -8481,7 +8630,7 @@
   .divumwxmoonphasem {
     align-items: center;
     justify-content: center;
-    left: -15px
+    left: -9px
   }
   
   .divumwxluminancem {
@@ -8498,7 +8647,7 @@
     overflow: hidden;
     color: silver;
     line-height: 8px;
-    font-size: .65em;
+    font-size: .60em;
     margin-top: 65px;
     font-family: weathertext2
   }
@@ -8512,7 +8661,7 @@
   .divumwxluminancem2 {
     align-items: center;
     justify-content: center;
-    left: 100px
+    left: 110px
   }
   
   divumwxdarkdaycircle,
@@ -9661,7 +9810,7 @@
   
   .barometerconverter {
     margin-left: 250px;
-    margin-top: -143.25px;
+    margin-top: -145.25px;
     font-size: 12px;
     position: relative;
     z-index: auto;
@@ -9685,7 +9834,7 @@
   }
   
   .updatedtime2 {
-    margin-top: -38.25px;
+    margin-top: -36.25px;
     font: .65em weathertext2;
     margin-left: 237px;
     color: silver;

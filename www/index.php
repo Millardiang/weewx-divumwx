@@ -13,27 +13,23 @@
 #    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
-session_start();
-if (!file_exists("userSettings.php")) {
-    if (isset($_SESSION['setupAttempted']) && $_SESSION['setupAttempted'] === true) {
-        echo "An error occurred. Please contact support.";
-        exit;
-    }
-    $_SESSION['canAccessSetup'] = true;
-    header("Location: dvmActSetup.php");
-    exit;
-}
+
+  if (!file_exists("./userSettings.php")) {
+    copy("./initial_userSettings.php", "./userSettings.php");
+  }
   include_once ('dvmCombinedData.php');
   include_once ('webserver_ip_address.php');
   require_once ('admin/assets/classes/geoplugin.class.php');
+  include_once ('dvmUpdater.php');
+  include_once ('dvmSideMenu.php');    
+  //include_once ('dvmAdvisory.php');
   date_default_timezone_set($TZ);
   header('Content-type: text/html; charset=utf-8');
   error_reporting(0);
 ?>
 <!DOCTYPE html>
-<html>
 <head>
-  <title><?php echo $stationlocation;?> Weather Station</title>
+  <!--title><?php echo $stationlocation;?> Weather Station</title-->
   <!--Google / Search Engine Tags -->
   <meta itemprop="image" content="img/divumMeta.png">
   <meta itemprop="name" content="Private Weather Station <?php echo $stationlocation;?>">
@@ -46,8 +42,6 @@ if (!file_exists("userSettings.php")) {
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name=apple-mobile-web-app-title content="WEATHER STATION">
-  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, viewport-fit=cover">
-
   <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
@@ -58,19 +52,15 @@ if (!file_exists("userSettings.php")) {
   <meta name="msapplication-config" content="./browserconfig.xml">
   <meta name="theme-color" content="#ffffff">
   <link rel="manifest" href="./site.webmanifest">
-  <link href="css/main.<?php echo $theme;?>.css?version=<?php echo filemtime('css/main.' . $theme . '.css');?>" rel="stylesheet prefetch">
-
-  <style>
-  .headerflag {
-    margin-left: 270px;
-    margin-top: -14.5px;
-  }
-  #tablet {
-    background: none;
-  }
-</style>
-
-
+  <link href="css/main.dark.css?version=<?php echo filemtime('css/main.dark.css');?>" rel="stylesheet prefetch">
+<html lang="en" >
+  <meta charset="UTF-8">
+  <title>DivumWX - Proposed Responsive CSS Grid Layout Scheme</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="stylesheet" href="style.css"><link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css'>
+<link rel="stylesheet" href="./css/main.dark.css">
+<link rel="stylesheet" href="./css/responsive.css">
+</head>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -84,219 +74,66 @@ if (!file_exists("userSettings.php")) {
       });
     }
   </script>
-</head>
-<!-- Top Grid Area-->
-<div class="divum2-container">
-  <!-- Row 1 -->
-  <div class="container divumwxbox-toparea">
-    <!-- position 1 - Fixed Position --->
-    <div class="divumwxbox clock">
-    <div class="divumbox-top-border">
-      <div class="title"><?php echo $info;?><?php echo $lang['timeTop'];?></div>
-      <div class="value">
-        <div id="position1"></div>
-      </div>
-    </div>
-   </div>
-    <!-- position 2--->
-    <div class="divumwxbox indoor">
-     <div class="divumbox-top-border">
-      <div class="value">
-        <div id="position2"></div>
-      </div>
-    </div>
-   </div>
-    <!-- position 3--->
-    <div class="divumwxbox earthquake">
-     <div class="divumbox-top-border">
-           <div class="value">
-        <div id="position3"></div>
-      </div>
-    </div>
-   </div>
-    <!-- position 4 - Fixed Position --->
-    <div class="divumwxbox alert">
-     <div class="divumbox-top-border">
-      <div class="title"><?php echo $info;?><?php echo $lang['advisoriesTop'];?></div>
-      <div class="value">
-        <div id="position4"></div>
-       </div>
-     </div>
-   </div>
- </div>
+<body>
+
+<div class="titlebar">
+	<h1>A DivumWX Weather Station</h1>
 </div>
-<!--Main Grid Area-->
-<!-- Row 2 -->
-<div class="divum-container">
-  <!-- position 5--->
-  <div class="divum-item">
-    <div id="position5">
-    </div>
-  </div>
-  <!-- position 6--->
-  <div class="divum-item">
-    <div id="position6">
-    </div>
-  </div>
-  <!-- position 7--->
-  <div class="divum-item">
-    <div id="position7">
-     </div>
-   </div>
-  </div>
-<div class="divum-container">
-<!-- Row 3 -->
-  <!-- position 8--->
-  <div class="divum-item">
-    <div id="position8">
-    </div>
-  </div>
-  <!-- position 9--->
-  <div class="divum-item">
-    <div id="position9">
-    </div>
-  </div>
-  <!-- position 10--->
-  <div class="divum-item">
-    <div id="position10">
-     </div>
-    </div>
-   </div>
-<div class="divum-container">
-<!-- Row 4 -->
-  <!-- position 11--->
-  <div class="divum-item">
-    <div id="position11">
-    </div>
-  </div>
-  <!--position 12-->
-  <div class="divum-item">
-    <div id="position12">
-    </div>
-  </div>
-  <!--position 13-->
-  <div class="divum-item">
-    <div id="position13">
-      </div>
-     </div>
-   </div>
-<div id="tablet"> 
-<div class="divum-container">
-<!-- Row 5 -->
-  <!-- position 14--->
-  <div class="divum-item">
-    <div id="position14">
-    </div>
-  </div>
-  <!--position 15-->
-  <div class="divum-item">
-    <div id="position15">
-    </div>
-  </div>
-  <!--position 16-->
-  <div class="divum-item">
-    <div id="position16">
-      </div>
-     </div>
-   </div>
-
-<div class="divum-container">
-<!-- Row 6 -->
-  <!-- position 17--->
-  <div class="divum-item">
-    <div id="position17">
-    </div>
-  </div>
-  <!--position 18-->
-  <div class="divum-item">
-    <div id="position18">
-    </div>
-  </div>
-  <!--position 19-->
-  <div class="divum-item">
-    <div id="position19">
-      </div>
-     </div>
-   </div>
+  
+<div class="alert">
+  <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
+  <span><strong>  Danger!</strong> Red Warning for Thunder and Lightning.</span>
 </div>
-<!--End Main Grid area-->
-<!--footer area -->
-<?php
-include_once ('dvmFooter.php');
-?>
-<!--end of footer area -->
-<div class="menuadmin">
-  <!-- Top Bar -->
-  <header class="menuadmin__header">
-    <div class="menutoolbar">
-      <div class="menutoolbar__left">
-        <button class="menubutton menubutton--primary"></button>
-      </div>
-      <div class="menutoolbar__center">
-        <button class="menubutton menubutton--primary">
-          <menutoptitle  style="font-size: 20px; font-weight: bold; text-transform: uppercase;"><?php echo $stationlocation; ?>  WEATHER STATION   <img src="./img/flags/<?php echo $flag?>.svg" width="20"></menutoptitle>
 
-        </button>
-      </div>
-      <div class="menutoolbar__right">
-          <input type="button" style="background: rgba(39, 123, 70, .8); color: white; border-radius: 2px; border-color: rgba(39, 123, 70, .8);" value="Tablet Mode" onclick="updateButton()"/>
-      </div>
-    </div>
+  
+<section class="card-container">
 
-    <script>
-      function updateButton() {
-        var x = document.getElementById("tablet");
-                const button = document.querySelector("input");
-        if (x.style.display === "none" && button.value === "Dashboard Mode") {
-          x.style.display = "block";
-          button.value = "Tablet Mode";
-        } else {
-          x.style.display = "none";
-          button.value = "Dashboard Mode";
-        }
-      }
-    </script>
- </header>
-    <?php
-      include_once ('dvmUpdater.php');
-      include_once ('dvmSideMenu.php');
-      //Add visits by country to admin database. No personal info is kept by this, ip is discarded
-      if($trkVisits){
-        $geoplugin = new geoPlugin();
-        $geoplugin->locate($_SERVER['REMOTE_ADDR']);
-        $countryCode = $geoplugin->countryCode;
-        $regionName = $geoplugin->regionName;
-        $cityCode = $geoplugin->city;
-        $lat = $geoplugin->latitude;
-        $long = $geoplugin->longitude;
-        $adminDB = __DIR__ . DIRECTORY_SEPARATOR . 'admin' . DIRECTORY_SEPARATOR . 'db' . DIRECTORY_SEPARATOR . 'dvmAdmin.db3';
-        $db = new PDO("sqlite:" . $adminDB);
-        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $regionName = empty($regionName) ? "Unknown" : $regionName;
-        $cityCode = empty($cityCode) ? "Unknown" : $cityCode;
-        $query = $db->prepare("SELECT * FROM visits WHERE countryCode = :countryCode AND regionName = :regionName AND cityName = :cityName");
-        $query->bindValue(':countryCode', $countryCode, PDO::PARAM_STR);
-        $query->bindValue(':regionName', $regionName, PDO::PARAM_STR);
-        $query->bindValue(':cityName', $cityCode, PDO::PARAM_STR);
-        $query->execute();
-        $row = $query->fetch(PDO::FETCH_ASSOC);
-        if ($row) {
-            $updateStmt = $db->prepare("UPDATE visits SET visit_count = visit_count + 1 WHERE countryCode = :countryCode AND regionName = :regionName AND cityName = :cityName");
-            $updateStmt->bindValue(':countryCode', $countryCode, PDO::PARAM_STR);
-            $updateStmt->bindValue(':regionName', $regionName, PDO::PARAM_STR);
-            $updateStmt->bindValue(':cityName', $cityCode, PDO::PARAM_STR);
-            $updateStmt->execute();
-        } else {
-            $insertStmt = $db->prepare("INSERT INTO visits (countryCode, regionName, cityName, lat, long, visit_count) VALUES (:countryCode, :regionName, :cityName, :lat, :long, 1)");
-            $insertStmt->bindValue(':countryCode', $countryCode, PDO::PARAM_STR);
-            $insertStmt->bindValue(':regionName', $regionName, PDO::PARAM_STR);
-            $insertStmt->bindValue(':cityName', $cityCode, PDO::PARAM_STR);
-            $insertStmt->bindValue(':lat', $lat, PDO::PARAM_STR);
-            $insertStmt->bindValue(':long', $long, PDO::PARAM_STR);
-            $insertStmt->execute();
-        }
-        $db = null;
-      }
-    ?>
+	<div class="cardP"><div class="module"><div id="position1"></div></div></div>
 
+	<div class="cardP"><div class="module"><div id="position2"></div></div></div>
+
+    <div class="cardP"><div class="module"><div id="position3"></div></div></div>
+
+	<div class="cardP"><div class="module"><div id="position4"></div></div></div>
+
+    <div class="cardP"><div class="module"><div id="position5"></div></div></div>
+
+	<div class="cardP"><div class="module"><div id="position6"></div></div></div>
+	
+    <div class="cardP"><div class="module"><div id="position7"></div></div></div>
+
+	<div class="cardP"><div class="module"><div id="position8"></div></div></div>
+
+    <div class="cardP"><div class="module"><div id="position9"></div></div></div>
+
+	<div class="cardE"><div class="module"><div id="position10"></div></div></div>
+
+    <div class="cardE"><div class="module"><div id="position11"></div></div></div>
+
+	<div class="cardE"><div class="module"><div id="position12"></div></div></div>
+	
+    <div class="cardE"><div class="module"><div id="position13"></div></div></div>
+
+	<div class="cardE"><div class="module"><div id="position14"></div></div></div>
+
+    <div class="cardE"><div class="module"><div id="position15"></div></div></div>
+
+	<div class="cardE"><div class="module"><div id="position16"></div></div></div>
+
+    <div class="cardE"><div class="module"><div id="position17"></div></div></div>
+
+	<div class="cardE"><div class="module"><div id="position18"></div></div></div>
+    
+    <div class="cardE"><div class="module"><div id="position19"></div></div></div>
+
+	<div class="cardE"><div class="module"><div id="position20"></div></div></div>
+
+</section>
+
+<footer>
+	<p><em><small>Psst... go ahead and squish your browser!</small></em></p>
+</footer>
+
+  
+</body>
 </html>

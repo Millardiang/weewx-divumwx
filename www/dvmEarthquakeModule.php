@@ -49,7 +49,7 @@ $eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $l
 
 .quakes {
   position: relative; 
-  margin-top: -1.5px; 
+  margin-top: 1.5px; 
   margin-left: 0px;
   z-index: auto;
 }
@@ -57,7 +57,6 @@ $eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $l
 </style>
 
 <div class="quakes"></div>
-<div id="svg"></div>
 
  <script>
             

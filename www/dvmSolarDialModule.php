@@ -19,7 +19,7 @@ header('Content-type: text/html; charset=utf-8');
 <style>
 .wrap {
   position: relative;
-  margin-top: -2px;
+  margin-top: -3px;
   margin-right: 0px;
 }
 .moduletitle2 {
