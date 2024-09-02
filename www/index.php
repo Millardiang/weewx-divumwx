@@ -22,7 +22,7 @@
   require_once ('admin/assets/classes/geoplugin.class.php');
   include_once ('dvmUpdater.php');
   include_once ('dvmSideMenu.php');    
-  //include_once ('dvmAdvisory.php');
+  include ('dvmAdvisory.php');
   date_default_timezone_set($TZ);
   header('Content-type: text/html; charset=utf-8');
   error_reporting(0);
@@ -85,11 +85,11 @@
                  </div> 
 
 </div>
-  
-<!--div class="alert">
+<?php if ($alertlevel !== "none") {?> 
+<div class="alert" style="background-color: <?php echo $lowercasealert;?>;">
   <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
-  <span><strong>  Danger!</strong> Red Warning for Thunder and Lightning.</span>
-</div-->
+  <span><img src="./css/svg/<?php echo $warnimage;?>"></img><a class="alertpos"><?php echo $alertPhrase;?></a></span>
+</div><?php } ?>
 
   
 <section class="card-container">

@@ -9677,10 +9677,6 @@ input:checked + .slider:before {
     right: 20px;
     margin-top: -10px;
   }
-  .alertpos {
-    margin: auto
-  }
-  
   
   .onlineMarkerOuter {
       /* width: 30px; */

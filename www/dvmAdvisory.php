@@ -48,7 +48,87 @@ else if (($parsed_json['channel']['item']['description']) !== null){$description
        else if(strpos($description, "lightning") !== false) {$alerttype='Lightning';}
        else if(strpos($description, "thunder") !== false) {$alerttype='Thunderstorms';}
        else {$alertlevel="none";}
-       $warnimage = $parsed_icon[$lowercasealert][$alerttype];
-?>
+       //$lowercasealert="yellow";
+       //$alertlevel="Yellow";
+       //$alerttype="Thunderstorms";
 
+       $warnimage = $parsed_icon[$lowercasealert][$alerttype];
+
+///MetOffice
+if ($alertlevel !== "none")
+{$alertPhrase = " ".$alertlevel." Warning ".$alerttype;}
+  
+
+  else if ($alertlevel === "none")
+  {$alertPhrase = "No Warnings in Force";} 
+    
+} 
+// north america  
+/*else if($advisoryzone == "na")
+{
+$name = $parsed_json["response"][0]["details"]["name"];
+$color = $parsed_json["response"][0]["details"]["color"];
+$begins = $parsed_json["response"][0]["timestamps"]["beginsISO"];
+$expires = $parsed_json["response"][0]["timestamps"]["expiresISO"];
+$code = $parsed_json["error"]["code"];
+}
+//aw alerts
+if ($code == "warn_no_data")
+  {$alertPhrase = "No Warnings in Force"; $alertlevel = "none";}  
+else if ($code == ""){$alertPhrase = $name." ".$alerttype;}
+
+else if($advisoryzone == "eu")
+{
+$name = $parsed_json['response'][0]['details']['name'];
+$type = $parsed_json["response"][0]["details"]["type"];
+$alertdesc = substr($type, 0 ,5);
+$level = substr($type, -2);
+            if ($level == "MD") {
+                $background = "yellow";
+                $alertlevel = "Yellow Alert";
+            } elseif ($level == "SV") {
+                $background = "orange";
+                $alertlevel = "Orange Alert";
+            } elseif ($level == "EX") {
+                $background = "red";
+                $alertlevel = "Red Alert";
+            }
+$alerttime = $parsed_json['response'][0]['timestamps']['begins'];
+$alertexp = $parsed_json['response'][0]['timestamps']['expires']; 
+$alertissued = $parsed_json['response'][0]['timestamps']['issued'];
+$warnimage = $parsed_icon[$background][$type];
+$alerttype = $parsed_icon['top']['alertdesc'][$alertdesc];
+
+if ($alertlevel != "")
+{$alertPhrase = $alertlevel." Warning ".$alerttype." ".$warnimage;}
+
+  else if ($level === "")
+  {$alertPhrase = "No Warnings in Force"; $alertlevel = "none";}   
+
+}
+
+else if($advisoryzone == "au")
+{
+$xml = simplexml_load_file("jsondata/au.txt") or die("Error: Cannot create object");
+$jsonData = json_encode($xml, JSON_PRETTY_PRINT);
+$parsed_json = json_decode($jsonData, true);
+if(($parsed_json["channel"]["title"])!==null){$alertlevel="Yellow";}
+else {$alertlevel="none";}
+///BOM Warning
+if (strpos($alertlevel,'Yellow') !== false)
+ {$alertPhrase = $newalertyellow;}  
+
+ 
+//outlook
+  else if ($alertlevel == "none")
+  {$alertPhrase = "No Wrnings in Force";}  
+
+}
+
+else ($advisoryzone == "rw")
+{$alertPhrase = "No Warnings in Force";}*/
+
+//echo $alertPhrase;
+//echo $warnimage;
+?>
 
