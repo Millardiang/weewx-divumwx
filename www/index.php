@@ -29,7 +29,7 @@
 ?>
 <!DOCTYPE html>
 <head>
-  <!--title><?php echo $stationlocation;?> Weather Station</title-->
+  <title><?php echo $stationlocation;?> Weather Station</title>
   <!--Google / Search Engine Tags -->
   <meta itemprop="image" content="img/divumMeta.png">
   <meta itemprop="name" content="Private Weather Station <?php echo $stationlocation;?>">
@@ -55,7 +55,7 @@
   <link href="css/main.dark.css?version=<?php echo filemtime('css/main.dark.css');?>" rel="stylesheet prefetch">
 <html lang="en" >
   <meta charset="UTF-8">
-  <title>DivumWX - Proposed Responsive CSS Grid Layout Scheme</title>
+  <!--title>DivumWX - Proposed Responsive CSS Grid Layout Scheme</title-->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="stylesheet" href="style.css"><link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css'>
 <link rel="stylesheet" href="./css/main.dark.css">
@@ -77,13 +77,19 @@
 <body>
 
 <div class="titlebar">
-	<h1>A DivumWX Weather Station</h1>
+	        <div class="stationLongname">
+          <div class="headerflag"><object data="./img/flags/<?php echo $flag;?>.svg" width="20px"></object>&nbsp;&nbsp;<?php echo $stationlocation;?>&nbsp; Weather Station&nbsp;&nbsp;<object data="./img/flags/<?php echo $flag;?>.svg" width="20px"></object></div>         
+                 </div> 
+        <div class="stationShortname">
+          <div class="headerflag"><object data="./img/flags/<?php echo $flag;?>.svg" width="20px"></object>&nbsp;&nbsp;<?php echo $stationAbbrev;?></object></div>         
+                 </div> 
+
 </div>
   
-<div class="alert">
+<!--div class="alert">
   <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
   <span><strong>  Danger!</strong> Red Warning for Thunder and Lightning.</span>
-</div>
+</div-->
 
   
 <section class="card-container">
@@ -131,7 +137,20 @@
 </section>
 
 <footer>
-	<p><em><small>Psst... go ahead and squish your browser!</small></em></p>
+	<div class="divumfooter-container">
+    <div class="divumfooter-item">
+      <div class="footerlogo1"><a href="http://weewx.com" alt="http://weewx.com" title="http://weewx.com">
+          <?php echo '<img src="img/icon-weewx.svg" alt="WeeWX" title="WeeWX" width="150px" height="55px"><div class="hardwarelogo1text"></div>';?></a>
+      </div>
+      <div class="footerlogo2">
+        <?php echo '<a href="https://divumwxweather.org/" title="https://divumwxweather.org/" target="_blank"><br><img src="img/divumLogo.svg" width="40px" alt="divumwxweather.org/" class="homeweatherstationlogo" ><divumwx>Copyright &copy; 2022-' . date('Y') . '<br>Team DivumWX<br>All rights reserved</divumwx></a>';?>
+      </div>
+      <div class="footertext"><red><?php echo "Never base important decisions that could result in harm to people or property on this weather information." ?></red></div>
+      <div class="footertext" style="font-size: 10px;"><?php echo "Operational Since " . $divum["since"]." - "; $info;?> (<value><?php echo $templateversion;?></value>) <?php echo " - WeeWX[MM]";?>-(<value><maxred><?php echo $divum["swversion"];?></value>)  - OS- <yellow><?php echo " " . $weatherhardware . "". $os_version." - PHP " . substr($phpVersion,0,7);?></value></div>
+      <div class="footertext"><a href="https://www.aerisweather.com/"><img src="img/aerisweather-attribution-h-<?php echo $theme;?>.png" width="75px"></a><br /><a href="https://developer.yr.no/featured-products/forecast/">    Meteogram Data by <img src="img/yr.svg" width="14px"></a><br /><a href="https://bas.dev/work/meteocons">     Animated Icons by <img src="img/bm.svg" width="14px"></a>
+    </div>
+  </div>
+</div>
 </footer>
 
   

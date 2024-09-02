@@ -8,8 +8,8 @@
 		<language>en-au</language>
 		<copyright>Copyright: (C) Copyright Commonwealth of Australia 2010, Bureau of Meteorology (ABN 92637 533532), see http://www.bom.gov.au/other/copyright.shtml for terms and conditions of reuse.</copyright>
 		<webMaster>webops@bom.gov.au (Help desk)</webMaster>
-		<pubDate>Fri, 23 Aug 2024 12:41:39 GMT</pubDate>
-		<lastBuildDate>Fri, 23 Aug 2024 12:41:39 GMT</lastBuildDate>
+		<pubDate>Mon, 02 Sep 2024 08:17:07 GMT</pubDate>
+		<lastBuildDate>Mon, 02 Sep 2024 08:17:07 GMT</lastBuildDate>
 		<generator>Australian Bureau of Meteorology</generator>
 		<ttl>10</ttl>
 		<image>
@@ -18,22 +18,48 @@
 			<link>http://www.bom.gov.au/fwo/IDZ00059.warnings_vic.xml</link>
 		</image>
 		<item>
-			<title>23/22:04 EST Marine Wind Warning Summary for Victoria</title>
+			<title>02/16:40 EST Marine Wind Warning Summary for Victoria</title>
 			<link>http://www.bom.gov.au/vic/warnings/marinewind.shtml</link>
-			<pubDate>Fri, 23 Aug 2024 12:04:17 GMT</pubDate>
+			<pubDate>Mon, 02 Sep 2024 06:40:19 GMT</pubDate>
 			<guid isPermaLink="false">http://www.bom.gov.au/vic/warnings/marinewind.shtml</guid>
 		</item>
 		<item>
-			<title>23/16:49 EST 
+			<title>02/16:56 EST 
                 Severe Weather Warning
             
 for 
-                parts of Central, East Gippsland, North Central, North East, West and South Gippsland and South West Forecast Districts.
+                West and South Gippsland and parts of Central, East Gippsland, South West and North East Forecast Districts.
                 
             </title>
-			<link>http://www.bom.gov.au/products/IDV21037.shtml</link>
-			<pubDate>Fri, 23 Aug 2024 06:49:06 GMT</pubDate>
-			<guid isPermaLink="false">http://www.bom.gov.au/products/IDV21037.shtml</guid>
+			<link>http://www.bom.gov.au/products/IDV21038.shtml</link>
+			<pubDate>Mon, 02 Sep 2024 06:56:10 GMT</pubDate>
+			<guid isPermaLink="false">http://www.bom.gov.au/products/IDV21038.shtml</guid>
+		</item>
+		<item>
+			<title>02/16:59 EST 
+                Coastal Hazard Warning
+            
+for 
+                parts of Central, East Gippsland, South West and West and South Gippsland Forecast Districts.
+                
+            </title>
+			<link>http://www.bom.gov.au/products/IDV21137.shtml</link>
+			<pubDate>Mon, 02 Sep 2024 06:59:49 GMT</pubDate>
+			<guid isPermaLink="false">http://www.bom.gov.au/products/IDV21137.shtml</guid>
+		</item>
+		<item>
+			<title>02/16:53 EST Frost Warning
+for Mallee and North East forecast districts</title>
+			<link>http://www.bom.gov.au/vic/warnings/frost.shtml</link>
+			<pubDate>Mon, 02 Sep 2024 06:53:02 GMT</pubDate>
+			<guid isPermaLink="false">http://www.bom.gov.au/vic/warnings/frost.shtml</guid>
+		</item>
+		<item>
+			<title>02/16:48 EST Warning to Sheep Graziers
+for North Central, North East, South West, Central, West and South Gippsland and East Gippsland forecast districts</title>
+			<link>http://www.bom.gov.au/vic/warnings/sheep.shtml</link>
+			<pubDate>Mon, 02 Sep 2024 06:48:43 GMT</pubDate>
+			<guid isPermaLink="false">http://www.bom.gov.au/vic/warnings/sheep.shtml</guid>
 		</item>
 	</channel>
 </rss>

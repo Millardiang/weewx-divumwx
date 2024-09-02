@@ -238,10 +238,10 @@ input:checked + .slider:before {
   .h4,
   .h5,
   .h6,
-  .divum-container,
+  /*.divum-container,
   .divum-item,
   .divum2-container,
-  .divum2-item,
+  .divum2-item,*/
   a,
   body,
   h1,
@@ -258,8 +258,8 @@ input:checked + .slider:before {
   .h4,
   .h5,
   .h6,
-  .divum-container,
-  .divum-item,
+ /* .divum-container,
+  .divum-item,*/
   a,
   body,
   h1,
@@ -279,16 +279,14 @@ input:checked + .slider:before {
   .indoortrend,
   .tempcontainer,
   .tempcontainer1,
-  .divum-container,
-  .divum-item,
   .divum2-alert,
   .divum2-alert.divumfooter-item,
   .divum2-clock,
-  .divum2-container,
+  /*.divum2-container,*/
   .divum2-indoor,
-  .divum2-item,
+  /*.divum2-item,
   .divumfooter-container,
-  .divumfooter-item,
+  .divumfooter-item,*/
   a,
   body,
   h3 {
@@ -396,7 +394,7 @@ input:checked + .slider:before {
     margin-top: -27px;
   }
   
-  .divum-item,
+  /*.divum-item,*/
   body,
   header {
     text-align: center;
@@ -519,7 +517,7 @@ input:checked + .slider:before {
     font-weight: 500;
   }
   
-  .divum-container {
+ /* .divum-container {
     display: flex;
     list-style: none;
     width: 960px;
@@ -573,43 +571,29 @@ input:checked + .slider:before {
     border: 0 solid #e9ebf1;
     float: left;
     font-size: .9em;
-  }
+  }*/
   
   .divum2-alert,
-  .divum2-clock,
-  .divumfooter-item {
+  .divum2-clock {
     background: rgba(33, 34, 39, .8);
     height: 90px;
   }
-  
-  .divumfooter-container,
-  .divumfooter-item {
+  /*   .divumfooter-container {
     font-family: Arial, system;
-  }
-  
+  }*/
+
+ /* .divumfooter-container {
+    display: flex;
+    width: 960px;
+    margin: 0 auto 2px;
+  }*/
+
+   
   .alerttopicons svg {
     margin-top: 33px;
     opacity: .5;
   }
-  
-  .divumfooter-container {
-    display: flex;
-    width: 960px;
-    margin: 0 auto 2px;
-  }
-  
-  .divumfooter-item {
-    width: 100%;
-    border: 1px solid #191b1e;
-    text-align: center;
-    -webkit-border-radius: 2px;
-    -o-border-radius: 2px;
-    -ms-border-radius: 2px;
-    border-radius: 5px;
-    margin: 0 2px 2px 0;
-    padding: 15px;
-  }
-  
+    
   .barometergaugegrid {
     width: 90%;
     text-align: center;
@@ -1909,7 +1893,7 @@ input:checked + .slider:before {
     .almanacpopup,
     .dvmuptime,
     .divum2-container,
-    .divumfooter-container,
+    /*.divumfooter-container,*/
     header {
       display: none
     }
@@ -1940,7 +1924,7 @@ input:checked + .slider:before {
   
     .almanacpopup,
     .divum2-container,
-    .divumfooter-container,
+    /*.divumfooter-container,*/
     header {
       display: none
     }
@@ -1972,7 +1956,7 @@ input:checked + .slider:before {
   
     .almanacpopup,
     .divum2-container,
-    .divumfooter-container,
+    /*.divumfooter-container,*/
     header {
       display: none
     }

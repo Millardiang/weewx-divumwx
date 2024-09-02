@@ -35,6 +35,73 @@ footer {
     padding-bottom: 1px;
     height: auto;
 }
+  
+.divumfooter-container,
+.divumfooter-item {
+  font-family: Arial, system;
+}
+  
+.divumfooter-container {
+  display: flex;
+  max-width: 960px;
+  margin: 0 auto 2px;
+  text-rendering: optimizeLegibility;
+  color-adjust: [exact];
+  }
+  
+.divumfooter-item {
+  max-width: 960px;
+  text-align: center;
+  margin: 0 2px 2px 0;
+  padding: 15px;
+  background: 0;
+  height: 90px;
+}
+  .footertext,
+  .online {
+    color: silver;
+    font-size: 12px;
+  }
+  
+  .footerlogo1 {
+    margin: -5px 0 0;
+    padding: 0;
+    float: left;
+  }
+  
+  .footerlogo1text {
+    position: absolute;
+    color: silver;
+    font-size: 10px;
+    width: 65px;
+    line-height: 10px;
+    margin-left: 36px;
+    font-weight: 500;
+  }
+  
+  .footerlogo2,
+  .footerlogo3 {
+    position: absolute;
+    padding: 0;
+    margin-right: 20px;
+  }
+  
+  .footerlogo2 {
+    margin-top: -10px;
+    margin-left: 760px;
+  }
+  
+  .footerlogo3 {
+    margin-top: 13px;
+    margin-left: 800px;
+  }
+  
+  .footertext {
+    position: relative;
+    float: left;
+    top: -10px;
+    margin-left: -5px;
+  }
 .titlebar {
   display: flex;
   max-width: 1596px;
@@ -57,7 +124,12 @@ footer {
   text-decoration: none;
   color: white;
 }
-
+.stationLongname {
+  display: block;
+}
+.stationShortname {
+  display: none;
+}
 .cardP, .cardE {
   color: white;
   text-align: center;
@@ -119,16 +191,32 @@ footer {
 }
 @media (min-width: 318px) {
   .alert, .titlebar, footer { max-width: 318px; margin: auto; }
+  .stationLongname, footer { display: none; }
+  .stationShortname { display: block; }
+  .cardE { display: block; }
+
 }
 @media (min-width: 635px) {
   .alert, .titlebar, footer { max-width: 635px; margin: auto; }
+  .stationLongname { display: block; }
+  .stationShortname, footer { display: none; }
+  .cardE { display: block; }
 }
 @media (min-width: 953px) {
   .alert, .titlebar, footer { max-width: 953px; margin: auto; }
+  .stationLongname , footer { display: block; }
+  .stationShortname { display: none;}
+  .cardE { display: none; }
 }
 @media (min-width: 1272px) {
   .alert, .titlebar, footer { max-width: 1272px; margin: auto; }
+  .stationLongname, footer { display: block; }
+  .stationShortname { display: none;}
+  .cardE {display: block; }
 }
 @media (min-width: 1596px) {
   .alert, .titlebar, footer { max-width: 1596px; margin: auto; }
+  .stationLongname , footer{ display: block; }
+  .stationShortname { display: none;}
+  .cardE {display: block; }
 }
