@@ -59,7 +59,7 @@ error_reporting(0);
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   
 <!--link rel="stylesheet" href="./css/divumwx.min.css?version=<?php echo filemtime('./css/divumwx.min.css'); ?>" rel="stylesheet prefetch"-->
-<link rel="stylesheet" href="./css/divumwx.min.css?version=<?php echo filemtime('./css/divumwx.main.css'); ?>" rel="stylesheet prefetch">
+<link rel="stylesheet" href="./css/divumwx.main.css?version=<?php echo filemtime('./css/divumwx.main.css'); ?>" rel="stylesheet prefetch">
 
   
 </head>

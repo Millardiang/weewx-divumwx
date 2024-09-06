@@ -52,7 +52,7 @@
   --darkermatter: #2c3e50;
   --greenapple: #2ecc71;
   --greyapple: #ecf0f1;
-   --menu-spinner: #000000;
+  --menu-spinner: #000000;
   --font-family: font-family: Arial, Helvetica, sans-serif;
   --menu-color: #e0eafb;
 }
@@ -10052,128 +10052,48 @@ line { stroke:#555; stroke-width:1; fill:none; }
 	}
 }
 @media (min-width: 318px) {
-  .alert, .titlebar { max-width: 318px; margin: auto; }
+  .alertbar, .titlebar { max-width: 318px; margin: auto; }
   .stationLongname { display: none; }
   .stationShortname { display: block; }
   .cardE { display: block; }
 
 }
 @media (min-width: 635px) {
-  .alert, .titlebar{ max-width: 635px; margin: auto; }
+  .alertbar, .titlebar{ max-width: 635px; margin: auto; }
   .stationLongname { display: none; }
   .stationShortname{ display: block; }
   .cardE { display: block; }
 }
 @media screen and (max-width:820px) {
-    .menuadmin {
-      --spacing: 1.3rem;
-      display: inline;
-      background: 0
-    }
-  
-    .menubutton {
-      background-color: 0;
-    }
-  
-    .menutoolbar {
-      display: flex;
-      flex: 1;
-      font-size: 1em;
-      background: #212428;
-      padding: 0 var(--spacing);
-      height: 30px;
-    }
-  
-    .menubutton--primary {
-      color: var(--text-color);
-      background-color: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      font-size: 0.9em;
-      padding: 0;
-    }
-  
-    .menuadmin__header {
-      display: flex;
-      flex-basis: 100%;
-      grid-area: header;
-      height: 30px;
-      background-color: transparent;
-      position: absolute;
-      font-size: 12px;
-    }
-  
-    .menubutton--primary a {
-      color: var(--text-color);
-      font-size: 0.85em;
-      font-weight: 500;
-    }
-  
-    menutoptitle {
-      display: none
-    }
-  
-    menuuptime {
-      top: 10px
-    }
-  
-    .divum-item {
-      margin-top: 32px;
-      margin-bottom: -28px
-    }
-  
-    .divumwxthemeicon {
-      position: absolute;
-      margin: 0;
-      left: 10px;
-      top: 10px;
-      max-height: 12px
-    }
-  
-    .divumwxthememonitor {
-      width: 15px;
-      height: 11px;
-      background: #ff832f;
-      border-radius: 2px
-    }
-  
-    .divumwxthememonitor li {
-      position: absolute;
-      list-style: none
-    }
-  
-    .divumwxthememonitor .divumwxthemefirst {
-      width: 13px;
-      height: 8px;
-      background: #4b545c;
-      top: 1px;
-      left: 1px;
-      z-index: 3
-    }
-  
-    .sidebarIconToggle {
-      cursor: pointer;
-      position: absolute;
-      z-index: 99;
-      top: 8px;
-      left: 15px;
-      height: 22px;
-      width: 22px
-    }
-  }
+    .menuadmin {--spacing: 1.3rem; display: inline; background: 0;}
+    .menubutton {background-color: 0;}
+    .menutoolbar {display: flex; flex: 1; font-size: 1em; background: #212428; padding: 0 var(--spacing); height: 30px; }
+    .menubutton--primary { color: var(--text-color); background-color: 0; font-family: Arial, Helvetica, sans-serif; font-size: 0.9em; padding: 0; }
+    .menuadmin__header { display: flex; flex-basis: 100%; grid-area: header; height: 30px; background-color: transparent; position: absolute; font-size: 12px; }
+    .menubutton--primary a { color: var(--text-color); font-size: 0.85em; font-weight: 500; }
+    menutoptitle { display: none; }
+    menuuptime { top: 10px; }
+   .divum-item { margin-top: 32px; margin-bottom: -28px; }
+   .divumwxthemeicon { position: absolute; margin: 0; left: 10px; top: 10px; max-height: 12px; }
+   .divumwxthememonitor { width: 15px; height: 11px; background: #ff832f; border-radius: 2px; }
+   .divumwxthememonitor li { position: absolute; list-style: none; }
+   .divumwxthememonitor .divumwxthemefirst { width: 13px; height: 8px; background: #4b545c; top: 1px; left: 1px; z-index: 3; }
+   .sidebarIconToggle { cursor: pointer; position: absolute; z-index: 99; top: 8px; left: 15px; height: 22px; width: 22px; } 
+}
   @media (min-width: 953px) {
-  .alert, .titlebar { max-width: 953px; margin: auto; }
+  .alertbar, .titlebar { max-width: 953px; margin: auto; }
   .stationLongname  { display: block; }
   .stationShortname { display: none;}
   .cardE { display: none; }
 }
 @media (min-width: 1272px) {
-  .alert, .titlebar { max-width: 1272px; margin: auto; }
+  .alertbar, .titlebar { max-width: 1272px; margin: auto; }
   .stationLongname { display: block; }
   .stationShortname { display: none;}
   .cardE {display: block; }
 }
 @media (min-width: 1596px) {
-  .alert, .titlebar { max-width: 1596px; margin: auto; }
+  .alertbar, .titlebar { max-width: 1596px; margin: auto; }
   .stationLongname { display: block; }
   .stationShortname { display: none;}
   .cardE {display: block; }
