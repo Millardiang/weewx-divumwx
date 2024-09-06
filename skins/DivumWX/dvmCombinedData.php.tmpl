@@ -199,6 +199,7 @@ $air["24h.rollingavg.pm10_0"] = $current.pm10_0.format(add_label=False, format_s
 #end if
 #end if
 #if $almanac.hasExtras
+$alm["moon_altitude"] = round($almanac.moon.alt,2);
 $alm["sun_altitude"] = round($almanac.sun.alt,2);
 if ($alm["sun_altitude"] < 0)
 {
