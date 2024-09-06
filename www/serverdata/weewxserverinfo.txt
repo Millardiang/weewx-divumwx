@@ -1,0 +1,1 @@
+192.168.1.132:25252::/home/dvm/weewx-data/bin

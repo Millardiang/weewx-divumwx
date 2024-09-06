@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Service Denied</title>
+<meta name="robots" content="noindex" />
+</head>
+<body style="margin-left: 15%; margin-right: 15%;">
+<h1>Service Denied</h1>
+<p style="font-size: larger; text-align: justify;">
+Your request has been denied by the Fourmilab server
+because you have submitted too many requests
+within a 10 minute period.
+</p>
+</body>
+</html>
+# robots.txt for http://www.fourmilab.ch
+
+User-agent: *
+Disallow: /bullets/zounds                     # Audio files for illustration only
+Disallow: /cgi-bin/                           # Dynamic services
+Disallow: /documents/DOS/   	    	      # Denial of service countermeasures
+Disallow: /hotbits/figures                    # Figures for illustration only
+Disallow: /hotbits/source                     # Source code
+Disallow: /earthview/cache/                   # Ephemeral files
+Disallow: /earthview/satellite.html           # Satellite orbital elements
+Disallow: /entrenous/                         # Files for specific people
+Disallow: /etexts/www/gergel		      # Mirror of Gergel PDF books
+Disallow: /goldberg/                          # Under construction
+Disallow: /netfone/                           # Renamed to /speakfree
+Disallow: /serverstats/                       # Changes every day, confusing
+Disallow: /sitemap.html                       # Temporary link to home page
+Disallow: /speakfree/unix/prior-releases      # Obsolete releases
+Disallow: /speakfree/windows/prior-releases   # Obsolete releases
+Disallow: /uscode/8usc/www/                   # Bulk text of 8 USC
+Disallow: /uscode/26usc/www/                  # Bulk text of 26 USC
+Disallow: /ustax/                             # Renamed to /uscode/26usc
+Disallow: /yoursky/catalogues/                # Yoursky object catalogues
+
+User-agent: NPBot
+Disallow: / 	    	    	    	      # Nameprotect.com spybot blocking
+
+User-agent: Twiceler	    	    	      # Moronic Twiceler cgi-bin chaser
+Disallow: /
+
+# Twitterbot blasts in dozens of requests in seconds,
+User-agent: Twitterbot
+Disallow: /
+
+# AhrefsBot generates lots of traffic and provides no
+# benefit to sites it scrapes.  It is also known for
+# ignoring robots.txt, so we also block it in .htaccess.
+User-agent: AhrefsBot
+Disallow: /
+
+# MJ12bot generates a lot of traffic to no benefit.
+# It claims to respect robots.txt.  Let's see.
+User-agent: MJ12bot
+Disallow: /
+
+# DotBot (Moz.com) crawls indiscriminately to no
+# benefit but their own.
+User-agent: DotBot
+Disallow: /
+
+# MauiBot crawls indiscriminately and quickly, and
+# nobody knows what it is.  Comes from an AWS
+# address range.
+User-agent: MauiBot
+Disallow: /
+
+# SEMrushBot is up to no good. In December 2019, it accounted for
+# almost 4% of all hits on the site.
+User-agent: SemrushBot
+Disallow: /
+
+# TurnitinBot is a "plagiarism" checker that hits the site
+# indiscriminately.
+User-agent: TurnitinBot
+Disallow: /
+
