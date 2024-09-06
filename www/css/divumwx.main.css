@@ -26,6 +26,7 @@
   --menu-spinner: #ffffff;
   --font-family: font-family: Arial, Helvetica, sans-serif;
   --menu-color: #151819;
+  --moon-line-circle: #c0c0c0;
 }
 [data-theme="light"] {
   --body-color: #e0eafb;
@@ -55,6 +56,7 @@
   --menu-spinner: #000000;
   --font-family: font-family: Arial, Helvetica, sans-serif;
   --menu-color: #e0eafb;
+  --moon-line-circle: #808080;
 }
 
 /* START OF OLD CSS */
@@ -9766,12 +9768,12 @@ input:checked + .slider:before {
 text { fill:var(--text-color); font-family:Helvetica; font-size:7.5px; }
 path { stroke:#555; stroke-width:1; fill:none; }
 line { stroke:#555; stroke-width:1; fill:none; }
-.moon.line { stroke:silver; stroke-width:1; fill:none; }
+.moon.line { stroke:var(--moon-line-circle); stroke-width:1; fill:none; }
 .sun.line { stroke:tomato; stroke-width:1; fill:none; }
 .horizon.line { stroke:#007fff; stroke-width:1; fill:none; }
 .zenith.line { stroke:#2e8b57; stroke-width:1; fill:none; }
 .sun.circle { stroke:tomato; shape-rendering:geometricPrecision; fill:tomato; }
-.moon.circle { stroke:silver; shape-rendering:geometricPrecision; fill:silver; }
+.moon.circle { stroke:var(--moon-line-circle); shape-rendering:geometricPrecision; fill:var(--moon-line-circle); }
 
 }
 /* anemometer*/
