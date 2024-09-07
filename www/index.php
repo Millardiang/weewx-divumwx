@@ -78,7 +78,7 @@ error_reporting(0);
   </script>
 <body>
 <!--start of header section-->
-  <div class="titlebar">
+  <div class="titlebar"style="background-color:transparent;">
   <div class="titlebar-item">
    </div>
   <div class="titlebar-item-center">
@@ -100,13 +100,7 @@ error_reporting(0);
           </div>
 <!--end of header section-->
 <!--start of alert section-->      
-<?php if ($alertlevel !== "none")
-{ ?> 
-<div class="alertbar" style="background-color: <?php echo $lowercasealert; ?>;">
-  <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
-  <span><img src="./css/svg/<?php echo $warnimage; ?>"></img><a class="alertpos"><?php echo $alertPhrase; ?></a></span>
-</div><?php
-} ?>
+
 <!--end of alert section-->
 <!--strat of grid section-->  
 <section class="card-container">

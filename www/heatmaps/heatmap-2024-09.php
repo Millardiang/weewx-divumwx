@@ -30,8 +30,8 @@ date: '2024-09-06',
 temperature: 26.0
 },
 {
-date: 'null',
-temperature: null
+date: '2024-09-07',
+temperature: 22.6
 },
 {
 date: 'null',
@@ -154,8 +154,8 @@ date: '2024-09-06',
 temperature: 78.8
 },
 {
-date: 'null',
-temperature: null
+date: '2024-09-07',
+temperature: 72.7
 },
 {
 date: 'null',

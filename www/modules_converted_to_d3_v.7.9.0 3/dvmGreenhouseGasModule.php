@@ -16,9 +16,9 @@
 include('dvmCombinedData.php');
 date_default_timezone_set($TZ);
 $lang['Greenhouse'] = "Greenhouse Gas";
-$json_string  = file_get_contents('jsondata/airquality.txt');
+$json_string  = file_get_contents('jsondata/open_meteo.txt');
 $parsed_json  = json_decode($json_string,true);
-$greenhouse["updated_time"] = $greenhouse["updated_time"] = date($timeFormat,filemtime('jsondata/airquality.txt'));
+$greenhouse["updated_time"] = $greenhouse["updated_time"] = date($timeFormat,filemtime('jsondata/open_meteo.txt'));
 $greenhouse["carbon_monoxide"] = $parsed_json["current"]["carbon_monoxide"];
 $greenhouse["nitrogen_dioxide"] = $parsed_json["current"]["nitrogen_dioxide"];
 $greenhouse["sulphur_dioxide"] = $parsed_json["current"]["sulphur_dioxide"];
@@ -28,20 +28,18 @@ $greenhouse["dust"] = $parsed_json["current"]["dust"];
 $greenhouse["ammonia"] = $parsed_json["current"]["ammonia"];
 ?>
 
-<div class="chartforecast">
-<span class="yearpopup"><a alt="airquality charts" title="Airquality Charts" href="dvmhighcharts/dvmAirQualityWeekChart.php" data-lity><?php echo $menucharticonpage;?> Airquality Charts and Information</a></span>
+<div class="chartforecast2">
+<span class="yearpopup"><a alt="solar" title="Gas Chart" href="highcharts/dvmWeekGasChart.php" data-lity><?php echo $menucharticonpage;?> Greenhouse Gas Charts</a></span>
 </div>
-<span class='moduletitle'><?php echo $lang['Greenhouse'];?></span>
+<span class='moduletitle2'><?php echo $lang['Greenhouse'];?></span>
 
 <div class="updatedtime1"><?php echo $online." ".$greenhouse["updated_time"];?></div>
 
-<script src="js/d3.7.9.0.min.js"></script>   
+<!--script src='js/d3.min.js'></script-->
+<script src="js/d3.7.9.0.min.js"></script>    
       
 <style>
-.Gas {
-  position: relative;
-  margin-top: -3.5px; 
-  margin-left: -0px;}
+.Gas {margin-top: -3px; margin-left: -0px;}
 </style>
 
 <div class="Gas">
@@ -68,7 +66,7 @@ var innerColor = "rgb(230, 200, 200)";
 
 var svg = d3.select(".GreenhouseGas")
     .append("svg")
-    //.style("background", "#292E35")
+    //.style("background", "#292E35") // box background to be commented out
     .attr("width", 310)
     .attr("height", 151.5);
 

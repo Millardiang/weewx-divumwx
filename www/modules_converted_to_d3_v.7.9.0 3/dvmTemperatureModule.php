@@ -70,7 +70,7 @@ else if ($theme === "light")
 <!--span class="yearpopup"><a alt="temp charts" title="temp charts" href="dvmTemperatureRecords.php" data-lity><?php echo $menucharticonpage;?> Temperature Almanac and Derived Charts</a></span-->
 <span class="yearpopup"><a alt="temp charts" title="temp charts" href="dvmHeatMapPopup.php" data-lity><?php echo $menucharticonpage;?> Heat Map</a></span>
 </div>    
-<span class='moduletitle'><?php echo $lang['temperatureModule'];?> (<valuetitleunit>¡Æ<?php echo $temp["units"];?></valuetitleunit>)</span>
+<span class='moduletitle4'><?php echo $lang['temperatureModule'];?> (<valuetitleunit>Â°<?php echo $temp["units"];?></valuetitleunit>)</span>
 <div class="updatedtime1"><?php if(file_exists($livedata)&&time()- filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>';else echo $online." ".$divum["time"];?></div>
 </div>
 
@@ -519,9 +519,9 @@ border-radius: 2px;
 <div class="tempconverter3">
 <?php
 if($theme == 'dark') {
-  if ($temp["units"]=='C'){echo "<div class=tempconvertercircleminus10 style='color:$colorOutTemp;'>".number_format(($temp["outside_now"]*9/5)+32,1).'¡Æ<smalltempunit2>F';} else if ($temp["units"]=='F'){echo "<div class=tempconvertercircleminus10 style='color:$colorOutTemp;'>".number_format(($temp["outside_now"]-32)*5/9,1).'¡Æ<smalltempunit2>C';}
+  if ($temp["units"]=='C'){echo "<div class=tempconvertercircleminus10 style='color:$colorOutTemp;'>".number_format(($temp["outside_now"]*9/5)+32,1).'Â°<smalltempunit2>F';} else if ($temp["units"]=='F'){echo "<div class=tempconvertercircleminus10 style='color:$colorOutTemp;'>".number_format(($temp["outside_now"]-32)*5/9,1).'Â°<smalltempunit2>C';}
 } else { 
-if ($temp["units"]=='C'){echo "<div class=tempconvertercircleminus10 style='background:$colorOutTemp;'>".number_format(($temp["outside_now"]*9/5)+32,1).'¡Æ<smalltempunit2>F';} else if ($temp["units"]=='F'){echo "<div class=tempconvertercircleminus10 style='background:$colorOutTemp;'>".number_format(($temp["outside_now"]-32)*5/9,1).'¡Æ<smalltempunit2>C';}}?>
+if ($temp["units"]=='C'){echo "<div class=tempconvertercircleminus10 style='background:$colorOutTemp;'>".number_format(($temp["outside_now"]*9/5)+32,1).'Â°<smalltempunit2>F';} else if ($temp["units"]=='F'){echo "<div class=tempconvertercircleminus10 style='background:$colorOutTemp;'>".number_format(($temp["outside_now"]-32)*5/9,1).'Â°<smalltempunit2>C';}}?>
 </smalltempunit2></div></div>
 
 <div class="divTable temperature">
@@ -535,11 +535,11 @@ if ($temp["units"]=='C'){echo "<div class=tempconvertercircleminus10 style='back
 <div class="divTableBody">
 <div class="divTableRow">
 <div class="divTableCell"><?php 
-if ($temp["outside_day_max"]<10){echo "?".$temp["outside_day_max"]."¡Æ".$temp["units"]."\n";?> | <?php echo $temp["outside_day_min"]."¡Æ".$temp["units"];}else if ($temp["outside_day_max"]>=10){echo $temp["outside_day_max"]."¡Æ".$temp["units"]."\n";?> | <?php echo $temp["outside_day_min"]."¡Æ".$temp["units"];}?>
+if ($temp["outside_day_max"]<10){echo "Â ".$temp["outside_day_max"]."Â°".$temp["units"]."\n";?> | <?php echo $temp["outside_day_min"]."Â°".$temp["units"];}else if ($temp["outside_day_max"]>=10){echo $temp["outside_day_max"]."Â°".$temp["units"]."\n";?> | <?php echo $temp["outside_day_min"]."Â°".$temp["units"];}?>
 </div>
 
-<div class="divTableCell" style="border-left: 5px solid <?php echo $colorAppTemp;?>; padding: 1px 1px;"><?php echo $temp["apptemp"]."¡Æ".$temp["units"];?></div>
-<div class="divTableCell" style="border-left: 5px solid <?php echo $colorOutTempDayAvg;?>;"><?php echo $temp["outside_day_avg"]."¡Æ".$temp["units"];?></div>
+<div class="divTableCell" style="border-left: 5px solid <?php echo $colorAppTemp;?>; padding: 1px 1px;"><?php echo $temp["apptemp"]."Â°".$temp["units"];?></div>
+<div class="divTableCell" style="border-left: 5px solid <?php echo $colorOutTempDayAvg;?>;"><?php echo $temp["outside_day_avg"]."Â°".$temp["units"];?></div>
 </div>
 </div>
   <div class="divTableHeading">
@@ -551,15 +551,15 @@ if ($temp["outside_day_max"]<10){echo "?".$temp["outside_day_max"]."¡Æ".$temp["u
 </div>
   <div class="divTableBody">
 <div class="divTableRow">
-<div class="divTableCell"><?php echo $temp["outside_trend"].'¡Æ' ?><smalltempunit2><?php echo $temp["units"];?></smalltempunit2><?php 
-if($temp["outside_trend"]>0){echo '?'.$risingsymbol;}else if($temp["outside_trend"]<0){echo '?'.$fallingsymbol;}else{ echo '?'.$steadysymbol;}?></div>
+<div class="divTableCell"><?php echo $temp["outside_trend"].'Â°' ?><smalltempunit2><?php echo $temp["units"];?></smalltempunit2><?php 
+if($temp["outside_trend"]>0){echo 'Â '.$risingsymbol;}else if($temp["outside_trend"]<0){echo 'Â '.$fallingsymbol;}else{ echo 'Â '.$steadysymbol;}?></div>
 
 <div class="divTableCell" style="border-left: 5px solid <?php echo $colorHumidityOut; ?>;"><?php echo $humid["now"]; ?><smalltempunit2>%</smalltempunit2><?php //humidity trend
-if($humid["trend"]>0){echo '?'.$risingsymbol;}else if($humid["trend"]<0){echo '?'.$fallingsymbol;}else{ echo '?'.$steadysymbol;}?></div>
+if($humid["trend"]>0){echo 'Â '.$risingsymbol;}else if($humid["trend"]<0){echo 'Â '.$fallingsymbol;}else{ echo 'Â '.$steadysymbol;}?></div>
 
 <div class="divTableCell" style="border-left: 5px solid <?php echo $colorDewpoint;?>;"><?php //dewpoint
-echo "?".$dew["now"].'¡Æ<smalltempunit2>'.$temp["units"];?><?php //dewpoint trend
-if($dew["trend"]>0){echo '?'.$risingsymbol;}else if($dew["trend"]<0){echo '?'.$fallingsymbol;}else{ echo '?'.$steadysymbol;}?></div>
+echo "Â ".$dew["now"].'Â°<smalltempunit2>'.$temp["units"];?><?php //dewpoint trend
+if($dew["trend"]>0){echo 'Â '.$risingsymbol;}else if($dew["trend"]<0){echo 'Â '.$fallingsymbol;}else{ echo 'Â '.$steadysymbol;}?></div>
 </div>
 </div>
 
@@ -572,10 +572,10 @@ if($dew["trend"]>0){echo '?'.$risingsymbol;}else if($dew["trend"]<0){echo '?'.$f
 </div>
     <div class="divTableBody">
 <div class="divTableRow">
-<div class="divTableCell" style="border-left: 5px solid <?php echo $colorInTemp;?>;"><?php echo "?".$hometemp."?".$temp["indoor_now"]. "¡Æ" .$temp["units"];?>
-<?php if($temp["indoor_trend"]>0){echo '?'.$risingsymbol;}else if($temp["indoor_trend"]<0){echo '?'.$fallingsymbol;}else{ echo '?'.$steadysymbol;}?></div>
-<div class="divTableCell" style="border-left: 5px solid <?php if($barom["units"]=="kPa"){echo $colorHumidex;}else{echo $colorHeatindex;}?>;"><?php if($barom["units"]=="kPa"){echo $temp["humidex"]."¡Æ".$temp["units"];}else{echo $temp["heatindex"]."¡Æ".$temp["units"];}?></div>
-<div class="divTableCell" style="border-left: 5px solid <?php echo $colorWindchill;?>;"><?php echo $temp["windchill"]."¡Æ".$temp["units"];?></div>
+<div class="divTableCell" style="border-left: 5px solid <?php echo $colorInTemp;?>;"><?php echo "Â ".$hometemp."Â ".$temp["indoor_now"]. "Â°" .$temp["units"];?>
+<?php if($temp["indoor_trend"]>0){echo 'Â '.$risingsymbol;}else if($temp["indoor_trend"]<0){echo 'Â '.$fallingsymbol;}else{ echo 'Â '.$steadysymbol;}?></div>
+<div class="divTableCell" style="border-left: 5px solid <?php if($barom["units"]=="kPa"){echo $colorHumidex;}else{echo $colorHeatindex;}?>;"><?php if($barom["units"]=="kPa"){echo $temp["humidex"]."Â°".$temp["units"];}else{echo $temp["heatindex"]."Â°".$temp["units"];}?></div>
+<div class="divTableCell" style="border-left: 5px solid <?php echo $colorWindchill;?>;"><?php echo $temp["windchill"]."Â°".$temp["units"];?></div>
 
 </div>
 </div>

@@ -572,7 +572,7 @@ else {$airqual["text"] = $airqual["text10"];
 <span class="yearpopup"><a alt="aquinfo" title="AQI Info" href="dvmAqiInfoPopup.php" . data-lity> <?php echo $info;?> AQI Info</a></span>
 </div>
 
-<span class='moduletitle'><?php echo $lang['airqualityModule'];?></span>       
+<span class='moduletitle2'><?php echo $lang['airqualityModule'];?></span>       
 <div class="updatedtime1"><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online.' '.date($timeFormat);?></div>
 
 <!--script src="js/d3.min.js"></script-->

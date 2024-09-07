@@ -4,9 +4,10 @@ date_default_timezone_set($TZ);
 ?>
 
 <div class="chartforecast2">
-<span class="yearpopup"><a alt="solar" title="solar" href="dvmSolarRecords.php" data-lity><?php echo $menucharticonpage;?> UV and Solar | UVI Records and Charts</a></span>
+<!--span class="yearpopup"><a alt="solar" title="UV Guide" href="dvmMenuSolarUvLux.php" data-lity><?php echo $menucharticonpage;?> UV and Solar Almanacs and Guide</a></span-->
+<span class="yearpopup"><a alt="solar" title="UV Guide" href="dvmSolarRecords.php" data-lity><?php echo $menucharticonpage;?> UV and Solar Almanacs and Guide</a></span>
 </div>
-<span class='moduletitle'><?php echo $lang['solarUvLuxModule'];?></span>
+<span class='moduletitle2'><?php echo $lang['solarUvLuxModule'];?></span>
 
 
 <div class="updatedtime1"><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>';else echo $online." ".$divum["time"];?></div>
@@ -24,14 +25,13 @@ else if ($uv["now"]>=0 ) {echo $uviclear,'<span>UVI</span> Low';}
 
 <html>
 
-<script src="js/d3.7.9.0.min.js"></script>   
-
-       
+<script src="js/d3.7.9.0.min.js"></script>    
+      
 <style>
-.sunshineposx {margin-top: -3.5px; margin-left: -0px;}
-.solarposx {margin-top: -10px; margin-left: -210px;}
-.uvipos {margin-top: -149.5px; margin-left: 0px;}
-.luxpos {margin-top: -150px; margin-left: 210px;}
+.sunshineposx {margin-top: -2px; margin-left: -0px;}
+.solarposx {margin-top: -17px; margin-left: -210px;}
+.uvipos {margin-top: -155px; margin-left: 0px;}
+.luxpos {margin-top: -155px; margin-left: 210px;}
 </style>
 
 <div class="sunshineposx">

@@ -30,7 +30,7 @@ $outlookPhrase = str_replace(" degrees","&deg".$temp["units"],$phrase);
     <title>Weather Clock</title>
 </head>
 <body>
-<span class='moduletitle'><?php echo $lang['timeTop']; ?></valuetitleunit></span>
+<span class='moduletitle2'><?php echo $lang['timeTop']; ?></valuetitleunit></span>
     
       
 <script src="js/d3.7.9.0.min.js"></script>
@@ -48,7 +48,7 @@ if (theme === 'dark') {
 
 } else {
 
-    var ringColor = "#898990";
+    var ringColor = "#a3abc2";
     var dateColor = "#000000";
 
 }

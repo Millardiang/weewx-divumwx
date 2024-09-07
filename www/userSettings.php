@@ -24,22 +24,22 @@ $timeFormatShort = "H:i"; //g:i, g:i a
 $clockformat = "24"; //12, 24
 $advisoryzone = "uk"; //uk, na, eu, au, rw (= UK, North America, Europe, Australia, Rest of World)
 $aqInUse = "yes"; // yes, no
-$aqZone = "uk";//uk, us, ei, ci, au, (= UK DAQI, US EPS, Europe EAQI, Europe CAQI, Australia)
+$aqZone = "uk"; //uk, us, ei, ci, au, (= UK DAQI, US EPS, Europe EAQI, Europe CAQI, Australia)
 $aqSource = "openmeteo"; //purple, weewx, sds, openmeteo
 $lightningSource = "1"; // use 'Boltek' or '0'
 $stationAbbrev = "SCWX.UK";
 $position1 = "dvmClockOutlookModule.php";
 $position2 = "dvmCurrentModule.php";
-$position3 = "dvmForecastModule.php";
-$position4 = "dvmTemperatureModule.php";
-$position5 = "dvmWindModule.php";
+$position3 = "dvmWebcamModule.php";
+$position4 = "dvmForecastModule.php";
+$position5 = "dvmTemperatureModule.php";
 $position6 = "dvmAnemometerModule.php";
-$position7 = "dvmBarometerModule.php";
-$position8 = "dvmRainfallModule.php";
-$position9 = "dvmSolarUvLuxModule.php";
+$position7 = "dvmWindModule.php";
+$position8 = "dvmBarometerModule.php";
+$position9 = "dvmRainfallModule.php";
 $position10 = "dvmAirqualityModule.php";
 $position11 = "dvmGreenhouseGasModule.php";
-$position12 = "dvmWebcamModule.php";
+$position12 = "dvmSolarUvLuxModule.php";
 $position13 = "dvmLightningModule.php";
 $position14 = "dvmEarthDaylightModule.php";
 $position15 = "dvmPollenModule.php";

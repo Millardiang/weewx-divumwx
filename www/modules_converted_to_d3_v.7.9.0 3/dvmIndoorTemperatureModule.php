@@ -10,20 +10,22 @@ $temp["indoor_now_feels"] = ($temp["indoor_now_feels"]-32)/9*5;}
 </head>
 
 <div class="chartforecast">
-<span class="yearpopup"><a alt="Indoor Chart" title="Indoor Chart" href="dvmhighcharts/tempCharts.php?chart='indoorplot'&span='yearly'&temp='<?php echo $temp["units"];?>'&pressure='<?php echo $barom["units"];?>'&wind='<?php echo $wind["units"];?>'&rain='<?php echo $rain["units"];?>" frameborder="0" scrolling="no" width="100%" height="100%" data-lity><?php echo $menucharticonpage;?> Indoor Temp | Humidity Chart</a></span>      
+<!--span class="yearpopup"><a alt="Indoor Chart" title="Indoor Chart" href="dvmMenuIndoorTemperaturePopup.php" data-lity><?php echo $menucharticonpage;?> Indoor Temp | Humidity Chart</a></span-->
+<span class="yearpopup"><a alt="indoor temp charts" title="Indoor Temp Charts" href="highcharts/dvmWeekIndoorTempChart.php" data-lity><?php echo $menucharticonpage;?> Indoor Temp Charts</a></span>
+<span class="yearpopup"><a alt="Home Indoors" title="Home Indoors" href="dvmHomeIndoorPopup.php" data-lity><?php echo $info;?> Home</a></span>       
 </div>
-<span class='moduletitle' style="font-family: Helvetica;"><?php echo $lang['indoorTempModule'];?> (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span> </span>
+<span class='moduletitle'><?php echo $lang['indoorTempModule'];?> (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span> </span>
 
 <div class="updatedtime1"><span><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?></div><br/>
 <style>
-silver {
-	color: silver;
-}
+
 </style> 
 <div class="tempindoorconverter">
 <?php
-  if ($temp["units"]=='C'){echo "<div class=tempconvertercircleminus10 style='$convertStyle $colorInTemp;'>".number_format(($temp["indoor_now"]*9/5)+32,1).'&deg<smalltempunit2>F';} else if ($temp["units"]=='F'){echo "<div class=tempconvertercircleminus10 style='$convertStyle $colorInTemp;'>".number_format(($temp["indoor_now"]-32)*5/9,1).'&deg<smalltempunit2>C';}
-?>
+if($theme == 'dark') {
+  if ($temp["units"]=='C'){echo "<div class=tempconvertercircleminus10 style='color:$colorInTemp;'>".number_format(($temp["indoor_now"]*9/5)+32,1).'°<smalltempunit2>F';} else if ($temp["units"]=='F'){echo "<div class=tempconvertercircleminus10 style='color:$colorInTemp;'>".number_format(($temp["indoor_now"]-32)*5/9,1).'°<smalltempunit2>C';}
+} else { 
+if ($temp["units"]=='C'){echo "<div class=tempconvertercircleminus10 style='background:$colorInTemp;'>".number_format(($temp["indoor_now"]*9/5)+32,1).'°<smalltempunit2>F';} else if ($temp["units"]=='F'){echo "<div class=tempconvertercircleminus10 style='background:$colorInTemp;'>".number_format(($temp["indoor_now"]-32)*5/9,1).'°<smalltempunit2>C';}}?>
 </smalltempunit2></div></div>
 
 
@@ -36,15 +38,16 @@ silver {
 
 .house {
   position: relative; 
-  margin-top: -22.5px; 
+  margin-top: -21.5px; 
   margin-left: 0px;
 }
 .idtemppos {
-  margin-top: -148px;
+  margin-top: -153px;
   margin-left: -135.5px;
 }
 </style>
 
+<!--script src="js/d3.min.js"></script-->
 <script src="js/d3.7.9.0.min.js"></script>
 
 <div class="house"></div>
@@ -59,11 +62,9 @@ silver {
     if (theme === 'dark') {
     var tubeFillColor = "rgba(45,47,50,1)";
     var colorS = "silver";
-    var houseColor = "#38383c";
     } else {
     tubeFillColor = "rgba(230,232,239,1)";
     colorS = "#777777";
-    houseColor = "#898990";
     }
 
 </script>
@@ -81,7 +82,7 @@ silver {
 	var h_trend = "<?php echo $humid["indoors_trend"];?>";
 	h_trend = h_trend || 0; 
 		
-	var hcolor = "<?php echo $colorInHumidity;?>";
+	var hcolor = "<?php echo $colorHumidityIn;?>";
 
 	var fcolor = "<?php echo $colorFeels;?>";
 	
@@ -101,7 +102,7 @@ var svg = d3.select(".house")
     			.attr("x2", 150)
     			.attr("y1", 145)
     			.attr("y2", 145)
-    			.style("stroke", houseColor)
+    			.style("stroke", "#38383c")
     			.style("stroke-width", "3px")
     			.style("stroke-linecap", "round");
     			    			
@@ -110,7 +111,7 @@ var svg = d3.select(".house")
     			.attr("x2", 25)
     			.attr("y1", 71)
     			.attr("y2", 145)
-    			.style("stroke", houseColor)
+    			.style("stroke", "#38383c")
     			.style("stroke-width", "3px")
     			.style("stroke-linecap", "round");
     			    			    			
@@ -120,7 +121,7 @@ var svg = d3.select(".house")
     			.attr("x2", 25)
     			.attr("y1", 70.25)
     			.attr("y2", 70.25)
-    			.style("stroke", houseColor)
+    			.style("stroke", "#38383c")
     			.style("stroke-width", "3px")
     			.style("stroke-linecap", "round");
     			
@@ -131,7 +132,7 @@ var svg = d3.select(".house")
     			.endAngle(-3)    			
     			svg.append("path")
     			.attr("d", arc)
-    			.attr("fill", houseColor)
+    			.attr("fill", "#38383c")
     			.attr("transform", "translate(10,63.75)");
 
     			svg.append("line") //  roof left diagonal line
@@ -139,7 +140,7 @@ var svg = d3.select(".house")
     			.attr("x2", 83)
     			.attr("y1", 59.5)
     			.attr("y2", 5)
-    			.style("stroke", houseColor)
+    			.style("stroke", "#38383c")
     			.style("stroke-width", "3px")
     			.style("stroke-linecap", "round");
     			
@@ -150,7 +151,7 @@ var svg = d3.select(".house")
     			.endAngle(0)   			
     			svg.append("path")
     			.attr("d", arc)
-    			.attr("fill", houseColor)
+    			.attr("fill", "#38383c")
     			.attr("transform", "translate(87.5,9.75)");
     			
     			svg.append("line") // right wall
@@ -158,7 +159,7 @@ var svg = d3.select(".house")
     			.attr("x2", 150)
     			.attr("y1", 71)
     			.attr("y2", 145)
-    			.style("stroke", houseColor)
+    			.style("stroke", "#38383c")
     			.style("stroke-width", "3px")
     			.style("stroke-linecap", "round");
     			    		   			
@@ -168,7 +169,7 @@ var svg = d3.select(".house")
     			.attr("x2", 165)
     			.attr("y1", 70.25)
     			.attr("y2", 70.25)
-    			.style("stroke", houseColor)
+    			.style("stroke", "#38383c")
     			.style("stroke-width", "3px")
     			.style("stroke-linecap", "round");
     			    
@@ -179,7 +180,7 @@ var svg = d3.select(".house")
     			.endAngle(3)   			
     			svg.append("path")
     			.attr("d", arc)
-    			.attr("fill", houseColor)
+    			.attr("fill", "#38383c")
     			.attr("transform", "translate(164,63.75)");
     			
     			svg.append("line") //  roof diagonal to Chimney left line
@@ -187,7 +188,7 @@ var svg = d3.select(".house")
     			.attr("x2", 127)
     			.attr("y1", 5)
     			.attr("y2", 30)
-    			.style("stroke", houseColor)
+    			.style("stroke", "#38383c")
     			.style("stroke-width", "3px")
     			.style("stroke-linecap", "round");
     			
@@ -196,7 +197,7 @@ var svg = d3.select(".house")
     			.attr("x2", 169)
     			.attr("y1", 42)
     			.attr("y2", 59.5)
-    			.style("stroke", houseColor)
+    			.style("stroke", "#38383c")
     			.style("stroke-width", "3px")
     			.style("stroke-linecap", "round");
     			    			    			   			
@@ -207,7 +208,7 @@ var svg = d3.select(".house")
     			.endAngle(0)   			
     			svg.append("path")
     			.attr("d", arc)
-    			.attr("fill", houseColor)
+    			.attr("fill", "#38383c")
     			.attr("transform", "translate(87.5,9.75)");
     			
     			// Chimney 
@@ -216,7 +217,7 @@ var svg = d3.select(".house")
     			.attr("x2", 127)
     			.attr("y1", 10)
     			.attr("y2", 30)
-    			.style("stroke", houseColor)
+    			.style("stroke", "#38383c")
     			.style("stroke-width", "3px")
     			.style("stroke-linecap", "round");
     			
@@ -225,7 +226,7 @@ var svg = d3.select(".house")
     			.attr("x2", 145)
     			.attr("y1", 10)
     			.attr("y2", 42)
-    			.style("stroke", houseColor)
+    			.style("stroke", "#38383c")
     			.style("stroke-width", "3px")
     			.style("stroke-linecap", "round");
     			
@@ -234,7 +235,7 @@ var svg = d3.select(".house")
     			.attr("x2", 145)
     			.attr("y1", 10)
     			.attr("y2", 10)
-    			.style("stroke", houseColor)
+    			.style("stroke", "#38383c")
     			.style("stroke-width", "3px")
     			.style("stroke-linecap", "round");
 
