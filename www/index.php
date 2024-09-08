@@ -177,7 +177,7 @@ $info; ?> <?php echo $templateversion; ?> <?php echo " - WeeWX"; ?>(<?php echo $
 <!--section3-->
 <div class="stationLongname">
 <div class="titlebar-item">      <div class="weewxLogoFooter" style="width: 30px;"><a href="http://weewx.com" alt="http://weewx.com" title="http://weewx.com">
-          <?php echo '<img src="img/icon-weewx.svg" alt="WeeWX" title="WeeWX" width="100px" height="55px"><div class="hardwarelogo1text"></div>'; ?></a>
+          <?php echo '<img src="img/icon-weewx-'.$theme.'.svg" alt="WeeWX" title="WeeWX" width="100px" height="55px"><div class="hardwarelogo1text"></div>'; ?></a>
       </div>
 </div>
           </div>
