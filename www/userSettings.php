@@ -61,7 +61,6 @@ $notifications = "yes";
 $notifyWind = "yes";
 $notifyEarthquake = "yes";
 $notifyMagnitude = "3";
-$linkWU = "yes";
 $linkWUNew = "yes";
 $WUid = "IYOURWUKWY";
 $linkCWOPID = "";
