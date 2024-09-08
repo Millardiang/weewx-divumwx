@@ -163,7 +163,7 @@ else if(anyToC($temp["outside_day_avg_60mn"])<40){$tempcolor = "#dc4953";}
 else if(anyToC($temp["outside_day_avg_60mn"])<100){$tempcolor = "#e26870";}
 ?>
 
-<script src="js/d3.min.js"></script>
+<script src="js/d3.7.9.0.min.js"></script>
 
 <style>
 .current {

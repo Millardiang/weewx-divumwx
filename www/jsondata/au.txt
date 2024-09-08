@@ -8,8 +8,8 @@
 		<language>en-au</language>
 		<copyright>Copyright: (C) Copyright Commonwealth of Australia 2010, Bureau of Meteorology (ABN 92637 533532), see http://www.bom.gov.au/other/copyright.shtml for terms and conditions of reuse.</copyright>
 		<webMaster>webops@bom.gov.au (Help desk)</webMaster>
-		<pubDate>Fri, 06 Sep 2024 13:39:15 GMT</pubDate>
-		<lastBuildDate>Fri, 06 Sep 2024 13:39:15 GMT</lastBuildDate>
+		<pubDate>Sat, 07 Sep 2024 20:16:52 GMT</pubDate>
+		<lastBuildDate>Sat, 07 Sep 2024 20:16:52 GMT</lastBuildDate>
 		<generator>Australian Bureau of Meteorology</generator>
 		<ttl>10</ttl>
 		<image>
@@ -18,22 +18,10 @@
 			<link>http://www.bom.gov.au/fwo/IDZ00059.warnings_vic.xml</link>
 		</image>
 		<item>
-			<title>06/22:00 EST Marine Wind Warning Summary for Victoria</title>
+			<title>08/05:10 EST Marine Wind Warning Summary for Victoria</title>
 			<link>http://www.bom.gov.au/vic/warnings/marinewind.shtml</link>
-			<pubDate>Fri, 06 Sep 2024 12:00:35 GMT</pubDate>
+			<pubDate>Sat, 07 Sep 2024 19:10:21 GMT</pubDate>
 			<guid isPermaLink="false">http://www.bom.gov.au/vic/warnings/marinewind.shtml</guid>
-		</item>
-		<item>
-			<title>06/15:42 EST 
-                Cancellation of Severe Weather Warning
-            
-for 
-                Central, East Gippsland, North Central, North East and West and South Gippsland Forecast Districts.
-                
-            </title>
-			<link>http://www.bom.gov.au/products/IDV21037.shtml</link>
-			<pubDate>Fri, 06 Sep 2024 05:42:58 GMT</pubDate>
-			<guid isPermaLink="false">http://www.bom.gov.au/products/IDV21037.shtml</guid>
 		</item>
 	</channel>
 </rss>

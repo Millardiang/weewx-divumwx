@@ -15,7 +15,7 @@ include('dvmCombinedData.php');
 ?>
 
 <div class="chartforecast2">
-<span class="yearpopup"><a alt="rain charts" title="rain charts" href="dvmRainfallRecords.php" data-lity><?php echo $menucharticonpage;?> Rainfall Almanac and Charts</a></span>     
+<span class="yearpopup"><a alt="rain charts" title="rain charts" href="dvmMenuRainfall.php" data-lity><?php echo $menucharticonpage;?> Rainfall Almanac and Charts</a></span>     
 </div>
 <span class='moduletitle'><?php echo $lang['rainfallModule'], " (<valuetitleunit>" . $rain["units"];?></valuetitleunit>)</span>
 <div class="updatedtime1"><span><?php if (file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?></div>
@@ -30,16 +30,16 @@ if ($rain["units"] =='in'){echo "<div class=rainconvertercircle style='backgroun
 </div></div>
 
 <!DOCTYPE html>
-<script src="js/d3.min.js"></script>
+<script src="js/d3.7.9.0.min.js"></script>
 
 
 <style>
 .rainposs {
-  margin-top: -3px;
+  margin-top: -5px;
   margin-left: -160px;
 }
 .stormRain {
-  margin-top: -147.25px;
+  margin-top: -152.5px;
   margin-left: 130px;
 }
 </style>
@@ -79,7 +79,7 @@ var bulb_cy = bottomY - bulbRadius,
 
 var svg = d3.select("#raingaugex")
     .append("svg")
-    //.style("background", "#292E35")
+  //.style("background", "#292E35") // box background to be commented out
     .attr("width", width)
     .attr("height", height);
 
@@ -176,7 +176,7 @@ if (domain[1] - maxRain < 0.66 * step)
   domain[1] += step;
 
 // D3 scale object
-var scale = d3.scale.linear()
+var scale = d3.scaleLinear()
     .range([bulb_cy - bulbRadius / 2 - 8.5, top_cy])
     .domain(domain);
 
@@ -206,7 +206,7 @@ svg.append("rect")
     .attr("rx", 3)
     .attr("width", 37.5)
     .attr("height", 4)
-    .style("fill", "rgba(45,47,50,1)");    
+    .style("fill", "rgba(45,47,50,1)")   
 
 svg.append("line")
     .attr("x1", width / 2 - 20.5)
@@ -231,12 +231,9 @@ svg.append("line")
 var tickValues = d3.range((domain[1] - domain[0]) / step + 1).map(function(v) { return domain[0] + v * step; });
 
 // D3 axis object for the scale
-var axis = d3.svg.axis()
-    .scale(scale)
-    .innerTickSize(7)
-    .outerTickSize(0)
-    .tickValues(tickValues)
-    .orient("left");
+var axis = d3.axisLeft(scale)
+    .tickSize(7)
+    .tickValues(tickValues);
 
 // Add the axis to the image
 var svgAxis = svg.append("g")
@@ -247,6 +244,7 @@ var svgAxis = svg.append("g")
 // Format text labels
 svgAxis.selectAll(".tick text")
     .style("fill", "rgba(119, 119, 119, 1)")
+    .style("font-family", "Helvetica")
     .style("font-size", "8px");
 
 // Set main axis line to no stroke or fill
@@ -393,7 +391,7 @@ if (domain[1] - maxRain < 0.66 * step)
   domain[1] += step;
 
 // D3 scale object
-var scale = d3.scale.linear()
+var scale = d3.scaleLinear()
   .range([bulb_cy - bulbRadius / 2 - 8.5, top_cy])
   .domain(domain);
 
@@ -448,12 +446,9 @@ svg.append("line")
 var tickValues = d3.range((domain[1] - domain[0]) / step + 1).map(function(v) { return domain[0] + v * step; });
 
 // D3 axis object for the scale
-var axis = d3.svg.axis()
-    .scale(scale)
-    .innerTickSize(7)
-    .outerTickSize(0)
-    .tickValues(tickValues)
-    .orient("left");
+var axis = d3.axisLeft(scale)
+  .tickSize(7)
+  .tickValues(tickValues);
 
 // Add the axis to the image
 var svgAxis = svg.append("g")
@@ -464,6 +459,7 @@ var svgAxis = svg.append("g")
 // Format text labels
 svgAxis.selectAll(".tick text")
     .style("fill", "rgba(119, 119, 119, 1)")
+    .style("font-family", "Helvetica")
     .style("font-size", "8px");
 
 // Set main axis line to no stroke or fill
@@ -506,7 +502,7 @@ var theme = "<?php echo $theme;?>";
 // script to display rain data
 var svg = d3.select(".stormRain")
     .append("svg")
-    //.style("background", "#292E35")
+    //.style("background", "#292E35") // box background to be commented out
     .attr("width", 180)
     .attr("height", 150);
 
@@ -525,7 +521,7 @@ var last24HoursColor = "<?php echo $colorRain24hrSum;?>";
 var rainMonthColor = "<?php echo $colorRainMonthSum;?>";
 var rainYearColor = "<?php echo $colorRainYearSum;?>";
 
-var stormStart = "<?php echo $rain["storm_rain_start"];?>"; 
+var stormStart = "<?php echo $rain["storm_start"];?>"; 
 var rainRate = <?php echo $rain["rate"];?>;
 var lastHour = <?php echo $rain["last_hour"];?>;
 var last24Hours = <?php echo $rain["24h_total"];?>;
@@ -544,7 +540,7 @@ svg.append("text") // storm start text
     .style("font-size", "8px")
     .style("text-anchor", "middle")
     .style("font-weight", "normal")
-    .text("Storm Rain Started on " + stormStart);
+    .text("Storm Rain Started @ " + stormStart);
 
 svg.append("rect") // stormRain box    
     .attr("x", 12 )
@@ -1097,7 +1093,7 @@ var text = svg.selectAll(null)
 
 </script>
 
-<div id="raindrops" width="300" height="150" style="position: relative; top: -159px; left: 0px;"></div>
+<div id="raindrops" width="300" height="150" style="position: relative; top: -157px; left: 0px;"></div>
 
 <script>
 

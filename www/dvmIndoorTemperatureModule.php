@@ -36,7 +36,7 @@ silver {
 
 .house {
   position: relative; 
-  margin-top: -20.5px; 
+  margin-top: -22.5px; 
   margin-left: 0px;
 }
 .idtemppos {
@@ -45,7 +45,7 @@ silver {
 }
 </style>
 
-<script src="js/d3.min.js"></script>
+<script src="js/d3.7.9.0.min.js"></script>
 
 <div class="house"></div>
 <div class="idtemppos">
@@ -63,7 +63,7 @@ silver {
     } else {
     tubeFillColor = "rgba(230,232,239,1)";
     colorS = "#777777";
-    houseColor = "#808080";
+    houseColor = "#898990";
     }
 
 </script>
@@ -124,7 +124,7 @@ var svg = d3.select(".house")
     			.style("stroke-width", "3px")
     			.style("stroke-linecap", "round");
     			
-    			var arc = d3.svg.arc() // bottom left arc
+    			var arc = d3.arc() // bottom left arc
     			.innerRadius(5)
     			.outerRadius(8)
     			.startAngle(-45 * (Math.PI/180))
@@ -143,7 +143,7 @@ var svg = d3.select(".house")
     			.style("stroke-width", "3px")
     			.style("stroke-linecap", "round");
     			
-    			var arc = d3.svg.arc() // Apex arc left
+    			var arc = d3.arc() // Apex arc left
     			.innerRadius(5)
     			.outerRadius(8)
     			.startAngle(-45 * (Math.PI/180))
@@ -172,7 +172,7 @@ var svg = d3.select(".house")
     			.style("stroke-width", "3px")
     			.style("stroke-linecap", "round");
     			    
-				var arc = d3.svg.arc() // bottom right arc
+				var arc = d3.arc() // bottom right arc
     			.innerRadius(5)
     			.outerRadius(8)
     			.startAngle(45 * (Math.PI/180))
@@ -200,7 +200,7 @@ var svg = d3.select(".house")
     			.style("stroke-width", "3px")
     			.style("stroke-linecap", "round");
     			    			    			   			
-    			var arc = d3.svg.arc() // Apex arc right
+    			var arc = d3.arc() // Apex arc right
     			.innerRadius(5)
     			.outerRadius(8)
     			.startAngle(45 * (Math.PI/180))
@@ -280,7 +280,7 @@ var svg = d3.select(".house")
 				.style("font-family", "Helvetica")
 				.style("font-weight", "normal")
 				.style("fill", "silver")
-				.text(feels + "\u00B0" + units);
+				.text(feels + "°" + units);
 						
 				
 		if (h_trend > 0) {
@@ -370,7 +370,7 @@ var svg = d3.select(".house")
 				.style("font-family", "Helvetica")
 				.style("font-weight", "normal")
 				.style("fill", "black")
-				.text(feels+"\u00B0");
+				.text(feels+"°C");
 				
 		} else {
 		
@@ -382,7 +382,7 @@ var svg = d3.select(".house")
 				.style("font-family", "Helvetica")
 				.style("font-weight", "normal")
 				.style("fill", "black")
-				.text(feels+"��F");
+				.text(feels+"°F");
 				
 			}
 				
@@ -545,7 +545,6 @@ var bulb_cy = bottomY - bulbRadius,
 
 var svg = d3.select(".idthermometer")
   .append("svg")
-  //.style("background", "#292E35")
   .attr("width", width)
   .attr("height", height);
 
@@ -603,7 +602,7 @@ if (domain[1] - maxTemp < 0.66 * step)
   domain[1] += step;
 
 // D3 scale object
-var scale = d3.scale.linear()
+var scale = d3.scaleLinear()
   .range([bulb_cy - bulbRadius / 2 - 8.5, top_cy])
   .domain(domain);
 
@@ -632,6 +631,7 @@ var scale = d3.scale.linear()
     .attr("dy", isMax ? null : "0.75em")
     .text(label)
     .style("fill", textCol)
+    .style("font-family", "Helvetica")
     .style("font-size", "8px");
 
 });
@@ -660,12 +660,9 @@ svg.append("circle")
 var tickValues = d3.range((domain[1] - domain[0]) / step + 1).map(function(v) { return domain[0] + v * step; });
 
 // D3 axis object for the temperature scale
-var axis = d3.svg.axis()
-  .scale(scale)
-  .innerTickSize(7)
-  .outerTickSize(0)
-  .tickValues(tickValues)
-  .orient("left");
+var axis = d3.axisLeft(scale)
+  .tickSize(7)
+  .tickValues(tickValues);
 
 // Add the axis to the image
 var svgAxis = svg.append("g")
@@ -676,6 +673,7 @@ var svgAxis = svg.append("g")
 // Format text labels
 svgAxis.selectAll(".tick text")
     .style("fill", "#777777")
+    .style("font-family", "Helvetica")
     .style("font-size", "8px");
 
 // Set main axis line to no stroke or fill
