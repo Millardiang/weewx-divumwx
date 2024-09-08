@@ -77,7 +77,18 @@ error_reporting(0);
     }
   </script>
 <body>
-<!--start of header section-->
+  <!--start of header section-->
+  <!-- start of theme switch -->
+  <div class="theme-switch-wrapper">
+      <label class="theme-switch" for="checkbox">
+    <input type="checkbox" id="checkbox" />
+    <div class="slider round"></div>
+  </label>
+    
+      
+  </div>
+<!-- end of theme switch -->      
+
   <div class="titlebar"style="background-color:transparent;">
   <div class="titlebar-item">
    </div>
@@ -89,20 +100,13 @@ error_reporting(0);
           <div class="headerflag"><object data="./img/flags/<?php echo $flag; ?>.svg" width="20px"></object>&nbsp;&nbsp;<?php echo $stationAbbrev; ?></object></div>         
                  </div> 
 </div>
-          <div class="titlebar-item"><div class="theme-switch-wrapper">
-      <label class="theme-switch" for="checkbox">
-    <input type="checkbox" id="checkbox" />
-    <div class="slider round"></div>
-  </label>
-    
-      
-  </div></div>
+          <div class="titlebar-item"></div>
           </div>
 <!--end of header section-->
 <!--start of alert section-->      
 
 <!--end of alert section-->
-<!--strat of grid section-->  
+<!--start of grid section-->  
 <section class="card-container">
 
 	<div class="cardP"><div class="module"><div id="position1"></div></div></div>
@@ -150,7 +154,7 @@ error_reporting(0);
 
 <!--start of footer section-->
 
-<div class="titlebar" style="height: auto;">
+<div class="titlebar" style="height: auto; padding: 10px;">
 <!--section1-->
 <div class="stationLongname">
   <div class="titlebar-item"> 
