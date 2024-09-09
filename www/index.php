@@ -22,7 +22,7 @@ include_once ('webserver_ip_address.php');
 require_once ('admin/assets/classes/geoplugin.class.php');
 include_once ('dvmUpdater.php');
 include_once ('dvmSideMenu.php');
-include ('dvmAdvisory.php');
+//include ('dvmAdvisory.php');
 date_default_timezone_set($TZ);
 header('Content-type: text/html; charset=utf-8');
 error_reporting(0);
