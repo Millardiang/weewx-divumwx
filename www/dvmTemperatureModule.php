@@ -1,4 +1,19 @@
 <?php
+##############################################################################################
+#        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
+#       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    #
+#       (.  ___  :)||  |\   \  //  / |   (  ) : | \   \  //   |  |'  /    \:  | \   \  /     #
+#       |: \   ) |||:  | \\  \/. ./  (:  |  | . ) /\\  \/.    |  |: /'        |  \\  \/      #
+#       (| (___\ |||.  |  \.    //    \\ \__/ // |: \.        |   \//  /\'    |  /\.  \      #
+#       |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \     #
+#       (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|    #
+#                                                                                            #
+#     Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      #
+#      Distributed under terms of the GPLv3.  See the file LICENSE.txt for your rights.      #
+#    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
+#                    https://github.com/Millardiang/weewx-divumwx/issues                     #
+##############################################################################################
+
 #####################################################################################################################
 #
 # Thermometer image based on an idea by David Banks
@@ -20,16 +35,6 @@
 # DEALINGS IN THE SOFTWARE.
 #
 #####################################################################################################################                                                                                 
-#                                                                                                                   #
-# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
-#                                                                                                                   #
-# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
-#                                                                                                                   #
-# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
-#                                                                                                                   #
-# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
-#                                                                                                                   #
-#####################################################################################################################
 ?>
 <!DOCTYPE html>
 <title>divumwx current conditions</title>
@@ -70,7 +75,7 @@ else if ($theme === "light")
 <!--span class="yearpopup"><a alt="temp charts" title="temp charts" href="dvmTemperatureRecords.php" data-lity><?php echo $menucharticonpage;?> Temperature Almanac and Derived Charts</a></span-->
 <span class="yearpopup"><a alt="temp charts" title="temp charts" href="dvmHeatMapPopup.php" data-lity><?php echo $menucharticonpage;?> Heat Map</a></span>
 </div>    
-<span class='moduletitle'><?php echo $lang['temperatureModule'];?> (<valuetitleunit>&deg<?php echo $temp["units"];?></valuetitleunit>)</span>
+<span class='moduletitle4'><?php echo $lang['temperatureModule'];?> (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span>
 <div class="updatedtime1"><?php if(file_exists($livedata)&&time()- filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>';else echo $online." ".$divum["time"];?></div>
 </div>
 
@@ -508,20 +513,20 @@ border-radius: 2px;
 
 .tempconverter3 {
   position: absolute;
-  margin-top: -21px;
+  margin-top: -28px;
   font-size: 12px;
   margin-left: 167px;
 }
 
 </style>
-<div class="Table" style="position: relative; top: -125px; left: 85px;"> <!--top -130px-->
+<div class="Table" style="position: relative; top: -120px; left: 85px;"> <!--top -130px-->
 
 <div class="tempconverter3">
 <?php
 if($theme == 'dark') {
-  if ($temp["units"]=='C'){echo "<div class=tempconvertercircleminus10 style='color:$colorOutTemp;'>".number_format(($temp["outside_now"]*9/5)+32,1).'��<smalltempunit2>F';} else if ($temp["units"]=='F'){echo "<div class=tempconvertercircleminus10 style='color:$colorOutTemp;'>".number_format(($temp["outside_now"]-32)*5/9,1).'��<smalltempunit2>C';}
+  if ($temp["units"]=='C'){echo "<div class=tempconvertercircleminus10 style='color:$colorOutTemp;'>".number_format(($temp["outside_now"]*9/5)+32,1).'&deg;<smalltempunit2>F';} else if ($temp["units"]=='F'){echo "<div class=tempconvertercircleminus10 style='color:$colorOutTemp;'>".number_format(($temp["outside_now"]-32)*5/9,1).'&deg;<smalltempunit2>C';}
 } else { 
-if ($temp["units"]=='C'){echo "<div class=tempconvertercircleminus10 style='background:$colorOutTemp;'>".number_format(($temp["outside_now"]*9/5)+32,1).'��<smalltempunit2>F';} else if ($temp["units"]=='F'){echo "<div class=tempconvertercircleminus10 style='background:$colorOutTemp;'>".number_format(($temp["outside_now"]-32)*5/9,1).'��<smalltempunit2>C';}}?>
+if ($temp["units"]=='C'){echo "<div class=tempconvertercircleminus10 style='background:$colorOutTemp;'>".number_format(($temp["outside_now"]*9/5)+32,1).'&deg;<smalltempunit2>F';} else if ($temp["units"]=='F'){echo "<div class=tempconvertercircleminus10 style='background:$colorOutTemp;'>".number_format(($temp["outside_now"]-32)*5/9,1).'&deg;<smalltempunit2>C';}}?>
 </smalltempunit2></div></div>
 
 <div class="divTable temperature">
@@ -535,11 +540,11 @@ if ($temp["units"]=='C'){echo "<div class=tempconvertercircleminus10 style='back
 <div class="divTableBody">
 <div class="divTableRow">
 <div class="divTableCell"><?php 
-if ($temp["outside_day_max"]<10){echo "?".$temp["outside_day_max"]."��".$temp["units"]."\n";?> | <?php echo $temp["outside_day_min"]."��".$temp["units"];}else if ($temp["outside_day_max"]>=10){echo $temp["outside_day_max"]."��".$temp["units"]."\n";?> | <?php echo $temp["outside_day_min"]."��".$temp["units"];}?>
+if ($temp["outside_day_max"]<10){echo ' '.$temp["outside_day_max"]."&deg;".$temp["units"]."\n";?> | <?php echo $temp["outside_day_min"]."&deg;".$temp["units"];}else if ($temp["outside_day_max"]>=10){echo $temp["outside_day_max"]."&deg;".$temp["units"]."\n";?> | <?php echo $temp["outside_day_min"]."&deg;".$temp["units"];}?>
 </div>
 
-<div class="divTableCell" style="border-left: 5px solid <?php echo $colorAppTemp;?>; padding: 1px 1px;"><?php echo $temp["apptemp"]."��".$temp["units"];?></div>
-<div class="divTableCell" style="border-left: 5px solid <?php echo $colorOutTempDayAvg;?>;"><?php echo $temp["outside_day_avg"]."��".$temp["units"];?></div>
+<div class="divTableCell" style="border-left: 5px solid <?php echo $colorAppTemp;?>; padding: 1px 1px;"><?php echo $temp["apptemp"]."&deg;".$temp["units"];?></div>
+<div class="divTableCell" style="border-left: 5px solid <?php echo $colorOutTempDayAvg;?>;"><?php echo $temp["outside_day_avg"]."&deg;".$temp["units"];?></div>
 </div>
 </div>
   <div class="divTableHeading">
@@ -551,15 +556,15 @@ if ($temp["outside_day_max"]<10){echo "?".$temp["outside_day_max"]."��".$tem
 </div>
   <div class="divTableBody">
 <div class="divTableRow">
-<div class="divTableCell"><?php echo $temp["outside_trend"].'��' ?><smalltempunit2><?php echo $temp["units"];?></smalltempunit2><?php 
-if($temp["outside_trend"]>0){echo '?'.$risingsymbol;}else if($temp["outside_trend"]<0){echo '?'.$fallingsymbol;}else{ echo '?'.$steadysymbol;}?></div>
+<div class="divTableCell"><?php echo $temp["outside_trend"].'&deg;' ?><smalltempunit2><?php echo $temp["units"];?></smalltempunit2><?php 
+if($temp["outside_trend"]>0){echo " ".$risingsymbol;}else if($temp["outside_trend"]<0){echo " ".$fallingsymbol;}else{ echo " ".$steadysymbol;}?></div>
 
 <div class="divTableCell" style="border-left: 5px solid <?php echo $colorHumidityOut; ?>;"><?php echo $humid["now"]; ?><smalltempunit2>%</smalltempunit2><?php //humidity trend
-if($humid["trend"]>0){echo '?'.$risingsymbol;}else if($humid["trend"]<0){echo '?'.$fallingsymbol;}else{ echo '?'.$steadysymbol;}?></div>
+if($humid["trend"]>0){echo " ".$risingsymbol;}else if($humid["trend"]<0){echo " ".$fallingsymbol;}else{ echo " ".$steadysymbol;}?></div>
 
 <div class="divTableCell" style="border-left: 5px solid <?php echo $colorDewpoint;?>;"><?php //dewpoint
-echo "?".$dew["now"].'��<smalltempunit2>'.$temp["units"];?><?php //dewpoint trend
-if($dew["trend"]>0){echo '?'.$risingsymbol;}else if($dew["trend"]<0){echo '?'.$fallingsymbol;}else{ echo '?'.$steadysymbol;}?></div>
+echo $dew["now"].'&deg;<smalltempunit2>'.$temp["units"];?><?php //dewpoint trend
+if($dew["trend"]>0){echo " ".$risingsymbol;}else if($dew["trend"]<0){echo " ".$fallingsymbol;}else{ echo " ".$steadysymbol;}?></div>
 </div>
 </div>
 
@@ -572,10 +577,10 @@ if($dew["trend"]>0){echo '?'.$risingsymbol;}else if($dew["trend"]<0){echo '?'.$f
 </div>
     <div class="divTableBody">
 <div class="divTableRow">
-<div class="divTableCell" style="border-left: 5px solid <?php echo $colorInTemp;?>;"><?php echo "?".$hometemp."?".$temp["indoor_now"]. "��" .$temp["units"];?>
-<?php if($temp["indoor_trend"]>0){echo '?'.$risingsymbol;}else if($temp["indoor_trend"]<0){echo '?'.$fallingsymbol;}else{ echo '?'.$steadysymbol;}?></div>
-<div class="divTableCell" style="border-left: 5px solid <?php if($barom["units"]=="kPa"){echo $colorHumidex;}else{echo $colorHeatindex;}?>;"><?php if($barom["units"]=="kPa"){echo $temp["humidex"]."��".$temp["units"];}else{echo $temp["heatindex"]."��".$temp["units"];}?></div>
-<div class="divTableCell" style="border-left: 5px solid <?php echo $colorWindchill;?>;"><?php echo $temp["windchill"]."��".$temp["units"];?></div>
+<div class="divTableCell" style="border-left: 5px solid <?php echo $colorInTemp;?>;"><?php echo ' '.$hometemp.' '.$temp["indoor_now"]. "&deg;" .$temp["units"];?>
+<?php if($temp["indoor_trend"]>0){echo " ".$risingsymbol;}else if($temp["indoor_trend"]<0){echo " ".$fallingsymbol;}else{ echo " ".$steadysymbol;}?></div>
+<div class="divTableCell" style="border-left: 5px solid <?php if($barom["units"]=="kPa"){echo $colorHumidex;}else{echo $colorHeatindex;}?>;"><?php if($barom["units"]=="kPa"){echo $temp["humidex"]."&deg;".$temp["units"];}else{echo $temp["heatindex"]."&deg;".$temp["units"];}?></div>
+<div class="divTableCell" style="border-left: 5px solid <?php echo $colorWindchill;?>;"><?php echo $temp["windchill"]."&deg;".$temp["units"];?></div>
 
 </div>
 </div>
