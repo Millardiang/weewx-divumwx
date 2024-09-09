@@ -13,215 +13,244 @@
 #    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
-if (!file_exists("./userSettings.php"))
-{
-    copy("./initial_userSettings.php", "./userSettings.php");
-}
-include_once ('dvmCombinedData.php');
-include_once ('webserver_ip_address.php');
-require_once ('admin/assets/classes/geoplugin.class.php');
-include_once ('dvmUpdater.php');
-include_once ('dvmSideMenu.php');
-include ('dvmAdvisory.php');
-date_default_timezone_set($TZ);
-header('Content-type: text/html; charset=utf-8');
-error_reporting(0);
-
 ?>
-<!DOCTYPE html>
-<head>
-  <title><?php echo $stationlocation; ?> Weather Station</title>
-  <!--Google / Search Engine Tags -->
-  <meta itemprop="image" content="img/divumMeta.png">
-  <meta itemprop="name" content="Private Weather Station <?php echo $stationlocation; ?>">
-  <meta content="Private weather station providing current weather conditions for <?php echo $stationlocation; ?>" name="description">
-  <meta itemprop="description" content="Private weather station providing current weather conditions for <?php echo $stationlocation; ?>">
-  <meta content="DivumWX" name="author">
-  <meta content="place" property="og:type">
-  <meta content="INDEX,FOLLOW" name="robots">
-  <meta name="theme-color" content="#ffffff">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name=apple-mobile-web-app-title content="WEATHER STATION">
-  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
-  <link rel="manifest" href="./site.webmanifest">
-  <link rel="mask-icon" href="./safari-pinned-tab.svg" color="#5bbad5">
-  <link rel="shortcut icon" href="./favicon.ico">
-  <meta name="msapplication-TileColor" content="#da532c">
-  <meta name="msapplication-config" content="./browserconfig.xml">
-  <meta name="theme-color" content="#ffffff">
-  <link rel="manifest" href="./site.webmanifest">
-<html lang="en" >
-  <meta charset="UTF-8">
-  <!--title>DivumWX - Proposed Responsive CSS Grid Layout Scheme</title-->
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  
-<!--link rel="stylesheet" href="./css/divumwx.min.css?version=<?php echo filemtime('./css/divumwx.min.css'); ?>" rel="stylesheet prefetch"-->
-<link rel="stylesheet" href="./css/divumwx.main.css?version=<?php echo filemtime('./css/divumwx.main.css'); ?>" rel="stylesheet prefetch">
-
-  
-</head>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
-          .then(registration => {
-            console.log('SW registered with scope:', registration.scope);
-          })
-          .catch(err => {
-            console.error('Registration failed:', err);
-          });
-      });
-    }
-  </script>
-<body>
-  <!--start of header section-->
-  <!-- start of theme switch -->
-  <div class="theme-switch-wrapper">
-      <label class="theme-switch" for="checkbox">
-    <input type="checkbox" id="checkbox" />
-    <div class="slider round"></div>
+<!-- Side Menu -->
+ <input type="checkbox" class="sidebarmenu" id="sidebarmenu"/>
+  <label for="sidebarmenu" class="sidebarIconToggle">
+    <div class="menuspinner menucross part-1"></div>
+    <div class="menuspinner menuhorizontal"></div>
+    <div class="menuspinner menucross part-2"></div>
   </label>
-    
-      
+  <div id="divumwxsidebarMenu">
+    <ul class="divumwxsidebarMenuInner">
+      <br/><br/><br/>
+     <li class="header">
+        <a href="index.php" title="WEATHERSTATION HOME PAGE">
+          <weather34menumarkergreen></weather34menumarkergreen> HOME
+        </a>
+      </li>
+          
+      <li class="header">ADMIN</li>
+        <li><a href="./admin/index.php" title="DvM Admin"><menumarkergreen></menumarkergreen> DvM Admin</a></li>
+      <!--li class="header">UI THEME</li>
+      <li>
+        <a href="<?php echo ($theme == 'dark') ? '?theme=light' : '?theme=dark'; ?>">
+          <?php if ($theme == 'dark'){
+            echo '<menumarkerlight></menumarkerlight> Light Theme';
+          }else{
+            echo '<menumarkerbluegrey></menumarkerbluegrey> Dark Theme';
+          }?></a>
+      </li-->
+      <li class="header">UNITS</li>
+      <?php if ($units != Null && $units != 'default'){
+        echo '<li>
+          <a href="./?units=default"><menumarkerred></menumarkerred> Default Units';
+            if ($tempunit == 'F'){
+              echo '<topbarimperialf>°F</topbarimperialf>';
+            }else{
+              echo '<topbarmetricc>°C</topbarmetricc>';
+            }?></a>
+        </li>
+      <?php
+      }
+      if ($units != 'us'){
+        echo '<li>
+          <a href="./?units=us"><menumarkerorange></menumarkerorange> US Customary <topbarimperialf>°F</topbarimperialf></a>
+        </li>';
+      }
+      if ($units != 'metric'){
+        echo '<li>
+          <a href="./?units=metric"><menumarkerblue></menumarkerblue> Metric <topbarmetricc>°C</topbarmetricc></a>
+        </li>';
+      }
+      if ($units != 'uk'){
+        echo '<li>
+          <a href="./?units=uk"><menumarkeryellow></menumarkeryellow> UK (mph) <topbarmetricc>°C</topbarmetricc></a>
+        </li>';
+      }
+      if ($units != 'scandinavia'){
+        echo '<li>
+          <a href="./?units=scandinavia"><menumarkerred></menumarkerred> Scandinavia (m/s) <topbarmetricc>°C</topbarmetricc></a>
+        </li>';
+      }
+      if ($units != 'ca'){
+        echo '<li>
+          <a href="./?units=ca"><menumarkerred></menumarkerred> Canada (kPa) <topbarmetricc>°C</topbarmetricc></a>
+        </li>';
+      }
+       if ($units != 'kts'){
+        echo '<li>
+          <a href="./?units=kts"><menumarkerred></menumarkerred> Metar (kts) <topbarmetricc>°C</topbarmetricc></a>
+        </li>';
+      }
+      if ($extralinks == 'yes') {
+        echo '<li class="header sub">LINKS <img class="menuimg" src="img/arrowiconlink.svg" alt=""/>';
+        echo '<ul>';
+        if ($linkWU == 'yes') {
+          echo '<li>
+                  <a href="' . (($linkWUNewDash == 'yes' || empty($linkWUNewDash)) ? 'https://www.wunderground.com/dashboard/pws/' : 'https://www.wunderground.com/personal-weather-station/dashboard?id=') . $WUid . '" title="' . $WUid . ' on Weather Underground" target="_blank"><img class="menuimg" src="img/wulogo.svg" style="width:30px" alt=""/>' . $WUid . ' on WU</a>
+                </li>';
+        }
+        if (!empty($linkCWOPID)){
+          echo '<li>
+                  <a href="https://weather.gladstonefamily.net/site/' . $linkCWOPID . '" title="' . $linkCWOPID . ' on CWOP" target="_blank"><img class="menuimg" src="img/arrowiconlink.svg" alt=""/>' . $linkCWOPID . ' on CWOP</a>
+                </li>';
+        }
+        if (!empty($linkFindUID)) {
+          echo '<li>
+                  <a href="http://www.findu.com/cgi-bin/wxpage.cgi?call=' . $linkFindUID . '&last=48" title="' . $linkFindUID . ' on Findu.com" target="_blank"><img class="menuimg" src="img/arrowiconlink.svg" alt=""/>' . $linkFindUID . ' on FindU.com</a>
+                </li>';
+        }
+        if (($linkNOAA == 'yes') && (!empty($linkCWOPID) && (empty($linkNOAAID)))) {
+          echo '<li>
+                  <a href="https://www.wrh.noaa.gov/mesowest/getobext.php?wfo=lox&sid=' . $linkCWOPID . '" title="' . $linkCWOPID . ' on NOAA Meso West" target="_blank"><img class="menuimg" src="img/noaa.svg" style="max-width:30px" alt=""/>' . $linkCWOPID . ' on NOAA</a>
+                </li>';
+        }
+        if ($linkNOAA == 'yes' && !empty($linkNOAAID)) {
+          echo '<li>
+                  <a href="https://www.wrh.noaa.gov/mesowest/getobext.php?wfo=lox&sid=' . $linkNOAAID . '" title="' . $linkNOAAID . ' on NOAA Meso West" target="_blank"><img class="menuimg" src="img/noaa.svg" style="max-width:30px" alt=""/>' . $linkNOAAID . ' on NOAA</a>
+                </li>';
+        }
+        if ($linkMADIS == 'yes' && !empty($linkCWOPID)) {
+          echo '<li>
+                  <a href="https://madis-data.ncep.noaa.gov/MadisSurface/?CenterLAT=' . $lat . '&CenterLON=' . $lon . '&Zoom=11.00&StationID=' . $linkCWOPID . '" title="' . $linkCWOPID . ' on MADIS Map" target="_blank"><img class="menuimg" src="img/noaa.svg" style="max-width:30px" alt=""/>' . $linkCWOPID . ' on NOAA MADIS Map</a>
+                </li>';
+        }
+        if (($linkMesoWest == 'yes') && (!empty($linkCWOPID) && (empty($linkMesoWestID)))) {
+          echo '<li>
+                  <a href="https://mesowest.utah.edu/cgi-bin/droman/meso_base.cgi?stn=' . $linkCWOPID . '" title="' . $linkCWOPID . ' on Meso West" target="_blank"><img class="menuimg" src="img/mesowest.svg" alt=""/>' . $linkCWOPID . ' on Meso West</a>
+                </li>';
+        }
+        if ($linkMesoWest == 'yes' && !empty($linkMesoWestID)) {
+          echo '<li>
+                  <a href="https://mesowest.utah.edu/cgi-bin/droman/meso_base.cgi?stn=' . $linkMesoWestID . '" title="' . $linkMesoWestID . ' on Meso West" target="_blank"><img class="menuimg" src="img/mesowest.svg" alt=""/>' . $linkMesoWestID . ' on Meso West</a>
+                </li>';
+        }
+        if (!empty($linkWeatherCloudID)) {
+          echo '<li>
+                  <a href="https://app.weathercloud.net/' . $linkWeatherCloudID . '" title="View on WeatherCloud" target="_blank"><img class="menuimg" src="img/weathercloud.svg" style="width:21px" alt=""/>View on WeatherCloud</a>
+                </li>';
+        }
+        if (!empty($linkWindyID)) {
+          echo '<li>
+                  <a href="https://www.windy.com/station/pws-' . $linkWindyID . '?' . $lat . ',' . $lon . ',8" title="View on Windy.com" target="_blank"><img class="menuimg" src="img/windy.svg" style="width:21px" alt=""/>View on Windy.com</a>
+                </li>';
+        }
+        if (!empty($linkAWEKASID)) {
+          echo '<li>
+                  <a href="https://www.awekas.at/en/instrument.php?id=' . $linkAWEKASID . '" title="View on AWEKAS" target="_blank"><img class="menuimg" src="img/awekas.svg" alt=""/>View on AWEKAS</a>
+               </li>';
+        }
+        if (!empty($linkAmbientWeatherID)) {
+          echo '<li>
+                    <a href="https://dashboard.ambientweather.net/devices/public/' . $linkAmbientWeatherID . '" title="Ambient weather" target= "_blank"><img class="menuimg" src="img/ambientweather.svg" alt=""/>View on Ambient weather</a>
+                </li>';
+        }
+        if (!empty($linkPWSWeatherID)) {
+          echo '<li>
+                  <a href="https://www.pwsweather.com/obs/' . $linkPWSWeatherID . '.html" title="PWS Weather" target="_blank"><img style="background-color:white" class="menuimg" src="img/pwslogo.svg" alt=""/>View on PWS Weather</a>
+                </li>';
+        }
+        if (!empty($linkMetOfficeID)) {
+          echo '<li>
+                    <a href="http://wow.metoffice.gov.uk/observations/details?site_id=' . $linkMetOfficeID . '" title="MetOffice/WoW" target="_blank"><img class="menuimg" src="img/metoffice.svg" alt=""/>View on MetOffice/WoW</a>
+                </li>';
+        }
+        if (!empty($linkCustom1Title)) {
+          echo '<li>
+                  <a href="' . $linkCustom1URL . '" title="' . $linkCustom1Title . '" target="_blank">
+                      <img class="menuimg" src="img/arrowiconlink.svg" alt=""/>
+                      ' . $linkCustom1Title . '
+                    </a>
+                  </li>';
+        }
+        if (!empty($linkCustom2Title) && !empty($linkCustom2URL)) {
+          echo '<li>
+                  <a href="' . $linkCustom2URL . '" title="' . $linkCustom2Title . '" target="_blank"><img class="menuimg" src="img/arrowiconlink.svg" alt=""/>' . $linkCustom2Title . '</a>
+                </li>';
+        }
+        echo '</ul>';
+      }
+      echo '<li class="header">EXTRAS</li>';
+      if ($weatherflowoption == "yes") {
+          echo '<li>
+                  <a href="https://tempestwx.com/map/' . $lat . '/' . $lon . '/' . $weatherflowmapzoom . '" data-lity title="see your weather station on the official WeatherFlow map"><menumarkerblue></menumarkerblue> WeatherFlow Map</a>
+                </li>';
+      }
+      if (!empty($webcamurl) && $webcamurl != ' ' && $webcamurl != 'Null' && $webcamurl != 'null') {
+          echo '<li>
+                  <a href="dvmWebcamPopup.php" data-lity title="Weather Station Webcam"><menumarkeryellow></menumarkeryellow> Web Cam</a>
+                </li>';
+      }
+      echo '<li>
+              <a href="dvmBioPopup.php" data-lity title="Weather Station Owner Contact Card Info"><menumarkerorange></menumarkerorange> Contact Card</a>
+            </li>
+            <li>
+              <a href="stationinfo.php" data-lity title="Weather Station Hardware Info"><menumarkerred></menumarkerred> Hardware Info</a>
+            </li>
+            <li>
+              <a href="dvmMenuCheckVariable.php" data-lity title="Check Variables"><menumarkerorange></menumarkerorange> Variable Check Lists</a>
+            </li>';
+      if (!empty($extraLinkTitle) && !empty($extraLinkURL) && !empty($extraLinkColor)) {
+          echo '<li>
+                  <a href="' . $extraLinkURL . '" title="' . $extraLinkTitle . '" target="_blank">';
+          if ($extraLinkColor == 'white') {
+              echo '<menumarkerlight></menumarkerlight>';
+          } else if ($extraLinkColor == 'red') {
+              echo '<menumarkerred></menumarkerred>';
+          } else if ($extraLinkColor == 'grey') {
+              echo '<menumarkerbluegrey></menumarkerbluegrey>';
+          } else if ($extraLinkColor == 'green') {
+              echo '<menumarkergreen></menumarkergreen>';
+          } else if ($extraLinkColor == 'yellow') {
+              echo '<menumarkeryellow></menumarkeryellow>';
+          } else if ($extraLinkColor == 'blue') {
+              echo '<menumarkerblue></menumarkerblue>';
+          } else {
+              echo '<menumarkerorange></menumarkerorange>';
+          }
+          echo $extraLinkTitle . '</a></li>';
+      }
+      if ($sbLang == "yes") {
+          echo '<li class="header">' . $lang["language"] . '</li>
+                <li class="flagstop">
+                  <a href="index.php?lang=en">English</a><br />
+                  <a href="index.php?lang=dk">Danish</a><br />
+                  <a href="index.php?lang=gr">Greek</a><br />
+                  <a href="index.php?lang=it">Italian</a><br />
+                  <a href="index.php?lang=fr">French</a><br />
+                  <a href="index.php?lang=de">German</a><br />
+                  <a href="index.php?lang=nl">Dutch</a><br />
+                  <a href="index.php?lang=cat">Catalan</a><br />
+                  <a href="index.php?lang=sp">Spanish</a><br />
+                  <a href="index.php?lang=tr">Turkish</a><br />
+                  <a href="index.php?lang=hu">Hungary</a><br />
+                  <a href="index.php?lang=pl">Polish</a><br />
+                  <a href="index.php?lang=no">Norwegian</a><br />
+                </li><br /><br />';
+      }
+      echo '<li class="header">MISC</li>
+            <li>
+              <a href="https://chrisalemany.ca/2021/02/24/installing-the-weather34-skin-on-weewx-with-remote-web-server-2021-edition/" title="Remote Setup" target="_blank"><menumarkerbluegrey></menumarkerbluegrey> Remote Setup Guide</a>
+            </li>
+            <li>
+              <a href="team_divumwx/index.html" title="weewx-DivumWX on Github" target="_blank"><menumarkerbluegrey></menumarkerbluegrey> Download DivumWX template</a>
+            </li>
+            <li>
+              <a href="https://steepleian.github.io/weewx-Weather34/" title="Web Services Setup Page" target="_blank"><menumarkerbluegrey></menumarkerbluegrey> Web Services Setup Page</a>
+            </li>
+            <li class="header">The DivumWX Team</li>
+            <li class="flagstop">
+              <a href="mailto:steepleian@btinternet.com" title="Email Steepleian for Support" target="_blank">Ian Millard (Steepleian)</a><br />
+              <a href="#">Steven Sheeley (Rayvenhaus)</a><br />
+              <a href="#">Sean Balfour</a><br />
+            </li><br /><br />';
+      if (!empty($USAWeatherFinder)) {
+          echo '<li>
+                    <a href="https://usaweatherfinder.com/index.php?a=stats&u=' . $USAWeatherFinder . '" title="' . $USAWeatherFinder . '\'s Weather Finder" target="_blank"><img src="https://usaweatherfinder.com/button.php?u=' . $USAWeatherFinder . '" alt="USA Weather Finder" border="0" /></a>
+                </li>';
+      }
+      ?>
+    </ul>
   </div>
-<!-- end of theme switch -->      
-
-  <div class="titlebar"style="background-color:transparent;">
-  <div class="titlebar-item">
-   </div>
-  <div class="titlebar-item-center">
-	        <div class="stationLongname">
-          <div class="headerflag"><object data="./img/flags/<?php echo $flag; ?>.svg" width="20px"></object>&nbsp;&nbsp;<?php echo $stationlocation; ?>&nbsp; Weather Station&nbsp;&nbsp;<object data="./img/flags/<?php echo $flag; ?>.svg" width="20px"></object></div>         
-                 </div> 
-        <div class="stationShortname">
-          <div class="headerflag"><object data="./img/flags/<?php echo $flag; ?>.svg" width="20px"></object>&nbsp;&nbsp;<?php echo $stationAbbrev; ?></object></div>         
-                 </div> 
 </div>
-          <div class="titlebar-item"></div>
-          </div>
-<!--end of header section-->
-<!--start of alert section-->      
-
-<!--end of alert section-->
-<!--start of grid section-->  
-<section class="card-container">
-
-	<div class="cardP"><div class="module"><div id="position1"></div></div></div>
-
-	<div class="cardP"><div class="module"><div id="position2"></div></div></div>
-
-    <div class="cardP"><div class="module"><div id="position3"></div></div></div>
-
-	<div class="cardP"><div class="module"><div id="position4"></div></div></div>
-
-    <div class="cardP"><div class="module"><div id="position5"></div></div></div>
-
-	<div class="cardP"><div class="module"><div id="position6"></div></div></div>
-	
-    <div class="cardP"><div class="module"><div id="position7"></div></div></div>
-
-	<div class="cardP"><div class="module"><div id="position8"></div></div></div>
-
-    <div class="cardP"><div class="module"><div id="position9"></div></div></div>
-
-	<div class="cardE"><div class="module"><div id="position10"></div></div></div>
-
-    <div class="cardE"><div class="module"><div id="position11"></div></div></div>
-
-	<div class="cardE"><div class="module"><div id="position12"></div></div></div>
-	
-    <div class="cardE"><div class="module"><div id="position13"></div></div></div>
-
-	<div class="cardE"><div class="module"><div id="position14"></div></div></div>
-
-    <div class="cardE"><div class="module"><div id="position15"></div></div></div>
-
-	<div class="cardE"><div class="module"><div id="position16"></div></div></div>
-
-    <div class="cardE"><div class="module"><div id="position17"></div></div></div>
-
-	<div class="cardE"><div class="module"><div id="position18"></div></div></div>
-    
-    <div class="cardE"><div class="module"><div id="position19"></div></div></div>
-
-	<div class="cardE"><div class="module"><div id="position20"></div></div></div>
-
-</section>
-<!--end of grid section-->
-
-<!--start of footer section-->
-
-<div class="titlebar" style="height: auto; padding: 10px;">
-<!--section1-->
-<div class="stationLongname">
-  <div class="titlebar-item"> 
-<div class="divumwxLogoFooter" style="width: 60px;"><?php echo '<a href="https://divumwxweather.org/" title="https://divumwxweather.org/" target="_blank"><br><img src="img/divumLogo-dark.svg" style="width: 55px; margin-top: -10px; font-size: 9px; margin-left: -20px;" alt="divumwxweather.org/"></img>' ?>
-<div class="divumwxLogoFooter-text-block"><?php echo '<a>Copyright &copy; 2022-' . date('Y') . '<br>Team DivumWX<br>All rights reserved</divumwx></a>'; ?> </div>
-
-</div></div>
-</div>
-<!--end section1-->
-<!--section2-->
-
-<div class="titlebar-item-center" style="font-size:11px;">
-        <p><red><?php echo "Never base important decisions that could result in harm to people or property on this weather information." ?></red></p>
-        <p><?php echo "Operational Since " . $divum["since"] . " - ";
-$info; ?> <?php echo $templateversion; ?> <?php echo " - WeeWX"; ?>(<?php echo $divum["swversion"]; ?>)  - OS- <?php echo " " . $weatherhardware . "" . $os_version . " - PHP( " . substr($phpVersion, 0, 7); ?>)</value></p>
-        <a href="https://www.xweather.com/" target="_blank" title="Forecasts Powered by Vaisala Xweather"><img src="https://www.xweather.com/assets/logos/vaisala-xweather-logo-<?php echo $reverseTheme; ?>.svg" alt="Vaisala Xweather" height="30" /></a><a href="https://developer.yr.no/featured-products/forecast/">    Meteogram Data by <img src="img/yr.svg" width="14px"></a><a href="https://bas.dev/work/meteocons">     Animated Icons by <img src="img/bm.svg" width="14px"></p>
-
-</div>
-<!--end section2-->
-<!--section3-->
-<div class="stationLongname">
-<div class="titlebar-item">      <div class="weewxLogoFooter" style="width: 30px;"><a href="http://weewx.com" alt="http://weewx.com" title="http://weewx.com">
-          <?php echo '<img src="img/icon-weewx.svg" alt="WeeWX" title="WeeWX" width="100px" height="55px"><div class="hardwarelogo1text"></div>'; ?></a>
-      </div>
-</div>
-          </div>
-<!--end section2-->
-</div>
-          
-          
-<!--end of footer section-->
-
-
-          
-          <script>
-const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
-const currentTheme = localStorage.getItem('theme');
-
-if (currentTheme) {
-    document.documentElement.setAttribute('data-theme', currentTheme);
-  
-    if (currentTheme === 'dark') {
-        toggleSwitch.checked = true;
-        document.cookie = "theme=dark";
-       
-    }
-}
-
-function switchTheme(e) {
-    if (e.target.checked) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        localStorage.setItem('theme', 'dark');
-        document.cookie = "theme=dark";
-        location.reload();
-    }
-    else {        document.documentElement.setAttribute('data-theme', 'light');
-          localStorage.setItem('theme', 'light');
-          document.cookie = "theme=light";
-          location.reload();
-    }    
-}
-
-toggleSwitch.addEventListener('change', switchTheme, false);
-
-
-</script>
-
-  
-</body>
-</html>

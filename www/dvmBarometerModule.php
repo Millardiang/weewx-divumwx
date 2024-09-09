@@ -43,7 +43,7 @@ if ($barom["units"]=='mbar' OR $barom["units"]=="hPa"){echo number_format($barom
 </div></div>
 
 
-<script src="js/d3.min.js"></script>
+<script src="js/d3.v3.min.js"></script>
 <script src="js/iopctrl.js"></script>
 
 <style>
