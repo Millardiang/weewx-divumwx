@@ -1265,7 +1265,7 @@ input:checked+.slider{background-color:var(--item-reverse-border);}
 .analog-hours{stroke-width:3.5;stroke:rgba(170,170,170,1);stroke-linecap:round;}
 .analog-minutes{stroke-width:2;stroke:rgba(170,170,170,1);stroke-linecap:round;}
 .analog-seconds{stroke-width:1;stroke:#ff7c39;stroke-linecap:round;}
-.clockOutlook{position:absolute;color:var(--text-color);font-family:var(--font-family);font-size:13px;padding-left:9px;padding-right:9px;padding-top:12px;margin-left:15px;width:280px;height:80px;overflow:hidden;margin-top:10px;}
+.clockOutlook{position:absolute;color:var(--text-color);font-family:var(--font-family);font-size:12px;padding-left:9px;padding-right:9px;padding-top:12px;margin-left:15px;width:280px;height:80px;overflow:hidden;margin-top:10px;}
 .sidebarIconToggle{cursor:pointer;position:absolute;z-index:99;top:15px;left:15px;height:22px;width:22px;margin-top:8px;margin-left:10px;}
 .menu,.thearrow7:after{-webkit-border-radius:0;}
 #divumwxsidebarMenu,.divumwxsidebarMenuInner li{background:var(--menu-color);width:240px;float:left;}
