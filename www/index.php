@@ -20,9 +20,9 @@ if (!file_exists("./userSettings.php"))
 include_once ('dvmCombinedData.php');
 include_once ('webserver_ip_address.php');
 require_once ('admin/assets/classes/geoplugin.class.php');
-include_once ('dvmUpdater.php');
-include_once ('dvmSideMenu.php');
-//include ('dvmAdvisory.php');
+include ('dvmUpdater.php');
+
+
 date_default_timezone_set($TZ);
 header('Content-type: text/html; charset=utf-8');
 error_reporting(0);
@@ -30,6 +30,16 @@ error_reporting(0);
 ?>
 <!DOCTYPE html>
 <head>
+    <script>
+    // IMPORTANT: set this in <HEAD> top before any other tag.
+    const setTheme = (theme) => {
+      theme ??= localStorage.theme || "dark";
+      document.documentElement.dataset.theme = theme;
+      localStorage.theme = theme;
+    };
+    setTheme();
+  </script>
+
   <title><?php echo $stationlocation; ?> Weather Station</title>
   <!--Google / Search Engine Tags -->
   <meta itemprop="image" content="img/divumMeta.png">
@@ -62,7 +72,9 @@ error_reporting(0);
 <link rel="stylesheet" href="./css/divumwx.main.css?version=<?php echo filemtime('./css/divumwx.main.css'); ?>" rel="stylesheet prefetch">
 
   
-</head>
+
+  
+
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -76,7 +88,9 @@ error_reporting(0);
       });
     }
   </script>
+  </head>
 <body>
+ <?php include_once ('dvmSideMenu.php');?>
   <!--start of header section-->
   <!-- start of theme switch -->
   <div class="theme-switch-wrapper">
@@ -103,7 +117,8 @@ error_reporting(0);
           <div class="titlebar-item"></div>
           </div>
 <!--end of header section-->
-<!--start of alert section-->      
+<!--start of alert section-->
+          <div class="alertbar">There are currently no weather advisories, alerts or warnings in force for London and the South East Region of the United Kingdom</div>
 
 <!--end of alert section-->
 <!--start of grid section-->  
@@ -177,7 +192,7 @@ $info; ?> <?php echo $templateversion; ?> <?php echo " - WeeWX"; ?>(<?php echo $
 <!--section3-->
 <div class="stationLongname">
 <div class="titlebar-item">      <div class="weewxLogoFooter" style="width: 30px;"><a href="http://weewx.com" alt="http://weewx.com" title="http://weewx.com">
-          <?php echo '<img src="img/icon-weewx-'.$theme.'.svg" alt="WeeWX" title="WeeWX" width="100px" height="55px"><div class="hardwarelogo1text"></div>'; ?></a>
+          <?php echo '<img src="img/icon-weewx-'.$theme.'.svg" alt="WeeWX" title="WeeWX" width="100px" height="55px">'; ?></a>
       </div>
 </div>
           </div>
@@ -186,7 +201,7 @@ $info; ?> <?php echo $templateversion; ?> <?php echo " - WeeWX"; ?>(<?php echo $
           
           
 <!--end of footer section-->
-
+<?php include ('dvmAdvisoryEU.php');?>
 
           
           <script>
@@ -199,19 +214,19 @@ if (currentTheme) {
     if (currentTheme === 'dark') {
         toggleSwitch.checked = true;
         document.cookie = "theme=dark";
-       
+        
     }
 }
 
 function switchTheme(e) {
     if (e.target.checked) {
         document.documentElement.setAttribute('data-theme', 'dark');
-        localStorage.setItem('theme', 'dark');
+        localStorage.setItem('theme', 'dark','true', 2628000000,'/',false);
         document.cookie = "theme=dark";
         location.reload();
     }
     else {        document.documentElement.setAttribute('data-theme', 'light');
-          localStorage.setItem('theme', 'light');
+          localStorage.setItem('theme', 'light', 'true', 2628000000, '/',false);
           document.cookie = "theme=light";
           location.reload();
     }    
