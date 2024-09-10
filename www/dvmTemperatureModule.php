@@ -75,7 +75,7 @@ else if ($theme === "light")
 <!--span class="yearpopup"><a alt="temp charts" title="temp charts" href="dvmTemperatureRecords.php" data-lity><?php echo $menucharticonpage;?> Temperature Almanac and Derived Charts</a></span-->
 <span class="yearpopup"><a alt="temp charts" title="temp charts" href="dvmHeatMapPopup.php" data-lity><?php echo $menucharticonpage;?> Heat Map</a></span>
 </div>    
-<span class='moduletitle4'><?php echo $lang['temperatureModule'];?> (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span>
+<span class='moduletitle'><?php echo $lang['temperatureModule'];?> (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span>
 <div class="updatedtime1"><?php if(file_exists($livedata)&&time()- filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>';else echo $online." ".$divum["time"];?></div>
 </div>
 
