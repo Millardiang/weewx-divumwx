@@ -20,7 +20,7 @@ if (!file_exists("./userSettings.php"))
 include_once ('dvmCombinedData.php');
 include_once ('webserver_ip_address.php');
 require_once ('admin/assets/classes/geoplugin.class.php');
-include_once ('dvmUpdater.php');
+include ('dvmUpdater.php');
 
 
 date_default_timezone_set($TZ);
@@ -184,7 +184,7 @@ error_reporting(0);
 <div class="titlebar-item-center" style="font-size:11px;">
         <p><red><?php echo "Never base important decisions that could result in harm to people or property on this weather information." ?></red></p>
         <p><?php echo "Operational Since " . $divum["since"] . " - ";
-$info; ?> <?php echo $templateversion; ?> <?php echo " - WeeWX"; ?>(<?php echo $divum["swversion"]; ?>)  - OS- <?php echo " " . $weatherhardware . "" . $os_version . " - PHP( " . substr($phpVersion, 0, 7); ?>)</value></p>
+$info; ?> <?php echo $templateversion; ?> <?php echo " - WeeWX"; ?>(<?php echo $divum["swversion"]; ?>)  - OS- <?php echo " " . $os_version . " - PHP( " . substr($phpVersion, 0, 7); ?>)</value></p>
         <a href="https://www.xweather.com/" target="_blank" title="Forecasts Powered by Vaisala Xweather"><img src="https://www.xweather.com/assets/logos/vaisala-xweather-logo-<?php echo $reverseTheme; ?>.svg" alt="Vaisala Xweather" height="30" /></a><a href="https://developer.yr.no/featured-products/forecast/">    Meteogram Data by <img src="img/yr.svg" width="14px"></a><a href="https://bas.dev/work/meteocons">     Animated Icons by <img src="img/bm.svg" width="14px"></p>
 
 </div>
@@ -192,7 +192,7 @@ $info; ?> <?php echo $templateversion; ?> <?php echo " - WeeWX"; ?>(<?php echo $
 <!--section3-->
 <div class="stationLongname">
 <div class="titlebar-item">      <div class="weewxLogoFooter" style="width: 30px;"><a href="http://weewx.com" alt="http://weewx.com" title="http://weewx.com">
-          <?php echo '<img src="img/icon-weewx-'.$theme.'.svg" alt="WeeWX" title="WeeWX" width="100px" height="55px"><div class="hardwarelogo1text"></div>'; ?></a>
+          <?php echo '<img src="img/icon-weewx-'.$theme.'.svg" alt="WeeWX" title="WeeWX" width="100px" height="55px">'; ?></a>
       </div>
 </div>
           </div>
@@ -214,7 +214,7 @@ if (currentTheme) {
     if (currentTheme === 'dark') {
         toggleSwitch.checked = true;
         document.cookie = "theme=dark";
-       
+        
     }
 }
 
@@ -223,12 +223,12 @@ function switchTheme(e) {
         document.documentElement.setAttribute('data-theme', 'dark');
         localStorage.setItem('theme', 'dark','true', 2628000000,'/',false);
         document.cookie = "theme=dark";
-        
+        location.reload();
     }
     else {        document.documentElement.setAttribute('data-theme', 'light');
           localStorage.setItem('theme', 'light', 'true', 2628000000, '/',false);
           document.cookie = "theme=light";
-          
+          location.reload();
     }    
 }
 
