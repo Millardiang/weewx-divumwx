@@ -184,7 +184,7 @@ error_reporting(0);
 <div class="titlebar-item-center" style="font-size:11px;">
         <p><red><?php echo "Never base important decisions that could result in harm to people or property on this weather information." ?></red></p>
         <p><?php echo "Operational Since " . $divum["since"] . " - ";
-$info; ?> <?php echo $templateversion; ?> <?php echo " - WeeWX"; ?>(<?php echo $divum["swversion"]; ?>)  - OS- <?php echo " " . $weatherhardware . "" . $os_version . " - PHP( " . substr($phpVersion, 0, 7); ?>)</value></p>
+$info; ?> <?php echo $templateversion; ?> <?php echo " - WeeWX"; ?>(<?php echo $divum["swversion"]; ?>)  - OS- <?php echo " " . $os_version . " - PHP( " . substr($phpVersion, 0, 7); ?>)</value></p>
         <a href="https://www.xweather.com/" target="_blank" title="Forecasts Powered by Vaisala Xweather"><img src="https://www.xweather.com/assets/logos/vaisala-xweather-logo-<?php echo $reverseTheme; ?>.svg" alt="Vaisala Xweather" height="30" /></a><a href="https://developer.yr.no/featured-products/forecast/">    Meteogram Data by <img src="img/yr.svg" width="14px"></a><a href="https://bas.dev/work/meteocons">     Animated Icons by <img src="img/bm.svg" width="14px"></p>
 
 </div>
