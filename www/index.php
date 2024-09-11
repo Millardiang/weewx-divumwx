@@ -13,10 +13,17 @@
 #    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
-if (!file_exists("./userSettings.php"))
-{
-    copy("./initial_userSettings.php", "./userSettings.php");
+session_start();
+if (!file_exists("userSettings.php")) {
+    if (isset($_SESSION['setupAttempted']) && $_SESSION['setupAttempted'] === true) {
+        echo "An error occurred. Please contact support.";
+        exit;
+    }
+    $_SESSION['canAccessSetup'] = true;
+    header("Location: dvmActSetup.php");
+    exit;
 }
+
 include_once ('dvmCombinedData.php');
 include_once ('webserver_ip_address.php');
 require_once ('admin/assets/classes/geoplugin.class.php');
@@ -30,16 +37,7 @@ error_reporting(0);
 ?>
 <!DOCTYPE html>
 <head>
-    <script>
-    // IMPORTANT: set this in <HEAD> top before any other tag.
-    const setTheme = (theme) => {
-      theme ??= localStorage.theme || "dark";
-      document.documentElement.dataset.theme = theme;
-      localStorage.theme = theme;
-    };
-    setTheme();
-  </script>
-
+ 
   <title><?php echo $stationlocation; ?> Weather Station</title>
   <!--Google / Search Engine Tags -->
   <meta itemprop="image" content="img/divumMeta.png">
@@ -72,9 +70,6 @@ error_reporting(0);
 <link rel="stylesheet" href="./css/divumwx.main.css?version=<?php echo filemtime('./css/divumwx.main.css'); ?>" rel="stylesheet prefetch">
 
   
-
-  
-
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -90,7 +85,7 @@ error_reporting(0);
   </script>
   </head>
 <body>
- <?php include_once ('dvmSideMenu.php');?>
+ 
   <!--start of header section-->
   <!-- start of theme switch -->
   <div class="theme-switch-wrapper">
@@ -118,7 +113,9 @@ error_reporting(0);
           </div>
 <!--end of header section-->
 <!--start of alert section-->
-          <div class="alertbar">There are currently no weather advisories, alerts or warnings in force for London and the South East Region of the United Kingdom</div>
+
+        <?php include ("europe.php");?>
+          <!--div class="alertbar" style="background-color:<?php echo $alertBackground?>;color:<?php echo $alertColor?>;"><?php echo $alertPhrase;?></div-->
 
 <!--end of alert section-->
 <!--start of grid section-->  
@@ -201,7 +198,7 @@ $info; ?> <?php echo $templateversion; ?> <?php echo " - WeeWX"; ?>(<?php echo $
           
           
 <!--end of footer section-->
-<?php include ('dvmAdvisoryEU.php');?>
+
 
           
           <script>
@@ -239,4 +236,45 @@ toggleSwitch.addEventListener('change', switchTheme, false);
 
   
 </body>
+<?php 
+      include_once ('dvmSideMenu.php');
+      //Add visits by country to admin database. No personal info is kept by this, ip is discarded
+      if($trkVisits){
+        $geoplugin = new geoPlugin();
+        $geoplugin->locate($_SERVER['REMOTE_ADDR']);
+        $countryCode = $geoplugin->countryCode;
+        $regionName = $geoplugin->regionName;
+        $cityCode = $geoplugin->city;
+        $lat = $geoplugin->latitude;
+        $long = $geoplugin->longitude;
+        $adminDB = __DIR__ . DIRECTORY_SEPARATOR . 'admin' . DIRECTORY_SEPARATOR . 'db' . DIRECTORY_SEPARATOR . 'dvmAdmin.db3';
+        $db = new PDO("sqlite:" . $adminDB);
+        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $regionName = empty($regionName) ? "Unknown" : $regionName;
+        $cityCode = empty($cityCode) ? "Unknown" : $cityCode;
+        $query = $db->prepare("SELECT * FROM visits WHERE countryCode = :countryCode AND regionName = :regionName AND cityName = :cityName");
+        $query->bindValue(':countryCode', $countryCode, PDO::PARAM_STR);
+        $query->bindValue(':regionName', $regionName, PDO::PARAM_STR);
+        $query->bindValue(':cityName', $cityCode, PDO::PARAM_STR);
+        $query->execute();
+        $row = $query->fetch(PDO::FETCH_ASSOC);
+        if ($row) {
+            $updateStmt = $db->prepare("UPDATE visits SET visit_count = visit_count + 1 WHERE countryCode = :countryCode AND regionName = :regionName AND cityName = :cityName");
+            $updateStmt->bindValue(':countryCode', $countryCode, PDO::PARAM_STR);
+            $updateStmt->bindValue(':regionName', $regionName, PDO::PARAM_STR);
+            $updateStmt->bindValue(':cityName', $cityCode, PDO::PARAM_STR);
+            $updateStmt->execute();
+        } else {
+            $insertStmt = $db->prepare("INSERT INTO visits (countryCode, regionName, cityName, lat, long, visit_count) VALUES (:countryCode, :regionName, :cityName, :lat, :long, 1)");
+            $insertStmt->bindValue(':countryCode', $countryCode, PDO::PARAM_STR);
+            $insertStmt->bindValue(':regionName', $regionName, PDO::PARAM_STR);
+            $insertStmt->bindValue(':cityName', $cityCode, PDO::PARAM_STR);
+            $insertStmt->bindValue(':lat', $lat, PDO::PARAM_STR);
+            $insertStmt->bindValue(':long', $long, PDO::PARAM_STR);
+            $insertStmt->execute();
+        }
+        $db = null;
+      }
+    ?>
+
 </html>
