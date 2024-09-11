@@ -18,7 +18,7 @@ error_reporting(0);
 
 $json_icon = file_get_contents("jsondata/lookupTable.json");
 $parsed_icon = json_decode($json_icon, true);
-$json_string = file_get_contents("jsondata/awTest.txt");
+$json_string = file_get_contents("jsondata/awa.txt");
 $parsed_json = json_decode($json_string, true);
 $cnt = count($parsed_json["response"]);
 $code = $parsed_json["error"]["code"];
