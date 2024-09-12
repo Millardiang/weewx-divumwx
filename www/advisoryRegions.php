@@ -15,9 +15,12 @@
 ##############################################################################################
 
 error_reporting(0);
-
+$advisoryzone = "na";
+if($advisoryzone == "eu" || $advisoryzone == "na"){$advisoryzone = "eu-na";} 
 $json_icon = file_get_contents("jsondata/lookupTable.json");
 $parsed_icon = json_decode($json_icon, true);
+switch ($advisoryzone) {
+case "eu-na": 
 $json_string = file_get_contents("jsondata/awa.txt");
 $parsed_json = json_decode($json_string, true);
 $cnt = count($parsed_json["response"]);
@@ -64,11 +67,49 @@ echo'<div class="alertbar"><b>'.$aPhrase.'</b></div>';
         }
         $alerttype[$i] = $parsed_icon['pop']['alertdesc'][$alertdesc[$i]];
         $warnimage[$i] = "css/svg/" . $parsed_icon[$background[$i]][$type[$i]];
-        $begins[$i] = date("D j F H:i", strtotime($parsed_json["response"][$i]["timestamps"]["beginsISO"]));
-        $expires[$i] = date("D j F H:i", strtotime($parsed_json["response"][$i]["timestamps"]["expiresISO"]));
-        $alertPhrase[$i]  = $alertlevel[$i].". ".$description[$i] .".<br>From ".$begins[$i] ." to ".$expires[$i] ."." ;
+        $begins[$i] = date("D j M H:i", strtotime($parsed_json["response"][$i]["timestamps"]["beginsISO"]));
+        $expires[$i] = date("D j M H:i", strtotime($parsed_json["response"][$i]["timestamps"]["expiresISO"]));
+        $alertPhrase[$i]  = $alertlevel[$i].". From ".$begins[$i]." to ".$expires[$i] .".<br>".$description[$i]."." ;
       ?>
-      <div class="alertbar" style="background-color:<?php echo $background[$i]?>;color:<?php echo $alertColor[$i]?>;"><div class="alert-logo-box"><img src="<?php echo $warnimage[$i]; ?>"style="width:40px";></div><div class="alert-text-box"><?php echo $alertPhrase[$i];?></div></div><?php
+      <div class="alertbar" style="background-color:<?php echo $background[$i]?>;color:<?php echo $alertColor[$i]?>;"><div class="alert-logo-box"><img src="<?php echo $warnimage[$i]; ?>"style="width:36px";></div><div class="alert-text-box"><?php echo $alertPhrase[$i];?></div></div><?php
     }
+}
+
+break;
+
+case "na": 
+
+break;
+
+case "au": 
+$xml = simplexml_load_file("jsondata/au.txt") or die("Error: Cannot create object");
+$jsonData = json_encode($xml, JSON_PRETTY_PRINT);
+$parsed_json = json_decode($jsonData, true);
+$title1 = $parsed_json["channel"]["title"];
+$count = count($parsed_json["channel"]["item"]); 
+if (($parsed_json['channel']['item'][0]["title"]) == null){
+$parsed_json["channel"]["item"][0]["title"] = $parsed_json["channel"]["item"]["title"];
+$parsed_json["channel"]["item"][0]["link"] = $parsed_json["channel"]["item"]["link"];
+$parsed_json["channel"]["item"][0]["pubDate"] = $parsed_json["channel"]["item"]["pubDate"];
+$parsed_json["channel"]["item"][0]["guid"] = $parsed_json["channel"]["item"]["guid"];
+$count = 1;}
+for ($i = 0; $i < $count; $i++) {
+
+    $title2[$i] = $parsed_json["channel"]["item"][$i]["title"];
+    $link[$i] = $parsed_json["channel"]["item"][$i]["link"];
+    $pubDate[$i] = $parsed_json["channel"]["item"][$i]["pubDate"];
+    $guid[$i] = $parsed_json["channel"]["item"][$i]["guid"];
+?>
+<div class="alertbar" style="color:<?php echo $text1; ?>;";><?php echo $title2[$i]; ?><a href="<?php echo $link[$i]; ?>" title="<?php echo $link[$i]; ?>" target="_blank" style="color:<?php echo $url; ?>;"> <?php echo $link[$i]; ?> </a></div>
+<?php
+  
+}
+break;
+
+case "rw": 
+
+break;
+
+
 }
 ?>
