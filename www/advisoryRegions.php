@@ -29,7 +29,7 @@ if($code == "warn_no_data")
 {$aPhrase = "There are currently no weather advisories, alerts or warnings in force.";
 echo'<div class="alertbar"><bold>'.$aPhrase.'</bold></div>';}
 else
-{$aPhrase = 'The following Weather Alert(s) Currently in Force for South East England.';
+{$aPhrase = 'The following Weather Alert(s) Currently in Force.';
 echo'<div class="alertbar"><b>'.$aPhrase.'</b></div>';
 
     for ($i = 0;$i < $cnt;$i++)
