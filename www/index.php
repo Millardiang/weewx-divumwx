@@ -114,7 +114,7 @@ error_reporting(0);
 <!--end of header section-->
 <!--start of alert section-->
 
-        <?php include ("europe.php");?>
+        <?php include ("advisoryRegions.php");?>
           <!--div class="alertbar" style="background-color:<?php echo $alertBackground?>;color:<?php echo $alertColor?>;"><?php echo $alertPhrase;?></div-->
 
 <!--end of alert section-->

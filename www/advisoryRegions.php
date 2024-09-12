@@ -15,9 +15,11 @@
 ##############################################################################################
 
 error_reporting(0);
-
+$advisoryzone = "eu";
 $json_icon = file_get_contents("jsondata/lookupTable.json");
 $parsed_icon = json_decode($json_icon, true);
+switch ($advisoryzone) {
+case "eu": 
 $json_string = file_get_contents("jsondata/awa.txt");
 $parsed_json = json_decode($json_string, true);
 $cnt = count($parsed_json["response"]);
@@ -64,11 +66,28 @@ echo'<div class="alertbar"><b>'.$aPhrase.'</b></div>';
         }
         $alerttype[$i] = $parsed_icon['pop']['alertdesc'][$alertdesc[$i]];
         $warnimage[$i] = "css/svg/" . $parsed_icon[$background[$i]][$type[$i]];
-        $begins[$i] = date("D j F H:i", strtotime($parsed_json["response"][$i]["timestamps"]["beginsISO"]));
-        $expires[$i] = date("D j F H:i", strtotime($parsed_json["response"][$i]["timestamps"]["expiresISO"]));
-        $alertPhrase[$i]  = $alertlevel[$i].". ".$description[$i] .".<br>From ".$begins[$i] ." to ".$expires[$i] ."." ;
+        $begins[$i] = date("D j M H:i", strtotime($parsed_json["response"][$i]["timestamps"]["beginsISO"]));
+        $expires[$i] = date("D j M H:i", strtotime($parsed_json["response"][$i]["timestamps"]["expiresISO"]));
+        //$alertPhrase[$i]  = $alertlevel[$i].". ".$description[$i] .".<br>From ".$begins[$i] ." to ".$expires[$i] ."." ;
+        $alertPhrase[$i]  = $alertlevel[$i].". From ".$begins[$i]." to ".$expires[$i] .".<br>".$description[$i]."." ;
       ?>
-      <div class="alertbar" style="background-color:<?php echo $background[$i]?>;color:<?php echo $alertColor[$i]?>;"><div class="alert-logo-box"><img src="<?php echo $warnimage[$i]; ?>"style="width:40px";></div><div class="alert-text-box"><?php echo $alertPhrase[$i];?></div></div><?php
+      <div class="alertbar" style="background-color:<?php echo $background[$i]?>;color:<?php echo $alertColor[$i]?>;"><div class="alert-logo-box"><img src="<?php echo $warnimage[$i]; ?>"style="width:36px";></div><div class="alert-text-box"><?php echo $alertPhrase[$i];?></div></div><?php
     }
+}
+
+break;
+
+case "na": 
+
+break;
+
+case "au": 
+
+break;
+
+case "rw": 
+
+break;
+
 }
 ?>
