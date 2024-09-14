@@ -1708,7 +1708,7 @@ series: [{}],
 	    }
 	    options.yAxis[0].min = 0;
 	    options.yAxis[0].minorTickInterval = 1;
-	    options.yAxis[0].title.text = "(μg/㎥)";
+	    options.yAxis[0].title.text = "(Î¼g/ãŽ¥)";
 	    return options;
 	};
 	
