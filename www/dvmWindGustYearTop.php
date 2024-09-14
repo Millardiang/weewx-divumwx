@@ -1,16 +1,19 @@
+<?php
+#####################################################################################################################                                                                                 
+#                                                                                                                   #
+# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
+#                                                                                                                   #
+# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
+#                                                                                                                   #
+# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
+#                                                                                                                   #
+# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
+#                                                                                                                   #
+#####################################################################################################################
+?>
 <?php include('dvmCombinedData.php');
 
 $image["image"] = "img/meteocons/umbrella-wind-static.svg";
-
-if($wind["gust_year_max"]>=0){$colormax = "#487ea9";}
-else if($wind["gust_year_max"]>=5){$colormax = "#3b9cac";}
-else if($wind["gust_year_max"]>10){$colormax = "#9aba2f";}
-else if($wind["gust_year_max"]>20){$colormax = "#e6a141";}
-else if($wind["gust_year_max"]>25){$colormax = "#ec5a34";}
-else if($wind["gust_year_max"]>30){$colormax = "#d05f2d";}
-else if($wind["gust_year_max"]>35){$colormax = "#d65b4a";}
-else if($wind["gust_year_max"]>40){$colormax = "#dc4953";}
-else {$wind["gust_year_max"] = $colormax = "#e26870";}
 
 ?>
 
@@ -27,38 +30,19 @@ else {$wind["gust_year_max"] = $colormax = "#e26870";}
 </style>
 
 <div class="windTop"></div>
-<div id="svg"></div>
 
-	<script>
+<script>
 
 	var theme = "<?php echo $theme;?>";
-	var image = "<?php echo $image["image"];?>";
-	
-	var year = "<?php echo date('Y');?>";		
-	var maxcolor = "<?php echo $colormax;?>";
-	 	
+	var image = "<?php echo $image["image"];?>";		
+	var maxcolorM = "<?php echo $color["windGust_month_max"];?>";
+    var maxcolorY = "<?php echo $color["windGust_year_max"];?>";
 	var units = "<?php echo $wind["units"];?>";
-	
-	if (units === 'km/h') {
-	
 	var maxGustY = "<?php echo $wind["gust_year_max"];?>";	
 	var maxGustM = "<?php echo $wind["gust_month_max"];?>";
-	
-	} else if (units === 'mph') {
-	 		
-	var maxGustY = "<?php echo number_format($wind["gust_year_max"]*0.621371,0);?>";	
-	var maxGustM = "<?php echo number_format($wind["gust_month_max"]*0.621371,0);?>";
-	
-	} else if (units === 'm/s') {
-	
-	var maxGustY = "<?php echo number_format($wind["gust_year_max"]*0.277778,0);?>";	
-	var maxGustM = "<?php echo number_format($wind["gust_month_max"]*0.277778,0);?>";
-	}
-		
-	var maxdateGustYear = "<?php echo $wind["gust_year_maxtime2"];?>";	
-	var maxdateGustMonth = "<?php echo $wind["gust_month_maxtime2"];?>";
- 
-		
+	var Year = "<?php echo date('Y');?>";	
+	var Month = "<?php echo date('M');?>";
+ 	
 		var svg = d3.select(".windTop")
 					.append("svg")
 					//.style("background", "#292E35")
@@ -115,8 +99,8 @@ svg.append("circle")
 			.attr("cx", 50)			
 			.attr("cy", 30)
 			.attr("r", 25)
-			.style('stroke', maxcolor)
-			.style('fill', maxcolor);
+			.style('stroke', maxcolorM)
+			.style('fill', maxcolorM);
 			
 		svg.append("text")		
 			.attr("x", 50)
@@ -134,10 +118,10 @@ svg.append("circle")
 			.attr("y", 33)
 			.style("fill", "black")
 			.style("font-family", "Helvetica")
-			.style("font-size", "12px")
+			.style("font-size", "10px")
 			.style("text-anchor", "middle")
 			.style("font-weight", "bold")
-			.text(maxGustM+" "+units);
+			.text(d3.format(".1f")(maxGustM) + " " + units);
 			
 		// max gust month date text	
 		svg.append("text")		
@@ -148,15 +132,15 @@ svg.append("circle")
 			.style("font-size", "9px")
 			.style("text-anchor", "middle")
 			.style("font-weight", "bold")
-			.text(maxdateGustMonth);
+			.text(Month);
 
 		// max Gust circle			
 		svg.append("circle")
 			.attr("cx", 180)			
 			.attr("cy", 30)
 			.attr("r", 25)
-			.style('stroke', maxcolor)
-			.style('fill', maxcolor);
+			.style('stroke', maxcolorY)
+			.style('fill', maxcolorY);
 			
 		svg.append("text")		
 			.attr("x", 180)
@@ -174,10 +158,10 @@ svg.append("circle")
 			.attr("y", 33)
 			.style("fill", "black")
 			.style("font-family", "Helvetica")
-			.style("font-size", "12px")
+			.style("font-size", "10px")
 			.style("text-anchor", "middle")
 			.style("font-weight", "bold")
-			.text(maxGustY+" "+units);
+			.text(d3.format(".1f")(maxGustY) + " " + units);
 			
 		// max gust year date text	
 		svg.append("text")		
@@ -188,6 +172,6 @@ svg.append("circle")
 			.style("font-size", "9px")
 			.style("text-anchor", "middle")
 			.style("font-weight", "bold")
-			.text(maxdateGustYear);
+			.text(Year);
 
 </script> 

@@ -24,7 +24,7 @@ else if($theme==="light"){echo '<style>@font-face{font-family:weathertext2;src:u
 <?php
 $forecastime = filemtime('jsondata/awd.txt'); ?>
  
-  
+<?php include('forecastSelect.php');?>  
 <main class="grid">
   <?php
 $jsonIcon = 'jsondata/lookupTable.json';
@@ -75,7 +75,11 @@ for ($k = 0;$k < 12;$k++)
 
     $forecastTempHigh[$k] = $parsed_json['response'][0]['periods'][$k]['maxTempC'];
     $forecastTempLow[$k] = $parsed_json['response'][0]['periods'][$k]['minTempC'];
+    if ($windunit == 'kts') {
+    $forecastWindGust[$k] = $parsed_json['response'][0]['periods'][$k]['windSpeedMaxKTS'];
+    } else {
     $forecastWindGust[$k] = $parsed_json['response'][0]['periods'][$k]['windSpeedMaxKPH'];
+    }
     $forecastWinddircardinal[$k] = $parsed_json['response'][0]['periods'][$k]['windDir'];
     $forecastprecipIntensity[$k] = $parsed_json['response'][0]['periods'][$k]['precipMM'];
     $forecastPrecipProb[$k] = $parsed_json['response'][0]['periods'][$k]['pop'];

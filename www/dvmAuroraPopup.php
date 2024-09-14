@@ -1,3 +1,16 @@
+<?php
+#####################################################################################################################                                                                                                        #
+#                                                                                                                   #
+# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
+#                                                                                                                   #
+# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
+#                                                                                                                   #
+# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
+#                                                                                                                   #
+# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
+#                                                                                                                   #
+#####################################################################################################################
+?>
 <?php include('shared.php');
 // K-INDEX & SOLAR DATA 
 $str = file_get_contents('jsondata/ki.txt');
@@ -81,10 +94,10 @@ align-items:center;justify-content:center;margin-bottom:10px;top:0}
 <main class="grid">
   <article>       
  <div class="kpcontainer1"><?php 
-if ($kp>6) {echo '<div class=kptoday7>'.number_format($kp,1)."<smalluvunit> &nbsp;KP-Index";}
-else if ($kp>5) {echo '<div class=kptoday6>'.number_format($kp,1)."<smalluvunit> &nbsp;KP-Index";}
-else if ($kp>4) {echo '<div class=kptoday4>'.number_format($kp,1)."<smalluvunit> &nbsp;KP-Index";}
-else if ($kp>0) {echo '<div class=kptoday1>'.number_format($kp,1)."<smalluvunit> &nbsp;KP-Index";}
+if ($kp>6) {echo '<div class=kptoday7>'.number_format($kp,1)."<smalluvunit>  KP-Index";}
+else if ($kp>5) {echo '<div class=kptoday6>'.number_format($kp,1)."<smalluvunit>  KP-Index";}
+else if ($kp>4) {echo '<div class=kptoday4>'.number_format($kp,1)."<smalluvunit>  KP-Index";}
+else if ($kp>0) {echo '<div class=kptoday1>'.number_format($kp,1)."<smalluvunit>  KP-Index";}
 ?></smalluvunit></div></div>
     <div class="kpcaution"><?php 
 if ($kp>6) {echo 'Storm';}
@@ -99,13 +112,13 @@ else if ($kp>=0) {echo 'Quiet';}
   
   <article>
 <div class="kpcontainer1"><?php 
-if ($kp>8.9) {echo '<div class=kptoday7>400<smalluvunit> &nbsp;A-Index';}
-else if ($kp>7.9) {echo '<div class=kptoday7>208<smalluvunit> &nbsp;A-Index';}
-else if ($kp>6.9) {echo '<div class=kptoday7>132<smalluvunit> &nbsp;A-Index';}
-else if ($kp>6) {echo '<div class=kptoday7>80<smalluvunit> &nbsp;A-Index';}
-else if ($kp>4.9) {echo '<div class=kptoday4>'.number_format($kp*6,0)."<smalluvunit> &nbsp;A-Index";}
-else if ($kp>3.9) {echo '<div class=kptoday4>'.number_format($kp*5,0)."<smalluvunit> &nbsp;A-Index";}
-else if ($kp>0) {echo '<div class=kptoday1>'.number_format($kp*2,0)."<smalluvunit> &nbsp;A-Index";}
+if ($kp>8.9) {echo '<div class=kptoday7>400<smalluvunit>  A-Index';}
+else if ($kp>7.9) {echo '<div class=kptoday7>208<smalluvunit>  A-Index';}
+else if ($kp>6.9) {echo '<div class=kptoday7>132<smalluvunit>  A-Index';}
+else if ($kp>6) {echo '<div class=kptoday7>80<smalluvunit>  A-Index';}
+else if ($kp>4.9) {echo '<div class=kptoday4>'.number_format($kp*6,0)."<smalluvunit>  A-Index";}
+else if ($kp>3.9) {echo '<div class=kptoday4>'.number_format($kp*5,0)."<smalluvunit>  A-Index";}
+else if ($kp>0) {echo '<div class=kptoday1>'.number_format($kp*2,0)."<smalluvunit>  A-Index";}
 ?></smalluvunit></div></div>
     <div class="kpcaution"><?php 
 if ($kp>6) {echo 'Storm';}
@@ -137,7 +150,7 @@ Aurora scatter communications using specialised operating techniques allows comm
               
   </article> 
   <article>
-  <div class=actualt>&nbsp;&nbsp &copy; Information</div>  
+  <div class=actualt> &copy; Information</div>  
   <?php echo $info ;?> Data Provided by <a href="https://www.swpc.noaa.gov/products/station-k-and-indices" title="https://www.swpc.noaa.gov/products/station-k-and-indices" target="_blank"><br>NATIONAL OCEANIC AND ATMOSPHERIC ADMINISTRATION</a> 
   
         <br>  <br> <br>     

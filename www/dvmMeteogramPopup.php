@@ -1,11 +1,23 @@
 <?php
-// Ian Millard
-include('dvmCombinedData.php');include('common.php');include('userSettings.php');
+#####################################################################################################################                                                                                                        #
+#                                                                                                                   #
+# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
+#                                                                                                                   #
+# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
+#                                                                                                                   #
+# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
+#                                                                                                                   #
+# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
+#                                                                                                                   #
+#####################################################################################################################
+?>
+<?php
+include('dvmCombinedData.php');
 //chart theme
 if ($theme === "dark")
 {$body = "#292E35";
 $pressure = "lightgreen";
-$text = "silver";
+$text = "white";
 $barb = "darkorange";
 $grid = "#666666";}
 else if ($theme === "light")
@@ -108,8 +120,9 @@ else
 <script src="https://code.highcharts.com/modules/data.js"></script>
 <script src="https://code.highcharts.com/modules/exporting.js"></script>
 <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+<script src="dvmhighcharts/scripts/brand-<?php echo $theme;?>.js"></script>
 <link href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
-
+<?php include('forecastSelect.php');?>
 <figure class="highcharts-figure">
   <div id="container">
     <div id="loading">

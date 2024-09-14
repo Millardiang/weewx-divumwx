@@ -29,15 +29,17 @@ include_once('dvmCombinedData.php');
 $iconset = "icon2";
 error_reporting(0); date_default_timezone_set($TZ);
 header('Content-type: text/html; charset=UTF-8');
-if ($windunit=='kts'){$windunit="kn";}
+if ($windunit=='kts'){$windunit="kts";}
 $jsonfile="jsondata/awd.txt";if(!file_exists($jsonfile)) {return;}
 
 ?>
     <div class="chartforecast4">
-      <span class="yearpopup"><a alt="Forecast Menu" title="Forecast Menu" href="dvmMenuForecastPopup.php" data-lity><?php echo $menucharticonpage;?> Forecasts</a></span>
-      <span class="yearpopup"><a alt="Advisories" title="Advisories" href="<?php echo $advisory;?>" . data-lity> <?php echo $menucharticonpage;?> Advisories</a></span>
-        <span class="yearpopup"><a alt="Meteogram I" title="Meteogram" href="dvmMeteogramPopup.php" data-lity><?php echo $menucharticonpage;?> Meteogram</a></span>
-    </div>
+      <span class="yearpopup"><a alt="Forecast Menu" title="Forecast Menu" href="dvmForecastHourlyPopup.php" data-lity><?php echo $chartinfo;?> Forecasts and Meteogram</a></span>
+        <!--span class="yearpopup"><a alt="Meteogram" title="Meteogram" href="dvmMeteogramPopup.php" data-lity><?php echo $menucharticonpage;?> Meteogram</a></span-->
+    <span class="yearpopup"><a alt="Advisories" title="Advisories" href="<?php echo $advisory;?>" . data-lity> <?php echo $chartinfo;?> Advisories</a></span>
+    <?php if($city == "London"){ ?>
+    <span class="yearpopup"><a alt="Weather Health" title="Weather Health" href="<?php echo $ukWeatherHealth;?>" . data-lity> <?php echo $chartinfo;?> Weather Health</a></span><?php } ?>
+</div>
     <span class='moduletitle4'><?php echo $lang['forecastModule'];?> (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span>
 
 
@@ -68,7 +70,11 @@ for ($k=0;$k<=2;$k++)
      $forecastdayTempLow = $parsed_forecastjson['response'][0]['periods'][$k]['minTempC'];
      $forecastHumidity = $parsed_forecastjson['response'][0]['periods'][$k]['humidity'].'%';
      if($forecastdayTempHigh ===null){$forecastdayTempHigh = $forecastdayTempLow;}
+     if ($windunit == 'kts') {
+     $forecastdayWindGust = $parsed_forecastjson['response'][0]['periods'][$k]['windSpeedMaxKTS'];   
+     }else {
      $forecastdayWindGust = $parsed_forecastjson['response'][0]['periods'][$k]['windSpeedMaxKPH'];
+    }
      //$forecastdayWinddir = $parsed_forecastjson->{'daypart'}[0]->{'windDirection'}[$k];
 	 $forecastdayWinddircardinal = $parsed_forecastjson['response'][0]['periods'][$k]['windDir']; 
      //$forecastdayacumm = $parsed_forecastjson->{'daypart'}[0]->{'snowRange'}[$k];
@@ -116,7 +122,8 @@ for ($k=0;$k<=2;$k++)
     {
         $forecastdayWindGust = round((number_format($forecastdayWindGust, 1) * 0.621371) , 0);
         $forecastdayWindSpeed = round((number_format($forecastdayWindSpeed, 1) * 0.621371) , 0);
-    }	//convert lightning index shorter phrases
+    }   
+    //convert lightning index shorter phrases
 	if ( $forecastthunder==0 ){$forecastthunder='';}else if ( $forecastthunder==1 ){$forecastthunder=$lightningalert4.' Thunder Risk';}else if ( $forecastthunder==2 ){$forecastthunder=$lightningalert4.' Thunder';}else if ( $forecastthunder>=3 ){$forecastthunder=$lightningalert4.' Severe Tstorm';}	
 	//icon + day
 	echo '<div class="aerisforecastinghome" style="border:0px">';echo '<div class="aerisweekdayhome">'.$forecastdayTime[$k].'</div><div class=aerishomeicons>';
@@ -128,7 +135,7 @@ for ($k=0;$k<=2;$k++)
 	else if($tempunit=='F' && $forecastdayTempHigh>80.6){echo '<aeristemphihome><redt>'.number_format($forecastdayTempHigh,0).'°'.$tempunit.'</redt></aeristemphihome>';}
 	else if($tempunit=='F' && $forecastdayTempHigh>64.4){echo '<aeristemphihome><oranget>'.number_format($forecastdayTempHigh,0).'°'.$tempunit.'</oranget></aeristemphihome>';}
 	else if($tempunit=='F' && $forecastdayTempHigh>55){echo '<aeristemphihome><yellowt>'.number_format($forecastdayTempHigh,0).'°'.$tempunit.'</yellowt></aeristemphihome>';}
-	else if($tempunit=='F' && $forecastdayTempHigh>=44.6){echo '<aeristemphihome><greent>'.number_format($forecastdayTempHigh,0).'°</greent></aeristemphihome>';}
+	else if($tempunit=='F' && $forecastdayTempHigh>=44.6){echo '<aeristemphihome><greent>'.number_format($forecastdayTempHigh,0).'°'.$tempunit.'</greent></aeristemphihome>';}
 	//temp metric
 	else if($forecastdayTempHigh<7){echo '<aeristemphihome><bluet>'.number_format($forecastdayTempHigh,0).'°'.$tempunit.'</bluet></aeristemphihome>';}
 	else if($forecastdayTempHigh>40){echo '<aeristemphihome><purplet>'.number_format($forecastdayTempHigh,0).'°'.$tempunit.'</purplet></aeristemphihome>';}
@@ -141,16 +148,16 @@ for ($k=0;$k<=2;$k++)
 	echo $windalert2." ".$forecastdayWinddircardinal; 
 	echo " ".number_format($forecastdayWindGust,0)," <valuewindunit>".$windunit;echo  '</div>';'<br>';
 	//snow
-	if ( $forecastdaysnow>0 && $rainunit=='in'){ echo '<precip>'.$snowflakesvg.' <aeristempwindhome><span><oblue> '.$forecastdaysnow.'</oblue><valuewindunit> in</valuewindunit></aeriswindhome></span></precip>';}
-	else if ( $forecastdaysnow>0 && $rainunit=='mm'){ echo '<precip>'.$snowflakesvg.' <aeristempwindhome><span><oblue> '.$forecastdaysnow.'</oblue><valuewindunit> cm</valuewindunit></aeriswindhome></span></precip>';}
+	if ( $forecastdaysnow>0 && $rainunit=='in'){ echo '<precip>'.$snowflakesvg.'&nbsp;<aeristempwindhome><span><oblue>&nbsp;'.$forecastdaysnow.'</oblue><valuewindunit> in</valuewindunit></aeriswindhome></span></precip>';}
+	else if ( $forecastdaysnow>0 && $rainunit=='mm'){ echo '<precip>'.$snowflakesvg.'&nbsp;<aeristempwindhome><span><oblue>&nbsp;'.$forecastdaysnow.'</oblue><valuewindunit> cm</valuewindunit></aeriswindhome></span></precip>';}
 	
 	
 	//rain
-	else if ($forecastdayPrecipType='rain' && $rainunit=='in'){echo '<precip>'.$rainsvg.' <aeristempwindhome><span><oblue> '. number_format($forecastdayprecipIntensity,2).'</oblue> <valuewindunit>'.$rainunit.'</valuewindunit></aeriswindhome></span></precip>';}
-	else if ($forecastdayPrecipType='rain' && $rainunit=='mm'){echo '<precip>'.$rainsvg.' <aeristempwindhome><span><oblue> '. number_format($forecastdayprecipIntensity,2).'</oblue> <valuewindunit>'.$rainunit.'</valuewindunit></aeriswindhome></span></precip>';}
+	else if ($forecastdayPrecipType='rain' && $rainunit=='in'){echo '<precip>'.$rainsvg.'&nbsp;<aeristempwindhome><span><oblue>&nbsp;'. number_format($forecastdayprecipIntensity,2).'</oblue>&nbsp;<valuewindunit>'.$rainunit.'</valuewindunit></aeriswindhome></span></precip>';}
+	else if ($forecastdayPrecipType='rain' && $rainunit=='mm'){echo '<precip>'.$rainsvg.'&nbsp;<aeristempwindhome><span><oblue>&nbsp;'. number_format($forecastdayprecipIntensity,2).'</oblue>&nbsp;<valuewindunit>'.$rainunit.'</valuewindunit></aeriswindhome></span></precip>';}
 	//uvi
-if ($forecastdaynight=='D'){echo '<br><wuuvicon>&#9788;</wuuvicon> <aeristemplohome><uv>UVI <uvspan>';if ($forecastdayUV>=10){echo "<purpleu>".$forecastdayUV. '</purpleu><greyu> '.$forecastdayUVdesc;}else  if ($forecastdayUV>=7){echo "<redu>".$forecastdayUV. '</redu><greyu> '.$forecastdayUVdesc;}else if ($forecastdayUV>5){ echo "<orangeu>".$forecastdayUV. '</orangeu><greyu> '.$forecastdayUVdesc;}else if ($forecastdayUV>2){  echo "<yellowu>".$forecastdayUV. '</yellowu><greyu> '.$forecastdayUVdesc;}else if ($forecastdayUV>=0){ echo "<greenu>".$forecastdayUV. '</greenu><greyu> '.$forecastdayUVdesc;}echo '</uvspan></uv>';}
-else if ($forecastdaynight=='N'){echo '<br><blueu>'.$humidity.' <aeristemplohome><uv>Hum <uvspan>'.$forecastHumidity. '</blueu>';}
+if ($forecastdaynight=='D'){echo '<br><wuuvicon>&#9788;</wuuvicon>&nbsp;<aeristemplohome><uv>UVI <uvspan>';if ($forecastdayUV>=10){echo "<purpleu>".$forecastdayUV. '</purpleu><greyu> '.$forecastdayUVdesc;}else  if ($forecastdayUV>=7){echo "<redu>".$forecastdayUV. '</redu><greyu> '.$forecastdayUVdesc;}else if ($forecastdayUV>5){ echo "<orangeu>".$forecastdayUV. '</orangeu><greyu> '.$forecastdayUVdesc;}else if ($forecastdayUV>2){  echo "<yellowu>".$forecastdayUV. '</yellowu><greyu> '.$forecastdayUVdesc;}else if ($forecastdayUV>=0){ echo "<greenu>".$forecastdayUV. '</greenu><greyu> '.$forecastdayUVdesc;}echo '</uvspan></uv>';}
+else if ($forecastdaynight=='N'){echo '<br><blueu>'.$humidity.'&nbsp;<aeristemplohome><uv>Hum <uvspan>'.$forecastHumidity. '</blueu>';}
 	//lightning
 	echo '<thunder>'.$forecastthunder;echo '</aeristemplohome></div>';
 } // end for loop for icons

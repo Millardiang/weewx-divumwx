@@ -1,10 +1,11 @@
 <?php
 include('dvmCombinedData.php');
 date_default_timezone_set($TZ);
+#$lightningSource = 1
 ?>
 
    <div class="chartforecast">
-       <span class="yearpopup"><a alt="aquinfo" title="Lightning Almanac" href="dvmMenuLightning.php" data-lity><?php echo $info;?> Lightning Almanac</a></span>
+       <span class="yearpopup"><a alt="aquinfo" title="Lightning Almanac" href="dvmLightningRecords.php" data-lity><?php echo $info;?> Lightning Records and Chart</a></span>
     </div>
     <span class='moduletitle'><?php echo $lang['lightningModule'];?></span>
 
@@ -20,7 +21,7 @@ date_default_timezone_set($TZ);
 if (empty ($lightning["alltime_strike_count"])) {
 	$lightning['last_time'] =  "None";
 } else {
-	$lightning['last_time'] =  date('jS M H:i',$lightning['last_time']);
+	$lightning['last_time'] =  date('H:i jS M Y',$lightning['last_time']);
 }
 if ($lightningSource == 0) {
 	$lightninglivedata = 'jsondata/NSDRealtime.txt';
@@ -137,11 +138,12 @@ else
 	var month = "<?php echo date('F Y');?>";
 	var year = "<?php echo date('Y');?>";
 	var Strikes_last_hour = "<?php echo $lightning["hour_strike_count"];?>";
-	var day_strike_count = "<?php echo $lightning["day_strike_count"];?>";
+	var Strikes_Yesterday = "<?php echo $lightning["yesterday_strike_count"];?>";
+	var day_strike_count = "<?php echo $lightning["today_strike_count"];?>";
 	var Strikes_this_month = "<?php echo $lightning["month_strike_count"];?>";
 	var Strikes_this_year = "<?php echo $lightning["year_strike_count"];?>";
 	var Alltime_strikes = "<?php echo $lightning["alltime_strike_count"];?>";
-	var Last_detected = "<?php echo ($lightning['last_time']);?>";
+	var Last_detected = "<?php echo $lightning["last_time"];?>";
 	var Last_distance = "<?php echo number_format($lightning["last_distance"],1);?>";
 	var Bearing = "<?php echo $lightning["bearing"];?>";
     var Bearingx = "<?php echo $lightning["bearingx"];?>";
@@ -210,6 +212,15 @@ else
 					.style("text-anchor", "left")
 					.style("font-weight", "normal")
 					.text("Last Hour");
+                svg.append("text") // Yesterday
+                                        .attr("x", 130)
+                                        .attr("y", 69)
+                                        .style("fill", textFill)
+                                        .style("font-family", "Helvetica")
+                                        .style("font-size", "10px")
+                                        .style("text-anchor", "left")
+                                        .style("font-weight", "normal")
+                                        .text("Yesterday");
 		var data = ["Total "+month+" "+"-"+Strikes_this_month];
 		var text = svg.selectAll(null)
   					.data(data)
@@ -217,7 +228,7 @@ else
   					.append("text")
   					.attr("x", 130)
   					.attr("y", function(d, i) {
-    				return 70 + i *70
+    				return 82 + i *70
   					})
   					.style("fill", textFill)
   					.style("font-family", "Helvetica")
@@ -234,7 +245,7 @@ else
   					})
 		svg.append("text") // Year
 					.attr("x", 130)
-					.attr("y", 83)
+					.attr("y", 95)
 					.style("fill", textFill)
 					.style("font-family", "Helvetica")
 					.style("font-size", "10px")
@@ -243,7 +254,7 @@ else
 					.text("Total"+" "+year);
 		svg.append("text") // Alltime
 					.attr("x", 130)
-					.attr("y", 96)
+					.attr("y", 108)
 					.style("fill", textFill)
 					.style("font-family", "Helvetica")
 					.style("font-size", "10px")
@@ -252,7 +263,7 @@ else
 					.text("All-time Strike Total");
 		svg.append("text") // Last detected strike time
 					.attr("x", 130)
-					.attr("y", 109)
+					.attr("y", 121)
 					.style("fill", textFill)
 					.style("font-family", "Helvetica")
 					.style("font-size", "10px")
@@ -261,13 +272,13 @@ else
 					.text("Last Strike");
 		svg.append("text") // Last Distance
 					.attr("x", 130)
-					.attr("y", 122)
+					.attr("y", 134)
 					.style("fill", textFill)
 					.style("font-family", "Helvetica")
 					.style("font-size", "10px")
 					.style("text-anchor", "left")
 					.style("font-weight", "normal")
-					.text("Distance @");
+					.text("At a Distance of ");
 		// Begin color Text output
 		svg.append("text") // Strikes Today
 					.attr("x", 160)
@@ -287,9 +298,18 @@ else
 					.style("text-anchor", "left")
 					.style("font-weight", "normal")
 					.text(Strikes_last_hour);
+                svg.append("text") // Yesterday
+                                        .attr("x", 178)
+                                        .attr("y", 69)
+                                        .style("fill", "#ff964f")
+                                        .style("font-family", "Helvetica")
+                                        .style("font-size", "10px")
+                                        .style("text-anchor", "left")
+                                        .style("font-weight", "normal")
+                                        .text(Strikes_Yesterday);
 		svg.append("text") // Year
 					.attr("x", 182)
-					.attr("y", 83)
+					.attr("y", 95)
 					.style("fill", "#ff964f")
 					.style("font-family", "Helvetica")
 					.style("font-size", "10px")
@@ -298,7 +318,7 @@ else
 					.text(Strikes_this_year);
 		svg.append("text") // Alltime
 					.attr("x", 220)
-					.attr("y", 96)
+					.attr("y", 108)
 					.style("fill", "#ff964f")
 					.style("font-family", "Helvetica")
 					.style("font-size", "10px")
@@ -307,7 +327,7 @@ else
 					.text(Alltime_strikes);
 		svg.append("text") // Last detected strike time
 					.attr("x", 182)
-					.attr("y", 109)
+					.attr("y", 121)
 					.style("fill", "#ff964f")
 					.style("font-family", "Helvetica")
 					.style("font-size", "10px")
@@ -315,8 +335,8 @@ else
 					.style("font-weight", "normal")
 					.text(Last_detected);
 		svg.append("text") // Last Distance
-					.attr("x", 187)
-					.attr("y", 122)
+					.attr("x", 204)
+					.attr("y", 134)
 					.style("fill", "#ff964f")
 					.style("font-family", "Helvetica")
 					.style("font-size", "10px")

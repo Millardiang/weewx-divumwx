@@ -1,5 +1,19 @@
+<?php
+#####################################################################################################################                                                                                                        #
+#                                                                                                                   #
+# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
+#                                                                                                                   #
+# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
+#                                                                                                                   #
+# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
+#                                                                                                                   #
+# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
+#                                                                                                                   #
+#####################################################################################################################
+?>
 <!-- begin updater.php  14-Nov-2022 -->
 <?php
+$filepileRefresh = 60;
 include_once "userSettings.php";
 
 include_once "fixedSettings.php";
@@ -33,6 +47,10 @@ var b=setInterval(function(){c.load("<?php echo $position2; ?>")},<?php echo $cy
 (function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position3").show()}});var c=a("#position3");c.load("<?php echo $position3; ?>");
 var b=setInterval(function(){c.load("<?php echo $position3; ?>")},<?php echo $cycles3; ?>)})})(jQuery); // 60 seconds
   
+//update the modules  position 3a
+(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position3a").show()}});var c=a("#position3a");c.load("<?php echo $position3a; ?>");
+var b=setInterval(function(){c.load("<?php echo $position3a; ?>")},<?php echo $cycles3a; ?>)})})(jQuery); // 60 seconds
+
 //update the modules  position 4 - fixed position
 (function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position4").show()}});var c=a("#position4");c.load("dvmAdvisoryOutlookTop.php");
 var b=setInterval(function(){c.load("dvmAdvisoryOutlookTop.php")},<?php echo $cycles4; ?>)})})(jQuery); // 60 seconds
@@ -101,23 +119,26 @@ var b=setInterval(function(){c.load("<?php echo $position18; ?>")},<?php echo $c
 (function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position19").show()}});var c=a("#position19");c.load("<?php echo $position19; ?>");
 var b=setInterval(function(){c.load("<?php echo $position19; ?>")},<?php echo $cycles19; ?>)})})(jQuery); // 60 seconds
 
-//update the moonphase and earth image
-var refreshId;$(document).ready(function(){moonearthimage()});function moonearthimage(){$.ajax({cache:true,success:function(a){$("#moonearthimage").html(a);<?php if (
-    $moonRefresh > 0
-) {
-    echo "setTimeout(moonearthimage, 3600000)";
-} ?>},
-	type:"GET",url:"dvmGetMoonEarth.php"})};
+//update the modules position 20
+(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position20").show()}});var c=a("#position20");c.load("<?php echo $position20; ?>");
+var b=setInterval(function(){c.load("<?php echo $position20; ?>")},<?php echo $cycles20; ?>)})})(jQuery); // 60 seconds
 
-//update the AQI data
-var refreshId;$(document).ready(function(){aqidata()});function aqidata(){$.ajax({cache:true,success:function(a){$("#aqidata").html(a);<?php if (
-    $aqiRefresh > 0
-) {
-    echo "setTimeout(aqidata, 60000)";
-} ?>},
-	type:"GET",url:"aqitextcreate.php"})};
+//update the webcam image file
+var refreshId;$(document).ready(function(){webcamcron()});function webcamcron(){$.ajax({cache:false,
+  success:function(a){$("#blank")
+  .html(a);<?php if ($filepileRefresh >0) {
+  echo 'setTimeout(webcamcron,' . 1000*$filepileRefresh.')';}?>},
+  contentType: "application/x-www-form-urlencoded;charset=ISO-8859-15",
+  type:"GET",url:"dvmGetWebcamImg.php"})}; 
 
-			
+//update the filepileTextData.txt
+var refreshId;$(document).ready(function(){stationcron()});function stationcron(){$.ajax({cache:false,
+  success:function(a){$("#blank")
+  .html(a);<?php if ($filepileRefresh >0) {
+  echo 'setTimeout(stationcron,' . 1000*$filepileRefresh.')';}?>},
+  contentType: "application/x-www-form-urlencoded;charset=ISO-8859-15",
+  type:"GET",url:"filepileTextCreate.php"})}; 
+
 
 </script>
 

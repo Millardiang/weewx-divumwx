@@ -1,32 +1,25 @@
+###################################################################################
 #
-# This program is free software; you can redistribute it and/or modify it under
-# the terms of the GNU General Public License as published by the Free Software
-# Foundation; either version 2 of the License, or (at your option) any later
-# version.
+# Adapted by Jerry Dietrich, dvmhighchartsSearchX.py is largely based on 
+# highchartssearchlist.py which are search list extensions to support the 
+# weewx-highcharts extension.
+# Copyright (C) 2016-21 Gary Roderick               
+# gjroderick<at>gmail.com
 #
-# This program is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
-# details.
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation, either version 3 of the License, or (at your option) any
+# later version.
 #
-# Search List Extension classes to support generation of JSON data file for
-# use by dvmhighcharts to plot weewx observations.
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 #
-# Version: 0.2.1                                    Date: 16 May 2017
+# You should have received a copy of the GNU General Public License along with
+# this program.  If not, see http://www.gnu.org/licenses/.
 #
-# Revision History
-#   16 May 2017         v0.2.1
-#       - Fixed bug with day/week windrose getSqlVectors call that resulted in 
-#         'IndexError: list index out of range' error on line 962.
-#   4 May 2017          v0.2.0
-#       - Removed hard coding of weeWX-WD bindings for appTemp and Insolation
-#         data. Now attempts to otain bindings for each from weeWX-WD, if
-#         weeWX-WD is not installed bindings are sought in weewx.conf
-#         [StdReport][[dvmhighcharts]]. If no binding can be found appTemp and
-#         insolation data is omitted.
-#   22 November 2016    v0.1.0
-#       - initial implementation
-#
+###################################################################################
+
 
 import calendar
 import datetime
@@ -741,7 +734,7 @@ class dvmhighcharts_solar_week(SearchList):
                                                        
         # Create cloudcover json
         try:
-                (time_start_vt, time_stop_vt, cloudcover_vt) = db_lookup().getSqlVectors(TimeSpan(_start_ts, timespan.stop), 'signal8')
+                (time_start_vt, time_stop_vt, cloudcover_vt) = db_lookup().getSqlVectors(TimeSpan(_start_ts, timespan.stop), 'cloudcover')
                 cloudcoverRound = int(self.generator.skin_dict['Units']['StringFormats'].get(cloudcover_vt[1], "1f")[-2])
                 cloudcoverRound_vt =  [roundNone(x,cloudcoverRound) if x != None else 0 for x in cloudcover_vt[0]]
                 cloudcover_time_ms =  [time_stop_vt[0][0] if (x == 0) else time_stop_vt[0][x] - time_stop_vt[0][0] for x in range(len(time_stop_vt[0]))]

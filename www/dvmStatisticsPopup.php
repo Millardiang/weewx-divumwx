@@ -1,4 +1,17 @@
 <?php
+#####################################################################################################################                                                                                                        #
+#                                                                                                                   #
+# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
+#                                                                                                                   #
+# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
+#                                                                                                                   #
+# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
+#                                                                                                                   #
+# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
+#                                                                                                                   #
+#####################################################################################################################
+?>
+<?php
 
 
 include('dvmCombinedData.php');error_reporting(0);
@@ -21,7 +34,7 @@ else if ($theme === "light")
 else if($theme==="light"){$text1="black";}
 $forecastime = filemtime ('inc_history.html');?>
 <div class="divumwxdarkbrowser" style="color:<?php echo $text1 ?>;" url="Weather Statistics for <?php echo $stationName ?>
-                                         <?php echo '&nbsp;';echo "Updated &nbsp;".date( $timeFormatShort, $forecastime);?>"></div>  
+                                         <?php echo ' ';echo "Updated  ".date( $timeFormatShort, $forecastime);?>"></div>  
  
  
 <body>

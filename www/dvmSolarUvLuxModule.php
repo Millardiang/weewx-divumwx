@@ -1,27 +1,12 @@
 <?php
 include('dvmCombinedData.php');
 date_default_timezone_set($TZ);
-//align colours with Total sky UV index (provided by CAMS) https://climate-adapt.eea.europa.eu/en/observatory/evidence/projections-and-tools/cams-uv-index-forecast
-if ($uv["now"]<1){$uv["color"]="grey";}
-else if ($uv["now"]<2){$uv["color"]="#379925";} // darker green
-else if ($uv["now"]<3){$uv["color"]="#8bbe09";} // lighter green
-else if ($uv["now"]<4){$uv["color"]="#fff306";} // lighter yellow
-else if ($uv["now"]<5){$uv["color"]="#ffce0b";} // darker yellow
-else if ($uv["now"]<6){$uv["color"]="#f1a40a";} // lighter orange
-else if ($uv["now"]<7){$uv["color"]="#e87408";} // mid orange
-else if ($uv["now"]<8){$uv["color"]="#de5404";} // darker orange
-else if ($uv["now"]<9){$uv["color"]="#dd1d0f";} // red
-else if ($uv["now"]<10){$uv["color"]="#de006f";} // magenta
-else if ($uv["now"]<11){$uv["color"]="#a44c92";} // lighter purple
-else if ($uv["now"]<13){$uv["color"]="##6e67a6";} // darker purple
-else if ($uv["now"]<15){$uv["color"]="#6cceff";} // lighter cyan
-else {$uv["color"]="#40d2ff";} // darker cyan
 ?>
 
-    <div class="chartforecast2">
-       <span class="yearpopup"><a alt="solar" title="UV Guide" href="dvmMenuSolarUvLux.php" data-lity><?php echo $menucharticonpage;?> UV and Solar Almanacs and Guide</a></span>
-    </div>
-    <span class='moduletitle2'><?php echo $lang['solarUvLuxModule'];?> </span>
+<div class="chartforecast2">
+<span class="yearpopup"><a alt="solar" title="solar" href="dvmSolarRecords.php" data-lity><?php echo $menucharticonpage;?> UV and Solar | UVI Records and Charts</a></span>
+</div>
+<span class='moduletitle2'><?php echo $lang['solarUvLuxModule'];?></span>
 
 
 <div class="updatedtime1"><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>';else echo $online." ".$divum["time"];?></div>
@@ -43,31 +28,86 @@ else if ($uv["now"]>=0 ) {echo $uviclear,'<span>UVI</span> Low';}
 
        
 <style>
-.solarposx {margin-top: -2px; margin-left: -210px;}
+.sunshineposx {margin-top: -2px; margin-left: -0px;}
+.solarposx {margin-top: -17px; margin-left: -210px;}
 .uvipos {margin-top: -155px; margin-left: 0px;}
 .luxpos {margin-top: -155px; margin-left: 210px;}
 </style>
-    <script>
-       
+
+<div class="sunshineposx">
+<div class="sunshine"></div>
+</div>
+<script>
+var svg = d3.select(".sunshine")
+    .append("svg")
+    //.style("background", "#292E35")
+    .attr("width", 310)
+    .attr("height", 15);
+
+
+var sunshine_duration = "<?php echo $solar["sun_duration_hours_minutes"];?>";
+
+var threshold = "<?php echo $solar["threshold"];?>";
+
+var solarunits = "W/m²";
+
+var data = ["Sunshine Duration " + "-" + sunshine_duration];
+
+var text = svg.selectAll(null)
+    .data(data)
+    .enter() 
+    .append("text")
+    .attr("x", 155)
+    .attr("y", function(d, i) { return 10 + i * 10; })
+
+    .style("fill", baseTextColor)
+    .style("font-family", "Helvetica") 
+    .style("font-size", "10px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text(function(d) { return d.split("-")[0]; })
+
+    .append("tspan")
+    .style("fill", "red")
+    .style("font-weight", "bold")
+    .text(function(d) { return d.split("-")[1]; })
+
+    .append("tspan")
+    .style("fill", baseTextColor)
+    .style("font-weight", "normal")
+    .text(function(d) { return d.split("-")[2]; })
+
+    .append("tspan")
+    .style("fill", "Green")
+    .style("font-weight", "bold")
+    .text(function(d) { return d.split("-")[3]; })
+
+    .append("tspan")
+    .style("fill", baseTextColor)
+    .style("font-weight", "normal")
+    .text(function(d) { return d.split("-")[4]; })
+</script>
+
+<script>
+            
     var theme = "<?php echo $theme;?>";
 
     if (theme === 'dark') {
     var tubeFillColor = "rgba(45,47,50,1)";
     var baseTextColor = "silver";
     } else {
-    var tubeFillColor = "rgba(230, 232, 239, 1)";
+    var tubeFillColor = "rgba(230,232,239,1)";
     var baseTextColor = "#2d3a4b";
     }
 
-    </script>
+</script>
 
 <div class="solarposx">
-<div id="solarx"></div>
+<div class="solarx"></div>
 </div>
-		
-	<script>
-		
-
+        
+<script>
+        
     var width = 95,
     height = 150;
         
@@ -79,6 +119,11 @@ else if ($uv["now"]>=0 ) {echo $uviclear,'<span>UVI</span> Low';}
     
     var minSolar = 0;
     
+    var maxThreshold = "<?php echo $solar["threshold"];?>";
+    maxThreshold = maxThreshold || 0;
+    
+    var minThreshold = 0;
+    
     var solarMaxTime = "<?php echo $solar["day_maxtime"];?>";
     solarMaxTime = solarMaxTime || 0;
        
@@ -89,14 +134,14 @@ var bottomY = height + 10,
     bulbRadius = 25.5,
     tubeWidth = 35,
     tubeBorderWidth = 1,
-    solarColor = "rgba(255,124,57,1)",
+    solarColor = "<?php echo $colorSolarCurrent;?>",
     tubeBorderColor = "#999999";
 
 var bulb_cy = bottomY - bulbRadius,
     bulb_cx = width / 2,
     top_cy = topY + tubeWidth / 2;
 
-var svg = d3.select("#solarx")
+var svg = d3.select(".solarx")
     .append("svg")
     //.style("background", "#292E35") // box background to be commented out
     .attr("width", width)
@@ -169,6 +214,34 @@ var scale = d3.scale.linear()
 
 });
 
+[maxThreshold].forEach(function(t) {
+
+  var isMax = (t == maxThreshold),
+      label = (isMax ? "T'hold" : "min"),
+      textCol = (isMax ? "silver" : "silver"),
+      textOffset = (isMax ? - 3 : 3);
+      
+  svg.append("line")
+    .attr("id", label + "Line")
+    .attr("x1", width / 2 + 38 - tubeWidth / 2)
+    .attr("x2", width / 2 + 38 + tubeWidth / 2 - 18)
+    .attr("y1", scale(t))
+    .attr("y2", scale(t))
+    .style("stroke", tubeBorderColor)
+    .style("stroke-width", "1px")
+    .style("stroke-linecap", "round");
+
+
+  svg.append("text")
+    .attr("x", width / 2 + tubeWidth / 2 + 4)
+    .attr("y", scale(t) + textOffset)
+    .attr("dy", isMax ? null : "0.75em")
+    .text(label)
+    .style("fill", textCol)
+    .style("font-size", "8px");
+
+});
+
 var tubeFill_bottom = bulb_cy,
     tubeFill_top = scale(currentSolar);
 
@@ -216,33 +289,31 @@ svgAxis.selectAll(".tick line")
 
 // text output current solar  
 svg.append("text")
-	.text("Solar" + " " + currentSolar + " " + solarunits )
-	.attr("x", width / 2)
-	.attr("y", 133)
-	.attr("text-anchor", "middle")
-	.style("font-size", "9px")
-	.style("font-family", "Helvetica")
-	.style("fill", baseTextColor);
-	
-svg.append("text") // max solar text output
-	.text("Max " + maxSolar + " " + "(" + solarMaxTime + ")")
+    .text("Solar" + " " + currentSolar + " " + solarunits )
     .attr("x", width / 2)
-    .attr("y", 143)
+    .attr("y", 133)
+    .attr("text-anchor", "middle")
+    .style("font-size", "9px")
+    .style("font-family", "Helvetica")
+    .style("fill", baseTextColor);
+    
+svg.append("text") // max solar text output
+    .text("Max " + maxSolar + " " + "(" + solarMaxTime + ")")
+    .attr("x", width / 2)
+    .attr("y", 145)
     .style("text-anchor", "middle")
     .style("font-size", "8px")
     .style("font-family", "Helvetica")    
-   	.style("fill", baseTextColor);
-  
-
-			
+    .style("fill", baseTextColor);
+             
 </script>
-<div class="uvipos">
-<div id="uvi"></div>
-</div>
-		
-	<script>
-		
 
+<div class="uvipos">
+<div class="uvi"></div>
+</div>
+        
+<script>
+        
     var width = 95,
     height = 150;
     
@@ -264,14 +335,14 @@ var bottomY = height + 10,
     bulbRadius = 25.5,
     tubeWidth = 35,
     tubeBorderWidth = 1,
-    uviColor = "<?php echo $uv["color"];?>",
+    uviColor = "<?php echo $colorUVCurrent;?>",
     tubeBorderColor = "#999999";
 
 var bulb_cy = bottomY - bulbRadius,
     bulb_cx = width / 2,
     top_cy = topY + tubeWidth / 2;
 
-var svg = d3.select("#uvi")
+var svg = d3.select(".uvi")
     .append("svg")
     //.style("background", "#292E35") // box background to be commented out
     .attr("width", width)
@@ -391,43 +462,43 @@ svgAxis.selectAll(".tick line")
 
 // text output current uvi  
 svg.append("text")
-	.text( uviunits + " " + currentUVI )
-	.attr("x", width / 2)
-	.attr("y", 133)
-	.attr("text-anchor", "middle")
-	.style("font-size", "9px")
-	.style("font-family", "Helvetica")
-	.style("fill", baseTextColor);
-	
+    .text( uviunits + " " + currentUVI )
+    .attr("x", width / 2)
+    .attr("y", 133)
+    .attr("text-anchor", "middle")
+    .style("font-size", "9px")
+    .style("font-family", "Helvetica")
+    .style("fill", baseTextColor);
+    
  svg.append("text") // max uvi text output
     .attr("x", width / 2)
-    .attr("y", 143)
+    .attr("y", 145)
     .style("fill", baseTextColor)
     .style("font-family", "Helvetica")
     .style("font-size", "8px")
     .style("text-anchor", "middle")
     .style("font-weight", "normal")
     .text("Max " + maxUVI + " " + "(" + uviMaxTime + ")");
-  
+              
+</script>
 
-			
-</script>  
 <div class="luxpos">
-<div id="lux"></div>
+<div class="lux"></div>
 </div>
-		
-	<script>
-		
-
+        
+<script>
+        
     var width = 95,
     height = 150;
     
-    var currentLux = "<?php echo $sky["lux"];?>";
+    var currentLux = "<?php echo $sky["lux"] ;?>";
     currentLux = currentLux || 0;
     
-    var maxLux = currentLux;
+    var maxLux = "<?php echo $sky["day_lux_max"];?>";
     maxLux = maxLux || 0;
-    
+
+    var maxLuxTime = "<?php echo $solar["day_maxtime"];?>";
+   
     var minLux = 0;    
     
 var bottomY = height + 10,
@@ -435,14 +506,14 @@ var bottomY = height + 10,
     bulbRadius = 25.5,
     tubeWidth = 35,
     tubeBorderWidth = 1,
-    LuxColor = "rgba(255, 85, 85, 1)",
+    LuxColor = "<?php echo $colorLuxCurrent;?>",
     tubeBorderColor = "#999999";
 
 var bulb_cy = bottomY - bulbRadius,
     bulb_cx = width / 2,
     top_cy = topY + tubeWidth / 2;
 
-var svg = d3.select("#lux")
+var svg = d3.select(".lux")
     .append("svg")
     //.style("background", "#292E35") // box background to be commented out
     .attr("width", width)
@@ -468,7 +539,7 @@ svg.append("rect")
     .attr("width", tubeWidth - 10);
 
 // Scale step size
-var step = 20000;
+var step = 30000;
 
 // Determine a suitable range for the lux scale
 var domain = [
@@ -487,12 +558,31 @@ var scale = d3.scale.linear()
     .range([bulb_cy - bulbRadius / 2 - 8.5, top_cy])
     .domain(domain);
 
-[minLux, maxLux].forEach(function(t) {
+[maxLux].forEach(function(t) {
 
   var isMax = (t == maxLux),
-      label = (isMax ? "max" : "min"),
-      textCol = (isMax ? "rgb(230, 0, 0)" : "rgb(0, 0, 230)"),
-      textOffset = (isMax ? -4 : 4);
+      label = (isMax ? "Max" : "min"),
+      textCol = (isMax ? "silver" : "silver"),
+      textOffset = (isMax ? - 3 : 3);
+
+ svg.append("line")
+    .attr("id", label + "Line")
+    .attr("x1", width / 2 + 38 - tubeWidth / 2)
+    .attr("x2", width / 2 + 38 + tubeWidth / 2 - 18)
+    .attr("y1", scale(t))
+    .attr("y2", scale(t))
+    .style("stroke", tubeBorderColor)
+    .style("stroke-width", "1px")
+    .style("stroke-linecap", "round");
+
+
+  svg.append("text")
+    .attr("x", width / 2 + tubeWidth / 2 + 4)
+    .attr("y", scale(t) + textOffset)
+    .attr("dy", isMax ? null : "0.75em")
+    .text(label)
+    .style("fill", textCol)
+    .style("font-size", "8px");
 
 });
 
@@ -543,16 +633,23 @@ svgAxis.selectAll(".tick line")
 
 // text output current lux  
 svg.append("text")
-	.text("Lux" + " " + currentLux )
-	.attr("x", width / 2)
-	.attr("y", 133)
-	.attr("text-anchor", "middle")
-	.style("font-size", "9px")
-	.style("font-family", "Helvetica")
-	.style("fill", baseTextColor);
-  
+    .text("Lux " + currentLux)
+    .attr("x", width / 2)
+    .attr("y", 133)
+    .attr("text-anchor", "middle")
+    .style("font-size", "9px")
+    .style("font-family", "Helvetica")
+    .style("fill", baseTextColor);
 
-			
+svg.append("text") // max solar text output
+    .text("Max " + maxLux + " " + "(" + maxLuxTime + ")")
+    .attr("x", width / 2)
+    .attr("y", 145)
+    .style("text-anchor", "middle")
+    .style("font-size", "8px")
+    .style("font-family", "Helvetica")    
+    .style("fill", baseTextColor);
+            
 </script>
            
 </html>

@@ -1,3 +1,16 @@
+<?php
+#####################################################################################################################                                                                                                        #
+#                                                                                                                   #
+# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
+#                                                                                                                   #
+# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
+#                                                                                                                   #
+# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
+#                                                                                                                   #
+# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
+#                                                                                                                   #
+#####################################################################################################################
+?>
 <style>
 .moonmodulepos {
   position: absolute;
@@ -12,7 +25,6 @@
 </style>
 <?php 
 include('dvmCombinedData.php');
-include('userSettings.php');
 header('Content-type: text/html; charset=utf-8');
 if($alm["moonphase_no"]>4){$waxwan = "wan";}
 else{$waxwan = "wax";}
@@ -55,7 +67,7 @@ foreach ($meteor_events as $meteor_check) {
 };?>
 
     <div class="chartforecast">
-<span class="yearpopup"><a alt="meteor showers" title="meteor showers" href="dvmMeteorshowersPopup.php" data-lity><?php echo $meteorinfo; ?> &nbsp;<?php if (
+<span class="yearpopup"><a alt="meteor showers" title="meteor showers" href="dvmMeteorshowersPopup.php" data-lity><?php echo $meteorinfo; ?>  <?php if (
      $meteor_default == "No Meteor"
  ) {
      echo "Meteor Showers";

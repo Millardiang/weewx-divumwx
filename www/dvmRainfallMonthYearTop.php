@@ -1,4 +1,17 @@
 <?php
+#####################################################################################################################                                                                                                        #
+#                                                                                                                   #
+# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
+#                                                                                                                   #
+# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
+#                                                                                                                   #
+# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
+#                                                                                                                   #
+# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
+#                                                                                                                   #
+#####################################################################################################################
+?>
+<?php
 include('dvmCombinedData.php');
 
 $image["image"] = "img/meteocons/umbrella-rain.svg";
@@ -23,7 +36,8 @@ $image["image"] = "img/meteocons/umbrella-rain.svg";
 
 	var theme = "<?php echo $theme;?>";
 	var image = "<?php echo $image["image"];?>";	
-	var color = "#487ea9";	 	
+	var colorM = "<?php echo $colorRainMonthSum;?>";
+    var colorY = "<?php echo $colorRainYearSum;?>"; 
 	var units = "<?php echo $rain["units"];?>";		
 	var rainY = "<?php echo $rain["year_total"];?>";	
 	var rainM = "<?php echo $rain["month_total"];?>";			
@@ -87,8 +101,8 @@ svg.append("circle")
 			.attr("cx", 50)			
 			.attr("cy", 30)
 			.attr("r", 25)
-			.style('stroke', color)
-			.style('fill', color);
+			.style('stroke', colorM)
+			.style('fill', colorM);
 			
 		svg.append("text")		
 			.attr("x", 50)
@@ -106,10 +120,10 @@ svg.append("circle")
 			.attr("y", 33)
 			.style("fill", "black")
 			.style("font-family", "Helvetica")
-			.style("font-size", "11px")
+			.style("font-size", "9px")
 			.style("text-anchor", "middle")
 			.style("font-weight", "bold")
-			.text(rainM+" "+units);
+			.text(d3.format(".1f")(rainM) +" " + units);
 			
 		// max rainfall month text	
 		svg.append("text")		
@@ -127,8 +141,8 @@ svg.append("circle")
 			.attr("cx", 180)			
 			.attr("cy", 30)
 			.attr("r", 25)
-			.style('stroke', color)
-			.style('fill', color);
+			.style('stroke', colorY)
+			.style('fill', colorY);
 			
 		svg.append("text")		
 			.attr("x", 180)
@@ -146,10 +160,10 @@ svg.append("circle")
 			.attr("y", 33)
 			.style("fill", "black")
 			.style("font-family", "Helvetica")
-			.style("font-size", "11px")
+			.style("font-size", "9px")
 			.style("text-anchor", "middle")
 			.style("font-weight", "bold")
-			.text(rainY+" "+units);
+			.text(d3.format(".1f")(rainY) + " " + units);
 			
 		//  year text	
 		svg.append("text")		

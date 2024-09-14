@@ -2,6 +2,7 @@
 "dvmAirqualityModule.php": {"cycle": "60000"},
 "dvmBarometerModule.php":{"cycle": "60000"},
 "dvmCurrentModule.php":{"cycle": "60000"},
+"dvmCurrentModule.phpAlt.php":{"cycle": "60000"},
 "dvmEarthDaylightModule.php":{"cycle": "60000"},
 "dvmEarthquakeModule.php":{"cycle": "60000"},
 "dvmForecastModule.php":{"cycle": "60000"},
@@ -19,8 +20,10 @@
 "dvmTemperatureModule.php":{"cycle": "60000"},
 "dvmTemperatureYearTop.php":{"cycle": "3600000"},
 "dvmWeatherClockTop.php":{"cycle": "86400000"},
+"dvmTickerTapeTop.php":{"cycle": "86400000"},
 "dvmWebcamModule.php":{"cycle": "60000"},
 "dvmWindGustYearTop.php":{"cycle": "3600000"},
 "dvmWindModule.php":{"cycle": "4000"},
-"dvmAnemometerModule.php":{"cycle": "4000"}
+"dvmAnemometerModule.php":{"cycle": "4000"},
+"dvmGreenhouseGasModule.php":{"cycle": "60000"}
 }

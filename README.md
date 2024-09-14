@@ -2,14 +2,13 @@
 Please note that any branch, other than main, is assumed to be **broken**, or will be **broken**, or can be **broken**, at any given time. Any branch, other than main, are branches that are being worked on by the Development Team for new enhancements and bug fixes. If you download any branch, other than main, and it is **highly recommended** that you do not, you use that branch at your own risk, and no bug reports or issues raised will be acted upon. Lastly, remember, this software is currently in **ALPHA** and is _not ready_ for prime time in any definition of the word and must not be used in a production environment.
 
 # DivumWX skin for WeeWX - Now Under Construction
-Weather Station website skin with Live Data for WeeWX. This version is compatible with WeeWX 4.6.x builds / Python 3.x. **This version of the template requires either the extended database schema introduced with WeeWX 4.0.0 or one that has been manually extended to include fields for lightning data.** It is strongly recommended that you start with an entirely new clean Python3 install of WeeWX 4.4.0 or later.
-
+Weather Station website skin with Live Data for WeeWX. 
 
 # Setup
 
 Follow the instructions in the 'installation guide' ([INSTALLATION_GUIDE.md](https://github.com/Millardiang/weewx-divumwx/blob/alpha/INSTALLATION_GUIDE.md)) to install the template.
 
-# Alpha build 0.4.7 install notes
+# Beta 0.9.99.00 has been released
 
 As always, as we are still in Alpha testing, back up your current install first. You will need to make a full install over the top of your existing install, as the key file divumwx.py has also been updated.
 
@@ -30,6 +29,5 @@ You will also have to add this stanza to your weewx.conf (manually for the time 
 
 ############################################################################## 
 
-Please note the latitude or longitude should be a maximum of 3 decimal places. Also, no negative values if you are in a West of South location, just an absolute value for latitude or longitude example, -12.345 should be entered as 12.345
-
 Also, and this is very, very important, you must delete dvmGetMoonEarth.php from your divumwx folder
+Please note the latitude or longitude should be a maximum or 3 decimal places. Also no negative values if you are in a West of South location, just an absolute value for latitude or longitude example -12.345 should be entered as 12.345

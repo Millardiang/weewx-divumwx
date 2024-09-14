@@ -1,11 +1,21 @@
+<?php
+#####################################################################################################################                                                                                                        #
+#                                                                                                                   #
+# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
+#                                                                                                                   #
+# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
+#                                                                                                                   #
+# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
+#                                                                                                                   #
+# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
+#                                                                                                                   #
+#####################################################################################################################
+?>
 <!DOCTYPE html>
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <?php
-
-
-//include_once ('fixedSettings.php');
 include ('dvmCombinedData.php');
 date_default_timezone_set($TZ);
 if($theme==="light"){$background="white";$text="black";}
@@ -64,33 +74,14 @@ body {
 <body>
 
 <button class="tablink" onclick="openPage('Tab1', this, 'rgba(194, 102, 58)')" id="defaultOpen">Lightning Almanac</button>
-<button class="tablink" onclick="openPage('Tab2', this, 'rgba(194, 102, 58)')">Yearly Lightning</button>
-<button class="tablink" onclick="openPage('Tab3', this, 'rgba(194, 102, 58)')">Monthly Lightning</button>  
-<button class="tablink" onclick="openPage('Tab4', this, 'rgba(194, 102, 58)')">Weekly Lightning</button>  
-<button class="tablink" onclick="openPage('Tab5', this, 'rgba(194, 102, 58)')">Strikes in Central England</button>  
+<button class="tablink" onclick="openPage('Tab2', this, 'rgba(194, 102, 58)')">Strikes in Central England</button>  
 
   <div id="Tab1" class="tabcontent">
   
-  <iframe width="100%" height="92%" scrolling="no" src="dvmLightningAlmanac.php" frameborder="0"></iframe>
-</div>
+  <iframe width="100%" height="92%" scrolling="no" src="dvmLightningAlmanac.php" frameborder="0"></iframe></div>
+  
   
   <div id="Tab2" class="tabcontent">
-  
-  <iframe width="100%" height="92%" scrolling="no" src="<?php echo $chartsource;?>/<?php echo $theme1;?>-charts.html?chart='lightningplot'&span='yearly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>
-" frameborder="0"></iframe>
-</div>
- 
-  <div id="Tab3" class="tabcontent">
-  
-  <iframe width="100%" height="92%" scrolling="no" src="<?php echo $chartsource;?>/<?php echo $theme1;?>-charts.html?chart='lightningmonthplot'&span='weekly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>
-" frameborder="0"></iframe>
-  </div>
-<div id="Tab4" class="tabcontent">
-  
-  <iframe width="100%" height="92%" scrolling="no" src="<?php echo $chartsource;?>/<?php echo $theme1;?>-charts.html?chart='lightningplot'&span='weekly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>
-" frameborder="0"></iframe>
-  </div>
-  <div id="Tab5" class="tabcontent">
   
   <iframe width="100%" height="92%" scrolling="no" src="dvmLightningUKPopup.php" frameborder="0"></iframe>
 </div>

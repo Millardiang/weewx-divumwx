@@ -1,7 +1,21 @@
 <?php
+##############################################################################################
+#        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
+#       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    #
+#       (.  ___  :)||  |\   \  //  / |   (  ) : | \   \  //   |  |'  /    \:  | \   \  /     #
+#       |: \   ) |||:  | \\  \/. ./  (:  |  | . ) /\\  \/.    |  |: /'        |  \\  \/      #
+#       (| (___\ |||.  |  \.    //    \\ \__/ // |: \.        |   \//  /\'    |  /\.  \      #
+#       |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \     #
+#       (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|    #
+#                                                                                            #
+#     Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      #
+#      Distributed under terms of the GPLv3.  See the file LICENSE.txt for your rights.      #
+#    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
+#                    https://github.com/Millardiang/weewx-divumwx/issues                     #
+##############################################################################################
 include('dvmCombinedData.php');
 $airqual["pm_units"] = "μg/㎥";
-$aqSource = "weewx";
+//$aqSource = "weewx";
 //PM10 is particulate matter 10 micrometers or less in diameter, PM25 is particulate matter 2.5 micrometers or less in diameter.
 //PM2.5 is generally described as fine particles. By way of comparison, a human hair is about 100 micrometres, so roughly
 //40 fine particles could be placed on its width.
@@ -36,6 +50,15 @@ $airqual["pm25"] = round($parsed_json['pm25'],1);
 $airqual["pm10"] = round($parsed_json['pm10'],1);
 $airqual["city"] = $stationlocation.$airqual["subtitle"];
 }
+//open meteo api source
+else if ($aqSource == "openmeteo"){
+	$json_string = file_get_contents("jsondata/airquality.txt");
+	$parsed_json = json_decode($json_string, true);
+	$airqual["pm25"] = round($parsed_json["current"]["pm2_5"],1);
+	$airqual["pm10"] = round($parsed_json["current"]["pm10"],1);
+	$airqual["city"] = $stationlocation;
+	}
+	
 
 //Europe EAQI
 if ($aqZone == "ei"){
@@ -402,7 +425,7 @@ $airqual["priority25"] = 2;
 
 }
 else if ($airqual["aqi25"] < 151 ){
-$airqual["image25"] = "./css/aqi/uhsfhair.svg?ver=1.4";
+$airqual["image25"] = "./css/aqi/uhfsair.svg?ver=1.4";
 $airqual["color25"] = "#ff7e00";
 $airqual["text25"] = "Unhealthy for Sensitive Groups";
 $airqual["priority25"] = 3;
@@ -441,7 +464,7 @@ if ($airqual["aqi10"] < 55 ){
     $airqual["priority10"] = 2;
     }
     else if ($airqual["aqi10"] < 255 ){
-    $airqual["image10"] = "./css/aqi/uhsfhair.svg?ver=1.4";
+    $airqual["image10"] = "./css/aqi/uhfsair.svg?ver=1.4";
     $airqual["color10"] = "#ff7e00";
     $airqual["text10"] = "Unhealthy for Sensitive Groups";
     $airqual["priority10"] = 3;
@@ -558,8 +581,8 @@ else {$airqual["text"] = $airqual["text10"];
     <div class="chartforecast2">
       
 
-      <span class="yearpopup"><a alt="airquality charts" title="Airquality Charts" href="dvmMenuAirquality.php" data-lity><?php echo $menucharticonpage;?> Airquality Charts</a></span>
-      <span class="yearpopup"><a alt="aquinfo" title="AQI Info" href="dvmAqiInfoPopup.php" . data-lity> <?php echo $info;?> AQI Info</a></span>
+      <span class="yearpopup" style="background-colr: red" ><a alt="airquality charts" title="Airquality Charts" href="dvmhighcharts/dvmAirQualityWeekChart.php" data-lity><?php echo $menucharticonpage;?> Airquality Charts and Information</a></span>
+      
 
     </div>
     <span class='moduletitle2'><?php echo $lang['airqualityModule'];?></span>
@@ -580,12 +603,11 @@ else {$airqual["text"] = $airqual["text10"];
 </style>
 
 <script>
-    var theme = "<?php echo $theme; ?>";
-    if (theme == 'dark') {
-        var cityTextFill = "silver";
-    }else{
-	var cityTextFill = "rgba(85,85,85,1)";
-    }
+var theme = "<?php echo $theme;?>";
+	if (theme == 'dark') {
+var cityTextFill = "silver";}
+else
+{var cityTextFill = "rgba(85,85,85,1)";}
 </script>
 
 <div class="aqi"></div>
@@ -593,8 +615,8 @@ else {$airqual["text"] = $airqual["text10"];
 
 <script>
 
-	var aqiA = "<?php echo $airqual["aqi25"];?>";
-	var aqiB = "<?php echo $airqual["aqi10"];?>";
+	var aqiA = "<?php echo round($airqual["aqi25"]);?>";
+	var aqiB = "<?php echo round($airqual["aqi10"]);?>";
 	var pmA = "<?php echo $airqual["pm25"];?>";
 	var pmB = "<?php echo $airqual["pm10"];?>";
       

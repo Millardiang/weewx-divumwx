@@ -16,7 +16,7 @@ else if ($theme === "light")
 //start the aw output
 
 ?>
-<link href="css/auxillary.<?php echo $theme; ?>.css?version=<?php echo filemtime('css/auxillary.' . $theme . '.css'); ?>" rel="stylesheet prefetch">
+<!--link href="css/auxillary.<?php echo $theme; ?>.css?version=<?php echo filemtime('css/auxillary.' . $theme . '.css'); ?>" rel="stylesheet prefetch"-->
 
 <script src="js/jquery.js"></script>
 
@@ -32,7 +32,7 @@ else if ($theme === "light")
 <?php
 $forecastime = filemtime('jsondata/awh.txt'); ?>
 
-  
+<?php include('forecastSelect.php');?> 
 <main class="grid">
   <?php
 $jsonIcon = 'jsondata/lookupTable.json';
@@ -48,9 +48,11 @@ for ($k = 0;$k < 12;$k++)
     $forecastIcon[$k] = $parsed_icon[$pngicon[$k]][$iconset];
     $forecastTime[$k] = date("H:i", $parsed_json['response'][0]['periods'][$k]['timestamp']);
     $forecastTempHigh[$k] = $parsed_json['response'][0]['periods'][$k]['maxTempC'];
-
+    if ($windunit == 'kts') {
+    $forecastWindGust[$k] = $parsed_json['response'][0]['periods'][$k]['windSpeedMaxKTS'];
+    } else {
     $forecastWindGust[$k] = $parsed_json['response'][0]['periods'][$k]['windSpeedMaxKPH'];
-
+    }
     $forecastWinddircardinal[$k] = $parsed_json['response'][0]['periods'][$k]['windDir'];
 
     $forecastprecipIntensity[$k] = $parsed_json['response'][0]['periods'][$k]['precipMM'];

@@ -1,7 +1,18 @@
+<?php
+#####################################################################################################################                                                                                                        #
+#                                                                                                                   #
+# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
+#                                                                                                                   #
+# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
+#                                                                                                                   #
+# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
+#                                                                                                                   #
+# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
+#                                                                                                                   #
+#####################################################################################################################
+?>
 <?php 
 
-
-include_once('fixedSettings.php');
 include('dvmCombinedData.php');
 if ($theme === "dark") {
     echo '<style>@font-face{font-family: weathertext2; src: url(css/fonts/verbatim-regular.woff) format("woff"), url(fonts/verbatim-regular.woff2) format("woff2"), url(fonts/verbatim-regular.ttf) format("truetype");}html,body{font-size: 13px; font-family: "weathertext2", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;}.grid{display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 2fr)); grid-gap: 10px; align-items: stretch; color: #fff; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;}.grid > article{border: 1px solid #212428; box-shadow: 2px 2px 6px 0px rgba(0, 0, 0, 0.3); padding: 20px; font-size: 0.8em; -webkit-border-radius: 4px; border-radius: 4px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;}.divumwxdarkbrowser{position: relative; background: 0; width: 97%; height: 30px; margin: auto; margin-top: -5px; margin-left: 0px; border-top-left-radius: 5px; border-top-right-radius: 5px; padding-top: 10px;}.divumwxdarkbrowser[url]:after{content: attr(url); color: #aaa; font-size: 14px; text-align: center; position: absolute; left: 0; right: 0; top: 0; padding: 4px 15px; margin: 11px 10px 0 auto; font-family: arial; height: 20px;}blue{color: #01a4b4;}orange{color: #009bb4;}orange1{color: rgba(255, 131, 47, 1);}green{color: #aaa;}red{color: #f37867;}red6{color: #d65b4a;}value{color: #fff;}yellow{color: #cc0;}purple{color: #916392;}.hitempyposx{position: relative; top: -90px; margin-left: 40px; margin-bottom: -30px;}.hitempypos{position: absolute; margin-top: -100px; margin-left: 40px; margin-bottom: 20px; display: block;}.hitempd{position: absolute; font-family: weathertext2, Arial, Helvetica, sans-serif; background: rgba(86, 95, 103, 0.3); color: #fff; font-size: 0.7rem; width: 140px; padding: 0; margin-left: 30px; padding-left: 3px; align-items: center; justify-content: center; display: block; margin-top: 5px;}.hitempd1{position: absolute; font-family: weathertext2, Arial, Helvetica, sans-serif; background: rgba(86, 95, 103, 0.3); color: #fff; font-size: 0.7rem; width: 140px; padding: 0; margin-left: 30px; padding-left: 3px; align-items: center; justify-content: center; display: block; margin-top: 40px;}.uvmaxi3{position: absolute; left: -30px; color: rgba(0, 154, 171, 1); margin-top: -40px; font-size: 16px; width: 240px;}.uvmaxi3 span{color: #aaa;}.hitemp{color: #fff; font-size: 0.7rem; display: inline;}.hitemp span{color: rgba(255, 124, 57, 1);}blue{color: rgba(0, 154, 171, 1);}.temperaturecontainer1{position: absolute; left: 20px; margin-top: -5px; margin-bottom: 20px;}.temperaturecontainer2{position: absolute; left: 20px; margin-top: 60px;}smalluvunit{font-size: 0.9rem; font-family: Arial, Helvetica, system;}.uvcontainer1{left: 70px; top: 0;}.uvtoday1,.uvtoday1-3,.uvtoday11,.uvtoday4-5,.uvtoday6-8,.uvtoday9-10{font-family: weathertext2, Arial, Helvetica, system; width: 7rem; height: 5.5rem; -webkit-border-radius: 3px; -moz-border-radius: 3px; -o-border-radius: 3px; display: flex;}.uvtoday1,.uvtoday1-3,.uvtoday11,.uvtoday4-5,.uvtoday6-8,.uvtoday9-10{font-size: 1.7rem; padding-top: 2px; color: #fff; border-bottom: 15px solid rgba(56, 56, 60, 1); align-items: center; justify-content: center; border-radius: 3px; margin-bottom: 10px;}.uvtrend{position: absolute; font-size: 1rem;}.uvtoday1,.uvtoday1-3{background: #9aba2f;}.uvtoday4-5{background: #ff7c39; background: -webkit-linear-gradient(90deg, #90b12a, #ff7c39); background: linear-gradient(90deg, #90b12a, #ff7c39);}.uvtoday6-8{background: #efa80f; background: -webkit-linear-gradient(90deg, #efa80f, #d86858); background: linear-gradient(90deg, #efa80f, #d86858);}.uvtoday9-10{background: #d05f2d; background: -webkit-linear-gradient(90deg, #d65b4a, #ac2816); background: linear-gradient(90deg, #d65b4a, #ac2816);}.uvtoday11{background: #95439f; background: -webkit-linear-gradient(90deg, #95439f, #a475cb); background: linear-gradient(90deg, #95439f, #a475cb);}.uvtrend{margin-left: 135px; margin-top: 48px; z-index: 1; color: #fff;}.simsekcontainer{float: left; font-family: weathertext, system; -o-font-smoothing: antialiased; left: 0; bottom: 0; right: 0; position: relative; margin: 40px 10px 10px 40px; left: -10px; top: 13px;}.simsek{font-size: 1.55rem; padding-top: 12px; color: #f8f8f8; background: rgba(230, 161, 65, 1); border-bottom: 18px solid rgba(56, 56, 60, 1); align-items: center; justify-content: center; border-radius: 3px;}smalluvunit{font-size: 0.65rem; font-family: Arial, Helvetica, system;}sup{font-size: 1em;}supwm2{font-size: 0.7em; vertical-align: super;}.uvcontainer1{left: -30px; top: -10px;}.uvtoday1,.uvtoday1-3,.uvtoday11,.uvtoday4-5,.uvtoday6-8,.uvtoday9-10{font-family: weathertext2, Arial, Helvetica, system; width: 6rem; height: 2.5rem; -webkit-border-radius: 3px; -moz-border-radius: 3px; -o-border-radius: 3px; display: flex;}.uvtoday1,.uvtoday1-3,.uvtoday11,.uvtoday4-5,.uvtoday6-8,.uvtoday9-10{font-size: 1.25rem; padding-top: 2px; color: #fff; border-bottom: 15px solid rgba(56, 56, 60, 1); align-items: center; justify-content: center; border-radius: 3px;}.uvtoday1-3{background: #9aba2f;}.uvtoday4-5{background: rgba(230, 161, 65, 1);}.uvtoday6-8{background: rgba(255, 124, 57, 0.8);}.uvtoday9-10{background: rgba(211, 93, 78, 0.8);}.uvtoday11{background: rgba(204, 135, 248, 0.7);}.uvcaution{margin-left: 0; margin-top: 0px; font-family: weathertext2, Arial, Helvetica, system; font-size: 1em;}.uvtrend{margin-left: 135px; margin-top: 48px; z-index: 1; color: #fff;}.solartoday1,.solartoday200,.solartoday500,.solartoday1000{font-family: weathertext2, Arial, Helvetica, system; width: 6rem; height: 2.5rem; -webkit-border-radius: 3px; -moz-border-radius: 3px; -o-border-radius: 3px; display: flex;}.solartoday1,.solartoday200,.solartoday500,.solartoday1000{font-size: 1.25rem; padding-top: 2px; color: #fff; border-bottom: 15px solid rgba(56, 56, 60, 1); align-items: center; justify-content: center; border-radius: 3px;}.solartoday1{background: rgba(74, 99, 111, 1);}.solartoday200{background: rgba(230, 161, 65, 1);}.solartoday500{background: rgba(255, 124, 57, 0.8);}.solartoday1000{background: rgba(211, 93, 78, 0.8);}.luxtoday1,.luxtoday200,.luxtoday500,.luxtoday1000{font-family: weathertext2, Arial, Helvetica, system; width: 6rem; height: 2.5rem; -webkit-border-radius: 3px; -moz-border-radius: 3px; -o-border-radius: 3px; display: flex;}.luxtoday1,.luxtoday200,.luxtoday500,.luxtoday1000{font-size: 1.25rem; padding-top: 2px; color: #fff; border-bottom: 15px solid rgba(56, 56, 60, 1); align-items: center; justify-content: center; border-radius: 3px;}.luxtoday1{background: rgba(74, 99, 111, 1);}.luxtoday200{background: rgba(230, 161, 65, 1);}.luxtoday500{background: rgba(255, 124, 57, 0.8);}.luxtoday1000{background: rgba(211, 93, 78, 0.8);}.solarcontainer1{left: 10px; top: 0;}.advisory{font-family: Arial, Helvetica, system; position: absolute; font-size: 1rem; line-height: 10px; display: inline; width: 150px; margin-top: 40px; left: 120px;}.advisoryguide{font-family: Arial, Helvetica, system; position: absolute; font-size: 1rem; line-height: 10px; display: inline; width: 300px; margin-top: 5px; left: 3px; text-align: left;}.dvmconvertrain{position: relative; font-size: 0.5em; top: 10px; color: #c0c0c0; margin-left: 5px;}.hitempy{position: relative; background: rgba(61, 64, 66, 0.5); color: #fff; width: 90px; padding: 1px; -webit-border-radius: 2px; border-radius: 2px; margin-top: -20px; margin-left: 92px; padding-left: 3px; line-height: 11px; font-size: 9px;}.actualt{position: relative; left: 5px; -webkit-border-radius: 3px; -moz-border-radius: 3px; -o-border-radius: 3px; border-radius: 3px; background: teal; padding: 5px; font-family: Arial, Helvetica, sans-serif; width: 170px; height: 0.8em; font-size: 0.8rem; padding-top: 2px; color: white; align-items: center; justify-content: center; margin-bottom: 10px; top: 0;}.actualw{position: relative; left: 5px; -webkit-border-radius: 3px; -moz-border-radius: 3px; -o-border-radius: 3px; border-radius: 3px; background: rgba(74, 99, 111, 0.1); padding: 5px; font-family: Arial, Helvetica, sans-serif; width: 100px; height: 0.8em; font-size: 0.8rem; padding-top: 2px; color: #fff; align-items: center; justify-content: center; margin-bottom: 10px; top: 0;}
@@ -23,22 +34,14 @@ if ($theme === "dark") {
 <main class="grid">
   <article>  
    <div class=actualt>Current UV-INDEX</div>        
-   <div class="uvcontainer1"><?php 
-if ($uv["now"]>=10) {echo '<div class=uvtoday11>'.number_format($uv["now"],1)."<smalluvunit> &nbsp;UVI";}
-else if ($uv["now"]>=8) {echo '<div class=uvtoday9-10>'.number_format($uv["now"],1)."<smalluvunit> &nbsp;UVI";}
-else if ($uv["now"]>=5) {echo '<div class=uvtoday6-8>'.number_format($uv["now"],1)."<smalluvunit> &nbsp;UVI";}
-else if ($uv["now"]>3) {echo '<div class=uvtoday4-5>'.number_format($uv["now"],1)."<smalluvunit> &nbsp;UVI";}
-else if ($uv["now"]>=0) {echo '<div class=uvtoday1-3>'.number_format($uv["now"],1)."<smalluvunit> &nbsp;UVI";}
-
-?></smallrainunit></div></div>
- 
-</div>  
+   <div class="uvcontainer1"><?php echo "<div class='uvtoday11' style='background: $colorUVCurrent';>",number_format($uv["now"],1)."<smalluvunit>  UVI";?></smallrainunit></div></div>
+ </div>  
 <div class="uvcaution"><?php 
-if ($uv["now"]>10) {echo 'Extreme UVI<br>Avoid being outside seek a <br>cool shaded area!';}
-else if ($uv["now"]>8) {echo 'Very High UVI<br>Avoid being outside seek a <br>cool shaded area!';}
-else if ($uv["now"]>5) {echo 'High UVI<br>Avoid being outside at midday overhead sun!<br>Wear sunglasses!';}
-else if ($uv["now"]>3) {echo 'Moderate UVI<br>Cautionary use suncream protection <br>Wear sunglasses!';}
-else if ($uv["now"]>=0) {echo 'Low UVI<br>No cautions required<br>Safe for all Skin types!';}
+if ($uv["now"]>10) {echo 'Extreme UVI<br>Avoid being outside during midday hours! Make sure you seek shade! Shirt, sunscreen and hat are a must! ';}
+else if ($uv["now"]>8) {echo 'Very High UVI<br>Avoid being outside during midday hours! Make sure you seek shade! Shirt, sunscreen and hat are a must! ';}
+else if ($uv["now"]>5) {echo 'High UVI<br>Seek shade during midday hours! Slip on a shirt, slop on sunscreen and slap on hat! <br>Wear sunglasses!';}
+else if ($uv["now"]>3) {echo 'Moderate UVI<br>Seek shade during midday hours! Slip on a shirt, slop on sunscreen and slap on hat!  <br>Wear sunglasses!';}
+else if ($uv["now"]>=0) {echo 'You can safely enjoy being outside! ';}
 ?></div>
 
 </article>  
@@ -46,10 +49,7 @@ else if ($uv["now"]>=0) {echo 'Low UVI<br>No cautions required<br>Safe for all S
   <article> 
   <div class=actualt>Current Solar Radiation </div>        
     <div class="solarcontainer1"><?php 
-if ($solar["now"]>=1000) {echo '<div class=solartoday1000>'.number_format($solar["now"],0)."<smalluvunit> &nbsp;W/m<sup>2</sup>";}
-else if ($solar["now"]>=500) {echo '<div class=solartoday500>'.number_format($solar["now"],0)."<smalluvunit> &nbsp;W/m<sup>2</sup>";}
-else if ($solar["now"]>=10) {echo '<div class=solartoday200>'.number_format($solar["now"],0)."<smalluvunit> &nbsp;W/m<sup>2</sup>";}
-else if ($solar["now"]>=0) {echo '<div class=solartoday1>'.number_format($solar["now"],0)."<smalluvunit> &nbsp;W/m<sup>2</sup>";}
+echo "<div class=solartoday1  style='background: $colorSolarCurrent';>",number_format($solar["now"],0)."<smalluvunit>  W/m<sup>2</sup>";
 
 ?></smallrainunit></div></div>     
              <?php
@@ -107,10 +107,8 @@ else if ($solar["now"]>=0) {echo '<div class=solartoday1>'.number_format($solar[
 $b="--";if($sky["lux"]==$b){$sky["lux"] = "N/A" ;}	?>		   
 
 <div class="solarcontainer1"><?php 
-if ($sky["lux"]>=100000) {echo '<div class=luxtoday1000>'.number_format($sky["lux"],0,'.','')."<smalluvunit> &nbsp;Lux";}
-else if ($sky["lux"]>=50000) {echo '<div class=luxtoday500>'.number_format($sky["lux"],0,'.','')."<smalluvunit> &nbspLux";}
-else if ($sky["lux"]>=10) {echo '<div class=luxtoday200>'.number_format($sky["lux"],0,'.','')."<smalluvunit> &nbsp;Lux";}
-else if ($sky["lux"]>=0) {echo '<div class=luxtoday1>'.number_format($sky["lux"],0,'.','')."<smalluvunit> &nbsp;Lux";}
+
+echo "<div class=luxtoday1 style='background: $colorLuxCurrent';>",number_format($sky["lux"],0,'.','')."<smalluvunit>  Lux";
 
 ?></smallrainunit></div></div>  
 
@@ -131,13 +129,10 @@ else if ($sky["lux"]>=0) {echo '<div class=luxtoday1>'.number_format($sky["lux"]
   
    <article> 
   <div class=actualt><?php echo $info?> Guide</div>        
-  <?php
-   echo '<purple>10+</purple> Avoid being outside seek a cool shaded area!<br>'; 	
-echo '<red>8-10</red> Avoid being outside during midday hours use <orange1>Sunscreen</orange1><br>'; 
-echo '<orange1>6-8</orange1> Seek shadea area during midday hours!<br>'; 	
-echo '<yellow>3-5</yellow> Midday hours! caution use some form of  protection<br>'; 	
-echo '<green>1-3</green> UVI No advisory required <br>';	 	
-echo '<green>0</green> UVI No cautions required<br>'; 
+  <?php	
+echo '<font color="red">8+</font> Avoid being outside during midday hours! Make sure you seek shade! Shirt, sunscreen and hat are a must! <br><br>';  	
+echo '<font color="orange">3-7</font> Seek shade during midday hours! Slip on a shirt, slop on sunscreen and slap on hat!<br><br>'; 		 	
+echo '<font color="green">0-2</font> You can safely enjoy being outside! <br>'; 
 ?>
  
 </article> 
@@ -206,7 +201,7 @@ echo '<green>0</green> UVI No cautions required<br>';
   </article> 
   
   <article>
-   <div class=actualt>&copy; Information</div>  
+   <div class=actualt>© Information</div>  
   
   </article> 
   

@@ -1,3 +1,19 @@
+<?php
+#####################################################################################################################                                                                                                        #
+#                                                                                                                   #
+# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
+#                                                                                                                   #
+# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
+#                                                                                                                   #
+# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
+#                                                                                                                   #
+# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
+#                                                                                                                   #
+#####################################################################################################################
+include('dvmCombinedData.php');
+if($theme === "light"){ echo "<body style='background-color:#FFFFFF'>";}
+else if($theme === "dark"){ echo "<body style='background-color:#292E35'>";}
+?>
 <style>
   body {
   	overflow: hidden;

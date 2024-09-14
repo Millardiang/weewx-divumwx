@@ -1,4 +1,17 @@
 <?php
+#####################################################################################################################                                                                                                        #
+#                                                                                                                   #
+# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
+#                                                                                                                   #
+# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
+#                                                                                                                   #
+# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
+#                                                                                                                   #
+# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
+#                                                                                                                   #
+#####################################################################################################################
+?>
+<?php
 include "dvmCombinedData.php";
 //include "shared.php";
 error_reporting(0);
@@ -103,7 +116,7 @@ else
 <main class="grid_FT">
 <articlegraph_FT style="height:15px">  
   <div class="lotemp">
-   <?php echo $info; ?> CSS/SVG/PHP scripts by steepleian at claydonsweather.org.uk &copy; 2021-<?php echo date("Y"); ?>  -  <a href="https://www.aerisweather.com/support/docs/api/reference/endpoints/alerts/" title="AerisWeather" target="_blank">Data © <?php echo date("Y"); ?>AerisWeather Alerts</a></span>
+   <?php echo $info; ?> CSS/SVG/PHP scripts by steepleian at claydonsweather.org.uk © 2021-<?php echo date("Y"); ?>  -  <a href="https://www.aerisweather.com/support/docs/api/reference/endpoints/alerts/" title="AerisWeather" target="_blank">Data © <?php echo date("Y"); ?>AerisWeather Alerts</a></span>
   </div>   
     
      

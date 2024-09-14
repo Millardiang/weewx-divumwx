@@ -1,13 +1,45 @@
+<?php
+#####################################################################################################################                                                                                                        #
+#                                                                                                                   #
+# Copyright (c) 2023 by Paul Noble  (https://codepen.io/paulnoble/pen/qZaNRB)                                       #
+#                                                                                                                   #
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated      #
+# documentation files (the "Software"), to deal in the Software without restriction, including without limitation   #
+# the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and  #
+# to permit persons to whom the Software is furnished to do so, subject to the following conditions:                #
+#                                                                                                                   #
+# The above copyright notice and this permission notice shall be included in all copies or substantial portions of  #
+# the Software.                                                                                                     #
+#                                                                                                                   #
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO  #
+# THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE    #
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF         #
+# CONTRACT,                                                                                                         #
+# TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE    #
+# SOFTWARE.                                                                                                         #
+#                                                                                                                   #
+#####################################################################################################################
+#                                                                                                                   #
+# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
+#                                                                                                                   #
+# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
+#                                                                                                                   #
+# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
+#                                                                                                                   #
+# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
+#                                                                                                                   #
+#####################################################################################################################
+?>
 <?php 
-include('fixedSettings.php');
-include('shared.php');
+include('dvmCombinedData.php');
 error_reporting(0);
 date_default_timezone_set($TZ);
 header('Content-type: text/html; charset=utf-8');
-echo "<body style='background-color:#292E35'>";
+if($theme === "light"){ echo "<body style='background-color:#FFFFFF'>";}
+else if($theme === "dark"){ echo "<body style='background-color:#292E35'>";}
 ?>
 
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
   <meta charset="UTF-8">
@@ -20,7 +52,8 @@ echo "<body style='background-color:#292E35'>";
 <body>
 <div style="position:relative; top: 30px; left: 0px;">
 <?php
-echo "<font color='white'>"."World Daylight Map"."</font>";
+if($theme === "light"){echo "<font color='black'>"."World Daylight Map"."</font>";}
+else if($theme === "dark"){echo "<font color='silver'>"."World Daylight Map"."</font>";}
 ?>
 </div>
 <!-- partial:index.partial.html -->

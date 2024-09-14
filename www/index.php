@@ -1,28 +1,36 @@
 <?php
-#####################################################################################################################
-# index.php                                                                                                         #
-#                                                                                                                   #
-# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
-#                                                                                                                   #
-# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour                                                      #
-#                                                                                                                   #
-# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
-#                                                                                                                   #
-# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
-#                                                                                                                   #
-#####################################################################################################################
-
-  if (!file_exists("userSettings.php")) {
-    copy("initial_userSettings.php", "userSettings.php");
-  }
+##############################################################################################
+#        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
+#       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    #
+#       (.  ___  :)||  |\   \  //  / |   (  ) : | \   \  //   |  |'  /    \:  | \   \  /     #
+#       |: \   ) |||:  | \\  \/. ./  (:  |  | . ) /\\  \/.    |  |: /'        |  \\  \/      #
+#       (| (___\ |||.  |  \.    //    \\ \__/ // |: \.        |   \//  /\'    |  /\.  \      #
+#       |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \     #
+#       (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|    #
+#                                                                                            #
+#     Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      #
+#      Distributed under terms of the GPLv3.  See the file LICENSE.txt for your rights.      #
+#    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
+#                    https://github.com/Millardiang/weewx-divumwx/issues                     #
+##############################################################################################
+session_start();
+if (!file_exists("userSettings.php")) {
+    if (isset($_SESSION['setupAttempted']) && $_SESSION['setupAttempted'] === true) {
+        echo "An error occurred. Please contact support.";
+        exit;
+    }
+    $_SESSION['canAccessSetup'] = true;
+    header("Location: dvmActSetup.php");
+    exit;
+}
   include_once ('dvmCombinedData.php');
   include_once ('webserver_ip_address.php');
+  require_once ('admin/assets/classes/geoplugin.class.php');
   date_default_timezone_set($TZ);
   header('Content-type: text/html; charset=utf-8');
   error_reporting(0);
 ?>
 <!DOCTYPE html>
-
 <html>
 <head>
   <title><?php echo $stationlocation;?> Weather Station</title>
@@ -51,6 +59,17 @@
   <meta name="theme-color" content="#ffffff">
   <link rel="manifest" href="./site.webmanifest">
   <link href="css/main.<?php echo $theme;?>.css?version=<?php echo filemtime('css/main.' . $theme . '.css');?>" rel="stylesheet prefetch">
+
+  <style>
+  .headerflag {
+    margin-left: 270px;
+    margin-top: -14.5px;
+  }
+  #tablet {
+    background: none;
+  }
+</style>
+
 
   <script>
     if ('serviceWorker' in navigator) {
@@ -161,8 +180,7 @@
       </div>
      </div>
    </div>
-<?php
-if($themelayout == "4" || $themelayout == "5"){?>
+<div id="tablet"> 
 <div class="divum-container">
 <!-- Row 5 -->
   <!-- position 14--->
@@ -181,9 +199,7 @@ if($themelayout == "4" || $themelayout == "5"){?>
       </div>
      </div>
    </div>
-<?php
-}
-if($themelayout == "5"){?>
+
 <div class="divum-container">
 <!-- Row 6 -->
   <!-- position 17--->
@@ -202,9 +218,7 @@ if($themelayout == "5"){?>
       </div>
      </div>
    </div>
-<?php
-}
-?>
+</div>
 <!--End Main Grid area-->
 <!--footer area -->
 <?php
@@ -220,16 +234,69 @@ include_once ('dvmFooter.php');
       </div>
       <div class="menutoolbar__center">
         <button class="menubutton menubutton--primary">
-          <menutoptitle><?php echo ($stationlocation); ?>  Weather Station  <img src="./img/flags/<?php echo $flag?>.svg" width="20"></menutoptitle>
+          <menutoptitle  style="font-size: 20px; font-weight: bold; text-transform: uppercase;"><?php echo $stationlocation; ?>  WEATHER STATION   <img src="./img/flags/<?php echo $flag?>.svg" width="20"></menutoptitle>
+
         </button>
       </div>
       <div class="menutoolbar__right">
-            <a href="dvmIndexTablet.php" title="Select Tablet Mode"><topbarbutton>T</topbarbutton></a>
+          <input type="button" style="background: rgba(39, 123, 70, .8); color: white; border-radius: 2px; border-color: rgba(39, 123, 70, .8);" value="Tablet Mode" onclick="updateButton()"/>
       </div>
     </div>
-  </header>
-<?php
-  include_once ('dvmUpdater.php');
-  include_once ('dvmSideMenu.php');
-?>
+
+    <script>
+      function updateButton() {
+        var x = document.getElementById("tablet");
+                const button = document.querySelector("input");
+        if (x.style.display === "none" && button.value === "Dashboard Mode") {
+          x.style.display = "block";
+          button.value = "Tablet Mode";
+        } else {
+          x.style.display = "none";
+          button.value = "Dashboard Mode";
+        }
+      }
+    </script>
+ </header>
+    <?php
+      include_once ('dvmUpdater.php');
+      include_once ('dvmSideMenu.php');
+      //Add visits by country to admin database. No personal info is kept by this, ip is discarded
+      if($trkVisits){
+        $geoplugin = new geoPlugin();
+        $geoplugin->locate($_SERVER['REMOTE_ADDR']);
+        $countryCode = $geoplugin->countryCode;
+        $regionName = $geoplugin->regionName;
+        $cityCode = $geoplugin->city;
+        $lat = $geoplugin->latitude;
+        $long = $geoplugin->longitude;
+        $adminDB = __DIR__ . DIRECTORY_SEPARATOR . 'admin' . DIRECTORY_SEPARATOR . 'db' . DIRECTORY_SEPARATOR . 'dvmAdmin.db3';
+        $db = new PDO("sqlite:" . $adminDB);
+        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $regionName = empty($regionName) ? "Unknown" : $regionName;
+        $cityCode = empty($cityCode) ? "Unknown" : $cityCode;
+        $query = $db->prepare("SELECT * FROM visits WHERE countryCode = :countryCode AND regionName = :regionName AND cityName = :cityName");
+        $query->bindValue(':countryCode', $countryCode, PDO::PARAM_STR);
+        $query->bindValue(':regionName', $regionName, PDO::PARAM_STR);
+        $query->bindValue(':cityName', $cityCode, PDO::PARAM_STR);
+        $query->execute();
+        $row = $query->fetch(PDO::FETCH_ASSOC);
+        if ($row) {
+            $updateStmt = $db->prepare("UPDATE visits SET visit_count = visit_count + 1 WHERE countryCode = :countryCode AND regionName = :regionName AND cityName = :cityName");
+            $updateStmt->bindValue(':countryCode', $countryCode, PDO::PARAM_STR);
+            $updateStmt->bindValue(':regionName', $regionName, PDO::PARAM_STR);
+            $updateStmt->bindValue(':cityName', $cityCode, PDO::PARAM_STR);
+            $updateStmt->execute();
+        } else {
+            $insertStmt = $db->prepare("INSERT INTO visits (countryCode, regionName, cityName, lat, long, visit_count) VALUES (:countryCode, :regionName, :cityName, :lat, :long, 1)");
+            $insertStmt->bindValue(':countryCode', $countryCode, PDO::PARAM_STR);
+            $insertStmt->bindValue(':regionName', $regionName, PDO::PARAM_STR);
+            $insertStmt->bindValue(':cityName', $cityCode, PDO::PARAM_STR);
+            $insertStmt->bindValue(':lat', $lat, PDO::PARAM_STR);
+            $insertStmt->bindValue(':long', $long, PDO::PARAM_STR);
+            $insertStmt->execute();
+        }
+        $db = null;
+      }
+    ?>
+
 </html>

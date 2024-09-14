@@ -1,15 +1,35 @@
 <?php
+#####################################################################################################################                                                                                                        #
+#                                                                                                                   #
+# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
+#                                                                                                                   #
+# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
+#                                                                                                                   #
+# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
+#                                                                                                                   #
+# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
+#                                                                                                                   #
+#####################################################################################################################
+?>
+<?php
   if (!file_exists("userSettings.php")) {
     copy("initial_userSettings.php", "userSettings.php");
   }
   include_once ('dvmCombinedData.php');
   include_once ('webserver_ip_address.php');
+  $warn_summary =  "cache/meteoalarm-summary.html";
   date_default_timezone_set($TZ);
   header('Content-type: text/html; charset=utf-8');
   error_reporting(0);
 ?>
 
 <!DOCTYPE html>
+<style>
+.headerflag {
+    margin-left: 270px;
+    margin-top: -14.5px;
+}
+</style>
 <html>
 <head>
   <title><?php echo $stationlocation;?> Weather Station</title>
@@ -52,6 +72,7 @@
       });
     }
   </script>
+ 
 </head>
 <!-- Top Grid Area-->
 <div class="divum2-container">
@@ -85,7 +106,8 @@
     <!-- position 4 - Fixed Position --->
     <div class="divumwxbox alert">
      <div class="divumbox-top-border">
-      <div class="title"><?php echo $info;?><?php echo $lang['advisoriesTop'];?></div>
+      <div class="title"><?php echo $info;?><?php echo $lang['advisoriesTop'];?> (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</div>
+
       <div class="value">
         <div id="position4"></div>
        </div>
@@ -164,17 +186,59 @@ include_once ('dvmFooter.php');
         <button class="menubutton menubutton--primary"></button>
       </div>
       <div class="menutoolbar__center">
-        <button class="menubutton menubutton--primary">
-          <menutoptitle><?php echo ($stationlocation); ?>  Weather Station  <img src="./img/flags/<?php echo $flag?>.svg" width="20"></menutoptitle>
+        <button class="menubutton menubutton--primary"  style="font-size: 20px; font-weight: bold;">
+          <menutoptitle><?php echo strtoupper($stationlocation); ?>  WEATHER STATION   <img src="./img/flags/<?php echo $flag?>.svg" width="20"></menutoptitle>
         </button>
       </div>
       <div class="menutoolbar__right">
-            <a href="index.php" title="Select Dashboard Mode"><topbarbutton>D</topbarbutton></a>
+            <a href="index.php" title="Select Tablet Mode"><topbarbutton>D</topbarbutton></a>
       </div>
     </div>
   </header>
+</html>
 <?php
   include_once ('dvmUpdater.php');
   include_once ('dvmSideMenu.php');
-?>
-</html>
+      //Add visits by country to admin database. No personal info is kept by this, ip is discarded
+      $geoplugin = new geoPlugin();
+      $geoplugin->locate($_SERVER['REMOTE_ADDR']);
+      $countryCode = $geoplugin->countryCode;
+      $regionName = $geoplugin->regionName;
+      $cityCode = $geoplugin->city;
+      $lat = $geoplugin->latitude;
+      $long = $geoplugin->longitude;
+      $adminDB = __DIR__ . DIRECTORY_SEPARATOR . 'admin' . DIRECTORY_SEPARATOR . 'db' . DIRECTORY_SEPARATOR . 'dvmAdmin.db3';
+      try {
+          $db = new PDO("sqlite:" . $adminDB);
+          $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+          $regionName = empty($regionName) ? "Unknown" : $regionName;
+          $cityCode = empty($cityCode) ? "Unknown" : $cityCode;
+          $query = $db->prepare("SELECT * FROM visits WHERE countryCode = :countryCode AND regionName = :regionName AND cityName = :cityName");
+          $query->bindValue(':countryCode', $countryCode, PDO::PARAM_STR);
+          $query->bindValue(':regionName', $regionName, PDO::PARAM_STR);
+          $query->bindValue(':cityName', $cityCode, PDO::PARAM_STR);
+          $query->execute();
+          $row = $query->fetch(PDO::FETCH_ASSOC);
+          if ($row) {
+              $updateStmt = $db->prepare("UPDATE visits SET visit_count = visit_count + 1 WHERE countryCode = :countryCode AND regionName = :regionName AND cityName = :cityName");
+              $updateStmt->bindValue(':countryCode', $countryCode, PDO::PARAM_STR);
+              $updateStmt->bindValue(':regionName', $regionName, PDO::PARAM_STR);
+              $updateStmt->bindValue(':cityName', $cityCode, PDO::PARAM_STR);
+              $updateStmt->execute();
+          } else {
+              // Entry does not exist, insert a new one with visit_count set to 1
+              $insertStmt = $db->prepare("INSERT INTO visits (countryCode, regionName, cityName, lat, long, visit_count) VALUES (:countryCode, :regionName, :cityName, :lat, :long, 1)");
+              $insertStmt->bindValue(':countryCode', $countryCode, PDO::PARAM_STR);
+              $insertStmt->bindValue(':regionName', $regionName, PDO::PARAM_STR);
+              $insertStmt->bindValue(':cityName', $cityCode, PDO::PARAM_STR);
+              $insertStmt->bindValue(':lat', $lat, PDO::PARAM_STR);
+              $insertStmt->bindValue(':long', $long, PDO::PARAM_STR);
+              $insertStmt->execute();
+          }
+          $db = null;
+      } catch (PDOException $e) {
+          echo "Database error: " . $e->getMessage();
+          exit;
+      }
+
+    ?>

@@ -338,6 +338,7 @@ $lang['WindTop']                 = 'Month | Year Maximum Wind Speed';
 $lang['temperatureModule']       = 'Temperature';
 $lang['forecastModule']          = 'Forecast';
 $lang['currentModule']           = 'Current Conditions';
+$lang['actualModule']            = 'Summary of Actual Conditions';
 $lang['windModule']              = 'Wind Speed | Direction';
 $lang['barometerModule']         = 'Barometer';
 $lang['solarDialModule']         = 'Solar Dial';
@@ -351,5 +352,7 @@ $lang['moonPhaseModule']         = 'Current Moonphase';
 $lang['earthquakeModule']        = 'Earthquake';
 $lang['indoorTempModule']        = 'Inside Conditions';
 $lang['Anemometer']              = 'Anemometer';
-
+$lang['PollenModule']            = 'Current Pollen Risk';
+$lang['greenhouseGasModule']     = 'Greenhouse Gases Concentrations';
+$lang['weather_live']            = 'Live Weather Conditions';
 ?>
