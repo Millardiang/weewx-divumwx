@@ -22,7 +22,7 @@ At this point in time, we do not yet support upgrading an existing DivumWX from 
 
 Installation
 
-    * From the command line: - 
+  * From the command line: - 
                 
 		Download the current DivumWX archive from https://www.divumwx.org/files/latest.tar.gz into your local Download folder alongside the services.json file.
 		Upload both files to your weewx server (if needed)
