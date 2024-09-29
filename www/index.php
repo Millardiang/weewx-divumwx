@@ -191,8 +191,8 @@ error_reporting(0);
 <!--section1-->
 <div class="stationLongname">
   <div class="titlebar-item"> 
-<div class="divumwxLogoFooter" style="width: 60px;"><?php
-echo '<a href="https://divumwxweather.org/" title="https://divumwxweather.org/" target="_blank"><br><img src="img/divumLogo-dark.svg" style="width: 55px; margin-top: -10px; font-size: 9px; margin-left: 10px; padding-right: 10px;" alt="divumwxweather.org/"></img>' ?>
+<div class="divumwxLogoFooter" style="width: 60px;">
+<a href="https://divumwxweather.org/" title="https://divumwxweather.org/" target="_blank"><?php echo $divumwxLogo;?>
 <div class="divumwxLogoFooter-text-block" style="padding-left: 4px;"><?php
 echo '<a>Copyright &copy; 2022-' . date('Y') . '<br>Team DivumWX<br>All rights reserved</divumwx></a>';
 ?> </div>
@@ -224,14 +224,14 @@ echo $reverseTheme;
 </div>
 <!--end section2-->
 <!--section3-->
-<div class="stationLongname" style="left:20px;">
+<div class="stationLongname" >
 <div class="titlebar-item">      <div class="weewxLogoFooter" style="width: 30px;"><a href="http://weewx.com" alt="http://weewx.com" title="http://weewx.com">
           <?php echo $weewxLogo;?>
 </a>
       </div>
 </div>
           </div>
-<!--end section2-->
+<!--end section3-->
 </div>
           
           

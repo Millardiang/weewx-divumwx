@@ -1120,9 +1120,6 @@ html{...
 transition: all 1s;}
 a{... 
 transition: all 1s;}
-.divumwxLogoFooter{width:40px;margin-top:45px;margin-left:40px;float:right;}
-.divumwxLogoFooter-text-block{position:relative;top:-53px;right:-56px;color:var(--col-6);font-size:8px;float:left;}
-.weewxLogoFooter{width:40px;margin-top:-5px;margin-right:75px;padding:0;float:right;}
 .closebtn{margin-left:15px;color:#000000;font-weight:bold;float:right;font-size:22px;line-height:20px;cursor:pointer;transition:0.3s;}
 .closebtn:hover{color:grey;}
 .module{width:315px;height:195px;text-align:center;}
@@ -1244,11 +1241,15 @@ html{...
 transition: all 1s;}
 a{... 
 transition: all 1s;}
-/*new changes*/
+
 .divumwxeclipticangle{position:absolute;height:4.1rem;width:7.4rem;overflow:hidden;color:var(--col-6);line-height:8px;font-size:0.59em;margin-top:65px;font-family:weathertext2;}
 .divumwxeclipticangle{align-items:center;justify-content:center;left:-20px;}
 .divumwxequinox{position:absolute;height:4.1rem;width:7.4rem;overflow:hidden;color:var(--col-6);line-height:8px;font-size:0.59em;margin-top:65px;font-family:weathertext2;}
 .divumwxequinox{align-items:center;justify-content:center;left:205px;}
+/*new changes*/
+.divumwxLogoFooter{width:40px;margin-top:45px;margin-left:40px;float:right;}
+.divumwxLogoFooter-text-block{position:relative;top:-68px;right:-56px;color:var(--col-6);font-size:8px;float:left;}
+.weewxLogoFooter{width:40px;margin-top:-5px;margin-right:75px;padding:0;float:right;}
 
 
 @media screen and (max-width:768px){
