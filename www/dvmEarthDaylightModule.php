@@ -10,20 +10,6 @@
 # Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
 #                                                                                                                   #
 #####################################################################################################################
-?>
-<style>
-.earthmodulepos {
-  position: absolute;
-  top: 60px;
-  left: 110px
-}
-.earthpos {
-  position: absolute;
-  top: -14px;
-  left: -25px
-}
-</style>
-<?php
 include('dvmCombinedData.php');
 date_default_timezone_set($TZ);
 header('Content-type: text/html; charset=utf-8');
@@ -31,7 +17,7 @@ $earthimg = "img/earth-1.jpg";
 if ($theme === "dark")
 {$circleborder = "rgb(30,32,36.1)";}
 else if ($theme === "light")
-{$circleborder = "white";} 
+{$circleborder = "#c9daf9";} 
 $light = $alm["daylight"]; 
 $daylight = ltrim($light, '0'); 
 $dark = 24 - str_replace(':', '.', $alm["daylight"]);
@@ -52,7 +38,7 @@ $sun_elevation = round($sun_alt,2)."°<div class=sunbelowdivumwx> </div>";
         <span class="yearpopup"><a alt="celestial" title="celestial" href="dvmMenuCelestialPopup.php" data-lity><?php echo $info;?> Celestial Data</a></span>
 
     </div>
-    <span class='moduletitle2'><?php echo $lang['earthDaylightModule'];?></span>
+    <span class='moduletitle'><?php echo $lang['earthDaylightModule'];?></span>
     
 <div class="updatedtime1"><?php if(file_exists($earthimg)&&time() - filemtime($earthimg)>3600) echo $offline. '<offline> Offline </offline>'; else echo $online." ".date("H:i:s", filemtime($earthimg));?></div>
 
@@ -76,14 +62,14 @@ $sun_elevation = round($sun_alt,2)."°<div class=sunbelowdivumwx> </div>";
 
 <style>
 .earthmodulepos {
-  position: relative;
-top: 15px;
-left: 0px
+  position: absolute;
+top: 6px;
+left: 112.5px
 }
 .earthpos {
-  position: relative;
-top: -110px;
-left: -5px
+  position: absolute;
+top: -14px;
+left: 72.5px
 }
 </style>
 <html>

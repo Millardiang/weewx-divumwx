@@ -188,14 +188,34 @@
 "so2Week": $week.so2.series(aggregate_type='last', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
 "o3Week": $week.o3.series(aggregate_type='last', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
 "nh3Week": $week.nh3.series(aggregate_type='last', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
-"pm2_5": $alltime.pm2_5.series(aggregate_type='last', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json,
-"pm10_0": $alltime.pm10_0.series(aggregate_type='last', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"aodWeek": $week.aerosol_optical_depth.series(aggregate_type='last', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"dustWeek": $week.dust.series(aggregate_type='last', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"pm2_5": $week.pm2_5.series(aggregate_type='last', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"pm10_0": $week.pm10_0.series(aggregate_type='last', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json,
 "co": $alltime.co.series(aggregate_type='last', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json,
 "no2": $alltime.no2.series(aggregate_type='last', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json,
 "so2": $alltime.so2.series(aggregate_type='last', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json,
 "o3": $alltime.o3.series(aggregate_type='last', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json,
-"nh3": $alltime.nh3.series(aggregate_type='last', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json},
+"nh3": $alltime.nh3.series(aggregate_type='last', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"aod": $alltime.aerosol_optical_depth.series(aggregate_type='last', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"dust": $alltime.dust.series(aggregate_type='last', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json},
 "units": "μg/m³"#slurp
+}, 
+##
+"pollenplot": {"series":
+{"alder_pollenWeek": $week.alder_pollen.series(aggregate_type='last', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"birch_pollenWeek": $week.birch_pollen.series(aggregate_type='last', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"olive_pollenWeek": $week.olive_pollen.series(aggregate_type='last', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"grass_pollenWeek": $week.grass_pollen.series(aggregate_type='last', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"mugwort_pollenWeek": $week.mugwort_pollen.series(aggregate_type='last', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"ragweed_pollenWeek": $week.ragweed_pollen.series(aggregate_type='last', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"alder_pollen": $alltime.alder_pollen.series(aggregate_type='last', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"birch_pollen": $alltime.birch_pollen.series(aggregate_type='last', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"olive_pollen": $alltime.olive_pollen.series(aggregate_type='last', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"grass_pollen": $alltime.grass_pollen.series(aggregate_type='last', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"mugwort_pollen": $week.mugwort_pollen.series(aggregate_type='last', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"ragweed_pollen": $week.ragweed_pollen.series(aggregate_type='last', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json},
+"units": "grains/m³"#slurp
 }, 
 ##
 "stormRainplot": {"series":

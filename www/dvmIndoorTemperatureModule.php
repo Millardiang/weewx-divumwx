@@ -12,7 +12,7 @@ $temp["indoor_now_feels"] = ($temp["indoor_now_feels"]-32)/9*5;}
 <div class="chartforecast">
 <span class="yearpopup"><a alt="Indoor Chart" title="Indoor Chart" href="dvmhighcharts/tempCharts.php?chart='indoorplot'&span='yearly'&temp='<?php echo $temp["units"];?>'&pressure='<?php echo $barom["units"];?>'&wind='<?php echo $wind["units"];?>'&rain='<?php echo $rain["units"];?>" frameborder="0" scrolling="no" width="100%" height="100%" data-lity><?php echo $menucharticonpage;?> Indoor Temp | Humidity Chart</a></span>      
 </div>
-<span class='moduletitle'><?php echo $lang['indoorTempModule'];?> (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span> </span>
+<span class='moduletitle' style="font-family: Helvetica;"><?php echo $lang['indoorTempModule'];?> (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span> </span>
 
 <div class="updatedtime1"><span><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?></div><br/>
 <style>
@@ -22,7 +22,7 @@ silver {
 </style> 
 <div class="tempindoorconverter">
 <?php
-  if ($temp["units"]=='C'){echo "<div class=tempconvertercircleminus10 style='$convertStyle $colorInTemp;'>".number_format(($temp["indoor_now"]*9/5)+32,1).'<silver>&deg<smalltempunit2>F</silver>';} else if ($temp["units"]=='F'){echo "<div class=tempconvertercircleminus10 style='$convertStyle $colorInTemp;'>".number_format(($temp["indoor_now"]-32)*5/9,1).'<silver>&deg<smalltempunit2>C</silver>';}
+  if ($temp["units"]=='C'){echo "<div class=tempconvertercircleminus10 style='$convertStyle $colorInTemp;'>".number_format(($temp["indoor_now"]*9/5)+32,1).'&deg<smalltempunit2>F';} else if ($temp["units"]=='F'){echo "<div class=tempconvertercircleminus10 style='$convertStyle $colorInTemp;'>".number_format(($temp["indoor_now"]-32)*5/9,1).'&deg<smalltempunit2>C';}
 ?>
 </smalltempunit2></div></div>
 
@@ -36,11 +36,11 @@ silver {
 
 .house {
   position: relative; 
-  margin-top: -21.5px; 
+  margin-top: -20.5px; 
   margin-left: 0px;
 }
 .idtemppos {
-  margin-top: -153px;
+  margin-top: -148px;
   margin-left: -135.5px;
 }
 </style>
@@ -58,8 +58,12 @@ silver {
 
     if (theme === 'dark') {
     var tubeFillColor = "rgba(45,47,50,1)";
+    var colorS = "silver";
+    var houseColor = "#38383c";
     } else {
-    var tubeFillColor = "rgba(230,232,239,1)";
+    tubeFillColor = "rgba(230,232,239,1)";
+    colorS = "#777777";
+    houseColor = "#808080";
     }
 
 </script>
@@ -97,7 +101,7 @@ var svg = d3.select(".house")
     			.attr("x2", 150)
     			.attr("y1", 145)
     			.attr("y2", 145)
-    			.style("stroke", "#38383c")
+    			.style("stroke", houseColor)
     			.style("stroke-width", "3px")
     			.style("stroke-linecap", "round");
     			    			
@@ -106,7 +110,7 @@ var svg = d3.select(".house")
     			.attr("x2", 25)
     			.attr("y1", 71)
     			.attr("y2", 145)
-    			.style("stroke", "#38383c")
+    			.style("stroke", houseColor)
     			.style("stroke-width", "3px")
     			.style("stroke-linecap", "round");
     			    			    			
@@ -116,7 +120,7 @@ var svg = d3.select(".house")
     			.attr("x2", 25)
     			.attr("y1", 70.25)
     			.attr("y2", 70.25)
-    			.style("stroke", "#38383c")
+    			.style("stroke", houseColor)
     			.style("stroke-width", "3px")
     			.style("stroke-linecap", "round");
     			
@@ -127,7 +131,7 @@ var svg = d3.select(".house")
     			.endAngle(-3)    			
     			svg.append("path")
     			.attr("d", arc)
-    			.attr("fill", "#38383c")
+    			.attr("fill", houseColor)
     			.attr("transform", "translate(10,63.75)");
 
     			svg.append("line") //  roof left diagonal line
@@ -135,7 +139,7 @@ var svg = d3.select(".house")
     			.attr("x2", 83)
     			.attr("y1", 59.5)
     			.attr("y2", 5)
-    			.style("stroke", "#38383c")
+    			.style("stroke", houseColor)
     			.style("stroke-width", "3px")
     			.style("stroke-linecap", "round");
     			
@@ -146,7 +150,7 @@ var svg = d3.select(".house")
     			.endAngle(0)   			
     			svg.append("path")
     			.attr("d", arc)
-    			.attr("fill", "#38383c")
+    			.attr("fill", houseColor)
     			.attr("transform", "translate(87.5,9.75)");
     			
     			svg.append("line") // right wall
@@ -154,7 +158,7 @@ var svg = d3.select(".house")
     			.attr("x2", 150)
     			.attr("y1", 71)
     			.attr("y2", 145)
-    			.style("stroke", "#38383c")
+    			.style("stroke", houseColor)
     			.style("stroke-width", "3px")
     			.style("stroke-linecap", "round");
     			    		   			
@@ -164,7 +168,7 @@ var svg = d3.select(".house")
     			.attr("x2", 165)
     			.attr("y1", 70.25)
     			.attr("y2", 70.25)
-    			.style("stroke", "#38383c")
+    			.style("stroke", houseColor)
     			.style("stroke-width", "3px")
     			.style("stroke-linecap", "round");
     			    
@@ -175,7 +179,7 @@ var svg = d3.select(".house")
     			.endAngle(3)   			
     			svg.append("path")
     			.attr("d", arc)
-    			.attr("fill", "#38383c")
+    			.attr("fill", houseColor)
     			.attr("transform", "translate(164,63.75)");
     			
     			svg.append("line") //  roof diagonal to Chimney left line
@@ -183,7 +187,7 @@ var svg = d3.select(".house")
     			.attr("x2", 127)
     			.attr("y1", 5)
     			.attr("y2", 30)
-    			.style("stroke", "#38383c")
+    			.style("stroke", houseColor)
     			.style("stroke-width", "3px")
     			.style("stroke-linecap", "round");
     			
@@ -192,7 +196,7 @@ var svg = d3.select(".house")
     			.attr("x2", 169)
     			.attr("y1", 42)
     			.attr("y2", 59.5)
-    			.style("stroke", "#38383c")
+    			.style("stroke", houseColor)
     			.style("stroke-width", "3px")
     			.style("stroke-linecap", "round");
     			    			    			   			
@@ -203,7 +207,7 @@ var svg = d3.select(".house")
     			.endAngle(0)   			
     			svg.append("path")
     			.attr("d", arc)
-    			.attr("fill", "#38383c")
+    			.attr("fill", houseColor)
     			.attr("transform", "translate(87.5,9.75)");
     			
     			// Chimney 
@@ -212,7 +216,7 @@ var svg = d3.select(".house")
     			.attr("x2", 127)
     			.attr("y1", 10)
     			.attr("y2", 30)
-    			.style("stroke", "#38383c")
+    			.style("stroke", houseColor)
     			.style("stroke-width", "3px")
     			.style("stroke-linecap", "round");
     			
@@ -221,7 +225,7 @@ var svg = d3.select(".house")
     			.attr("x2", 145)
     			.attr("y1", 10)
     			.attr("y2", 42)
-    			.style("stroke", "#38383c")
+    			.style("stroke", houseColor)
     			.style("stroke-width", "3px")
     			.style("stroke-linecap", "round");
     			
@@ -230,7 +234,7 @@ var svg = d3.select(".house")
     			.attr("x2", 145)
     			.attr("y1", 10)
     			.attr("y2", 10)
-    			.style("stroke", "#38383c")
+    			.style("stroke", houseColor)
     			.style("stroke-width", "3px")
     			.style("stroke-linecap", "round");
 
@@ -541,6 +545,7 @@ var bulb_cy = bottomY - bulbRadius,
 
 var svg = d3.select(".idthermometer")
   .append("svg")
+  //.style("background", "#292E35")
   .attr("width", width)
   .attr("height", height);
 
@@ -607,7 +612,7 @@ var scale = d3.scale.linear()
 
   var isMax = (t == maxTemp),
       label = (isMax ? "Max" : "Min"),
-      textCol = (isMax ? "silver" : "silver"),
+      textCol = (isMax ? colorS : colorS),
       textOffset = (isMax ? - 3 : 3);
 
   svg.append("line")

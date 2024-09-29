@@ -19,7 +19,7 @@ header('Content-type: text/html; charset=utf-8');
 <style>
 .wrap {
   position: relative;
-  margin-top: -2px;
+  margin-top: -1px;
   margin-right: 0px;
 }
 .moduletitle2 {
@@ -70,7 +70,7 @@ $sun_elevation = round($sun_alt,2)."°<div class=sunbelowdivumwx> </div>";
       <span class="yearpopup"><a alt="Astroclock" title="Astroclock" href="dvmAstroclockPopup.php" data-lity><?php echo $info;?> Astroclock</a></span>
 </div>
 
-<span class="moduletitle2"><?php echo $lang['solarDialModule'];?></span>
+<span class="moduletitle"><?php echo $lang['solarDialModule'];?></span>
 
 <div class="updatedtime1"><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?></div>
 

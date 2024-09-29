@@ -33,7 +33,7 @@ $moonimg = "img/moon-1.jpg";
 if ($theme === "dark")
 {$circleborder = "rgb(30,32,36";}
 else if ($theme === "light")
-{$circleborder = "white";}  
+{$circleborder = "#c9daf9";}  
 ?>
 <?php 
 $meteor_default="No Meteor Showers";
@@ -91,7 +91,7 @@ foreach ($meteor_events as $meteor_check) {
 
 <div class="svgpos">
 <svg width="160" height="160" viewBox="0 0 160 160">
-   <circle cx="80" cy="80" r="60" stroke="<?php echo $circleborder;?>" stroke-width="21" fill="none" />
+   <circle cx="80" cy="80" r="60" stroke="<?php echo $circleborder;?>" stroke-width="21.5" fill="none" />
 </svg> 
   </div>
 

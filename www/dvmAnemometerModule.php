@@ -15,10 +15,10 @@ maxGust {
    <div class="chartforecast2">
       <span class="yearpopup"><a alt="wind charts" title="wind charts" href="dvmWindRecords.php" data-lity><?php echo $menucharticonpage;?> Wind Records and Charts</a></span>
     </div>
-    <span class='moduletitle2'><?php echo $lang['Anemometer']. " (<valuetitleunit>". $wind["units"];?></valuetitleunit>)</span>
+    <span class='moduletitle'><?php echo $lang['Anemometer']. " (<valuetitleunit>". $wind["units"];?></valuetitleunit>)</span>
   
 
-<div class="updatedtime2"><span><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?></div><br />
+<div class="updatedtime2" style="margin-top: -33px;"><span><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?></div><br />
 
 <div class="windspeedtrend1">
 <?php echo "<valuetext>Max "."<max><value><maxGust>".number_format($wind["gust_max"],1)."</maxGust></max></span>"."<supmb> ".$wind["units"]."</supmb><br> ".$lang['Gust']." (".$wind["gust_maxtime"].")</valuetext>";?></div>
@@ -56,6 +56,7 @@ echo ' <div class=divumwxwindrun>'.$windalert3.' &nbsp;<grey><valuetext1>',numbe
 <grey><divumwxwindrunspan></valuetext>
 <?php if ($wind["units"] == 'mph') echo 'mi'; else if ($wind["units"] == 'm/s') echo 'km'; else if ($wind["units"] == 'kts') echo 'mi';else echo 'km';?></divumwxwindrunspan>
 </div></div><br /><div class=windrun1><?php echo  $lang['Wind Run'];?></div>
+
 <?php // beaufort
 if ($wind["speed_bft"] >= 12) {
   echo '<div class=divumwxbeaufort12>' . $beaufort12 . "&nbsp;" . $wind["speed_bft"];
@@ -229,7 +230,7 @@ if ($theme === "dark") { echo
     
       .anemometer {
         position: relative; 
-        margin-top: -35px; 
+        margin-top: -33px; 
         margin-left: -1px;
       }
 
@@ -357,7 +358,7 @@ if ($theme === "dark") { echo
     
         .anemometer {
         position: relative; 
-        margin-top: -35px; 
+        margin-top: -33px; 
         margin-left: -1px;
       }
       

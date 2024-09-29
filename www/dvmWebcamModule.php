@@ -31,7 +31,7 @@ if($dayPartCivil == "night"){$webcamurl = "img/nightTime.svg";$lang['webcamModul
        echo '<span class="yearpopup"><a alt="webcam" title="Webcam" href="dvmTimelapsePopup.php" data-lity>'. $webcamicon.'Timelapse</a></span>';
 }?>
     </div>
-    <span class='moduletitle2'><?php echo $lang['webcamModule'];?></span>
+    <span class='moduletitle'><?php echo $lang['webcamModule'];?></span>
 
 
 <div class="updatedtime1"><span>

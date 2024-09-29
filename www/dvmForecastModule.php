@@ -1,10 +1,4 @@
 <style>
-.moduletitle4 {
-  position: relative;
-  top: -21px;
-  font-size: .8em;
-  float: none;
-}
 .chartforecast4 {
   position: absolute;
   font-family: arial, system;
@@ -40,7 +34,7 @@ $jsonfile="jsondata/awd.txt";if(!file_exists($jsonfile)) {return;}
     <?php if($city == "London"){ ?>
     <span class="yearpopup"><a alt="Weather Health" title="Weather Health" href="<?php echo $ukWeatherHealth;?>" . data-lity> <?php echo $chartinfo;?> Weather Health</a></span><?php } ?>
 </div>
-    <span class='moduletitle4'><?php echo $lang['forecastModule'];?> (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span>
+    <span class='moduletitle'><?php echo $lang['forecastModule'];?> (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span>
 
 
 <div class="updatedtime1"><?php $forecastime=filemtime('jsondata/awd.txt');

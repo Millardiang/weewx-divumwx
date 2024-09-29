@@ -22,8 +22,8 @@ include('dvmCombinedData.php');
 <div class="chartforecast2">
 <span class="yearpopup"><a alt="barometer charts" title="barometer charts" href="dvmBarometerRecords.php" data-lity><?php echo $menucharticonpage;?> Air Density | Barometer Records and Charts</a></span>   
 </div>    
-<span class='moduletitle2'><?php echo $lang['barometerModule'], " (<valuetitleunit>", $barom["units"];?></valuetitleunit>)</span>
-<div class="updatedtime2">
+<span class='moduletitle'><?php echo $lang['barometerModule'], " (<valuetitleunit>", $barom["units"];?></valuetitleunit>)</span>
+<div class="updatedtime1">
 <?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?>
 </div>
  
@@ -86,7 +86,7 @@ if ($theme === "dark") { echo
     
         .barometer {
             position: relative; 
-            margin-top: -16px; 
+            margin-top: -14px; 
             margin-left: -0px;
         }
                 
@@ -146,7 +146,7 @@ if ($theme === "dark") { echo
     
         .barometer {
             position: relative; 
-            margin-top: -18px; 
+            margin-top: -14px; 
             margin-left: -0px;
         }
         

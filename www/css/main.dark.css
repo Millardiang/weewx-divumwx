@@ -1,35 +1,154 @@
-@supports (-moz-appearance:none) {
-  selector { property:value; }
-  }
-  /* Chrome version 29 and above */
-  @media screen and (-webkit-min-device-pixel-ratio:0)
-  and (min-resolution:.001dpcm) {
-  selector{ property:value; }
-  }
-  #beaker:after,
-  #beaker:before,
-  #raintoday:after,
-  .thearrow:after,
-  .thearrow:before {
-    content: ''
-  }
+:root {
+  --body-color: #151819;
+  --item-background: #1f2024;
+  --header-color: rgba(33, 34, 39, 0.8);
+  --text-color: #FFFFFF;
+  --text-reverse-color: #000000;
+  --menu-color: rgba(37, 41, 45, 0.7);
+  --border-right-bottom: #333;
+  --box-shadow: rgba(0, 0, 0, 0.3);
+  --top-box-border-gap: #151718;
+  --item-border: #26282c;
+  --footer-border: #191b1e;
+  --lightning-rain: #ff7c39;
+  --clock-text: #ffffff;
+  --offline: rgba(33, 34, 39, 0.8);
+  --online: #777777;
+  --designedby: #555555;
+  --active: #2c2d34;
+  --converter-border: 1px solid #e6e8ef;
+  --converter-text: #000000;
+  --darkmatter: #34495e;
+  --darkermatter: #2c3e50;
+  --greenapple: #2ecc71;
+  --greyapple: #ecf0f1;
+  --font-family: font-family: Arial, Helvetica, sans-serif;
+}
+[data-theme="light"] {
+  --body-color: #224f77;
+  --item-background: #afcee9;
+  --header-color: rgba(33, 34, 39, 0.8);
+  --text-color: #000000;
+  --text-reverse-color: #FFFFFF;
+  --menu-color: rgba(37, 41, 45, 0.7);
+  --border-right-bottom: #333;
+  --box-shadow: rgba(0, 0, 0, 0.3);
+  --top-box-border-gap: red;
+  --item-border: #488fcc;
+  --footer-border: #191b1e;
+  --lightning-rain: #ff7c39;
+  --clock-text: #ffffff;
+  --offline: rgba(33, 34, 39, 0.8);
+  --online: #777777;
+  --designedby: #555555;
+  --active: #2c2d34;
+  --converter-border: 1px solid #e6e8ef;
+  --converter-text: #FFFFFF;
+  --darkmatter: #34495e;
+  --darkermatter: #2c3e50;
+  --greenapple: #2ecc71;
+  --greyapple: #ecf0f1;
+  --font-family: font-family: Arial, Helvetica, sans-serif;
+}
   
-  .davisfooterlogo,
-  img {
-    image-rendering: auto;
-  }
-  
+.topnav {
+  overflow: hidden;
+  background-color: var(--item-border);
+  border-radius: 5px;
+  border-top: 5px solid var(--item-border);
+  border-bottom: 5px solid var(--item-border);
+}
+.topnav a {
+  float: none;
+  display: block;
+  color: var(--text-color);
+  text-align: center;
+  padding-right: 16px;
+  margin-top: -1px;
+  text-decoration: none;
+  font-size: 17px;
+}
+.topnav a.active {
+  background-color: teal;
+  color: var(--text-color);
+}
+.topnav .icon {
+  display: none;
+}
+.headerflag {
+  float: none;
+  font-weight: bold;
+  font-size: 20px;
+  text-transform: uppercase;
+  text-align: center;
+}  
   @font-face {
     font-family: system;
     font-style: normal;
     src: local("Arial")
   }
   
-  .menu,
-  .thearrow7:after {
-    -webkit-border-radius: 0;
+.theme-switch-wrapper {
+  display: flex;
+  align-items: center;
+  float: right;
+  margin-top: -22px;
+
+  em {
+    margin-left: 5px;
+    font-size: 1rem;
   }
-  
+}
+.theme-switch {
+  display: inline-block;
+  height: 17px;
+  position: relative;
+  width: 30px;
+  margin-left: -52px;
+}
+
+.theme-switch input {
+  display: none;
+}
+
+.slider {
+  background-color: #ccc;
+  bottom: 0;
+  cursor: pointer;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  transition: 0.4s;
+}
+
+.slider:before {
+  background-color: #fff;
+  bottom: 2px;
+  content: "";
+  height: 13px;
+  left: 2px;
+  position: absolute;
+  transition: 0.4s;
+  width: 13px;
+}
+
+input:checked + .slider {
+  background-color: #66bb6a;
+}
+
+input:checked + .slider:before {
+  transform: translateX(13px);
+}
+
+.slider.round {
+  border-radius: 17px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+ 
   .div:empty { display: none; }
   
   .averagedir,
@@ -90,10 +209,10 @@
   .h4,
   .h5,
   .h6,
-  .divum-container,
+  /*.divum-container,
   .divum-item,
   .divum2-container,
-  .divum2-item,
+  .divum2-item,*/
   a,
   body,
   h1,
@@ -110,8 +229,8 @@
   .h4,
   .h5,
   .h6,
-  .divum-container,
-  .divum-item,
+ /* .divum-container,
+  .divum-item,*/
   a,
   body,
   h1,
@@ -131,16 +250,14 @@
   .indoortrend,
   .tempcontainer,
   .tempcontainer1,
-  .divum-container,
-  .divum-item,
   .divum2-alert,
   .divum2-alert.divumfooter-item,
   .divum2-clock,
-  .divum2-container,
+  /*.divum2-container,*/
   .divum2-indoor,
-  .divum2-item,
+  /*.divum2-item,
   .divumfooter-container,
-  .divumfooter-item,
+  .divumfooter-item,*/
   a,
   body,
   h3 {
@@ -198,7 +315,7 @@
     clear: both;
     font-size: 14px;
     line-height: 1.42857143;
-    color: silver;
+    color: var(--text-color);
     cursor:default;
    
   }
@@ -241,14 +358,14 @@
     line-height: 6px;
     font-family: Arial, Helvetica, sans-serif, system;
     font-size: .8em;
-    color: silver;
+    color: var(--text-color);
     background: rgba(86, 95, 103, .4);
     -webkit-border-radius: 2px;
     border-radius: 2px;
     margin-top: -27px;
   }
   
-  .divum-item,
+  /*.divum-item,*/
   body,
   header {
     text-align: center;
@@ -321,7 +438,7 @@
   .barometertrend steady,
   .logo,
   .logo span {
-    color: silver;
+    color: var(--text-color);
   }
   
   .h1 .small,
@@ -337,7 +454,7 @@
   h5 .small,
   h6 .small {
     line-height: 1;
-    color: silver;
+    color: var(--text-color);
   }
   
   .h1,
@@ -371,7 +488,7 @@
     font-weight: 500;
   }
   
-  .divum-container {
+ /* .divum-container {
     display: flex;
     list-style: none;
     width: 960px;
@@ -425,43 +542,29 @@
     border: 0 solid #e9ebf1;
     float: left;
     font-size: .9em;
-  }
+  }*/
   
   .divum2-alert,
-  .divum2-clock,
-  .divumfooter-item {
+  .divum2-clock {
     background: rgba(33, 34, 39, .8);
     height: 90px;
   }
-  
-  .divumfooter-container,
-  .divumfooter-item {
+  /*   .divumfooter-container {
     font-family: Arial, system;
-  }
-  
+  }*/
+
+ /* .divumfooter-container {
+    display: flex;
+    width: 960px;
+    margin: 0 auto 2px;
+  }*/
+
+   
   .alerttopicons svg {
     margin-top: 33px;
     opacity: .5;
   }
-  
-  .divumfooter-container {
-    display: flex;
-    width: 960px;
-    margin: 0 auto 2px;
-  }
-  
-  .divumfooter-item {
-    width: 100%;
-    border: 1px solid #191b1e;
-    text-align: center;
-    -webkit-border-radius: 2px;
-    -o-border-radius: 2px;
-    -ms-border-radius: 2px;
-    border-radius: 5px;
-    margin: 0 2px 2px 0;
-    padding: 15px;
-  }
-  
+    
   .barometergaugegrid {
     width: 90%;
     text-align: center;
@@ -530,7 +633,7 @@
   .heading1,
   supmb,
   supunit {
-    color: silver;
+    color: var(--text-color);
   }
   
   .indoorlocation,
@@ -547,7 +650,7 @@
   }
   
   .indoortitles {
-    color: silver;
+    color: var(--text-color);
     margin-top: 5px;
     text-align: center;
     font: 1.2em arial, system
@@ -601,7 +704,7 @@
   }
   
   .heatcircle-content {
-    color: silver;
+    color: var(--text-color);
     float: left;
     margin-left: -4px;
     padding: 0;
@@ -664,7 +767,7 @@
   
   .humidity,
   a {
-    color: silver
+    color: var(--text-color)
   }
   
   suprain,
@@ -677,7 +780,7 @@
   .chartforecast {
     margin-left: 0;
     font-size: .67em;
-    color: silver;
+    color: var(--text-color);
     margin-top: 155px;
     width: 300px;
     padding-left: 10px;
@@ -687,7 +790,7 @@
   .chartforecastlink {
     margin-left: 0;
     font-size: .67em;
-    color: silver;
+    color: var(--text-color);
     margin-top: 155px;
     width: 300px;
     padding-left: 10px;
@@ -721,7 +824,7 @@
   }
   
   .windgustheading {
-    color: silver;
+    color: var(--text-color);
     font: 1em weathertext2
   }
   
@@ -797,7 +900,7 @@
   }
   
   .daylight {
-    color: silver;
+    color: var(--text-color);
     font-family: arial, system;
     top: 50px;
     margin-left: 360px;
@@ -840,7 +943,7 @@
   
   .feels,
   .feels1 {
-    color: silver;
+    color: var(--text-color);
     margin-left: auto
   }
   
@@ -877,7 +980,7 @@
   }
   
   .outlooktitle span {
-    color: silver;
+    color: var(--text-color);
     font-family: arial, system
   }
   
@@ -885,35 +988,19 @@
   #dayaftertomo,
   #night,
   #tomo {
-    color: silver;
+    color: var(--text-color);
     padding: 5px;
     border-bottom: 0 solid #e9ebf1;
     text-align: left
   }
   
   .beaufortconditions {
-    color: silver;
+    color: var(--text-color);
     width: 140px
   }
   
-  .updatedtime,
-  .updatedtime1,
-  .updatedtimeuv {
-    font: .65em weathertext2;
-    margin-left: 235px;
-    padding: 0;
-    margin-top: -35px;
-    color: silver;
-    line-height: 10px
-  }
+
   
-  .updatedtime1 {
-    margin-bottom: 10px
-  }
-  
-  .updatedtimecurrent {
-    border-radius: 2px
-  }
   
   .barometertrend1 {
     width: 100px;
@@ -921,14 +1008,14 @@
     margin-left: 10px;
     margin-top: 120px;
     text-align: left;
-    color: silver;
+    color: var(--text-color);
     font: .68em weathertext2;
     line-height: 9px
   }
   
   .barometertrend1 hourtrend {
     font: 500 10px arial, system;
-    color: silver;
+    color: var(--text-color);
     line-height: 9px;
     text-align: left;
     margin-left: 15px
@@ -943,12 +1030,12 @@
   }
   
   barometerinfo {
-    color: silver
+    color: var(--text-color)
   }
   
   .barometermax {
     margin-top: 10px;
-    color: silver;
+    color: var(--text-color);
     font: 10px arial, system;
     line-height: 9px
   }
@@ -967,13 +1054,13 @@
   
   .barometermax unit {
     font: 500 10px arial, system;
-    color: silver
+    color: var(--text-color)
   }
   
   .barometermin {
     margin-left: 240px;
     width: 50px;
-    color: silver;
+    color: var(--text-color);
     font: 10px arial, system;
     line-height: 9px
   }
@@ -988,7 +1075,7 @@
   }
   
   .barometermin unit {
-    color: silver
+    color: var(--text-color)
   }
   
   .barometertrend falling,
@@ -1043,7 +1130,7 @@
   .text,
   .windvalue {
     font-size: 26px;
-    color: silver
+    color: var(--text-color)
   }
   
   sub {
@@ -1182,7 +1269,7 @@
   .homeweathercompass>.windirectiontext {
     display: block;
     text-align: center;
-    color: silver;
+    color: var(--text-color);
     font-family: Arial, system;
     font-weight: 600;
     line-height: 12px;
@@ -1205,7 +1292,7 @@
   }
   
   .raintext1 span {
-    color: silver;
+    color: var(--text-color);
     font-size: 1em
   }
   
@@ -1224,12 +1311,11 @@
   .hrstillsunset period,
   .hrswassunrise,
   .hrswassunrise period,
-  .moduletitle,
   .sunrisehome,
   .sunrisehome period,
   .sunsethome,
   .sunsethome period {
-    color: silver
+    color: var(--text-color)
   }
   
   .wi-daylight:before {
@@ -1249,12 +1335,6 @@
     display: none
   }
   
-  .moduletitle {
-    position: relative;
-    top: -20px;
-    font-size: .8em;
-    float: none;
-  }
   
   .yearpopup {
     margin-left: 5px
@@ -1296,13 +1376,9 @@
   supsolar,
   suptemp1,
   suptempindoor {
-    color: silver
+    color: var(--text-color)
   }
   
-  .outlook,
-  .updatedtime {
-    position: absolute
-  }
   
   .barometertrend falling,
   .barometertrend rising,
@@ -1322,7 +1398,7 @@
   
   ::-webkit-scrollbar-track {
     background-color: #eaeaea;
-    border-left: 1px solid silver
+    border-left: 1px solid var(--text-color)
   }
   
   ::-webkit-scrollbar-thumb {
@@ -1339,7 +1415,7 @@
   
   ::-moz-scrollbar-track {
     background-color: #eaeaea;
-    border-left: 1px solid silver
+    border-left: 1px solid var(--text-color)
   }
   
   ::-moz-scrollbar-thumb {
@@ -1356,7 +1432,7 @@
   
   ::-o-scrollbar-track {
     background-color: #eaeaea;
-    border-left: 1px solid silver
+    border-left: 1px solid var(--text-color)
   }
   
   ::-o-scrollbar-thumb {
@@ -1373,7 +1449,7 @@
   
   ::scrollbar-track {
     background-color: #eaeaea;
-    border-left: 1px solid silver
+    border-left: 1px solid var(--text-color)
   }
   
   ::scrollbar-thumb {
@@ -1400,13 +1476,9 @@
   .average span,
   .averagedir span,
   .averageindoor span,
-  .averageuv span,
-  .updatedtime span,
-  .updatedtimealert span,
-  .updatedtimecurrent span,
-  .updatedtimedir span {
-    margin-bottom: 0;
-    color: silver;
+  .averageuv span {
+   margin-bottom: 0;
+    color: var(--text-color);
     font-family: weathertext2;
     text-rendering: optimizeLegibility
   }
@@ -1415,21 +1487,21 @@
   .temperatureindoor span {
     margin-bottom: 0;
     font-size: .4em;
-    color: silver;
+    color: var(--text-color);
     font-family: weathertext2
   }
   
   .windalarm span,
   .windcondition span {
     margin-bottom: 0;
-    color: silver;
+    color: var(--text-color);
     font-weight: 600;
     font-family: arial, system
   }
   
   .windalarm,
   .windcondition {
-    color: silver;
+    color: var(--text-color);
     font: 600 9px arial, system;
     position: absolute;
     width: 100px;
@@ -1448,7 +1520,7 @@
   
   .gustspeedtrend,
   .gustspeedtrend span {
-    color: silver
+    color: var(--text-color)
   }
   
   .gustspeedtrend,
@@ -1489,7 +1561,7 @@
   
   .windspeedtrend span {
     margin-bottom: 0;
-    color: silver;
+    color: var(--text-color);
     font-family: arial, system
   }
   
@@ -1501,7 +1573,7 @@
   .windvalue1 {
     font-family: weathertext2;
     font-size: 0.65rem;
-    color: silver
+    color: var(--text-color)
   }
   
   .windvalue1 {
@@ -1601,7 +1673,7 @@
   .homeweathercompass1>.windirectiontext1 {
     display: block;
     text-align: center;
-    color: silver;
+    color: var(--text-color);
     font-family: Arial, system;
     font-weight: 600;
     line-height: 12px;
@@ -1636,7 +1708,7 @@
   }
   
   .windunits {
-    color: silver
+    color: var(--text-color)
   }
   
   .beaufort {
@@ -1649,13 +1721,13 @@
   .windspeedvalue {
     font-size: 1.55rem;
     margin-top: 50px;
-    color: silver
+    color: var(--text-color)
   }
   
   .windgustvalue {
     font-size: 1.55rem;
     margin-top: 50px;
-    color: silver
+    color: var(--text-color)
   }
   
   .windspeedvalues {
@@ -1674,7 +1746,7 @@
   
   .gustspeedtrend1,
   .windspeedtrend1 {
-    margin-top: -14px;
+    margin-top: -13px;
     position: absolute
   }
   
@@ -1707,7 +1779,7 @@
   
   .windspeedtrend1,
   .windspeedtrend1 span {
-    color: silver;
+    color: var(--text-color);
     font: 10px arial, system;
     line-height: 9px
   }
@@ -1740,7 +1812,7 @@
   
   suptemp1,
   suptemp3 {
-    color: silver
+    color: var(--text-color)
   }
   
   .divumwxmenulisting {
@@ -1761,7 +1833,7 @@
     .almanacpopup,
     .dvmuptime,
     .divum2-container,
-    .divumfooter-container,
+    /*.divumfooter-container,*/
     header {
       display: none
     }
@@ -1792,7 +1864,7 @@
   
     .almanacpopup,
     .divum2-container,
-    .divumfooter-container,
+    /*.divumfooter-container,*/
     header {
       display: none
     }
@@ -1809,6 +1881,7 @@
       right: 40px
     }
   }
+
   
   @media screen and (max-width:640px) {
     .divum-container {
@@ -1823,7 +1896,7 @@
   
     .almanacpopup,
     .divum2-container,
-    .divumfooter-container,
+    /*.divumfooter-container,*/
     header {
       display: none
     }
@@ -1844,7 +1917,7 @@
     width: 303px;
     background-color: #f05e40;
     border-radius: 5px;
-    color: silver
+    color: var(--text-color)
   }
   
   .Circle1 {
@@ -1928,7 +2001,7 @@
   
   .footertext,
   .online {
-    color: silver;
+    color: var(--text-color);
     font-size: 12px
   }
   
@@ -1940,7 +2013,7 @@
   
   .hardwarelogo1text {
     position: absolute;
-    color: silver;
+    color: var(--text-color);
     font-size: 10px;
     width: 65px;
     line-height: 10px;
@@ -2044,7 +2117,7 @@
   }
   
   .lightningrain {
-    color: silver;
+    color: var(--text-color);
     margin-top: 142px;
     margin-left: 0
   }
@@ -2057,7 +2130,7 @@
   .rainaverage {
     margin-top: 143px;
     width: 100px;
-    color: silver;
+    color: var(--text-color);
     margin-left: 200px
   }
   
@@ -2079,7 +2152,7 @@
     border-top: 1px;
     border-bottom: 1px;
     border-radius: 6px;
-    color: silver;
+    color: var(--text-color);
     float: left;
     padding: 5px;
     position: relative;
@@ -2092,7 +2165,7 @@
   .divumwxbox .value {
     position: absolute;
     float: left;
-    color: silver
+    color: var(--text-color)
   }
   
   .divumwxbox .title {
@@ -2116,7 +2189,7 @@
   }
   
   .divumwxbox.indoor span {
-    color: silver;
+    color: var(--text-color);
     font-weight: 500
   }
   
@@ -2132,7 +2205,7 @@
   }
   
   .divumwxbox.clock span {
-    color: silver;
+    color: var(--text-color);
     font-weight: 500
   }
   
@@ -2154,7 +2227,7 @@
   spanm2,
   spanm4,
   spanm5 {
-    color: silver
+    color: var(--text-color)
   }
   
   spanm {
@@ -2204,7 +2277,7 @@
   }
   
   .homeindoordate {
-    color: silver;
+    color: var(--text-color);
     text-transform: none;
     top: 23px;
     right: 40px;
@@ -2245,7 +2318,7 @@
   nav,
   nav li,
   nav ul {
-    color: silver
+    color: var(--text-color)
   }
   
   .rainblue1,
@@ -2296,7 +2369,7 @@
   .main-menu li>a,
   .main-menu menu {
     font-size: 12px;
-    color: silver
+    color: var(--text-color)
   }
   
   .main-menu {
@@ -2403,7 +2476,7 @@
   
   infogrey,
   ogreyh1 {
-    color: silver
+    color: var(--text-color)
   }
   
   hiti,
@@ -2541,7 +2614,7 @@
     width: 5.5rem;
     line-height: 16px;
     font-family: weathertext2;
-    color: silver;
+    color: var(--text-color);
     justify-content: center;
     font-size: .85em;
     border: 1px solid #393d40;
@@ -2620,7 +2693,7 @@
   
   greyuv,
   solartrend {
-    color: silver
+    color: var(--text-color)
   }
   
   purpleuv {
@@ -2695,7 +2768,7 @@
   }
   
   .tempgreen {
-    color: silver
+    color: var(--text-color)
   }
   
   .tempgreen span {
@@ -2704,7 +2777,7 @@
   }
   
   .temporange {
-    color: silver
+    color: var(--text-color)
   }
   
   .temporange span {
@@ -2718,7 +2791,7 @@
   }
   
   .tempred {
-    color: silver
+    color: var(--text-color)
   }
   
   .tempred span {
@@ -2728,7 +2801,7 @@
   
   .tempblue,
   .tempgreenfeels {
-    color: silver
+    color: var(--text-color)
   }
   
   .tempblue span {
@@ -2739,7 +2812,7 @@
   .tempgreendew,
   .temporangedew,
   .tempreddew {
-    color: silver;
+    color: var(--text-color);
     margin-top: -5px;
     float: left;
     width: 60px
@@ -2765,7 +2838,7 @@
   }
   
   .temporangefeels {
-    color: silver
+    color: var(--text-color)
   }
   
   .temporangefeels span {
@@ -2774,7 +2847,7 @@
   }
   
   .tempredfeels {
-    color: silver
+    color: var(--text-color)
   }
   
   .tempredfeels span {
@@ -2783,7 +2856,7 @@
   }
   
   .tempbluefeels {
-    color: silver
+    color: var(--text-color)
   }
   
   .tempbluefeels span {
@@ -2813,7 +2886,7 @@
   .barometerorange {
     position: absolute;
     background: rgba(97, 106, 114, 0);
-    color: silver;
+    color: var(--text-color);
     width: 60px;
     border-radius: 2px;
     padding: 1px;
@@ -2881,7 +2954,7 @@
   .daylightgreen span,
   .daylightred,
   .daylightred span {
-    color: silver
+    color: var(--text-color)
   }
   
   .daylightblue,
@@ -2903,7 +2976,7 @@
   }
   
   .rainrateblue span {
-    color: silver;
+    color: var(--text-color);
     font-size: 10px
   }
   
@@ -2921,7 +2994,7 @@
   .homeweathercompass2,
   .raintodayblue span,
   todayrain {
-    color: silver;
+    color: var(--text-color);
     font-size: 12px
   }
   
@@ -2988,7 +3061,7 @@
   .pressuretextfast {
     position: absolute;
     font-size: .7rem;
-    color: silver;
+    color: var(--text-color);
     margin-top: 115px;
     margin-left: 77px;
     width: 90px;
@@ -3003,7 +3076,7 @@
   .text2 span,
   .text3 {
     font-size: 11px;
-    color: silver
+    color: var(--text-color)
   }
   
   .thearrow4,
@@ -3041,7 +3114,7 @@
   
   .barometertrend2 {
     position: absolute;
-    color: silver;
+    color: var(--text-color);
     padding: 1px;
     border-radius: 2px;
     margin-top: 129px;
@@ -3076,7 +3149,7 @@
   
   .barometerconv span,
   convtext {
-    color: silver;
+    color: var(--text-color);
     display: block;
     font-weight: 500
   }
@@ -3148,7 +3221,7 @@
   .hoursgoneby {
     top: 40px;
     left: 27px;
-    color: silver;
+    color: var(--text-color);
     border: 0
   }
   
@@ -3159,7 +3232,7 @@
     line-height: 20px;
     width: 100px;
     position: absolute;
-    color: silver;
+    color: var(--text-color);
     border: 0
   }
   
@@ -3176,7 +3249,7 @@
   
   .daylightvalue span {
     position: absolute;
-    color: silver;
+    color: var(--text-color);
     font-size: 3px;
     left: 67px;
     top: 0;
@@ -3196,7 +3269,7 @@
   
   .daylightvalue dayperiod {
     position: absolute;
-    color: silver;
+    color: var(--text-color);
     font-size: 10px;
     left: 15px;
     top: 20px;
@@ -3207,7 +3280,7 @@
   .daylightvalue hrs,
   .daylightvalue min {
     position: absolute;
-    color: silver;
+    color: var(--text-color);
     font-size: 9px;
     top: -17px;
     letter-spacing: normal
@@ -3263,7 +3336,7 @@
   .divumwxmenulisting {
     width: 250px;
     padding: 5px;
-    color: silver;
+    color: var(--text-color);
     height: 800px;
     position: absolute;
     left: 0;
@@ -3280,11 +3353,11 @@
     float: left;
     text-align: left;
     margin-left: 5px;
-    color: silver
+    color: var(--text-color)
   }
   
   .divumwxmenulistings a {
-    color: silver
+    color: var(--text-color)
   }
   
   .divumwxmenulistings a:hover {
@@ -3369,7 +3442,7 @@
   .sunsetday {
     width: 100px;
     position: absolute;
-    color: silver
+    color: var(--text-color)
   }
   
   .daylightvalue1,
@@ -3419,7 +3492,7 @@
   .daylightvalue1 min {
     font-size: 9px;
     top: -17px;
-    color: silver;
+    color: var(--text-color);
     letter-spacing: normal;
     position: absolute
   }
@@ -3499,7 +3572,7 @@
   .daylightcompass2 {
     display: block;
     text-align: center;
-    color: silver;
+    color: var(--text-color);
     font-family: Arial, system;
     font-weight: 600;
     line-height: 12px;
@@ -3529,7 +3602,7 @@
   smallicon {
     margin-top: -12px;
     margin-left: 10px;
-    color: silver;
+    color: var(--text-color);
     font-size: 10px
   }
   
@@ -3549,7 +3622,7 @@
   }
   
   aurora {
-    color: silver
+    color: var(--text-color)
   }
   
   wforange {
@@ -3570,7 +3643,7 @@
   }
   
   .uvimax span {
-    color: silver;
+    color: var(--text-color);
     font: 10px arial, system
   }
   
@@ -3677,30 +3750,7 @@
     width: 50px
   }
   
-  #divumwxsidebarMenu,
-  .divumwxsidebarMenuInner li {
-    background: #151718;
-    width: 240px;
-    float: left
-  }
-  
-  .divumwxsidebarMenuInner li.flagstop{
-    margin-bottom: -4px;
-    padding-top: 0;
-    padding-bottom: 0
-  }
-  
-  .divumwxsidebarMenuInner li.flagsmiddle {
-    margin-top: -4px;
-    margin-bottom: -4px;
-    padding-top: 0;
-    padding-bottom:0
-  }
-  .divumwxsidebarMenuInner li.flagsbottom {
-    margin-top: -4px;
-    padding-top: 0;
-    padding-bottom: 5px
-  }
+ 
   
   .alertcircle,
   civil {
@@ -3708,202 +3758,14 @@
     font-weight: 500
   }
   
-  #divumwxsidebarMenu {
-    position: absolute;
-    left: 0;
-    top: 0;
-    transform: translateX(-250px);
-    transition: transform 250ms ease-in-out;
-    height: 900px;
-    z-index: 30
-  }
-  
-  .sidebarIconToggle,
-  .menuspinner,
-  input[type=checkbox] {
-    transition: all .3s;
-    box-sizing: border-box
-  }
-  
-  .divumwxsidebarMenuInner {
-    margin: 0;
-    padding: 0;
-    border-top: 0;
-    width: 240px;
-    float: left;
-    font-weight: 500
-  }
-  
-  .menucross.part-2,
-  .menuhorizontal {
-    margin-top: 3px
-  }
-  
-  .divumwxsidebarMenuInner li {
-    list-style: none;
-    color: silver;
-    padding: 0px 5px 3px 14px;
-    cursor: pointer;
-    border-bottom: 0;
-    font-size: 12px;
-    font-weight: 500
-  }
+ 
   
   .luxrate,
   rainu {
     padding-left: 0
   }
   
-  .divumwxsidebarMenuInner li.header,
-  .divumwxsidebarMenuInner li.header.sub {
-    font-size: 15px;
-    text-align: left;
-    color: #ff8841;
-    font-weight: bold;
-    padding-top: 5px;
-    padding-bottom: 2px;
-    padding-left: 8px
-  }
-  
-  .divumwxsidebarMenuInner li span {
-    display: block;
-    font-size: 12px;
-    color: silver;
-    float: left;
-    width: 240px;
-    font-weight: 500
-  }
-  
-  .divumwxsidebarMenuInner li a {
-    color: silver;
-    cursor: pointer;
-    text-decoration: none;
-    float: left;
-    font-size: 12px;
-    font-weight: 500
-  }
-  
-  .divumwxsidebarMenuInner li a:hover {
-    color: #ff7c39;
-    cursor: pointer;
-    text-decoration: none;
-    float: left;
-    font-size: 12px;
-    font-weight: 500
-  }
-  
-  /* CSS for the flyout menu */
-  .divumwxsidebarMenuInner li.sub {
-  //  background-image: url(sub2.svg);
-    background-repeat: no-repeat;
-    background-position-x: right;
-    background-position-y: center;
-  }
-  
-  .divumwxsidebarMenuInner li ul {
-    visibility: hidden;
-    position: absolute;
-    top: -30px;
-    /* set up the overlap (minus the overrun) */
-    left: 100px;
-    /* set up the overrun area */
-    padding: 30px;
-    /* this is for IE to make it interpret the overrrun padding */
-  //  background: transparent url(transparent.gif);
-  }
-  
-  .divumwxsidebarMenuInner li.sub ul li {
-    padding-top: 6px;
-    background-color: rgba(33, 34, 39, .95);
-  }
-  
-  .divumwxsidebarMenuInner li:hover {
-    position: relative;
-  }
-  
-  /* For accessibility of the top level menu when tabbing */
-  /* .divumwxsidebarMenuInner a:active,
-  .divumwxsidebarMenuInner a:focus {
-    color: #000;
-  } */
-  
-  /* for browsers that understand this is all you need for the flyouts */
-  .divumwxsidebarMenuInner li:hover>ul {
-    visibility: visible;
-  }
-  
-  /* for IE5.5 and IE6 you need to style each level hover */
-  
-  /* keep the third level+ hidden when you hover on first level link */
-  .divumwxsidebarMenuInner ul a:hover ul ul {
-    visibility: hidden;
-  }
-  
-  /* keep the fourth level+ hidden when you hover on second level link */
-  .divumwxsidebarMenuInner ul a:hover ul a:hover ul ul {
-    visibility: hidden;
-  }
-  
-  /* keep the fifth level hidden when you hover on third level link */
-  .mendivumwxsidebarMenuInneru ul a:hover ul a:hover ul a:hover ul ul {
-    visibility: hidden;
-  }
-  
-  /* make the second level visible when hover on first level link */
-  .divumwxsidebarMenuInner ul a:hover ul {
-    visibility: visible;
-  }
-  
-  /* make the third level visible when you hover over second level link */
-  .medivumwxsidebarMenuInnernu ul a:hover ul a:hover ul {
-    visibility: visible;
-  }
-  
-  /* make the fourth level visible when you hover over third level link */
-  .divumwxsidebarMenuInner ul a:hover ul a:hover ul a:hover ul {
-    visibility: visible;
-  }
-  
-  /* make the fifth level visible when you hover over fourth level link */
-  .divumwxsidebarMenuInner ul a:hover ul a:hover ul a:hover ul a:hover ul {
-    visibility: visible;
-  }
-  /* End flyout menu */
-  
-  input[type=checkbox]:checked~#divumwxsidebarMenu {
-    transform: translateX(0)
-  }
-  
-  input[type=checkbox] {
-    display: none
-  }
-  
-  .sidebarIconToggle {
-    cursor: pointer;
-    position: absolute;
-    z-index: 99;
-    top: 15px;
-    left: 15px;
-    height: 22px;
-    width: 22px
-  }
-  
-  .menuspinner {
-    position: absolute;
-    height: 3px;
-    width: 100%;
-    background-color: silver
-  }
-  
-  .menucross.part-1,
-  .menucross.part-2,
-  .menuhorizontal {
-    position: relative;
-    transition: all .3s;
-    box-sizing: border-box;
-    float: left
-  }
-  
+ 
   .alertcircle,
   .lightningstrikes,
   .maxyesterday,
@@ -3912,25 +3774,7 @@
     position: absolute
   }
   
-  input[type=checkbox]:checked~.sidebarIconToggle>.menuhorizontal {
-    transition: all .3s;
-    box-sizing: border-box;
-    opacity: 0
-  }
-  
-  input[type=checkbox]:checked~.sidebarIconToggle>.menucross.part-1 {
-    transition: all .3s;
-    box-sizing: border-box;
-    transform: rotate(135deg);
-    margin-top: 8px
-  }
-  
-  input[type=checkbox]:checked~.sidebarIconToggle>.menucross.part-2 {
-    transition: all .3s;
-    box-sizing: border-box;
-    transform: rotate(-135deg);
-    margin-top: -9px
-  }
+ 
   
   uptime {
     font-size: 12px;
@@ -3949,7 +3793,7 @@
   .wfstrikes {
     font-size: 9px;
     top: -12px;
-    color: silver
+    color: var(--text-color)
   }
   
   .daylightmoduleposition {
@@ -3961,13 +3805,13 @@
   highestrecorded {
     margin-top: -25px;
     display: block;
-    color: silver;
+    color: var(--text-color);
     margin-left: 10px;
   }
   
   .averagetemp {
     font-size: .6em;
-    color: silver;
+    color: var(--text-color);
     display: block;
     top: 8px;
     width: 30px;
@@ -3993,7 +3837,7 @@
   }
   
   suplight {
-    color: silver;
+    color: var(--text-color);
     left: 3px;
     font-size: .7em;
   }
@@ -4027,7 +3871,7 @@
   .aerisweekdayhome {
     font-family: weathertext2;
     font-size: .93em;
-    color: silver
+    color: var(--text-color)
   }
   
   .aerisdiv {
@@ -4046,14 +3890,14 @@
     padding: 1px;
     background: 0;
     border: 1px solid rgba(153, 155, 156, .1);
-    color: silver
+    color: var(--text-color)
   }
   
   .aerisweekdayhome {
     position: absolutue;
     text-align: center;
     padding: 1px;
-    color: silver;
+    color: var(--text-color);
     margin: 0;
     background: 0
   }
@@ -4108,7 +3952,7 @@
   .aerisnexthours span1,
   .aerisnexthours span2 {
     font-family: arial, helvetica, system;
-    color: silver
+    color: var(--text-color)
   }
   
   .aerisnexthours span1,
@@ -4122,7 +3966,7 @@
     font-size: 9px;
     font-weight: 500;
     top: -2px;
-    color: silver
+    color: var(--text-color)
   }
   
   
@@ -4139,7 +3983,7 @@
   }
   
   heatindex {
-    color: silver;
+    color: var(--text-color);
     margin-top: -25px;
     display: block;
     font-size: 12px
@@ -4158,7 +4002,7 @@
     margin: 20px auto 0;
     left: 45px;
     font-size: .7rem;
-    color: silver;
+    color: var(--text-color);
     font-family: weathertext2;
     text-align: center;
     width: 200px;
@@ -4183,7 +4027,7 @@
     margin-top: 20px;
     margin-left: 125px;
     max-width: 120px;
-    color: silver
+    color: var(--text-color)
   }
   
   .aerisnexthours {
@@ -4261,7 +4105,7 @@
     top: 0;
     left: -15px;
     display: block;
-    color: silver
+    color: var(--text-color)
   }
   
   .smallf {
@@ -4291,7 +4135,7 @@
     margin-left: 125px;
     padding: 5px;
     text-align: left;
-    color: silver
+    color: var(--text-color)
   }
   
   .wfstrikes1 {
@@ -4299,7 +4143,7 @@
     font-size: 9px;
     top: -12px;
     left: 12px;
-    color: silver
+    color: var(--text-color)
   }
   
   agolightning,
@@ -4341,7 +4185,7 @@
     top: 0;
     left: 0;
     display: block;
-    color: silver
+    color: var(--text-color)
   }
   
   lorange1 {
@@ -4351,7 +4195,7 @@
   timeago {
     display: block;
     font-size: .7rem;
-    color: silver
+    color: var(--text-color)
   }
   
   agolightning {
@@ -4549,7 +4393,7 @@
   }
   
   darkgrey {
-    color: silver
+    color: var(--text-color)
   }
   
   supmb {
@@ -4935,7 +4779,7 @@
     top: 24px;
     left: 40px;
     letter-spacing: normal;
-    color: silver
+    color: var(--text-color)
   }
   
   .daylightvalue1 hrs {
@@ -4994,7 +4838,7 @@
   
   .consoleoutlook {
     position: relative;
-    color: silver;
+    color: var(--text-color);
     font-size: .42em;
     margin-top: 1.5rem;
     line-height: 1em;
@@ -5119,7 +4963,7 @@
     font-size: 14px;
     font-weight: lighter;
     padding: 0 3px;
-    color: silver;
+    color: var(--text-color);
     float: left;
     top: 30px;
     display: block;
@@ -5135,7 +4979,7 @@
   .tempconvertercircleyellow {
     align-items: center;
     width: 4.2rem;
-    color: silver;
+    color: #ffffff;
     font-family: weathertext2;
     height: 1rem;
     line-height: 16px;
@@ -5208,7 +5052,7 @@
   }
   
   smallsup {
-    color: silver;
+    color: var(--text-color);
     font-size: .5rem;
     font-family: Arial, Helvetica, system
   }
@@ -5287,7 +5131,7 @@
   
   .windconverter {
     margin-left: 252px;
-    margin-top: -15px;
+    margin-top: -13px;
   }
   
   .windconvertercircleblue1,
@@ -5306,7 +5150,7 @@
     line-height: 16px;
     font-family: weathertext2;
     font-size: .85em;
-    color: silver;
+    color: var(--text-color);
     background: 0
   }
   
@@ -5450,7 +5294,7 @@
     text-align: center;
     z-index: auto;
     font-size: 0;
-    color: silver;
+    color: var(--text-color);
     font-family: Arial, system
   }
   
@@ -5494,7 +5338,7 @@
   .maxdata {
     position: absolute;
     font-size: .68em;
-    color: silver;
+    color: var(--text-color);
     margin-top: 27px;
     margin-left: 88px;
   }
@@ -5649,7 +5493,7 @@
     margin-left: 14px;
     text-align: center;
     z-index: auto;
-    color: silver;
+    color: var(--text-color);
     font-family: Arial, system
   }
   
@@ -5833,7 +5677,7 @@
     margin-top: 61px;
     font-size: .54rem;
     z-index: 1;
-    color: silver;
+    color: var(--text-color);
     width: 50px
   }
   
@@ -5863,7 +5707,7 @@
   }
   
   .windunitidspeed {
-    color: silver;
+    color: var(--text-color);
     margin-top: -35px;
     font-size: 10px;
     position: absolute;
@@ -5872,7 +5716,7 @@
   }
   
   .windunitidgust {
-    color: silver;
+    color: var(--text-color);
     margin-top: -35px;
     font-size: 10px;
     position: absolute;
@@ -5882,7 +5726,7 @@
   
   .windunitgust,
   .windunitspeed {
-    color: silver;
+    color: var(--text-color);
     margin-top: 7px;
     font-size: 10px;
     position: absolute;
@@ -5890,7 +5734,7 @@
   }
   
   .windunitgust2 {
-    color: silver;
+    color: var(--text-color);
     margin-top: 7px;
     font-size: 10px;
     position: absolute;
@@ -5926,12 +5770,12 @@
   
   .daylightword {
     left: 105px;
-    top: -0px
+    top: -2px
   }
   
   .elevationword {
     left: 105px;
-    top: 134px
+    top: 136px
   }
   
   .elevationword span {
@@ -5942,7 +5786,7 @@
   .elevationword {
     font-size: .6rem;
     position: absolute;
-    color: silver
+    color: var(--text-color)
   }
   
   .sundialcontainerdiv2 {
@@ -6181,7 +6025,7 @@
     justify-content: center;
     border-radius: 2px;
     margin-top: 5px;
-    color: silver
+    color: var(--text-color)
   }
   
   .uvcautionbig span {
@@ -6203,8 +6047,8 @@
     align-items: center;
     justify-content: center;
     border-radius: 2px;
-    margin-top: -23px;
-    color: silver
+    margin-top: -22px;
+    color: var(--text-color)
   }
   
   .uvcautionbig2 span {
@@ -6234,7 +6078,7 @@
     -moz-border-radius: 50%;
     border-radius: 50%;
     background: #e6a141;
-    border: 1px solid silver;
+    border: 1px solid var(--text-color);
     height: .45rem;
     width: .45rem;
     display: inline;
@@ -6357,7 +6201,7 @@
   .divumwxbeaufort6 {
     font-size: .7rem;
     position: absolute;
-    margin-top: 85px;
+    margin-top: 80px;
     margin-left: 20px;
     display: flex;
     align-items: center;
@@ -6390,7 +6234,7 @@
     margin-left: 3px;
     font-size: .55rem;
     font-family: Arial, Helvetica, system;
-    color: silver
+    color: var(--text-color)
   }
   
   .divumwxwindrun {
@@ -6410,7 +6254,7 @@
   .beaufort1,
   .windrun1,
   divumwxwindrunspan {
-    color: silver;
+    color: var(--text-color);
     font-family: Arial, Helvetica, system
   }
   
@@ -6428,7 +6272,7 @@
   
   .beaufort1,
   .windrun1 {
-    margin-top: 102px;
+    margin-top: 103px;
     font-size: .65rem;
     width: 6.5rem;
     display: flex
@@ -6506,7 +6350,7 @@
   }
   
   .feelslikebig span {
-    color: silver;
+    color: var(--text-color);
     padding-right: 3px
   }
   
@@ -6572,7 +6416,7 @@
   
   aeristemplohome uv {
     font-size: .6rem;
-    color: silver
+    color: var(--text-color)
   }
   
   #divumwxrainbeaker:before {
@@ -6581,7 +6425,7 @@
   
   rainu {
     font-size: 10px;
-    color: silver;
+    color: var(--text-color);
     left: 3px
   }
   
@@ -6716,20 +6560,20 @@
   
   .rainratesmall {
     top: 1px;
-    color: silver;
+    color: var(--text-color);
     font-size: 9px;
     line-height: 12px;
     left: 40px
   }
   
   smallrainunit {
-    color: silver
+    color: #ffffff;
   }
   
   smallrainunit2,
   smallrainunit3 {
     font-size: .5rem;
-    color: silver;
+    color: var(--text-color);
     font-family: Arial, Helvetica, system
   }
   
@@ -6813,7 +6657,7 @@
   }
   
   units {
-    color: silver
+    color: var(--text-color)
   }
   
   valuetext,
@@ -6862,7 +6706,7 @@
     line-height: 16px;
     font-family: weathertext2;
     font-size: .85em;
-    color: silver
+    color: var(--text-color)
   }
   
   .footertext,
@@ -6872,7 +6716,7 @@
     line-height: 16px;
     font-family: weathertext2;
     font-weight: 400;
-    color: silver
+    color: var(--text-color)
   }
   
   .temphumcircle60-80 {
@@ -6929,21 +6773,21 @@
     margin-left: 10px;
     font-family: weathertext2;
     font-size: .9em;
-    color: silver
+    color: var(--text-color)
   }
   
   valuetextheading2 {
     margin-left: 0px;
     font-family: weathertext2;
     font-size: .9em;
-    color: silver
+    color: var(--text-color)
   }
   
   .tempconverter,
   .tempconverter2,
   .tempconverter3 {
     position: absolute;
-    margin-top: 5px;
+    margin-top: 2px;
     font-size: 12px
   }
   
@@ -6975,12 +6819,12 @@
   
   menutextheading1 {
     font-family: weathertext2;
-    color: silver
+    color: var(--text-color)
   }
   
   rainratetextheading {
     font-family: weathertext2;
-    color: silver;
+    color: var(--text-color);
     font-size: .75em
   }
   
@@ -7016,7 +6860,7 @@
     align-items: center;
     line-height: 16px;
     font-family: weathertext2;
-    color: silver;
+    color: var(--text-color);
     border: 1px solid #393d40;
     font-weight: 400
   }
@@ -7060,7 +6904,7 @@
     font-family: weathertext2;
     font-size: .65rem;
     font-weight: 400;
-    color: silver;
+    color: var(--text-color);
     border: 1px solid #393d40
   }
   
@@ -7096,7 +6940,7 @@
     align-items: center;
     line-height: 16px;
     font-family: weathertext2;
-    color: silver;
+    color: var(--text-color);
     border: 1px solid #393d40;
     font-weight: 400
   }
@@ -7131,7 +6975,7 @@
     align-items: center;
     line-height: 16px;
     font-family: weathertext2;
-    color: silver;
+    color: var(--text-color);
     border: 1px solid #393d40;
     font-weight: 400
   }
@@ -7164,7 +7008,7 @@
     line-height: 16px;
     font-family: weathertext2;
     font-size: .65rem;
-    color: silver;
+    color: var(--text-color);
     border: 1px solid #393d40;
     font-weight: 400
   }
@@ -7220,7 +7064,7 @@
     line-height: 16px;
     font-family: weathertext2;
     font-size: .65rem;
-    color: silver;
+    color: var(--text-color);
     font-weight: 400;
     display: flex;
     overflow: hidden
@@ -7384,7 +7228,7 @@
   .eqt {
     margin-left: 10px;
     margin-top: -15px;
-    color: silver;
+    color: var(--text-color);
     font-size: .65rem
   }
   
@@ -7443,7 +7287,7 @@
   
   .mooncircle1,
   .mooncircle1:after {
-    color: silver;
+    color: var(--text-color);
     margin-left: 0;
     padding-top: 40px;
     padding-bottom: 10px;
@@ -7480,14 +7324,14 @@
     position: absolute;
     font-size: .65rem;
     margin-top: -17px;
-    color: silver;
+    color: var(--text-color);
     display: block;
     text-align: center;
     margin-left: 25px
   }
   
   .mooncircle1 span {
-    color: silver;
+    color: var(--text-color);
     text-align: center;
     display: block;
     margin-left: 0;
@@ -7506,7 +7350,7 @@
   
   .moonphase,
   .moonrise1 {
-    color: silver
+    color: var(--text-color)
   }
   
   .moonphase {
@@ -7559,25 +7403,25 @@
   }
   
   .moonrise1 span {
-    color: silver;
+    color: var(--text-color);
     margin-left: 25px
   }
   
   .moonset1 {
     margin-top: 120px;
     margin-left: -105px;
-    color: silver
+    color: var(--text-color)
   }
   
   .moonset1 span {
-    color: silver;
+    color: var(--text-color);
     margin-left: 15px
   }
   
   .fullmoon1,
   .meteorshower,
   .newmoon1 {
-    color: silver;
+    color: var(--text-color);
     font-family: weathertext2
   }
   
@@ -7921,7 +7765,7 @@
   .divumwxindoorword {
     margin-left: 93px;
     margin-top: 26px;
-    color: silver;
+    color: var(--text-color);
     font-size: .55rem;
     font-family: arial, system;
     position: absolute
@@ -8037,85 +7881,9 @@
     color: #38383c
   }
   
-  .updatedtime,
-  .updatedtimealert,
-  .updatedtimecurrent,
-  .updatedtimedir,
-  .updatedtimeuv {
-    width: 75px;
-    text-align: center
-  }
+ 
   
-  .updatedtime,
-  .updatedtimeuv {
-    font: .65em weathertext2;
-    margin-left: 235px;
-    color: silver;
-    background: 0;
-    padding: 3px
-  }
-  
-  .updatedtime,
-  updatedtime1 {
-    margin-top: -38px;
-    line-height: 10px;
-  }
-  
-  .updatedtimeuv {
-    margin-top: -112px;
-    line-height: 10px
-  }
-  
-  .updatedtimeuv span {
-    color: silver
-  }
-  
-  .updatedtimecurrent {
-    margin-top: -38px;
-    margin-left: 235px;
-    color: silver;
-    font: .65em weathertext2;
-    line-height: 10px;
-    background: 0;
-    padding: 3px
-  }
-  
-  .updatedtimealert {
-    margin-top: 5px;
-    margin-left: 215px;
-    color: silver;
-    font: .65em weathertext2;
-    line-height: 10px
-  }
-  
-  .updatedtimedir {
-    margin-top: -25px;
-    margin-left: 135px;
-    position: absolute;
-    color: silver;
-    font: .65em weathertext2;
-    line-height: 10px;
-    border-radius: 2px;
-    background: 0;
-    padding: 3px
-  }
-  
-  updatedtime {
-    position: absolute
-  }
-  
-  .updatedtime span,
-  .updatedtimealert span,
-  .updatedtimecurrent span,
-  .updatedtimedir span {
-    margin-bottom: 0;
-    color: silver;
-    font-family: weathertext2;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    -moz-font-smoothing: antialiased;
-  }
+
   
   .homeweatherstationlogo {
     margin-top: -15px;
@@ -8166,7 +7934,7 @@
   
   .inheatcircle-content {
     position: absolute;
-    color: silver;
+    color: var(--text-color);
     float: left;
     margin-left: -4px;
     padding: 0;
@@ -8187,7 +7955,7 @@
   
   .inheatcircle2-content {
     position: absolute;
-    color: silver;
+    color: var(--text-color);
     float: left;
     margin-top: 35px;
     margin-left: -5px;
@@ -8221,7 +7989,7 @@
     line-height: 16px;
     font-family: weathertext2;
     font-size: .85em;
-    color: silver
+    color: var(--text-color)
   }
   
   .intemphumcircle60-80 {
@@ -8277,7 +8045,7 @@
   greyu {
     font-size: .55rem;
     font-family: weathertext2;
-    color: silver
+    color: var(--text-color)
   }
   
   valuetitleunit {
@@ -8342,7 +8110,7 @@
     overflow: hidden;
     -webkit-border-radius: 2px;
     border-radius: 2px;
-    color: silver;
+    color: #ffffff;
     line-height: 16px;
     font-family: weathertext2;
     font-size: .85em;
@@ -8421,7 +8189,7 @@
     height: 2.1rem;
     width: 6.4rem;
     overflow: hidden;
-    color: silver;
+    color: var(--text-color);
     line-height: 8px;
     font-family: weathertext2;
     font-size: .6em;
@@ -8446,7 +8214,7 @@
     height: 5.1rem;
     width: 8.2rem;
     overflow: hidden;
-    color: silver;
+    color: var(--text-color);
     line-height: 8px;
     font-family: weathertext2;
     font-size: .6em;
@@ -8471,7 +8239,7 @@
     height: 4.1rem;
     width: 7.4rem;
     overflow: hidden;
-    color: silver;
+    color: var(--text-color);
     line-height: 8px;
     font-family: weathertext2;
     font-size: .6em;
@@ -8481,7 +8249,7 @@
   .divumwxmoonphasem {
     align-items: center;
     justify-content: center;
-    left: -15px
+    left: -9px
   }
   
   .divumwxluminancem {
@@ -8496,9 +8264,9 @@
     height: 4.1rem;
     width: 7.4rem;
     overflow: hidden;
-    color: silver;
+    color: var(--text-color);
     line-height: 8px;
-    font-size: .65em;
+    font-size: .60em;
     margin-top: 65px;
     font-family: weathertext2
   }
@@ -8512,7 +8280,7 @@
   .divumwxluminancem2 {
     align-items: center;
     justify-content: center;
-    left: 100px
+    left: 110px
   }
   
   divumwxdarkdaycircle,
@@ -8626,7 +8394,7 @@
   .wulargeforecasthome,
   .wulargeforecastinghome {
     font-family: weathertext2;
-    color: silver
+    color: var(--text-color)
   }
   
   .wulargeforecasthome {
@@ -8651,7 +8419,7 @@
   .wulargeweekdayhome {
     font-family: weathertext2;
     font-size: .65rem;
-    color: silver
+    color: var(--text-color)
   }
   
   .wulargediv {
@@ -8670,14 +8438,14 @@
     padding: 0;
     background: 0;
     border: 0px solid rgba(153, 155, 156, .1);
-    color: silver
+    color: var(--text-color)
   }
   
   .wulargeweekdayhome {
     position: absolutue;
     text-align: left;
     padding: 1px;
-    color: silver;
+    color: var(--text-color);
     margin: 0 0 0 5px;
     background: 0
   }
@@ -8735,7 +8503,7 @@
     width: 8.5rem;
     height: 1rem;
     font-size: 10px;
-    color: silver;
+    color: var(--text-color);
     justify-content: center;
     margin-left: 140px;
     margin-top: 27px
@@ -9029,7 +8797,7 @@
     width: 8.5em;
     height: 1rem;
     font-size: 10px;
-    color: silver;
+    color: var(--text-color);
     justify-content: center;
     margin-top: -18px;
     line-height: 10px;
@@ -9090,7 +8858,7 @@
   }
   
   .menubutton--primary {
-    color: silver;
+    color: var(--text-color);
     background-color: rgba(86, 95, 103, 0);
     max-height: 22px;
     font-family: Arial, Helvetica, sans-serif;
@@ -9102,7 +8870,7 @@
   
   .menubutton--primary a {
     position: relative;
-    color: silver;
+    color: var(--text-color);
     font-size: 0.85em;
     font-weight: 500;
     left: 65px;
@@ -9198,7 +8966,7 @@
     align-items: center;
     justify-content: center;
     border: 0;
-    color: silver;
+    color: var(--text-color);
     line-height: 12px
   }
   
@@ -9230,105 +8998,7 @@
     background: #b5b9c1
   }
   
-  @media screen and (max-width:820px) {
-    .menuadmin {
-      --spacing: 1.3rem;
-      display: inline;
-      background: 0
-    }
-  
-    .menubutton {
-      background-color: 0;
-    }
-  
-    .menutoolbar {
-      display: flex;
-      flex: 1;
-      font-size: 1em;
-      background: #212428;
-      padding: 0 var(--spacing);
-      height: 30px;
-    }
-  
-    .menubutton--primary {
-      color: silver;
-      background-color: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      font-size: 0.9em;
-      padding: 0;
-      color: silver;
-    }
-  
-    .menuadmin__header {
-      display: flex;
-      flex-basis: 100%;
-      grid-area: header;
-      height: 30px;
-      background-color: transparent;
-      position: absolute;
-      font-size: 12px;
-    }
-  
-    .menubutton--primary a {
-      color: silver;
-      font-size: 0.85em;
-      font-weight: 500;
-      color: silver;
-    }
-  
-    menutoptitle {
-      display: none
-    }
-  
-    menuuptime {
-      top: 10px
-    }
-  
-    .divum-item {
-      margin-top: 32px;
-      margin-bottom: -28px
-    }
-  
-    .divumwxthemeicon {
-      position: absolute;
-      margin: 0;
-      left: 10px;
-      top: 10px;
-      max-height: 12px
-    }
-  
-    .divumwxthememonitor {
-      width: 15px;
-      height: 11px;
-      background: #ff832f;
-      border-radius: 2px
-    }
-  
-    .divumwxthememonitor li {
-      position: absolute;
-      list-style: none
-    }
-  
-    .divumwxthememonitor .divumwxthemefirst {
-      width: 13px;
-      height: 8px;
-      background: #4b545c;
-      top: 1px;
-      left: 1px;
-      z-index: 3
-    }
-  
-    .sidebarIconToggle {
-      cursor: pointer;
-      position: absolute;
-      z-index: 99;
-      top: 8px;
-      left: 15px;
-      height: 22px;
-      width: 22px
-    }
-  }
-  
+ 
   .lity {
     z-index: 9990;
     position: fixed;
@@ -9529,7 +9199,7 @@
     margin-top: 61px;
     font-size: .54rem;
     z-index: 1;
-    color: silver;
+    color: var(--text-color);
     width: 50px
   }
   
@@ -9544,11 +9214,6 @@
     right: 20px;
     margin-top: -10px;
   }
-  .alertpos {
-    margin: auto
-  }
-  
-  
   .onlineMarkerOuter {
       /* width: 30px; */
       /* height: 30px; */
@@ -9646,7 +9311,7 @@
   baro-units {
     left: 140px;
     font-size: 11px;
-    color: silver;
+    color: var(--text-color);
   }
   
   
@@ -9661,7 +9326,7 @@
   
   .barometerconverter {
     margin-left: 250px;
-    margin-top: -143.25px;
+    margin-top: -140.25px;
     font-size: 12px;
     position: relative;
     z-index: auto;
@@ -9676,33 +9341,27 @@
     border: 1px solid #38383c;
     overflow: hidden;
     border-radius: 2px;
-    color: silver;
+    color: #ffffff;
     line-height: 16px;
     font-family: weathertext2, Helvetica, system;
     font-size: .85em;
     right: 10px;
     background: 0;
+    margin-top: 5px;
   }
   
-  .updatedtime2 {
-    margin-top: -38.25px;
-    font: .65em weathertext2;
-    margin-left: 237px;
-    color: silver;
-    background: 0;
-    padding: 3px;
-  }
+
   valuetextpwsbold {
     font-family: weathertext2;
     font-size: .65em;
     font-weight: bold;
-    color: silver;
+    color: var(--text-color);
   }
   valuetextpws {
     font-family: weathertext2;
     font-size: .65em;
     font-weight: 500;
-    color: silver;
+    color: var(--text-color);
   }
   outlook-panel {
    

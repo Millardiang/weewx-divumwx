@@ -13,7 +13,6 @@
 #    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
-
 ?>
 <!-- Side Menu -->
  <input type="checkbox" class="sidebarmenu" id="sidebarmenu"/>
@@ -33,7 +32,7 @@
           
       <li class="header">ADMIN</li>
         <li><a href="./admin/index.php" title="DvM Admin"><menumarkergreen></menumarkergreen> DvM Admin</a></li>
-      <li class="header">UI THEME</li>
+      <!--li class="header">UI THEME</li>
       <li>
         <a href="<?php echo ($theme == 'dark') ? '?theme=light' : '?theme=dark'; ?>">
           <?php if ($theme == 'dark'){
@@ -41,7 +40,7 @@
           }else{
             echo '<menumarkerbluegrey></menumarkerbluegrey> Dark Theme';
           }?></a>
-      </li>
+      </li-->
       <li class="header">UNITS</li>
       <?php if ($units != Null && $units != 'default'){
         echo '<li>

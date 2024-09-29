@@ -578,16 +578,9 @@ else {$airqual["text"] = $airqual["text10"];
 
 ?>
 
-    <div class="chartforecast2">
-      
-
-      <span class="yearpopup" style="background-colr: red" ><a alt="airquality charts" title="Airquality Charts" href="dvmhighcharts/dvmAirQualityWeekChart.php" data-lity><?php echo $menucharticonpage;?> Airquality Charts and Information</a></span>
-      
-
-    </div>
-    <span class='moduletitle2'><?php echo $lang['airqualityModule'];?></span>
-
-
+ <div class="chartforecast2">
+ <span class="yearpopup" style="background-colr: red" ><a alt="airquality charts" title="Airquality Charts" href="dvmhighcharts/dvmAirQualityWeekChart.php" data-lity><?php echo $menucharticonpage;?> Airquality Charts and Information</a></span></div>
+ <span class='moduletitle'><?php echo $lang['airqualityModule'];?></span>
 <div class="updatedtime1"><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online.' '.date($timeFormat);?></div>
 
 <script src="js/d3.v3.min.js"></script>
@@ -596,7 +589,7 @@ else {$airqual["text"] = $airqual["text10"];
 
 .aqi {
   position: relative; 
-  margin-top: -1.5px; 
+  margin-top: 2px; 
   margin-left: 0px;
 }
 
@@ -611,7 +604,6 @@ else
 </script>
 
 <div class="aqi"></div>
-<div id="svg"></div>
 
 <script>
 

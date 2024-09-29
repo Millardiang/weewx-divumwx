@@ -1,0 +1,17 @@
+WARNING: combining -O with -r or -p will mean that all downloaded content
+will be placed in the single file you specified.
+
+--2024-06-23 05:47:30--  https://www.fourmilab.ch/cgi-bin/Earth?img=NASAmMM.evif&imgsize=320&dynimg=y&opt=-l&lat=51.940&ns=North&lon=0.987&ew=West&alt=35785&tle=&date=0&utc=&jd=/Earth.jpg
+Resolving www.fourmilab.ch (www.fourmilab.ch)... 2a05:d014:d43:3101:94aa:a276:e035:6a2a, 52.28.236.0
+Connecting to www.fourmilab.ch (www.fourmilab.ch)|2a05:d014:d43:3101:94aa:a276:e035:6a2a|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: unspecified [image/jpeg]
+Saving to: ‘/var/www/html/divumwx/img/earth-1.jpg’
+
+/var/www/html/divumwx/img/earth-1.jpg                      [<=>                                                                                                                       ]       0  --.-KB/s               /var/www/html/divumwx/img/earth-1.jpg                      [ <=>                                                                                                                      ]  20.26K  --.-KB/s    in 0.03s   
+
+2024-06-23 05:47:30 (721 KB/s) - ‘/var/www/html/divumwx/img/earth-1.jpg’ saved [20750]
+
+FINISHED --2024-06-23 05:47:30--
+Total wall clock time: 0.3s
+Downloaded: 1 files, 20K in 0.03s (721 KB/s)

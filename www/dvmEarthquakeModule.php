@@ -39,7 +39,7 @@ $eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $l
         <span class="yearpopup"><a alt="Earthquakes Worldwide" title="Earthquakes Worldwide" href="dvmEarthquakePopup.php" data-lity><?php echo $chartinfo;?> Worldwide Earthquakes</a></span>
         <span class="yearpopup"><a alt="Earthquake Map" title="Earthquakes Map" href="dvmEarthquakeMapPopup.php" data-lity><?php echo $chartinfo;?> World Earthquake Map</a></span>
     </div>
-    <span class='moduletitle2'><?php echo $lang['earthquakeModule']; ?></valuetitleunit></span>
+    <span class='moduletitle'><?php echo $lang['earthquakeModule']; ?></valuetitleunit></span>
 
 <div class= "updatedtime1"><span><?php if(file_exists('jsondata/eq.txt')&&time() - filemtime('jsondata/eq.txt')>3600) echo $offline. '<offline> Offline </offline>';else echo $online," ",date($timeFormat, filemtime('jsondata/eq.txt'));?></span></div>
 <html>
@@ -49,7 +49,7 @@ $eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $l
 
 .quakes {
   position: relative; 
-  margin-top: -1.5px; 
+  margin-top: -0.75px; 
   margin-left: 0px;
   z-index: auto;
 }
@@ -57,7 +57,6 @@ $eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $l
 </style>
 
 <div class="quakes"></div>
-<div id="svg"></div>
 
  <script>
             

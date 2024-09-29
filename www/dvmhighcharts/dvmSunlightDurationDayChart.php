@@ -46,6 +46,7 @@ if ($theme === "dark") {
     <script src="https://code.highcharts.com/stock/highcharts-more.js"></script>
     <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
     <script src="scripts/dark-theme.js" type="text/javascript"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
 </head>
 <body>
 

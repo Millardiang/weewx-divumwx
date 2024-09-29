@@ -42,7 +42,7 @@ $code = $parsed_json["error"]["code"];
   
     <?php
 $cnt = count($parsed_json["response"]);
-if ($code == "warn_no_data")
+if ($code == "warn_no_data" )
 { ?>
   <p><main class="grid3"><articlegraph3 class="alert-row-narrow" style="background-color:white; font-size:10px;"><img src="css/svg/icon-warning-noalert-white.svg" style="width:75px; height:75px;"><ul><li><?php
         echo "NO WEATHER ALERTS in force for this location at the present time."
@@ -80,17 +80,17 @@ else
         $type[$i] = $parsed_json["response"][$i]["details"]["type"];
         $alertdesc[$i] = substr($type[$i], 0 ,5);
         $level[$i] = substr($type[$i], -2);
-        if ($level[$i] == "MD")
+        if ($level[$i] == "MD" && != "MN")
         {
             $background[$i] = "yellow";
             $alertlevel[$i] = "YELLOW ALERT FOR ";
         }
-        elseif ($level[$i] == "SV")
+        elseif ($level[$i] == "SV" && != "MN")
         {
             $background[$i] = "orange";
             $alertlevel[$i] = "ORANGE ALERT FOR ";
         }
-        elseif ($level[$i] == "EX")
+        elseif ($level[$i] == "EX" && != "MN")
         {
             $background[$i] = "red";
             $alertlevel[$i] = "RED ALERT FOR ";

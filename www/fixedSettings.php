@@ -1,18 +1,15 @@
 <?php
-##############################################################################################
-#        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
-#       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    #
-#       (.  ___  :)||  |\   \  //  / |   (  ) : | \   \  //   |  |'  /    \:  | \   \  /     #
-#       |: \   ) |||:  | \\  \/. ./  (:  |  | . ) /\\  \/.    |  |: /'        |  \\  \/      #
-#       (| (___\ |||.  |  \.    //    \\ \__/ // |: \.        |   \//  /\'    |  /\.  \      #
-#       |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \     #
-#       (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|    #
-#                                                                                            #
-#     Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      #
-#      Distributed under terms of the GPLv3.  See the file LICENSE.txt for your rights.      #
-#    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
-#                    https://github.com/Millardiang/weewx-divumwx/issues                     #
-##############################################################################################
+#####################################################################################################################                                                                                                        #
+#                                                                                                                   #
+# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
+#                                                                                                                   #
+# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
+#                                                                                                                   #
+# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
+#                                                                                                                   #
+# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
+#                                                                                                                   #
+#####################################################################################################################
 
 include ('userSettings.php');
 include ('dvmVersion.php');
@@ -21,10 +18,9 @@ $TZconf = $TZ; // PLEASE LEAVE it is fixed
 $UTC_offset = timezone_offset_get(timezone_open($TZ), new DateTime()) / 3600; // DO NOT CHANGE
 $forecastlocation = $stationlocation; //
 $emailform = $email; // PLEASE LEAVE FIXED
-
-$theme = isset($theme) ? $theme : "dark";
-$theme1 = $theme;
-
+$theme = $_COOKIE["theme"];
+ if($theme == "dark"){$reverseTheme="light";}
+  else if($theme == "light"){$reverseTheme="dark";}
 $charttheme = $theme;
 $livedata = "serverdata/dvmRealtime.txt";
 $chartsource =  "dvmhighcharts"; 
@@ -38,6 +34,9 @@ $cycles4 = "60000";
 $cycles5 = $parsed_json[$position5]["cycle"];
 $cycles6 = $parsed_json[$position6]["cycle"];
 $cycles7 = $parsed_json[$position7]["cycle"];
+$cycles5a = $parsed_json[$position5a]["cycle"];
+$cycles6a = $parsed_json[$position6a]["cycle"];
+$cycles7a = $parsed_json[$position7a]["cycle"];
 $cycles8 = $parsed_json[$position8]["cycle"]; 
 $cycles9 = $parsed_json[$position9]["cycle"];
 $cycles10 = $parsed_json[$position10]["cycle"];
@@ -51,8 +50,6 @@ $cycles17 = $parsed_json[$position17]["cycle"];
 $cycles18 = $parsed_json[$position18]["cycle"];
 $cycles19 = $parsed_json[$position19]["cycle"];
 $cycles20 = $parsed_json[$position20]["cycle"];
-$cycles21 = $parsed_json[$position21]["cycle"];
-$cycles22 = $parsed_json[$position22]["cycle"];
 
 
 //$copyYear = 2023;

@@ -14,7 +14,7 @@ maxGust {
    <div class="chartforecast2">
       <span class="yearpopup"><a alt="wind charts" title="wind charts" href="dvmWindRecords.php" data-lity><?php echo $menucharticonpage;?> Wind Records and Charts</a></span>
     </div>
-    <span class='moduletitle2'><?php echo $lang['Direction'];?> | <?php echo $lang['Windspeed'], " (<valuetitleunit>", $wind["units"];?></valuetitleunit>)</span>
+    <span class='moduletitle'><?php echo $lang['Direction'];?> | <?php echo $lang['Windspeed'], " (<valuetitleunit>", $wind["units"];?></valuetitleunit>)</span>
   
 
 <div class="updatedtime2"><span><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?></div><br />
@@ -54,6 +54,7 @@ echo ' <div class=divumwxwindrun>'.$windalert3.' &nbsp;<grey><valuetext1>',numbe
 <grey><divumwxwindrunspan></valuetext>
 <?php if ($wind["units"] == 'mph') echo 'mi'; else if ($wind["units"] == 'm/s') echo 'km'; else if ($wind["units"] == 'kts') echo 'mi';else echo 'km';?></divumwxwindrunspan>
 </div></div><br /><div class=windrun1><?php echo  $lang['Wind Run'];?></div>
+
 <?php // beaufort
 if ($wind["speed_bft"] >= 12) {
   echo '<div class=divumwxbeaufort12>' . $beaufort12 . "&nbsp;" . $wind["speed_bft"];
@@ -84,6 +85,7 @@ if ($wind["speed_bft"] >= 12) {
 }
 ?>
 <divumwxbftspan>BFT<divumwxbftspan></div>
+ 
 <div class="beaufort1">
 <?php
 if ($wind["speed_bft"] == 0) {
@@ -269,13 +271,8 @@ if ($theme === "dark") { echo
 
 <style>
 .vanilla-compass {
-  margin-top: -31px;
+  margin-top: -28px;
   margin-left: 0px;
-}
-.wrap {
-  position: relative;
-  margin-top: -2px;
-  margin-right: 0px;
 }
 .moduletitle2 {
   position: relative;
@@ -308,7 +305,8 @@ if ($theme === "dark") { echo
 <!DOCTYPE html>
 <html>
 <div class="vanilla-compass">
-<svg id="vanilla-compass" width="300" height="140" viewBox="-80 0 300 140" xmlns="http://www.w3.org/2000/svg"></svg>  
+<svg id="vanilla-compass" width="300" height="140" viewBox="-80 0 300 140" xmlns="http://www.w3.org/2000/svg"></svg>
+<!--svg id="vanilla-compass" width="300" height="140" viewBox="-80 0 300 140" style="border:1px solid red" xmlns="http://www.w3.org/2000/svg"></svg--> <!--don't touch used for positioning-->  
 </div>
 
  <script>

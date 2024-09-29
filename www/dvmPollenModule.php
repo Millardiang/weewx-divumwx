@@ -65,9 +65,9 @@ else {$pollen["weed_risk"] = "No Data"; $pollen["weed_color"]=$noColor;}
 
 <div class="chartforecast2">
 
-       <span class="yearpopup"><a alt="pollen" title="Pollen Data" href="dvmPollenPopup.php" data-lity><?php echo $menucharticonpage;?> Pollen Information</a></span>
+       <span class="yearpopup"><a alt="pollen" title="Pollen Data" href="dvmhighcharts/dvmPollenWeekChart.php" data-lity><?php echo $menucharticonpage;?> Pollen Charts and Information</a></span>
     </div>
-    <span class='moduletitle2'><?php echo $lang['PollenModule'];?></span>
+    <span class='moduletitle'><?php echo $lang['PollenModule'];?></span>
 
 
 
@@ -80,10 +80,10 @@ else {$pollen["weed_risk"] = "No Data"; $pollen["weed_color"]=$noColor;}
     --weed-color: <?php echo $pollen["weed_color"];?>;
     --stroke-color: black;
 }
-.pollenpos {margin-top: -294px; margin-left: 0px;}
-.Gposx {margin-top: -165px; margin-left: -200px;}
-.Tposx {margin-top: -454px; margin-left: 0px;}
-.Wposx {margin-top: -454px; margin-left: 200px;}
+.pollenpos {margin-top: -288px; margin-left: 0px;}
+.Gposx {margin-top: -162px; margin-left: -200px;}
+.Tposx {margin-top: -450px; margin-left: 0px;}
+.Wposx {margin-top: -450.5px; margin-left: 200px;}
 
 </style>
 
@@ -153,7 +153,7 @@ var riskWeed = "<?php echo $pollen["weed_risk"];?>";
     
 var svg = d3.select(".pollen")
     .append("svg")
-    //.style("background", "#292E35") // box background to be commented out
+    //.style("background", "#292E35")
     .attr("width", 300)
     .attr("height", 150);
 

@@ -379,6 +379,6 @@ include('tempSelect.php');
   </main>
  <main class="grid1">
 <articlegraph style="margin-top: 10px; background-color: transparent; height: 232px"> 
-     <iframe  src="charts/tempSmallCharts.php?chart='tempsmallplot'&span='yearly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['rain_units']?>"frameborder="0" scrolling="no" width="99.5%" height="800%"></iframe>   
+     <iframe  src="dvmhighcharts/tempSmallCharts.php?chart='tempsmallplot'&span='yearly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['rain_units']?>"frameborder="0" scrolling="no" width="99.5%" height="800%"></iframe>   
   </articlegraph> 
    </main>

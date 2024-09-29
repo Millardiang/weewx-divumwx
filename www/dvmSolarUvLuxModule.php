@@ -6,7 +6,7 @@ date_default_timezone_set($TZ);
 <div class="chartforecast2">
 <span class="yearpopup"><a alt="solar" title="solar" href="dvmSolarRecords.php" data-lity><?php echo $menucharticonpage;?> UV and Solar | UVI Records and Charts</a></span>
 </div>
-<span class='moduletitle2'><?php echo $lang['solarUvLuxModule'];?></span>
+<span class='moduletitle'><?php echo $lang['solarUvLuxModule'];?></span>
 
 
 <div class="updatedtime1"><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>';else echo $online." ".$divum["time"];?></div>
@@ -28,10 +28,10 @@ else if ($uv["now"]>=0 ) {echo $uviclear,'<span>UVI</span> Low';}
 
        
 <style>
-.sunshineposx {margin-top: -2px; margin-left: -0px;}
-.solarposx {margin-top: -17px; margin-left: -210px;}
-.uvipos {margin-top: -155px; margin-left: 0px;}
-.luxpos {margin-top: -155px; margin-left: 210px;}
+.sunshineposx {margin-top: -3.5px; margin-left: -0px;}
+.solarposx {margin-top: -10px; margin-left: -210px;}
+.uvipos {margin-top: -149.5px; margin-left: 0px;}
+.luxpos {margin-top: -150px; margin-left: 210px;}
 </style>
 
 <div class="sunshineposx">
@@ -95,9 +95,11 @@ var text = svg.selectAll(null)
     if (theme === 'dark') {
     var tubeFillColor = "rgba(45,47,50,1)";
     var baseTextColor = "silver";
+    var colorS = "silver";
     } else {
-    var tubeFillColor = "rgba(230,232,239,1)";
-    var baseTextColor = "#2d3a4b";
+    tubeFillColor = "rgba(230,232,239,1)";
+    baseTextColor = "#2d3a4b";
+    colorS = "#777777";
     }
 
 </script>
@@ -143,7 +145,7 @@ var bulb_cy = bottomY - bulbRadius,
 
 var svg = d3.select(".solarx")
     .append("svg")
-    //.style("background", "#292E35") // box background to be commented out
+    //.style("background", "#292E35")
     .attr("width", width)
     .attr("height", height);
 
@@ -190,7 +192,7 @@ var scale = d3.scale.linear()
 
   var isMax = (t == maxSolar),
       label = (isMax ? "Max" : "min"),
-      textCol = (isMax ? "silver" : "silver"),
+      textCol = (isMax ? colorS : colorS),
       textOffset = (isMax ? - 3 : 3);
       
   svg.append("line")
@@ -218,7 +220,7 @@ var scale = d3.scale.linear()
 
   var isMax = (t == maxThreshold),
       label = (isMax ? "T'hold" : "min"),
-      textCol = (isMax ? "silver" : "silver"),
+      textCol = (isMax ? colorS : colorS),
       textOffset = (isMax ? - 3 : 3);
       
   svg.append("line")
@@ -344,7 +346,7 @@ var bulb_cy = bottomY - bulbRadius,
 
 var svg = d3.select(".uvi")
     .append("svg")
-    //.style("background", "#292E35") // box background to be commented out
+    //.style("background", "#292E35")
     .attr("width", width)
     .attr("height", height);
 
@@ -391,7 +393,7 @@ var scale = d3.scale.linear()
 
   var isMax = (t == maxUVI),
       label = (isMax ? "Max" : "min"),
-      textCol = (isMax ? "silver" : "silver"),
+      textCol = (isMax ? colorS : colorS),
       textOffset = (isMax ? - 3 : 3);
       
     svg.append("line")
@@ -515,7 +517,7 @@ var bulb_cy = bottomY - bulbRadius,
 
 var svg = d3.select(".lux")
     .append("svg")
-    //.style("background", "#292E35") // box background to be commented out
+    //.style("background", "#292E35")
     .attr("width", width)
     .attr("height", height);
 
@@ -562,7 +564,7 @@ var scale = d3.scale.linear()
 
   var isMax = (t == maxLux),
       label = (isMax ? "Max" : "min"),
-      textCol = (isMax ? "silver" : "silver"),
+      textCol = (isMax ? colorS : colorS),
       textOffset = (isMax ? - 3 : 3);
 
  svg.append("line")

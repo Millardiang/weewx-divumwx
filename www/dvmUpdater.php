@@ -36,8 +36,8 @@ if ($sta["latitude"] > "90") {
 //update the modules
 
 //update the modules position 1 - fixed position
-(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position1").show()}});var c=a("#position1");c.load("dvmWeatherClockTop.php");
-var b=setInterval(function(){c.load("dvmWeatherClockTop.php")},<?php echo $cycles1; ?>)})})(jQuery); // 24 hours 
+(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position1").show()}});var c=a("#position1");c.load("<?php echo $position1; ?>");
+var b=setInterval(function(){c.load("<?php echo $position1; ?>")},<?php echo $cycles1; ?>)})})(jQuery); // 24 hours 
     
 //update the modules position 2
 (function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position2").show()}});var c=a("#position2");c.load("<?php echo $position2; ?>");
@@ -47,13 +47,9 @@ var b=setInterval(function(){c.load("<?php echo $position2; ?>")},<?php echo $cy
 (function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position3").show()}});var c=a("#position3");c.load("<?php echo $position3; ?>");
 var b=setInterval(function(){c.load("<?php echo $position3; ?>")},<?php echo $cycles3; ?>)})})(jQuery); // 60 seconds
   
-//update the modules  position 3a
-(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position3a").show()}});var c=a("#position3a");c.load("<?php echo $position3a; ?>");
-var b=setInterval(function(){c.load("<?php echo $position3a; ?>")},<?php echo $cycles3a; ?>)})})(jQuery); // 60 seconds
-
 //update the modules  position 4 - fixed position
-(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position4").show()}});var c=a("#position4");c.load("dvmAdvisoryOutlookTop.php");
-var b=setInterval(function(){c.load("dvmAdvisoryOutlookTop.php")},<?php echo $cycles4; ?>)})})(jQuery); // 60 seconds
+(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position4").show()}});var c=a("#position4");c.load("<?php echo $position4; ?>");
+var b=setInterval(function(){c.load("<?php echo $position4; ?>")},<?php echo $cycles4; ?>)})})(jQuery); // 60 seconds
 
 //update the modules position 5
 (function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position5").show()}});var c=a("#position5");c.load("<?php echo $position5; ?>");
@@ -122,6 +118,14 @@ var b=setInterval(function(){c.load("<?php echo $position19; ?>")},<?php echo $c
 //update the modules position 20
 (function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position20").show()}});var c=a("#position20");c.load("<?php echo $position20; ?>");
 var b=setInterval(function(){c.load("<?php echo $position20; ?>")},<?php echo $cycles20; ?>)})})(jQuery); // 60 seconds
+
+//update the modules position 21
+(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position21").show()}});var c=a("#position21");c.load("<?php echo $position21; ?>");
+var b=setInterval(function(){c.load("<?php echo $position21; ?>")},<?php echo $cycles21; ?>)})})(jQuery); // 60 seconds
+
+//update the modules position 22
+(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position22").show()}});var c=a("#position22");c.load("<?php echo $position22; ?>");
+var b=setInterval(function(){c.load("<?php echo $position22; ?>")},<?php echo $cycles22; ?>)})})(jQuery); // 60 seconds
 
 //update the webcam image file
 var refreshId;$(document).ready(function(){webcamcron()});function webcamcron(){$.ajax({cache:false,

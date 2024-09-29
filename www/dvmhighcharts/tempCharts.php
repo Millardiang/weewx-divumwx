@@ -25,6 +25,7 @@ if ($theme === "dark") {
     <script src="scripts/plots.js" type="text/javascript"></script>
     <script src="scripts/convert_units.js" type="text/javascript"></script>
     <script src="../languages/translations.js" type="text/javascript"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
     <script type="text/javascript">
 
 
