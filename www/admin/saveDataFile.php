@@ -26,9 +26,9 @@ if (PHP_OS === 'Linux') {
 $changedData = file_get_contents('php://input');
 $changes = json_decode($changedData, true);
 $parentDirectory = dirname(getcwd());
-$originalFile = './userSettings.php';
-$backupFile =  './archives/userSettings.php' . '.' . date('Y-d-m-His');
-$n$new_permissions = 0766;
+$originalFile = $parentDirectory . DIRECTORY_SEPARATOR . 'userSettings.php';
+$backupFile =    $parentDirectory . DIRECTORY_SEPARATOR . 'admin' . DIRECTORY_SEPARATOR . 'archives' . DIRECTORY_SEPARATOR . 'userSettings.php' . '.' . date('Y-d-m-His');
+$new_permissions = 0766;
 $timezone = '';
 
 if (!file_exists($originalFile)) {
