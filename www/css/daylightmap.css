@@ -3,10 +3,11 @@
 }
 body {
   background: #1a233b;
-  font-family: menlo, "source-code-pro", 'andale mono', 'courier new', sans-serif;
+  font-family: "Helvetica";
   text-align: center;
   color: #525f83;
   margin: 0 20px;
+  overflow: hidden;
 }
 svg {
   display: block;
@@ -32,6 +33,10 @@ svg {
   left: 0;
   width: 100%;
   height: 100%;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  -o-border-radius: 8px;
+  border-radius: 8px;
 }
 h1 {
   font-weight: normal;
@@ -75,7 +80,7 @@ h1 + p {
   right: 0;
   background-image: linear-gradient(to left, #df5862, #f3b142);
   display: block;
-  height: 3px;
+  height: 0px;
   width: calc(100% - 10px);
   content: '';
 }
@@ -148,9 +153,10 @@ h1 + p {
 }
 .animate {
   text-align: center;
-  font-family: menlo, "source-code-pro", 'andale mono', 'courier new', sans-serif;
+  font-family: "Helvetica";
 }
 .animate a {
+  margin-top: 110px;
   display: inline-block;
   width: auto;
   font-size: 11px;
@@ -159,7 +165,7 @@ h1 + p {
   color: #59648e;
   line-height: 16px;
   text-transform: uppercase;
-  padding: 4px 10px;
+  padding: 4px 10px;  
   width: 130px;
   text-decoration: none;
   border: solid 1px #2b3245;

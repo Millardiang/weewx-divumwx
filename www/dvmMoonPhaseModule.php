@@ -1,40 +1,26 @@
 <?php
-#####################################################################################################################                                                                                                        #
-#                                                                                                                   #
-# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
-#                                                                                                                   #
-# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
-#                                                                                                                   #
-# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
-#                                                                                                                   #
-# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
-#                                                                                                                   #
-#####################################################################################################################
-?>
-<style>
-.moonmodulepos {
-  position: absolute;
-  top: 16px;
-  left: 110px
-}
-.svgpos {
-  position: absolute;
-  top: -14px;
-  left: -25px
-}
-</style>
-<?php 
+##############################################################################################
+#        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
+#       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    #
+#       (.  ___  :)||  |\   \  //  / |   (  ) : | \   \  //   |  |'  /    \:  | \   \  /     #
+#       |: \   ) |||:  | \\  \/. ./  (:  |  | . ) /\\  \/.    |  |: /'        |  \\  \/      #
+#       (| (___\ |||.  |  \.    //    \\ \__/ // |: \.        |   \//  /\'    |  /\.  \      #
+#       |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \     #
+#       (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|    #
+#                                                                                            #
+#     Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      #
+#      Distributed under terms of the GPLv3.  See the file LICENSE.txt for your rights.      #
+#    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
+#                    https://github.com/Millardiang/weewx-divumwx/issues                     #
+############################################################################################## 
 include('dvmCombinedData.php');
 header('Content-type: text/html; charset=utf-8');
 if($alm["moonphase_no"]>4){$waxwan = "wan";}
-else{$waxwan = "wax";}
-  
+else{$waxwan = "wax";} 
 $moonimg = "img/moon-1.jpg"; 
-if ($theme === "dark")
-{$circleborder = "rgb(30,32,36";}
-else if ($theme === "light")
-{$circleborder = "#c9daf9";}  
+$circleborder = "var(--col-2)"; 
 ?>
+
 <?php 
 $meteor_default="No Meteor Showers";
 $meteor_events[]=array("event_start"=>mktime(0, 0, 0, 1, 1),"event_title"=>"Quadrantids","event_end"=>mktime(23, 59, 59, 1, 2),);
@@ -66,17 +52,16 @@ foreach ($meteor_events as $meteor_check) {
     }
 };?>
 
-    <div class="chartforecast">
-<span class="yearpopup"><a alt="meteor showers" title="meteor showers" href="dvmMeteorshowersPopup.php" data-lity><?php echo $meteorinfo; ?>  <?php if (
-     $meteor_default == "No Meteor"
- ) {
-     echo "Meteor Showers";
- } else {
-     echo $meteor_default;
- } ?></a></span>    </div>
-    <span class='moduletitle'><?php echo $lang['moonPhaseModule'];?></span>
+<!DOCTYPE html>
+<html lang="en">
+
+<div class="chartforecast">
+<span class="yearpopup"><a alt="Moon Info" title="Moon Info" href="dvmMenuCelestialPopup.php" data-lity><?php echo $info;?> Celestial Data</a></span>
+</div>
+<span class='moduletitle'><?php echo $lang['moonPhaseModule'];?></span>
 
 <div class="updatedtime1"><span><?php if(file_exists($moonimg)&&time()- filemtime($moonimg)>3600)echo $offline. '<offline> Offline </offline>';else echo $online." ". date("H:i:s",  filemtime($moonimg));?></span></div>
+
 <div class="moonphasemoduleposition">
 <div class="moonrise1">
 <svg id="divumwx moon rise" viewBox="0 0 32 32" width="6" height="6" fill="none" stroke="#01a4b5" stroke-linecap="round" stroke-linejoin="round" stroke-width="10%">    
@@ -86,44 +71,39 @@ foreach ($meteor_events as $meteor_check) {
 <div class="moonmodulepos">
 <div id = "dldata">
 <img rel='prefetch' src='<?php echo $moonimg; ?>' width='100px' height='100px' alt='moon image'>
-
 </div></div></div>
 
 <div class="svgpos">
 <svg width="160" height="160" viewBox="0 0 160 160">
-   <circle cx="80" cy="80" r="60" stroke="<?php echo $circleborder;?>" stroke-width="21.5" fill="none" />
+<circle cx="80" cy="80" r="60" stroke="<?php echo $circleborder;?>" stroke-width="21" fill="none" />
 </svg> 
-  </div>
+</div>
 
 <div class="fullmoon1">
 <svg id="divumwx full moon" viewBox="0 0 32 32" width="6" height="6" fill="#aaa" stroke="#aaa" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%"><circle cx="16" cy="16" r="14" /><path d="M6 6 L26 26" /></svg>
-<?php echo $lang['Nextfullmoon'];?>	<br /> <div class="nextfullmoon"><value><moonm>
+<?php echo $lang['Nextfullmoon'];?> <br /> <div class="nextfullmoon"><value><moonm>
 <?php echo $alm["fullmoon"] ;?></value></div>
-
-
-
- </span>
+</span>
 </div>
-
 
 <div class="newmoon1">
 <svg id="divumwx new moon" viewBox="0 0 32 32" width="6" height="6" fill="#777" stroke="#777" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%"><circle cx="16" cy="16" r="14" /> <path d="M6 6 L26 26" /></svg>
 <?php echo $lang['Nextnewmoon'];?> <div class="nextnewmoon"><value><moonm>
 <?php echo $alm["newmoon"] ;?></value></div>
-
- </span>
+</span>
 </div>
+
 <div class="moonset1">
 <svg id="divumwx moon set" viewBox="0 0 32 32" width="6" height="6" fill="none" stroke="#f26c4f" stroke-linecap="round" stroke-linejoin="round" stroke-width="10%">
-    <path d="M30 12 L16 24 2 12" /></svg>
+<path d="M30 12 L16 24 2 12" /></svg>
 <?php echo $lang['Moon']?><div class="nextnewmoon">
 <?php echo 'Set<maxred> '.$alm["moonset"].'</maxred>' ;?></span> 
 
 </div></div>
 <div class="meteorshower"><svg xmlns='http://www.w3.org/2000/svg' width='10px' height='10px' viewBox='0 0 16 16'><path fill='currentcolor' d='M0 0l14.527 13.615s.274.382-.081.764c-.355.382-.82.055-.82.055L0 0zm4.315 1.364l11.277 10.368s.274.382-.081.764c-.355.382-.82.055-.82.055L4.315 1.364zm-3.032 2.92l11.278 10.368s.273.382-.082.764c-.355.382-.819.054-.819.054L1.283 4.284zm6.679-1.747l7.88 7.244s.19.267-.058.534-.572.038-.572.038l-7.25-7.816zm-5.68 5.13l7.88 7.244s.19.266-.058.533-.572.038-.572.038l-7.25-7.815zm9.406-3.438l3.597 3.285s.094.125-.029.25c-.122.125-.283.018-.283.018L11.688 4.23zm-7.592 7.04l3.597 3.285s.095.125-.028.25-.283.018-.283.018l-3.286-3.553z'/></svg>
-<?php // simple meteor shower output of major shower events // 'Set<orange> ' .$moon_set.'</orange>'
-echo $meteor_default;?>
+<?php echo $meteor_default;?>
 </div>
 
 <?php echo'<div class="divumwxmoonphasem2">Moon Phase<br>'.$alm["moonphase"].'</div>
 <div class="divumwxluminancem2">Luminance<br>'.round($alm["luminance"],2).' %</div>';?>
+</html>

@@ -33,7 +33,7 @@ $outlookPhrase = str_replace(" degrees","&deg".$temp["units"],$phrase);
 <span class='moduletitle'><?php echo $lang['timeTop']; ?></valuetitleunit></span>
     
       
-<script src="js/d3.4.2.2.min.js"></script>
+<script src="js/d3.7.9.0.min.js"></script>
 
 <div class="stationtime"></div>
 
@@ -41,28 +41,16 @@ $outlookPhrase = str_replace(" degrees","&deg".$temp["units"],$phrase);
 
 var theme = "<?php echo $theme;?>";
 
-if (theme === 'dark') {
-
-    var ringColor = "rgba(230,232,239,0.2)";
-    var dateColor = "#ffffff";
-
-} else {
-
-    var ringColor = "#a3abc2";
-    var dateColor = "#000000";
-
-}
-
-</script>
-<script>
+    var ringColor = "var(--col-12)";
+    var dateColor = "var(--col-6)";
 
 var date = "<?php echo date('l jS M Y');?>";
 
 var svg = d3.select(".stationtime")
     .append("svg")
     .attr("width", 226)
-    //.style("background", "#292e35")
-    .attr("height", 55);
+    /*.style("background", "#292e35")*/
+    .attr("height", 56);
 
 svg.append("circle")
     .style("stroke", ringColor)
@@ -148,7 +136,7 @@ svg.append("rect")
     .attr("rx", 2)
     .attr("height", 20.5)
     .attr("width", 103)
-    .style("fill", "rgba(46,139,87,1)");
+    .style("fill", "var(--col-4)");
 
 </script>
 

@@ -1,55 +1,23 @@
 <?php
-#####################################################################################################################                                                                                                        #
-#                                                                                                                   #
-# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
-#                                                                                                                   #
-# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
-#                                                                                                                   #
-# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
-#                                                                                                                   #
-# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
-#                                                                                                                   #
-#####################################################################################################################
-?>
-<?php
+##############################################################################################
+#        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
+#       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    #
+#       (.  ___  :)||  |\   \  //  / |   (  ) : | \   \  //   |  |'  /    \:  | \   \  /     #
+#       |: \   ) |||:  | \\  \/. ./  (:  |  | . ) /\\  \/.    |  |: /'        |  \\  \/      #
+#       (| (___\ |||.  |  \.    //    \\ \__/ // |: \.        |   \//  /\'    |  /\.  \      #
+#       |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \     #
+#       (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|    #
+#                                                                                            #
+#     Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      #
+#      Distributed under terms of the GPLv3.  See the file LICENSE.txt for your rights.      #
+#    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
+#                    https://github.com/Millardiang/weewx-divumwx/issues                     #
+##############################################################################################
 include('dvmCombinedData.php');
 date_default_timezone_set($TZ);
 header('Content-type: text/html; charset=utf-8');
 ?>
-<style>
-.wrap {
-  position: relative;
-  margin-top: -1px;
-  margin-right: 0px;
-}
-.moduletitle2 {
-  position: relative;
-  top: -20px;
-  font-size: .8em;
-  float: none;
-}
-.chartforecast2 {
-  position: absolute;
-  font-family: arial, system;
-  z-index: 20;
-  padding-top: 1px;
-  margin-left: 0;
-  font-size: .67em;
-  color: silver;
-  margin-top: 159px;
-  width: 300px;
-  padding-left: 10px;
-  text-align: left;
-}
-.chartforecast2:hover {
-  color: #90b12a;
-}
-.daylightmoduleposition2 {
-  position: relative;
-  left: 5px;
-  margin-top: 0px;
-}
-</style>    
+   
 <?php
 $light = $alm["daylight"]; 
 $daylight = ltrim($light, '0'); 
@@ -65,18 +33,17 @@ $sun_elevation = round($sun_alt,2)."°<div class=sunabovedivumwx> </div>";
 } else if (round($sun_alt,2) < 0) { 
 $sun_elevation = round($sun_alt,2)."°<div class=sunbelowdivumwx> </div>"; 
 }?>
-<div class="chartforecast2">
-      <span class="yearpopup"><a alt="Orrery" title="Orrery" href="dvmOrreyPopup.php" data-lity><?php echo $info;?> Orrery</a></span>
-      <span class="yearpopup"><a alt="Astroclock" title="Astroclock" href="dvmAstroclockPopup.php" data-lity><?php echo $info;?> Astroclock</a></span>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<div class="chartforecast">
+<span class="yearpopup"><a alt="Orrery" title="Orrery" href="dvmOrreryPopup.php" data-lity><?php echo $info;?> Solar System Orrery</a></span>
+<span class="yearpopup"><a alt="Astroclock" title="Astroclock" href="dvmAstroclockPopup.php" data-lity><?php echo $info;?> Astronomical Clock</a></span>
 </div>
-
 <span class="moduletitle"><?php echo $lang['solarDialModule'];?></span>
-
 <div class="updatedtime1"><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?></div>
-
-
-
-    </div>
+</div>
 
 <div class="daylightmoduleposition2"> 
 <?php echo 
@@ -84,42 +51,25 @@ $sun_elevation = round($sun_alt,2)."°<div class=sunbelowdivumwx> </div>";
 <div class="divumwxsundarkday">'.$darkhours.':'.$darkminutes.' hrs <divumwxdarkdaycircle></divumwxdarkdaycircle><br>'.$lang['TotalDarkness'].'</div>
 <div class="divumwxsunriseday">'.$sunuphalf.''.$lang['Sunrise'].'<br><value>'.$lang["Today"].'<span><value>: '.$alm["sunrise"].'<br>First Light: (<blueu>'.$alm["civil_twilight_begin"] .'</blueu>)</div>
 <div class="divumwxsunsetday">'.$sundownhalf.''.$lang['Sunset'].'<br><value>'.$lang["Tonight"].'<span><value>: '.$alm["sunset"].'<br>Last Light: (<blueu>'.$alm["civil_twilight_end"].'</blueu>)</div>
-
 <div class="daylightword"><value>Sun Azimuth<span><value><maxred> '.round($alm["sun_azimuth"],2).'°</maxred></value></span></div>
-
 <div class="elevationword"><value>Sun Elevation<span><value><maxred> '.$alm["sun_altitude"].'°</maxred></value></span></div>
-
-<div class="sundialcontainerdiv2" ><div id="sundialcontainer" class=sundialcontainer><div class="suncanvasstyle"></div></div>
-
+<div class="sundialcontainerdiv2"><div id="sundialcontainer" class=sundialcontainer><div class="suncanvasstyle"></div></div>
 <div class="divumwxmoonphasem"><value>'.$lang["Moonphase"].'<span><value><br>'.$alm["moonphase"].'<br>'.$lang['Moonrise'].'<br>'.'<blueu> '.$alm["moonrise"].'</blueu></div>
 <div class="divumwxluminancem"><value>'.$lang["Luminance"].'<span><value><br> '.$alm["luminance"].' %<br>'.$lang['Moonset'].'<br>'.'<maxred> '.$alm["moonset"].'</maxred></div>';?>
 
-<html>
-
 <script src="js/two.js"></script>
-    
-
-
+ 
 <div style="overflow: hidden">
 <div class="wrap">
 <div id="sundial" width="130" height="130"></div>
 </div></div>
 
- <script>
-            
-    var theme = "<?php echo $theme;?>";
-
-    if (theme === 'dark') {
-    var baseTextColor = "silver";
-    var backgroundRing = "rgba(59,60,63,1)";
-    } else {
-    var baseTextColor = "#2d3a4b";
-    var backgroundRing = "rgba(230,232,239,1)";
-    }
-
-</script>
-
 <script>
+
+var baseTextColor = "var(--col-6)";
+var backgroundRing = "var(--col-16)";
+var tickMarks = "var(--col-17)";
+
 function toDegrees(x) {
   return x * (180.0 / Math.PI);
 }
@@ -282,20 +232,6 @@ function resize() {
   two.scene.position.set(two.width / 2, two.height / 2);
 }
 
-	/*
-	// image test
-	var img = new Two.Texture('img/globe.svg', function() {
-    var shape = two.makeRectangle(0, 25, img.image.width, img.image.height);
-    shape.noStroke().fill = img;
-    //scale
-    shape.scale = 0.045;
-    //clone and png blending
-    //var shape2 = shape.clone();
-    //translate
-    //shape2.translation.addSelf(new Two.Vector(125, 50));
-    })
-    */
-
 var x = - 48 * Math.sin(toRadians(sunrise));
 var y = + 48 * Math.cos(toRadians(sunrise));
 
@@ -344,7 +280,7 @@ for (let i = 0; i < 24; i++) {
   var ticks = two.makeLine(x, y, Ix, Iy);
   
   ticks.noFill();
-  ticks.stroke = "silver";
+  ticks.stroke = tickMarks;
   ticks.linewidth = 1.5;
   ticks.cap = "round";
 }
@@ -398,11 +334,8 @@ function Sun() {
     	  	
 }
  	
-Sun();
- 
+Sun(); 
 two.update();
 
 </script>
-
-
 </html>

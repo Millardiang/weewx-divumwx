@@ -163,28 +163,13 @@ else if(anyToC($temp["outside_day_avg_60mn"])<40){$tempcolor = "#dc4953";}
 else if(anyToC($temp["outside_day_avg_60mn"])<100){$tempcolor = "#e26870";}
 ?>
 
-<script src="js/d3.min.js"></script>
+<script src="js/d3.7.9.0.min.js"></script>
 
-<style>
-.current {
-    position: relative; 
-    margin-top: 7.5px; 
-    margin-left: 0px;
-    }  
-</style>
 
-<script>            
-    var theme = "<?php echo $theme;?>";
-    if (theme === 'dark') {
-    var baseTextColor = "silver";
-    } else {
-    var baseTextColor = "#2d3a4b";
-    }
-</script>
-
-<div class="current"></div>
+<div class="current-module"></div>
 
 <script>
+var baseTextColor = "var(--col-6)";
 
 var currentImage = "<?php echo $current["image"];?>";
 
@@ -232,7 +217,7 @@ var windunits = "<?php echo $wind['units'];?>";
 var rainunits = "<?php echo $rain['units'];?>";
 var tempunits = "<?php echo $temp['units'];?>"; 
 
-var svg = d3.select(".current")
+var svg = d3.select(".current-module")
     .append("svg")
     //.style("background", "#292E35")
     .attr("width", 310)

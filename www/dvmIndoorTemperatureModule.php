@@ -1,51 +1,42 @@
 <?php 
+##############################################################################################
+#        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
+#       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    #
+#       (.  ___  :)||  |\   \  //  / |   (  ) : | \   \  //   |  |'  /    \:  | \   \  /     #
+#       |: \   ) |||:  | \\  \/. ./  (:  |  | . ) /\\  \/.    |  |: /'        |  \\  \/      #
+#       (| (___\ |||.  |  \.    //    \\ \__/ // |: \.        |   \//  /\'    |  /\.  \      #
+#       |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \     #
+#       (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|    #
+#                                                                                            #
+#     Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      #
+#      Distributed under terms of the GPLv3.  See the file LICENSE.txt for your rights.      #
+#    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
+#                    https://github.com/Millardiang/weewx-divumwx/issues                     #
+##############################################################################################
 include('dvmCombinedData.php');
-if($temp["units"] == "C"){
-$temp["indoor_now_feels"] = ($temp["indoor_now_feels"]-32)/9*5;}
-?>
+if($temp["units"] == "C"){$temp["indoor_now_feels"] = ($temp["indoor_now_feels"]-32)/9*5;}?>
 <!DOCTYPE html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <title>Indoor Temperature conditions</title>
 </head>
 
 <div class="chartforecast">
-<span class="yearpopup"><a alt="Indoor Chart" title="Indoor Chart" href="dvmhighcharts/tempCharts.php?chart='indoorplot'&span='yearly'&temp='<?php echo $temp["units"];?>'&pressure='<?php echo $barom["units"];?>'&wind='<?php echo $wind["units"];?>'&rain='<?php echo $rain["units"];?>" frameborder="0" scrolling="no" width="100%" height="100%" data-lity><?php echo $menucharticonpage;?> Indoor Temp | Humidity Chart</a></span>      
+<span class="yearpopup"><a alt="indoor temp charts" title="Indoor Temp Charts" href="dvmTemperatureRecords.php" data-lity><?php echo $menucharticonpage;?> Indoor Temp Charts</a></span>
+<span class="yearpopup"><a alt="Home Indoor Info" title=" Home Indoor Info" href="dvmHomeIndoorPopup.php" data-lity><?php echo $menucharticonpage;?> Indoor Info</a></span>    
 </div>
 <span class='moduletitle' style="font-family: Helvetica;"><?php echo $lang['indoorTempModule'];?> (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span> </span>
 
 <div class="updatedtime1"><span><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300)echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?></div><br/>
-<style>
-silver {
-	color: silver;
-}
-</style> 
+
 <div class="tempindoorconverter">
 <?php
-  if ($temp["units"]=='C'){echo "<div class=tempconvertercircleminus10 style='$convertStyle $colorInTemp;'>".number_format(($temp["indoor_now"]*9/5)+32,1).'&deg<smalltempunit2>F';} else if ($temp["units"]=='F'){echo "<div class=tempconvertercircleminus10 style='$convertStyle $colorInTemp;'>".number_format(($temp["indoor_now"]-32)*5/9,1).'&deg<smalltempunit2>C';}
+  if ($temp["units"]=='C'){echo "<div class=tempconvertercircle style='$convertStyle $colorInTemp;'>".number_format(($temp["indoor_now"]*9/5)+32,1).'&deg<smalltempunit2>F';} else if ($temp["units"]=='F'){echo "<div class=tempconvertercircle style='$convertStyle $colorInTemp;'>".number_format(($temp["indoor_now"]-32)*5/9,1).'&deg<smalltempunit2>C';}
 ?>
 </smalltempunit2></div></div>
 
-
-<style>
-
-.tempindoorconverter {
-  margin-left: 251px;
-  margin-top: -20px
-}
-
-.house {
-  position: relative; 
-  margin-top: -20.5px; 
-  margin-left: 0px;
-}
-.idtemppos {
-  margin-top: -148px;
-  margin-left: -135.5px;
-}
-</style>
-
-<script src="js/d3.min.js"></script>
+<script src="js/d3.7.9.0.min.js"></script>
 
 <div class="house"></div>
 <div class="idtemppos">
@@ -53,22 +44,10 @@ silver {
 </div>
 
 <script>
-            
-    var theme = "<?php echo $theme;?>";
 
-    if (theme === 'dark') {
-    var tubeFillColor = "rgba(45,47,50,1)";
-    var colorS = "silver";
-    var houseColor = "#38383c";
-    } else {
-    tubeFillColor = "rgba(230,232,239,1)";
-    colorS = "#777777";
-    houseColor = "#808080";
-    }
-
-</script>
-
-<script>
+	var tubeFillColor = "var(--col-10)";
+    var colorS = "var(--col-6)";
+    var houseColor = "var(--col-18)";
 
 	var theme = "<?php echo $theme;?>";
 
@@ -81,7 +60,7 @@ silver {
 	var h_trend = "<?php echo $humid["indoors_trend"];?>";
 	h_trend = h_trend || 0; 
 		
-	var hcolor = "<?php echo $colorInHumidity;?>";
+	var hcolor = "<?php echo $colorHumidityIn;?>";
 
 	var fcolor = "<?php echo $colorFeels;?>";
 	
@@ -124,7 +103,7 @@ var svg = d3.select(".house")
     			.style("stroke-width", "3px")
     			.style("stroke-linecap", "round");
     			
-    			var arc = d3.svg.arc() // bottom left arc
+    			var arc = d3.arc() // bottom left arc
     			.innerRadius(5)
     			.outerRadius(8)
     			.startAngle(-45 * (Math.PI/180))
@@ -143,7 +122,7 @@ var svg = d3.select(".house")
     			.style("stroke-width", "3px")
     			.style("stroke-linecap", "round");
     			
-    			var arc = d3.svg.arc() // Apex arc left
+    			var arc = d3.arc() // Apex arc left
     			.innerRadius(5)
     			.outerRadius(8)
     			.startAngle(-45 * (Math.PI/180))
@@ -172,7 +151,7 @@ var svg = d3.select(".house")
     			.style("stroke-width", "3px")
     			.style("stroke-linecap", "round");
     			    
-				var arc = d3.svg.arc() // bottom right arc
+				var arc = d3.arc() // bottom right arc
     			.innerRadius(5)
     			.outerRadius(8)
     			.startAngle(45 * (Math.PI/180))
@@ -200,7 +179,7 @@ var svg = d3.select(".house")
     			.style("stroke-width", "3px")
     			.style("stroke-linecap", "round");
     			    			    			   			
-    			var arc = d3.svg.arc() // Apex arc right
+    			var arc = d3.arc() // Apex arc right
     			.innerRadius(5)
     			.outerRadius(8)
     			.startAngle(45 * (Math.PI/180))
@@ -248,7 +227,7 @@ var svg = d3.select(".house")
 				.style("font-size", "12px")
 				.style("font-family", "Helvetica")
 				.style("font-weight", "normal")
-				.style("fill", "silver")
+				.style("fill", "var(--col-6)")
 				.text("Humidity");
 				
 			svg.append("text")	
@@ -258,7 +237,7 @@ var svg = d3.select(".house")
 				.style("font-size", "10px")
 				.style("font-family", "Helvetica")
 				.style("font-weight", "normal")
-				.style("fill", "silver")
+				.style("fill", "var(--col-6)")
 				.text(humidity+"%");
 				
 			// feels temp	
@@ -269,7 +248,7 @@ var svg = d3.select(".house")
 				.style("font-size", "12px")
 				.style("font-family", "Helvetica")
 				.style("font-weight", "normal")
-				.style("fill", "silver")
+				.style("fill", "var(--col-6)")
 				.text("Feels");
 				
 			svg.append("text")	
@@ -279,8 +258,8 @@ var svg = d3.select(".house")
 				.style("font-size", "10px")
 				.style("font-family", "Helvetica")
 				.style("font-weight", "normal")
-				.style("fill", "silver")
-				.text(feels + "\u00B0" + units);
+				.style("fill", "var(--col-6)")
+				.text(feels + "\xB0" + units);
 						
 				
 		if (h_trend > 0) {
@@ -336,7 +315,7 @@ var svg = d3.select(".house")
 				.style("font-size", "12px")
 				.style("font-family", "Helvetica")
 				.style("font-weight", "normal")
-				.style("fill", "black")
+				.style("fill", "var(--col-6)")
 				.text("Humidity");
 				
 			svg.append("text")	
@@ -346,7 +325,7 @@ var svg = d3.select(".house")
 				.style("font-size", "10px")
 				.style("font-family", "Helvetica")
 				.style("font-weight", "normal")
-				.style("fill", "black")
+				.style("fill", "var(--col-6)")
 				.text(humidity+"%");
 				
 			// feels temp	
@@ -357,7 +336,7 @@ var svg = d3.select(".house")
 				.style("font-size", "12px")
 				.style("font-family", "Helvetica")
 				.style("font-weight", "normal")
-				.style("fill", "black")
+				.style("fill", "var(--col-6)")
 				.text("Feels");
 				
 			if (units === 'C') {
@@ -369,8 +348,8 @@ var svg = d3.select(".house")
 				.style("font-size", "10px")
 				.style("font-family", "Helvetica")
 				.style("font-weight", "normal")
-				.style("fill", "black")
-				.text(feels+"\u00B0");
+				.style("fill", "var(--col-6)")
+				.text(feels +"\xB0" + units);
 				
 		} else {
 		
@@ -381,8 +360,8 @@ var svg = d3.select(".house")
 				.style("font-size", "10px")
 				.style("font-family", "Helvetica")
 				.style("font-weight", "normal")
-				.style("fill", "black")
-				.text(feels+"��F");
+				.style("fill", "var(--col-6)")
+				.text(feels +"\xB0" + units);
 				
 			}
 				
@@ -438,7 +417,7 @@ var svg = d3.select(".house")
     			.attr("x", 206)
     			.attr("y", 66)
     			.attr("rx", 2)
-    			.style("stroke", "#38383c")
+    			.style("stroke", "var(--col-13)")
     			.attr("height", 15)
     			.attr("width", 55)
     			.style("fill", "none");
@@ -456,7 +435,7 @@ var svg = d3.select(".house")
     			.attr("x", 206)
     			.attr("y", 102)
     			.attr("rx", 2)
-    			.style("stroke", "#38383c")
+    			.style("stroke", "var(--col-13)")
     			.attr("height", 15)
     			.attr("width", 55)
     			.style("fill", "none");
@@ -476,7 +455,7 @@ var svg = d3.select(".house")
     			.attr("x", 206)
     			.attr("y", 66)
     			.attr("rx", 2)
-    			.style("stroke", "#999999")
+    			.style("stroke", "var(--col-13)")
     			.attr("height", 15)
     			.attr("width", 55)
     			.style("fill", "none");
@@ -494,7 +473,7 @@ var svg = d3.select(".house")
     			.attr("x", 206)
     			.attr("y", 102)
     			.attr("rx", 2)
-    			.style("stroke", "#999999")
+    			.style("stroke", "var(--col-13)")
     			.attr("height", 15)
     			.attr("width", 55)
     			.style("fill", "none");
@@ -603,7 +582,7 @@ if (domain[1] - maxTemp < 0.66 * step)
   domain[1] += step;
 
 // D3 scale object
-var scale = d3.scale.linear()
+var scale = d3.scaleLinear()
   .range([bulb_cy - bulbRadius / 2 - 8.5, top_cy])
   .domain(domain);
 
@@ -632,6 +611,7 @@ var scale = d3.scale.linear()
     .attr("dy", isMax ? null : "0.75em")
     .text(label)
     .style("fill", textCol)
+    .style("font-family", "Helvetica")
     .style("font-size", "8px");
 
 });
@@ -660,12 +640,9 @@ svg.append("circle")
 var tickValues = d3.range((domain[1] - domain[0]) / step + 1).map(function(v) { return domain[0] + v * step; });
 
 // D3 axis object for the temperature scale
-var axis = d3.svg.axis()
-  .scale(scale)
-  .innerTickSize(7)
-  .outerTickSize(0)
-  .tickValues(tickValues)
-  .orient("left");
+var axis = d3.axisLeft(scale)
+  .tickSize(7)
+  .tickValues(tickValues);
 
 // Add the axis to the image
 var svgAxis = svg.append("g")
@@ -675,7 +652,8 @@ var svgAxis = svg.append("g")
 
 // Format text labels
 svgAxis.selectAll(".tick text")
-    .style("fill", "#777777")
+    .style("fill", "var(--col-6)")
+    .style("font-family", "Helvetica")
     .style("font-size", "8px");
 
 // Set main axis line to no stroke or fill

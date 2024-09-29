@@ -1,30 +1,24 @@
 <?php
-#####################################################################################################################                                                                                                        #
-#                                                                                                                   #
-# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
-#                                                                                                                   #
-# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
-#                                                                                                                   #
-# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
-#                                                                                                                   #
-# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
-#                                                                                                                   #
-#####################################################################################################################
-?>
-<?php include('dvmCombinedData.php');error_reporting(0);
-
+################################################################################################
+##        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     ##
+##       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    ##
+##       (.  ___  :)||  |\   \  //  / |   (  ) : | \   \  //   |  |'  /    \:  | \   \  /     ##
+##       |: \   ) |||:  | \\  \/. ./  (:  |  | . ) /\\  \/.    |  |: /'        |  \\  \/      ##
+##       (| (___\ |||.  |  \.    //    \\ \__/ // |: \.        |   \//  /\'    |  /\.  \      ##
+##       |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \     ##
+##       (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|    ##
+##                                                                                            ##
+##     Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      ##
+##      Distributed under terms of the GPLv3.  See the file LICENSE.txt for your rights.      ##
+##    Issues for weewx-divumwx skin template are only addressed via the issues register at    ##
+##                    https://github.com/Millardiang/weewx-divumwx/issues                     ##
+################################################################################################ 
+include('dvmCombinedData.php');
+error_reporting(0);
 if($dayPartCivil == "night"){$webcamurl = "img/nightTime.svg";$lang['webcamModule']="Timelapse";}
+$file_headers = @get_headers($webcamurl); ?>
 
-
-?>
-<style>
-.webcam{
--webkit-border-radius:4px;	-moz-border-radius:4px;	-o-border-radius:4px;	-ms-border-radius:4px;border-radius:4px;width:275px;height:145px;margin:1px;}
-</style>
-
-<?php $file_headers = @get_headers($webcamurl); ?>
-
-    <div class="chartforecast2">
+    <div class="chartforecast">
 
 <?php if($dayPartCivil == "day"){
 
@@ -35,20 +29,15 @@ if($dayPartCivil == "night"){$webcamurl = "img/nightTime.svg";$lang['webcamModul
 
 
 <div class="updatedtime1"><span>
-<?php 
-if ($dayPartCivil == "night") {
-  echo $online. ' <online>'.$alm["civil_twilight_end"].':00</online>';
-}
-else if($file_headers && $file_headers[0] != 'HTTP/1.1 404 Not Found') {
+<?php if($file_headers && $file_headers[0] != 'HTTP/1.1 404 Not Found') {
   echo $online.' '.date($timeFormat);
 } else if (file_exists($webcamurl)&&time()- filemtime($webcamurl)<300) {
   echo $online. ' <online>'.date($timeFormat,filemtime($webcamurl)).'</online>';
-} 
-else {
+} else {
   echo $offline. '<offline> Offline </offline>';
 }
 ?>
 </span></div>
 <!-- HOMEWEATHER STATION TEMPLATE SIMPLE WEBCAM -add your url as shown below do NOT delete the class='webcam' !!! -->
-<a><img src="<?php echo $webcamurl?>?v=<?php echo date('YmdGis');?>>" alt="weathercam" class="webcam" href="dvmTimelapsePopup.php" data-lity></a>
+<a href="dvmTimelapsePopup.php" data-lity><img src="<?php echo $webcamurl?>?v=<?php echo date('YmdGis');?>>" style="border:solid transparent 1px; border-radius:5px;width: 280px;margin-top:1px;" alt="weathercam" class="webcam"></a->
 </span>

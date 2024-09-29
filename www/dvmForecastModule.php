@@ -1,24 +1,38 @@
+<?php
+##############################################################################################
+#        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
+#       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    #
+#       (.  ___  :)||  |\   \  //  / |   (  ) : | \   \  //   |  |'  /    \:  | \   \  /     #
+#       |: \   ) |||:  | \\  \/. ./  (:  |  | . ) /\\  \/.    |  |: /'        |  \\  \/      #
+#       (| (___\ |||.  |  \.    //    \\ \__/ // |: \.        |   \//  /\'    |  /\.  \      #
+#       |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \     #
+#       (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|    #
+#                                                                                            #
+#     Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      #
+#      Distributed under terms of the GPLv3.  See the file LICENSE.txt for your rights.      #
+#    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
+#                    https://github.com/Millardiang/weewx-divumwx/issues                     #
+##############################################################################################
+?>
 <style>
-.chartforecast4 {
+.forecast4 {
   position: absolute;
   font-family: arial, system;
   z-index: 20;
   padding-top: 1px;
   margin-left: 0;
   font-size: .67em;
-  color: silver;
+  color: var(--col-6);
   margin-top: 159px;
   width: 300px;
   padding-left: 10px;
   text-align: left;
 }
-.chartforecast4:hover {
+.forecast4:hover {
   color: #90b12a
 }
 </style>
 <?php 
-
-
 include_once('dvmCombinedData.php');
 $iconset = "icon2";
 error_reporting(0); date_default_timezone_set($TZ);
@@ -27,12 +41,9 @@ if ($windunit=='kts'){$windunit="kts";}
 $jsonfile="jsondata/awd.txt";if(!file_exists($jsonfile)) {return;}
 
 ?>
-    <div class="chartforecast4">
+    <div class="forecast4">
       <span class="yearpopup"><a alt="Forecast Menu" title="Forecast Menu" href="dvmForecastHourlyPopup.php" data-lity><?php echo $chartinfo;?> Forecasts and Meteogram</a></span>
-        <!--span class="yearpopup"><a alt="Meteogram" title="Meteogram" href="dvmMeteogramPopup.php" data-lity><?php echo $menucharticonpage;?> Meteogram</a></span-->
-    <span class="yearpopup"><a alt="Advisories" title="Advisories" href="<?php echo $advisory;?>" . data-lity> <?php echo $chartinfo;?> Advisories</a></span>
-    <?php if($city == "London"){ ?>
-    <span class="yearpopup"><a alt="Weather Health" title="Weather Health" href="<?php echo $ukWeatherHealth;?>" . data-lity> <?php echo $chartinfo;?> Weather Health</a></span><?php } ?>
+      
 </div>
     <span class='moduletitle'><?php echo $lang['forecastModule'];?> (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span>
 

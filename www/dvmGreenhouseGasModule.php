@@ -28,20 +28,18 @@ $greenhouse["dust"] = $parsed_json["current"]["dust"];
 $greenhouse["ammonia"] = $parsed_json["current"]["ammonia"];
 ?>
 
-<div class="chartforecast2">
-<span class="yearpopup"><a alt="airquality charts" title="Airquality Charts" href="dvmhighcharts/dvmAirQualityWeekChart.php" data-lity><?php echo $menucharticonpage;?> Airquality Charts and Information</a></span>
+<div class="chartforecast">
+<span class="yearpopup"><a alt="solar" title="Gas Chart" href="dvmhighcharts/dvmAirQualityYearChart.php" data-lity><?php echo $menucharticonpage;?> Greenhouse Gas Charts</a></span>
 </div>
 <span class='moduletitle'><?php echo $lang['Greenhouse'];?></span>
 
 <div class="updatedtime1"><?php echo $online." ".$greenhouse["updated_time"];?></div>
 
-<script src='js/d3.min.js'></script>    
+<!--script src='js/d3.min.js'></script-->
+<script src="js/d3.7.9.0.min.js"></script>    
       
 <style>
-.Gas {
-  position: relative;
-  margin-top: -1.5px; 
-  margin-left: -0px;}
+.Gas {margin-top: -3px; margin-left: -0px;}
 </style>
 
 <div class="Gas">
@@ -68,7 +66,7 @@ var innerColor = "rgb(230, 200, 200)";
 
 var svg = d3.select(".GreenhouseGas")
     .append("svg")
-    //.style("background", "#292E35")
+    //.style("background", "#292E35") // box background to be commented out
     .attr("width", 310)
     .attr("height", 151.5);
 

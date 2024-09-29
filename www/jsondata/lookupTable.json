@@ -50,11 +50,11 @@
 		"generic": "Generic",
 		"wind": "Wind"
 	},
-	"amber": {
+	"#FFBF00": {
 		"AW.AV.SV": "icon-warning-avalanches-orange.svg",
 		"AW.CE.SV": "icon-warning-generic-orange.svg",
 		"AW.FG.SV": "icon-warning-fog-orange.svg",
-		"AW.FL.SV": "icon-warning-flood-orange.svg",
+		"AW.FL.SV": "icon-warning-flood-#FFBF00.svg",
 		"AW.FR.SV": "icon-warning-forestfire-orange.svg",
 		"AW.HT.SV": "icon-warning-heat-orange.svg",
 		"AW.LI.SV": "icon-warning-lightning-orange.svg",
