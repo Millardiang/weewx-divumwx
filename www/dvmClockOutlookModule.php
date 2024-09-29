@@ -33,7 +33,7 @@ $outlookPhrase = str_replace(" degrees","&deg".$temp["units"],$phrase);
 <span class='moduletitle'><?php echo $lang['timeTop']; ?></valuetitleunit></span>
     
       
-<script src="js/d3.7.9.0.min.js"></script>
+<script src="js/d3.4.2.2.min.js"></script>
 
 <div class="stationtime"></div>
 
@@ -48,7 +48,7 @@ if (theme === 'dark') {
 
 } else {
 
-    var ringColor = "#898990";
+    var ringColor = "#a3abc2";
     var dateColor = "#000000";
 
 }

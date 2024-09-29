@@ -24,7 +24,7 @@ else if ($uv["now"]>=0 ) {echo $uviclear,'<span>UVI</span> Low';}
 
 <html>
 
-<script src="js/d3.7.9.0.min.js"></script>   
+<script src='js/d3.min.js'></script>    
 
        
 <style>
@@ -62,7 +62,7 @@ var text = svg.selectAll(null)
 
     .style("fill", baseTextColor)
     .style("font-family", "Helvetica") 
-    .style("font-size", "9px")
+    .style("font-size", "10px")
     .style("text-anchor", "middle")
     .style("font-weight", "normal")
     .text(function(d) { return d.split("-")[0]; })
@@ -72,6 +72,20 @@ var text = svg.selectAll(null)
     .style("font-weight", "bold")
     .text(function(d) { return d.split("-")[1]; })
 
+    .append("tspan")
+    .style("fill", baseTextColor)
+    .style("font-weight", "normal")
+    .text(function(d) { return d.split("-")[2]; })
+
+    .append("tspan")
+    .style("fill", "Green")
+    .style("font-weight", "bold")
+    .text(function(d) { return d.split("-")[3]; })
+
+    .append("tspan")
+    .style("fill", baseTextColor)
+    .style("font-weight", "normal")
+    .text(function(d) { return d.split("-")[4]; })
 </script>
 
 <script>
@@ -131,7 +145,7 @@ var bulb_cy = bottomY - bulbRadius,
 
 var svg = d3.select(".solarx")
     .append("svg")
-    //.style("background", "#292E35") // box background to be commented out
+    //.style("background", "#292E35")
     .attr("width", width)
     .attr("height", height);
 
@@ -170,7 +184,7 @@ if (domain[1] - maxSolar < 0.66 * step)
   domain[1] += step;
 
 // D3 scale object
-var scale = d3.scaleLinear()
+var scale = d3.scale.linear()
     .range([bulb_cy - bulbRadius / 2 - 8.5, top_cy])
     .domain(domain);
     
@@ -191,30 +205,28 @@ var scale = d3.scaleLinear()
     .style("stroke-width", "1px")
     .style("stroke-linecap", "round");
 
+
   svg.append("text")
     .attr("x", width / 2 + tubeWidth / 2 + 4)
     .attr("y", scale(t) + textOffset)
     .attr("dy", isMax ? null : "0.75em")
     .text(label)
     .style("fill", textCol)
-    .style("font-family", "Helvetica")
     .style("font-size", "8px");
 
 });
-/*
-if (maxThreshold > 120) {
 
 [maxThreshold].forEach(function(t) {
 
   var isMax = (t == maxThreshold),
       label = (isMax ? "T'hold" : "min"),
-      textCol = (isMax ? "silver" : "silver"),
+      textCol = (isMax ? colorS : colorS),
       textOffset = (isMax ? - 3 : 3);
       
   svg.append("line")
     .attr("id", label + "Line")
     .attr("x1", width / 2 + 38 - tubeWidth / 2)
-    .attr("x2", width / 2 + 38 + tubeWidth / 2 - 11)
+    .attr("x2", width / 2 + 38 + tubeWidth / 2 - 18)
     .attr("y1", scale(t))
     .attr("y2", scale(t))
     .style("stroke", tubeBorderColor)
@@ -232,8 +244,6 @@ if (maxThreshold > 120) {
 
 });
 
-} else {}
-*/
 var tubeFill_bottom = bulb_cy,
     tubeFill_top = scale(currentSolar);
 
@@ -250,10 +260,12 @@ svg.append("rect")
 var tickValues = d3.range((domain[1] - domain[0]) / step + 1).map(function(v) { return domain[0] + v * step; });
 
 // D3 axis object for the solar scale
-var axis = d3.axisLeft(scale)
-    .tickSize(7)
+var axis = d3.svg.axis()
+    .scale(scale)
+    .innerTickSize(7)
+    .outerTickSize(0)
     .tickValues(tickValues)
-    .tickFormat(d3.format("d"));
+    .orient("left").tickFormat(d3.format("d"));
 
 // Add the axis to the image
 var svgAxis = svg.append("g")
@@ -264,7 +276,6 @@ var svgAxis = svg.append("g")
 // Format text labels
 svgAxis.selectAll(".tick text")
     .style("fill", "#777777")
-    .style("font-family", "Helvetica")
     .style("font-size", "7px");
 
 // Set main axis line to no stroke or fill
@@ -335,7 +346,7 @@ var bulb_cy = bottomY - bulbRadius,
 
 var svg = d3.select(".uvi")
     .append("svg")
-    //.style("background", "#292E35") // box background to be commented out
+    //.style("background", "#292E35")
     .attr("width", width)
     .attr("height", height);
 
@@ -374,7 +385,7 @@ if (domain[1] - maxUVI < 0.66 * step)
   domain[1] += step;
 
 // D3 scale object
-var scale = d3.scaleLinear()
+var scale = d3.scale.linear()
     .range([bulb_cy - bulbRadius / 2 - 8.5, top_cy])
     .domain(domain);
     
@@ -395,13 +406,13 @@ var scale = d3.scaleLinear()
     .style("stroke-width", "1px")
     .style("stroke-linecap", "round");
 
+
   svg.append("text")
     .attr("x", width / 2 + tubeWidth / 2 + 4)
     .attr("y", scale(t) + textOffset)
     .attr("dy", isMax ? null : "0.75em")
     .text(label)
     .style("fill", textCol)
-    .style("font-family", "Helvetica")
     .style("font-size", "8px");
 
 });
@@ -422,10 +433,12 @@ svg.append("rect")
 var tickValues = d3.range((domain[1] - domain[0]) / step + 1).map(function(v) { return domain[0] + v * step; });
 
 // D3 axis object for the lux scale
-var axis = d3.axisLeft(scale)
-    .tickSize(7)
+var axis = d3.svg.axis()
+    .scale(scale)
+    .innerTickSize(7)
+    .outerTickSize(0)
     .tickValues(tickValues)
-    .tickFormat(d3.format("d"));
+    .orient("left").tickFormat(d3.format("d"));
 
 // Add the axis to the image
 var svgAxis = svg.append("g")
@@ -436,7 +449,6 @@ var svgAxis = svg.append("g")
 // Format text labels
 svgAxis.selectAll(".tick text")
     .style("fill", "#777777")
-    .style("font-family", "Helvetica")
     .style("font-size", "7px");
 
 // Set main axis line to no stroke or fill
@@ -481,10 +493,10 @@ svg.append("text")
     var width = 95,
     height = 150;
     
-    var currentLux = "<?php echo $solar["nowLux"];?>";
+    var currentLux = "<?php echo $sky["lux"] ;?>";
     currentLux = currentLux || 0;
     
-    var maxLux = "<?php echo $solar["day_maxLux"];?>";
+    var maxLux = "<?php echo $sky["day_lux_max"];?>";
     maxLux = maxLux || 0;
 
     var maxLuxTime = "<?php echo $solar["day_maxtime"];?>";
@@ -505,7 +517,7 @@ var bulb_cy = bottomY - bulbRadius,
 
 var svg = d3.select(".lux")
     .append("svg")
-    //.style("background", "#292E35") // box background to be commented out
+    //.style("background", "#292E35")
     .attr("width", width)
     .attr("height", height);
 
@@ -544,7 +556,7 @@ if (domain[1] - maxLux < 0.66 * step)
   domain[1] += step;
 
 // D3 scale object
-var scale = d3.scaleLinear()
+var scale = d3.scale.linear()
     .range([bulb_cy - bulbRadius / 2 - 8.5, top_cy])
     .domain(domain);
 
@@ -565,13 +577,13 @@ var scale = d3.scaleLinear()
     .style("stroke-width", "1px")
     .style("stroke-linecap", "round");
 
+
   svg.append("text")
     .attr("x", width / 2 + tubeWidth / 2 + 4)
     .attr("y", scale(t) + textOffset)
     .attr("dy", isMax ? null : "0.75em")
     .text(label)
     .style("fill", textCol)
-    .style("font-family", "Helvetica")
     .style("font-size", "8px");
 
 });
@@ -592,10 +604,12 @@ svg.append("rect")
 var tickValues = d3.range((domain[1] - domain[0]) / step + 1).map(function(v) { return domain[0] + v * step; });
 
 // D3 axis object for the lux scale
-var axis = d3.axisLeft(scale)
-    .tickSize(7)
+var axis = d3.svg.axis()
+    .scale(scale)
+    .innerTickSize(7)
+    .outerTickSize(0)
     .tickValues(tickValues)
-    .tickFormat(d3.format("d"));
+    .orient("left").tickFormat(d3.format("d"));
 
 // Add the axis to the image
 var svgAxis = svg.append("g")
@@ -606,7 +620,6 @@ var svgAxis = svg.append("g")
 // Format text labels
 svgAxis.selectAll(".tick text")
     .style("fill", "#777777")
-    .style("font-family", "Helvetica")
     .style("font-size", "7px");
 
 // Set main axis line to no stroke or fill

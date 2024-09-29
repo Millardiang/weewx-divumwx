@@ -13,23 +13,16 @@
 #    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
-session_start();
-if (!file_exists("userSettings.php")) {
-    if (isset($_SESSION['setupAttempted']) && $_SESSION['setupAttempted'] === true) {
-        echo "An error occurred. Please contact support.";
-        exit;
-    }
-    $_SESSION['canAccessSetup'] = true;
-    header("Location: dvmActSetup.php");
-    exit;
+if (!file_exists("./userSettings.php"))
+{
+    copy("./initial_userSettings.php", "./userSettings.php");
 }
-
 include_once ('dvmCombinedData.php');
 include_once ('webserver_ip_address.php');
 require_once ('admin/assets/classes/geoplugin.class.php');
-include ('dvmUpdater.php');
-
-
+include_once ('dvmUpdater.php');
+include_once ('dvmSideMenu.php');
+include ('dvmAdvisory.php');
 date_default_timezone_set($TZ);
 header('Content-type: text/html; charset=utf-8');
 error_reporting(0);
@@ -37,7 +30,6 @@ error_reporting(0);
 ?>
 <!DOCTYPE html>
 <head>
- 
   <title><?php echo $stationlocation; ?> Weather Station</title>
   <!--Google / Search Engine Tags -->
   <meta itemprop="image" content="img/divumMeta.png">
@@ -67,9 +59,10 @@ error_reporting(0);
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   
 <!--link rel="stylesheet" href="./css/divumwx.min.css?version=<?php echo filemtime('./css/divumwx.min.css'); ?>" rel="stylesheet prefetch"-->
-<link rel="stylesheet" href="./css/divumwx.main.css?version=<?php echo filemtime('./css/divumwx.main.css'); ?>" rel="stylesheet prefetch">
+<link rel="stylesheet" href="./css/divumwx.min.css?version=<?php echo filemtime('./css/divumwx.main.css'); ?>" rel="stylesheet prefetch">
 
   
+</head>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -83,22 +76,9 @@ error_reporting(0);
       });
     }
   </script>
-  </head>
 <body>
- 
-  <!--start of header section-->
-  <!-- start of theme switch -->
-  <div class="theme-switch-wrapper">
-      <label class="theme-switch" for="checkbox">
-    <input type="checkbox" id="checkbox" />
-    <div class="slider round"></div>
-  </label>
-    
-      
-  </div>
-<!-- end of theme switch -->      
-
-  <div class="titlebar"style="background-color:transparent;">
+<!--start of header section-->
+  <div class="titlebar">
   <div class="titlebar-item">
    </div>
   <div class="titlebar-item-center">
@@ -109,16 +89,26 @@ error_reporting(0);
           <div class="headerflag"><object data="./img/flags/<?php echo $flag; ?>.svg" width="20px"></object>&nbsp;&nbsp;<?php echo $stationAbbrev; ?></object></div>         
                  </div> 
 </div>
-          <div class="titlebar-item"></div>
+          <div class="titlebar-item"><div class="theme-switch-wrapper">
+      <label class="theme-switch" for="checkbox">
+    <input type="checkbox" id="checkbox" />
+    <div class="slider round"></div>
+  </label>
+    
+      
+  </div></div>
           </div>
 <!--end of header section-->
-<!--start of alert section-->
-
-        <?php include ("advisoryRegions.php");?>
-          <!--div class="alertbar" style="background-color:<?php echo $alertBackground?>;color:<?php echo $alertColor?>;"><?php echo $alertPhrase;?></div-->
-
+<!--start of alert section-->      
+<?php if ($alertlevel !== "none")
+{ ?> 
+<div class="alertbar" style="background-color: <?php echo $lowercasealert; ?>;">
+  <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
+  <span><img src="./css/svg/<?php echo $warnimage; ?>"></img><a class="alertpos"><?php echo $alertPhrase; ?></a></span>
+</div><?php
+} ?>
 <!--end of alert section-->
-<!--start of grid section-->  
+<!--strat of grid section-->  
 <section class="card-container">
 
 	<div class="cardP"><div class="module"><div id="position1"></div></div></div>
@@ -166,7 +156,7 @@ error_reporting(0);
 
 <!--start of footer section-->
 
-<div class="titlebar" style="height: auto; padding: 10px;">
+<div class="titlebar" style="height: auto;">
 <!--section1-->
 <div class="stationLongname">
   <div class="titlebar-item"> 
@@ -181,7 +171,7 @@ error_reporting(0);
 <div class="titlebar-item-center" style="font-size:11px;">
         <p><red><?php echo "Never base important decisions that could result in harm to people or property on this weather information." ?></red></p>
         <p><?php echo "Operational Since " . $divum["since"] . " - ";
-$info; ?> <?php echo $templateversion; ?> <?php echo " - WeeWX"; ?>(<?php echo $divum["swversion"]; ?>)  - OS- <?php echo " " . $os_version . " - PHP( " . substr($phpVersion, 0, 7); ?>)</value></p>
+$info; ?> <?php echo $templateversion; ?> <?php echo " - WeeWX"; ?>(<?php echo $divum["swversion"]; ?>)  - OS- <?php echo " " . $weatherhardware . "" . $os_version . " - PHP( " . substr($phpVersion, 0, 7); ?>)</value></p>
         <a href="https://www.xweather.com/" target="_blank" title="Forecasts Powered by Vaisala Xweather"><img src="https://www.xweather.com/assets/logos/vaisala-xweather-logo-<?php echo $reverseTheme; ?>.svg" alt="Vaisala Xweather" height="30" /></a><a href="https://developer.yr.no/featured-products/forecast/">    Meteogram Data by <img src="img/yr.svg" width="14px"></a><a href="https://bas.dev/work/meteocons">     Animated Icons by <img src="img/bm.svg" width="14px"></p>
 
 </div>
@@ -189,7 +179,7 @@ $info; ?> <?php echo $templateversion; ?> <?php echo " - WeeWX"; ?>(<?php echo $
 <!--section3-->
 <div class="stationLongname">
 <div class="titlebar-item">      <div class="weewxLogoFooter" style="width: 30px;"><a href="http://weewx.com" alt="http://weewx.com" title="http://weewx.com">
-          <?php echo '<img src="img/icon-weewx-'.$theme.'.svg" alt="WeeWX" title="WeeWX" width="100px" height="55px">'; ?></a>
+          <?php echo '<img src="img/icon-weewx.svg" alt="WeeWX" title="WeeWX" width="100px" height="55px"><div class="hardwarelogo1text"></div>'; ?></a>
       </div>
 </div>
           </div>
@@ -211,19 +201,19 @@ if (currentTheme) {
     if (currentTheme === 'dark') {
         toggleSwitch.checked = true;
         document.cookie = "theme=dark";
-        
+       
     }
 }
 
 function switchTheme(e) {
     if (e.target.checked) {
         document.documentElement.setAttribute('data-theme', 'dark');
-        localStorage.setItem('theme', 'dark','true', 2628000000,'/',false);
+        localStorage.setItem('theme', 'dark');
         document.cookie = "theme=dark";
         location.reload();
     }
     else {        document.documentElement.setAttribute('data-theme', 'light');
-          localStorage.setItem('theme', 'light', 'true', 2628000000, '/',false);
+          localStorage.setItem('theme', 'light');
           document.cookie = "theme=light";
           location.reload();
     }    
@@ -236,45 +226,4 @@ toggleSwitch.addEventListener('change', switchTheme, false);
 
   
 </body>
-<?php 
-      include_once ('dvmSideMenu.php');
-      //Add visits by country to admin database. No personal info is kept by this, ip is discarded
-      if($trkVisits){
-        $geoplugin = new geoPlugin();
-        $geoplugin->locate($_SERVER['REMOTE_ADDR']);
-        $countryCode = $geoplugin->countryCode;
-        $regionName = $geoplugin->regionName;
-        $cityCode = $geoplugin->city;
-        $lat = $geoplugin->latitude;
-        $long = $geoplugin->longitude;
-        $adminDB = __DIR__ . DIRECTORY_SEPARATOR . 'admin' . DIRECTORY_SEPARATOR . 'db' . DIRECTORY_SEPARATOR . 'dvmAdmin.db3';
-        $db = new PDO("sqlite:" . $adminDB);
-        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $regionName = empty($regionName) ? "Unknown" : $regionName;
-        $cityCode = empty($cityCode) ? "Unknown" : $cityCode;
-        $query = $db->prepare("SELECT * FROM visits WHERE countryCode = :countryCode AND regionName = :regionName AND cityName = :cityName");
-        $query->bindValue(':countryCode', $countryCode, PDO::PARAM_STR);
-        $query->bindValue(':regionName', $regionName, PDO::PARAM_STR);
-        $query->bindValue(':cityName', $cityCode, PDO::PARAM_STR);
-        $query->execute();
-        $row = $query->fetch(PDO::FETCH_ASSOC);
-        if ($row) {
-            $updateStmt = $db->prepare("UPDATE visits SET visit_count = visit_count + 1 WHERE countryCode = :countryCode AND regionName = :regionName AND cityName = :cityName");
-            $updateStmt->bindValue(':countryCode', $countryCode, PDO::PARAM_STR);
-            $updateStmt->bindValue(':regionName', $regionName, PDO::PARAM_STR);
-            $updateStmt->bindValue(':cityName', $cityCode, PDO::PARAM_STR);
-            $updateStmt->execute();
-        } else {
-            $insertStmt = $db->prepare("INSERT INTO visits (countryCode, regionName, cityName, lat, long, visit_count) VALUES (:countryCode, :regionName, :cityName, :lat, :long, 1)");
-            $insertStmt->bindValue(':countryCode', $countryCode, PDO::PARAM_STR);
-            $insertStmt->bindValue(':regionName', $regionName, PDO::PARAM_STR);
-            $insertStmt->bindValue(':cityName', $cityCode, PDO::PARAM_STR);
-            $insertStmt->bindValue(':lat', $lat, PDO::PARAM_STR);
-            $insertStmt->bindValue(':long', $long, PDO::PARAM_STR);
-            $insertStmt->execute();
-        }
-        $db = null;
-      }
-    ?>
-
 </html>

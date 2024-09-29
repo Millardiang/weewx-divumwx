@@ -111,7 +111,7 @@ if ($wind["units"] == "mph"){
 
 </style>
 
-<script src="js/d3.7.9.0.min.js"></script>
+<script src="js/d3.min.js"></script>
 
 <script>
 	if (theme == 'dark') {

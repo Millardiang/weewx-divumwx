@@ -109,12 +109,14 @@ $divum["date"] = date($dateFormat, $divum["datetime"]);
 $divum["time"] = date($timeFormat, $divum["datetime"]);
 $divum["swversion"] = "$station.version";
 $divum["build"] = $weewxrt[38];
-$divum["since"] = "$alltime.outTemp.firsttime.raw";
+$divum["since"] = "$alltime.outTemp.firsttime.format(format_string="%Y")";
+$divum["heatmap_year"] = date("Y");
 $stationUptime = "$station.uptime.long_form";
 $TS = time();
-//$theme = "$bodyTheme";
-if($theme == 'dark') {$convertStyle = "color:";}
+
+if($theme == 'dark') {$convertStyle = "background: 0; border-color: #393d40; color:";}
 else {$convertStyle = "background:";}
+
 $phpVersion = phpversion();
 
 //air density
@@ -199,8 +201,9 @@ $air["24h.rollingavg.pm10_0"] = $current.pm10_0.format(add_label=False, format_s
 #end if
 #end if
 #if $almanac.hasExtras
-$alm["moon_altitude"] = round($almanac.moon.alt,2);
 $alm["sun_altitude"] = round($almanac.sun.alt,2);
+$alm["moon_altitude"] = round($almanac.moon.alt,2);
+
 if ($alm["sun_altitude"] < 0)
 {
 $alm["sun_None"] = "<i>(Always down)</i>";
@@ -332,10 +335,9 @@ $barom["alltime_mintime"] = date('j M Y H:i',$alltime.barometer.mintime.raw);
 
 //dewpoint
 $dew["now"] = $weewxrt[4];
-#if $trend.dewpoint.has_data
-$dew["trend"] = $trend.dewpoint.format(add_label=False);
-if(is_numeric($dew["trend"]) != 1){$dew["trend"] = 0;}
-#end if
+$dewTrend = "$trend.dewpoint.format(add_label=False)";
+if(is_numeric($dewTrend) != 1 or $dewTrend == '   N/A'){$dew["trend"] = 0;}
+else {$dew["trend"] = intval($dewTrend);}
 $dew["day_max"] = $day.dewpoint.max.format(add_label=False);
 $dew["day_maxtime"] = date('H:i',$day.dewpoint.maxtime.raw);
 $dew["day_min"] = $day.dewpoint.min.format(add_label=False);
@@ -477,9 +479,11 @@ $rain["year_total"] = round($year.rain.sum.raw,1);
 $rain["alltime_rate_max"] = $alltime.rainRate.max.raw;
 $rain["alltime_rate_maxtime"] = $alltime.rainRate.maxtime.raw;
 $rain["alltime_total"] = round($alltime.rain.sum.raw,1);
+
 #if $current.stormRain.has_data
-$rain["storm_rain"] = $current.stormRain.raw;
-if(is_numeric($rain["storm_rain"]) != 1){$rain["storm_rain"] = 0;}
+$rainStorm = $current.stormRain.raw;
+if(is_numeric($rainStorm) != 1){$rain["storm_rain"] = 0;}
+else{$rain["storm_rain"] = $rainStorm;}
 if($rain["storm_rain"] > 0 ){$rain["storm_rain_start"] = date('D j M H:i',($TS)-($time_since('stormRain=0').raw));}
 #end if
 $rain["last_rain"] = date('D j M H:i',$time_at('rain>0').raw);
@@ -490,22 +494,27 @@ else if($weewxrt[8] >= 50){$rain["intensity"]="Violent";}
 #end if
 
 //sky
-$sky["lux"] = round($weewxrt[45]/0.00809399477,0,PHP_ROUND_HALF_UP);
-$sky["day_rad_max"] = "$day.radiation.max.format($localize=False,add_label=False)";
-if($sky["day_rad_max"] == "   N/A"){$sky["day_rad_max"]=0;}
-else{$sky["day_rad_max"] = $day.radiation.max.format($localize=False,add_label=False);}
-$sky["day_lux_max"] = round($sky["day_rad_max"]/0.00809399477,0,PHP_ROUND_HALF_UP);
 $sky["cloud_base"] = $weewxrt[52];
 #if $current.cloudcover.has_data
-$sky["cloud_cover"] = $current.cloudcover.raw;
+$sky["cloud_cover"] = round($current.cloudcover.raw,2,PHP_ROUND_HALF_UP);
 if(is_numeric($sky["cloud_cover"]) != 1){$sky["cloud_cover"] = 0;}
 #end if
 
 //solar
 #if $current.radiation.has_data
+$solar["lux"] = round($current.luminosity.raw,0,PHP_ROUND_HALF_UP);
+$solar["day_lux_max"] = round($day.luminosity.max.raw,0,PHP_ROUND_HALF_UP);
+$solar["day_lux_maxtime"] = "$day.luminosity.maxtime.raw";
+$solar["threshold"] = round($current.threshold.raw,0,PHP_ROUND_HALF_UP);
+$solar["sun_duration_minutes"] = $day.sunshine_time.sum.raw;
+$solar["sun_duration_hours_minutes"] = intdiv($solar["sun_duration_minutes"], 60).'hr:'. ($solar["sun_duration_minutes"] % 60).'min';
+$solar["sunshine_hours_yesterday"] = $day($days_ago=1).sunshine_hours.sum.raw;
+$solar["sunshine_minutes_yesterday"] = $solar["sunshine_hours_yesterday"] * 60;
+$solar["sunshine_hours_minutes_yesterday"] = intdiv($solar["sunshine_minutes_yesterday"], 60).'hr:'. ($solar["sunshine_minutes_yesterday"] % 60).'min';
 $solar["now"] = $current.radiation.format($localize=False,add_label=False);
 $solar["day_max"] = $day.radiation.max.format($localize=False,add_label=False);
 $solar["day_maxtime"] = date('H:i',$day.radiation.maxtime.raw);
+if($solar["day_rad_max"] == "   N/A"){$solar["day_rad_max"]=0;}
 $solar["yesterday_max"] = $day($days_ago=1).radiation.max.format($localize=False,add_label=False);
 $solar["yesterday_maxtime"] = date('H:i',$day($days_ago=1).radiation.maxtime.raw);
 $solar["month_max"] = $month.radiation.max.format($localize=False,add_label=False);
@@ -921,21 +930,21 @@ $colorSolarMonthMax = "$colorize($month.radiation.max)";
 $colorSolarYearMax = "$colorize($year.radiation.max)";
 $colorSolarAlltimeMax = "$colorize($alltime.radiation.max)";
 
-if($sky["lux"] == 0){$colorLuxCurrent='grey';}
-else if($sky["lux"] < 16000){$colorLuxCurrent='#89C7E7';}
-else if($sky["lux"] < 32000){$colorLuxCurrent='#ADD8E5';}
-else if($sky["lux"] < 48000){$colorLuxCurrent='#C4EBF1';}
-else if($sky["lux"] < 64000){$colorLuxCurrent='#FFFFC2';}
-else if($sky["lux"] < 80000){$colorLuxCurrent='#FFF684';}
-else if($sky["lux"] > 80000){$colorLuxCurrent='#FFD301';}
+if($solar["lux"] == 0){$colorLuxCurrent='grey';}
+else if($solar["lux"] < 16000){$colorLuxCurrent='#89C7E7';}
+else if($solar["lux"] < 32000){$colorLuxCurrent='#ADD8E5';}
+else if($solar["lux"] < 48000){$colorLuxCurrent='#C4EBF1';}
+else if($solar["lux"] < 64000){$colorLuxCurrent='#FFFFC2';}
+else if($solar["lux"] < 80000){$colorLuxCurrent='#FFF684';}
+else if($solar["lux"] > 80000){$colorLuxCurrent='#FFD301';}
 
-if($sky["day_lux_max"] == 0){$colorLuxDay='grey';}
-else if($sky["day_lux_max"] < 16000){$colorLuxDay='#89C7E7';}
-else if($sky["day_lux_max"] < 32000){$colorLuxDay='#ADD8E5';}
-else if($sky["day_lux_max"] < 48000){$colorLuxDay='#C4EBF1';}
-else if($sky["day_lux_max"] < 64000){$colorLuxDay='#FFFFC2';}
-else if($sky["day_lux_max"] < 80000){$colorLuxDay='#FFF684';}
-else if($sky["day_lux_max"] > 80000){$colorLuxDay='#FFD301';}
+if($solar["day_lux_max"] == 0){$colorLuxDay='grey';}
+else if($solar["day_lux_max"] < 16000){$colorLuxDay='#89C7E7';}
+else if($solar["day_lux_max"] < 32000){$colorLuxDay='#ADD8E5';}
+else if($solar["day_lux_max"] < 48000){$colorLuxDay='#C4EBF1';}
+else if($solar["day_lux_max"] < 64000){$colorLuxDay='#FFFFC2';}
+else if($solar["day_lux_max"] < 80000){$colorLuxDay='#FFF684';}
+else if($solar["day_lux_max"] > 80000){$colorLuxDay='#FFD301';}
 
 //Convert temperatures if necessary
 include('dvmUnitConversions.php');
@@ -951,4 +960,6 @@ $Tdc = (($Tc-(14.55+0.114*$Tc)*(1-(0.01*$RH))-pow((2.5+0.007*$Tc)*(1-(0.01*$RH))
 $E = (6.11*pow(10,(7.5*$Tdc/(237.7+$Tdc))));
 $wetbulbcalc = (((0.00066*$P)*$Tc)+((4098*$E)/pow(($Tdc+237.7),2)*$Tdc))/((0.00066*$P)+(4098*$E)/pow(($Tdc+237.7),2));
 $wetbulbx = number_format($wetbulbcalc,1);
+  
+  
 ?>

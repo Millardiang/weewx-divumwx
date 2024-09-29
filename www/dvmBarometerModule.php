@@ -1,19 +1,15 @@
 <?php
-##############################################################################################
-#        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
-#       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    #
-#       (.  ___  :)||  |\   \  //  / |   (  ) : | \   \  //   |  |'  /    \:  | \   \  /     #
-#       |: \   ) |||:  | \\  \/. ./  (:  |  | . ) /\\  \/.    |  |: /'        |  \\  \/      #
-#       (| (___\ |||.  |  \.    //    \\ \__/ // |: \.        |   \//  /\'    |  /\.  \      #
-#       |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \     #
-#       (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|    #
-#                                                                                            #
-#     Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      #
-#      Distributed under terms of the GPLv3.  See the file LICENSE.txt for your rights.      #
-#    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
-#                    https://github.com/Millardiang/weewx-divumwx/issues                     #
-##############################################################################################
-
+#####################################################################################################################                                                                                
+#                                                                                                                   #
+# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
+#                                                                                                                   #
+# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
+#                                                                                                                   #
+# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
+#                                                                                                                   #
+# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
+#                                                                                                                   #
+#####################################################################################################################
 include('dvmCombinedData.php');
 
 ?>
@@ -47,7 +43,7 @@ if ($barom["units"]=='mbar' OR $barom["units"]=="hPa"){echo number_format($barom
 </div></div>
 
 
-<script src="js/d3.v3.min.js"></script>
+<script src="js/d3.min.js"></script>
 <script src="js/iopctrl.js"></script>
 
 <style>
@@ -173,7 +169,7 @@ if ($theme === "dark") { echo
         }
         
         .gauge line {
-            stroke: #C0C0C0;
+            stroke: rgba(230, 232, 239, 1);
             stroke-width: 0.75px;
             stroke-linecap: round; 
         }
