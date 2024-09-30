@@ -103,27 +103,32 @@ switch ($advisoryzoneMapping) {
             $floodAlertlevel[$i] = $flood_json["items"][$i]["severity"];
             if ($floodLevel[$i] == 4) {
                 $floodBackground[$i] = "white";
+                $floodBorder[$i] = "#b1b4b6";
                 $floodAlertColor[$i] = "black";
             } elseif ($floodLevel[$i] == 3) {
-                $floodBackground[$i] = "orange";
+                $floodBackground[$i] = "#fef3e6";
+                $floodBorder[$i] = "#f18700";
                 $floodAlertColor[$i] = "black";
             } elseif ($floodLevel[$i] == 2) {
-                $floodBackground[$i] = "red";
-                $floodAlertColor[$i] = "white";
-            } elseif ($floodFevel[$i] == 1) {
-                $floodBackground[$i] = "red";
+                $floodBackground[$i] = "#fdedee";
+                $floodBorder[$i] = "#e3000f";
+                $floodAlertColor[$i] = "black";
+            } elseif ($floodLevel[$i] == 1) {
+                $floodBackground[$i] = "#e3000f";
+                $floodBorder[$i] = "#e3000f";
                 $floodAlertColor[$i] = "white";
             }
+        
             $floodHeadline[$i] = "  " . $floodAlertlevel[$i] . " for " . $floodDescription[$i] . ".  Updated ".$floodUpdated[$i].".";
  
             if (str_contains($floodMessage[$i], $englishFloodLocation)) { ?>
  
       <section>
-      <div class="alertbar" style="margin-bottom:4px;padding-bottom:10px;background-color:<?php echo $floodBackground[$i]; ?>;color:<?php echo $floodAlertColor[$i]; ?>;border-radius:5px;">
+      <div class="alertbar" style="margin-bottom:4px;padding-bottom:10px;background-color:<?php echo $floodBackground[$i]; ?>;color:<?php echo $floodAlertColor[$i]; ?>;border-radius:5px;border: solid <?php echo $floodBorder[$i]; ?> 4px;">
       <div class="alert-text-box" style="padding-left:20px;padding-right:20px;display:flex;margin: 0 auto;">
-		<div class="post" style="font-weight:500; font-size:14px; color:<?php echo $floodAlertColor[$i]; ?>;"><img src="css/svg/icon-warning-flood-<?php echo $floodBackground[$i]; ?>.svg"style="margin-bottom:-10px;"><?php echo $floodHeadline[
+		<div class="post" style="font-weight:500; font-size:14px; color:<?php echo $floodAlertColor[$i]; ?>;"><img src="img/flood<?php echo $floodLevel[$i]; ?>.png"style="margin-bottom:-10px; width:40px;"><?php echo $floodHeadline[
     $i
-]; ?><img src="css/svg/icon-warning-flood-<?php echo $floodBackground[$i]; ?>.svg"style="margin-bottom:-10px;">
+]; ?><img src="img/flood<?php echo $floodLevel[$i]; ?>.png"style="margin-bottom:-10px; width:40px;">
 			
 			<span class="more" style="padding-top:-20px;display:none;"><p><?php echo $floodMessage[$i] . "."; ?></p></span>
 
