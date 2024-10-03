@@ -1,17 +1,18 @@
 <?php
-#####################################################################################################################                                                                                                        #
-#                                                                                                                   #
-# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
-#                                                                                                                   #
-# Copyright (C) 2023 Sean Balfour. All rights reserved                                 #
-#                                                                                                                   #
-# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
-#                                                                                                                   #
-# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
-#                                                                                                                   #
-#####################################################################################################################
-?>
-<?php
+##############################################################################################
+#        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
+#       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    #
+#       (.  ___  :)||  |\   \  //  / |   (  ) : | \   \  //   |  |'  /    \:  | \   \  /     #
+#       |: \   ) |||:  | \\  \/. ./  (:  |  | . ) /\\  \/.    |  |: /'        |  \\  \/      #
+#       (| (___\ |||.  |  \.    //    \\ \__/ // |: \.        |   \//  /\'    |  /\.  \      #
+#       |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \     #
+#       (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|    #
+#                                                                                            #
+#     Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      #
+#      Distributed under terms of the GPLv3.  See the file LICENSE.txt for your rights.      #
+#    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
+#                    https://github.com/Millardiang/weewx-divumwx/issues                     #
+##############################################################################################
 
 /*
 Astronomical clock coded in D3.js
@@ -32,18 +33,21 @@ Cheers Sean
 */
 
 include('dvmCombinedData.php');
-echo "<body style='background-color:#292E35'>";
+//echo "<body style='background-color:#292E35'>";
+if($theme === "light"){ echo "<body style='background-color:#FFFFFF'>";}
+else if($theme === "dark"){ echo "<body style='background-color:#292E35'>";}
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <title>Astronomical Clock</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes">
 </head>
+<body>
 
-<script src='js/d3.4.2.2.min.js'></script> 
+<script src="js/d3.7.9.0.min.js"></script>
 
 <style>
 .clockpos {
@@ -55,7 +59,7 @@ echo "<body style='background-color:#292E35'>";
     src: url('css/fonts/AstroDotBasic.ttf') format('truetype');
 }
 body {
-    overflow: hidden;
+    overflow: auto;
 }
 .analog-hours {
     stroke-width: 5;
@@ -74,13 +78,19 @@ body {
 }
 </style>
 
-<body>
-
 <div class="clockpos">
 <div class="astroclock"></div>
 </div>
 
 <script>
+
+var theme = "<?php echo $theme;?>";
+
+if (theme === 'dark') {
+    var moonTextColor = "white";
+} else {
+    moonTextColor = "#2d3a4b";
+}
     
 // refresh the script every 60 seconds
 window.setInterval('refresh()', 60000);     
@@ -465,7 +475,7 @@ var Luminance = "Luminance: <?php echo number_format($alm["luminance"],2);?> %";
 svg.append("text")
     .attr("x", 520)
     .attr("y", 312)
-    .style("fill", "white")
+    .style("fill", moonTextColor)
     .style("font-family", "Helvetica")
     .style("font-size", "14px")
     .style("text-anchor", "left")
@@ -476,7 +486,7 @@ var Moonphase = "Moon phase: <?php echo $alm["moonphase"];?>";
 svg.append("text")
     .attr("x", 520)
     .attr("y", 326.75)
-    .style("fill", "white")
+    .style("fill", moonTextColor)
     .style("font-family", "Helvetica")
     .style("font-size", "14px")
     .style("text-anchor", "left")
@@ -487,7 +497,7 @@ var MoonAge = "Moon cycle: <?php echo number_format($alm["moon_age"],2);?> Days 
 svg.append("text")
     .attr("x", 520)
     .attr("y", 342.75)
-    .style("fill", "white")
+    .style("fill", moonTextColor)
     .style("font-family", "Helvetica")
     .style("font-size", "14px")
     .style("text-anchor", "left")
@@ -498,7 +508,7 @@ var Hmoon = "Moon azimuth: <?php echo $alm["moon_azimuth"];?>°";
 svg.append("text")
     .attr("x", 520)
     .attr("y", 358.75)
-    .style("fill", "white")
+    .style("fill", moonTextColor)
     .style("font-family", "Helvetica")
     .style("font-size", "14px")
     .style("text-anchor", "left")
@@ -549,7 +559,7 @@ var sector = svg.append("path")
     .attr("fill", "none")
     .attr("stroke-width", 0.5)
     .attr("stroke", "rgba(137,142,143,1)")
-    .attr("d", arc({ startAngle: - 15 * Math.PI / 180, endAngle: + 15 * Math.PI / 180 }))
+    .attr("d", arc({ startAngle: - 17 * Math.PI / 180, endAngle: + 17 * Math.PI / 180 }))
     .attr("transform", "translate(260,42) rotate(180)");    
 
 var arc = d3.arc().innerRadius(165).outerRadius(165);
@@ -585,10 +595,10 @@ var sector = svg.append("path")
     .attr("transform", "translate(260,-575) rotate(180)");
 
 svg.append("line")
-    .attr("x1", 139)
-    .attr("x2", 381)
-    .attr("y1", 205.5)
-    .attr("y2", 205.5)
+    .attr("x1", 138)
+    .attr("x2", 382)
+    .attr("y1", 207.5)
+    .attr("y2", 207.5)
     .style("stroke", "rgba(137,142,143,1)")
     .style("stroke-width", 0.5)
     .style("stroke-linecap", "round");
@@ -631,7 +641,7 @@ var sector = svg.append("path")
     .attr("fill", "none")
     .attr("stroke-width", 0.5)
     .attr("stroke", "rgba(137,142,143,1)")
-    .attr("d", arc({ startAngle: - 73 * Math.PI / 180, endAngle: + 73 * Math.PI / 180 }))
+    .attr("d", arc({ startAngle: - 74 * Math.PI / 180, endAngle: + 74 * Math.PI / 180 }))
     .attr("transform", "translate(260,205) rotate(180)");
 
 var arc = d3.arc().innerRadius(145.5).outerRadius(145.5);
@@ -639,7 +649,7 @@ var sector = svg.append("path")
     .attr("fill", "none")
     .attr("stroke-width", 0.5)
     .attr("stroke", "rgba(137,142,143,1)")
-    .attr("d", arc({ startAngle: - 91 * Math.PI / 180, endAngle: + 51 * Math.PI / 180 }))
+    .attr("d", arc({ startAngle: - 94 * Math.PI / 180, endAngle: + 51 * Math.PI / 180 }))
     .attr("transform", "translate(233.5,208) rotate(180)");
 
 var arc = d3.arc().innerRadius(145.5).outerRadius(145.5);
@@ -647,7 +657,7 @@ var sector = svg.append("path")
     .attr("fill", "none")
     .attr("stroke-width", 0.5)
     .attr("stroke", "rgba(137,142,143,1)")
-    .attr("d", arc({ startAngle: - 51 * Math.PI / 180, endAngle: + 91 * Math.PI / 180 }))
+    .attr("d", arc({ startAngle: - 51 * Math.PI / 180, endAngle: + 94 * Math.PI / 180 }))
     .attr("transform", "translate(286.5,208) rotate(180)");
 
 var arc = d3.arc().innerRadius(142).outerRadius(142);
@@ -663,7 +673,7 @@ var sector = svg.append("path")
     .attr("fill", "none")
     .attr("stroke-width", 0.5)
     .attr("stroke", "rgba(137,142,143,1)")
-    .attr("d", arc({ startAngle: - 23 * Math.PI / 180, endAngle: + 21 * Math.PI / 180 }))
+    .attr("d", arc({ startAngle: - 23 * Math.PI / 180, endAngle: + 22 * Math.PI / 180 }))
     .attr("transform", "translate(320,208) rotate(270)");
 
 var arc = d3.arc().innerRadius(162).outerRadius(162);
@@ -719,7 +729,7 @@ var sector = svg.append("path")
     .attr("fill", "none")
     .attr("stroke-width", 0.5)
     .attr("stroke", "rgba(137,142,143,1)")
-    .attr("d", arc({ startAngle: - 21 * Math.PI / 180, endAngle: + 23 * Math.PI / 180 }))
+    .attr("d", arc({ startAngle: - 22 * Math.PI / 180, endAngle: + 23 * Math.PI / 180 }))
     .attr("transform", "translate(199.5,208) rotate(90)");
 
 var arc = d3.arc().innerRadius(162).outerRadius(162);

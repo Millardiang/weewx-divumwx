@@ -329,7 +329,7 @@ $lang['notifyFreezing']          = "Below Freezing";
 $lang['timeTop']                 = 'Station Time';
 $lang['airQualityTop']           = 'Air Quality Current PM<sub>2.5</sub> Concentration';
 $lang['lightningTop']            = 'Lightning Strikes';
-$lang['advisoriesTop']           = 'Weather Outlook and Advisories';
+$lang['advisories']              = 'Advisories and Alerts';
 $lang['TemperatureTop']          = 'Annual Temperature High | Low';
 $lang['RainfallTop']             = 'Month | Year Rainfall Totals';
 $lang['WindTop']                 = 'Month | Year Maximum Wind Speed';
@@ -355,4 +355,5 @@ $lang['Anemometer']              = 'Anemometer';
 $lang['PollenModule']            = 'Current Pollen Risk';
 $lang['greenhouseGasModule']     = 'Greenhouse Gases Concentrations';
 $lang['weather_live']            = 'Live Weather Conditions';
+$lang['clockModule']             = 'Outlook';
 ?>

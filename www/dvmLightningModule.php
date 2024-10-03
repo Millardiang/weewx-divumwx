@@ -1,125 +1,175 @@
 <?php
+##############################################################################################
+#        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
+#       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    #
+#       (.  ___  :)||  |\   \  //  / |   (  ) : | \   \  //   |  |'  /    \:  | \   \  /     #
+#       |: \   ) |||:  | \\  \/. ./  (:  |  | . ) /\\  \/.    |  |: /'        |  \\  \/      #
+#       (| (___\ |||.  |  \.    //    \\ \__/ // |: \.        |   \//  /\'    |  /\.  \      #
+#       |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \     #
+#       (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|    #
+#                                                                                            #
+#     Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      #
+#      Distributed under terms of the GPLv3.  See the file LICENSE.txt for your rights.      #
+#    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
+#                    https://github.com/Millardiang/weewx-divumwx/issues                     #
+############################################################################################## 
 include('dvmCombinedData.php');
 date_default_timezone_set($TZ);
-#$lightningSource = 1
 ?>
 
-   <div class="chartforecast">
-       <span class="yearpopup"><a alt="aquinfo" title="Lightning Almanac" href="dvmLightningRecords.php" data-lity><?php echo $info;?> Lightning Records and Chart</a></span>
-    </div>
-    <span class='moduletitle'><?php echo $lang['lightningModule'];?></span>
+<!DOCTYPE html>
+<html lang="en">
 
+<div class="chartforecast">
+<span class="yearpopup"><a alt="aquinfo" title="Lightning Almanac" href="dvmLightningRecords.php" data-lity><?php echo $menucharticonpage;?> Lightning Records | Radar | Maps</a></span>
+</div>
+<span class='moduletitle'><?php echo $lang['lightningModule'];?><?php if (filesize('jsondata/NSDRealtime.txt') < 100) { echo "&nbsp;" , $offline;} else echo "";?></span>
 
 <div class="updatedtime1"><span><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?></div>
 
-<html>
-
 <?php
 
-//check for any strikes to set last_time correctly
-
-if (empty ($lightning["alltime_strike_count"])) {
-	$lightning['last_time'] =  "None";
-} else {
-	$lightning['last_time'] =  date('H:i jS M Y',$lightning['last_time']);
-}
 if ($lightningSource == 0) {
-	$lightninglivedata = 'jsondata/NSDRealtime.txt';
-	$file_live = file_get_contents($lightninglivedata);
-	$lightningBolt = explode( ',',$file_live);
-	if (!empty($lightningBolt)) {
-		$lightning["unixtimestamp"]           	= $lightningBolt[0]; // unix timestamp
-		$lightning["rate_per_min"]            	= $lightningBolt[1]; // current rate/min
-		$lightning["close_rate_per_min"]      	= $lightningBolt[2]; // current close rate/min (< 50km)
-		$lightning['last_time']      			= $lightningBolt[3]; // last strike date and time
-		$lightning["bearing"] 					= $lightningBolt[4]; // Bearing number
-		$lightning["bearingx"] 					= $lightningBolt[4]; // Bearing ordinals
-		$lightning["last_distance"]  			= $lightningBolt[5]; // last strike distance
-		$lightning["last_strike_type"]      	= $lightningBolt[6]; // last strike type ( CC+, CC-, CG+, CG- )
-		$lightning["hour_strike_count"]     	= $lightningBolt[7]; // strikes last hour
-		$lightning["today_strike_count"]  		= $lightningBolt[8]; // strikes today
-		$lightning["month_strike_count"]   		= $lightningBolt[9]; // strikes this month
-		$lightning["year_strike_count"]    		= $lightningBolt[10]; // strikes this year
-		$lightning["max_rate_per_min"]			= $lightningBolt[11]; // max rate/min
-		$lightning["max_ratetime"]				= $lightningBolt[12]; // max ratetime (hh:mm)
-		$lightning["max_burst"]					= $lightningBolt[13]; // max burst/s
-		$lightning["max_burst_time"]			= $lightningBolt[14]; // max bursttime (hh:mm)
-		$lightning["CG+_strikes"]				= $lightningBolt[15]; // CG+ strikes today
-		$lightning["CG-_strikes"]				= $lightningBolt[16]; // CG- strikes today
-		$lightning["CC+_strikes"]				= $lightningBolt[17]; // CC+ strikes today
-		$lightning["CC-_strikes"]				= $lightningBolt[18]; // CC- strikes today
-		$lightning["uptime"]					= $lightningBolt[19]; // uptime (x days x hours x mins)
-		$lightning["unitsx"]					= $lightningBolt[20]; // km or miles (set in config.ini)
-		$lightning["persistence"]				= $lightningBolt[21]; // Persistence in minutes set 60 mins
-		$lightning["nsdcrop"]					= $lightningBolt[22]; // Max strikes in NSDStrikes file (set to 2000)
-	}
-	// Bearing
-	if ($lightning["bearingx"]<=11.25){
-		$lightning["bearingx"]='North';
-	}else if ($lightning["bearingx"]<=33.75){
-		$lightning["bearingx"]='NNE';
-	}else if ($lightning["bearingx"]<=56.25){
-		$lightning["bearingx"]='NE';
-	}else if ($lightning["bearingx"]<=78.75){
-		$lightning["bearingx"]='ENE';
-	}else if ($lightning["bearingx"]<=101.25){
-		$lightning["bearingx"]='East';
-	}else if ($lightning["bearingx"]<=123.75){
-		$lightning["bearingx"]='ESE';
-	}else if ($lightning["bearingx"]<= 146.25){
-		$lightning["bearingx"] = 'SE';
-	}else if ($lightning["bearingx"]<=168.75){
-		$lightning["bearingx"]='SSE';
-	}else if ($lightning["bearingx"]<=191.25){
-		$lightning["bearingx"]='South';
-	}else if ($lightning["bearingx"]<=213.75){
-		$lightning["bearingx"]='SSW';
-	}else if ($lightning["bearingx"]<=236.25){
-		$lightning["bearingx"]='SW';
-	}else if ($lightning["bearingx"]<=281.25){
-		$lightning["bearingx"]='West';
-	}else if ($lightning["bearingx"]<=303.75){
-		$lightning["bearingx"]='WNW';
-	}else if ($lightning["bearingx"]<=326.25){
-		$lightning["bearingx"]='NW';
-	}else if ($lightning["bearingx"]<=348.75){
-		$lightning["bearingx"]='NWN';
-	}else {$lightning["bearingx"]='North';}
+
+$lightninglivedata = 'jsondata/NSDRealtime.txt';
+$file_live = file_get_contents($lightninglivedata);
+$lightningBolt = explode( ',',$file_live);
+
+if (empty($lightningBolt[0])) {
+  $lightningBolt[0] = 0;
+}
+if (empty($lightningBolt[1])) {
+  $lightningBolt[1] = 0;
+}
+if (empty($lightningBolt[2])) {
+  $lightningBolt[2] = 0;
+}
+if (empty($lightningBolt[3])) {
+  $lightningBolt[3] = 0;
+}
+if (empty($lightningBolt[4])) {
+  $lightningBolt[4] = 0;
+}
+if (empty($lightningBolt[5])) {
+  $lightningBolt[5] = 0;
+}
+if (empty($lightningBolt[6])) {
+  $lightningBolt[6] = 0;
+}
+if (empty($lightningBolt[7])) {
+  $lightningBolt[7] = 0;
+}
+if (empty($lightningBolt[8])) {
+  $lightningBolt[8] = 0;
+}
+if (empty($lightningBolt[9])) {
+  $lightningBolt[9] = 0;
+}
+if (empty($lightningBolt[10])) {
+  $lightningBolt[10] = 0;
+}
+if (empty($lightningBolt[11])) {
+  $lightningBolt[11] = 0;
+}
+if (empty($lightningBolt[12])) {
+  $lightningBolt[12] = 0;
+}
+if (empty($lightningBolt[13])) {
+  $lightningBolt[13] = 0;
+}
+if (empty($lightningBolt[14])) {
+  $lightningBolt[14] = 0;
+}
+if (empty($lightningBolt[15])) {
+  $lightningBolt[15] = 0;
+}
+if (empty($lightningBolt[16])) {
+  $lightningBolt[16] = 0;
+}
+if (empty($lightningBolt[17])) {
+  $lightningBolt[17] = 0;
+}
+if (empty($lightningBolt[18])) {
+  $lightningBolt[18] = 0;
+}
+if (empty($lightningBolt[19])) {
+  $lightningBolt[19] = 0;
+}
+if (empty($lightningBolt[20])) {
+  $lightningBolt[20] = 0;
+}
+if (empty($lightningBolt[21])) {
+  $lightningBolt[21] = 0;
+}
+if (empty($lightningBolt[22])) {
+  $lightningBolt[22] = 0;
 }
 
-if ($wind["units"] == "mph"){
-	$lightning["last_distance"] = $lightning["last_distance"] * 0.621371;
-	$lightning["distunit"] = "mi";
-} else {
-	$lightning["distunit"] = "km";
-}
-?>
+$lightning["unixtimestamp"]           	= $lightningBolt[0]; // unix timestamp
+$lightning["rate_per_min"]            	= $lightningBolt[1]; // current rate/min
+$lightning["close_rate_per_min"]      	= $lightningBolt[2]; // current close rate/min (< 50km)
+$lightning['last_time']      						= $lightningBolt[3]; // last strike date and time
+$lightning["bearing"] 									= $lightningBolt[4]; // Bearing number
+$lightning["bearingx"] 									= $lightningBolt[4]; // Bearing ordinals 
+$lightning["last_distance"]  						= $lightningBolt[5]; // last strike distance 
+$lightning["last_strike_type"]      		= $lightningBolt[6]; // last strike type ( CC+, CC-, CG+, CG- )
+$lightning["hour_strike_count"]     		= $lightningBolt[7]; // strikes last hour
+$lightning["today_strike_count"]  			= $lightningBolt[8]; // strikes today
+$lightning["month_strike_count"]   			= $lightningBolt[9]; // strikes this month
+$lightning["year_strike_count"]    			= $lightningBolt[10]; // strikes this year
+$lightning["max_rate_per_min"]					= $lightningBolt[11]; // max rate/min
+$lightning["max_ratetime"]							= $lightningBolt[12]; // max ratetime (hh:mm)
+$lightning["max_burst"]									= $lightningBolt[13]; // max burst/s
+$lightning["max_burst_time"]						= $lightningBolt[14]; // max bursttime (hh:mm)
+$lightning["CG+_strikes"]								= $lightningBolt[15]; // CG+ strikes today
+$lightning["CG-_strikes"]								= $lightningBolt[16]; // CG- strikes today
+$lightning["CC+_strikes"]								= $lightningBolt[17]; // CC+ strikes today
+$lightning["CC-_strikes"]								= $lightningBolt[18]; // CC- strikes today
+$lightning["uptime"]										= $lightningBolt[19]; // uptime (x days x hours x mins)
+$lightning["unitsx"]										= $lightningBolt[20]; // km or miles (set in config.ini)
+$lightning["persistence"]								= $lightningBolt[21]; // Persistence in minutes set 60 mins
+$lightning["nsdcrop"]										= $lightningBolt[22]; // Max strikes in NSDStrikes file (set to 2000)
 
-<style>
 
-.Strikes {
-  position: relative;
-  margin-top: -1.5px;
-  margin-left: 0px;
-  z-index: auto;
-}
-.base {
- position: relative;
-  margin-top: -83.5px;
-  margin-left: -200px;
-}
+		// Bearing
+		if ($lightning["bearingx"]<=11.25){
+			$lightning["bearingx"]='North';
+		}else if ($lightning["bearingx"] <= 33.75){
+			$lightning["bearingx"]='NNE';
+		}else if ($lightning["bearingx"] <= 56.25){
+			$lightning["bearingx"]='NE';
+		}else if ($lightning["bearingx"] <= 78.75){
+			$lightning["bearingx"]='ENE';
+		}else if ($lightning["bearingx"] <= 101.25){
+			$lightning["bearingx"]='East';
+		}else if ($lightning["bearingx"] <= 123.75){
+			$lightning["bearingx"]='ESE';
+		}else if ($lightning["bearingx"] <= 146.25){
+			$lightning["bearingx"] = 'SE';
+		}else if ($lightning["bearingx"] <= 168.75){
+			$lightning["bearingx"]='SSE';
+		}else if ($lightning["bearingx"] <= 191.25){
+			$lightning["bearingx"]='South';
+		}else if ($lightning["bearingx"] <= 213.75){
+			$lightning["bearingx"]='SSW';
+		}else if ($lightning["bearingx"] <= 236.25){
+			$lightning["bearingx"]='SW';
+		} else if ($lightning["bearingx"] <= 261.25){
+			$lightning["bearingx"]='WSW';
+		}else if ($lightning["bearingx"] <= 281.25){
+			$lightning["bearingx"]='West';
+		}else if ($lightning["bearingx"] <= 303.75){
+			$lightning["bearingx"]='WNW';
+		}else if ($lightning["bearingx"] <= 326.25){
+			$lightning["bearingx"]='NW';
+		}else if ($lightning["bearingx"] <= 348.75){
+			$lightning["bearingx"]='NNW';
+		}else {$lightning["bearingx"]='North';}
+	} 
 
-</style>
+if ($wind["units"] == "mph"){$lightning["last_distance"] = $lightning["last_distance"] * 0.621371; $lightning["distunit"] = "miles";} else {$lightning["distunit"] = "km";}?>
 
-<script src="js/d3.min.js"></script>
-
-<script>
-	if (theme == 'dark') {
-var textFill = "silver";}
-else
-{var textFill = "rgba(85,85,85,1)";}
-</script>
-
+<script src="js/d3.7.9.0.min.js"></script>
 
 <div class="Strikes"></div>
 
@@ -131,28 +181,44 @@ else
 </svg>
 </div>
 
+
 <script>
 
-	var theme = "<?php echo $theme;?>";
+	var textFill = "var(--col-6)";
+
 	var source = "<?php echo $lightningSource;?>";
+
 	var month = "<?php echo date('F Y');?>";
 	var year = "<?php echo date('Y');?>";
+
 	var Strikes_last_hour = "<?php echo $lightning["hour_strike_count"];?>";
-	var Strikes_Yesterday = "<?php echo $lightning["yesterday_strike_count"];?>";
-	var day_strike_count = "<?php echo $lightning["today_strike_count"];?>";
+	Strikes_last_hour = Strikes_last_hour || 0;
+
 	var Strikes_this_month = "<?php echo $lightning["month_strike_count"];?>";
+	Strikes_this_month = Strikes_this_month || 0;
+
 	var Strikes_this_year = "<?php echo $lightning["year_strike_count"];?>";
-	var Alltime_strikes = "<?php echo $lightning["alltime_strike_count"];?>";
-	var Last_detected = "<?php echo $lightning["last_time"];?>";
+	Strikes_this_year = Strikes_this_year || 0;
+
+	var Alltime_strikes = "<?php echo $lightning["alltime_strike_count"] + $lightning["year_strike_count"];?>";
+
+	var Last_detected = "<?php echo date('jS M H:i',$lightning["last_time"]);?>";
+
 	var Last_distance = "<?php echo number_format($lightning["last_distance"],1);?>";
+	Last_distance = Last_distance || 0;
+
 	var Bearing = "<?php echo $lightning["bearing"];?>";
-    var Bearingx = "<?php echo $lightning["bearingx"];?>";
-    var Unit = "<?php echo $lightning["distunit"];?>";
+  var Bearingx = "<?php echo $lightning["bearingx"];?>";
+  	
+  var Unit = "<?php echo $lightning["distunit"];?>";
+
+
 	var svg = d3.select(".Strikes")
     				.append("svg")
     				//.style("background", "#292E35")
     				.attr("width", 300)
     				.attr("height", 150);
+
 	    svg.append("line") // upright post
     				.attr("x1", 52)
     				.attr("x2", 52)
@@ -161,6 +227,7 @@ else
     				.style("stroke", "#2e8b57")
     				.style("stroke-width", "3px")
     				.style("stroke-linecap", "round");
+
 		svg.append('polyline') // Lightning bolt
 					.attr("cx", 40)
 					.attr("cy", 0)
@@ -169,6 +236,7 @@ else
 					.duration(250)
 					.attr('fill', "none")
 					.attr('stroke', '#6CA6CD');
+
 		svg.append('polyline') // Lightning bolt
 					.attr("cx", 40)
 					.attr("cy", 0)
@@ -177,6 +245,7 @@ else
 					.duration(250)
 					.attr('fill', "none")
 					.attr('stroke', '#6CA6CD');
+
 		svg.append('polyline') // Lightning bolt
 					.attr("cx", 40)
 					.attr("cy", 0)
@@ -185,6 +254,7 @@ else
 					.duration(250)
 					.attr('fill', "none")
 					.attr('stroke', '#6CA6CD');
+
 		svg.append("text") // Recorded Strikes
 					.attr("x", 150)
 					.attr("y", 22.5)
@@ -193,8 +263,9 @@ else
 					.style("font-size", "12px")
 					.style("text-anchor", "middle")
 					.style("font-weight", "normal")
-					.text("Recorded Strikes")
-		svg.append("text") // Strikes Today
+					.text("Recorded Strikes");
+
+		svg.append("text") // Last 1 hour
 					.attr("x", 130)
 					.attr("y", 45)
 					.style("fill", textFill)
@@ -202,33 +273,17 @@ else
 					.style("font-size", "10px")
 					.style("text-anchor", "left")
 					.style("font-weight", "normal")
-                                       .text("Today");
-		svg.append("text") // Last 1 hour
-					.attr("x", 130)
-					.attr("y", 57)
-					.style("fill", textFill)
-					.style("font-family", "Helvetica")
-					.style("font-size", "10px")
-					.style("text-anchor", "left")
-					.style("font-weight", "normal")
 					.text("Last Hour");
-                svg.append("text") // Yesterday
-                                        .attr("x", 130)
-                                        .attr("y", 69)
-                                        .style("fill", textFill)
-                                        .style("font-family", "Helvetica")
-                                        .style("font-size", "10px")
-                                        .style("text-anchor", "left")
-                                        .style("font-weight", "normal")
-                                        .text("Yesterday");
+
 		var data = ["Total "+month+" "+"-"+Strikes_this_month];
+
 		var text = svg.selectAll(null)
   					.data(data)
-  					.enter()
+  					.enter() 
   					.append("text")
   					.attr("x", 130)
   					.attr("y", function(d, i) {
-    				return 82 + i *70
+    				return 60 + i * 60
   					})
   					.style("fill", textFill)
   					.style("font-family", "Helvetica")
@@ -243,125 +298,119 @@ else
   					.text(function(d) {
     				return d.split("-")[1]
   					})
+
 		svg.append("text") // Year
 					.attr("x", 130)
-					.attr("y", 95)
+					.attr("y", 75)
 					.style("fill", textFill)
 					.style("font-family", "Helvetica")
 					.style("font-size", "10px")
 					.style("text-anchor", "left")
 					.style("font-weight", "normal")
 					.text("Total"+" "+year);
+
 		svg.append("text") // Alltime
 					.attr("x", 130)
-					.attr("y", 108)
+					.attr("y", 90)
 					.style("fill", textFill)
 					.style("font-family", "Helvetica")
 					.style("font-size", "10px")
 					.style("text-anchor", "left")
 					.style("font-weight", "normal")
 					.text("All-time Strike Total");
+
 		svg.append("text") // Last detected strike time
 					.attr("x", 130)
-					.attr("y", 121)
+					.attr("y", 105)
 					.style("fill", textFill)
 					.style("font-family", "Helvetica")
 					.style("font-size", "10px")
 					.style("text-anchor", "left")
 					.style("font-weight", "normal")
-					.text("Last Strike");
+					.text("Last Detected");
+
 		svg.append("text") // Last Distance
 					.attr("x", 130)
-					.attr("y", 134)
+					.attr("y", 120)
 					.style("fill", textFill)
 					.style("font-family", "Helvetica")
 					.style("font-size", "10px")
 					.style("text-anchor", "left")
 					.style("font-weight", "normal")
-					.text("At a Distance of ");
-		// Begin color Text output
-		svg.append("text") // Strikes Today
-					.attr("x", 160)
-					.attr("y", 45)
-					.style("fill", "#ff964f")
-					.style("font-family", "Helvetica")
-					.style("font-size", "10px")
-					.style("text-anchor", "left")
-					.style("font-weight", "normal")
-					.text(day_strike_count);
-		svg.append("text") // Last 1 hour
-					.attr("x", 177)
-					.attr("y", 57)
-					.style("fill", "#ff964f")
-					.style("font-family", "Helvetica")
-					.style("font-size", "10px")
-					.style("text-anchor", "left")
-					.style("font-weight", "normal")
-					.text(Strikes_last_hour);
-                svg.append("text") // Yesterday
-                                        .attr("x", 178)
-                                        .attr("y", 69)
-                                        .style("fill", "#ff964f")
-                                        .style("font-family", "Helvetica")
-                                        .style("font-size", "10px")
-                                        .style("text-anchor", "left")
-                                        .style("font-weight", "normal")
-                                        .text(Strikes_Yesterday);
-		svg.append("text") // Year
-					.attr("x", 182)
-					.attr("y", 95)
-					.style("fill", "#ff964f")
-					.style("font-family", "Helvetica")
-					.style("font-size", "10px")
-					.style("text-anchor", "left")
-					.style("font-weight", "normal")
-					.text(Strikes_this_year);
-		svg.append("text") // Alltime
-					.attr("x", 220)
-					.attr("y", 108)
-					.style("fill", "#ff964f")
-					.style("font-family", "Helvetica")
-					.style("font-size", "10px")
-					.style("text-anchor", "left")
-					.style("font-weight", "normal")
-					.text(Alltime_strikes);
-		svg.append("text") // Last detected strike time
-					.attr("x", 182)
-					.attr("y", 121)
-					.style("fill", "#ff964f")
-					.style("font-family", "Helvetica")
-					.style("font-size", "10px")
-					.style("text-anchor", "left")
-					.style("font-weight", "normal")
-					.text(Last_detected);
-		svg.append("text") // Last Distance
-					.attr("x", 204)
-					.attr("y", 134)
-					.style("fill", "#ff964f")
-					.style("font-family", "Helvetica")
-					.style("font-size", "10px")
-					.style("text-anchor", "left")
-					.style("font-weight", "normal")
-					.text(Last_distance+" "+(Unit));
+					.text("Distance @");
+
+	// Begin color Text output
+   	svg.append("text") // Last 1 hour
+             	.attr("x", 177)
+            	.attr("y", 45)
+            	.style("fill", "#ff964f")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "10px")
+            	.style("text-anchor", "left")
+            	.style("font-weight", "normal")
+   				.text(Strikes_last_hour);
+
+	svg.append("text") // Year
+             	.attr("x", 182)
+            	.attr("y", 75)
+            	.style("fill", "#ff964f")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "10px")
+            	.style("text-anchor", "left")
+            	.style("font-weight", "normal")
+				.text(Strikes_this_year);
+
+	svg.append("text") // Alltime
+             	.attr("x", 220)
+            	.attr("y", 90)
+            	.style("fill", "#ff964f")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "10px")
+            	.style("text-anchor", "left")
+            	.style("font-weight", "normal")
+				.text(Alltime_strikes);
+
+	svg.append("text") // Last detected strike time
+             	.attr("x", 197)
+            	.attr("y", 105)
+            	.style("fill", "#ff964f")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "10px")
+            	.style("text-anchor", "left")
+            	.style("font-weight", "normal")
+				.text(Last_detected);
+
+	svg.append("text") // Last Distance
+             	.attr("x", 185)
+            	.attr("y", 120)
+            	.style("fill", "#ff964f")
+            	.style("font-family", "Helvetica")
+            	.style("font-size", "10px")
+            	.style("text-anchor", "left")
+            	.style("font-weight", "normal")
+				.text(Last_distance+" "+Unit);
+
 	if (source == 0) {
-		svg.append("text") // Last Bearing
-					.attr("x", 130)
-					.attr("y", 135)
-					.style("fill", textFill)
-					.style("font-family", "Helvetica")
-					.style("font-size", "10px")
-					.style("text-anchor", "left")
-					.style("font-weight", "normal")
-					.text("Bearing");
-		svg.append("text") // Last Bearing
-					.attr("x", 169)
-					.attr("y", 135)
-					.style("fill", "#2e8b57")
-					.style("font-family", "Helvetica")
-					.style("font-size", "10px")
-					.style("text-anchor", "left")
-					.style("font-weight", "normal")
-					.text(Bearing+"Â°"+" "+Bearingx);
+
+	svg.append("text") // Last Bearing
+				.attr("x", 130)
+				.attr("y", 135)
+				.style("fill", textFill)
+				.style("font-family", "Helvetica")
+				.style("font-size", "10px")
+				.style("text-anchor", "left")
+				.style("font-weight", "normal")
+				.text("Bearing");
+
+    svg.append("text") // Last Bearing
+				.attr("x", 169)
+				.attr("y", 135)
+				.style("fill", "#2e8b57")
+				.style("font-family", "Helvetica")
+				.style("font-size", "10px")
+				.style("text-anchor", "left")
+				.style("font-weight", "normal")
+				.text(Bearing+"¡Æ"+" "+Bearingx);
 	}
 </script>
 </html>

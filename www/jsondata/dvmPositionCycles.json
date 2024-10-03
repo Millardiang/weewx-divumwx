@@ -8,7 +8,6 @@
 "dvmForecastModule.php":{"cycle": "60000"},
 "dvmIndoorTemperatureModule.php":{"cycle": "60000"},
 "dvmLightningModule.php":{"cycle": "60000"},
-"dvmAdvisoryOutlookTop.php":{"cycle": "60000"},
 "dvmAirqualityTop.php":{"cycle": "60000"},
 "dvmLightningTop.php":{"cycle": "60000"},
 "dvmMoonPhaseModule.php":{"cycle": "60000"},
@@ -20,10 +19,15 @@
 "dvmTemperatureModule.php":{"cycle": "60000"},
 "dvmTemperatureYearTop.php":{"cycle": "3600000"},
 "dvmWeatherClockTop.php":{"cycle": "86400000"},
-"dvmTickerTapeTop.php":{"cycle": "86400000"},
+"dvmTickerTapeTop.php":{"cycle": "60000"},
 "dvmWebcamModule.php":{"cycle": "60000"},
+"dvmGeocentricModule.php":{"cycle": "60000"},
 "dvmWindGustYearTop.php":{"cycle": "3600000"},
 "dvmWindModule.php":{"cycle": "4000"},
 "dvmAnemometerModule.php":{"cycle": "4000"},
-"dvmGreenhouseGasModule.php":{"cycle": "60000"}
+"dvmGreenhouseGasModule.php":{"cycle": "60000"},
+"dvmClockOutlookModule.php":{"cycle": "60000"},
+"dvmBlankModule2.php":{"cycle": "60000"},
+"dvmGeocentricModule.php":{"cycle": "60000"},
+"dvmAdvisoryModule.php":{"cycle": "60000"}
 }

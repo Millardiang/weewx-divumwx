@@ -1,5 +1,21 @@
 {
 	"UK AW ALERT ICONS SECTION": "STARTS HERE",
+	"white": {
+		"AW.AV.MN": "icon-warning-avalanches-white.svg",
+		"AW.CE.MN": "icon-warning-generic-white.svg",
+		"AW.FG.MN": "icon-warning-fog-white.svg",
+		"AW.FL.MN": "icon-warning-flood-white.svg",
+		"AW.FR.MN": "icon-warning-forestfire-white.svg",
+		"AW.HT.MN": "icon-warning-heat-white.svg",
+		"AW.LI.MN": "icon-warning-lightning-white.svg",
+		"AW.LT.MN": "icon-warning-polarlow-white.svg",
+		"AW.RA.MN": "icon-warning-rain-white.svg",
+		"AW.RF.MN": "icon-warning-flood-white.svg",
+		"AW.SI.MN": "icon-warning-ice-whitesvg",
+		"AW.TS.MN": "icon-warning-lightning-white.svg",
+		"AW.UK.MN": "icon-warning-generic-white.svg",
+		"AW.WI.MN": "icon-warning-wind-white.svg"
+	},
 	"yellow": {
 		"AW.AV.MD": "icon-warning-avalanches-yellow.svg",
 		"AW.CE.MD": "icon-warning-generic-yellow.svg",
@@ -34,11 +50,11 @@
 		"generic": "Generic",
 		"wind": "Wind"
 	},
-	"amber": {
+	"#FFBF00": {
 		"AW.AV.SV": "icon-warning-avalanches-orange.svg",
 		"AW.CE.SV": "icon-warning-generic-orange.svg",
 		"AW.FG.SV": "icon-warning-fog-orange.svg",
-		"AW.FL.SV": "icon-warning-flood-orange.svg",
+		"AW.FL.SV": "icon-warning-flood-#FFBF00.svg",
 		"AW.FR.SV": "icon-warning-forestfire-orange.svg",
 		"AW.HT.SV": "icon-warning-heat-orange.svg",
 		"AW.LI.SV": "icon-warning-lightning-orange.svg",
@@ -308,7 +324,7 @@
 		},
 		"fair_day": {
 			"icon1": "02d.svg",
-                        "icon2": "mostly-clear-day.svg",
+                        "icon12": "mostly-clear-day.svg",
 			"summary": "Fair"
 		},
 		"fair_night": {
@@ -324,6 +340,18 @@
 			"icon1": "03d-most.svg",
                         "icon2": "overcast-day.svg",
 			"summary": "Partly Cloudy"
+		},
+		"lightrainnight": {
+			"icon1": "46n.svg",
+			"summary": "Light Rain"
+		},
+		"lightrainday": {
+			"icon1": "46d.svg",
+			"summary": "Light Rain"
+		},
+		"lightrain": {
+			"icon1": "46.svg",
+			"summary": "Light Rain"
 		},
 		"mostlycloudy_night": {
 			"icon1": "03n-most.svg",
@@ -389,7 +417,7 @@
 			"summary": "Sleet Showers"
 		},
 		"sleetshowers_twilight": {
-			"icon": "07m.svg",
+			"icon1": "07m.svg",
 			"summary": "Sleet Showers"
 		},
 		"snowshowers_day": {
@@ -403,7 +431,7 @@
 			"summary": "Snow Showers"
 		},
 		"snowshowers_twilight": {
-			"icon": "08m.svg",
+			"icon1": "08m.svg",
 			"summary": "Snow Showers"
 		},
 		"rain": {
@@ -452,187 +480,196 @@
 			"summary": "Sleet and Thunder"
 		},
 		"lightrainshowersandthunder_day": {
-			"icon": "24d.svg",
+			"icon1": "24d.svg",
 			"summary": "Light Thundery Showers"
 		},
 		"lightrainshowersandthunder_night": {
-			"icon": "24n.svg",
+			"icon1": "24n.svg",
 			"summary": "Light Thundery Showers"
 		},
 		"lightrainshowersandthunder_twilight": {
-			"icon": "24m.svg",
+			"icon1": "24m.svg",
 			"summary": "Light Thundery Showers"
 		},
 		"heavyrainshowersandthunder_day": {
-			"icon": "25d.svg",
+			"icon1": "25d.svg",
 			"summary": "Heavy Thundery Showers"
 		},
 		"heavyrainshowersandthunder_night": {
-			"icon": "25n.svg",
+			"icon1": "25n.svg",
 			"summary": "Heavy Thundery Showers"
 		},
 		"heavyrainshowersandthunder_twilight": {
-			"icon": "25m.svg",
+			"icon1": "25m.svg",
 			"summary": "Heavy Thundery Showers"
 		},
 		"lightssleetshowersandthunder_day": {
-			"icon": "26d.svg",
+			"icon1": "26d.svg",
 			"summary": "Light Sleet Showers and Thunder"
 		},
 		"lightssleetshowersandthunder_night": {
-			"icon": "26n.svg",
+			"icon1": "26n.svg",
 			"summary": "Light Sleet Showers and Thunder"
 		},
 		"lightssleetshowersandthunder_twilight": {
-			"icon": "26m.svg",
+			"icon1": "26m.svg",
 			"summary": "Light Sleet Showers and Thunder"
 		},
 		"heavysleetshowersandthunder_day": {
-			"icon": "27d.svg",
+			"icon1": "27d.svg",
 			"summary": "Heavy Sleet Showers and Thunder"
 		},
 		"heavysleetshowersandthunder_night": {
-			"icon": "27n.svg",
+			"icon1": "27n.svg",
 			"summary": "Heavy Sleet Showers and Thunder"
 		},
 		"heavysleetshowersandthunder_twilight": {
-			"icon": "27m.svg",
+			"icon1": "27m.svg",
 			"summary": "Heavy Sleet Showers and Thunder"
 		},
 		"lightssnowshowersandthunder_day": {
-			"icon": "28d.svg",
+			"icon1": "28d.svg",
 			"summary": "Light Snow Showers and Thunder"
 		},
 		"lightssnowshowersandthunder_night": {
-			"icon": "28n.svg",
+			"icon1": "28n.svg",
 			"summary": "Light Snow Showers and Thunder"
 		},
 		"lightssnowshowersandthunder_twilight": {
-			"icon": "28m.svg",
+			"icon1": "28m.svg",
 			"summary": "Light Snow Showers and Thunder"
 		},
 		"heavysnowshowersandthunder_day": {
-			"icon": "29d.svg",
+			"icon1": "29d.svg",
 			"summary": "Heavy Snow Showers and Thunder"
 		},
 		"heavysnowshowersandthunder_night": {
-			"icon": "29n.svg",
+			"icon1": "29n.svg",
 			"summary": "Heavy Snow Showers and Thunder"
 		},
 		"heavysnowshowersandthunder_twilight": {
-			"icon": "29m.svg",
+			"icon1": "29m.svg",
 			"summary": "Heavy Snow Showers and Thunder"
 		},
 		"lightrainandthunder": {
-			"icon": "30.svg",
+			"icon1": "30.svg",
 			"summary": "Light Rain and Thunder"
 		},
 		"lightsleetandthunder": {
-			"icon": "31.svg",
+			"icon1": "31.svg",
 			"summary": "Light Sleet and Thunder"
 		},
 		"heavysleetandthunder": {
-			"icon": "32.svg",
+			"icon1": "32.svg",
 			"summary": "Heavy Sleet and Thunder"
 		},
 		"lightsnowandthunder": {
-			"icon": "33.svg",
+			"icon1": "33.svg",
 			"summary": "Light Snow and Thunder"
 		},
 		"heavysnowandthunder": {
-			"icon": "34.svg",
+			"icon1": "34.svg",
 			"summary": "Heavy Snow and Thunder"
 		},
 		"lightrainshowers_day": {
-			"icon": "40d.svg",
+			"icon1": "40d.svg",
 			"summary": "Light Showers"
 		},
 		"lightrainshowers_night": {
-			"icon": "40n.svg",
+			"icon1": "40n.svg",
 			"summary": "Light Showers"
 		},
 		"lightrainshowers_twilight": {
-			"icon": "40m.svg",
+			"icon1": "40m.svg",
 			"summary": "Light Showers"
 		},
 		"heavyrainshowers_day": {
-			"icon": "41d.svg",
+			"icon1": "41d.svg",
 			"summary": "Heavy Showers"
 		},
 		"heavyrainshowers_night": {
-			"icon": "41n.svg",
+			"icon1": "41n.svg",
 			"summary": "Heavy Showers"
 		},
 		"heavyrainshowers_twilight": {
-			"icon": "41m.svg",
+			"icon1": "41m.svg",
 			"summary": "Heavy Showers"
 		},
 		"lightsleetshowers_day": {
-			"icon": "42d.svg",
+			"icon1": "42d.svg",
 			"summary": "Light Sleet Showers"
 		},
 		"lightsleetshowers_night": {
-			"icon": "42n.svg",
+			"icon1": "42n.svg",
 			"summary": "Light Sleet Showers"
 		},
 		"lightsleetshowers_twilight": {
-			"icon": "42m.svg",
+			"icon1": "42m.svg",
 			"summary": "Light Sleet Showers"
 		},
 		"heavysleetshowers_day": {
-			"icon": "43d.svg",
+			"icon1": "43d.svg",
 			"summary": "Heavy Sleet Showers"
 		},
 		"heavysleetshowers_night": {
-			"icon": "43n.svg",
+			"icon1": "43n.svg",
 			"summary": "Heavy Sleet Showers"
 		},
 		"heavysleetshowers_twilight": {
-			"icon": "43m.svg",
+			"icon1": "43m.svg",
 			"summary": "Heavy Sleet Showers"
 		},
 		"lightsnowshowers_day": {
-			"icon": "44d.svg",
+			"icon1": "44d.svg",
 			"summary": "Light Sleet Showers"
 		},
 		"lightsnowshowers_night": {
-			"icon": "44n.svg",
-			"summary": "Light Sleet Showers"
+			"icon1": "44n.svg",
+			"summary": "Light Snow Showers"
 		},
 		"lightsnowshowers_twilight": {
-			"icon": "44m.svg",
+			"icon1": "44m.svg",
 			"summary": "Light Sleet Showers"
 		},
 		"heavysnowshowers_day": {
-			"icon": "45d.svg",
+			"icon1": "45d.svg",
 			"summary": "Heavy Snow Showers"
 		},
 		"heavysnowshowers_night": {
-			"icon": "45n.svg",
+			"icon1": "45n.svg",
 			"summary": "Heavy Snow Showers"
 		},
 		"heavysnowshowers_twilight": {
-			"icon": "45m.svg",
+			"icon1": "45m.svg",
 			"summary": "Heavy Snow Showers"
 		},
-		"lightrain": {
-			"icon": "46.svg",
+		"lightrainnight": {
+			"icon1": "46n.svg",
 			"summary": "Light Rain"
 		},
+		"lightrainday": {
+			"icon1": "46d.svg",
+			"summary": "Light Rain"
+		},
+		"lightrain": {
+			"icon1": "46.svg",
+			"summary": "Light Rain"
+		},
+
 		"lightsleet": {
-			"icon": "47.svg",
+			"icon1": "47.svg",
 			"summary": "Light Sleet"
 		},
 		"heavysleet": {
-			"icon": "48.svg",
+			"icon1": "48.svg",
 			"summary": "Light Sleet"
 		},
 		"lightsnow": {
-			"icon": "49.svg",
+			"icon1": "49.svg",
 			"summary": "Light Snow"
 		},
 		"heavysnow": {
-			"icon": "50.svg",
+			"icon1": "50.svg",
 			"summary": "Heavy Snow"
 		},
 		"AERISWEATHER SECTION": "STARTS HERE",
@@ -900,11 +937,11 @@
 			"icon2": "partly-cloudy-night.svg"
 		},
 		"N/A.png": {
-			"icon": "offline.svg",
+			"icon1": "offline.svg",
 			"summary": "Offline"
 		},
 		"na.png": {
-			"icon": "offline.svg",
+			"icon1": "offline.svg",
 			"summary": "Offline"
 		},
 		"pcloudy.png": {

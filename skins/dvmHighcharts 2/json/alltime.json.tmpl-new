@@ -1,0 +1,226 @@
+##errorCatcher Echo
+##
+##This program is free software; you can redistribute it and/or modify it
+##under the terms of the GNU General Public License as published by the Free
+##Software Foundation; either version 2 of the License, or (at your option)
+##any later version.
+##
+##This program is distributed in the hope that it will be useful, but WITHOUT
+##ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+##FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+##more details.
+##
+##############################################################################
+##                                                                           #
+## Highcharts for weewx Extension                                            #
+##                                                                           #
+## Year observation plots JSON data file template                            #
+##                                                                           #
+## Version: DivumWX                                   Date: 16 May 2017      #
+##                                                                           #
+##############################################################################
+[{
+"_version": "year.json.tmpl version 1.0.0", 
+"utcoffset": $utcOffset, 
+"timespan": {"start": $yearPlotStart, "stop": $yearPlotEnd},
+##
+#set $min_outTemp = $alltime.outTemp.series(aggregate_type='min', aggregate_interval=86400,  time_series='start', time_unit='unix_epoch_ms').round(1)
+#set $max_outTemp = $alltime.outTemp.series(aggregate_type='max', aggregate_interval=86400,  time_series='start', time_unit='unix_epoch_ms').round(1)
+#set $min_inTemp = $alltime.inTemp.series(aggregate_type='min', aggregate_interval=86400,  time_series='start', time_unit='unix_epoch_ms').round(1)
+#set $max_inTemp = $alltime.inTemp.series(aggregate_type='max', aggregate_interval=86400,  time_series='start', time_unit='unix_epoch_ms').round(1)
+##
+"temperatureplot": {
+"outTempminmax": $jsonize($zip($min_outTemp.start.raw, $min_outTemp.data.raw, $max_outTemp.data.raw)), 
+"outTempaverage": $alltime.outTemp.series(aggregate_type='avg', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json, 
+"inTempminmax": $jsonize($zip($min_inTemp.start.raw, $min_inTemp.data.raw, $max_inTemp.data.raw)), 
+"inTempaverage": $alltime.inTemp.series(aggregate_type='avg', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json, 
+"units": "$unit.label.outTemp"#slurp
+}, 
+"dewpointplot": {
+"dewpointminmax": $dewpointMinMax_json, 
+"dewpointaverage": $dewpointAvg_json, 
+"units": "$unit.label.outTemp"#slurp
+}, 
+"windchillplot": {
+#if $appTempMinMax_json is not None
+"appTempminmax": $appTempMinMax_json, 
+#end if
+#if $appTempMin_json is not None
+"appTempmin": $appTempMin_json, 
+#end if
+#if $appTempMax_json is not None
+"appTempmax": $appTempMax_json, 
+#end if
+#if $appTempAvg_json is not None
+"appTempaverage": $appTempAvg_json, 
+#end if
+"windchillaverage": $windchillAvg_json, 
+"windchillminmax": $windchillMinMax_json, 
+"heatindexaverage": $heatindexAvg_json, 
+"heatindexminmax": $heatindexMinMax_json, 
+"units": "$unit.label.outTemp"#slurp
+}, 
+"humidityplot": {
+"outHumidityminmax": $outHumidityMinMax_json, 
+"outHumidityaverage": $outHumidityAvg_json, 
+"inHumidityminmax": $inHumidityMinMax_json, 
+"inHumidityaverage": $inHumidityAvg_json, 
+"units": "$unit.label.outHumidity"#slurp
+}, 
+"barometerplot": {
+"barometerminmax": $barometerMinMax_json, 
+"barometeraverage": $barometerAvg_json, 
+"units": "$unit.label.barometer"#slurp
+}, 
+"windplot": {
+"windmax": $windMax_json, 
+"windaverage": $windAvg_json, 
+"windAvmax": $windSpeedMax_json, 
+"windAverage": $windSpeedAvg_json, 
+"units": "$unit.label.windSpeed"#slurp
+}, 
+"winddirplot": {
+"windDir": $windDir_json, 
+"units": "$unit.label.windDir"#slurp
+}, 
+"rainplot": {
+"rainsum": $rainSum_json, 
+"units": "$unit.label.rain"#slurp
+},
+"radiationplot": {
+"radiationmax": $radiationMax_json, 
+"radiationaverage": $radiationAvg_json,
+#if $uvaWmMax_json is not None
+"uvaWmMax": $uvaWmMax_json, 
+#end if
+#if $uvaWmAvg_json is not None
+"uvaWmAvg": $uvaWmAvg_json, 
+#end if
+#if $uvbWmMax_json is not None
+"uvbWmMax": $uvbWmMax_json, 
+#end if
+#if $uvbWmAvg_json is not None
+"uvbWmAvg": $uvbWmAvg_json, 
+#end if
+"units": "$unit.label.radiation"#slurp
+}, 
+"uvplot": {
+"uvmax": $uvMax_json, 
+"uvaverage": $uvAvg_json,
+#if $uvaMax_json is not None
+"uvaMax": $uvaMax_json, 
+#end if
+#if $uvaAvg_json is not None
+"uvaAvg": $uvaAvg_json, 
+#end if
+#if $uvbMax_json is not None
+"uvbMax": $uvbMax_json, 
+#end if
+#if $uvbAvg_json is not None
+"uvbAvg": $uvbAvg_json, 
+#end if
+#if $full_spectrumMax_json is not None
+"full_spectrumMax": $full_spectrumMax_json, 
+#end if
+#if $full_spectrumAvg_json is not None
+"full_spectrumAvg": $full_spectrumAvg_json, 
+#end if
+#if $luxMax_json is not None
+"luxMax": $luxMax_json, 
+#end if
+#if $luxAvg_json is not None
+"luxAvg": $luxAvg_json, 
+#end if
+#if $infraredMax_json is not None
+"infraredMax": $infraredMax_json, 
+#end if
+#if $infraredAvg_json is not None
+"infraredAvg": $infraredAvg_json, 
+#end if
+"units": "$unit.label.UV"#slurp
+}, 
+"cloudcoverplot": {
+#if $cloudcoverMax_json is not None
+"cloudcoverMax": $cloudcoverMax_json, 
+#end if
+#if $cloudcoverAvg_json is not None
+"cloudcoverAvg": $cloudcoverAvg_json, 
+#end if
+"units": "$unit.label.UV"#slurp
+},
+"aqplot": {
+#if $pm2_5Max_json is not None
+"pm2_5Max": $pm2_5Max_json, 
+#end if
+#if $pm2_5Avg_json is not None
+"pm2_5Avg": $pm2_5Avg_json, 
+#end if
+#if $pm10_0Max_json is not None
+"pm10_0Max": $pm10_0Max_json, 
+#end if
+#if $pm10_0Avg_json is not None
+"pm10_0Avg": $pm10_0Avg_json 
+#end if
+},
+##
+#set $min_sh = $year.lightning_distance.series(aggregate_type='min', aggregate_interval=86400, time_unit='unix_epoch_ms').round(1)
+#set $max_sh = $year.lightning_distance.series(aggregate_type='max', aggregate_interval=86400, time_unit='unix_epoch_ms').round(1)
+#set $min_sh_mile = $year.lightning_distance.series(aggregate_type='min', aggregate_interval=86400, time_unit='unix_epoch_ms').mile.round(1)
+#set $max_sh_mile = $year.lightning_distance.series(aggregate_type='max', aggregate_interval=86400, time_unit='unix_epoch_ms').mile.round(1)
+##
+"strikeplot": {"series":
+{"lightning_strike_count": $year.lightning_strike_count.series(aggregate_type='sum', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+"lightning_distance_minmax": $jsonize($zip($min_sh.start.raw, $min_sh.data.raw, $max_sh.data.raw)),
+"lightning_distance_minmax_mile": $jsonize($zip($min_sh_mile.start.raw, $min_sh_mile.data.raw, $max_sh_mile.data.raw))},
+"units": "Strikes"#slurp
+},
+##
+"airDensityplot": {"series":
+{"air_density": $year.AirDensity.series(aggregate_type='last', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(5).json},
+"units": "kg/m"#slurp
+}, 
+##
+"airqualityplot": {"series":
+{"pm2_5Week": $week.pm2_5.series(aggregate_type='last', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"pm10_0Week": $week.pm10_0.series(aggregate_type='last', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"coWeek": $week.co.series(aggregate_type='last', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"no2Week": $week.no2.series(aggregate_type='last', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"so2Week": $week.so2.series(aggregate_type='last', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"o3Week": $week.o3.series(aggregate_type='last', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"nh3Week": $week.nh3.series(aggregate_type='last', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"aodWeek": $week.aod.series(aggregate_type='last', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"dustWeek": $week.dust.series(aggregate_type='last', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"pm2_5": $week.pm2_5.series(aggregate_type='last', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"pm10_0": $week.pm10_0.series(aggregate_type='last', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"co": $alltime.co.series(aggregate_type='last', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"no2": $alltime.no2.series(aggregate_type='last', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"so2": $alltime.so2.series(aggregate_type='last', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"o3": $alltime.o3.series(aggregate_type='last', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"nh3": $alltime.nh3.series(aggregate_type='last', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"aod": $alltime.aod.series(aggregate_type='last', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"dust": $alltime.dust.series(aggregate_type='last', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json},
+"units": "μg/m³"#slurp
+}, 
+##
+"pollenplot": {"series":
+{"alder_pollenWeek": $week.alder_pollen.series(aggregate_type='last', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"birch_pollenWeek": $week.birch_pollen.series(aggregate_type='last', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"olive_pollenWeek": $week.olive_pollen.series(aggregate_type='last', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"grass_pollenWeek": $week.grass_pollen.series(aggregate_type='last', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"mugwort_pollenWeek": $week.mugwort_pollen.series(aggregate_type='last', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"ragweed_pollenWeek": $week.ragweed_pollen.series(aggregate_type='last', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"alder_pollen": $alltime.alder_pollen.series(aggregate_type='last', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"birch_pollen": $alltime.birch_pollen.series(aggregate_type='last', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"olive_pollen": $alltime.olive_pollen.series(aggregate_type='last', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"grass_pollen": $alltime.grass_pollen.series(aggregate_type='last', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"mugwort_pollen": $week.mugwort_pollen.series(aggregate_type='last', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+"ragweed_pollen": $week.ragweed_pollen.series(aggregate_type='last', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json},
+"units": "grains/m³"#slurp
+}, 
+##
+"stormRainplot": {"series":
+{"storm_rain_mm": $year.stormRain.series(aggregate_type='last', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').mm.round(1).json,
+"storm_rain_inch": $year.stormRain.series(aggregate_type='last', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').inch.round(2).json},
+"units": "$unit.label.rain"#slurp
+}
+}]

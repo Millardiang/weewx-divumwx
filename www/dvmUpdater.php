@@ -1,18 +1,19 @@
 <?php
-#####################################################################################################################                                                                                                        #
-#                                                                                                                   #
-# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
-#                                                                                                                   #
-# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
-#                                                                                                                   #
-# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
-#                                                                                                                   #
-# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
-#                                                                                                                   #
-#####################################################################################################################
-?>
-<!-- begin updater.php  14-Nov-2022 -->
-<?php
+##############################################################################################
+#        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
+#       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    #
+#       (.  ___  :)||  |\   \  //  / |   (  ) : | \   \  //   |  |'  /    \:  | \   \  /     #
+#       |: \   ) |||:  | \\  \/. ./  (:  |  | . ) /\\  \/.    |  |: /'        |  \\  \/      #
+#       (| (___\ |||.  |  \.    //    \\ \__/ // |: \.        |   \//  /\'    |  /\.  \      #
+#       |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \     #
+#       (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|    #
+#                                                                                            #
+#     Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      #
+#      Distributed under terms of the GPLv3.  See the file LICENSE.txt for your rights.      #
+#    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
+#                    https://github.com/Millardiang/weewx-divumwx/issues                     #
+##############################################################################################
+
 $filepileRefresh = 60;
 include_once "userSettings.php";
 
@@ -20,14 +21,7 @@ include_once "fixedSettings.php";
 
 include_once "common.php";
 date_default_timezone_set($TZ);
-//check which hemisphere for sun option and moonphase option
-if ($sta["latitude"] > "90") {
-    $sunoption = "sun4.php";
-    $hemisphere = "180";
-} else {
-    $sunoption = "sun3.php";
-    $hemisphere = "0";
-}
+
 ?>
 
 <script src="js/jquery.js"></script>
@@ -36,8 +30,8 @@ if ($sta["latitude"] > "90") {
 //update the modules
 
 //update the modules position 1 - fixed position
-(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position1").show()}});var c=a("#position1");c.load("dvmWeatherClockTop.php");
-var b=setInterval(function(){c.load("dvmWeatherClockTop.php")},<?php echo $cycles1; ?>)})})(jQuery); // 24 hours 
+(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position1").show()}});var c=a("#position1");c.load("<?php echo $position1; ?>");
+var b=setInterval(function(){c.load("<?php echo $position1; ?>")},<?php echo $cycles1; ?>)})})(jQuery); // 24 hours 
     
 //update the modules position 2
 (function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position2").show()}});var c=a("#position2");c.load("<?php echo $position2; ?>");
@@ -47,13 +41,9 @@ var b=setInterval(function(){c.load("<?php echo $position2; ?>")},<?php echo $cy
 (function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position3").show()}});var c=a("#position3");c.load("<?php echo $position3; ?>");
 var b=setInterval(function(){c.load("<?php echo $position3; ?>")},<?php echo $cycles3; ?>)})})(jQuery); // 60 seconds
   
-//update the modules  position 3a
-(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position3a").show()}});var c=a("#position3a");c.load("<?php echo $position3a; ?>");
-var b=setInterval(function(){c.load("<?php echo $position3a; ?>")},<?php echo $cycles3a; ?>)})})(jQuery); // 60 seconds
-
 //update the modules  position 4 - fixed position
-(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position4").show()}});var c=a("#position4");c.load("dvmAdvisoryOutlookTop.php");
-var b=setInterval(function(){c.load("dvmAdvisoryOutlookTop.php")},<?php echo $cycles4; ?>)})})(jQuery); // 60 seconds
+(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position4").show()}});var c=a("#position4");c.load("<?php echo $position4; ?>");
+var b=setInterval(function(){c.load("<?php echo $position4; ?>")},<?php echo $cycles4; ?>)})})(jQuery); // 60 seconds
 
 //update the modules position 5
 (function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position5").show()}});var c=a("#position5");c.load("<?php echo $position5; ?>");
@@ -122,6 +112,14 @@ var b=setInterval(function(){c.load("<?php echo $position19; ?>")},<?php echo $c
 //update the modules position 20
 (function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position20").show()}});var c=a("#position20");c.load("<?php echo $position20; ?>");
 var b=setInterval(function(){c.load("<?php echo $position20; ?>")},<?php echo $cycles20; ?>)})})(jQuery); // 60 seconds
+
+//update the modules position 21
+(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position21").show()}});var c=a("#position21");c.load("<?php echo $position21; ?>");
+var b=setInterval(function(){c.load("<?php echo $position21; ?>")},<?php echo $cycles21; ?>)})})(jQuery); // 60 seconds
+
+//update the modules position 22
+(function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position22").show()}});var c=a("#position22");c.load("<?php echo $position22; ?>");
+var b=setInterval(function(){c.load("<?php echo $position22; ?>")},<?php echo $cycles22; ?>)})})(jQuery); // 60 seconds
 
 //update the webcam image file
 var refreshId;$(document).ready(function(){webcamcron()});function webcamcron(){$.ajax({cache:false,

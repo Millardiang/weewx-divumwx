@@ -1,23 +1,28 @@
 <?php
-#####################################################################################################################                                                                                 #                                                                                                                   #
-# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
-#                                                                                                                   #
-# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
-#                                                                                                                   #
-# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
-#                                                                                                                   #
-# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
-#                                                                                                                   #
-#####################################################################################################################
-?>
-<?php  
+##############################################################################################
+#        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
+#       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    #
+#       (.  ___  :)||  |\   \  //  / |   (  ) : | \   \  //   |  |'  /    \:  | \   \  /     #
+#       |: \   ) |||:  | \\  \/. ./  (:  |  | . ) /\\  \/.    |  |: /'        |  \\  \/      #
+#       (| (___\ |||.  |  \.    //    \\ \__/ // |: \.        |   \//  /\'    |  /\.  \      #
+#       |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \     #
+#       (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|    #
+#                                                                                            #
+#     Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      #
+#      Distributed under terms of the GPLv3.  See the file LICENSE.txt for your rights.      #
+#    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
+#                    https://github.com/Millardiang/weewx-divumwx/issues                     #
+##############################################################################################
 include('dvmCombinedData.php');
 ?>
 
-<div class="chartforecast2">
-<span class="yearpopup"><a alt="rain charts" title="rain charts" href="dvmRainfallRecords.php" data-lity><?php echo $menucharticonpage;?> Rainfall Almanac and Charts</a></span>     
+<!DOCTYPE html>
+<html lang="en">
+
+<div class="chartforecast">
+<span class="yearpopup"><a alt="rain charts" title="rain charts" href="dvmRainfallRecords.php" data-lity><?php echo $menucharticonpage;?> Rainfall Records and Charts</a></span>     
 </div>
-<span class='moduletitle2'><?php echo $lang['rainfallModule'], " (<valuetitleunit>" . $rain["units"];?></valuetitleunit>)</span>
+<span class='moduletitle'><?php echo $lang['rainfallModule'], " (<valuetitleunit>" . $rain["units"];?></valuetitleunit>)</span>
 <div class="updatedtime1"><span><?php if (file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?></div>
 <div class="rainconverter">
 <?php 
@@ -29,20 +34,7 @@ if ($rain["units"] =='in'){echo "<div class=rainconvertercircle style='backgroun
 ?></span>
 </div></div>
 
-<!DOCTYPE html>
-<script src="js/d3.min.js"></script>
-
-
-<style>
-.rainposs {
-  margin-top: -5px;
-  margin-left: -160px;
-}
-.stormRain {
-  margin-top: -152.5px;
-  margin-left: 130px;
-}
-</style>
+<script src="js/d3.7.9.0.min.js"></script>
 
 <div class="rainposs">
 <div id="raingaugex"></div>
@@ -51,226 +43,6 @@ if ($rain["units"] =='in'){echo "<div class=rainconvertercircle style='backgroun
     <script>
 
     var theme = "<?php echo $theme;?>";
-
-    if (theme == 'dark') {
-    
-    var currentRain = "<?php echo $rain["day"];?>";
-    currentRain = currentRain || 0;
-    
-    var maxRain = currentRain;
-    maxRain = maxRain || 0;
-    
-    var minRain = 0.0;  
-    var rainColor = "<?php echo $colorRainDaySum;?>";
-    
-    var width = 105,
-    height = 150;
-        
-var bottomY = height + 38,
-    topY = 48,
-    bulbRadius = 25.5,
-    tubeWidth = 25.5,
-    tubeBorderWidth = 1,    
-    tubeBorderColor = "rgba(153, 153, 153, 1)";
-
-var bulb_cy = bottomY - bulbRadius,
-    bulb_cx = width / 2,
-    top_cy = topY + tubeWidth / 2;
-
-var svg = d3.select("#raingaugex")
-    .append("svg")
-  //.style("background", "#292E35") // box background to be commented out
-    .attr("width", width)
-    .attr("height", height);
-
-var defs = svg.append("defs");
-
-svg.append("line")
-    .attr("x1", width / 2)
-    .attr("x2", width / 2)
-    .attr("y1", 55)
-    .attr("y2", 144)
-    .style("stroke", tubeBorderColor)
-    .style("stroke-width", "41px")
-    .style("fill", "none");
-    
-svg.append("line")
-    .attr("x1", width / 2 + 6 - 35)
-    .attr("x2", width / 2)
-    .attr("y1", 13.5)
-    .attr("y2", 95)
-    .style("stroke", "rgba(45,47,50,1)")
-    .style("stroke-width", "10px")
-    .style("fill", "none"); 
-    
-svg.append("line")
-    .attr("x1", width /2)
-    .attr("x2", width / 2 - 6 + 35)
-    .attr("y1", 95)
-    .attr("y2", 13.5)
-    .style("stroke", "rgba(45,47,50,1)")
-    .style("stroke-width", "10px")
-    .style("fill", "none");     
-    
-svg.append("line")
-    .attr("x1", width / 2 - 37)
-    .attr("x2", width / 2 + 37)
-    .attr("y1", 13.5)
-    .attr("y2", 13.5)
-    .style("stroke", tubeBorderColor)
-    .style("stroke-width", "3px")
-    .style("fill", "none")    
-    .style("stroke-linecap", "round");
-    
-svg.append("line")
-    .attr("x1", width / 2 - 35)
-    .attr("x2", width / 2)
-    .attr("y1", 13.5)
-    .attr("y2", 110)
-    .style("stroke", tubeBorderColor)
-    .style("stroke-width", "1.5px")
-    .style("fill", "none");    
-
-svg.append("line")
-    .attr("x1", width / 2)
-    .attr("x2", width / 2 + 35)
-    .attr("y1", 110)
-    .attr("y2", 13.5)
-    .style("stroke", tubeBorderColor)
-    .style("stroke-width", "1.5px")
-    .style("fill", "none"); 
-  
-svg.append("line")
-    .attr("x1", width / 2)
-    .attr("x2", width / 2)
-    .attr("y1", 15)
-    .attr("y2", 144)
-    .style("stroke", "rgba(45,47,50,1)")
-    .style("stroke-width", "38px");
-    
-svg.append("rect")
-    .attr("x", width / 2 - 25.5 )
-    .attr("y", 15)
-    .attr("width", 50)
-    .attr("height", 11.5)
-    .style("fill", "rgba(45,47,50,1)");
-    
-var units = "<?php echo $rain["units"];?>";
-
-if (units == 'mm') {    
-    var step = 5;
-} else {
-    var step = 5 / 25.4;
-}
-
-// Determine a suitable range of the scale
-var domain = [
-  step * Math.floor(minRain / step),
-  step * Math.ceil(maxRain / step)
-  ];
-
-if (minRain - domain[0] < 0.00 * step)
-  domain[0] -= step;
-
-if (domain[1] - maxRain < 0.66 * step)
-  domain[1] += step;
-
-// D3 scale object
-var scale = d3.scale.linear()
-    .range([bulb_cy - bulbRadius / 2 - 8.5, top_cy])
-    .domain(domain);
-
-[minRain, maxRain].forEach(function(t) {
-
-  var isMax = (t == maxRain),
-      label = (isMax ? "max" : "min"),
-      textCol = (isMax ? "rgb(230, 0, 0)" : "rgb(0, 0, 230)"),
-      textOffset = (isMax ? - 4 : 4);
-
-});
-
-var tubeFill_bottom = bulb_cy,
-    tubeFill_top = scale(currentRain);
-
-// Rect element 
-svg.append("rect")
-    .attr("x", width / 2 - 18.75 )
-    .attr("y", tubeFill_top - 2)
-    .attr("width", 37.5)
-    .attr("height", tubeFill_bottom - 17.5 - tubeFill_top)
-    .style("fill", rainColor);
-    
-svg.append("rect")
-    .attr("x", width / 2 - 18.75 )
-    .attr("y", tubeFill_top - 4)
-    .attr("rx", 3)
-    .attr("width", 37.5)
-    .attr("height", 4)
-    .style("fill", "rgba(45,47,50,1)");    
-
-svg.append("line")
-    .attr("x1", width / 2 - 20.5)
-    .attr("x2", width / 2 + 20.5)
-    .attr("y1", 145)
-    .attr("y2", 145)
-    .style("stroke", tubeBorderColor)
-    .style("stroke-width", "3.5px")
-    .style("fill", "none");    
-  
-svg.append("line")
-    .attr("x1", width / 2 - 30)
-    .attr("x2", width / 2 + 30)
-    .attr("y1", 148)
-    .attr("y2", 148)
-    .style("stroke", tubeBorderColor)
-    .style("stroke-width", "3px")
-    .style("fill", "none")    
-    .style("stroke-linecap", "round");
-
-// Values to use along the scale ticks up the tube
-var tickValues = d3.range((domain[1] - domain[0]) / step + 1).map(function(v) { return domain[0] + v * step; });
-
-// D3 axis object for the scale
-var axis = d3.svg.axis()
-    .scale(scale)
-    .innerTickSize(7)
-    .outerTickSize(0)
-    .tickValues(tickValues)
-    .orient("left");
-
-// Add the axis to the image
-var svgAxis = svg.append("g")
-    .attr("id", "RainScale")
-    .attr("transform", "translate(" + (width / 2 - tubeWidth / 2 - 12) + ", 0)")
-    .call(axis);
-
-// Format text labels
-svgAxis.selectAll(".tick text")
-    .style("fill", "rgba(119, 119, 119, 1)")
-    .style("font-size", "8px");
-
-// Set main axis line to no stroke or fill
-svgAxis.select("path")
-    .style("stroke", "none")
-    .style("fill", "none");
-
-// Set the style of the ticks 
-svgAxis.selectAll(".tick line")
-    .style("stroke", tubeBorderColor)
-    .style("stroke-linecap", "round")
-    .style("stroke-width", "2px");
-  
-svg.append("text")
-    .text( d3.format(".2f")(currentRain) )
-    .attr("x", width / 2)
-    .attr("y", 40)
-    .attr("text-anchor", "middle")
-    .style("font-size", "18px")
-    .style("font-family", "Helvetica")
-    .style("font-weight", "600")
-    .style("fill", "rgba(230, 232,239, 1)");
-        
-} else {
 
     var currentRain = "<?php echo $rain["day"];?>";
     currentRain = currentRain || 0;
@@ -289,7 +61,7 @@ var bottomY = height + 38,
     bulbRadius = 25.5,
     tubeWidth = 25.5,
     tubeBorderWidth = 1,
-    tubeBorderColor = "rgba(153, 153, 153, 1)";
+    tubeBorderColor = "var(--col-14)";
 
 var bulb_cy = bottomY - bulbRadius,
     bulb_cx = width / 2,
@@ -316,7 +88,7 @@ svg.append("line")
     .attr("x2", width / 2)
     .attr("y1", 13.5)
     .attr("y2", 95)
-    .style("stroke", "rgba(230, 232, 239, 1)")
+    .style("stroke", "var(--col-10)")
     .style("stroke-width", "10px")
     .style("fill", "none"); 
     
@@ -325,7 +97,7 @@ svg.append("line")
     .attr("x2", width / 2 - 6 + 35)
     .attr("y1", 95)
     .attr("y2", 13.5)
-    .style("stroke", "rgba(230, 232, 239, 1)")
+    .style("stroke", "var(--col-10)")
     .style("stroke-width", "10px")
     .style("fill", "none"); 
     
@@ -362,7 +134,7 @@ svg.append("line")
     .attr("x2", width / 2)
     .attr("y1", 15)
     .attr("y2", 144)
-    .style("stroke", "rgba(230, 232, 239, 1)")
+    .style("stroke", "var(--col-10)")
     .style("stroke-width", "38px");
 
 svg.append("rect")
@@ -370,7 +142,7 @@ svg.append("rect")
     .attr("y", 15)
     .attr("width", 50)
     .attr("height", 11.5)
-    .style("fill", "rgba(230, 232, 239, 1)");
+    .style("fill", "var(--col-10)");
     
 var units = "<?php echo $rain["units"];?>";
 
@@ -393,7 +165,7 @@ if (domain[1] - maxRain < 0.66 * step)
   domain[1] += step;
 
 // D3 scale object
-var scale = d3.scale.linear()
+var scale = d3.scaleLinear()
   .range([bulb_cy - bulbRadius / 2 - 8.5, top_cy])
   .domain(domain);
 
@@ -423,7 +195,7 @@ svg.append("rect")
     .attr("rx", 3)
     .attr("width", 37.5)
     .attr("height", 4)
-    .style("fill", "rgba(230, 232, 239, 1)");
+    .style("fill", "var(--col-10)");
 
 svg.append("line")
     .attr("x1", width / 2 - 20.5)
@@ -448,12 +220,9 @@ svg.append("line")
 var tickValues = d3.range((domain[1] - domain[0]) / step + 1).map(function(v) { return domain[0] + v * step; });
 
 // D3 axis object for the scale
-var axis = d3.svg.axis()
-    .scale(scale)
-    .innerTickSize(7)
-    .outerTickSize(0)
-    .tickValues(tickValues)
-    .orient("left");
+var axis = d3.axisLeft(scale)
+  .tickSize(7)
+  .tickValues(tickValues);
 
 // Add the axis to the image
 var svgAxis = svg.append("g")
@@ -463,7 +232,8 @@ var svgAxis = svg.append("g")
 
 // Format text labels
 svgAxis.selectAll(".tick text")
-    .style("fill", "rgba(119, 119, 119, 1)")
+    .style("fill", "var(--col-6)")
+    .style("font-family", "Helvetica")
     .style("font-size", "8px");
 
 // Set main axis line to no stroke or fill
@@ -485,24 +255,17 @@ svg.append("text")
     .style("font-size", "18px")
     .style("font-family", "Helvetica")
     .style("font-weight", "600")
-    .style("fill", "rgba(30, 32, 36, 1)");
-}           
+    .style("fill", "var(--col-6)");
+           
 </script>
 
 <div class="stormRain"></div>
 
-<script>            
-var theme = "<?php echo $theme;?>";
-    if (theme === 'dark') {
-        var boxColor = "#38383c";
-        var baseTextColor = "silver";
-} else {
-        boxColor = "#e6e8ef";
-        baseTextColor = "#2d3a4b";
-}
-</script>
 
 <script>
+        var boxColor = "var(--col-13)";
+        var baseTextColor = "var(--col-6)";
+
 // script to display rain data
 var svg = d3.select(".stormRain")
     .append("svg")
@@ -525,7 +288,7 @@ var last24HoursColor = "<?php echo $colorRain24hrSum;?>";
 var rainMonthColor = "<?php echo $colorRainMonthSum;?>";
 var rainYearColor = "<?php echo $colorRainYearSum;?>";
 
-var stormStart = "<?php echo $rain["storm_rain_start"];?>"; 
+var stormStart = "<?php echo $rain["storm_start"];?>"; 
 var rainRate = <?php echo $rain["rate"];?>;
 var lastHour = <?php echo $rain["last_hour"];?>;
 var last24Hours = <?php echo $rain["24h_total"];?>;
@@ -544,7 +307,7 @@ svg.append("text") // storm start text
     .style("font-size", "8px")
     .style("text-anchor", "middle")
     .style("font-weight", "normal")
-    .text("Storm Rain Started on " + stormStart);
+    .text("Storm Rain Started @ " + stormStart);
 
 svg.append("rect") // stormRain box    
     .attr("x", 12 )
@@ -1097,7 +860,7 @@ var text = svg.selectAll(null)
 
 </script>
 
-<div id="raindrops" width="300" height="150" style="position: relative; top: -159px; left: 0px;"></div>
+<div id="raindrops" width="300" height="150" style="position: relative; top: -153px; left: 0px;"></div>
 
 <script>
 

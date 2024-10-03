@@ -18,3 +18,5 @@
          error_log("Cannot connect to weewx server at ".$weewxserver_address.":".$weewxserver_port." ".$e->getMessage());
       }
     }
+?> 
+

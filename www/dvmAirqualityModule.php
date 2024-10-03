@@ -1,4 +1,5 @@
 <?php
+include('dvmCombinedData.php');
 ##############################################################################################
 #        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
 #       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    #
@@ -13,12 +14,10 @@
 #    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
-include('dvmCombinedData.php');
-$airqual["pm_units"] = "μg/㎥";
-//$aqSource = "weewx";
-//PM10 is particulate matter 10 micrometers or less in diameter, PM25 is particulate matter 2.5 micrometers or less in diameter.
-//PM2.5 is generally described as fine particles. By way of comparison, a human hair is about 100 micrometres, so roughly
-//40 fine particles could be placed on its width.
+
+// PM10 is particulate matter 10 micrometers or less in diameter, PM25 is particulate matter 2.5 micrometers or less in diameter.
+// PM2.5 is generally described as fine particles. By way of comparison, a human hair is about 100 micrometres, so roughly
+// 40 fine particles could be placed on its width.
 
 //PurpleAir Sensor source
 if ($aqSource == "purple") {
@@ -40,7 +39,7 @@ $json_string = file_get_contents("jsondata/aq.txt");
 $parsed_json = json_decode($json_string, true);
 $airqual["pm25"] = $parsed_json["data"]["iaqi"]["pm25"]["v"];
 $airqual["pm10"] = $parsed_json["data"]["iaqi"]["pm10"]["v"];
-$airqual["city"] = $parsed["data"]["city"]["name"].$airqual["subtitle"];
+$airqual["city"] = $parsed_json["data"]["city"]["name"].$airqual["subtitle"];
 }
 //SDS Source
 else if ($aqSource == "sds"){
@@ -50,15 +49,6 @@ $airqual["pm25"] = round($parsed_json['pm25'],1);
 $airqual["pm10"] = round($parsed_json['pm10'],1);
 $airqual["city"] = $stationlocation.$airqual["subtitle"];
 }
-//open meteo api source
-else if ($aqSource == "openmeteo"){
-	$json_string = file_get_contents("jsondata/airquality.txt");
-	$parsed_json = json_decode($json_string, true);
-	$airqual["pm25"] = round($parsed_json["current"]["pm2_5"],1);
-	$airqual["pm10"] = round($parsed_json["current"]["pm10"],1);
-	$airqual["city"] = $stationlocation;
-	}
-	
 
 //Europe EAQI
 if ($aqZone == "ei"){
@@ -407,7 +397,7 @@ function map($value, $fromLow, $fromHigh, $toLow, $toHigh){
 
 $airqual["aqi25"] = number_format($airqual["aqi25"],1);
 $airqual["aqi25"] = pm25_to_aqi($airqual["pm25"]);
-$airqual["aqi10"] = number_format($airqual["aqi10"]);
+$airqual["aqi10"] = number_format($airqual["aqi10"],1);
 $airqual["aqi10"] = pm10_to_aqi($airqual["pm10"]);
 
 if ($airqual["aqi25"] < 51 ){
@@ -464,7 +454,7 @@ if ($airqual["aqi10"] < 55 ){
     $airqual["priority10"] = 2;
     }
     else if ($airqual["aqi10"] < 255 ){
-    $airqual["image10"] = "./css/aqi/uhfsair.svg?ver=1.4";
+    $airqual["image10"] = "./css/aqi/uhsfhair.svg?ver=1.4";
     $airqual["color10"] = "#ff7e00";
     $airqual["text10"] = "Unhealthy for Sensitive Groups";
     $airqual["priority10"] = 3;
@@ -492,7 +482,7 @@ if ($airqual["aqi10"] < 55 ){
 
 //Australia AQI
 if ($aqZone == "au"){
-	$airqual["aqi25"] = round($airqual["pm25"]*4, 0);
+	$airqual["aqi25"] = round($airqual["pm25"]*4,0);
 	if ($airqual["aqi25"] < 34 ){
 		$airqual["image25"] = "./css/aqi/goodair.svg?ver=1.4";
 		$airqual["color25"] = "#32ADD3";
@@ -575,48 +565,30 @@ if ($airqual["priority25"] > $airqual["priority10"])
 else {$airqual["text"] = $airqual["text10"];
 	$airqual["qualColor"] = $airqual["color10"];
 }
-
 ?>
 
-    <div class="chartforecast2">
-      
+<!DOCTYPE html>
+<html lang="en">
 
-      <span class="yearpopup" style="background-colr: red" ><a alt="airquality charts" title="Airquality Charts" href="dvmhighcharts/dvmAirQualityWeekChart.php" data-lity><?php echo $menucharticonpage;?> Airquality Charts and Information</a></span>
-      
+<div class="chartforecast">
+<span class="yearpopup"><a alt="airquality charts" title="Airquality Charts" href="dvmhighcharts/dvmAirQualityWeekChart.php" data-lity><?php echo $menucharticonpage;?> Airquality Charts</a></span>
+<span class="yearpopup"><a alt="aquinfo" title="AQI Info" href="dvmAqiInfoPopup.php" . data-lity> <?php echo $info;?> AQ-Index Info</a></span>
+</div>
 
-    </div>
-    <span class='moduletitle2'><?php echo $lang['airqualityModule'];?></span>
-
-
+<span class='moduletitle'><?php echo $lang['airqualityModule'];?></span>       
 <div class="updatedtime1"><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online.' '.date($timeFormat);?></div>
 
-<script src="js/d3.v3.min.js"></script>
-<html>
-<style>
-
-.aqi {
-  position: relative; 
-  margin-top: -1.5px; 
-  margin-left: 0px;
-}
-
-</style>
-
-<script>
-var theme = "<?php echo $theme;?>";
-	if (theme == 'dark') {
-var cityTextFill = "silver";}
-else
-{var cityTextFill = "rgba(85,85,85,1)";}
-</script>
+<script src="js/d3.7.9.0.min.js"></script>
 
 <div class="aqi"></div>
-<div id="svg"></div>
 
 <script>
 
-	var aqiA = "<?php echo round($airqual["aqi25"]);?>";
-	var aqiB = "<?php echo round($airqual["aqi10"]);?>";
+	var cityTextFill = "var(--col-6)";
+
+	var aqiA = "<?php echo number_format($airqual["aqi25"],0);?>";
+	var aqiB = "<?php echo number_format($airqual["aqi10"],0);?>";
+	
 	var pmA = "<?php echo $airqual["pm25"];?>";
 	var pmB = "<?php echo $airqual["pm10"];?>";
       
@@ -655,7 +627,8 @@ else
               	.attr("y", 30)
     			.attr("width", 50)
     			.attr("height", 25)    			
-    			.style("fill", "silver")
+    			.style("fill", "#c0c0c0")
+    			.style("font-family", "Helvetica")
     			.style("font-size", "10px")
     			.style("text-anchor", "middle")
               	.style("font-weight", "normal")
@@ -667,7 +640,7 @@ else
               	.attr("y", 30)
     			.attr("width", 50)
     			.attr("height", 25)   			
-    			.style("fill", "silver")
+    			.style("fill", "#c0c0c0")
     			.style("font-family", "Helvetica")
     			.style("font-size", "10px")
     			.style("text-anchor", "middle")
@@ -681,7 +654,7 @@ else
     			.attr("x2", 135)
     			.attr("y1", 104)
     			.attr("y2", 104)
-    			.style("stroke", "silver")
+    			.style("stroke", "#c0c0c0")
     			.style("stroke-width", "12px")
     			.style("stroke-linecap", "round"); 
 
@@ -690,14 +663,14 @@ else
     			.attr("x2", 287)
     			.attr("y1", 104)
     			.attr("y2", 104)
-    			.style("stroke", "silver")
+    			.style("stroke", "#c0c0c0")
     			.style("stroke-width", "12px")
     			.style("stroke-linecap", "round");
 
 			 svg.append("text") // pm 2.5 micro gram text output
              	.attr("x", 108.5)
             	.attr("y", 107)
-            	.style("fill", "black")
+            	.style("fill", "var(--col-19)")
             	.style("font-family", "Helvetica")
             	.style("font-size", "10px")
             	.style("text-anchor", "middle")
@@ -707,13 +680,12 @@ else
    			svg.append("text") // pm 10 micro gram text output
              	.attr("x", 261)
             	.attr("y", 107)
-            	.style("fill", "black")
+            	.style("fill", "var(--col-19)")
             	.style("font-family", "Helvetica")
             	.style("font-size", "10px")
             	.style("text-anchor", "middle")
             	.style("font-weight", "bold")
    				.text(d3.format(".1f")(pmB)+" "+"μg/m³");
-
 
       		// begin pm 2.5
 			svg.append("circle")
@@ -741,7 +713,7 @@ else
             	.attr("cx", 50) // center dark ring
             	.attr("cy", 75)
             	.attr("r", 34)
-            	.style('stroke', '#1e2024')
+            	.style('stroke', "var(--col-2)")
             	.style('fill', 'none')
             	.style('stroke-width', 3);		             		 
             		             		 
@@ -765,7 +737,7 @@ else
 			svg.append("text") // AQ Index text output
              	.attr("x", 106)
             	.attr("y", 79)
-            	.style("fill", "black")
+            	.style("fill", "var(--col-19)")
             	.style("font-family", "Helvetica")
             	.style("font-size", "10px")
             	.style("text-anchor", "middle")
@@ -799,7 +771,7 @@ else
             	.attr("cx", 202) // center dark ring
             	.attr("cy", 75)
             	.attr("r", 34)
-            	.style('stroke', '#1e2024')
+            	.style('stroke', "var(--col-2)")
             	.style('fill', 'none')
             	.style('stroke-width', 3);		             		 
              		             		 
@@ -813,7 +785,7 @@ else
    			svg.append("text") // AQ Index text output
              	.attr("x", 258)
             	.attr("y", 79)
-            	.style("fill", "black")
+            	.style("fill", "var(--col-19)")
             	.style("font-family", "Helvetica")
             	.style("font-size", "10px")
             	.style("text-anchor", "middle")

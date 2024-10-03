@@ -1,4 +1,18 @@
 <?php
+##############################################################################################
+#        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
+#       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    #
+#       (.  ___  :)||  |\   \  //  / |   (  ) : | \   \  //   |  |'  /    \:  | \   \  /     #
+#       |: \   ) |||:  | \\  \/. ./  (:  |  | . ) /\\  \/.    |  |: /'        |  \\  \/      #
+#       (| (___\ |||.  |  \.    //    \\ \__/ // |: \.        |   \//  /\'    |  /\.  \      #
+#       |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \     #
+#       (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|    #
+#                                                                                            #
+#     Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      #
+#      Distributed under terms of the GPLv3.  See the file LICENSE.txt for your rights.      #
+#    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
+#                    https://github.com/Millardiang/weewx-divumwx/issues                     #
+##############################################################################################
 #####################################################################################################################                                                                                                        #
 #                                                                                                                   #
 # Copyright (c) 2023 by Paul Noble  (https://codepen.io/paulnoble/pen/qZaNRB)                                       #
@@ -19,18 +33,7 @@
 # SOFTWARE.                                                                                                         #
 #                                                                                                                   #
 #####################################################################################################################
-#                                                                                                                   #
-# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
-#                                                                                                                   #
-# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
-#                                                                                                                   #
-# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
-#                                                                                                                   #
-# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
-#                                                                                                                   #
-#####################################################################################################################
-?>
-<?php 
+
 include('dvmCombinedData.php');
 error_reporting(0);
 date_default_timezone_set($TZ);
@@ -46,7 +49,7 @@ else if($theme === "dark"){ echo "<body style='background-color:#292E35'>";}
   <title>World daylight map</title>
   <script src="https://use.typekit.net/vff2oqo.js"></script>
 <script>try{Typekit.load({ async: true });}catch(e){}</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
-<link rel="stylesheet" href="daylightmap/daylightmap.css">
+<link rel="stylesheet" href="css/daylightmap.css">
 
 </head>
 <body>
@@ -107,7 +110,7 @@ else if($theme === "dark"){echo "<font color='silver'>"."World Daylight Map"."</
 <script src='https://cdnjs.cloudflare.com/ajax/libs/d3-geo-projection/0.2.16/d3.geo.projection.min.js'></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.12.0/moment.min.js'></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.1/moment-timezone.min.js'></script>
-<script src='https://s3-us-west-2.amazonaws.com/s.cdpn.io/215059/suncalc.js'></script><script  src="daylightmap/daylightmap.js"></script>
+<script src='https://s3-us-west-2.amazonaws.com/s.cdpn.io/215059/suncalc.js'></script><script  src="js/daylightMap.js"></script>
 
 </body>
 </html>

@@ -2,60 +2,70 @@
 include('dvmCombinedData.php');
 $speedColor = $color["windSpeed"];
 $gustColorMax = $color["windGust_max"];
-$textColor = "White";
+##############################################################################################
+#        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
+#       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    #
+#       (.  ___  :)||  |\   \  //  / |   (  ) : | \   \  //   |  |'  /    \:  | \   \  /     #
+#       |: \   ) |||:  | \\  \/. ./  (:  |  | . ) /\\  \/.    |  |: /'        |  \\  \/      #
+#       (| (___\ |||.  |  \.    //    \\ \__/ // |: \.        |   \//  /\'    |  /\.  \      #
+#       |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \     #
+#       (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|    #
+#                                                                                            #
+#     Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      #
+#      Distributed under terms of the GPLv3.  See the file LICENSE.txt for your rights.      #
+#    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
+#                    https://github.com/Millardiang/weewx-divumwx/issues                     #
+##############################################################################################
 ?>
+<!DOCTYPE html>
+<html lang="en">
 <meta http-equiv="Content-Type: text/html; charset=UTF-8"/>
-<style>
-maxGust {
- color: <?php echo $gustColorMax;?>;
-}
-</style>
 
+<div class="chartforecast">
+<span class="yearpopup"><a alt="wind charts" title="wind charts" href="dvmWindRecords.php" data-lity><?php echo $menucharticonpage;?> Wind Records and Charts</a></span>
+</div>
+<span class='moduletitle'><?php echo $lang['Anemometer']. " (<valuetitleunit>". $wind["units"];?></valuetitleunit>)</span>
 
-   <div class="chartforecast2">
-      <span class="yearpopup"><a alt="wind charts" title="wind charts" href="dvmWindRecords.php" data-lity><?php echo $menucharticonpage;?> Wind Records and Charts</a></span>
-    </div>
-    <span class='moduletitle2'><?php echo $lang['Anemometer']. " (<valuetitleunit>". $wind["units"];?></valuetitleunit>)</span>
-  
+<div class="updatedtime2" style="margin-top: -33px;"><span><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?></div><br />
 
-<div class="updatedtime2"><span><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?></div><br />
-
-<div class="windspeedtrend1">
-<?php echo "<valuetext>Max "."<max><value><maxGust>".number_format($wind["gust_max"],1)."</maxGust></max></span>"."<supmb> ".$wind["units"]."</supmb><br> ".$lang['Gust']." (".$wind["gust_maxtime"].")</valuetext>";?></div>
+<div class="windspeedtrend2">
+<?php echo "<valuetext>Max "."<max><maxGust style='color:$gustColorMax;'>".number_format($wind["gust_max"],1)."</maxGust></max></span>"." ".$wind["units"]."<br> ".$lang['Gust']." (".$wind["gust_maxtime"].")</valuetext>";?></div>
 
 <div class="windconverter">
 
 <?php
 if($theme == 'dark') { 
 // convert kmh to mph
-if ($wind["units"]=="km/h"){echo "<div class=windconvertercirclered1 style='color:$speedColor;'>".number_format($wind["speed"]*0.621371,1)." <smallrainunit>mph</smallrainunit>";}
+if ($wind["units"]=="km/h"){echo "<div class=windconvertercircle style='color:$speedColor;'>".number_format($wind["speed"]*0.621371,1)." <smallrainunit>&nbsp;mph</smallrainunit>";}
 // convert mph to kmh
-else if ($wind["units"]=="mph"){echo "<div class=windconvertercirclered1 style='color:$speedColor;'>".number_format($wind["speed"]*1.609343502101025,1)." <smallrainunit>&nbsp;km/h</smallrainunit>";}
+else if ($wind["units"]=="mph"){echo "<div class=windconvertercircle style='color:$speedColor;'>".number_format($wind["speed"]*1.609343502101025,1)." <smallrainunit>&nbsp;km/h</smallrainunit>";}
 // convert ms to kmh
-else if ($wind["units"]=="m/s"){echo "<div class=windconvertercirclered1 style='color:$speedColor;'>".number_format($wind["speed"]*3.60000288,1)." <smallrainunit>&nbsp;km/h</smallrainunit>";}
+else if ($wind["units"]=="m/s"){echo "<div class=windconvertercircle style='color:$speedColor;'>".number_format($wind["speed"]*3.60000288,1)." <smallrainunit>&nbsp;km/h</smallrainunit>";}
 // knots to kmh
-else if ($wind["units"]=="kts"){echo "<div class=windconvertercirclered1 style='color:$speedColor;'>".number_format($wind["speed"]*1.85200,1)." <smallrainunit>&nbsp;km/h</smallrainunit>";}
+else if ($wind["units"]=="kts"){echo "<div class=windconvertercircle style='color:$speedColor;'>".number_format($wind["speed"]*1.85200,1)." <smallrainunit>&nbsp;km/h</smallrainunit>";}
 
 } else {
 
 // convert kmh to mph
-if ($wind["units"]=="km/h"){echo "<div class=windconvertercirclered1 style='background:$speedColor; color:$textColor;'>".number_format($wind["speed"]*0.621371,1)." <smallrainunit>mph</smallrainunit>";}
+if ($wind["units"]=="km/h"){echo "<div class=windconvertercircle style='background:$speedColor; color:$textColor;'>".number_format($wind["speed"]*0.621371,1)." <smallrainunit>&nbsp;mph</smallrainunit>";}
 // convert mph to kmh
-else if ($wind["units"]=="mph"){echo "<div class=windconvertercirclered1 style='background:$speedColor; color:$textColor;'>".number_format($wind["speed"]*1.609343502101025,1)." <smallrainunit>&nbsp;km/h</smallrainunit>";}
+else if ($wind["units"]=="mph"){echo "<div class=windconvertercircle style='background:$speedColor; color:$textColor;'>".number_format($wind["speed"]*1.609343502101025,1)." <smallrainunit>&nbsp;km/h</smallrainunit>";}
 // convert ms to kmh
-else if ($wind["units"]=="m/s"){echo "<div class=windconvertercirclered1 style='background:$speedColor; color:$textColor;'>".number_format($wind["speed"]*3.60000288,1)." <smallrainunit>&nbsp;km/h</smallrainunit>";}
+else if ($wind["units"]=="m/s"){echo "<div class=windconvertercircle style='background:$speedColor; color:$textColor;'>".number_format($wind["speed"]*3.60000288,1)." <smallrainunit>&nbsp;km/h</smallrainunit>";}
 // knots to kmh
-else if ($wind["units"]=="kts"){echo "<div class=windconvertercirclered1 style='background:$speedColor; color:$textColor;'>".number_format($wind["speed"]*1.85200,1)." <smallrainunit>&nbsp;km/h</smallrainunit>";}}?>
+else if ($wind["units"]=="kts"){echo "<div class=windconvertercircle style='background:$speedColor; color:$textColor;'>".number_format($wind["speed"]*1.85200,1)." <smallrainunit>&nbsp;km/h</smallrainunit>";}}?>
 </div></div>
 <?php 
 if ($wind["units"] == 'mph'){$wind["wind_run"]=$wind["wind_run"]*0.621371;}
 else if ($wind["units"] == 'kts'){$wind["wind_run"]=$wind["wind_run"]*0.621371;}
 else {$wind["wind_run"]=$wind["wind_run"]*1;}
 
-echo ' <div class=divumwxwindrun>'.$windalert3.' &nbsp;<grey><valuetext1>',number_format($wind["wind_run"],1);?>
-<grey><divumwxwindrunspan></valuetext>
+echo ' <div class=divumwxwindrun>'.$windalert3.' &nbsp;<valuetext1>',number_format($wind["wind_run"],1);?></valuetext1>
+<divumwxwindrunspan>
 <?php if ($wind["units"] == 'mph') echo 'mi'; else if ($wind["units"] == 'm/s') echo 'km'; else if ($wind["units"] == 'kts') echo 'mi';else echo 'km';?></divumwxwindrunspan>
-</div></div><br /><div class=windrun1><?php echo  $lang['Wind Run'];?></div>
+</div></div><br /><div class=windrun><?php echo $lang['Wind Run'];?></div>
+
+<div class=divumwxbeaufort>
 <?php // beaufort
 if ($wind["speed_bft"] >= 12) {
   echo '<div class=divumwxbeaufort12>' . $beaufort12 . "&nbsp;" . $wind["speed_bft"];
@@ -86,7 +96,7 @@ if ($wind["speed_bft"] >= 12) {
 }
 ?>
 <divumwxbftspan>BFT<divumwxbftspan></div>
-<div class="beaufort1">
+<div class="beaufort">
 <?php
 if ($wind["speed_bft"] == 0) {
   echo "Calm";
@@ -116,319 +126,55 @@ if ($wind["speed_bft"] == 0) {
   echo "Hurricane Force ";
 }
 ?>
+</div></div>
 
-</div>
-<style>
 
-.moduletitle2 {
-  position: relative;
-  top: -20px;
-  font-size: .8em;
-  float: none;
-}
-.chartforecast2 {
-  position: absolute;
-  font-family: arial, system;
-  z-index: 20;
-  padding-top: 1px;
-  margin-left: 0;
-  font-size: .67em;
-  color: silver;
-  margin-top: 159px;
-  width: 300px;
-  padding-left: 10px;
-  text-align: left;
-}
-.chartforecast2:hover {
-  color: #90b12a;
-}
-.daylightmoduleposition2 {
-  position: relative;
-  left: 5px;
-  margin-top: 0px;
-}
-</style>
-
-<html>
-
-<script src="js/d3.min.js"></script>
+<script src="js/d3.v3.min.js"></script>
 <script src="js/iopctrl.js"></script>
-
-<?php 
-
-if ($theme === "dark") { echo
-    
-    '<style>
-
-    .divumwxbeaufort0 {
-    color: #85a3aa;
-  }
-  .divumwxbeaufort1 {
-    color: #7e98bb;
-  }
-  .divumwxbeaufort2 {
-    color: #6e90d0;
-  }
-  .divumwxbeaufort3 {
-    color: #0f94a7;
-  }
-  .divumwxbeaufort4 {
-    color: #39a239;
-  }
-  .divumwxbeaufort5 {
-    color: #c2863e;
-  }
-  .divumwxbeaufort6 {
-    color: #c8420d;
-  }
-  .divumwxbeaufort7 {
-    color: #d20032;
-  }
-  .divumwxbeaufort8 {
-    color: #af5088;
-  }
-  .divumwxbeaufort9 {
-    color: #754a92;
-  }
-  .divumwxbeaufort10 {
-    color: #45698d;
-  }
-  .divumwxbeaufort11 {
-    color: #c1fc77;
-  }
-  .divumwxbeaufort12 {
-    color: #f1ff6c;
-  }
-  .divumwxbeaufort0,
-  .divumwxbeaufort1,
-  .divumwxbeaufort2,
-  .divumwxbeaufort3,
-  .divumwxbeaufort4,
-  .divumwxbeaufort5,
-  .divumwxbeaufort6,
-  .divumwxbeaufort7,
-  .divumwxbeaufort8,
-  .divumwxbeaufort9,
-  .divumwxbeaufort10,
-  .divumwxbeaufort11,
-  .divumwxbeaufort12 {
-    font-size: .7rem;
-    position: absolute;
-    margin-top: 85px;
-    margin-left: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 1rem;
-    width: 4rem;
-    border: 1px solid rgba(74, 99, 111, .2);
-    overflow: hidden;
-    border-radius: 2px;
-    font-family: weathertext2;
-  }
-    
-      .anemometer {
-        position: relative; 
-        margin-top: -35px; 
-        margin-left: -1px;
-      }
-
-        .unselectable {
-            -moz-user-select: -moz-none;
-            -khtml-user-select: none;
-            -webkit-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-        .gauge .domain {
-            stroke-width: 0px;
-            stroke: rgba(59, 60, 63, 1);
-        }
-        
-        .gauge .tick line {
-            stroke: rgba(255,99,71,1);
-            stroke-width: 1px;
-            stroke-linecap: round;
-        }
-        
-        .gauge line {
-            stroke: rgba(59, 60, 63, 1);
-            stroke-width: 0.75px;
-            stroke-linecap: round; 
-        }
-                
-        .gauge .arc, .gauge .cursor {
-          stroke: rgba(59, 60, 63, 0);
-          stroke-width: 2px;
-          fill: rgba(59, 60, 63, 0);
-        }
-        .gauge .major {
-            fill: rgba(147, 147, 147, 1);
-            font-size: 8px;
-            font-family: arial;
-            font-weight: normal;
-            letter-spacing: .015rem;
-        }
-        
-        .gauge .indicator {
-            stroke: rgba(255,0,0,1);
-            fill: #000;
-            stroke-width: 1px;
-        }
-                
-         .gauge circle {
-          stroke: rgba(59, 60, 63, 1);
-          fill: rgba(59, 60, 63, 1);                
-    }          
-       
-  </style>';
-  
-  } else { echo
-  
-    '<style>
-
-    .divumwxbeaufort0 {
-    background: #85a3aa;
-  }
-  .divumwxbeaufort1 {
-    background: #7e98bb;
-  }
-  .divumwxbeaufort2 {
-    background: #6e90d0;
-  }
-  .divumwxbeaufort3 {
-    background: #0f94a7;
-  }
-  .divumwxbeaufort4 {
-    background: #39a239;
-  }
-  .divumwxbeaufort5 {
-    background: #c2863e;
-  }
-  .divumwxbeaufort6 {
-    background: #c8420d;
-  }
-  .divumwxbeaufort7 {
-    background: #d20032;
-  }
-  .divumwxbeaufort8 {
-    background: #af5088;
-  }
-  .divumwxbeaufort9 {
-    background: #754a92;
-  }
-  .divumwxbeaufort10 {
-    background: #45698d;
-  }
-  .divumwxbeaufort11 {
-    background: #c1fc77;
-  }
-  .divumwxbeaufort12 {
-    background: #f1ff6c;
-  }
-  .divumwxbeaufort0,
-  .divumwxbeaufort1,
-  .divumwxbeaufort2,
-  .divumwxbeaufort3,
-  .divumwxbeaufort4,
-  .divumwxbeaufort5,
-  .divumwxbeaufort6,
-  .divumwxbeaufort7,
-  .divumwxbeaufort8,
-  .divumwxbeaufort9,
-  .divumwxbeaufort10,
-  .divumwxbeaufort11,
-  .divumwxbeaufort12 {
-    font-size: .7rem;
-    position: absolute;
-    margin-top: 85px;
-    margin-left: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 1.05rem;
-    width: 4rem;
-    border: 1px solid #e6e8ef;
-    overflow: hidden;
-    border-radius: 2px;
-    color: #fff;
-    font-family: weathertext2
-  }
-    
-        .anemometer {
-        position: relative; 
-        margin-top: -35px; 
-        margin-left: -1px;
-      }
-      
-        .unselectable {
-            -moz-user-select: -moz-none;
-            -khtml-user-select: none;
-            -webkit-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-        .gauge .domain {
-            stroke-width: 0px;
-            stroke: rgba(59, 60, 63, 1);
-        }
-        
-        .gauge .tick line {
-            stroke: rgba(255,99,71,1);
-            stroke-width: 1px;
-            stroke-linecap: round;
-        }
-        
-        .gauge line {
-            stroke: rgba(230, 232, 239, 1);
-            stroke-width: 0.75px;
-            stroke-linecap: round; 
-        }
-        .gauge .arc, .gauge .cursor {
-          stroke: rgba(59, 60, 63, 0);
-          stroke-width: 2px;
-          fill: rgba(59, 60, 63, 0);
-        }
-        .gauge .major {
-            fill: rgba(147, 147, 147, 1);
-            font-size: 8px;
-            font-family: arial;
-            font-weight: normal;
-            letter-spacing: .015rem;
-        }
-        
-        .gauge .indicator {
-            stroke: rgba(255,0,0,1);
-            fill: #000;
-            stroke-width: 1px;
-        }
-        
-        .gauge circle {
-          stroke: rgba(230, 232, 239, 1);
-          fill: rgba(230, 232, 239, 1);                
-    }
-           
-  </style>';  
-}
-?>
-
-<script>            
-    var theme = "<?php echo $theme;?>";
-
-    if (theme === 'dark') {
-    var baseTextColor = "silver";
-    } else {
-    var baseTextColor = "#2d3a4b";
-    }
-</script>
 
 <div class="anemometer"></div>
    
-     <script>
+<script>
 
+var Bearing = "<?php echo $wind["direction"];?>";
+Bearing = Bearing || 0;
+    
+  // Bearing  
+  if (Bearing <= 11.25) { 
+    Bearing = "North";
+    } else if (Bearing <= 33.75) {
+    Bearing = "NNE";
+    } else if (Bearing <= 56.25) {
+    Bearing = "NE";
+    } else if (Bearing <= 78.75) {
+    Bearing = "ENE";
+    } else if (Bearing <= 101.25) {
+    Bearing = "East";
+    } else if (Bearing <= 123.75) { 
+    Bearing = "ESE";
+    } else if (Bearing <= 146.25) { 
+    Bearing = "SE";
+    } else if (Bearing <= 168.75) {
+    Bearing = "SSE";
+    } else if (Bearing <= 191.25) {
+    Bearing = "South";
+    } else if (Bearing <= 213.75) {
+    Bearing = "SSW";
+    } else if (Bearing <= 236.25) { 
+    Bearing = "SW";
+    } else if (Bearing <= 281.25) {
+    Bearing = "West";
+    } else if (Bearing <= 303.75) { 
+    Bearing = "WNW";
+    } else if (Bearing <= 326.25) {
+    Bearing = "NW";
+    } else if (Bearing <= 348.75) {
+    Bearing = "NNW";
+    } else { Bearing = "North"; }
+/*
 var ordinal = "<?php echo $wind["cardinal"];?>";
 ordinal = ordinal || "North";
- 
+*/ 
 var current_direction = "<?php echo $wind["direction"];?>";  
 current_direction = current_direction || 0;
 
@@ -530,7 +276,7 @@ var units = "<?php echo $wind["units"];?>";
             svg.append("text") // Bearing text output
               .attr("x", 45)
               .attr("y", 55)
-              .style("fill", baseTextColor)
+              .style("fill", "var(--col-6)")
               .style("font-family", "Helvetica")
               .style("font-size", "12px")
               .style("text-anchor", "middle")
@@ -540,7 +286,7 @@ var units = "<?php echo $wind["units"];?>";
           svg.append("text") // Cardinal text output
               .attr("x", 265)
               .attr("y", 55)
-              .style("fill", baseTextColor)
+              .style("fill", "var(--col-6)")
               .style("font-family", "Helvetica")
               .style("font-size", "12px")
               .style("text-anchor", "middle")
@@ -550,7 +296,7 @@ var units = "<?php echo $wind["units"];?>";
           svg.append("text") // Bearing text output
               .attr("x", 45)
               .attr("y", 80)
-              .style("fill", baseTextColor)
+              .style("fill", "var(--col-6)")
               .style("font-family", "Helvetica")
               .style("font-size", "24px")
               .style("text-anchor", "middle")
@@ -560,12 +306,12 @@ var units = "<?php echo $wind["units"];?>";
           svg.append("text") // Cardinal text output
               .attr("x", 265)
               .attr("y", 80)
-              .style("fill", baseTextColor)
+              .style("fill", "var(--col-6)")
               .style("font-family", "Helvetica")
               .style("font-size", "24px")
               .style("text-anchor", "middle")
               .style("font-weight", "normal")
-          .text(ordinal);
+          .text(Bearing);
                   
         var gauge = iopctrl.arcslider()
                 .radius(52.5)
@@ -751,7 +497,7 @@ var units = "<?php echo $wind["units"];?>";
             svg.append("text") // Bearing text output
               .attr("x", 45)
               .attr("y", 55)
-              .style("fill", baseTextColor)
+              .style("fill", "var(--col-6)")
               .style("font-family", "Helvetica")
               .style("font-size", "12px")
               .style("text-anchor", "middle")
@@ -761,7 +507,7 @@ var units = "<?php echo $wind["units"];?>";
           svg.append("text") // Cardinal text output
               .attr("x", 265)
               .attr("y", 55)
-              .style("fill", baseTextColor)
+              .style("fill", "var(--col-6)")
               .style("font-family", "Helvetica")
               .style("font-size", "12px")
               .style("text-anchor", "middle")
@@ -771,7 +517,7 @@ var units = "<?php echo $wind["units"];?>";
           svg.append("text") // Bearing text output
               .attr("x", 45)
               .attr("y", 80)
-              .style("fill", baseTextColor)
+              .style("fill", "var(--col-6)")
               .style("font-family", "Helvetica")
               .style("font-size", "24px")
               .style("text-anchor", "middle")
@@ -781,12 +527,12 @@ var units = "<?php echo $wind["units"];?>";
           svg.append("text") // Cardinal text output
               .attr("x", 265)
               .attr("y", 80)
-              .style("fill", baseTextColor)
+              .style("fill", "var(--col-6)")
               .style("font-family", "Helvetica")
               .style("font-size", "24px")
               .style("text-anchor", "middle")
               .style("font-weight", "normal")
-          .text(ordinal);
+          .text(Bearing);
                                                          
         var gauge = iopctrl.arcslider()
                 .radius(52.5)
@@ -971,7 +717,7 @@ var units = "<?php echo $wind["units"];?>";
             svg.append("text") // Bearing text output
               .attr("x", 45)
               .attr("y", 55)
-              .style("fill", baseTextColor)
+              .style("fill", "var(--col-6)")
               .style("font-family", "Helvetica")
               .style("font-size", "12px")
               .style("text-anchor", "middle")
@@ -981,7 +727,7 @@ var units = "<?php echo $wind["units"];?>";
           svg.append("text") // Cardinal text output
               .attr("x", 265)
               .attr("y", 55)
-              .style("fill", baseTextColor)
+              .style("fill", "var(--col-6)")
               .style("font-family", "Helvetica")
               .style("font-size", "12px")
               .style("text-anchor", "middle")
@@ -991,7 +737,7 @@ var units = "<?php echo $wind["units"];?>";
           svg.append("text") // Bearing text output
               .attr("x", 45)
               .attr("y", 80)
-              .style("fill", baseTextColor)
+              .style("fill", "var(--col-6)")
               .style("font-family", "Helvetica")
               .style("font-size", "24px")
               .style("text-anchor", "middle")
@@ -1001,12 +747,12 @@ var units = "<?php echo $wind["units"];?>";
           svg.append("text") // Cardinal text output
               .attr("x", 265)
               .attr("y", 80)
-              .style("fill", baseTextColor)
+              .style("fill", "var(--col-6)")
               .style("font-family", "Helvetica")
               .style("font-size", "24px")
               .style("text-anchor", "middle")
               .style("font-weight", "normal")
-          .text(ordinal);
+          .text(Bearing);
     
         var gauge = iopctrl.arcslider()
                 .radius(52.5)
@@ -1189,7 +935,7 @@ var units = "<?php echo $wind["units"];?>";
             svg.append("text") // Bearing text output
               .attr("x", 45)
               .attr("y", 55)
-              .style("fill", baseTextColor)
+              .style("fill", "var(--col-6)")
               .style("font-family", "Helvetica")
               .style("font-size", "12px")
               .style("text-anchor", "middle")
@@ -1199,7 +945,7 @@ var units = "<?php echo $wind["units"];?>";
           svg.append("text") // Cardinal text output
               .attr("x", 265)
               .attr("y", 55)
-              .style("fill", baseTextColor)
+              .style("fill", "var(--col-6)")
               .style("font-family", "Helvetica")
               .style("font-size", "12px")
               .style("text-anchor", "middle")
@@ -1209,7 +955,7 @@ var units = "<?php echo $wind["units"];?>";
           svg.append("text") // Bearing text output
               .attr("x", 45)
               .attr("y", 80)
-              .style("fill", baseTextColor)
+              .style("fill", "var(--col-6)")
               .style("font-family", "Helvetica")
               .style("font-size", "24px")
               .style("text-anchor", "middle")
@@ -1219,12 +965,12 @@ var units = "<?php echo $wind["units"];?>";
           svg.append("text") // Cardinal text output
               .attr("x", 265)
               .attr("y", 80)
-              .style("fill", baseTextColor)
+              .style("fill", "var(--col-6)")
               .style("font-family", "Helvetica")
               .style("font-size", "24px")
               .style("text-anchor", "middle")
               .style("font-weight", "normal")
-          .text(ordinal);
+          .text(Bearing);
      
         var gauge = iopctrl.arcslider()
                 .radius(52.5)

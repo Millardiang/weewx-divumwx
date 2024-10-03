@@ -28,14 +28,15 @@ $greenhouse["dust"] = $parsed_json["current"]["dust"];
 $greenhouse["ammonia"] = $parsed_json["current"]["ammonia"];
 ?>
 
-<div class="chartforecast2">
-<span class="yearpopup"><a alt="airquality charts" title="Airquality Charts" href="dvmhighcharts/dvmAirQualityWeekChart.php" data-lity><?php echo $menucharticonpage;?> Airquality Charts and Information</a></span>
+<div class="chartforecast">
+<span class="yearpopup"><a alt="solar" title="Gas Chart" href="dvmhighcharts/dvmAirQualityYearChart.php" data-lity><?php echo $menucharticonpage;?> Greenhouse Gas Charts</a></span>
 </div>
-<span class='moduletitle2'><?php echo $lang['Greenhouse'];?></span>
+<span class='moduletitle'><?php echo $lang['Greenhouse'];?></span>
 
 <div class="updatedtime1"><?php echo $online." ".$greenhouse["updated_time"];?></div>
 
-<script src='js/d3.min.js'></script>    
+<!--script src='js/d3.min.js'></script-->
+<script src="js/d3.7.9.0.min.js"></script>    
       
 <style>
 .Gas {margin-top: -3px; margin-left: -0px;}

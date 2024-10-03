@@ -1,4 +1,19 @@
-<?php 
+<?php
+##############################################################################################
+#        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
+#       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    #
+#       (.  ___  :)||  |\   \  //  / |   (  ) : | \   \  //   |  |'  /    \:  | \   \  /     #
+#       |: \   ) |||:  | \\  \/. ./  (:  |  | . ) /\\  \/.    |  |: /'        |  \\  \/      #
+#       (| (___\ |||.  |  \.    //    \\ \__/ // |: \.        |   \//  /\'    |  /\.  \      #
+#       |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \     #
+#       (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|    #
+#                                                                                            #
+#     Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      #
+#      Distributed under terms of the GPLv3.  See the file LICENSE.txt for your rights.      #
+#    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
+#                    https://github.com/Millardiang/weewx-divumwx/issues                     #
+##############################################################################################
+
 
 include('dvmCombinedData.php');
 $heatindexwu='<svg "divumwx heatindex icon" width="10px" height="10px" viewBox="0 0 250 250" version="3.4.2019" >
@@ -21,7 +36,7 @@ $windchillwu='<svg "divumwx windchill icon" width="10px" height="10px" viewBox="
   <meta charset="UTF-8">
   <title>Home Enviroment Temperature | Humidity</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="css/homeindoor.<?php echo $theme; ?>.css?version=<?php echo filemtime('css/homeindoor.' . $theme . '.css'); ?>" rel="stylesheet prefetch">
+<link href="css/homeindoor.css?version=<?php echo filemtime('css/homeindoor.css'); ?>" rel="stylesheet prefetch">
 
 <div class="divumwxdarkbrowser" url="Home Environment Temperature | Humidity"></div>
   
