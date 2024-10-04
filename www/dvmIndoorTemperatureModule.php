@@ -60,7 +60,7 @@ if($temp["units"] == "C"){$temp["indoor_now_feels"] = ($temp["indoor_now_feels"]
 	var h_trend = "<?php echo $humid["indoors_trend"];?>";
 	h_trend = h_trend || 0; 
 		
-	var hcolor = "<?php echo $colorHumidityIn;?>";
+	var hcolor = "<?php echo $colorInHumidity;?>";
 
 	var fcolor = "<?php echo $colorFeels;?>";
 	

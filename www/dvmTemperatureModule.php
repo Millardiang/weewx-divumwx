@@ -322,7 +322,7 @@ if ($temp["outside_day_max"]<10){echo ' '.$temp["outside_day_max"]."&deg;".$temp
 <div class="divTableCell"><?php echo $temp["outside_trend"].'&deg;' ?><smalltempunit2><?php echo $temp["units"];?></smalltempunit2><?php 
 if($temp["outside_trend"]>0){echo " ".$risingsymbol;}else if($temp["outside_trend"]<0){echo " ".$fallingsymbol;}else{ echo " ".$steadysymbol;}?></div>
 
-<div class="divTableCell" style="border-left: 5px solid <?php echo $colorHumidityOut; ?>;"><?php echo $humid["now"]; ?><smalltempunit2>%</smalltempunit2><?php //humidity trend
+<div class="divTableCell" style="border-left: 5px solid <?php echo $colorOutHumidity; ?>;"><?php echo $humid["now"]; ?><smalltempunit2>%</smalltempunit2><?php //humidity trend
 if($humid["trend"]>0){echo " ".$risingsymbol;}else if($humid["trend"]<0){echo " ".$fallingsymbol;}else{ echo " ".$steadysymbol;}?></div>
 
 <div class="divTableCell" style="border-left: 5px solid <?php echo $colorDewpoint;?>;"><?php //dewpoint

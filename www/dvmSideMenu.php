@@ -26,7 +26,7 @@
       <br/><br/><br/>
      <li class="header">
         <a href="index.php" title="WEATHERSTATION HOME PAGE">
-          <weather34menumarkergreen></weather34menumarkergreen> HOME
+          <menumarkergreen></menumarkergreen> HOME
         </a>
       </li>
           

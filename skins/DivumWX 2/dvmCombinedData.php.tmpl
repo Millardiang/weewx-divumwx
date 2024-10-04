@@ -746,9 +746,9 @@ else if($weewxrt[54]<100){$colorAppTemp = "#e26870";}
 $colorOutTempDayAvg = "$colorize($day.outTemp.avg)";
 
 //humidity
-if($humid["now"]<30){$colorHumidity="Blue";}
-else if($humid["now"]<60){$colorHumidity="Green";}
-else if($humid["now"]<100){$colorHumidity="Red";}
+if($humid["now"]<30){$colorOutHumidity="Blue";}
+else if($humid["now"]<60){$colorOutHumidity="Green";}
+else if($humid["now"]<100){$colorOutHumidity="Red";}
 
 if($humid["day_max"]<30){$colorHumidityDayMax="Blue";}
 else if($humid["day_max"]<60){$colorHumidityDayMax="Green";}

@@ -6,248 +6,256 @@ if($tempunit == 'C'){
 $heatData = 
 "[
 {
-date: '2024-09-01',
-temperature: 27.8
+date: '2024-10-01',
+temperature: 12.6
 },
 {
-date: '2024-09-02',
-temperature: 22.3
+date: '2024-10-02',
+temperature: 15.5
 },
 {
-date: '2024-09-03',
-temperature: 18.1
+date: '2024-10-03',
+temperature: 17.5
 },
 {
-date: '2024-09-04',
-temperature: 18.7
+date: '2024-10-04',
+temperature: 16.8
 },
 {
-date: '2024-09-05',
-temperature: 18.6
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-06',
-temperature: 26.0
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-07',
-temperature: 22.6
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-08',
-temperature: 23.1
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-09',
-temperature: 18.1
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-10',
-temperature: 18.3
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-11',
-temperature: 15.1
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-12',
-temperature: 14.3
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-13',
-temperature: 17.8
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-14',
-temperature: 19.4
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-15',
-temperature: 18.0
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-16',
-temperature: 20.4
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-17',
-temperature: 20.3
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-18',
-temperature: 22.2
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-19',
-temperature: 21.6
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-20',
-temperature: 23.2
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-21',
-temperature: 21.1
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-22',
-temperature: 18.7
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-23',
-temperature: 15.9
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-24',
-temperature: 15.7
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-25',
-temperature: 15.6
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-26',
-temperature: 18.8
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-27',
-temperature: 13.6
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-28',
-temperature: 15.1
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-29',
-temperature: 14.3
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-30',
-temperature: 15.9
+date: 'null',
+temperature: null
+},
+{
+date: 'null',
+temperature: null
 },
 ];";}
 else {
 $heatData = 
 "[
 {
-date: '2024-09-01',
-temperature: 82.0
+date: '2024-10-01',
+temperature: 54.7
 },
 {
-date: '2024-09-02',
-temperature: 72.1
+date: '2024-10-02',
+temperature: 59.9
 },
 {
-date: '2024-09-03',
-temperature: 64.6
+date: '2024-10-03',
+temperature: 63.5
 },
 {
-date: '2024-09-04',
-temperature: 65.7
+date: '2024-10-04',
+temperature: 62.2
 },
 {
-date: '2024-09-05',
-temperature: 65.5
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-06',
-temperature: 78.8
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-07',
-temperature: 72.7
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-08',
-temperature: 73.6
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-09',
-temperature: 64.6
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-10',
-temperature: 64.9
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-11',
-temperature: 59.2
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-12',
-temperature: 57.7
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-13',
-temperature: 64.0
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-14',
-temperature: 66.9
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-15',
-temperature: 64.4
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-16',
-temperature: 68.7
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-17',
-temperature: 68.5
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-18',
-temperature: 72.0
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-19',
-temperature: 70.9
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-20',
-temperature: 73.8
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-21',
-temperature: 70.0
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-22',
-temperature: 65.7
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-23',
-temperature: 60.6
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-24',
-temperature: 60.3
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-25',
-temperature: 60.1
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-26',
-temperature: 65.8
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-27',
-temperature: 56.5
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-28',
-temperature: 59.2
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-29',
-temperature: 57.7
+date: 'null',
+temperature: null
 },
 {
-date: '2024-09-30',
-temperature: 60.6
+date: 'null',
+temperature: null
+},
+{
+date: 'null',
+temperature: null
 },
 ];";
 };
@@ -361,7 +369,7 @@ Highcharts.chart('container', {
     },
 
     title: {
-        text: 'Maximum Day Temperature (<?php echo $unitTemp;?>) in Steeple Claydon, UK Sep 2024',
+        text: 'Maximum Day Temperature (<?php echo $unitTemp;?>) in Steeple Claydon, UK Oct 2024',
         align: 'center'
     },
 

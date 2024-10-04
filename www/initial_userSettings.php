@@ -14,7 +14,6 @@
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
 
-//$themelayout = "5"; //4, 5, tablet
 $TZ = "Europe/London";
 $extralinks = "yes";
 $sbLang = "yes";
@@ -23,8 +22,8 @@ $timeFormat = "H:i:s"; //g:i:s, g:i:s a
 $timeFormatShort = "H:i"; //g:i, g:i a
 $clockformat = "24"; //12, 24
 $advisoryzone = "uk"; //uk, na, eu, au, rw (= UK, North America, Europe, Australia, Rest of World)
-$advisoryregion = "My Alert Region";
-$englishFloodLocation="My English Flood Area"; // english locations only " " for other locations
+$advisoryregion = "Some Region in UK";
+$englishFloodLocation="Somewhere in England"; // english locations only " " for other countries
 $aqInUse = "yes"; // yes, no
 $aqZone = "uk"; //uk, us, ei, ci, au, (= UK DAQI, US EPS, Europe EAQI, Europe CAQI, Australia)
 $aqSource = "weewx"; //purple, weewx, sds, openmeteo
@@ -52,17 +51,11 @@ $position20 = "dvmGeocentricModule.php";
 $webcamurl = "./img/picam.jpg";
 $videoWeatherCamURL = "";
 $email = "";
-$twitter = "";
 $since = "2021";
 $defaultlanguage = "en";
 $password = "";
 $flag = "gb";
-$manifestShortName = "SHORT-WX";
-$notifications = "yes";
-$notifyWind = "yes";
-$notifyEarthquake = "yes";
-$notifyMagnitude = "3";
-//$linkWU = "yes";
+$manifestShortName = "SHORT-NAME";
 $linkWUNew = "yes";
 $WUid = "IYOURWUKWY";
 $linkCWOPID = "";

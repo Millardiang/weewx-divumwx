@@ -14,6 +14,9 @@
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
 echo '<style>#alert {background-color:transparent;color:var(--col-6);opacity:1;transition:opacity 0.6s;margin-top:4px;margin-bottom:4px;border-radius:5px;}</style>';
+echo '<style>.alert-container{align-items:start;display:grid;grid-gap:4px;grid-template-columns:repeat(auto-fit,10% 60% 10%);justify-content:center;margin-top:4px;margin-bottom:4px;}
+.alert-item{color:var(--col-6);text-align:center;background-color:var(--col-2);height:195px;border-top:solid var(--col-3) 20px;border-radius:5px;border-bottom:solid var(--col-3) 18px;}
+</style>';
 error_reporting(0);
 if ($advisoryzone == "eu") {
     $advisoryzoneMapping = "europe";
@@ -102,21 +105,21 @@ switch ($advisoryzoneMapping) {
             $floodLevel[$i] = $flood_json["items"][$i]["severityLevel"];
             $floodAlertlevel[$i] = $flood_json["items"][$i]["severity"];
             if ($floodLevel[$i] == 4) {
-                $floodBackground[$i] = "white";
+                $floodBackground[$i] = "#ffffff";
                 $floodBorder[$i] = "#b1b4b6";
-                $floodAlertColor[$i] = "black";
+                $floodAlertColor[$i] = "#000000";
             } elseif ($floodLevel[$i] == 3) {
                 $floodBackground[$i] = "#f18700";
                 $floodBorder[$i] = "#f18700";
-                $floodAlertColor[$i] = "black";
+                $floodAlertColor[$i] = "#FFFFFF";
             } elseif ($floodLevel[$i] == 2) {
                 $floodBackground[$i] = "#e3000f";
                 $floodBorder[$i] = "#e3000f";
-                $floodAlertColor[$i] = "black";
+                $floodAlertColor[$i] = "#000000";
             } elseif ($floodLevel[$i] == 1) {
                 $floodBackground[$i] = "#e3000f";
                 $floodBorder[$i] = "#e3000f";
-                $floodAlertColor[$i] = "white";
+                $floodAlertColor[$i] = "#ffffff";
             }
         
             $floodHeadline[$i] = "  " . $floodAlertlevel[$i] . " for " . $floodDescription[$i] . ".  Updated ".$floodUpdated[$i].".";
@@ -124,11 +127,12 @@ switch ($advisoryzoneMapping) {
             if (str_contains($floodMessage[$i], $englishFloodLocation)) { ?>
  
       <section>
-      <div class="alertbar" style="margin-bottom:4px;padding-bottom:10px;background-color:<?php echo $floodBackground[$i]; ?>;color:<?php echo $floodAlertColor[$i]; ?>;border-radius:5px;border: transparent 4px;">
-      <div class="alert-text-box" style="padding-left:20px;padding-right:20px;display:flex;margin: 0 auto;">
-		<div class="post" style="font-weight:500; font-size:14px; color:<?php echo $floodAlertColor[$i]; ?>;"><img src="img/flood<?php echo $floodLevel[$i]; ?>.png"style="margin-bottom:-10px; width:40px;"><?php echo $floodHeadline[
+      <div class="alertbar" style="margin-bottom:4px;padding-bottom:10px;background-color:<?php echo $floodBackground[$i]; ?>;color:<?php echo $floodAlertColor[$i]; ?>;border-radius:5px;border-left: solid <?php echo $floodBorder[$i]; ?> 14px;border-right: solid <?php echo $floodBorder[$i]; ?> 14px;">
+      <!--div class="alert-text-box" style="padding-left:20px;padding-right:20px;display:flex;margin: 0 auto;"-->
+            <div class="alert-item"><img src="img/flood<?php echo $floodLevel[$i]; ?>.png"style="margin-bottom:-10px; width:40px;"></div>
+		<div class="alert-item"><div class="post" style="font-weight:500; font-size:14px; color:<?php echo $floodAlertColor[$i]; ?>;"><?php echo $floodHeadline[
     $i
-]; ?><!--img src="img/flood<?php echo $floodLevel[$i]; ?>.png"style="margin-bottom:-10px; width:40px;"-->
+]; ?></div><div class="alert-item"><img src="img/flood<?php echo $floodLevel[$i]; ?>.png"style="margin-bottom:-10px; width:40px;"></div>
 			
 			<span class="more" style="padding-top:-20px;display:none;"><p><?php echo $floodMessage[$i] . "."; ?></p></span>
 
