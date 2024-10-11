@@ -118,6 +118,7 @@ if($theme == 'dark') {$convertStyle = "background: 0; border-color: #393d40; col
 else {$convertStyle = "background:";}
 
 $phpVersion = phpversion();
+$hemisphere = 0;
 
 //air density
 #if $current.AirDensity.has_data
@@ -215,12 +216,15 @@ $alm["sun_None"] = "<i>(Always up)</i>";
 $alm["daylight_str"] = "24:00";
 }
 $alm["sun_azimuth"] = $almanac.sun.az;
+$alm["sun_declination"] = $almanac.sun.dec;
 $alm["moon_azimuth"] = $almanac.moon.az;
+$alm["moon_declination"] = $almanac.moon.dec;
 $alm["sunrise"] = "$almanac.sun.rise.format(format_string="%H:%M")";
 $alm["sunset"] = "$almanac.sun.set.format(format_string="%H:%M")";
 $alm["sunrise_date"] = "$almanac.sun.rise.format("%b %d %Y %H:%M:%S")";
 $alm["sunset_date"] = "$almanac.sun.set.format("%b %d %Y %H:%M:%S")";
 $alm["sun_right_ascension"] = $almanac.sun.ra;
+$alm["moon_right_ascension"] = $almanac.moon.ra;
 $alm["next_equinox"] = "$almanac.next_equinox";
 $alm["next_solstice"] = "$almanac.next_solstice";
 $alm["sidereal_time"] = $almanac.sidereal_time;
