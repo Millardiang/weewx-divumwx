@@ -38,7 +38,7 @@ else if ($theme === "light")
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>AerisWeather Hourly Forecast</title>
+  <title>XWeather Hourly Forecast</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <!--<link href="css/popup.light.css?version=<?php echo filemtime('css/popup.light.css'); ?>" rel="stylesheet prefetch">//-->
 
@@ -165,7 +165,7 @@ for ($k = 0;$k < 12;$k++)
     {
         echo "<greent>" . $forecastTime[$k] . "h&nbsp;&nbsp;   " . number_format($forecastTempHigh[$k], 0);
     }
-    echo "°" . $tempunit . "</actualtn>";
+    echo "째" . $tempunit . "</actualtn>";
 
     //high temp icon
     if ($forecastnight == 'D')
@@ -330,20 +330,7 @@ for ($k = 0;$k < 12;$k++)
 </article>
 <?php
 } ?>
- <!-- copyright needs to be kept please be ethical--->
-  <article>
-    <span style="font-size:9px;color:<?php echo $text1 ?>;">
-     </article>
-  <article>
-    <span style="font-size:9px;color:<?php echo $text1 ?>;">
-     </article>
-  <article>
-    <span style="font-size:9px;color:<?php echo $text1 ?>;">
-  <?php echo $knfo ?> Data for Forecast provided by <a href="https://www.aerisweather.com/develop/api/" title="AerisWeather API" target="_blank">AerisWeather</a></span></br>
-    <span style="font-size:9px;color:<?php echo $text1 ?>;">
-  <?php echo $knfo ?> Icons for Forecast provided by <a href="https://github.com/nrkno/yr-weather-symbols/tree/master/dist/svg" title="YR" target="_blank">Yr.no</a></span>
- 
-    </article>
+
 </main>
   </div>
   </body>
