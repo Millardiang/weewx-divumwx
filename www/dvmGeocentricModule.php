@@ -22,7 +22,7 @@ date_default_timezone_set($TZ);
 <meta charset="utf-8">
 <title>Geocentric View for weewx</title>
 <div class="chartforecast">
-<!--span class="yearpopup"><a alt="SunMoon" title="SunMoon" href="dvmSunPath.php" data-lity><?php echo $menucharticonpage;?> Geocentric</a></span-->
+<span class="yearpopup"><a alt="SunMoon" title="SunMoon" href="dvmSunPath.php" data-lity><?php echo $menucharticonpage;?> Geocentric</a></span>
 </div>
 <span class='moduletitle'><?php echo 'Geocentric';?></span>
 <div class="updatedtime1"><span><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?></div>
@@ -32,7 +32,7 @@ date_default_timezone_set($TZ);
 <!--style>
 
 // make sure your have these variables in your dvmCombinedData.php.tmpl
-$hemisphere = 0;
+
 $alm["moon_azimuth"] = $almanac.moon.az;
 $alm["sun_altitude"] = $almanac.sun.alt;
 
@@ -47,7 +47,7 @@ $alm["moon_declination"] = $almanac.moon.dec;
 
 // divumwx.main.css
 // comment out or delete your old Geocentric css then add the new css below.
-// once to have done everything you can delete this text within the style brackets and enjoy !
+// once you have done everything you can delete this text within the style brackets and enjoy !
 
 .Geocentric{position:relative;top:-2px;left:0px;text{fill:"var(--col-6)";font-family:Helvetica;font-size:7.5px;}
 path{stroke:#555;stroke-width:1;fill:none;}.horizon.line{stroke:#007fff;stroke-width:1;fill:none;stroke-linecap:round;}
@@ -63,7 +63,13 @@ line{stroke:#555;stroke-width:1;stroke-linecap:round;fill:none;}.zenith.line{str
 
 var latitude = <?php echo $lat;?>; 
 var longitude = <?php echo $lon;?>;
-var hemisphere = <?php echo $hemisphere;?>;
+var hemisphere;
+
+if (latitude >= "0") {
+  <?php echo "hemisphere = 0";?>;
+} else {
+  <?php echo "hemisphere = 1";?>;
+}
 
 function toDegrees(x) {
   return x * (180.0 / Math.PI);
@@ -203,13 +209,12 @@ if (hemisphere == 1) {
     }
   }
 }
-console.log(azitab);
+
 /*
-At 180 degrees (The Meridian Transit, this is sun and moon's highest points), 
-in the loop data for both of the curves there is a NaN.
-In theory we can test for this and replace it with 180.0 otherwise 
-the curve will not exist for 60 seconds.
-as I have been at work, I have not been able to see the result yet !
+At 180 degrees (The Meridian Transit, the sun and moon's highest point), 
+in the loop data set for both of the curves there is a NaN.
+We can test for this and replace it with 180.0 otherwise 
+the curve(s) will not exist for 60 seconds.
 */
 function nan(x) {
   if (isNaN(x)) {
@@ -218,9 +223,8 @@ function nan(x) {
   return x;
 }
 
-/*
-Create some fake data to populate the chart scale 
-*/
+// Create some fake data to populate the chart scale 
+
 var suncurve = [[0.0, 0.0],[0.0, 0.0]];
 var mooncurve = [[0.0, 0.0],[0.0 ,0.0]];
 
@@ -262,14 +266,14 @@ var xAxis = d3.axisBottom(xScale)
     .ticks(9)
     .tickSize(4)
     .tickPadding(3)
-    .tickFormat(function(d) { return d + "째";})
+    .tickFormat(function(d) { return d + "°";})
     .tickValues([0, 45, 90, 135, 180, 225, 270, 315, 360]);
 
 var yAxis = d3.axisLeft(yScale)
     .ticks(9)
     .tickSize(4)
     .tickPadding(2)
-    .tickFormat(function(d) { return d + "째";})
+    .tickFormat(function(d) { return d + "°";})
     .tickValues([-80, -60, -40, -20, 0, 20, 40, 60, 80]);
 
   svg
@@ -407,7 +411,7 @@ var horizon = "Horizon";
     .attr("x", xScale(5))
     .attr("y", yScale(5))
     .text(horizon);
-
+    
 </script> 
 </body>
 </html> 
