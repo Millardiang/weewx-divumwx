@@ -266,14 +266,14 @@ var xAxis = d3.axisBottom(xScale)
     .ticks(9)
     .tickSize(4)
     .tickPadding(3)
-    .tickFormat(function(d) { return d + "°";})
+    .tickFormat(function(d) { return d + "\u00B0";})
     .tickValues([0, 45, 90, 135, 180, 225, 270, 315, 360]);
 
 var yAxis = d3.axisLeft(yScale)
     .ticks(9)
     .tickSize(4)
     .tickPadding(2)
-    .tickFormat(function(d) { return d + "°";})
+    .tickFormat(function(d) { return d + "\u00B0";})
     .tickValues([-80, -60, -40, -20, 0, 20, 40, 60, 80]);
 
   svg
