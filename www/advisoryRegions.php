@@ -13,7 +13,6 @@
 #    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
-echo '<style>#alert {background-color:transparent;color:var(--col-6);opacity:1;transition:opacity 0.6s;margin-top:4px;margin-bottom:4px;border-radius:5px;}</style>';
 error_reporting(0);
 if ($advisoryzone == "eu") {
     $advisoryzoneMapping = "europe";
@@ -36,7 +35,6 @@ switch ($advisoryzoneMapping) {
         echo '<div id="alert">';
         if ($cnt + $fCnt > 0) {
             $aPhrase = $aHeader . $stationlocation . " area.";
-            echo '<div class="alertbar" style="margin-bottom:4px;"><b>' . $aPhrase . '</b></div>';
         }
         //weather alerts
         for ($i = 0; $i < $cnt; $i++) {
@@ -81,7 +79,7 @@ switch ($advisoryzoneMapping) {
       <div class="alertbar" style="margin-bottom:4px;padding-bottom:10px;background-color:<?php echo $background[$i]; ?>;color:<?php echo $alertColor[$i]; ?>;border-radius:5px;">
       <div class="alert-text-box" style="padding-left:20px;padding-right:20px;display:flex;margin: 0 auto;">
 		<div class="post" style="font-weight:500; font-size:14px; color:<?php echo $alertColor[$i]; ?>;">
-			<img src="<?php echo $warnimage[$i]; ?>"style="margin-bottom:-10px;"><?php echo $alertHeadline[$i]; ?><img src="<?php echo $warnimage[$i]; ?>"style="margin-bottom:-10px;">
+			<img src="<?php echo $warnimage[$i]; ?>"style="margin-bottom:-10px;"><?php echo $alertHeadline[$i]; ?>
 			
 			<span class="more" style="padding-top:-20px;display:none;"><p><?php echo $description[$i] . "."; ?></p></span>
 
@@ -93,7 +91,6 @@ switch ($advisoryzoneMapping) {
       <?php
         }
         //english flood alerts
-
         for ($i = 0; $i < $fCnt; $i++) {
             $floodDescription[$i] = $flood_json["items"][$i]["description"];
             $floodUpdated[$i] = date("D j M H:i", strtotime($flood_json["items"][$i]["timeMessageChanged"]));
@@ -120,15 +117,15 @@ switch ($advisoryzoneMapping) {
             }
         
             $floodHeadline[$i] = "  " . $floodAlertlevel[$i] . " for " . $floodDescription[$i] . ".  Updated ".$floodUpdated[$i].".";
- 
-            if (str_contains($floodMessage[$i], $englishFloodLocation)) { ?>
- 
+        $cnt2 = count($parsed_json["response"]);
+ if (substr_count($floodMessage[$i], $englishFloodLocation) === 0 && $cnt2 === 0) {echo '<section></section>';}
+            else if (str_contains($floodMessage[$i], $englishFloodLocation)) { ?>
       <section>
       <div class="alertbar" style="margin-bottom:4px;padding-bottom:10px;background-color:<?php echo $floodBackground[$i]; ?>;color:<?php echo $floodAlertColor[$i]; ?>;border-radius:5px;border: transparent 4px;">
       <div class="alert-text-box" style="padding-left:20px;padding-right:20px;display:flex;margin: 0 auto;">
 		<div class="post" style="font-weight:500; font-size:14px; color:<?php echo $floodAlertColor[$i]; ?>;"><img src="img/flood<?php echo $floodLevel[$i]; ?>.png"style="margin-bottom:-10px; width:40px;"><?php echo $floodHeadline[
     $i
-]; ?><!--img src="img/flood<?php echo $floodLevel[$i]; ?>.png"style="margin-bottom:-10px; width:40px;"-->
+]; ?>
 			
 			<span class="more" style="padding-top:-20px;display:none;"><p><?php echo $floodMessage[$i] . "."; ?></p></span>
 
@@ -137,8 +134,12 @@ switch ($advisoryzoneMapping) {
 	</section>	
 	
             
-      <?php }
+      <?php 
+                                                                      }
+   
+       
         }
+echo '<div class="alertbar" style="background-color: transparent;"></div>';
 
         break;
     case "europe":
@@ -212,6 +213,7 @@ switch ($advisoryzoneMapping) {
       
       <?php
         }
+echo '<div class="alertbar" style="background-color: transparent;"></div>';
         break;
 
     case "restofworld":
@@ -266,6 +268,7 @@ switch ($advisoryzoneMapping) {
       
       <?php
         }
+echo '<div class="alertbar" style="background-color: transparent;"></div>';
         break;
 }
 ?> 
@@ -293,8 +296,7 @@ $(document).ready(function(){
 		}
 	});
 });
-</script>
-<script>
+
 function myFunction() {
   var x = document.getElementById("alert");
   if (x.style.display === "none") {

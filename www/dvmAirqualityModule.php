@@ -580,7 +580,7 @@ else {$airqual["text"] = $airqual["text10"];
 
 <script>
 
-	var cityTextFill = "var(--col-6)";
+	var themeTextFill = "var(--col-6)";
 
 	var aqiA = "<?php echo number_format($airqual["aqi25"],0);?>";
 	var aqiB = "<?php echo number_format($airqual["aqi10"],0);?>";
@@ -595,7 +595,7 @@ else {$airqual["text"] = $airqual["text10"];
 	  	
 	var colorA = "<?php echo $airqual["color25"];?>";
 	var colorB = "<?php echo $airqual["color10"];?>"; 
-    var colorQ = "<?php echo $airqual["qualColor"];?>";
+    var colorQ = "val(--col-6)";
 		
 	var imageA = "<?php echo $airqual["image25"];?>";
 	var imageB = "<?php echo $airqual["image10"];?>";
@@ -611,7 +611,7 @@ else {$airqual["text"] = $airqual["text10"];
             svg.append("text") // City text output
              	.attr("x", 150)
             	.attr("y", 20)
-            	.style("fill", cityTextFill)
+            	.style("fill", themeTextFill)
             	.style("font-family", "Helvetica")
             	.style("font-size", "12px")
             	.style("text-anchor", "middle")
@@ -723,7 +723,7 @@ else {$airqual["text"] = $airqual["text10"];
     		svg.append("text") // Air Quality text output
              	.attr("x", 150)
             	.attr("y", 135)
-            	.style("fill", colorQ)
+            	.style("fill", themeTextFill)
             	.style("font-family", "Helvetica")
             	.style("font-size", "12px")
             	.style("text-anchor", "middle")
