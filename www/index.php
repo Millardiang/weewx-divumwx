@@ -114,7 +114,7 @@ echo filemtime('./css/divumwx.themes.css');
 echo $flag;
 ?>.svg" style="width:20px;"></object>&nbsp;&nbsp;<?php
 echo $stationlocation;
-?>&nbsp; Weather Station&nbsp;&nbsp;<object data="./img/flags/<?php
+?>&nbsp; Local Weather&nbsp;&nbsp;<object data="./img/flags/<?php
 echo $flag;
 ?>.svg" width="20px"></object></div>         
                  </div> 
@@ -133,7 +133,7 @@ echo $manifestShortName;
 
         <?php
 include ("advisoryRegions.php");
-//include ("engFloodAlerts.php");
+//include ("advisoryFloodsEngland.php");
 error_reporting(0);
 ?>
           
@@ -187,7 +187,7 @@ error_reporting(0);
 
 <!--start of footer section-->
 
-<div class="titlebar" style="padding: 10px;">
+<div class="titlebar" style="padding: 10px;  height: 105px;">
 <!--section1-->
 <div class="stationLongname">
   <div class="titlebar-item"> 
@@ -205,7 +205,7 @@ echo '<a>Copyright &copy; 2022-' . date('Y') . '<br>Team DivumWX<br>All rights r
 <div class="titlebar-item-center" style="font-size:11px;">
         <p><red><?php
 echo "Never base important decisions that could result in harm to people or property on this weather information." ?></red></p>
-        <p><?php
+<p><?php
 echo "Operational Since " . $divum["since"] . " - ";
 $info;
 ?> <?php
@@ -216,9 +216,9 @@ echo " - WeeWX";
 echo $divum["swversion"];
 ?>)  - OS- <?php
 echo " " . $os_version." - PHP( " . substr($phpVersion, 0, 7);
-?>)</value></p>
-        <a href="https://www.xweather.com/" target="_blank" title="Forecasts Powered by Vaisala Xweather"><?php echo $vaisalaLogo;?></a><a href="https://developer.yr.no/featured-products/forecast/">    Meteogram Data by <img src="img/yr.svg" width="14px"></a><a href="https://bas.dev/work/meteocons">     Animated Icons by <img src="img/bm.svg" width="14px"></p>
-
+?>)</value></p>        
+<div class="stationLongname" ><a href="https://www.xweather.com/" target="_blank" title="Forecasts Powered by Vaisala Xweather"><?php echo $vaisalaLogo;?></a><a href="https://developer.yr.no/featured-products/forecast/">    Meteogram Data by <img src="img/yr.svg" width="14px"></a><a href="https://bas.dev/work/meteocons">     Animated Icons by <img src="img/bm.svg" width="14px"></p>
+</div>        
 </div>
 <!--end section2-->
 <!--section3-->
