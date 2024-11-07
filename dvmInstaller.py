@@ -9,9 +9,9 @@ import re
 import getpass
 import grp
 import pwd
+import shutil
 import distutils
 from datetime import datetime
-from zipfile import ZipFile
 
 # Define ANSI codes
 reset = "\033[0m"
@@ -27,7 +27,7 @@ cyan = "\033[36m"
 white = "\033[37m"
 
 os.system("clear")
-print(f"{white}DIS {blue}(DivumWX Installation Script) {white}starting.....{reset}")
+print(f"{white}DIS {cyan}(DivumWX Installation Script) {white}starting.....{reset}")
 print(f"{yellow}Standby, importing and verifying required python modules...{reset}")
 
 version = "3.9.72.000"
@@ -228,6 +228,16 @@ class DVMInstaller:
     def dirNotEmpty(self, path):
         return os.path.isdir(path) and bool(os.listdir(path))
 
+    def deleteContents(self, path):
+        for root, dirs, files in os.walk(path):
+            for file in files:
+                file_path = os.path.join(root, file)
+                os.remove(file_path)
+
+            for dir in dirs:
+                dir_path = os.path.join(root, dir)
+                shutil.rmtree(dir_path)
+
     def chkSvcFile(self):
         services_file = None
         if os.path.exists("../services.json"):
@@ -348,7 +358,7 @@ class DVMInstaller:
         recursive_update(d, "filename", html_root)
         
     def addStanza(self, config_data, entries):
-        for i in range(4, 10):  # config_entries4 to config_entries9
+        for i in range(5, 11):  # config_entries4 to config_entries9
             entry = entries[f'config_entries{i}']
             for section, values in entry.items():
                 for key, value in values.items():
@@ -369,7 +379,7 @@ class DVMInstaller:
             config_data[section] = values
 
     def appendStanza(self, config_data, entries, do_overwrite):
-        for i in range(4):  # config_entries0 to config_entries3
+        for i in range(5):  # config_entries0 to config_entries4
             entry = entries[f'config_entries{i}']
             for section, values in entry.items():
                 if section in config_data:
@@ -481,25 +491,26 @@ class DVMInstaller:
                 wsName = webserver
                 wsOwner = owner
                 wsGroup = owner
+            else:
+                while True:
+                    wsName = input("Please enter the web server name (or 'q' to quit): ").strip()
+                    if wsName.lower() == 'q':
+                        print("Exiting script.")
+                        sys.exit(0)
+                    wsOwner = input("Please enter the web server owner (or 'q' to quit): ").strip()
+                    if wsOwner.lower() == 'q':
+                        print("Exiting script.")
+                        sys.exit(0)
+                    wsGroup = input("Please enter the web server group (or 'q' to quit): ").strip()
+                    if wsGroup.lower() == 'q':
+                        print("Exiting script.")
+                        sys.exit(0)
+                    if self.chkWebsrv(wsName, wsOwner):
+                        break
+                    else:
+                        print(f"{red}The web server '{wsName}' owned by '{wsOwner}' is not running. Please check the details and try again.{reset}")
         else:
             print(f"{red}I was unable to locate either Apache2 or Nginx running. Please enter the webserver name and the user and group that owns the process.{reset}")
-        while True:
-            wsName = input("Please enter the web server name (or 'q' to quit): ").strip()
-            if wsName.lower() == 'q':
-                print("Exiting script.")
-                sys.exit(0)
-            wsOwner = input("Please enter the web server owner (or 'q' to quit): ").strip()
-            if wsOwner.lower() == 'q':
-                print("Exiting script.")
-                sys.exit(0)
-            wsGroup = input("Please enter the web server group (or 'q' to quit): ").strip()
-            if wsGroup.lower() == 'q':
-                print("Exiting script.")
-                sys.exit(0)
-            if self.chkWebsrv(wsName, wsOwner):
-                break
-            else:
-                print(f"{red}The web server '{wsName}' owned by '{wsOwner}' is not running. Please check the details and try again.{reset}")
         try:
             with open(conf_file) as infile:
                 conf_content = infile.read()
@@ -527,7 +538,7 @@ class DVMInstaller:
             print(f"{white}For example, if the document root is set to {yellow}/var/www/html{white}, then when a client requests {yellow}http://mywebsite.com{white},")
             print(f"{white}the server will look for the index file (like index.php) in {yellow}/var/www/html.{reset}")
             print(f"{white}If a client requests {yellow}http://mywebsite.com/divumwx{white}, the server will look for the 'divumwx' directory inside")
-            print(f"{white}the web server's document root ({yellow}/var/www/html/skin{white}).")
+            print(f"{white}the web server's document root ({yellow}/var/www/html/divumwx{white}).")
             print(f"{white}The document root essentially serves as the base directory for resolving all relative file paths{reset}")
             print(f"{white}that are requested via URL.{reset}\n")
             
@@ -563,7 +574,6 @@ class DVMInstaller:
             else:
                 html_root_status_message = "Path does not exist or could not be created"
                 html_root_status_color = red
-            
             os.system("clear")
             bkpWXSrv = False    
             bkpWX = input('Do you wish to use the Divum Backup Service to backup your weewx database? (yes/no): ').strip().lower()
@@ -631,13 +641,6 @@ class DVMInstaller:
             print(f"{cyan}WeeWX Config File:{reset} {green}{weewx_config_file}{reset}")
             print(f"           Status: {green if weewx_config_file_exists else red}{'Yes' if weewx_config_file_exists else 'No'}{reset}")
             print(f"{blue}+--------------------------------------------------------------------------------------+{reset}")
-            print(f"{cyan}Overwrite Existing Files:{reset} {green}{'Yes' if d['over_write'] == 'True' else 'No'}{reset}")
-            if zip_file := d.get("zip_file"):
-                print(f"{cyan}Zip File:{reset} {green}{zip_file}{reset}")
-                print(f"{cyan}Extract To Path:{reset} {green}{d['extract_to_path']}{reset}")
-            else:
-                print(f"{cyan}Zip File:{reset} {red}None specified{reset}")
-            print(f"{blue}+--------------------------------------------------------------------------------------+{reset}")
             print(f"{cyan}DivumWX Backup Service Status:{reset}\n")
             if bkpWXSrv:
                 print(f"        {white}DivumWX Backup Service:  {green}Enabled{reset}")
@@ -648,7 +651,7 @@ class DVMInstaller:
                 
             print("\n\nExplanation of Next Steps:\n")
             print(f"{green}The script will now perform the following actions:{reset}")
-            print(f"{yellow}1. Extract the necessary files from the specified zip file. {white}(If needed){reset}")
+            print(f"{yellow}1. Check that the destination html_root path is empty.{reset}")
             print(f"{yellow}2. Copy the existing/extracted files to the appropriate directories.{reset}")
             print(f"{yellow}3. Apply the correct file and directory permissions.{reset}")
             print(f"{yellow}4. Update the WeeWX configuration based on the provided settings.{reset}")
@@ -661,71 +664,55 @@ class DVMInstaller:
                 sys.exit(1)
 
             do_overwrite = d["over_write"] == "True"
-            extract_path = d.get("extract_to_path", "temp")
-            
-            if zip_file:
-                with ZipFile(zip_file, 'r') as zip_ref:
-                    if not os.path.exists(extract_path):
-                        os.makedirs(extract_path)
+            try:
+                if os.path.exists("user"):
+                    print(f"{white}Copying {yellow}user{white} directory....")
+                    if self.dirNotEmpty('user'):
+                        distutils.dir_util.copy_tree("user", locations["user"], update=do_overwrite)
+                        print(f"{green}Copied {white}user {green}directory successfully{reset}")
                     else:
-                        if not do_overwrite:
-                            response = input("Extract path exists and overwrite set to False. Do you want to abort the install? (yes/no): ").strip()
-                            if response.upper().startswith("Y"):
-                                return
-                        print(f'Extracting all the files to {extract_path}')
-                        zip_ref.extractall(extract_path)
-                        print('Files extracted')
-
-                try:
-                    distutils.dir_util.copy_tree(os.path.join(extract_path, "user"), locations["user"], update=do_overwrite)
-                    distutils.dir_util.copy_tree(os.path.join(extract_path, "skins"), locations["skins"], update=do_overwrite)
-                    self.chgPermRecur([locations["www"]], user_group)
-                except Exception as e:
-                    print(e)
-
-                if d.get("delete_extracted_files") == "True" and extract_path != os.getcwd():
-                    distutils.dir_util.remove_tree(extract_path)
-                    distutils.file_util.copy_file(weewx_config_file, weewx_config_file + f".{int(time.time())}")
-            else:
-                try:
-                    if os.path.exists("user"):
-                        print(f"{white}Copying {yellow}user{white} directory....")
-                        if self.dirNotEmpty('user'):
-                            distutils.dir_util.copy_tree("user", locations["user"], update=do_overwrite)
-                            print(f"{green}Copied {white}user {green}directory successfully{reset}")
-                        else:
-                            print(f"{red}Directory 'user' is empty, unable to copy files.{reset}")
-                            sys.exit(1)
-                    else:
-                        print(f"{red}Directory 'user' does not exist.{reset}")
+                        print(f"{red}Directory 'user' is empty, unable to copy files.{reset}")
                         sys.exit(1)
-                    if os.path.exists("skins"):
-                        print(f"{white}Copying {yellow}skins{white} directory....")
-                        if self.dirNotEmpty('skins'):
-                            distutils.dir_util.copy_tree("skins", locations["skins"], update=do_overwrite)
-                            print(f"{green}Copied {white}skins {green}directory successfully{reset}")
-                        else:
-                            print(f"{red}Directory 'skins' is empty, unable to copy files.{reset}")
-                            sys.exit(1)
+                else:
+                    print(f"{red}Directory 'user' does not exist.{reset}")
+                    sys.exit(1)
+                if os.path.exists("skins"):
+                    print(f"{white}Copying {yellow}skins{white} directory....")
+                    if self.dirNotEmpty('skins'):
+                        distutils.dir_util.copy_tree("skins", locations["skins"], update=do_overwrite)
+                        print(f"{green}Copied {white}skins {green}directory successfully{reset}")
                     else:
-                        print(f"{red}Directory 'skins' does not exist.{reset}")
+                        print(f"{red}Directory 'skins' is empty, unable to copy files.{reset}")
                         sys.exit(1)
-                    if os.path.exists("www"):
-                        print(f"{white}Copying {yellow}www{white} directory....")
-                        if self.dirNotEmpty('www'):
-                            distutils.dir_util.copy_tree("www", locations["www"], update=do_overwrite)
-                            print(f"{green}Copied {white}www {green}directory successfully{reset}")
-                            self.chgPermRecur([locations["www"]], user_group)
-                            print(f"{green}File permissions and ownership in the {white}www {green}directory successfully set{reset}")
-                        else:
-                            print(f"{red}Directory 'www' is empty, unable to copy files.{reset}")
-                            sys.exit(1)
-                    else:
-                        print(f"{red}Directory 'www' does not exist.{reset}")
-                        sys.exit(1)
-                except Exception as e:
-                    print(e)
-
+                else:
+                    print(f"{red}Directory 'skins' does not exist.{reset}")
+                    sys.exit(1)
+                if os.path.exists("www"):
+                    if self.dirNotEmpty(html_root):
+                        while True:
+                            print(f"{yellow}\n\nThe {white}html_root{yellow} patch contains files from your previous skin. These must be removed.{reset}")
+                            user_input = input("Do you want to empty the directory first? (y/n): ").strip().lower()
+                            if user_input == 'y':
+                                self.deleteContents(html_root)
+                                print(f"{green}Directory {html_root} has been emptied.{reset}")
+                                print(f"{white}Copying {yellow}www{white} directory....")
+                                distutils.dir_util.copy_tree("www", locations["www"], update=do_overwrite)
+                                print(f"{green}Copied {white}www {green}directory successfully{reset}")
+                                self.chgPermRecur([locations["www"]], user_group)
+                                print(f"{green}File permissions and ownership in the {white}www {green}directory successfully set{reset}")
+                                break
+                            elif user_input == 'n':
+                                print(f"{red}Not emptying the HTML_ROOT directory of the previous skin's files {reset}")
+                                print(f"{red}can cause {white}SERIOUS{red} issues with DivumWX. You will need to empty the{reset}")
+                                print(f"{red}the directory manually or add a sub-directory to install DivumWX to.{reset}")
+                                sys.exit(1)
+                            else:
+                                print(f"{red}Invalid input. Please enter 'y' or 'n'.{reset}")
+                else:
+                    print(f"{red}Directory 'www' does not exist.{reset}")
+                    sys.exit(1)
+            except Exception as e:
+                print(e)
             timestamp = time.strftime('%Y%m%d%H%M%S')
             backup_file = f"{weewx_config_file}.{timestamp}"
             distutils.file_util.copy_file(weewx_config_file, backup_file)
@@ -778,6 +765,7 @@ class DVMInstaller:
             self.setOwnership(wsOwner)
             self.updDatabase()
             print(f"{white}Done! WeeWX must be {yellow}restarted{white} for changes to become active{reset}")
+            print(f"{green}You will need to ensure that your webserver is set to deliver the DivumWX skin{reset}")
             self.restartWeewx()
             
         except Exception as e:
