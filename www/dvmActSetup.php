@@ -281,35 +281,30 @@ function setupFailsForSomeReason() {
                             <div class="status-state" id="php-version-status">Checking...</div>
                         </div>
                         <div class="sub-list hidden" id="php-version-details">
-                            <!-- Additional details about PHP version check will go here -->
                         </div>
                         <div class="status-item" id="weewx-item">
                             <div class="status-label"><i class="fas fa-plus icon"></i>WeeWX Version:</div>
                             <div class="status-state" id="weewx-status">Checking...</div>
                         </div>
                         <div class="sub-list hidden" id="weewx-details">
-                            <!-- Additional details about WeeWX version check will go here -->
                         </div>
                         <div class="status-item" id="php-modules-item">
                             <div class="status-label"><i class="fas fa-plus icon"></i>PHP Modules:</div>
                             <div class="status-state" id="php-modules-status">Checking...</div>
                         </div>
                         <div class="sub-list hidden" id="php-modules-details">
-                            <!-- Additional details about PHP modules check will go here -->
                         </div>
                         <div class="status-item" id="directories-item">
                             <div class="status-label"><i class="fas fa-plus icon"></i>Directories:</div>
                             <div class="status-state" id="directory-status">Checking...</div>
                         </div>
                         <div class="sub-list hidden" id="directory-details">
-                            <!-- Additional details about directories check will go here -->
                         </div>
                         <div class="status-item" id="db-check-item">
                             <div class="status-label"><i class="fas fa-plus icon"></i>Database Check:</div>
                             <div class="status-state" id="db-check-status">Checking...</div>
                         </div>
                         <div class="sub-list hidden" id="db-check-details">
-                            <!-- Additional details about database check will go here -->
                         </div>
                     </div>
                 </div>
@@ -328,6 +323,8 @@ function setupFailsForSomeReason() {
                             <li>Includes at least one numeric digit</li>
                             <li>Has at least one special character</li>
                         </ul>
+                        <h4>After entering your new password and clicking on submit, the password will be updated in the database, and the next button will be enabled. Clicking on the next button will take you to the admin login page. Your login will be "admin" and the new password you've just created.</h4>
+                        <p>In the event of a lost password, there is a cli script that can be run locally, in your admin directory, called resetPassword.php. This script can only be run from the command line and not from a web server.</p>
                     </div>
                     <form id="password-form">
                         <label for="password">Enter Password:</label>
@@ -342,7 +339,7 @@ function setupFailsForSomeReason() {
                 <button id="next-button" class="next-button" disabled>Next</button>
             </div>
             <footer class="footer">
-                © 2024 Myndworx Asylum. All rights reserved.
+                © 2024 Team DivumWX. All rights reserved.
             </footer>
         </div>
     </div>

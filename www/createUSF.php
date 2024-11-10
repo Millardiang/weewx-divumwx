@@ -28,13 +28,10 @@ foreach ($configArray as $item) {
 }
 
 try {
-    // Attempt to write the file
     if (file_put_contents('userSettings.php', $phpContent) === false) {
         echo json_encode(["status" => "fail", "message" => "Error writing file"]);
         exit;
     }
-
-    // Retrieve the owner and group of the file
     $ownerInfo = posix_getpwuid(fileowner('userSettings.php'));
     $groupInfo = posix_getgrgid(filegroup('userSettings.php'));
     $owner = $ownerInfo['name'];

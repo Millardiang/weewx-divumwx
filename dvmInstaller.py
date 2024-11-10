@@ -190,41 +190,6 @@ class DVMInstaller:
             print(f"{red}An error occurred while validating the web server process: {e}{reset}")
             return False
 
-    def setOwnership(self, ws_owner):
-        user = getpass.getuser()
-        base_path = f"/home/{user}/weewx-data"
-        public_html_path = os.path.join(base_path, "public_html")
-        
-        try:
-            print(f"{yellow}Attempting to change ownership of {base_path} and {public_html_path} to {user}:{ws_owner}{reset}")
-            os.system(f"sudo chown -R {user}:{ws_owner} {base_path}")
-            os.system(f"sudo chown -R {user}:{ws_owner} {public_html_path}")
-            print(f"{green}Successfully changed ownership of {base_path} and {public_html_path} to {user}:{ws_owner}{reset}\n")
-            print(f"{yellow}Attempting to change permissions of {base_path} and {public_html_path} to 0775{reset}")
-            os.system(f"sudo chmod -R 0775 {base_path}")
-            os.system(f"sudo chmod -R 0775 {public_html_path}")
-            print(f"{green}Successfully changed permissions of {base_path} and {public_html_path} to 0775{reset}\n")
-        except Exception as e:
-            print(f"{red}Error: {str(e)}{reset}")
-            print(f"{red}There was an error attempting to change ownership or permissions.{reset}")
-            print(f"{red}Your web pages will not be able to be displayed unless these commands are run successfully.{reset}")
-            chown_command_base = f"sudo chown -R {user}:{ws_owner} {base_path}"
-            chown_command_html = f"sudo chown -R {user}:{ws_owner} {public_html_path}"
-            chmod_command_base = f"sudo chmod -R 0775 {base_path}"
-            chmod_command_html = f"sudo chmod -R 0775 {public_html_path}"
-            print(f"\n{yellow}To manually attempt the changes, run the following commands:{reset}\n")
-            print(f"\nDirectory: {blue}{base_path}{reset}")
-            print(f"  - Change ownership to: {green}{user}:{ws_owner}{reset}")
-            print(f"  - Command: {cyan}{chown_command_base}{reset}")
-            print(f"  - Change permissions to: {green}0775{reset}")
-            print(f"  - Command: {cyan}{chmod_command_base}{reset}")
-            print(f"\nDirectory: {blue}{public_html_path}{reset}")
-            print(f"  - Change ownership to: {green}{user}:{ws_owner}{reset}")
-            print(f"  - Command: {cyan}{chown_command_html}{reset}")
-            print(f"  - Change permissions to: {green}0775{reset}")
-            print(f"  - Command: {cyan}{chmod_command_html}{reset}")
-            print(f"\n{red}IMPORTANT:{reset} Your web pages will not be displayed until the above commands are executed successfully.")
-
     def dirNotEmpty(self, path):
         return os.path.isdir(path) and bool(os.listdir(path))
 
@@ -285,14 +250,61 @@ class DVMInstaller:
             os.chown(p, uid, gid)
             for root, dirs, files in os.walk(p, topdown=False):
                 for directory in (os.path.join(root, d) for d in dirs):
-                    os.chmod(directory, 0o755)
+                    os.chmod(directory, 0o775)
                     os.chown(directory, uid, gid)
                     if "json_day" in directory:
                         os.chmod(directory, 0o777)
                 for filename in (os.path.join(root, f) for f in files):
                     os.chmod(filename, 0o777 if "dvm_reports" in filename else 0o755)
                     os.chown(filename, uid, gid)
-    
+
+    def setfnlOwner(self):
+        user = getpass.getuser()
+        base_path = f"/home/{user}/weewx-data"
+        public_html_path = os.path.join(base_path, "public_html")
+        db_path = os.path.join(public_html_path, "admin/db/dvmAdmin.db3")
+        
+        try:
+            print(f"{yellow}Attempting to change ownership of {base_path}, {public_html_path} and {db_path} to {user}:{self.wsOwner}{reset}")
+            os.system(f"sudo chown -R {user}:{self.wsOwner} {base_path}")
+            os.system(f"sudo chown -R {user}:{self.wsOwner} {public_html_path}")
+            os.system(f"sudo chown {user}:{self.wsOwner} {db_path}")
+            print(f"{green}Successfully changed ownership of {base_path}, {public_html_path} and {db_path} to {user}:{self.wsOwner}{reset}\n")
+            print(f"{yellow}Attempting to change permissions of {base_path} and {public_html_path} to 0775{reset}")
+            os.system(f"sudo chmod -R 0775 {base_path}")
+            os.system(f"sudo chmod -R 0775 {public_html_path}")
+            print(f"{green}Successfully changed permissions of {base_path} and {public_html_path} to 0775{reset}\n")
+            print(f"{yellow}Attempting to change permissions of {db_path} to 0666{reset}")
+            os.system(f"sudo chmod 0666 {db_path}")
+            print(f"{green}Successfully changed permissions of {db_path} to 0666{reset}\n")
+        except Exception as e:
+            print(f"{red}Error: {str(e)}{reset}")
+            print(f"{red}There was an error attempting to change ownership or permissions.{reset}")
+            print(f"{red}Your web pages will not be able to be displayed unless these commands are run successfully.{reset}")
+            chown_command_base = f"sudo chown -R {user}:{self.ws_owner} {base_path}"
+            chown_command_html = f"sudo chown -R {user}:{self.ws_owner} {public_html_path}"
+            chown_command_db = f"sudo chown {user}:{self.wsOwner} {db_path}"
+            chmod_command_base = f"sudo chmod -R 0775 {base_path}"
+            chmod_command_html = f"sudo chmod -R 0775 {public_html_path}"
+            chmod_command_db = f"sudo chmod 0666 {db_path}"
+            print(f"\n{yellow}To manually attempt the changes, run the following commands:{reset}\n")
+            print(f"\nDirectory: {blue}{base_path}{reset}")
+            print(f"  - Change ownership to: {green}{user}:{self.ws_owner}{reset}")
+            print(f"  - Command: {cyan}{chown_command_base}{reset}")
+            print(f"  - Change permissions to: {green}0775{reset}")
+            print(f"  - Command: {cyan}{chmod_command_base}{reset}")
+            print(f"\nDirectory: {blue}{public_html_path}{reset}")
+            print(f"  - Change ownership to: {green}{user}:{self.ws_owner}{reset}")
+            print(f"  - Command: {cyan}{chown_command_html}{reset}")
+            print(f"  - Change permissions to: {green}0775{reset}")
+            print(f"  - Command: {cyan}{chmod_command_html}{reset}")
+            print(f"\nFile: {blue}{db_path}{reset}")
+            print(f"  - Change ownership to: {green}{user}:{self.ws_owner}{reset}")
+            print(f"  - Command: {cyan}{chown_command_db}{reset}")
+            print(f"  - Change permissions to: {green}0666{reset}")
+            print(f"  - Command: {cyan}{chmod_command_db}{reset}")            
+            print(f"\n{red}IMPORTANT:{reset} Your web pages will not be displayed until the above commands are executed successfully.")
+                
     def chkPyVer(self):
         current_version = sys.version_info
         required_version = (3, 10)
@@ -321,25 +333,25 @@ class DVMInstaller:
             print(f"{white}WeeWX version {yellow}{weewx_version}{white} is supported. Proceeding with installation.{reset}")
     
     def chkUgrp(self):
-        user = getpass.getuser()
+        self.user = getpass.getuser()
         try:
-            user_info = pwd.getpwnam(user)
+            user_info = pwd.getpwnam(self.user)
             uid = user_info.pw_uid
             gid = user_info.pw_gid
-            group = grp.getgrgid(gid).gr_name
+            self.group = grp.getgrgid(gid).gr_name
         except KeyError:
-            print(f"Cannot find user or group information for {user}")
+            print(f"Cannot find user or group information for {self.user}")
             sys.exit(1)
         print(f"\n{white}For the purposes of file permissions and ownership, we will be using the below listed user and group.{reset}")
-        print(f"Detected user: {white}{user}{reset}")
-        print(f"Detected group: {white}{group}{reset}")
+        print(f"Detected user: {white}{self.user}{reset}")
+        print(f"Detected group: {white}{self.group}{reset}")
         confirm = input("Is this correct? (yes/no): ").strip().lower()
         if confirm in ['yes', 'y']:
-            return (user, group)
+            return (self.user, self.group)
         else:
-            user = input("Please enter the correct user: ").strip()
-            group = input("Please enter the correct group: ").strip()
-            return (user, group)
+            self.user = input("Please enter the correct user: ").strip()
+            self.group = input("Please enter the correct group: ").strip()
+            return (self.user, self.group)
 
     def chgHroot(self, d, html_root):
         def recursive_update(d, key_to_update, new_value):
@@ -469,46 +481,53 @@ class DVMInstaller:
             except Exception as e:
                 print(f"An exception occurred: {e}")
 
-    def restartWeewx(self):
-        restart = input("Do you want to restart WeeWX to apply changes? (yes/no): ").strip().lower()
+    def startWeewx(self):
+        restart = input("Are you ready to start the WeeWX service to apply changes? (yes/no): ").strip().lower()
         if restart in ['yes', 'y']:
             try:
                 print("Attempting to restart WeeWX service...")
-                subprocess.check_call(["sudo", "systemctl", "restart", "weewx"])
-                print("WeeWX service restarted successfully.")
+                subprocess.check_call(["sudo", "systemctl", "start", "weewx"])
+                print("WeeWX service started successfully.")
             except subprocess.CalledProcessError as e:
-                print(f"Failed to restart WeeWX service: {e}")
+                print(f"Failed to start the WeeWX service: {e}")
         else:
-            print("WeeWX service restart was not requested. Please remember to restart manually for changes to take effect.")
+            print("WeeWX service start was not requested. Please remember to start WeeWX manually for changes to take effect.")
 
+    def stopWeewx(self):
+        try:
+            print("Attempting to stop the WeeWX service...")
+            subprocess.check_call(["sudo", "systemctl", "stop", "weewx"])
+        except subprocess.CalledProcessError as e:
+            print(f"Failed to stop the WeeWX service: {e}")
+            
     def run_installer(self, conf_file):
-        user_group = self.chkUgrp()
+        self.user, self.group = self.chkUgrp()
         webserver, owner = self.websrvInfo()
         if webserver:
             print(f"{white}I think that you're running {yellow}{webserver}{white}, and it's run by {yellow}{owner}{white}, is this correct?{reset}")
             wsIsCorrect = input("yes/no: ").strip().lower()
             if wsIsCorrect in ['yes', 'y']:
-                wsName = webserver
-                wsOwner = owner
-                wsGroup = owner
+                self.wsName = webserver
+                self.wsOwner = owner
+                self.wsGroup = owner
             else:
                 while True:
-                    wsName = input("Please enter the web server name (or 'q' to quit): ").strip()
+                    self.wsName = input("Please enter the web server name (or 'q' to quit): ").strip()
                     if wsName.lower() == 'q':
                         print("Exiting script.")
                         sys.exit(0)
-                    wsOwner = input("Please enter the web server owner (or 'q' to quit): ").strip()
+                    self.wsOwner = input("Please enter the web server owner (or 'q' to quit): ").strip()
                     if wsOwner.lower() == 'q':
                         print("Exiting script.")
                         sys.exit(0)
-                    wsGroup = input("Please enter the web server group (or 'q' to quit): ").strip()
+                    self.wsGroup = input("Please enter the web server group (or 'q' to quit): ").strip()
                     if wsGroup.lower() == 'q':
                         print("Exiting script.")
                         sys.exit(0)
-                    if self.chkWebsrv(wsName, wsOwner):
+                    if self.chkWebsrv(self.wsName, self.wsOwner):
                         break
                     else:
-                        print(f"{red}The web server '{wsName}' owned by '{wsOwner}' is not running. Please check the details and try again.{reset}")
+                        print(f"{red}The web server '{self.wsName}' owned by '{delf.wsOwner}' is not running. Please check the details and try again.{reset}")
         else:
             print(f"{red}I was unable to locate either Apache2 or Nginx running. Please enter the webserver name and the user and group that owns the process.{reset}")
         try:
@@ -582,7 +601,6 @@ class DVMInstaller:
                 home_directory = os.path.expanduser('~')
                 subdirectory_path = 'weewx-data/archive'
                 file_name = 'weewx.sdb'
-                
                 while True:
                     try:
                         dir_path = input('Please enter the directory path for your backup file (Directory Path only, no filename): ').strip()
@@ -641,6 +659,12 @@ class DVMInstaller:
             print(f"{cyan}WeeWX Config File:{reset} {green}{weewx_config_file}{reset}")
             print(f"           Status: {green if weewx_config_file_exists else red}{'Yes' if weewx_config_file_exists else 'No'}{reset}")
             print(f"{blue}+--------------------------------------------------------------------------------------+{reset}")
+            print(f"            {cyan}Detected user:{reset} {white}{self.user}{reset}")
+            print(f"      {cyan}Detected user group:{reset} {white}{self.group}{reset}")
+            print(f"          {cyan}Webserver:{reset} {green}{self.wsName}{reset}")
+            print(f"    {cyan}Webserver Owner:{reset} {green}{self.wsOwner}{reset}")
+            print(f"    {cyan}Webserver Group:{reset} {green}{self.wsGroup}{reset}")
+            print(f"{blue}+--------------------------------------------------------------------------------------+{reset}")
             print(f"{cyan}DivumWX Backup Service Status:{reset}\n")
             if bkpWXSrv:
                 print(f"        {white}DivumWX Backup Service:  {green}Enabled{reset}")
@@ -664,6 +688,7 @@ class DVMInstaller:
                 sys.exit(1)
 
             do_overwrite = d["over_write"] == "True"
+            self.stopWeewx()
             try:
                 if os.path.exists("user"):
                     print(f"{white}Copying {yellow}user{white} directory....")
@@ -698,7 +723,7 @@ class DVMInstaller:
                                 print(f"{white}Copying {yellow}www{white} directory....")
                                 distutils.dir_util.copy_tree("www", locations["www"], update=do_overwrite)
                                 print(f"{green}Copied {white}www {green}directory successfully{reset}")
-                                self.chgPermRecur([locations["www"]], user_group)
+                                self.chgPermRecur([locations["www"]], (self.user, self.wsOwner))
                                 print(f"{green}File permissions and ownership in the {white}www {green}directory successfully set{reset}")
                                 break
                             elif user_input == 'n':
@@ -759,14 +784,32 @@ class DVMInstaller:
                     if target in line:
                         lines.insert(i, insert_text)
                         break
+            print(f"{white}Checking if default skin, {reset}{cyan}Seasons{reset}{white}is still enabled{reset}")
+            print(f"{white}and disabling if true.{reset}")
+            seasons_found = False
+            for i, line in enumerate(lines):
+                if "[[SeasonsReport]]" in line:
+                    seasons_found = True
+                elif seasons_found and "skin = Seasons" in line:
+                    for j in range(i + 1, len(lines)):
+                        if "enable = true" in lines[j]:
+                            print(f"{yellow}Seasons skin is enabled, disabling{reset}")
+                            lines[j] = lines[j].replace("enable = true", "enable = false")
+                            print(f"{green}Successfully disabled Seasons skin{reset}")
+                            seasons_found = False
+                            break
+                        elif "enable = false" in lines[j]:
+                            print(f"{blue}Seasons skin is already disabled{reset}")
+                            seasons_found = False
+                            break
             time.sleep(2)
             with open(weewx_config_file, 'w') as file:
                 file.writelines(lines)
-            self.setOwnership(wsOwner)
             self.updDatabase()
-            print(f"{white}Done! WeeWX must be {yellow}restarted{white} for changes to become active{reset}")
+            self.setfnlOwner()
+            print(f"{white}Done! WeeWX must be {yellow}started{white} for changes to become active{reset}")
             print(f"{green}You will need to ensure that your webserver is set to deliver the DivumWX skin{reset}")
-            self.restartWeewx()
+            self.startWeewx()
             
         except Exception as e:
             traceback.print_exc()
