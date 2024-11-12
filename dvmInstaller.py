@@ -30,7 +30,7 @@ os.system("clear")
 print(f"{white}DIS {cyan}(DivumWX Installation Script) {white}starting.....{reset}")
 print(f"{yellow}Standby, importing and verifying required python modules...{reset}")
 
-version = "3.9.72.000"
+version = "4.1.00.000"
 srvGenURL = 'https://www.divumwx.org/settingsGen/'
 
 def modMissing(module_name):
@@ -367,18 +367,21 @@ class DVMInstaller:
                         else:
                             d[key] = f"{new_value}{value}"
         recursive_update(d, "HTML_ROOT", html_root)
-        recursive_update(d, "filename", html_root)
+        recursive_update(d, "filename", html_root + "/serverdata/filepileTextData.txt")
         
     def addStanza(self, config_data, entries):
-        for i in range(5, 11):  # config_entries4 to config_entries9
+        for i in range(5, 12):
             entry = entries[f'config_entries{i}']
             for section, values in entry.items():
                 for key, value in values.items():
                     if isinstance(value, dict):
                         for sub_key, sub_value in value.items():
                             value[sub_key] = sub_value
+                            print(f"Adding/Updating Sub-Stanza at {section} -> {key} -> {sub_key}")
                     values[key] = value
+                    print(f"Adding/Updating Key at {section} -> {key}")
                 config_data[section] = values
+                print(f"Adding Section '{section}'")
 
     def addBkpStanza(self, config_data, entries):
         entry = entries['backupEntry1']
@@ -387,8 +390,11 @@ class DVMInstaller:
                 if isinstance(value, dict):
                     for sub_key, sub_value in value.items():
                         value[sub_key] = sub_value
+                        print(f"Adding/Updating Sub-Stanza at {section} -> {key} -> {sub_key}")
                 values[key] = value
+                print(f"Adding/Updating Key at {section} -> {key}")
             config_data[section] = values
+            print(f"Adding Section '{section}'")
 
     def appendStanza(self, config_data, entries, do_overwrite):
         for i in range(5):  # config_entries0 to config_entries4
@@ -403,21 +409,27 @@ class DVMInstaller:
                                         existing_value = config_data[section][key][sub_key]
                                         if do_overwrite or existing_value != sub_value:
                                             config_data[section][key][sub_key] = sub_value
+                                            print(f"Appending Sub-Stanza {section} -> {key} -> {sub_key}")
                                     else:
                                         config_data[section][key][sub_key] = sub_value
                             else:
                                 config_data[section][key] = value
+                                print(f"Appending Stanza {section}")
                         else:
                             if key in config_data[section]:
                                 existing_value = config_data[section][key]
                                 if isinstance(existing_value, list):
                                     existing_value.append(value)
+                                    print(f"Appending value to list at {section} -> {key}")
                                 else:
                                     config_data[section][key] = f"{existing_value}, {value}"
+                                    print(f"Updating existing key at {section} -> {key} with value '{existing_value}, {value}'")
                             else:
                                 config_data[section][key] = value
+                                print(f"Adding new key at {section} -> {key} with value '{value}'")
                 else:
                     config_data[section] = values
+                    print(f"Adding new section '{section}'")
 
     def appendSvcs(self, config_data, entries):
         for key, value in entries.items():
@@ -430,13 +442,17 @@ class DVMInstaller:
                     existing_value = config_data['Engine']['Services'][service_type]
                     if existing_value in [',', '""']:
                         config_data['Engine']['Services'][service_type] = service_value
+                        print(f"Added service '{service_type}' with value '{service_value}' to config_data['Engine']['Services']")
                     else:
                         config_data['Engine']['Services'][service_type] += f", {service_value}"
+                        print(f"Appended value '{service_value}' to existing service '{service_type}' in config_data['Engine']['Services']")
                 else:
                     config_data['Engine']['Services'][service_type] = service_value
+                     print(f"Added new service '{service_type}' with value '{service_value}' to config_data['Engine']['Services']")
 
                 if config_data['Engine']['Services'].get('data_services') == ',':
                     config_data['Engine']['Services']['data_services'] = '""'
+                    print(f"Updated 'data_services' in config_data['Engine']['Services'] from ',' to '\"\"'")
 
     def appendBkpSvcs(self, config_data, entries):
         for key, value in entries.items():

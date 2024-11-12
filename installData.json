@@ -236,7 +236,8 @@
             "backup_times": ""
         }
     },
-    "config_entries_append": "process_services=user.divumwx.DivumWXRealTime",
-    "config_entries_append2": "xtype_services=user.divumwx.LastNonZeroService, user.divumwx.AirDensityService",
+    "config_entries_append": "process_services = user.divumwx.DivumWXRealTime",
+    "config_entries_append2": "xtype_services = user.divumwx.LastNonZeroService, user.divumwx.AirDensityService",
+    "config_entries_append3" :"data_services = user.divumwx.FilePile",
     "backupScvs1": "process_services=user.dvm_db_backup.DVM_DB_Backup"
 }
