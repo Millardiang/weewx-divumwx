@@ -448,7 +448,7 @@ class DVMInstaller:
                         print(f"Appended value '{service_value}' to existing service '{service_type}' in config_data['Engine']['Services']")
                 else:
                     config_data['Engine']['Services'][service_type] = service_value
-                     print(f"Added new service '{service_type}' with value '{service_value}' to config_data['Engine']['Services']")
+                    print(f"Added new service '{service_type}' with value '{service_value}' to config_data['Engine']['Services']")
 
                 if config_data['Engine']['Services'].get('data_services') == ',':
                     config_data['Engine']['Services']['data_services'] = '""'
