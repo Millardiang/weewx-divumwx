@@ -216,7 +216,7 @@ document.addEventListener('DOMContentLoaded', function() {
             switchToTab('tab3');
             document.getElementById('next-button').disabled = true;
         } else if (activeTab === 'tab3') {
-            window.location.href = '../admin/index.php';
+            window.location.href = 'admin/index.php';
         }
     });
 
