@@ -30,7 +30,7 @@ os.system("clear")
 print(f"{white}DIS {cyan}(DivumWX Installation Script) {white}starting.....{reset}")
 print(f"{yellow}Standby, importing and verifying required python modules...{reset}")
 
-version = "3.9.85.000"
+version = "3.9.85.012"
 srvGenURL = 'https://www.divumwx.org/settingsGen/'
 
 def modMissing(module_name):
@@ -258,52 +258,47 @@ class DVMInstaller:
                     os.chmod(filename, 0o777 if "dvm_reports" in filename else 0o755)
                     os.chown(filename, uid, gid)
 
-import os
-import getpass
-import shutil
-import time
+    def setfnlOwner(self):
+        user = getpass.getuser()
+        base_path = f"/home/{user}/weewx-data"
+        public_html_path = os.path.join(base_path, "public_html")
+        websrv_path = "/var/www/html/divumwx"
+        websrv_path2 = "/var/www/divumwx"
+        db_path = os.path.join(public_html_path, "admin/db/dvmAdmin.db3")
+        
+        paths_to_check = [public_html_path, websrv_path, websrv_path2]
 
-def setfnlOwner(self):
-    user = getpass.getuser()
-    base_path = f"/home/{user}/weewx-data"
-    public_html_path = os.path.join(base_path, "public_html")
-    websrv_path = "/var/www/html/divumwx"
-    websrv_path2 = "/var/www/divumwx"
-    db_path = os.path.join(public_html_path, "admin/db/dvmAdmin.db3")
-    
-    paths_to_check = [public_html_path, websrv_path, websrv_path2]
+        for path in paths_to_check:
+            dvm_version_path = os.path.join(path, "dvmVersion.php")
+            if os.path.exists(path) and os.path.isfile(dvm_version_path):
+                try:
+                    print(f"{yellow}Attempting to change ownership of {path} to {user}:{self.wsOwner}{reset}")
+                    os.system(f"sudo chown -R {user}:{self.wsOwner} {path}")
+                    print(f"{green}Successfully changed ownership of {path} to {user}:{self.wsOwner}{reset}\n")
+                    print(f"{yellow}Attempting to change permissions of {path} to 0775{reset}")
+                    os.system(f"sudo chmod -R 0775 {path}")
+                    print(f"{green}Successfully changed permissions of {path} to 0775{reset}\n")
+                    print(f"{yellow}Attempting to change permissions of {db_path} to 0666{reset}")
+                    os.system(f"sudo chmod 0666 {db_path}")
+                    print(f"{green}Successfully changed permissions of {db_path} to 0666{reset}\n")
 
-    for path in paths_to_check:
-        dvm_version_path = os.path.join(path, "dvmVersion.php")
-        if os.path.exists(path) and os.path.isfile(dvm_version_path):
-            try:
-                print(f"{yellow}Attempting to change ownership of {path} to {user}:{self.wsOwner}{reset}")
-                os.system(f"sudo chown -R {user}:{self.wsOwner} {path}")
-                print(f"{green}Successfully changed ownership of {path} to {user}:{self.wsOwner}{reset}\n")
-                print(f"{yellow}Attempting to change permissions of {path} to 0775{reset}")
-                os.system(f"sudo chmod -R 0775 {path}")
-                print(f"{green}Successfully changed permissions of {path} to 0775{reset}\n")
-                print(f"{yellow}Attempting to change permissions of {db_path} to 0666{reset}")
-                os.system(f"sudo chmod 0666 {db_path}")
-                print(f"{green}Successfully changed permissions of {db_path} to 0666{reset}\n")
-
-            except Exception as e:
-                print(f"{red}Error: {str(e)}{reset}")
-                print(f"{red}There was an error attempting to change ownership or permissions for {path}.{reset}")
-                print(f"{red}Your web pages will not be able to be displayed unless these commands are run successfully.{reset}")
-                chown_command = f"sudo chown -R {user}:{self.wsOwner} {path}"
-                chmod_command = f"sudo chmod -R 0775 {path}"
-                chmod_command_db = f"sudo chmod 0666 {db_path}"
-                print(f"\n{yellow}To manually attempt the changes, run the following commands for {path}:{reset}\n")
-                print(f"  - Change ownership to: {green}{user}:{self.wsOwner}{reset}")
-                print(f"  - Command: {cyan}{chown_command}{reset}")
-                print(f"  - Change permissions to: {green}0775{reset}")
-                print(f"  - Command: {cyan}{chmod_command}{reset}")
-                print(f"\nFile: {blue}{db_path}{reset}")
-                print(f"  - Change permissions to: {green}0666{reset}")
-                print(f"  - Command: {cyan}{chmod_command_db}{reset}")
-                print(f"\n{red}IMPORTANT:{reset} Your web pages will not be displayed until the above commands are executed successfully.\n")
-            break
+                except Exception as e:
+                    print(f"{red}Error: {str(e)}{reset}")
+                    print(f"{red}There was an error attempting to change ownership or permissions for {path}.{reset}")
+                    print(f"{red}Your web pages will not be able to be displayed unless these commands are run successfully.{reset}")
+                    chown_command = f"sudo chown -R {user}:{self.wsOwner} {path}"
+                    chmod_command = f"sudo chmod -R 0775 {path}"
+                    chmod_command_db = f"sudo chmod 0666 {db_path}"
+                    print(f"\n{yellow}To manually attempt the changes, run the following commands for {path}:{reset}\n")
+                    print(f"  - Change ownership to: {green}{user}:{self.wsOwner}{reset}")
+                    print(f"  - Command: {cyan}{chown_command}{reset}")
+                    print(f"  - Change permissions to: {green}0775{reset}")
+                    print(f"  - Command: {cyan}{chmod_command}{reset}")
+                    print(f"\nFile: {blue}{db_path}{reset}")
+                    print(f"  - Change permissions to: {green}0666{reset}")
+                    print(f"  - Command: {cyan}{chmod_command_db}{reset}")
+                    print(f"\n{red}IMPORTANT:{reset} Your web pages will not be displayed until the above commands are executed successfully.\n")
+                break
                 
     def chkPyVer(self):
         current_version = sys.version_info
