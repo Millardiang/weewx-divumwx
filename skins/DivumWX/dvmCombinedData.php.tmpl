@@ -506,9 +506,25 @@ if(is_numeric($sky["cloud_cover"]) != 1){$sky["cloud_cover"] = 0;}
 
 //solar
 #if $current.radiation.has_data
+$solar["generation"] = round($current.solarGeneration.raw,0,PHP_ROUND_HALF_UP);
+$solar["day_generation_max"] = round($day.solarGeneration.max.raw,0,PHP_ROUND_HALF_UP);
+$solar["day_generation_maxtime"] = date('H:i',$day.solarGeneration.maxtime.raw);
+//illuminance (or luminous flux) lux value
+#if $current.illuminance.has_data
+$solar["lux"] = round($current.illuminance.raw,0,PHP_ROUND_HALF_UP);
+$solar["day_lux_max"] = round($day.illuminance.max.raw,0,PHP_ROUND_HALF_UP);
+$solar["day_lux_maxtime"] = "$day.illuminance.maxtime.raw";
+##if luminosity is used in database to store illuminance lux values
+#else if $current.luminosity.has_data
 $solar["lux"] = round($current.luminosity.raw,0,PHP_ROUND_HALF_UP);
 $solar["day_lux_max"] = round($day.luminosity.max.raw,0,PHP_ROUND_HALF_UP);
 $solar["day_lux_maxtime"] = "$day.luminosity.maxtime.raw";
+##if illuminance lux value is derived from radiation
+#else
+$solar["lux"] = round($weewxrt[45]/0.00809399477,0,PHP_ROUND_HALF_UP);
+$solar["day_lux_max"] = round($day.radiation.max.format($localize=False,add_label=False)/0.00809399477,0,PHP_ROUND_HALF_UP);
+$solar["day_lux_maxtime"] = date('H:i',$day.radiation.maxtime.raw);
+#end if
 $solar["threshold"] = round($current.threshold.raw,0,PHP_ROUND_HALF_UP);
 $solar["sun_duration_minutes"] = $day.sunshine_time.sum.raw;
 $solar["sun_duration_hours_minutes"] = intdiv($solar["sun_duration_minutes"], 60).'hr:'. ($solar["sun_duration_minutes"] % 60).'min';
