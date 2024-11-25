@@ -1,12 +1,8 @@
 {
-    "zip_file": "",
     "user": "~/weewx-data/bin/user/",
     "skins": "~/weewx-data/skins/",
     "weewx_config_file": "~/weewx-data/weewx.conf",
-    "www_path": "~/weewx-data/public_html/",
     "over_write": "True",
-    "delete_extracted_files": "False",
-    "extract_to_path": ".",
     "config_entries0": {
         "StdReport": {
             "DivumWXReport": {
