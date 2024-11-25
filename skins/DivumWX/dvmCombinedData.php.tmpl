@@ -555,6 +555,8 @@ else if($temp["units"] == "°F")
 {
 $temp["units"] = "F";
 }
+// indoor temp
+#if $current.outTemp.has_data
 $temp["indoor_now"] = $weewxrt[22];
 #if $trend.inTemp.has_data
 $temp["indoor_trend"] = round($trend.inTemp.raw,1);
@@ -562,11 +564,14 @@ if(is_numeric($temp["indoor_trend"]) != 1){$temp["indoor_trend"] = 0;}
 #end if
 $temp["indoor_day_max"] = $day.inTemp.max.format(add_label=False);
 $temp["indoor_day_min"] = $day.inTemp.min.format(add_label=False);
-$temp["outside_now"] = $weewxrt[2];
+#end if
+//outside temperature
+#if $current.outTemp.has_data
 #if $trend.outTemp.has_data
 $temp["outside_trend"] = round($trend.outTemp.raw,1);
 if(is_numeric($temp["outside_trend"]) != 1){$temp["outside_trend"] = 0;}
 #end if
+$temp["outside_now"] = $weewxrt[2];
 $temp["apptemp"] = $weewxrt[54];
 $temp["heatindex"] = $weewxrt[41];
 $temp["windchill"] = round($weewxrt[24],1);
@@ -599,6 +604,8 @@ $temp["outside_alltime_max"] = $alltime.outTemp.max.format(add_label=False);
 $temp["outside_alltime_maxtime"] = date('j M Y H:i',$alltime.outTemp.maxtime.raw);
 $temp["outside_alltime_min"] = $alltime.outTemp.min.format(add_label=False);
 $temp["outside_alltime_mintime"] = date('j M Y H:i',$alltime.outTemp.mintime.raw);
+#end if
+//feels like indoors
 $Temp = $temp["indoor_now"];
 $Humidity = $humid["indoors_now"];
 $T = $Temp*9/5+32;
@@ -611,7 +618,6 @@ else if ($RH>85&&$T>=80&&$T<=87){$adjust=(($RH-85)/10)*((87-$T)/5);$HI=$HI+$adju
 else if ($T<80){$HI=0.5*($T+61.0+(($T-68.0)*1.2)+($RH*0.094));}
 $temp["indoor_now_feels"] = number_format($HI, 1);
 $temp["indoor_now_feels_degC"] = (number_format($HI, 1)-32)*5/9;
-
 
 //uv
 $uv["now"] = $weewxrt[43];
