@@ -25,6 +25,7 @@ $json_icon = file_get_contents("jsondata/lookupTable.json");
 $parsed_icon = json_decode($json_icon, true);
 switch ($advisoryzoneMapping) {
     case "unitedkingdom":
+        $url = "https://www.metoffice.gov.uk/weather/warnings-and-advice/uk-warnings";
         $json_string = file_get_contents("jsondata/awa.txt");
         $parsed_json = json_decode($json_string, true);
         $cnt = count($parsed_json["response"]);
@@ -43,7 +44,8 @@ switch ($advisoryzoneMapping) {
             $alerttype[$i] = explode(" ", $name[$i]);
             $bodyFull[$i] = str_replace("No Special Awareness Required", "", $parsed_json["response"][$i]["details"]["bodyFull"]);
             $type[$i] = $parsed_json["response"][$i]["details"]["type"];
-            $description[$i] = $parsed_json["response"][$i]["details"]["bodyFull"];
+            $descriptionLong[$i] = $parsed_json["response"][$i]["details"]["bodyFull"];
+            $description[$i] = str_replace($url, "" ,$descriptionLong[$i]);
             $level[$i] = substr($type[$i], -2);
             $color[$i] = $parsed_json["response"][$i]["details"]["color"];
             if ($level[$i] == "MN") {
@@ -81,7 +83,7 @@ switch ($advisoryzoneMapping) {
 		<div class="post" style="font-weight:500; font-size:14px; color:<?php echo $alertColor[$i]; ?>;">
 			<img src="<?php echo $warnimage[$i]; ?>"style="margin-bottom:-10px;"><?php echo $alertHeadline[$i]; ?>
 			
-			<span class="more" style="padding-top:-20px;display:none;"><p><?php echo $description[$i] . "."; ?></p></span>
+			<span class="more" style="padding-top:-20px;display:none;"><p><?php echo $description[$i]; ?><?php  echo"<a href='$url' style='color:<?php echo $alertColor[$i]; ?>'>$url</a>"; ?></p></span>
 
 			<more-button class="read">More</more-button>
 		</div></div></div></div>
@@ -109,7 +111,7 @@ switch ($advisoryzoneMapping) {
             } elseif ($floodLevel[$i] == 2) {
                 $floodBackground[$i] = "#e3000f";
                 $floodBorder[$i] = "#e3000f";
-                $floodAlertColor[$i] = "black";
+                $floodAlertColor[$i] = "white";
             } elseif ($floodLevel[$i] == 1) {
                 $floodBackground[$i] = "#e3000f";
                 $floodBorder[$i] = "#e3000f";
@@ -139,7 +141,7 @@ switch ($advisoryzoneMapping) {
    
        
         }
-echo '<div class="alertbar" style="background-color: transparent;"></div>';
+echo '<div class="alertbar" style="background-color: transparent;height:4px;border:0px;padding:0px;margin:0px;"></div>';
 
         break;
     case "europe":
