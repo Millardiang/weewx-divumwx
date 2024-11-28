@@ -10,35 +10,7 @@
 #set $daylength = time.strftime('%H:%M', time.gmtime(int($almanac.sun.set.raw -  $almanac.sun.rise.raw)))
 ##Truncate station uptime decimals
 #set $stationuptime = $alltime.outTemp.firsttime   
-#if $almanac.moon_phase.lower() == "New".lower()
-#set $moonphase_no = "0"
-#else if $almanac.moon_phase.lower() == "Waxing Crescent".lower()
-#set $moonphase_no = "1"
-#else if $almanac.moon_phase.lower() == "First Quarter".lower()
-#set $moonphase_no = "2"
-#else if $almanac.moon_phase.lower() == "Waxing Gibbous".lower()
-#set $moonphase_no = "3"
-#else if $almanac.moon_phase.lower() == "Full".lower()
-#set $moonphase_no = "4"
-#else if $almanac.moon_phase.lower() == "Waning Gibbous".lower()
-#set $moonphase_no = "5"
-#else if $almanac.moon_phase.lower() == "Last Quarter".lower()
-#set $moonphase_no = "6"
-#else if $almanac.moon_phase.lower() == "Waning Crescent".lower()
-#set $moonphase_no = "7"
-#end if         
-#import datetime
-#set $now = datetime.datetime.now()
-#set $nowHour = $now.hour
-#set $sunrise_hour = datetime.datetime.fromtimestamp($almanac.sunrise.raw).strftime('%H')
-#set $sunset_hour = datetime.datetime.fromtimestamp($almanac.sunset.raw).strftime('%H')
-##if $sunrise_hour <= $nowHour < $sunset_hour ## This works but to keep it inline with JavaScript the below works too
-##if int($sunrise_hour) <= int($nowHour) and int($nowHour) < int($sunset_hour)
-##set $bodyTheme = "light"
-##else
-## Night time, use dark mode
-##set $bodyTheme = "dark"
-##end if  
+ 
 #set $mlsc = "N/A"
 #if $varExists('month.lightning_strike_count') and $month.lightning_strike_count.sum is not None 
 #set $mlsc = $month.lightning_strike_count.sum 
@@ -166,8 +138,60 @@ $air["24h.rollingavg.pm10_0"] = $current.pm10_0.format(add_label=False, format_s
 //almanac
 ## If extended almanac information is available, do extra calculations.
 #if $almanac.hasExtras
-#set $sun_altitude = $almanac.sun.alt
+##moonphase description, David Marshall method
 #set $moonDays = ($current.dateTime.raw - $almanac.previous_new_moon.raw)/86400
+#set $illumination = $almanac.moon.moon_fullness
+#if $illumination > 2 and $illumination < 48 and $moonDays < 15
+#set $phaseDescDM ="$lang['Waxingcrescent']"
+#else if $illumination >= 48 and $illumination <= 52 and $moonDays < 15
+#set $phaseDescDM ="$lang['Firstquarter']" 
+#else if $illumination > 52 and $illumination < 98 and $moonDays < 15
+#set $phaseDescDM ="$lang['Waxinggibbous']"
+#else if $illumination >= 98
+#set $phaseDescDM="$lang['Fullmoon']"
+#else if $illumination < 98 and $illumination > 52 and $moonDays > 14
+#set $phaseDescDM ="$lang['Waninggibbous']"
+#else if $illumination >= 48 and $illumination <= 52 and $moonDays > 14 
+#set $phaseDescDM ="$lang['Lastquarter']"
+#else if $illumination < 48 and $illumination > 2 and $moonDays > 14
+#set$phaseDescDM ="$lang['Waningcrescent']"
+#else
+#set $phaseDescDM =$lang['Newmoon']
+#end if
+
+
+#if $almanac.moon_phase.lower() == "New".lower()
+#set $moonphase_no = "0"
+#else if $almanac.moon_phase.lower() == "Waxing Crescent".lower()
+#set $moonphase_no = "1"
+#else if $almanac.moon_phase.lower() == "First Quarter".lower()
+#set $moonphase_no = "2"
+#else if $almanac.moon_phase.lower() == "Waxing Gibbous".lower()
+#set $moonphase_no = "3"
+#else if $almanac.moon_phase.lower() == "Full".lower()
+#set $moonphase_no = "4"
+#else if $almanac.moon_phase.lower() == "Waning Gibbous".lower()
+#set $moonphase_no = "5"
+#else if $almanac.moon_phase.lower() == "Last Quarter".lower()
+#set $moonphase_no = "6"
+#else if $almanac.moon_phase.lower() == "Waning Crescent".lower()
+#set $moonphase_no = "7"
+#end if         
+#import datetime
+#set $now = datetime.datetime.now()
+#set $nowHour = $now.hour
+#set $sunrise_hour = datetime.datetime.fromtimestamp($almanac.sunrise.raw).strftime('%H')
+#set $sunset_hour = datetime.datetime.fromtimestamp($almanac.sunset.raw).strftime('%H')
+##if $sunrise_hour <= $nowHour < $sunset_hour ## This works but to keep it inline with JavaScript the below works too
+##if int($sunrise_hour) <= int($nowHour) and int($nowHour) < int($sunset_hour)
+##set $bodyTheme = "light"
+##else
+## Night time, use dark mode
+##set $bodyTheme = "dark"
+##end if 
+
+#set $sun_altitude = $almanac.sun.alt
+
 #if $sun_altitude < 0
 #set $sun_None="<i>(Always down)</i>"
 #set $daylight_str = "00:00"
@@ -200,8 +224,8 @@ $air["24h.rollingavg.pm10_0"] = $current.pm10_0.format(add_label=False, format_s
 ##set $daylight_str = "%s<br/>%s" % ($daylight_str, $delta_str)
 #end if
 #end if
-#end if
-#if $almanac.hasExtras
+
+
 $alm["sun_altitude"] = round($almanac.sun.alt,2);
 $alm["moon_altitude"] = round($almanac.moon.alt,2);
 
@@ -236,12 +260,12 @@ $alm["astronomical_twilight_begin"] = "$almanac(horizon=-18).sun(use_center=1).r
 $alm["astronomical_twilight_end"] = "$almanac(horizon=-18).sun(use_center=1).set.format(format_string="%H:%M")";
 $alm["sun_meridian_transit"] = "$almanac.sun.transit.format(format_string="%H:%M")";
 $alm["moon_meridian_transit"] = "$almanac.moon.transit.format(format_string="%H:%M")";
-$alm["moonphase"] = "$almanac.moon_phase";
+$alm["moonphase"] = $phaseDescDM;
 $alm["moonphase_number"] = $moonphase_no;
 $alm["moon_age"] = $moonDays;
 $alm["hour_sun"] = $(almanac.sun.ha % 360.0);
 $alm["hour_moon"] = $(almanac.moon.ha % 360.0);
-$alm["luminance"] = round($almanac.moon.moon_fullness,2);
+$alm["luminance"] = round($illumination,2);
 $alm["fullmoon"] = "$almanac.next_full_moon.format("%d %b %H:%M")";
 $alm["newmoon"] = "$almanac.next_new_moon.format("%d %b %H:%M")";   
 $alm["daylight"] = "$daylength";
