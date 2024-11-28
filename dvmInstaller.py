@@ -9,9 +9,9 @@ import re
 import getpass
 import grp
 import pwd
+import shutil
 import distutils
 from datetime import datetime
-from zipfile import ZipFile
 
 # Define ANSI codes
 reset = "\033[0m"
@@ -27,10 +27,10 @@ cyan = "\033[36m"
 white = "\033[37m"
 
 os.system("clear")
-print(f"{white}DIS {blue}(DivumWX Installation Script) {white}starting.....{reset}")
+print(f"{white}DIS {cyan}(DivumWX Installation Script) {white}starting.....{reset}")
 print(f"{yellow}Standby, importing and verifying required python modules...{reset}")
 
-version = "3.9.72.000"
+version = "4.1.00.000"
 srvGenURL = 'https://www.divumwx.org/settingsGen/'
 
 def modMissing(module_name):
@@ -190,43 +190,18 @@ class DVMInstaller:
             print(f"{red}An error occurred while validating the web server process: {e}{reset}")
             return False
 
-    def setOwnership(self, ws_owner):
-        user = getpass.getuser()
-        base_path = f"/home/{user}/weewx-data"
-        public_html_path = os.path.join(base_path, "public_html")
-        
-        try:
-            print(f"{yellow}Attempting to change ownership of {base_path} and {public_html_path} to {user}:{ws_owner}{reset}")
-            os.system(f"sudo chown -R {user}:{ws_owner} {base_path}")
-            os.system(f"sudo chown -R {user}:{ws_owner} {public_html_path}")
-            print(f"{green}Successfully changed ownership of {base_path} and {public_html_path} to {user}:{ws_owner}{reset}\n")
-            print(f"{yellow}Attempting to change permissions of {base_path} and {public_html_path} to 0775{reset}")
-            os.system(f"sudo chmod -R 0775 {base_path}")
-            os.system(f"sudo chmod -R 0775 {public_html_path}")
-            print(f"{green}Successfully changed permissions of {base_path} and {public_html_path} to 0775{reset}\n")
-        except Exception as e:
-            print(f"{red}Error: {str(e)}{reset}")
-            print(f"{red}There was an error attempting to change ownership or permissions.{reset}")
-            print(f"{red}Your web pages will not be able to be displayed unless these commands are run successfully.{reset}")
-            chown_command_base = f"sudo chown -R {user}:{ws_owner} {base_path}"
-            chown_command_html = f"sudo chown -R {user}:{ws_owner} {public_html_path}"
-            chmod_command_base = f"sudo chmod -R 0775 {base_path}"
-            chmod_command_html = f"sudo chmod -R 0775 {public_html_path}"
-            print(f"\n{yellow}To manually attempt the changes, run the following commands:{reset}\n")
-            print(f"\nDirectory: {blue}{base_path}{reset}")
-            print(f"  - Change ownership to: {green}{user}:{ws_owner}{reset}")
-            print(f"  - Command: {cyan}{chown_command_base}{reset}")
-            print(f"  - Change permissions to: {green}0775{reset}")
-            print(f"  - Command: {cyan}{chmod_command_base}{reset}")
-            print(f"\nDirectory: {blue}{public_html_path}{reset}")
-            print(f"  - Change ownership to: {green}{user}:{ws_owner}{reset}")
-            print(f"  - Command: {cyan}{chown_command_html}{reset}")
-            print(f"  - Change permissions to: {green}0775{reset}")
-            print(f"  - Command: {cyan}{chmod_command_html}{reset}")
-            print(f"\n{red}IMPORTANT:{reset} Your web pages will not be displayed until the above commands are executed successfully.")
-
     def dirNotEmpty(self, path):
         return os.path.isdir(path) and bool(os.listdir(path))
+
+    def deleteContents(self, path):
+        for root, dirs, files in os.walk(path):
+            for file in files:
+                file_path = os.path.join(root, file)
+                os.remove(file_path)
+
+            for dir in dirs:
+                dir_path = os.path.join(root, dir)
+                shutil.rmtree(dir_path)
 
     def chkSvcFile(self):
         services_file = None
@@ -275,14 +250,61 @@ class DVMInstaller:
             os.chown(p, uid, gid)
             for root, dirs, files in os.walk(p, topdown=False):
                 for directory in (os.path.join(root, d) for d in dirs):
-                    os.chmod(directory, 0o755)
+                    os.chmod(directory, 0o775)
                     os.chown(directory, uid, gid)
                     if "json_day" in directory:
                         os.chmod(directory, 0o777)
                 for filename in (os.path.join(root, f) for f in files):
                     os.chmod(filename, 0o777 if "dvm_reports" in filename else 0o755)
                     os.chown(filename, uid, gid)
-    
+
+    def setfnlOwner(self):
+        user = getpass.getuser()
+        base_path = f"/home/{user}/weewx-data"
+        public_html_path = os.path.join(base_path, "public_html")
+        db_path = os.path.join(public_html_path, "admin/db/dvmAdmin.db3")
+        
+        try:
+            print(f"{yellow}Attempting to change ownership of {base_path}, {public_html_path} and {db_path} to {user}:{self.wsOwner}{reset}")
+            os.system(f"sudo chown -R {user}:{self.wsOwner} {base_path}")
+            os.system(f"sudo chown -R {user}:{self.wsOwner} {public_html_path}")
+            os.system(f"sudo chown {user}:{self.wsOwner} {db_path}")
+            print(f"{green}Successfully changed ownership of {base_path}, {public_html_path} and {db_path} to {user}:{self.wsOwner}{reset}\n")
+            print(f"{yellow}Attempting to change permissions of {base_path} and {public_html_path} to 0775{reset}")
+            os.system(f"sudo chmod -R 0775 {base_path}")
+            os.system(f"sudo chmod -R 0775 {public_html_path}")
+            print(f"{green}Successfully changed permissions of {base_path} and {public_html_path} to 0775{reset}\n")
+            print(f"{yellow}Attempting to change permissions of {db_path} to 0666{reset}")
+            os.system(f"sudo chmod 0666 {db_path}")
+            print(f"{green}Successfully changed permissions of {db_path} to 0666{reset}\n")
+        except Exception as e:
+            print(f"{red}Error: {str(e)}{reset}")
+            print(f"{red}There was an error attempting to change ownership or permissions.{reset}")
+            print(f"{red}Your web pages will not be able to be displayed unless these commands are run successfully.{reset}")
+            chown_command_base = f"sudo chown -R {user}:{self.ws_owner} {base_path}"
+            chown_command_html = f"sudo chown -R {user}:{self.ws_owner} {public_html_path}"
+            chown_command_db = f"sudo chown {user}:{self.wsOwner} {db_path}"
+            chmod_command_base = f"sudo chmod -R 0775 {base_path}"
+            chmod_command_html = f"sudo chmod -R 0775 {public_html_path}"
+            chmod_command_db = f"sudo chmod 0666 {db_path}"
+            print(f"\n{yellow}To manually attempt the changes, run the following commands:{reset}\n")
+            print(f"\nDirectory: {blue}{base_path}{reset}")
+            print(f"  - Change ownership to: {green}{user}:{self.ws_owner}{reset}")
+            print(f"  - Command: {cyan}{chown_command_base}{reset}")
+            print(f"  - Change permissions to: {green}0775{reset}")
+            print(f"  - Command: {cyan}{chmod_command_base}{reset}")
+            print(f"\nDirectory: {blue}{public_html_path}{reset}")
+            print(f"  - Change ownership to: {green}{user}:{self.ws_owner}{reset}")
+            print(f"  - Command: {cyan}{chown_command_html}{reset}")
+            print(f"  - Change permissions to: {green}0775{reset}")
+            print(f"  - Command: {cyan}{chmod_command_html}{reset}")
+            print(f"\nFile: {blue}{db_path}{reset}")
+            print(f"  - Change ownership to: {green}{user}:{self.ws_owner}{reset}")
+            print(f"  - Command: {cyan}{chown_command_db}{reset}")
+            print(f"  - Change permissions to: {green}0666{reset}")
+            print(f"  - Command: {cyan}{chmod_command_db}{reset}")            
+            print(f"\n{red}IMPORTANT:{reset} Your web pages will not be displayed until the above commands are executed successfully.")
+                
     def chkPyVer(self):
         current_version = sys.version_info
         required_version = (3, 10)
@@ -311,25 +333,25 @@ class DVMInstaller:
             print(f"{white}WeeWX version {yellow}{weewx_version}{white} is supported. Proceeding with installation.{reset}")
     
     def chkUgrp(self):
-        user = getpass.getuser()
+        self.user = getpass.getuser()
         try:
-            user_info = pwd.getpwnam(user)
+            user_info = pwd.getpwnam(self.user)
             uid = user_info.pw_uid
             gid = user_info.pw_gid
-            group = grp.getgrgid(gid).gr_name
+            self.group = grp.getgrgid(gid).gr_name
         except KeyError:
-            print(f"Cannot find user or group information for {user}")
+            print(f"Cannot find user or group information for {self.user}")
             sys.exit(1)
         print(f"\n{white}For the purposes of file permissions and ownership, we will be using the below listed user and group.{reset}")
-        print(f"Detected user: {white}{user}{reset}")
-        print(f"Detected group: {white}{group}{reset}")
+        print(f"Detected user: {white}{self.user}{reset}")
+        print(f"Detected group: {white}{self.group}{reset}")
         confirm = input("Is this correct? (yes/no): ").strip().lower()
         if confirm in ['yes', 'y']:
-            return (user, group)
+            return (self.user, self.group)
         else:
-            user = input("Please enter the correct user: ").strip()
-            group = input("Please enter the correct group: ").strip()
-            return (user, group)
+            self.user = input("Please enter the correct user: ").strip()
+            self.group = input("Please enter the correct group: ").strip()
+            return (self.user, self.group)
 
     def chgHroot(self, d, html_root):
         def recursive_update(d, key_to_update, new_value):
@@ -345,18 +367,21 @@ class DVMInstaller:
                         else:
                             d[key] = f"{new_value}{value}"
         recursive_update(d, "HTML_ROOT", html_root)
-        recursive_update(d, "filename", html_root)
+        recursive_update(d, "filename", html_root + "/serverdata/filepileTextData.txt")
         
     def addStanza(self, config_data, entries):
-        for i in range(4, 10):  # config_entries4 to config_entries9
+        for i in range(5, 12):
             entry = entries[f'config_entries{i}']
             for section, values in entry.items():
                 for key, value in values.items():
                     if isinstance(value, dict):
                         for sub_key, sub_value in value.items():
                             value[sub_key] = sub_value
+                            print(f"Adding/Updating Sub-Stanza at {section} -> {key} -> {sub_key}")
                     values[key] = value
+                    print(f"Adding/Updating Key at {section} -> {key}")
                 config_data[section] = values
+                print(f"Adding Section '{section}'")
 
     def addBkpStanza(self, config_data, entries):
         entry = entries['backupEntry1']
@@ -365,11 +390,14 @@ class DVMInstaller:
                 if isinstance(value, dict):
                     for sub_key, sub_value in value.items():
                         value[sub_key] = sub_value
+                        print(f"Adding/Updating Sub-Stanza at {section} -> {key} -> {sub_key}")
                 values[key] = value
+                print(f"Adding/Updating Key at {section} -> {key}")
             config_data[section] = values
+            print(f"Adding Section '{section}'")
 
     def appendStanza(self, config_data, entries, do_overwrite):
-        for i in range(4):  # config_entries0 to config_entries3
+        for i in range(5):  # config_entries0 to config_entries4
             entry = entries[f'config_entries{i}']
             for section, values in entry.items():
                 if section in config_data:
@@ -381,21 +409,27 @@ class DVMInstaller:
                                         existing_value = config_data[section][key][sub_key]
                                         if do_overwrite or existing_value != sub_value:
                                             config_data[section][key][sub_key] = sub_value
+                                            print(f"Appending Sub-Stanza {section} -> {key} -> {sub_key}")
                                     else:
                                         config_data[section][key][sub_key] = sub_value
                             else:
                                 config_data[section][key] = value
+                                print(f"Appending Stanza {section}")
                         else:
                             if key in config_data[section]:
                                 existing_value = config_data[section][key]
                                 if isinstance(existing_value, list):
                                     existing_value.append(value)
+                                    print(f"Appending value to list at {section} -> {key}")
                                 else:
                                     config_data[section][key] = f"{existing_value}, {value}"
+                                    print(f"Updating existing key at {section} -> {key} with value '{existing_value}, {value}'")
                             else:
                                 config_data[section][key] = value
+                                print(f"Adding new key at {section} -> {key} with value '{value}'")
                 else:
                     config_data[section] = values
+                    print(f"Adding new section '{section}'")
 
     def appendSvcs(self, config_data, entries):
         for key, value in entries.items():
@@ -408,13 +442,17 @@ class DVMInstaller:
                     existing_value = config_data['Engine']['Services'][service_type]
                     if existing_value in [',', '""']:
                         config_data['Engine']['Services'][service_type] = service_value
+                        print(f"Added service '{service_type}' with value '{service_value}' to config_data['Engine']['Services']")
                     else:
                         config_data['Engine']['Services'][service_type] += f", {service_value}"
+                        print(f"Appended value '{service_value}' to existing service '{service_type}' in config_data['Engine']['Services']")
                 else:
                     config_data['Engine']['Services'][service_type] = service_value
+                    print(f"Added new service '{service_type}' with value '{service_value}' to config_data['Engine']['Services']")
 
                 if config_data['Engine']['Services'].get('data_services') == ',':
                     config_data['Engine']['Services']['data_services'] = '""'
+                    print(f"Updated 'data_services' in config_data['Engine']['Services'] from ',' to '\"\"'")
 
     def appendBkpSvcs(self, config_data, entries):
         for key, value in entries.items():
@@ -459,47 +497,55 @@ class DVMInstaller:
             except Exception as e:
                 print(f"An exception occurred: {e}")
 
-    def restartWeewx(self):
-        restart = input("Do you want to restart WeeWX to apply changes? (yes/no): ").strip().lower()
+    def startWeewx(self):
+        restart = input("Are you ready to start the WeeWX service to apply changes? (yes/no): ").strip().lower()
         if restart in ['yes', 'y']:
             try:
                 print("Attempting to restart WeeWX service...")
-                subprocess.check_call(["sudo", "systemctl", "restart", "weewx"])
-                print("WeeWX service restarted successfully.")
+                subprocess.check_call(["sudo", "systemctl", "start", "weewx"])
+                print("WeeWX service started successfully.")
             except subprocess.CalledProcessError as e:
-                print(f"Failed to restart WeeWX service: {e}")
+                print(f"Failed to start the WeeWX service: {e}")
         else:
-            print("WeeWX service restart was not requested. Please remember to restart manually for changes to take effect.")
+            print("WeeWX service start was not requested. Please remember to start WeeWX manually for changes to take effect.")
 
+    def stopWeewx(self):
+        try:
+            print("Attempting to stop the WeeWX service...")
+            subprocess.check_call(["sudo", "systemctl", "stop", "weewx"])
+        except subprocess.CalledProcessError as e:
+            print(f"Failed to stop the WeeWX service: {e}")
+            
     def run_installer(self, conf_file):
-        user_group = self.chkUgrp()
+        self.user, self.group = self.chkUgrp()
         webserver, owner = self.websrvInfo()
         if webserver:
             print(f"{white}I think that you're running {yellow}{webserver}{white}, and it's run by {yellow}{owner}{white}, is this correct?{reset}")
             wsIsCorrect = input("yes/no: ").strip().lower()
             if wsIsCorrect in ['yes', 'y']:
-                wsName = webserver
-                wsOwner = owner
-                wsGroup = owner
+                self.wsName = webserver
+                self.wsOwner = owner
+                self.wsGroup = owner
+            else:
+                while True:
+                    self.wsName = input("Please enter the web server name (or 'q' to quit): ").strip()
+                    if wsName.lower() == 'q':
+                        print("Exiting script.")
+                        sys.exit(0)
+                    self.wsOwner = input("Please enter the web server owner (or 'q' to quit): ").strip()
+                    if wsOwner.lower() == 'q':
+                        print("Exiting script.")
+                        sys.exit(0)
+                    self.wsGroup = input("Please enter the web server group (or 'q' to quit): ").strip()
+                    if wsGroup.lower() == 'q':
+                        print("Exiting script.")
+                        sys.exit(0)
+                    if self.chkWebsrv(self.wsName, self.wsOwner):
+                        break
+                    else:
+                        print(f"{red}The web server '{self.wsName}' owned by '{delf.wsOwner}' is not running. Please check the details and try again.{reset}")
         else:
             print(f"{red}I was unable to locate either Apache2 or Nginx running. Please enter the webserver name and the user and group that owns the process.{reset}")
-        while True:
-            wsName = input("Please enter the web server name (or 'q' to quit): ").strip()
-            if wsName.lower() == 'q':
-                print("Exiting script.")
-                sys.exit(0)
-            wsOwner = input("Please enter the web server owner (or 'q' to quit): ").strip()
-            if wsOwner.lower() == 'q':
-                print("Exiting script.")
-                sys.exit(0)
-            wsGroup = input("Please enter the web server group (or 'q' to quit): ").strip()
-            if wsGroup.lower() == 'q':
-                print("Exiting script.")
-                sys.exit(0)
-            if self.chkWebsrv(wsName, wsOwner):
-                break
-            else:
-                print(f"{red}The web server '{wsName}' owned by '{wsOwner}' is not running. Please check the details and try again.{reset}")
         try:
             with open(conf_file) as infile:
                 conf_content = infile.read()
@@ -527,7 +573,7 @@ class DVMInstaller:
             print(f"{white}For example, if the document root is set to {yellow}/var/www/html{white}, then when a client requests {yellow}http://mywebsite.com{white},")
             print(f"{white}the server will look for the index file (like index.php) in {yellow}/var/www/html.{reset}")
             print(f"{white}If a client requests {yellow}http://mywebsite.com/divumwx{white}, the server will look for the 'divumwx' directory inside")
-            print(f"{white}the web server's document root ({yellow}/var/www/html/skin{white}).")
+            print(f"{white}the web server's document root ({yellow}/var/www/html/divumwx{white}).")
             print(f"{white}The document root essentially serves as the base directory for resolving all relative file paths{reset}")
             print(f"{white}that are requested via URL.{reset}\n")
             
@@ -563,7 +609,6 @@ class DVMInstaller:
             else:
                 html_root_status_message = "Path does not exist or could not be created"
                 html_root_status_color = red
-            
             os.system("clear")
             bkpWXSrv = False    
             bkpWX = input('Do you wish to use the Divum Backup Service to backup your weewx database? (yes/no): ').strip().lower()
@@ -572,7 +617,6 @@ class DVMInstaller:
                 home_directory = os.path.expanduser('~')
                 subdirectory_path = 'weewx-data/archive'
                 file_name = 'weewx.sdb'
-                
                 while True:
                     try:
                         dir_path = input('Please enter the directory path for your backup file (Directory Path only, no filename): ').strip()
@@ -631,12 +675,11 @@ class DVMInstaller:
             print(f"{cyan}WeeWX Config File:{reset} {green}{weewx_config_file}{reset}")
             print(f"           Status: {green if weewx_config_file_exists else red}{'Yes' if weewx_config_file_exists else 'No'}{reset}")
             print(f"{blue}+--------------------------------------------------------------------------------------+{reset}")
-            print(f"{cyan}Overwrite Existing Files:{reset} {green}{'Yes' if d['over_write'] == 'True' else 'No'}{reset}")
-            if zip_file := d.get("zip_file"):
-                print(f"{cyan}Zip File:{reset} {green}{zip_file}{reset}")
-                print(f"{cyan}Extract To Path:{reset} {green}{d['extract_to_path']}{reset}")
-            else:
-                print(f"{cyan}Zip File:{reset} {red}None specified{reset}")
+            print(f"            {cyan}Detected user:{reset} {white}{self.user}{reset}")
+            print(f"      {cyan}Detected user group:{reset} {white}{self.group}{reset}")
+            print(f"          {cyan}Webserver:{reset} {green}{self.wsName}{reset}")
+            print(f"    {cyan}Webserver Owner:{reset} {green}{self.wsOwner}{reset}")
+            print(f"    {cyan}Webserver Group:{reset} {green}{self.wsGroup}{reset}")
             print(f"{blue}+--------------------------------------------------------------------------------------+{reset}")
             print(f"{cyan}DivumWX Backup Service Status:{reset}\n")
             if bkpWXSrv:
@@ -648,7 +691,7 @@ class DVMInstaller:
                 
             print("\n\nExplanation of Next Steps:\n")
             print(f"{green}The script will now perform the following actions:{reset}")
-            print(f"{yellow}1. Extract the necessary files from the specified zip file. {white}(If needed){reset}")
+            print(f"{yellow}1. Check that the destination html_root path is empty.{reset}")
             print(f"{yellow}2. Copy the existing/extracted files to the appropriate directories.{reset}")
             print(f"{yellow}3. Apply the correct file and directory permissions.{reset}")
             print(f"{yellow}4. Update the WeeWX configuration based on the provided settings.{reset}")
@@ -661,71 +704,56 @@ class DVMInstaller:
                 sys.exit(1)
 
             do_overwrite = d["over_write"] == "True"
-            extract_path = d.get("extract_to_path", "temp")
-            
-            if zip_file:
-                with ZipFile(zip_file, 'r') as zip_ref:
-                    if not os.path.exists(extract_path):
-                        os.makedirs(extract_path)
+            self.stopWeewx()
+            try:
+                if os.path.exists("user"):
+                    print(f"{white}Copying {yellow}user{white} directory....")
+                    if self.dirNotEmpty('user'):
+                        distutils.dir_util.copy_tree("user", locations["user"], update=do_overwrite)
+                        print(f"{green}Copied {white}user {green}directory successfully{reset}")
                     else:
-                        if not do_overwrite:
-                            response = input("Extract path exists and overwrite set to False. Do you want to abort the install? (yes/no): ").strip()
-                            if response.upper().startswith("Y"):
-                                return
-                        print(f'Extracting all the files to {extract_path}')
-                        zip_ref.extractall(extract_path)
-                        print('Files extracted')
-
-                try:
-                    distutils.dir_util.copy_tree(os.path.join(extract_path, "user"), locations["user"], update=do_overwrite)
-                    distutils.dir_util.copy_tree(os.path.join(extract_path, "skins"), locations["skins"], update=do_overwrite)
-                    self.chgPermRecur([locations["www"]], user_group)
-                except Exception as e:
-                    print(e)
-
-                if d.get("delete_extracted_files") == "True" and extract_path != os.getcwd():
-                    distutils.dir_util.remove_tree(extract_path)
-                    distutils.file_util.copy_file(weewx_config_file, weewx_config_file + f".{int(time.time())}")
-            else:
-                try:
-                    if os.path.exists("user"):
-                        print(f"{white}Copying {yellow}user{white} directory....")
-                        if self.dirNotEmpty('user'):
-                            distutils.dir_util.copy_tree("user", locations["user"], update=do_overwrite)
-                            print(f"{green}Copied {white}user {green}directory successfully{reset}")
-                        else:
-                            print(f"{red}Directory 'user' is empty, unable to copy files.{reset}")
-                            sys.exit(1)
-                    else:
-                        print(f"{red}Directory 'user' does not exist.{reset}")
+                        print(f"{red}Directory 'user' is empty, unable to copy files.{reset}")
                         sys.exit(1)
-                    if os.path.exists("skins"):
-                        print(f"{white}Copying {yellow}skins{white} directory....")
-                        if self.dirNotEmpty('skins'):
-                            distutils.dir_util.copy_tree("skins", locations["skins"], update=do_overwrite)
-                            print(f"{green}Copied {white}skins {green}directory successfully{reset}")
-                        else:
-                            print(f"{red}Directory 'skins' is empty, unable to copy files.{reset}")
-                            sys.exit(1)
+                else:
+                    print(f"{red}Directory 'user' does not exist.{reset}")
+                    sys.exit(1)
+                if os.path.exists("skins"):
+                    print(f"{white}Copying {yellow}skins{white} directory....")
+                    if self.dirNotEmpty('skins'):
+                        distutils.dir_util.copy_tree("skins", locations["skins"], update=do_overwrite)
+                        print(f"{green}Copied {white}skins {green}directory successfully{reset}")
                     else:
-                        print(f"{red}Directory 'skins' does not exist.{reset}")
+                        print(f"{red}Directory 'skins' is empty, unable to copy files.{reset}")
                         sys.exit(1)
-                    if os.path.exists("www"):
-                        print(f"{white}Copying {yellow}www{white} directory....")
-                        if self.dirNotEmpty('www'):
-                            distutils.dir_util.copy_tree("www", locations["www"], update=do_overwrite)
-                            print(f"{green}Copied {white}www {green}directory successfully{reset}")
-                            self.chgPermRecur([locations["www"]], user_group)
-                            print(f"{green}File permissions and ownership in the {white}www {green}directory successfully set{reset}")
-                        else:
-                            print(f"{red}Directory 'www' is empty, unable to copy files.{reset}")
-                            sys.exit(1)
-                    else:
-                        print(f"{red}Directory 'www' does not exist.{reset}")
-                        sys.exit(1)
-                except Exception as e:
-                    print(e)
-
+                else:
+                    print(f"{red}Directory 'skins' does not exist.{reset}")
+                    sys.exit(1)
+                if os.path.exists("www"):
+                    if self.dirNotEmpty(html_root):
+                        while True:
+                            print(f"{yellow}\n\nThe {white}html_root{yellow} patch contains files from your previous skin. These must be removed.{reset}")
+                            user_input = input("Do you want to empty the directory first? (y/n): ").strip().lower()
+                            if user_input == 'y':
+                                self.deleteContents(html_root)
+                                print(f"{green}Directory {html_root} has been emptied.{reset}")
+                                print(f"{white}Copying {yellow}www{white} directory....")
+                                distutils.dir_util.copy_tree("www", locations["www"], update=do_overwrite)
+                                print(f"{green}Copied {white}www {green}directory successfully{reset}")
+                                self.chgPermRecur([locations["www"]], (self.user, self.wsOwner))
+                                print(f"{green}File permissions and ownership in the {white}www {green}directory successfully set{reset}")
+                                break
+                            elif user_input == 'n':
+                                print(f"{red}Not emptying the HTML_ROOT directory of the previous skin's files {reset}")
+                                print(f"{red}can cause {white}SERIOUS{red} issues with DivumWX. You will need to empty the{reset}")
+                                print(f"{red}the directory manually or add a sub-directory to install DivumWX to.{reset}")
+                                sys.exit(1)
+                            else:
+                                print(f"{red}Invalid input. Please enter 'y' or 'n'.{reset}")
+                else:
+                    print(f"{red}Directory 'www' does not exist.{reset}")
+                    sys.exit(1)
+            except Exception as e:
+                print(e)
             timestamp = time.strftime('%Y%m%d%H%M%S')
             backup_file = f"{weewx_config_file}.{timestamp}"
             distutils.file_util.copy_file(weewx_config_file, backup_file)
@@ -772,13 +800,32 @@ class DVMInstaller:
                     if target in line:
                         lines.insert(i, insert_text)
                         break
+            print(f"{white}Checking if default skin, {reset}{cyan}Seasons{reset}{white}is still enabled{reset}")
+            print(f"{white}and disabling if true.{reset}")
+            seasons_found = False
+            for i, line in enumerate(lines):
+                if "[[SeasonsReport]]" in line:
+                    seasons_found = True
+                elif seasons_found and "skin = Seasons" in line:
+                    for j in range(i + 1, len(lines)):
+                        if "enable = true" in lines[j]:
+                            print(f"{yellow}Seasons skin is enabled, disabling{reset}")
+                            lines[j] = lines[j].replace("enable = true", "enable = false")
+                            print(f"{green}Successfully disabled Seasons skin{reset}")
+                            seasons_found = False
+                            break
+                        elif "enable = false" in lines[j]:
+                            print(f"{blue}Seasons skin is already disabled{reset}")
+                            seasons_found = False
+                            break
             time.sleep(2)
             with open(weewx_config_file, 'w') as file:
                 file.writelines(lines)
-            self.setOwnership(wsOwner)
             self.updDatabase()
-            print(f"{white}Done! WeeWX must be {yellow}restarted{white} for changes to become active{reset}")
-            self.restartWeewx()
+            self.setfnlOwner()
+            print(f"{white}Done! WeeWX must be {yellow}started{white} for changes to become active{reset}")
+            print(f"{green}You will need to ensure that your webserver is set to deliver the DivumWX skin{reset}")
+            self.startWeewx()
             
         except Exception as e:
             traceback.print_exc()

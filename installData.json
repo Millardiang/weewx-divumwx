@@ -141,25 +141,52 @@
     },
     "config_entries2": {
         "StdCalibrate": {
-            "Corrections": {
-                "lightning_strike_count": "lightning_strike_count if lightning_strike_count > 0 else 0",
-                "lightning_distance": "None if lightning_strike_count is 0 else lightning_distance"
+            "HeatmapCharts": {
+                "skin": "Heatmaps",
+                "HTML_ROOT": "",
+                "enable": "True",
+                "Units": {
+                    "Groups": {
+                        "group_altitude": "meter",
+                        "group_degree_day": "degree_C_day",
+                        "group_pressure": "hPa",
+                        "group_rain": "mm",
+                        "group_rainrate": "mm_per_hour",
+                        "group_speed": "meter_per_second",
+                        "group_speed2": "meter_per_second2",
+                        "group_temperature": "degree_C"
+                    }
+                }
             }
         }
     },
     "config_entries3": {
+        "StdCalibrate": {
+            "Corrections": {
+                "lightning_strike_count": "lightning_strike_count if lightning_strike_count > 0 else 0",
+                "lightning_distance": "None if lightning_strike_count is 0 else lightning_distance",
+                "stormRain": "0 if stormRain is NULL else stormRain"
+            }
+        }
+    },
+    "config_entries4": {
         "StdWXCalculate": {
             "Calculations": {
                 "AirDensity": "software"
             }
         }
     },
-    "config_entries6": {
+    "config_entries7": {
+        "RadiationDays": {
+            "min_sunshine": "120"
+        }
+    },
+    "config_entries8": {
         "LastNonZero": {
             "algorithm": "simple"
         }
     },
-    "config_entries7": {
+    "config_entries9": {
         "DivumWXRealTime": {
             "HTML_ROOT": "",
             "realtime_path_only": "",
@@ -173,16 +200,31 @@
             "weewx_file_transfer": ""
         }
     },
-    "config_entries8": {
+    "config_entries10": {
         "AirDensity": {
             "algorithm": "simple"
         }
     },
-    "config_entries9": {
+    "config_entries11": {
         "FilePile": {
             "filename": "/serverdata/filepileTextData.txt",
             "unit_system": "US",
             "label_map": {
+                "pm25": "pm2_5",
+                "pm10": "pm10_0",
+                "co": "co",
+                "no2": "no2",
+                "so2": "so2",
+                "o3": "o3",
+                "nh3": "nh3",
+                "aod": "aerosol_optical_depth",
+                "dust": "dust",
+                "alder": "alder_pollen",
+                "birch": "birch_pollen",
+                "olive": "olive_pollen",
+                "grass": "grass_pollen",
+                "mugwort": "mugwort_pollen",
+                "ragweed": "ragweed_pollen",
                 "cloudCover": "cloudcover"
             }
         }
@@ -194,7 +236,8 @@
             "backup_times": ""
         }
     },
-    "config_entries_append": "process_services=user.divumwx.DivumWXRealTime",
-    "config_entries_append2": "xtype_services=user.divumwx.LastNonZeroService, user.divumwx.AirDensityService",
+    "config_entries_append": "process_services = user.divumwx.DivumWXRealTime",
+    "config_entries_append2": "xtype_services = user.divumwx.LastNonZeroService, user.divumwx.AirDensityService",
+    "config_entries_append3" :"data_services = user.divumwx.FilePile",
     "backupScvs1": "process_services=user.dvm_db_backup.DVM_DB_Backup"
 }
