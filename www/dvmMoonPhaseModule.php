@@ -105,5 +105,5 @@ foreach ($meteor_events as $meteor_check) {
 </div>
 
 <?php echo'<div class="divumwxmoonphasem2">Moon Phase<br>'.$alm["moonphase"].'</div>
-<div class="divumwxluminancem2">Luminance<br>'.round($alm["luminance"],2).' %</div>';?>
+<div class="divumwxluminancem2">'.$lang['Illumination'].'<br>'.round($alm["luminance"],2).' %</div>';?>
 </html>
