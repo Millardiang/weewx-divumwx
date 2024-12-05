@@ -5,7 +5,8 @@
 ## If you do this, you should also change the 'Content-Type' metadata below.
 #encoding UTF-8
 ##      
-##
+##calculate
+
 ##Calculate length of daylight
 #set $daylength = time.strftime('%H:%M', time.gmtime(int($almanac.sun.set.raw -  $almanac.sun.rise.raw)))
 ##Truncate station uptime decimals
@@ -134,7 +135,6 @@ $air["current.pm10_0"] = $current.pm10_0.format(add_label=False, format_string="
 $air["24h.rollingavg.pm10_0"] = $current.pm10_0.format(add_label=False, format_string="%.1f");
 #end if
 
-
 //almanac
 ## If extended almanac information is available, do extra calculations.
 #if $almanac.hasExtras
@@ -158,8 +158,6 @@ $air["24h.rollingavg.pm10_0"] = $current.pm10_0.format(add_label=False, format_s
 #else
 #set $phaseDescDM ="$lang['Newmoon']"
 #end if
-
-
 #if $almanac.moon_phase.lower() == "New".lower()
 #set $moonphase_no = "0"
 #else if $almanac.moon_phase.lower() == "Waxing Crescent".lower()
@@ -178,7 +176,10 @@ $air["24h.rollingavg.pm10_0"] = $current.pm10_0.format(add_label=False, format_s
 #set $moonphase_no = "7"
 #end if         
 #import datetime
+#from math import radians as rad, degrees as deg
+#from ephem import Equatorial, Ecliptic
 #set $now = datetime.datetime.now()
+#set $ecliptic_tilt = $deg($Ecliptic(Equatorial('90', '0', epoch = $now)).lat)
 #set $nowHour = $now.hour
 #set $sunrise_hour = datetime.datetime.fromtimestamp($almanac.sunrise.raw).strftime('%H')
 #set $sunset_hour = datetime.datetime.fromtimestamp($almanac.sunset.raw).strftime('%H')
@@ -189,9 +190,7 @@ $air["24h.rollingavg.pm10_0"] = $current.pm10_0.format(add_label=False, format_s
 ## Night time, use dark mode
 ##set $bodyTheme = "dark"
 ##end if 
-
 #set $sun_altitude = $almanac.sun.alt
-
 #if $sun_altitude < 0
 #set $sun_None="<i>(Always down)</i>"
 #set $daylight_str = "00:00"
@@ -224,11 +223,9 @@ $air["24h.rollingavg.pm10_0"] = $current.pm10_0.format(add_label=False, format_s
 ##set $daylight_str = "%s<br/>%s" % ($daylight_str, $delta_str)
 #end if
 #end if
-
-
+$alm["ecliptic_tilt"] = $ecliptic_tilt;
 $alm["sun_altitude"] = round($almanac.sun.alt,2);
 $alm["moon_altitude"] = round($almanac.moon.alt,2);
-
 if ($alm["sun_altitude"] < 0)
 {
 $alm["sun_None"] = "<i>(Always down)</i>";
@@ -298,9 +295,6 @@ if (strtotime(date("G.i")) >= strtotime($alm["sunrise"]) && strtotime(date("G.i"
     $dayPartNatural = "night";
 }
 
-
-
-
 //barometer
 #if $current.barometer.has_data
 $barom["units"] = "$unit.label.barometer";
@@ -359,7 +353,6 @@ $barom["alltime_maxtime"] = date('j M Y H:i',$alltime.barometer.maxtime.raw);
 $barom["alltime_min"] = $alltime.barometer.min.format(add_label=False);
 $barom["alltime_mintime"] = date('j M Y H:i',$alltime.barometer.mintime.raw);
 #end if
-
 
 //dewpoint
 $dew["now"] = $weewxrt[4];
@@ -507,7 +500,6 @@ $rain["year_total"] = round($year.rain.sum.raw,1);
 $rain["alltime_rate_max"] = $alltime.rainRate.max.raw;
 $rain["alltime_rate_maxtime"] = $alltime.rainRate.maxtime.raw;
 $rain["alltime_total"] = round($alltime.rain.sum.raw,1);
-
 #if $current.stormRain.has_data
 $rainStorm = $current.stormRain.raw;
 if(is_numeric($rainStorm) != 1){$rain["storm_rain"] = 0;}
@@ -1010,6 +1002,6 @@ $Tdc = (($Tc-(14.55+0.114*$Tc)*(1-(0.01*$RH))-pow((2.5+0.007*$Tc)*(1-(0.01*$RH))
 $E = (6.11*pow(10,(7.5*$Tdc/(237.7+$Tdc))));
 $wetbulbcalc = (((0.00066*$P)*$Tc)+((4098*$E)/pow(($Tdc+237.7),2)*$Tdc))/((0.00066*$P)+(4098*$E)/pow(($Tdc+237.7),2));
 $wetbulbx = number_format($wetbulbcalc,1);
-  
+include ('dvmCustomData.php');  
   
 ?>
