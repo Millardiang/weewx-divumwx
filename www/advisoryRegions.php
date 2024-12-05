@@ -13,6 +13,9 @@
 #    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
+//  Ian Millard 05/11/24 added styling to links for MetOffice warning links                  #
+//                                                                                           #
+//############################################################################################
 error_reporting(0);
 if ($advisoryzone == "eu") {
     $advisoryzoneMapping = "europe";
@@ -34,7 +37,22 @@ switch ($advisoryzoneMapping) {
         $fCnt = count($flood_json["items"]);
         $aHeader = "Alert(s) or warning(s) currently in force potentially affecting the ";
         echo '<div id="alert">';
-        if ($cnt + $fCnt > 0) {
+        //$cnt = 0;
+        //$fCnt = 1;
+        if ($cnt==0 && $fCnt==0) 
+        { ?>
+ 
+      <section>
+      <div class="alertbar" style="margin-bottom:4px;padding-bottom:10px;background-color:<?php echo $background[$i]; ?>;color:<?php echo $alertColor[$i]; ?>;border-radius:5px;">
+      <div class="alert-text-box" style="padding-left:20px;padding-right:20px;display:flex;margin: 0 auto;">
+		<div class="post" style="font-weight:500; font-size:14px; color:<?php echo $alertColor[$i]; ?>;">There are currently no weather advisories, alerts or warnings in force for Steeple Claydon and Surrounding Area
+			</div></div></div>
+	</section>	
+	
+            
+      <?php
+        }
+        else if ($cnt>0 || $fCnt>0) {
             $aPhrase = $aHeader . $stationlocation . " area.";
         }
         //weather alerts
@@ -51,21 +69,25 @@ switch ($advisoryzoneMapping) {
             if ($level[$i] == "MN") {
                 $background[$i] = "white";
                 $alertColor[$i] = "black";
+                $linkColor[$i] = "darkblue";
                 $alertlevel[$i] = "MINOR";
                 $alertlevelColor[$i] = "MINOR";
             } elseif ($level[$i] == "MD") {
                 $background[$i] = "yellow";
                 $alertColor[$i] = "black";
+                $linkColor[$i] = "darkblue";
                 $alertlevel[$i] = "MODERATE";
                 $alertlevelColor[$i] = "YELLOW";
             } elseif ($level[$i] == "SV") {
                 $background[$i] = "#FFBF00";
                 $alertColor[$i] = "black";
+                $linkColor[$i] = "darkblue";
                 $alertlevel[$i] = "SEVERE";
                 $alertlevelColor[$i] = "AMBER";
             } elseif ($level[$i] == "EX") {
                 $background[$i] = "red";
                 $alertColor[$i] = "white";
+                $linkColor[$i] = "cream";
                 $alertlevel[$i] = "EXTREME";
                 $alertlevelColor[$i] = "RED";
             }
@@ -76,6 +98,9 @@ switch ($advisoryzoneMapping) {
             $expires[$i] = date("D j M H:i", strtotime($parsed_json["response"][$i]["timestamps"]["expiresISO"]));
             $alertHeadline[$i] = "  " . $nameColor[$i] . " ALERT. From " . $begins[$i] . " to " . $expires[$i] . ".  ";
             ?>
+
+    <style>a:link{color:<?php echo $linkColor[$i];?>}a:visited{color:<?php echo $linkColor[$i];?>;}a:hover{color:blue;}a:active{color:green;}</style>
+
  
       <section>
       <div class="alertbar" style="margin-bottom:4px;padding-bottom:10px;background-color:<?php echo $background[$i]; ?>;color:<?php echo $alertColor[$i]; ?>;border-radius:5px;">
@@ -83,7 +108,7 @@ switch ($advisoryzoneMapping) {
 		<div class="post" style="font-weight:500; font-size:14px; color:<?php echo $alertColor[$i]; ?>;">
 			<img src="<?php echo $warnimage[$i]; ?>"style="margin-bottom:-10px;"><?php echo $alertHeadline[$i]; ?>
 			
-			<span class="more" style="padding-top:-20px;display:none;"><p><?php echo $description[$i]; ?><?php  echo"<a href='$url' style='color:<?php echo $alertColor[$i]; ?>'>$url</a>"; ?></p></span>
+			<span class="more" style="padding-top:-20px;display:none;"><p><?php echo $description[$i]; ?><?php  echo"<a href='$url' style='color:<?php echo $linkColor[$i]'>$url</a>"; ?></p></span>
 
 			<more-button class="read">More</more-button>
 		</div></div></div></div>

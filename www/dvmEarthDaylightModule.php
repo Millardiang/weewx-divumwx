@@ -13,8 +13,10 @@
 #    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
+//  Ian Millard 05/11/24 updated to use dvmCombinedData.php.tmpl ecliptic angle              #
+//                                                                                           #
+//############################################################################################
 include('dvmCombinedData.php');
-include('dvmEclipticData.php');
 date_default_timezone_set($TZ);
 header('Content-type: text/html; charset=utf-8');
 $earthimg = "img/earth-1.jpg";
@@ -62,6 +64,6 @@ $sun_elevation = round($sun_alt,2)."°<div class=sunbelowdivumwx> </div>";
 <circle cx="80" cy="80" r="60" stroke="<?php echo $circleborder;?>" stroke-width="21.5" fill="none" />
 </svg> 
 </div>
-<?php echo'<div class="divumwxeclipticangle">Ecliptic Angle<br><maxred>'.number_format($EclipticAngle,5).'°</maxred></div>';?>
+<?php echo'<div class="divumwxeclipticangle">Ecliptic Angle<br><maxred>'.number_format($alm["ecliptic_tilt"],5).'°</maxred></div>';?>
 <?php echo'<div class="divumwxequinox">Next Equinox<br><blueu>'.$alm["next_equinox"].'</blueu></div>';?>
 </html>
