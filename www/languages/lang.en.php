@@ -166,6 +166,8 @@ $lang['Flooding']                = 'Flooding Possible';
 $lang['Rainbow']                 = 'Rainbow';
 $lang['Windy']                   = 'Windy';
 //sun -moon-daylight-darkness
+$lang['Rise']                    = 'Rise';
+$lang['CelestialData']           = 'Celestial Data';
 $lang['Sun']                     = 'Sun';
 $lang['Moon']                    = 'Moon';
 $lang['Sunrise']                 = 'Sun Rise';

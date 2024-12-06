@@ -56,7 +56,7 @@ foreach ($meteor_events as $meteor_check) {
 <html lang="en">
 
 <div class="chartforecast">
-<span class="yearpopup"><a alt="Moon Info" title="Moon Info" href="dvmMenuCelestialPopup.php" data-lity><?php echo $info;?> Celestial Data</a></span>
+<span class="yearpopup"><a alt="Moon Info" title="Moon Info" href="dvmMenuCelestialPopup.php" data-lity><?php echo $info;?> <?php echo $lang['CelestialData'];?></a></span>
 </div>
 <span class='moduletitle'><?php echo $lang['moonPhaseModule'];?></span>
 
@@ -66,7 +66,7 @@ foreach ($meteor_events as $meteor_check) {
 <div class="moonrise1">
 <svg id="divumwx moon rise" viewBox="0 0 32 32" width="6" height="6" fill="none" stroke="#01a4b5" stroke-linecap="round" stroke-linejoin="round" stroke-width="10%">    
 <path d="M30 20 L16 8 2 20" /></svg>
- <?php echo $lang['Moon'];?> <br /><?php  echo 'Rise<blueu> ' .$alm["moonrise"].'</blueu>';?>
+ <?php echo $lang['Moon'];?> <br /><?php  echo $lang['Rise'].' <blueu>'  .$alm["moonrise"].'</blueu>';?>
 
 <div class="moonmodulepos">
 <div id = "dldata">
@@ -104,6 +104,6 @@ foreach ($meteor_events as $meteor_check) {
 <?php echo $meteor_default;?>
 </div>
 
-<?php echo'<div class="divumwxmoonphasem2">Moon Phase<br>'.$alm["moonphase"].'</div>
+<?php echo'<div class="divumwxmoonphasem2">'.$lang['Moonphase'].'<br>'.$alm["moonphase"].'</div>
 <div class="divumwxluminancem2">'.$lang['Illumination'].'<br>'.round($alm["luminance"],2).' %</div>';?>
 </html>

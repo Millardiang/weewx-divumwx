@@ -1,6 +1,10 @@
+/*new changes since last update
+ 05-12-24 added --col-22 at lines 1 and 2 - popup link hover color
+ 06-12-24 adjustments to light theme
+*/
 /*--col-6 for white */
 :root{--col-1:#151819;--col-2:#1f2024;--col-3:#26282c;--col-4:#2e8b57;--col-5:#488fcc;--col-6:#FFFFFF;--col-7:#000000;--col-8:#00FF00;--col-9:#FF0000;--col-10:#2d2f32;--col-11:#ffffff;--col-12:#47494d;--col-13:#393d40;--col-14:#999999;--col-15:#393d40;--col-16:#3b3c3f;--col-17:#ffffff;--col-18:#38383c;--col-19:#000000;--col-20:#b9cff7;--col-21:#c0c0c0;--col-22:silver;--font:Arial,Helvetica,sans-serif;}
-[data-theme="light"]{--col-1:#e0eafb;--col-2:#c9daf9;--col-3:#b9cff7;--col-4:#488fcc;--col-5:#488fcc;--col-6:#1c4263;--col-7:#ffffff;--col-8:#00FF00;--col-9:#FF0000;--col-10:#e0eafb;--col-11:#ffffff;--col-12:#898990;--col-13:var(--col-6);--col-14:#999999;--col-15:#e9ebf1;--col-16:#e6e8ef;--col-17:#777777;--col-18:#aac5f5;--col-19:#1c4263;--col-20:#cccccc;--col-21:#808080;--col-22:darkblue;---font:Arial,Helvetica,sans-serif;
+[data-theme="light"]{--col-1:#ebf5f9;--col-2:#d8ecf3;--col-3:#c4e2ed;--col-4:#488fcc;--col-5:#488fcc;--col-6:#1c4263;--col-7:#ffffff;--col-8:#00FF00;--col-9:#FF0000;--col-10:#e0eafb;--col-11:#ffffff;--col-12:#898990;--col-13:var(--col-6);--col-14:#999999;--col-15:#e9ebf1;--col-16:#e6e8ef;--col-17:#777777;--col-18:#aac5f5;--col-19:#1c4263;--col-20:#cccccc;--col-21:#808080;--col-22:darkblue;---font:Arial,Helvetica,sans-serif;
 .divumwxbeaufort0{background:#85a3aa;}
 .divumwxbeaufort1{background:#7e98bb;}
 .divumwxbeaufort2{background:#6e90d0;}
@@ -1200,9 +1204,6 @@ transition: all 1s;}
 .closebtn{margin-left:15px;color:#000000;font-weight:bold;float:right;font-size:22px;line-height:20px;cursor:pointer;transition:0.3s;}
 .closebtn:hover{color:grey;}
 .module{width:315px;height:195px;text-align:center;}
-/*new changes since last update
- 05-12-24 added --col-22 at lines 1 and 2 - popup link hover color*/
-
 /*media section*/
 @media (prefers-color-scheme:dark){
 html{background-color:#000000;color:#ffffff;}
