@@ -522,9 +522,6 @@ if(is_numeric($sky["cloud_cover"]) != 1){$sky["cloud_cover"] = 0;}
 
 //solar
 #if $current.radiation.has_data
-$solar["generation"] = round($current.solarGeneration.raw,0,PHP_ROUND_HALF_UP);
-$solar["day_generation_max"] = round($day.solarGeneration.max.raw,0,PHP_ROUND_HALF_UP);
-$solar["day_generation_maxtime"] = date('H:i',$day.solarGeneration.maxtime.raw);
 //illuminance (or luminous flux) lux value
 #if $current.illuminance.has_data
 $solar["lux"] = round($current.illuminance.raw,0,PHP_ROUND_HALF_UP);
