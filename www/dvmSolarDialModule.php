@@ -55,7 +55,7 @@ $sun_elevation = round($sun_alt,2)."°<div class=sunbelowdivumwx> </div>";
 <div class="elevationword"><value>Sun Elevation<span><value><maxred> '.$alm["sun_altitude"].'°</maxred></value></span></div>
 <div class="sundialcontainerdiv2"><div id="sundialcontainer" class=sundialcontainer><div class="suncanvasstyle"></div></div>
 <div class="divumwxmoonphasem"><value>'.$lang["Moonphase"].'<span><value><br>'.$alm["moonphase"].'<br>'.$lang['Moonrise'].'<br>'.'<blueu> '.$alm["moonrise"].'</blueu></div>
-<div class="divumwxluminancem"><value>'.$lang["Luminance"].'<span><value><br> '.$alm["luminance"].' %<br>'.$lang['Moonset'].'<br>'.'<maxred> '.$alm["moonset"].'</maxred></div>';?>
+<div class="divumwxluminancem"><value>'.$lang["Illumination"].'<span><value><br> '.$alm["luminance"].' %<br>'.$lang['Moonset'].'<br>'.'<maxred> '.$alm["moonset"].'</maxred></div>';?>
 
 <script src="js/two.js"></script>
  

@@ -13,27 +13,25 @@
 #    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
-
 $chkReqStatusFile = __DIR__ . '/chkReqstatus.json';
 if (file_exists($chkReqStatusFile)) {
     unlink($chkReqStatusFile);
 }
 
 function findWeeWXBinary($userHome) {
-    $directory = new RecursiveDirectoryIterator($userHome, FilesystemIterator::SKIP_DOTS);
-    $iterator = new RecursiveIteratorIterator(
-        new RecursiveCallbackFilterIterator($directory, function ($current) {
-            // Skip hidden files and directories (names starting with a dot)
-            if ($current->getFilename()[0] === '.') {
-                return false;
-            }
-            return true;
-        })
-    );
+    $binaryPath = $userHome . '/weewx-venv/bin/weewxd';
+    if (is_file($binaryPath) && is_executable($binaryPath)) {
+        return $binaryPath;
+    }
+    return false;
+}
 
-    foreach ($iterator as $file) {
-        if ($file->isFile() && $file->getFilename() == 'weewxd' && is_executable($file->getPathname())) {
-            return $file->getPathname();
+function findUserHomeWithWeeWX() {
+    $userDirs = glob('/home/*', GLOB_ONLYDIR);
+    foreach ($userDirs as $userDir) {
+        $binary = findWeeWXBinary($userDir);
+        if ($binary) {
+            return $userDir;
         }
     }
     return false;
@@ -79,9 +77,8 @@ function getGroupName($groupId) {
 }
 
 function checkDirectory($path, $expectedPerms, $expectedOwner, $expectedGroup, &$debug) {
-    // Skip directories that start with a dot
     if (strpos(basename($path), '.') === 0) {
-        return ['status' => true, 'perms' => null, 'owner' => null, 'group' => null]; // Assume success for hidden directories
+        return ['status' => true, 'perms' => null, 'owner' => null, 'group' => null];
     }
 
     if (!is_dir($path)) {
@@ -91,15 +88,6 @@ function checkDirectory($path, $expectedPerms, $expectedOwner, $expectedGroup, &
     $perms = substr(sprintf('%o', fileperms($path)), -4);
     $owner = getOwnerName(fileowner($path));
     $group = getGroupName(filegroup($path));
-    if ($perms != $expectedPerms) {
-        $debug[$path] = "Permissions are $perms, expected $expectedPerms.";
-    }
-    if ($owner != $expectedOwner) {
-        $debug[$path] = "Owner is $owner, expected $expectedOwner.";
-    }
-    if ($group != $expectedGroup) {
-        $debug[$path] = "Group is $group, expected $expectedGroup.";
-    }
     return [
         'status' => $perms == $expectedPerms && $owner == $expectedOwner && $group == $expectedGroup,
         'perms' => $perms,
@@ -109,9 +97,8 @@ function checkDirectory($path, $expectedPerms, $expectedOwner, $expectedGroup, &
 }
 
 function checkFile($path, $expectedPerms, $expectedOwner, $expectedGroup, &$debug) {
-    // Skip files that start with a dot
     if (strpos(basename($path), '.') === 0) {
-        return ['status' => true, 'perms' => null, 'owner' => null, 'group' => null]; // Assume success for hidden files
+        return ['status' => true, 'perms' => null, 'owner' => null, 'group' => null];
     }
 
     if (!is_file($path)) {
@@ -121,15 +108,6 @@ function checkFile($path, $expectedPerms, $expectedOwner, $expectedGroup, &$debu
     $perms = substr(sprintf('%o', fileperms($path)), -4);
     $owner = getOwnerName(fileowner($path));
     $group = getGroupName(filegroup($path));
-    if ($perms != $expectedPerms) {
-        $debug[$path] = "Permissions are $perms, expected $expectedPerms.";
-    }
-    if ($owner != $expectedOwner) {
-        $debug[$path] = "Owner is $owner, expected $expectedOwner.";
-    }
-    if ($group != $expectedGroup) {
-        $debug[$path] = "Group is $group, expected $expectedGroup.";
-    }
     return [
         'status' => $perms == $expectedPerms && $owner == $expectedOwner && $group == $expectedGroup,
         'perms' => $perms,
@@ -137,8 +115,6 @@ function checkFile($path, $expectedPerms, $expectedOwner, $expectedGroup, &$debu
         'group' => $group
     ];
 }
-
-$requiredModules = ['intl', 'json', 'mysqli', 'pdo_sqlite', 'random', 'session', 'sqlite3'];
 
 function getScriptOwnerAndGroup() {
     $scriptPath = __DIR__;
@@ -157,8 +133,16 @@ function getCurrentUser() {
 
 list($scriptOwner, $scriptGroup) = getScriptOwnerAndGroup();
 $currentUser = getCurrentUser();
-$ownerInfo = posix_getpwnam($scriptOwner);
-$userHome = $ownerInfo['dir'];
+
+if ($scriptOwner === 'www-data' && $scriptGroup === 'www-data') {
+    $userHome = findUserHomeWithWeeWX();
+    if (!$userHome) {
+        die(json_encode(['error' => 'WeeWX binary not found under any user home directory']));
+    }
+} else {
+    $ownerInfo = posix_getpwnam($scriptOwner);
+    $userHome = $ownerInfo['dir'];
+}
 
 $directories = [
     ['path' => './admin', 'perms' => '0775', 'owner' => $scriptOwner, 'group' => $scriptGroup],
@@ -170,7 +154,7 @@ $directories = [
 $results = [
     'weewx' => checkWeeWXVersion($userHome),
     'php_version' => checkPHPVersion(),
-    'php_modules' => checkPHPModules($requiredModules),
+    'php_modules' => checkPHPModules(['intl', 'json', 'mysqli', 'pdo_sqlite', 'random', 'session', 'sqlite3']),
     'directories' => [],
     'running_user' => $currentUser,
 ];

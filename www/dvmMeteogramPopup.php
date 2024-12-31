@@ -1,17 +1,19 @@
 <?php
-#####################################################################################################################                                                                                                        #
-#                                                                                                                   #
-# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
-#                                                                                                                   #
-# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
-#                                                                                                                   #
-# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
-#                                                                                                                   #
-# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
-#                                                                                                                   #
-#####################################################################################################################
-?>
-<?php
+##############################################################################################
+#        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
+#       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    #
+#       (.  ___  :)||  |\   \  //  / |   (  ) : | \   \  //   |  |'  /    \:  | \   \  /     #
+#       |: \   ) |||:  | \\  \/. ./  (:  |  | . ) /\\  \/.    |  |: /'        |  \\  \/      #
+#       (| (___\ |||.  |  \.    //    \\ \__/ // |: \.        |   \//  /\'    |  /\.  \      #
+#       |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \     #
+#       (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|    #
+#                                                                                            #
+#     Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      #
+#      Distributed under terms of the GPLv3.  See the file LICENSE.txt for your rights.      #
+#    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
+#                    https://github.com/Millardiang/weewx-divumwx/issues                     #
+##############################################################################################
+
 include('dvmCombinedData.php');
 //chart theme
 if ($theme === "dark")
@@ -114,7 +116,8 @@ else
   background: #f1f7ff;
 }
 </style>
-<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/stock/highstock.js"></script>
+<script src="https://code.highcharts.com/stock/highcharts-more.js"></script>
 <script src="https://code.highcharts.com/modules/windbarb.js"></script>
 <script src="https://code.highcharts.com/modules/pattern-fill.js"></script>
 <script src="https://code.highcharts.com/modules/data.js"></script>
@@ -571,7 +574,7 @@ Meteogram.prototype.getChartOptions = function () {
         text: null
       },
       labels: {
-        format: '{value}°',
+        format: '{value}째',
         style: {
           fontSize: '10px',
           color: '<?php echo $text;?>'
@@ -654,7 +657,7 @@ Meteogram.prototype.getChartOptions = function () {
       },
       tooltip: {
         pointFormat: '<span style="color:{point.color}">\u25CF</span> ' +
-          '{series.name}: <b>{point.y}°<?php echo $temp["units"];?></b><br/>'
+          '{series.name}: <b>{point.y}째<?php echo $temp["units"];?></b><br/>'
       },
       zIndex: 1,
       color: '#FF3333',

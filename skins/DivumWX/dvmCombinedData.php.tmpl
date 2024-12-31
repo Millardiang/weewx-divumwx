@@ -5,40 +5,13 @@
 ## If you do this, you should also change the 'Content-Type' metadata below.
 #encoding UTF-8
 ##      
-##
+##calculate
+
 ##Calculate length of daylight
 #set $daylength = time.strftime('%H:%M', time.gmtime(int($almanac.sun.set.raw -  $almanac.sun.rise.raw)))
 ##Truncate station uptime decimals
 #set $stationuptime = $alltime.outTemp.firsttime   
-#if $almanac.moon_phase.lower() == "New".lower()
-#set $moonphase_no = "0"
-#else if $almanac.moon_phase.lower() == "Waxing Crescent".lower()
-#set $moonphase_no = "1"
-#else if $almanac.moon_phase.lower() == "First Quarter".lower()
-#set $moonphase_no = "2"
-#else if $almanac.moon_phase.lower() == "Waxing Gibbous".lower()
-#set $moonphase_no = "3"
-#else if $almanac.moon_phase.lower() == "Full".lower()
-#set $moonphase_no = "4"
-#else if $almanac.moon_phase.lower() == "Waning Gibbous".lower()
-#set $moonphase_no = "5"
-#else if $almanac.moon_phase.lower() == "Last Quarter".lower()
-#set $moonphase_no = "6"
-#else if $almanac.moon_phase.lower() == "Waning Crescent".lower()
-#set $moonphase_no = "7"
-#end if         
-#import datetime
-#set $now = datetime.datetime.now()
-#set $nowHour = $now.hour
-#set $sunrise_hour = datetime.datetime.fromtimestamp($almanac.sunrise.raw).strftime('%H')
-#set $sunset_hour = datetime.datetime.fromtimestamp($almanac.sunset.raw).strftime('%H')
-##if $sunrise_hour <= $nowHour < $sunset_hour ## This works but to keep it inline with JavaScript the below works too
-##if int($sunrise_hour) <= int($nowHour) and int($nowHour) < int($sunset_hour)
-##set $bodyTheme = "light"
-##else
-## Night time, use dark mode
-##set $bodyTheme = "dark"
-##end if  
+ 
 #set $mlsc = "N/A"
 #if $varExists('month.lightning_strike_count') and $month.lightning_strike_count.sum is not None 
 #set $mlsc = $month.lightning_strike_count.sum 
@@ -162,12 +135,62 @@ $air["current.pm10_0"] = $current.pm10_0.format(add_label=False, format_string="
 $air["24h.rollingavg.pm10_0"] = $current.pm10_0.format(add_label=False, format_string="%.1f");
 #end if
 
-
 //almanac
 ## If extended almanac information is available, do extra calculations.
 #if $almanac.hasExtras
-#set $sun_altitude = $almanac.sun.alt
+##moonphase description, David Marshall method
 #set $moonDays = ($current.dateTime.raw - $almanac.previous_new_moon.raw)/86400
+#set $illumination = $almanac.moon.moon_fullness
+#if $illumination > 2 and $illumination < 48 and $moonDays < 15
+#set $phaseDescDM ="$lang['Waxingcrescent']"
+#else if $illumination >= 48 and $illumination <= 52 and $moonDays < 15
+#set $phaseDescDM ="$lang['Firstquarter']" 
+#else if $illumination > 52 and $illumination < 98 and $moonDays < 15
+#set $phaseDescDM ="$lang['Waxinggibbous']"
+#else if $illumination >= 98
+#set $phaseDescDM="$lang['Fullmoon']"
+#else if $illumination < 98 and $illumination > 52 and $moonDays > 14
+#set $phaseDescDM ="$lang['Waninggibbous']"
+#else if $illumination >= 48 and $illumination <= 52 and $moonDays > 14 
+#set $phaseDescDM ="$lang['Lastquarter']"
+#else if $illumination < 48 and $illumination > 2 and $moonDays > 14
+#set$phaseDescDM ="$lang['Waningcrescent']"
+#else
+#set $phaseDescDM ="$lang['Newmoon']"
+#end if
+#if $almanac.moon_phase.lower() == "New".lower()
+#set $moonphase_no = "0"
+#else if $almanac.moon_phase.lower() == "Waxing Crescent".lower()
+#set $moonphase_no = "1"
+#else if $almanac.moon_phase.lower() == "First Quarter".lower()
+#set $moonphase_no = "2"
+#else if $almanac.moon_phase.lower() == "Waxing Gibbous".lower()
+#set $moonphase_no = "3"
+#else if $almanac.moon_phase.lower() == "Full".lower()
+#set $moonphase_no = "4"
+#else if $almanac.moon_phase.lower() == "Waning Gibbous".lower()
+#set $moonphase_no = "5"
+#else if $almanac.moon_phase.lower() == "Last Quarter".lower()
+#set $moonphase_no = "6"
+#else if $almanac.moon_phase.lower() == "Waning Crescent".lower()
+#set $moonphase_no = "7"
+#end if         
+#import datetime
+#from math import radians as rad, degrees as deg
+#from ephem import Equatorial, Ecliptic
+#set $now = datetime.datetime.now()
+#set $ecliptic_tilt = $deg($Ecliptic(Equatorial('90', '0', epoch = $now)).lat)
+#set $nowHour = $now.hour
+#set $sunrise_hour = datetime.datetime.fromtimestamp($almanac.sunrise.raw).strftime('%H')
+#set $sunset_hour = datetime.datetime.fromtimestamp($almanac.sunset.raw).strftime('%H')
+##if $sunrise_hour <= $nowHour < $sunset_hour ## This works but to keep it inline with JavaScript the below works too
+##if int($sunrise_hour) <= int($nowHour) and int($nowHour) < int($sunset_hour)
+##set $bodyTheme = "light"
+##else
+## Night time, use dark mode
+##set $bodyTheme = "dark"
+##end if 
+#set $sun_altitude = $almanac.sun.alt
 #if $sun_altitude < 0
 #set $sun_None="<i>(Always down)</i>"
 #set $daylight_str = "00:00"
@@ -200,11 +223,9 @@ $air["24h.rollingavg.pm10_0"] = $current.pm10_0.format(add_label=False, format_s
 ##set $daylight_str = "%s<br/>%s" % ($daylight_str, $delta_str)
 #end if
 #end if
-#end if
-#if $almanac.hasExtras
+$alm["ecliptic_tilt"] = $ecliptic_tilt;
 $alm["sun_altitude"] = round($almanac.sun.alt,2);
 $alm["moon_altitude"] = round($almanac.moon.alt,2);
-
 if ($alm["sun_altitude"] < 0)
 {
 $alm["sun_None"] = "<i>(Always down)</i>";
@@ -236,12 +257,12 @@ $alm["astronomical_twilight_begin"] = "$almanac(horizon=-18).sun(use_center=1).r
 $alm["astronomical_twilight_end"] = "$almanac(horizon=-18).sun(use_center=1).set.format(format_string="%H:%M")";
 $alm["sun_meridian_transit"] = "$almanac.sun.transit.format(format_string="%H:%M")";
 $alm["moon_meridian_transit"] = "$almanac.moon.transit.format(format_string="%H:%M")";
-$alm["moonphase"] = "$almanac.moon_phase";
+$alm["moonphase"] = $phaseDescDM;
 $alm["moonphase_number"] = $moonphase_no;
 $alm["moon_age"] = $moonDays;
 $alm["hour_sun"] = $(almanac.sun.ha % 360.0);
 $alm["hour_moon"] = $(almanac.moon.ha % 360.0);
-$alm["luminance"] = round($almanac.moon.moon_fullness,2);
+$alm["luminance"] = round($illumination,2);
 $alm["fullmoon"] = "$almanac.next_full_moon.format("%d %b %H:%M")";
 $alm["newmoon"] = "$almanac.next_new_moon.format("%d %b %H:%M")";   
 $alm["daylight"] = "$daylength";
@@ -273,9 +294,6 @@ if (strtotime(date("G.i")) >= strtotime($alm["sunrise"]) && strtotime(date("G.i"
 }else{
     $dayPartNatural = "night";
 }
-
-
-
 
 //barometer
 #if $current.barometer.has_data
@@ -335,7 +353,6 @@ $barom["alltime_maxtime"] = date('j M Y H:i',$alltime.barometer.maxtime.raw);
 $barom["alltime_min"] = $alltime.barometer.min.format(add_label=False);
 $barom["alltime_mintime"] = date('j M Y H:i',$alltime.barometer.mintime.raw);
 #end if
-
 
 //dewpoint
 $dew["now"] = $weewxrt[4];
@@ -483,7 +500,6 @@ $rain["year_total"] = round($year.rain.sum.raw,1);
 $rain["alltime_rate_max"] = $alltime.rainRate.max.raw;
 $rain["alltime_rate_maxtime"] = $alltime.rainRate.maxtime.raw;
 $rain["alltime_total"] = round($alltime.rain.sum.raw,1);
-
 #if $current.stormRain.has_data
 $rainStorm = $current.stormRain.raw;
 if(is_numeric($rainStorm) != 1){$rain["storm_rain"] = 0;}
@@ -506,9 +522,22 @@ if(is_numeric($sky["cloud_cover"]) != 1){$sky["cloud_cover"] = 0;}
 
 //solar
 #if $current.radiation.has_data
+//illuminance (or luminous flux) lux value
+#if $current.illuminance.has_data
+$solar["lux"] = round($current.illuminance.raw,0,PHP_ROUND_HALF_UP);
+$solar["day_lux_max"] = round($day.illuminance.max.raw,0,PHP_ROUND_HALF_UP);
+$solar["day_lux_maxtime"] = "$day.illuminance.maxtime.raw";
+##if luminosity is used in database to store illuminance lux values
+#else if $current.luminosity.has_data
 $solar["lux"] = round($current.luminosity.raw,0,PHP_ROUND_HALF_UP);
 $solar["day_lux_max"] = round($day.luminosity.max.raw,0,PHP_ROUND_HALF_UP);
 $solar["day_lux_maxtime"] = "$day.luminosity.maxtime.raw";
+##if illuminance lux value is derived from radiation
+#else
+$solar["lux"] = round($weewxrt[45]/0.00809399477,0,PHP_ROUND_HALF_UP);
+$solar["day_lux_max"] = round($day.radiation.max.format($localize=False,add_label=False)/0.00809399477,0,PHP_ROUND_HALF_UP);
+$solar["day_lux_maxtime"] = date('H:i',$day.radiation.maxtime.raw);
+#end if
 $solar["threshold"] = round($current.threshold.raw,0,PHP_ROUND_HALF_UP);
 $solar["sun_duration_minutes"] = $day.sunshine_time.sum.raw;
 $solar["sun_duration_hours_minutes"] = intdiv($solar["sun_duration_minutes"], 60).'hr:'. ($solar["sun_duration_minutes"] % 60).'min';
@@ -539,6 +568,8 @@ else if($temp["units"] == "°F")
 {
 $temp["units"] = "F";
 }
+// indoor temp
+#if $current.outTemp.has_data
 $temp["indoor_now"] = $weewxrt[22];
 #if $trend.inTemp.has_data
 $temp["indoor_trend"] = round($trend.inTemp.raw,1);
@@ -546,11 +577,14 @@ if(is_numeric($temp["indoor_trend"]) != 1){$temp["indoor_trend"] = 0;}
 #end if
 $temp["indoor_day_max"] = $day.inTemp.max.format(add_label=False);
 $temp["indoor_day_min"] = $day.inTemp.min.format(add_label=False);
-$temp["outside_now"] = $weewxrt[2];
+#end if
+//outside temperature
+#if $current.outTemp.has_data
 #if $trend.outTemp.has_data
 $temp["outside_trend"] = round($trend.outTemp.raw,1);
 if(is_numeric($temp["outside_trend"]) != 1){$temp["outside_trend"] = 0;}
 #end if
+$temp["outside_now"] = $weewxrt[2];
 $temp["apptemp"] = $weewxrt[54];
 $temp["heatindex"] = $weewxrt[41];
 $temp["windchill"] = round($weewxrt[24],1);
@@ -583,6 +617,8 @@ $temp["outside_alltime_max"] = $alltime.outTemp.max.format(add_label=False);
 $temp["outside_alltime_maxtime"] = date('j M Y H:i',$alltime.outTemp.maxtime.raw);
 $temp["outside_alltime_min"] = $alltime.outTemp.min.format(add_label=False);
 $temp["outside_alltime_mintime"] = date('j M Y H:i',$alltime.outTemp.mintime.raw);
+#end if
+//feels like indoors
 $Temp = $temp["indoor_now"];
 $Humidity = $humid["indoors_now"];
 $T = $Temp*9/5+32;
@@ -595,7 +631,6 @@ else if ($RH>85&&$T>=80&&$T<=87){$adjust=(($RH-85)/10)*((87-$T)/5);$HI=$HI+$adju
 else if ($T<80){$HI=0.5*($T+61.0+(($T-68.0)*1.2)+($RH*0.094));}
 $temp["indoor_now_feels"] = number_format($HI, 1);
 $temp["indoor_now_feels_degC"] = (number_format($HI, 1)-32)*5/9;
-
 
 //uv
 $uv["now"] = $weewxrt[43];
@@ -964,6 +999,6 @@ $Tdc = (($Tc-(14.55+0.114*$Tc)*(1-(0.01*$RH))-pow((2.5+0.007*$Tc)*(1-(0.01*$RH))
 $E = (6.11*pow(10,(7.5*$Tdc/(237.7+$Tdc))));
 $wetbulbcalc = (((0.00066*$P)*$Tc)+((4098*$E)/pow(($Tdc+237.7),2)*$Tdc))/((0.00066*$P)+(4098*$E)/pow(($Tdc+237.7),2));
 $wetbulbx = number_format($wetbulbcalc,1);
-  
+include ('dvmCustomData.php');  
   
 ?>

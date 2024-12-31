@@ -1,5 +1,3 @@
-<!DOCTYPE html> 
-<html lang="en">
 <?php
 include ('dvmCombinedData.php');
 date_default_timezone_set($TZ);
@@ -18,42 +16,19 @@ date_default_timezone_set($TZ);
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
 ?>
+<!DOCTYPE html> 
+<html lang="en">
 <head> 
 <meta charset="utf-8">
 <title>Geocentric View for weewx</title>
 <div class="chartforecast">
-<span class="yearpopup"><a alt="SunMoon" title="SunMoon" href="dvmSunPath.php" data-lity><?php echo $menucharticonpage;?> Geocentric</a></span>
+<span class="yearpopup"><a alt="Meeus" title="Meeus" href="dvmMeeusLiveModule.php" data-lity><?php echo $menucharticonpage;?> Geocentric Meeus Live</a></span>
+<span class="yearpopup"><a alt="Meeus" title="Meeus" href="dvmSunPath.php" data-lity><?php echo $menucharticonpage;?> Geocentric Chart</a></span>
 </div>
 <span class='moduletitle'><?php echo 'Geocentric';?></span>
 <div class="updatedtime1"><span><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?></div>
 </head>
 <body>
-
-<!--style>
-
-// make sure your have these variables in your dvmCombinedData.php.tmpl
-
-$alm["moon_azimuth"] = $almanac.moon.az;
-$alm["sun_altitude"] = $almanac.sun.alt;
-
-$alm["moon_azimuth"] = $almanac.moon.az;
-$alm["moon_altitude"] = $almanac.moon.alt;
-
-$alm["sun_right_ascension"] = $almanac.sun.ra;
-$alm["sun_declination"] = $almanac.sun.dec;
-
-$alm["moon_right_ascension"] = $almanac.moon.ra;
-$alm["moon_declination"] = $almanac.moon.dec;
-
-// divumwx.main.css
-// comment out or delete your old Geocentric css then add the new css below.
-// once you have done everything you can delete this text within the style brackets and enjoy !
-
-.Geocentric{position:relative;top:-2px;left:0px;text{fill:"var(--col-6)";font-family:Helvetica;font-size:7.5px;}
-path{stroke:#555;stroke-width:1;fill:none;}.horizon.line{stroke:#007fff;stroke-width:1;fill:none;stroke-linecap:round;}
-line{stroke:#555;stroke-width:1;stroke-linecap:round;fill:none;}.zenith.line{stroke:#2e8b57;stroke-width:1;fill:none;stroke-linecap:round;}}
-
-</style--> 
 
 <script src="js/d3.7.9.0.min.js"></script>
 
@@ -63,9 +38,9 @@ line{stroke:#555;stroke-width:1;stroke-linecap:round;fill:none;}.zenith.line{str
 
 var latitude = <?php echo $lat;?>; 
 var longitude = <?php echo $lon;?>;
-var hemisphere;
 
-if (latitude >= "0") {
+var hemisphere;
+if (latitude >= 0.0) {
   <?php echo "hemisphere = 0";?>;
 } else {
   <?php echo "hemisphere = 1";?>;
@@ -77,6 +52,13 @@ function toDegrees(x) {
 
 function toRadians(x) {
   return x * (Math.PI / 180.0);
+}
+
+function nan(x) {
+  if (isNaN(x)) {
+    return 180.0;
+  }
+  return x;
 }
 
 var delta = <?php echo $alm["sun_declination"];?>;
@@ -210,23 +192,11 @@ if (hemisphere == 1) {
   }
 }
 
-/*
-At 180 degrees (The Meridian Transit, the sun and moon's highest point), 
-in the loop data set for both of the curves there is a NaN.
-We can test for this and replace it with 180.0 otherwise 
-the curve(s) will not exist for 60 seconds.
-*/
-function nan(x) {
-  if (isNaN(x)) {
-    return 180.00000000000000;
-  }
-  return x;
-}
-
-// Create some fake data to populate the chart scale 
-
+// Create some fake data to populate a d3.js chart scale 
 var suncurve = [[0.0, 0.0],[0.0, 0.0]];
 var mooncurve = [[0.0, 0.0],[0.0 ,0.0]];
+
+var innerColor = "rgb(230, 200, 200)";
 
 var sunData = [];
 for(var i = 1; i < suncurve.length; i++) {
@@ -238,11 +208,22 @@ for(var i = 1; i < mooncurve.length; i++) {
   moonData = [...moonData,[mooncurve[i - 1],mooncurve[i]]]
 };
 
+// Create the d3 chart and add the sun and moon data 
 var w = 310;
 var h = 160;
 var padding = 25;
 var padding_up = 8;
 
+if (latitude < 0.0) {
+var xScale = d3.scaleLinear()
+    .domain([360, 0])
+    .range([padding, w - padding + 16]);
+
+var yScale = d3.scaleLinear()
+    .domain([-100, 100])
+    .range([h - padding, padding_up]);
+
+} else {
 var xScale = d3.scaleLinear()
     .domain([0, 360])
     .range([padding, w - padding + 16]);
@@ -250,6 +231,7 @@ var xScale = d3.scaleLinear()
 var yScale = d3.scaleLinear()
     .domain([-80, 80])
     .range([h - padding, padding_up]);
+}
 
 var svg = d3.select('.Geocentric')
     .append('svg')
@@ -266,15 +248,24 @@ var xAxis = d3.axisBottom(xScale)
     .ticks(9)
     .tickSize(4)
     .tickPadding(3)
-    .tickFormat(function(d) { return d + "\u00B0";})
+    .tickFormat(function(d) { return d + "°";})
     .tickValues([0, 45, 90, 135, 180, 225, 270, 315, 360]);
 
+if (latitude < 0.0) {
 var yAxis = d3.axisLeft(yScale)
     .ticks(9)
     .tickSize(4)
     .tickPadding(2)
-    .tickFormat(function(d) { return d + "\u00B0";})
-    .tickValues([-80, -60, -40, -20, 0, 20, 40, 60, 80]);
+    .tickFormat(function(d) { return d + "°";})
+    .tickValues([-100, -80, -60, -40, -20, 0, 20, 40, 60, 80, 100]);
+} else {
+var yAxis = d3.axisLeft(yScale)
+    .ticks(9)
+    .tickSize(4)
+    .tickPadding(2)
+    .tickFormat(function(d) { return d + "°";})
+    .tickValues([-80, -60, -40, -20, 0, 20, 40, 60, 80]);  
+}
 
   svg
     .append('g')
@@ -297,6 +288,18 @@ var yAxis = d3.axisLeft(yScale)
     .attr("x2", xScale(360))
     .attr("y2", yScale(0));
 
+if (latitude < 0.0) {
+  svg
+    .selectAll(".zenith.line")
+    .data(sunData)
+    .enter()
+    .append('line')
+    .attr("class", "zenith line")
+    .attr("x1", xScale(180))
+    .attr("y1", yScale(100))
+    .attr("x2", xScale(180))
+    .attr("y2", yScale(-100));
+} else {
   svg
     .selectAll(".zenith.line")
     .data(sunData)
@@ -307,8 +310,7 @@ var yAxis = d3.axisLeft(yScale)
     .attr("y1", yScale(80))
     .attr("x2", xScale(180))
     .attr("y2", yScale(-80));
-
-var innerColor = "rgb(230, 200, 200)";
+}
 
 var defs = svg.append("defs");
 
@@ -347,7 +349,6 @@ sunGradient.append("stop")
 var sunazi = <?php echo $alm["sun_azimuth"];?>;
 var sunalt = <?php echo $alm["sun_altitude"];?>;
 
-// get the data for the sun curve
 for (var i = 0; i < total; i++) {
 
 var sun_azitab = nan(azitab[i]);
@@ -359,21 +360,43 @@ var sun_althrtab = althrtab[i];
     .attr("y1", yScale(sun_althrtab))
     .attr("x2", xScale(sun_azitab))
     .attr("y2", yScale(sun_althrtab))
-    .style("stroke", "tomato");
+    .style("stroke-width", 1)
+    .style("stroke", "rgba(255,99,71,1)")
+    .style("stroke-linecap", "round")
+    .attr("transform", "translate(0, 0)");
 
+if (latitude < 0.0) {
+if (sunazi < 180.0) {
+ svg
+    .append("circle")
+    .style("fill", "url(#sunGradient)")
+    .attr("r", 6.5)
+    .attr("cx", xScale(180 - sunazi))
+    .attr("cy", yScale(sunalt))
+    .attr("transform", "translate(0, 0)");
+} else {
   svg
     .append("circle")
+    .style("fill", "url(#sunGradient)")
+    .attr("r", 6.5)
+    .attr("cx", xScale(360 + 180 - sunazi))
+    .attr("cy", yScale(sunalt))
+    .attr("transform", "translate(0, 0)");
+  }
+} else {
+  svg
+    .append("circle")
+    .style("fill", "url(#sunGradient)")
     .attr("r", 6.5)
     .attr("cx", xScale(sunazi))
     .attr("cy", yScale(sunalt))
-    .style("fill", "url(#sunGradient)")
-    .style("stroke-width", "2px");
+    .attr("transform", "translate(0, 0)");
+  }    
 }
-
+ 
 var moonazi = <?php echo $alm["moon_azimuth"];?>;
 var moonalt = <?php echo $alm["moon_altitude"];?>;
-
-// get the data for the moon curve  
+  
 for (var i = 0; i < total; i++) {
 
 var moon_azitabx = nan(azitabx[i]);
@@ -385,31 +408,54 @@ var moon_althrtabx = althrtabx[i];
     .attr("y1", yScale(moon_althrtabx))
     .attr("x2", xScale(moon_azitabx))
     .attr("y2", yScale(moon_althrtabx))
-    .style("stroke", "silver");
+    .style("stroke-width", 1)
+    .style("stroke", "silver")
+    .style("stroke-linecap", "round")
+    .attr("transform", "translate(0, 0)");
 
+if (latitude < 0.0) {
+if (moonazi < 180.0) {
   svg
     .append("circle")
+    .style("fill", "url(#moonGradient)")
+    .attr("r", 4)
+    .attr("cx", xScale(180 - moonazi))
+    .attr("cy", yScale(moonalt))
+    .attr("transform", "translate(0, 0)");
+} else {
+  svg
+    .append("circle")
+    .style("fill", "url(#moonGradient)")
+    .attr("r", 4)
+    .attr("cx", xScale(360 + 180 - moonazi))
+    .attr("cy", yScale(moonalt))
+    .attr("transform", "translate(0, 0)");
+  }
+} else {
+  svg
+    .append("circle")
+    .style("fill", "url(#moonGradient)")
     .attr("r", 4)
     .attr("cx", xScale(moonazi))
     .attr("cy", yScale(moonalt))
-    .style("fill", "url(#moonGradient)")
-    .style("stroke-width", "1px");  
+    .attr("transform", "translate(0, 0)");
+  } 
 }
 
 var zenith = "Zenith";
   svg
     .append("text")
+    .attr("x", 152)
+    .attr("y", 6)
     .style("fill", "var(--col-6)")
-    .attr("x", xScale(167))
-    .attr("y", yScale(83))
     .text(zenith);
 
 var horizon = "Horizon";
   svg
     .append("text")
+    .attr("x", 30)
+    .attr("y", 69)
     .style("fill", "var(--col-6)")
-    .attr("x", xScale(5))
-    .attr("y", yScale(5))
     .text(horizon);
     
 </script> 

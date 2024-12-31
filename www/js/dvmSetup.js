@@ -216,7 +216,7 @@ document.addEventListener('DOMContentLoaded', function() {
             switchToTab('tab3');
             document.getElementById('next-button').disabled = true;
         } else if (activeTab === 'tab3') {
-            window.location.href = '../admin/index.php';
+            window.location.href = 'admin/index.php';
         }
     });
 
@@ -273,7 +273,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const configArray = [
         { key: 'themelayout', value: '5' },
         { key: 'TZ', value: 'Europe/London' },
-        { key: 'trkVisits', value: 0 },
+        { key: 'trkVisits', value: 1 },
         { key: 'stripLocal', value: 1 },
         { key: 'localIP', value: '0.0.0.0' },
         { key: 'webSrvr', value: 0 },
@@ -308,7 +308,6 @@ document.addEventListener('DOMContentLoaded', function() {
         { key: 'webcamurl', value: '' },
         { key: 'videoWeatherCamURL', value: '' },
         { key: 'email', value: 'example@me.com' },
-        { key: 'twitter', value: '@exampleAccount' },
         { key: 'since', value: '2000' },
         { key: 'defaultlanguage', value: 'en' },
         { key: 'flag', value: 'en' },
@@ -320,11 +319,11 @@ document.addEventListener('DOMContentLoaded', function() {
         { key: 'linkWU', value: 'yes' },
         { key: 'linkWUNewDash', value: 'yes' },
         { key: 'WUid', value: 'YOURWUKEY' },
-        { key: 'linkCWOPID', value: '' },
-        { key: 'linkFindUID', value: '' },
-        { key: 'linkNOAA', value: 'yes' },
-        { key: 'linkMADIS', value: 'yes' },
-        { key: 'linkMesoWest', value: 'yes' },
+        { key: 'linkCWOPID', value: 'no' },
+        { key: 'linkFindUID', value: 'no' },
+        { key: 'linkNOAA', value: 'no' },
+        { key: 'linkMADIS', value: 'no' },
+        { key: 'linkMesoWest', value: 'no' },
         { key: 'linkWeatherCloudID', value: '' },
         { key: 'linkWindyID', value: '' },
         { key: 'linkAWEKASID', value: '' },
@@ -332,7 +331,7 @@ document.addEventListener('DOMContentLoaded', function() {
         { key: 'linkPWSWeatherID', value: '' },
         { key: 'linkMetOfficeID', value: '' },
         { key: 'linkCustom1Title', value: 'Services Config Generator' },
-        { key: 'linkCustom1URL', value: 'https://steepleian.github.io/weewx-divumwx-divumwx/divumwx_settings_txt.html' },
+        { key: 'linkCustom1URL', value: 'https://www.divumwx.org/settingsGen/' },
         { key: 'linkCustom2Title', value: '' },
         { key: 'linkCustom2URL', value: '' },
         { key: 'USAWeatherFinder', value: '' },
