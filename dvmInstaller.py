@@ -15,6 +15,9 @@ import shutil
 import distutils
 from datetime import datetime
 
+version = "4.5.25.000"
+srvGenURL = 'https://www.divumwx.org/settingsGen/'
+
 # Define ANSI codes
 reset = "\033[0m"
 bold = "\033[1m"
@@ -39,14 +42,14 @@ def setup_logging():
         logging.basicConfig(
             filename=f'./dvmwxInstall_{timestamp}.log',
             level=logging.DEBUG,
-            format='[%(asctime)s] [%(levelname)s] [%(message)s]',
+            format='[%(asctime)s] [%(levelname)-5s] [%(message)s]',
             datefmt='%Y-%m-%d %H:%M:%S',
         )
     elif args.info:
         logging.basicConfig(
             filename=f'./dvmwxInstall_{timestamp}.log',
             level=logging.INFO,
-            format='[%(asctime)s] [%(levelname)s] [%(message)s]',
+            format='[%(asctime)s] [%(levelname)-5s] [%(message)s]',
             datefmt='%Y-%m-%d %H:%M:%S',
         )
     else:
@@ -55,33 +58,33 @@ def setup_logging():
     return args
 args = setup_logging()
 os.system("clear")
-logging.debug("+--------------------Debug logging enabled for DivumWX Installer--------------------+")
+logging.debug("+-------------------- Debug logging enabled for DivumWX Installer --------------------+")
+logging.debug(f"+----------------------- DivumWX Installer Version: {version} -----------------------+")
 print(f"{white}DIS {cyan}(DivumWX Installation Script) {white}starting.....{reset}")
 print(f"{yellow}Standby, importing and verifying required python modules...{reset}")
 
-
-version = "3.9.89.050"
-srvGenURL = 'https://www.divumwx.org/settingsGen/'
-
 def modMissing(module_name):
-    if logging.getLogger().isEnabledFor(logging.DEBUG):
-        logging.debug(f"Module '{module_name}' is not installed.")
+    logging.debug(f"Module '{module_name}' is not installed.")
     print(f"{red}Module '{module_name}' is not installed.{reset}")
     install = input(f"Do you want to install the missing module '{module_name}'? (y/n): ").strip().lower()
     if install == 'y':
         try:
             print(f"Installing '{module_name}'...")
-            subprocess.check_call([sys.executable, "-m", "pip", "install", module_name])
+            logging.debug(f"Installing '{module_name}'...")
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", module_name])
             print(f"{green}Module '{module_name}' installed successfully.{reset}")
+            logging.debug(f"Module '{module_name}' installed successfully.")
             print(f"{green}Restarting script...{reset}")
+            logging.debug(f"Restarting script...")
             os.execl(sys.executable, sys.executable, *sys.argv)
         except subprocess.CalledProcessError as e:
-            if logging.getLogger().isEnabledFor(logging.DEBUG):
-                logging.debug(f"Failed to install module '{module_name}': {e}")
+            logging.debug(f"Failed to install module '{module_name}': {e}")
             print(f"{red}Failed to install module '{module_name}': {e}{reset}")
+            logging.debug(f"Exiting the script.")
             sys.exit(1)
     else:
         print(f"{red}The module '{module_name}' was not installed. The script cannot continue and will exit.{reset}")
+        logging.debug(f"Exiting the script.")
         sys.exit(1)
 try:
     import readchar
@@ -98,6 +101,11 @@ try:
 except ImportError:
     modMissing("configobj")
     from configobj import ConfigObj
+try:
+    from crontab import CronTab
+except ImportError:
+    modMissing("CronTab")
+    from crontab import CronTab
 print(f"{green}Python module import complete...{reset}")
 
 class DVMInstaller:
@@ -117,10 +125,27 @@ class DVMInstaller:
         key = readchar.readkey()
 
     def viewFile(self, file_path, lines_per_page=20):
-        logging.info(f"Displaying Installation guide")
+        logging.debug(f"Displaying Installation guide")
         banner_text = "Installation Guide (Up/Down arrows to navigate, 'q' to quit)"
         curses.wrapper(self.file_viewer, file_path, banner_text, lines_per_page)
 
+    def chkSvcFile(self):
+        logging.debug(f"Checking for services.json file")
+        services_file = None
+        if os.path.exists("../services.json"):
+            services_file = "../services.json"
+            logging.debug(f"services.json has been located")
+        elif os.path.exists("services.json"):
+            services_file = "services.json"
+            logging.debug(f"services.json has been located")
+        else:
+            print(f"{yellow}You are missing the required services.json file. Please go to {red}[{white}{srvGenURL}{red}]{white}{reset}")
+            print(f"{yellow}and follow the instructions there to create the services.json file for your station. Copy that file to the {green}same{reset}")
+            print(f"{yellow}directory that {white}dvmInstaller.py{yellow} is in and run {white}dvmInstaller.py{yellow} again.{reset}")
+            logging.debug(f"services.json was not located, script exiting.")
+            sys.exit(1)
+        return services_file
+    
     def file_viewer(self, stdscr, file_path, banner_text, lines_per_page=20):
         curses.curs_set(0)
         stdscr.clear()
@@ -165,6 +190,60 @@ class DVMInstaller:
             stdscr.refresh()
             stdscr.getch()
 
+    def prnWelMsg(self):
+        logging.debug(f"Displaying Welcome Message")
+        os.system("clear")
+        print(f"{green}Welcome to the DivumWX Skin Installer {white}v{cyan}{version}{reset}")
+        print(f"\n{white}Overview{reset}\n")
+        print("The `dvm_installer.py` script is a powerful and automated tool designed to streamline the installation")
+        print("and configuration of the DivumWX skin for the WeeWX amateur weather software.")
+        print("This script helps in setting up essential components, updating configurations, and ensuring smooth")
+        print("deployment of the weather data management system, which integrates seamlessly with WeeWX.\n")
+        print(f"{white}Features:{reset}")
+        print(f" - {yellow}Automated Installation{reset}: Automates the extraction and placement of necessary files from a provided zip file.")
+        print(f" - {yellow}Configuration Management{reset}: Updates configuration files with specified settings, ensuring your system is")
+        print("     correctly configured for operation.")
+        print(f" - {yellow}Permissions Management{reset}: Recursively applies appropriate file and directory permissions.")
+        print(f" - {yellow}Interactive Prompts{reset}: Guides you through critical decisions with easy-to-follow prompts, ensuring clarity")
+        print("     and user control.")
+        print(f" - {yellow}Error Handling{reset}: Provides comprehensive error messages and handles exceptions gracefully to aid in")
+        print("     troubleshooting during installation.\n")
+        print(f"{white}Let's get started!{reset}\n")
+        self.waitFKP()
+
+    def chkPyVer(self):
+        logging.debug(f"Checking Python version")
+        current_version = sys.version_info
+        required_version = (3, 10)
+        if current_version >= required_version:
+            logging.debug(f"Correct python version found")
+            print(f"{yellow}Python version {white}{current_version.major}.{current_version.minor}.{current_version.micro} {yellow}meets the minimum required version of {green}3.10.x. {yellow}Proceeding with installation.{reset}")
+        else:
+            logging.debug(f"Incorrect python version found, script exiting.")
+            print(f"{red}Python version {white}{current_version.major}.{current_version.minor}.{current_version.micro} {red}does not meet the minimum required version of {white}3.10.x{red}. Installation aborted.{reset}")
+            sys.exit(1)
+
+    def chkVenv(self):
+        logging.debug(f"Checking Python virtual environment")
+        if not hasattr(sys, 'real_prefix') and not (hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix):
+            print(f"{red}This script is not running inside a Python virtual environment. Please ensure that you have activated the virtual WeeWX environment by running the following command before proceeding.{reset}")
+            print(f"{white}source /home/weewx/bin/activate{reset}")
+            logging.debug(f"The script is not running inside the Python Virtual Environment, script exiting.")
+            sys.exit(1)
+        else:
+            logging.debug(f"The script is operating inside a Python Virtual Environment, proceeding")
+            print(f"{white}This script is running inside a Python virtual environment. Proceeding with installation.{reset}")
+
+        weewxd_path = os.path.expanduser('~/weewx-venv/bin/weewxd')
+        weewx_version = subprocess.run([weewxd_path, '--version'], capture_output=True, text=True).stdout.strip()
+        required_version = [5, 1, 0]
+        current_version = list(map(int, weewx_version.split('.')))
+        if current_version < required_version:
+            print(f"{red}WeeWX version {weewx_version} is not supported. Please upgrade to version 5.1.0 or higher and try again.{reset}")
+            sys.exit(1)
+        else:
+            print(f"{white}WeeWX version {yellow}{weewx_version}{white} is supported. Proceeding with installation.{reset}")
+        
     def chkWebsrv(self):
         try:
             result = subprocess.run(
@@ -185,20 +264,25 @@ class DVMInstaller:
 
                     command, user, group, ppid = parts[0], parts[1], parts[2], parts[3]
                     if command in ["apache2", "nginx"] and user == "root":
+                        logging.debug(f"Found webserver root process")
                         web_server_parent = (command, user, group)
 
                     if command in ["apache2", "nginx"] and user != "root":
+                        logging.debug(f"Found webserver child process")
                         web_server_child = (command, user, group)
 
                 if web_server_parent and web_server_child:
+                    logging.debug(f"Webserver Type: {web_server_parent[0]}, Webserver Root: {web_server_parent[1]}:{web_server_parent[2]}, Webserver Child: {web_server_child[1]}:{web_server_child[2]}")
                     return True, web_server_parent[0], web_server_parent[1], web_server_parent[2], web_server_child[1], web_server_child[2]
-
+                logging.debug(f"Webserver Type: None, Webserver Root: None:None, Webserver Child: None:None")
                 return False, None, None, None, None, None
 
             else:
+                logging.debug(f"Webserver Type: None, Webserver Root: None:None, Webserver Child: None:None")
                 return False, None, None, None, None, None
 
         except Exception:
+            logging.debug(f"Webserver Type: None, Webserver Root: None:None, Webserver Child: None:None")
             return False, None, None, None, None, None
 
 
@@ -277,25 +361,63 @@ class DVMInstaller:
     def chkWeewx(self, wxName='weewx'):
         try:
             result = subprocess.run(
-                ["ps", "-eo", "user,group,comm"],
+                ["ps", "-eo", "user:20,group:20,args"],  # Use 'args' to get the full command line
                 capture_output=True,
                 text=True
             )
             if result.returncode == 0:
                 processes = result.stdout.splitlines()
                 for line in processes:
-                    if wxName in line:
-                        fields = line.split()
-                        process_name = fields[-1]
-                        if process_name == wxName:
-                            wxOwner = fields[0]
-                            wxGroup = fields[1]
-                            return True, wxName, wxOwner, wxGroup
+                    if wxName in line:  # Check if wxName is in the full command line
+                        fields = line.split(None, 2)  # Split into user, group, and args
+                        wxOwner = fields[0]
+                        wxGroup = fields[1]
+                        return True, wxName, wxOwner, wxGroup
                 return False, wxName, None, None
             else:
                 return False, wxName, None, None
         except Exception:
             return False, wxName, None, None
+
+    def createCron(self, html_root):
+        logging.debug("Entering CronTab setup function")
+        username = os.getlogin()
+        home_dir = os.path.expanduser("~")
+        script_dir = os.path.join(home_dir, "scripts")
+        script_path = os.path.join(script_dir, "getWeewxVersion.sh")
+        output_file = os.path.join(html_root, "weewxVer.txt")
+        os.makedirs(script_dir, exist_ok=True)
+        
+        bash_script_content = f"""#!/bin/bash
+    # Enter the pip virtual env and get the WeeWX version
+    cd ~/weewx-venv/bin || exit 1
+    source ~/weewx-venv/bin/activate
+    ./weewxd --version > {output_file} 2>&1
+    deactivate
+    """
+        logging.debug("Writing bash script for cron job")
+        with open(script_path, "w") as script_file:
+            script_file.write(bash_script_content)
+        
+        os.chmod(script_path, 0o755)
+        
+        logging.debug("Creating cron entry")
+        cron = CronTab(user=username)
+        job = cron.new(command=f"{script_path}", comment="WeeWX Version Fetch")
+        job.setall("0 2 * * *")
+        cron.write()
+        
+        logging.debug("Test run of script to grab initial WeeWX version")
+        subprocess.run([script_path], check=True)
+        
+        if os.path.exists(output_file):
+            with open(output_file, "r") as version_file:
+                version = version_file.read().strip()
+                logging.debug(f"Current WeeWX version: {version}")
+                return version
+        else:
+            logging.debug("Version file was not created by the script.")
+            return "Unknown"
 
     def dirNotEmpty(self, path):
         return os.path.isdir(path) and bool(os.listdir(path))
@@ -309,39 +431,6 @@ class DVMInstaller:
             for dir in dirs:
                 dir_path = os.path.join(root, dir)
                 shutil.rmtree(dir_path)
-
-    def chkSvcFile(self):
-        services_file = None
-        if os.path.exists("../services.json"):
-            services_file = "../services.json"
-        elif os.path.exists("services.json"):
-            services_file = "services.json"
-        else:
-            print(f"{yellow}You are missing the required services.json file. Please go to {red}[{white}{srvGenURL}{red}]{white}{reset}")
-            print(f"{yellow}and follow the instructions there to create the services.json file for your station. Copy that file to the {green}same{reset}")
-            print(f"{yellow}directory that {white}dvmInstaller.py{yellow} is in and run {white}dvmInstaller.py{yellow} again.{reset}")
-            sys.exit(1)
-        return services_file
-
-    def prnWelMsg(self):
-        os.system("clear")
-        print(f"{green}Welcome to the DivumWX Skin Installer {white}v{cyan}{version}{reset}")
-        print(f"\n{white}Overview{reset}\n")
-        print("The `dvm_installer.py` script is a powerful and automated tool designed to streamline the installation")
-        print("and configuration of the DivumWX skin for the WeeWX amateur weather software.")
-        print("This script helps in setting up essential components, updating configurations, and ensuring smooth")
-        print("deployment of the weather data management system, which integrates seamlessly with WeeWX.\n")
-        print(f"{white}Features:{reset}")
-        print(f" - {yellow}Automated Installation{reset}: Automates the extraction and placement of necessary files from a provided zip file.")
-        print(f" - {yellow}Configuration Management{reset}: Updates configuration files with specified settings, ensuring your system is")
-        print("     correctly configured for operation.")
-        print(f" - {yellow}Permissions Management{reset}: Recursively applies appropriate file and directory permissions.")
-        print(f" - {yellow}Interactive Prompts{reset}: Guides you through critical decisions with easy-to-follow prompts, ensuring clarity")
-        print("     and user control.")
-        print(f" - {yellow}Error Handling{reset}: Provides comprehensive error messages and handles exceptions gracefully to aid in")
-        print("     troubleshooting during installation.\n")
-        print(f"{white}Let's get started!{reset}\n")
-        self.waitFKP()
 
     def chgPermRecur(self, path_list, uid_gid):
         user, group = uid_gid
@@ -367,21 +456,11 @@ class DVMInstaller:
 
     def setfnlOwner(self, locations):
         logging.debug(f"Setting Final Ownership for DivumWX files and directories")
-        user = getpass.getuser()
-        base_path = f"/home/{user}/weewx-data"
-        pubHTMLpth = os.path.join(base_path, "public_html")
         websrvDRpth = locations.get("www")
-        db_path_public_html = os.path.join(pubHTMLpth, "admin/db/dvmAdmin.db3")
         db_path_web = os.path.join(websrvDRpth, "admin/db/dvmAdmin.db3")
 
-        if os.path.exists(pubHTMLpth) and os.path.exists(websrvDRpth):
-            logging.debug(f"Error: Both directories '{pubHTMLpth}' and '{websrvDRpth}' exist, exiting program.")
-            print(f"{red}Error: Both directories '{pubHTMLpth}' and '{websrvDRpth}' exist. The DivumWX files{reset}")
-            print(f"{red}can only be placed in one directory.{reset}")
-            print(f"{red}Please ensure only one of these directories exists to proceed.{reset}")
-            sys.exit(1)
 
-        chkPaths = [pubHTMLpth, websrvDRpth]
+        chkPaths = [websrvDRpth]
 
         for path in chkPaths:
             if not os.path.exists(path):
@@ -400,20 +479,11 @@ class DVMInstaller:
                     os.system(f"sudo chmod -R 0775 {path}")
                     logging.debug(f"Successfully changed permissions of {path} to 0775")
                     print(f"{green}Successfully changed permissions of {path} to 0775{reset}\n")
-
-                    if path == pubHTMLpth and os.path.exists(db_path_public_html):
-                        logging.debug(f"Attempting to change permissions of {db_path_public_html} to 0666")
-                        print(f"{yellow}Attempting to change permissions of {db_path_public_html} to 0666{reset}")
-                        os.system(f"sudo chmod 0666 {db_path_public_html}")
-                        logging.debug(f"Successfully changed permissions of {db_path_public_html} to 0666")
-                        print(f"{green}Successfully changed permissions of {db_path_public_html} to 0666{reset}\n")
-
-                    if path == websrvDRpth and os.path.exists(db_path_web):
-                        logging.debug(f"Attempting to change permissions of {db_path_web} to 0666")
-                        print(f"{yellow}Attempting to change permissions of {db_path_web} to 0666{reset}")
-                        os.system(f"sudo chmod 0666 {db_path_web}")
-                        logging.debug(f"Successfully changed permissions of {db_path_web} to 0666")
-                        print(f"{green}Successfully changed permissions of {db_path_web} to 0666{reset}\n")
+                    logging.debug(f"Attempting to change permissions of {db_path_web} to 0666")
+                    print(f"{yellow}Attempting to change permissions of {db_path_web} to 0666{reset}")
+                    os.system(f"sudo chmod 0666 {db_path_web}")
+                    logging.debug(f"Successfully changed permissions of {db_path_web} to 0666")
+                    print(f"{green}Successfully changed permissions of {db_path_web} to 0666{reset}\n")
 
                 except Exception as e:
                     print(f"{red}Error: {str(e)}{reset}")
@@ -423,11 +493,7 @@ class DVMInstaller:
 
                     chown_command = f"sudo chown -R {self.wsCOwner}:{self.wsCGroup} {path}"
                     chmod_command = f"sudo chmod -R 0775 {path}"
-
-                    if path == pubHTMLpth:
-                        chmod_command_db = f"sudo chmod 0666 {db_path_public_html}"
-                    else:
-                        chmod_command_db = f"sudo chmod 0666 {db_path_web}"
+                    chmod_command_db = f"sudo chmod 0666 {db_path_web}"
 
                     print(f"\n{yellow}To manually attempt the changes, run the following commands for {path}:{reset}\n")
                     print(f"  - Change ownership to: {green}{self.wsCOwner}:{self.wsCGroup}{reset}")
@@ -438,33 +504,6 @@ class DVMInstaller:
                     print(f"  - Change permissions to: {green}0666{reset}")
                     print(f"\n{red}IMPORTANT:{reset} Your web pages will not be displayed until the above commands are executed successfully.\n")
                 break
-
-    def chkPyVer(self):
-        current_version = sys.version_info
-        required_version = (3, 10)
-        if current_version >= required_version:
-            print(f"{yellow}Python version {white}{current_version.major}.{current_version.minor}.{current_version.micro} {yellow}meets the minimum required version of {green}3.10.x. {yellow}Proceeding with installation.{reset}")
-        else:
-            print(f"{red}Python version {white}{current_version.major}.{current_version.minor}.{current_version.micro} {red}does not meet the minimum required version of {white}3.10.x{red}. Installation aborted.{reset}")
-            sys.exit(1)
-
-    def chkVenv(self):
-        if not hasattr(sys, 'real_prefix') and not (hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix):
-            print(f"{red}This script is not running inside a Python virtual environment. Please ensure that you have activated the virtual WeeWX environment by running the following command before proceeding.{reset}")
-            print(f"{white}source /home/weewx/bin/activate{reset}")
-            sys.exit(1)
-        else:
-            print(f"{white}This script is running inside a Python virtual environment. Proceeding with installation.{reset}")
-
-        weewxd_path = os.path.expanduser('~/weewx-venv/bin/weewxd')
-        weewx_version = subprocess.run([weewxd_path, '--version'], capture_output=True, text=True).stdout.strip()
-        required_version = [5, 1, 0]
-        current_version = list(map(int, weewx_version.split('.')))
-        if current_version < required_version:
-            print(f"{red}WeeWX version {weewx_version} is not supported. Please upgrade to version 5.1.0 or higher and try again.{reset}")
-            sys.exit(1)
-        else:
-            print(f"{white}WeeWX version {yellow}{weewx_version}{white} is supported. Proceeding with installation.{reset}")
     
     def chkUgrp(self):
         self.user = getpass.getuser()
@@ -476,6 +515,7 @@ class DVMInstaller:
         except KeyError:
             print(f"Cannot find user or group information for {self.user}")
             sys.exit(1)
+        logging.debug(f"For the purposes of file permissions and ownership, we will be using {self.user} and {self.group}.")
         print(f"\n{white}For the purposes of file permissions and ownership, we will be using the below listed user and group.{reset}")
         print(f"Detected user: {white}{self.user}{reset}")
         print(f"Detected group: {white}{self.group}{reset}")
@@ -485,6 +525,8 @@ class DVMInstaller:
         else:
             self.user = input("Please enter the correct user: ").strip()
             self.group = input("Please enter the correct group: ").strip()
+            logging.debug(f"User entered information")
+            logging.debug(f"For the purposes of file permissions and ownership, we will be using {self.user} and {self.group}.")
             return (self.user, self.group)
 
     def chgHroot(self, d, html_root):
@@ -657,12 +699,10 @@ class DVMInstaller:
     def stopWeewx(self):
         try:
             print("Stopping the WeeWX service...")
-            if logging.getLogger().isEnabledFor(logging.DEBUG):
-                logging.debug(f"Stopping the WeeWX service...")
+            logging.debug(f"Stopping the WeeWX service...")
             subprocess.check_call(["sudo", "systemctl", "stop", "weewx"])
         except subprocess.CalledProcessError as e:
-            if logging.getLogger().isEnabledFor(logging.DEBUG):
-                logging.debug(f"Failed to stop the WeeWX service: {e}")
+            logging.debug(f"Failed to stop the WeeWX service: {e}")
             print(f"Failed to stop the WeeWX service: {e}")
     
     def getEnabledSkins(self, weewx_config_file):
@@ -712,78 +752,91 @@ class DVMInstaller:
                 self.wsName = wsName
                 self.wsCOwner = wsCOwner
                 self.wsCGroup = wsCGroup
-                if logging.getLogger().isEnabledFor(logging.DEBUG):
-                    mainDocumentRoot, siteDocumentRoots = self.getWebRoot()
-                    if mainDocumentRoot:
-                        logging.debug(f"Main DocumentRoot: {mainDocumentRoot}")
-                    else:
-                        logging.debug(f"No Main DocumentRoot")
-                    if siteDocumentRoots:
-                        for key, value in siteDocumentRoots.items():
-                            logging.debug(f"{key}: {value}")
-                    else:
-                        logging.debug("No site-specific DocumentRoots found.")
+                mainDocumentRoot, siteDocumentRoots = self.getWebRoot()
+                if mainDocumentRoot:
+                    logging.debug(f"Main DocumentRoot: {mainDocumentRoot}")
+                else:
+                    logging.debug(f"No Main DocumentRoot")
+                if siteDocumentRoots:
+                    for key, value in siteDocumentRoots.items():
+                        logging.debug(f"{key}: {value}")
+                else:
+                    logging.debug("No site-specific DocumentRoots found.")
             else:
                 while True:
                     self.wsName = input("Please enter the web server name (or 'q' to quit): ").strip()
+                    logging.debug(f"User entered wsName: {self.wsName}")
                     if self.wsName.lower() == 'q':
+                        logging.debug(f"Exiting script.")
                         print("Exiting script.")
                         sys.exit(0)
                     self.wsOwner = input("Please enter the web server owner (or 'q' to quit): ").strip()
+                    logging.debug(f"User entered wsOwner: {self.wsOwner}")
                     if self.wsOwner.lower() == 'q':
+                        logging.debug(f"Exiting script")
                         print("Exiting script.")
                         sys.exit(0)
                     self.wsGroup = input("Please enter the web server group (or 'q' to quit): ").strip()
+                    logging.debug(f"User entered wsGroup: {self.wsGroup}")
                     if self.wsGroup.lower() == 'q':
+                        logging.debug(f"Exiting script")
                         print("Exiting script.")
                         sys.exit(0)
                     if self.chkWebsrv(self.wsName, self.wsOwner, self.wsGroup):
+                        logging.debug(f"User entered webserver found")
                         break
                     else:
                         print(f"{red}The web server '{self.wsName}' owned by '{self.wsOwner}' of '{self.wsGroup}' is not running. Please check the details and try again.{reset}")
+                        logging.debug(f"User entered web server not found")
         else:
             print(f"{red}I was unable to locate either Apache2 or Nginx running. Please enter the webserver name and the user and group that owns the process.{reset}")
+            logging.debug(f"Unable to locate either Apache2 or Nginx running on this server")
         print(f"{white}Loading installation configuration files.....{reset}")
+        logging.debug(f"Loading installation configuration files.....")
         try:
             with open(conf_file) as infile:
+                logging.debug(f"Loading installData.json")
                 conf_content = infile.read()
                 conf_content = re.sub(r'##.*\n', '', conf_content).replace("\n", "").replace("\t", "")
                 d = json.loads(conf_content)
             with open(self.services_file) as infile:
+                logging.debug(f"Loading services.json")
                 services_content = infile.read()
                 services_content = re.sub(r'##.*\n', '', services_content).replace("\n", "").replace("\t", "")
                 d.update(json.loads(services_content))
+            logging.debug(f"Setting user, skins and weewx_conf paths")
             user_path = os.path.expanduser(d["user"])
             skins_path = os.path.expanduser(d["skins"])
             weewx_config_file = os.path.expanduser(d["weewx_config_file"])
+            weewx_www_root = os.path.expanduser(d["weewx_www_root"])
             if logging.getLogger().isEnabledFor(logging.DEBUG):
                 logging.debug(f"Conf Paths:")
-                logging.debug(f"    user_path: {user_path}")
-                logging.debug(f"    skins_path: {skins_path}")
-                logging.debug(f"    weewx_config_file: {weewx_config_file}")
+                logging.debug(f"        user_path: {user_path}")
+                logging.debug(f"       skins_path: {skins_path}")
+                logging.debug(f"weewx_config_file: {weewx_config_file}")
+                logging.debug(f"   weewx_www_root: {weewx_www_root}")
             config_data = ConfigObj(weewx_config_file, encoding='utf8', list_values=False, write_empty_values=True)
             os.system("clear")
+            logging.debug(f"Determining if any other skins are enabled already.")
             allSkins = self.getEnabledSkins(weewx_config_file)
             enabledSkins = [skin["section"] for skin in allSkins if skin["enabled"] == "true"]
             print(f"{green}+-------------------------------------------------------------------------------+{reset}")
             print(f"{white}The following skins are enabled on your system:{reset}")
+            logging.debug(f"The following skins are enabled")
             for skin in enabledSkins:
+                logging.debug(f"     - {skin}")
                 print(f"{cyan} - {skin}{reset}")
             print("")
-            if logging.getLogger().isEnabledFor(logging.DEBUG):
-                logging.debug(f"Found {skin} enabled")
             print(f"{white}Your weewx.conf file [StdReport] section has {yellow}{config_data['StdReport'].get('HTML_ROOT')}{white} as your HTML_ROOT setting.{reset}", end="\n")
+            logging.debug(f"The HTML_ROOT setting in weewx.conf is {config_data['StdReport'].get('HTML_ROOT')}")
             print(f"{green}To preserve any existing skin that you have, we will be adding {magenta}/divumwx{white} to the{reset}")
             print(f"{green}current {yellow}HTML_ROOT{white} setting.{reset}", end="\n\n")
-            html_root = config_data['StdReport'].get('HTML_ROOT')
-            if logging.getLogger().isEnabledFor(logging.DEBUG):
-                logging.debug(f"weewx.conf existing HTML_ROOT: {html_root}")
-            html_root = os.path.join(html_root, "divumwx")
-            if logging.getLogger().isEnabledFor(logging.DEBUG):
-                logging.debug(f"Amended HTML_ROOT: {html_root}")
-            print(f"{red}Web Server URLS{reset}")
-            print(f"{white}If your {cyan}DOCUMENTROOT {white}setting for your webserver URL is {green}http://mywebsite.com/, {white}the DivumWX skin will be{reset}")
-            print(f"{white}at {green}http://mywebsite.com/divumwx {white}and your previous skin will still be at {green}http://mywebsite.com/{reset}", end="\n")
+            wxConfHTMLRoot = config_data['StdReport'].get('HTML_ROOT')
+            if wxConfHTMLRoot.lower() == 'public_html':
+                html_root = os.path.join(weewx_www_root , "divumwx")
+            else:
+                html_root = os.path.join(wxConfHTMLRoot, "divumwx")
+            logging.debug(f"DivumWX new HTML_ROOT: {html_root}")
             print(f"Final HTML_ROOT: {html_root}")
             locations = {
                 "user": user_path,
@@ -796,10 +849,12 @@ class DVMInstaller:
             html_root_created = False
             if not html_root_exists:
                 try:
+                    logging.debug(f"Creating DivumWX html directory")
                     os.makedirs(html_root)
                     html_root_exists = True
                     html_root_created = True
                 except Exception as e:
+                    logging.debug(f"Error creating DivumWX directory")
                     print(f"Error creating directory {html_root}: {e}")
             weewx_config_file_exists = os.path.exists(weewx_config_file)
             self.waitFKP()
@@ -817,6 +872,7 @@ class DVMInstaller:
             print(f"{green}+-------------------------------------------------------------------------------+{reset}")
             bkpWX = input('Do you wish to use the Divum Backup Service to backup your weewx database? (yes/no): ').strip().lower()
             if bkpWX in ['yes', 'y']:
+                logging.debug(f"DivumWX Backup service enabled")
                 bkpWXSrv = True
                 home_directory = os.path.expanduser('~')
                 subdirectory_path = 'weewx-data/archive'
@@ -861,11 +917,7 @@ class DVMInstaller:
                 d["backupEntry1"]["DVM_DB_Backup"]["databases"] = wxMainDB
                 d["backupEntry1"]["DVM_DB_Backup"]["backups"] = wxBkpDB
                 d["backupEntry1"]["DVM_DB_Backup"]["backup_times"] = wxBkpTime
-                if logging.getLogger().isEnabledFor(logging.DEBUG):
-                    logging.debug(f"DivumWX Backup Service Enabled")
             else:
-                if logging.getLogger().isEnabledFor(logging.DEBUG):
-                    logging.debug(f"DivumWX Backup Service disabled")
                 print(f"{yellow}DivumWX Backup service disabled{reset}")
                 self.waitFKP()
             os.system("clear")
@@ -904,38 +956,36 @@ class DVMInstaller:
             print(f"{yellow}4. Update the WeeWX configuration based on the provided settings.{reset}")
             print(f"{yellow}5. Verify new directory and file user/group ownership settings for webserver access.{reset}")
             print(f"{yellow}6. Add additional columns to weewx database to support DivumWX skin .{reset}\n")
-            if logging.getLogger().isEnabledFor(logging.DEBUG):
-                logging.debug(f"+--------------------------------------------------------------------------------------+")
-                logging.debug(f"Summary of Gathered Information:")
-                logging.debug(f"        User Path: {user_path}")
-                logging.debug(f"           Status: {'Path Exists' if user_path_exists else 'Path does not exist'}")
-                logging.debug(f"       Skins Path: {skins_path}")
-                logging.debug(f"           Status: {'Path Exists' if skins_path_exists else 'Path does not exist'}")
-                logging.debug(f"   HTML Root Path: {html_root}")
-                logging.debug(f"           Status: {html_root_status_message}")
-                if html_root_created:
-                    logging.debug(f"      Note: Your webserver DOCUMENT_ROOT may need to be changed to point to:")
-                    logging.debug(f"            {html_root}")
-                logging.debug(f"WeeWX Config File: {weewx_config_file}")
-                logging.debug(f"           Status: {'Yes' if weewx_config_file_exists else 'No'}")
-                logging.debug(f"+--------------------------------------------------------------------------------------+")
-                logging.debug(f"            Detected user: {self.user}")
-                logging.debug(f"      Detected user group: {self.group}")
-                logging.debug(f"          Webserver: {self.wsName}")
-                logging.debug(f"    Webserver Owner: {self.wsCOwner}")
-                logging.debug(f"    Webserver Group: {self.wsCGroup}")
-                logging.debug(f"+--------------------------------------------------------------------------------------+")
-                logging.debug(f"DivumWX Backup Service Status:")
-                if bkpWXSrv:
-                    logging.debug(f"        DivumWX Backup Service:  Enabled")
-                    logging.debug(f"DivumWX Backup Path & Filename:  {bkpName}")
-                    logging.debug(f"     DivumWX Backup Start Time:  {bkpTime}")
-                else:
-                    logging.debug(f"        DivumWX Backup Service:  Disabled")
+            logging.debug(f"+--------------------------------------------------------------------------------------+")
+            logging.debug(f"Summary of Gathered Information:")
+            logging.debug(f"        User Path: {user_path}")
+            logging.debug(f"           Status: {'Path Exists' if user_path_exists else 'Path does not exist'}")
+            logging.debug(f"       Skins Path: {skins_path}")
+            logging.debug(f"           Status: {'Path Exists' if skins_path_exists else 'Path does not exist'}")
+            logging.debug(f"   HTML Root Path: {html_root}")
+            logging.debug(f"           Status: {html_root_status_message}")
+            if html_root_created:
+                logging.debug(f"      Note: Your webserver DOCUMENT_ROOT may need to be changed to point to:")
+                logging.debug(f"            {html_root}")
+            logging.debug(f"WeeWX Config File: {weewx_config_file}")
+            logging.debug(f"           Status: {'Yes' if weewx_config_file_exists else 'No'}")
+            logging.debug(f"+--------------------------------------------------------------------------------------+")
+            logging.debug(f"            Detected user: {self.user}")
+            logging.debug(f"      Detected user group: {self.group}")
+            logging.debug(f"          Webserver: {self.wsName}")
+            logging.debug(f"    Webserver Owner: {self.wsCOwner}")
+            logging.debug(f"    Webserver Group: {self.wsCGroup}")
+            logging.debug(f"+--------------------------------------------------------------------------------------+")
+            logging.debug(f"DivumWX Backup Service Status:")
+            if bkpWXSrv:
+                logging.debug(f"        DivumWX Backup Service:  Enabled")
+                logging.debug(f"DivumWX Backup Path & Filename:  {bkpName}")
+                logging.debug(f"     DivumWX Backup Start Time:  {bkpTime}")
+            else:
+                logging.debug(f"        DivumWX Backup Service:  Disabled")
             continue_install = input(f"{yellow}Do you want to start the installation process? (yes/no): {reset}").strip().lower()
             if continue_install not in ['yes', 'y']:
-                if logging.getLogger().isEnabledFor(logging.DEBUG):
-                    logging.debug(f"Installation aborted by user")
+                logging.debug(f"Installation aborted by user")
                 print(f"{red}Installation aborted by user.{reset}")
                 sys.exit(1)
 
@@ -943,48 +993,39 @@ class DVMInstaller:
             self.stopWeewx()
             try:
                 if os.path.exists("user"):
-                    if logging.getLogger().isEnabledFor(logging.DEBUG):
-                        logging.debug(f"Copying user directory files")    
+                    logging.debug(f"Copying user directory files")    
                     print(f"{white}Copying {yellow}user{white} directory....")
                     if self.dirNotEmpty('user'):
                         distutils.dir_util.copy_tree("user", locations["user"], update=do_overwrite)
-                        if logging.getLogger().isEnabledFor(logging.DEBUG):
-                            logging.debug(f"Copied user directory successfully")
+                        logging.debug(f"Copied user directory successfully")
                         print(f"{green}Copied {white}user {green}directory successfully{reset}")
                     else:
-                        if logging.getLogger().isEnabledFor(logging.DEBUG):
-                            logging.debug(f"Directory 'user' is empty, unable to copy files.")
+                        logging.debug(f"Directory 'user' is empty, unable to copy files.")
                         print(f"{red}Directory 'user' is empty, unable to copy files.{reset}")
                         sys.exit(1)
                 else:
-                    if logging.getLogger().isEnabledFor(logging.DEBUG):
-                        logging.debug(f"Directory 'user' does not exist.")
+                    logging.debug(f"Directory 'user' does not exist.")
                     print(f"{red}Directory 'user' does not exist.{reset}")
                     sys.exit(1)
                 if os.path.exists("skins"):
-                    if logging.getLogger().isEnabledFor(logging.DEBUG):
-                        logging.debug(f"Copying skins directory files") 
+                    logging.debug(f"Copying skins directory files") 
                     print(f"{white}Copying {yellow}skins{white} directory....")
                     if self.dirNotEmpty('skins'):
-                        if logging.getLogger().isEnabledFor(logging.DEBUG):
-                            logging.debug(f"Copied skins directory successfully")
+                        logging.debug(f"Copied skins directory successfully")
                         distutils.dir_util.copy_tree("skins", locations["skins"], update=do_overwrite)
                         print(f"{green}Copied {white}skins {green}directory successfully{reset}")
                     else:
-                        if logging.getLogger().isEnabledFor(logging.DEBUG):
-                            logging.debug(f"Directory 'skins' is empty, unable to copy files.")
+                        logging.debug(f"Directory 'skins' is empty, unable to copy files.")
                         print(f"{red}Directory 'skins' is empty, unable to copy files.{reset}")
                         sys.exit(1)
                 else:
-                    if logging.getLogger().isEnabledFor(logging.DEBUG):
-                        logging.debug(f"Directory 'skins' does not exist.")
+                    logging.debug(f"Directory 'skins' does not exist.")
                     print(f"{red}Directory 'skins' does not exist.{reset}")
                     sys.exit(1)
                 if os.path.exists("www"):
                     if self.dirNotEmpty(html_root):
                         while True:
-                            if logging.getLogger().isEnabledFor(logging.DEBUG):
-                                logging.debug(f"The www directory is not empty")
+                            logging.debug(f"The www directory is not empty")
                             print(f"{yellow}\n\nThe {white}html_root{yellow} path contains files and should be empty.{reset}")
                             print(f"{yellow}The {white}html_root{yellow} path that was created earlier should be a.{reset}")
                             print(f"{yellow}new directory and therefore, empty. If it is not empty, this installation{reset}")
@@ -993,8 +1034,7 @@ class DVMInstaller:
                             print(f"{red}Answering NO to the question below will terminate the installation program.\n\n{reset}")
                             user_input = input("Do you want to empty the directory first? (y/n): ").strip().lower()
                             if user_input == 'y':
-                                if logging.getLogger().isEnabledFor(logging.DEBUG):
-                                    logging.debug(f"Emptying the www directory prior to new file installation.")
+                                logging.debug(f"Emptying the www directory prior to new file installation.")
                                 self.deleteContents(html_root)
                                 print(f"{green}Directory {html_root} has been emptied.{reset}")
                                 print(f"{white}Copying {yellow}www{white} directory....")
@@ -1004,8 +1044,7 @@ class DVMInstaller:
                                 print(f"{green}File permissions and ownership in the {white}www {green}directory successfully set{reset}")
                                 break
                             elif user_input == 'n':
-                                if logging.getLogger().isEnabledFor(logging.DEBUG):
-                                    logging.debug(f"www directory not emptied. Exiting the installation program.")
+                                logging.debug(f"www directory not emptied. Exiting the installation program.")
                                 print(f"{red}Not emptying the HTML_ROOT directory of the previous skin's files {reset}")
                                 print(f"{red}can cause {white}SERIOUS{red} issues with DivumWX. You will need to empty the{reset}")
                                 print(f"{red}the directory manually or add a sub-directory to install DivumWX to.{reset}")
@@ -1014,39 +1053,42 @@ class DVMInstaller:
                             else:
                                 print(f"{red}Invalid input. Please enter 'y' or 'n'.{reset}")
                     else:
-                        if logging.getLogger().isEnabledFor(logging.DEBUG):
-                            logging.debug(f"Copying www directory files")
+                        logging.debug(f"Copying www directory files")
                         print(f"{white}Copying {yellow}www{white} directory....")
                         distutils.dir_util.copy_tree("www", locations["www"], update=do_overwrite)
                         print(f"{green}Copied {white}www {green}directory successfully{reset}")
                 else:
-                    if logging.getLogger().isEnabledFor(logging.DEBUG):
-                        logging.debug(f"Directory 'www' does not exist.")
+                    logging.debug(f"Directory 'www' does not exist.")
                     print(f"{red}Directory 'www' does not exist.{reset}")
                     sys.exit(1)
             except Exception as e:
                 print(e)
-            if logging.getLogger().isEnabledFor(logging.DEBUG):
-                logging.debug(f"Backing up weewx config file")
+            logging.debug(f"Backing up weewx config file")
             print('Backing up weewx config file')
             timestamp = time.strftime('%Y%m%d%H%M%S')
             backup_file = f"{weewx_config_file}.{timestamp}"
             distutils.file_util.copy_file(weewx_config_file, backup_file)
             print(f"Backup of weewx config created: {backup_file}")
             time.sleep(1)
+            logging.debug(f"Verifying HTML_ROOT for added/updated stanzas")
             print(f"{white}Verifying HTML_ROOT for added/updated stanzas{reset}")
             self.chgHroot(d, html_root)
+            logging.debug(f"Appending to existing stanzas")
             print(f"{white}Appending to existing stanzas{reset}")
             self.appendStanza(config_data, d, do_overwrite)
+            logging.debug(f"Adding new stanzas")
             print(f"{white}Adding new stanzas{reset}")
             self.addStanza(config_data, d)
+            logging.debug(f"Updating Services stanza")
             print(f"{white}Updating Services stanza{reset}")
             self.appendSvcs(config_data, d)
             logging.debug(f"Checking if DivumWS backup service is enabled")
             if bkpWX:
+                logging.info(f"Adding DivumWX Backup Stanza")
+                print(f"{white}Adding DivumWX Backup Stanza")
+                self.addBkpStanza(config_data, d)
                 logging.info(f"Adding DivumWX Backup Service")
                 print(f"{white}Adding DivumWX Backup Service")
-                self.addBkpStanza(config_data, d)
                 self.appendBkpSvcs(config_data, d)
             else:
                 logging.debug(f"DivumWX Backup Service not enabled")    
@@ -1081,8 +1123,12 @@ class DVMInstaller:
                 file.writelines(lines)
             self.updDatabase()
             self.setfnlOwner(locations)
+            weewxVersion = self.createCron(html_root)
+            print(f"{green}Weewx Version: {weewxVersion}{reset}")
+            logging.debug(f"WeeWX Version: {weewxVersion}")
             print(f"{white}Done! WeeWX must be {yellow}started{white} for changes to become active{reset}")
             print(f"{green}You will need to ensure that your webserver is set to deliver the DivumWX skin{reset}")
+            logging.debug(f"DivumWX Installation has been completed.")
             self.startWeewx()
             
         except Exception as e:
