@@ -583,7 +583,6 @@ class DVMInstaller:
                         config_data['Engine']['Services'][service_type] += f", {service_value}"
                 else:
                     config_data['Engine']['Services'][service_type] = service_value
-
                 if config_data['Engine']['Services'].get('data_services') == ',':
                     config_data['Engine']['Services']['data_services'] = '""'
         if logging.getLogger().isEnabledFor(logging.DEBUG):
