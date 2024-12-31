@@ -13,6 +13,9 @@
 //    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
 //                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 //#############################################################################################
+//  Ian Millard 05/11/24 added styling to links for popup charts and records                  #
+//                                                                                            #
+//#############################################################################################
 session_start();
 if (!file_exists("userSettings.php")) {
 	if (isset($_SESSION['setupAttempted']) && $_SESSION['setupAttempted'] === true) {
@@ -64,6 +67,7 @@ echo $stationlocation;
   <link rel="manifest" href="./site.webmanifest">
   <link rel="mask-icon" href="./safari-pinned-tab.svg" color="#5bbad5">
   <link rel="shortcut icon" href="./favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@200;300;400;600;700" rel="stylesheet">
   <meta name="msapplication-TileColor" content="#da532c">
   <meta name="msapplication-config" content="./browserconfig.xml">
   <meta name="theme-color" content="#ffffff">
@@ -76,8 +80,7 @@ echo filemtime('./css/divumwx.main.css');
 <link rel="stylesheet" href="./css/divumwx.themes.css?version=<?php
 echo filemtime('./css/divumwx.themes.css');
 ?>" rel="stylesheet prefetch">
-  
-  <script>
+    <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js')
@@ -114,7 +117,7 @@ echo filemtime('./css/divumwx.themes.css');
 echo $flag;
 ?>.svg" style="width:20px;"></object>&nbsp;&nbsp;<?php
 echo $stationlocation;
-?>&nbsp; Weather Station&nbsp;&nbsp;<object data="./img/flags/<?php
+?>&nbsp; Local Weather&nbsp;&nbsp;<object data="./img/flags/<?php
 echo $flag;
 ?>.svg" width="20px"></object></div>         
                  </div> 
@@ -133,13 +136,14 @@ echo $manifestShortName;
 
         <?php
 include ("advisoryRegions.php");
-//include ("engFloodAlerts.php");
+//include ("advisoryFloodsEngland.php");
 error_reporting(0);
 ?>
           
 
 <!--end of alert section-->
-<!--start of grid section-->  
+<!--start of grid section--> 
+<style>a:link{color:var(--col-6);}a:visited{color:var(--col-6);}a:hover{color:var(--col-22);}a:active{color:blue;}</style>
 <section class="card-container">
 
 	<div class="cardP"><div class="module"><div id="position1"></div></div></div>
@@ -187,7 +191,7 @@ error_reporting(0);
 
 <!--start of footer section-->
 
-<div class="titlebar" style="padding: 10px;">
+<div class="titlebar" style="padding: 10px;  height: 105px;">
 <!--section1-->
 <div class="stationLongname">
   <div class="titlebar-item"> 
@@ -205,7 +209,7 @@ echo '<a>Copyright &copy; 2022-' . date('Y') . '<br>Team DivumWX<br>All rights r
 <div class="titlebar-item-center" style="font-size:11px;">
         <p><red><?php
 echo "Never base important decisions that could result in harm to people or property on this weather information." ?></red></p>
-        <p><?php
+<p><?php
 echo "Operational Since " . $divum["since"] . " - ";
 $info;
 ?> <?php
@@ -216,9 +220,9 @@ echo " - WeeWX";
 echo $divum["swversion"];
 ?>)  - OS- <?php
 echo " " . $os_version." - PHP( " . substr($phpVersion, 0, 7);
-?>)</value></p>
-        <a href="https://www.xweather.com/" target="_blank" title="Forecasts Powered by Vaisala Xweather"><?php echo $vaisalaLogo;?></a><a href="https://developer.yr.no/featured-products/forecast/">    Meteogram Data by <img src="img/yr.svg" width="14px"></a><a href="https://bas.dev/work/meteocons">     Animated Icons by <img src="img/bm.svg" width="14px"></p>
-
+?>)</value></p>        
+<div class="stationLongname" ><a href="https://www.xweather.com/" target="_blank" title="Forecasts Powered by Vaisala Xweather"><?php echo $vaisalaLogo;?></a><a href="https://developer.yr.no/featured-products/forecast/">    Meteogram Data by <img src="img/yr.svg" width="14px"></a><a href="https://bas.dev/work/meteocons">     Animated Icons by <img src="img/bm.svg" width="14px"></p>
+</div>        
 </div>
 <!--end section2-->
 <!--section3-->

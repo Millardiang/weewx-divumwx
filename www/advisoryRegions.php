@@ -13,6 +13,9 @@
 #    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
+//  Ian Millard 05/11/24 added styling to links for MetOffice warning links                  #
+//                                                                                           #
+//############################################################################################
 error_reporting(0);
 if ($advisoryzone == "eu") {
     $advisoryzoneMapping = "europe";
@@ -25,6 +28,7 @@ $json_icon = file_get_contents("jsondata/lookupTable.json");
 $parsed_icon = json_decode($json_icon, true);
 switch ($advisoryzoneMapping) {
     case "unitedkingdom":
+        $url = "https://www.metoffice.gov.uk/weather/warnings-and-advice/uk-warnings";
         $json_string = file_get_contents("jsondata/awa.txt");
         $parsed_json = json_decode($json_string, true);
         $cnt = count($parsed_json["response"]);
@@ -33,7 +37,22 @@ switch ($advisoryzoneMapping) {
         $fCnt = count($flood_json["items"]);
         $aHeader = "Alert(s) or warning(s) currently in force potentially affecting the ";
         echo '<div id="alert">';
-        if ($cnt + $fCnt > 0) {
+        //$cnt = 0;
+        //$fCnt = 1;
+        if ($cnt==0 && $fCnt==0) 
+        { ?>
+ 
+      <section>
+      <div class="alertbar" style="margin-bottom:4px;padding-bottom:10px;background-color:<?php echo $background[$i]; ?>;color:<?php echo $alertColor[$i]; ?>;border-radius:5px;">
+      <div class="alert-text-box" style="padding-left:20px;padding-right:20px;display:flex;margin: 0 auto;">
+		<div class="post" style="font-weight:500; font-size:14px; color:<?php echo $alertColor[$i]; ?>;">There are currently no weather advisories, alerts or warnings in force for Steeple Claydon and Surrounding Area
+			</div></div></div>
+	</section>	
+	
+            
+      <?php
+        }
+        else if ($cnt>0 || $fCnt>0) {
             $aPhrase = $aHeader . $stationlocation . " area.";
         }
         //weather alerts
@@ -43,27 +62,32 @@ switch ($advisoryzoneMapping) {
             $alerttype[$i] = explode(" ", $name[$i]);
             $bodyFull[$i] = str_replace("No Special Awareness Required", "", $parsed_json["response"][$i]["details"]["bodyFull"]);
             $type[$i] = $parsed_json["response"][$i]["details"]["type"];
-            $description[$i] = $parsed_json["response"][$i]["details"]["bodyFull"];
+            $descriptionLong[$i] = $parsed_json["response"][$i]["details"]["bodyFull"];
+            $description[$i] = str_replace($url, "" ,$descriptionLong[$i]);
             $level[$i] = substr($type[$i], -2);
             $color[$i] = $parsed_json["response"][$i]["details"]["color"];
             if ($level[$i] == "MN") {
                 $background[$i] = "white";
                 $alertColor[$i] = "black";
+                $linkColor[$i] = "darkblue";
                 $alertlevel[$i] = "MINOR";
                 $alertlevelColor[$i] = "MINOR";
             } elseif ($level[$i] == "MD") {
                 $background[$i] = "yellow";
                 $alertColor[$i] = "black";
+                $linkColor[$i] = "darkblue";
                 $alertlevel[$i] = "MODERATE";
                 $alertlevelColor[$i] = "YELLOW";
             } elseif ($level[$i] == "SV") {
                 $background[$i] = "#FFBF00";
                 $alertColor[$i] = "black";
+                $linkColor[$i] = "darkblue";
                 $alertlevel[$i] = "SEVERE";
                 $alertlevelColor[$i] = "AMBER";
             } elseif ($level[$i] == "EX") {
                 $background[$i] = "red";
                 $alertColor[$i] = "white";
+                $linkColor[$i] = "cream";
                 $alertlevel[$i] = "EXTREME";
                 $alertlevelColor[$i] = "RED";
             }
@@ -74,6 +98,9 @@ switch ($advisoryzoneMapping) {
             $expires[$i] = date("D j M H:i", strtotime($parsed_json["response"][$i]["timestamps"]["expiresISO"]));
             $alertHeadline[$i] = "  " . $nameColor[$i] . " ALERT. From " . $begins[$i] . " to " . $expires[$i] . ".  ";
             ?>
+
+    <style>a:link{color:<?php echo $linkColor[$i];?>}a:visited{color:<?php echo $linkColor[$i];?>;}a:hover{color:blue;}a:active{color:green;}</style>
+
  
       <section>
       <div class="alertbar" style="margin-bottom:4px;padding-bottom:10px;background-color:<?php echo $background[$i]; ?>;color:<?php echo $alertColor[$i]; ?>;border-radius:5px;">
@@ -81,7 +108,7 @@ switch ($advisoryzoneMapping) {
 		<div class="post" style="font-weight:500; font-size:14px; color:<?php echo $alertColor[$i]; ?>;">
 			<img src="<?php echo $warnimage[$i]; ?>"style="margin-bottom:-10px;"><?php echo $alertHeadline[$i]; ?>
 			
-			<span class="more" style="padding-top:-20px;display:none;"><p><?php echo $description[$i] . "."; ?></p></span>
+			<span class="more" style="padding-top:-20px;display:none;"><p><?php echo $description[$i]; ?><?php  echo"<a href='$url' style='color:<?php echo $linkColor[$i]'>$url</a>"; ?></p></span>
 
 			<more-button class="read">More</more-button>
 		</div></div></div></div>
@@ -109,7 +136,7 @@ switch ($advisoryzoneMapping) {
             } elseif ($floodLevel[$i] == 2) {
                 $floodBackground[$i] = "#e3000f";
                 $floodBorder[$i] = "#e3000f";
-                $floodAlertColor[$i] = "black";
+                $floodAlertColor[$i] = "white";
             } elseif ($floodLevel[$i] == 1) {
                 $floodBackground[$i] = "#e3000f";
                 $floodBorder[$i] = "#e3000f";
@@ -139,7 +166,7 @@ switch ($advisoryzoneMapping) {
    
        
         }
-echo '<div class="alertbar" style="background-color: transparent;"></div>';
+echo '<div class="alertbar" style="background-color: transparent;height:4px;border:0px;padding:0px;margin:0px;"></div>';
 
         break;
     case "europe":
