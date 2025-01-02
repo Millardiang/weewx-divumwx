@@ -64,9 +64,9 @@ print(f"{white}DIS {cyan}(DivumWX Installation Script) {white}starting.....{rese
 print(f"{yellow}Standby, importing and verifying required python modules...{reset}")
 
 def modMissing(module_name):
-    logging.debug(f"Module '{module_name}' is not installed.")
-    print(f"{red}Module '{module_name}' is not installed.{reset}")
-    install = input(f"Do you want to install the missing module '{module_name}'? (y/n): ").strip().lower()
+    logging.debug(f"Module '{module_name}' is not installed or is incorrect.")
+    print(f"{red}Module '{module_name}' is not installed or is incorrect.{reset}")
+    install = input(f"Do you want to install the missing or correct version of module '{module_name}'? (y/n): ").strip().lower()
     if install == 'y':
         try:
             print(f"Installing '{module_name}'...")
@@ -103,8 +103,20 @@ except ImportError:
     from configobj import ConfigObj
 try:
     from crontab import CronTab
+    if not hasattr(CronTab, '__version__') or "python-crontab" not in str(CronTab):
+        import pkg_resources
+        installed_crontab = pkg_resources.get_distribution("crontab")
+        invalid_package_name = f"{installed_crontab.project_name}-{installed_crontab.version}-py3-none-any"
+        print(f"{red}Incorrect crontab module detected: {invalid_package_name}. It must be 'python-crontab'.{reset}")
+        logging.debug(f"Incorrect crontab module detected: {invalid_package_name}.")
+        print(f"{yellow}Removing the incorrect crontab module...{reset}")
+        logging.debug("Attempting to uninstall the incorrect crontab module...")
+        subprocess.check_call([sys.executable, "-m", "pip", "uninstall", "-y", "crontab"])
+        print(f"{green}Incorrect crontab module removed successfully.{reset}")
+        logging.debug("Incorrect crontab module removed successfully.")
+        raise ImportError("Removed incorrect crontab module. Installing python-crontab.")
 except ImportError:
-    modMissing("CronTab")
+    modMissing("python-crontab")
     from crontab import CronTab
 print(f"{green}Python module import complete...{reset}")
 
@@ -244,19 +256,19 @@ class DVMInstaller:
         else:
             print(f"{white}WeeWX version {yellow}{weewx_version}{white} is supported. Proceeding with installation.{reset}")
         
-    def chkWebsrv(self):
+    def chkWebsrv(self, wsName=None, wsOwner=None, wsGroup=None):
         try:
             result = subprocess.run(
                 ["ps", "-eo", "comm=,user=,group=,ppid="],
                 capture_output=True,
                 text=True
             )
-            
+
             if result.returncode == 0:
                 processes = result.stdout.splitlines()
                 web_server_parent = None
                 web_server_child = None
-                
+
                 for line in processes:
                     parts = line.split()
                     if len(parts) < 4:
@@ -270,6 +282,15 @@ class DVMInstaller:
                     if command in ["apache2", "nginx"] and user != "root":
                         logging.debug(f"Found webserver child process")
                         web_server_child = (command, user, group)
+
+                # If parameters are provided, validate against them
+                if wsName or wsOwner or wsGroup:
+                    if web_server_parent and web_server_parent[0] != wsName:
+                        return False, None, None, None, None, None
+                    if web_server_child and web_server_child[1] != wsOwner:
+                        return False, None, None, None, None, None
+                    if web_server_parent and web_server_parent[2] != wsGroup:
+                        return False, None, None, None, None, None
 
                 if web_server_parent and web_server_child:
                     logging.debug(f"Webserver Type: {web_server_parent[0]}, Webserver Root: {web_server_parent[1]}:{web_server_parent[2]}, Webserver Child: {web_server_child[1]}:{web_server_child[2]}")
@@ -361,15 +382,15 @@ class DVMInstaller:
     def chkWeewx(self, wxName='weewx'):
         try:
             result = subprocess.run(
-                ["ps", "-eo", "user:20,group:20,args"],  # Use 'args' to get the full command line
+                ["ps", "-eo", "user:20,group:20,args"],
                 capture_output=True,
                 text=True
             )
             if result.returncode == 0:
                 processes = result.stdout.splitlines()
                 for line in processes:
-                    if wxName in line:  # Check if wxName is in the full command line
-                        fields = line.split(None, 2)  # Split into user, group, and args
+                    if wxName in line:
+                        fields = line.split(None, 2)
                         wxOwner = fields[0]
                         wxGroup = fields[1]
                         return True, wxName, wxOwner, wxGroup

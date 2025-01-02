@@ -18,8 +18,8 @@ if (file_exists($chkReqStatusFile)) {
     unlink($chkReqStatusFile);
 }
 
-function checkWeeWXVersion($userHome) {
-    $versionFilePath = $userHome . './weewxVer.txt';
+function checkWeeWXVersion() {
+    $versionFilePath = './weewxVer.txt';
 
     if (!file_exists($versionFilePath)) {
         return ['status' => false, 'version' => 'File not found'];
@@ -149,7 +149,7 @@ $directories = [
 ];
 
 $results = [
-    'weewx' => checkWeeWXVersion($userHome),
+    'weewx' => checkWeeWXVersion(),
     'php_version' => checkPHPVersion(),
     'php_modules' => checkPHPModules($requiredModules),
     'directories' => [],
