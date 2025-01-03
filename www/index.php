@@ -13,6 +13,9 @@
 //    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
 //                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 //#############################################################################################
+//  Ian Millard 05/11/24 added styling to links for popup charts and records                  #
+//                                                                                            #
+//#############################################################################################
 session_start();
 if (!file_exists("userSettings.php")) {
 	if (isset($_SESSION['setupAttempted']) && $_SESSION['setupAttempted'] === true) {
@@ -64,6 +67,7 @@ echo $stationlocation;
   <link rel="manifest" href="./site.webmanifest">
   <link rel="mask-icon" href="./safari-pinned-tab.svg" color="#5bbad5">
   <link rel="shortcut icon" href="./favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@200;300;400;600;700" rel="stylesheet">
   <meta name="msapplication-TileColor" content="#da532c">
   <meta name="msapplication-config" content="./browserconfig.xml">
   <meta name="theme-color" content="#ffffff">
@@ -76,8 +80,7 @@ echo filemtime('./css/divumwx.main.css');
 <link rel="stylesheet" href="./css/divumwx.themes.css?version=<?php
 echo filemtime('./css/divumwx.themes.css');
 ?>" rel="stylesheet prefetch">
-  
-  <script>
+    <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js')
@@ -139,7 +142,8 @@ error_reporting(0);
           
 
 <!--end of alert section-->
-<!--start of grid section-->  
+<!--start of grid section--> 
+<style>a:link{color:var(--col-6);}a:visited{color:var(--col-6);}a:hover{color:var(--col-22);}a:active{color:blue;}</style>
 <section class="card-container">
 
 	<div class="cardP"><div class="module"><div id="position1"></div></div></div>

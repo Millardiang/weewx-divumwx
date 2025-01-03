@@ -633,7 +633,7 @@ svgAxis.selectAll(".tick line")
 
 // text output current lux  
 svg.append("text")
-    .text("Lux " + currentLux)
+    .text("Illum. " + currentLux + " Lux")
     .attr("x", width / 2)
     .attr("y", 133)
     .attr("text-anchor", "middle")

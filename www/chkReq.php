@@ -13,40 +13,21 @@
 #    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
-
 $chkReqStatusFile = __DIR__ . '/chkReqstatus.json';
 if (file_exists($chkReqStatusFile)) {
     unlink($chkReqStatusFile);
 }
 
-function findWeeWXBinary($userHome) {
-    $directory = new RecursiveDirectoryIterator($userHome, FilesystemIterator::SKIP_DOTS);
-    $iterator = new RecursiveIteratorIterator(
-        new RecursiveCallbackFilterIterator($directory, function ($current) {
-            // Skip hidden files and directories (names starting with a dot)
-            if ($current->getFilename()[0] === '.') {
-                return false;
-            }
-            return true;
-        })
-    );
+function checkWeeWXVersion() {
+    $versionFilePath = './weewxVer.txt';
 
-    foreach ($iterator as $file) {
-        if ($file->isFile() && $file->getFilename() == 'weewxd' && is_executable($file->getPathname())) {
-            return $file->getPathname();
-        }
+    if (!file_exists($versionFilePath)) {
+        return ['status' => false, 'version' => 'File not found'];
     }
-    return false;
-}
 
-function checkWeeWXVersion($userHome) {
-    $binary = findWeeWXBinary($userHome);
-    if (!$binary) {
-        return ['status' => false, 'version' => 'Not found'];
-    }
-    $output = shell_exec("$binary --version");
-    $output = trim($output);
-    return ['status' => version_compare($output, '5.0.0', '>='), 'version' => $output];
+    $version = trim(file_get_contents($versionFilePath));
+    $status = version_compare($version, '5.0.0', '>=');
+    return ['status' => $status, 'version' => $version];
 }
 
 function checkPHPVersion() {
@@ -168,7 +149,7 @@ $directories = [
 ];
 
 $results = [
-    'weewx' => checkWeeWXVersion($userHome),
+    'weewx' => checkWeeWXVersion(),
     'php_version' => checkPHPVersion(),
     'php_modules' => checkPHPModules($requiredModules),
     'directories' => [],

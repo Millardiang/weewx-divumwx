@@ -1,12 +1,9 @@
 {
-    "zip_file": "",
     "user": "~/weewx-data/bin/user/",
     "skins": "~/weewx-data/skins/",
     "weewx_config_file": "~/weewx-data/weewx.conf",
-    "www_path": "~/weewx-data/public_html/",
+    "weewx_www_root": "~/weewx-data/public_html",
     "over_write": "True",
-    "delete_extracted_files": "False",
-    "extract_to_path": ".",
     "config_entries0": {
         "StdReport": {
             "DivumWXReport": {
@@ -236,8 +233,8 @@
             "backup_times": ""
         }
     },
-    "config_entries_append": "process_services = user.divumwx.DivumWXRealTime",
-    "config_entries_append2": "xtype_services = user.divumwx.LastNonZeroService, user.divumwx.AirDensityService",
-    "config_entries_append3" :"data_services = user.divumwx.FilePile",
+    "config_entries_append": "process_services=user.divumwx.DivumWXRealTime",
+    "config_entries_append2": "xtype_services=user.divumwx.LastNonZeroService, user.divumwx.AirDensityService",
+    "config_entries_append3": "data_services=user.divumwx.FilePile",
     "backupScvs1": "process_services=user.dvm_db_backup.DVM_DB_Backup"
 }
