@@ -24,6 +24,7 @@ $theme = $_COOKIE["theme"];
 $charttheme = $theme;
 $livedata = "serverdata/dvmRealtime.txt";
 $chartsource =  "dvmhighcharts"; 
+$filepileRefresh = 60;
 // Updater timing cycles
 $json_string = file_get_contents("jsondata/dvmPositionCycles.json");
 $parsed_json = json_decode($json_string, true);
