@@ -12,13 +12,12 @@ import getpass
 import grp
 import pwd
 import shutil
-import distutils
 from datetime import datetime
+from pkg_resources import DistributionNotFound, get_distribution
 
-version = "4.5.25.000"
+version = "4.6.00.000"
 srvGenURL = 'https://www.divumwx.org/settingsGen/'
 
-# Define ANSI codes
 reset = "\033[0m"
 bold = "\033[1m"
 underline = "\033[4m"
@@ -53,7 +52,7 @@ def setup_logging():
             datefmt='%Y-%m-%d %H:%M:%S',
         )
     else:
-        logging.basicConfig(level=logging.CRITICAL)  # Suppress all logs by default
+        logging.basicConfig(level=logging.CRITICAL)
 
     return args
 args = setup_logging()
@@ -63,7 +62,7 @@ logging.debug(f"+----------------------- DivumWX Installer Version: {version} --
 print(f"{white}DIS {cyan}(DivumWX Installation Script) {white}starting.....{reset}")
 print(f"{yellow}Standby, importing and verifying required python modules...{reset}")
 
-def modMissing(module_name):
+def modMissing(module_name, force_restart=False):
     logging.debug(f"Module '{module_name}' is not installed or is incorrect.")
     print(f"{red}Module '{module_name}' is not installed or is incorrect.{reset}")
     install = input(f"Do you want to install the missing or correct version of module '{module_name}'? (y/n): ").strip().lower()
@@ -74,9 +73,10 @@ def modMissing(module_name):
             subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", module_name])
             print(f"{green}Module '{module_name}' installed successfully.{reset}")
             logging.debug(f"Module '{module_name}' installed successfully.")
-            print(f"{green}Restarting script...{reset}")
-            logging.debug(f"Restarting script...")
-            os.execl(sys.executable, sys.executable, *sys.argv)
+            if force_restart:
+                print(f"{green}Restarting script...{reset}")
+                logging.debug(f"Restarting script...")
+                os.execl(sys.executable, sys.executable, *sys.argv)
         except subprocess.CalledProcessError as e:
             logging.debug(f"Failed to install module '{module_name}': {e}")
             print(f"{red}Failed to install module '{module_name}': {e}{reset}")
@@ -89,35 +89,30 @@ def modMissing(module_name):
 try:
     import readchar
 except ImportError:
-    modMissing("readchar")
-    import readchar
+    modMissing("readchar", force_restart=True)
 try:
     import curses
 except ImportError:
-    modMissing("curses")
-    import curses
+    modMissing("curses", force_restart=True)
 try:
     from configobj import ConfigObj
 except ImportError:
-    modMissing("configobj")
-    from configobj import ConfigObj
+    modMissing("configobj", force_restart=True)
 try:
     from crontab import CronTab
-    if not hasattr(CronTab, '__version__') or "python-crontab" not in str(CronTab):
-        import pkg_resources
-        installed_crontab = pkg_resources.get_distribution("crontab")
-        invalid_package_name = f"{installed_crontab.project_name}-{installed_crontab.version}-py3-none-any"
-        print(f"{red}Incorrect crontab module detected: {invalid_package_name}. It must be 'python-crontab'.{reset}")
-        logging.debug(f"Incorrect crontab module detected: {invalid_package_name}.")
-        print(f"{yellow}Removing the incorrect crontab module...{reset}")
-        logging.debug("Attempting to uninstall the incorrect crontab module...")
-        subprocess.check_call([sys.executable, "-m", "pip", "uninstall", "-y", "crontab"])
-        print(f"{green}Incorrect crontab module removed successfully.{reset}")
-        logging.debug("Incorrect crontab module removed successfully.")
-        raise ImportError("Removed incorrect crontab module. Installing python-crontab.")
+    try:
+        from pkg_resources import get_distribution, DistributionNotFound
+        try:
+            installed_crontab = get_distribution("python-crontab")
+            logging.debug(f"Detected correct crontab module: {installed_crontab.project_name}-{installed_crontab.version}.")
+        except DistributionNotFound:
+            print(f"{red}No crontab module detected. Installing python-crontab...{reset}")
+            logging.debug("No crontab module detected. Installing python-crontab.")
+            raise ImportError("No crontab module detected. Installing python-crontab.")
+    except DistributionNotFound:
+        modMissing("python-crontab", force_restart=True)
 except ImportError:
-    modMissing("python-crontab")
-    from crontab import CronTab
+    modMissing("python-crontab", force_restart=True)
 print(f"{green}Python module import complete...{reset}")
 
 class DVMInstaller:
@@ -183,7 +178,7 @@ class DVMInstaller:
                 for i in range(lines_per_page):
                     line_number = current_line + i
                     if line_number < total_lines:
-                        stdscr.addstr(i + 1, 0, lines[line_number][:max_x-1], curses.color_pair(2))  # Use text color
+                        stdscr.addstr(i + 1, 0, lines[line_number][:max_x-1], curses.color_pair(2))
 
                 stdscr.refresh()
                 key = stdscr.getch()
@@ -257,6 +252,7 @@ class DVMInstaller:
             print(f"{white}WeeWX version {yellow}{weewx_version}{white} is supported. Proceeding with installation.{reset}")
         
     def chkWebsrv(self, wsName=None, wsOwner=None, wsGroup=None):
+        logging.debug(f"Entering Web Server verification check")
         try:
             result = subprocess.run(
                 ["ps", "-eo", "comm=,user=,group=,ppid="],
@@ -283,7 +279,6 @@ class DVMInstaller:
                         logging.debug(f"Found webserver child process")
                         web_server_child = (command, user, group)
 
-                # If parameters are provided, validate against them
                 if wsName or wsOwner or wsGroup:
                     if web_server_parent and web_server_parent[0] != wsName:
                         return False, None, None, None, None, None
@@ -308,6 +303,7 @@ class DVMInstaller:
 
 
     def getWebRoot(self):
+        logging.debug(f"Entering webroot check")
         def find_file(search_paths, filename):
             for path in search_paths:
                 potential_path = os.path.join(path, filename)
@@ -380,6 +376,7 @@ class DVMInstaller:
         return main_document_root, document_roots
 
     def chkWeewx(self, wxName='weewx'):
+        logging.debug(f"Enter check weewx location routine")
         try:
             result = subprocess.run(
                 ["ps", "-eo", "user:20,group:20,args"],
@@ -393,11 +390,15 @@ class DVMInstaller:
                         fields = line.split(None, 2)
                         wxOwner = fields[0]
                         wxGroup = fields[1]
+                        logging.debug(f"{wxName} located. Owner: {wxOwner}, Group: {wxGroup}")
                         return True, wxName, wxOwner, wxGroup
+                logging.debug(f"weewx not found")
                 return False, wxName, None, None
             else:
+                logging.debug(f"weewx not found")
                 return False, wxName, None, None
         except Exception:
+            logging.debug(f"weewx not found")
             return False, wxName, None, None
 
     def createCron(self, html_root):
@@ -410,27 +411,42 @@ class DVMInstaller:
         os.makedirs(script_dir, exist_ok=True)
         
         bash_script_content = f"""#!/bin/bash
-    # Enter the pip virtual env and get the WeeWX version
-    cd ~/weewx-venv/bin || exit 1
-    source ~/weewx-venv/bin/activate
-    ./weewxd --version > {output_file} 2>&1
-    deactivate
-    """
+# Enter the pip virtual env and get the WeeWX version
+cd ~/weewx-venv/bin || exit 1
+source ~/weewx-venv/bin/activate
+./weewxd --version > {output_file} 2>&1
+deactivate
+"""
         logging.debug("Writing bash script for cron job")
-        with open(script_path, "w") as script_file:
-            script_file.write(bash_script_content)
-        
-        os.chmod(script_path, 0o755)
-        
+        try:
+            with open(script_path, "w") as script_file:
+                script_file.write(bash_script_content)
+            logging.debug(f"Successfully wrote bash script to {script_path}")
+            print(f"{green}Successfully created bash script at {script_path}{reset}")
+        except IOError as e:
+            logging.debug(f"Failed to write bash script to {script_path}: {e}")
+            print(f"{red}Failed to create bash script at {script_path}: {e}{reset}")
+        logging.debug("Changing permissions on bash script for cron job")        
+        try:
+            os.chmod(script_path, 0o755)
+            logging.debug(f"Successfully set permissions for {script_path} to 755")
+            print(f"{green}Successfully set permissions for {script_path} to 755{reset}")
+        except OSError as e:
+            logging.error(f"Failed to set permissions for {script_path}: {e}")
+            print(f"{red}Failed to set permissions for {script_path}: {e}{reset}")
         logging.debug("Creating cron entry")
-        cron = CronTab(user=username)
-        job = cron.new(command=f"{script_path}", comment="WeeWX Version Fetch")
-        job.setall("0 2 * * *")
-        cron.write()
-        
+        try:
+            cron = CronTab(user=username)
+            job = cron.new(command=f"{script_path}", comment="WeeWX Version Fetch")
+            job.setall("0 2 * * *")
+            cron.write()
+            logging.debug(f"Successfully created cron job for script {script_path} with schedule '0 2 * * *'")
+            print(f"{green}Successfully created cron job for script {script_path} with schedule '0 2 * * *'{reset}")
+        except Exception as e:
+            logging.error(f"Failed to create cron job for script {script_path}: {e}")
+            print(f"{red}Failed to create cron job for script {script_path}: {e}{reset}")
         logging.debug("Test run of script to grab initial WeeWX version")
         subprocess.run([script_path], check=True)
-        
         if os.path.exists(output_file):
             with open(output_file, "r") as version_file:
                 version = version_file.read().strip()
@@ -441,9 +457,11 @@ class DVMInstaller:
             return "Unknown"
 
     def dirNotEmpty(self, path):
+        logging.debug(f"Checking for empty directory")
         return os.path.isdir(path) and bool(os.listdir(path))
 
     def deleteContents(self, path):
+        logging.debug(f"Deleting directory contents")
         for root, dirs, files in os.walk(path):
             for file in files:
                 file_path = os.path.join(root, file)
@@ -453,7 +471,22 @@ class DVMInstaller:
                 dir_path = os.path.join(root, dir)
                 shutil.rmtree(dir_path)
 
+    def copyDir(self, src, dst, overwrite=False):
+        logging.debug(f"Entering Directory copy function")
+        if not os.path.exists(dst):
+            logging.debug(f"Creating required directory")
+            os.makedirs(dst)
+        for item in os.listdir(src):
+            source_path = os.path.join(src, item)
+            dest_path = os.path.join(dst, item)
+            if os.path.isdir(source_path):
+                self.copyDir(source_path, dest_path, overwrite)
+            else:
+                if not os.path.exists(dest_path) or overwrite:
+                    shutil.copy2(source_path, dest_path)
+
     def chgPermRecur(self, path_list, uid_gid):
+        logging.debug(f"CHanging permissions recursively")
         user, group = uid_gid
         try:
             uid = pwd.getpwnam(user).pw_uid
@@ -527,6 +560,7 @@ class DVMInstaller:
                 break
     
     def chkUgrp(self):
+        logging.debug(f"Verifying user/group")
         self.user = getpass.getuser()
         try:
             user_info = pwd.getpwnam(self.user)
@@ -551,6 +585,7 @@ class DVMInstaller:
             return (self.user, self.group)
 
     def chgHroot(self, d, html_root):
+        logging.debug(f"Changing HTML_ROOT")
         def recursive_update(d, key_to_update, new_value):
             for key, value in d.items():
                 if isinstance(value, dict):
@@ -582,7 +617,7 @@ class DVMInstaller:
                 config_data[section] = values
 
     def addBkpStanza(self, config_data, entries):
-        logging.info(f"Backup Service stanza added")
+        logging.debug(f"Backup Service stanza added")
         entry = entries['backupEntry1']
         for section, values in entry.items():
             for key, value in values.items():
@@ -652,24 +687,25 @@ class DVMInstaller:
             logging.debug(f"Total entries appended: {count}")
 
     def appendBkpSvcs(self, config_data, entries):
-        for key, value in entries.items():
-            logging.info(f"DivumWX Backup service appended to weewx config file")
-            if key.startswith("backupScvs"):
-                service_type, service_value = value.split("=")
-                service_type = service_type.strip()
-                service_value = service_value.strip()
+        if bkpWXSrv:
+            logging.debug(f"Adding DivumWX Backup service to weewx config file")
+            for key, value in entries.items():
+                if key.startswith("backupScvs"):
+                    service_type, service_value = value.split("=")
+                    service_type = service_type.strip()
+                    service_value = service_value.strip()
 
-                if service_type in config_data['Engine']['Services']:
-                    existing_value = config_data['Engine']['Services'][service_type]
-                    if existing_value in [',', '""']:
-                        config_data['Engine']['Services'][service_type] = service_value
+                    if service_type in config_data['Engine']['Services']:
+                        existing_value = config_data['Engine']['Services'][service_type]
+                        if existing_value in [',', '""']:
+                            config_data['Engine']['Services'][service_type] = service_value
+                        else:
+                            config_data['Engine']['Services'][service_type] += f", {service_value}"
                     else:
-                        config_data['Engine']['Services'][service_type] += f", {service_value}"
-                else:
-                    config_data['Engine']['Services'][service_type] = service_value
+                        config_data['Engine']['Services'][service_type] = service_value
 
-                if config_data['Engine']['Services'].get('data_services') == ',':
-                    config_data['Engine']['Services']['data_services'] = '""'
+                    if config_data['Engine']['Services'].get('data_services') == ',':
+                        config_data['Engine']['Services']['data_services'] = '""'
 
     def updDatabase(self):
         logging.debug(f"Updating weewx database with additional columns for DivumWX Skin")
@@ -727,6 +763,7 @@ class DVMInstaller:
             print(f"Failed to stop the WeeWX service: {e}")
     
     def getEnabledSkins(self, weewx_config_file):
+        logging.debug(f"Getting currently enabled skins")
         report_configs = []
         inside_std_report = False
         current_section = None
@@ -1017,7 +1054,7 @@ class DVMInstaller:
                     logging.debug(f"Copying user directory files")    
                     print(f"{white}Copying {yellow}user{white} directory....")
                     if self.dirNotEmpty('user'):
-                        distutils.dir_util.copy_tree("user", locations["user"], update=do_overwrite)
+                        self.copyDir("user", locations["user"], do_overwrite)
                         logging.debug(f"Copied user directory successfully")
                         print(f"{green}Copied {white}user {green}directory successfully{reset}")
                     else:
@@ -1032,8 +1069,8 @@ class DVMInstaller:
                     logging.debug(f"Copying skins directory files") 
                     print(f"{white}Copying {yellow}skins{white} directory....")
                     if self.dirNotEmpty('skins'):
+                        self.copyDir("skins", locations["skins"], do_overwrite)
                         logging.debug(f"Copied skins directory successfully")
-                        distutils.dir_util.copy_tree("skins", locations["skins"], update=do_overwrite)
                         print(f"{green}Copied {white}skins {green}directory successfully{reset}")
                     else:
                         logging.debug(f"Directory 'skins' is empty, unable to copy files.")
@@ -1059,7 +1096,7 @@ class DVMInstaller:
                                 self.deleteContents(html_root)
                                 print(f"{green}Directory {html_root} has been emptied.{reset}")
                                 print(f"{white}Copying {yellow}www{white} directory....")
-                                distutils.dir_util.copy_tree("www", locations["www"], update=do_overwrite)
+                                self.copyDir("www", locations["www"], do_overwrite)
                                 print(f"{green}Copied {white}www {green}directory successfully{reset}")
                                 self.chgPermRecur([locations["www"]], (self.user, self.wsOwner))
                                 print(f"{green}File permissions and ownership in the {white}www {green}directory successfully set{reset}")
@@ -1076,7 +1113,7 @@ class DVMInstaller:
                     else:
                         logging.debug(f"Copying www directory files")
                         print(f"{white}Copying {yellow}www{white} directory....")
-                        distutils.dir_util.copy_tree("www", locations["www"], update=do_overwrite)
+                        self.copyDir("www", locations["www"], do_overwrite)
                         print(f"{green}Copied {white}www {green}directory successfully{reset}")
                 else:
                     logging.debug(f"Directory 'www' does not exist.")
@@ -1088,7 +1125,7 @@ class DVMInstaller:
             print('Backing up weewx config file')
             timestamp = time.strftime('%Y%m%d%H%M%S')
             backup_file = f"{weewx_config_file}.{timestamp}"
-            distutils.file_util.copy_file(weewx_config_file, backup_file)
+            shutil.copy2(weewx_config_file, backup_file)
             print(f"Backup of weewx config created: {backup_file}")
             time.sleep(1)
             logging.debug(f"Verifying HTML_ROOT for added/updated stanzas")
@@ -1104,11 +1141,11 @@ class DVMInstaller:
             print(f"{white}Updating Services stanza{reset}")
             self.appendSvcs(config_data, d)
             logging.debug(f"Checking if DivumWS backup service is enabled")
-            if bkpWX:
-                logging.info(f"Adding DivumWX Backup Stanza")
+            if bkpWXSrv:
+                logging.debug(f"Adding DivumWX Backup Stanza")
                 print(f"{white}Adding DivumWX Backup Stanza")
                 self.addBkpStanza(config_data, d)
-                logging.info(f"Adding DivumWX Backup Service")
+                logging.debug(f"Adding DivumWX Backup Service")
                 print(f"{white}Adding DivumWX Backup Service")
                 self.appendBkpSvcs(config_data, d)
             else:
@@ -1145,7 +1182,7 @@ class DVMInstaller:
             self.updDatabase()
             self.setfnlOwner(locations)
             weewxVersion = self.createCron(html_root)
-            print(f"{green}Weewx Version: {weewxVersion}{reset}")
+            print(f"{cyan}Weewx Version: {weewxVersion}{reset}")
             logging.debug(f"WeeWX Version: {weewxVersion}")
             print(f"{white}Done! WeeWX must be {yellow}started{white} for changes to become active{reset}")
             print(f"{green}You will need to ensure that your webserver is set to deliver the DivumWX skin{reset}")
