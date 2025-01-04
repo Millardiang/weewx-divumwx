@@ -27,17 +27,9 @@ $file_headers = @get_headers($webcamurl); ?>
     </div>
     <span class='moduletitle'><?php echo $lang['webcamModule'];?></span>
 
+<div class="updatedtime1"><?php if(file_exists($webcamurl)&&time()- filemtime($webcamurl)>400||$dayPartCivil == "night")echo $offline. '<offline> Offline </offline>';else echo $online." ".$divum["time"];?></div>
+</div>
 
-<div class="updatedtime1"><span>
-<?php if($file_headers && $file_headers[0] != 'HTTP/1.1 404 Not Found') {
-  echo $online.' '.date($timeFormat);
-} else if (file_exists($webcamurl)&&time()- filemtime($webcamurl)<300) {
-  echo $online. ' <online>'.date($timeFormat,filemtime($webcamurl)).'</online>';
-} else {
-  echo $offline. '<offline> Offline </offline>';
-}
-?>
-</span></div>
 <!-- HOMEWEATHER STATION TEMPLATE SIMPLE WEBCAM -add your url as shown below do NOT delete the class='webcam' !!! -->
 <a href="dvmTimelapsePopup.php" data-lity><img src="<?php echo $webcamurl?>?v=<?php echo date('YmdGis');?>>" style="border:solid transparent 1px; border-radius:5px;width: 280px;margin-top:1px;" alt="weathercam" class="webcam"></a->
 </span>

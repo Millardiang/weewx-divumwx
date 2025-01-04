@@ -23,7 +23,8 @@ $theme = $_COOKIE["theme"];
   else if($theme == "light"){$reverseTheme="dark";}
 $charttheme = $theme;
 $livedata = "serverdata/dvmRealtime.txt";
-$chartsource =  "dvmhighcharts"; 
+$chartsource =  "dvmhighcharts";
+$position99 = "filepileTextCreate.php";
 $filepileRefresh = 60;
 // Updater timing cycles
 $json_string = file_get_contents("jsondata/dvmPositionCycles.json");
@@ -51,7 +52,7 @@ $cycles17 = $parsed_json[$position17]["cycle"];
 $cycles18 = $parsed_json[$position18]["cycle"];
 $cycles19 = $parsed_json[$position19]["cycle"];
 $cycles20 = $parsed_json[$position20]["cycle"];
-
+$cycles99 = $parsed_json[$position99]["cycle"];
 
 //$copyYear = 2023;
 $curYear = date("Y");

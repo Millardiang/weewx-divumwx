@@ -135,8 +135,7 @@ var refreshId;$(document).ready(function(){stationcron()});function stationcron(
   .html(a);<?php if ($filepileRefresh >0) {
   echo 'setTimeout(stationcron,' . 1000*$filepileRefresh.')';}?>},
   contentType: "application/x-www-form-urlencoded;charset=ISO-8859-15",
-  type:"GET",url:"filepileTextCreate.php"})}; 
-
+  type:"GET",url:"filepileTextCreate.php"})};
 
 </script>
 
