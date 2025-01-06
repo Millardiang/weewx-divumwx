@@ -13,7 +13,6 @@
 #    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
- 
 include('dvmCombinedData.php');
 error_reporting(0);
 $result = date_sun_info(time(), $lat, $lon);
@@ -859,7 +858,7 @@ var theme = "<?php echo $theme;?>";
   
   DirectionBearing(70, 80, Bearing); // Bearing
     
-  DirectionAngle(70, 65, angle + "°"); // Direction in degrees
+  DirectionAngle(70, 65, angle + "\u00B0"); // Direction in degrees
 
   CardinalNorth(66.75, 29, "N");
   CardinalDirection(111, 72.75, "E");
@@ -1025,3 +1024,4 @@ $date = strtotime($date) + 60 * 60 * $UTC; echo date('jS M H:i',$date);
 </article> 
    
 </main>
+
