@@ -3,6 +3,7 @@
  06-12-24 adjustments to light theme
  19-12-24 adjustment to light theme --col-14 for the power module roundel background color
  04-01-25 tweaks to light theme
+ 07-01-25 lines 49 - 51 power module css
 */
 /*--col-6 for white */
 :root{--col-1:#151819;--col-2:#1f2024;--col-3:#26282c;--col-4:#2e8b57;--col-5:#488fcc;--col-6:#FFFFFF;--col-7:#000000;--col-8:#00FF00;--col-9:#FF0000;--col-10:#2d2f32;--col-11:#ffffff;--col-12:#47494d;--col-13:#393d40;--col-14:#999999;--col-15:#393d40;--col-16:#3b3c3f;--col-17:#ffffff;--col-18:#38383c;--col-19:#000000;--col-20:#b9cff7;--col-21:#c0c0c0;--col-22:silver;--rain-col:#3B9CAC;--font:Arial,Helvetica,sans-serif;}
@@ -45,7 +46,9 @@ font-size:.7rem;position:absolute;margin-top:85px;margin-left:20px;display:flex;
 .gauge .tick line{stroke:rgba(255,99,71,1);stroke-width:1px;stroke-linecap:round;}.gauge line{stroke:rgba(59,60,63,1);stroke-width:0.75px;stroke-linecap:round;}.gauge .arc,.gauge .cursor{stroke:rgba(59,60,63,0);stroke-width:2px;fill:rgba(59,60,63,0);}
 .gauge .major{fill:rgba(147,147,147,1);font-size:8px;font-family:arial;font-weight:normal;letter-spacing:.015rem;}.gauge .indicator{stroke:rgba(255,0,0,1);fill:#000;stroke-width:1px;}.gauge circle{stroke:rgba(59,60,63,1);fill:rgba(59,60,63,1);}
 .vanilla-compass{margin-top:-32.5px;margin-left:0px;}.barometer{position:relative;margin-top:-17.35px;margin-left:-0px;}.anemometer{position:relative;margin-top:-37px;margin-left:-1px;}.divumwxbeaufort{margin-top:-1px;}
-
+table.power{width:95%;text-align:center;border-spacing:3px;}
+table.power td, table.power th{border:1px solid var(--col-13);border-radius:2px;padding:1px 1px;}
+table.power tbody td{font-size:0.585em;width:50px;}
 .headerflag{float:none;font-weight:bold;font-size:20px;text-transform:capitalize;text-align:center;}
 @font-face{font-family:system;font-style:normal;src:local("Arial");}
 .averagedir,.averagedir span,.averagedir span2,.averagedir1 span,.averagedir1 span2,.avgspeedgust span,.avgspeedgust1 span,.avgspeedwind span,.avgspeedwind1 span,.baromcircle-content,.barometertrend falling,.barometertrend rising,.barometertrend steady,.feels,.footertext,.gustspeedtrend,.gustspeedtrend span,.gustspeedtrend1 span,.homeindoorfeels,.max,.notificationinfo,.outlooktitle span,.divumwxtext,.windalarm span,.windchillcircle-content,.windcondition span,.windgustmphcircle-content,.windmphcircle-content,.windspeedtrend span,.windspeedtrend1 span,a,body,daylighthours:before,html,lo,sup,suprain2,suptemp{text-rendering:optimizeLegibility;color-adjust:[exact];-webkit-osx-font-smoothing:grayscale;-moz-osx-font-smoothing:grayscale;font-smoothing:grayscale;}
