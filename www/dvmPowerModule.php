@@ -66,13 +66,13 @@ else echo $online,"";echo " ",	date($timeFormat,$forecastime);	?></div>
 <tr>
 <td rowspan="2" style="border: transparent;"><img src="./img/house.svg" style="height:26px;border: transparent;"></td>
 <td style="border: transparent;">Power</td>
-<td style="border: transparent;">USB Power</td>
+<td style="border: transparent;">UPS Power</td>
 <td style="border: transparent;">Total Power</td>
 <td style="border: transparent;">Daily Energy</td>
 </tr>
 <tr>
 <td style="border-left: 5px solid rgb(158,74,27);"><?php echo $load["power"];?>W</td>
-<td style="border-left: 5px solid rgb(158,74,27);"><?php echo $load["total_usb_power"];?>W</td>
+<td style="border-left: 5px solid rgb(158,74,27);"><?php echo $load["total_ups_power"];?>W</td>
 <td style="border-left: 5px solid rgb(158,74,27);"><?php echo $load["total_power"];?>W</td>
 <td style="border-left: 5px solid rgb(158,74,27);"><?php echo $load["daily_energy"];?>kWh</td>
 </tr>
