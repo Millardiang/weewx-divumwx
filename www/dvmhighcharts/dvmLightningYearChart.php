@@ -39,7 +39,7 @@ $distanceminmaxYear = json_encode($distanceminmax);
     <script src="scripts/highcharts-more.js"></script>
     <script src="scripts/exporting.js"></script>
     <script src="scripts/export-data.js"></script>
-    <script src="scripts/brand-<?php echo $theme;?>.js" type="text/javascript"></script>
+    <script src="scripts/divumwx-<?php echo $theme;?>.js" type="text/javascript"></script>
 </head>
 <body>
 

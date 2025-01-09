@@ -18,12 +18,13 @@ if ($theme === "dark") {
 <head>
   <meta charset="UTF-8">
   <title>Solar Generation Bell Curve</title>
-  <script src="https://code.highcharts.com/highcharts.js"></script>
-<script src="https://code.highcharts.com/modules/histogram-bellcurve.js"></script>
-<script src="https://code.highcharts.com/modules/exporting.js"></script>
-<script src="https://code.highcharts.com/modules/export-data.js"></script>
-<script src="https://code.highcharts.com/modules/accessibility.js"></script>
-<script src="scripts/divumwx-<?php echo $theme;?>.js" type="text/javascript"></script>
+  <script src="scripts/jquery.min.js"></script>
+    <script src="scripts/highstock.js"></script>
+    <script src="scripts/boost.js"></script>
+    <script src="scripts/highcharts-more.js"></script>
+    <script src="scripts/exporting.js"></script>
+    <script src="scripts/export-data.js"></script>
+    <script src="scripts/divumwx-<?php echo $theme;?>.js" type="text/javascript"></script>
 
 </head>
 <body>
