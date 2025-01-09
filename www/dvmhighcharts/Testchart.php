@@ -14,22 +14,23 @@
 ##                    https://github.com/Millardiang/weewx-divumwx/issues                     ##
 ################################################################################################
 
-$json_string = file_get_contents('json/alltime.json');
+$json_string = file_get_contents('./json/power.json');
 $parsed_json = json_decode($json_string,true);
 $offset = $parsed_json[0]["utcoffset"];
 $utcoffset = json_encode($offset);
-$alder = $parsed_json[0]["pollenplot"]["series"]["alder_pollenWeek"];
-$birch = $parsed_json[0]["pollenplot"]["series"]["birch_pollenWeek"]; 
-$olive = $parsed_json[0]["pollenplot"]["series"]["olive_pollenWeek"];
-$grass = $parsed_json[0]["pollenplot"]["series"]["grass_pollenWeek"];
-$mugwort = $parsed_json[0]["pollenplot"]["series"]["mugwort_pollenWeek"];
-$ragweed = $parsed_json[0]["pollenplot"]["series"]["ragweed_pollenWeek"];
-$alderWeek = json_encode($alder);
-$birchWeek = json_encode($birch); 
-$oliveWeek = json_encode($olive);
-$grassWeek = json_encode($grass);
-$mugwortWeek = json_encode($mugwort);
-$ragweedWeek = json_encode($ragweed);
+echo $batteryPower = $parsed_json[0]["powerPlot"]["series"]["batteryPower"];
+echo $batterySOC = $parsed_json[0]["powerPlot"]["series"]["batterySOC"]; 
+//$dailyBatteryCharge = $parsed_json[0][0]["powerPlot"]["series"]["dailyBatteryCharge"];
+//$grass = $parsed_json[0]["pollenplot"]["series"]["grass_pollenWeek"];
+//$mugwort = $parsed_json[0]["pollenplot"]["series"]["mugwort_pollenWeek"];
+//$ragweed = $parsed_json[0]["pollenplot"]["series"]["ragweed_pollenWeek"];
+echo $batteryPowerWeek = json_encode($batteryPower);
+echo $batterySOCWeek = json_encode($batterySOC);
+//$birchWeek = json_encode($birch); 
+//$oliveWeek = json_encode($olive);
+//$grassWeek = json_encode($grass);
+//$mugwortWeek = json_encode($mugwort);
+//$ragweedWeek = json_encode($ragweed);
 include('../fixedSettings.php');
 include('pollSelect.php');
 if ($theme === "dark") {
@@ -40,189 +41,3 @@ if ($theme === "dark") {
     </style>';
 }
 ?>
-<html>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Highcharts Year graph for weewx</title>
-    <script src="scripts/jquery.min.js"></script>
-    <script src="scripts/highstock.js"></script>
-    <script src="scripts/boost.js"></script>
-    <script src="scripts/highcharts-more.js"></script>
-    <script src="scripts/exporting.js"></script>
-    <script src="scripts/export-data.js"></script>
-    <script src="scripts/brand-<?php echo $theme;?>.js" type="text/javascript"></script>
-
-<figure class="highcharts-figure">
-    <div id="container"></div>
-    
-</figure>
-
-<script>
-var alderWeek = <?php echo $alderWeek;?>;
-var birchWeek = <?php echo $birchWeek;?>;
-var oliveWeek = <?php echo $oliveWeek;?>;
-var grassWeek= <?php echo $grassWeek;?>;
-var mugwortWeek= <?php echo $mugwortWeek;?>;
-var ragweedWeek = <?php echo $ragweedWeek;?>;
-var utcoffset = <?php echo $utcoffset;?>;
-
-Highcharts.chart('container', {
-        time: {
-        timezoneOffset: - utcoffset
-    },
-    title: {
-        text: 'Pollen Count Week Chart',
-        align: 'center'
-    },
-    chart: {
-        height: 500,
-        type: 'line'
-    },
-
-    tooltip: {
-        dateTimeLabelFormats: {
-            minute: '%e %B %Y %H:%M',
-            hour: '%e %B %Y %H:%M',
-            day: '%A %e %B %Y'
-        },
-        shared: true,
-        // need to set valueSuffix so we can set it later if needed
-        valueSuffix: ' grains/㎥'
-    },
-    yAxis: {
-        title: {
-            text: 'Pollen Count (grains/㎥)'
-        }
-    },
-
-    xAxis: {
-        dateTimeLabelFormats: {
-            day: '%e %b',
-            week: '%e %b',
-            month: '%b %y',
-        },
-        labels: {
-            x: 0,
-            y: 18
-        },
-        lineColor: '#555',
-        lineWidth: 1,
-        minorGridLineWidth: 0,
-        minorTickColor: '#555',
-        minorTickLength: 2,
-        minorTickPosition: 'outside',
-        minorTickWidth: 1,
-        tickColor: '#555',
-        tickLength: 4,
-        tickPosition: 'outside',
-        tickWidth: 1,
-        title: {
-            style: {
-                font: 'bold 12px Lucida Grande, Lucida Sans Unicode, Verdana, Arial, Helvetica, sans-serif'
-            }
-        },
-        type: 'datetime',
-    },
-
-    legend: {
-        layout: 'horizontal',
-        align: 'center',
-        verticalAlign: 'bottom'
-    },
-
-    plotOptions: {
-        series: {
-            label: {
-                connectorAllowed: false
-            },
-            marker: {
-                radius: 3
-            },
-            lineWidth: 0.5,
-            pointStart: 2010
-        }
-    },
-    rangeSelector: {
-        enabled: true,
-        inputEnabled: true,
-        inputDateFormat: '%e %b %y',
-        inputEditDateFormat: '%e %b %y',
-        buttons: [ {type: 'hour',
-                    count: 24,
-                    text: '24h'
-                    },{
-            type: 'week',
-            count: 1,
-            text: '1w'
-        }, {
-            type: 'month',
-            count: 1,
-            text: '1m'
-        }, {
-            type: 'month',
-            count: 3,
-            text: '3m'
-        }, {
-            type: 'month',
-            count: 6,
-            text: '6m'
-        }, {
-            type: 'ytd',
-            text: 'YTD'
-        }, {
-            type: 'year',
-            count: 1,
-            text: '1y'
-        }, {
-            type: 'all',
-            text: 'All'
-        }],
-            selected: 0
-        },
-
-    exporting: {
-        enabled: false
-    },
-    series: [{
-        name: 'Alder',
-        type: 'spline',
-        data: alderWeek
-    }, {
-        name: 'Birch',
-        type: 'spline',
-        data: birchWeek
-    }, {
-        name: 'Olive',
-        type: 'spline',
-        data: oliveWeek
-    }, {
-        name: 'Grass',
-        type: 'spline',
-        data: grassWeek
-    }, {
-        name: 'Mugwort',
-        type: 'spline',
-        data: mugwortWeek
-    }, {
-        name: 'Ragweed',
-        type: 'spline',
-        data: ragweedWeek
-    }],
-
-    responsive: {
-        rules: [{
-            condition: {
-                maxWidth: 500
-            },
-            chartOptions: {
-                legend: {
-                    layout: 'horizontal',
-                    align: 'center',
-                    verticalAlign: 'bottom'
-                }
-            }
-        }]
-    }
-
-});
-</script>
-</html>

@@ -1,7 +1,6 @@
 <?php
 include ('../fixedSettings.php');
-
-####################################################################################################################                                                                                  #                                                                                                                   #
+#####################################################################################################################                                                                                 #                                                                                                                   #
 # weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
 #                                                                                                                   #
 # Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
@@ -11,33 +10,40 @@ include ('../fixedSettings.php');
 # Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
 #                                                                                                                   #
 #####################################################################################################################
-$json_string = file_get_contents('json/alltime.json');
+$json_string = file_get_contents('./json/solar.json');
 $parsed_json = json_decode($json_string,true);
 
 $offset = $parsed_json[0]["utcoffset"];
 $utcoffset = json_encode($offset);
 
-//$strikes = $parsed_json[0]["strikeplot"]["series"]["lightning_strike_count"];
-
-$distanceminmax = $parsed_json[0]["outTempplot"]["series"]["outTemp_minmax"]; 
-//$strikesYear = json_encode($strikes);
-//$distanceYear = json_encode($distance);
-echo $distanceminmaxYear = json_encode($distanceminmax);
+// for column or spline
+$solarGenDecode = $parsed_json[0]['solarGenTotalsPlot']['series']['watts']['name'];
+$solarGen = json_encode($solarGenDecode);
 ?>
 
 <!DOCTYPE html>
-<html>
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Highcharts Year graph for weewx</title>
+    <title>Highcharts Week graph for weewx</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://code.highcharts.com/stock/highstock.js"></script>
     <script src="https://code.highcharts.com/modules/boost.js"></script>
     <script src="https://code.highcharts.com/stock/highcharts-more.js"></script>
     <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
     <script src="https://code.highcharts.com/modules/export-data.js"></script>
-    <script src="scripts/dark-theme.js" type="text/javascript"></script>
+    <script src="scripts/brand-<?php echo $theme;?>.js" type="text/javascript"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+    <style>
+    body {
+    background-color: 'transparent',
+}
+#airDensity-chart {
+    width: 100%;
+    height: 500px;
+}
+</style>
+
 </head>
 <body>
 
@@ -45,42 +51,42 @@ echo $distanceminmaxYear = json_encode($distanceminmax);
     body {
     background-color: 'transparent',
 }
-#year-chart {
-    width: 790px;
-    height: 350px;
+#solarGen-chart {
+    width: 100%;
+    height: 500px;
 }
 </style>
 
-<div id="year-chart"></div>
+<div id="solarGen-chart"></div>
 
 <script>
-var y2units  = "<?php echo $y2unit;?>";
-console.log(y2units);
-var strikesYear = <?php echo $strikesYear;?>;
-var distanceYear = <?php echo $distanceYear;?>;
-var distanceminmaxYear = <?php echo $distanceminmaxYear;?>;
+var units = "W";
+var solarGen = <?php echo $solarGen;?>;
 var utcoffset = <?php echo $utcoffset;?>;
-
+ 
 Highcharts.setOptions({
     lang: {
     thousandsSep: ""
   }
 });
-Highcharts.chart('year-chart', {
+Highcharts.chart('solarGen-chart', {
     time: {
         timezoneOffset: - utcoffset
     },
     chart: {
+        type: 'column',
         borderWidth: 0,
-        marginRight: 62.5,
+        marginRight: 10,
+        marginLeft: 70,
         backgroundColor: 'transparent',
+        plotBackgroundColor: 'transparent',
         spacing: [15, 20, 10, 0],
         zoomType: 'x'
     },
-    legend: {
-        enabled: true
+    legend: { 
+        enabled: true 
     },
-    plotOptions: {backgroundColor: 'transparent',
+    plotOptions: {
         area: {
             lineWidth: 1,
             marker: {
@@ -216,8 +222,8 @@ Highcharts.chart('year-chart', {
             }
         },
     },
-    rangeSelector: {
-        buttonSpacing: 0,
+    rangeSelector: { 
+        buttonSpacing: 0 
     },
     series: [{
     }],
@@ -241,7 +247,7 @@ Highcharts.chart('year-chart', {
             x: 0,
             y: 18
         },
-        lineColor: '#000',
+        lineColor: '#555',
         lineWidth: 1,
         minorGridLineWidth: 0,
         minorTickColor: '#555',
@@ -257,7 +263,7 @@ Highcharts.chart('year-chart', {
                 font: 'bold 12px Lucida Grande, Lucida Sans Unicode, Verdana, Arial, Helvetica, sans-serif'
             }
         },
-        type: 'datetime',
+        type: 'datetime'
     },
     yAxis: {
         endOnTick: true,
@@ -265,17 +271,17 @@ Highcharts.chart('year-chart', {
             x: -8,
             y: 3
         },
-        lineColor: '#000',
+        lineColor: '#555',
         lineWidth: 1,
         minorGridLineWidth: 0,
-        minorTickColor: '#000',
+        minorTickColor: '#555',
         minorTickLength: 2,
         minorTickPosition: 'outside',
         minorTickWidth: 1,
         opposite: false,
         showLastLabel: true,
         startOnTick: true,
-        tickColor: '#000',
+        tickColor: '#555',
         tickLength: 4,
         tickPosition: 'outside',
         tickWidth: 1,
@@ -311,10 +317,11 @@ Highcharts.chart('year-chart', {
             selected: 2
      },
     title: {
-        text: ''
+        text: 'Solar Power Generation Totals'
     },
-    tooltip: {
+    tooltip: { 
         valueDecimals: 0,
+        backgroundColor: '#222328' 
     },
     yAxis: [{
         labels: {
@@ -323,46 +330,47 @@ Highcharts.chart('year-chart', {
         },
         tickLength: 4,
         lineWidth: 1,
-        type: 'column',
+        type: 'circle',
         title: {           
-            text: '(Strike Count)'
+            text: '(' + units + ')'
         }
-    }, {
+        }, {
         labels: {
             x: 5,
             y: 3
         },
-        tickLength: 4,
+        tickLength: 0,
         lineWidth: 1,
         opposite: true,
         title: {
-            text: '(Distance ' + y2units + ')'
+            text: ''
         }
     }],
     plotOptions: {
-        backgroundColor: 'transparent',
-        series: {
-            borderWidth: 0
+        series: { 
+            borderWidth: 0 
         }
     },
-    borderRadius: {
-            radius: 0
-        },
-    series: [{
-        name: 'Distance',
-        type: 'columnrange',
-        data: distanceminmaxYear,
-        yAxis: 1,
-        tooltip: {
-        valueSuffix: y2units
-    }
-        }],
-    exporting: {
-        enabled: false
+    borderRadius: { 
+        radius: 0 
     },
-    accessibility: {
-    enabled: false
-  }
+    series: [{
+        marker: {
+            radius: 2
+            },
+        name: 'Daily Power Generation Totals',
+        type: 'column',
+        data: solarGen,
+        tooltip: { 
+            valueSuffix: ' ' + units 
+        }
+    }],
+    exporting: { 
+        enabled: false 
+    },
+    accessibility: { 
+        enabled: false 
+    }
 });
 
 </script>

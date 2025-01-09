@@ -14,11 +14,11 @@
 ##                    https://github.com/Millardiang/weewx-divumwx/issues                     ##
 ################################################################################################
 
-$json_string = file_get_contents('json/alltime.json');
+$json_string = file_get_contents('json/power.json');
 $parsed_json = json_decode($json_string,true);
 $offset = $parsed_json[0]["utcoffset"];
 $utcoffset = json_encode($offset);
-$alder = $parsed_json[0]["pollenplot"]["series"]["alder_pollenWeek"];
+$alder = $parsed_json[0]["powerPlot"]["series"]["batteryPower"];
 $birch = $parsed_json[0]["pollenplot"]["series"]["birch_pollenWeek"]; 
 $olive = $parsed_json[0]["pollenplot"]["series"]["olive_pollenWeek"];
 $grass = $parsed_json[0]["pollenplot"]["series"]["grass_pollenWeek"];
@@ -41,15 +41,20 @@ if ($theme === "dark") {
 }
 ?>
 <html>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Highcharts Year graph for weewx</title>
-    <script src="scripts/jquery.min.js"></script>
+    <script src="scripts/jquery-1.12.4.min.js"></script>
+    <script src="scripts/jquerry-ui-1.12.1.min.js"></script>
     <script src="scripts/highstock.js"></script>
-    <script src="scripts/boost.js"></script>
     <script src="scripts/highcharts-more.js"></script>
+    <script src="scripts/windbarb.js"></script>
+    <script src="scripts/boost.js"></script>
     <script src="scripts/exporting.js"></script>
-    <script src="scripts/export-data.js"></script>
-    <script src="scripts/brand-<?php echo $theme;?>.js" type="text/javascript"></script>
+    <script src="scripts/divumwx-<?php echo $theme;?>.js" type="text/javascript"></script>
+    <script src="scripts/plots_config.js" type="text/javascript"></script>
+    <script src="scripts/plots.js" type="text/javascript"></script>
+    <script src="scripts/convert_units.js" type="text/javascript"></script>
+    <script src="../languages/translations.js" type="text/javascript"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+    <script type="text/javascript">
 
 <figure class="highcharts-figure">
     <div id="container"></div>
