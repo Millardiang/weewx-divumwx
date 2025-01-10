@@ -16,7 +16,7 @@
 include('dvmCombinedData.php');
 date_default_timezone_set($TZ);
 //echo "<body style='background-color:#292E35'>";
-if($theme === "light"){ echo "<body style='background-color:#FFFFFF'>";}
+if($theme === "light"){ echo "<body style='background-color:e0eafb'>";}
 else if($theme === "dark"){ echo "<body style='background-color:#292E35'>";}
 ?>
 
@@ -29,15 +29,7 @@ else if($theme === "dark"){ echo "<body style='background-color:#292E35'>";}
 <body>
 
 <style>
-.Orrery {
-    position: relative;
-    margin-top: 10px;
-    margin-left: -10px;
-    
-}
-body {
-    overflow: auto;
-}
+body { overflow: auto; }
 </style>
 
 <script src="js/d3.7.9.0.min.js"></script>
@@ -144,7 +136,42 @@ svg.append("circle")
     .attr("cx", jupiterX)
     .attr("cy", jupiterY)
     .attr("r", 10)
-    .attr('fill', '#BE688B');
+    .attr('fill', '#BE688B')
+    .on("mouseover", jupiterMouseOver)
+    .on("mousemove", jupiterMouseMove)
+    .on("mouseout", jupiterMouseOut);
+
+var tooltipJupiter = d3.select(".Orrery")
+    .append("div")
+    .style("position", "absolute")
+    .style("visibility", "hidden")
+    .style("font-family", "Helvetica")
+    .style("color", "#BE688B")
+    .style("font-size", "7.5px")
+    .style("background-color", "#292e35")
+    .style("border", "solid #BE688B")
+    .style("border-width", "1px")
+    .style("border-radius", "5px")
+    .style("padding", "10px")
+    .style("box-shadow", "2px 2px 20px")
+    .style("opacity", "0.9")
+    .attr("id", "tooltip");
+
+  function jupiterMouseOver (event, d) {
+       d3.select(this);
+       tooltipJupiter.style("visibility", "visible");
+  };
+  
+  function jupiterMouseMove (event, d) {
+      tooltipJupiter
+        .style("top", (event.pageY)+"px").style("left",(event.pageX)+"px")
+        .html("Jupiter: " + "<br>" + Jupiter + "°");
+  };
+
+  function jupiterMouseOut (event, d) {
+       d3.select(this);
+       tooltipJupiter.style("visibility", "hidden");
+  }; 
 
 // Saturn Orbit
  svg.append("circle")   
@@ -172,7 +199,42 @@ svg.append("circle")
     .attr("cx", saturnX)
     .attr("cy", saturnY)
     .attr("r", 6.5)
-    .attr('fill', '#FFA54F');
+    .attr('fill', '#FFA54F')
+    .on("mouseover", saturnMouseOver)
+    .on("mousemove", saturnMouseMove)
+    .on("mouseout", saturnMouseOut);
+
+var tooltipSaturn = d3.select(".Orrery")
+    .append("div")
+    .style("position", "absolute")
+    .style("visibility", "hidden")
+    .style("font-family", "Helvetica")
+    .style("color", "#FFA54F")
+    .style("font-size", "7.5px")
+    .style("background-color", "#292e35")
+    .style("border", "solid #FFA54F")
+    .style("border-width", "1px")
+    .style("border-radius", "5px")
+    .style("padding", "10px")
+    .style("box-shadow", "2px 2px 20px")
+    .style("opacity", "0.9")
+    .attr("id", "tooltip");
+
+  function saturnMouseOver (event, d) {
+       d3.select(this);
+       tooltipSaturn.style("visibility", "visible");
+  };
+  
+  function saturnMouseMove (event, d) {
+      tooltipSaturn
+        .style("top", (event.pageY)+"px").style("left",(event.pageX)+"px")
+        .html("Saturn: " + "<br>" + Saturn + "°");
+  };
+
+  function saturnMouseOut (event, d) {
+       d3.select(this);
+       tooltipSaturn.style("visibility", "hidden");
+  };
 
 // inner ring
 svg.append("circle")   
@@ -218,7 +280,42 @@ svg.append("circle")
     .attr("cx", uranusX)
     .attr("cy", uranusY)
     .attr("r", 6)
-    .attr('fill', '#F67F40');
+    .attr('fill', '#F67F40')
+    .on("mouseover", uranusMouseOver)
+    .on("mousemove", uranusMouseMove)
+    .on("mouseout", uranusMouseOut);
+
+var tooltipUranus = d3.select(".Orrery")
+    .append("div")
+    .style("position", "absolute")
+    .style("visibility", "hidden")
+    .style("font-family", "Helvetica")
+    .style("color", "#F67F40")
+    .style("font-size", "7.5px")
+    .style("background-color", "#292e35")
+    .style("border", "solid #F67F40")
+    .style("border-width", "1px")
+    .style("border-radius", "5px")
+    .style("padding", "10px")
+    .style("box-shadow", "2px 2px 20px")
+    .style("opacity", "0.9")
+    .attr("id", "tooltip");
+
+  function uranusMouseOver (event, d) {
+       d3.select(this);
+       tooltipUranus.style("visibility", "visible");
+  };
+  
+  function uranusMouseMove (event, d) {
+      tooltipUranus
+        .style("top", (event.pageY)+"px").style("left",(event.pageX)+"px")
+        .html("Uranus: " + "<br>" + Uranus + "°");
+  };
+
+  function uranusMouseOut (event, d) {
+       d3.select(this);
+       tooltipUranus.style("visibility", "hidden");
+  };
 
 // Neptune Orbit
  svg.append("circle")   
@@ -246,7 +343,42 @@ svg.append("circle")
     .attr("cx", neptuneX)
     .attr("cy", neptuneY)
     .attr("r", 6)
-    .attr('fill', '#5FC6C6');
+    .attr('fill', '#5FC6C6')
+    .on("mouseover", neptuneMouseOver)
+    .on("mousemove", neptuneMouseMove)
+    .on("mouseout", neptuneMouseOut);
+
+var tooltipNeptune = d3.select(".Orrery")
+    .append("div")
+    .style("position", "absolute")
+    .style("visibility", "hidden")
+    .style("font-family", "Helvetica")
+    .style("color", "#5FC6C6")
+    .style("font-size", "7.5px")
+    .style("background-color", "#292e35")
+    .style("border", "solid #5FC6C6")
+    .style("border-width", "1px")
+    .style("border-radius", "5px")
+    .style("padding", "10px")
+    .style("box-shadow", "2px 2px 20px")
+    .style("opacity", "0.9")
+    .attr("id", "tooltip");
+
+  function neptuneMouseOver (event, d) {
+       d3.select(this);
+       tooltipNeptune.style("visibility", "visible");
+  };
+  
+  function neptuneMouseMove (event, d) {
+      tooltipNeptune
+        .style("top", (event.pageY)+"px").style("left",(event.pageX)+"px")
+        .html("Neptune: " + "<br>" + Neptune + "°");
+  };
+
+  function neptuneMouseOut (event, d) {
+       d3.select(this);
+       tooltipNeptune.style("visibility", "hidden");
+  };
 
 // Pluto Orbit
  svg.append("circle")   
@@ -274,7 +406,42 @@ svg.append("circle")
     .attr("cx", plutoX)
     .attr("cy", plutoY)
     .attr("r", 3)
-    .attr('fill', '#B6F131');
+    .attr('fill', '#B6F131')
+    .on("mouseover", plutoMouseOver)
+    .on("mousemove", plutoMouseMove)
+    .on("mouseout", plutoMouseOut);
+
+var tooltipPluto = d3.select(".Orrery")
+    .append("div")
+    .style("position", "absolute")
+    .style("visibility", "hidden")
+    .style("font-family", "Helvetica")
+    .style("color", "#B6F131")
+    .style("font-size", "7.5px")
+    .style("background-color", "#292e35")
+    .style("border", "solid #B6F131")
+    .style("border-width", "1px")
+    .style("border-radius", "5px")
+    .style("padding", "10px")
+    .style("box-shadow", "2px 2px 20px")
+    .style("opacity", "0.9")
+    .attr("id", "tooltip");
+
+  function plutoMouseOver (event, d) {
+       d3.select(this);
+       tooltipPluto.style("visibility", "visible");
+  };
+  
+  function plutoMouseMove (event, d) {
+      tooltipPluto
+        .style("top", (event.pageY)+"px").style("left",(event.pageX)+"px")
+        .html("Pluto: " + "<br>" + Pluto + "°");
+  };
+
+  function plutoMouseOut (event, d) {
+       d3.select(this);
+       tooltipPluto.style("visibility", "hidden");
+  };
 
 // Mercury Orbit
  svg.append("circle")   
@@ -302,7 +469,42 @@ svg.append("circle")
     .attr("cx", mercuryX)
     .attr("cy", mercuryY)
     .attr("r", 4)
-    .attr('fill', '#F618CC');
+    .attr('fill', '#F618CC')
+    .on("mouseover", mercuryMouseOver)
+    .on("mousemove", mercuryMouseMove)
+    .on("mouseout", mercuryMouseOut);
+
+var tooltipMercury = d3.select(".Orrery")
+    .append("div")
+    .style("position", "absolute")
+    .style("visibility", "hidden")
+    .style("font-family", "Helvetica")
+    .style("color", "#F618CC")
+    .style("font-size", "7.5px")
+    .style("background-color", "#292e35")
+    .style("border", "solid #F618CC")
+    .style("border-width", "1px")
+    .style("border-radius", "5px")
+    .style("padding", "10px")
+    .style("box-shadow", "2px 2px 20px")
+    .style("opacity", "0.9")
+    .attr("id", "tooltip");
+
+  function mercuryMouseOver (event, d) {
+       d3.select(this);
+       tooltipMercury.style("visibility", "visible");
+  };
+  
+  function mercuryMouseMove (event, d) {
+      tooltipMercury
+        .style("top", (event.pageY)+"px").style("left",(event.pageX)+"px")
+        .html("Mercury: " + "<br>" + Mercury + "°");
+  };
+
+  function mercuryMouseOut (event, d) {
+       d3.select(this);
+       tooltipMercury.style("visibility", "hidden");
+  };
 
 // Venus Orbit
  svg.append("circle")   
@@ -330,7 +532,42 @@ svg.append("circle")
     .attr("cx", venusX)
     .attr("cy", venusY)
     .attr("r", 4)
-    .attr('fill', '#2E8B57');    
+    .attr('fill', '#2E8B57')
+    .on("mouseover", venusMouseOver)
+    .on("mousemove", venusMouseMove)
+    .on("mouseout", venusMouseOut);
+
+var tooltipVenus = d3.select(".Orrery")
+    .append("div")
+    .style("position", "absolute")
+    .style("visibility", "hidden")
+    .style("font-family", "Helvetica")
+    .style("color", "#2E8B57")
+    .style("font-size", "7.5px")
+    .style("background-color", "#292e35")
+    .style("border", "solid #2E8B57")
+    .style("border-width", "1px")
+    .style("border-radius", "5px")
+    .style("padding", "10px")
+    .style("box-shadow", "2px 2px 20px")
+    .style("opacity", "0.9")
+    .attr("id", "tooltip");
+
+  function venusMouseOver (event, d) {
+       d3.select(this);
+       tooltipVenus.style("visibility", "visible");
+  };
+  
+  function venusMouseMove (event, d) {
+      tooltipVenus
+        .style("top", (event.pageY)+"px").style("left",(event.pageX)+"px")
+        .html("Venus: " + "<br>" + Venus + "°");
+  };
+
+  function venusMouseOut (event, d) {
+       d3.select(this);
+       tooltipVenus.style("visibility", "hidden");
+  };    
 
 // Mars Orbit
  svg.append("circle")   
@@ -358,7 +595,42 @@ svg.append("circle")
     .attr("cx", marsX)
     .attr("cy", marsY)
     .attr("r", 4)
-    .attr('fill', '#FF0000');
+    .attr('fill', '#FF0000')
+    .on("mouseover", marsMouseOver)
+    .on("mousemove", marsMouseMove)
+    .on("mouseout", marsMouseOut);
+
+var tooltipMars = d3.select(".Orrery")
+    .append("div")
+    .style("position", "absolute")
+    .style("visibility", "hidden")
+    .style("font-family", "Helvetica")
+    .style("color", "#FF0000")
+    .style("font-size", "7.5px")
+    .style("background-color", "#292e35")
+    .style("border", "solid #FF0000")
+    .style("border-width", "1px")
+    .style("border-radius", "5px")
+    .style("padding", "10px")
+    .style("box-shadow", "2px 2px 20px")
+    .style("opacity", "0.9")
+    .attr("id", "tooltip");
+
+  function marsMouseOver (event, d) {
+       d3.select(this);
+       tooltipMars.style("visibility", "visible");
+  };
+  
+  function marsMouseMove (event, d) {
+      tooltipMars
+        .style("top", (event.pageY)+"px").style("left",(event.pageX)+"px")
+        .html("Mars: " + "<br>" + Mars + "°");
+  };
+
+  function marsMouseOut (event, d) {
+       d3.select(this);
+       tooltipMars.style("visibility", "hidden");
+  };
 
 // Earth Orbit
  svg.append("circle")   
@@ -407,7 +679,42 @@ svg.append("circle")
     .attr("cx", earthX)
     .attr("cy", earthY)
     .attr("r", 5.5)
-    .attr('fill', '#007FFF');
+    .attr('fill', '#007FFF')
+    .on("mouseover", earthMouseOver)
+    .on("mousemove", earthMouseMove)
+    .on("mouseout", earthMouseOut);
+
+var tooltipEarth = d3.select(".Orrery")
+    .append("div")
+    .style("position", "absolute")
+    .style("visibility", "hidden")
+    .style("font-family", "Helvetica")
+    .style("color", "#007FFF")
+    .style("font-size", "7.5px")
+    .style("background-color", "#292e35")
+    .style("border", "solid #007FFF")
+    .style("border-width", "1px")
+    .style("border-radius", "5px")
+    .style("padding", "10px")
+    .style("box-shadow", "2px 2px 20px")
+    .style("opacity", "0.9")
+    .attr("id", "tooltip");
+
+  function earthMouseOver (event, d) {
+       d3.select(this);
+       tooltipEarth.style("visibility", "visible");
+  };
+  
+  function earthMouseMove (event, d) {
+      tooltipEarth
+        .style("top", (event.pageY)+"px").style("left",(event.pageX)+"px")
+        .html("Earth: " + "<br>" + Earth + "°");
+  };
+
+  function earthMouseOut (event, d) {
+       d3.select(this);
+       tooltipEarth.style("visibility", "hidden");
+  };
 
 if (theme === 'dark') {
 
@@ -416,7 +723,42 @@ svg.append("circle")
     .attr("cx", moonX)
     .attr("cy", moonY)
     .attr("r", 2)
-    .attr('fill', 'white');
+    .attr('fill', 'white')
+    .on("mouseover", moonMouseOver)
+    .on("mousemove", moonMouseMove)
+    .on("mouseout", moonMouseOut);
+
+var tooltipMoon = d3.select(".Orrery")
+    .append("div")
+    .style("position", "absolute")
+    .style("visibility", "hidden")
+    .style("font-family", "Helvetica")
+    .style("color", "white")
+    .style("font-size", "7.5px")
+    .style("background-color", "#292e35")
+    .style("border", "solid white")
+    .style("border-width", "1px")
+    .style("border-radius", "5px")
+    .style("padding", "10px")
+    .style("box-shadow", "2px 2px 20px")
+    .style("opacity", "0.9")
+    .attr("id", "tooltip");
+
+  function moonMouseOver (event, d) {
+       d3.select(this);
+       tooltipMoon.style("visibility", "visible");
+  };
+  
+  function moonMouseMove (event, d) {
+      tooltipMoon
+        .style("top", (event.pageY)+"px").style("left",(event.pageX)+"px")
+        .html("Moon: " + "<br>" + Moon + "°");
+  };
+
+  function moonMouseOut (event, d) {
+       d3.select(this);
+       tooltipMoon.style("visibility", "hidden");
+  };
 
 } else {
 
@@ -434,7 +776,42 @@ svg.append("circle")
     .attr("r", 2)
     .attr('stroke', moonTextColor)
     .attr('fill', 'none') 
-    .style("stroke-width", 0.5);   
+    .style("stroke-width", 0.5)
+    .on("mouseover", moonMouseOver)
+    .on("mousemove", moonMouseMove)
+    .on("mouseout", moonMouseOut);
+
+var tooltipMoon = d3.select(".Orrery")
+    .append("div")
+    .style("position", "absolute")
+    .style("visibility", "hidden")
+    .style("font-family", "Helvetica")
+    .style("color", "white")
+    .style("font-size", "7.5px")
+    .style("background-color", "#292e35")
+    .style("border", "solid white")
+    .style("border-width", "1px")
+    .style("border-radius", "5px")
+    .style("padding", "10px")
+    .style("box-shadow", "2px 2px 20px")
+    .style("opacity", "0.9")
+    .attr("id", "tooltip");
+
+  function moonMouseOver (event, d) {
+       d3.select(this);
+       tooltipMoon.style("visibility", "visible");
+  };
+  
+  function moonMouseMove (event, d) {
+      tooltipMoon
+        .style("top", (event.pageY)+"px").style("left",(event.pageX)+"px")
+        .html("Moon: " + "<br>" + Moonx + "°");
+  };
+
+  function moonMouseOut (event, d) {
+       d3.select(this);
+       tooltipMoon.style("visibility", "hidden");
+  };   
 }
 
 // Sun with noise filter

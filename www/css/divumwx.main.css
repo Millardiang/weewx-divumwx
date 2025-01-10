@@ -1172,8 +1172,14 @@ html{...
 transition: all 1s;}
 a{... 
 transition: all 1s;}
-.divumwxeclipticangle{position:absolute;height:4.1rem;width:7.4rem;overflow:hidden;color:var(--col-6);line-height:8px;font-size:0.59em;margin-top:65px;font-family:weathertext2;}
-.divumwxeclipticangle{align-items:center;justify-content:center;left:-20px;}
+.divumwxsundistance{position:absolute;height:4.1rem;width:7.4rem;overflow:hidden;color:var(--col-6);line-height:8px;font-size:0.59em;margin-top:3px;font-family:weathertext2;}
+.divumwxsundistance{align-items:center;justify-content:center;left:92px;}
+.divumwxequinox{position:absolute;height:4.1rem;width:7.4rem;overflow:hidden;color:var(--col-6);line-height:8px;font-size:0.59em;margin-top:65px;font-family:weathertext2;}
+.divumwxequinox{align-items:center;justify-content:center;left:205px;}
+.divumwxsolstice{position:absolute;height:4.1rem;width:7.4rem;overflow:hidden;color:var(--col-6);line-height:8px;font-size:0.59em;margin-top:65px;font-family:weathertext2;}
+.divumwxsolstice{align-items:center;justify-content:center;left:-20px;}
+.divumwxeclipticangle{position:absolute;height:4.1rem;width:7.4rem;overflow:hidden;color:var(--col-6);line-height:8px;font-size:0.59em;margin-top:135px;font-family:weathertext2;}
+.divumwxeclipticangle{align-items:center;justify-content:center;left:95px;}
 .divumwxequinox{position:absolute;height:4.1rem;width:7.4rem;overflow:hidden;color:var(--col-6);line-height:8px;font-size:0.59em;margin-top:65px;font-family:weathertext2;}
 .divumwxequinox{align-items:center;justify-content:center;left:205px;}
 .divumwxLogoFooter{width:40px;margin-top:70px;margin-left:40px;float:right;}
@@ -1263,7 +1269,9 @@ archblue{color:#007fff;}
 .earthpos{position:absolute;top:-14px;left:72.5px}
 .daylightmoduleposition2{position:relative;left:5px;margin-top:0px;}
 .wrap{position:relative;margin-top:-2.5px;margin-right:0px;}
-.moonmodulepos{position:absolute;top:16px;left:110px}.svgpos{position:absolute;top:-14px;left:-25px}
+.moonmodulepos{position:absolute;top:16px;left:110px}
+.svgpos{position:absolute;top:-8px;left:-25px}
+.distance{display:flex;justify-content:center;align-items:center;margin-top:0px;margin-left:-200px}
 .Strikes{position:relative; margin-top:-2.5px; margin-left:0px;z-index:auto;}.base{position:relative;margin-top:-78px; margin-left:-200px;}
 .quakes{position:relative;margin-top:-1.5px;margin-left:0px;z-index:auto;}
 .house{position:relative; margin-top:-18.5px; margin-left:0px;}.idtemppos{margin-top:-148px;margin-left:-135.5px;}

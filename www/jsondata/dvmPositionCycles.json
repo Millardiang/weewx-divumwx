@@ -10,7 +10,7 @@
     "dvmLightningModule.php":{"cycle": "60000"},
     "dvmAirqualityTop.php":{"cycle": "60000"},
     "dvmLightningTop.php":{"cycle": "60000"},
-    "dvmMoonPhaseModule.php":{"cycle": "60000"},
+    "dvmMoonPhaseModule.php":{"cycle": "600000"},
     "dvmRainfallModule.php":{"cycle": "60000"},
     "dvmRainfallSpoonModule.php":{"cycle": "60000"},
     "dvmRainfallPiezoModule.php":{"cycle": "60000"},

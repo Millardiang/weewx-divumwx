@@ -4,7 +4,19 @@
 ## actually in Latin-1, then you should replace the string "UTF-8" with "latin-1"
 ## If you do this, you should also change the 'Content-Type' metadata below.
 #encoding UTF-8
-##      
+##
+#import ephem
+#import math
+#from math import radians as rad, degrees as deg
+#from ephem import Equatorial, Ecliptic
+#set $now = datetime.datetime.now()
+#set $tilt = Equatorial('90', '0', epoch = $now)
+#set $nowHour = $now.hour
+#set $sun = ephem.Sun($now)
+#set $moon = ephem.Moon($now)
+#set $ecliptic_longitude_sun = ephem.Ecliptic(sun).lon
+#set $ecliptic_longitude_moon = ephem.Ecliptic(moon).lon
+#set $ecliptic_latitude_moon = ephem.Ecliptic(moon).lat
 ##calculate
 
 ##Calculate length of daylight
@@ -86,7 +98,7 @@ $divum["since"] = "$alltime.outTemp.firsttime.format(format_string="%Y")";
 $divum["heatmap_year"] = date("Y");
 $stationUptime = "$station.uptime.long_form";
 $TS = time();
-
+$dvmPath = "$HTML_ROOT";
 if($theme == 'dark') {$convertStyle = "background: 0; border-color: #393d40; color:";}
 else {$convertStyle = "background:";}
 
@@ -223,6 +235,13 @@ $air["24h.rollingavg.pm10_0"] = $current.pm10_0.format(add_label=False, format_s
 ##set $daylight_str = "%s<br/>%s" % ($daylight_str, $delta_str)
 #end if
 #end if
+$alm["parallacticAngle"] = $deg($almanac.moon.parallactic_angle());
+$alm["ecliptic_longitude_moon"] = $deg($ecliptic_longitude_moon);
+$alm["ecliptic_latitude_moon"] = $deg($ecliptic_latitude_moon);
+$alm["moon_ecliptic_angle"] = $($deg($ecliptic_longitude_moon - $ecliptic_longitude_sun) % 360.0);
+$alm["ecliptic_angle"] = $deg($Ecliptic($tilt).lat);
+$alm["moon_distance"] = $(almanac.moon.earth_distance * ephem.meters_per_au / 1000);
+$alm["sun_distance"] = $(almanac.sun.earth_distance * ephem.meters_per_au / 1000);
 $alm["ecliptic_tilt"] = $ecliptic_tilt;
 $alm["sun_altitude"] = round($almanac.sun.alt,2);
 $alm["moon_altitude"] = round($almanac.moon.alt,2);
@@ -1001,6 +1020,6 @@ $Tdc = (($Tc-(14.55+0.114*$Tc)*(1-(0.01*$RH))-pow((2.5+0.007*$Tc)*(1-(0.01*$RH))
 $E = (6.11*pow(10,(7.5*$Tdc/(237.7+$Tdc))));
 $wetbulbcalc = (((0.00066*$P)*$Tc)+((4098*$E)/pow(($Tdc+237.7),2)*$Tdc))/((0.00066*$P)+(4098*$E)/pow(($Tdc+237.7),2));
 $wetbulbx = number_format($wetbulbcalc,1);
-//include ('dvmCustomData.php');  
+include ('dvmCustomData.php');  
   
 ?>

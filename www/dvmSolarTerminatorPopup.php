@@ -1,6 +1,7 @@
 <?php
 include('dvmCombinedData.php');
-date_default_timezone_set($TZ);
+if($theme==="light"){ echo "<body style='background-color:e0eafb'>";}
+else if($theme==="dark"){ echo "<body style='background-color:#292E35'>";}
 ##############################################################################################
 #        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
 #       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    #
@@ -15,51 +16,19 @@ date_default_timezone_set($TZ);
 #    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
-$light = $alm["daylight"]; 
-$daylight = ltrim($light, '0'); 
-$dark = 24 - str_replace(':', '.', $alm["daylight"]);
-$lighthours = substr($alm["daylight"], 0, 2); 
-$lightmins = substr($alm["daylight"], - 2);
-$darkhours = 23 - $lighthours; 
-$darkminutes = 60 - $lightmins;
-$darkminutes = ($darkminutes < 10) ? '0' .$darkminutes : $darkminutes;
-if (round($sun_alt,2) >= 0) { 
-$sun_elevation = round($sun_alt,2)."°<div class=sunabovedivumwx> </div>";
-} else if (round($sun_alt,2) < 0) { 
-$sun_elevation = round($sun_alt,2)."°<div class=sunbelowdivumwx> </div>"; 
-}?>
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head> 
 <meta charset="utf-8">
-<title>Earth Daylight Module</title>
+<title>Solar Terminator</title>
 <!--link rel="preload" href="jsondata/worldmap.json" as="fetch" crossOrigin="anonymous"/-->
 </head>
 <body>
-<div class="chartforecast">
-<span class="yearpopup"><a alt="daylightmap" title="daylightmap" href="dvmDaylightMapPopup.php" data-lity><?php echo $chartinfo;?> World Daylight Map</a></span>
-<!--span class="yearpopup"><a alt="Projection" title="Projection" href="dvmProjection.php" data-lity><?php echo $chartinfo;?> Projected World Maps</a></span-->
-<span class="yearpopup"><a alt="Solar Terminator" title="Solar Terminator" href="dvmSolarTerminatorPopup.php" data-lity><?php echo $chartinfo;?> Solar Terminator</a></span>
-</div>
-<span class='moduletitle'><?php echo $lang['earthDaylightModule'];?></span>   
-<div class="updatedtime1"><span>
-<?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?></span>
-</div>
-<div class="daylightmoduleposition"> 
-<?php echo 
-'<div class="divumwxsunlightday"><divumwxdaylightdaycircle></divumwxdaylightdaycircle> '.$alm["daylight"].' hrs<br>'.$lang['TotalDaylight'].'</div>
-<div class="divumwxsundarkday">'.$darkhours.':'.$darkminutes.' hrs <divumwxdarkdaycircle></divumwxdarkdaycircle><br>'.$lang['TotalDarkness'].'</div>
-<div class="divumwxsunriseday">'.$sunuphalf.''.$lang['Sunrise'].'<br>Today: '.$alm["sunrise"].'<br>First Light: (<blueu>'.$alm["civil_twilight_begin"] .'</blueu>)</div>
-<div class="divumwxsunsetday">'.$sundownhalf.''.$lang['Sunset'].'<br>Tonight: '.$alm["sunset"].'<br>Last Light: (<blueu>'.$alm["civil_twilight_end"].'</blueu>)</div>
-<div class="sundialcontainerdiv2" ><div id="sundialcontainer" class=sundialcontainer><div class="suncanvasstyle"></div></div>';?></div>
-<?php echo'<div class="divumwxsundistance">Distance<maxred> '.number_format(($alm['sun_distance']),2).' </maxred>km</div>';?>
-<?php echo'<div class="divumwxeclipticangle">Ecliptic Angle <maxred>'.number_format($alm["ecliptic_angle"],5).'&deg;</maxred></div>';?>
-<?php echo'<div class="divumwxequinox">Next Equinox<br><blueu>'.$alm["next_equinox"].'</blueu></div>';?>
-<?php echo'<div class="divumwxsolstice">Next Solstice<br><blueu>'.$alm["next_solstice"].'</blueu></div>';?>
-
 <style>
+body {overflow:hidden;}    
 .defs { position:absolute;width:0;height:0;visibility:hidden; }
-.solar-oscillator svg { margin-Top:16px;margin-left:-10px;width:var(--earth-width);height:var(--earth-height); }
+.solar-oscillator svg { margin-Top:42px;margin-left:111.5px;width:var(--earth-width);height:var(--earth-height);}
 .solar-oscillator .stroke { fill:none;stroke:rgba(41, 46, 53, 0.8);stroke-width:1px; }
 .solar-oscillator .ocean { fill:#99bbff; }
 .solar-oscillator .graticule { fill:none;stroke:#444;stroke-width:0.2px;stroke-opacity:1.0; }
@@ -70,6 +39,8 @@ $sun_elevation = round($sun_alt,2)."°<div class=sunbelowdivumwx> </div>";
 .solar-oscillator .nauticaltwilight { stroke-width:0.1px;stroke:#292e35;fill:#292e35;fill-opacity:0.6; }
 .solar-oscillator .astronomicaltwilight { stroke-width:0.1px;stroke:#292e35;fill:#292e35;fill-opacity:0.8; }
 .ecliptic { stroke:yellow;stroke-width:0.5px;fill:none;}
+.dot { fill:red; }
+.ring { fill:none;stroke:red; }
 </style>
 
 <script src="js/d3.7.9.0.min.js"></script>
@@ -79,6 +50,7 @@ $sun_elevation = round($sun_alt,2)."°<div class=sunbelowdivumwx> </div>";
 <figure class="earth">
 <div id="Globe" class="solar-oscillator"></div>
 </figure>
+
 <script>
 
     var π = Math.PI;
@@ -97,49 +69,49 @@ function toRadians(x) {
 	var lat = <?php echo $lat;?>;
 	var long = <?php echo $lon;?>;
 
-  	var w = 130;
-  	var h = 110;
+  	var w = 500;
+  	var h = 450;
 
   	var circle0 = d3.geoCircle().radius(90); // night time (sunrise sunset)
     var circle1 = d3.geoCircle().radius(84); // civil twilight (dawn dusk) -6°
     var circle2 = d3.geoCircle().radius(78); // nautical twilight (dawn dusk) -12°
     var circle3 = d3.geoCircle().radius(72); // astronomical twilight (dawn dusk) -18°
-
+ 	  
 if (lat > 0.0) {
-    var projection = d3.geoOrthographic()
-        .scale(50)
-        .translate([w/2, h/2])
+  	var projection = d3.geoOrthographic()
+      	.scale(200)
+      	.translate([w/2, h/2])
         .rotate([-long, -Ecliptic, -Ecliptic])
-        .precision(0.1)
-        .clipAngle(90);
+      	.precision(0.1)
+      	.clipAngle(90);
 
     var sunProjection = d3.geoOrthographic()
-        .scale(60)
+        .scale(230)
         .rotate([-long, -Ecliptic, -Ecliptic])
         .precision(0.1)
         .translate(projection.translate());
 
     var moonProjection = d3.geoOrthographic()
-        .scale(55)
+        .scale(210)
         .rotate([-long, -Ecliptic, -Ecliptic])
         .precision(0.1)
         .translate(projection.translate());
 } else {
     var projection = d3.geoOrthographic()
-        .scale(50)
+        .scale(200)
         .translate([w/2, h/2])
         .rotate([-long, Ecliptic, -Ecliptic])
         .precision(0.1)
         .clipAngle(90);
 
     var sunProjection = d3.geoOrthographic()
-        .scale(60)
+        .scale(230)
         .rotate([-long, Ecliptic, -Ecliptic])
         .precision(0.1)
         .translate(projection.translate());
 
     var moonProjection = d3.geoOrthographic()
-        .scale(55)
+        .scale(210)
         .rotate([-long, Ecliptic, -Ecliptic])
         .precision(0.1)
         .translate(projection.translate());
@@ -148,21 +120,39 @@ if (lat > 0.0) {
   	var path = d3.geoPath()
       	.projection(projection);
 
-    var center = [w/2, h/2];
+    var center = [w/2, h/2];         
 
-  	var graticule = d3.geoGraticule();
+  	var graticule = d3.geoGraticule(); 
 
   	var svg = d3.select("#Globe")
       	.append("svg")
       	//.style("background", "red")      	  
-      	.attr("width", 130)      	
-      	.attr("height", 110);
+      	.attr("width", 500)      	
+      	.attr("height", 450);
 
     var defs = svg.append("defs");
 
+    var innerColor = "rgb(230, 200, 200)";
+
+    var sunGradient = defs.append("radialGradient")
+        .attr("id", "sunGradient")
+        .attr("cx", "50%")
+        .attr("cy", "50%")
+        .attr("r", "50%")
+        .attr("fx", "50%")
+        .attr("fy", "50%");
+
+    sunGradient.append("stop")
+        .attr("offset", "0%")
+        .style("stop-color", innerColor);
+
+    sunGradient.append("stop")
+        .attr("offset", "90%")
+        .style("stop-color", "yellow");
+
   	svg.append("defs")
       	.append("path")
-      	.datum({ type: "Sphere" })
+      	.datum({type: "Sphere"})
       	.attr("id", "sphere")
       	.attr("d", path);
   
@@ -177,17 +167,12 @@ if (lat > 0.0) {
       	.attr("class", "ocean")
       	.attr("xlink:href", "#sphere");
 
-  	var g = earth.append("g");
+  	var g = earth.append("g")
 
   	g.append("path")
       	.datum(graticule)
       	.attr("class", "graticule")
       	.attr("d", path);
-
-    svg.append("circle")
-        .attr("r",1)
-        .style("fill", "red")
-        .attr("transform", d => { return "translate(" + projection([long, lat]) + ")"; }); // location
 
     var meridian180 = d3.geoGraticule()
         .step([179.9999, 0])
@@ -230,9 +215,10 @@ if (lat > 0.0) {
 
     g.append("path")
         .datum(capricorn)
+        .attr("class", "capricorn")
         .style("stroke", "blue")
         .style("fill", "none")
-        .style("stroke-dasharray", ("2, 2")) 
+        .style("stroke-dasharray", ("3, 3")) 
         .style("stroke-width", 0.5)
         .attr("d", path);
 
@@ -245,7 +231,7 @@ if (lat > 0.0) {
         .datum(cancer)
         .style("stroke", "blue")
         .style("fill", "none")
-        .style("stroke-dasharray", ("2, 2")) 
+        .style("stroke-dasharray", ("3, 3")) 
         .style("stroke-width", 0.5)
         .attr("d", path);
 
@@ -258,20 +244,20 @@ if (lat > 0.0) {
         .datum(arctic)
         .style("stroke", "magenta")
         .style("fill", "none")
-        .style("stroke-dasharray", ("2, 2")) 
+        .style("stroke-dasharray", ("3, 3")) 
         .style("stroke-width", 0.5)
         .attr("d", path);
 
     var antarctic = d3.geoGraticule()
         .step([0, 66.563444])
         .extentMajor([[-180, -66.563444], [180, 0]])
-        .extentMinor([[-180, -66.563444 - 1e-6], [180, -66.563444 + 1e-6]]);       
-
+        .extentMinor([[-180, -66.563444 - 1e-6], [180, -66.563444 + 1e-6]]);
+     
     g.append("path")
         .datum(antarctic)
         .style("stroke", "magenta")
         .style("fill", "none")
-        .style("stroke-dasharray", ("2, 2")) 
+        .style("stroke-dasharray", ("3, 3")) 
         .style("stroke-width", 0.5)
         .attr("d", path);
 
@@ -279,6 +265,28 @@ if (lat > 0.0) {
         .datum({type: "LineString", coordinates: [[-180, 0], [-90, -Ecliptic], [0, 0], [90, Ecliptic], [180, 0]]})
         .attr("class", "ecliptic")
         .attr("d", path);
+
+    svg.append("circle")
+        .attr("class", "dot")
+        .attr("transform", "translate(" + projection([long, lat]) + ")")
+        .attr("r", 1);
+
+    setInterval(function() {
+    svg.append("circle")
+        .attr("class", "ring")
+        .attr("transform", "translate(" + projection([long, lat]) + ")")
+        .attr("r", 2)
+        .style("stroke-width", 1)
+        .style("stroke", "red")
+        .transition()
+        .ease(d3.easeLinear)
+        .duration(6000)
+        .style("stroke-opacity", 1e-6)
+        .style("stroke-width", 1)
+        .style("stroke", "red")
+        .attr("r", 20)
+        .remove();
+}, 1000);
 
     d3.json("jsondata/worldmap.json").then(function(world) {
 
@@ -290,41 +298,40 @@ if (lat > 0.0) {
     g.insert("path", ".graticule")
         .datum(topojson.mesh(world, world.objects.countries, function(a, b) {return a !== b;}))
         .attr("class", "borders")
-        .attr("d", path);             
+        .attr("d", path);    
  });
 
     var Δ = 0; // delta
     var solarTerminator = solarPosition(new Date(Date.now() + Δ));
 
-    var Sun = [[solarTerminator[0], solarTerminator[1], 'Solar Terminator']];   
-    
-    svg.selectAll("circle.sun") // floating sun
-        .data(Sun)
-        .enter()
+    var Sun = [[solarTerminator[0], solarTerminator[1], 'Solar Terminator']];
+
+     svg.selectAll("circle.sun") // floating sun
+        .data(Sun).enter()
         .append("circle")
         .attr("cx", d => sunProjection(d)[0])
         .attr("cy", d => sunProjection(d)[1])
-        .attr("r", 4.5)
+        .attr("r", 10)
         .attr('fill', d => {
     var sunCoordinates = [solarTerminator[0], solarTerminator[1]];
         sunDistance = d3.geoDistance(sunCoordinates, sunProjection.invert(center));
         return sunDistance > (π / 2) ? 'none' : 'yellow'; })
         .attr("class", d => { if (d[2] == "Solar Terminator") return "solar-terminator"; });
 
-    var Moon = [[solarTerminator[0] + lunarTerminator, moonDec, 'Moon']];  
+    var Moon = [[solarTerminator[0] + lunarTerminator, moonDec, 'Moon']]; 
 
     svg.selectAll("circle.moon") // floating moon
-        .data(Moon)
-        .enter()
+        .data(Moon).enter()
         .append("circle")
         .attr("cx", d => moonProjection(d)[0])
         .attr("cy", d => moonProjection(d)[1])
-        .attr("r", 2)
+        .attr("r", 5) 
         .attr('fill', d => {
-    var moonCoordinates = [solarTerminator[0]+lunarTerminator, moonDec];
-        moonDistance = d3.geoDistance(moonCoordinates, moonProjection.invert(center));
-        return moonDistance > (π / 2) ? 'none' : 'white'; })
-        .attr("class", d => { if (d[2] == "Moon") return "moon"; });
+    var moonCoordinates = [solarTerminator[0] + lunarTerminator, moonDec];
+        var moonDistance = d3.geoDistance(moonCoordinates, moonProjection.invert(center));
+        return moonDistance > (π / 2) ? 'none' : 'white';})
+        .attr("class", d => { if (d[2] == "Moon") return "moon"; });       
+              
 
     var night = g.append("path")
         .attr("class", "night");
@@ -332,13 +339,13 @@ if (lat > 0.0) {
     var civil_twilight = g.append("path")
         .attr("class", "civiltwilight");
 
-    var nautical_twilight = g.append("path")
+    var nautical_twilight = g.append("path")        
         .attr("class", "nauticaltwilight");
 
     var astronomical_twilight = g.append("path")
         .attr("class", "astronomicaltwilight");
 
-    var now = new Date(Date.now() + Δ);
+    var now = new Date(Date.now() + Δ );
 
     night.datum(circle0.center(antipode(solarPosition(now)))).attr("d", path);
 
@@ -347,8 +354,7 @@ if (lat > 0.0) {
     nautical_twilight.datum(circle2.center(antipode(solarPosition(now)))).attr("d", path);
 
     astronomical_twilight.datum(circle3.center(antipode(solarPosition(now)))).attr("d", path);
-
-    Δ += 1;
+    Δ += 1;   
 
 function antipode(position) { 
     return [position[0] + 180.0, - position[1]];
@@ -363,12 +369,12 @@ function solarPosition(time) {
     ];
  }
 
-// Kepler's equation of time
+ // Kepler's equation of time
 function equationOfTime(T) { 
     var e = eccentricityEarthOrbit(T),
         m = solarGeometricMeanAnomaly(T),
         l = solarGeometricMeanLongitude(T),
-        y = Math.tan(obliquityCorrection(T) / 2);
+        y = Math.tan( obliquityCorrection(T) / 2);
     y *= y;
     return y * Math.sin(2 * l) - 2 * e * Math.sin(m) + 4 * e * y * Math.sin(m) * Math.cos(2 * l) - 0.5 * y * y * Math.sin(4 * l) - 1.25 * e * e * Math.sin(2 * m);
  }

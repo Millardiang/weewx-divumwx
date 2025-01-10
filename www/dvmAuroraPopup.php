@@ -1,27 +1,20 @@
 <?php
-##############################################################################################
-#        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
-#       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    #
-#       (.  ___  :)||  |\   \  //  / |   (  ) : | \   \  //   |  |'  /    \:  | \   \  /     #
-#       |: \   ) |||:  | \\  \/. ./  (:  |  | . ) /\\  \/.    |  |: /'        |  \\  \/      #
-#       (| (___\ |||.  |  \.    //    \\ \__/ // |: \.        |   \//  /\'    |  /\.  \      #
-#       |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \     #
-#       (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|    #
-#                                                                                            #
-#     Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      #
-#      Distributed under terms of the GPLv3.  See the file LICENSE.txt for your rights.      #
-#    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
-#                    https://github.com/Millardiang/weewx-divumwx/issues                     #
-##############################################################################################
-
-include('shared.php');
+#####################################################################################################################                                                                                             
+#                                                                                                                   #
+# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
+#                                                                                                                   #
+# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
+#                                                                                                                   #
+# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
+#                                                                                                                   #
+# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
+#                                                                                                                   #
+#####################################################################################################################
+include('dvmCombinedData.php');
 // K-INDEX & SOLAR DATA 
 $str = file_get_contents('jsondata/ki.txt');
 $json = array_reverse(json_decode($str,false));
 $kp =  $json[1][1];
-echo $kp;
-
-
 ?>
 
 <!DOCTYPE html>
@@ -31,14 +24,15 @@ echo $kp;
   <title>Weather Radio Aurora/ Northern Lights<br>s</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  
-<style>
+<?php   
+if ($theme === "dark") {
+    echo '<style>
 @font-face{font-family:weathertext2;src:url(css/fonts/verbatim-regular.woff) format("woff"),url(fonts/verbatim-regular.woff2) format("woff2"),url(fonts/verbatim-regular.ttf) format("truetype")}
 html,body{font-size:13px;font-family: "weathertext2", Helvetica, Arial, sans-serif;}
 .grid { 
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  grid-gap: 20px;
+  grid-gap: 4px;
   align-items: stretch;
   color:#f5f7fc
   }
@@ -65,7 +59,7 @@ a:visited {
 
 /* mouse over link */
 a:hover {
-  color: silver;
+  color: #9aba2f;
 }
 
 /* selected link */
@@ -73,25 +67,79 @@ a:active {
   color: white;
 }  
 .divumwxdarkbrowser{position:relative;background:0;width:97%;height:30px;margin:auto;margin-top:-5px;margin-left:0px;border-top-left-radius:5px;border-top-right-radius:5px;padding-top:10px;}
-.divumwxdarkbrowser[url]:after{content:attr(url);color:#aaa;font-size:14px;text-align: center;position:absolute;left:0;right:0;top:0;padding:4px 15px;margin:11px 10px 0 auto;font-family:arial;height:20px;}
+.divumwxdarkbrowser[url]:after{content:attr(url);color:silver;font-size:14px;text-align: center;position:absolute;left:0;right:0;top:0;padding:4px 15px;margin:11px 10px 0 auto;font-family:arial;height:20px;}
  blue{color:#01a4b4}orange{color:#009bb4}orange1{position:relative;color:#009bb4;margin:0 auto;text-align:center;margin-left:5%;font-size:1.1rem}green{color:#aaa}red{color:#f37867}red6{color:#d65b4a}value{color:#fff}yellow{color:#CC0}purple{color:#916392}meteotextshowertext{font-size:1.2rem;color:#009bb4}meteorsvgicon{color:#f5f7fc}  
 .moonphasetext{font-size:1.1rem;color:#f5f7fc;position:absolute;display:inline;left:140px;top:80px}
 moonphaseriseset{font-size:.9rem;}credit{position:relative;font-size:.8em;top:10%}
-
-
 
 smalluvunit{font-size:.9rem;font-family:Arial,Helvetica,system;font-weight:600}
 .kpcontainer1{left:100px;top:0}.kptoday1,.kptoday11,.kptoday4,.kptoday6,.kptoday7{font-family:weathertext2,Arial,Helvetica,system;width:8rem;height:3rem;-webkit-border-radius:3px;-moz-border-radius:3px;border-radius:3px;display:flex}.kptoday1,.kptoday11,.kptoday4,.kptoday6,.kptoday7{font-size:1.5rem;padding-top:7px;color:#fff;border-bottom:15px solid rgba(56,56,60,1);align-items:center;justify-content:center;border-radius:3px}
 .kpcaution,.uvtrend{position:absolute;font-size:.8rem}
 .kptoday1{background:#9aba2f}.kptoday4{background:rgba(230,161,65,1)}.kptoday6{background:rgba(255,124,57,.8)}.kptoday7{background:rgba(211,93,78,.8)}.kptoday11{background:rgba(204,135,248,.7)}
 .kpcaution{margin-left:38px;margin-top:-14px;font-family:Arial,Helvetica,system}.kptrend{margin-left:135px;margin-top:48px;z-index:1;color:#fff}
-.actualt{position:relative;left:5px;-webkit-border-radius:3px;-moz-border-radius:3px;-o-border-radius:3px;border-radius:3px;background:rgba(74, 99, 111, 0.1);
-padding:5px;font-family:Arial, Helvetica, sans-serif;width:100px;height:0.8em;font-size:0.8rem;padding-top:2px;color:#aaa;border-bottom:2px solid rgba(56,56,60,1);
-align-items:center;justify-content:center;margin-bottom:10px;top:0}
+.actualt{position:relative;left:0px;-webkit-border-radius:3px;-moz-border-radius:3px;-o-border-radius:3px;border-radius:3px;background:teal;padding:5px;font-family:Arial, Helvetica, sans-serif;width:100px;height:0.8em;font-size:0.8rem;padding-top:2px;color:white;align-items:center;justify-content:center;margin-bottom:10px;top:-10px}
 .actualw{position:relative;left:5px;-webkit-border-radius:3px;-moz-border-radius:3px;-o-border-radius:3px;border-radius:3px;background:rgba(74, 99, 111, 0.1);
 padding:5px;font-family:Arial, Helvetica, sans-serif;width:100px;height:0.8em;font-size:0.8rem;padding-top:2px;color:#aaa;border-bottom:2px solid rgba(56,56,60,1);
 align-items:center;justify-content:center;margin-bottom:10px;top:0}
-</style>
+    </style>';
+} elseif ($theme === "light") {
+    echo '<style>
+@font-face{font-family:weathertext2;src:url(css/fonts/verbatim-regular.woff) format("woff"),url(fonts/verbatim-regular.woff2) format("woff2"),url(fonts/verbatim-regular.ttf) format("truetype")}
+html,body{font-size:13px;font-family: "weathertext2", Helvetica, Arial, sans-serif;}
+.grid { 
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-gap: 4px;
+  align-items: stretch;
+  color:black;
+  }
+.grid > article {
+  box-shadow: 2px 2px 6px 0px  rgba(0,0,0,0.3);
+  padding:20px;
+  font-size:0.8em;
+  -webkit-border-radius:4px;
+  border-radius:4px;
+}
+.grid > article img {
+  max-width: 100%;
+}
+/* unvisited link */
+a:link {
+  color: black;
+}
+
+/* visited link */
+a:visited {
+  color: silver;
+}
+
+/* mouse over link */
+a:hover {
+  color: #9aba2f;
+}
+
+/* selected link */
+a:active {
+  color: white;
+}  
+.divumwxdarkbrowser{position:relative;background:0;width:97%;height:30px;margin:auto;margin-top:-5px;margin-left:0px;border-top-left-radius:5px;border-top-right-radius:5px;padding-top:10px;}
+.divumwxdarkbrowser[url]:after{content:attr(url);color:black;font-size:14px;text-align: center;position:absolute;left:0;right:0;top:0;padding:4px 15px;margin:11px 10px 0 auto;font-family:arial;height:20px;}
+ blue{color:#01a4b4}orange{color:#009bb4}orange1{position:relative;color:#009bb4;margin:0 auto;text-align:center;margin-left:5%;font-size:1.1rem}green{color:#aaa}red{color:#f37867}red6{color:#d65b4a}value{color:#fff}yellow{color:#CC0}purple{color:#916392}meteotextshowertext{font-size:1.2rem;color:#009bb4}meteorsvgicon{color:#f5f7fc}  
+.moonphasetext{font-size:1.1rem;color:#f5f7fc;position:absolute;display:inline;left:140px;top:80px}
+moonphaseriseset{font-size:.9rem;}credit{position:relative;font-size:.8em;top:10%}
+
+smalluvunit{font-size:.9rem;font-family:Arial,Helvetica,system;font-weight:600}
+.kpcontainer1{left:100px;top:0}.kptoday1,.kptoday11,.kptoday4,.kptoday6,.kptoday7{font-family:weathertext2,Arial,Helvetica,system;width:8rem;height:3rem;-webkit-border-radius:3px;-moz-border-radius:3px;border-radius:3px;display:flex}.kptoday1,.kptoday11,.kptoday4,.kptoday6,.kptoday7{font-size:1.5rem;padding-top:7px;color:#fff;border-bottom:15px solid rgba(56,56,60,1);align-items:center;justify-content:center;border-radius:3px}
+.kpcaution,.uvtrend{position:absolute;font-size:.8rem}
+.kptoday1{background:#9aba2f}.kptoday4{background:rgba(230,161,65,1)}.kptoday6{background:rgba(255,124,57,.8)}.kptoday7{background:rgba(211,93,78,.8)}.kptoday11{background:rgba(204,135,248,.7)}
+.kpcaution{margin-left:38px;color:white;margin-top:-14px;font-family:Arial,Helvetica,system}.kptrend{margin-left:135px;margin-top:48px;z-index:1;color:#fff}
+.actualt{position:relative;left:0px;-webkit-border-radius:3px;-moz-border-radius:3px;-o-border-radius:3px;border-radius:3px;background:teal;padding:5px;font-family:Arial, Helvetica, sans-serif;width:100px;height:0.8em;font-size:0.8rem;padding-top:2px;color:white;align-items:center;justify-content:center;margin-bottom:10px;top:-10px}
+.actualw{position:relative;left:5px;-webkit-border-radius:3px;-moz-border-radius:3px;-o-border-radius:3px;border-radius:3px;background:rgba(74, 99, 111, 0.1);
+padding:5px;font-family:Arial, Helvetica, sans-serif;width:100px;height:0.8em;font-size:0.8rem;padding-top:2px;color:#aaa;border-bottom:2px solid rgba(56,56,60,1);
+align-items:center;justify-content:center;margin-bottom:10px;top:0}
+</style>';
+}
+?>
 <div class="divumwxdarkbrowser" url="Radio Aurora | Northern Lights"></div> 
   
 <main class="grid">
