@@ -6,7 +6,7 @@
    style="clip-rule:evenodd;fill-rule:evenodd;image-rendering:optimizeQuality;shape-rendering:geometricPrecision;text-rendering:geometricPrecision"
    id="svg3692"
    sodipodi:docname="divumwxLogo2.svg"
-   inkscape:version="1.2.2 (b0a84865, 2022-12-01)"
+   inkscape:version="1.3.2 (091e20e, 2023-11-25)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -33,12 +33,12 @@
      inkscape:deskcolor="#d1d1d1"
      showgrid="false"
      inkscape:zoom="3.025641"
-     inkscape:cx="29.745763"
-     inkscape:cy="25.779661"
+     inkscape:cx="63.788135"
+     inkscape:cy="25.944915"
      inkscape:window-width="1312"
      inkscape:window-height="658"
      inkscape:window-x="63"
-     inkscape:window-y="103"
+     inkscape:window-y="131"
      inkscape:window-maximized="0"
      inkscape:current-layer="svg3692" />
   <text
@@ -1898,7 +1898,7 @@
      id="path3688" />
   <text
      xml:space="preserve"
-     style="font-size:12.7986px;fill:none;fill-opacity:1;stroke:var(--col-6);stroke-width:1.33319;stroke-opacity:1"
+     style="font-size:12.7986px;fill:#008080;fill-opacity:1;stroke:#008080;stroke-width:1.33319;stroke-opacity:1"
      x="23.698124"
      y="51.913826"
      id="text3"
@@ -1907,5 +1907,5 @@
        id="tspan3"
        x="23.698124"
        y="51.913826"
-       style="stroke-width:1.33319;fill:none;stroke:var(--col-6);stroke-opacity:1">DivumWX</tspan></text>
+       style="stroke-width:1.33319">DivumWX</tspan></text>
 </svg>

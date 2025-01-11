@@ -15,7 +15,6 @@
 ############################################################################################## 
 include('dvmCombinedData.php');
 header('Content-type: text/html; charset=utf-8');
-$moon = "img/moon.svg";
 $meteor_default="No Meteor Showers";
 $meteor_events[]=array("event_start"=>mktime(0, 0, 0, 1, 1),"event_title"=>"Quadrantids","event_end"=>mktime(23, 59, 59, 1, 2),);
 $meteor_events[]=array("event_start"=>mktime(0, 0, 0, 1, 3),"event_title"=>"Quadrantids peak","event_end"=>mktime(23, 59, 59, 1, 4),);
@@ -51,11 +50,7 @@ foreach ($meteor_events as $meteor_check) {
 <meta charset="utf-8">
 <title>moon phase</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<<<<<<< Updated upstream
-<link rel="prefetch" href="img/moon.svg" as="image">
-=======
 
->>>>>>> Stashed changes
 </head>
 <body>
 <div class="chartforecast">
@@ -438,10 +433,7 @@ var hi = 110;
 var radx = wi / 2 * 0.91;
 var gradient = 2;
 var mAxis = <?php echo $alm["parallacticAngle"];?>;
-<<<<<<< Updated upstream
-=======
 var moonface = "#high-res-moon";
->>>>>>> Stashed changes
 
 function getX(phase, angle) {
     const f = Math.cos(toRadians(phase));
@@ -527,14 +519,6 @@ function display(phase) {
         .attr("xlink:href", moonface)
         .attr("width", 100)
         .attr("height", 100)
-        .attr('x', 5.1)
-        .attr('y', 5);
-
-    svg
-        .append('image') // image output
-        .attr('xlink:href', moon)
-        .attr('width', 100)
-        .attr('height', 100)
         .attr('x', 5.1)
         .attr('y', 5);
 
