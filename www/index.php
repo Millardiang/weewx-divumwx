@@ -61,16 +61,14 @@ echo $stationlocation;
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name=apple-mobile-web-app-title content="WEATHER STATION">
-  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
-  <link rel="manifest" href="./site.webmanifest">
-  <link rel="mask-icon" href="./safari-pinned-tab.svg" color="#5bbad5">
-  <link rel="shortcut icon" href="./favicon.ico">
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@200;300;400;600;700" rel="stylesheet">
   <meta name="msapplication-TileColor" content="#da532c">
   <meta name="msapplication-config" content="./browserconfig.xml">
   <meta name="theme-color" content="#ffffff">
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@200;300;400;600;700" rel="stylesheet">
   <link rel="manifest" href="./site.webmanifest"><html lang="en" ><meta charset="UTF-8">
   <!--title>DivumWX - Proposed Responsive CSS Grid Layout Scheme</title-->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -95,8 +93,8 @@ echo filemtime('./css/divumwx.themes.css');
   </script>
   </head>
 <body>
- 
   <!--start of header section-->
+  <!--?php include('aheader.html');?-->
   <!-- start of theme switch -->
   <div class="theme-switch-wrapper">
       <label class="theme-switch" for="checkbox">
@@ -108,7 +106,7 @@ echo filemtime('./css/divumwx.themes.css');
   </div>
 <!-- end of theme switch -->      
 
-  <div class="titlebar"style="background-color:var(--col-3);">
+  <div class="titlebar"style="background-color:transparent;">
   <div class="titlebar-item">
    </div>
   <div class="titlebar-item-center">
@@ -188,18 +186,17 @@ error_reporting(0);
 
 </section>
 <!--end of grid section-->
-
 <!--start of footer section-->
 
 <div class="titlebar" style="padding: 10px;  height: 105px;">
 <!--section1-->
 <div class="stationLongname">
   <div class="titlebar-item"> 
-<div class="divumwxLogoFooter" style="width: 60px;">
-<a href="https://divumwxweather.org/" title="https://divumwxweather.org/" target="_blank"><?php echo $divumwxLogo;?>
-<div class="divumwxLogoFooter-text-block" style="padding-left: 4px;"><?php
+<div class="divumwxLogoFooter" style="width: 60px; margin-top: 1px;">
+<a href="https://divumwxweather.org/" title="https://divumwxweather.org/" target="_blank"><?php echo $divumwxLogo2;?>
+<!--div class="divumwxLogoFooter-text-block" style="padding-left: 4px;"><?php
 echo '<a>Copyright &copy; 2022-' . date('Y') . '<br>Team DivumWX<br>All rights reserved</divumwx></a>';
-?> </div>
+?> </div-->
 
 </div></div>
 </div>
