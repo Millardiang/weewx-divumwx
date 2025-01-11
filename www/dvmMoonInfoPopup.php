@@ -1,7 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
 <?php 
 include('dvmCombinedData.php');
+$moon = "img/moon.svg";
 if ($theme === "dark") {
     echo '<style>@font-face{font-family:weathertext;src:url(css/fonts/verbatim-regular.woff)format("woff"),url(fonts/verbatim-regular.woff2)format("woff2"),url(fonts/verbatim-regular.ttf)format("truetype");}html,body{font-size:13px;font-family:"weathertext",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}.grid{display:grid;
   grid-template-columns:repeat(auto-fill,minmax(200px,2fr));grid-gap:5px;align-items:stretch;color:#f5f7fc;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}.grid > article{
@@ -24,11 +23,14 @@ padding:5px;font-family:Arial,Helvetica,sans-serif;width:100px;height:0.8em;font
 </style>';
 }
 ?>
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Moon Phase Information</title>
+  <link rel="prefetch" href="img/moon.svg" as="image">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+</head>
 <div class="divumwxdarkbrowser" url="Moon Phase Information"></div> 
 <main class="grid">
 <article>
@@ -49,6 +51,8 @@ padding:5px;font-family:Arial,Helvetica,sans-serif;width:100px;height:0.8em;font
 </div>
 
 <script>
+
+var moon = "<?php echo $moon;?>";
  var theme = "<?php echo $theme;?>";
     if (theme === 'dark') {
     var baseTextColor = "silver";
@@ -396,7 +400,6 @@ function drawDarkSide(phase) {
     path.closePath();
     svg.append("path")
     .attr("d", path)
-    //.style('filter','blur(2px)')
     .style('fill');
     return gradientPoints;
 }
@@ -415,46 +418,12 @@ function fillGradient(points) {
         if(points[i][3] > 180) {
             x1++;
         }
-
-        var defs = svg.append('defs');
-
-        const gradientx = defs.append('linearGradient')
-        .attr('id', 'Gradients')
-        .attr('x1', '0%')
-        .attr('x2', '0%')
-        .attr('y1', '0%')
-        .attr('y2', '0%');
-
-        gradientx.append('stop')
-        .attr('offset', '0%')
-        .attr('class', 'stop-left')
-        .attr('stop-color', '#9bf')
-        .attr('stop-opacity', 0.1)
-
-        gradientx.append('stop')
-        .attr('offset', '0%')
-        .attr('class', 'stop-right')        
-        .attr('stop-color', '#292e35')
-        .attr('stop-opacity', 0.3);
-
-        const shadow = d3.path();
-        shadow.moveTo(x1, y1);
-        shadow.lineTo(x2, y1);
-        shadow.lineTo(x2, y2);
-        shadow.lineTo(x1, y2);
-        shadow.closePath();
-        svg
-          .append("path")            
-          .attr("d", shadow)          
-          .attr('fill', 'none');
-          //.style('filter','blur(2px)')
-          //.style('fill', "url(#Gradients)");
     }
 }
 
 function drawPhase(phase) {
     svg.attr("transform", "rotate("+ mAxis +", 0, 0)")
-    svg.style('fill', 'rgba(41, 46, 53, 0.8)');
+    .style('fill', 'rgba(41, 46, 53, 0.8)');
     const gradientPoints = drawDarkSide(phase);
     fillGradient(gradientPoints);
 
@@ -463,12 +432,12 @@ function drawPhase(phase) {
 function display(phase) {
 
     svg
-        .append("circle") // background circle
-        .attr("cx", 55)
-        .attr("cy", 55)
-        .attr("r", 49.25)
-        .style('stroke', "#9bf")
-        .style('fill', "#9bf");
+        .append('image') // image output
+        .attr('xlink:href', moon)
+        .attr('width', 100)
+        .attr('height', 100)
+        .attr('x', 5.1)
+        .attr('y', 5);
 
   drawPhase(phase);    
 }
@@ -508,10 +477,10 @@ display(phase);
 <?php echo "Current Moon cycle is: <span style='color:#ff8841'>", number_format($alm["moon_age"],2),"</span> days old";?>
 </span><br /><svg id="i-ban" viewBox="0 0 32 32" width="10" height="10" fill="#007fff" stroke="#007fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
 <circle cx="16" cy="16" r="14" /><path d="M6 6 L26 26" /></svg> 
-<?php echo "Illumination: <span style='color:#ff8841'>", number_format($alm["luminance"],2),"</span> %";?>
+<?php echo "Illumination: <span style='color:#ff8841'>", number_format($alm["Illumination"],2),"</span> %";?>
 </span><br /><svg id="i-ban" viewBox="0 0 32 32" width="10" height="10" fill="#9bf" stroke="#9bf" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
 <circle cx="16" cy="16" r="14" /><path d="M6 6 L26 26" /></svg> 
-<?php echo "Moonphase: <span style='color:#9bf'>", $alm["moonphase"],"</span>";?>
+<?php echo "Moonphase: <span style='color:#9bf'>", $alm["moonPhase"],"</span>";?>
 </span><br /><svg id="i-ban" viewBox="0 0 32 32" width="10" height="10" fill="#007fff" stroke="#007fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
 <circle cx="16" cy="16" r="14" /><path d="M6 6 L26 26" /></svg> 
 <?php echo "Moon Distance: <span style='color:#ff8841'>", number_format(($alm["moon_distance"]),2),"</span> km";?>
