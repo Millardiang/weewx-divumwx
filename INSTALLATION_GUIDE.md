@@ -1,16 +1,21 @@
 # DivumWX Installation Guide
 
+This new documentation is for Beta9 and above. 
+
 The installation process has changed greatly since it's original inception for the Weather34 skin. With the release of DivumWX we have rewritten almost all of the code and moved most of it into functions. We've made it more intuitive so that it can automatically suss out where most things that it needs are located. It now gives you information each step of the way and allows to to make changes at critical junctures, with the major addition of a debugging log
 
 At this time we ONLY support the following
 
 	Linux (Most any Distro)
-	Python 3
-	weewx 5.x or higher
+	Python 3.11+
+	weewx 5.1+
 	weewx installed using pip
 	Apache2 or Nginx
 	
 Now, with that being said, I want to make sure that you understand that we are not trying to cover every conceivable scenario with the installer, especially when it comes to the DOCUMENTROOT of your webserver and how you are delivering your web pages, either locally, or publicly available on the web. Since we are only supporting the pip installation method at this time and we are not going to try and cover all potential web server DOCUMENTROOT scenarios.
+
+DivumWX requires a webserver. ZIf you wish to view your pages locally only, how you set that up is out of scope for this installer
+
 
 What we do, however, is look at your existing weewx.conf file and pull out the existing HTML_ROOT.  This should be the path that points to where the generated reports are placed, relative to WEEWX_ROOT, unless you give it a full path, For example, if your weewx.conf contained "public_html" for the HTML_ROOT, in weewx 5.x and higher, in ~/weewx-data/public_html, and, as we all know, the "~" means the running users home directory.  This then means that if the default skin, "Seasons" is enabled, then the Seasons Report files would be generated in that directory. Same for any other skin that was enabled.
 

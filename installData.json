@@ -2,7 +2,7 @@
     "user": "~/weewx-data/bin/user/",
     "skins": "~/weewx-data/skins/",
     "weewx_config_file": "~/weewx-data/weewx.conf",
-    "weewx_www_root": "~/weewx-data/public_html",
+    "www_root": "/var/www/html",
     "over_write": "True",
     "config_entries0": {
         "StdReport": {

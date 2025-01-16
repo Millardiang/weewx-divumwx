@@ -15,10 +15,9 @@ import getpass
 import textwrap
 import shutil
 from datetime import datetime
-from pkg_resources import DistributionNotFound, get_distribution
 from pathlib import Path
 
-version = "4.6.45.387"
+version = "4.6.82.888"
 srvGenURL = 'https://www.divumwx.org/settingsGen/'
 
 reset = "\033[0m"
@@ -143,17 +142,18 @@ except ImportError:
 try:
     from crontab import CronTab
     try:
-        from pkg_resources import get_distribution, DistributionNotFound
-        try:
-            installed_crontab = get_distribution("python-crontab")
-            logging.debug(f"Detected correct crontab module: {installed_crontab.project_name}-{installed_crontab.version}.")
-        except DistributionNotFound:
-            print(f"{red}No crontab module detected. Installing python-crontab...{reset}")
-            logging.debug("No crontab module detected. Installing python-crontab.")
-            raise ImportError("No crontab module detected. Installing python-crontab.")
-    except DistributionNotFound:
+        CronTab(user="test_user")
+        logging.debug("Detected crontab module with 'user' parameter support.")
+    except TypeError:
+        print(f"{red}Detected an old, incompatible crontab module. Uninstalling...{reset}")
+        logging.debug("Old, incompatible crontab module detected. Uninstalling...")
+        subprocess.check_call([sys.executable, "-m", "pip", "uninstall", "-y", "crontab"])
+        print(f"{red}Installing python-crontab...{reset}")
+        logging.debug("Installing python-crontab...")
         modMissing("python-crontab", force_restart=True)
 except ImportError:
+    print(f"{red}The crontab module is not installed. Installing python-crontab...{reset}")
+    logging.debug("No crontab module detected. Attempting installation.")
     modMissing("python-crontab", force_restart=True)
 print(f"{green}Python module import complete...{reset}")
 
@@ -977,12 +977,12 @@ deactivate
             user_path = os.path.expanduser(d["user"])
             skins_path = os.path.expanduser(d["skins"])
             weewx_config_file = os.path.expanduser(d["weewx_config_file"])
-            weewx_www_root = os.path.expanduser(d["weewx_www_root"])
+            www_root = os.path.expanduser(d["www_root"])
             logging.debug(f"Conf Paths:")
             logging.debug(f"        user_path: {user_path}")
             logging.debug(f"       skins_path: {skins_path}")
             logging.debug(f"weewx_config_file: {weewx_config_file}")
-            logging.debug(f"   weewx_www_root: {weewx_www_root}")
+            logging.debug(f"   www_root: {www_root}")
             config_data = ConfigObj(weewx_config_file, encoding='utf8', list_values=False, write_empty_values=True)
             os.system("clear")
             logging.debug(f"Determining if any other skins are enabled already.")
@@ -1001,8 +1001,8 @@ deactivate
             print(f"{green}current {yellow}HTML_ROOT{white} setting.{reset}", end="\n\n")
             wxConfHTMLRoot = config_data['StdReport'].get('HTML_ROOT')
             if wxConfHTMLRoot.lower() == 'public_html':
-                html_root = os.path.join(weewx_www_root , "divumwx")
-                preDVMRoot = weewx_www_root
+                html_root = os.path.join(www_root , "divumwx")
+                preDVMRoot = www_root
             else:
                 html_root = os.path.join(wxConfHTMLRoot, "divumwx")
                 preDVMRoot = wxConfHTMLRoot
