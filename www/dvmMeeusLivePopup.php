@@ -4,7 +4,7 @@ include('dvmCombinedData.php');
 if($theme==="light"){ echo "<body style='background-color:e0eafb'>";}
 else if($theme==="dark"){ echo "<body style='background-color:#292E35'>";}
 if($theme==="light"){ $textColor = "#1c4263";}
-else if($theme==="dark"){ $textColor = "silver";}
+else if($theme==="dark"){ $textColor = "white";}
 ##############################################################################################
 #        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
 #       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    #
@@ -31,7 +31,7 @@ else if($theme==="dark"){ $textColor = "silver";}
 <div style="position:relative; top:10px;display:flex;justify-content:center;align-items:center;font-family:Helvetica;">
 <?php
 if($theme==="light"){echo "<font color='#1c4263'>"."Geocentric Live Meeus Calculation"."</font>";}
-else if($theme==="dark"){echo "<font color='silver'>"."Geocentric Live Meeus Calculation"."</font>";}
+else if($theme==="dark"){echo "<font color='white'>"."Geocentric Live Meeus Calculation"."</font>";}
 ?>
 </div>
 <style>
@@ -473,7 +473,7 @@ var value = ELP82.elp82(T);
 // Moon distance in km
 const Rm = value[1];
 // Illumination in %
-const perc = value[3] * 100;
+const perc = value[3] * 100 -0.154;
 // Sun distance in km
 const Rs = value[4] * 1.496e+8;
 
@@ -1633,7 +1633,7 @@ var ra = "Ra λSun: " + toDegrees(Ra) + "°";
     .attr("y", 44)
     .text(ra);
 
-var esun = "Ecliptic εSun: " + εSun + "°";
+var esun = "εEcliptic Angle: " + εSun + "°";
   svg
     .append("text")
     .style("fill", "tomato")
@@ -2111,9 +2111,9 @@ var svg = d3.select(".moonphaze")
     .attr("width", 100)
     .attr("height", 100);
 
-var wi = 100;
-var hi = 100;
-var radx = wi / 2 * 0.51;
+var w = 100;
+var h = 100;
+var radius = w / 2 * 0.51;
 var gradient = 2;
 var mAxis = <?php echo $alm["parallacticAngle"];?>;
 var moonface = "#high-res-moon";
@@ -2123,10 +2123,10 @@ function getX(phase, angle) {
 
     let x;
     const cosi = Math.cos(toRadians(angle));
-    x = f * radx * cosi + wi / 2;
+    x = f * radius * cosi + w / 2;
 
     if((phase <= 180 && cosi < 0) || (phase > 180 && cosi > 0)) {
-        x = radx * cosi + wi / 2;
+        x = radius * cosi + w / 2;
     }
     return x;    
 }
@@ -2135,7 +2135,7 @@ function drawDarkSide(phase) {
     const gradientPoints = [];
 
     let x = getX(phase - gradient, 0);
-    let y = radx * Math.sin(0) + hi / 2;
+    let y = radius * Math.sin(0) + h / 2;
 
     var path = d3.path();
     path.moveTo(x, y);
@@ -2149,7 +2149,7 @@ function drawDarkSide(phase) {
             x = x2;
             x2 = temp; 
         }
-        y = radx * Math.sin(toRadians(i)) + hi / 2;
+        y = radius * Math.sin(toRadians(i)) + h / 2;
 
         gradientPoints.push([x, x2, y, phase]);
 
@@ -2202,9 +2202,9 @@ function display(phase) {
     svg
         .append("use")
         .attr("xlink:href", moonface)
-        .attr("width", 50)
-        .attr("height", 50)
-        .attr('x', 25.1)
+        .attr("width", 49.9)
+        .attr("height", 49.9)
+        .attr('x', 25.03)
         .attr('y', 25);
 
   drawPhase(phase);    

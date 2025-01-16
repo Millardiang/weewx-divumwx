@@ -102,8 +102,6 @@ foreach ($meteor_events as $meteor_check) {
 
 <script>
 
-var moon = "<?php echo $moon;?>";
-
 function toDegrees(x) {
   return x * (180.0 / Math.PI);
 }
@@ -428,9 +426,9 @@ var svg = d3.select(".moonphasexx")
     .attr("width", 110)
     .attr("height", 110);
 
-var wi = 110;
-var hi = 110;
-var radx = wi / 2 * 0.91;
+var w = 110;
+var h = 110;
+var radius = w / 2 * 0.91;
 var gradient = 2;
 var mAxis = <?php echo $alm["parallacticAngle"];?>;
 var moonface = "#high-res-moon";
@@ -440,10 +438,10 @@ function getX(phase, angle) {
 
     let x;
     const cosi = Math.cos(toRadians(angle));
-    x = f * radx * cosi + wi / 2;
+    x = f * radius * cosi + w / 2;
 
     if((phase <= 180 && cosi < 0) || (phase > 180 && cosi > 0)) {
-        x = radx * cosi + wi / 2;
+        x = radius * cosi + w / 2;
     }
     return x;    
 }
@@ -452,7 +450,7 @@ function drawDarkSide(phase) {
     const gradientPoints = [];
 
     let x = getX(phase - gradient, 0);
-    let y = radx * Math.sin(0) + hi / 2;
+    let y = radius * Math.sin(0) + h / 2;
 
     var path = d3.path();
     path.moveTo(x, y);
@@ -466,7 +464,7 @@ function drawDarkSide(phase) {
             x = x2;
             x2 = temp; 
         }
-        y = radx * Math.sin(toRadians(i)) + hi / 2;
+        y = radius * Math.sin(toRadians(i)) + h / 2;
 
         gradientPoints.push([x, x2, y, phase]);
 
@@ -517,9 +515,9 @@ function display(phase) {
     svg
         .append("use")
         .attr("xlink:href", moonface)
-        .attr("width", 100)
-        .attr("height", 100)
-        .attr('x', 5.1)
+        .attr("width", 99.9)
+        .attr("height", 99.9)
+        .attr('x', 5.03)
         .attr('y', 5);
 
   drawPhase(phase);    
