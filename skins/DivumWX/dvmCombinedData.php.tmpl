@@ -378,9 +378,11 @@ $dew["now"] = $weewxrt[4];
 $dewTrend = "$trend.dewpoint.format(add_label=False)";
 if(is_numeric($dewTrend) != 1 or $dewTrend == '   N/A'){$dew["trend"] = 0;}
 else {$dew["trend"] = intval($dewTrend);}
-$dew["day_max"] = $day.dewpoint.max.format(add_label=False);
+$dew["day_max"] = "$day.dewpoint.max.format(add_label=False)";
+if ($dew["day_max"] == '   N/A'){$dew["day_max"] = 0;}
 $dew["day_maxtime"] = date('H:i',$day.dewpoint.maxtime.raw);
-$dew["day_min"] = $day.dewpoint.min.format(add_label=False);
+$dew["day_min"] = "$day.dewpoint.min.format(add_label=False)";
+if ($dew["day_min"] == '   N/A'){$dew["day_min"] = 0;}
 $dew["day_mintime"] = date('H:i',$day.dewpoint.mintime.raw);
 $dew["yesterday_max"] = $day($days_ago=1).dewpoint.max.format(add_label=False);
 $dew["yesterday_maxtime"] = date('H:i',$day($days_ago=1).dewpoint.maxtime.raw);
@@ -560,10 +562,10 @@ $solar["day_lux_maxtime"] = date('H:i',$day.radiation.maxtime.raw);
 #if $current.threshold.has_data
 $solar["threshold"] = round($current.threshold.raw,0,PHP_ROUND_HALF_UP);
 $solar["sun_duration_minutes"] = $day.sunshine_time.sum.raw;
-$solar["sun_duration_hours_minutes"] = intdiv($solar["sun_duration_minutes"], 60).'hr:'. ($solar["sun_duration_minutes"] % 60).'min';
-$solar["sunshine_hours_yesterday"] = $day($days_ago=1).sunshine_hours.sum.raw;
+$solar["sun_duration_hours_minutes"] = intdiv($solar["sun_duration_minutes"], 60).' hrs: '. ($solar["sun_duration_minutes"] % 60).' mins';
+$solar["sunshine_hours_yesterday"] = $day($days_ago=1).sunshine_time.sum.raw;
 $solar["sunshine_minutes_yesterday"] = $solar["sunshine_hours_yesterday"] * 60;
-$solar["sunshine_hours_minutes_yesterday"] = intdiv($solar["sunshine_minutes_yesterday"], 60).'hr:'. ($solar["sunshine_minutes_yesterday"] % 60).'min';
+$solar["sunshine_hours_minutes_yesterday"] = intdiv($solar["sunshine_minutes_yesterday"], 60).' hrs: '. ($solar["sunshine_minutes_yesterday"] % 60).' mins';
 #end if
 $solar["now"] = $current.radiation.format($localize=False,add_label=False);
 $solar["day_max"] = $day.radiation.max.format($localize=False,add_label=False);
@@ -1020,6 +1022,6 @@ $Tdc = (($Tc-(14.55+0.114*$Tc)*(1-(0.01*$RH))-pow((2.5+0.007*$Tc)*(1-(0.01*$RH))
 $E = (6.11*pow(10,(7.5*$Tdc/(237.7+$Tdc))));
 $wetbulbcalc = (((0.00066*$P)*$Tc)+((4098*$E)/pow(($Tdc+237.7),2)*$Tdc))/((0.00066*$P)+(4098*$E)/pow(($Tdc+237.7),2));
 $wetbulbx = number_format($wetbulbcalc,1);
-include ('dvmCustomData.php');  
+//include ('dvmCustomData.php');  
   
 ?>
