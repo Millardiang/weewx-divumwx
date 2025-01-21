@@ -13,10 +13,7 @@
 #    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
-
-//include_once('dvmCombinedData.php');
 include "dvmForecastData.php";
-
 error_reporting(0);
 date_default_timezone_set($TZ);
 header("Content-type: text/html; charset=UTF-8");
@@ -51,7 +48,7 @@ echo " ". date($timeFormat, $forecastime);
   z-index: 20;
   padding-top: 1px;
   margin-left: 0;
-  font-size: .67em;
+  font-size: .71em;
   color: var(--col-6);
   margin-top: 159px;
   width: 300px;
@@ -74,7 +71,6 @@ table.forecast5 tbody td{font-size:0.500em;}
 <td style="border: transparent;"><?php echo $forecastTime[1]; ?></td>
 <td style="border: transparent;"><?php echo $forecastTime[2]; ?></td>
 <td style="border: transparent;"><?php echo $forecastTime[3]; ?></td>
-<td style="border: transparent;"><?php echo $forecastTime[4]; ?></td>
 </tr>
 <tr>
 <td style="border: transparent;width:10%;"></td>
@@ -82,7 +78,6 @@ table.forecast5 tbody td{font-size:0.500em;}
 <td style="border: transparent;"><?php echo $forecastIcon[1]; ?></td>
 <td style="border: transparent;"><?php echo $forecastIcon[2]; ?></td>
 <td style="border: transparent;"><?php echo $forecastIcon[3]; ?></td>
-<td style="border: transparent;"><?php echo $forecastIcon[4]; ?></td>
 </tr>
 <tr>
 <td style="border: transparent;width:5%;"><?php echo $thermIcon; ?></td>
@@ -90,7 +85,6 @@ table.forecast5 tbody td{font-size:0.500em;}
 <td style="border-left: 5px solid <?php echo $colorOutTemp; ?>;"><?php echo $forecastTempMax[1]; ?>&deg;<?php echo $tempunit; ?></td>
 <td style="border-left: 5px solid <?php echo $colorOutTemp; ?>;"><?php echo $forecastTempMax[2]; ?>&deg;<?php echo $tempunit; ?></td>
 <td style="border-left: 5px solid <?php echo $colorOutTemp; ?>;"><?php echo $forecastTempMax[3]; ?>&deg;<?php echo $tempunit; ?></td>
-<td style="border-left: 5px solid <?php echo $colorOutTemp; ?>;"><?php echo $forecastTempMax[4]; ?>&deg;<?php echo $tempunit; ?></td>
 </tr>
 <tr>
 <td style="border: transparent;width:5%;"><?php echo $windalert2; ?></td></td>
@@ -118,12 +112,6 @@ echo $windunit;
 echo $forecastWindGust[3];
 echo $windunit;
 ?></td>
-<td style="border-left: 5px solid <?php echo $color[
-    "windGust"
-]; ?>;"><?php echo $forecastWindDirMax[4]; ?>&nbsp;<?php
-echo $forecastWindGust[4];
-echo $windunit;
-?></td>
 </tr>
 <tr>
 <td style="border: transparent;width:5%;"><?php echo $rainsvg; ?></td>
@@ -143,10 +131,6 @@ echo $rainunit;
 echo $forecastPrecip[3];
 echo $rainunit;
 ?></td>
-<td style="border-left: 5px solid <?php echo $color["rain"]; ?>;"><?php
-echo $forecastPrecip[4];
-echo $rainunit;
-?></td>
 </tr>
 <tr>
 <td style="border: transparent;width:5%;"><?php echo $uvicon; ?></td>
@@ -162,9 +146,6 @@ echo $rainunit;
 <td style="border-left: 5px solid <?php echo $color[
     "UVI"
 ]; ?>;"><?php echo $forecastUVI[3]; ?></td>
-<td style="border-left: 5px solid <?php echo $color[
-    "UVI"
-]; ?>;"><?php echo $forecastUVI[4]; ?></td>
 </tr>
 <tr>
 <td style="border: transparent;width:5%;"><?php echo $humidity; ?></td>
@@ -172,7 +153,6 @@ echo $rainunit;
 <td style="border-left: 5px solid <?php echo $colorOutHumidity; ?>;"><?php echo $forecastHumid[1]; ?>%</td>
 <td style="border-left: 5px solid <?php echo $colorOutHumidity; ?>;"><?php echo $forecastHumid[2]; ?>%</td>
 <td style="border-left: 5px solid <?php echo $colorOutHumidity; ?>;"><?php echo $forecastHumid[3]; ?>%</td>
-<td style="border-left: 5px solid <?php echo $colorOutHumidity; ?>;"><?php echo $forecastHumid[4]; ?>%</td>
 </tr>
 </tbody>
 </table>
