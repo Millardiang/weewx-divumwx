@@ -236,7 +236,7 @@ else echo $online,"";echo " ",  date($timeFormat,$forecastime);?>
 </tr>
 <tr>
 <td style="width:20%;text-align: center;border-left: 5px solid rgb(109,100,136);"><?php echo $sky["cloud_base"];?><?php echo $distance;?></td>
-<td style="width:20%;text-align: center;border-left: 5px solid #cccccc;"><?php echo $sky["cloud_cover"];?></td>
+<td style="width:20%;text-align: center;border-left: 5px solid #cccccc;"><?php echo $sky["cloud_cover"];?>%</td>
 </tr>
 <tr>
 <td style="border:transparent;">10min Rainfall</td>
