@@ -29,9 +29,8 @@ error_reporting(0);
 
 <?php //cloudbase
 $clouds = "Cloudbase";
-if ($windunit == 'mph' || $windunit == 'kts'){$sky["cloud_base"] = round($sky["cloud_base"] * 3.281);}
-if ($windunit == 'mph' || $windunit == 'kts'){$distance = "ft";}
-else if ($windunit == 'km/h' || $windunit == 'm/s'){$distance = "m";}
+if ($windunit == 'mph' || $windunit == 'kts'){$sky["cloud_base"] = round($sky["cloud_base"] * 3.281);$distance = "ft";}
+else {$distance = "m";}
 ?>
 
 <?php
