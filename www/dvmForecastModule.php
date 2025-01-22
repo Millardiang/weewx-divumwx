@@ -58,7 +58,7 @@ echo " ". date($timeFormat, $forecastime);
 .forecast4:hover {
   color: #90b12a
 }
-table.forecast5{width:98%;height:70%;text-align:center;border-spacing:3px;}
+table.forecast5{width:98%;height:70%;text-align:center;border-spacing:0.35em;}
 table.forecast5 td, table.power th{border:1px solid var(--col-13);border-radius:2px;padding:0px 0px;width:15%;}
 table.forecast5 tbody td{font-size:0.500em;}
 </style>
@@ -87,7 +87,7 @@ table.forecast5 tbody td{font-size:0.500em;}
 <td style="border-left: 5px solid <?php echo $colorOutTemp; ?>;"><?php echo $forecastTempMax[3]; ?>&deg;<?php echo $tempunit; ?></td>
 </tr>
 <tr>
-<td style="border: transparent;width:5%;"><?php echo $windalert2; ?></td></td>
+<td style="border: transparent;width:5%;"><?php echo $windalert2; ?></td>
 <td style="border-left: 5px solid <?php echo $color[
     "windGust"
 ]; ?>;"><?php echo $forecastWindDirMax[0]; ?>&nbsp;<?php
