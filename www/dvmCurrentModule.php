@@ -127,15 +127,15 @@ else if($sky["cloud_cover"] < 95) {$sky["summary"] = "Mostly Cloudy";}
 else if($sky["cloud_cover"] >= 95) {$sky["summary"] = "Overcast";}
 else if(filesize('jsondata/me.txt') < 160){$sky["summary"] = "Conditions Not Available";} 
 //oktas
-if($sky["cloud_cover"] < 5 && $sky["cloud_cover"] > 0) {$sky["cloud_oktas"] = "0 oktas";}
-else if($sky["cloud_cover"] <= 12.5) {$sky["cloud_oktas"] = "1 okta";}
-else if($sky["cloud_cover"] <= 25) {$sky["cloud_oktas"] = "2 oktas";}
-else if($sky["cloud_cover"] <= 37.5) {$sky["cloud_oktas"] = "3 oktas";}
-else if($sky["cloud_cover"] <= 50) {$sky["cloud_oktas"] = "4 oktas";}
-else if($sky["cloud_cover"] <= 62.5) {$sky["cloud_oktas"] = "5 oktas";}
-else if($sky["cloud_cover"] <= 75) {$sky["cloud_oktas"] = "6 oktas";}
-else if($sky["cloud_cover"] <= 87.5) {$sky["cloud_oktas"] = "7 oktas";}
-else if($sky["cloud_cover"] <= 100) {$sky["cloud_oktas"] = "8 oktas";}
+if($sky["cloud_cover"] < 5 && $sky["cloud_cover"] > 0) {$sky["cloud_oktas"] = "0oktas";}
+else if($sky["cloud_cover"] <= 12.5) {$sky["cloud_oktas"] = "1okta";}
+else if($sky["cloud_cover"] <= 25) {$sky["cloud_oktas"] = "2oktas";}
+else if($sky["cloud_cover"] <= 37.5) {$sky["cloud_oktas"] = "3oktas";}
+else if($sky["cloud_cover"] <= 50) {$sky["cloud_oktas"] = "4oktas";}
+else if($sky["cloud_cover"] <= 62.5) {$sky["cloud_oktas"] = "5oktas";}
+else if($sky["cloud_cover"] <= 75) {$sky["cloud_oktas"] = "6oktas";}
+else if($sky["cloud_cover"] <= 87.5) {$sky["cloud_oktas"] = "7oktas";}
+else if($sky["cloud_cover"] <= 100) {$sky["cloud_oktas"] = "8oktas";}
 
 if(anyToC($temp["outside_day_avg_60mn"])<=-10){$tempcolor = "#8781bd";}
 else if(anyToC($temp["outside_day_avg_60mn"])<=0){$tempcolor = "#487ea9";}
@@ -192,13 +192,14 @@ if ($wind["direction_10m_avg"] <= 11.25) {
 table.current {
   font-family: Arial, Helvetica, sans-serif;
   background-color: transparent;
-  width: 92%;
+  width: 95%;
   text-align: center;
 }
 table.current td, table.current th {
   border:1px solid var(--col-13);
   border-radius:2px;
-  padding: 1px 1px;
+  padding: 1px 0px;
+column-gap: 20px;
 }
 table.current tbody td {
   font-size: 0.6em;
@@ -234,8 +235,8 @@ else echo $online,"";echo " ",  date($timeFormat,$forecastime);?>
 <td style="border:transparent;">Cloud Cover</td>
 </tr>
 <tr>
-<td style="width:20%;text-align: center;border-left: 5px solid rgb(109,100,136);"><?php echo $sky["cloud_base"];?><?php echo $distance;?></td>
-<td style="width:20%;text-align: center;border-left: 5px solid #cccccc;"><?php echo $sky["cloud_cover"];?>%</td>
+<td style="width:auto;text-align: center;border-left: 5px solid rgb(109,100,136);"><?php echo $sky["cloud_base"];?><?php echo $distance;?></td>
+<td style="width:auto;text-align: center;border-left: 5px solid #cccccc;"><?php echo $sky["cloud_cover"];?>%&nbsp;(<?php echo $sky["cloud_oktas"];?>)</td>
 </tr>
 <tr>
 <td style="border:transparent;">10min Rainfall</td>
