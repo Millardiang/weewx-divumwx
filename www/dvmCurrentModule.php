@@ -192,17 +192,18 @@ if ($wind["direction_10m_avg"] <= 11.25) {
 table.current {
   font-family: Arial, Helvetica, sans-serif;
   background-color: transparent;
-  width: 95%;
+  width: 92%;
   text-align: center;
 }
 table.current td, table.current th {
   border:1px solid var(--col-13);
   border-radius:2px;
   padding: 1px 0px;
-column-gap: 20px;
+  column-gap: 20px;
 }
 table.current tbody td {
   font-size: 0.6em;
+  color: var(--col-6);
 }
 </style>
 </head>
@@ -215,11 +216,7 @@ table.current tbody td {
 <span class="todaypopup"><a alt="cloud cover" title="cloud cover" href="dvmhighcharts/cloudCharts.php?chart='cloudcoverplot'&span='weekly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>
 " data-lity><?php echo $menucharticonpage;?> Cloud Cover</a></span>
 </div>
-<span class='moduletitle'><?php echo $lang[
-    "currentModule"
-]; ?> (<valuetitleunit>&deg;<?php echo $temp[
-     "units"
- ]; ?></valuetitleunit>)</span>
+<span class='moduletitle'><?php echo $lang["currentModule"]; ?> (<valuetitleunit>&deg;<?php echo $temp["units"]; ?></valuetitleunit>)</span>
 <div class="updatedtime1">
 <?php $forecastime=filemtime('jsondata/awc.txt');$divumwxwuurl=file_get_contents("jsondata/awc.txt");if(filesize('jsondata/awc.txt')<10){echo $offline;}
 else echo $online,"";echo " ",  date($timeFormat,$forecastime);?>    
