@@ -15,6 +15,7 @@
 ############################################################################################## 
 include('dvmCombinedData.php');
 date_default_timezone_set($TZ);
+
 ?>
 
 <!DOCTYPE html>
@@ -108,27 +109,27 @@ if (empty($lightningBolt[22])) {
 $lightning["unixtimestamp"]           	= $lightningBolt[0]; // unix timestamp
 $lightning["rate_per_min"]            	= $lightningBolt[1]; // current rate/min
 $lightning["close_rate_per_min"]      	= $lightningBolt[2]; // current close rate/min (< 50km)
-$lightning['last_time']      						= $lightningBolt[3]; // last strike date and time
-$lightning["bearing"] 									= $lightningBolt[4]; // Bearing number
-$lightning["bearingx"] 									= $lightningBolt[4]; // Bearing ordinals 
-$lightning["last_distance"]  						= $lightningBolt[5]; // last strike distance 
-$lightning["last_strike_type"]      		= $lightningBolt[6]; // last strike type ( CC+, CC-, CG+, CG- )
-$lightning["hour_strike_count"]     		= $lightningBolt[7]; // strikes last hour
-$lightning["today_strike_count"]  			= $lightningBolt[8]; // strikes today
-$lightning["month_strike_count"]   			= $lightningBolt[9]; // strikes this month
-$lightning["year_strike_count"]    			= $lightningBolt[10]; // strikes this year
-$lightning["max_rate_per_min"]					= $lightningBolt[11]; // max rate/min
-$lightning["max_ratetime"]							= $lightningBolt[12]; // max ratetime (hh:mm)
-$lightning["max_burst"]									= $lightningBolt[13]; // max burst/s
-$lightning["max_burst_time"]						= $lightningBolt[14]; // max bursttime (hh:mm)
-$lightning["CG+_strikes"]								= $lightningBolt[15]; // CG+ strikes today
-$lightning["CG-_strikes"]								= $lightningBolt[16]; // CG- strikes today
-$lightning["CC+_strikes"]								= $lightningBolt[17]; // CC+ strikes today
-$lightning["CC-_strikes"]								= $lightningBolt[18]; // CC- strikes today
-$lightning["uptime"]										= $lightningBolt[19]; // uptime (x days x hours x mins)
-$lightning["unitsx"]										= $lightningBolt[20]; // km or miles (set in config.ini)
-$lightning["persistence"]								= $lightningBolt[21]; // Persistence in minutes set 60 mins
-$lightning["nsdcrop"]										= $lightningBolt[22]; // Max strikes in NSDStrikes file (set to 2000)
+$lightning['last_time']      			= $lightningBolt[3]; // last strike date and time
+$lightning["bearing"] 					= $lightningBolt[4]; // Bearing number
+$lightning["bearingx"] 					= $lightningBolt[4]; // Bearing ordinals 
+$lightning["last_distance"]  			= $lightningBolt[5]; // last strike distance 
+$lightning["last_strike_type"]      	= $lightningBolt[6]; // last strike type ( CC+, CC-, CG+, CG- )
+$lightning["hour_strike_count"]     	= $lightningBolt[7]; // strikes last hour
+$lightning["today_strike_count"]  		= $lightningBolt[8]; // strikes today
+$lightning["month_strike_count"]   		= $lightningBolt[9]; // strikes this month
+$lightning["year_strike_count"]    		= $lightningBolt[10]; // strikes this year
+$lightning["max_rate_per_min"]			= $lightningBolt[11]; // max rate/min
+$lightning["max_ratetime"]				= $lightningBolt[12]; // max ratetime (hh:mm)
+$lightning["max_burst"]					= $lightningBolt[13]; // max burst/s
+$lightning["max_burst_time"]			= $lightningBolt[14]; // max bursttime (hh:mm)
+$lightning["CG+_strikes"]				= $lightningBolt[15]; // CG+ strikes today
+$lightning["CG-_strikes"]				= $lightningBolt[16]; // CG- strikes today
+$lightning["CC+_strikes"]				= $lightningBolt[17]; // CC+ strikes today
+$lightning["CC-_strikes"]				= $lightningBolt[18]; // CC- strikes today
+$lightning["uptime"]					= $lightningBolt[19]; // uptime (x days x hours x mins)
+$lightning["unitsx"]					= $lightningBolt[20]; // km or miles (set in config.ini)
+$lightning["persistence"]				= $lightningBolt[21]; // Persistence in minutes set 60 mins
+$lightning["nsdcrop"]					= $lightningBolt[22]; // Max strikes in NSDStrikes file (set to 2000)
 
 
 		// Bearing
@@ -167,12 +168,18 @@ $lightning["nsdcrop"]										= $lightningBolt[22]; // Max strikes in NSDStrike
 		}else {$lightning["bearingx"]='North';}
 	} 
 
-if ($wind["units"] == "mph"){$lightning["last_distance"] = $lightning["last_distance"] * 0.621371; $lightning["distunit"] = "miles";} else {$lightning["distunit"] = "km";}?>
-
+if ($wind["units"] == "mph"){$lightning["last_distance"] = $lightning["last_distance"] * 0.621371; $lightning["distunit"] = "miles";} else {$lightning["distunit"] = "km";}
+?>
+<style>
+table.lightning {font-family: Arial, Helvetica, sans-serif;border:0px solid transparent;border-radius:2px;border-spacing: 3px;background-color: transparent;width: 75%;height:70%;text-align: center;}
+table.lightning td, table.lightning th {border: 1px solid #000000;padding: 1px 1px;border:1px solid var(--col-13);border-radius:2px;}
+table.lightning tbody td {font-size: 0.6em;color: var(--col-6);}
+table.lightning thead th {font-size: 12px;font-weight: normal;text-align: center;padding: 0px 0px;}
+</style>
 <script src="js/d3.7.9.0.min.js"></script>
-
+<div class="lightning-module" style="display:grid;grid-template-columns: auto auto;">
+<div class="lightning-img">
 <div class="Strikes"></div>
-
 <div class="base">
 <svg id="base" width="50" height="100" viewBox="0 0 88.7 90">
 <g><path fill="grey" d="M57.1,63.4c9.7,1.8,14.8,6.2,11.5,10.3c-3.6,4.5-16,7-27.6,5.6c-10.7-1.3-17-5.5-15.2-9.6c0,0,0,0,0,0 c-4.1,5.1,3.2,10.4,16.2,12c13,1.6,26.9-1.2,30.9-6.3C76.9,70.3,69.8,65,57.1,63.4z"></path></g>
@@ -180,39 +187,54 @@ if ($wind["units"] == "mph"){$lightning["last_distance"] = $lightning["last_dist
 <g><path fill="grey" d="M85.1,71.8c0,8.3-17.3,15-38.7,15c-21.4,0-38.7-6.7-38.7-15c0-4.3,4.7-8.2,12.1-10.9 c-9.4,3-15.5,7.6-15.5,12.7C4.3,82.7,23.2,90,46.5,90s42.2-7.3,42.2-16.4c0-5.3-6.6-10.1-16.8-13.1C80,63.3,85.1,67.3,85.1,71.8 z"></path></g>
 </svg>
 </div>
+</div>
 
+<table class="lightning" style="margin-left:-166px;margin-top:0px;">
+<tbody>
+<thead>
+<tr>
+<th colspan="2"style="border:transparent;">Recorded Strikes</th>
+</tr>
+</thead>
+<tr>
+<td style="border:transparent;">Detected</td>
+<td style="border:transparent;">Distance</td>
+</tr>
+<tr>
+<td style="border-left: 5px solid orange;width:30%;"><?php echo date('d m H:i',$lightning["last_time"]);?></td>
+</td>
+<td style="border-left: 5px solid rgb(121,164,201);width:30%;"><?php echo number_format($lightning["last_distance"],1);?></td>
+</tr>
+<tr>
+<td style="border:transparent;">Last Hour</td>
+<td style="border:transparent;">Month</td>
+</tr>
+<tr>
+<td style="border-left: 5px solid rgb(74,137,92);width:30%;"><?php echo $lightning["hour_strike_count"];?></td>
+<td style="border-left: 5px solid orange;width:30%;"><?php echo $lightning["month_strike_count"];?></td>
+</tr>
+<tr>
+<td style="border:transparent;">Year</td>
+<td style="border:transparent;">Alltime</td>
+</tr>
+<tr>
+<td style="border-left: 5px solid rgb(121,164,201);width:30%;"><?php echo $lightning["year_strike_count"];?></td>
+<td style="border-left: 5px solid rgb(74,137,92);width:30%;"><?php echo $lightning["alltime_strike_count"] + $lightning["year_strike_count"];?></td>
+</tr>
+<?php if ($lightningSource==0){echo
+'<tr>
+<td style="border:transparent;">Bearing</td>
+<td style="border-left: 5px solid rgb(74,137,92);width:30%;">'.$lightning["bearingx"].'&nbsp;'.$lightning["bearing"].'</td></tr>
+<tr>
+</tr>';
+}?>
+
+</tbody>
+</table>
+</div>
+</html>
 
 <script>
-
-	var textFill = "var(--col-6)";
-
-	var source = "<?php echo $lightningSource;?>";
-
-	var month = "<?php echo date('F Y');?>";
-	var year = "<?php echo date('Y');?>";
-
-	var Strikes_last_hour = "<?php echo $lightning["hour_strike_count"];?>";
-	Strikes_last_hour = Strikes_last_hour || 0;
-
-	var Strikes_this_month = "<?php echo $lightning["month_strike_count"];?>";
-	Strikes_this_month = Strikes_this_month || 0;
-
-	var Strikes_this_year = "<?php echo $lightning["year_strike_count"];?>";
-	Strikes_this_year = Strikes_this_year || 0;
-
-	var Alltime_strikes = "<?php echo $lightning["alltime_strike_count"] + $lightning["year_strike_count"];?>";
-
-	var Last_detected = "<?php echo date('jS M H:i',$lightning["last_time"]);?>";
-
-	var Last_distance = "<?php echo number_format($lightning["last_distance"],1);?>";
-	Last_distance = Last_distance || 0;
-
-	var Bearing = "<?php echo $lightning["bearing"];?>";
-  var Bearingx = "<?php echo $lightning["bearingx"];?>";
-  	
-  var Unit = "<?php echo $lightning["distunit"];?>";
-
-
 	var svg = d3.select(".Strikes")
     				.append("svg")
     				//.style("background", "#292E35")
@@ -254,163 +276,8 @@ if ($wind["units"] == "mph"){$lightning["last_distance"] = $lightning["last_dist
 					.duration(250)
 					.attr('fill', "none")
 					.attr('stroke', '#6CA6CD');
-
-		svg.append("text") // Recorded Strikes
-					.attr("x", 150)
-					.attr("y", 22.5)
-					.style("fill", textFill)
-					.style("font-family", "Helvetica")
-					.style("font-size", "12px")
-					.style("text-anchor", "middle")
-					.style("font-weight", "normal")
-					.text("Recorded Strikes");
-
-		svg.append("text") // Last 1 hour
-					.attr("x", 130)
-					.attr("y", 45)
-					.style("fill", textFill)
-					.style("font-family", "Helvetica")
-					.style("font-size", "10px")
-					.style("text-anchor", "left")
-					.style("font-weight", "normal")
-					.text("Last Hour");
-
-		var data = ["Total "+month+" "+"-"+Strikes_this_month];
-
-		var text = svg.selectAll(null)
-  					.data(data)
-  					.enter() 
-  					.append("text")
-  					.attr("x", 130)
-  					.attr("y", function(d, i) {
-    				return 60 + i * 60
-  					})
-  					.style("fill", textFill)
-  					.style("font-family", "Helvetica")
-  					.style("font-size", "10px")
-  					.style("text-anchor", "left")
-  					.style("font-weight", "normal")
-  					.text(function(d) {
-    				return d.split("-")[0]
-  					})
-  					.append("tspan")
-  					.style("fill", "#ff964f")
-  					.text(function(d) {
-    				return d.split("-")[1]
-  					})
-
-		svg.append("text") // Year
-					.attr("x", 130)
-					.attr("y", 75)
-					.style("fill", textFill)
-					.style("font-family", "Helvetica")
-					.style("font-size", "10px")
-					.style("text-anchor", "left")
-					.style("font-weight", "normal")
-					.text("Total"+" "+year);
-
-		svg.append("text") // Alltime
-					.attr("x", 130)
-					.attr("y", 90)
-					.style("fill", textFill)
-					.style("font-family", "Helvetica")
-					.style("font-size", "10px")
-					.style("text-anchor", "left")
-					.style("font-weight", "normal")
-					.text("All-time Strike Total");
-
-		svg.append("text") // Last detected strike time
-					.attr("x", 130)
-					.attr("y", 105)
-					.style("fill", textFill)
-					.style("font-family", "Helvetica")
-					.style("font-size", "10px")
-					.style("text-anchor", "left")
-					.style("font-weight", "normal")
-					.text("Last Detected");
-
-		svg.append("text") // Last Distance
-					.attr("x", 130)
-					.attr("y", 120)
-					.style("fill", textFill)
-					.style("font-family", "Helvetica")
-					.style("font-size", "10px")
-					.style("text-anchor", "left")
-					.style("font-weight", "normal")
-					.text("Distance @");
-
-	// Begin color Text output
-   	svg.append("text") // Last 1 hour
-             	.attr("x", 177)
-            	.attr("y", 45)
-            	.style("fill", "#ff964f")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "10px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-   				.text(Strikes_last_hour);
-
-	svg.append("text") // Year
-             	.attr("x", 182)
-            	.attr("y", 75)
-            	.style("fill", "#ff964f")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "10px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-				.text(Strikes_this_year);
-
-	svg.append("text") // Alltime
-             	.attr("x", 220)
-            	.attr("y", 90)
-            	.style("fill", "#ff964f")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "10px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-				.text(Alltime_strikes);
-
-	svg.append("text") // Last detected strike time
-             	.attr("x", 197)
-            	.attr("y", 105)
-            	.style("fill", "#ff964f")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "10px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-				.text(Last_detected);
-
-	svg.append("text") // Last Distance
-             	.attr("x", 185)
-            	.attr("y", 120)
-            	.style("fill", "#ff964f")
-            	.style("font-family", "Helvetica")
-            	.style("font-size", "10px")
-            	.style("text-anchor", "left")
-            	.style("font-weight", "normal")
-				.text(Last_distance+" "+Unit);
-
-	if (source == 0) {
-
-	svg.append("text") // Last Bearing
-				.attr("x", 130)
-				.attr("y", 135)
-				.style("fill", textFill)
-				.style("font-family", "Helvetica")
-				.style("font-size", "10px")
-				.style("text-anchor", "left")
-				.style("font-weight", "normal")
-				.text("Bearing");
-
-    svg.append("text") // Last Bearing
-				.attr("x", 169)
-				.attr("y", 135)
-				.style("fill", "#2e8b57")
-				.style("font-family", "Helvetica")
-				.style("font-size", "10px")
-				.style("text-anchor", "left")
-				.style("font-weight", "normal")
-				.text(Bearing+"¡Æ"+" "+Bearingx);
-	}
 </script>
-</html>
+
+
+
+
