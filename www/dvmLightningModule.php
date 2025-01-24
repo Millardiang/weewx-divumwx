@@ -166,7 +166,7 @@ $lightning["nsdcrop"]										= $lightningBolt[22]; // Max strikes in NSDStrike
 			$lightning["bearingx"]='NNW';
 		}else {$lightning["bearingx"]='North';}
 	} 
-if ($wind["units"] == "mph"){$lightning["last_distance"] = $lightning["last_distance"] * 0.621371; $lightning["distunit"] = "miles";} else {$lightning["distunit"] = "km";}?>
+if ($wind["units"] == "mph"){$lightning["last_distance"] = $lightning["last_distance"] * 0.621371; $lightning["distunit"] = "mi";} else {$lightning["distunit"] = "km";}?>
 
 <script src="js/d3.7.9.0.min.js"></script>
 <style>
@@ -204,7 +204,7 @@ table.lightning tbody td {
 <td style="border:transparent;">Distance</td>
 </tr>
 <tr>
-<td><?php echo date('jS M H:i',$lightning["last_time"]);?></td>
+<td><?php echo date('j-m-y H:i',$lightning["last_time"]);?></td>
 <td><?php echo number_format($lightning["last_distance"],1);?></td>
 </tr>
 <tr>
