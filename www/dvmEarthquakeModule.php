@@ -30,11 +30,11 @@ $depth          = round($depthraw, 1);
 $time           = $parsed_json['features'][0]['properties']['time'];
 $lati           = $parsed_json['features'][0]['properties']['lat'];
 $longi          = $parsed_json['features'][0]['properties']['lon'];
-$eventime       = date("H:i:s j M y", strtotime($time) );
+$eventime       = date("H:i:s", strtotime($time) );
 $eqdist         = round(distance($lat, $lon, $lati, $longi), 1) ;
 
-$eqdist; if ($wind["units"] == 'mph') {$eqdist = round(distance($lat, $lon, $lati, $longi) * 0.621371, 1) ." miles";
-} else {$eqdist = round(distance($lat, $lon, $lati, $longi), 1)." km";}
+$eqdist; if ($wind["units"] == 'mph') {$eqdist = round(distance($lat, $lon, $lati, $longi) * 0.621371, 1) ."mi";
+} else {$eqdist = round(distance($lat, $lon, $lati, $longi), 1)."km";}
 $eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $lati, $longi), 1) ."<smallrainunit>&nbsp;km";
 } else {$eqdista = round(distance($lat, $lon, $lati, $longi) * 0.621371, 1)."<smallrainunit>&nbsp;miles";} 
 ?>
@@ -48,8 +48,8 @@ table.earthquake {
   border-spacing:0.35em;
 }
 table.earthquake td {
-  border: 1px solid var(--col-13);border-radius:2px;;
-  padding: 3px 2px;
+  border: 1px solid var(--col-13);border-radius:2px;
+  padding: 1px 1px;
 }
 table.earthquake tbody td {
   font-size: 10px;
@@ -65,27 +65,27 @@ table.earthquake tbody td {
 
 <div class= "updatedtime1"><span><?php if(file_exists('jsondata/eq.txt')&&time() - filemtime('jsondata/eq.txt')>3600) echo $offline. '<offline> Offline </offline>';else echo $online," ",date($timeFormat, filemtime('jsondata/eq.txt'));?></span></div>
 
-<script src="js/d3.7.9.0.min.js"></script>
+
 <div class="earthquake-title" style="font-size:10px;"><?php echo $eqtitle;?></div>
 <div class="earthquake-module" style="display:grid;grid-template-columns: auto auto;">
-<div class="quakes" style="top:-20px;margin-left:-10px;"></div>
-<div class="earthquake-table" style="margin-top:10px;margin-left:-30px;">
+<div class="quakes" style="top:-25px;margin-left:-10px;"></div>
+<div class="earthquake-table" style="margin-top:17px;margin-left:-30px;">
 <table class="earthquake">
 <tbody>
 <tr>
-<td style="border: transparent;">Time and Date</td>
+<td style="border: transparent;">Time</td>
 <td style="border: transparent;">Depth</td>
 </tr>
 <tr>
-<td style="border-left: 5px solid grey;"><?php echo $eventime;?></td>
-<td style="border-left: 5px solid teal;"><?php echo $depth;?>km</td>
+<td style="border-left: 5px solid <?php echo $magnitudeColor;?>;"><?php echo $eventime;?></td>
+<td style="border-left: 5px solid <?php echo $magnitudeColor;?>;"><?php echo $depth;?>km</td>
 </tr>
 <tr>
-<td style="border: transparent;">Epicenter Distance</td>
+<td style="border: transparent;">Epicenter</td>
 <td style="border: transparent;">Category</td>
 </tr>
 <tr>
-<td style="border-left: 5px solid #efaad8;"><?php echo $eqdist;?></td>
+<td style="border-left: 5px solid <?php echo $magnitudeColor;?>;"><?php echo $eqdist;?></td>
 <td style="border-left: 5px solid <?php echo $magnitudeColor;?>;"><?php echo $category;?></td>
 </tr>
 </tbody>
@@ -94,7 +94,7 @@ table.earthquake tbody td {
 </div>
 </html>
 
-
+<script src="js/d3.7.9.0.min.js"></script>
 
 <script>
 

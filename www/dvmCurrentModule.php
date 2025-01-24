@@ -44,9 +44,9 @@ $snow = $parsed_visibility['response'][0]['periods'][0]['snowIN'];
 }
 
 if ($windunit == 'mph') {
-$visibility = round($parsed_visibility['response'][0]['periods'][0]['visibilityMI'],0,PHP_ROUND_HALF_UP)." miles";
+$visibility = round($parsed_visibility['response'][0]['periods'][0]['visibilityMI'],0,PHP_ROUND_HALF_UP)."mi";
 } else {
-$visibility = round($parsed_visibility['response'][0]['periods'][0]['visibilityKM'],0,PHP_ROUND_HALF_UP)." km";
+$visibility = round($parsed_visibility['response'][0]['periods'][0]['visibilityKM'],0,PHP_ROUND_HALF_UP)."km";
 }
 $sky["cloud_cover"] = $parsed_visibility['response'][0]['periods'][0]['sky'];
         
