@@ -192,7 +192,7 @@ if ($wind["direction_10m_avg"] <= 11.25) {
 table.current {
   font-family: Arial, Helvetica, sans-serif;
   background-color: transparent;
-  width: 92%;
+  width: 94%;
   text-align: center;
 }
 table.current td, table.current th {
