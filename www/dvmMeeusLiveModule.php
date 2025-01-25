@@ -1,0 +1,2309 @@
+<?php
+include('dvmCombinedData.php');
+
+if($theme==="light"){ echo "<body style='background-color:e0eafb'>";}
+else if($theme==="dark"){ echo "<body style='background-color:#292E35'>";}
+if($theme==="light"){ $textColor = "#1c4263";}
+else if($theme==="dark"){ $textColor = "silver";}
+##############################################################################################
+#        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
+#       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    #
+#       (.  ___  :)||  |\   \  //  / |   (  ) : | \   \  //   |  |'  /    \:  | \   \  /     #
+#       |: \   ) |||:  | \\  \/. ./  (:  |  | . ) /\\  \/.    |  |: /'        |  \\  \/      #
+#       (| (___\ |||.  |  \.    //    \\ \__/ // |: \.        |   \//  /\'    |  /\.  \      #
+#       |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \     #
+#       (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|    #
+#                                                                                            #
+#     Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      #
+#      Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.       #
+#    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
+#                    https://github.com/Millardiang/weewx-divumwx/issues                     #
+##############################################################################################
+?>
+<!DOCTYPE html> 
+<html lang="en">
+<head> 
+<meta charset="utf-8">
+<title>Meeus Live</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body> 
+<div style="position:relative; top:10px;display:flex;justify-content:center;align-items:center;font-family:Helvetica;">
+<?php
+if($theme==="light"){echo "<font color='#1c4263'>"."Geocentric Live Meeus Calculation"."</font>";}
+else if($theme==="dark"){echo "<font color='silver'>"."Geocentric Live Meeus Calculation"."</font>";}
+?>
+</div>
+<style>
+.meeus{display:flex;justify-content:center;align-items:center;margin-top:20px;margin-left:0px;
+text{fill:<?php if($theme==="light"){echo "#1c4263";} else if($theme==="dark"){echo "silver";}?>;font-family:Helvetica;font-size:7.5px;}
+.axis path{stroke:<?php if($theme==="light"){echo "#1c4263";} else if($theme==="dark"){echo "#555";}?>;stroke-width:1;fill:none;}
+.axis line{stroke:<?php if($theme==="light"){echo "#1c4263";} else if($theme==="dark"){echo "#555";}?>;stroke-width:1;fill:none;} 
+.horiz.line{stroke:#007fff;stroke-width:1;fill:none;}
+.zen.line{stroke:#2e8b57;stroke-width:1;fill:none;}}
+.output{display:flex;justify-content:center;align-items:center;margin-top:0px;margin-left:10px;}
+.moonx{display:flex;justify-content:center;align-items:center;margin-top:-565px;margin-left:520px;}
+</style>
+<script src="js/d3.7.9.0.min.js"></script>
+<div class="meeus"></div>
+<div class="output"></div>
+<div class="moonx">
+<div class="moonphaze"></div>
+</div>
+<script>
+
+// text color
+var tcolor = "<?php echo $textColor;?>";
+
+// Math functions
+function toDegrees(x) {
+  return x * (180.0 / Math.PI);
+}
+
+function toRadians(x) {
+  return x * (Math.PI / 180.0);
+}
+
+function constrain(x) {
+    let t = x % 360;
+    if(t < 0) {
+      t += 360;
+    }
+  return t;  
+}
+
+function skynet(tiktok) {
+    if (tiktok < 10) {
+      tiktok = '0' + tiktok;
+    }
+  return tiktok;
+} 
+
+function nan(x) {
+  if (isNaN(x)) {
+    return 180.0;
+  }
+  return x;
+}
+
+    var dx = new Date();
+    var start = new Date(dx.getUTCFullYear(), 0, 0);
+    var diff = dx - start + (start.getTimezoneOffset() - dx.getTimezoneOffset()) * 60 * 1000;
+    var Day = 1000 * 60 * 60 * 24;
+    var day = Math.floor(diff / Day); // elapsed days since the beginning of the year
+
+    var delta = dx.getUTCFullYear() - 1949;   
+    var leap = delta / 4;
+
+    // Timezone as a text
+    var TZ = Intl.DateTimeFormat().resolvedOptions().timeZone; // example Europe/Berlin
+
+    // Establish UT Decimal time for the Sun Calculation
+    var UT = (dx.getUTCHours() + dx.getUTCMinutes() / 60 + dx.getUTCSeconds() / 3600.0 + dx.getUTCMilliseconds() / 86400);
+
+    // Your latitude and longitude comes from weewx dvmCombinedData.php
+    var latitude = <?php echo $lat;?>;
+    var longitude = <?php echo $lon;?>;
+
+    // Your Location, Do you live in the Northern or Southern Hemisphere ?
+    var hemisphere;
+    if (latitude > 0.0) {
+      <?php echo "hemisphere = 0";?>;
+    } 
+     else {
+      <?php echo "hemisphere = 1";?>;
+    }
+
+    // Establish Julian date and jd 2451545.0 (noon, 1 January 2000)
+    var jd = 32916.5 + delta * 365 + leap + day + UT / 24;
+    // centuries
+    var t = jd - 51545;
+
+    // Establish Ecliptic coordinates (Sun)  
+    // Sun's Mean longitude
+    var mnlong = constrain(280.460 + 0.9856474 * t);
+    // Sun's Mean anomaly
+    var mnanom = toRadians(constrain(357.528 + 0.9856003 * t));
+    // Sun's Ecliptic longitude 
+    var eclong = toRadians(constrain(mnlong + 1.915 * Math.sin(mnanom) + 0.020 * Math.sin(2 * mnanom)));
+    // Obliquity of ecliptic
+    var oblqec = toRadians(23.439 - 0.0000004 * t);
+
+    // Establish Celestial coordinates (Sun)     
+    var num = Math.cos(oblqec) * Math.sin(eclong);
+    var den = Math.cos(eclong);
+    var Ra = Math.atan(num / den);
+
+    // Sun Right Ascension
+    if (den < 0) {
+        Ra = Ra + Math.PI;
+    } else if (num < 0) {
+        Ra = Ra + 2 * Math.PI;
+    }
+    // Sun Declination
+    var Dec = Math.asin(Math.sin(oblqec) * Math.sin(eclong));
+
+    // Establish Local coordinates
+
+    // Greenwich mean sidereal time
+    var gmst = (6.697375 + 0.0657098242 * t + UT);
+    // re-evaluate gmst so it stays within the domain 0 to 24.
+        var gmst = gmst % 24;
+          if (gmst < 0) {
+            var gmst = gmst + 24;
+          }
+
+    // Local mean sidereal time 
+    var lmst = (gmst + longitude / 15);
+    // re-evaluate gmst so it stays within the domain 0 to 24.
+        var lmst = lmst % 24;
+          if (lmst < 0) {
+            var lmst = lmst + 24;
+          }
+
+    var Lmst = toRadians(15 * lmst);
+
+    // Sun Hour angle
+    var Ha = (Lmst - Ra) % (2 * Math.PI);
+
+    // Sun Altitude
+    var alt = Math.asin(Math.sin(Dec) * Math.sin(toRadians(latitude)) + Math.cos(Dec) * Math.cos(toRadians(latitude)) * Math.cos(Ha));
+
+    // Sun Azimuth
+    var azi = Math.asin( - Math.cos(Dec) * Math.sin(Ha) / Math.cos(alt));
+
+    if (Math.sin(Dec) - Math.sin(alt) * Math.sin(toRadians(latitude)) < 0) {
+        azi = Math.PI - azi;
+    } else if (Math.sin(azi) < 0) {
+        azi += 2 * Math.PI;
+    }
+
+    // start Moon calculation
+
+    // Universal Time variables
+    // Selected epoch constants for January 2010, 00:00:00
+
+    var epochDays = 2455196.5;          // JD at selected epoch
+    var εg = 279.557208;                // Sun's mean ecliptic longitude
+    var ωg = 283.112438;                // Longitude of the Sun at perigee
+    var eccSunEarth = 0.016705;         // Eccentricity of the Sun-Earth orbit
+    var l0 = 91.929336;                 // Moon's mean longitude at epoch
+    var P0 = 130.143076;                // Mean longitude of the perigee at epoch
+    var N0 = 291.682547;                // Mean longitude of the node at epoch
+    var iMoon = 5.145396;               // Inclination of Moon's orbit
+    var eMoon = 0.0549;                 // Eccentricity of the Moon's orbit
+    var aMoon = 384401;                 // Semi-major axis of Moon's orbit
+    var θ0Moon = 0.5181;                // Moon's angular diameter at distance a from Earth
+    var π0Moon = 0.9507;                // Moon's parallax at distance a from Earth
+    
+    // Establish current time
+    var dayCurrent = dx.getUTCDate();
+    var monthCurrent = dx.getUTCMonth() + 1;
+    var yearCurrent = dx.getUTCFullYear();
+    var hourCurrent = dx.getUTCHours();
+    var minuteCurrent = dx.getUTCMinutes();
+    var secondCurrent = dx.getUTCSeconds();
+    var millisecondCurrent = dx.getUTCMilliseconds();   
+    var timezoneOffset = dx.getTimezoneOffset() / 60;
+    var UTCString = dx.toUTCString();
+    
+    // Julian date
+    var dayJulian = dayCurrent + ((hourCurrent * 3600 + minuteCurrent * 60 + secondCurrent + millisecondCurrent / 1000) / 86400);
+    
+    if (monthCurrent <= 2) {
+      var monthJulian = monthCurrent + 12;
+      var yearJulian = yearCurrent - 1;
+    }
+    else {
+      var monthJulian = monthCurrent;
+      var yearJulian = yearCurrent;
+    }
+    
+    // Assuming the date is after the start of the Gregorian calendar (15/10/1582)
+    var valueA = Math.floor(yearJulian / 100);
+    var valueB = 2 - valueA + Math.floor(valueA / 4);
+    
+    var valueC = Math.floor(365.25 * yearJulian);
+    var valueD = Math.floor(30.6001 * (monthJulian + 1));
+
+    // Establish JD
+    var JD = valueB + valueC + valueD + dayJulian + 1720994.5;
+    // Centuries
+    var T = (JD - 2451545) / 36525.0;
+
+    // Establish current Moon age in days
+    var daysPerLunarMonth = 29.530588853;
+    var f = ((JD - 2451550.1) / daysPerLunarMonth) % 1;
+    f = (f < 0) ? f + 1 : f;
+    var m_days = f * daysPerLunarMonth - 0.385;
+
+// Establish current Moon Distance using ELP82 Table class
+// Establish current Sun Distance using ELP82 Table class
+// Establish current Moon Illumination in % using ELP82 Table class
+// The moon's latitude and longitude is also calculated but not needed for final output
+Lat = latitude;
+Lon = longitude; 
+var ELP82 = class ELP82 {
+    // Chapront ELP2000/82 truncated implementation from Meeus
+    static elp82(T) {
+        // Sun's mean longitude
+        const Lp = ELP82.toRadians(constrain(218.3164477 + 481267.88123421 * T 
+          - 0.0015786 * T * T + 1.0 / 538841.0 * T * T * T 
+          - 1.0 / 65194000.0 * T * T * T * T));
+        // Mean elongation of the Moon
+        const D = ELP82.toRadians(constrain(297.8501921 + 445267.1114034 * T 
+          - 0.0018819 * T * T + 1.0 / 545868.0 * T * T * T 
+          - 1.0 / 113065000.0 * T * T * T * T));
+        // Sun's mean anomaly
+        const M = ELP82.toRadians(constrain(357.5291092 + 35999.0502909 * T 
+          - 0.0001536 * T * T + 1.0 / 24490000.0 * T * T * T));
+        // Moon's mean anomaly
+        const Mp = ELP82.toRadians(constrain(134.9633964 + 477198.8675055 * T 
+          + 0.0087414 * T * T + 1.0 / 69699.0 * T * T * T 
+          - 1.0 / 14712000.0 * T * T * T * T));
+        // Moon's argument of latitude (mean distance of the moon from it's ascending node)
+        const F = ELP82.toRadians(constrain(93.2720950 + 483202.0175233 * T 
+          - 0.0036539 * T * T - 1.0 / 3526000.0 * T * T * T 
+          + 1.0 / 863310000.0 * T * T * T * T));
+        // moon's argument of longitude of it's ascending node
+        const Ω = ELP82.toRadians(constrain(125.04452 - (1934.136261 * T) 
+          + (0.0020708 * T * T) + (T * T * T) / 450000));
+        // Earth's eccentricity of its orbit around the Sun
+        const E = 1 - 0.002516 * T - 0.0000074 * T * T;
+        // further arguments
+        const A1 = ELP82.toRadians(constrain(119.75 + 131.849 * T));
+        const A2 = ELP82.toRadians(constrain(53.09 + 479264.290 * T));
+        const A3 = ELP82.toRadians(constrain(313.45 + 481266.484 * T));
+
+        const LongitudeRadius = [ 
+           // D   M  Mp   F    Long     Radius
+            [ 0,  0,  1,  0,  6288774, -20905335 ], 
+            [ 2,  0, -1,  0,  1274027,  -3699111 ], 
+            [ 2,  0,  0,  0,   658314,  -2955968 ], 
+            [ 0,  0,  2,  0,   213618,   -569925 ], 
+            [ 0,  1,  0,  0,  -185116,     48888 ], 
+            [ 0,  0,  0,  2,  -114332,     -3149 ], 
+            [ 2,  0, -2,  0,    58793,    246158 ], 
+            [ 2, -1, -1,  0,    57066,   -152138 ], 
+            [ 2,  0,  1,  0,    53322,   -170733 ], 
+            [ 2, -1,  0,  0,    45758,   -204586 ], 
+            [ 0,  1, -1,  0,   -40923,   -129620 ], 
+            [ 1,  0,  0,  0,   -34720,    108743 ], 
+            [ 0,  1,  1,  0,   -30383,    104755 ], 
+            [ 2,  0,  0, -2,    15327,     10321 ], 
+            [ 0,  0,  1,  2,   -12528,         0 ], 
+            [ 0,  0,  1, -2,    10980,     79661 ], 
+            [ 4,  0, -1,  0,    10675,    -34782 ], 
+            [ 0,  0,  3,  0,    10034,    -23210 ], 
+            [ 4,  0, -2,  0,     8548,    -21636 ], 
+            [ 2,  1, -1,  0,    -7888,     24208 ], 
+            [ 2,  1,  0,  0,    -6766,     30824 ], 
+            [ 1,  0, -1,  0,    -5163,     -8379 ], 
+            [ 1,  1,  0,  0,     4987,    -16675 ], 
+            [ 2, -1,  1,  0,     4036,    -12831 ], 
+            [ 2,  0,  2,  0,     3994,    -10445 ], 
+            [ 4,  0,  0,  0,     3861,    -11650 ], 
+            [ 2,  0, -3,  0,     3665,     14403 ], 
+            [ 0,  1, -2,  0,    -2689,     -7003 ], 
+            [ 2,  0, -1,  2,    -2602,         0 ], 
+            [ 2, -1, -2,  0,     2390,     10056 ], 
+            [ 1,  0,  1,  0,    -2348,      6322 ], 
+            [ 2, -2,  0,  0,     2236,     -9884 ], 
+            [ 0,  1,  2,  0,    -2120,      5751 ], 
+            [ 0,  2,  0,  0,    -2069,         0 ], 
+            [ 2, -2, -1,  0,     2048,     -4950 ], 
+            [ 2,  0,  1, -2,    -1773,      4130 ], 
+            [ 2,  0,  0,  2,    -1595,         0 ], 
+            [ 4, -1, -1,  0,     1215,     -3958 ], 
+            [ 0,  0,  2,  2,    -1110,         0 ], 
+            [ 3,  0, -1,  0,     -892,      3258 ], 
+            [ 2,  1,  1,  0,     -810,      2616 ], 
+            [ 4, -1, -2,  0,      759,     -1897 ], 
+            [ 0,  2, -1,  0,     -713,     -2117 ], 
+            [ 2,  2, -1,  0,     -700,      2354 ], 
+            [ 2,  1, -2,  0,      691,         0 ], 
+            [ 2, -1,  0, -2,      596,         0 ], 
+            [ 4,  0,  1,  0,      549,     -1423 ], 
+            [ 0,  0,  4,  0,      537,     -1117 ], 
+            [ 4, -1,  0,  0,      520,     -1571 ], 
+            [ 1,  0, -2,  0,     -487,     -1739 ], 
+            [ 2,  1,  0, -2,     -399,         0 ], 
+            [ 0,  0,  2, -2,     -381,     -4421 ], 
+            [ 1,  1,  1,  0,      351,         0 ], 
+            [ 3,  0, -2,  0,     -340,         0 ], 
+            [ 4,  0, -3,  0,      330,         0 ], 
+            [ 2, -1,  2,  0,      327,         0 ], 
+            [ 0,  2,  1,  0,     -323,      1165 ], 
+            [ 1,  1, -1,  0,      299,         0 ], 
+            [ 2,  0,  3,  0,      294,         0 ], 
+            [ 2,  0, -1, -2,        0,      8752 ] 
+        ]; 
+
+        const Latitude = [ 
+            [ 0,  0,  0,  1, 5128122 ], 
+            [ 0,  0,  1,  1,  280602 ], 
+            [ 0,  0,  1, -1,  277693 ], 
+            [ 2,  0,  0, -1,  173237 ], 
+            [ 2,  0, -1,  1,   55413 ], 
+            [ 2,  0, -1, -1,   46271 ], 
+            [ 2,  0,  0,  1,   32573 ], 
+            [ 0,  0,  2,  1,   17198 ], 
+            [ 2,  0,  1, -1,    9266 ], 
+            [ 0,  0,  2, -1,    8822 ], 
+            [ 2, -1,  0, -1,    8216 ], 
+            [ 2,  0, -2, -1,    4324 ], 
+            [ 2,  0,  1,  1,    4200 ], 
+            [ 2,  1,  0, -1,   -3359 ], 
+            [ 2, -1, -1,  1,    2463 ], 
+            [ 2, -1,  0,  1,    2211 ], 
+            [ 2, -1, -1, -1,    2065 ], 
+            [ 0,  1, -1, -1,   -1870 ], 
+            [ 4,  0, -1, -1,    1828 ], 
+            [ 0,  1,  0,  1,   -1794 ], 
+            [ 0,  0,  0,  3,   -1749 ], 
+            [ 0,  1, -1,  1,   -1565 ], 
+            [ 1,  0,  0,  1,   -1491 ], 
+            [ 0,  1,  1,  1,   -1475 ], 
+            [ 0,  1,  1, -1,   -1410 ], 
+            [ 0,  1,  0, -1,   -1344 ], 
+            [ 1,  0,  0, -1,   -1335 ], 
+            [ 0,  0,  3,  1,    1107 ], 
+            [ 4,  0,  0, -1,    1021 ], 
+            [ 4,  0, -1,  1,     833 ], 
+            [ 0,  0,  1, -3,     777 ], 
+            [ 4,  0, -2,  1,     671 ], 
+            [ 2,  0,  0, -3,     607 ], 
+            [ 2,  0,  2, -1,     596 ], 
+            [ 2, -1,  1, -1,     491 ], 
+            [ 2,  0, -2,  1,    -451 ], 
+            [ 0,  0,  3, -1,     439 ], 
+            [ 2,  0,  2,  1,     422 ], 
+            [ 2,  0, -3, -1,     421 ], 
+            [ 2,  1, -1,  1,    -366 ], 
+            [ 2,  1,  0,  1,    -351 ], 
+            [ 4,  0,  0,  1,     331 ], 
+            [ 2, -1,  1,  1,     315 ], 
+            [ 2, -2,  0, -1,     302 ], 
+            [ 0,  0,  1,  3,    -283 ], 
+            [ 2,  1,  1, -1,    -229 ], 
+            [ 1,  1,  0, -1,     223 ], 
+            [ 1,  1,  0,  1,     223 ], 
+            [ 0,  1, -2, -1,    -220 ], 
+            [ 2,  1, -2, -1,    -220 ], 
+            [ 1,  0,  1,  1,    -185 ], 
+            [ 2, -1, -2, -1,     181 ], 
+            [ 0,  1,  2,  1,    -177 ], 
+            [ 4,  0, -2, -1,     176 ], 
+            [ 4, -1, -1, -1,     166 ], 
+            [ 1,  0,  1, -1,    -164 ], 
+            [ 4,  0,  1, -1,     132 ], 
+            [ 1,  0, -1, -1,    -119 ], 
+            [ 4, -1,  0, -1,     115 ], 
+            [ 2, -2,  0,  1,     107 ] 
+        ]; 
+
+        let Lon = 0;
+        let Radius = 0;
+        for(let i = 0; i < LongitudeRadius.length; i++) {
+            const t = LongitudeRadius[i];
+            const a = D * t[0] + M * t[1] + Mp * t[2] + F * t[3];
+
+            let e = 1;
+            if(t[1] == 1 || t[1] == -1){e = E;}
+            if(t[1] == 2 || t[1] == -2){e = E * E;}
+
+            Lon += e * t[4] * Math.sin(a);
+            Radius += e * t[5] * Math.cos(a);
+        }
+
+        let Lat = 0;
+        for(let i = 0; i < Latitude.length; i++) {
+            const t = Latitude[i];
+            const a = D * t[0] + M * t[1] + Mp * t[2] + F * t[3];
+
+            let e = 1;
+            if(t[1] == 1 || t[1] == -1){e = E;}
+            if(t[1] == 2 || t[1] == -2){e = E * E;}
+
+            Lat += e * t[4] * Math.sin(a);
+        }
+
+        const aLon = 3958 * Math.sin(A1) + 1962 * Math.sin(Lp - F) + 318 * Math.sin(A2);
+        const aLat = -2235 * Math.sin(Lp) + 382 * Math.sin(A3) + 175 * Math.sin(A1 - F) 
+        + 175 * Math.sin(A1 + F) + 127 * Math.sin(Lp - Mp) - 115 * Math.sin(Lp + Mp);
+
+        Lon = toDegrees(Lp) + (Lon + aLon) / 1000000;
+        Radius = 385000.56 + Radius / 1000;
+        Lat = (Lat + aLat) / 1000000;
+
+        // Selenocentric elongation of the Earth from the Sun "The phase angle (i)"
+        const i = toRadians(constrain(180 - D * 180 / Math.PI - 6.289 * Math.sin(Mp) 
+        + 2.1 * Math.sin(M) - 1.274 * Math.sin(2 * D - Mp) - 0.658 * Math.sin(2 * D) 
+        - 0.214 * Math.sin(2 * Mp) - 0.11 * Math.sin(D)));
+
+        // moon Illumination
+        const K = (1 + Math.cos(i)) / 2;
+        // Sun distance
+        const S = (1.00014 - 0.01671 * Math.cos(M) - 0.00014 * Math.cos(2 * M));
+
+        // mean obliquity
+        const ε0 = 23.43929 - (0.01300417 * T) - (0.0000001638889 * T * T) - (0.0000005036111 * T * T * T);
+        // obliquity nutation
+        const Δε = 0.0026 * Math.cos(125.0 - 0.05295 * T) + 0.0002 * Math.cos(200.9 + 1.97129 * T);
+        // true obliquity
+        const ε = ε0 + Δε;
+
+        return [Lon, Radius, Lat, K, S, ε];
+    }
+static constrain(d) {
+        let t = d;
+        t = t % 360;
+        if (t < 0) {
+        t += 360;
+        }
+        return t;
+    }
+static toRadians(x) {
+  return x * (Math.PI / 180.0);
+ }
+}
+var value = ELP82.elp82(T);
+// Moon distance in km
+const Rm = value[1];
+// Illumination in %
+const perc = value[3] * 100;
+// Sun distance in km
+const Rs = value[4] * 1.496e+8;
+
+const Δ = value[5];
+
+var moonphase;
+    if (perc > 2 && perc < 48 && m_days < 15) {
+        moonphase = "<?php echo "Waxing Crescent";?>";
+    } else if (perc >= 48 && perc <= 52 && m_days < 15) { 
+        moonphase = "<?php echo "First Quarter";?>";
+    } else if (perc > 52 && perc < 98 && m_days < 15) {
+        moonphase = "<?php echo "Waxing Gibbous";?>";
+    } else if (perc >= 98) {
+        moonphase = "<?php echo "Full Moon";?>"; 
+    } else if (perc < 98 && perc > 52 && m_days > 14) {
+        moonphase = "<?php echo "Waning Gibbous";?>";
+    } else if (perc >= 48 && perc <= 52 && m_days > 14) { 
+        moonphase = "<?php echo "Last Quarter";?>"; 
+    } else if (perc < 48 && perc > 2 && m_days > 14) {
+        moonphase = "<?php echo "Waning Crescent";?>";
+    } else {
+        moonphase = "<?php echo "New Moon";?>";
+    }
+
+      // Convert Julian day to the adopted epoch
+      var daysSinceEpoch = JD - epochDays;
+          
+      // Convert UT to Greenwich Mean Sidereal Time, GMST
+      var DateAt0h = new Date(yearCurrent, monthCurrent - 1, dayCurrent, - timezoneOffset, 0, 0, 0);
+
+      var dayCurrentAt0h = DateAt0h.getUTCDate();
+      var monthCurrentAt0h = DateAt0h.getUTCMonth() + 1;
+      var yearCurrentAt0h = DateAt0h.getUTCFullYear();
+      var hourCurrentAt0h = DateAt0h.getUTCHours();
+      var minuteCurrentAt0h = DateAt0h.getUTCMinutes();
+      var secondCurrentAt0h = DateAt0h.getUTCSeconds();
+      var millisecondCurrentAt0h = DateAt0h.getUTCMilliseconds();
+      var timezoneOffsetAt0h = DateAt0h.getTimezoneOffset() / 60;
+      var UTCStringAt0h = DateAt0h.toUTCString();
+      
+      // Convert JDAt0h to Julian Day
+      var dayJulianAt0h = dayCurrentAt0h + ((hourCurrentAt0h * 3600 + minuteCurrentAt0h * 60 + secondCurrentAt0h + millisecondCurrentAt0h / 1000) / 86400);
+
+      if (monthCurrentAt0h <= 2) {
+        var monthJulianAt0h = monthCurrentAt0h + 12;
+        var yearJulianAt0h = yearCurrentAt0h - 1;
+      }
+      else {
+        var monthJulianAt0h = monthCurrentAt0h;
+        var yearJulianAt0h = yearCurrentAt0h;
+      }
+      
+      // Assuming the date is after the start of the Gregorian calendar (15/10/1582)
+      var JDAt0h = valueB + valueC + valueD + dayJulianAt0h + 1720994.5;
+      
+      var valueS = JDAt0h - 2451545;
+      var valueT = valueS / 36525;
+      
+      var valueT0 = 6.697374558 + (2400.051336 * valueT) + (0.000025862 * valueT * valueT);
+        // re-evaluate valueT0 so it stays within the domain 0 to 24.
+        var valueT0 = valueT0 % 24;
+          if (valueT0 < 0) {
+            var valueT0 = valueT0 + 24;
+          }
+      
+      // Convert UT to decimal time
+      var UTDecimal = ((dx.getUTCSeconds() + dx.getUTCMilliseconds() / 1000) / 60 + dx.getUTCMinutes()) / 60 + dx.getUTCHours();
+
+      var UTDecimal = UTDecimal * 1.002737909;
+      
+      // Add decimal time to T0
+      var GST = valueT0 + UTDecimal;
+      
+        // re-evaluate GST so it stays within the domain 0 to 24.
+        var GST = GST % 24;
+          if (GST < 0) {
+            var GST = GST + 24;
+          }
+
+      // Convert GST to hours, minutes, seconds
+      var GSTHours = GST / Math.abs(GST) * Math.floor(Math.abs(GST));
+      var GSTMinutes = Math.floor((Math.abs(GST) - Math.abs(GSTHours)) * 60);
+      var GSTSeconds = ((Math.abs(GST) - Math.abs(GSTHours)) * 60 - GSTMinutes) * 60;
+
+    // Position of the Sun
+    var valueD = JDAt0h - epochDays;
+    
+    var valueN = (valueD * 360) / 365.242191;
+      // re-evaluate N so it stays within the domain 0 to 360.
+      var valueN = valueN % 360;
+        if (valueN < 0) {
+          var valueN = valueN + 360;
+        }
+    var MSun = valueN + εg - ωg;
+
+      if (MSun < 0) {
+        var MSun = MSun + 360;
+      }
+     
+    var Ec = 360 / Math.PI * eccSunEarth * Math.sin(toRadians(MSun));    
+    var λSun = valueN + Ec + εg;     
+      // re-evaluate λSun so it stays within the domain 0 to 360.
+      var λSun = λSun % 360;
+        if (λSun < 0) {
+          var λSun = λSun + 360;
+        }       
+    // Convert ecliptic longitude of Sun and λSun to equatorial coordinates
+    var valueT = (JD - 2451545) / 36525;
+    var εSun = 23.439292 - (((46.815 * valueT) + (0.0006 * valueT * valueT) - (0.00181 * valueT * valueT * valueT)) / 3600);
+    var βSun = 0;
+    var δSun = toDegrees(Math.asin(Math.sin(toRadians(βSun)) * Math.cos(toRadians(εSun)) + Math.cos(toRadians(βSun)) * Math.sin(toRadians(εSun)) * Math.sin(toRadians(λSun))));
+    var YSun = Math.sin(toRadians(λSun)) * Math.cos(toRadians(εSun)) - Math.tan(toRadians(βSun)) * Math.sin(toRadians(εSun));
+    var XSun = Math.cos(toRadians(λSun));
+    var αSun = toDegrees(Math.atan(YSun/XSun));
+    var αSun = αSun % 360;
+
+      // Solve ambiguity which arises from taking the inverse tan. First identify which quadrant the angle should belong to (by checking the signs on XSun and YSun)     
+      if (YSun > 0) {
+        if (XSun > 0) {
+          var LOQuadrant = 0;
+          var HIQuadrant = 90;
+        }
+        else {
+          var LOQuadrant = 90;
+          var HIQuadrant = 180;
+        }
+      }
+      else {
+        if (XSun > 0) {
+          var LOQuadrant = 270;
+          var HIQuadrant = 360;
+        }
+        else {
+          var LOQuadrant = 180;
+          var HIQuadrant = 270;
+        }
+      } 
+
+      // Add 180 or 360 depending on the quadrant αSun is in.
+      if (αSun < HIQuadrant && αSun > LOQuadrant) {
+        αSun = αSun;
+      }
+      else if ((αSun + 180) < HIQuadrant && (αSun + 180) > LOQuadrant) {
+         αSun = αSun + 180;
+      }
+      else if ((αSun + 360) < HIQuadrant && (αSun + 360) > LOQuadrant) {
+         αSun = αSun + 360;
+      }
+      else {
+        αSun = "<?php echo "Error";?>";
+        // If this is the case, something has gone wrong. αSun should be in the quadrant by either adding 180 or 360.
+      }
+
+    // Convert to hours
+    var αSun = αSun / 15;   
+    var αSunHours = αSun / Math.abs(αSun) * Math.floor(Math.abs(αSun));
+    var αSunMinutes = Math.floor((Math.abs(αSun) - Math.abs(αSunHours)) * 60);
+    var αSunSeconds = (((Math.abs(αSun) - Math.abs(αSunHours)) * 60) - αSunMinutes) * 60;
+    
+    var δSunHours = δSun / Math.abs(δSun) * Math.floor(Math.abs(δSun));
+    var δSunMinutes = Math.floor((Math.abs(δSun) - Math.abs(δSunHours)) * 60);
+    var δSunSeconds = (((Math.abs(δSun) - Math.abs(δSunHours)) * 60) - δSunMinutes) * 60;
+
+    // Convert sun altitude to hours
+    var sHours = toDegrees(alt) / (Math.abs(toDegrees(alt))) * Math.floor(Math.abs(toDegrees(alt)));
+    var sMinutes = Math.floor((Math.abs(toDegrees(alt)) - Math.abs(sHours)) * 60);
+    var sSeconds = (((Math.abs(toDegrees(alt)) - Math.abs(sHours)) * 60) - sMinutes) * 60;
+
+    // Convert sun azimuth to hours
+    var SHours = toDegrees(azi) / (Math.abs(toDegrees(azi))) * Math.floor(Math.abs(toDegrees(azi)));
+    var SMinutes = Math.floor((Math.abs(toDegrees(azi)) - Math.abs(SHours)) * 60);
+    var SSeconds = (((Math.abs(toDegrees(azi)) - Math.abs(SHours)) * 60) - SMinutes) * 60;
+
+    // Calculate Moon position
+    
+    var lMoon = 13.1763966 * daysSinceEpoch + l0;
+      // Constrain lMoon to within 0 to 360
+      var lMoon = lMoon % 360;
+        if (lMoon < 0) {
+          var lMoon = lMoon + 360;
+        }
+    var Mm = lMoon - 0.1114041 * daysSinceEpoch - P0;
+      // Constrain Mm to within 0 to 360
+      var Mm = Mm % 360;
+        if (Mm < 0) {
+          var Mm = Mm + 360;
+        }   
+    var NMoon = N0 - 0.0529539 * daysSinceEpoch;
+      // Constrain Mm to within 0 to 360
+      var NMoon = NMoon % 360;
+        if (NMoon < 0) {
+          var NMoon = NMoon + 360;
+        }
+
+    var Ev = 1.2739 * Math.sin(2 * (toRadians(lMoon) - toRadians(λSun)) - toRadians(Mm));
+    var Ae = 0.1858 * Math.sin(toRadians(MSun));
+    var A3 = 0.37 * Math.sin(toRadians(MSun));
+    var MPrimem = Mm + Ev - Ae - A3;
+    var Ec = 6.2886 * Math.sin(toRadians(MPrimem));   
+    var A4 = 0.214 * Math.sin(2 * toRadians(MPrimem));
+    var lPrime = lMoon + Ev + Ec - Ae + A4;
+    var VMoon = 0.6583 * Math.sin(2 * (toRadians(lPrime) - toRadians(λSun)));  
+    var lPrimePrime = lPrime + VMoon;  
+    var NPrime = NMoon - (0.16 * Math.sin(toRadians(MSun)));
+    var yMoon = Math.sin(toRadians(lPrimePrime) - toRadians(NPrime)) * Math.cos(toRadians(iMoon));
+    var xMoon = Math.cos(toRadians(lPrimePrime) - toRadians(NPrime));
+    var λMoon = toDegrees(Math.atan(yMoon / xMoon));
+
+    // Establish Moonphase Angle (0°-360°)
+    var MphaseAngle = (lPrime - toDegrees(eclong));
+      // Constrain MphaseAngle to within 0 to 360
+      MphaseAngle = MphaseAngle % 360;
+        if (MphaseAngle < 0) {
+           MphaseAngle = MphaseAngle + 360;
+        }
+
+      // Solve ambiguity which arises from taking the inverse tan. First identify which quadrant the angle should belong to (by checking the signs on XMoon and YMoon)     
+      if (yMoon > 0) {
+        if (xMoon > 0) {
+          var LOQuadrantMn = 0;
+          var HIQuadrantMn = 90;
+        }
+        else {
+          var LOQuadrantMn = 90;
+          var HIQuadrantMn = 180;
+        }
+      }
+      else {
+        if (xMoon > 0) {
+          var LOQuadrantMn = 270;
+          var HIQuadrantMn = 360;
+        }
+        else {
+          var LOQuadrantMn = 180;
+          var HIQuadrantMn = 270;
+        }
+      } 
+
+      // Add 180 or 360 depending on the quadrant Moon is in.
+      if (λMoon < HIQuadrantMn && αSun > LOQuadrantMn) {
+        λMoon = λMoon;
+      }
+      else if ((λMoon + 180) < HIQuadrantMn && (λMoon + 180) > LOQuadrantMn) {
+        λMoon = λMoon + 180;
+      }
+      else if ((λMoon + 360) < HIQuadrantMn && (λMoon + 360) > LOQuadrantMn) {
+        λMoon = λMoon + 360;
+      }
+      else {
+        λMoon = "<?php echo "Error";?>";
+        // If this is the case, something has gone wrong. αSun should be in the quadrant by either adding 180 or 360.
+      }
+
+    var λMoon = λMoon + NPrime;
+    var βMoon = toDegrees(Math.asin(Math.sin(toRadians(lPrimePrime) - toRadians(NPrime)) * Math.sin(toRadians(iMoon))));
+    var δMoon = toDegrees(Math.asin(Math.sin(toRadians(βMoon)) * Math.cos(toRadians(εSun)) + Math.cos(toRadians(βMoon)) * Math.sin(toRadians(εSun)) * Math.sin(toRadians(λMoon))));
+    var valueYMoon = Math.sin(toRadians(λMoon)) * Math.cos(toRadians(εSun)) - Math.tan(toRadians(βMoon)) * Math.sin(toRadians(εSun));
+    var valueXMoon = Math.cos(toRadians(λMoon));  
+    var αMoon = toDegrees(Math.atan(valueYMoon / valueXMoon));
+    var αMoon = αMoon % 360;
+
+      // Solve ambiguity which arises from taking the inverse tan. First identify which quadrant the angle should belong to (by checking the signs on X and Y)     
+      if (valueYMoon > 0) {
+        if (valueXMoon > 0) {
+          var LOQuadrantMn2 = 0;
+          var HIQuadrantMn2 = 90;
+        }
+        else {
+          var LOQuadrantMn2 = 90;
+          var HIQuadrantMn2 = 180;
+        }
+      }
+      else {
+        if (valueXMoon > 0) {
+          var LOQuadrantMn2 = 270;
+          var HIQuadrantMn2 = 360;
+        }
+        else {
+          var LOQuadrantMn2 = 180;
+          var HIQuadrantMn2 = 270;
+        }
+      } 
+
+      // Add 180 or 360 depending on the quadrant αSun is in.
+      if (αMoon < HIQuadrantMn2 && αMoon > LOQuadrantMn2) {
+        αMoon = αMoon;      
+      }     
+      else if ((αMoon + 180) < HIQuadrantMn2 && (αMoon + 180) > LOQuadrantMn2) {
+        αMoon = αMoon + 180;
+      }
+      else if ((αMoon + 360) < HIQuadrantMn2 && (αMoon + 360) > LOQuadrantMn2) {
+        αMoon = αMoon + 360;
+      }
+      else {
+        αMoon = "<?php echo "Error";?>";
+        // If this is the case, something has gone wrong. αSun should be in the quadrant by either adding 180 or 360.
+      }
+
+    // Convert to hours
+    var αMoon = αMoon / 15;
+    var αMoonHours = αMoon / (Math.abs(αMoon)) * Math.floor(Math.abs(αMoon));
+    var αMoonMinutes = Math.floor((Math.abs(αMoon) - Math.abs(αMoonHours)) * 60);
+    var αMoonSeconds = (((Math.abs(αMoon) - Math.abs(αMoonHours)) * 60) - αMoonMinutes) * 60;
+    
+    var δMoonHours = δMoon / (Math.abs(δMoon)) * Math.floor(Math.abs(δMoon));
+    var δMoonMinutes = Math.floor((Math.abs(δMoon) - Math.abs(δMoonHours)) * 60);
+    var δMoonSeconds = (((Math.abs(δMoon) - Math.abs(δMoonHours)) * 60) - δMoonMinutes) * 60;
+  
+    // Convert equatorial coordinates to horizon coordinates
+  
+    // East longitudes are positive, West are negative
+
+    var LST = GST + longitude / 15;
+    // Constrain LST to within 0 to 24
+        LST = LST % 24;
+      if (LST < 0) {
+           LST = LST + 24;
+      }
+
+    // Convert to hours
+    var LSTHours = LST / (Math.abs(LST)) * Math.floor(Math.abs(LST));
+    var LSTMinutes = Math.floor((Math.abs(LST) - Math.abs(LSTHours)) * 60);
+    var LSTSeconds = (((Math.abs(LST) - Math.abs(LSTHours)) * 60) - LSTMinutes) * 60;
+
+  var hourAngle = LST - αMoon;
+    if (hourAngle < 0) {
+      hourAngle = hourAngle + 24;
+    }
+
+  // Convert to hours
+  var HHours = hourAngle / (Math.abs(hourAngle)) * Math.floor(Math.abs(hourAngle));
+  var HMinutes = Math.floor((Math.abs(hourAngle) - Math.abs(HHours)) * 60);
+  var HSeconds = (((Math.abs(hourAngle) - Math.abs(HHours)) * 60) - HMinutes) * 60;
+
+  var hourAngle = hourAngle * 15;
+  // a = moon altitude
+  var a = toDegrees(Math.asin(Math.sin(toRadians(δMoon)) * Math.sin(toRadians(latitude)) + Math.cos(toRadians(δMoon)) * Math.cos(toRadians(latitude)) * Math.cos(toRadians(hourAngle))));
+  // APrime = moon azimuth
+  var APrime = toDegrees(Math.acos((Math.sin(toRadians(δMoon)) - (Math.sin(toRadians(latitude)) * Math.sin(toRadians(a)))) / (Math.cos(toRadians(latitude)) * Math.cos(toRadians(a)))));
+
+    if ( hourAngle > 0 && hourAngle < 180 ) {
+      var azimuth = 360 - APrime;
+    }
+    else {
+      var azimuth = APrime;
+    }
+
+  // Convert to hours
+  var aHours = a / (Math.abs(a)) * Math.floor(Math.abs(a));
+  var aMinutes = Math.floor((Math.abs(a) - Math.abs(aHours)) * 60);
+  var aSeconds = (((Math.abs(a) - Math.abs(aHours)) * 60) - aMinutes) * 60;
+
+  // Convert to hours
+  var AHours = azimuth / (Math.abs(azimuth)) * Math.floor(Math.abs(azimuth));
+  var AMinutes = Math.floor((Math.abs(azimuth) - Math.abs(AHours)) * 60);
+  var ASeconds = (((Math.abs(azimuth) - Math.abs(AHours)) * 60) - AMinutes) * 60;
+
+// now we are ready to calculate the sun and moon curves and use the Meeus data
+
+// Sun Declination
+var DeclinationS = toDegrees(Dec);
+
+// calculate Sun curve
+var sdec = DeclinationS;
+var althrtab = [];
+var shartab = [];
+var total = 1440;
+
+for (var i = 0; i < total; i++) {
+  var sha = 180.0 + i * (360.0 / total);  
+  var cossha = Math.cos(toRadians(sha)); 
+  var cossundec = Math.cos(toRadians(sdec));  
+  var coslat = Math.cos(toRadians(latitude)); 
+  var cosmath = cossha * cossundec * coslat; 
+  var sinsundec = Math.sin(toRadians(sdec)); 
+  var sinlat = Math.sin(toRadians(latitude));  
+  var sinmath = sinsundec * sinlat;  
+  var sinelevation = cosmath + sinmath;  
+  var elevation = toDegrees(Math.asin(sinelevation));
+  var curaltlong = elevation;  
+  var curalt = curaltlong;  
+  althrtab[i] = curalt;
+  shartab[i] = sha - 360.0;
+}
+
+var azitab;
+var azmathA;
+var azmathB;
+var cosazA;
+var aziA;
+var aziplotA;
+
+if (hemisphere == 0) {
+  azitab = [];
+  for (var i = 0; i < total; i++) {
+    azmathA =
+      Math.cos(toRadians(shartab[i])) * cossundec * sinlat - sinsundec * coslat;
+    azmathB = Math.cos(toRadians(althrtab[i]));
+    cosazA = azmathA / azmathB;
+    aziA = toDegrees(Math.acos(cosazA));
+    aziplotA = aziA;
+    if (shartab[i] < 0) {
+      azitab[i] = (aziplotA - 180.0) * -1;
+    } else {
+      azitab[i] = aziplotA + 180.0;
+    }
+  }
+}
+if (hemisphere == 1) {
+  azitab = [];
+  for (var i = 0; i < total; i++) {
+    azmathA =
+      Math.cos(toRadians(shartab[i])) * cossundec * sinlat - sinsundec * coslat;
+    azmathB = Math.cos(toRadians(althrtab[i]));
+    cosazA = azmathA / azmathB;
+    aziA = toDegrees(Math.acos(cosazA));
+    aziplotA = aziA;
+    if (shartab[i] < 0) {
+      azitab[i] = (aziplotA - 360.0) * -1;
+    } else {
+      azitab[i] = aziplotA;
+    }
+  }
+}
+
+// Moon Declination       
+var DeclinationM = δMoon;
+
+// calculate Moon curve
+var sdecx = DeclinationM;
+var shartabx = [];
+var althrtabx = [];
+var total = 1440;
+
+var cossundecx = Math.cos(toRadians(sdecx));
+var coslatx = Math.cos(toRadians(latitude));
+var sinlatx = Math.sin(toRadians(latitude));
+var sinsundecx = Math.sin(toRadians(sdecx));
+var sinmathx = sinsundecx * sinlatx;
+
+for (var i = 0; i < total; i++) {
+  var shax = 180.0 + i * (360.0 / total);
+  var cosshax = Math.cos(toRadians(shax));
+  var cosmathx = cosshax * cossundecx * coslatx;
+  var sinelevationx = cosmathx + sinmathx;
+  var elevationx = toDegrees(Math.asin(sinelevationx));
+  var curaltlongx = elevationx;
+  var curaltx = curaltlongx;
+  althrtabx[i] = curaltx;
+  shartabx[i] = shax - 360.0;
+}
+
+var azitabx;
+var azmath1;
+var azmath2;
+var cosazx;
+var azix;
+var aziplotx;
+
+if (hemisphere == 0) {
+  azitabx = [];
+  for (var i = 0; i < total; i++) {
+    azmath1 =
+      Math.cos(toRadians(shartabx[i])) * cossundecx * sinlatx -
+      sinsundecx * coslatx;
+    azmath2 = Math.cos(toRadians(althrtabx[i]));
+    cosazx = azmath1 / azmath2;
+    azix = toDegrees(Math.acos(cosazx));
+    aziplotx = azix;
+    if (shartabx[i] < 0) {
+      azitabx[i] = (aziplotx - 180.0) * -1;
+    } else {
+      azitabx[i] = aziplotx + 180.0;
+    }
+  }
+}
+if (hemisphere == 1) {
+  azitabx = [];
+  for (var i = 0; i < total; i++) {
+    azmath1 =
+      Math.cos(toRadians(shartabx[i])) * cossundecx * sinlatx -
+      sinsundecx * coslatx;
+    azmath2 = Math.cos(toRadians(althrtabx[i]));
+    cosazx = azmath1 / azmath2;
+    azix = toDegrees(Math.acos(cosazx));
+    aziplotx = azix;
+    if (shartabx[i] < 0) {
+      azitabx[i] = (aziplotx - 360.0) * -1;
+    } else {
+      azitabx[i] = aziplotx;
+    }
+  }
+}
+
+// Create some fake data to populate a d3.js chart scale 
+var suncurve = [[0.0, 0.0],[0.0, 0.0]];
+var mooncurve = [[0.0, 0.0],[0.0 ,0.0]];
+
+var innerColor = "rgb(230, 200, 200)";
+
+var sunData = [];
+for(var i = 1; i < suncurve.length; i++) {
+  sunData = [...sunData,[suncurve[i - 1],suncurve[i]]]
+};
+
+var moonData = [];
+for(var i = 1; i < mooncurve.length; i++) {
+  moonData = [...moonData,[mooncurve[i - 1],mooncurve[i]]]
+};
+
+// Create the d3 chart and add the sun and moon data 
+var w = 620;
+var h = 320;
+var padding = 25;
+var padding_up = 8;
+
+if (latitude < 0.0) {
+var xScale = d3.scaleLinear()
+    .domain([360, 0])
+    .range([padding, w - padding + 16]);
+
+var yScale = d3.scaleLinear()
+    .domain([-100, 100])
+    .range([h - padding, padding_up]);
+
+} else {
+var xScale = d3.scaleLinear()
+    .domain([0, 360])
+    .range([padding, w - padding + 16]);
+
+var yScale = d3.scaleLinear()
+    .domain([-80, 80])
+    .range([h - padding, padding_up]);
+}
+
+var svg = d3.select('.meeus')
+    .append('svg')
+    //.style("background", "#292e35")
+    .attr('width', w)
+    .attr('height', h);
+
+var line = d3.line() 
+    .x(d => xScale(d.x))
+    .y(d => yScale(d.y))
+    .curve(d3.curveBasisOpen());
+
+var xAxis = d3.axisBottom(xScale)
+    .ticks(9)
+    .tickSize(4)
+    .tickPadding(3)
+    .tickFormat(function(d) { return d + "°";})
+    .tickValues([0, 45, 90, 135, 180, 225, 270, 315, 360]);
+
+if (latitude < 0.0) {
+var yAxis = d3.axisLeft(yScale)
+    .ticks(9)
+    .tickSize(4)
+    .tickPadding(2)
+    .tickFormat(function(d) { return d + "°";})
+    .tickValues([-100, -80, -60, -40, -20, 0, 20, 40, 60, 80, 100]);
+} else {
+var yAxis = d3.axisLeft(yScale)
+    .ticks(9)
+    .tickSize(4)
+    .tickPadding(2)
+    .tickFormat(function(d) { return d + "°";})
+    .tickValues([-80, -60, -40, -20, 0, 20, 40, 60, 80]);  
+}
+
+  svg
+    .append('g')
+    .attr("class", "x axis")
+    .attr('transform', 'translate(0,' + (h - padding) + ')')
+    .call(xAxis);
+
+  svg
+    .append('g')
+    .attr("class", "x axis")
+    .attr('transform', 'translate(' + padding + ',0)')
+    .call(yAxis);
+
+  svg
+    .selectAll(".horiz.line")
+    .data(sunData)
+    .enter()
+    .append('line')
+    .attr("class", "horiz line")
+    .attr("x1", xScale(0))
+    .attr("y1", yScale(0))
+    .attr("x2", xScale(360))
+    .attr("y2", yScale(0));
+
+if (latitude < 0.0) {
+  svg
+    .selectAll(".zen.line")
+    .data(sunData)
+    .enter()
+    .append('line')
+    .attr("class", "zen line")
+    .attr("x1", xScale(180))
+    .attr("y1", yScale(100))
+    .attr("x2", xScale(180))
+    .attr("y2", yScale(-100));
+} else {
+  svg
+    .selectAll(".zen.line")
+    .data(sunData)
+    .enter()
+    .append('line')
+    .attr("class", "zen line")
+    .attr("x1", xScale(180))
+    .attr("y1", yScale(80))
+    .attr("x2", xScale(180))
+    .attr("y2", yScale(-80));
+}
+
+var defs = svg.append("defs");
+
+var moonGradientMeeus = defs.append("radialGradient")
+    .attr("id", "moonGradientMeeus")
+    .attr("cx", "50%")
+    .attr("cy", "50%")
+    .attr("r", "50%")
+    .attr("fx", "50%")
+    .attr("fy", "50%");
+
+moonGradientMeeus.append("stop")
+    .attr("offset", "0%")
+    .style("stop-color", innerColor);
+
+moonGradientMeeus.append("stop")
+    .attr("offset", "90%")
+    .style("stop-color", "#555");
+
+var sunGradientMeeus = defs.append("radialGradient")
+    .attr("id", "sunGradientMeeus")
+    .attr("cx", "50%")
+    .attr("cy", "50%")
+    .attr("r", "50%")
+    .attr("fx", "50%")
+    .attr("fy", "50%");
+
+sunGradientMeeus.append("stop")
+    .attr("offset", "0%")
+    .style("stop-color", innerColor);
+
+sunGradientMeeus.append("stop")
+    .attr("offset", "90%")
+    .style("stop-color", "tomato");
+
+var sunazi = toDegrees(azi);
+var sunalt = toDegrees(alt);
+
+for (var i = 0; i < total; i++) {
+
+var sun_azitab = nan(azitab[i]);
+var sun_althrtab = althrtab[i];
+  
+  svg
+    .append("line")
+    .attr("x1", xScale(sun_azitab))
+    .attr("y1", yScale(sun_althrtab))
+    .attr("x2", xScale(sun_azitab))
+    .attr("y2", yScale(sun_althrtab))
+    .style("stroke-width", 1)
+    .style("stroke", "rgba(255,99,71,1)")
+    .style("stroke-linecap", "round")
+    .attr("transform", "translate(0, 0)");
+
+if (latitude < 0.0) {
+if (sunazi < 180.0) {
+ svg
+    .append("circle")
+    .style("fill", "url(#sunGradientMeeus)")
+    .attr("r", 8)
+    .attr("cx", xScale(180 - sunazi))
+    .attr("cy", yScale(sunalt))
+    .attr("transform", "translate(0, 0)")
+    .on("mouseover", sMouseOver)
+    .on("mousemove", sMouseMove)
+    .on("mouseout", sMouseOut);
+} else {
+  svg
+    .append("circle")
+    .style("fill", "url(#sunGradientMeeus)")
+    .attr("r", 8)
+    .attr("cx", xScale(360 + 180 - sunazi))
+    .attr("cy", yScale(sunalt))
+    .attr("transform", "translate(0, 0)")
+    .on("mouseover", sMouseOver)
+    .on("mousemove", sMouseMove)
+    .on("mouseout", sMouseOut);
+  }
+} else {
+  svg
+    .append("circle")
+    .style("fill", "url(#sunGradientMeeus)")
+    .attr("r", 8)
+    .attr("cx", xScale(sunazi))
+    .attr("cy", yScale(sunalt))
+    .attr("transform", "translate(0, 0)")
+    .on("mouseover", sMouseOver)
+    .on("mousemove", sMouseMove)
+    .on("mouseout", sMouseOut);
+  }    
+}
+ 
+
+var moonazi = azimuth;
+var moonalt = a;
+  
+for (var i = 0; i < total; i++) {
+
+var moon_azitabx = nan(azitabx[i]);
+var moon_althrtabx = althrtabx[i];
+
+  svg
+    .append("line")
+    .attr("x1", xScale(moon_azitabx))
+    .attr("y1", yScale(moon_althrtabx))
+    .attr("x2", xScale(moon_azitabx))
+    .attr("y2", yScale(moon_althrtabx))
+    .style("stroke-width", 1)
+    .style("stroke", "silver")
+    .style("stroke-linecap", "round")
+    .attr("transform", "translate(0, 0)");
+
+if (latitude < 0.0) {
+if (moonazi < 180.0) {
+  svg
+    .append("circle")
+    .style("fill", "url(#moonGradientMeeus)")
+    .attr("r", 5)
+    .attr("cx", xScale(180 - moonazi))
+    .attr("cy", yScale(moonalt))
+    .attr("transform", "translate(0, 0)")
+    .on("mouseover", mMouseOver)
+    .on("mousemove", mMouseMove)
+    .on("mouseout", mMouseOut);
+} else {
+  svg
+    .append("circle")
+    .style("fill", "url(#moonGradientMeeus)")
+    .attr("r", 5)
+    .attr("cx", xScale(360 + 180 - moonazi))
+    .attr("cy", yScale(moonalt))
+    .attr("transform", "translate(0, 0)")
+    .on("mouseover", mMouseOver)
+    .on("mousemove", mMouseMove)
+    .on("mouseout", mMouseOut);
+  }
+} else {
+  svg
+    .append("circle")
+    .style("fill", "url(#moonGradientMeeus)")
+    .attr("r", 5)
+    .attr("cx", xScale(moonazi))
+    .attr("cy", yScale(moonalt))
+    .attr("transform", "translate(0, 0)")
+    .on("mouseover", mMouseOver)
+    .on("mousemove", mMouseMove)
+    .on("mouseout", mMouseOut);
+  } 
+}
+
+var zenith = "Zenith";
+  svg
+    .append("text")
+    .attr("x", 307.5)
+    .attr("y", 5)
+    .text(zenith);
+
+var horizon = "Horizon";
+  svg
+    .append("text")
+    .attr("x", 30)
+    .attr("y", 148)
+    .text(horizon);
+
+var tooltipm = d3.select(".meeus")
+    .append("div")
+    .style("position", "absolute")
+    .style("visibility", "hidden")
+    .style("font-family", "Helvetica")
+    .style("color", "silver")
+    .style("font-size", "7.5px")
+    .style("background-color", "#292e35")
+    .style("border", "solid silver")
+    .style("border-width", "1px")
+    .style("border-radius", "5px")
+    .style("padding", "10px")
+    .style("box-shadow", "2px 2px 20px")
+    .style("opacity", "0.9")
+    .attr("id", "tooltip");
+
+  function mMouseOver (event, d) {
+       d3.select(this);
+       tooltipm.style("visibility", "visible");
+  };
+  
+  function mMouseMove (event, d) {
+      tooltipm
+        .style("top", (event.pageY)+"px").style("left",(event.pageX)+"px")
+        .html("Moon Azimuth: " + moonazi.toFixed(2) + "°" + "<br>" + "Moon Altitude: " + moonalt.toFixed(2) + "°");
+  };
+
+  function mMouseOut (event, d) {
+       d3.select(this);
+       tooltipm.style("visibility", "hidden");
+  };
+
+var tooltips = d3.select(".meeus")
+    .append("div")
+    .style("position", "absolute")
+    .style("visibility", "hidden")
+    .style("font-family", "Helvetica")
+    .style("color", "tomato")
+    .style("font-size", "7.5px")
+    .style("background-color", "#292e35")
+    .style("border", "solid tomato")
+    .style("border-width", "1px")
+    .style("border-radius", "5px")
+    .style("padding", "10px")
+    .style("box-shadow", "2px 2px 20px")
+    .style("opacity", "0.9")
+    .attr("id", "tooltip");
+
+  function sMouseOver (event, d) {
+       d3.select(this);
+       tooltips.style("visibility", "visible");
+  };
+  
+  function sMouseMove (event, d) {
+      tooltips
+        .style("top", (event.pageY)+"px").style("left",(event.pageX)+"px")
+        .html("Sun Azimuth: " + sunazi.toFixed(2) + "°" + "<br>" + "Sun Altitude: " + sunalt.toFixed(2) + "°");
+  };
+
+  function sMouseOut (event, d) {
+       d3.select(this);
+       tooltips.style("visibility", "hidden");
+  };
+
+// End Chart
+
+// The complete text output from the Meeus calculation starts here
+var svg = d3.select('.output')
+    .append('svg')
+    //.style("background", "#292e35")
+    .attr('width', 640)
+    .attr('height', 245);
+
+var loc = "Δ Location: ";
+  svg
+    .append("text")
+    .style("fill", "#2e8b57")
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .style("font-weight", "bold")
+    .attr("x", 25)
+    .attr("y", 8)
+    .text(loc);
+
+var city = "Station: <?php echo $stationlocation;?>";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 17)
+    .text(city);
+
+var tzone = "Timezone: " + TZ;
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 25)
+    .text(tzone);
+
+var lat = "Latitude: " + latitude + "°";
+  svg
+    .append("text")
+    .style("fill", "#2e8b57")
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .style("font-weight", "bold")
+    .attr("x", 25)
+    .attr("y", 34)
+    .text(lat);
+
+var lon = "Longitude: " + longitude + "°";
+  svg
+    .append("text")
+    .style("fill", "#2e8b57")
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .style("font-weight", "bold")
+    .attr("x", 25)
+    .attr("y", 43)
+    .text(lon);
+
+var time = "Time | Date:";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .style("font-weight", "bold")
+    .attr("x", 25)
+    .attr("y", 52)
+    .text(time);
+
+var utcdate = "UTC - Date: " + dayCurrent + "." + monthCurrent + "." + yearCurrent;
+  svg
+    .append('text')
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 61)
+    .text(utcdate);
+
+var utctime = "UTC - Time: " + skynet(hourCurrent) + ":" + skynet(minuteCurrent) + ":" + skynet(secondCurrent) + "." + millisecondCurrent;
+  svg
+    .append('text')
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 70)
+    .text(utctime);
+
+var tzoffset = "Timezone Offset: " + timezoneOffset;
+  svg
+    .append('text')
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 79)
+    .text(tzoffset);
+
+var utcstring = "UTC - String: " + UTCString;
+  svg
+    .append('text')
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 88)
+    .text(utcstring);
+
+var decimaldate = "Decimal - Date: " + dayJulian + "-" + monthJulian+ "-" + yearJulian;
+  svg
+    .append('text')
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 97)
+    .text(decimaldate);
+
+var juliandecimaldate = "Julian Decimal Date: " + JD;
+  svg
+    .append('text')
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 106)
+    .text(juliandecimaldate);
+
+var adoptedepoch = "Adopted Epoch: " + epochDays;
+  svg
+    .append('text')
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 115)
+    .text(adoptedepoch);
+
+var dayssinceepoch = "Days Since Epoch: " + daysSinceEpoch;
+svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 124)
+    .text(dayssinceepoch);
+
+var utdecimal = "UT - Decimal: " + UTDecimal;
+  svg
+    .append('text')
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 133)
+    .text(utdecimal);
+
+var jdAt0h = "JDAt0h: " + JDAt0h;
+  svg
+    .append('text')
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 142)
+    .text(jdAt0h);
+
+var valuet = "T: " + valueT;
+  svg
+    .append('text')
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 151)
+    .text(valuet);
+
+var valuet0 = "T0: " + valueT0;
+  svg
+    .append('text')
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 160)
+    .text(valuet0);
+
+var gst = "GMST: " + GST + "°";
+  svg
+    .append('text')
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 169)
+    .text(gst);
+
+var gsttime = "GMST - Time: " + GSTHours + "h" + " " + GSTMinutes + "m" + " " + GSTSeconds + "/ms";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 178)
+    .text(gsttime);
+
+var horizoncoordinates = "Horizon Coordinates:";
+  svg
+    .append("text")
+    .style("fill", "#007fff")
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .style("font-weight", "bold")
+    .attr("x", 25)
+    .attr("y", 195)
+    .text(horizoncoordinates);
+
+var lst = "LMST: " + LST + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 204)
+    .text(lst); 
+
+var lsttime = "LMST - Time: " + LSTHours + "h" + " " + LSTMinutes + "m" + " " + LSTSeconds + "/ms";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 213)
+    .text(lsttime);
+
+var h = "Hα: " + hourAngle + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 222)
+    .text(h);
+
+var htime = "Hα-time: " + HHours + "h" + " " + HMinutes + "m" + " " + HSeconds + "/ms";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 231)
+    .text(htime);
+
+var sunposition = "Sun Position: ";
+  svg
+    .append("text")
+    .style("fill", "tomato")
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .style("font-weight", "bold")
+    .attr("x", 236.5)
+    .attr("y", 8)
+    .text(sunposition);
+
+var valuen = "N: " + valueN + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 17)
+    .text(valuen);
+
+var msun = "MSun: " + MSun + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 26)
+    .text(msun);
+
+var maxe = "Ec: " + Ec + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 35)
+    .text(maxe);
+
+var ra = "Ra λSun: " + toDegrees(Ra) + "°";
+  svg
+    .append("text")
+    .style("fill", "#007fff")
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .style("font-weight", "bold")
+    .attr("x", 236.5)
+    .attr("y", 44)
+    .text(ra);
+
+var esun = "εEcliptic Angle: " + εSun + "°";
+  svg
+    .append("text")
+    .style("fill", "tomato")
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .style("font-weight", "bold")
+    .attr("x", 236.5)
+    .attr("y", 53)
+    .text(esun);
+
+var sunDec = "Dec δSun: " + δSun + "°";
+  svg
+    .append("text")
+    .style("fill", "#007fff")
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .style("font-weight", "bold")
+    .attr("x", 236.5)
+    .attr("y", 62)
+    .text(sunDec);
+
+var ysun = "YSun: " + YSun;
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 71)
+    .text(ysun);
+
+var xsun = "XSun: " + XSun;
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 80)
+    .text(xsun);       
+
+var loquadrant = "LO-Quadrant: " + LOQuadrant + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 89)
+    .text(loquadrant);
+
+var hiquadrant = "HI-Quadrant: " + HIQuadrant + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 98)
+    .text(hiquadrant);
+
+var asun = "αSun: " + αSun + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 107)
+    .text(asun);
+
+var asuntime = "αSun - Time: " + αSunHours + "h" + " " + αSunMinutes + "m" + " " + αSunSeconds + "/ms";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 116)
+    .text(asuntime);
+
+var asuntime = "δSun - Time: " + δSunHours + "h" + " " + δSunMinutes + "m" + " " + δSunSeconds + "/ms";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 125)
+    .text(asuntime);
+
+var sunazimuth = "Sun Azimuth (Decimal): " + sunazi + "°";
+  svg
+    .append("text")
+    .style("fill", "tomato")
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .style("font-weight", "bold")
+    .attr("x", 236.5)
+    .attr("y", 134)
+    .text(sunazimuth);
+
+var sunaltitude = "Sun Altitude (Decimal): " + sunalt + "°";
+  svg
+    .append("text")
+    .style("fill", "tomato")
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .style("font-weight", "bold")
+    .attr("x", 236.5)
+    .attr("y", 143)
+    .text(sunaltitude);
+
+var sunazimuthdeg = "Sun Azimuth (Dms): " + SHours + "°" + SMinutes + "'" + SSeconds + "/ms";
+  svg
+    .append("text")
+    .style("fill", "tomato")
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 152)
+    .text(sunazimuthdeg);
+
+var sunaltitudedeg = "Sun Altitude (Dms): " + sHours + "°" + sMinutes + "'" + sSeconds + "/ms";
+  svg
+    .append("text")
+    .style("fill", "tomato")
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 161)
+    .text(sunaltitudedeg);
+
+var sundistance = "Sun Distance: " + d3.format(",.3f")(Rs) + " km";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 170)
+    .text(sundistance);
+
+ var moonposition = "Moon Position:";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .style("font-weight", "bold")
+    .attr("x", 448)
+    .attr("y", 8)
+    .text(moonposition);
+
+var lmoon = "lMoon: " + lMoon + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 17)
+    .text(lmoon);
+
+var mm = "Mm: " + Mm + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 26)
+    .text(mm);
+
+var nmoon = "NMoon: " + NMoon + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 35)
+    .text(nmoon);
+
+var ev = "Ev: " + Ev;
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 44)
+    .text(ev);
+
+var ae = "Ae: " + Ae;
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 53)
+    .text(ae);
+
+var a3 = "A3: " + A3;
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 62)
+    .text(a3);
+
+var mmx = "M'm: " + MPrimem + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 71)
+    .text(mmx);
+
+var ecx = "Ec: " + Ec + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 80)
+    .text(ecx);
+
+var a4 = "A4: " + A4;
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 89)
+    .text(a4);
+
+var lp = "lPrime: " + lPrime + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 98)
+    .text(lp);
+
+var np = "NPrime: " + NPrime + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 107)
+    .text(np);
+
+var ramoon = "Ra λMoon: " + λMoon + "°";
+  svg
+    .append("text")
+    .style("fill", "#007fff")
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .style("font-weight", "bold")
+    .attr("x", 448)
+    .attr("y", 116)
+    .text(ramoon);
+
+var bmoon = "βMoon: " + βMoon + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 125)
+    .text(bmoon);
+
+var decmoon = "Dec δMoon: " + δMoon + "°";
+  svg
+    .append("text")
+    .style("fill", "#007fff")
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .style("font-weight", "bold")
+    .attr("x", 448)
+    .attr("y", 134)
+    .text(decmoon);
+
+var valueymoon = "YMoon: " + valueYMoon;
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 143)
+    .text(valueymoon);
+
+var valuexmoon = "XMoon: " + valueXMoon;
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 152)
+    .text(valuexmoon);
+
+var loquadrantMn = "LO-Quadrant: " + LOQuadrantMn + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 161)
+    .text(loquadrantMn);
+
+var hiquadrantMn = "HI-Quadrant: " + HIQuadrantMn + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 170)
+    .text(hiquadrantMn);
+
+var amoon = "αMoon: " + αMoon + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 179)
+    .text(amoon);
+
+var amoontime = "αMoon - Time: " + αMoonHours + "h" + " " + αMoonMinutes + "m" + " " + αMoonSeconds + "/ms";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 188)
+    .text(amoontime);
+
+var decmoontime = "δMoon - Time: " + δMoonHours + "h" + " " + δMoonMinutes + "m" + " " + δMoonSeconds + "/ms";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 197)
+    .text(decmoontime);
+
+var moonazimuth = "Moon Azimuth (Decimal): " + moonazi + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .style("font-weight", "bold")
+    .attr("x", 448)
+    .attr("y", 206)
+    .text(moonazimuth);
+
+var moonaltitude = "Moon Altitude (Decimal): "  + moonalt + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .style("font-weight", "bold")
+    .attr("x", 448)
+    .attr("y", 215)
+    .text(moonaltitude);
+
+var moonazimuthdeg = "Moon Azimuth (Dms): " + AHours + "º" + AMinutes + "'" + ASeconds + "/ms";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 224)
+    .text(moonazimuthdeg);
+
+var moonaltitudedeg = "Moon Altitude (Dms): " + aHours + "º" + aMinutes + "'" + aSeconds + "/ms";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 233)
+    .text(moonaltitudedeg);
+
+var moonp = "Moonphase:";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .style("font-weight", "bold")
+    .attr("x", 236.5)
+    .attr("y", 187)
+    .text(moonp);
+
+var moondistance = "Moon Distance: " + d3.format(",.3f")(Rm) + " km";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 196)
+    .text(moondistance);
+
+var mdays = "Moon Age: " + m_days + " Days";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 205)
+    .text(mdays);
+
+var frac = "Illumination: " + perc + " %";
+  svg
+    .append("text")
+    .style("fill", tcolor)    
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 214)
+    .text(frac);
+
+var mphase = "Moonphase: " + moonphase;
+  svg
+    .append("text")
+    .style("fill", tcolor)    
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 223)
+    .text(mphase);
+
+var mphaseA = ["Moonphase Angle: " + MphaseAngle + "°"];
+  svg
+    .append("text")
+    .style("fill", tcolor)    
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 232)
+    .text(mphaseA)
+// --end text output--
+
+// create an svg moonphase graphic
+var svg = d3.select(".moonphaze")
+    .append("svg")
+    //.style("background", "#292e35")
+    .attr("width", 100)
+    .attr("height", 100);
+
+var w = 100;
+var h = 100;
+var radius = w / 2 * 0.51;
+var gradient = 2;
+var mAxis = <?php echo $alm["parallacticAngle"];?>;
+var moonface = "#high-res-moon";
+
+function getX(phase, angle) {
+    const f = Math.cos(toRadians(phase));
+
+    let x;
+    const cosi = Math.cos(toRadians(angle));
+    x = f * radius * cosi + w / 2;
+
+    if((phase <= 180 && cosi < 0) || (phase > 180 && cosi > 0)) {
+        x = radius * cosi + w / 2;
+    }
+    return x;    
+}
+
+function drawDarkSide(phase) {
+    const gradientPoints = [];
+
+    let x = getX(phase - gradient, 0);
+    let y = radius * Math.sin(0) + h / 2;
+
+    var path = d3.path();
+    path.moveTo(x, y);
+
+    for(let i = 0; i <= 360; i += 1) {
+        x = getX(phase + gradient, i);
+        let x2 = getX(phase - gradient, i);
+
+        if(phase > 180) {
+            const temp = x;
+            x = x2;
+            x2 = temp; 
+        }
+        y = radius * Math.sin(toRadians(i)) + h / 2;
+
+        gradientPoints.push([x, x2, y, phase]);
+
+        path.lineTo(x, y);
+    }
+    path.closePath();
+    svg.append("path")
+    .attr("d", path)
+    .style('fill');
+    return gradientPoints;
+}
+ 
+function fillGradient(points) {  
+
+    if(Math.abs(points[0][3] - 180) <= gradient) {
+         return;
+    } 
+    for(let i = 0; i < points.length - 1; i++) {
+        let x1 = points[i][0];
+        let x2 = points[i][1];
+        let y1 = points[i][2];
+        let y2 = points[i+1][2];
+
+        if(points[i][3] > 180) {
+            x1++;
+        }
+    }
+}
+
+function drawPhase(phase) {
+
+    svg.attr("transform", "rotate("+ mAxis +", 0, 0)")
+       .style('fill', 'rgba(41, 46, 53, 0.8)');
+
+    const gradientPoints = drawDarkSide(phase);
+    fillGradient(gradientPoints);
+
+}
+
+function display(phase) {
+/*
+ svg
+        .append('image') // image output
+        .attr('xlink:href', moon)
+        .attr('width', 50)
+        .attr('height', 50)
+        .attr('x', 25.1)
+        .attr('y', 25);
+*/
+    svg
+        .append("use")
+        .attr("xlink:href", moonface)
+        .attr("width", 49.9)
+        .attr("height", 49.9)
+        .attr('x', 25.03)
+        .attr('y', 25);
+
+  drawPhase(phase);    
+}
+
+phase = MphaseAngle;
+display(phase);
+// wow ! job done enjoy :-)
+</script>
+<svg id="svg-defs" class="svg-defs" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <!-- moon -->
+  <linearGradient id="b" x1="1327.9395" x2="1156.0339" y1="103.897" y2="398.9926" gradientUnits="userSpaceOnUse" gradientTransform="matrix(.938 0 0 -.938 -679.11 677.625)">
+    <stop offset="0" stop-color="#ADADB0"/>
+    <stop offset="1" stop-color="#B7B7B9" stop-opacity=".3878"/>
+  </linearGradient>
+  <linearGradient id="c" x1="522.8037" x2="333.1784" y1="492.1099" y2="544.0406" gradientUnits="userSpaceOnUse" gradientTransform="matrix(.938 0 0 -.938 28.573 676.39)">
+    <stop offset="0" stop-color="#ADADB0"/>
+    <stop offset="1" stop-color="#B7B7B9" stop-opacity=".3878"/>
+  </linearGradient>
+  <radialGradient id="d" cx="227.7266" cy="351.9722" r="171.9204" gradientTransform="matrix(.96 .1 .172 -1.667 -50.283 919.35)" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#7D7D7F"/>
+    <stop offset="1" stop-color="#515056"/>
+  </radialGradient>
+  <linearGradient id="e" x1="325.3955" x2="325.6149" y1="154.312" y2="272.1671" gradientUnits="userSpaceOnUse" gradientTransform="matrix(.973 0 0 -.973 9.094 686.87)">
+    <stop offset="0" stop-color="#4A4A4C"/>
+    <stop offset="1" stop-color="#626266"/>
+  </linearGradient>
+  <radialGradient id="f" cx="680.7578" cy="-76.7183" r="171.9202" gradientTransform="matrix(.798 .387 .112 -.23 10.146 158.745)" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#7D7D7F"/>
+    <stop offset="1" stop-color="#515056"/>
+  </radialGradient>
+  <radialGradient id="g" cx="-50.1562" cy="618.5278" r="171.9207" gradientTransform="matrix(.2 -.154 -.285 -.372 654.266 432.98)" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#8B8B8E"/>
+    <stop offset="1" stop-color="#58575D"/>
+  </radialGradient>
+  <radialGradient id="h" cx="390.7393" cy="163.7007" r="125.1765" gradientTransform="matrix(1.056 .173 .35 -2.148 -84.647 856.22)" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#FDFDFE"/>
+    <stop offset="1" stop-color="#F1F1F2" stop-opacity=".4694"/>
+  </radialGradient>
+  <radialGradient id="i" cx="356.7021" cy="151.3325" r="125.1816" gradientTransform="matrix(.81 .317 .366 -.937 40.5 600.824)" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#FDFDFE"/>
+    <stop offset="1" stop-color="#F1F1F2" stop-opacity=".4694"/>
+  </radialGradient>
+  <radialGradient id="j" cx="1208.7109" cy="115.5049" r="8.3684" gradientTransform="matrix(1.683 -.495 -.513 -1.375 -1589.063 1329.948)" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#8C8C8C"/>
+    <stop offset=".6731" stop-color="#8C8C8C"/>
+    <stop offset="1" stop-color="#8C8C8C" stop-opacity="0"/>
+  </radialGradient>
+  <symbol viewBox="152.555 141.918 512 512" id="high-res-moon">
+    <path fill="#D1D1D2" d="M664.555 398.161c.021 139.406-114.577 252.434-255.961 252.455-141.385.021-256.018-112.974-256.039-252.38v-.075c-.021-139.406 114.577-252.434 255.962-252.455 141.385-.021 256.017 112.974 256.038 252.379v.076z"/>
+    <path fill="#bfbfc0" d="M168.597 486.176c-20.082-57.297-24.044-122.035 6.608-191.814 1.288-2.931 5.252 7.267 5.252 10.446v13.852c0 5.926.778 7.096 2.77 11.081 1.425 2.85 2.989 5.976 4.618 9.234 1.821 3.642 1.383 5.532 2.771 11.081.808 3.234 1.736 9.014 3.694 12.928 2.506 5.015 2.953 10.524 5.541 15.698 2.216 4.433 5.163 10.496 6.464 15.699 1.333 5.331 3.868 10.506 6.464 15.698 1.956 3.911 2.745 9.209 5.541 12.006 2.386 2.387 4.585 4.378 9.234 5.541 5.752 1.437 14.759 2.761 20.316 5.54 3.705 1.854 9.308 2.807 12.928 4.617 2.73 1.366 5.183 3.977 8.311 5.541 4.618 2.309 7.086 4.315 10.158 7.387 1.53 1.53 6.464 6.187 6.464 9.234v13.852c0 2.195-1.38 12.472 0 13.852 2.093 2.094 3.6 6.973 8.311 4.617 3-1.5 5.586-2.815 8.311-5.54 1.577-1.576 4.765-6.428 8.312-5.541 1.803.451 5.427.81 8.311 3.693 2.378 2.379 4.565 3.644 7.387 6.465 1.742 1.741 4.759 5.149 7.388 6.464 1.313.656 7.841 3.662 8.311 5.54.82 3.28 1.879 8.073-2.77 9.235-4.169 1.041-6.074 1.651-10.158 3.693-2.253 1.126-6.346 3.895-9.235 4.617-4.945 1.235-7.169 1.411-9.234 5.541-1.646 3.293-3.573 4.496-6.463 7.386-2.24 2.24-5.858 4.301-1.848 8.312 2.015 2.014 4.272 4.905 7.388 6.463 3.635 1.818 6.479 3.702 10.157 5.541 2.447 1.224 7.289 2.672 9.235 4.617 4.171 4.171 2.695 4.138-2.771 2.771-4.081-1.021-7.522-2.806-11.081-3.694-4.084-1.021-7.925-.923-12.929-.923-5.016 0-8.831-.923-13.851-.923-5.604 0-10.313-.925-15.699-.925-2.773 0-11.933.711-8.311 5.54 3.343 4.459 4.401 4.618 11.081 4.618 4.693 0 8.284-.026 11.082 2.771 2.469 2.469 3.858 4.947 5.541 8.311 2.022 4.045 4.578 7.309 6.464 11.081 2.179 4.358 3.454 6.226 7.387 10.158 2.38 2.38 6.981 4.025 12.005 2.77 3.081-.77 11.718-4.267 12.928-1.846-1.663-3.326-1.987 7.526-4.618 10.157-3.312 3.312-7.385 1.387-10.157 0-3.151-1.576-7.164-2.196-10.158-3.693-3.771-1.886-5.825-3.837-9.234-5.541-5.386-2.692-4.569-2.961-3.694-6.465 1.582-6.323-.754-3.693-6.463-3.693-5.174 0-8.543.981-12.004 1.848-5.99 1.497-2.391 4.073 0 6.464 5.062 5.062-2.632.069-4.618-.923-3.309-1.655-6.241-4.395-8.311-6.466-3.178-3.177-6.33-4.481-9.234-7.386-2.634-2.635-5.472-4.121-8.311-5.541-3.331-1.666-5.252-4.329-7.388-6.465-1.931-1.931 3.694-3.216 3.694-8.311 0-6.494-.683-7.146-3.694-10.158-2.548-2.547-1.146 7.611-3.693 10.158-.743.743-8.773-4.387-9.234-4.617-3.356-1.678-5.847-3.076-8.312-5.541-2.504-2.503-3.701-6.78-5.541-9.233-2.43-3.24-3.499-5.492-7.387-6.464-1.975-.495-5.276-6.2-6.464-7.388-2.821-2.821-4.086-5.01-6.464-7.388-3.024-3.024-1.259-7.641 0-10.158 1.557-3.113 4.451-5.374 6.464-7.388.061-.06-8.049 2.474-9.234 2.771-5.26 1.315-4.648-1.877-7.388-4.616-2.115-2.116-1.847-7.891-1.847-12.006-.004-3.37-6.479-3.587-9.093-4.242z"/>
+    <path fill="url(#b)" d="M576.838 504.029c-9.562 8.733-1.756 22.77 8.361 25.704-1.598 13.859-17.187 10.598-24.836 18.721-3.89 7.558 25.33 1.455 10.477 9.57-7.657.782-17.566 29.471-8.543 15.504 9.216-1.451 16.391-16.34 25.786-9.395 7.934-2.815 8.692.397 1.978 4.546-6.456 5.635-11.055 20.145-19.595 13.828-6.35 9.193-18.704 14.052-29.735 14.126-8.129 1.425 5.1 13.699-7.391 14.745-12.32 6.354-1.907-15.091 4.695-15.264-.008-9.392 5.42-13.79 14.906-12.991 9.294-13.903 5.078-17.385-3.314-8.411-7.525 7.673-19.243 11.37-29.867 10.586-3.881-9.669-15.718-4.406-21.508-8.927 10.072-10.691 26.336-11.242 38.236-19.22 6.947-3.139 18.778-2.205 14.654-12.9 3.105-6.907 17.028-6.703 17.775-11.057-6.354-.772-10.577-.342-11.255-5.604-10.298 2.208-11.205 10.56-10.12 19.031-5.68 10.438-18.792 5.837-27.822 10.653-11.336 2.043-24.049 3.341-34.53-2.217-7.587-3.538-19.957 7.23-23.89 3.726 7.007-8.155 18.789-5.14 27.583-10.189 9.258-5.513 24.856-18.661 20.254-29.831-13.896-3.216-19.453 16.313-27.848 21.335-6.814-2.657-11.503-7.32-19.168-4.487.881-6.621.637-12.967-8.966-13.163-12.066 4.136-23.757-9.827-10.444-17.254.891-8.533-14.441 1.033-18.305 3.237-15.669 6.247-4.521-15.075.317-20.128.606-10.416 5.156-22.717-.642-32.133-7.066-3.264-20.024-17.791-6.326-20.582 11.374 5.229 27.564-1.464 19.447-15.57-2.184-6.472-9.584-22.555 2.05-22.161 3.226-6.786-6.219-17.833 6.229-21.022 6.538-8.43 12.817-15.92 23.683-18.215 11.085-7.214 18.934-17.523 24.297-29.544 3.148-14.628 21.739-4.051 31.688-3.442 7.279 5.26 2.206 20.046.264 28.191-3.766 10.045-2.905 21.63-.929 31.993 4.699 10.88 15.433 17.625 21.646 27.333 5.179 10.996-1.49 27.187 9.35 34.426 8.952 8.976 15.183 29.978 20.189 41.359 1.335 1.647 20.009 4.67 26.487-4.684 7.785 3.184 13.006 9.909 12.391 10.671-1.797 2.229 8.926 11.505-1 15.49-4.861 1.951-7.351-6.777-11.5-9.335-4.149-2.556-10.942 1.551-12.601 1.609-6.626.23-11.619-.648-12.608 1.342z"/>
+    <path fill="#B3B3B5" d="M464.875 363.909c-6.202 3.69-3.985 11.711-4.914 17.616-1.96 6.176-9.018 7.635-14.603 8.768-6.573 1.13-11.548 7.325-18.668 6.037-6.043-.266-12.885.926-17.778-3.541-45.154-49.696-22.15-88.81-17.912-98.714-18.712-36.003 116.302-22.75 100.268 23.291 1.581 5.168.552 10.73.149 15.976-2.874 4.406-8.476 7.001-8.742 12.861-2.344 5.612-15.568 16.747-17.8 17.706z"/>
+    <path fill="#FBFBFC" d="M519.357 332.511c-1.146 1.17-3.108 1.21-4.65 1.679-2.924.554-5.896 1.18-8.884 1.041-3.533-.778-5.801-3.909-8.849-5.594-2.075-1.234-4.085.851-4.271 2.879-.172 1.792-1.049 4.529.898 5.62 2.86 1.44 6.107 1.75 9.133 2.687 2.01 1.054.303 3.372-.79 4.472-1.417 1.462-2.985 2.818-4.751 3.838-1.821.399-4.178 1.468-4.021 3.68-.203 1.854 2.06 3.48.967 5.213-1.955 2.942-5.856 4.253-7.045 7.752-.765 1.321.693 2.547 1.52.986 1.038-1.546 1.832-3.377 3.725-4.087 2.173-1.166 4.551-1.876 6.913-2.541 1.447-1.137 1.521-3.208 1.869-4.888.395-2.161.292-4.406.831-6.533 1.206-2.379 4.308-2.668 5.896-4.706 2.043-2.251 4.028-4.708 6.893-5.958 1.772-.553 3.489-1.198 3.743-3.323.288-.74.578-1.479.873-2.217z"/>
+    <path fill="url(#c)" d="M526.698 258.167c3.346-7.127 5.086-10.586 0-15.671-5.218-5.219-11.753 3.792-11.753-7.835 0-4.709 6.694-7.186 7.836-11.753 1.112-4.453-3.51-12.244-5.224-15.671-3.275-6.55-3.338-7.255-7.836-11.753-5.478-5.478 1.062-21.304 4.57-24.813 2.79-2.789-68.9-38.439-164.547-13.711-.981.253-6.351 16.798-7.183 17.63-4.76 4.76-6.901 5.042-5.223 11.753.169.677 23.129-2.54 24.898-2.54 6.53 0 7.778 3.154 14.279 2.54 29.504-2.771 124.634 16.573 133.205 19.589 6.578 2.314 4.602 7.773 2.611 11.753-1.222 2.444-10.007 6.09-11.753 7.835-1.146 1.146 4.485 8.008 2.612 11.753-2.456 4.91-5.804 5.95 0 11.753 4.231 4.232 4.942 7.554 9.141 11.753 2.279 2.277 13.71-2.349 14.367-2.612z"/>
+    <path fill="url(#d)" d="M385.791 330.104c-.23.459 6.591-1.648 7.835-1.959 3.177-.794 4.939-2.143 7.183-3.265 4.573-2.287 1.736-1.306 4.571-1.306 3.112 0 4.379-.924 5.876-3.917 1.102-2.203 3.146-3.799 4.571-5.224 1.33-1.33 3.236-1.952 5.877-2.612 3.797-.95 4.995-.425 7.183-2.612 2.905-2.906-5.906-2.612-7.183-2.612-3.903 0-4.983.997-3.918-3.265.05-.2-8.412-1.287-8.488-1.306-2.63-.658-4.637-3.625-6.53-4.571-2.811-1.406-4.564-2.61-7.183-3.265-3.073-.769-3.353-4.269-3.918-6.529-.838-3.353 2.266-5.292 3.918-6.53 2.613-1.96 3.788-1.764 7.183-2.612 3.691-.923 6.389.512 7.835 1.959 2.013 2.013 5.168 1.944 7.835 2.612 2.141.535 1.18 3.917 5.877 3.917 5.14 0 5.384.814 6.529 1.959.884.884-13.618 5.877-1.958 5.877 3.296 0 2.744 3.917 7.183 3.917 3.146 0 4.431-1.924 7.183-2.612 1.565-.392 2.948-5.263 3.265-6.53.653-2.61 2.597-3.856 3.265-6.529.75-2.999 1.923-4.425 2.612-7.183.727-2.908 2.611-3.593 2.611-7.183 0-3.68.907-5.352 3.266-6.53 2.187-1.094-.586-2.995-1.307-5.876-.873-3.495-1.833-5.373-2.611-8.489-.703-2.811 1.741-5.441 2.611-7.183 1.889-3.775-2.797-4.78-4.57-5.224-1.452-.363-3.777 3.393-5.877 3.918-3.147.786-2.611-3.188-2.611-6.53 0-3.836-1.366-4.601-3.918-5.877-2.229-1.114-4.814 1.959-7.836 1.959-1.961 0-3.426-4.079-4.571-5.224-1.578-1.578-1.987-4.685-2.612-7.183-.897-3.588-3.06-2.612-7.183-2.612-1.074 0-4.483-2.753-6.53-3.265-2.83-.708-5.517-1.379-7.835-1.959-2.601-.65-4.19-1.864-7.183-2.612-2.736-.684-5.946-.636-8.488 0-.727.181-4.01-3.357-4.571-3.918-4.189-4.188-14.1 1.5-16.324 2.612-2.26 1.13-4.964 2.058-7.183 2.612-3.242.811-5.08 2.867-7.183 3.918-2.231 1.116-3.983 2.954-5.224 3.265-.469.118-5.247-2.944-6.53-3.265-3.079-.77-6.388-.653-9.795-.653-3.351 0-4.907 1.474-7.183 2.612-1.938.969-3.109 4.261-3.918 5.876-1.426 2.851-2.612 2.824-2.612 7.183 0 3.062 2.146 3.823 1.306 7.183-.64 2.562-5.796-2.245-6.53-2.612-.235-.118-4.228 4.322-5.224 4.571-2.48.62-2.788 4.622-3.265 6.53-.538 2.15-3.377 4.03-4.571 5.224-2.074 2.075-3.472 3.68-4.57 5.876-1.905 3.809-3.925 1.276-4.571-1.305-.511-2.043 4.014-5.225-1.959-5.225-2.303 0-4.656 2.329-6.53 3.265-3.16 1.58-4.782-2.802-5.224-4.571-.538-2.15 1.863-5.685 2.612-7.183 1.396-2.791 1.148-5.244 1.959-8.489.588-2.351 2.523-2.258 3.265-5.224.852-3.406 5.264.733 2.612-4.571-1.47-2.939 2.447-7.885 3.265-9.794 1.441-3.364 3.427-2.734 6.529-1.959 2.848.712 6.842 0 9.794 0 4.255 0 4.527-1.262 6.53-3.265 1.713-1.712 4.134-3.046 5.877-3.917 3.128-1.564 5.016-.445 7.183-2.612 1.362-1.363 5.441-2.394 7.183-3.265 2.707-1.354 5.006-1.251 7.835-1.959 2.533-.633 5.209-1.625 7.183-2.612 3.235-1.618-4.053-3.788-4.571-3.917-2.773-.693-4.8-1.306-8.488-1.306h-9.795c-3.178 0-5.215 1.302-7.835 2.612-2.403 1.202-4.657 1.817-7.835 2.612-2.743.686-4.543 1.952-7.183 2.612-2.255.563-2.204 3.04-6.53 1.959-1.917-.479-4.553 1.959-7.835 1.959-3.44 0-4.505-1.696-5.224-4.571-.823-3.292 1.945-4.517 2.612-7.183.687-2.745-5.305 1.999-7.836 3.265-2.505 1.253-4.533 2.266-6.529 3.265-2.71 1.355-4.167 2.208-5.877 3.917-3.488 3.488-10.404 7.911-16.324 10.448-2.312.99-3.644 2.801-5.877 3.917-1.985.993-3.269 3.922-4.571 5.224-2.15 2.151-3.407 3.549-4.571 5.877-1.505 3.01 3.818-.929 4.571-1.306 4.707-2.354 2.117 1.148.652 2.612-1.995 1.996-3.542 2.889-5.224 4.571-1.995 1.996-2.889 3.543-4.571 5.224-2.674 2.675-3.933 1.275-5.224-1.306-.111-.223-4.695 5.349-5.224 5.876-1.586 1.586-3.044 4.35-4.571 5.877-2.596 2.596-3.196 4.227.653 3.265 2.295-.573-2.525 3.179-3.265 3.918-2.649 2.649-1.846-.192-5.224.653-1.869.467-4.163 3.509-5.224 4.571-3.274 3.275-1.708 2.962-1.306 4.571.361 1.444 1.59 1.674-1.305 4.571-1.996 1.995-3.543 2.889-5.224 4.571-1.927 1.926-2.858 3.755-3.918 5.876-1.012 2.023-3.677 3.677-5.877 5.877-.829.829 1.831 2.216 1.306 3.265-1.292 2.583-2.191 4.382-3.265 6.53-1.675 3.349 4.453-6.026 6.529-9.142 1.757-2.635 2.919-4.878 4.571-6.53l5.224-5.223c1.241-1.241.132 3.654-.653 5.223-1.247 2.494-2.789 3.62-3.918 5.877-1.146 2.292-3.42 2.923-4.57 5.224-1.218 2.437-3.387 2.855-4.571 5.224-1.729 3.457-2.667 2.393-1.959 5.224.561 2.244 3.536-3.154 4.571-5.224 1.335-2.672 4.234-.613 5.224-4.571.725-2.902 3.522-3.656 4.571-3.918 1.702-.426 2.868 2.187 4.571 2.612 2.274.569-2.611 4.186-2.611 6.53 0 6.09-3.758-2.602-5.225 3.265-.469 1.877-3.01 4.062-3.917 5.877-1.247 2.493-2.789 3.619-3.918 5.876-1.477 2.953-3.265-5.175-3.265-6.529 0-3.6-.289-1.67-2.612.653-1.616 1.617-2.479 4.957-3.265 6.53-1.191 2.384-.528 6.376 0 8.488.919 3.676 3.822 2.333 5.877 1.306 3.273-1.637 1.959 1.371 1.959 5.224 0 4.445-3.308 1.959-6.53 1.959-1.799 0-3.451 4.942-3.918 5.876-1.11 2.222-.743 6.236-1.306 8.489-.865 3.46-2.958 4.811 1.306 5.876 1.483.371 4.059-5.194 4.571-5.876 1.363-1.817 1.306-5.565 1.306-8.489 0-3.055.653 6.086.653 9.142 0 4.138 3.662 1.959 6.53 1.959 2.481 0-.26 6.073 1.959 7.183 3.704 1.852.128 2.548-2.612 3.917-.459.23 2.612 3.287 2.612 4.571 0 5.645-3.918-1.048-3.918 4.571 0 4.444.538 5.109 2.612 7.183 1.995 1.995 2.889 3.542 4.571 5.224 2.514 2.515.5 5.377-.653 6.53-1.282 1.282-3.028-6.17-4.571 0-.422 1.688 0 6.639 0 8.488 0 3.183-1.738 5.434-2.612 7.183-1.084 2.168-3.167 3.723-3.265 3.918-1.035 2.069 3.536 3.154 4.571 5.224 1.668 3.335 4.434 1.443 5.877 0 3.655-3.654 2.612.274 2.612 3.918 0 4.26 1.995 3.936 4.571 5.224 4.671 2.336 3.917 2.293 3.917 10.448 0 2.882 2.269 4.537 3.266 6.53 1.532 3.063 2.902 2.754 1.958 6.529-.679 2.718-1.38 4.926-.653 7.836.67 2.681 2.906 3.559 4.571 5.224 1.927 1.926 6.442.044 7.835-.653 1.196-.599.654-7.244.654-9.142 0-.726 5.22-3.754 5.876-3.918.322-.08 1.306 6.985 1.306 8.489 0 2.527-4.307 1.058-3.266 5.224.637 2.545 3.918.441 3.918 5.876 0 4.908 3.416 1.155 4.571 0 1.629-1.629 5.585-1.813 7.183-2.612 2.33-1.164-2.336-5.428-2.612-6.529-.653-2.61-2.597-3.856-3.266-6.529-.955-3.821 4.751 1.667 5.224 2.611 1.252 2.505 2.502 3.891 5.225 4.571 2.813.703.32-9.164 1.958-2.611 1.149 4.594 7.093 1.677 9.142.652 1.574-.787 3.03-3.474 5.224-4.57.235-.118 5.209 4.236 5.877 4.57 3.053 1.526-1.231 4.421-1.959 5.877-2.066 4.133 34.373 24.394 35.26 23.507 2.65-2.65 4.983-.894 6.529.652 3.992 3.991 4.765 1.354 8.489-1.305.163-.117-5.523.6-3.265-3.919 1.159-2.317.569-7.012 1.306-8.488 1.176-2.353 2.059 3.037 5.55 2.285 2.774-.598 1.959-2.386 1.959-5.224 0-1.66 3.386-.112 4.244-.327 4.518-1.129 2.102-2.212 5.224-.652.629.315 0 8.738 0 9.794 0 2.435-.715 4.822-1.305 7.184-.426 1.703-3.655-.132-5.225.652-1.292.646-1.959-2.755-1.959 3.919 0 2.913-3.265 2.059-3.265 6.528 0 3.056-2.692 1.96-6.53 1.96-1.971 0 .741-4.483-.653-5.878-2.699-2.698-4.777 1.481-5.224 3.266-.985 3.941 25.11 8.747-.653 5.876-3.059 1.529-1.782 4.271-.653 6.531.62 1.238 74.6-51.771 75.092-76.397.062-3.151 1.999-9.756 2.612-9.143 1.371 1.371 8.247.654 10.447.654 3.41 0 6.583-.667 9.142-1.307 4.82-1.205 1.057-2.674-1.306-3.265-3.974-.994-4.913-.342-7.183-2.611-2.123-2.123-.28-1.679 1.958-3.918.067-.067-2.657-2.764 1.959-3.917 3.013-.754 3.265-5.098 3.265-7.836 0-5.41 2.778.985 3.265 1.959.948 1.898 4.456 3.86 5.876 4.571.025.013 3.141-6.281 3.265-6.53 1.089-2.178 1.958-4.95 1.958-7.835 0-3.871-4.722-1.104-6.529-.653-3.412.853-4.571.443-4.571-3.918 0-4.377.47-4.489 1.306-7.835.15-.6 4.486-3.095 5.224-4.571.794-1.589-3.252-.653-6.53-.653-4.407 0-1.046-3.983 1.306-4.571 3.45-.862 6.169.726 8.489 1.306 1.537.385 1.306-2.986 1.306-4.571 0-2.22 4.376 1.844 6.53 1.306 3.693-.924.802-2.864 5.224-.653 2.203 1.101 5.925-1.983 7.183-2.612 2.896-1.448 4.016-2.098 7.183-1.306 2.428.607 4.497 3.191 5.877 4.571 2.521 2.521 2.022 3.576 5.877 2.612 3.579-.895 6.238.743 8.488 1.306 2.369.592 2.511 3.729 5.877 4.571 3.198.8 5.679-.049 8.488.653 5.366 1.341 3.842-1.459 2.612-3.918-.371-.74 3.176-4.87 3.265-5.224.517-2.068-2.63-3.845-1.959-6.53.055-.217 11.74-1.309 3.918-3.265-2.941-.735-6.135-.588-8.489 0-3.683.921-.641 6.542-5.224 1.959-3.294-3.294 1.414-4.761 3.265-5.224 2.058-.515 7.048-.523 1.307-1.959-3.116-.779-4.885-1.62-6.53-3.265-1.12-1.12-3.033-.922-4.57-1.306 1.088-.653 2.176-1.306 3.265-1.959 1.572-.943 2.137-5.401 3.265-6.53 1.721-1.72 4.169 2.674 6.53 3.265 3.848.962 2.05 3.827.652 5.224-2.992 2.992 3.295 4.571 5.224 4.571 2.179 0 3.266 6.786 3.266 0 0-2.426 2.102-5.224 4.57-5.224 3.931 0 3.468-3.105 2.612-6.53-.955-3.818-3.266-2.846-3.266 1.306 0 4.223-2.884 3.265-5.224 3.265-4.073 0-5.045-.591-5.876-3.918-.653-2.612 5.427.755 7.835 1.959 2.508 1.253-1.618-4.074-2.611-4.571-1.247-.623 3.598-2.28 2.611-3.265-1.768-1.768-6.511 2.276-7.183 2.612-3.547 1.773-4.81-.772-7.183-1.959-2.942-1.471-2.747-2.973-6.529-3.918-3.861-.965-4.622 2.162-5.224 4.571-.582 2.327 4.398 1.478.652 5.224-2.914 2.915-4.635-2.023-5.876-3.265-1.835-1.834-5.552-1.306-8.489-1.306-3.997 0-1.733-4.166-1.306-5.877.487-1.947-3.613-4.267-4.57-5.224-2.833-2.833-3.096-1.331-3.919 1.959-.911 3.649-2.578 4.571 2.612 4.571 4.379 0 1.527 4.35.653 5.224-2.771 2.771-5.104-1.546-7.183 2.612-1.716 3.432-4.789.87-2.612 5.224 1.028 2.056-2.337 2.509-.653 5.877 1.313 2.625 2.565 3.73 3.265 6.529 1.333 5.335-1.78 4.808-5.224 6.53-4.123 2.061-3.918-1.038-3.918-4.571 0-3.306.653-5.409.653-9.142 0-4.478-.943-4.317-4.571-5.224-3.375-.843-6.917.521-8.488 1.306-3.436 1.718-2.347 1.765-5.877 0-2.134-1.067-1.306-5.467-1.306-8.489 0-2.692-5.224 1.306-7.835 1.959-3.451.866-6.914-.52-9.788-1.957zm-69.295 91.939c.631 2.355-3.17 3.247-2.96 4.693.104.797.427 1.542.765 2.265-.421 1.237-1.558 1.987-2.42 2.896-1.036.896-2.109 1.943-2.358 3.353-.41 1.865 2.111 9.242 1.495 11.076-.309.61-3.215-4.759-3.654-5.246-.805-.642-1.569-1.487-2.653-1.601-1.452-.345-3.58-.119-5.017-.533-.923-.557-1.767-2.198-1.881-3.187-.14-1.022-.234-2.109.174-3.083.426-.513 1.156-.583 1.775-.502.641-.12.861-1.022.449-1.487-.471-1.225-.812-3.729-.781-5.094.175-1.253 1.18-2.15 2.121-2.891.941-.703 2.154-1.12 2.797-2.162.332-.464.468-1.159 1.084-1.342.693-.021 1.099.657 1.349 1.209.424.886 1.451 3.434 1.587 4.404-.337.554.433 1.363.974.931 1.099-.726 1.693-1.957 2.66-2.823.788-.493 3.026-1.117 4.494-.876z"/>
+    <path fill="url(#e)" d="M260.395 441.698c.234-.118 5.208 4.235 5.876 4.569 3.052 1.526-1.231 4.419-1.959 5.875-2.065 4.133 4.109 3.264 6.529 3.264 4.037 0 2.137 4.51 1.958 5.224-.774 3.096-1.464 4.253 0 7.181 1.394 2.788-.653 4.048-.653 7.835 0 3.659-2.964 3.264-6.528 3.264-4.052 0-5.58-.801-8.487.652-.565.283-2.932 5.863-3.264 6.529-1.096 2.19-4.166 3.061-5.875 3.917-2.501 1.25.365 7.259.653 7.833 1.056 2.114 3.887 2.553 5.223 5.224 1.791 3.581-.462 5.412 1.958 7.833 2.074 2.075 1.688 3.687 5.223 4.571 3.21.802 1.988-.335 5.875-1.308 2.244-.561 2.934 3.588 4.57 5.224.834.834.651 5.872 1.305 7.181 1.638 3.275 5.365-2.044 6.529 2.611.962 3.85 4.459.71 5.875 0 2.219-1.108.849 4.962 1.958 7.182 1.251 2.5 6.104 2.188 2.612-1.306-1.801-1.801 1.994-4.711 2.611-7.182.244-.976-7.228-1.807-7.834-1.958-4.009-1.002-1.763-4.112-.653-5.223 1.952-1.951 5.649 3.466 5.875 3.917.004.009 2.777-4.569 5.222-4.569 4.795 0 3.449-3.08 1.307-5.224-3.977-3.976-.054-3.21 0-3.264 1.077-1.076 3.888 1.362 4.569 0 2.04-4.08 1.958 3.27 1.958 5.224 0 .791 5.385-.939 6.529-.653 4.53 1.132 4.011-.377 4.57-2.612.123-.489-5.552-3.594-5.875-3.917-2.756-2.755-3.917-1.977-3.917-6.527 0-5.112-.782-5.095-3.265-2.612-2.125 2.126-2.757-.798-4.569-2.611-2.117-2.116-3.265 6.209-3.265 0 0-2.661-1.646-5.251-2.611-7.181-1.119-2.237.282-7.658.653-9.14.896-3.581.802-.653 3.917-.653 1.871 0 3.684-4.336 4.57-5.222 2.65-2.65 4.982-.895 6.528.652 3.99 3.99 4.764 1.354 8.487-1.306.163-.116-5.523.601-3.264-3.918 1.158-2.316.568-7.011 1.305-8.486 1.176-2.353 2.058 3.038 5.549 2.286 2.773-.599 1.958-2.387 1.958-5.224 0-1.66 3.386-.111 4.244-.326 4.516-1.13 2.102-2.214 5.222-.652.628.313 0 8.735 0 9.791 0 2.434-.715 4.821-1.306 7.183-.426 1.701-3.653-.132-5.223.652-1.292.646-1.958-2.756-1.958 3.917 0 2.913-3.264 2.059-3.264 6.529 0 3.053-2.692 1.958-6.528 1.958-1.971 0 .74-4.483-.653-5.877-2.7-2.698-4.777 1.479-5.223 3.265-.985 3.941 4.435 3.332-.653 5.876-3.058 1.529-1.781 4.271-.652 6.527.619 1.24 4.479 3.873 5.875 4.571.972.484 2.531 5.796 3.264 6.527.87.871 2.118-.666 3.264 3.917.51 2.04 1.67.803 2.612 4.57 1.192 4.77-3.251 3.265-5.876 3.265-3.627 0-4.067 2.257-5.223 4.569-1.807 3.612.771 5.742-3.917 4.57-2.748-.688-4.348-4.127-1.959.653.919 1.835-2.095 3.779.654 6.527 2.156 2.157 2.083 3.917 5.875 3.917 4.474 0 5.096-.399 6.528-3.265 1.562-3.123 2.214-3.916 6.528-3.916 7.728 0-1.621 1.35-.653 5.222.687 2.746 5.292 1.779 7.181 1.306 2.489-.622-5.725-5.021 1.306-3.264 3.108.777 4.568.001 6.528-1.958 1.836-1.836 3.608-5.223-.653-5.223-2.91 0-5.909.645-8.486 0-2.936-.734-4.725-1.307-8.487-1.307-4.974 0-.309-2.954.653-3.917.985-.985 1.364-2.64 2.611-3.264 1.185-.592 3.325.531 3.917-.652.486-.973-1.556-1.696-2.612-1.959-2.079-.52 4.36 1.096 5.875 2.611 1.231 1.231 3.666.778 5.223 0 1.159-.58 9.7 3.824 11.098 5.223 1.548 1.549 1.954.004 3.917-1.959 1.226-1.225-1.865-4.847-1.306-2.61.64 2.562 6.539.977 7.834.652 2.468-.616 1.599-3.264 6.528-3.264 3.738 0 5.408-.653 9.14-.653 3.631 0 5.936-1.974 8.486-2.61 2.08-.521.468 5.875 2.612 5.875 1.477 0 3.178-5.137 3.917-5.875 3.09-3.091 3.917-.312 3.917 3.264 0 2.272 4.497-.943 6.529-1.959 2.612-1.307.637-5.906 0-7.182-1.771-3.54.759-4.054 3.917-3.264 2.36.59.415-5.46-1.306-7.181-1.466-1.468-5.612-2.22-7.181-2.612-2.936-.733-5.79-.368-1.306-2.611 3.667-1.832 3.036-6.273-.653-8.485-2.059-1.236 1.478-5.568 1.958-6.529 1.387-2.773 2.825-3.478 4.57-5.223 1.994-1.994 3.541-2.889 5.222-4.57 1.871-1.869 1.958-4.801 1.958-7.834 0-2.584.654-5.755.654-9.14 0-.59-4.204 2.756-5.223 3.266-3.071 1.534-4.763 1.534-7.834 0-3.126-1.564-3.777-2.705-4.57-5.877-1.136-4.546.925-5.127 3.917-5.875 2.507-.628 3.642 5.429 3.917 6.528.773 3.091 0-3.976 0-5.875 0-2.685-2.461-4.925-3.264-6.529-1.167-2.334-3.036-3.207-5.875-3.917-3.06-.765-4.101-2.326-5.223-4.569-1.359-2.719-1.305-5.026-1.305-8.487-6.488 3.245-9.544 3.316-16.983 3.316-2.083 0-4.5-9.139-4.922-10.827-.98-3.923-2.953-8.314-2.953-12.796 0-3.464-4.327-7.28-5.906-8.858-3.368-3.369-4.798-3.937-10.827-3.937-4.602 0-5.533 4.549-7.874 6.89-3.25 3.249-6.478 1.306-7.875 6.89-1.043 4.173-3.204 6.409-4.921 9.843-1.992 3.985 2.123 4.058.984 8.613-.994 3.975 6.852 4.582-7.136 13.779-3.575 2.352 4.419 10.188 2.707 12.304-2.538 3.137-4.779 1.022-6.397-2.214-2.023-4.047 3.108-3.027-1.477-3.938-4.045-.803-11.793-6.144-15.256-7.874-4.249-2.125-5.495-2.953-11.812-2.953-5.846 0-10.789 1.458-15.256 3.69-1.315.661-4.526 4.336-2.908 7.659z"/>
+    <path fill="#E5E5E6" d="M587.151 321.813c2.188 1.132 4.009 3.036 6.439 3.644 2.619.28 3.914-2.522 5.904-3.663.899 1.126-1.046 3.584-1.17 5.202-.213 1.497-1.714 5.073.726 5.138 2.001-.898 3.566-2.592 4.921-4.275.741-1.779 2.657-3.612 4.273-1.506 1.269 2.16 3.362.856 4.763-.426 1.357-1.244 2.344.13 1.211 1.337-1.173 2.31-3.035 4.479-3.11 7.174-.12 1.528 2.011 3.312 2.016 4.078-1.158-.013-3.521-1.511-3.989-.612 1.423 2.25 3.341 4.19 5.395 5.872 1.08.468 4.525 2.334 1.824 2.934-1.379.656-3.776-.807-4.513.593.477 2.497 2.123 4.572 3.224 6.824.497 1.07 1.704 2.94 1.409 3.603-1.373-.718-3.483-1.476-4.63.012-1.321 1.909-.091 4.48-1.265 6.408-1.766-.479-2.149-3.031-3.112-4.475-1.639-3.155-2.075-7.037-4.878-9.497-2.489-2.54-4.478-5.521-7.025-8.008-2.798-3.002-3.084-7.24-4.308-10.96-1.114-2.972-3.37-5.445-3.939-8.639-.06-.252-.116-.505-.166-.758z"/>
+    <path fill="url(#f)" d="M451.607 273.185c2.959 1.229 5.066-.574 7.836-1.959 2.677-1.338 2.434-3.057 5.877-3.918.793-.198 1.216-8.132 1.306-8.488.909-3.638-.222-5.658 3.265-6.53 2.51-.627 3.64-2.986 5.224-4.571 1.462-1.462 6.592 1.306 8.488 1.306 4.284 0 5.822-.055 7.836 1.959 2.257 2.257 3.923 2.45 7.183 3.265 3.725.931 4.671 2.662 7.183 3.918 2.155 1.077 7.88-.338 9.142-.653 4.3-1.075-2.555-5.848-2.612-5.876-2.396-1.199-4.342-2.384-5.876-3.918-2.651-2.65-2.612-1.649-2.612-3.265 0-.676-7.39-2.07 0-3.918 4.123-1.03 5.528-.348 2.612-3.265-2.479-2.478 5.773.601 5.876.653 3.036 1.518 3.984 2.025 5.877 3.918 1.802 1.801-6.043.333-7.183 2.612-.811 1.622 4.256 4.255 5.224 5.224 3.258 3.257-2.086 4.376 3.918 5.877 1.394.349 4.743-4.744 5.224-5.224 2.923-2.923 3.918-1.596 3.918 1.306 0 2.539-4.407 3.959.653 5.224 3.587.896 3.624 2.479 2.611 6.53-.752 3.011-1.959 4.148-1.959 8.488 0 2.689 2.887 3.987 5.224 4.571 3.608.902 3.879.827 7.183 0 2.543-.635-1.288 5.293-.652 7.835.61 2.443 4.588 3.936 5.876 5.225 2.333 2.331-1.884 4.534-3.265 5.224-3.316 1.658-1.61 4.614-.652 6.53 1.384 2.767 2.728 3.497 3.917 5.876 1.716 3.43 3.421 4.166-1.306 6.53-1.569.784 1.894 3.982.653 5.224-2.766 2.765-3.846 1.449-1.959 5.224.473.945 5.32-.653 7.835-.653 2.434 0-.217 5.006-1.305 7.183-.725 1.449 6.149 0 7.182 0 2.66 0 5.194 3.143 3.918-1.959-.856-3.427-.532-5.465.653-7.835.255-.51 6.852 4.24 7.183 4.571 1.847 1.847 1.168-5.5 0-7.836-1.086-2.172-2.074-5.684-2.611-7.835-1.271-5.081 4.225-1.152 5.224-.653 3.332 1.666 5.876-.411 5.876 4.571 0 2.303-2.611 3.871-2.611 7.183 0 3.1 4.498 1.306 7.183 1.306 3.222 0 3.918 2.492 3.918 5.877 0 2.313-4.663 2.326-5.224 4.57-.199.795 3.581 4.533 3.917 5.877.712 2.848 0 6.842 0 9.794 0 2.752 3.862 3.265 6.53 3.265 2.5 0 5.816 1.455 7.835 1.959 1.284.321-.632 3.597.653 3.918 5.669 1.417 3.951-.133 3.265 2.612-.103.411-1.294 6.952 2.915 6.952 3.025 0 7.319 1.756 9.491 2.842 1.545.772 0 6.829 0 7.183 0 2.771 4.639 3.399 5.877 5.876 1.321 2.643 2.15 4.3 3.265 6.53 1.288 2.576 2.283 4.242 3.918 5.877 2.481 2.481 3.146-1.306 7.183-1.306 2.743 0 3.265 4.274 3.265 5.224 0 2.347-4.221.7-1.959 5.224 1.068 2.136 2.073 5.028 2.612 7.183.733 2.937 1.306 4.726 1.306 8.49 0 3.737.653 5.407.653 9.14 0 3.787-1.307 5.37-1.307 9.143 0 3.815-.689 6.021-1.306 8.488-.845 3.379-1.34 4.639-2.611 7.184-1.281 2.562-2.146 4.29-3.266 6.529-1.306 2.611-2.432 5.47-3.738 8.081-1.332 2.665-2.958 3.422-4.02 5.545-1.021 2.045-1.553 6.641-2.036 8.575-.684 2.732-2.159 4.569-5.224 4.569-1.358 0 .507-8.196-2.612-1.958-1.317 2.636-.317 6.513-1.306 8.488-.903 1.809-4.521 3.239-5.877 3.919-2.507 1.253-4.23 1.873-7.183 2.61-.612.153.653-3.396.653-6.529 0-4.569-2.342-2.837-3.265-6.53-.571-2.282 4.159-4.69 5.224-5.224 2.663-1.332 5.877.277 5.877-3.916 0-5.716 1.726-2.556 2.959-.088.231.463 6.246-3.443 6.246-5.094 0-2.512 4.379-4.26 5.276-6.055 2.188-4.377-8.061-6.287-9.911-4.437-2.726 2.725-2.646 2.922-5.877 1.307-3.021-1.511-1.193-3.727-4.57-4.57-.054-.014-4.678 4.676-5.224 5.224-2.804 2.804-5.203 1.263-3.265-2.612 1.696-3.396.877-3.693-1.307-5.877-2.649-2.65-.826-5.051.653-6.529 2.17-2.171 3.819-2.637 6.529-1.959 1.946.486-2.776 3.02-4.57 3.918-3.95 1.976 5.519 3.265 6.529 3.265 3.116 0 .245-6.938-1.959-9.142-2.243-2.243-2.57-3.306-5.224-.652-.953.952-4.124.858-5.877 2.611-3.124 3.123-5.224-.677-5.224-3.265 0-3.164 2.826-3.972 5.224-4.57 1.805-.451 3.909.644 5.225 1.958 1.636 1.636-2.936-3.588-4.571-5.224-2.342-2.342-2.408-3.102-3.265-6.529-.835-3.341 3.068-3.918 5.877-3.918 2.932 0 2.611 4.369 2.611 7.183 0 4.703 1.13 2.663 1.959-.653.962-3.848-1.028-5.974-1.959-7.836-1.199-2.396-2.804-3.648-3.918-5.877-1.329-2.657 2.707-5.971-1.306-1.958-3.462 3.461-1.737.863-.653-1.307 1.229-2.456 2.21-4.42 3.266-6.53 1.099-2.198 1.996-4.72 2.611-7.183.515-2.061 2.988-4.017 3.918-5.876 1.229-2.459.944-5.808 1.959-7.836 1.598-3.195.41-5.467 3.265-2.612 2.021 2.022 1.822 5.12 1.306 7.183-.885 3.541-.563 4.749 0 5.877 1.14 2.279 1.994-4.711 2.612-7.183.634-2.537.694-6.042 1.306-8.489 1.122-4.489-1.218-5.898-3.918-5.224-1.478.37 0 3.047 0 4.571 0 2.188-4.573-1.631-6.529-.653-1.829.914-2.544 5.087-3.265 6.53-1.389 2.776.015 5.286.652 7.835.465 1.86-1.099 1.72.653 5.224.866 1.732-5.857.019-7.183-1.306-3.884-3.883-1.521 4.142-1.306 4.571 2.878 5.757-2.889 1.683-3.918.653-1.772-1.772-3.854-1.243-5.877-3.265-.778-.778-3.771 2.085-5.876 2.612-3.895.974-2.602-3.22-3.266-5.876-.598-2.389-4.122-3.021-5.224-5.224-2.531-5.062-3.161-.237-2.611 1.958.879 3.517 1.959 4.569.652 7.183-1.874 3.75.211 5.171-5.224 6.53-1.442.361-2.953 5.283-3.265 6.53-.836 3.346-.139 4.672.652 7.836.307 1.224-2.09 5.097-2.611 7.184-1.004 4.015 1.22 5.979 2.611 7.835 2.035 2.713 2.112 4.611 1.307 7.836-.592 2.367 4.941 2.612 7.183 2.612 4.274 0 5.825-.053 7.836 1.958 2.755 2.756-1.039 4.639 3.917 5.877 4.024 1.006 3.697 2.382 4.57 5.876.265 1.056-2.589 5.833-3.264 7.184-1.058 2.114-.209 7.361-.653 9.142-.89 3.559-1.21 4.84-1.959 7.835-.212.852 2.612 4.587 2.612 7.183 0 3.646.057 4.456-1.307 7.183-1.408 2.816-1.094 4.354-4.57 5.224-4.755 1.188-1.387-3.104-.653-4.571 1.435-2.868 1.179-4.715 1.959-7.835.59-2.361-5.441-1.088-6.53-3.265-.026-.055-3.082 3.173-4.569 3.918-1.771.885-3.83-4.481-4.571-5.224-5.919-5.919-4.054-.136-1.959 1.958 2.21 2.211 1.995 4.428 1.306 7.184-.638 2.551-5.323-1.405-7.183-3.266-3.099-3.099-3.534-1.689-.653-4.57 2.223-2.222 4.89-.686 3.919-4.571-.552-2.203-4.326 2.511-6.53 1.96-1.964-.492-5.326-10.466-.653-23.507.738-2.06 5.497-.216 7.453-1.194 2.264-1.132 3.081-1.135 4.953-2.071 3.752-1.875-.671-4.979-.731-5.224-.18-.717-3.728-3.807-4.491-4.57-2.246-2.245-.344-3.885-2.612.652-1.251 2.502-2.623 3.921-5.224 4.571-3.332.832-3.266-3.573-3.266-6.529 0-4.551-1.148-5.721-3.264-7.836-1.696-1.696-4.495 1.45-6.53 1.959-4.388 1.097-3.918-2.439-3.918-5.877 0-2.426.626-5.986 0-8.488-.339-1.357-3.71.653-5.224.653-2.313 0 2.936-3.588 4.57-5.224 2.448-2.447 8.489-3.287 8.489-7.184 0-3.461.016-5.91.652-7.183 1.14-2.279-4.903-1.473-7.183-2.612-2.81-1.405-2.544.517-3.918 3.265-1.247 2.494-4.799-2.84-5.224-3.265-3.476-3.476-1.032-1.959-6.529-1.959-.636 0-2.958.959-5.224-1.306-2.602-2.602-.7-4.559 1.959-5.224 3.853-.962 4.535 3.779 4.57 3.918.618 2.472 1.994-4.711 2.612-7.183.152-.61-5.502-6.904-7.836-4.571-1.547 1.547.325 4.573-.652 6.53-1.14 2.279-2.612-4.635-2.612-7.183 0-2.632-4.231-2.011-3.265-5.877.423-1.689 2.196-3.623 1.306-7.183-.354-1.419 5.524.552 4.571-3.265-.606-2.426-2.596-4.554-3.918-5.876-2.491-2.491-4.011-2.894-3.265-5.877.476-1.902 5.513 2.537 2.611-3.265-1.16-2.32-2.832-4.359-3.918-6.53-1.516-3.032-2.611-2.86-2.611-5.876 0-1.755 3.982.588 5.224-.653 2.521-2.521 2.113-2.956 3.918.653 2.231 4.463 2.611-.219 2.611-3.265 0-3.698 1.733-4.891 3.918-6.529.871-.653 1.843 2.728 2.612 1.959 2.312-2.312 2.71-2.612 5.876-2.612 1.154 0 2.85 4.779 7.183 2.612 2.774-1.387-.191-4.685-.652-6.53-.105-.424-6.058 3.029-6.53 3.265-4.755 2.377-2.784-2.265-1.959-3.917 1.846-3.69-2.561-.503-4.57 0-2.937.734-4.726 1.306-8.488 1.306-2.823 0-4.332-1.899-7.183-2.612-3.526-.881-5.514-1.777-8.489-3.265-2.278-1.14-4.678-2.639-7.183-3.266-2.61-.652-3.856-2.596-6.529-3.264-3.94-.985-.445 2.819.653 3.918 2.825 2.826-2.89 3.265-5.224 3.265-4.664 0-.854-3.817.652-4.571.106-.053-4.598-3.292-5.876-4.571-2.835-2.835-2.239-1.49-3.266 2.612-.506 2.024-4.86-.147-5.876 3.918-.451 1.804-3.42-1.508-5.224-1.959-2.282-.57-1.745 4.132-5.224.652-2.514-2.512-2.695-2.944-3.266-5.223-.694-2.778 5.626 1.306 8.489 1.306 2.62 0-.52-5.492.652-7.836.824-1.647-.514-6.432 0-8.488.277-1.111 3.194-2.982 3.918-5.877.569-2.274-.905-4.216-.653-5.224.295-1.178 2.612-2.85 2.612-7.183 0-3.343-4.168-1.305-7.183-1.305-4.772 0-.793.372-3.265-4.571-1.319-2.655-.44-4.44.658-7.189z"/>
+    <path fill="#504F55" d="M643.58 324.117c-2.555-5.11 3.838 10.781 5.224 16.324 1.378 5.514-4.838.779-5.877 0-.261-.196 2.01 6.58 2.612 7.183 2.101 2.101-.919 5.49-1.959 6.529-1.325 1.325-3.097 4.235-3.918 5.877-1.368 2.736-4.453 1.959-7.836 1.959-4.417 0-4.88-2.92-7.183-5.224-2.334-2.334-.521-4.179-3.918-5.877-2.413-1.207-4.3-4.03-5.224-5.876-1.228-2.458-2.762-3.565-3.918-5.877-2.182-4.364-.471-2.521 1.959-1.306 4.965 2.482 1.217-3.444.653-4.571-1.881-3.762-3.844-2.107-1.959-5.877 1.388-2.775 4.352-2.395 0-4.571-2.827-1.414-3.918-2.229-3.918-5.876 0-2.638 2.52-4.479 3.918-5.876 2.271-2.27 2.209-4.821 3.918-6.53 1.979-1.978 4.518-1.959 7.836-1.959 3.987 0 4.859 2.104 7.183 3.264 2.029 1.015 3.243 3.897 4.57 5.225 1.995 1.995 2.236 4.195 3.918 5.876 2.591 2.59 3.253 6.353 6.529 10.447"/>
+    <path fill="url(#g)" d="M519.516 200.053c-3.146.786-1.576 6.641-.652 8.488 1.54 3.08-2.456.528-4.571 0-2.916-.729-3.198-2.302-7.183-1.306-4.358 1.09-5.887-.675-3.917 3.265 1.827 3.655-4.241 1.144-5.225.653-2.042-1.021-4.57-6.288-4.57 0 0 3.211-2.711 3.943-5.224 4.571-4.153 1.038-4.57.434-4.57 5.224 0 4.235-.775 3.53-3.918 1.959-2.669-1.334-4.676-1.169-7.836-1.959-2.892-.723-4.863-1.452-7.183-2.612-2.779-1.39-2.382-3.044-5.877-3.918-2.724-.681-4.562-2.281-6.529-3.265-2.58-1.291-4.104-2.144-6.529-4.571-2.901-2.9-3.603-3.581-1.307-5.876 3.277-3.278-.621-1.967-3.265-1.306-2.416.604-3.746 2.568-6.53 3.265-3.735.933-4.396.047-5.224-3.265-.921-3.686 2.883-3.455-1.959-5.876-2.712-1.357-7.661-1.099-11.1-1.959-3.402-.851-4.875-1.872-7.836-2.612-3.05-.762-5.586-.726-8.488 0-2.768.692-4.472 2.587-7.183 3.265-2.569.643-4.586 2.293-6.53 3.265-2.848 1.424-6.029.25-7.835-.653-3.148-1.575-5.123.276-7.183 1.306-4.158 2.079-2.677.718-.653-1.306 2.171-2.171 2.793-2.331 6.529-3.265 5.133-1.283-2.648-1.306-4.571-1.306-4.083 0-4.866 1.217-7.835 1.959-4.336 1.084-3.628 1.125-5.876 0-1.846-.922 11.158-2.82.653-4.571-3.892-.648-.625-3.946.652-5.223.927-.926-6.041-.653-7.835-.653-5.112 0-5.306-.736-6.53-1.959-.292-.292 8.001-1.306 9.142-1.306 2.866 0 5.644-1.412 7.835-1.959 4.057-1.014.414 3.265 5.877 3.265 1.062 0 3.312-4.094 5.224-4.571 2.22-.555 3.377.788 6.53 0 3.55-.887 5.118.706 7.835-.652 2.019-1.01 3.045-3.481 5.224-4.571 3.583-1.792 1.645 3.967 1.959 5.224.234.939 4.427 2.037 5.224 5.224.569 2.275 4.255-3.18 6.53-2.611 2.243.561 2.667 1.619 6.529.653 2.538-.635 6.041-.694 8.489-1.306 3.268-.817 1.581-4.296 5.224-.653 2.676 2.676-.427 4.357 3.918 6.529 2.458 1.23 5.687 1.422 7.835 1.959 2.739.685 4.359 2.179 6.53 3.265 2.292 1.146 2.923 3.42 5.224 4.57 4.731 2.367 1.524-3.046.652-3.917-3.361-3.362 2.202-4.143 3.918-4.571 2.766-.692 9.907 5.28 12.406 6.53 2.503 1.251 4.997-3.039 5.877-3.918 1.25-1.25 7.382 1.029 8.488 1.306 3.93.982 6.043 1.97 5.224-1.306-.638-2.551 6.545.713 7.183 3.265.294 1.175 7.423.653 9.142.653 1.17 0 4.902 3.43 5.877 3.917 3.139 1.57 3.853 2.024 5.877 0 3.575-3.579 3.917 4.312 3.917 5.222z"/>
+    <path fill="#4F4F4F" d="M178.667 405.411c-3.776 1.383-4.851 5.996-4.683 9.612.208 3.231-.166 6.796 1.956 9.521 1.497 2.373 5.271 4.114 7.529 1.762 2.571-3.27 1.581-7.694 1.686-11.538.177-4.073-2.078-8.739-6.488-9.357z"/>
+    <path fill="#4D4D53" d="M408.185 202.174c.003 2.074-3.209 3.757-7.176 3.759-3.966.001-7.186-1.678-7.189-3.751v-.008c-.004-2.073 3.208-3.756 7.175-3.758 3.967-.001 7.186 1.677 7.19 3.751v.007z"/>
+    <path fill="#5D5C63" d="M417.653 394.637c1.565-2.243 3.097-5.206 3.918-8.488.993-3.972 3.586-1.97 4.571 0 1.499 2.997 1.684 4.15 5.224 3.265 4.379-1.094-1.772-4.804-2.612-5.224-3.53-1.765-2.507-3.37-.653-5.224 2.65-2.65 3.775-1.449 5.877.653.941.941 2.125 6.208 2.612 7.183 1.159 2.318 2.018-4.453 1.306-5.876-1.934-3.868 3.768-3.629 5.224-3.265 4.441 1.11 1.015 9.071.653 9.794-1.602 3.202-2.229 3.379-.653 6.53 1.402 2.805 2.747 3.375 1.959 6.53-.163.652-7.762.653-9.142.653-.47 0-4.862 4.209-5.224 4.571-2.353 2.354-1.773 3.708-5.224 4.571-3.114.778-4.62-2.624-7.183-3.265-2.559-.64-3.265-3.841-3.265-6.529.001-2.541.926-3.067 2.612-5.879z"/>
+    <path fill="#5F5E64" d="M558.041 257.514c1.213 1.213 5.117-.106 7.183 1.959 3.274 3.274-2.655 5.561-3.917 5.877-3.73.932-3.638-.747-5.224-3.918-.675-1.349-6.365-1.794-2.613 1.959 3.247 3.247.394 2.612-3.917 2.612-.625 0 3.26 3.913 3.917 4.571.544.543-6.99.422-7.835 0-2.942-1.471-3.789-2.098-4.571-5.223-.935-3.739 3.183-3.96-1.959-6.53-.108-.055.475 4.392-2.611 1.306-3.301-3.301 1.767-5.224-3.265-5.224-3.813 0-1.892 2.32-5.224.653-1.582-.792 4.456-5.109 4.57-5.224.803-.802 7.102-1.592 7.836-1.958 2.27-1.135-3.303-4.067-3.918-6.53-.32-1.284 2.634-.332 3.918-.653 1.53-.382 2.328.369 4.57 2.612 1.612 1.612 1.948-5.889 7.184-.653 1.24 1.241-1.895 3.983-.653 5.224 1.863 1.864 3.364 2.097-1.307 3.265-2.196.548 7.244 5.638 7.836 5.875zm94.027 108.392c2.054-2.053.095 6.436-1.959 8.489-2.147 2.147.594 6.41 1.306 7.835 1.39 2.778.248 6.033-.652 7.835-1.311 2.62-2.077 5.697-2.612 7.836-.743 2.972-1.959 3.562-1.959 7.835 0 2.435 5.224.344 5.224 4.571 0 4.095 3.265.206 3.265-3.265 0-2.498-3.265-4.461-3.265-8.488v-9.794c0-1.669 5.808 3.778 2.612-2.612-1.715-3.429 2.937 1.955 3.265 2.612 1.27 2.538-.653-5.65-.653-8.489 0-1.505 2.808-3.135 1.959-6.529-.099-.392-6.234-7.464-6.531-7.836z"/>
+    <path fill="#69686F" d="M595.261 477.564c0-2.92-2.612 5.225-3.918 7.836-1.604 3.205.275 3.17 3.265 3.918 3.848.962 4.017 1.763 2.612 4.57-1.179 2.357-2.906 3.853-3.918 5.877-1.375 2.75-4.011 2.962-5.224 3.266-2.361.59 2.177-4.354 3.265-6.531 1.592-3.182-.99-5.896-1.959-7.835-1.362-2.725-1.523-5.006-.653-8.488 1.652-6.611 6.663-2.39 4.571-5.877-.654-1.089 1.959 1.994 1.959 3.264z"/>
+    <path fill="#5F5E64" d="M585.466 233.354c-.255-.424-6.003-3.328-7.183-3.917-1.144-.572-3.067-5.679-3.918-6.53-2.198-2.199-4.492-3.552-6.53-4.571-2.67-1.335-2.63-3.274-5.224-4.571-5.075-2.538-3.97 2.506-3.265 3.918.641 1.279 5.644 2.822 6.53 3.265 3.34 1.67 3.573 2.303 1.306 4.571-2.521 2.521.745 6.061 1.307 7.183 1.511 3.022 1.811 3.77 3.917 5.877 3.467 3.467 3.644.104 2.612-1.959-1.263-2.526-3.309-2.698-4.57-5.224-2.173-4.347 1.433-3.886 3.917-3.265 1.37.342 4.396 3.744 5.224 4.571 1.692 1.692 3.247 1.178 5.877.652zm7.182-.979c-2.573-3.725-8.111-9.917-5.877-.979.27 1.076 4.789.761 5.877.979z"/>
+    <path fill="#56555B" d="M262.247 565.715c-.704-2.817-5.891-.66-8.488-1.96-3.769-1.884-2.505 3.039-1.959 5.224.901 3.605 8.309 2.612 9.142 2.612 3.395 0 2.51-2.862 1.305-5.876z"/>
+    <path fill="#6B6A71" d="M262.9 552.002c3.769 0 3.265-5.925 3.265-9.794 0-3.806-2.442-3.239-3.265-6.529-.93-3.721 6.977.446 7.183.652 1.546 1.547 4.407-1.185 6.529-.652 2.123.53-1.631 4.572-.653 6.529.85 1.699 8.303-1.261 8.489-1.306 3.542-.887-.713 3.978-1.306 4.57-2.378 2.378.139 4.196 1.306 6.529 1.956 3.911-.689 4.58-3.265 5.224-1.477.369-4.093-4.921-4.571-5.876-1.163-2.328-3.729-3.077-5.224-4.571-2.229-2.229-2.866 1.161-3.917 3.266-.742 1.483-3.032 1.342-4.571 1.958zm31.996-5.223c-1.724 3.446 4.748 4.615 7.183 5.224 2.542.636-.018-5.294-.653-7.836-1.538-6.15-4.346 3.048-6.53 2.612zm20.895-2.612c-.792-3.168 4.916 4.417 7.835 5.876 2.276 1.14-1.245-3.886-2.612-4.569-2.274-1.139-1.847-1.307-5.223-1.307zm6.529 13.712c-4.073-2.036-5.699-1.249-4.57 3.265.794 3.175 6.027.289 7.183 0 2.458-.614 4.875 3.09 6.529 3.918 2.622 1.311 6.575-1.328 7.836-1.959 2.109-1.055-3.273-1.636-5.224-2.611-3.114-1.557-4.209-2.612-7.836-2.612h-3.918zm-49.625 16.325c-3.743 0-3.918-2.488-3.918 4.569 0 3.858 2.969 5.102 3.918 1.308.33-1.324 0-4.962 0-5.877zm-37.872-40.485c.472-1.889-5.224.666-5.224 2.612 0 1.44 5.013 3.486 5.876 3.917 1.957.979-.223-4.383-.652-6.529zm0 16.978c2.538 1.27-3.302-4.646-4.571-7.183-2.686-5.373-3.629 1.806-3.264 3.265.849 3.396.057 3.413-1.959 3.918-3.168.792 6.994 1.679 9.794 0 2.086-1.253-1.055 6.592 1.306 7.183 3.913.977 2.563-4.972-1.306-7.183zm7.182-48.32c1.352.338-2.95 1.912-2.612 3.264.347 1.388 5.691 2.847 6.53 3.266 1.051.525 1.788 7.149 1.959 7.836.51 2.043 3.265 6.548 3.265 1.306 0-3.924-1.428-4.813-2.612-7.184-1.669-3.337-2.389-5.175-6.53-8.488zm-53.543-37.872c-1.088-2.178.904 5.939 3.265 6.529 4.547 1.138-3.305-6.73-3.917-9.795-.593-2.964-3.178-4.396-4.571-7.182-2.304-4.607-6.803-.273-1.306 5.224 2.16 2.161 3.556 2.845 6.529 5.224zm37.219-7.836c1.46 1.46-2.882 4.03-1.958 5.876 1.545 3.093 1.511 4.366-.654 6.53-1.246 1.246 2.515 6.266 3.918.653.954-3.814 1.018-4.428 3.917-5.877.533-.266-3.888-4.958-5.223-7.182z"/>
+    <path fill="#56555B" d="M167.893 397.249c-4.482 4.039-1.131 8.02-.652 8.979.544 1.088 2.73-1.263 3.591-2.123.915-.915-.546-4.03-.653-4.245-.699-1.395-.12-1.745-2.286-2.611z"/>
+    <path fill="#A8A7AA" d="M462.056 240.537c-1.518 2.611-.041 6.866-3.918 7.836-1.287.321-6.54-2.291-7.183-2.612-3.132-1.565-1.663-3.666-5.877-2.612-2.012.503-1.599 7.048-1.959 8.489-.638 2.551-.62 6.01 0 8.488.47 1.878 3.505 4.158 4.571 5.225 2.202 2.202 3.268 3.933 3.917 6.529.607 2.429.849 6.659 1.307 8.489.102.411-2.908 5.814-3.266 6.53-1.929 3.859-5.366-.796-6.529-1.959-1.931-1.932-3.582-3.182-6.529-3.918-2.478-.619-3.834-3.243-6.53-3.917-3.804-.952-5.259 1.446-5.876 3.917-.996 3.982 2.389 4.349 3.917 5.877 2.65 2.649 2.171 3.705 0 5.876-1.985 1.985-6.119-2.854-6.529-3.264-1.567-1.568-2.167-5.4-2.612-7.183-.571-2.284-4.212-2.253-5.877-3.918-2.302-2.302.159-6.848.653-7.835 1.775-3.55 11.172-.653 14.365-.653 2.314 0 2.501-4.189 4.571-5.224 4.212-2.106 2.012-.653-2.612-.653-2.438 0-5.067 2.083-7.183 2.612-4.303 1.076-1.852-4.786-1.306-5.876 1.801-3.603 1.398-4.479-.653-6.53-1.692-1.693-4.859.581-7.183 0-2.102-.526-4.053-3.399-5.224-4.571-2.177-2.177-4.098-2.792-5.876-4.571-2.739-2.739 2.187-4.685 3.265-5.224 2.394-1.197 5.415-1.306 8.489-1.306 4.002 0 4.571-1.417 4.571-5.224 0-3.572-2.52-3.917 3.265-3.917 2.585 0 4.233 2.528 7.183 3.265.875.219 5.277-1.959 7.835-1.959 3.421 0 5.797-.333 6.53-3.265 1.392-5.567 4.485 2.923 4.57 3.265 1.142 4.566.065 4.636 2.612 7.183 2.439 2.441 4.26-3.327 4.57-4.571.896-3.588 5.721 3.295 5.877 3.918.269 1.075.435 2.175.654 3.263zm-38.827 33.954c0 1.803-1.913 3.266-4.27 3.266s-4.269-1.463-4.269-3.266c0-1.802 1.912-3.265 4.269-3.265s4.27 1.463 4.27 3.265zm17.931-15.508c0 2.073-1.316 3.755-2.938 3.755s-2.938-1.682-2.938-3.755c0-2.072 1.315-3.755 2.938-3.755s2.938 1.683 2.938 3.755z"/>
+    <path fill="#959595" stroke="#B9B9B9" stroke-width="1.987" d="M483.612 207.774c-.643 2.992-4.801 4.628-9.286 3.656-4.485-.973-7.602-4.187-6.958-7.179.001-.008.003-.016.005-.024.643-2.992 4.8-4.628 9.286-3.656 4.485.973 7.602 4.186 6.958 7.177-.001.01-.003.018-.005.026z"/>
+    <path fill="#A7A7A7" stroke="#CACACA" stroke-width="1.6096" d="M541.854 276.732c-2.979 1.869-7.763-.163-10.686-4.539-2.923-4.375-2.879-9.438.101-11.307.008-.005.016-.01.023-.015 2.979-1.869 7.762.163 10.686 4.538 2.923 4.375 2.878 9.438-.101 11.307-.007.006-.015.011-.023.016z"/>
+    <path fill="#959595" stroke="#B9B9B9" stroke-width="3.8944" d="M482.685 228.726c-1.309 1.906-4.542 1.884-7.222-.05-2.679-1.934-3.79-5.046-2.482-6.953.004-.005.008-.01.012-.016 1.309-1.905 4.541-1.884 7.221.051 2.68 1.934 3.791 5.046 2.482 6.952-.005.005-.008.01-.011.016z"/>
+    <path fill="#CACACA" d="M636.376 452.772c-2.525-1.176-3.222-6.154-1.556-11.119 1.666-4.966 5.064-8.038 7.59-6.862l.018.009c2.524 1.176 3.222 6.153 1.556 11.119-1.667 4.967-5.064 8.037-7.59 6.861-.006-.002-.012-.005-.018-.008z"/>
+    <path fill="#CDCDCD" d="M616.513 501.579c-2.306-1.563-2.198-6.59.238-11.226 2.438-4.637 6.282-7.126 8.588-5.562.005.003.01.006.016.011 2.305 1.563 2.198 6.59-.239 11.226-2.438 4.637-6.281 7.126-8.587 5.562-.007-.004-.011-.008-.016-.011z"/>
+    <path fill="#E7E6E8" stroke="#A9A9A9" stroke-width="3.6222" d="M471.494 338.724c0 1.782-1.446 3.227-3.23 3.227s-3.229-1.445-3.229-3.227c0-1.782 1.445-3.227 3.229-3.227s3.23 1.445 3.23 3.227z"/>
+    <path fill="#ECECED" d="M475.548 475.469c-.594.866-1.4 1.554-2.127 2.303-1.019 1.037-2.087 2.069-2.792 3.357-.331.615-.566 1.458-.104 2.069.473.497 1.246.445 1.862.324 1.898-.416 3.548-1.994 3.857-3.942.29-1.704-.305-4.522-.696-4.111z"/>
+    <path fill="url(#h)" d="M503.197 524.125c3.516-1.758 5.646-3.484 8.311 0 2.204 4.407-6.242 5.716-9.234 6.464-4.042 1.011-6.655 2.866-10.158 4.617-4.294 2.146 1.714-3.626 3.694-4.617 3.315-1.658 3.871-4.706 7.387-6.464z"/>
+    <path fill="#ECECED" d="M535.979 412.85c2.662-1.316 3.336 6.583-.448 8.764-3.374 3.715-10.197 3.712-11.526 9.312-1.56 4.185-3.189 9.195.749 12.688 1.973 4.256 6.633 4.292 10.664 4.752 5.507-1.023 6.696 4.977 9.466 8.354 4.044.244 8.018-12.092 13.259-4.255 3.51 2.524 2.734 10.038-.955 11.315-3.38 1.647-8.065-1.36-9.472 2.588.14 3.537-3.164 9.245-3.046 14.409 2.953 3.326 1.326.8 1.623 5.745 1.534 3.314 4.914 7.646 1.072 8.859-4.023 2.249-5.001 8.725-8.89 11.181-3.266 3.458-7.684 5.468-10.998 8.865-2.616 1.944-8.619 5.188-10.786 2.668 2.554-3.571 6.203-6.232 9.408-9.198 3.537-2.001 6.233-5.109 9.718-7.149 3.269-1.694 6.409-6.514 3.82-9.906-2.853-2.842-8.609-3.208-9.031-8.058-1.72-4.97 3.93-7.988 3.527-12.758.2-2.426-2.192-10.088-3.685-4.281-.312 2.951-3.918 4.858-4.471.85-2.041-4.466-.912-10.565-4.767-14.048-3.901-.643-8.001.842-11.98 1.033-5.144 1.29-6.859 6.745-9.396 10.719-4.928 2.938-4.741-6.681-4.424-9.699.396-3.367-.855-11.975 5.066-8.874 3.473 1.646 10.48 6.905 11.208-.265 1.828-4.962-1.179-9.437-6.37-9.888-5.396-1.465.12-7.737 1.751-10.411 3.024-2.532 3.352-7.377 6.902-9.254 4.311-.866 8.457 1.596 12.701 1.349 2.919-.878 6.386-4.549 9.311-5.407zm-48.806-22.135c-1.656-2.149-8.864-5.655-10.242-5.818-1.914-.125-3.837-.284-5.715-.679-.636.958.022 2.324.136 3.406.511 2.362.813 10.838.177 12.708-.64 1.679-1.164 3.458-1.095 5.269.689 1.439 6.045 5.644 7.636 6.433 1.377.287 1.964-1.34 2.441-2.324.805-1.673 5.2-4.997 6.233-5.732 1.923-1.088 2.177-3.572 2.054-5.559-.098-1.677-1.243-6.988-1.625-7.704zm-14.911 44.299c1.521.286 1.468 2.329 1.138 3.52-.598 2.396-7.362 5.596-7.867 6.679-1.143 3.048-1.6 6.309-1.646 9.551-.096 1.821-6.771 4.893-7.754 3.493-.307-1.657 4.377-10.521 4.588-13.832.408-3.263-1.014-6.334-1.564-9.48-.345-3.726 1.42-7.222 3.144-10.396 1.451-1.126 8.137 7.456 9.961 10.465zm-16.621 45.247c.454-.513.106-1.299-.603-.984-1.773.446-3.404 1.312-5.119 1.932-1.734.624-3.551 1.342-5.429 1.153-.962-.154-1.769-.761-2.618-1.198-1.355-.778-2.729-1.806-3.203-3.368-.264-.883-.54-1.778-.649-2.694.23-.82 1.204-.001 1.665.255 2.354 1.56 4.487 3.521 7.131 4.6 1.15.489 2.42.25 3.631.306 1.73-.002 3.462-.002 5.194-.002z"/>
+    <path fill="url(#i)" d="M373.455 565.217c-4.316-5.397-10.018-14.621-15.699-20.777-7.159-7.098-12.23-15.824-16.479-24.879-4.563-6.491-8.19-18.667-13.455-21.897.493 4.86-6.327 7.824 1.599 10.093 8.236 3.605 4.666 14.505 11.801 18.858 3.832 8.027 8.782 15.603 14.185 22.722 3.734 4.487 14.175 12.303 13.378 15.56-3.523-8.799-13.891-13.574-22.835-13.885-7.023 3.297 7.115 6.92 10.555 5.572 4.524-.016 13.695 8.28 4.371 4.418-5.39 4.113-11.07-4.888-15.561-1.07 1.508 2.783 13.682 4.03 10.583 5.548-3.722.102-12.887-6.322-12.438.22 4.583 2.801 11.945.837 15.332 4.33-2.623 4.032-6.568 3.495-9.951 5.653-.913 6.981 13.314.464 5.872 6.471-8.121 7.939 8.998-.047 8.158.398-4.667 5.515 2.107 3.851 4.154 3.634-3.489 7.554-8.75 13.934-12.962 21.049-4.986 6.107-8.845 13.16-14.775 18.469-2.741 5.896 5.326-2.411 6.81-3.972 8.173-4.972 13.158-13.636 18.123-21.424 2.616-4.497 6.003-10.451 8.85-13.735 4.583 6.507-.388 14.563 1.308 22.51 6.655 4.747-1.721 13.139 1.792 17.423 11.602.562 7.348-12.153 6.991-19.07-1.169-4.422 3.129-8.365 4.655-2.367-.461 4.075 2.629 7.202 2.622 1.39-.144-3.896.439-6.142 1.581-.862 1.078 2.963 7.741 13.989 6.369 4.41.072-4.913-7.769-12.47-1.758-15.862 5.331 3.005 9.539 6.764 4.545 12.511-5.288 2.583 4.499 11.053 7.105 5.371 5.052.93 6.739-3.257 8.421-6.293 5.991 5.275 16.953-.198 20.431-5.247-2.796.368-10.577-3.297-3.191-2.022 3.104 1.261 11.182 2.746 4.858-1.71.83-3.892 10.751.864 14.756.332-.202-5.17-10.871-2.75-7.697-10.43-2.002-4.571-9.768 8.803-9.01-.601-2.658-5.854-5.344 2.594-3.904 5.215-5.221-2.824-4.908 8.758-6.052 1.19 1.559-3.828 5.711-10.9 2.582-14.261-3.253 3.744-10.401 3.083-13.718 1.502 8.132-.117 16.049-2.263 23.785.729 6.614-.073 9.467-4.812 13.354-8.667 5.094.361-2.2-12.731-3.979-5.342-2.277 8.2-9.052 5.462-14.514 2.953-2.063 1.805-10.935 3.871-10.124 1.87 6.525-2.202 15.669-1.415 20.138-5.873-1.257-2.099 4.24-6.322.477-5.848 3.941-5.113 7.074 5.084 10.749-2.155 8.792-2.792 18.548-3.572 26.755-7.573 4.661-4.087 17.271-5.891 17.156-11.707-8.136.648-14.74 10.289-24.09 9.906-8.271 4.286-17.212 8.172-26.747 7.99-3.194.202-12.309.304-4.155-1.848 6.773-.45 16.625.734 20.567-5.996-2.613-5.479-15.197 6.497-16.745.289 6.061-5.329 12.489-9.979 18.676-14.995 4.732-3.267 15.068-7.608 6.969-13.074 4.16-5.981 23.617-4.188 18.102-15.358-9.317-7.55-10.066 9.114-17.48 9.536-3.281-3.068-12.871 1.081-9.853-5.887-6.095-2.11-14.792 9.618-3.614 8.548-.075 4.166 4.531 11.933 7.839 8.251-1.849-6.804 7.676-2.562 1.857 1.445-4.11 2.974-8.808 8.805-13.833 5.026-5.759 2.589-5.865-2.12-2.439-5.144-5.338-2.836-11.563 1.985-11.294-7.315-4.44-.524-13.314 1.189-6.14-5.034 7.572-5.256 8.756-14.642 14.846-21.093 3.974-2.025 6.594-10.055-.321-5.849-4.291 5.386-4.664 18.162-11.975 18.858.365-7.921-6.521 5.819-3.848-2.689 1.883-3.568.389-7.582-1.155-1.804 1.155 6.112-10.096 11.594-5.518 16.134 4.831-.269-3.98 13.463-4.957 3.369-1-2.94-.437-10.446-4.618-4.618-1.328 7.509-8.202 2.664-5.31-3.066-1.424-5.445 4.407-11.603 3.691-15.551-6.803 6.341-5.097-6.776-10.504-4.893-1.978 7.084 10.751 8.551 5.762 16.771-1.917 9.655-2.975-7.609-7.614-.392-6.52 1.278-3.961 13.297-12.632 10.966-1.651-7.29-6.172-3.416-6.364 1.827-4.811.454-5.889-6.859-11.354-2.431-3.701-1.089-6.014-4.104-7.387 1.848-3.561 1.32-10.257-5.184-9.859 3.145.1 6.138 8.746 3.231 8.059 10.194 4.239 2.496 1.05.916.098 2.809 4.674 2.821 11.71 8.532 7.464 14.274-5.745-6.256-13.113-10.939-16.381-19.341-5.85-6.536-6.765-15.819-11.681-22.967-9.508-5.269-3.498-15.064-6.788-23.204-5.078-7.599-11.224 4.387-4.283 7.529 3.955 7.255 7.64 14.141 11.208 21.559 2.156 8.458 7.272 15.512 11.538 22.949 4.81 5.966 11.77 10.53 14.973 17.661-7.019-4.385-10.522-12.279-16.815-17.525-.833-1.891-6.791-11.134-6.224-6.273 4.879 7.839 11.931 13.896 17.221 21.428 1.239 4.169 7.359 6.715 7.009 11.163z"/>
+    <path fill="#E3E3E3" fill-opacity=".4464" d="M519.107 237.189c.715 5.257-2.568 10.03-1.281 15.256.03 5.246 1.382 11.216-2.625 15.426-2.794 4.112-3.369 9.062-4.622 13.746-1.248 3.584-2.935 6.991-3.604 10.763-2 4.103-1.861 8.792-3.226 13.099-.713 3.797-.795 7.691-.996 11.54.996 2.47 1.943-3.74 2.55-4.81 1.124-4.575 3.916-8.569 4.741-13.198-.197-4.753 3.559-8.404 4.016-13.083 1.228-3.86 3.346-7.357 4.469-11.259 1.787-4.561 1.316-9.666 2.238-14.44.938-4.766 1.403-9.549 1.653-14.384.89-5.065 1.359-10.184 2.022-15.286 1.395-4.96.965-10.198 2.581-15.092.268-1.716 2.809-8.798.154-4.363-2.094 4.459-3.326 9.315-4.755 14.034-.412 1.262-4.57 6.272-3.315 12.051z"/>
+    <path fill="#54535A" d="M379.572 526.432c.003 2.997-3.042 5.428-6.804 5.431s-6.813-2.422-6.817-5.419v-.012c-.004-2.995 3.042-5.427 6.803-5.43 3.761-.003 6.813 2.423 6.818 5.42v.01z"/>
+    <path fill="#E7E6E8" stroke="#A9A9A9" stroke-width="3.6222" d="M510.741 397.824c0 1.782-1.447 3.227-3.23 3.227-1.785 0-3.231-1.445-3.231-3.227 0-1.782 1.446-3.227 3.231-3.227 1.783 0 3.23 1.445 3.23 3.227z"/>
+    <path fill="#E7E6E8" stroke="#A9A9A9" stroke-width="4.12" d="M529.383 336.877c0 1.782-1.118 3.227-2.497 3.227s-2.496-1.445-2.496-3.227c0-1.782 1.117-3.227 2.496-3.227s2.497 1.445 2.497 3.227z"/>
+    <path fill="#959595" stroke="#B9B9B9" stroke-width="3.8944" d="M386.624 289.018c-.025 2.311-2.724 4.087-6.027 3.971-3.302-.118-5.96-2.085-5.935-4.395v-.018c.025-2.31 2.724-4.087 6.026-3.971 3.303.118 5.96 2.085 5.935 4.395.001.006.001.012.001.018z" opacity=".658"/>
+    <path fill="#94939A" fill-opacity=".6548" d="M365.321 496.652c0 2.494-1.94 4.517-4.333 4.517s-4.333-2.022-4.333-4.517 1.939-4.516 4.333-4.516 4.333 2.022 4.333 4.516zm-8.773-40.401c0 2.494-1.94 4.517-4.333 4.517s-4.333-2.022-4.333-4.517 1.939-4.516 4.333-4.516 4.333 2.022 4.333 4.516z"/>
+    <path fill="#94939A" fill-opacity=".6548" d="M352.854 458.099c0 2.494-1.94 4.517-4.333 4.517-2.393 0-4.333-2.022-4.333-4.517 0-2.494 1.94-4.518 4.333-4.518 2.393.001 4.333 2.024 4.333 4.518zm5.541 33.243c0 2.494-1.94 4.517-4.333 4.517-2.393 0-4.333-2.022-4.333-4.517 0-2.495 1.94-4.516 4.333-4.516 2.393.001 4.333 2.021 4.333 4.516zm-61.871-19.392c.002 2.494-1.936 4.519-4.329 4.521-2.393.002-4.334-2.019-4.336-4.513v-.009c-.003-2.494 1.935-4.518 4.329-4.521 2.393-.002 4.334 2.018 4.337 4.512-.001.004-.001.007-.001.01zm280.096-26.232c.004 2.494-1.932 4.521-4.325 4.525-2.393.005-4.336-2.014-4.341-4.508v-.018c-.004-2.494 1.932-4.52 4.325-4.524 2.393-.004 4.336 2.014 4.341 4.508v.017z"/>
+    <path fill="#FBFBFC" d="M186.503 478.218c.336 1.657 2.911 7.126 3.918 9.14 2.586 5.173 4.644-.799 5.224-1.958 1.404-2.809 7.409 4.797 7.835 5.224 2.256 2.256 5.928-.678 7.183-1.306 3.596-1.798 6.671-.725 2.612 1.306-3.13 1.565-2.631 3.88-1.305 6.53 1.324 2.647.993 5.904 1.958 7.835 1.101 2.202-3.293 2.612-5.876 2.612-2.952 0-4.978-2.265-7.183-3.918-1.302-.977-5.648 2.824-6.53 3.266-2.022 1.01-2.432 7.898-3.917 1.958-.461-1.845 3.947-4.253 5.224-4.571 3.885-.971 2.822-3.701-.652-4.57-4.059-1.015-.963-2.956.652-4.571 1.665-1.664-4.212-2.253-5.877-3.918-2.146-2.146-2.512-3.517-3.265-6.529-1.045-4.177 1.162-.718-.001-6.53zm12.406-31.996c-.037-.149 4.555 5.191 5.224 6.529 1.582 3.163 3.224 6.363 3.918 9.142 1.239 4.956-2.463-.504-3.264-1.306-2.799-2.798-4.125-2.509-6.53-1.306-5.555 2.777-1.204-3.367-.653-3.918 2.036-2.035 1.305-5.748 1.305-9.141zm309.007-280.959c53.808 22.229 94.997 60.462 120.806 103.914-7.328.682-12.859-4.829-17.37-10.025-4.231-4.591-3.708-15.087-11.049-15.413-5.378 4.057-.237 10.322 2.389 14.356 3.289 4.571-2.896 9.349-4.617 2.77-3.812-6.331-4.171-14.09-8.613-20.077-3.041-6.467-6.144-13.321-12.685-16.989-5.343-4.146-12.123-6.032-17.863-9.602-7.055-.726 1.502 9.369.023 13.078-3.572 3.954-4.031-11.074-6.256-3.017-.397 2.332-1.587 6.227-1.02 1.282.378-5.264 1.21-11.805 6.831-13.349-.974-8.455-11.815-1.467-15.166-8.363-4.106-4.271-10.546-3.044-14.748-2.38-.239 8.412-7.72-2.375-8.581-5.417-5.144-2.78-10.234-6.616-15.165-9.078-2.229 2.012-13.708 4.459-7.289-.62 2.959-2.251 9.731-6.23 1.975-5.063-6.459-.331-12.93.406-18.438 4.043 2.702-5.091 7.604-10.16 13.997-8.676 5.548.705 14.371 1.143 12.619-7.052.245-1.282-.046-3.044.22-4.322zm-222.751 11.459c48.054-26.008 114.539-42.72 188.796-22.775-6.058 1.171-17.435 8.7-22.853 3.741-4.847-2.704-13.789-1.609-9.842 5.761-4.727 2.558-11.692-5.187-15.875.458-1.48 2.819 6.371 6.957-.949 6.453-7.428 1.681-6.604-9.624-13.896-6.987-8-.567-3.049-9.083 2.776-8.467 4.713-.037 4.647-3.725-.155-3.75-3.809-.835-16.835-4.291-10.54 3.22-2.223 2.466-11.98.75-5.702 5.422 3.29 6.043-9.266 3.78-7.548-1.431-5.156.957-8.095-.94-4.288-4.906-6.471-.418-12.965 1.721-19.523 1.398-8.142 1.355-15.388 6.016-23.712 7.078-11.385-.107.801 12.665-7.663 16.553-5.29 3.269-12.004.393-17.66 2.706-6.664 1.358-13.528 3.116-17.948 8.737-4.112 3.117-15.449 6.67-12.772-2.682.178-2.843-.054-7.702-.646-10.529zM660.76 354.336c-5.235-30.978-17.148-60.346-29.331-80.61-1.081-3.775-9.069-2.529-9.471 1.08-1.463 3.384 4.039 6.424 1.672 9.153-2.737.406-4.576 2.387-1.525 4.358 2.738 2.833 6.504 4.178 9.677 6.376 2.541 1.795 3.982 6.084-.32 6.566-3.365 1.891-2.071 6.982 1.517 7.745 2.953 1.567 6.935 1.06 9.194 3.801 2.176 3.599.13 8.144 2.277 11.794 2.127 3.71 1.418 8.032 2.256 12.054.776 4.569 1.323 9.648 4.999 12.932 2.154 2.702 5.966 3.407 9.055 4.751zm-24.825 154.011c5.346-2.674-7.485 9.43-10.157 14.774-1.835 3.668-3.878 6.647-6.465 9.235-3.132 3.131-3.668 4.604-7.387 6.463-4.653 2.327.302-6.766.923-7.388 2.178-2.177 5.208-5.206 7.388-7.386 2.575-2.576 4.173-5.576 5.541-8.312 1.927-3.855 5.227-5.414 10.157-7.386zm-41.555 26.78c1.658-3.315-4.072 6.652-7.387 8.311-3.84 1.919-5.541 4.759-5.541-2.771 0-3.011 3.856-7.55 5.541-9.235 2.575-2.574 5.575-4.172 8.311-5.54 2.767-1.383.225 6.362-.924 9.235zm18.469-16.622c3.579-1.79-3.646 7.198-4.617 11.081-1.082 4.331-4.674 4.616-9.234 4.616-1.235 0-4.201 7.181-6.464 8.311-5.445 2.724-6.482 5.506-4.617 9.235 2.005 4.009 7.802-3.185 8.312-3.693 2.821-2.821 3.162-5.934 5.54-8.312 2.916-2.914 5.122-5.121 7.388-7.386 1.883-1.883 2.992-7.354 3.693-10.158.297-1.195-.001-2.462-.001-3.694zm-337.773 95.203c71.513 43.37 161.71 49.156 239.937 14.365-5.113-1.547-14.303-4.419-21.348-2.491-6.986.428-9.117 12.522-18.476 8.385-5.576-5.707-14.39-2.368-20.316-6.219-4.028 1.483-8.043 5.667-10.479.864-7.315.277-13.483 5.905-20.471.548-8.878-3.896-10.527 3.889-5.282 6.58-7.601 1.696-16.476-2.413-21.066-8.339 1.176-4.528 1.536-12.32-5.418-9.458.237 6.146-6.003 9.286-9.084 11.509-6.13-7.971-12.492-1.126-17.995 3.249-7.586 1.295-14.452-5.813-22.225-2.103-5.423 2.177-10.456-1.189-9.001-7.157-5.155-.314-17.277-4.928-8.267-10.059-7.488-1.817-15.834-.177-21.977-5.868-2.749-3.061-16.265-5.18-8.413.499 7.091 1.173 11.785 12.778 1.163 10.665-7.72 1.218-14.304-12.095-21.282-4.97zm305.166-201.441c-2.373-.593-5.666-2.42-6.529-5.877-.67-2.677.688-6.017 1.305-8.488.582-2.323-4.858.581-7.183 0-3.106-.777-2.602-3.303-3.917 1.958-.985 3.944.633 5.917-.652 8.489-.701 1.401-4.903 2.944-5.878 3.918-2.819 2.82-.723 5.154.653 6.529.139.14 6.243-3.703 6.53-3.917 2.78-2.086 3.779-1.684 5.223-4.571 1.084-2.167 6.405 4.447 6.53 4.571 2.769 2.768 3.918 2.5 3.918-2.612z"/>
+    <path fill="#5F5E64" d="M551.838 202.665c.587-2.025-5.685-6.769-8.815-6.53-3.965.302-.596 4.079 0 4.571 6.393 5.278 9.033 3.047 8.815 1.959z"/>
+    <path fill="#98989E" d="M587.922 325.585c.214.853 4.494 3.57 5.541 4.618.953.953 3.546 2.465 5.079 3.232 1.717.858 2.952 2.03 4.155 3.231 1.636 1.637 2.539 3.079 3.694 4.618.956 1.276.923 3.907.923 6.002 0 2.263-1.847 2.746-1.847 5.541 0 1.241 3.393-.742 3.693.462.403 1.611 1.681 3.361 2.309 4.617 1.271 2.54-.041 3.704-1.847 4.155-1.847.462-.039 4.195-1.386 5.542-1.527 1.528-2.389 1.846-5.079 1.846-3.579 0-1.067 2.893 0 3.694 1.635 1.225 1.848 3.043 1.848 4.155 0 3.537-6.742-2.804-6.927-3.232-1.155-2.699-4.133 2.266-4.155 2.309-1.353 2.707-1.944-1.651-1.385-2.77.429-.857 5.535-.692 6.464-.924 1.965-.491-.018-4.191-.924-6.002-.554-1.11 2.491-.763 3.694-.462 1.669.418 1.093-3.4 2.309-4.617 1.759-1.759 1.175-3.694-1.385-3.694-2.958 0-3.601-.549-4.155-2.771-.503-2.008-3.336-1.411-5.079-1.846-2.192-.548-3.532-.993-4.849-2.309-1.469-1.469-2.032-2.129-2.539-4.155-.494-1.979-.969-4.338-1.385-6.002-.698-2.792-.487-3.746-1.386-5.541-1.16-2.321-1.799-2.356 0-4.156 1.812-1.81 2.171-2.48 4.619-5.541z"/>
+    <path fill="url(#j)" d="M400.12 568.994c2.384 6.351-1.985 13.362-9.76 15.659s-16.009-.988-18.393-7.34c-.004-.012-.009-.023-.013-.035-2.385-6.351 1.985-13.362 9.759-15.66 7.775-2.297 16.01.988 18.394 7.34.004.01.008.024.013.036z" opacity=".5959"/>
+    <path fill="#FFF" d="M392.64 571.715c1.175 3.137-.983 6.598-4.821 7.731-3.837 1.133-7.901-.492-9.076-3.629-.002-.005-.004-.011-.006-.015-1.176-3.137.982-6.6 4.82-7.731 3.838-1.133 7.901.491 9.077 3.628.002.007.005.01.006.016z" opacity=".8497"/>
+    <path fill="#A8A7AA" fill-opacity=".8671" d="M366.069 322.158c-.101-7.974 2.144-15.792 1.306-23.833-.794-8.732 2.246-17.525.392-26.15-3.447-2.939-2.864 9.408-3.004 12.52 1.808 7.122-3.419 14.418-.05 20.842 2.216 6.096-2.128 14.039-5.705 18.586-10.24.542-2.794-12.763-.994-17.743.141-8.865-1.576-17.525-4.073-25.998-.225-4.173-5.456-16.781-4.401-5.674-.7 7.812 2.601 14.992 3.386 22.619.034 7.83.597 15.996-1.206 23.569-4.315 2.499-17.589-.041-14.093-5.722 9.806-.137-9.788-12.426 2.55-13.517 4.591-1.35 8.656 3.958 8.66-3.862 4.145-11.234-9.304-7.786-14.282-3.765-.887-4.987-.417-15.507-4.072-17.538-4.886 6.749 2.786 13.802.999 21.003-.737 3.133 4.931 6.549-1.324 5.944 1.022 5.643.728 10.97-5.989 12.677-1.973 9.116-11.084 1.424-16.299-.155-2.132-8.894-14.061-1.845-18.235-9.092-2.07-2.94-6.938-3.326-1.922.271 6.105 6.129 16.374 6.998 20.479 15.281-7.084 1.362-13.304-5.708-20.104-7.635-2.443-2.529-16.82-4.788-7.659-.699 7.984 4.779 16.977 7.97 24.228 13.928-2.523 4.07-13.71-.914-19.229-1.771-2.331 1.088 9.356 5.903 12.857 6.549-3.084 1.148-14.691 5.304-6.319 6.012 5.23 1.243 12.796-8.275 15.446-3.25-1.533 4.768-.064 8.5-1.756 12.666 1.465 4.146 14.88 7.849 4.288 8.899-4.387-.437-12.668 2.683-3.947 4.216 5.938-.328 14.508-.256 18.796-1.767-6.475 2.822-13.761 4.573-20.494 6.267-4.075-1.374-15.437-4.762-15.979-1.094 4.734 5.242 15.474 1.583 18.243 6.545-5.087-1.292-16.562-3.791-12.619 5.388-2.24 4.944-3.241 9.644 2.444 12.664.552 7.731 13.596 1.443 10.583 9.245 6.332 1.713 13.163 3.002 15.074 10.86 2.001 2.774 1.182 12.326 6.333 6.184-2.103-6.8-2.342-13.992-6.117-20.251-2.885-6.775 1.982 6.731 4.776 7.294 4.355 5.255 6.086-9.009 10.675-1.71 7.267 2.072-6.516-9.603 2.703-10.311 9.03-1.959 5.874 12.143 5.858 17.656.075 4.156-.144 9.876-5.577 5.346-7.309-2.336-2.103 6.228-6.041 8.826-1.68 6.347 3.607 13.45 8.809 6.546 2.75 7.214 8.295 12.412 14.542 16.293 5.011 4.626 7.007 10.501 4.933 17.075 4.417.285 5.345-7.754 11.027-7.137 3.052-6.285-.052-16.114-6.466-18.593-4.617-4.778 8.564-4.527 6.244-11.335 2.243-3.608.384-16.398-3.596-9.641 3.629 4.937-1.257 12.012-2.773 3.763 3.75-6.366-2.345-9.433-5.396-13.16 2.008-9.299-6.643-15.805-2.412-25.088.514-3.284 5.017 4.59 8.582 2.664 7.105 1.415 14.413.965 21.602 1.639 10.958-.899-5.771-8.514-9.772-7.789-6.451 2.604-13.207.323-18.396-3.808-9.538-5.479 6.425-8.231 10.674-5.043 5.138 1.982 8.301 9.355 12.184 10.359 4.783-4.349 2.034-13.19 8.881-14.702.029-4.161-12.529-8.869-1.787-9.716 7.928-5.463-7.248-6.135-10.589-8.448 1.034-4.571 11.025-9.338 3.633-14.749-5.59-.189-4.217-9.646-9.291-3.646-8.978 5.842-1.004-6.864-1.995-8.671-2.816-1.517-4.926 1.886-7.224 2.867z"/>
+    <path fill="#B9B8BA" d="M347.786 338.482c-2.594-3.587-4.685-8.541-9.569-9.346-3.222-1.114-7.298-.535-8.279 3.238-1.469 3.767 5.416 2.5 7.505 3.84 1.777 1.917 4.677 4.635 4.558 7.035-3.301 1.624-6.812 3.212-10.594 3.05-3.709.957-5.428-2.973-6.712-5.66-1.663-3.442-5.334-5.834-5.586-9.906.175-2.566-1.832-8.638-3.936-3.617-1.774 3.098.216 6.314 2.174 8.714 1.981 3.424-4.609 2.916-5.089 5.861-1.692 3.738 1.558 8.062 5.474 8.242 2.031.331 9.141-.182 5.414 2.993-2.109.343-3.77 1.849-.604 2.287 3.204 1.562 10.07-.603 10.026 4.5-2.833 2.681-7.278 4.174-8.196 8.408-1.141 2.345-1.739 7.861 2.466 5.821 2.225-.297 4.1-6.956 3.968-1.924.22 3.356-1.201 7.594 1.715 10.147 2.015.743 5.596-3.708 4.602.835-1.203 2.518-.007 5.191 2.989 3.402 4.245-3.047 3.776 5.618 8.33 4.972 4.489.717 3.286-4.569 1.037-6.366-3.232-.63-4.969-3.314-4.889-6.573-.995-3.276-7.206.615-7.346-3.755.461-2.991 2.152-7.492-2.565-7.653-4.968-1.611 2.33-4.807 4.581-5.176 4.311-.872 9.186 1.527 13.079-1.313 3.555-1.832 6.793-4.991 11.082-4.655 3.079 1.369 6.578 1.161 9.578 2.565 2.193 1.803 3.806 4.736 6.973 4.913 2.049.629 6.736 1.528 4.248-2.037-1.303-3.136-4.521-4.315-7.315-5.718-1.778-1.227-6.668-4.289-1.61-4.056 3.569.98 6.216-.709 5.144-4.577.905-3.85-6.014-4.302-5.807-.642-.563 3.185-2.053 7.24-5.684 7.747-3.914.253-7.921-.377-11.625-1.6-2.141-1.611-5.679-6.542-.819-6.729 2.075-.608 6.959-1.417 3.547-4.175-1.832-2.686-6.145-3.137-6.82-6.608 1.231-3.57-3.101-7.573-4.624-2.74-.696 2.002-.804 4.152-.821 6.256z"/>
+    <path fill="#E5E5E6" d="M348.438 346.97c.127-.992-1.024-1.296-1.781-1.01-2.464.577-4.666 2.061-7.213 2.313-1.595-.093-2.924 1.082-3.633 2.413-.715 1.362-1.287 2.877-1.261 4.435.021 1.361 1.103 2.427 2.317 2.874 1.675.635 3.449.959 5.178 1.412 2.701.62 5.518.796 8.269.462 1.403-.165 2.746-.916 3.467-2.155.933-1.396 1.513-3.188.913-4.832-.429-1.254-1.203-2.351-1.819-3.514-1.095-1.17-2.688-1.67-4.126-2.277-.104-.04-.207-.079-.311-.121z"/>
+    <path fill="#A8A7AA" fill-opacity=".8671" d="M289.672 345.665c-3.799-9.733-15.49-13.356-7.183-25.466-17.721-2.755-1.496-14.282-12.713-24.162 9.281-.049 14.467 10.352 9.2-4.566 5.449-13.343 13.326 4.724 22.516-6.352 17.876-5.191 3.66-16.425-7.903-8.669-8.802 4.304-24.021-4.397-5.876-5.224 22.587-6.038-3.659-14.676-14.017-13.251-12.466-.04 7.284-29.521-8.037-16.27 5.373 23.653-31.869 10.015-29.53 20.379 12.253 6.314-20.371 14.74-24.16 25.466-7.971 7.404-21.553 21.264-3.266 7.836 15.817-4.687 37.554-37.432 49.523-20.666-8.168 13.179-16.109 27.464-32.458 15.189-10.44 8.039 21.756 7.535 7.026 21.437-1.286 19.069 13.227-16.987 11.026 5.283 4.083-16.801 5.188-3.548 10.203-1.47 18.637-11.022 5.721 10.833-4.784 14.333-23.411 12.521 24.183 16.628 3.173 26.611-2.395 6.775-44.562-.799-18.896 5.885 12.703-1.549 23.514 2.529 5.235 5.536-14.254 19.155 17.762-5.068 17.757 9.878 1.385 11.093 20.118 17.414 11.654.224 3.196-16.694 9.174 5.989 8.757 6.389 5.571-11.527 14.699-24.538 12.753-38.35z"/>
+    <path fill="#B9B8BA" d="M287.06 352.847c-1.897.581-3.78 2.149-5.849 1.532-2-.69-.33-3.763-2.394-4.084-1.999-.616-3.666-2.441-3.511-4.63.021-1.633.071-4.693-2.35-4.356-1.796.075-4.31.803-3.78 3.136.094 1.872 1.161 3.632.927 5.514-1.316 1.702-3.72-1.926-4.779.382-.831 1.466-1.611 3.608-3.705 3.324-1.089.221-2.653-.682-3.417-.394 1.203 1.434 2.629 2.683 3.987 3.953.49 2.244-2.683 2.002-4.129 2.407-2.409.479-4.91.177-7.291.777-1.892.314-.597 1.692.641 1.497 3.809.373 7.591-.462 11.281-1.272 1.999.666 1.666 3.35 2.173 5.028.107 1.182.877 2.654 1.206 3.448-.28-2.205 3.487-1.7 3.925-.026.225 1.063 1.277 2.243 1.562.499.456-1.249.743-4.719 2.69-3.13 1.186 1.08 1.289 2.943 2.182 4.068 1.184-1.242 1.34-3.151 1.944-4.723.413-1.855 2.704-1.796 4.191-1.659 1.629-.067 3.747.957 5.077.13-1.184-1.698-3.183-2.626-4.729-3.967-.846-.516-1.517-1.25-.025-1.119 2.537-.271 5.155-.327 7.66-.515-2.453-.738-5.038-1.052-7.581-1.295.493-1.562 2.204-2.568 3.315-3.776.263-.247.537-.482.779-.749z"/>
+    <path fill="#F3F3F4" d="M257.677 288.856c-3.461-.382-5.604.107-7.183 3.266-.08.158-5.378 3.418-5.877 3.917-3.365 3.365 1.602.357 2.612-.652 1.34-1.34 6.639-.653 9.142-.653 3.239-.001 2.352-3.26 1.306-5.878z"/>
+    <path fill="#E5E5E6" d="M258.33 281.021c.893 0 2.553 6.025-3.265 4.571-2.349-.587-.084-6.361 0-6.53.567-1.135 2.176 1.306 3.265 1.959zM274 355.459c.143-.285-6.709 4.571.653 4.571 3.014 0 .307-2.971-.653-4.571z"/>
+    <path fill="#CDCDCD" fill-opacity=".4345" d="M664.555 398.161c0 139.406-114.615 252.417-256 252.417-141.384 0-256-113.011-256-252.417s114.616-252.417 256-252.417c141.384 0 256 113.01 256 252.417z"/>
+</svg>
+</body>
+</html> 

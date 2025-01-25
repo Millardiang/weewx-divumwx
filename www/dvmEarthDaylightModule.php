@@ -57,18 +57,29 @@ $sun_elevation = round($sun_alt,2)."°<div class=sunbelowdivumwx> </div>";
 <?php echo'<div class="divumwxsolstice">Next Solstice<br><blueu>'.$alm["next_solstice"].'</blueu></div>';?>
 
 <style>
-.defs { position:absolute;width:0;height:0;visibility:hidden; }
-.solar-oscillator svg { margin-Top:16px;margin-left:-10px;width:var(--earth-width);height:var(--earth-height); }
-.solar-oscillator .stroke { fill:none;stroke:rgba(41, 46, 53, 0.8);stroke-width:1px; }
-.solar-oscillator .ocean { fill:#99bbff; }
-.solar-oscillator .graticule { fill:none;stroke:#444;stroke-width:0.2px;stroke-opacity:1.0; }
-.solar-oscillator .land { fill:#2e8b57; }
-.solar-oscillator .borders { fill:none;stroke:#292E35;stroke-width:0.1px; }
-.solar-oscillator .night { stroke-width:0.1px;stroke:#292e35;fill:#292e35;fill-opacity:0.1; }
-.solar-oscillator .civiltwilight { stroke-width:0.1px;stroke:#292e35;fill:#292e35;fill-opacity:0.3; }
-.solar-oscillator .nauticaltwilight { stroke-width:0.1px;stroke:#292e35;fill:#292e35;fill-opacity:0.5; }
-.solar-oscillator .astronomicaltwilight { stroke-width:0.1px;stroke:#292e35;fill:#292e35;fill-opacity:0.6; }
-.ecliptic { stroke:yellow;stroke-width:0.5px;fill:none;}
+.solar-oscillator svg { margin-Top: 16px; margin-left: -10px; }
+.ocean { fill: url(#oceanGradient); }
+.graticule { fill: none; stroke: #444; stroke-width: 0.2px; stroke-opacity: 1.0; }
+.land { fill: url(#landGradient); }
+.borders { fill: none; stroke: #292E35; stroke-width: 0.1px; }
+.night { stroke-width: 0.1px; stroke: #292e35; fill: #292e35; fill-opacity: 0.2; }
+.civiltwilight { stroke-width: 0.1px; stroke: #292e35; fill: #292e35; fill-opacity: 0.35; }
+.nauticaltwilight { stroke-width: 0.1px; stroke: #292e35; fill: #292e35; fill-opacity: 0.5; }
+.astronomicaltwilight { stroke-width: 0.1px; stroke: #292e35; fill: #292e35; fill-opacity: 0.6; }
+.ecliptic { stroke: yellow; stroke-width: 0.5px; fill: none;}
+
+.sun { mask: url(#globeMaskSun); }
+.sun { fill: url(#sunGradientMini); }
+.moon { mask: url(#globeMaskMoon); }
+.moon { fill: url(#moonGradientMini); }
+
+#globeMaskSun rect { fill: #fff; }
+#globeMaskMoon rect { fill: #fff; }
+#globeMaskCircleSun { fill: #000; opacity: 0.0; }
+#globeMaskCircleMoon { fill: #000; opacity: 0.0; }
+#globeMaskCircleSun.behind { opacity: 1.0; }
+#globeMaskCircleMoon.behind { opacity: 1.0; }
+
 </style>
 
 <script src="js/d3.7.9.0.min.js"></script>
@@ -96,7 +107,7 @@ function toRadians(x) {
 	var lat = <?php echo $lat;?>;
 	var long = <?php echo $lon;?>;
 
-  	var w = 130;
+  	var w = 140;
   	var h = 110;
 
   	var circle0 = d3.geoCircle().radius(90); // night time (sunrise sunset)
@@ -154,23 +165,85 @@ if (lat > 0.0) {
   	var svg = d3.select("#Globe")
       	.append("svg")
       	//.style("background", "red")      	  
-      	.attr("width", 130)      	
-      	.attr("height", 110);
+      	.attr("width", w)      	
+      	.attr("height", h);
 
     var defs = svg.append("defs");
+
+    // sun and moon scale factor for a 3D effect
+    var sunScale = d3.scaleLinear().domain([0,1]).range([1.5,10]);
+    var moonScale = d3.scaleLinear().domain([0,1]).range([1,3]);
 
   	svg.append("defs")
       	.append("path")
       	.datum({ type: "Sphere" })
       	.attr("id", "sphere")
       	.attr("d", path);
+
+    var globeMaskSun = defs.append('mask')
+      .attr('id','globeMaskSun')
+      .attr('x',0).attr('y',0)
+      .attr('width', w)
+      .attr('height', h);
   
+  globeMaskSun.append('rect')
+      .attr('x',0).attr('y',0)
+      .attr('width', w)
+      .attr('height', h);
+
+  globeMaskSun.append('use')
+      .attr('id','globeMaskCircleSun')
+      .attr("xlink:href", "#sphere");
+
+  var globeMaskMoon = defs.append('mask')
+      .attr('id','globeMaskMoon')
+      .attr('x',0).attr('y',0)
+      .attr('width', w)
+      .attr('height', h);
+  
+  globeMaskMoon.append('rect')
+      .attr('x',0).attr('y',0)
+      .attr('width', w)
+      .attr('height', h);
+
+  globeMaskMoon.append('use')
+      .attr('id','globeMaskCircleMoon')
+      .attr("xlink:href", "#sphere");
+
+    var sunGradientMini = defs.append("radialGradient")
+    .attr("id", "sunGradientMini")
+    .attr("cx", "75%")
+    .attr("cy", "25%");
+  
+  sunGradientMini.append("stop").attr("offset", "5%").attr("stop-color", "#ffcfc7");
+  sunGradientMini.append("stop").attr("offset", "150%").attr("stop-color", "#ff6347");
+
+  var moonGradientMini = defs.append("radialGradient")
+    .attr("id", "moonGradientMini")
+    .attr("cx", "75%")
+    .attr("cy", "25%");
+  
+  moonGradientMini.append("stop").attr("offset", "5%").attr("stop-color", "#f5f5f5");
+  moonGradientMini.append("stop").attr("offset", "150%").attr("stop-color", "#999999");
+
+  var oceanGradient = defs.append("radialGradient")
+      .attr("id", "oceanGradient")
+      .attr("cx", "75%")
+      .attr("cy", "25%");
+
+  oceanGradient.append("stop").attr("offset", "5%").attr("stop-color", "#d4e2ff");
+  oceanGradient.append("stop").attr("offset", "150%").attr("stop-color", "#99bbff");
+
+  var landGradient = defs.append("radialGradient")
+      .attr("id", "landGradient")
+      .attr("cx", "75%")
+      .attr("cy", "25%");
+
+  landGradient.append("stop").attr("offset", "5%").attr("stop-color", "#44c17b");
+  landGradient.append("stop").attr("offset", "150%").attr("stop-color", "#2e8b57");
+ 
   	var earth = svg.append("g")
       	.attr("id", "earth");
-
-    earth.append("use")
-      	.attr("class", "stroke")
-      	.attr("xlink:href", "#sphere");    
 
     earth.append("use")
       	.attr("class", "ocean")
@@ -231,7 +304,7 @@ if (lat > 0.0) {
         .datum(capricorn)
         .style("stroke", "blue")
         .style("fill", "none")
-        .style("stroke-dasharray", ("2, 2")) 
+        .style("stroke-dasharray", "2, 2") 
         .style("stroke-width", 0.5)
         .attr("d", path);
 
@@ -244,7 +317,7 @@ if (lat > 0.0) {
         .datum(cancer)
         .style("stroke", "blue")
         .style("fill", "none")
-        .style("stroke-dasharray", ("2, 2")) 
+        .style("stroke-dasharray", "2, 2") 
         .style("stroke-width", 0.5)
         .attr("d", path);
 
@@ -257,7 +330,7 @@ if (lat > 0.0) {
         .datum(arctic)
         .style("stroke", "magenta")
         .style("fill", "none")
-        .style("stroke-dasharray", ("2, 2")) 
+        .style("stroke-dasharray", "2, 2") 
         .style("stroke-width", 0.5)
         .attr("d", path);
 
@@ -270,7 +343,7 @@ if (lat > 0.0) {
         .datum(antarctic)
         .style("stroke", "magenta")
         .style("fill", "none")
-        .style("stroke-dasharray", ("2, 2")) 
+        .style("stroke-dasharray", "2, 2") 
         .style("stroke-width", 0.5)
         .attr("d", path);
 
@@ -295,35 +368,104 @@ if (lat > 0.0) {
     var Δ = 0; // delta
     var solarTerminator = solarPosition(new Date(Date.now() + Δ));
 
-    var Sun = [[solarTerminator[0], solarTerminator[1], 'Solar Terminator']];
+    svg.append('circle').datum([])
+      .attr('class','sun');
 
-    var Moon = [[solarTerminator[0] + lunarTerminator, moonDec, 'Moon']];  
+    svg.append('circle').datum([])
+      .attr('class','moon');
 
-    svg.selectAll("circle.moon") // floating moon
-        .data(Moon)
-        .enter()
-        .append("circle")
-        .attr("cx", d => moonProjection(d)[0])
-        .attr("cy", d => moonProjection(d)[1])
-        .attr("r", 2)
-        .attr('fill', d => {
-    var moonCoordinates = [solarTerminator[0]+lunarTerminator, moonDec];
-        moonDistance = d3.geoDistance(moonCoordinates, moonProjection.invert(center));
-        return (moonDistance > π / 2) ? 'none' : 'white'; })
-        .attr("class", d => { if (d[2] == "Moon") return "moon"; });
+    var sunshine = d3.selectAll('.sun'); 
+    var moonshine = d3.selectAll('.moon');     
+    var globeMaskCircleSun = d3.selectAll('#globeMaskCircleSun');
+    var globeMaskCircleMoon = d3.selectAll('#globeMaskCircleMoon');
 
-    svg.selectAll("circle.sun") // floating sun
-        .data(Sun)
-        .enter()
-        .append("circle")
-        .attr("cx", d => sunProjection(d)[0])
-        .attr("cy", d => sunProjection(d)[1])
-        .attr("r", 4.5)
-        .attr('fill', d => {
-    var sunCoordinates = [solarTerminator[0], solarTerminator[1]];
-        sunDistance = d3.geoDistance(sunCoordinates, sunProjection.invert(center));
-        return (sunDistance > π / 2) ? 'none' : 'yellow'; })
-        .attr("class", d => { if (d[2] == "Solar Terminator") return "solar-terminator"; });
+    var sunPos = solarTerminator,
+      antiSunPos = antipode(sunPos);
+
+    var moonPos = [sunPos[0]+lunarTerminator, moonDec],
+      antiSunPos = antipode(sunPos);
+
+    var noonSun = {
+      projection: projection(sunPos),
+      sunProjection: sunProjection(sunPos)
+    };
+
+    var noonMoon = {
+      projection: projection(moonPos),
+      moonProjection: moonProjection(moonPos)
+    };
+
+    // sunshine refelction across the ocean (middle point is sun position) 
+    d3.select('#oceanGradient')
+    .attr('cx', ((noonSun.projection[0] - (w - h) / 2) / h * 100) + '%')
+    .attr('cy', (noonSun.projection[1] / h * 100) + '%');
+
+    // sunshine refelction across land (middle point is sun position)
+    d3.select('#landGradient')
+    .attr('cx', ((noonSun.projection[0] - (w - h) / 2) / h * 100) + '%')
+    .attr('cy', (noonSun.projection[1] / h * 100) + '%');
+ 
+    // 3D effect starting at sunrise small --> midday largest --> sunset small (displays a distance effect)
+    var sunSizeFactor = 1 - (degrees_from_center_sun(sunPos) / 180);
+
+    // 3D effect starting at moonrise small --> midday largest --> moonset small (displays a distance effect)
+    var moonSizeFactor = 1 - (degrees_from_center_moon(moonPos) / 180);
+
+    sunshine
+      .attr("cx", noonSun.sunProjection[0])
+      .attr("cy", noonSun.sunProjection[1])
+      .attr('r', sunScale(sunSizeFactor));
+
+    moonshine
+      .attr("cx", noonMoon.moonProjection[0])
+      .attr("cy", noonMoon.moonProjection[1])
+      .attr('r', moonScale(moonSizeFactor));
+
+    d3.selectAll('.land').attr('d',path);
+    d3.selectAll('.ocean').attr('d',path);
+
+    globeMaskCircleSun // (sun mask) naturally rising an setting of the sun behind the globe
+      .classed('behind', d => { return degrees_from_center_sun(sunPos) > 90 ? true : false; });
+
+    globeMaskCircleMoon // (moon mask) naturally rising and setting of the moon behind the globe
+      .classed('behind', d => { return degrees_from_center_moon(moonPos) > 90 ? true : false; });
+
+    function degrees_from_center_sun(d) {
+    var distanceBetweenSun = d3.geoDistance
+    centerPos = sunProjection.invert(center);   
+  return toDegrees(distanceBetweenSun(d,centerPos));
+}
+
+function degrees_from_center_moon(d) {
+    var distanceBetweenMoon = d3.geoDistance
+    centerPos = moonProjection.invert(center); 
+  return toDegrees(distanceBetweenMoon(d,centerPos));
+}
+
+function fade_at_edge_sun(d) {
+  var sunPos = d;
+  var sunDistance = degrees_from_center_sun(sunPos);  
+  var fadeRangeSun = 6; // 6°
+  var sunFade = d3.scaleLinear()
+    .domain([90 + fadeRangeSun, 90 - fadeRangeSun])
+    .range([0.1, 1]) // opacity range
+    .clamp(true); 
+  
+  return sunFade(sunDistance);
+}
+
+// this function is not used but might be useful at some point
+function fade_at_edge_moon(d) {
+  var moonPos = d;
+  var moonDistance = degrees_from_center_moon(moonPos);  
+  var fadeRangeMoon = 6; // 6°
+  var moonFade = d3.scaleLinear()
+    .domain([90 + fadeRangeMoon, 90 - fadeRangeMoon])
+    .range([0.1, 1]) // opacity range
+    .clamp(true); 
+  
+  return moonFade(moonDistance);  
+}
 
     var night = g.append("path")
         .attr("class", "night");

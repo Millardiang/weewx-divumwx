@@ -100,7 +100,7 @@ if (lat > 0.0) {
     .rotate([-long, -ecliptic, -ecliptic])
     .precision(0.1);
 
-  var sky = d3.geoOrthographic()
+  var skynet = d3.geoOrthographic()
     .scale(230)
     .rotate([-long, -ecliptic, -ecliptic])
     .translate(earth.translate());
@@ -109,7 +109,6 @@ if (lat > 0.0) {
     .scale(208)
     .rotate([-long, -ecliptic, -ecliptic])
     .translate(earth.translate());
-
 } else {
   // southern hemisphere titlt globe backwards
   var earth = d3.geoOrthographic()
@@ -119,7 +118,7 @@ if (lat > 0.0) {
     .rotate([-long, ecliptic, -ecliptic])
     .precision(0.1);
 
-  var sky = d3.geoOrthographic()
+  var skynet = d3.geoOrthographic()
     .scale(230)
     .rotate([-long, ecliptic, -ecliptic])
     .translate(earth.translate());
@@ -163,11 +162,6 @@ if (lat > 0.0) {
       .datum({type: "Sphere"})
       .attr("id", "sphere")
       .attr("d", path);
-
-  defs.append("clipPath")
-      .attr("id", "clip")
-      .append("use")
-      .attr("xlink:href", "#sphere");
 
   var globeMaskSun = defs.append('mask')
       .attr('id','globeMaskSun')
@@ -371,7 +365,7 @@ function redraw(now) {
 
     var noonSun = {
       earth: earth(sunPos),
-      sky: sky(sunPos)
+      skynet: skynet(sunPos)
     };
 
     var noonMoon = {
@@ -405,8 +399,8 @@ function redraw(now) {
     var moonSizeFactor = 1 - (degrees_from_center_moon(moonPos) / 180);
 
     sunshine
-      .attr("cx", noonSun.sky[0])
-      .attr("cy", noonSun.sky[1])
+      .attr("cx", noonSun.skynet[0])
+      .attr("cy", noonSun.skynet[1])
       .attr('r', sunScale(sunSizeFactor));
 
     moonshine
@@ -437,7 +431,7 @@ function redraw(now) {
 
 function degrees_from_center_sun(d) {
     var distanceBetweenSun = d3.geoDistance
-    centerPos = earth.invert(center);   
+    centerPos = skynet.invert(center);   
   return toDegrees(distanceBetweenSun(d,centerPos));
 }
 

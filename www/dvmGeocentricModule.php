@@ -22,8 +22,9 @@ date_default_timezone_set($TZ);
 <meta charset="utf-8">
 <title>Geocentric View for weewx</title>
 <div class="chartforecast">
-<span class="yearpopup"><a alt="Meeus" title="Meeus" href="dvmMeeusLiveModule.php" data-lity><?php echo $menucharticonpage;?> Geocentric Meeus Live</a></span>
-<span class="yearpopup"><a alt="Meeus" title="Meeus" href="dvmSunPath.php" data-lity><?php echo $menucharticonpage;?> Geocentric Chart</a></span>
+<span class="yearpopup"><a alt="Meeus" title="Meeus" href="dvmMeeusLivePopup.php" data-lity><?php echo $menucharticonpage;?> Geocentric Meeus Live</a></span>
+<span class="yearpopup"><a alt="Solar Light Map" title="Solar Light Map" href="dvmSolarLightMap.php" data-lity><?php echo $menucharticonpage;?> Solar Light Map</a></span>
+<!--span class="yearpopup"><a alt="Meeus" title="Meeus" href="dvmSunPath.php" data-lity><?php echo $menucharticonpage;?> Geocentric Chart</a></span-->
 </div>
 <span class='moduletitle'><?php echo 'Geocentric';?></span>
 <div class="updatedtime1"><span><?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?></div>
@@ -314,35 +315,35 @@ if (latitude < 0.0) {
 
 var defs = svg.append("defs");
 
-var moonGradient = defs.append("radialGradient")
-    .attr("id", "moonGradient")
+var moonGradientG = defs.append("radialGradient")
+    .attr("id", "moonGradientG")
     .attr("cx", "50%")
     .attr("cy", "50%")
     .attr("r", "50%")
     .attr("fx", "50%")
     .attr("fy", "50%");
 
-moonGradient.append("stop")
+moonGradientG.append("stop")
     .attr("offset", "0%")
     .style("stop-color", innerColor);
 
-moonGradient.append("stop")
+moonGradientG.append("stop")
     .attr("offset", "90%")
     .style("stop-color", "#555");
 
-var sunGradient = defs.append("radialGradient")
-    .attr("id", "sunGradient")
+var sunGradientG = defs.append("radialGradient")
+    .attr("id", "sunGradientG")
     .attr("cx", "50%")
     .attr("cy", "50%")
     .attr("r", "50%")
     .attr("fx", "50%")
     .attr("fy", "50%");
 
-sunGradient.append("stop")
+sunGradientG.append("stop")
     .attr("offset", "0%")
     .style("stop-color", innerColor);
 
-sunGradient.append("stop")
+sunGradientG.append("stop")
     .attr("offset", "90%")
     .style("stop-color", "tomato");
 
@@ -369,7 +370,7 @@ if (latitude < 0.0) {
 if (sunazi < 180.0) {
  svg
     .append("circle")
-    .style("fill", "url(#sunGradient)")
+    .style("fill", "url(#sunGradientG)")
     .attr("r", 6.5)
     .attr("cx", xScale(180 - sunazi))
     .attr("cy", yScale(sunalt))
@@ -377,7 +378,7 @@ if (sunazi < 180.0) {
 } else {
   svg
     .append("circle")
-    .style("fill", "url(#sunGradient)")
+    .style("fill", "url(#sunGradientG)")
     .attr("r", 6.5)
     .attr("cx", xScale(360 + 180 - sunazi))
     .attr("cy", yScale(sunalt))
@@ -386,7 +387,7 @@ if (sunazi < 180.0) {
 } else {
   svg
     .append("circle")
-    .style("fill", "url(#sunGradient)")
+    .style("fill", "url(#sunGradientG)")
     .attr("r", 6.5)
     .attr("cx", xScale(sunazi))
     .attr("cy", yScale(sunalt))
@@ -417,7 +418,7 @@ if (latitude < 0.0) {
 if (moonazi < 180.0) {
   svg
     .append("circle")
-    .style("fill", "url(#moonGradient)")
+    .style("fill", "url(#moonGradientG)")
     .attr("r", 4)
     .attr("cx", xScale(180 - moonazi))
     .attr("cy", yScale(moonalt))
@@ -425,7 +426,7 @@ if (moonazi < 180.0) {
 } else {
   svg
     .append("circle")
-    .style("fill", "url(#moonGradient)")
+    .style("fill", "url(#moonGradientG)")
     .attr("r", 4)
     .attr("cx", xScale(360 + 180 - moonazi))
     .attr("cy", yScale(moonalt))
@@ -434,7 +435,7 @@ if (moonazi < 180.0) {
 } else {
   svg
     .append("circle")
-    .style("fill", "url(#moonGradient)")
+    .style("fill", "url(#moonGradientG)")
     .attr("r", 4)
     .attr("cx", xScale(moonazi))
     .attr("cy", yScale(moonalt))
