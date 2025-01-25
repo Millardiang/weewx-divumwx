@@ -19,42 +19,21 @@ $json_string    = file_get_contents('jsondata/eq.txt');
 $parsed_json    = json_decode($json_string,true);
 $eqtitle        = $parsed_json['features'][0]['properties']['flynn_region'];
 $magnitude      = $parsed_json['features'][0]['properties']['mag'];
-if ($magnitude < 4.0){$category = "Minor";$magnitudeColor="#2e8b57";}
-else if ($magnitude < 5.0){$category = "Light";$magnitudeColor="#ef9f70";}
-else if ($magnitude < 6.0){$category = "Moderate";$magnitudeColor="#ff964f";}
-else if ($magnitude < 7.0){$category = "Strong";$magnitudeColor="#ff6181";}
-else if ($magnitude < 8.0){$category = "Great";$magnitudeColor="#be688b";}
-else if ($magnitude > 8.0){$category = "Major";$magnitudeColor="#007FFF";}
 $depthraw       = $parsed_json['features'][0]['properties']['depth'];
 $depth          = round($depthraw, 1);
 $time           = $parsed_json['features'][0]['properties']['time'];
 $lati           = $parsed_json['features'][0]['properties']['lat'];
 $longi          = $parsed_json['features'][0]['properties']['lon'];
-$eventime       = date("H:i:s", strtotime($time) );
+$eventime       = date("H:i:s j M y", strtotime($time) );
 $eqdist         = round(distance($lat, $lon, $lati, $longi), 1) ;
 
-$eqdist; if ($wind["units"] == 'mph') {$eqdist = round(distance($lat, $lon, $lati, $longi) * 0.621371, 1) ."mi";
-} else {$eqdist = round(distance($lat, $lon, $lati, $longi), 1)."km";}
+$eqdist; if ($wind["units"] == 'mph') {$eqdist = round(distance($lat, $lon, $lati, $longi) * 0.621371, 1) ." miles";
+} else {$eqdist = round(distance($lat, $lon, $lati, $longi), 1)." km";}
 $eqdista; if ($wind["units"] == 'mph') {$eqdista = round(distance($lat, $lon, $lati, $longi), 1) ."<smallrainunit>&nbsp;km";
 } else {$eqdista = round(distance($lat, $lon, $lati, $longi) * 0.621371, 1)."<smallrainunit>&nbsp;miles";} 
 ?>
 
 <!DOCTYPE html>
-<style>
-table.earthquake {
-  background-color: transparent;
-  width: 90%;
-  text-align: center;
-  border-spacing:0.35em;
-}
-table.earthquake td {
-  border: 1px solid var(--col-13);border-radius:2px;
-  padding: 1px 1px;
-}
-table.earthquake tbody td {
-  font-size: 10px;
-}
-</style>
 <html lang="en">
 
 <div class="chartforecast">
@@ -65,36 +44,11 @@ table.earthquake tbody td {
 
 <div class= "updatedtime1"><span><?php if(file_exists('jsondata/eq.txt')&&time() - filemtime('jsondata/eq.txt')>3600) echo $offline. '<offline> Offline </offline>';else echo $online," ",date($timeFormat, filemtime('jsondata/eq.txt'));?></span></div>
 
-
-<div class="earthquake-title" style="font-size:10px;"><?php echo $eqtitle;?></div>
-<div class="earthquake-module" style="display:grid;grid-template-columns: auto auto;">
-<div class="quakes" style="top:-25px;margin-left:-10px;"></div>
-<div class="earthquake-table" style="margin-top:17px;margin-left:-30px;">
-<table class="earthquake">
-<tbody>
-<tr>
-<td style="border: transparent;">Time</td>
-<td style="border: transparent;">Depth</td>
-</tr>
-<tr>
-<td style="border-left: 5px solid <?php echo $magnitudeColor;?>;"><?php echo $eventime;?></td>
-<td style="border-left: 5px solid <?php echo $magnitudeColor;?>;"><?php echo $depth;?>km</td>
-</tr>
-<tr>
-<td style="border: transparent;">Epicenter</td>
-<td style="border: transparent;">Category</td>
-</tr>
-<tr>
-<td style="border-left: 5px solid <?php echo $magnitudeColor;?>;"><?php echo $eqdist;?></td>
-<td style="border-left: 5px solid <?php echo $magnitudeColor;?>;"><?php echo $category;?></td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</html>
-
 <script src="js/d3.7.9.0.min.js"></script>
+
+
+<div class="quakes"></div>
+
 
 <script>
 
@@ -115,18 +69,24 @@ table.earthquake tbody td {
     var Distance = "<?php echo $eqdist;?>";
     
     var Depth = "<?php echo $depth;?>";
-
-    var Category = "<?php echo $category;?>";
-
-
                    
            var svg = d3.select(".quakes")
                 .append("svg")
                 //.style("background", "#292E35")
-                .attr("width", 130)
+                .attr("width", 300)
                 .attr("height", 150);
                      
-           
+             
+             svg.append("text") // Earthquake Location text output
+                .attr("x", 150)
+                .attr("y", 20)
+                .style("fill", baseTextColor)
+                .style("font-family", "Helvetica")
+                .style("font-size", "11px")
+                .style("text-anchor", "middle")
+                .style("font-weight", "normal")
+                .text(Location);
+            
             svg.append("text") // Magnitude word output
                 .attr("x", 60)
                 .attr("y", 40)
@@ -146,8 +106,200 @@ table.earthquake tbody td {
                 .style("text-anchor", "middle")
                 .style("font-weight", "normal")
                 .text(d3.format(".1f")(Magnitude));
-        
+                        
+            svg.append("text") // Time and Date text output
+                .attr("x", 145)
+                .attr("y", 70)
+                .style("fill", baseTextColor)
+                .style("font-family", "Helvetica")
+                .style("font-size", "11px")
+                .style("text-anchor", "left")
+                .style("font-weight", "normal")
+                .text(Time);
+                
+            svg.append("text") // Depth text output
+                .attr("x", 145)
+                .attr("y", 85)
+                .style("fill", baseTextColor)
+                .style("font-family", "Helvetica")
+                .style("font-size", "11px")
+                .style("text-anchor", "left")
+                .style("font-weight", "normal")
+                .text("Depth");
+                
+            svg.append("text") // Depth text output
+                .attr("x", 177.5)
+                .attr("y", 85)
+                .style("fill", "#2e8b57")
+                .style("font-family", "Helvetica")
+                .style("font-size", "11px")
+                .style("text-anchor", "left")
+                .style("font-weight", "normal")
+                .text(Depth+" km");
+                
+            svg.append("text") // Distance text output
+                .attr("x", 145)
+                .attr("y", 100)
+                .style("fill", baseTextColor)
+                .style("font-family", "Helvetica")
+                .style("font-size", "11px")
+                .style("text-anchor", "left")
+                .style("font-weight", "normal")
+                .text("Epicenter");
+                
+            svg.append("text") // Distance text output
+                .attr("x", 194.5)
+                .attr("y", 100)
+                .style("fill", "#ff964f")
+                .style("font-family", "Helvetica")
+                .style("font-size", "11px")
+                .style("text-anchor", "left")
+                .style("font-weight", "normal")
+                .text(Distance);
+                
+            svg.append("text") // Station text output
+                .attr("x", 145)
+                .attr("y", 115)
+                .style("fill", baseTextColor)
+                .style("font-family", "Helvetica")
+                .style("font-size", "11px")
+                .style("text-anchor", "left")
+                .style("font-weight", "normal")
+                .text("From"+" "+Station);
             
+        if (Magnitude < 4.0) {  
+            
+            svg.append("text") // category text output
+                .attr("x", 145)
+                .attr("y", 130)
+                .style("fill", baseTextColor)
+                .style("font-family", "Helvetica")
+                .style("font-size", "11px")
+                .style("text-anchor", "left")
+                .style("font-weight", "normal")
+                .text("Category");
+                
+            svg.append("text") // category text output
+                .attr("x", 193)
+                .attr("y", 130)
+                .style("fill", "#2e8b57")
+                .style("font-family", "Helvetica")
+                .style("font-size", "11px")
+                .style("text-anchor", "left")
+                .style("font-weight", "normal")
+                .text("Minor");
+                
+        } else if (Magnitude < 5.0) {
+        
+            svg.append("text") // Category text output
+                .attr("x", 145)
+                .attr("y", 130)
+                .style("fill", baseTextColor)
+                .style("font-family", "Helvetica")
+                .style("font-size", "11px")
+                .style("text-anchor", "left")
+                .style("font-weight", "normal")
+                .text("Category");
+                
+            svg.append("text") // Category text output
+                .attr("x", 193)
+                .attr("y", 130)
+                .style("fill", "#fde396")
+                .style("font-family", "Helvetica")
+                .style("font-size", "11px")
+                .style("text-anchor", "left")
+                .style("font-weight", "normal")
+                .text("Light");
+                
+        } else if (Magnitude < 6.0) {
+        
+            svg.append("text") // Category text output
+                .attr("x", 145)
+                .attr("y", 130)
+                .style("fill", baseTextColor)
+                .style("font-family", "Helvetica")
+                .style("font-size", "11px")
+                .style("text-anchor", "left")
+                .style("font-weight", "normal")
+                .text("Category");
+                
+            svg.append("text") // Category text output
+                .attr("x", 193)
+                .attr("y", 130)
+                .style("fill", "#ff964f")
+                .style("font-family", "Helvetica")
+                .style("font-size", "11px")
+                .style("text-anchor", "left")
+                .style("font-weight", "normal")
+                .text("Moderate");
+                
+        } else if (Magnitude < 7.0) {
+        
+            svg.append("text") // Category text output
+                .attr("x", 145)
+                .attr("y", 130)
+                .style("fill", baseTextColor)
+                .style("font-family", "Helvetica")
+                .style("font-size", "11px")
+                .style("text-anchor", "left")
+                .style("font-weight", "normal")
+                .text("Category");
+                
+            svg.append("text") // Category text output
+                .attr("x", 193)
+                .attr("y", 130)
+                .style("fill", "#ff6181")
+                .style("font-family", "Helvetica")
+                .style("font-size", "11px")
+                .style("text-anchor", "left")
+                .style("font-weight", "normal")
+                .text("Strong");
+                
+         } else if (Magnitude < 8.0) {
+         
+            svg.append("text") // Category text output
+                .attr("x", 145)
+                .attr("y", 130)
+                .style("fill", baseTextColor)
+                .style("font-family", "Helvetica")
+                .style("font-size", "11px")
+                .style("text-anchor", "left")
+                .style("font-weight", "normal")
+                .text("Category");
+                
+            svg.append("text") // Category text output
+                .attr("x", 193)
+                .attr("y", 130)
+                .style("fill", "#be688b")
+                .style("font-family", "Helvetica")
+                .style("font-size", "11px")
+                .style("text-anchor", "left")
+                .style("font-weight", "normal")
+                .text("Great");
+                
+         } else if (Magnitude > 8.0) {
+         
+            svg.append("text") // Category text output
+                .attr("x", 145)
+                .attr("y", 130)
+                .style("fill", baseTextColor)
+                .style("font-family", "Helvetica")
+                .style("font-size", "11px")
+                .style("text-anchor", "left")
+                .style("font-weight", "normal")
+                .text("Category");
+                
+            svg.append("text") // Category text output
+                .attr("x", 193)
+                .attr("y", 130)
+                .style("fill", "#007FFF")
+                .style("font-family", "Helvetica")
+                .style("font-size", "11px")
+                .style("text-anchor", "left")
+                .style("font-weight", "normal")
+                .text("Major");
+                
+        }       
                                 
       if (Magnitude < 4.0) {        
             
@@ -217,7 +369,7 @@ table.earthquake tbody td {
                      .attr("cx", 60) // center circle
                      .attr("cy", 95)
                      .attr("r", 17)
-                     .attr('stroke', '#ef9f70')
+                     .attr('stroke', '#fde396')
                      .attr('fill', 'none')
                      .attr('stroke-width', 2.5);
                      
@@ -225,7 +377,7 @@ table.earthquake tbody td {
                      .attr("cx", 60) // center circle
                      .attr("cy", 95)
                      .attr("r", 27)
-                     .attr('stroke', '#ef9f70')
+                     .attr('stroke', '#fde396')
                      .attr('fill', 'none')
                      .attr('stroke-width', 2);
                 
@@ -233,7 +385,7 @@ table.earthquake tbody td {
                      .attr("cx", 60) // center circle
                      .attr("cy", 95)
                      .attr("r", 37)
-                     .attr('stroke', '#ef9f70')
+                     .attr('stroke', '#fde396')
                      .attr('fill', 'none')
                      .attr('stroke-width', 1);
                      
@@ -241,7 +393,7 @@ table.earthquake tbody td {
                      .attr("cx", 60) // center circle
                      .attr("cy", 95)
                      .attr("r", 47)
-                     .attr('stroke', '#ef9f70')
+                     .attr('stroke', '#fde396')
                      .attr('fill', 'none')
                      .attr('stroke-width', 0.5);
 
@@ -254,7 +406,7 @@ table.earthquake tbody td {
                     .append("circle")
                     .attr("class", "one")
                     .attr("stroke-width", 2.5)
-                    .style('stroke', "#ef9f70")
+                    .style('stroke', "#fde396")
                     .style('fill', "none")
                     .attr("r", 17)
                     .attr("cx", 60)
@@ -523,3 +675,4 @@ table.earthquake tbody td {
             
             }
 </script>
+</html>
