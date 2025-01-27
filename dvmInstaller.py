@@ -976,9 +976,9 @@ class DVMInstaller:
         if not html_root_exists:
             directory_structure = {
                 "/var": {"permissions": 0o755, "owner": "root", "group": "root", "critical": True},
-                "/var/www": {"permissions": 0o755, "owner": "www-data", "group": "www-data", "critical": True},
-                "/var/www/html": {"permissions": 0o755, "owner": "www-data", "group": "www-data", "critical": False},
-                "/var/www/html/divumwx": {"permissions": 0o775, "owner": "www-data", "group": "rayvenhaus", "critical": False}
+                "/var/www": {"permissions": 0o755, "owner": wsOwner, "group": wsGroup, "critical": True},
+                "/var/www/html": {"permissions": 0o755, "owner": wsOwner, "group": wsGroup, "critical": False},
+                "/var/www/html/divumwx": {"permissions": 0o775, "owner": wsOwner, "group": self.user, "critical": False}
             }
             html_root_created = self.chkDir(html_root, directory_structure)
             if html_root_created:
