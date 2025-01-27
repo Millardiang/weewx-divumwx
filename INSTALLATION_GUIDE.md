@@ -19,13 +19,11 @@ DivumWX requires a webserver. ZIf you wish to view your pages locally only, how 
 
 What we do, however, is look at your existing weewx.conf file and pull out the existing HTML_ROOT.  This should be the path that points to where the generated reports are placed, relative to WEEWX_ROOT, unless you give it a full path, For example, if your weewx.conf contained "public_html" for the HTML_ROOT, in weewx 5.x and higher, in ~/weewx-data/public_html, and, as we all know, the "~" means the running users home directory.  This then means that if the default skin, "Seasons" is enabled, then the Seasons Report files would be generated in that directory. Same for any other skin that was enabled.
 
-So, since a directory called public_html in a users home directory in not a "normal" location for your web server to serve pages from, we check for the existence of a symlink (symbolic link) between your web servers DOCUMENTROOT and the HTML_ROOT entry in weewx.conf, which would look something like this:
+Now, since serving page from a user home directory is usually a Bad Thing (tm), we, the Good Folks at Team DivumWX, all Graduates in Good Standing of either the MacGyger School of Engineering or the Banzai Institute of Rational Transcendentalism, have decided to not allow DivumWX to be located in the home directory. Since a directory called public_html in a users home directory in not a "normal" location for your web server to serve pages from, we check for the existence of a symlink (symbolic link) between your web servers DOCUMENTROOT and the HTML_ROOT entry in weewx.conf, which would look something like this:
 
 					lrwxrwxrwx 1 rayvenhaus rayvenhaus    39 Jan 10 13:58 public_html -> /home/rayvenhaus/weewx-data/public_html
 
-If we find that symlink, that tells us that you are serving pages. or can serve pages, from that directory.  In the interest or keeping your previous skin operational, we then tack /divumwx onto the constructed HTML_ROOT and now have the path to where we are going to place the DivumWX www files:
-
-					~/weewx-data/public_html/divumwx
+If we find that symlink, that tells us you don't care if the natural order of things are ripped asunder and cats & dogs start sleeping together. We say NAY, NAY!! Basically we've standardized on the default web server DocumentRoot of /var/www/html and are going to place the DivumWX file in a subdirectory called divumwx.
 
 Once the installer is finished, how you modify your directory structure to view your pages is entirely up to you. If you make any modifications to weewx.conf after the installer is completed its run, then please remember, any assistance that we can provide will be on a case by case basis, your mileage will vary and please do not fold, spindle or mutilate the packaging when shipping.
 
