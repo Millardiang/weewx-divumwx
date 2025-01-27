@@ -42,12 +42,16 @@ $jsonfile="jsondata/awd.txt";if(!file_exists($jsonfile)) {return;}
 
 ?>
     <div class="forecast4">
-      <span class="yearpopup"><a alt="Forecast Menu" title="Forecast Menu" href="dvmForecastHourlyPopup.php" data-lity><?php echo $chartinfo;?> Forecasts and Meteogram</a></span>
-      
+      <span class="yearpopup"><a alt="Forecast Menu" title="Forecast Menu" href="dvmForecastHourlyPopup.php" data-lity><?php echo $chartinfo; ?> Forecasts and Meteogram</a></span>
+      <span class="yearpopup"><a alt="rss" title="MetOffice RSS" href="rss.php" data-lity><?php echo $chartinfo; ?> MetOffice RSS</a></span>
+ 
+      <span class="yearpopup"><a alt="Health" title="Health" href="alert.html"><?php echo $chartinfo; ?> Weather Health</a></span>      
 </div>
-    <span class='moduletitle'><?php echo $lang['forecastModule'];?> (<valuetitleunit>&deg;<?php echo $temp["units"];?></valuetitleunit>)</span>
-
-
+<span class='moduletitle'><?php echo $lang[
+    "forecastModule"
+]; ?> (<valuetitleunit>&deg;<?php echo $temp[
+     "units"
+ ]; ?></valuetitleunit>)</span>
 <div class="updatedtime1"><?php $forecastime=filemtime('jsondata/awd.txt');
 
 $forecasturl = file_get_contents("jsondata/awd.txt");
@@ -135,19 +139,19 @@ for ($k=0;$k<=2;$k++)
 	echo '<img src="img/meteocons/' . $forecastIcon[$k] . '" width="45%" ></img>';	
 	echo '</div><div class="aeristempdesc" style="font-size: 0.53rem"}>'.$forecastdaysummary.'</div>';
 	//temp non metric
-	if($tempunit=='F' && $forecastdayTempHigh<44.6){echo '<aeristemphihome><bluet>'.number_format($forecastdayTempHigh,0).'°'.$tempunit.'</bluet></aeristemphihome>';}
-	else if($tempunit=='F' && $forecastdayTempHigh>104){echo '<aeristemphihome><purplet>'.number_format($forecastdayTempHigh,0).'°'.$tempunit.'</purplet></aeristemphihome>';}
-	else if($tempunit=='F' && $forecastdayTempHigh>80.6){echo '<aeristemphihome><redt>'.number_format($forecastdayTempHigh,0).'°'.$tempunit.'</redt></aeristemphihome>';}
-	else if($tempunit=='F' && $forecastdayTempHigh>64.4){echo '<aeristemphihome><oranget>'.number_format($forecastdayTempHigh,0).'°'.$tempunit.'</oranget></aeristemphihome>';}
-	else if($tempunit=='F' && $forecastdayTempHigh>55){echo '<aeristemphihome><yellowt>'.number_format($forecastdayTempHigh,0).'°'.$tempunit.'</yellowt></aeristemphihome>';}
-	else if($tempunit=='F' && $forecastdayTempHigh>=44.6){echo '<aeristemphihome><greent>'.number_format($forecastdayTempHigh,0).'°'.$tempunit.'</greent></aeristemphihome>';}
+	if($tempunit=='F' && $forecastdayTempHigh<44.6){echo '<aeristemphihome>'.$thermIcon.'&nbsp;<bluet>'.number_format($forecastdayTempHigh,0).'°'.$tempunit.'</bluet></aeristemphihome>';}
+	else if($tempunit=='F' && $forecastdayTempHigh>104){echo '<aeristemphihome>'.$thermIcon.'&nbsp;<purplet>'.number_format($forecastdayTempHigh,0).'°'.$tempunit.'</purplet></aeristemphihome>';}
+	else if($tempunit=='F' && $forecastdayTempHigh>80.6){echo '<aeristemphihome>'.$thermIcon.'&nbsp;<redt>'.number_format($forecastdayTempHigh,0).'°'.$tempunit.'</redt></aeristemphihome>';}
+	else if($tempunit=='F' && $forecastdayTempHigh>64.4){echo '<aeristemphihome>'.$thermIcon.'&nbsp;<oranget>'.number_format($forecastdayTempHigh,0).'°'.$tempunit.'</oranget></aeristemphihome>';}
+	else if($tempunit=='F' && $forecastdayTempHigh>55){echo '<aeristemphihome>'.$thermIcon.'&nbsp;<yellowt>'.number_format($forecastdayTempHigh,0).'°'.$tempunit.'</yellowt></aeristemphihome>';}
+	else if($tempunit=='F' && $forecastdayTempHigh>=44.6){echo '<aeristemphihome>'.$thermIcon.'&nbsp;<greent>'.number_format($forecastdayTempHigh,0).'°'.$tempunit.'</greent></aeristemphihome>';}
 	//temp metric
-	else if($forecastdayTempHigh<7){echo '<aeristemphihome><bluet>'.number_format($forecastdayTempHigh,0).'°'.$tempunit.'</bluet></aeristemphihome>';}
-	else if($forecastdayTempHigh>40){echo '<aeristemphihome><purplet>'.number_format($forecastdayTempHigh,0).'°'.$tempunit.'</purplet></aeristemphihome>';}
-	else if($forecastdayTempHigh>27){echo '<aeristemphihome><redt>'.number_format($forecastdayTempHigh,0).'°'.$tempunit.'</redt></aeristemphihome>';}
-	else if($forecastdayTempHigh>18){echo '<aeristemphihome><oranget>'.number_format($forecastdayTempHigh,0).'°'.$tempunit.'</oranget></aeristemphihome>';}
-	else if($forecastdayTempHigh>12.7){echo '<aeristemphihome><yellowt>'.number_format($forecastdayTempHigh,0).'°'.$tempunit.'</yellowt></aeristemphihome>';}
-	else if($forecastdayTempHigh>=7){echo '<aeristemphihome><greent>'.number_format($forecastdayTempHigh,0).'°'.$tempunit.'</greent></aeristemphihome>';}
+	else if($forecastdayTempHigh<7){echo '<aeristemphihome>'.$thermIcon.'&nbsp;<bluet>'.number_format($forecastdayTempHigh,0).'°'.$tempunit.'</bluet></aeristemphihome>';}
+	else if($forecastdayTempHigh>40){echo '<aeristemphihome>'.$thermIcon.'&nbsp;<purplet>'.number_format($forecastdayTempHigh,0).'°'.$tempunit.'</purplet></aeristemphihome>';}
+	else if($forecastdayTempHigh>27){echo '<aeristemphihome>'.$thermIcon.'&nbsp;<redt>'.number_format($forecastdayTempHigh,0).'°'.$tempunit.'</redt></aeristemphihome>';}
+	else if($forecastdayTempHigh>18){echo '<aeristemphihome>'.$thermIcon.'&nbsp;<oranget>'.number_format($forecastdayTempHigh,0).'°'.$tempunit.'</oranget></aeristemphihome>';}
+	else if($forecastdayTempHigh>12.7){echo '<aeristemphihome>'.$thermIcon.'&nbsp;<yellowt>'.number_format($forecastdayTempHigh,0).'°'.$tempunit.'</yellowt></aeristemphihome>';}
+	else if($forecastdayTempHigh>=7){echo '<aeristemphihome>'.$thermIcon.'&nbsp;<greent>'.number_format($forecastdayTempHigh,0).'°'.$tempunit.'</greent></aeristemphihome>';}
 	//wind
 	echo "<div class='aeriswindspeedicon'>";
 	echo $windalert2." ".$forecastdayWinddircardinal; 
@@ -161,8 +165,8 @@ for ($k=0;$k<=2;$k++)
 	else if ($forecastdayPrecipType='rain' && $rainunit=='in'){echo '<precip>'.$rainsvg.'&nbsp;<aeristempwindhome><span><oblue>&nbsp;'. number_format($forecastdayprecipIntensity,2).'</oblue>&nbsp;<valuewindunit>'.$rainunit.'</valuewindunit></aeriswindhome></span></precip>';}
 	else if ($forecastdayPrecipType='rain' && $rainunit=='mm'){echo '<precip>'.$rainsvg.'&nbsp;<aeristempwindhome><span><oblue>&nbsp;'. number_format($forecastdayprecipIntensity,2).'</oblue>&nbsp;<valuewindunit>'.$rainunit.'</valuewindunit></aeriswindhome></span></precip>';}
 	//uvi
-if ($forecastdaynight=='D'){echo '<br>'.$uvicon.'&#9788;&nbsp;<aeristemplohome><uv>UVI <uvspan>';if ($forecastdayUV>=10){echo "<purpleu>".$forecastdayUV. '</purpleu><greyu> '.$forecastdayUVdesc;}else  if ($forecastdayUV>=7){echo "<redu>".$forecastdayUV. '</redu><greyu> '.$forecastdayUVdesc;}else if ($forecastdayUV>5){ echo "<orangeu>".$forecastdayUV. '</orangeu><greyu> '.$forecastdayUVdesc;}else if ($forecastdayUV>2){  echo "<yellowu>".$forecastdayUV. '</yellowu><greyu> '.$forecastdayUVdesc;}else if ($forecastdayUV>=0){ echo "<greenu>".$forecastdayUV. '</greenu><greyu> '.$forecastdayUVdesc;}echo '</uvspan></uv>';}
-else if ($forecastdaynight=='N'){echo '<br><blueu>'.$humidity.'&nbsp;<aeristemplohome><uv>Hum <uvspan>'.$forecastHumidity. '</blueu>';}
+if ($forecastdaynight=='D'){echo '<br>'.$uvicon.'&nbsp;<aeristemplohome><uv><uvspan>';if ($forecastdayUV>=10){echo "<purpleu>".$forecastdayUV. '</purpleu><greyu> '.$forecastdayUVdesc;}else  if ($forecastdayUV>=7){echo "<redu>".$forecastdayUV. '</redu><greyu> '.$forecastdayUVdesc;}else if ($forecastdayUV>5){ echo "<orangeu>".$forecastdayUV. '</orangeu><greyu> '.$forecastdayUVdesc;}else if ($forecastdayUV>2){  echo "<yellowu>".$forecastdayUV. '</yellowu><greyu> '.$forecastdayUVdesc;}else if ($forecastdayUV>=0){ echo "<greenu>".$forecastdayUV. '</greenu><greyu> '.$forecastdayUVdesc;}echo '</uvspan></uv>';}
+else if ($forecastdaynight=='N'){echo '<br><blueu>'.$humidity.'&nbsp;<aeristemplohome><uv><uvspan>'.$forecastHumidity. '</blueu>';}
 	//lightning
 	echo '<thunder>'.$forecastthunder;echo '</aeristemplohome></div>';
 } // end for loop for icons
