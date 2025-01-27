@@ -1,4 +1,10 @@
 <?php
+include('dvmCombinedData.php');
+
+if($theme==="light"){ echo "<body style='background-color:e0eafb'>";}
+else if($theme==="dark"){ echo "<body style='background-color:#292E35'>";}
+if($theme==="light"){ $textColor = "#1c4263";}
+else if($theme==="dark"){ $textColor = "silver";}
 ##############################################################################################
 #        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
 #       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    #
@@ -9,99 +15,47 @@
 #       (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|    #
 #                                                                                            #
 #     Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      #
-#      Distributed under terms of the GPLv3.  See the file LICENSE.txt for your rights.      #
+#      Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.       #
 #    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
-############################################################################################## 
-include('dvmCombinedData.php');
-header('Content-type: text/html; charset=utf-8');
-$meteor_default="No Meteor Showers";
-$meteor_events[]=array("event_start"=>mktime(0, 0, 0, 1, 1),"event_title"=>"Quadrantids","event_end"=>mktime(23, 59, 59, 1, 2),);
-$meteor_events[]=array("event_start"=>mktime(0, 0, 0, 1, 3),"event_title"=>"Quadrantids peak","event_end"=>mktime(23, 59, 59, 1, 4),);
-$meteor_events[]=array("event_start"=>mktime(0, 0, 0, 1, 5),"event_title"=>"Quadrantids","event_end"=>mktime(23, 59, 59, 1, 12),);
-$meteor_events[]=array("event_start"=>mktime(0, 0, 0, 4, 9),"event_title"=>"Approaching Lyrids","event_end"=>mktime(23, 59, 59, 4, 20),);
-$meteor_events[]=array("event_start"=>mktime(0, 0, 0, 4, 21),"event_title"=>"Lyrids peak","event_end"=>mktime(23, 59, 59, 4, 22),);
-$meteor_events[]=array("event_start"=>mktime(0, 0, 0, 5, 5),"event_title"=>"ETA Aquarids","event_end"=>mktime(23, 59, 59, 5, 6),);
-$meteor_events[]=array("event_start"=>mktime(0, 0, 0, 7, 20),"event_title"=>"Approaching Delta Aquarids","event_end"=>mktime(23, 59, 59, 7, 27),);
-$meteor_events[]=array("event_start"=>mktime(0, 0, 0, 7, 28),"event_title"=>"Delta Aquarids peak","event_end"=>mktime(23, 59, 59, 7, 29),);
-$meteor_events[]=array("event_start"=>mktime(0, 0, 0, 8, 1),"event_title"=>"Perseids Aug 1st-24th","event_end"=>mktime(23, 59, 59, 8, 10),);
-$meteor_events[]=array("event_start"=>mktime(0, 0, 0, 8, 11),"event_title"=>"Perseids peak","event_end"=>mktime(23, 59, 59, 8, 13),);
-$meteor_events[]=array("event_start"=>mktime(0, 0, 0, 8, 14),"event_title"=>"Perseids passed","event_end"=>mktime(23, 59, 59, 8, 18),);
-$meteor_events[]=array("event_start"=>mktime(0, 0, 0, 10, 7),"event_title"=>"Draconids peak","event_end"=>mktime(23, 59, 59, 10, 7),);
-$meteor_events[]=array("event_start"=>mktime(0, 0, 0, 10, 20),"event_title"=>"Orionids peak","event_end"=>mktime(23, 59, 59, 10, 21),);
-$meteor_events[]=array("event_start"=>mktime(0, 0, 0, 11, 4),"event_title"=>"South Taurids peak","event_end"=>mktime(23, 59, 59, 11, 5),);
-$meteor_events[]=array("event_start"=>mktime(0, 0, 0, 11, 11),"event_title"=>"North Taurids peak","event_end"=>mktime(23, 59, 59, 11, 11),);
-$meteor_events[]=array("event_start"=>mktime(0, 0, 0, 11, 17),"event_title"=>"Leonids peak","event_end"=>mktime(23, 59, 59, 11, 18),);
-$meteor_events[]=array("event_start"=>mktime(0, 0, 0, 12, 13),"event_title"=>"Geminids peak","event_end"=>mktime(23, 59, 59, 12, 14),);
-$meteor_events[]=array("event_start"=>mktime(0, 0, 0, 12, 17),"event_title"=>"Ursids 17th-25th","event_end"=>mktime(23, 59, 59, 12, 20),);
-$meteor_events[]=array("event_start"=>mktime(0, 0, 0, 12, 21),"event_title"=>"Ursids peak","event_end"=>mktime(23, 59, 59, 12, 22),);
-$meteor_events[]=array("event_start"=>mktime(0, 0, 0, 12, 23),"event_title"=>"Ursids 17th-25th","event_end"=>mktime(23, 59, 59, 12, 25),);
-$meteorNow = time();
-$meteorOP = false;
-foreach ($meteor_events as $meteor_check) {
-    if ($meteor_check["event_start"] <= $meteorNow && $meteorNow <= $meteor_check["event_end"]) {
-        $meteorOP = true;
-        $meteor_default = $meteor_check["event_title"];
-    }
-};?>
-<!DOCTYPE html>
+##############################################################################################
+?>
+<!DOCTYPE html> 
 <html lang="en">
 <head> 
 <meta charset="utf-8">
-<title>moon phase</title>
+<title>Meeus Live</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 </head>
-<body>
-<div class="chartforecast">
-<span class="yearpopup"><a alt="Moon Info" title="Moon Info" href="dvmMenuCelestialPopup.php" data-lity><?php echo $info;?> Celestial Data</a></span>
+<body> 
+<div style="position:relative; top:10px;display:flex;justify-content:center;align-items:center;font-family:Helvetica;">
+<?php
+if($theme==="light"){echo "<font color='#1c4263'>"."Geocentric Live Meeus Calculation"."</font>";}
+else if($theme==="dark"){echo "<font color='silver'>"."Geocentric Live Meeus Calculation"."</font>";}
+?>
 </div>
-<span class='moduletitle'><?php echo $lang['moonPhaseModule'];?></span>
-<div class="updatedtime1"><span>
-<?php if(file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?>
-</span></div>
-
+<style>
+.meeus{display:flex;justify-content:center;align-items:center;margin-top:20px;margin-left:0px;
+text{fill:<?php if($theme==="light"){echo "#1c4263";} else if($theme==="dark"){echo "silver";}?>;font-family:Helvetica;font-size:7.5px;}
+.axis path{stroke:<?php if($theme==="light"){echo "#1c4263";} else if($theme==="dark"){echo "#555";}?>;stroke-width:1;fill:none;}
+.axis line{stroke:<?php if($theme==="light"){echo "#1c4263";} else if($theme==="dark"){echo "#555";}?>;stroke-width:1;fill:none;} 
+.horiz.line{stroke:#007fff;stroke-width:1;fill:none;}
+.zen.line{stroke:#2e8b57;stroke-width:1;fill:none;}}
+.output{display:flex;justify-content:center;align-items:center;margin-top:0px;margin-left:10px;}
+.moonx{display:flex;justify-content:center;align-items:center;margin-top:-565px;margin-left:520px;}
+</style>
 <script src="js/d3.7.9.0.min.js"></script>
-
-<div class="moonphasemoduleposition">
-<div class="moonrise1">
-<svg id="divumwx moon rise" viewBox="0 0 32 32" width="6" height="6" fill="none" stroke="#01a4b5" stroke-linecap="round" stroke-linejoin="round" stroke-width="10%">    
-<path d="M30 20 L16 8 2 20" /></svg>
- <?php echo $lang['Moon'];?> <br /><?php  echo 'Rise<blueu> ' .$alm["moonrise"].'</blueu>';?>
-
-<div class="moonmodulepos">
-<div class="moonphasexx"></div>
-</div></div>
-
-<div class="fullmoon1">
-<svg id="divumwx full moon" viewBox="0 0 32 32" width="6" height="6" fill="#aaa" stroke="#aaa" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%"><circle cx="16" cy="16" r="14" /><path d="M6 6 L26 26" /></svg>
-<?php echo $lang['Nextfullmoon'];?> <br /> <div class="nextfullmoon"><value><moonm>
-<?php echo $alm["fullmoon"] ;?></value></div>
-</span>
+<div class="meeus"></div>
+<div class="output"></div>
+<div class="moonx">
+<div class="moonphaze"></div>
 </div>
-
-<div class="newmoon1">
-<svg id="divumwx new moon" viewBox="0 0 32 32" width="6" height="6" fill="#777" stroke="#777" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%"><circle cx="16" cy="16" r="14" /> <path d="M6 6 L26 26" /></svg>
-<?php echo $lang['Nextnewmoon'];?> <div class="nextnewmoon"><value><moonm>
-<?php echo $alm["newmoon"] ;?></value></div>
-</span>
-</div>
-
-<div class="moonset1">
-<svg id="divumwx moon set" viewBox="0 0 32 32" width="6" height="6" fill="none" stroke="#f26c4f" stroke-linecap="round" stroke-linejoin="round" stroke-width="10%">
-<path d="M30 12 L16 24 2 12" /></svg>
-<?php echo $lang['Moon']?><div class="nextnewmoon">
-<?php echo 'Set<maxred> '.$alm["moonset"].'</maxred>' ;?></span> 
-
-</div></div>
-<div class="meteorshower"><svg xmlns='http://www.w3.org/2000/svg' width='10px' height='10px' viewBox='0 0 16 16'><path fill='currentcolor' d='M0 0l14.527 13.615s.274.382-.081.764c-.355.382-.82.055-.82.055L0 0zm4.315 1.364l11.277 10.368s.274.382-.081.764c-.355.382-.82.055-.82.055L4.315 1.364zm-3.032 2.92l11.278 10.368s.273.382-.082.764c-.355.382-.819.054-.819.054L1.283 4.284zm6.679-1.747l7.88 7.244s.19.267-.058.534-.572.038-.572.038l-7.25-7.816zm-5.68 5.13l7.88 7.244s.19.266-.058.533-.572.038-.572.038l-7.25-7.815zm9.406-3.438l3.597 3.285s.094.125-.029.25c-.122.125-.283.018-.283.018L11.688 4.23zm-7.592 7.04l3.597 3.285s.095.125-.028.25-.283.018-.283.018l-3.286-3.553z'/></svg>
-<?php echo $meteor_default;?>
-</div>
-<?php echo'<div class="divumwxmoonphasem2">Moon Phase<br>'.$alm["moonphase"].'</div>
-<div class="divumwxluminancem2">Illumination<br>'.number_format($alm["luminance"],2).' %</div>';?>
-
 <script>
 
+// text color
+var tcolor = "<?php echo $textColor;?>";
+
+// Math functions
 function toDegrees(x) {
   return x * (180.0 / Math.PI);
 }
@@ -118,12 +72,130 @@ function constrain(x) {
   return t;  
 }
 
-    var dx = new Date();
+function skynet(tiktok) {
+    if (tiktok < 10) {
+      tiktok = '0' + tiktok;
+    }
+  return tiktok;
+} 
 
-    // latitude and longitude from weewx dvmCombinedData.php
+function nan(x) {
+  if (isNaN(x)) {
+    return 180.0;
+  }
+  return x;
+}
+
+    var dx = new Date();
+    var start = new Date(dx.getUTCFullYear(), 0, 0);
+    var diff = dx - start + (start.getTimezoneOffset() - dx.getTimezoneOffset()) * 60 * 1000;
+    var Day = 1000 * 60 * 60 * 24;
+    var day = Math.floor(diff / Day); // elapsed days since the beginning of the year
+
+    var delta = dx.getUTCFullYear() - 1949;   
+    var leap = delta / 4;
+
+    // Timezone as a text
+    var TZ = Intl.DateTimeFormat().resolvedOptions().timeZone; // example Europe/Berlin
+
+    // Establish UT Decimal time for the Sun Calculation
+    var UT = (dx.getUTCHours() + dx.getUTCMinutes() / 60 + dx.getUTCSeconds() / 3600.0 + dx.getUTCMilliseconds() / 86400);
+
+    // Your latitude and longitude comes from weewx dvmCombinedData.php
     var latitude = <?php echo $lat;?>;
     var longitude = <?php echo $lon;?>;
-  
+
+    // Your Location, Do you live in the Northern or Southern Hemisphere ?
+    var hemisphere;
+    if (latitude > 0.0) {
+      <?php echo "hemisphere = 0";?>;
+    } 
+     else {
+      <?php echo "hemisphere = 1";?>;
+    }
+
+    // Establish Julian date and jd 2451545.0 (noon, 1 January 2000)
+    var jd = 32916.5 + delta * 365 + leap + day + UT / 24;
+    // centuries
+    var t = jd - 51545;
+
+    // Establish Ecliptic coordinates (Sun)  
+    // Sun's Mean longitude
+    var mnlong = constrain(280.460 + 0.9856474 * t);
+    // Sun's Mean anomaly
+    var mnanom = toRadians(constrain(357.528 + 0.9856003 * t));
+    // Sun's Ecliptic longitude 
+    var eclong = toRadians(constrain(mnlong + 1.915 * Math.sin(mnanom) + 0.020 * Math.sin(2 * mnanom)));
+    // Obliquity of ecliptic
+    var oblqec = toRadians(23.439 - 0.0000004 * t);
+
+    // Establish Celestial coordinates (Sun)     
+    var num = Math.cos(oblqec) * Math.sin(eclong);
+    var den = Math.cos(eclong);
+    var Ra = Math.atan(num / den);
+
+    // Sun Right Ascension
+    if (den < 0) {
+        Ra = Ra + Math.PI;
+    } else if (num < 0) {
+        Ra = Ra + 2 * Math.PI;
+    }
+    // Sun Declination
+    var Dec = Math.asin(Math.sin(oblqec) * Math.sin(eclong));
+
+    // Establish Local coordinates
+
+    // Greenwich mean sidereal time
+    var gmst = (6.697375 + 0.0657098242 * t + UT);
+    // re-evaluate gmst so it stays within the domain 0 to 24.
+        var gmst = gmst % 24;
+          if (gmst < 0) {
+            var gmst = gmst + 24;
+          }
+
+    // Local mean sidereal time 
+    var lmst = (gmst + longitude / 15);
+    // re-evaluate gmst so it stays within the domain 0 to 24.
+        var lmst = lmst % 24;
+          if (lmst < 0) {
+            var lmst = lmst + 24;
+          }
+
+    var Lmst = toRadians(15 * lmst);
+
+    // Sun Hour angle
+    var Ha = (Lmst - Ra) % (2 * Math.PI);
+
+    // Sun Altitude
+    var alt = Math.asin(Math.sin(Dec) * Math.sin(toRadians(latitude)) + Math.cos(Dec) * Math.cos(toRadians(latitude)) * Math.cos(Ha));
+
+    // Sun Azimuth
+    var azi = Math.asin( - Math.cos(Dec) * Math.sin(Ha) / Math.cos(alt));
+
+    if (Math.sin(Dec) - Math.sin(alt) * Math.sin(toRadians(latitude)) < 0) {
+        azi = Math.PI - azi;
+    } else if (Math.sin(azi) < 0) {
+        azi += 2 * Math.PI;
+    }
+
+    // start Moon calculation
+
+    // Universal Time variables
+    // Selected epoch constants for January 2010, 00:00:00
+
+    var epochDays = 2455196.5;          // JD at selected epoch
+    var εg = 279.557208;                // Sun's mean ecliptic longitude
+    var ωg = 283.112438;                // Longitude of the Sun at perigee
+    var eccSunEarth = 0.016705;         // Eccentricity of the Sun-Earth orbit
+    var l0 = 91.929336;                 // Moon's mean longitude at epoch
+    var P0 = 130.143076;                // Mean longitude of the perigee at epoch
+    var N0 = 291.682547;                // Mean longitude of the node at epoch
+    var iMoon = 5.145396;               // Inclination of Moon's orbit
+    var eMoon = 0.0549;                 // Eccentricity of the Moon's orbit
+    var aMoon = 384401;                 // Semi-major axis of Moon's orbit
+    var θ0Moon = 0.5181;                // Moon's angular diameter at distance a from Earth
+    var π0Moon = 0.9507;                // Moon's parallax at distance a from Earth
+    
     // Establish current time
     var dayCurrent = dx.getUTCDate();
     var monthCurrent = dx.getUTCMonth() + 1;
@@ -153,10 +225,17 @@ function constrain(x) {
     
     var valueC = Math.floor(365.25 * yearJulian);
     var valueD = Math.floor(30.6001 * (monthJulian + 1));
-    // JD
-    var JD = valueB + valueC + valueD + dayJulian + 1720994.5;
 
+    // Establish JD
+    var JD = valueB + valueC + valueD + dayJulian + 1720994.5;
+    // Centuries
     var T = (JD - 2451545) / 36525.0;
+
+    // Establish current Moon age in days
+    var daysPerLunarMonth = 29.530588853;
+    var f = ((JD - 2451550.1) / daysPerLunarMonth) % 1;
+    f = (f < 0) ? f + 1 : f;
+    var m_days = f * daysPerLunarMonth - 0.385;
 
 // Establish current Moon Distance using ELP82 Table class
 // Establish current Sun Distance using ELP82 Table class
@@ -186,6 +265,9 @@ var ELP82 = class ELP82 {
         const F = ELP82.toRadians(constrain(93.2720950 + 483202.0175233 * T 
           - 0.0036539 * T * T - 1.0 / 3526000.0 * T * T * T 
           + 1.0 / 863310000.0 * T * T * T * T));
+        // moon's argument of longitude of it's ascending node
+        const Ω = ELP82.toRadians(constrain(125.04452 - (1934.136261 * T) 
+          + (0.0020708 * T * T) + (T * T * T) / 450000));
         // Earth's eccentricity of its orbit around the Sun
         const E = 1 - 0.002516 * T - 0.0000074 * T * T;
         // further arguments
@@ -359,13 +441,19 @@ var ELP82 = class ELP82 {
         + 2.1 * Math.sin(M) - 1.274 * Math.sin(2 * D - Mp) - 0.658 * Math.sin(2 * D) 
         - 0.214 * Math.sin(2 * Mp) - 0.11 * Math.sin(D)));
 
-        // moon Illumination * 100
+        // moon Illumination
         const K = (1 + Math.cos(i)) / 2;
-
         // Sun distance
         const S = (1.00014 - 0.01671 * Math.cos(M) - 0.00014 * Math.cos(2 * M));
-      
-        return [Lon, Radius, Lat, K, S];
+
+        // mean obliquity
+        const ε0 = 23.43929 - (0.01300417 * T) - (0.0000001638889 * T * T) - (0.0000005036111 * T * T * T);
+        // obliquity nutation
+        const Δε = 0.0026 * Math.cos(125.0 - 0.05295 * T) + 0.0002 * Math.cos(200.9 + 1.97129 * T);
+        // true obliquity
+        const ε = ε0 + Δε;
+
+        return [Lon, Radius, Lat, K, S, ε];
     }
 static constrain(d) {
         let t = d;
@@ -381,54 +469,1649 @@ static toRadians(x) {
 }
 var value = ELP82.elp82(T);
 // Moon distance in km
-var Rm = value[1];
+const Rm = value[1];
 // Illumination in %
-// var perc = value[3] * 100;
+const perc = value[3] * 100;
 // Sun distance in km
-// var Rs = value[4] * 1.496e+8;
+const Rs = value[4] * 1.496e+8;
+
+const Δ = value[5];
+
+var moonphase;
+    if (perc > 2 && perc < 48 && m_days < 15) {
+        moonphase = "<?php echo "Waxing Crescent";?>";
+    } else if (perc >= 48 && perc <= 52 && m_days < 15) { 
+        moonphase = "<?php echo "First Quarter";?>";
+    } else if (perc > 52 && perc < 98 && m_days < 15) {
+        moonphase = "<?php echo "Waxing Gibbous";?>";
+    } else if (perc >= 98) {
+        moonphase = "<?php echo "Full Moon";?>"; 
+    } else if (perc < 98 && perc > 52 && m_days > 14) {
+        moonphase = "<?php echo "Waning Gibbous";?>";
+    } else if (perc >= 48 && perc <= 52 && m_days > 14) { 
+        moonphase = "<?php echo "Last Quarter";?>"; 
+    } else if (perc < 48 && perc > 2 && m_days > 14) {
+        moonphase = "<?php echo "Waning Crescent";?>";
+    } else {
+        moonphase = "<?php echo "New Moon";?>";
+    }
+
+      // Convert Julian day to the adopted epoch
+      var daysSinceEpoch = JD - epochDays;
+          
+      // Convert UT to Greenwich Mean Sidereal Time, GMST
+      var DateAt0h = new Date(yearCurrent, monthCurrent - 1, dayCurrent, - timezoneOffset, 0, 0, 0);
+
+      var dayCurrentAt0h = DateAt0h.getUTCDate();
+      var monthCurrentAt0h = DateAt0h.getUTCMonth() + 1;
+      var yearCurrentAt0h = DateAt0h.getUTCFullYear();
+      var hourCurrentAt0h = DateAt0h.getUTCHours();
+      var minuteCurrentAt0h = DateAt0h.getUTCMinutes();
+      var secondCurrentAt0h = DateAt0h.getUTCSeconds();
+      var millisecondCurrentAt0h = DateAt0h.getUTCMilliseconds();
+      var timezoneOffsetAt0h = DateAt0h.getTimezoneOffset() / 60;
+      var UTCStringAt0h = DateAt0h.toUTCString();
+      
+      // Convert JDAt0h to Julian Day
+      var dayJulianAt0h = dayCurrentAt0h + ((hourCurrentAt0h * 3600 + minuteCurrentAt0h * 60 + secondCurrentAt0h + millisecondCurrentAt0h / 1000) / 86400);
+
+      if (monthCurrentAt0h <= 2) {
+        var monthJulianAt0h = monthCurrentAt0h + 12;
+        var yearJulianAt0h = yearCurrentAt0h - 1;
+      }
+      else {
+        var monthJulianAt0h = monthCurrentAt0h;
+        var yearJulianAt0h = yearCurrentAt0h;
+      }
+      
+      // Assuming the date is after the start of the Gregorian calendar (15/10/1582)
+      var JDAt0h = valueB + valueC + valueD + dayJulianAt0h + 1720994.5;
+      
+      var valueS = JDAt0h - 2451545;
+      var valueT = valueS / 36525;
+      
+      var valueT0 = 6.697374558 + (2400.051336 * valueT) + (0.000025862 * valueT * valueT);
+        // re-evaluate valueT0 so it stays within the domain 0 to 24.
+        var valueT0 = valueT0 % 24;
+          if (valueT0 < 0) {
+            var valueT0 = valueT0 + 24;
+          }
+      
+      // Convert UT to decimal time
+      var UTDecimal = ((dx.getUTCSeconds() + dx.getUTCMilliseconds() / 1000) / 60 + dx.getUTCMinutes()) / 60 + dx.getUTCHours();
+
+      var UTDecimal = UTDecimal * 1.002737909;
+      
+      // Add decimal time to T0
+      var GST = valueT0 + UTDecimal;
+      
+        // re-evaluate GST so it stays within the domain 0 to 24.
+        var GST = GST % 24;
+          if (GST < 0) {
+            var GST = GST + 24;
+          }
+
+      // Convert GST to hours, minutes, seconds
+      var GSTHours = GST / Math.abs(GST) * Math.floor(Math.abs(GST));
+      var GSTMinutes = Math.floor((Math.abs(GST) - Math.abs(GSTHours)) * 60);
+      var GSTSeconds = ((Math.abs(GST) - Math.abs(GSTHours)) * 60 - GSTMinutes) * 60;
+
+    // Position of the Sun
+    var valueD = JDAt0h - epochDays;
     
-var svg = d3.select(".distance")
-    .append("svg")
+    var valueN = (valueD * 360) / 365.242191;
+      // re-evaluate N so it stays within the domain 0 to 360.
+      var valueN = valueN % 360;
+        if (valueN < 0) {
+          var valueN = valueN + 360;
+        }
+    var MSun = valueN + εg - ωg;
+
+      if (MSun < 0) {
+        var MSun = MSun + 360;
+      }
+     
+    var Ec = 360 / Math.PI * eccSunEarth * Math.sin(toRadians(MSun));    
+    var λSun = valueN + Ec + εg;     
+      // re-evaluate λSun so it stays within the domain 0 to 360.
+      var λSun = λSun % 360;
+        if (λSun < 0) {
+          var λSun = λSun + 360;
+        }       
+    // Convert ecliptic longitude of Sun and λSun to equatorial coordinates
+    var valueT = (JD - 2451545) / 36525;
+    var εSun = 23.439292 - (((46.815 * valueT) + (0.0006 * valueT * valueT) - (0.00181 * valueT * valueT * valueT)) / 3600);
+    var βSun = 0;
+    var δSun = toDegrees(Math.asin(Math.sin(toRadians(βSun)) * Math.cos(toRadians(εSun)) + Math.cos(toRadians(βSun)) * Math.sin(toRadians(εSun)) * Math.sin(toRadians(λSun))));
+    var YSun = Math.sin(toRadians(λSun)) * Math.cos(toRadians(εSun)) - Math.tan(toRadians(βSun)) * Math.sin(toRadians(εSun));
+    var XSun = Math.cos(toRadians(λSun));
+    var αSun = toDegrees(Math.atan(YSun/XSun));
+    var αSun = αSun % 360;
+
+      // Solve ambiguity which arises from taking the inverse tan. First identify which quadrant the angle should belong to (by checking the signs on XSun and YSun)     
+      if (YSun > 0) {
+        if (XSun > 0) {
+          var LOQuadrant = 0;
+          var HIQuadrant = 90;
+        }
+        else {
+          var LOQuadrant = 90;
+          var HIQuadrant = 180;
+        }
+      }
+      else {
+        if (XSun > 0) {
+          var LOQuadrant = 270;
+          var HIQuadrant = 360;
+        }
+        else {
+          var LOQuadrant = 180;
+          var HIQuadrant = 270;
+        }
+      } 
+
+      // Add 180 or 360 depending on the quadrant αSun is in.
+      if (αSun < HIQuadrant && αSun > LOQuadrant) {
+        αSun = αSun;
+      }
+      else if ((αSun + 180) < HIQuadrant && (αSun + 180) > LOQuadrant) {
+         αSun = αSun + 180;
+      }
+      else if ((αSun + 360) < HIQuadrant && (αSun + 360) > LOQuadrant) {
+         αSun = αSun + 360;
+      }
+      else {
+        αSun = "<?php echo "Error";?>";
+        // If this is the case, something has gone wrong. αSun should be in the quadrant by either adding 180 or 360.
+      }
+
+    // Convert to hours
+    var αSun = αSun / 15;   
+    var αSunHours = αSun / Math.abs(αSun) * Math.floor(Math.abs(αSun));
+    var αSunMinutes = Math.floor((Math.abs(αSun) - Math.abs(αSunHours)) * 60);
+    var αSunSeconds = (((Math.abs(αSun) - Math.abs(αSunHours)) * 60) - αSunMinutes) * 60;
+    
+    var δSunHours = δSun / Math.abs(δSun) * Math.floor(Math.abs(δSun));
+    var δSunMinutes = Math.floor((Math.abs(δSun) - Math.abs(δSunHours)) * 60);
+    var δSunSeconds = (((Math.abs(δSun) - Math.abs(δSunHours)) * 60) - δSunMinutes) * 60;
+
+    // Convert sun altitude to hours
+    var sHours = toDegrees(alt) / (Math.abs(toDegrees(alt))) * Math.floor(Math.abs(toDegrees(alt)));
+    var sMinutes = Math.floor((Math.abs(toDegrees(alt)) - Math.abs(sHours)) * 60);
+    var sSeconds = (((Math.abs(toDegrees(alt)) - Math.abs(sHours)) * 60) - sMinutes) * 60;
+
+    // Convert sun azimuth to hours
+    var SHours = toDegrees(azi) / (Math.abs(toDegrees(azi))) * Math.floor(Math.abs(toDegrees(azi)));
+    var SMinutes = Math.floor((Math.abs(toDegrees(azi)) - Math.abs(SHours)) * 60);
+    var SSeconds = (((Math.abs(toDegrees(azi)) - Math.abs(SHours)) * 60) - SMinutes) * 60;
+
+    // Calculate Moon position
+    
+    var lMoon = 13.1763966 * daysSinceEpoch + l0;
+      // Constrain lMoon to within 0 to 360
+      var lMoon = lMoon % 360;
+        if (lMoon < 0) {
+          var lMoon = lMoon + 360;
+        }
+    var Mm = lMoon - 0.1114041 * daysSinceEpoch - P0;
+      // Constrain Mm to within 0 to 360
+      var Mm = Mm % 360;
+        if (Mm < 0) {
+          var Mm = Mm + 360;
+        }   
+    var NMoon = N0 - 0.0529539 * daysSinceEpoch;
+      // Constrain Mm to within 0 to 360
+      var NMoon = NMoon % 360;
+        if (NMoon < 0) {
+          var NMoon = NMoon + 360;
+        }
+
+    var Ev = 1.2739 * Math.sin(2 * (toRadians(lMoon) - toRadians(λSun)) - toRadians(Mm));
+    var Ae = 0.1858 * Math.sin(toRadians(MSun));
+    var A3 = 0.37 * Math.sin(toRadians(MSun));
+    var MPrimem = Mm + Ev - Ae - A3;
+    var Ec = 6.2886 * Math.sin(toRadians(MPrimem));   
+    var A4 = 0.214 * Math.sin(2 * toRadians(MPrimem));
+    var lPrime = lMoon + Ev + Ec - Ae + A4;
+    var VMoon = 0.6583 * Math.sin(2 * (toRadians(lPrime) - toRadians(λSun)));  
+    var lPrimePrime = lPrime + VMoon;  
+    var NPrime = NMoon - (0.16 * Math.sin(toRadians(MSun)));
+    var yMoon = Math.sin(toRadians(lPrimePrime) - toRadians(NPrime)) * Math.cos(toRadians(iMoon));
+    var xMoon = Math.cos(toRadians(lPrimePrime) - toRadians(NPrime));
+    var λMoon = toDegrees(Math.atan(yMoon / xMoon));
+
+    // Establish Moonphase Angle (0°-360°)
+    var MphaseAngle = (lPrime - toDegrees(eclong));
+      // Constrain MphaseAngle to within 0 to 360
+      MphaseAngle = MphaseAngle % 360;
+        if (MphaseAngle < 0) {
+           MphaseAngle = MphaseAngle + 360;
+        }
+
+      // Solve ambiguity which arises from taking the inverse tan. First identify which quadrant the angle should belong to (by checking the signs on XMoon and YMoon)     
+      if (yMoon > 0) {
+        if (xMoon > 0) {
+          var LOQuadrantMn = 0;
+          var HIQuadrantMn = 90;
+        }
+        else {
+          var LOQuadrantMn = 90;
+          var HIQuadrantMn = 180;
+        }
+      }
+      else {
+        if (xMoon > 0) {
+          var LOQuadrantMn = 270;
+          var HIQuadrantMn = 360;
+        }
+        else {
+          var LOQuadrantMn = 180;
+          var HIQuadrantMn = 270;
+        }
+      } 
+
+      // Add 180 or 360 depending on the quadrant Moon is in.
+      if (λMoon < HIQuadrantMn && αSun > LOQuadrantMn) {
+        λMoon = λMoon;
+      }
+      else if ((λMoon + 180) < HIQuadrantMn && (λMoon + 180) > LOQuadrantMn) {
+        λMoon = λMoon + 180;
+      }
+      else if ((λMoon + 360) < HIQuadrantMn && (λMoon + 360) > LOQuadrantMn) {
+        λMoon = λMoon + 360;
+      }
+      else {
+        λMoon = "<?php echo "Error";?>";
+        // If this is the case, something has gone wrong. αSun should be in the quadrant by either adding 180 or 360.
+      }
+
+    var λMoon = λMoon + NPrime;
+    var βMoon = toDegrees(Math.asin(Math.sin(toRadians(lPrimePrime) - toRadians(NPrime)) * Math.sin(toRadians(iMoon))));
+    var δMoon = toDegrees(Math.asin(Math.sin(toRadians(βMoon)) * Math.cos(toRadians(εSun)) + Math.cos(toRadians(βMoon)) * Math.sin(toRadians(εSun)) * Math.sin(toRadians(λMoon))));
+    var valueYMoon = Math.sin(toRadians(λMoon)) * Math.cos(toRadians(εSun)) - Math.tan(toRadians(βMoon)) * Math.sin(toRadians(εSun));
+    var valueXMoon = Math.cos(toRadians(λMoon));  
+    var αMoon = toDegrees(Math.atan(valueYMoon / valueXMoon));
+    var αMoon = αMoon % 360;
+
+      // Solve ambiguity which arises from taking the inverse tan. First identify which quadrant the angle should belong to (by checking the signs on X and Y)     
+      if (valueYMoon > 0) {
+        if (valueXMoon > 0) {
+          var LOQuadrantMn2 = 0;
+          var HIQuadrantMn2 = 90;
+        }
+        else {
+          var LOQuadrantMn2 = 90;
+          var HIQuadrantMn2 = 180;
+        }
+      }
+      else {
+        if (valueXMoon > 0) {
+          var LOQuadrantMn2 = 270;
+          var HIQuadrantMn2 = 360;
+        }
+        else {
+          var LOQuadrantMn2 = 180;
+          var HIQuadrantMn2 = 270;
+        }
+      } 
+
+      // Add 180 or 360 depending on the quadrant αSun is in.
+      if (αMoon < HIQuadrantMn2 && αMoon > LOQuadrantMn2) {
+        αMoon = αMoon;      
+      }     
+      else if ((αMoon + 180) < HIQuadrantMn2 && (αMoon + 180) > LOQuadrantMn2) {
+        αMoon = αMoon + 180;
+      }
+      else if ((αMoon + 360) < HIQuadrantMn2 && (αMoon + 360) > LOQuadrantMn2) {
+        αMoon = αMoon + 360;
+      }
+      else {
+        αMoon = "<?php echo "Error";?>";
+        // If this is the case, something has gone wrong. αSun should be in the quadrant by either adding 180 or 360.
+      }
+
+    // Convert to hours
+    var αMoon = αMoon / 15;
+    var αMoonHours = αMoon / (Math.abs(αMoon)) * Math.floor(Math.abs(αMoon));
+    var αMoonMinutes = Math.floor((Math.abs(αMoon) - Math.abs(αMoonHours)) * 60);
+    var αMoonSeconds = (((Math.abs(αMoon) - Math.abs(αMoonHours)) * 60) - αMoonMinutes) * 60;
+    
+    var δMoonHours = δMoon / (Math.abs(δMoon)) * Math.floor(Math.abs(δMoon));
+    var δMoonMinutes = Math.floor((Math.abs(δMoon) - Math.abs(δMoonHours)) * 60);
+    var δMoonSeconds = (((Math.abs(δMoon) - Math.abs(δMoonHours)) * 60) - δMoonMinutes) * 60;
+  
+    // Convert equatorial coordinates to horizon coordinates
+  
+    // East longitudes are positive, West are negative
+
+    var LST = GST + longitude / 15;
+    // Constrain LST to within 0 to 24
+        LST = LST % 24;
+      if (LST < 0) {
+           LST = LST + 24;
+      }
+
+    // Convert to hours
+    var LSTHours = LST / (Math.abs(LST)) * Math.floor(Math.abs(LST));
+    var LSTMinutes = Math.floor((Math.abs(LST) - Math.abs(LSTHours)) * 60);
+    var LSTSeconds = (((Math.abs(LST) - Math.abs(LSTHours)) * 60) - LSTMinutes) * 60;
+
+  var hourAngle = LST - αMoon;
+    if (hourAngle < 0) {
+      hourAngle = hourAngle + 24;
+    }
+
+  // Convert to hours
+  var HHours = hourAngle / (Math.abs(hourAngle)) * Math.floor(Math.abs(hourAngle));
+  var HMinutes = Math.floor((Math.abs(hourAngle) - Math.abs(HHours)) * 60);
+  var HSeconds = (((Math.abs(hourAngle) - Math.abs(HHours)) * 60) - HMinutes) * 60;
+
+  var hourAngle = hourAngle * 15;
+  // a = moon altitude
+  var a = toDegrees(Math.asin(Math.sin(toRadians(δMoon)) * Math.sin(toRadians(latitude)) + Math.cos(toRadians(δMoon)) * Math.cos(toRadians(latitude)) * Math.cos(toRadians(hourAngle))));
+  // APrime = moon azimuth
+  var APrime = toDegrees(Math.acos((Math.sin(toRadians(δMoon)) - (Math.sin(toRadians(latitude)) * Math.sin(toRadians(a)))) / (Math.cos(toRadians(latitude)) * Math.cos(toRadians(a)))));
+
+    if ( hourAngle > 0 && hourAngle < 180 ) {
+      var azimuth = 360 - APrime;
+    }
+    else {
+      var azimuth = APrime;
+    }
+
+  // Convert to hours
+  var aHours = a / (Math.abs(a)) * Math.floor(Math.abs(a));
+  var aMinutes = Math.floor((Math.abs(a) - Math.abs(aHours)) * 60);
+  var aSeconds = (((Math.abs(a) - Math.abs(aHours)) * 60) - aMinutes) * 60;
+
+  // Convert to hours
+  var AHours = azimuth / (Math.abs(azimuth)) * Math.floor(Math.abs(azimuth));
+  var AMinutes = Math.floor((Math.abs(azimuth) - Math.abs(AHours)) * 60);
+  var ASeconds = (((Math.abs(azimuth) - Math.abs(AHours)) * 60) - AMinutes) * 60;
+
+// now we are ready to calculate the sun and moon curves and use the Meeus data
+
+// Sun Declination
+var DeclinationS = toDegrees(Dec);
+
+// calculate Sun curve
+var sdec = DeclinationS;
+var althrtab = [];
+var shartab = [];
+var total = 1440;
+
+for (var i = 0; i < total; i++) {
+  var sha = 180.0 + i * (360.0 / total);  
+  var cossha = Math.cos(toRadians(sha)); 
+  var cossundec = Math.cos(toRadians(sdec));  
+  var coslat = Math.cos(toRadians(latitude)); 
+  var cosmath = cossha * cossundec * coslat; 
+  var sinsundec = Math.sin(toRadians(sdec)); 
+  var sinlat = Math.sin(toRadians(latitude));  
+  var sinmath = sinsundec * sinlat;  
+  var sinelevation = cosmath + sinmath;  
+  var elevation = toDegrees(Math.asin(sinelevation));
+  var curaltlong = elevation;  
+  var curalt = curaltlong;  
+  althrtab[i] = curalt;
+  shartab[i] = sha - 360.0;
+}
+
+var azitab;
+var azmathA;
+var azmathB;
+var cosazA;
+var aziA;
+var aziplotA;
+
+if (hemisphere == 0) {
+  azitab = [];
+  for (var i = 0; i < total; i++) {
+    azmathA =
+      Math.cos(toRadians(shartab[i])) * cossundec * sinlat - sinsundec * coslat;
+    azmathB = Math.cos(toRadians(althrtab[i]));
+    cosazA = azmathA / azmathB;
+    aziA = toDegrees(Math.acos(cosazA));
+    aziplotA = aziA;
+    if (shartab[i] < 0) {
+      azitab[i] = (aziplotA - 180.0) * -1;
+    } else {
+      azitab[i] = aziplotA + 180.0;
+    }
+  }
+}
+if (hemisphere == 1) {
+  azitab = [];
+  for (var i = 0; i < total; i++) {
+    azmathA =
+      Math.cos(toRadians(shartab[i])) * cossundec * sinlat - sinsundec * coslat;
+    azmathB = Math.cos(toRadians(althrtab[i]));
+    cosazA = azmathA / azmathB;
+    aziA = toDegrees(Math.acos(cosazA));
+    aziplotA = aziA;
+    if (shartab[i] < 0) {
+      azitab[i] = (aziplotA - 360.0) * -1;
+    } else {
+      azitab[i] = aziplotA;
+    }
+  }
+}
+
+// Moon Declination       
+var DeclinationM = δMoon;
+
+// calculate Moon curve
+var sdecx = DeclinationM;
+var shartabx = [];
+var althrtabx = [];
+var total = 1440;
+
+var cossundecx = Math.cos(toRadians(sdecx));
+var coslatx = Math.cos(toRadians(latitude));
+var sinlatx = Math.sin(toRadians(latitude));
+var sinsundecx = Math.sin(toRadians(sdecx));
+var sinmathx = sinsundecx * sinlatx;
+
+for (var i = 0; i < total; i++) {
+  var shax = 180.0 + i * (360.0 / total);
+  var cosshax = Math.cos(toRadians(shax));
+  var cosmathx = cosshax * cossundecx * coslatx;
+  var sinelevationx = cosmathx + sinmathx;
+  var elevationx = toDegrees(Math.asin(sinelevationx));
+  var curaltlongx = elevationx;
+  var curaltx = curaltlongx;
+  althrtabx[i] = curaltx;
+  shartabx[i] = shax - 360.0;
+}
+
+var azitabx;
+var azmath1;
+var azmath2;
+var cosazx;
+var azix;
+var aziplotx;
+
+if (hemisphere == 0) {
+  azitabx = [];
+  for (var i = 0; i < total; i++) {
+    azmath1 =
+      Math.cos(toRadians(shartabx[i])) * cossundecx * sinlatx -
+      sinsundecx * coslatx;
+    azmath2 = Math.cos(toRadians(althrtabx[i]));
+    cosazx = azmath1 / azmath2;
+    azix = toDegrees(Math.acos(cosazx));
+    aziplotx = azix;
+    if (shartabx[i] < 0) {
+      azitabx[i] = (aziplotx - 180.0) * -1;
+    } else {
+      azitabx[i] = aziplotx + 180.0;
+    }
+  }
+}
+if (hemisphere == 1) {
+  azitabx = [];
+  for (var i = 0; i < total; i++) {
+    azmath1 =
+      Math.cos(toRadians(shartabx[i])) * cossundecx * sinlatx -
+      sinsundecx * coslatx;
+    azmath2 = Math.cos(toRadians(althrtabx[i]));
+    cosazx = azmath1 / azmath2;
+    azix = toDegrees(Math.acos(cosazx));
+    aziplotx = azix;
+    if (shartabx[i] < 0) {
+      azitabx[i] = (aziplotx - 360.0) * -1;
+    } else {
+      azitabx[i] = aziplotx;
+    }
+  }
+}
+
+// Create some fake data to populate a d3.js chart scale 
+var suncurve = [[0.0, 0.0],[0.0, 0.0]];
+var mooncurve = [[0.0, 0.0],[0.0 ,0.0]];
+
+var innerColor = "rgb(230, 200, 200)";
+
+var sunData = [];
+for(var i = 1; i < suncurve.length; i++) {
+  sunData = [...sunData,[suncurve[i - 1],suncurve[i]]]
+};
+
+var moonData = [];
+for(var i = 1; i < mooncurve.length; i++) {
+  moonData = [...moonData,[mooncurve[i - 1],mooncurve[i]]]
+};
+
+// Create the d3 chart and add the sun and moon data 
+var w = 620;
+var h = 320;
+var padding = 25;
+var padding_up = 8;
+
+if (latitude < 0.0) {
+var xScale = d3.scaleLinear()
+    .domain([360, 0])
+    .range([padding, w - padding + 16]);
+
+var yScale = d3.scaleLinear()
+    .domain([-100, 100])
+    .range([h - padding, padding_up]);
+
+} else {
+var xScale = d3.scaleLinear()
+    .domain([0, 360])
+    .range([padding, w - padding + 16]);
+
+var yScale = d3.scaleLinear()
+    .domain([-80, 80])
+    .range([h - padding, padding_up]);
+}
+
+var svg = d3.select('.meeus')
+    .append('svg')
     //.style("background", "#292e35")
-    .attr("width", 120)
-    .attr("height", 20);
+    .attr('width', w)
+    .attr('height', h);
 
-var data = ["Distance " + "-" + d3.format(",.2f")(Rm) + " " + "-" + "km"];
+var line = d3.line() 
+    .x(d => xScale(d.x))
+    .y(d => yScale(d.y))
+    .curve(d3.curveBasisOpen());
 
-var text = svg.selectAll(null)
-    .data(data)
-    .enter() 
+var xAxis = d3.axisBottom(xScale)
+    .ticks(9)
+    .tickSize(4)
+    .tickPadding(3)
+    .tickFormat(function(d) { return d + "°";})
+    .tickValues([0, 45, 90, 135, 180, 225, 270, 315, 360]);
+
+if (latitude < 0.0) {
+var yAxis = d3.axisLeft(yScale)
+    .ticks(9)
+    .tickSize(4)
+    .tickPadding(2)
+    .tickFormat(function(d) { return d + "°";})
+    .tickValues([-100, -80, -60, -40, -20, 0, 20, 40, 60, 80, 100]);
+} else {
+var yAxis = d3.axisLeft(yScale)
+    .ticks(9)
+    .tickSize(4)
+    .tickPadding(2)
+    .tickFormat(function(d) { return d + "°";})
+    .tickValues([-80, -60, -40, -20, 0, 20, 40, 60, 80]);  
+}
+
+  svg
+    .append('g')
+    .attr("class", "x axis")
+    .attr('transform', 'translate(0,' + (h - padding) + ')')
+    .call(xAxis);
+
+  svg
+    .append('g')
+    .attr("class", "x axis")
+    .attr('transform', 'translate(' + padding + ',0)')
+    .call(yAxis);
+
+  svg
+    .selectAll(".horiz.line")
+    .data(sunData)
+    .enter()
+    .append('line')
+    .attr("class", "horiz line")
+    .attr("x1", xScale(0))
+    .attr("y1", yScale(0))
+    .attr("x2", xScale(360))
+    .attr("y2", yScale(0));
+
+if (latitude < 0.0) {
+  svg
+    .selectAll(".zen.line")
+    .data(sunData)
+    .enter()
+    .append('line')
+    .attr("class", "zen line")
+    .attr("x1", xScale(180))
+    .attr("y1", yScale(100))
+    .attr("x2", xScale(180))
+    .attr("y2", yScale(-100));
+} else {
+  svg
+    .selectAll(".zen.line")
+    .data(sunData)
+    .enter()
+    .append('line')
+    .attr("class", "zen line")
+    .attr("x1", xScale(180))
+    .attr("y1", yScale(80))
+    .attr("x2", xScale(180))
+    .attr("y2", yScale(-80));
+}
+
+var defs = svg.append("defs");
+
+var moonGradientMeeus = defs.append("radialGradient")
+    .attr("id", "moonGradientMeeus")
+    .attr("cx", "50%")
+    .attr("cy", "50%")
+    .attr("r", "50%")
+    .attr("fx", "50%")
+    .attr("fy", "50%");
+
+moonGradientMeeus.append("stop")
+    .attr("offset", "0%")
+    .style("stop-color", innerColor);
+
+moonGradientMeeus.append("stop")
+    .attr("offset", "90%")
+    .style("stop-color", "#555");
+
+var sunGradientMeeus = defs.append("radialGradient")
+    .attr("id", "sunGradientMeeus")
+    .attr("cx", "50%")
+    .attr("cy", "50%")
+    .attr("r", "50%")
+    .attr("fx", "50%")
+    .attr("fy", "50%");
+
+sunGradientMeeus.append("stop")
+    .attr("offset", "0%")
+    .style("stop-color", innerColor);
+
+sunGradientMeeus.append("stop")
+    .attr("offset", "90%")
+    .style("stop-color", "tomato");
+
+var sunazi = toDegrees(azi);
+var sunalt = toDegrees(alt);
+
+for (var i = 0; i < total; i++) {
+
+var sun_azitab = nan(azitab[i]);
+var sun_althrtab = althrtab[i];
+  
+  svg
+    .append("line")
+    .attr("x1", xScale(sun_azitab))
+    .attr("y1", yScale(sun_althrtab))
+    .attr("x2", xScale(sun_azitab))
+    .attr("y2", yScale(sun_althrtab))
+    .style("stroke-width", 1)
+    .style("stroke", "rgba(255,99,71,1)")
+    .style("stroke-linecap", "round")
+    .attr("transform", "translate(0, 0)");
+
+if (latitude < 0.0) {
+if (sunazi < 180.0) {
+ svg
+    .append("circle")
+    .style("fill", "url(#sunGradientMeeus)")
+    .attr("r", 8)
+    .attr("cx", xScale(180 - sunazi))
+    .attr("cy", yScale(sunalt))
+    .attr("transform", "translate(0, 0)")
+    .on("mouseover", sMouseOver)
+    .on("mousemove", sMouseMove)
+    .on("mouseout", sMouseOut);
+} else {
+  svg
+    .append("circle")
+    .style("fill", "url(#sunGradientMeeus)")
+    .attr("r", 8)
+    .attr("cx", xScale(360 + 180 - sunazi))
+    .attr("cy", yScale(sunalt))
+    .attr("transform", "translate(0, 0)")
+    .on("mouseover", sMouseOver)
+    .on("mousemove", sMouseMove)
+    .on("mouseout", sMouseOut);
+  }
+} else {
+  svg
+    .append("circle")
+    .style("fill", "url(#sunGradientMeeus)")
+    .attr("r", 8)
+    .attr("cx", xScale(sunazi))
+    .attr("cy", yScale(sunalt))
+    .attr("transform", "translate(0, 0)")
+    .on("mouseover", sMouseOver)
+    .on("mousemove", sMouseMove)
+    .on("mouseout", sMouseOut);
+  }    
+}
+ 
+
+var moonazi = azimuth;
+var moonalt = a;
+  
+for (var i = 0; i < total; i++) {
+
+var moon_azitabx = nan(azitabx[i]);
+var moon_althrtabx = althrtabx[i];
+
+  svg
+    .append("line")
+    .attr("x1", xScale(moon_azitabx))
+    .attr("y1", yScale(moon_althrtabx))
+    .attr("x2", xScale(moon_azitabx))
+    .attr("y2", yScale(moon_althrtabx))
+    .style("stroke-width", 1)
+    .style("stroke", "silver")
+    .style("stroke-linecap", "round")
+    .attr("transform", "translate(0, 0)");
+
+if (latitude < 0.0) {
+if (moonazi < 180.0) {
+  svg
+    .append("circle")
+    .style("fill", "url(#moonGradientMeeus)")
+    .attr("r", 5)
+    .attr("cx", xScale(180 - moonazi))
+    .attr("cy", yScale(moonalt))
+    .attr("transform", "translate(0, 0)")
+    .on("mouseover", mMouseOver)
+    .on("mousemove", mMouseMove)
+    .on("mouseout", mMouseOut);
+} else {
+  svg
+    .append("circle")
+    .style("fill", "url(#moonGradientMeeus)")
+    .attr("r", 5)
+    .attr("cx", xScale(360 + 180 - moonazi))
+    .attr("cy", yScale(moonalt))
+    .attr("transform", "translate(0, 0)")
+    .on("mouseover", mMouseOver)
+    .on("mousemove", mMouseMove)
+    .on("mouseout", mMouseOut);
+  }
+} else {
+  svg
+    .append("circle")
+    .style("fill", "url(#moonGradientMeeus)")
+    .attr("r", 5)
+    .attr("cx", xScale(moonazi))
+    .attr("cy", yScale(moonalt))
+    .attr("transform", "translate(0, 0)")
+    .on("mouseover", mMouseOver)
+    .on("mousemove", mMouseMove)
+    .on("mouseout", mMouseOut);
+  } 
+}
+
+var zenith = "Zenith";
+  svg
     .append("text")
-    .attr("x", 60)
-    .attr("y", function(d, i) { return 10 + i * 10; })
+    .attr("x", 307.5)
+    .attr("y", 5)
+    .text(zenith);
 
-    .style("fill", "var(--col-6)")
-    .style("font-family", "Helvetica") 
-    .style("font-size", "8.5px")
-    .style("text-anchor", "middle")
-    .style("font-weight", "normal")
-    .text(function(d) { return d.split("-")[0]; })
+var horizon = "Horizon";
+  svg
+    .append("text")
+    .attr("x", 30)
+    .attr("y", 148)
+    .text(horizon);
 
-    .append("tspan")
-    .style("fill", "#ff7c39")
-    .style("font-weight", "normal")
-    .text(function(d) { return d.split("-")[1]; })
+var tooltipm = d3.select(".meeus")
+    .append("div")
+    .style("position", "absolute")
+    .style("visibility", "hidden")
+    .style("font-family", "Helvetica")
+    .style("color", "silver")
+    .style("font-size", "7.5px")
+    .style("background-color", "#292e35")
+    .style("border", "solid silver")
+    .style("border-width", "1px")
+    .style("border-radius", "5px")
+    .style("padding", "10px")
+    .style("box-shadow", "2px 2px 20px")
+    .style("opacity", "0.9")
+    .attr("id", "tooltip");
 
-    .append("tspan")
-    .style("fill", "var(--col-6)")
-    .style("font-weight", "normal")
-    .text(function(d) { return d.split("-")[2]; });
+  function mMouseOver (event, d) {
+       d3.select(this);
+       tooltipm.style("visibility", "visible");
+  };
+  
+  function mMouseMove (event, d) {
+      tooltipm
+        .style("top", (event.pageY)+"px").style("left",(event.pageX)+"px")
+        .html("Moon Azimuth: " + moonazi.toFixed(2) + "°" + "<br>" + "Moon Altitude: " + moonalt.toFixed(2) + "°");
+  };
 
+  function mMouseOut (event, d) {
+       d3.select(this);
+       tooltipm.style("visibility", "hidden");
+  };
 
-var svg = d3.select(".moonphasexx")
+var tooltips = d3.select(".meeus")
+    .append("div")
+    .style("position", "absolute")
+    .style("visibility", "hidden")
+    .style("font-family", "Helvetica")
+    .style("color", "tomato")
+    .style("font-size", "7.5px")
+    .style("background-color", "#292e35")
+    .style("border", "solid tomato")
+    .style("border-width", "1px")
+    .style("border-radius", "5px")
+    .style("padding", "10px")
+    .style("box-shadow", "2px 2px 20px")
+    .style("opacity", "0.9")
+    .attr("id", "tooltip");
+
+  function sMouseOver (event, d) {
+       d3.select(this);
+       tooltips.style("visibility", "visible");
+  };
+  
+  function sMouseMove (event, d) {
+      tooltips
+        .style("top", (event.pageY)+"px").style("left",(event.pageX)+"px")
+        .html("Sun Azimuth: " + sunazi.toFixed(2) + "°" + "<br>" + "Sun Altitude: " + sunalt.toFixed(2) + "°");
+  };
+
+  function sMouseOut (event, d) {
+       d3.select(this);
+       tooltips.style("visibility", "hidden");
+  };
+
+// End Chart
+
+// The complete text output from the Meeus calculation starts here
+var svg = d3.select('.output')
+    .append('svg')
+    //.style("background", "#292e35")
+    .attr('width', 640)
+    .attr('height', 245);
+
+var loc = "Δ Location: ";
+  svg
+    .append("text")
+    .style("fill", "#2e8b57")
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .style("font-weight", "bold")
+    .attr("x", 25)
+    .attr("y", 8)
+    .text(loc);
+
+var city = "Station: <?php echo $stationlocation;?>";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 17)
+    .text(city);
+
+var tzone = "Timezone: " + TZ;
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 25)
+    .text(tzone);
+
+var lat = "Latitude: " + latitude + "°";
+  svg
+    .append("text")
+    .style("fill", "#2e8b57")
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .style("font-weight", "bold")
+    .attr("x", 25)
+    .attr("y", 34)
+    .text(lat);
+
+var lon = "Longitude: " + longitude + "°";
+  svg
+    .append("text")
+    .style("fill", "#2e8b57")
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .style("font-weight", "bold")
+    .attr("x", 25)
+    .attr("y", 43)
+    .text(lon);
+
+var time = "Time | Date:";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .style("font-weight", "bold")
+    .attr("x", 25)
+    .attr("y", 52)
+    .text(time);
+
+var utcdate = "UTC - Date: " + dayCurrent + "." + monthCurrent + "." + yearCurrent;
+  svg
+    .append('text')
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 61)
+    .text(utcdate);
+
+var utctime = "UTC - Time: " + skynet(hourCurrent) + ":" + skynet(minuteCurrent) + ":" + skynet(secondCurrent) + "." + millisecondCurrent;
+  svg
+    .append('text')
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 70)
+    .text(utctime);
+
+var tzoffset = "Timezone Offset: " + timezoneOffset;
+  svg
+    .append('text')
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 79)
+    .text(tzoffset);
+
+var utcstring = "UTC - String: " + UTCString;
+  svg
+    .append('text')
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 88)
+    .text(utcstring);
+
+var decimaldate = "Decimal - Date: " + dayJulian + "-" + monthJulian+ "-" + yearJulian;
+  svg
+    .append('text')
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 97)
+    .text(decimaldate);
+
+var juliandecimaldate = "Julian Decimal Date: " + JD;
+  svg
+    .append('text')
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 106)
+    .text(juliandecimaldate);
+
+var adoptedepoch = "Adopted Epoch: " + epochDays;
+  svg
+    .append('text')
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 115)
+    .text(adoptedepoch);
+
+var dayssinceepoch = "Days Since Epoch: " + daysSinceEpoch;
+svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 124)
+    .text(dayssinceepoch);
+
+var utdecimal = "UT - Decimal: " + UTDecimal;
+  svg
+    .append('text')
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 133)
+    .text(utdecimal);
+
+var jdAt0h = "JDAt0h: " + JDAt0h;
+  svg
+    .append('text')
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 142)
+    .text(jdAt0h);
+
+var valuet = "T: " + valueT;
+  svg
+    .append('text')
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 151)
+    .text(valuet);
+
+var valuet0 = "T0: " + valueT0;
+  svg
+    .append('text')
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 160)
+    .text(valuet0);
+
+var gst = "GMST: " + GST + "°";
+  svg
+    .append('text')
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 169)
+    .text(gst);
+
+var gsttime = "GMST - Time: " + GSTHours + "h" + " " + GSTMinutes + "m" + " " + GSTSeconds + "/ms";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 178)
+    .text(gsttime);
+
+var horizoncoordinates = "Horizon Coordinates:";
+  svg
+    .append("text")
+    .style("fill", "#007fff")
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .style("font-weight", "bold")
+    .attr("x", 25)
+    .attr("y", 195)
+    .text(horizoncoordinates);
+
+var lst = "LMST: " + LST + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 204)
+    .text(lst); 
+
+var lsttime = "LMST - Time: " + LSTHours + "h" + " " + LSTMinutes + "m" + " " + LSTSeconds + "/ms";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 213)
+    .text(lsttime);
+
+var h = "Hα: " + hourAngle + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 222)
+    .text(h);
+
+var htime = "Hα-time: " + HHours + "h" + " " + HMinutes + "m" + " " + HSeconds + "/ms";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 25)
+    .attr("y", 231)
+    .text(htime);
+
+var sunposition = "Sun Position: ";
+  svg
+    .append("text")
+    .style("fill", "tomato")
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .style("font-weight", "bold")
+    .attr("x", 236.5)
+    .attr("y", 8)
+    .text(sunposition);
+
+var valuen = "N: " + valueN + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 17)
+    .text(valuen);
+
+var msun = "MSun: " + MSun + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 26)
+    .text(msun);
+
+var maxe = "Ec: " + Ec + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 35)
+    .text(maxe);
+
+var ra = "Ra λSun: " + toDegrees(Ra) + "°";
+  svg
+    .append("text")
+    .style("fill", "#007fff")
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .style("font-weight", "bold")
+    .attr("x", 236.5)
+    .attr("y", 44)
+    .text(ra);
+
+var esun = "εEcliptic Angle: " + εSun + "°";
+  svg
+    .append("text")
+    .style("fill", "tomato")
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .style("font-weight", "bold")
+    .attr("x", 236.5)
+    .attr("y", 53)
+    .text(esun);
+
+var sunDec = "Dec δSun: " + δSun + "°";
+  svg
+    .append("text")
+    .style("fill", "#007fff")
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .style("font-weight", "bold")
+    .attr("x", 236.5)
+    .attr("y", 62)
+    .text(sunDec);
+
+var ysun = "YSun: " + YSun;
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 71)
+    .text(ysun);
+
+var xsun = "XSun: " + XSun;
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 80)
+    .text(xsun);       
+
+var loquadrant = "LO-Quadrant: " + LOQuadrant + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 89)
+    .text(loquadrant);
+
+var hiquadrant = "HI-Quadrant: " + HIQuadrant + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 98)
+    .text(hiquadrant);
+
+var asun = "αSun: " + αSun + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 107)
+    .text(asun);
+
+var asuntime = "αSun - Time: " + αSunHours + "h" + " " + αSunMinutes + "m" + " " + αSunSeconds + "/ms";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 116)
+    .text(asuntime);
+
+var asuntime = "δSun - Time: " + δSunHours + "h" + " " + δSunMinutes + "m" + " " + δSunSeconds + "/ms";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 125)
+    .text(asuntime);
+
+var sunazimuth = "Sun Azimuth (Decimal): " + sunazi + "°";
+  svg
+    .append("text")
+    .style("fill", "tomato")
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .style("font-weight", "bold")
+    .attr("x", 236.5)
+    .attr("y", 134)
+    .text(sunazimuth);
+
+var sunaltitude = "Sun Altitude (Decimal): " + sunalt + "°";
+  svg
+    .append("text")
+    .style("fill", "tomato")
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .style("font-weight", "bold")
+    .attr("x", 236.5)
+    .attr("y", 143)
+    .text(sunaltitude);
+
+var sunazimuthdeg = "Sun Azimuth (Dms): " + SHours + "°" + SMinutes + "'" + SSeconds + "/ms";
+  svg
+    .append("text")
+    .style("fill", "tomato")
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 152)
+    .text(sunazimuthdeg);
+
+var sunaltitudedeg = "Sun Altitude (Dms): " + sHours + "°" + sMinutes + "'" + sSeconds + "/ms";
+  svg
+    .append("text")
+    .style("fill", "tomato")
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 161)
+    .text(sunaltitudedeg);
+
+var sundistance = "Sun Distance: " + d3.format(",.3f")(Rs) + " km";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 170)
+    .text(sundistance);
+
+ var moonposition = "Moon Position:";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .style("font-weight", "bold")
+    .attr("x", 448)
+    .attr("y", 8)
+    .text(moonposition);
+
+var lmoon = "lMoon: " + lMoon + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 17)
+    .text(lmoon);
+
+var mm = "Mm: " + Mm + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 26)
+    .text(mm);
+
+var nmoon = "NMoon: " + NMoon + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 35)
+    .text(nmoon);
+
+var ev = "Ev: " + Ev;
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 44)
+    .text(ev);
+
+var ae = "Ae: " + Ae;
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 53)
+    .text(ae);
+
+var a3 = "A3: " + A3;
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 62)
+    .text(a3);
+
+var mmx = "M'm: " + MPrimem + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 71)
+    .text(mmx);
+
+var ecx = "Ec: " + Ec + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 80)
+    .text(ecx);
+
+var a4 = "A4: " + A4;
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 89)
+    .text(a4);
+
+var lp = "lPrime: " + lPrime + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 98)
+    .text(lp);
+
+var np = "NPrime: " + NPrime + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 107)
+    .text(np);
+
+var ramoon = "Ra λMoon: " + λMoon + "°";
+  svg
+    .append("text")
+    .style("fill", "#007fff")
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .style("font-weight", "bold")
+    .attr("x", 448)
+    .attr("y", 116)
+    .text(ramoon);
+
+var bmoon = "βMoon: " + βMoon + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 125)
+    .text(bmoon);
+
+var decmoon = "Dec δMoon: " + δMoon + "°";
+  svg
+    .append("text")
+    .style("fill", "#007fff")
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .style("font-weight", "bold")
+    .attr("x", 448)
+    .attr("y", 134)
+    .text(decmoon);
+
+var valueymoon = "YMoon: " + valueYMoon;
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 143)
+    .text(valueymoon);
+
+var valuexmoon = "XMoon: " + valueXMoon;
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 152)
+    .text(valuexmoon);
+
+var loquadrantMn = "LO-Quadrant: " + LOQuadrantMn + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 161)
+    .text(loquadrantMn);
+
+var hiquadrantMn = "HI-Quadrant: " + HIQuadrantMn + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 170)
+    .text(hiquadrantMn);
+
+var amoon = "αMoon: " + αMoon + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 179)
+    .text(amoon);
+
+var amoontime = "αMoon - Time: " + αMoonHours + "h" + " " + αMoonMinutes + "m" + " " + αMoonSeconds + "/ms";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 188)
+    .text(amoontime);
+
+var decmoontime = "δMoon - Time: " + δMoonHours + "h" + " " + δMoonMinutes + "m" + " " + δMoonSeconds + "/ms";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 197)
+    .text(decmoontime);
+
+var moonazimuth = "Moon Azimuth (Decimal): " + moonazi + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .style("font-weight", "bold")
+    .attr("x", 448)
+    .attr("y", 206)
+    .text(moonazimuth);
+
+var moonaltitude = "Moon Altitude (Decimal): "  + moonalt + "°";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .style("font-weight", "bold")
+    .attr("x", 448)
+    .attr("y", 215)
+    .text(moonaltitude);
+
+var moonazimuthdeg = "Moon Azimuth (Dms): " + AHours + "º" + AMinutes + "'" + ASeconds + "/ms";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 224)
+    .text(moonazimuthdeg);
+
+var moonaltitudedeg = "Moon Altitude (Dms): " + aHours + "º" + aMinutes + "'" + aSeconds + "/ms";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 448)
+    .attr("y", 233)
+    .text(moonaltitudedeg);
+
+var moonp = "Moonphase:";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .style("font-weight", "bold")
+    .attr("x", 236.5)
+    .attr("y", 187)
+    .text(moonp);
+
+var moondistance = "Moon Distance: " + d3.format(",.3f")(Rm) + " km";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 196)
+    .text(moondistance);
+
+var mdays = "Moon Age: " + m_days + " Days";
+  svg
+    .append("text")
+    .style("fill", tcolor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 205)
+    .text(mdays);
+
+var frac = "Illumination: " + perc + " %";
+  svg
+    .append("text")
+    .style("fill", tcolor)    
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 214)
+    .text(frac);
+
+var mphase = "Moonphase: " + moonphase;
+  svg
+    .append("text")
+    .style("fill", tcolor)    
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 223)
+    .text(mphase);
+
+var mphaseA = ["Moonphase Angle: " + MphaseAngle + "°"];
+  svg
+    .append("text")
+    .style("fill", tcolor)    
+    .style("font-family", "Helvetica")
+    .style("font-size", "7.5px")
+    .attr("x", 236.5)
+    .attr("y", 232)
+    .text(mphaseA)
+// --end text output--
+
+// create an svg moonphase graphic
+var svg = d3.select(".moonphaze")
     .append("svg")
     //.style("background", "#292e35")
-    .attr("width", 110)
-    .attr("height", 110);
+    .attr("width", 100)
+    .attr("height", 100);
 
-var w = 110;
-var h = 110;
-var radius = w / 2 * 0.91;
+var w = 100;
+var h = 100;
+var radius = w / 2 * 0.51;
 var gradient = 2;
 var mAxis = <?php echo $alm["parallacticAngle"];?>;
 var moonface = "#high-res-moon";
@@ -495,8 +2178,10 @@ function fillGradient(points) {
 }
 
 function drawPhase(phase) {
+
     svg.attr("transform", "rotate("+ mAxis +", 0, 0)")
-    .style('fill', 'rgba(41, 46, 53, 0.8)');
+       .style('fill', 'rgba(41, 46, 53, 0.8)');
+
     const gradientPoints = drawDarkSide(phase);
     fillGradient(gradientPoints);
 
@@ -504,32 +2189,30 @@ function drawPhase(phase) {
 
 function display(phase) {
 /*
-    svg
+ svg
         .append('image') // image output
         .attr('xlink:href', moon)
-        .attr('width', 100)
-        .attr('height', 100)
-        .attr('x', 5.1)
-        .attr('y', 5);
+        .attr('width', 50)
+        .attr('height', 50)
+        .attr('x', 25.1)
+        .attr('y', 25);
 */
     svg
         .append("use")
         .attr("xlink:href", moonface)
-        .attr("width", 99.9)
-        .attr("height", 99.9)
-        .attr('x', 5.03)
-        .attr('y', 5);
+        .attr("width", 49.9)
+        .attr("height", 49.9)
+        .attr('x', 25.03)
+        .attr('y', 25);
 
   drawPhase(phase);    
 }
 
-phase = <?php echo $alm["moon_ecliptic_angle"];?>;
+phase = MphaseAngle;
 display(phase);
-
+// wow ! job done enjoy :-)
 </script>
-<div class="distance"></div>
-
-  <svg id="svg-defs" class="svg-defs" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg id="svg-defs" class="svg-defs" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
   <!-- moon -->
   <linearGradient id="b" x1="1327.9395" x2="1156.0339" y1="103.897" y2="398.9926" gradientUnits="userSpaceOnUse" gradientTransform="matrix(.938 0 0 -.938 -679.11 677.625)">
     <stop offset="0" stop-color="#ADADB0"/>
@@ -623,4 +2306,4 @@ display(phase);
     <path fill="#CDCDCD" fill-opacity=".4345" d="M664.555 398.161c0 139.406-114.615 252.417-256 252.417-141.384 0-256-113.011-256-252.417s114.616-252.417 256-252.417c141.384 0 256 113.01 256 252.417z"/>
 </svg>
 </body>
-</html>
+</html> 

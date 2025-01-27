@@ -410,7 +410,7 @@ if ($wind["units"] == "mph"){$lightning["last_distance"] = $lightning["last_dist
 				.style("font-size", "10px")
 				.style("text-anchor", "left")
 				.style("font-weight", "normal")
-				.text(Bearing+"¡Æ"+" "+Bearingx);
+				.text(Bearing+"ï¿½ï¿½"+" "+Bearingx);
 	}
 </script>
 </html>

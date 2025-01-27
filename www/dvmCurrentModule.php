@@ -25,26 +25,12 @@ error_reporting(0);
 <title>weather current conditions</title>
 </head>
 
-<div class="chartforecast">
-<span class="yearpopup"><a alt="Airport Metar Station" title="Airport Metar Station" href="dvmMetarPopup.php" data-lity><?php echo $chartinfo;?><?php echo ' Airport | Metar';?>
-<?php if (filesize('jsondata/me.txt') < 160) { echo "&nbsp;" , $offline;} else echo "";?></a></span>
-<span class="monthpopup"><a href="dvmWindyRadarPopup.php" title="Windy.com Radar" alt="Windy.com Radar" data-lity><?php echo $chartinfo;?> Radar</a></span>
-<span class="monthpopup"><a href="dvmWindyWindPopup.php" title="Windy.com Wind Map" alt="Windy.com Wind Map" data-lity><?php echo $chartinfo;?> Wind Map</a></span>
-<span class="todaypopup"><a alt="cloud cover" title="cloud cover" href="dvmhighcharts/cloudCharts.php?chart='cloudcoverplot'&span='weekly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>
-" data-lity><?php echo $menucharticonpage;?> Cloud Cover</a></span>
-</div>
-<span class='moduletitle'><?php echo $lang['currentModule'];?></span>
 
-<div class="updatedtime1">
-<?php $forecastime=filemtime('jsondata/awc.txt');$divumwxwuurl=file_get_contents("jsondata/awc.txt");if(filesize('jsondata/awc.txt')<10){echo $offline;}
-else echo $online,"";echo " ",  date($timeFormat,$forecastime);?>    
-</div></div>
 
 <?php //cloudbase
 $clouds = "Cloudbase";
-if ($windunit == 'mph' || $windunit == 'kts'){$sky["cloud_base"] = round($sky["cloud_base"] * 3.281);}
-if ($windunit == 'mph' || $windunit == 'kts'){$distance = "ft";}
-else if ($windunit == 'km/h' || $windunit == 'm/s'){$distance = "m";}
+if ($windunit == 'mph' || $windunit == 'kts'){$sky["cloud_base"] = round($sky["cloud_base"] * 3.281);$distance = "ft";}
+else {$distance = "m";}
 ?>
 
 <?php
@@ -58,9 +44,9 @@ $snow = $parsed_visibility['response'][0]['periods'][0]['snowIN'];
 }
 
 if ($windunit == 'mph') {
-$visibility = round($parsed_visibility['response'][0]['periods'][0]['visibilityMI'],0,PHP_ROUND_HALF_UP)." miles";
+$visibility = round($parsed_visibility['response'][0]['periods'][0]['visibilityMI'],0,PHP_ROUND_HALF_UP)."mi";
 } else {
-$visibility = round($parsed_visibility['response'][0]['periods'][0]['visibilityKM'],0,PHP_ROUND_HALF_UP)." km";
+$visibility = round($parsed_visibility['response'][0]['periods'][0]['visibilityKM'],0,PHP_ROUND_HALF_UP)."km";
 }
 $sky["cloud_cover"] = $parsed_visibility['response'][0]['periods'][0]['sky'];
         
@@ -141,15 +127,15 @@ else if($sky["cloud_cover"] < 95) {$sky["summary"] = "Mostly Cloudy";}
 else if($sky["cloud_cover"] >= 95) {$sky["summary"] = "Overcast";}
 else if(filesize('jsondata/me.txt') < 160){$sky["summary"] = "Conditions Not Available";} 
 //oktas
-if($sky["cloud_cover"] < 5 && $sky["cloud_cover"] > 0) {$sky["cloud_oktas"] = "0 oktas";}
-else if($sky["cloud_cover"] <= 12.5) {$sky["cloud_oktas"] = "1 okta";}
-else if($sky["cloud_cover"] <= 25) {$sky["cloud_oktas"] = "2 oktas";}
-else if($sky["cloud_cover"] <= 37.5) {$sky["cloud_oktas"] = "3 oktas";}
-else if($sky["cloud_cover"] <= 50) {$sky["cloud_oktas"] = "4 oktas";}
-else if($sky["cloud_cover"] <= 62.5) {$sky["cloud_oktas"] = "5 oktas";}
-else if($sky["cloud_cover"] <= 75) {$sky["cloud_oktas"] = "6 oktas";}
-else if($sky["cloud_cover"] <= 87.5) {$sky["cloud_oktas"] = "7 oktas";}
-else if($sky["cloud_cover"] <= 100) {$sky["cloud_oktas"] = "8 oktas";}
+if($sky["cloud_cover"] < 5 && $sky["cloud_cover"] > 0) {$sky["cloud_oktas"] = "0oktas";}
+else if($sky["cloud_cover"] <= 12.5) {$sky["cloud_oktas"] = "1okta";}
+else if($sky["cloud_cover"] <= 25) {$sky["cloud_oktas"] = "2oktas";}
+else if($sky["cloud_cover"] <= 37.5) {$sky["cloud_oktas"] = "3oktas";}
+else if($sky["cloud_cover"] <= 50) {$sky["cloud_oktas"] = "4oktas";}
+else if($sky["cloud_cover"] <= 62.5) {$sky["cloud_oktas"] = "5oktas";}
+else if($sky["cloud_cover"] <= 75) {$sky["cloud_oktas"] = "6oktas";}
+else if($sky["cloud_cover"] <= 87.5) {$sky["cloud_oktas"] = "7oktas";}
+else if($sky["cloud_cover"] <= 100) {$sky["cloud_oktas"] = "8oktas";}
 
 if(anyToC($temp["outside_day_avg_60mn"])<=-10){$tempcolor = "#8781bd";}
 else if(anyToC($temp["outside_day_avg_60mn"])<=0){$tempcolor = "#487ea9";}
@@ -161,405 +147,124 @@ else if(anyToC($temp["outside_day_avg_60mn"])<30){$tempcolor = "#d05f2d";}
 else if(anyToC($temp["outside_day_avg_60mn"])<35){$tempcolor = "#d65b4a";}
 else if(anyToC($temp["outside_day_avg_60mn"])<40){$tempcolor = "#dc4953";}
 else if(anyToC($temp["outside_day_avg_60mn"])<100){$tempcolor = "#e26870";}
+//ordinal
+if ($wind["direction_10m_avg"] <= 11.25) {
+    $$bearing = 'N';
+} else if ($wind["direction_10m_avg"] <= 33.75) {
+    $bearing = 'NNE';
+} else if ($wind["direction_10m_avg"] <= 56.25) {
+    $bearing = 'NE';
+} else if ($wind["direction_10m_avg"] <= 78.75) {
+    $bearing = 'ENE';
+} else if ($wind["direction_10m_avg"] <= 101.25) {
+    $bearing = 'E';
+} else if ($wind["direction_10m_avg"] <= 123.75) {
+    $bearing = 'ESE';
+} else if ($wind["direction_10m_avg"] <= 146.25) {
+    $bearing = 'SE';
+} else if ($wind["direction_10m_avg"] <= 168.75) {
+    $bearing = 'SSE';
+} else if ($wind["direction_10m_avg"] <= 191.25) {
+    $bearing = 'S';
+} else if ($wind["direction_10m_avg"] <= 213.75) {
+    $bearing = 'SSW';
+} else if ($wind["direction_10m_avg"] <= 236.25) {
+    $bearing = 'SW';
+} else if ($wind["direction_10m_avg"] <= 261.25) {
+    $bearing = 'WSW';
+} else if ($wind["direction_10m_avg"] <= 281.25) {
+    $bearing = 'W';
+} else if ($wind["direction_10m_avg"] <= 303.75) {
+    $bearing = 'WNW';
+} else if ($wind["direction_10m_avg"] <= 326.25) {
+    $bearing = 'NW';
+} else if ($wind["direction_10m_avg"] <= 348.75) {
+    $bearing = 'NNW';
+} else { $bearing = 'North'; }
+
 ?>
 
-<script src="js/d3.7.9.0.min.js"></script>
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<title>weather current conditions</title>
+<style>
+table.current {
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: transparent;
+  width: 94%;
+  text-align: center;
+}
+table.current td, table.current th {
+  border:1px solid var(--col-13);
+  border-radius:2px;
+  padding: 1px 0px;
+  column-gap: 20px;
+}
+table.current tbody td {
+  font-size: 0.6em;
+  color: var(--col-6);
+}
+</style>
+</head>
 
-
-<div class="current-module"></div>
-
-<script>
-var baseTextColor = "var(--col-6)";
-
-var currentImage = "<?php echo $current["image"];?>";
-
-var bearing = "<?php echo $wind["direction_10m_avg"];?>";
-
-if (bearing <= 11.25) {
-    bearing = 'North';
-} else if (bearing <= 33.75) {
-    bearing = 'NNE';
-} else if (bearing <= 56.25) {
-    bearing = 'NE';
-} else if (bearing <= 78.75) {
-    bearing = 'ENE';
-} else if (bearing <= 101.25) {
-    bearing = 'East';
-} else if (bearing <= 123.75) {
-    bearing = 'ESE';
-} else if (bearing <= 146.25) {
-    bearing = 'SE';
-} else if (bearing <= 168.75) {
-    bearing = 'SSE';
-} else if (bearing <= 191.25) {
-    bearing = 'South';
-} else if (bearing <= 213.75) {
-    bearing = 'SSW';
-} else if (bearing <= 236.25) {
-    bearing = 'SW';
-} else if (bearing <= 261.25) {
-    bearing = 'WSW';
-} else if (bearing <= 281.25) {
-    bearing = 'West';
-} else if (bearing <= 303.75) {
-    bearing = 'WNW';
-} else if (bearing <= 326.25) {
-    bearing = 'NW';
-} else if (bearing <= 348.75) {
-    bearing = 'NNW';
-} else { bearing = 'North'; }
-
-var tempColor = "<?php echo $tempcolor;?>";
-var avg_sp_ten_min_color = "<?php echo $color["windSpeed_10min_avg"];?>";
-var max_gust_ten_min_color = "<?php echo $color["windGust_10min_max"];?>";
-
-var windunits = "<?php echo $wind['units'];?>";
-var rainunits = "<?php echo $rain['units'];?>";
-var tempunits = "<?php echo $temp['units'];?>"; 
-
-var svg = d3.select(".current-module")
-    .append("svg")
-    //.style("background", "#292E35")
-    .attr("width", 310)
-    .attr("height", 150);
+<div class="chartforecast">
+<span class="yearpopup"><a alt="Airport Metar Station" title="Airport Metar Station" href="dvmMetarPopup.php" data-lity><?php echo $chartinfo;?><?php echo ' Airport | Metar';?>
+<?php if (filesize('jsondata/me.txt') < 160) { echo "&nbsp;" , $offline;} else echo "";?></a></span>
+<span class="monthpopup"><a href="dvmWindyRadarPopup.php" title="Windy.com Radar" alt="Windy.com Radar" data-lity><?php echo $chartinfo;?> Radar</a></span>
+<span class="monthpopup"><a href="dvmWindyWindPopup.php" title="Windy.com Wind Map" alt="Windy.com Wind Map" data-lity><?php echo $chartinfo;?> Wind Map</a></span>
+<span class="todaypopup"><a alt="cloud cover" title="cloud cover" href="dvmhighcharts/cloudCharts.php?chart='cloudcoverplot'&span='weekly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>
+" data-lity><?php echo $menucharticonpage;?> Cloud Cover</a></span>
+</div>
+<span class='moduletitle'><?php echo $lang["currentModule"]; ?> (<valuetitleunit>&deg;<?php echo $temp["units"]; ?></valuetitleunit>)</span>
+<div class="updatedtime1">
+<?php $forecastime=filemtime('jsondata/awc.txt');$divumwxwuurl=file_get_contents("jsondata/awc.txt");if(filesize('jsondata/awc.txt')<10){echo $offline;}
+else echo $online,"";echo " ",  date($timeFormat,$forecastime);?>    
+</div></div>
  
-var data = ["<?php echo $sky["summary"];?>"];
-
-var text = svg.selectAll(null)
-    .data(data)
-    .enter() 
-    .append("text")
-    .attr("x", 155)
-    .attr("y", function(d, i) { return 20 + i * 20; })
-
-    .style("fill", baseTextColor)
-    .style("font-family", "Helvetica") 
-    .style("font-size", "14px")
-    .style("text-anchor", "middle")
-    .style("font-weight", "normal")
-    .text(function(d) { return d.split("-")[0]; });
-
-svg.append('image') // image output
-    .attr('xlink:href', currentImage)
-    .attr('width', 130)
-    .attr('height', 110)
-    .attr('x', 10)
-    .attr('y', 0);
-
-var visibility = "<?php echo $visibility;?>";
-
-var data = ["Visibility " + "-" + visibility];
-
-var text = svg.selectAll(null)
-    .data(data)
-    .enter() 
-    .append("text")
-    .attr("x", 300)
-    .attr("y", function(d, i) { return 48 + i * 48; })
-
-    .style("fill", baseTextColor)
-    .style("font-family", "Helvetica") 
-    .style("font-size", "11px")
-    .style("text-anchor", "end")
-    .style("font-weight", "normal")
-    .text(function(d) { return d.split("-")[0]; })
-
-    .append("tspan")
-    .style("fill", "#ff7c39")
-    .style("font-weight", "bold")
-    .text(function(d) { return d.split("-")[1]; });
-
-var cloudbase = "<?php echo $sky["cloud_base"];?>";
-var cloudbase_units = "<?php echo $distance;?>";
-
-var data = ["Cloudbase " + "-" + cloudbase + "-" + " " + cloudbase_units];
-
-var text = svg.selectAll(null)
-    .data(data)
-    .enter() 
-    .append("text")
-    .attr("x", 300)
-    .attr("y", function(d, i) { return 61 + i * 61; })
-
-    .style("fill", baseTextColor)
-    .style("font-family", "Helvetica") 
-    .style("font-size", "11px")
-    .style("text-anchor", "end")
-    .style("font-weight", "normal")
-    .text(function(d) { return d.split("-")[0]; })
-
-    .append("tspan")
-    .style("fill", "#ff7c39")
-    .style("font-weight", "bold")
-    .text(function(d) { return d.split("-")[1]; })
-
-    .append("tspan")
-    .style("fill", "#ff7c39")
-    .style("font-weight", "bold")
-    .text(function(d) { return d.split("-")[2]; });
-
-var cloud_cover = "<?php echo $sky["cloud_cover"];?>";
-
-var cloud_oktas = "<?php echo $sky["cloud_oktas"];?>";
-
-var data = ["Cloud Cover " + "-" + cloud_cover + "-" + " % " + "-" + "(" + cloud_oktas + ")"];
-
-var text = svg.selectAll(null)
-    .data(data)
-    .enter() 
-    .append("text")
-    .attr("x", 300)
-    .attr("y", function(d, i) { return 74 + i * 74; })
-
-    .style("fill", baseTextColor)
-    .style("font-family", "Helvetica") 
-    .style("font-size", "11px")
-    .style("text-anchor", "end")
-    .style("font-weight", "normal")
-    .text(function(d) { return d.split("-")[0]; })
-
-    .append("tspan")
-    .style("font-weight", "bold")
-    .style("fill", "#ff7c39")
-    .text(function(d) { return d.split("-")[1]; })
-
-    .append("tspan")
-    .style("fill", baseTextColor)
-    .style("font-weight", "normal")
-    .text(function(d) { return d.split("-")[2]; })
-
-    .append("tspan")
-    .style("fill", baseTextColor)
-    .text(function(d) { return d.split("-")[3]; });
-
-
-var rain_last_tenM = "<?php echo $rain["last_10min"];?>";
-
-var data = ["10 min " + "-" + "Rainfall " + "-" + "Total " + "-" + d3.format(".1f")(rain_last_tenM) + " " + "-" + rainunits];
-
-var text = svg.selectAll(null)
-    .data(data)
-    .enter() 
-    .append("text")
-    .attr("x", 300)
-    .attr("y", function(d, i) { return 87 + i * 87; })
-
-    .style("fill", baseTextColor)
-    .style("font-family", "Helvetica")
-    .style("font-size", "11px")
-    .style("text-anchor", "end")
-    .style("font-weight", "normal")
-    .text(function(d) { return d.split("-")[0]; })
-
-    .append("tspan")
-    .style("fill", "#01a4b4")       
-    .style("font-weight", "bold")
-    .text(function(d) { return d.split("-")[1]; })
-
-    .append("tspan")
-    .style("fill", baseTextColor)
-    .style("font-weight", "normal")
-    .text(function(d) { return d.split("-")[2]; })
-
-    .append("tspan")
-    .style("fill", "#01a4b4")
-    .style("font-weight", "bold")
-    .text(function(d) { return d.split("-")[3]; })
-
-    .append("tspan")
-    .style("fill", baseTextColor)
-    .style("font-weight", "normal")
-    .style("font-size", "9px")
-    .text(function(d) { return d.split("-")[4]; });
-
-var outside_day_avg_sixtyM = "<?php echo $temp["outside_day_avg_60mn"];?>";
-
-var data = ["1 hr " + "x" + "Temperature " + "x" + "Average " + "x" + d3.format(".1f")(outside_day_avg_sixtyM) + "x" + "\u00B0" + tempunits];
-
-var text = svg.selectAll(null)
-    .data(data)
-    .enter() 
-    .append("text")
-    .attr("x", 300)
-    .attr("y", function(d, i) { return 100.5 + i * 100.5; })
-
-    .style("fill", baseTextColor)
-    .style("font-family", "Helvetica") 
-    .style("font-size", "11px")
-    .style("text-anchor", "end")
-    .style("font-weight", "normal")
-    .text(function(d) { return d.split("x")[0]; })
-
-    .append("tspan")
-    .style("fill", tempColor)
-    .style("font-weight", "bold")
-    .text(function(d) { return d.split("x")[1]; })
-
-    .append("tspan")
-    .style("fill", baseTextColor)
-    .style("font-weight", "normal")
-    .text(function(d) { return d.split("x")[2]; })
-
-    .append("tspan")
-    .style("fill", tempColor)
-    .style("font-weight", "bold")
-    .text(function(d) { return d.split("x")[3]; })
-
-    .append("tspan")
-    .style("fill", baseTextColor)
-    .style("font-weight", "normal")
-    .style("font-size", "9px")
-    .text(function(d) { return d.split("x")[4]; });
-
-var direction_tenM_avg = "<?php echo $wind["direction_10m_avg"];?>";
-direction_tenM_avg = direction_tenM_avg || 0;
-
-var data = ["10 min " + "-" + "Wind Dir " + "-" + "Average " + "-" + bearing + "-" + " " + direction_tenM_avg + "\u00B0"];
-
-var text = svg.selectAll(null)
-    .data(data)
-    .enter() 
-    .append("text")
-    .attr("x", 300)
-    .attr("y", function(d, i) { return 114.5 + i * 114.5; })
-
-    .style("fill", baseTextColor)
-    .style("font-family", "Helvetica") 
-    .style("font-size", "11px")
-    .style("text-anchor", "end")
-    .style("font-weight", "normal")
-    .text(function(d) { return d.split("-")[0]; })
-
-    .append("tspan")
-    .style("fill", "#007FFF")
-    .style("font-weight", "bold")
-    .text(function(d) { return d.split("-")[1]; })
-
-    .append("tspan")
-    .style("fill", baseTextColor)
-    .style("font-weight", "normal")
-    .text(function(d) { return d.split("-")[2]; })
-
-    .append("tspan")
-    .style("fill", "#ff7c39")
-    .style("font-weight", "bold")
-    .text(function(d) { return d.split("-")[3]; })
-
-    .append("tspan")
-    .style("fill", "#007FFF")
-    .text(function(d) { return d.split("-")[4]; });
-
-var speed_tenM_avg = <?php echo $wind["speed_10m_avg"];?>;
-
-var gust_tenM_max = <?php echo $wind["gust_10m_max"];?>;
-
-var data = ["10 min Wind: -" + "-" + "Speed " + "-" + "Avg " + "-" + d3.format(".1f")(speed_tenM_avg) + "-" + " " + windunits + ", " + "-" + "Gust " + "-" + "Max " + "-" + d3.format(".1f")(gust_tenM_max) + "-" + " " + windunits];
-
-var text = svg.selectAll(null)
-    .data(data)
-    .enter() 
-    .append("text")
-    .attr("x", 300)
-    .attr("y", function(d, i) { return 128.5 + i * 128.5; }) // 114.5
-
-    .style("fill", baseTextColor)
-    .style("font-family", "Helvetica") 
-    .style("font-size", "11px")
-    .style("text-anchor", "end")
-    .style("font-weight", "normal")
-    .text(function(d) { return d.split("-")[0]; })
-
-    .append("tspan")
-    .style("fill", avg_sp_ten_min_color)
-    .style("font-weight", "bold")
-    .text(function(d) { return d.split("-")[1]; })
-
-    .append("tspan")
-    .style("fill", avg_sp_ten_min_color)
-    .style("font-weight", "bold")
-    .text(function(d) { return d.split("-")[2]; })
-
-    .append("tspan")
-    .style("fill", baseTextColor)
-    .style("font-weight", "normal")
-    .text(function(d) { return d.split("-")[3]; })
-
-    .append("tspan")
-    .style("fill", avg_sp_ten_min_color)
-    .style("font-weight", "bold")
-    .text(function(d) { return d.split("-")[4]; })
-
-    .append("tspan")
-    .style("fill", baseTextColor)
-    .style("font-weight", "normal")
-    .style("font-size", "9px")
-    .text(function(d) { return d.split("-")[5]; })
-
-    .append("tspan")
-    .style("fill", max_gust_ten_min_color)
-    .style("font-weight", "bold")
-    .style("font-size", "11px")
-    .text(function(d) { return d.split("-")[6]; })
-
-    .append("tspan")
-    .style("fill", baseTextColor)
-    .style("font-weight", "normal")
-    .style("font-size", "11px")
-    .text(function(d) { return d.split("-")[7]; })
-
-    .append("tspan")
-    .style("fill", max_gust_ten_min_color)
-    .style("font-weight", "bold") 
-    .text(function(d) { return d.split("-")[8]; })
-
-    .append("tspan")
-    .style("fill", baseTextColor)
-    .style("font-weight", "normal")
-    .style("font-size", "9px")
-    .text(function(d) { return d.split("-")[9]; });
-
-var sunshine_duration = "<?php echo $solar["sun_duration_hours_minutes"];?>";
-
-var threshold = "<?php echo $solar["threshold"];?>";
-
-var solarunits = "W/m²";
-
-var data = ["Sunshine Duration " + "-" + sunshine_duration + "-" + " Radiation Threshold " + "-" + threshold + solarunits];
-
-var text = svg.selectAll(null)
-    .data(data)
-    .enter() 
-    .append("text")
-    .attr("x", 300)
-    .attr("y", function(d, i) { return 142.5 + i * 142.5; }) // 114.5
-
-    .style("fill", baseTextColor)
-    .style("font-family", "Helvetica") 
-    .style("font-size", "11px")
-    .style("text-anchor", "end")
-    .style("font-weight", "normal")
-    .text(function(d) { return d.split("-")[0]; })
-
-    .append("tspan")
-    .style("fill", "red")
-    .style("font-weight", "bold")
-    .text(function(d) { return d.split("-")[1]; })
-
-    .append("tspan")
-    .style("fill", baseTextColor)
-    .style("font-weight", "normal")
-    .text(function(d) { return d.split("-")[2]; })
-
-    .append("tspan")
-    .style("fill", "Green")
-    .style("font-weight", "bold")
-    .text(function(d) { return d.split("-")[3]; })
-
-    .append("tspan")
-    .style("fill", "red")
-    .style("font-weight", "bold")
-    .text(function(d) { return d.split("-")[4]; })
-
-    
-</script>
+<div class="current-module" style="display:grid;grid-template-columns: auto auto;">
+<div><?php echo $sky["summary"];?></br><img src="<?php echo $current["image"];?>" style="width:120px;"</img></div>
+<table class="current">
+<tbody>
+<tr>
+
+<td style="border:transparent;">Cloudbase</td>
+<td style="border:transparent;">Cloud Cover</td>
+</tr>
+<tr>
+<td style="width:auto;text-align: center;border-left: 5px solid rgb(109,100,136);"><?php echo $sky["cloud_base"];?><?php echo $distance;?></td>
+<td style="width:auto;text-align: center;border-left: 5px solid #cccccc;"><?php echo $sky["cloud_cover"];?>%&nbsp;(<?php echo $sky["cloud_oktas"];?>)</td>
+</tr>
+<tr>
+<td style="border:transparent;">10min Rainfall</td>
+<td style="border:transparent;">60min Temp Avg</td>
+</tr>
+<tr>
+<td style="width:40%;text-align: center;border-left: 5px solid <?php echo $colorRainDaySum;?>;"><?php echo $rain["last_10min"];?><?php echo $rainunit;?></td>
+<td style="width:40%;text-align: center;border-left: 5px solid <?php echo $tempcolor;?>;"><?php echo $temp["outside_day_avg_60mn"];?>&deg;<?php echo $tempunit;?></td>
+</tr>
+<tr>
+<td style="border:transparent;">Visibility</td>
+<td style="border:transparent;">10min Bearing</td>
+</tr>
+<tr>
+<td style="width:40%;text-align: center;border-left: 5px solid rgb(214,57,129);"><?php echo $visibility;?></td>
+<td style="width:40%;text-align: center;border-left: 5px solid <?php echo $color["windSpeed_10min_avg"];?>;"><?php echo $bearing;?>&nbsp;<?php echo $wind["direction_10m_avg"];?>&deg;</td>
+</tr>
+<tr>
+<td style="border:transparent;">10min Speed Avg</td>
+<td style="border:transparent;">10min Gust Max</td>
+</tr>
+<tr>
+<tr>
+<td style="width:40%;text-align: center;border-left: 5px solid <?php echo $color["windSpeed_10min_avg"];?>;"><?php echo $wind["speed_10m_avg"];?><?php echo $windunit;?></td>
+<td style="width:40%;text-align: center;border-left: 5px solid <?php echo $color["windGust_10min_max"];?>;"><?php echo $wind["gust_10m_max"];?><?php echo $windunit;?></td>
+</tr>
+</tbody>
+</table>
+</div>
 </html>
+
+
+
+

@@ -55,7 +55,7 @@ padding:5px;font-family:Arial,Helvetica,sans-serif;width:100px;height:0.8em;font
 var moon = "<?php echo $moon;?>";
  var theme = "<?php echo $theme;?>";
     if (theme === 'dark') {
-    var baseTextColor = "silver";
+    var baseTextColor = "white";
     } else {
     baseTextColor = "#2d3a4b";
     }
@@ -354,9 +354,9 @@ var svg = d3.select(".moonphaze")
     .attr("width", 110)
     .attr("height", 110);
 
-var wi = 110;
-var hi = 110;
-var radx = wi / 2 * 0.91;
+var w = 110;
+var h = 110;
+var radius = w / 2 * 0.91;
 var gradient = 2;
 var mAxis = <?php echo $alm["parallacticAngle"];?>;
 var moonface = "#high-res-moon";
@@ -366,10 +366,10 @@ function getX(phase, angle) {
 
     let x;
     const cosi = Math.cos(toRadians(angle));
-    x = f * radx * cosi + wi / 2;
+    x = f * radius * cosi + w / 2;
 
     if((phase <= 180 && cosi < 0) || (phase > 180 && cosi > 0)) {
-        x = radx * cosi + wi / 2;
+        x = radius * cosi + w / 2;
     }
     return x;    
 }
@@ -378,7 +378,7 @@ function drawDarkSide(phase) {
     const gradientPoints = [];
 
     let x = getX(phase - gradient, 0);
-    let y = radx * Math.sin(0) + hi / 2;
+    let y = radius * Math.sin(0) + h / 2;
 
     var path = d3.path();
     path.moveTo(x, y);
@@ -392,7 +392,7 @@ function drawDarkSide(phase) {
             x = x2;
             x2 = temp; 
         }
-        y = radx * Math.sin(toRadians(i)) + hi / 2;
+        y = radius * Math.sin(toRadians(i)) + h / 2;
 
         gradientPoints.push([x, x2, y, phase]);
 
@@ -443,9 +443,9 @@ function display(phase) {
     svg
         .append("use")
         .attr("xlink:href", moonface)
-        .attr("width", 100)
-        .attr("height", 100)
-        .attr('x', 5.1)
+        .attr("width", 99.9)
+        .attr("height", 99.9)
+        .attr('x', 5.03)
         .attr('y', 5);
 
   drawPhase(phase);    
@@ -489,16 +489,16 @@ display(phase);
 <?php echo "Illumination: <span style='color:#ff8841'>", number_format($alm["luminance"],2),"</span> %";?>
 </span><br /><svg id="i-ban" viewBox="0 0 32 32" width="10" height="10" fill="#9bf" stroke="#9bf" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
 <circle cx="16" cy="16" r="14" /><path d="M6 6 L26 26" /></svg> 
-<?php echo "Moonphase: <span style='color:#9bf'>", $alm["moonphase"],"</span>";?>
+<?php echo "Moon Phase: <span style='color:#9bf'>", $alm["moonphase"],"</span>";?>
 </span><br /><svg id="i-ban" viewBox="0 0 32 32" width="10" height="10" fill="#007fff" stroke="#007fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
 <circle cx="16" cy="16" r="14" /><path d="M6 6 L26 26" /></svg> 
-<?php echo "Moon Distance: <span style='color:#ff8841'>", number_format(($alm["moon_distance"]),2),"</span> km";?>
+<?php echo "Moon Distance: <span style='color:#ff8841'>", number_format($alm["moon_distance"],2),"</span> km";?>
 </span><br /><svg id="i-ban" viewBox="0 0 32 32" width="10" height="10" fill="#9bf" stroke="#9bf" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
 <circle cx="16" cy="16" r="14" /><path d="M6 6 L26 26" /></svg> 
-<?php echo "Ecliptic Longitude: <span style='color:#9bf'>", $alm["moon_ecliptic_angle"],"&deg;</span>";?>
+<?php echo "Ecliptic Longitude: <span style='color:#9bf'>", number_format($alm["moon_ecliptic_angle"],4),"&deg;</span>";?>
 </span><br /><svg id="i-ban" viewBox="0 0 32 32" width="10" height="10" fill="#9bf" stroke="#9bf" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
 <circle cx="16" cy="16" r="14" /><path d="M6 6 L26 26" /></svg> 
-<?php echo "Parallactic Angle: <span style='color:#9bf'>", $alm["parallacticAngle"],"&deg;</span>";?>
+<?php echo "Parallactic Angle: <span style='color:#9bf'>", number_format($alm["parallacticAngle"],4),"&deg;</span>";?>
 </article>  
 
 <article>
@@ -553,7 +553,7 @@ Moon Data generated from python-pyephem
 <br>
 <svg id="i-ban" viewBox="0 0 32 32" width="8" height="8" fill="#3b9cac" stroke="#3b9cac" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
 <circle cx="16" cy="16" r="14" /><path d="M6 6 L26 26" /></svg>
-Moonphase Graphic Powered by D3.js   
+Moon Phase Graphic Powered by D3.js   
 </main>
 <svg id="svg-defs" class="svg-defs" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
   <!-- moon -->
