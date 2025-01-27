@@ -114,11 +114,13 @@ $air_density["day_min"] = number_format($day.AirDensity.min.format(add_label=Fal
 $air_density["day_avg"] = number_format($day.AirDensity.avg.format(add_label=False),4);
 $air_density["day_maxtime"] = date('H:i',$day.AirDensity.maxtime.raw);
 $air_density["day_mintime"] = date('H:i',$day.AirDensity.mintime.raw);
+#if $day($days_ago=1).AirDensity.has_data
 $air_density["yesterday_max"] = number_format($day($days_ago=1).AirDensity.max.format(add_label=False),4);
 $air_density["yesterday_min"] = number_format($day($days_ago=1).AirDensity.min.format(add_label=False),4);
 $air_density["yesterday_avg"] = number_format($day($days_ago=1).AirDensity.avg.format(add_label=False),4);
 $air_density["yesterday_maxtime"] = date('H:i',$day($days_ago=1).AirDensity.maxtime.raw);
 $air_density["yesterday_mintime"] = date('H:i',$day($days_ago=1).AirDensity.mintime.raw);
+#end if
 $air_density["month_max"] = number_format($month.AirDensity.max.format(add_label=False),4);
 $air_density["month_min"] = number_format($month.AirDensity.min.format(add_label=False),4);
 $air_density["month_avg"] = number_format($month.AirDensity.avg.format(add_label=False),4);
@@ -355,10 +357,12 @@ else if($barom["trend_code"]<-2){$barom["trend_desc"]="Falling Quickly";$barom["
 else if($barom["trend_code"]<-3){$barom["trend_desc"]="Falling Very Rapidly";$barom["trend_code"]=-4;}
 else if($barom["trend_code"]=="N/A"||$barom["trend_code"]==" N/A"||$barom["trend_code"]=="  N/A"||$barom["trend_code"]==    N/A){$barom["trend_desc"]="Steady";$barom["trend_code"]=0;}
 #end if
+#if $day($days_ago=1).barometer.has_data
 $barom["yesterday_max"] = $day($days_ago=1).barometer.max.format(add_label=False);
 $barom["yesterday_maxtime"] = date('H:i',$day($days_ago=1).barometer.maxtime.raw);
 $barom["yesterday_min"] = $day($days_ago=1).barometer.min.format(add_label=False);
 $barom["yesterday_mintime"] = date('H:i',$day($days_ago=1).barometer.mintime.raw);
+#end if
 $barom["month_max"] = $month.barometer.max.format(add_label=False);
 $barom["month_maxtime"] = date('j M H:i',$month.barometer.maxtime.raw);
 $barom["month_min"] = $month.barometer.min.format(add_label=False);
@@ -384,10 +388,12 @@ $dew["day_maxtime"] = date('H:i',$day.dewpoint.maxtime.raw);
 $dew["day_min"] = "$day.dewpoint.min.format(add_label=False)";
 if ($dew["day_min"] == '   N/A'){$dew["day_min"] = 0;}
 $dew["day_mintime"] = date('H:i',$day.dewpoint.mintime.raw);
+#if $day($days_ago=1).dewpoint.has_data
 $dew["yesterday_max"] = $day($days_ago=1).dewpoint.max.format(add_label=False);
 $dew["yesterday_maxtime"] = date('H:i',$day($days_ago=1).dewpoint.maxtime.raw);
 $dew["yesterday_min"] = $day($days_ago=1).dewpoint.min.format(add_label=False);
 $dew["yesterday_mintime"] = date('H:i',$day($days_ago=1).dewpoint.mintime.raw);
+#end if
 $dew["month_max"] = $month.dewpoint.max.format(add_label=False);
 $dew["month_maxtime"] = date('D j H:i',$month.dewpoint.maxtime.raw);
 $dew["month_min"] = $month.dewpoint.min.format(add_label=False);
@@ -411,10 +417,12 @@ $humid["day_max"] = $day.outHumidity.max.format(add_label=False);
 $humid["day_maxtime"] = date('H:i',$day.outHumidity.maxtime.raw);
 $humid["day_min"] = $day.outHumidity.min.format(add_label=False);
 $humid["day_mintime"] = date('H:i',$day.outHumidity.mintime.raw);
+#if $day($days_ago=1).outHumidity.has_data
 $humid["yesterday_max"] = $day($days_ago=1).outHumidity.max.format(add_label=False);
 $humid["yesterday_maxtime"] = date('H:i',$day($days_ago=1).outHumidity.maxtime.raw);
 $humid["yesterday_min"] = $day($days_ago=1).outHumidity.min.format(add_label=False);
 $humid["yesterday_mintime"] = date('H:i',$day($days_ago=1).outHumidity.mintime.raw);
+#end if
 $humid["month_max"] = $month.outHumidity.max.format(add_label=False);
 $humid["month_maxtime"] = date('D j H:i',$month.outHumidity.maxtime.raw);
 $humid["month_min"] = $month.outHumidity.min.format(add_label=False);
@@ -436,10 +444,12 @@ $humid["indoors_day_max"] = $day.inHumidity.max.format(add_label=False);
 $humid["indoors_day_maxtime"] = date('H:i',$day.inHumidity.maxtime.raw);
 $humid["indoors_day_min"] = $day.inHumidity.min.format(add_label=False);
 $humid["indoors_day_mintime"] = date('H:i',$day.inHumidity.mintime.raw);
+#if $day($days_ago=1).inHumidity.has_data
 $humid["indoors_yesterday_max"] = $day($days_ago=1).inHumidity.max.format(add_label=False);
 $humid["indoors_yesterday_maxtime"] = date('H:i',$day($days_ago=1).inHumidity.maxtime.raw);
 $humid["indoors_yesterday_min"] = $day($days_ago=1).inHumidity.min.format(add_label=False);
 $humid["indoors_yesterday_mintime"] = date('H:i',$day($days_ago=1).inHumidity.mintime.raw);
+#end if
 $humid["indoors_month_max"] = $month.inHumidity.max.format(add_label=False);
 $humid["indoors_month_maxtime"] = date('D j H:i',$month.inHumidity.maxtime.raw);
 $humid["indoors_month_min"] = $month.inHumidity.min.format(add_label=False);
@@ -458,7 +468,9 @@ $lightning["last_strike_time"] = "$alltime.lightning_last_det_time.lastnonzero.r
 $lightning["current_strike_count"] = "$current.lightning_strike_count"; 
 $lightning["hour_strike_count"] ="$hour.lightning_strike_count.sum";  
 $lightning["today_strike_count"] = "$day.lightning_strike_count.sum";
+#if $day($days_ago=1).lightning_strike_count.has_data
 $lightning["yesterday_strike_count"] = "$day($days_ago=1).lightning_strike_count.sum";
+#end if
 $lightning["month_strike_count"] = "$month.lightning_strike_count.sum";
 $lightning["year_strike_count"] = "$year.lightning_strike_count.sum";
 $lightning["last_time"] = "$alltime.lightning_last_det_time.lastnonzero.raw";
@@ -502,11 +514,13 @@ $rain["total"] = round($day.rain.sum.raw,1);
 $rain["last_hour"] = round($span($hour_delta=1).rain.sum.raw,1);
 $rain["last_10min"] = $span($time_delta=600).rain.sum.raw;
 $rain["last_24hour"] = round($span($hour_delta=24).rain.sum.raw,1);
+#if $day($days_ago=1).rainRate.has_data
 $rain["24h_rate_max"] = $day($days_ago=1).rainRate.max.raw;
 $rain["24h_rate_maxtime"] = $day($days_ago=1).rainRate.maxtime.raw;
 $rain["yesterday_rate_max"] = $day($days_ago=1).rainRate.max.raw;
 $rain["yesterday_rate_maxtime"] = $day($days_ago=1).rainRate.maxtime.raw;
 $rain["yesterday"] = round($day($days_ago=1)rain.sum.raw,1);
+#end if
 $rain["24h_total"] = round($span($hour_delta=24).rain.sum.raw,1);
 $rain["day"] = round($day.rain.sum.raw,1);
 $rain["day_rate_max"] = $day.rainRate.max.raw;
@@ -571,8 +585,10 @@ $solar["now"] = $current.radiation.format($localize=False,add_label=False);
 $solar["day_max"] = $day.radiation.max.format($localize=False,add_label=False);
 $solar["day_maxtime"] = date('H:i',$day.radiation.maxtime.raw);
 if($solar["day_rad_max"] == "   N/A"){$solar["day_rad_max"]=0;}
+#if $day($days_ago=1).radiation.has_data
 $solar["yesterday_max"] = $day($days_ago=1).radiation.max.format($localize=False,add_label=False);
 $solar["yesterday_maxtime"] = date('H:i',$day($days_ago=1).radiation.maxtime.raw);
+#end if
 $solar["month_max"] = $month.radiation.max.format($localize=False,add_label=False);
 $solar["month_maxtime"] = date('D j H:i',$month.radiation.maxtime.raw);
 $solar["year_max"] = $year.radiation.max.format($localize=False,add_label=False);
@@ -612,6 +628,7 @@ $temp["apptemp"] = $weewxrt[54];
 $temp["heatindex"] = $weewxrt[41];
 $temp["windchill"] = round($weewxrt[24],1);
 $temp["humidex"] = $weewxrt[42];
+#if $day($days_ago=1).outTemp.has_data
 $temp["outside_24h_max"] = $day($days_ago=1).outTemp.max.format(add_label=False);
 $temp["outside_day_avg_60mn"] = $span($time_delta=3600).outTemp.avg.format(add_label=False);
 $temp["outside_24h_maxtime"] = date('H:i',$day($days_ago=1).outTemp.maxtime.raw);
@@ -621,6 +638,7 @@ $temp["outside_yesterday_max"] = $day($days_ago=1).outTemp.max.format(add_label=
 $temp["outside_yesterday_maxtime"] = date('H:i',$day($days_ago=1).outTemp.maxtime.raw);
 $temp["outside_yesterday_min"] = $day($days_ago=1).outTemp.min.format(add_label=False);
 $temp["outside_yesterday_mintime"] = date('H:i',$day($days_ago=1).outTemp.mintime.raw);
+#end if
 $temp["outside_day_avg"] = $day.outTemp.avg.format(add_label=False);
 $temp["outside_day_max"] = $day.outTemp.max.format(add_label=False);
 $temp["outside_day_maxtime"] = date('H:i',$day.outTemp.maxtime.raw);
@@ -659,8 +677,10 @@ $temp["indoor_now_feels_degC"] = (number_format($HI, 1)-32)*5/9;
 $uv["now"] = $weewxrt[43];
 $uv["day_max"] = $day.UV.max.format(add_label=False);
 $uv["day_maxtime"] = date('H:i',$day.UV.maxtime.raw);
+#if $day($days_ago=1).UV.has_data
 $uv["yesterday_max"] = $day($days_ago=1).UV.max.format(add_label=False);
 $uv["yesterday_maxtime"] = date('H:i',$day($days_ago=1).UV.maxtime.raw);
+#end if
 $uv["month_max"] = $month.UV.max.format(add_label=False);
 $uv["month_maxtime"] = date('D j H:i',$month.UV.maxtime.raw);
 $uv["year_max"] = $year.UV.max.format(add_label=False);
@@ -701,10 +721,12 @@ $wind["wind_run"] = $weewxrt[17];
 $wind["speed_10m_avg"] = $span($time_delta=600).windSpeed.avg.format(add_label=False);
 $wind["speed_10m_max"] = $span($time_delta=600).windSpeed.max.format(add_label=False);
 $wind["gust_10m_max"] = $span($time_delta=600).windGust.max.format(add_label=False);
+#if $day($days_ago=1).windSpeed.has_data
 $wind["speed_yesterday_max"] = $day($days_ago=1).windSpeed.max.format(add_label=False);
 $wind["speed_yesterday_maxtime"] = date('H:i',$day($days_ago=1).windSpeed.maxtime.raw);
 $wind["gust_yesterday_max"] = $day($days_ago=1).windGust.max.format(add_label=False);
 $wind["gust_yesterday_maxtime"] = date('H:i',$day($days_ago=1).windGust.maxtime.raw);
+#end if
 $wind["speed_month_max"] = $month.windSpeed.max.format(add_label=False);
 $wind["speed_month_maxtime"] = date('M',$month.windSpeed.maxtime.raw);
 $wind["gust_month_max"] = $month.windGust.max.format(add_label=False);
