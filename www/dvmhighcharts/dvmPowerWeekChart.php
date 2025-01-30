@@ -18,12 +18,6 @@ $json_string = file_get_contents('json/power.json');
 $parsed_json = json_decode($json_string,true);
 $offset = $parsed_json[0]["utcoffset"];
 $utcoffset = json_encode($parsed_json[0]["utcoffset"]);
-//$alder = $parsed_json[0]["powerPlot"]["series"]["batteryPower"]);
-//$birch = $parsed_json[0]["pollenplot"]["series"]["birch_pollenWeek"]); 
-//$olive = $parsed_json[0]["pollenplot"]["series"]["olive_pollenWeek"]);
-//$grass = $parsed_json[0]["pollenplot"]["series"]["grass_pollenWeek"]);
-//$mugwort = $parsed_json[0]["pollenplot"]["series"]["mugwort_pollenWeek"];
-//$ragweed = $parsed_json[0]["pollenplot"]["series"]["ragweed_pollenWeek"];
 $alderWeek = json_encode($parsed_json[0]["powerPlot"]["series"]["batteryPower"]);
 $birchWeek = json_encode($parsed_json[0]["powerPlot"]["series"]["gridPower"]); 
 $oliveWeek = json_encode($parsed_json[0]["powerPlot"]["series"]["loadPower"]);
@@ -89,7 +83,7 @@ Highcharts.chart('container', {
     },
     yAxis: {
         title: {
-            text: 'Pollen Count (Watts)'
+            text: 'Power (Watts)'
         }
     },
 

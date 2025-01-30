@@ -42,6 +42,7 @@
 
 <?php
 include('dvmCombinedData.php');
+
 $bordercolor = "var(--col-13)";
 ?>
 

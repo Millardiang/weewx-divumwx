@@ -29,10 +29,10 @@ $filepileRefresh = 60;
 // Updater timing cycles
 $json_string = file_get_contents("jsondata/dvmPositionCycles.json");
 $parsed_json = json_decode($json_string, true);
-$cycles1 = "8640000";
+$cycles1 = $parsed_json[$position1]["cycle"];
 $cycles2 = $parsed_json[$position2]["cycle"];
 $cycles3 = $parsed_json[$position3]["cycle"];
-$cycles4 = "60000";
+$cycles4 = $parsed_json[$position4]["cycle"];
 $cycles5 = $parsed_json[$position5]["cycle"];
 $cycles6 = $parsed_json[$position6]["cycle"];
 $cycles7 = $parsed_json[$position7]["cycle"];

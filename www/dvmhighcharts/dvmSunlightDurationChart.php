@@ -42,13 +42,17 @@ if ($theme === "dark") {
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Highcharts graphs for weewx</title>
-    <script src="scripts/jquery.min.js"></script>
-    <script src="scripts/highstock.js"></script>
-    <script src="scripts/boost.js"></script>
-    <script src="scripts/highcharts-more.js"></script>
-    <script src="scripts/exporting.js"></script>
-    <script src="scripts/export-data.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
+    <script src="https://code.highcharts.com/highcharts-3d.js"></script>
+    <script src="https://code.highcharts.com/modules/cylinder.js"></script>
+    <script src="https://code.highcharts.com/modules/funnel3d.js"></script>
+    <!--script src="https://code.highcharts.com/modules/series-label.js"></script-->
+    <script src="https://code.highcharts.com/modules/boost.js"></script>
+    <script src="https://code.highcharts.com/stock/highcharts-more.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
     <script src="scripts/divumwx-<?php echo $theme;?>.js" type="text/javascript"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
 </head>
 <body>
 

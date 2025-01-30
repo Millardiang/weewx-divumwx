@@ -66,6 +66,8 @@ else if($theme==="dark"){ echo "<body style='background-color:#292E35'>"; }
 <div class="solarTerminator"></div>
 <script>
 
+
+
   var π = Math.PI;
 
 function toDegrees(x) {

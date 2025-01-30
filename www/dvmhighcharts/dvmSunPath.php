@@ -34,13 +34,14 @@ if ($theme === "dark") {
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Highcharts Week graph for weewx</title>
-    <script src="scripts/jquery.min.js"></script>
-    <script src="scripts/highstock.js"></script>
-    <script src="scripts/boost.js"></script>
-    <script src="scripts/highcharts-more.js"></script>
-    <script src="scripts/exporting.js"></script>
-    <script src="scripts/export-data.js"></script>
-    <script src="scripts/divumwx-<?php echo $theme;?>.js" type="text/javascript"></script>
+    <script src="dvmhighcharts/scripts/jquery.min.js"></script>
+    <script src="dvmhighcharts/scripts/highstock.js"></script>
+    <script src="dvmhighcharts/scripts/annotations.js"></script>
+    <script src="dvmhighcharts/scripts/boost.js"></script>
+    <script src="dvmhighcharts/scripts/highcharts-more.js"></script>
+    <script src="dvmhighcharts/scripts/exporting.js"></script>
+    <script src="dvmhighcharts/scripts/export-data.js"></script>
+    <script src="dvmhighcharts/scripts/divumwx-<?php echo $theme;?>.js" type="text/javascript"></script>
 </head>
 <body>
 

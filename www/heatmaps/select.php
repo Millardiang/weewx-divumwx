@@ -16,6 +16,7 @@ function openHeatmapFile(date) {
       <option value="2022">2022</option>
       <option value="2023">2023</option>
       <option value="2024">2024</option>
+      <option value="2025">2025</option>
       
       <option selected> -Select Year- </option>
     </select>
@@ -74,6 +75,9 @@ function openHeatmapFile(date) {
       <option value="2024-08">2024-08</option>
       <option value="2024-09">2024-09</option>
       <option value="2024-10">2024-10</option>
+      <option value="2024-11">2024-11</option>
+      <option value="2024-12">2024-12</option>
+      <option value="2025-01">2025-01</option>
       
       <option selected> -Select Month- </option>
     </select>

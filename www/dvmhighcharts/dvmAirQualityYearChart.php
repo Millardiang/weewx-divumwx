@@ -52,7 +52,6 @@ if ($theme === "dark") {
     <script src="scripts/exporting.js"></script>
     <script src="scripts/export-data.js"></script>
     <script src="scripts/divumwx-<?php echo $theme;?>.js" type="text/javascript"></script>
-
 <figure class="highcharts-figure">
     <div id="container"></div>
     

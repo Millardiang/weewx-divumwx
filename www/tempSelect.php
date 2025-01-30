@@ -33,7 +33,7 @@ function openTempCharts(chart) {
       <option value="dvmhighcharts/tempCharts.php?chart='tempderivedplot'&span='weekly'&temp='<?php echo $temp["units"];?>'&pressure='<?php echo $barom["units"];?>'&wind='<?php echo $wind["units"];?>'&rain='<?php echo $rain["units"];?>" frameborder="0" scrolling="no" width="100%" height="100%">Weekly Feels Like</option>
       <option value="dvmhighcharts/tempCharts.php?chart='humidityplot'&span='weekly'&temp='<?php echo $temp["units"];?>'&pressure='<?php echo $barom["units"];?>'&wind='<?php echo $wind["units"];?>'&rain='<?php echo $rain["units"];?>" frameborder="0" scrolling="no" width="100%" height="100%">Weekly Humidity</option>
       <option value="dvmhighcharts/tempCharts.php?chart='indoorplot'&span='yearly'&temp='<?php echo $temp["units"];?>'&pressure='<?php echo $barom["units"];?>'&wind='<?php echo $wind["units"];?>'&rain='<?php echo $rain["units"];?>" frameborder="0" scrolling="no" width="100%" height="100%">Indoor Temperature and Humidty</option>
-
+      <option value="heatmaps/select.php">Heatmaps</option>
       <option selected> -Select Chart- </option>
     </select>
   </div>

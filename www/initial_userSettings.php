@@ -14,7 +14,7 @@
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
 
-
+//$themelayout = "5"; //4, 5, tablet
 $TZ = "Europe/London";
 $extralinks = "yes";
 $sbLang = "yes";
@@ -62,6 +62,7 @@ $notifications = "yes";
 $notifyWind = "yes";
 $notifyEarthquake = "yes";
 $notifyMagnitude = "3";
+//$linkWU = "yes";
 $linkWUNew = "yes";
 $WUid = "IYOURWUKWY";
 $linkCWOPID = "";
