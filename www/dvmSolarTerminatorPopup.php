@@ -66,6 +66,11 @@ else if($theme==="dark"){ echo "<body style='background-color:#292E35'>"; }
 <div class="solarTerminator"></div>
 <script>
 
+// refresh the script every 60 seconds
+window.setInterval('refresh()', 60000);     
+    function refresh() {
+        window.location.reload();
+  }
 
 
   var π = Math.PI;
