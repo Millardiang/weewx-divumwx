@@ -1,3 +1,4 @@
+<?php
 ##errorCatcher Echo
 ##
 ################################################################################################
@@ -14,18 +15,30 @@
 ##    Issues for weewx-divumwx skin template are only addressed via the issues register at    ##
 ##                    https://github.com/Millardiang/weewx-divumwx/issues                     ##
 ################################################################################################
+?>
 ##
-[{
-"_version": "solar.json.tmpl",
-"utcoffset": $utcOffset,
-##
-"solarplot": {"series":
-{"sunshine_time_5min": {"name": $week.sunshine_time.series(aggregate_type='last', aggregate_interval=300, time_series='start', time_unit='unix_epoch_ms').round(0).json},
-"sunshine_time_day": {"name": $week.sunshine_time.series(aggregate_type='sum', aggregate_interval='day', time_series='start', time_unit='unix_epoch_ms').round(0).json},
-"sunshine_time_day_hours": {"name": $week.sunshine_time_hours.series(aggregate_type='sum', aggregate_interval='day', time_series='start', time_unit='unix_epoch_ms').round(2).json},
-"threshold": {"name": $week.threshold.series(aggregate_type='last', aggregate_interval=300, time_series='start', time_unit='unix_epoch_ms').round(0).json},
-"radiation": {"name": $week.radiation.series(aggregate_type='last', aggregate_interval=300, time_series='start', time_unit='unix_epoch_ms').round(0).json}},
-"units": "W/m"#slurp
-}
-}
-}]
+#errorCatcher Echo
+#set $YM="%Y-%m-%d"
+#set $MY="%B %Y"
+#set $Y="%Y"
+#set $D="  %d"
+#set $M=" %b"
+#set $NODAY="null"
+#set $Temp="%2.1f"
+#set $Wind="%6.1f"
+#set $Dir="%6.0f"
+#set $Count="%6d"
+#set $NONE=$day.solarGeneration.format(add_label=False)
+<?php
+$heatData = 
+"[
+#for $day in $month.days
+#if $day.solarGeneration.has_data
+$day.solarGeneration.format(add_label=False),
+#else 
+$NODAY,
+#slurp
+#end if
+#end for
+];";
+?>
