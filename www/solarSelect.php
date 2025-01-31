@@ -25,7 +25,7 @@ function openSolarCharts(chart) {
 <div id="title_bar" style="margin-top: 10px; margin-bottom: 7px;">
   <div id="reports">
     <select name="reports" onchange="openSolarCharts(value)"  style="background-color: rgb(194,102,58); color: white; border: 2px solid rgb(194,102,58); border-radius: 5px;">
-      <option value="dvmSolarRecords.php">Solar Records</option>
+      <option value="dvmSolarRecords.php">Solar Records</option> 
       <option value="charts/solarCharts.php?chart='radiationplot'&span='yearly'&temp='<?php echo $temp[
     "units"
 ]; ?>'&pressure='<?php echo $barom[
@@ -38,6 +38,8 @@ function openSolarCharts(chart) {
       <option value="dvmhighcharts/solarCharts.php?chart='uvplot'&span='weekly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>">UV Index</option>
       <option value="dvmUVIRecords.php">UVI Records</option>
       <option value="dvmhighcharts/dvmSunlightDurationChart.php">Sun Duration</option>
+      <option value="dvmhighcharts/dvmSolarGenMaxChart.php">Daily Electrical Power Generation</option>
+      <option value="dvmhighcharts/solarBellChart.php">Solar Power Generation</option>
       <option selected> -Select Chart- </option>
     </select>
   </div>

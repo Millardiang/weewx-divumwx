@@ -44,7 +44,7 @@ error_reporting(0);
 echo $stationlocation;
 ?> Weather Station</title>
   <!--Google / Search Engine Tags -->
-  <meta itemprop="image" content="img/divumMeta.png">
+  <meta itemprop="image" content="/my-favicon/favicon.svg">
   <meta itemprop="name" content="Private Weather Station <?php
 echo $stationlocation;
 ?>">
@@ -58,19 +58,13 @@ echo $stationlocation;
   <meta content="place" property="og:type">
   <meta content="INDEX,FOLLOW" name="robots">
   <meta name="theme-color" content="#ffffff">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name=apple-mobile-web-app-title content="WEATHER STATION">
-  <meta name="msapplication-TileColor" content="#da532c">
-  <meta name="msapplication-config" content="./browserconfig.xml">
-  <meta name="theme-color" content="#ffffff">
-  <link rel="icon" href="/favicon.ico" sizes="any" />
-  <link rel="icon" href="/icon.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-  <link rel="manifest" href="/manifest.webmanifest" />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@200;300;400;600;700" rel="stylesheet">
-  <link rel="manifest" href="./site.webmanifest"><html lang="en" ><meta charset="UTF-8">
-  <!--title>DivumWX - Proposed Responsive CSS Grid Layout Scheme</title-->
+  <link rel="icon" type="image/png" href="/my-favicon/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/my-favicon/favicon.svg" />
+  <link rel="shortcut icon" href="/my-favicon/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/my-favicon/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="DivumWX" />
+  <link rel="manifest" href="/my-favicon/site.webmanifest" />  
+<!--title>DivumWX - Proposed Responsive CSS Grid Layout Scheme</title-->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="stylesheet" href="./css/divumwx.main.css?version=<?php
 echo filemtime('./css/divumwx.main.css');
