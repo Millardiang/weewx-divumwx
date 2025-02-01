@@ -199,7 +199,7 @@ if (bearing <= 11.25) {
     bearing = 'NNW';
 } else { bearing = 'North'; }
 
-var tempColor = "<?php echo $colorOutTemp60minAvg;?>";
+var tempColor = "<?php echo $color["outTemp_60min_avg"];?>";
 var avg_sp_ten_min_color = "<?php echo $color["windSpeed_10min_avg"];?>";
 var max_gust_ten_min_color = "<?php echo $color["windGust_10min_max"];?>";
 var colorRain = "<?php echo $colorRainDaySum;?>";
