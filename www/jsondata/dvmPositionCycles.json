@@ -16,6 +16,7 @@
 "dvmRainfallModule.php":{"cycle": "60000"},
 "dvmRainfallSpoonModule.php":{"cycle": "60000"},
 "dvmRainfallPiezoModule.php":{"cycle": "60000"},
+"dvmPiezoRainModule.php":{"cycle": "60000"},
 "dvmSolarDialModule.php":{"cycle": "60000"},
 "dvmSolarUvLuxModule.php":{"cycle": "60000"},
 "dvmPollenModule.php":{"cycle": "60000"},
