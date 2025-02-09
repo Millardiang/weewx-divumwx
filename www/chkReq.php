@@ -13,6 +13,7 @@
 #    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
+$requiredModules = ['intl', 'json', 'mysqli', 'pdo_sqlite', 'random', 'session', 'sqlite3', 'mbstring'];
 $chkReqStatusFile = __DIR__ . '/chkReqstatus.json';
 if (file_exists($chkReqStatusFile)) {
     unlink($chkReqStatusFile);
@@ -62,7 +63,7 @@ function getGroupName($groupId) {
 function checkDirectory($path, $expectedPerms, $expectedOwner, $expectedGroup, &$debug) {
     // Skip directories that start with a dot
     if (strpos(basename($path), '.') === 0) {
-        return ['status' => true, 'perms' => null, 'owner' => null, 'group' => null]; // Assume success for hidden directories
+        return ['status' => true, 'perms' => null, 'owner' => null, 'group' => null];
     }
 
     if (!is_dir($path)) {
@@ -90,37 +91,41 @@ function checkDirectory($path, $expectedPerms, $expectedOwner, $expectedGroup, &
 }
 
 function checkFile($path, $expectedPerms, $expectedOwner, $expectedGroup, &$debug) {
-    // Skip files that start with a dot
-    if (strpos(basename($path), '.') === 0) {
-        return ['status' => true, 'perms' => null, 'owner' => null, 'group' => null]; // Assume success for hidden files
+    // Skip hidden files unless it's the database file
+    if (strpos(basename($path), '.') === 0 && basename($path) !== 'dvmAdmin.db3') {
+        return ['status' => true, 'perms' => null, 'owner' => null, 'group' => null, 'message' => 'Skipped hidden file.'];
     }
 
     if (!is_file($path)) {
-        $debug[$path] = "File does not exist.";
-        return ['status' => false, 'perms' => null, 'owner' => null, 'group' => null];
+        return [
+            'status' => false,
+            'perms' => null,
+            'owner' => null,
+            'group' => null,
+            'message' => 'Database file is missing.'
+        ];
     }
     $perms = substr(sprintf('%o', fileperms($path)), -4);
     $owner = getOwnerName(fileowner($path));
     $group = getGroupName(filegroup($path));
-    if ($perms != $expectedPerms) {
-        $debug[$path] = "Permissions are $perms, expected $expectedPerms.";
+    $message = '';
+    if ($perms !== $expectedPerms) {
+        $message .= "Expected permissions $expectedPerms, found $perms. ";
     }
-    if ($owner != $expectedOwner) {
-        $debug[$path] = "Owner is $owner, expected $expectedOwner.";
+    if ($owner !== $expectedOwner) {
+        $message .= "Expected owner $expectedOwner, found $owner. ";
     }
-    if ($group != $expectedGroup) {
-        $debug[$path] = "Group is $group, expected $expectedGroup.";
+    if ($group !== $expectedGroup) {
+        $message .= "Expected group $expectedGroup, found $group. ";
     }
     return [
-        'status' => $perms == $expectedPerms && $owner == $expectedOwner && $group == $expectedGroup,
+        'status' => ($perms === $expectedPerms && $owner === $expectedOwner && $group === $expectedGroup),
         'perms' => $perms,
         'owner' => $owner,
-        'group' => $group
+        'group' => $group,
+        'message' => $message ?: 'File exists but permissions may need adjustment.'
     ];
 }
-
-$requiredModules = ['intl', 'json', 'mysqli', 'pdo_sqlite', 'random', 'session', 'sqlite3'];
-
 function getScriptOwnerAndGroup() {
     $scriptPath = __DIR__;
     $owner = getOwnerName(fileowner($scriptPath));
@@ -166,10 +171,26 @@ foreach ($directories as $dir) {
         $errorDetected = true;
     }
 }
+function checkDatabaseConnection($dbFile) {
+    $result = ['status' => false, 'message' => ''];
+    try {
+        $db = new SQLite3($dbFile);
+        $result['status'] = true;
+        $result['message'] = 'Database is accessible and permissions are correct.';
+    } catch (Exception $e) {
+        $result['message'] = 'Failed to connect to the database: ' . $e->getMessage();
+    }
 
-$dbFileCheck = checkFile('./admin/db/dvmAdmin.db3', '0666', $scriptOwner, $scriptGroup, $debug);
+    return $result;
+}
+
+$dbFileCheck = checkFile('./admin/db/dvmAdmin.db3', '0644', $scriptOwner, $scriptGroup, $debug);
 $results['db_file'] = $dbFileCheck;
 if (!$dbFileCheck['status']) {
+    $results['db_connection'] = [
+        'status' => false,
+        'message' => 'Database connection was not tested due to file permission errors.'
+    ];
     $errorDetected = true;
 } else {
     $dbConnectionCheck = checkDatabaseConnection('./admin/db/dvmAdmin.db3');
@@ -181,20 +202,6 @@ if (!$dbFileCheck['status']) {
 
 header('Content-Type: application/json');
 echo json_encode($results);
-
-function checkDatabaseConnection($dbFile) {
-    $result = ['status' => false, 'message' => ''];
-
-    try {
-        $db = new SQLite3($dbFile);
-        $result['status'] = true;
-        $result['message'] = 'Database is accessible and permissions are correct.';
-    } catch (Exception $e) {
-        $result['message'] = 'Failed to connect to the database: ' . $e->getMessage();
-    }
-
-    return $result;
-}
 
 file_put_contents(__DIR__ . '/chkReqstatus.json', json_encode($results, JSON_PRETTY_PRINT));
 

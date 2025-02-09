@@ -13,29 +13,46 @@
 #    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
+session_start();
+header('Content-Type: application/json');
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $newPassword = $_POST['password'];
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    echo json_encode(['status' => 'error', 'message' => 'Invalid request method.']);
+    exit;
+}
+$username = trim($_POST['username'] ?? '');
+$password = trim($_POST['password'] ?? '');
 
-    if (empty($newPassword)) {
-        echo json_encode(['status' => 'error', 'message' => 'Password is required.']);
-        return;
+if (empty($username) || strlen($username) < 3) {
+    echo json_encode(['status' => 'error', 'message' => 'Username must be at least 3 characters long.']);
+    exit;
+}
+if (empty($password) || strlen($password) < 8) {
+    echo json_encode(['status' => 'error', 'message' => 'Password must be at least 8 characters long.']);
+    exit;
+}
+$hash = password_hash($password, PASSWORD_DEFAULT);
+try {
+    $db = new PDO('sqlite:./admin/db/dvmAdmin.db3');
+    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $stmt = $db->prepare("SELECT id FROM users WHERE username = :username");
+    $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+    $stmt->execute();
+    $existingUser = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($existingUser) {
+        echo json_encode(['status' => 'error', 'message' => 'Username already exists. Choose a different one.']);
+        exit;
     }
-
-    $hash = password_hash($newPassword, PASSWORD_DEFAULT);
-
-    try {
-        $db = new PDO('sqlite:./admin/db/dvmAdmin.db3');
-        $sql = "UPDATE users SET password = :password WHERE id = 1";
-        $stmt = $db->prepare($sql);
-        $stmt->bindParam(':password', $hash, PDO::PARAM_STR);
-        if ($stmt->execute()) {
-            echo json_encode(['status' => 'success', 'message' => 'Password updated successfully.']);
-        } else {
-            echo json_encode(['status' => 'error', 'message' => 'Failed to update password.']);
-        }
-    } catch (PDOException $e) {
-        echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+    $sql = "UPDATE users SET username = :username, password = :password WHERE id = 1";
+    $stmt = $db->prepare($sql);
+    $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+    $stmt->bindParam(':password', $hash, PDO::PARAM_STR);
+    if ($stmt->execute()) {
+        echo json_encode(['status' => 'success', 'message' => 'Admin credentials updated successfully.']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Failed to update admin credentials.']);
     }
+} catch (PDOException $e) {
+    echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
 }
 ?>

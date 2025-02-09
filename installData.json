@@ -3,6 +3,7 @@
     "skins": "~/weewx-data/skins/",
     "weewx_config_file": "~/weewx-data/weewx.conf",
     "www_root": "/var/www/html",
+    "bkupDBPath": "~/weewx-data/archive/",
     "over_write": "True",
     "config_entries0": {
         "StdReport": {
