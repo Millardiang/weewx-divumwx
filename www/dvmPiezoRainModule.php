@@ -58,7 +58,7 @@ var stormRain = <?php echo $rain["storm_rain"]/25.4;?>;
     stormRain = <?php echo $rain["storm_rain"];?>;
 }
 
-var currentRain = "<?php echo $rain["day"];?>";
+var currentRain = "<?php echo $rain["current"];?>";
     //currentRain = currentRain || 0;                   
 var stormRainColor ="<?php echo $colorStormRain;?>";
 var rainRateColor = "<?php echo $colorRainRate;?>";
@@ -70,7 +70,7 @@ var rainYearColor = "<?php echo $colorRainYearSum;?>";
 var stormStart = "<?php echo $rain["storm_start"];?>"; 
 var rainRate = <?php echo $rain["rate"];?>;
 var lastHour = <?php echo $rain["last_hour"];?>;
-var last24Hours = <?php echo $rain["24h_total"];?>;
+var last24Hours = <?php echo round($rain["24h_total"],1);?>;
 var rainMonth = <?php echo $rain["month_total"];?>; 
 var rainYear = <?php echo $rain["year_total"];?>;
 var month = "<?php echo date('F');?>"; 
@@ -183,6 +183,16 @@ svg.append("text")
 
 svg.append("text")
     .attr("x", 155)
+    .attr("y", 105)
+    .style("fill", baseTextColor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "14px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "bold")
+    .text(d3.format(".1f")(currentRain) + " " + rainunits);
+
+svg.append("text")
+    .attr("x", 155)
     .attr("y", 136)
     .style("fill", baseTextColor)
     .style("font-family", "Helvetica")
@@ -203,7 +213,7 @@ svg.append("text")
 
 svg.append("rect")
     .attr("x", 113)
-    .attr("y", 77)
+    .attr("y", 52)
     .attr("rx", 2)
     .attr("width", 85)
     .attr("height", 28)
@@ -211,7 +221,7 @@ svg.append("rect")
 
 svg.append("rect")
     .attr("x", 113)
-    .attr("y", 77)
+    .attr("y", 52)
     .attr("rx", 2)
     .attr("width", 85)
     .attr("height", 28)
@@ -221,7 +231,7 @@ svg.append("rect")
 
 svg.append("rect")
     .attr("x", 105)
-    .attr("y", 35)
+    .attr("y", 10)
     .attr("rx", 10)
     .attr("width", 102)
     .attr("height", 48)
@@ -229,23 +239,13 @@ svg.append("rect")
 
 svg.append("rect")
     .attr("x", 105)
-    .attr("y", 35)
+    .attr("y", 10)
     .attr("rx", 10)
     .attr("width", 102)
     .attr("height", 48)
     .style("stroke", "black")
     .style("stroke-width", 1.5)
     .style("fill", "none");
-
-svg.append("text")
-    .attr("x", 155)
-    .attr("y", 99)
-    .style("fill", baseTextColor)
-    .style("font-family", "Helvetica")
-    .style("font-size", "14px")
-    .style("text-anchor", "middle")
-    .style("font-weight", "bold")
-    .text(d3.format(".1f")(currentRain) + " " + rainunits);
 
 </script>
 
