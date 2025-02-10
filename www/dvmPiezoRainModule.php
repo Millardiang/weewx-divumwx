@@ -48,7 +48,7 @@ if ($rain["units"] =='in'){echo "<div class=rainconvertercircle style='backgroun
 
 var baseTextColor = "var(--col-6)";
 
-var reverseTextColor = "#000000";
+var reverseTextColor = "var(--col-6)";
     
 var colorRain = "<?php echo $colorRainDaySum;?>";
                    
@@ -90,7 +90,7 @@ svg.append("text") // storm start text
     .attr("y", 97)
     .style("fill", stormRainColor)
     .style("font-family", "Helvetica")
-    .style("font-size", "9px")
+    .style("font-size", "10px")
     .style("text-anchor", "middle")
     .style("font-weight", "normal")
     .text("Rain Event Started @ " + stormStart);
@@ -224,7 +224,7 @@ svg.append("rect")
     .attr("rx", 2)
     .attr("width", 85)
     .attr("height", 28)
-    .style("fill", colorRain);     
+    .style("fill", "none");     
 
 svg.append("rect")
     .attr("x", 113)
@@ -232,9 +232,9 @@ svg.append("rect")
     .attr("rx", 2)
     .attr("width", 85)
     .attr("height", 28)
-    .style("stroke", "black")
+    .style("stroke", "var(--col-14")
     .style("stroke-width", 1.5)
-    .style("fill", "none");
+    .style("fill", "var(--col-4)");
 
 svg.append("rect")
     .attr("x", 105)
@@ -250,13 +250,13 @@ svg.append("rect")
     .attr("rx", 10)
     .attr("width", 102)
     .attr("height", 48)
-    .style("stroke", "black")
+    .style("stroke", "var(--col-14")
     .style("stroke-width", 1.5)
     .style("fill", "none");
 
 svg.append("text")
     .attr("x", 155)
-    .attr("y", 40)
+    .attr("y", 74)
     .style("fill", reverseTextColor)
     .style("font-family", "Helvetica")
     .style("font-size", "14px")
