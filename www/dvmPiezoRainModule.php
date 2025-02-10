@@ -35,9 +35,9 @@ error_reporting(0);
 <div class="rainconverter">
 <?php 
 if($theme == 'dark') {
-if ($rain["units"] =='in'){echo "<div class=rainconvertercircle style='color:$colorRainDaySum;'>".number_format($rain["day"]*25.400013716,1)." <smallrainunit>mm";} else if ($rain["units"] =='mm'){echo "<div class=rainconvertercircle style='color:$colorRainDaySum;'>".number_format($rain["day"]*0.0393701,2)." <smallrainunit>in";}
+if ($rain["units"] =='in'){echo "<div class=rainconvertercircle style='color:$colorRainDaySum;'>".number_format($rain["dayRain"]*25.400013716,2)." <smallrainunit>mm";} else if ($rain["units"] =='mm'){echo "<div class=rainconvertercircle style='color:$colorRainDaySum;'>".number_format($rain["dayRain"]*0.0393701,2)." <smallrainunit>in";}
 } else {
-if ($rain["units"] =='in'){echo "<div class=rainconvertercircle style='background:$colorRainDaySum;'>".number_format($rain["day"]*25.400013716,1)." <smallrainunit>mm";} else if ($rain["units"] =='mm'){echo "<div class=rainconvertercircle style='background:$colorRainDaySum;'>".number_format($rain["day"]*0.0393701,2)." <smallrainunit>in";}
+if ($rain["units"] =='in'){echo "<div class=rainconvertercircle style='background:$colorRainDaySum;'>".number_format($rain["dayRain"]*25.400013716,2)." <smallrainunit>mm";} else if ($rain["units"] =='mm'){echo "<div class=rainconvertercircle style='background:$colorRainDaySum;'>".number_format($rain["dayRain"]*0.0393701,2)." <smallrainunit>in";}
 }
 ?></span>
 </div></div>
@@ -47,18 +47,20 @@ if ($rain["units"] =='in'){echo "<div class=rainconvertercircle style='backgroun
 <script>
 
 var baseTextColor = "var(--col-6)";
+
+var reverseTextColor = "#000000";
     
 var colorRain = "<?php echo $colorRainDaySum;?>";
                    
 var units = "<?php echo $rain["units"];?>";
 
 if (units == 'in') {
-var stormRain = <?php echo $rain["storm_rain"]/25.4;?>;    
+var stormRain = <?php echo round($rain["storm_rain"]/25.4,2);?>;    
 } else {
-    stormRain = <?php echo $rain["storm_rain"];?>;
+    stormRain = <?php echo round($rain["storm_rain"],2);?>;
 }
 
-var currentRain = "<?php echo $rain["current"];?>";
+var currentRain = "<?php echo round($rain["dayRain"],2);?>";
     //currentRain = currentRain || 0;                   
 var stormRainColor ="<?php echo $colorStormRain;?>";
 var rainRateColor = "<?php echo $colorRainRate;?>";
@@ -67,12 +69,12 @@ var last24HoursColor = "<?php echo $colorRain24hrSum;?>";
 var rainMonthColor = "<?php echo $colorRainMonthSum;?>";
 var rainYearColor = "<?php echo $colorRainYearSum;?>";
 
-var stormStart = "<?php echo $rain["storm_start"];?>"; 
+var stormStart = "<?php echo $rain["storm_rain_start"];;?>"; 
 var rainRate = <?php echo $rain["rate"];?>;
 var lastHour = <?php echo $rain["last_hour"];?>;
-var last24Hours = <?php echo round($rain["24h_total"],1);?>;
-var rainMonth = <?php echo $rain["month_total"];?>; 
-var rainYear = <?php echo $rain["year_total"];?>;
+var last24Hours = <?php echo round($rain["last_24hour"],2);?>;
+var rainMonth = <?php echo $rain["monthRain"];?>; 
+var rainYear = <?php echo $rain["yearRain"];?>;
 var month = "<?php echo date('F');?>"; 
 var year = <?php echo date('Y');?>;                   
 
@@ -80,6 +82,19 @@ var svg = d3.select(".piezo-module")
     .append("svg")
     .attr("width", 310)
     .attr("height", 150);
+
+if (stormRain > 0.0) {
+
+svg.append("text") // storm start text
+    .attr("x", 155)
+    .attr("y", 97)
+    .style("fill", stormRainColor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "9px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text("Rain Event Started @ " + stormStart);
+
 
 svg.append("text")
     .attr("x", 283)
@@ -89,7 +104,7 @@ svg.append("text")
     .style("font-size", "10px")
     .style("text-anchor", "middle")
     .style("font-weight", "normal")
-    .text("Storm Rain");
+    .text("Rain Event");
 
 svg.append("text")
     .attr("x", 283)
@@ -100,6 +115,8 @@ svg.append("text")
     .style("text-anchor", "middle")
     .style("font-weight", "normal")
     .text(stormRain + " " + units);
+
+} else {}
 
 svg.append("text")
     .attr("x", 35)
@@ -139,7 +156,7 @@ svg.append("text")
     .style("font-size", "10px")
     .style("text-anchor", "middle")
     .style("font-weight", "normal")
-    .text(d3.format(".1f")(lastHour) + " " + units);
+    .text(d3.format(".2f")(lastHour) + " " + units);
 
 svg.append("text")
     .attr("x", 37)
@@ -159,7 +176,7 @@ svg.append("text")
     .style("font-size", "10px")
     .style("text-anchor", "middle")
     .style("font-weight", "normal")
-    .text(d3.format(".1f")(rainMonth) + " " + units);
+    .text(d3.format(".2f")(rainMonth) + " " + units);
 
 svg.append("text")
     .attr("x", 272)
@@ -179,17 +196,7 @@ svg.append("text")
     .style("font-size", "10px")
     .style("text-anchor", "middle")
     .style("font-weight", "normal")
-    .text(d3.format(".1f")(rainYear) + " " + units);
-
-svg.append("text")
-    .attr("x", 155)
-    .attr("y", 105)
-    .style("fill", baseTextColor)
-    .style("font-family", "Helvetica")
-    .style("font-size", "14px")
-    .style("text-anchor", "middle")
-    .style("font-weight", "bold")
-    .text(d3.format(".1f")(currentRain) + " " + rainunits);
+    .text(d3.format(".2f")(rainYear) + " " + units);
 
 svg.append("text")
     .attr("x", 155)
@@ -246,6 +253,16 @@ svg.append("rect")
     .style("stroke", "black")
     .style("stroke-width", 1.5)
     .style("fill", "none");
+
+svg.append("text")
+    .attr("x", 155)
+    .attr("y", 40)
+    .style("fill", reverseTextColor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "14px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "bold")
+    .text(d3.format(".2f")(currentRain) + " " + rainunits);
 
 </script>
 
