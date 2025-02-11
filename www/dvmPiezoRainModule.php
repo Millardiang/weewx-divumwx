@@ -48,7 +48,7 @@ if ($rain["units"] =='in'){echo "<div class=rainconvertercircle style='backgroun
 
 var baseTextColor = "var(--col-6)";
 
-var reverseTextColor = "var(--col-6)";
+var reverseTextColor = "#000000";
     
 var colorRain = "<?php echo $colorRainDaySum;?>";
                    
@@ -59,6 +59,7 @@ var stormRain = <?php echo round($rain["storm_rain"]/25.4,2);?>;
 } else {
     stormRain = <?php echo round($rain["storm_rain"],2);?>;
 }
+var currentImage = "img/minusPlus.svg";
 
 var currentRain = "<?php echo round($rain["dayRain"],2);?>";
     //currentRain = currentRain || 0;                   
@@ -87,8 +88,8 @@ if (stormRain > 0.0) {
 
 svg.append("text") // storm start text
     .attr("x", 155)
-    .attr("y", 97)
-    .style("fill", stormRainColor)
+    .attr("y", 112)
+    .style("fill", baseTextColor)
     .style("font-family", "Helvetica")
     .style("font-size", "10px")
     .style("text-anchor", "middle")
@@ -220,7 +221,7 @@ svg.append("text")
 
 svg.append("rect")
     .attr("x", 113)
-    .attr("y", 52)
+    .attr("y", 62)
     .attr("rx", 2)
     .attr("width", 85)
     .attr("height", 28)
@@ -228,25 +229,25 @@ svg.append("rect")
 
 svg.append("rect")
     .attr("x", 113)
-    .attr("y", 52)
+    .attr("y", 62)
     .attr("rx", 2)
     .attr("width", 85)
     .attr("height", 28)
     .style("stroke", "var(--col-14")
     .style("stroke-width", 1.5)
-    .style("fill", "var(--col-4)");
+    .style("fill", "#F5F5DC");
 
 svg.append("rect")
     .attr("x", 105)
-    .attr("y", 10)
+    .attr("y", 20)
     .attr("rx", 10)
     .attr("width", 102)
     .attr("height", 48)
-    .style("fill", colorRain);
+    .style("fill", "#F5F5DC");
 
 svg.append("rect")
     .attr("x", 105)
-    .attr("y", 10)
+    .attr("y", 20)
     .attr("rx", 10)
     .attr("width", 102)
     .attr("height", 48)
@@ -254,9 +255,16 @@ svg.append("rect")
     .style("stroke-width", 1.5)
     .style("fill", "none");
 
+svg.append('image') // image output
+    .attr('xlink:href', currentImage)
+
+    .attr('height', 40)
+    .attr('x', 111)
+    .attr('y', 24);
+
 svg.append("text")
     .attr("x", 155)
-    .attr("y", 74)
+    .attr("y", 84)
     .style("fill", reverseTextColor)
     .style("font-family", "Helvetica")
     .style("font-size", "14px")
