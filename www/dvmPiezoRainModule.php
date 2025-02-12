@@ -98,8 +98,8 @@ svg.append("text") // storm start text
 
 
 svg.append("text")
-    .attr("x", 283)
-    .attr("y", 70)
+    .attr("x", 155)
+    .attr("y", 136)
     .style("fill", baseTextColor)
     .style("font-family", "Helvetica")
     .style("font-size", "10px")
@@ -108,8 +108,8 @@ svg.append("text")
     .text("Rain Event");
 
 svg.append("text")
-    .attr("x", 283)
-    .attr("y", 82)
+    .attr("x", 153.5)
+    .attr("y", 148)
     .style("fill", baseTextColor)
     .style("font-family", "Helvetica")
     .style("font-size", "10px")
@@ -200,8 +200,8 @@ svg.append("text")
     .text(d3.format(".2f")(rainYear) + " " + units);
 
 svg.append("text")
-    .attr("x", 155)
-    .attr("y", 136)
+    .attr("x", 283)
+    .attr("y", 70)
     .style("fill", baseTextColor)
     .style("font-family", "Helvetica")
     .style("font-size", "9px")
@@ -210,8 +210,8 @@ svg.append("text")
     .text("Rain Rate");
 
 svg.append("text")
-    .attr("x", 153.5)
-    .attr("y", 148)
+    .attr("x", 283)
+    .attr("y", 82)
     .style("fill", rainRateColor)
     .style("font-family", "Helvetica")
     .style("font-size", "10px")
