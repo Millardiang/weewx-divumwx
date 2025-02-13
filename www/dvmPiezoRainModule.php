@@ -94,7 +94,7 @@ svg.append("text") // storm start text
     .style("font-size", "10px")
     .style("text-anchor", "middle")
     .style("font-weight", "normal")
-    .text("Rain Event Started @ " + stormStart);
+    .text("Rain Event Started - " + stormStart);
 
 
 svg.append("text")
@@ -221,7 +221,7 @@ svg.append("text")
 
 svg.append("rect")
     .attr("x", 113)
-    .attr("y", 62)
+    .attr("y", 57)
     .attr("rx", 2)
     .attr("width", 85)
     .attr("height", 28)
@@ -229,7 +229,7 @@ svg.append("rect")
 
 svg.append("rect")
     .attr("x", 113)
-    .attr("y", 62)
+    .attr("y", 57)
     .attr("rx", 2)
     .attr("width", 85)
     .attr("height", 28)
@@ -239,7 +239,7 @@ svg.append("rect")
 
 svg.append("rect")
     .attr("x", 105)
-    .attr("y", 20)
+    .attr("y", 15)
     .attr("rx", 10)
     .attr("width", 102)
     .attr("height", 48)
@@ -247,7 +247,7 @@ svg.append("rect")
 
 svg.append("rect")
     .attr("x", 105)
-    .attr("y", 20)
+    .attr("y", 15)
     .attr("rx", 10)
     .attr("width", 102)
     .attr("height", 48)
@@ -260,11 +260,11 @@ svg.append('image') // image output
 
     .attr('height', 40)
     .attr('x', 111)
-    .attr('y', 24);
+    .attr('y', 19);
 
 svg.append("text")
     .attr("x", 155)
-    .attr("y", 84)
+    .attr("y", 79)
     .style("fill", reverseTextColor)
     .style("font-family", "Helvetica")
     .style("font-size", "14px")
