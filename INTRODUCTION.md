@@ -23,6 +23,7 @@ I would also like to thank Jerry, David, Brian, Ken, Wim and William who have ma
 Finally to those folks from WeeWX Tom, Gary, Matthew, Vince et al. They never cease to amaze me with their genorosity of time, knowledge and patience. Without them there would be no DivumWX.
 
 The DivumWX Team: -
-      Ian Millard
-      Sean Balfour
-      Steven Sheely
+            
+    Ian Millard
+    Sean Balfour
+    Steven Sheely
