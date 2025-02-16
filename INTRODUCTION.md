@@ -1,4 +1,4 @@
-#Introduction to the WeeWX-DivumWX Skin Template
+# Introduction to the WeeWX-DivumWX Skin Template
 
 This is the first release candidate for DivumWX. It is the successor project for weewx-Weather34 whose development is now at end of life.
 
