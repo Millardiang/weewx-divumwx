@@ -308,7 +308,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         fetch('dvmActSetupPwd.php', {
             method: 'POST',
-            body: formData
+            body: formData,
+            credentials: 'include'
         })
         .then(response => response.json())
         .then(data => {

@@ -10,7 +10,8 @@
 # Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
 #                                                                                                                   #
 #####################################################################################################################
-$templateversion = "DivumWX-(RESPONSIVE)";
+//include('dvmShared.php');
+$templateversion = "DivumWX-1.0.0rc1";
 $os = shell_exec('lsb_release -d');
 
 if (str_contains($os, "Manjaro")) {$osLogo = $archLogo;}

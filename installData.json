@@ -174,17 +174,17 @@
             }
         }
     },
-    "config_entries7": {
+    "config_entries6": {
         "RadiationDays": {
             "min_sunshine": "120"
         }
     },
-    "config_entries8": {
+    "config_entries7": {
         "LastNonZero": {
             "algorithm": "simple"
         }
     },
-    "config_entries9": {
+    "config_entries8": {
         "DivumWXRealTime": {
             "HTML_ROOT": "",
             "realtime_path_only": "",
@@ -198,12 +198,12 @@
             "weewx_file_transfer": ""
         }
     },
-    "config_entries10": {
+    "config_entries9": {
         "AirDensity": {
             "algorithm": "simple"
         }
     },
-    "config_entries11": {
+    "config_entries10": {
         "FilePile": {
             "filename": "/serverdata/filepileTextData.txt",
             "unit_system": "US",

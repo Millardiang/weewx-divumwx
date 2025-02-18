@@ -16,10 +16,20 @@
 session_start();
 header('Content-Type: application/json');
 
+error_log("Session ID: " . session_id());
+error_log("Session Data: " . print_r($_SESSION, true));
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['status' => 'error', 'message' => 'Invalid request method.']);
     exit;
 }
+
+if (!isset($_SESSION['setup_allowed']) || $_SESSION['setup_allowed'] !== true) {
+    error_log("Unauthorized script access: setup_allowed not set!");
+    echo json_encode(['status' => 'error', 'message' => 'Unauthorized script access.']);
+    exit;
+}
+
 $username = trim($_POST['username'] ?? '');
 $password = trim($_POST['password'] ?? '');
 
@@ -35,24 +45,25 @@ $hash = password_hash($password, PASSWORD_DEFAULT);
 try {
     $db = new PDO('sqlite:./admin/db/dvmAdmin.db3');
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $stmt = $db->prepare("SELECT id FROM users WHERE username = :username");
-    $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+
+    $stmt = $db->prepare("SELECT id FROM users WHERE id = 1");
     $stmt->execute();
     $existingUser = $stmt->fetch(PDO::FETCH_ASSOC);
     if ($existingUser) {
-        echo json_encode(['status' => 'error', 'message' => 'Username already exists. Choose a different one.']);
+        echo json_encode(['status' => 'error', 'message' => 'Admin user already exists. Setup cannot proceed.']);
         exit;
     }
-    $sql = "UPDATE users SET username = :username, password = :password WHERE id = 1";
+
+    $sql = "INSERT INTO users (id, username, password) VALUES (1, :username, :password)";
     $stmt = $db->prepare($sql);
     $stmt->bindParam(':username', $username, PDO::PARAM_STR);
     $stmt->bindParam(':password', $hash, PDO::PARAM_STR);
     if ($stmt->execute()) {
-        echo json_encode(['status' => 'success', 'message' => 'Admin credentials updated successfully.']);
+        echo json_encode(['status' => 'success', 'message' => 'Admin user created successfully.']);
+        unset($_SESSION['setup_allowed']);
     } else {
-        echo json_encode(['status' => 'error', 'message' => 'Failed to update admin credentials.']);
+        echo json_encode(['status' => 'error', 'message' => 'Failed to create admin user.']);
     }
 } catch (PDOException $e) {
     echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
 }
-?>

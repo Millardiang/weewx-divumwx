@@ -603,7 +603,7 @@ class DVMInstaller:
 
     def addStanza(self, config_data, entries):
         logging.debug(f"Adding new DivumWX specific stanzas to weewx config")
-        for i in range(5, 12):  # config_entries4 to config_entries11
+        for i in range(5, 11):  # config_entries4 to config_entries10
             logging.debug(f"Adding stanza #{i}")
             entry = entries[f'config_entries{i}']
             for section, values in entry.items():

@@ -14,6 +14,9 @@
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
 session_start();
+$_SESSION['setup_allowed'] = true;
+error_log("setup_allowed set in session");
+
 if (!isset($_SESSION['canAccessSetup']) || $_SESSION['canAccessSetup'] !== true) {
     die('Unauthorized access detected. This incident will be reported.');
 }
