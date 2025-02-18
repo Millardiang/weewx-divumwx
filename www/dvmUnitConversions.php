@@ -98,6 +98,8 @@ if ($rainunit != $rain["units"])
 {
     if ($rainunit == "mm")
     {
+        inTomm($rain, "dayRain");
+        inTomm($rain, "current");
         inTomm($rain, "rate");
         inTomm($rain, "total");
         inTomm($rain, "last_10min");
@@ -109,14 +111,35 @@ if ($rainunit != $rain["units"])
         inTomm($rain, "yesterday_total");
         inTomm($rain, "month_rate_max");
         inTomm($rain, "month_total");
+        inTomm($rain, "monthRain");
         inTomm($rain, "year_rate_max");
         inTomm($rain, "year_total");
+        inTomm($rain, "yearRain");
         inTomm($rain, "alltime_rate_max");
         inTomm($rain, "alltime_total");
+        inTomm($rain, "t_dayRain");
+        inTomm($rain, "t_rate");
+        inTomm($rain, "t_total");
+        inTomm($rain, "t_last_10min");
+        inTomm($rain, "t_last_hour");
+        inTomm($rain, "t_last_3hour");
+        inTomm($rain, "t_last_24hour");
+        inTomm($rain, "t_day");
+        inTomm($rain, "t_yesterday_rate_max");
+        inTomm($rain, "t_yesterday_total");
+        inTomm($rain, "t_month_rate_max");
+        inTomm($rain, "t_month_total");
+        inTomm($rain, "t_monthRain");
+        inTomm($rain, "t_year_rate_max");
+        inTomm($rain, "t_year_total");
+        inTomm($rain, "t_yearRain");
+        inTomm($rain, "t_alltime_rate_max");
+        inTomm($rain, "t_alltime_total");
         $rain["units"] = $rainunit;
     }
     else if ($rainunit == "in")
     {
+        mmToin($rain, "dayRain");
         mmToin($rain, "rate");
         mmToin($rain, "total");
         mmToin($rain, "last_10min");
@@ -128,10 +151,30 @@ if ($rainunit != $rain["units"])
         mmToin($rain, "yesterday_total");
         mmToin($rain, "month_rate_max");
         mmToin($rain, "month_total");
+        mmToin($rain, "monthRain");
         mmToin($rain, "year_rate_max");
         mmToin($rain, "year_total");
+        mmToin($rain, "yearRain");
         mmToin($rain, "alltime_rate_max");
         mmToin($rain, "alltime_total");
+        mmToin($rain, "t_dayRain");
+        mmToin($rain, "t_rate");
+        mmToin($rain, "t_total");
+        mmToin($rain, "t_last_10min");
+        mmToin($rain, "t_last_hour");
+        mmToin($rain, "t_last_3hour");
+        mmToin($rain, "t_last_24hour");
+        mmToin($rain, "t_day");
+        mmToin($rain, "t_yesterday_rate_max");
+        mmToin($rain, "t_yesterday_total");
+        mmToin($rain, "t_month_rate_max");
+        mmToin($rain, "t_month_total");
+        mmToin($rain, "t_monthRain");
+        mmToin($rain, "t_year_rate_max");
+        mmToin($rain, "t_year_total");
+        mmToin($rain, "t_yearRain");
+        mmToin($rain, "t_alltime_rate_max");
+        mmToin($rain, "t_alltime_total");
         $rain["units"] = $rainunit;
     }
 }
