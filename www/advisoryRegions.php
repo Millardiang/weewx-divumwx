@@ -26,8 +26,10 @@ if ($advisoryzone == "eu") {
 }
 $json_icon = file_get_contents("jsondata/lookupTable.json");
 $parsed_icon = json_decode($json_icon, true);
+
 switch ($advisoryzoneMapping) {
     case "unitedkingdom":
+        include('advisoryHealth.php');
         $url = "https://www.metoffice.gov.uk/weather/warnings-and-advice/uk-warnings";
         $json_string = file_get_contents("jsondata/awa.txt");
         $parsed_json = json_decode($json_string, true);
@@ -39,7 +41,7 @@ switch ($advisoryzoneMapping) {
         echo '<div id="alert">';
         //$cnt = 0;
         //$fCnt = 1;
-        if ($cnt==0 && $fCnt==0) 
+        if ($cnt==0 && $fCnt==0 && $healthAlertID == "0") 
         { ?>
  
       <section>
@@ -130,17 +132,17 @@ switch ($advisoryzoneMapping) {
                 $floodBorder[$i] = "#b1b4b6";
                 $floodAlertColor[$i] = "black";
             } elseif ($floodLevel[$i] == 3) {
-                $floodBackground[$i] = "#f18700";
-                $floodBorder[$i] = "#f18700";
+                $floodBackground[$i] = "rgb(252,243,231)";
+                $floodBorder[$i] = "rgb(227,140,80)";
                 $floodAlertColor[$i] = "black";
             } elseif ($floodLevel[$i] == 2) {
-                $floodBackground[$i] = "#e3000f";
-                $floodBorder[$i] = "#e3000f";
-                $floodAlertColor[$i] = "white";
+                $floodBackground[$i] = "rgb(251,237,238)";
+                $floodBorder[$i] = "rgb(208,45,36)";
+                $floodAlertColor[$i] = "black";
             } elseif ($floodLevel[$i] == 1) {
-                $floodBackground[$i] = "#e3000f";
-                $floodBorder[$i] = "#e3000f";
-                $floodAlertColor[$i] = "white";
+                $floodBackground[$i] = "rgb(251,237,238)";
+                $floodBorder[$i] = "rgb(208,45,36)";
+                $floodAlertColor[$i] = "black";
             }
         
             $floodHeadline[$i] = "  " . $floodAlertlevel[$i] . " for " . $floodDescription[$i] . ".  Updated ".$floodUpdated[$i].".";
@@ -148,7 +150,7 @@ switch ($advisoryzoneMapping) {
  if (substr_count($floodMessage[$i], $englishFloodLocation) === 0 && $cnt2 === 0) {echo '<section></section>';}
             else if (str_contains($floodMessage[$i], $englishFloodLocation)) { ?>
       <section>
-      <div class="alertbar" style="margin-bottom:4px;padding-bottom:10px;background-color:<?php echo $floodBackground[$i]; ?>;color:<?php echo $floodAlertColor[$i]; ?>;border-radius:5px;border: transparent 4px;">
+      <div class="alertbar" style="margin-bottom:4px;padding-bottom:10px;background-color:<?php echo $floodBackground[$i]; ?>;color:<?php echo $floodAlertColor[$i]; ?>;border-radius:5px;border-left: 10px solid <?php echo $floodBorder[$i];?>;">
       <div class="alert-text-box" style="padding-left:20px;padding-right:20px;display:flex;margin: 0 auto;">
 		<div class="post" style="font-weight:500; font-size:14px; color:<?php echo $floodAlertColor[$i]; ?>;"><img src="img/flood<?php echo $floodLevel[$i]; ?>.png"style="margin-bottom:-10px; width:40px;"><?php echo $floodHeadline[
     $i

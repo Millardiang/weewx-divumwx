@@ -65,7 +65,7 @@ else {$pollen["weed_risk"] = "No Data"; $pollen["weed_color"]=$noColor;}
 
 <div class="chartforecast">
 <span class="yearpopup"><a alt="pollen" title="Pollen Data" href="dvmhighcharts/dvmPollenWeekChart.php" data-lity><?php echo $menucharticonpage;?> Pollen Index Charts</a></span>
-<span class="yearpopup"><a alt="pollen Info" title="Pollen Info" href="dvmPollenData.php" . data-lity> <?php echo $info;?> Pollen Info</a></span>
+<span class="yearpopup"><a alt="pollen Info" title="Pollen Info" href="dvmPollenDataPopup.php" . data-lity> <?php echo $info;?> Pollen Info</a></span>
 </div>
 <span class='moduletitle'><?php echo $lang['PollenModule'];?></span>
 

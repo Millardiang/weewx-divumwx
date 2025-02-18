@@ -2,6 +2,7 @@ import os
 import pwd
 import grp
 import sys
+import glob
 import logging
 import argparse
 import subprocess
@@ -15,7 +16,7 @@ import shutil
 from datetime import datetime
 from pathlib import Path
 
-version = "5.1.10.010"
+version = "5.5.55.555"
 srvGenURL = 'https://www.divumwx.org/settingsGen/'
 
 reset = "\033[0m"
@@ -32,7 +33,12 @@ def setup_logging():
     parser = argparse.ArgumentParser(description="DivumWX Installation Script - This script installs the DivumWX skin for the Amateur Weather Station software, weewx.")
     parser.add_argument("--debug", action="store_true", help="Enable logging at DEBUG level")
     parser.add_argument("--info", action="store_true", help="Enable logging at INFO level")
+    parser.add_argument("-v", "--version", action="store_true", help="Display the script's version and exit")
     args = parser.parse_args()
+
+    if args.version:
+        print(f"DivumWX Installer Version: {version}")
+        sys.exit(0)
 
     if args.debug:
         logging.basicConfig(
@@ -56,7 +62,7 @@ args = setup_logging()
 os.system("clear")
 logging.debug("+-------------------- Debug logging enabled for DivumWX Installer --------------------+")
 logging.debug(f"+----------------------- DivumWX Installer Version: {version} -----------------------+")
-print(f"{white}DIS {cyan}(DivumWX Installation Script) {white}starting.....{reset}")
+print(f"{white}DIS {cyan}(DivumWX Installation Script) {green}version:{magenta}{version} {white}starting.....{reset}")
 print(f"{cyan}Standby, verifying system requirements{reset}")
 logging.debug(f"Standby, verifying system requirements")
 logging.debug(f"Checking Python version")
@@ -146,6 +152,11 @@ class DVMInstaller:
         conf_file = 'installData.json'
         self.run_installer(conf_file)
 
+    def chkBackup(self, config_file):
+        base_name = os.path.basename(config_file)
+        dir_name = os.path.dirname(config_file) or "."
+        pattern = os.path.join(dir_name, f"{base_name}_dvm.*")
+        return bool(glob.glob(pattern))
     def waitFKP(self):
         print("Press any key to continue:")
         key = readchar.readkey()
@@ -235,7 +246,7 @@ class DVMInstaller:
         print("This script helps in setting up essential components, updating configurations, and ensuring smooth")
         print("deployment of the weather data management system, which integrates seamlessly with WeeWX.\n")
         print(f"{white}Features:{reset}")
-        print(f" - {yellow}Automated Installation{reset}: Automates the extraction and placement of necessary files from a provided zip file.")
+        print(f" - {yellow}Automated Installation{reset}: Automates the placement of the necessary files within the weewx pip hierarchy.")
         print(f" - {yellow}Configuration Management{reset}: Updates configuration files with specified settings, ensuring your system is")
         print("     correctly configured for operation.")
         print(f" - {yellow}Permissions Management{reset}: Recursively applies appropriate file and directory permissions.")
@@ -406,41 +417,6 @@ class DVMInstaller:
         else:
             logging.debug(f"No symlink named '{symlink_name}' found in '{document_root}'.")
         return False
-
-    def getPathPerms(self, path):
-        try:
-            stat_info = os.stat(path)
-            permissions = str(oct(stat_info.st_mode & 0o777))[2:]
-            owner = pwd.getpwuid(stat_info.st_uid).pw_name
-            group = grp.getgrgid(stat_info.st_gid).gr_name
-            return {
-                "permissions": permissions,
-                "owner": owner,
-                "group": group,
-                "error": None
-            }
-        except FileNotFoundError:
-            return {
-                "permissions": None,
-                "owner": None,
-                "group": None,
-                "error": {"type": "FileNotFoundError", "message": "Path not found"}
-            }
-        except PermissionError:
-            return {
-                "permissions": None,
-                "owner": None,
-                "group": None,
-                "error": {"type": "PermissionError", "message": "Permission denied"}
-            }
-        except OSError as e:
-            return {
-                "permissions": None,
-                "owner": None,
-                "group": None,
-                "error": {"type": "OSError", "message": str(e)}
-            }
-
     def chkWeewx(self, wxName='weewx'):
         logging.debug(f"Entering check weewx location routine")
         try:
@@ -483,120 +459,106 @@ class DVMInstaller:
             else:
                 if not os.path.exists(dest_path) or overwrite:
                     shutil.copy2(source_path, dest_path)
-
-    def setPandO(self, path, perms, owner, group):
+    def getPerms(self, path):
         try:
-            os.chmod(path, perms)
-            subprocess.run(["chown", f"{owner}:{group}", path], check=True)
-            logging.debug(f"Updated permissions and ownership for '{path}'.")
-            print(f"Updated permissions and ownership for '{path}'.")
+            stat_info = os.stat(path)
+            return {
+                "permissions": oct(stat_info.st_mode & 0o777),
+                "owner": pwd.getpwuid(stat_info.st_uid).pw_name,
+                "group": grp.getgrgid(stat_info.st_gid).gr_name,
+                "error": None
+            }
+        except FileNotFoundError:
+            return {"error": "FileNotFoundError", "message": "Path not found"}
         except PermissionError:
-            logging.debug(f"PermissionError encountered while fixing '{path}'. Attempting with elevated permissions.")
-            print(f"PermissionError encountered while fixing '{path}'. Attempting with elevated permissions.")
-            try:
-                subprocess.run(["sudo", "chmod", oct(perms).replace("0o", ""), path], check=True)
-                subprocess.run(["sudo", "chown", f"{owner}:{group}", path], check=True)
-                logging.debug(f"Fixed permissions and ownership for '{path}' with elevated permissions.")
-                print(f"Fixed permissions and ownership for '{path}' with elevated permissions.")
-            except Exception as e:
-                logging.debug(f"Failed to fix permissions/ownership for '{path}' with elevated permissions. Error: {e}")
-                print(f"Failed to fix permissions/ownership for '{path}' with elevated permissions. Error: {e}")
-                sys.exit(1)
-
-    def chkDir(self, base_path, structure):
-        current_path = "/"
-        html_root_created = False  # Track if the last directory is created
-        base_segments = base_path.strip("/").split("/")
-
-        for idx, segment in enumerate(base_segments):
-            current_path = os.path.join(current_path, segment)
-            if current_path not in structure:
-                logging.debug(f"Skipping directory '{current_path}' as it is not in the defined structure.")
-                continue
-            result = self.getPathPerms(current_path)
-            is_last_segment = idx == len(base_segments) - 1  # Check if this is the last segment
-
-            if structure[current_path]["critical"]:
-                if result.get('error') is not None:
-                    logging.debug(f"The critical directory '{current_path}' is missing or inaccessible.")
-                    print(f"The critical directory '{current_path}' is missing or inaccessible.")
-                    logging.debug(f"Error details: {result['error']['type']} - {result['error']['message']}")
-                    print(f"Error details: {result['error']['type']} - {result['error']['message']}")
-                    sys.exit(1)
-                continue
-
-            if result.get('error') is not None:
-                logging.debug(f"The directory '{current_path}' is missing. Attempting to create it.")
-                print(f"The directory '{current_path}' is missing. Attempting to create it.")
+            return {"error": "PermissionError", "message": "Permission denied"}
+        except OSError as e:
+            return {"error": "OSError", "message": str(e)}
+    def fixPerms(self, path, perms, owner, group):
+        try:
+            if not os.path.exists(path):
+                logging.debug(f"Directory does not exist, attempting to create: {path}")
+                print(f"{cyan}Directory {path} does not exist. Creating it...{reset}")
                 try:
-                    os.makedirs(current_path, mode=structure[current_path]["permissions"])
-                    subprocess.run(
-                        ["chown", f"{structure[current_path]['owner']}:{structure[current_path]['group']}", current_path],
-                        check=True
-                    )
-                    logging.debug(f"Created '{current_path}' with permissions {oct(structure[current_path]['permissions'])} "
-                                f"and ownership {structure[current_path]['owner']}:{structure[current_path]['group']}.")
-                    print(f"Created '{current_path}' with permissions {oct(structure[current_path]['permissions'])} "
-                        f"and ownership {structure[current_path]['owner']}:{structure[current_path]['group']}.")
-                    if is_last_segment:
-                        html_root_created = True
+                    os.makedirs(path, exist_ok=True)
                 except PermissionError:
-                    logging.debug(f"PermissionError encountered while creating '{current_path}'. Attempting with elevated permissions.")
-                    print(f"PermissionError encountered while creating '{current_path}'. Attempting with elevated permissions.")
+                    logging.debug(f"Permission denied creating {path}, retrying with sudo.")
+                    print(f"{yellow}Permission denied when creating {path}. Retrying with sudo...{reset}")
                     try:
-                        subprocess.run(["sudo", "mkdir", "-p", current_path], check=True)
-                        subprocess.run(["sudo", "chmod", oct(structure[current_path]["permissions"]).replace("0o", ""), current_path], check=True)
-                        subprocess.run(["sudo", "chown", f"{structure[current_path]['owner']}:{structure[current_path]['group']}", current_path], check=True)
-                        logging.debug(f"Created '{current_path}' with elevated permissions.")
-                        print(f"Created '{current_path}' with elevated permissions.")
-                        if is_last_segment:
-                            html_root_created = True
-                    except Exception as e:
-                        logging.debug(f"Failed to create '{current_path}' with elevated permissions. Error: {e}")
-                        print(f"Failed to create '{current_path}' with elevated permissions. Error: {e}")
-                        sys.exit(1)
+                        print(f"{cyan}Attempting to create directory {path} using sudo...{reset}")
+                        subprocess.run(["sudo", "-S", "mkdir", "-p", path], check=True, stdin=subprocess.PIPE)
+                    except subprocess.CalledProcessError as e:
+                        logging.debug(f"Failed to create directory with sudo: {e}")
+                        return {"success": False, "message": "Failed to create directory with sudo.", "error": str(e)}
+            uid = pwd.getpwnam(owner).pw_uid
+            gid = grp.getgrnam(group).gr_gid
+            if int(oct(os.stat(path).st_mode & 0o777), 8) != perms:
+                logging.debug(f"Updating permissions for {path} to {oct(perms)}")
+                print(f"{cyan}Updating permissions for {path} to {oct(perms)}{reset}")
+                os.chmod(path, perms)
+            current_uid = os.stat(path).st_uid
+            current_gid = os.stat(path).st_gid
+            if current_uid != uid or current_gid != gid:
+                logging.debug(f"Updating ownership for {path} to {owner}:{group}")
+                print(f"{cyan}Updating ownership for {path} to {owner}:{group}{reset}")
+                os.chown(path, uid, gid)
+            logging.debug(f"Updated {path} to {oct(perms)} with {owner}:{group}")
+            print(f"{green}Updated {path} with permissions {oct(perms)} and owner:group {owner}:{group}{reset}")
+            return {"success": True, "message": "Permissions updated successfully.", "error": None}
+
+        except FileNotFoundError as e:
+            logging.debug(f"FileNotFoundError: {e}")
+            print(f"{red}FileNotFoundError: {e}{reset}")
+            return {"success": False, "message": "Path not found and could not be created.", "error": str(e)}
+        except PermissionError:
+            logging.debug(f"Permission error on {path}, retrying with sudo.")
+            print(f"{yellow}Permission error on {path}. Retrying with sudo...{reset}")
+            try:
+                subprocess.run(["sudo", "-S", "chmod", f"{perms:o}", path], check=True, stdin=subprocess.PIPE)
+                subprocess.run(["sudo", "-S", "chown", f"{owner}:{group}", path], check=True, stdin=subprocess.PIPE)
+                logging.debug(f"Fixed {path} with sudo.")
+                print(f"{green}Fixed permissions for {path} using sudo.{reset}")
+                return {"success": True, "message": "Permissions fixed using sudo.", "error": None}
+            except subprocess.CalledProcessError as e:
+                logging.debug(f"Failed to fix {path} with sudo. Error: {e}")
+                print(f"{red}Failed to update permissions for {path} using sudo.{reset}")
+                return {"success": False, "message": "Failed to update permissions with sudo.", "error": str(e)}
+        except Exception as e:
+            logging.debug(f"Unexpected error on {path}: {e}")
+            print(f"{red}Unexpected error on {path}: {e}{reset}")
+            return {"success": False, "message": "Unexpected error occurred.", "error": str(e)}
+    def chkDefaultPerms(self, dirDefaults):
+        print(f"\n{white}Checking Directory Permissions{reset}\n")
+        print(f"{cyan}{'{:<50} {:<10} {:<10} {:<10} {:<10} {:<10} {:<10} {:<5}'.format('Path', 'Exp Perm', 'Curr Perm', 'Exp Own', 'Curr Own', 'Exp Grp', 'Curr Grp', 'Fix')}{reset}")
+        print(f"{cyan}{'-' * 110}{reset}")
+        
+        for index, (path, settings) in enumerate(dirDefaults.items()):
+            current_perms = self.getPerms(path)
+            
+            if current_perms.get("error"):
+                settings["fix"] = "True"
+                print(f"{yellow}{'{:<50} {:<10} {:<10} {:<10} {:<10} {:<10} {:<10} {}'.format(path, oct(settings['permissions']), '-', settings['owner'], '-', settings['group'], '-', red + 'X' + reset)}")
+                continue
+            
+            expected_perms = settings["permissions"]
+            expected_owner = settings["owner"]
+            expected_group = settings["group"]
+            
+            perm_color = green if int(current_perms["permissions"], 8) == expected_perms else red
+            owner_color = green if current_perms["owner"] == expected_owner else red
+            group_color = green if current_perms["group"] == expected_group else red
+            
+            fix_needed = green + "N" + reset
+            if perm_color == red or owner_color == red or group_color == red:
+                fix_needed = red + "X" + reset
+                settings["fix"] = "True"
+                fix_needed = red + "X" + reset
             else:
-                required_perms = structure[current_path]["permissions"]
-                required_owner = structure[current_path]["owner"]
-                required_group = structure[current_path]["group"]
-                current_perms = int(result.get('permissions', 0))
-                current_owner = result.get('owner')
-                current_group = result.get('group')
-                if current_perms != required_perms or (current_owner, current_group) != (required_owner, required_group):
-                    self.setPandO(current_path, required_perms, required_owner, required_group)
-                else:
-                    print(f"Permissions and ownership are correct for '{current_path}'.")
-        return html_root_created
-
-    def setfnlOwner(self, path, owner, user): 
-        logging.debug(f"Setting final ownership for DivumWX files and directories")
-        db_path_web = os.path.join(path, "admin/db/dvmAdmin.db3")
-
-        try:
-            print(f"{cyan}Setting DivumWX final file owner:group bits{reset}")
-            subprocess.run(["sudo", "chown", "-R", f"{owner}:{user}", path], check=True)
-            logging.debug(f"Successfully changed ownership of {path} to {owner}:{user}")
-        except subprocess.CalledProcessError as e:
-            logging.error(f"Failed to change ownership for {path}: {e}")
-            print(f"{red}Error: Failed to change ownership for {path}.{reset}")
-            print(f"{yellow}Manual fix: {cyan}sudo chown -R {owner}:{user} {path}{reset}")
-        try:
-            print(f"{cyan}Setting DivumWX Final file permissions{reset}")
-            subprocess.run(["sudo", "chmod", "-R", "0775", path], check=True)
-            logging.debug(f"Successfully set permissions to 0775 for {path}")
-        except subprocess.CalledProcessError as e:
-            logging.error(f"Failed to set permissions for {path}: {e}")
-            print(f"{red}Error: Failed to set permissions for {path}.{reset}")
-            print(f"{yellow}Manual fix: {cyan}sudo chmod -R 0775 {path}{reset}")
-        try:
-            print(f"{cyan}Setting DivumWX Database final permissions{reset}")
-            subprocess.run(["sudo", "chmod", "0666", db_path_web], check=True)
-            logging.debug(f"Successfully set permissions to 0666 for {db_path_web}")
-        except subprocess.CalledProcessError as e:
-            logging.error(f"Failed to set permissions for {db_path_web}: {e}")
-            print(f"{red}Error: Failed to set permissions for {db_path_web}.{reset}")
-            print(f"{yellow}Manual fix: {cyan}sudo chmod 0666 {db_path_web}{reset}")
-
+                settings["fix"] = "False"
+                fix_needed = green + "N" + reset
+            
+            print(f"{yellow}{'{:<50} {:<10} {}{:<10}{} {:<10} {}{:<10}{} {:<10} {}{:<10}{} {}'.format(path, oct(expected_perms), perm_color, current_perms['permissions'], reset, expected_owner, owner_color, current_perms['owner'], reset, expected_group, group_color, current_perms['group'], reset, fix_needed)}")
+        print(f"{cyan}{'-' * 110}{reset}")
     def chkUgrp(self):
         logging.debug(f"Verifying user/group")
         self.user = getpass.getuser()
@@ -641,7 +603,7 @@ class DVMInstaller:
 
     def addStanza(self, config_data, entries):
         logging.debug(f"Adding new DivumWX specific stanzas to weewx config")
-        for i in range(5, 12):  # config_entries4 to config_entries11
+        for i in range(5, 11):  # config_entries4 to config_entries10
             logging.debug(f"Adding stanza #{i}")
             entry = entries[f'config_entries{i}']
             for section, values in entry.items():
@@ -828,16 +790,44 @@ class DVMInstaller:
             logging.error(f"Error reading the configuration file: {e}")
             raise
         return report_configs
-
+        
     def run_installer(self, conf_file):
         os.system('clear')
+        print(f"{white}Loading installation configuration files.....{reset}")
+        logging.debug(f"Loading installation configuration files.....")
+        with open(conf_file) as infile:
+            logging.debug(f"Loading installData.json")
+            conf_content = infile.read()
+            conf_content = re.sub(r'##.*\n', '', conf_content).replace("\n", "").replace("\t", "")
+            d = json.loads(conf_content)
+        with open(self.services_file) as infile:
+            logging.debug(f"Loading services.json")
+            services_content = infile.read()
+            services_content = re.sub(r'##.*\n', '', services_content).replace("\n", "").replace("\t", "")
+            d.update(json.loads(services_content))
+        logging.debug(f"Setting user, skins and weewx_conf paths")
+        user_path = os.path.expanduser(d["user"])
+        skins_path = os.path.expanduser(d["skins"])
+        weewx_config_file = os.path.expanduser(d["weewx_config_file"])
+        bkupDBPath = os.path.expanduser(d["bkupDBPath"])
+        config_data = ConfigObj(weewx_config_file, encoding='utf8', list_values=False, write_empty_values=True)
+        weewx_config_file_exists = True
+        if self.chkBackup(weewx_config_file):
+            print(f"{red}A previous weewx.conf backup file from dvmInstaller.py script found. Running this script again{reset}")
+            print(f"{red}will corrupt your weewx.conf file, and cause the fleas of a thousand neurotic camels to infest{reset}")
+            print(f"{red}your favorite accoutrement.{reset}")
+            print(f"{red}This backup must be rolled back if you wish to run this script again.{reset}")
+            print(f"{cyan}Exiting script.{reset}")
+            raise SystemExit("Backup already exists. The script has run before.")
+        else:
+            print(f"{green}No previous dvmInstaller backup file found, proceeding....{reset}")
         self.chkUgrp()
         global weewxRunning, wxName, wxOwner, wxGroup, wsStatus, wsName, wsOwner, wsGroup, mainDocRoot, docRoots, docRootType, siteDocRoots, symlinks, symlinkStatus
         print(f"Checking weewx status")
         weewxRunning, wxName, wxOwner, wxGroup = self.chkWeewx()
         if weewxRunning:
             logging.debug(f"WeeWX process '{wxName}' is running. Owned by '{wxOwner}:{wxGroup}'.")
-            print(f"WeeWX process {white}'{wxName}'{reset} is running. Owned by {cyan}'{wxOwner}:{wxGroup}'{reset}.")
+            print(f"{white}WeeWX process {cyan}'{wxName}' {white}is running. Owned by {cyan}'{wxOwner}:{wxGroup}'{reset}.")
         else:
             logging.debug(f"No running weewx process was found.")
             print(f"{red}No running weewx process was found.")
@@ -852,7 +842,7 @@ class DVMInstaller:
         wsOwner = childOwner if parentOwner == "root" else parentOwner
         wsGroup = childGroup if parentOwner == "root" else parentGroup
         logging.debug(f"Web server '{wsName}' detected. Owner: '{wsOwner}:{wsGroup}'.")
-        print(f"Web server {white}'{wsName}'{reset} detected. Owner: {cyan}'{wsOwner}:{wsGroup}'{reset}.")
+        print(f"{white}Web server {cyan}'{wsName}'{white} detected. Owner: {cyan}'{wsOwner}:{wsGroup}'{reset}.")
         docRoots = []
         if mainDocRoot:
             foundSymlinks = []
@@ -894,6 +884,7 @@ class DVMInstaller:
         if siteDocRoots and not mainDocRoot:
             mainDocRoot = next(iter(siteDocRoots.values()))
             logging.debug(f"mainDocRoot aligned with first entry in siteDocRoots: {mainDocRoot}")
+        www_root = os.path.expanduser(d["www_root"])
         print(f"{cyan}+---------------------------------------------------------------------------------------+")
         print(f" {white}Webserver Information:\n")
         if wsStatus:
@@ -908,54 +899,53 @@ class DVMInstaller:
             print(f"      Symlinks: {', '.join(root['symlinks']) if root['symlinks'] else 'None'}")
             print("-" * 50)
         print(f"{cyan}+---------------------------------------------------------------------------------------+")
-        self.waitFKP()
-        print(f"{white}Loading installation configuration files.....{reset}")
-        logging.debug(f"Loading installation configuration files.....")
-        with open(conf_file) as infile:
-            logging.debug(f"Loading installData.json")
-            conf_content = infile.read()
-            conf_content = re.sub(r'##.*\n', '', conf_content).replace("\n", "").replace("\t", "")
-            d = json.loads(conf_content)
-        with open(self.services_file) as infile:
-            logging.debug(f"Loading services.json")
-            services_content = infile.read()
-            services_content = re.sub(r'##.*\n', '', services_content).replace("\n", "").replace("\t", "")
-            d.update(json.loads(services_content))
-        logging.debug(f"Setting user, skins and weewx_conf paths")
-        user_path = os.path.expanduser(d["user"])
-        skins_path = os.path.expanduser(d["skins"])
-        weewx_config_file = os.path.expanduser(d["weewx_config_file"])
-        www_root = os.path.expanduser(d["www_root"])
+        print(f"{white}dvmInstaller installData file Paths:")
+        print(f"        user_path: {user_path}")
+        print(f"       skins_path: {skins_path}")
+        print(f"weewx_config_file: {weewx_config_file}")
+        print(f"         www_root: {www_root}")
+        logging.debug(f"+---------------------------------------------------------------------------------------+")
+        logging.debug(f" Webserver Information:\n")
+        if wsStatus:
+            logging.debug(f" {wsName} is running under {wsOwner}:{wsGroup}")
+        else:
+            logging.debug(f" No webserver was found, either automatically or manually.")
+        logging.debug(f" Document Root and symlink information")
+        for root in docRoots:
+            logging.debug(f"      Type: {root['type']}")
+            logging.debug(f"      Path: {root['path']}")
+            logging.debug(f"      Symlink Status: {root['symlinkStatus']}")
+            logging.debug(f"      Symlinks: {', '.join(root['symlinks']) if root['symlinks'] else 'None'}")
+            logging.debug("-" * 50)
+        logging.debug(f"+---------------------------------------------------------------------------------------+")
         logging.debug(f"Conf Paths:")
         logging.debug(f"        user_path: {user_path}")
         logging.debug(f"       skins_path: {skins_path}")
         logging.debug(f"weewx_config_file: {weewx_config_file}")
-        logging.debug(f"   www_root: {www_root}")
-        config_data = ConfigObj(weewx_config_file, encoding='utf8', list_values=False, write_empty_values=True)
-        weewx_config_file_exists = True
+        logging.debug(f"         www_root: {www_root}")
         self.waitFKP()
         os.system("clear")
-        logging.debug(f"Determining if any other skins are enabled already.")
+        logging.debug(f"Determining if any other skins are also enabled.")
+        print(f"{green}Determining if any other skins are also enabled.{reset}")
         allSkins = self.getEnabledSkins(weewx_config_file)
         enabledSkins = [skin["section"] for skin in allSkins if skin["enabled"] == "true"]
         print(f"{green}+-------------------------------------------------------------------------------+{reset}")
         print(f"{white}The following skins are enabled on your system:{reset}")
-        logging.debug(f"The following skins are enabled")
-        for skin in enabledSkins:
-            logging.debug(f"     - {skin}")
-            print(f"{cyan} - {skin}{reset}")
+        print(f"{green}+-------------------------------------------------------------------------------+{reset}")
+        logging.debug(f"+-------------------------------------------------------------------------------+")
         print(f"{white}Your weewx.conf file [StdReport] section has {yellow}{config_data['StdReport'].get('HTML_ROOT')}{white} as your HTML_ROOT setting.{reset}", end="\n")
         logging.debug(f"The HTML_ROOT setting in weewx.conf is {config_data['StdReport'].get('HTML_ROOT')}")
         if www_root == mainDocRoot:
-            logging.debug(f"www_root ({www_root}) matches DocumentRoot ({mainDocRoot}).")
-            print(f"{green}Match found!{reset} www_root matches DocumentRoot.{reset}")
+            logging.debug(f"www_root ({www_root}) from the dvmInstaller config file matches the Web Server DocumentRoot ({mainDocRoot}).")
+            print(f"{green}Match found!{reset} www_root from the dvmInstaller config file matches Web Server DocumentRoot.{reset}")
             print(f"{white}www_root:{reset} {cyan}{www_root}{reset}")
-            print(f"{white}DocumentRoot:{reset} {cyan}{mainDocRoot}{reset}")
+            print(f"{white}Web Server DocumentRoot:{reset} {cyan}{mainDocRoot}{reset}")
+            print(f"{green}This is a good thing (tm)!!{reset}")
         else:
             logging.debug(f"www_root ({www_root}) does not match DocumentRoot ({mainDocRoot}).")
             print(f"{red}Mismatch detected!{reset} www_root and DocumentRoot do not match.{reset}")
             print(f"{red}www_root:{reset} {yellow}{www_root}{reset}")
-            print(f"{red}DocumentRoot:{reset} {yellow}{mainDocRoot}{reset}")
+            print(f"{red}Web Server DocumentRoot:{reset} {yellow}{mainDocRoot}{reset}")
         self.waitFKP()
         html_root = os.path.join(www_root , "divumwx")
         logging.debug(f"DivumWX new HTML_ROOT: {html_root}")
@@ -968,30 +958,39 @@ class DVMInstaller:
         user_path_exists = os.path.exists(user_path)
         skins_path_exists = os.path.exists(skins_path)
         html_root_exists = os.path.exists(html_root)
-        html_root_created = False
-        print(f"Directory creation Info")
-        print(f"     User Path Exists: {user_path_exists}")
+        dirDefaults = {
+            "/var/www/html": {
+                "permissions": 0o775,
+                "owner": "www-data",
+                "group": "www-data",
+                "fix": "False"
+            },
+            "/var/www/html/divumwx": {
+                "permissions": 0o775,
+                "owner": "www-data",
+                "group": self.user,
+                "fix": "False"
+            },
+        }
+        print(f"{green}Gathering current path information{reset}")
+        logging.debug(f"Gathering current path information")
+        print(f"Current Directory Status")
+        print(f"      User Path Exists: {user_path_exists}")
         print(f"     Skins Path Exists: {skins_path_exists}")
-        print(f"     HTML Root Exists: {html_root_exists}")
-        if not html_root_exists:
-            directory_structure = {
-                "/var": {"permissions": 0o755, "owner": "root", "group": "root", "critical": True},
-                "/var/www": {"permissions": 0o755, "owner": wsOwner, "group": wsGroup, "critical": True},
-                "/var/www/html": {"permissions": 0o755, "owner": wsOwner, "group": wsGroup, "critical": False},
-                "/var/www/html/divumwx": {"permissions": 0o775, "owner": wsOwner, "group": self.user, "critical": False}
-            }
-            html_root_created = self.chkDir(html_root, directory_structure)
-            if html_root_created:
-                html_root_exists = os.path.exists(html_root)
-        if html_root_exists and html_root_created:
-            html_root_status_message = "HTML_ROOT was created"
-            html_root_status_color = yellow
-        elif html_root_exists:
-            html_root_status_message = "Path exists"
-            html_root_status_color = green
-        else:
-            html_root_status_message = "Path does not exist or could not be created"
-            html_root_status_color = red
+        print(f"      HTML Root Exists: {html_root_exists}")
+        self.chkDefaultPerms(dirDefaults)
+        print(f"{white}Any items that are marked with a {green}N{white} are good, any that are marked with a {red}X{white} will be fixed next.")
+        self.waitFKP()
+        print(f"{cyan}Scanning for paths that need fixing.\n")
+        logging.debug("Scanning for paths that need fixing.")
+        for path, settings in dirDefaults.items():
+            if settings["fix"] == "True":
+                print(f"{yellow}Fixing: {path}{reset}")
+                logging.debug(f"Fixing: {path}")
+                self.fixPerms(path, settings["permissions"], settings["owner"], settings["group"])
+            else:
+                print(f"{green}No fixes are needed, ready to proceed{reset}")
+                logging.debug(f"No fixes are needed, ready to proceed")
         self.waitFKP()
         os.system("clear")
         self.bkpWXSrv = False
@@ -1000,19 +999,21 @@ class DVMInstaller:
         if bkpWX in ['yes', 'y']:
             logging.debug(f"DivumWX Backup service enabled")
             self.bkpWXSrv = True
-            home_directory = os.path.expanduser('~')
-            subdirectory_path = 'weewx-data/archive'
+            default_dir = bkupDBPath
             main_file_name = 'weewx.sdb'
+            default_name = "weewx.sdb.bak"
+            default_time = "03:00"
             while True:
                 try:
-                    dir_path = input('Please enter the directory path for your backup file (Directory Path only, no filename): ').strip()
+                    dir_path = input(f"Please enter the directory path for your backup file (default: {default_dir}): ").strip()
+                    if not dir_path:
+                        dir_path = default_dir
                     if not os.path.isdir(dir_path):
                         print("The directory does not exist. Please enter a valid directory path.")
                     else:
                         break
                 except Exception as e:
                     print(f"An error occurred: {e}. Please try again.")
-            default_name = "weewx.sdb.bak"
             while True:
                 try:
                     file_name = input(f"Please enter the filename for your backup file (default: {default_name}): ").strip()
@@ -1026,7 +1027,9 @@ class DVMInstaller:
                 except Exception as e:
                     print(f"An error occurred: {e}. Please try again.")
             while True:
-                bkpTime = input('Please enter the time you want the backup to take place (e.g., 03:00): ').strip()
+                bkpTime = input(f"Please enter the time you want the backup to take place (default: {default_time}): ").strip()
+                if not bkpTime:
+                    bkpTime = default_time
                 if re.match(r'^([01][0-9]|2[0-3]):([0-5][0-9])$', bkpTime):
                     try:
                         datetime.strptime(bkpTime, '%H:%M')
@@ -1035,8 +1038,8 @@ class DVMInstaller:
                         print("The time is not valid. Please ensure it is a valid 24-hour time.")
                 else:
                     print("Invalid time format. Please enter the time in HH:MM format (24-hour clock).")
-            wxMainDB =  os.path.join(home_directory, subdirectory_path, main_file_name)
-            wxBkpDB = bkpName
+            wxMainDB =  os.path.join(dir_path, main_file_name)
+            wxBkpDB = os.path.join(dir_path, bkpName)
             wxBkpTime = bkpTime
             d["backupEntry1"]["DVM_DB_Backup"]["databases"] = wxMainDB
             d["backupEntry1"]["DVM_DB_Backup"]["backups"] = wxBkpDB
@@ -1048,11 +1051,13 @@ class DVMInstaller:
         print(f"{blue}+--------------------------------------------------------------------------------------+{reset}")
         print(f"{green}Summary of Gathered Information:{reset}\n")
         print(f"        {cyan}User Path:{reset} {green}{user_path}{reset}")
+        print(f"      {white}Info: Location where we will copy the DivumWX User files to{reset}")
         print(f"           Status: {green if user_path_exists else red}{'Path Exists' if user_path_exists else 'Path does not exist'}{reset}")
         print(f"       {cyan}Skins Path:{reset} {green}{skins_path}{reset}")
+        print(f"      {white}Info: Location where we will copy the DivumWX Skin files to{reset}")
         print(f"           Status: {green if skins_path_exists else red}{'Path Exists' if skins_path_exists else 'Path does not exist'}{reset}")
         print(f"   {cyan}HTML Root Path:{reset} {green}{html_root}{reset}")
-        print(f"           Status: {html_root_status_color}{html_root_status_message}{reset}")
+        print(f"      {white}Info: Location where we will copy the DivumWX Web Server files to{reset}")
         print(f"{cyan}WeeWX Config File:{reset} {green}{weewx_config_file}{reset}")
         print(f"           Status: {green}{'Yes' if weewx_config_file_exists else f'{red}No'}{reset}")
         print(f"{blue}+--------------------------------------------------------------------------------------+{reset}")
@@ -1084,10 +1089,6 @@ class DVMInstaller:
         logging.debug(f"       Skins Path: {skins_path}")
         logging.debug(f"           Status: {'Path Exists' if skins_path_exists else 'Path does not exist'}")
         logging.debug(f"   HTML Root Path: {html_root}")
-        logging.debug(f"           Status: {html_root_status_message}")
-        if html_root_created:
-            logging.debug(f"      Note: Your webserver DOCUMENT_ROOT may need to be changed to point to:")
-            logging.debug(f"            {html_root}")
         logging.debug(f"WeeWX Config File: {weewx_config_file}")
         logging.debug(f"           Status: {'Yes' if weewx_config_file_exists else 'No'}")
         logging.debug(f"+--------------------------------------------------------------------------------------+")
@@ -1164,7 +1165,7 @@ class DVMInstaller:
         logging.debug(f"Backing up weewx config file")
         print('Backing up weewx config file')
         timestamp = time.strftime('%Y%m%d%H%M%S')
-        backup_file = f"{weewx_config_file}.{timestamp}"
+        backup_file = f"{weewx_config_file}_dvm.{timestamp}"
         shutil.copy2(weewx_config_file, backup_file)
         print(f"Backup of weewx config created: {backup_file}")
         time.sleep(1)
@@ -1228,9 +1229,66 @@ class DVMInstaller:
         print(f"{cyan}Weewx Version: {weewx_version}{reset}")
         logging.debug(f"Current Weewx version, {weewx_version}, saved to '{wxVerFile}'.")
         print(f"Weewx version saved to '{wxVerFile}'.")
-        self.setfnlOwner(html_root, wsOwner, self.user)
+        print(f"{white}Performing final directory permissions check")
+        logging.debug(f"Performing final directory permissions check")
+        dirDefaults = {
+            "/var/www/html": {
+                "permissions": 0o755,
+                "owner": "www-data",
+                "group": self.user,
+                "fix": "False"
+            },
+            "/var/www/html/divumwx": {
+                "permissions": 0o775,
+                "owner": "www-data",
+                "group": self.user,
+                "fix": "False"
+            },
+            "/var/www/html/divumwx/admin": {
+                "permissions": 0o775,
+                "owner": "www-data",
+                "group": self.user,
+                "fix": "False"
+            },
+            "/var/www/html/divumwx/admin/archives": {
+                "permissions": 0o775,
+                "owner": "www-data",
+                "group": self.user,
+                "fix": "False"
+            },
+            "/var/www/html/divumwx/admin/assets": {
+                "permissions": 0o775,
+                "owner": "www-data",
+                "group": self.user,
+                "fix": "False"
+            },
+            "/var/www/html/divumwx/admin/db": {
+                "permissions": 0o775,
+                "owner": "www-data",
+                "group": self.user,
+                "fix": "False"
+            },
+            "/var/www/html/divumwx/admin/db/dvmAdmin.db3": {
+                "permissions": 0o644,
+                "owner": "www-data",
+                "group": self.user,
+                "fix": "False"
+            }
+        }
+        self.chkDefaultPerms(dirDefaults)
+        print(f"{cyan}Scanning for paths that need fixing.\n")
+        logging.debug("Scanning for paths that need fixing.")
+        for path, settings in dirDefaults.items():
+            if settings["fix"] == "True":
+                print(f"{yellow}Fixing: {path}{reset}")
+                logging.debug(f"Fixing: {path}")
+                self.fixPerms(path, settings["permissions"], settings["owner"], settings["group"])
+            else:
+                print(f"{green}No fixes are needed, ready to proceed{reset}")
+                logging.debug(f"No fixes are needed, ready to proceed")
+        self.waitFKP()
         print(f"{white}Done! WeeWX must be {yellow}started{white} for changes to become active{reset}")
-        print(f"{green}You will need to ensure that your webserver is set to deliver the DivumWX skin{reset}")
+        print(f"{green}DivumWX is available at {white}http(s)://YourFQDN[or IP]/divumwx")
         logging.debug(f"DivumWX Installation has been completed.")
         self.ctrlWeewx("start")
 

@@ -36,7 +36,7 @@ $sun_elevation = round($sun_alt,2)."°<div class=sunbelowdivumwx> </div>";
 </head>
 <body>
 <div class="chartforecast">
-<span class="yearpopup"><a alt="daylightmap" title="daylightmap" href="dvmDaylightMapPopup.php" data-lity><?php echo $chartinfo;?> World Daylight Map</a></span>
+<span class="yearpopup"><a alt="World Daylight Map" title="World Daylight Map" href="dvmDaylightMapPopup.php" data-lity><?php echo $chartinfo;?> World Daylight Map</a></span>
 <!--span class="yearpopup"><a alt="Projection" title="Projection" href="dvmProjection.php" data-lity><?php echo $chartinfo;?> Projected World Maps</a></span-->
 <span class="yearpopup"><a alt="Solar Terminator" title="Solar Terminator" href="dvmSolarTerminatorPopup.php" data-lity><?php echo $chartinfo;?> Solar Terminator</a></span>
 </div>
@@ -57,7 +57,7 @@ $sun_elevation = round($sun_alt,2)."°<div class=sunbelowdivumwx> </div>";
 <?php echo'<div class="divumwxsolstice">Next Solstice<br><blueu>'.$alm["next_solstice"].'</blueu></div>';?>
 
 <style>
-.solar-oscillator svg { margin-Top: 16px; margin-left: -10px; }
+.solar-oscillator svg { margin-Top: -2.5px; margin-left: -10px; }
 .ocean { fill: url(#oceanGradient); }
 .graticule { fill: none; stroke: #444; stroke-width: 0.2px; stroke-opacity: 1.0; }
 .land { fill: url(#landGradient); }
@@ -102,13 +102,13 @@ function toRadians(x) {
 }
 
     var moonDec = <?php echo $alm["moon_declination"];?>;
-	var Ecliptic = <?php echo $alm["ecliptic_angle"];?>;
+	var ecliptic = <?php echo $alm["ecliptic_angle"];?>;
     var lunarTerminator = <?php echo $alm["moon_ecliptic_angle"];?>; 
 	var lat = <?php echo $lat;?>;
 	var long = <?php echo $lon;?>;
 
-  	var w = 140;
-  	var h = 110;
+  	var w = 310;
+  	var h = 150;
 
   	var circle0 = d3.geoCircle().radius(90); // night time (sunrise sunset)
     var circle1 = d3.geoCircle().radius(84); // civil twilight (dawn dusk) -6°
@@ -119,38 +119,38 @@ if (lat > 0.0) {
     var projection = d3.geoOrthographic()
         .scale(50)
         .translate([w/2, h/2])
-        .rotate([-long, -Ecliptic, -Ecliptic])
+        .rotate([-long, -ecliptic, -ecliptic])
         .precision(0.1)
         .clipAngle(90);
 
     var sunProjection = d3.geoOrthographic()
-        .scale(60)
-        .rotate([-long, -Ecliptic, -Ecliptic])
+        .scale(61)
+        .rotate([-long, -ecliptic, -ecliptic])
         .precision(0.1)
         .translate(projection.translate());
 
     var moonProjection = d3.geoOrthographic()
-        .scale(55)
-        .rotate([-long, -Ecliptic, -Ecliptic])
+        .scale(53.5)
+        .rotate([-long, -ecliptic, -ecliptic])
         .precision(0.1)
         .translate(projection.translate());
 } else {
     var projection = d3.geoOrthographic()
         .scale(50)
         .translate([w/2, h/2])
-        .rotate([-long, Ecliptic, -Ecliptic])
+        .rotate([-long, ecliptic, -ecliptic])
         .precision(0.1)
         .clipAngle(90);
 
     var sunProjection = d3.geoOrthographic()
-        .scale(60)
-        .rotate([-long, Ecliptic, -Ecliptic])
+        .scale(61)
+        .rotate([-long, ecliptic, -ecliptic])
         .precision(0.1)
         .translate(projection.translate());
 
     var moonProjection = d3.geoOrthographic()
-        .scale(55)
-        .rotate([-long, Ecliptic, -Ecliptic])
+        .scale(53.5)
+        .rotate([-long, ecliptic, -ecliptic])
         .precision(0.1)
         .translate(projection.translate());
 }
@@ -171,8 +171,8 @@ if (lat > 0.0) {
     var defs = svg.append("defs");
 
     // sun and moon scale factor for a 3D effect
-    var sunScale = d3.scaleLinear().domain([0,1]).range([1.5,10]);
-    var moonScale = d3.scaleLinear().domain([0,1]).range([1,3]);
+    var sunScale = d3.scaleLinear().domain([0,1]).range([1.5,9]);
+    var moonScale = d3.scaleLinear().domain([0,1]).range([0.6,3.5]);
 
   	svg.append("defs")
       	.append("path")
@@ -211,17 +211,17 @@ if (lat > 0.0) {
       .attr("xlink:href", "#sphere");
 
     var sunGradientMini = defs.append("radialGradient")
-    .attr("id", "sunGradientMini")
-    .attr("cx", "75%")
-    .attr("cy", "25%");
-  
+      .attr("id", "sunGradientMini")
+      .attr("cx", "75%")
+      .attr("cy", "25%");
+
   sunGradientMini.append("stop").attr("offset", "5%").attr("stop-color", "#ffcfc7");
   sunGradientMini.append("stop").attr("offset", "150%").attr("stop-color", "#ff6347");
 
   var moonGradientMini = defs.append("radialGradient")
-    .attr("id", "moonGradientMini")
-    .attr("cx", "75%")
-    .attr("cy", "25%");
+      .attr("id", "moonGradientMini")
+      .attr("cx", "75%")
+      .attr("cy", "25%");    
   
   moonGradientMini.append("stop").attr("offset", "5%").attr("stop-color", "#f5f5f5");
   moonGradientMini.append("stop").attr("offset", "150%").attr("stop-color", "#999999");
@@ -348,7 +348,7 @@ if (lat > 0.0) {
         .attr("d", path);
 
     g.append("path")
-        .datum({type: "LineString", coordinates: [[-180, 0], [-90, -Ecliptic], [0, 0], [90, Ecliptic], [180, 0]]})
+        .datum({type: "LineString", coordinates: [[-180, 0], [-90, -ecliptic], [0, 0], [90, ecliptic], [180, 0]]})
         .attr("class", "ecliptic")
         .attr("d", path);
 
@@ -369,16 +369,17 @@ if (lat > 0.0) {
     var solarTerminator = solarPosition(new Date(Date.now() + Δ));
 
     svg.append('circle').datum([])
-      .attr('class','sun');
-
-    svg.append('circle').datum([])
       .attr('class','moon');
 
-    var sunshine = d3.selectAll('.sun'); 
-    var moonshine = d3.selectAll('.moon');     
-    var globeMaskCircleSun = d3.selectAll('#globeMaskCircleSun');
-    var globeMaskCircleMoon = d3.selectAll('#globeMaskCircleMoon');
+    svg.append('circle').datum([])
+      .attr('class','sun');
 
+    var sunshine = d3.selectAll('.sun'); 
+    var moonshine = d3.selectAll('.moon');
+        
+    var globeMaskCircleMoon = d3.selectAll('#globeMaskCircleMoon');     
+    var globeMaskCircleSun = d3.selectAll('#globeMaskCircleSun');
+    
     var sunPos = solarTerminator,
       antiSunPos = antipode(sunPos);
 

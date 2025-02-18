@@ -28,7 +28,7 @@ else if($theme==="light"){echo '<style>@font-face{font-family:weathertext2;src:u
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>XWeather Day and Night Forecast</title>
+  <title>AerisWeather Day and Night Forecast</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
@@ -191,7 +191,7 @@ for ($k = 0;$k < 12;$k++)
     {
         echo "<greent>" . $forecastTime[$k] . "&nbsp;&nbsp;   " . number_format($forecastTempHigh[$k], 0);
     }
-    echo "째" . $tempunit . "</actualt>";
+    echo "°" . $tempunit . "</actualt>";
 
     //high temp icon
     if ($forecastnight == 'D')

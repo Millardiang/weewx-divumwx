@@ -990,7 +990,7 @@ class Rain {
     animateRadiusX.setAttribute('begin', `${begin}ms`);
 
     let ellipse = document.createElementNS(ns, 'ellipse');
-    ellipse.setAttribute('stroke', `rgba(59, 156, 172, 0.4)`);
+    ellipse.setAttribute('stroke', `<?php echo $colorRainRate;?>`);
     ellipse.setAttribute('stroke-width', 1);
     ellipse.setAttribute('fill', 'none');
     ellipse.setAttribute('cx', randBetween(0, this.width));

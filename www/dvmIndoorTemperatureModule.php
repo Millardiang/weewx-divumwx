@@ -47,7 +47,7 @@ if($temp["units"] == "C"){$temp["indoor_now_feels"] = ($temp["indoor_now_feels"]
 
 	var tubeFillColor = "var(--col-10)";
     var colorS = "var(--col-6)";
-    var houseColor = "var(--col-18)";
+    var houseColor = "var(--col-14)";
 
 	var theme = "<?php echo $theme;?>";
 

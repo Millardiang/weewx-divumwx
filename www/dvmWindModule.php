@@ -1,5 +1,6 @@
 <?php
 include('dvmCombinedData.php');
+
 $speedColor = $color["windSpeed"];
 $gustColorMax = $color["windGust_max"];
 ##############################################################################################

@@ -31,8 +31,8 @@ filepileTextData.txt with permissions set to 0777 to make it writeable and execu
 # lines 33 to 37 and lines 39 to 42 and set the correct path to the source at line 10
 # Configure arrays at lines 36 and 37 to your json data as required
 #
-include('dvmUpdater.php');
-$json_cloud = file_get_contents("/var/www/html/divumwx/jsondata/awc.txt");
+include('getFilePileData.php');
+/*$json_cloud = file_get_contents("/var/www/html/divumwx/jsondata/awc.txt");
 $cloud = json_decode($json_cloud, true);
 $cloudcover = $cloud['response'][0]['periods'][0]['sky'];
 $json = "/var/www/html/divumwx/jsondata/airquality.txt";
@@ -53,6 +53,8 @@ $olive = $arr["current"]["olive_pollen"];
 $grass = $arr["current"]["grass_pollen"];
 $mugwort = $arr["current"]["mugwort_pollen"];
 $ragweed = $arr["current"]["ragweed_pollen"];
+*/
+//$solarGeneration = file_get_contents("/var/www/html/divumwx/serverdata/solarGeneration.txt");
 $myfile = fopen("/var/www/html/divumwx/serverdata/filepileTextData.txt", "w") or die("Unable to open file!");
 $txt = "pm25 = $pm25\n";
 fwrite($myfile, $txt);
@@ -84,7 +86,19 @@ $txt = "mugwort = $mugwort\n";
 fwrite($myfile, $txt);
 $txt = "ragweed = $ragweed\n";
 fwrite($myfile, $txt);
-$txt = "cloudCover = $cloudcover";
+$txt = "cloudCover = $cloudcover\n";
+fwrite($myfile, $txt);
+$txt = "kWh = $kwh\n";
+fwrite($myfile, $txt);
+$txt = "gridProduction = $gridProduction\n";
+fwrite($myfile, $txt);
+$txt = "solarBattery = $solarBattery\n";
+fwrite($myfile, $txt);
+$txt = "gridExport = $gridExport\n";
+fwrite($myfile, $txt);
+$txt = "batteryCharge = $batteryCharge\n";
+fwrite($myfile, $txt);
+$txt = "solarGeneration = $solarGeneration";
 fwrite($myfile, $txt);
 fclose($myfile);
 ?>

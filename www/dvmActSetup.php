@@ -14,22 +14,16 @@
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
 session_start();
+$_SESSION['setup_allowed'] = true;
+error_log("setup_allowed set in session");
+
 if (!isset($_SESSION['canAccessSetup']) || $_SESSION['canAccessSetup'] !== true) {
     die('Unauthorized access detected. This incident will be reported.');
 }
-unset($_SESSION['canAccessSetup']);
-unset($_SESSION['setupAttempted']);
-if (setupFailsForSomeReason()) {
-    // If an error happens, log it and set the flag to trigger the error message in index.php
-    $_SESSION['setupAttempted'] = true; // Indicate an error occurred
-    error_log("Error during setup.", 0); // Log more details as needed
-    header("Location: index.php"); // Redirect back to handle the error
-    exit;
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(length: 32));
 }
-function setupFailsForSomeReason() {
-    // Simulated setup failure condition
-    return false; // Change to true to simulate an error
-}
+echo "<script>const csrfToken = '" . $_SESSION['csrf_token'] . "';</script>";
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -315,18 +309,20 @@ function setupFailsForSomeReason() {
                 <div id="tab3" class="tab">
                 <div id="password-tab">
                     <div id="info-box" class="info-box">
-                        <h3>Create Admin Password</h3>
-                        <p>Please enter a strong password following the guidelines below:</p>
+                        <h3>Create Admin Account</h3>
+                        <p>Please enter an admin username and a strong password following the guidelines below:</p>
                         <ul>
                             <li>At least 8 characters long</li>
                             <li>Contains both uppercase and lowercase letters</li>
                             <li>Includes at least one numeric digit</li>
                             <li>Has at least one special character</li>
                         </ul>
-                        <h4>After entering your new password and clicking on submit, the password will be updated in the database, and the next button will be enabled. Clicking on the next button will take you to the admin login page. Your login will be "admin" and the new password you've just created.</h4>
-                        <p>In the event of a lost password, there is a cli script that can be run locally, in your admin directory, called resetPassword.php. This script can only be run from the command line and not from a web server.</p>
+                        <h4>After entering your admin username and new password, click submit. The credentials will be updated in the database, and the next button will be enabled. Clicking on the next button will take you to the admin login page.</h4>
+                        <p>In the event of a lost password, there is a CLI script that can be run locally, in your admin directory, called `resetPassword.php`. This script can only be run from the command line and not from a web server.</p>
                     </div>
                     <form id="password-form">
+                        <label for="admin-username">Admin Username:</label>
+                        <input type="text" id="admin-username" name="admin-username" required>
                         <label for="password">Enter Password:</label>
                         <input type="password" id="password" name="password" required>
                         <button type="button" id="password-submit-button" class="next-button">Submit</button>

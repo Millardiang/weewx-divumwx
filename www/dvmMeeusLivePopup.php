@@ -4,7 +4,7 @@ include('dvmCombinedData.php');
 if($theme==="light"){ echo "<body style='background-color:e0eafb'>";}
 else if($theme==="dark"){ echo "<body style='background-color:#292E35'>";}
 if($theme==="light"){ $textColor = "#1c4263";}
-else if($theme==="dark"){ $textColor = "white";}
+else if($theme==="dark"){ $textColor = "silver";}
 ##############################################################################################
 #        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
 #       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    #
@@ -31,7 +31,7 @@ else if($theme==="dark"){ $textColor = "white";}
 <div style="position:relative; top:10px;display:flex;justify-content:center;align-items:center;font-family:Helvetica;">
 <?php
 if($theme==="light"){echo "<font color='#1c4263'>"."Geocentric Live Meeus Calculation"."</font>";}
-else if($theme==="dark"){echo "<font color='white'>"."Geocentric Live Meeus Calculation"."</font>";}
+else if($theme==="dark"){echo "<font color='silver'>"."Geocentric Live Meeus Calculation"."</font>";}
 ?>
 </div>
 <style>
@@ -51,8 +51,6 @@ text{fill:<?php if($theme==="light"){echo "#1c4263";} else if($theme==="dark"){e
 <div class="moonphaze"></div>
 </div>
 <script>
-
-var moon = "<?php echo $moon;?>";
 
 // text color
 var tcolor = "<?php echo $textColor;?>";
@@ -473,7 +471,7 @@ var value = ELP82.elp82(T);
 // Moon distance in km
 const Rm = value[1];
 // Illumination in %
-const perc = value[3] * 100 -0.154;
+const perc = value[3] * 100;
 // Sun distance in km
 const Rs = value[4] * 1.496e+8;
 
@@ -1092,35 +1090,35 @@ if (latitude < 0.0) {
 
 var defs = svg.append("defs");
 
-var moonGradient = defs.append("radialGradient")
-    .attr("id", "moonGradient")
+var moonGradientMeeus = defs.append("radialGradient")
+    .attr("id", "moonGradientMeeus")
     .attr("cx", "50%")
     .attr("cy", "50%")
     .attr("r", "50%")
     .attr("fx", "50%")
     .attr("fy", "50%");
 
-moonGradient.append("stop")
+moonGradientMeeus.append("stop")
     .attr("offset", "0%")
     .style("stop-color", innerColor);
 
-moonGradient.append("stop")
+moonGradientMeeus.append("stop")
     .attr("offset", "90%")
     .style("stop-color", "#555");
 
-var sunGradient = defs.append("radialGradient")
-    .attr("id", "sunGradient")
+var sunGradientMeeus = defs.append("radialGradient")
+    .attr("id", "sunGradientMeeus")
     .attr("cx", "50%")
     .attr("cy", "50%")
     .attr("r", "50%")
     .attr("fx", "50%")
     .attr("fy", "50%");
 
-sunGradient.append("stop")
+sunGradientMeeus.append("stop")
     .attr("offset", "0%")
     .style("stop-color", innerColor);
 
-sunGradient.append("stop")
+sunGradientMeeus.append("stop")
     .attr("offset", "90%")
     .style("stop-color", "tomato");
 
@@ -1147,7 +1145,7 @@ if (latitude < 0.0) {
 if (sunazi < 180.0) {
  svg
     .append("circle")
-    .style("fill", "url(#sunGradient)")
+    .style("fill", "url(#sunGradientMeeus)")
     .attr("r", 8)
     .attr("cx", xScale(180 - sunazi))
     .attr("cy", yScale(sunalt))
@@ -1158,7 +1156,7 @@ if (sunazi < 180.0) {
 } else {
   svg
     .append("circle")
-    .style("fill", "url(#sunGradient)")
+    .style("fill", "url(#sunGradientMeeus)")
     .attr("r", 8)
     .attr("cx", xScale(360 + 180 - sunazi))
     .attr("cy", yScale(sunalt))
@@ -1170,7 +1168,7 @@ if (sunazi < 180.0) {
 } else {
   svg
     .append("circle")
-    .style("fill", "url(#sunGradient)")
+    .style("fill", "url(#sunGradientMeeus)")
     .attr("r", 8)
     .attr("cx", xScale(sunazi))
     .attr("cy", yScale(sunalt))
@@ -1205,7 +1203,7 @@ if (latitude < 0.0) {
 if (moonazi < 180.0) {
   svg
     .append("circle")
-    .style("fill", "url(#moonGradient)")
+    .style("fill", "url(#moonGradientMeeus)")
     .attr("r", 5)
     .attr("cx", xScale(180 - moonazi))
     .attr("cy", yScale(moonalt))
@@ -1216,7 +1214,7 @@ if (moonazi < 180.0) {
 } else {
   svg
     .append("circle")
-    .style("fill", "url(#moonGradient)")
+    .style("fill", "url(#moonGradientMeeus)")
     .attr("r", 5)
     .attr("cx", xScale(360 + 180 - moonazi))
     .attr("cy", yScale(moonalt))
@@ -1228,7 +1226,7 @@ if (moonazi < 180.0) {
 } else {
   svg
     .append("circle")
-    .style("fill", "url(#moonGradient)")
+    .style("fill", "url(#moonGradientMeeus)")
     .attr("r", 5)
     .attr("cx", xScale(moonazi))
     .attr("cy", yScale(moonalt))

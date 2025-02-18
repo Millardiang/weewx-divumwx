@@ -11,22 +11,23 @@ else if($theme==="dark"){ echo "<body style='background-color:#292E35'>"; }
 #       |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \     #
 #       (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|    #
 #                                                                                            #
-#     Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      #
+#     Copyright (C) 2025 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      #
 #      Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.       #
 #    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
+// Sean Jan 25th 2025
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <meta charset="utf-8">
 
 <style>
-.solarTerminator {display:flex; justify-content:center; align-items:center; margin-top:33px; margin-left:0px; }
+.solarTerminator { display:flex; justify-content:center; align-items:center; margin-top:33px; margin-left:0px; }
 .ocean { fill: url(#oceanGradient); }
 .graticule { fill: none; stroke: #444; stroke-width: 0.2px; stroke-opacity: 1.0; }
 .land { fill: url(#landGradient); }
-.borders {fill: none; stroke: #292E35; stroke-width: 0.2px; }
+.borders { fill: none; stroke: #292E35; stroke-width: 0.2px; }
 .night { stroke-width: 0.1px; stroke: #292e35; fill: #292e35; fill-opacity: 0.2; } 
 .civiltwilight { stroke-width: 0.1px; stroke: #292e35; fill: #292e35; fill-opacity: 0.35; }
 .nauticaltwilight { stroke-width: 0.1px; stroke: #292e35; fill: #292e35; fill-opacity: 0.5; }
@@ -62,16 +63,16 @@ else if($theme==="dark"){ echo "<body style='background-color:#292E35'>"; }
 <script src="js/d3.7.9.0.min.js"></script>
 <script src="js/d3-geo-projection.4.0.0.min.js"></script>
 <script src="js/topojson.3.0.2.min.js"></script>
-
 <div class="solarTerminator"></div>
 <script>
-/*
+
 // refresh the script every 60 seconds
 window.setInterval('refresh()', 60000);     
     function refresh() {
         window.location.reload();
-    }
-*/
+  }
+
+
   var π = Math.PI;
 
 function toDegrees(x) {
@@ -88,7 +89,7 @@ function toRadians(x) {
   var lat = <?php echo $lat;?>;
   var long = <?php echo $lon;?>;
 
-  var w = 500;
+  var w = 790;
   var h = 500;
 
 if (lat > 0.0) {
@@ -101,12 +102,12 @@ if (lat > 0.0) {
     .precision(0.1);
 
   var skynet = d3.geoOrthographic()
-    .scale(230)
+    .scale(235)
     .rotate([-long, -ecliptic, -ecliptic])
     .translate(earth.translate());
 
   var lunar = d3.geoOrthographic()
-    .scale(208)
+    .scale(217)
     .rotate([-long, -ecliptic, -ecliptic])
     .translate(earth.translate());
 } else {
@@ -119,12 +120,12 @@ if (lat > 0.0) {
     .precision(0.1);
 
   var skynet = d3.geoOrthographic()
-    .scale(230)
+    .scale(235)
     .rotate([-long, ecliptic, -ecliptic])
     .translate(earth.translate());
 
   var lunar = d3.geoOrthographic()
-    .scale(208)
+    .scale(217)
     .rotate([-long, ecliptic, -ecliptic])
     .translate(earth.translate());
 }
@@ -141,15 +142,52 @@ if (lat > 0.0) {
 
   var svg = d3.select(".solarTerminator")
       .append("svg")
-      //.style("background", "#292E35") 
+      //.style("background", "red") 
       .attr("width", w)
       .attr("height", h);
 
+  // create a random map of stars
+  var dots = 75;  
+  var stars = (function() {
+  var result = [];
+  for(var i = 0; i < 1 * dots; i++) {
+      result.push({
+          id: 1,
+          position: [Math.random() * w, Math.random() * h],
+          color: d3.rgb(0,150,250),
+          radius: 0.5,
+          fillOpacity: 1,
+          stroke: d3.rgb(0,150,250)
+      });
+      result.push({
+          id: 1,
+          position: [Math.random() * w, Math.random() * h],
+          color: d3.rgb(0,150,250),
+          radius: 0.5,
+          fillOpacity: 1,
+          stroke: d3.rgb(0,150,250)
+        });
+      }
+      return result;
+    });
+
+  svg.selectAll("stars")
+      .data(stars).enter()
+      .append("circle")
+      .attr("class", "stars")
+      .attr("id", (d, i) => { return "stars" + i; })
+      .attr("r", d => { return d.radius; })
+      .attr("cx", d => { return d.position[0]; })
+      .attr("cy", d => { return d.position[1]; })
+      .style("fill", d => { return d.color; })
+      .style("fill-opacity", d => { return d.fillOpacity; })
+      .style("stroke", d => { return d.stroke; });
+
   var defs = svg.append("defs");
-  
+    
   // sun and moon scale factor for a 3D effect
   var sunScale = d3.scaleLinear().domain([0,1]).range([5,25]);
-  var moonScale = d3.scaleLinear().domain([0,1]).range([2,6]);
+  var moonScale = d3.scaleLinear().domain([0,1]).range([2,8]);
 
   d3.json("jsondata/worldmap.json").then(function(world) {
 
@@ -194,17 +232,17 @@ if (lat > 0.0) {
       .attr("xlink:href", "#sphere");
 
   var sunGradient = defs.append("radialGradient")
-    .attr("id", "sunGradient")
-    .attr("cx", "75%")
-    .attr("cy", "25%");
+      .attr("id", "sunGradient")
+      .attr("cx", "75%")
+      .attr("cy", "25%");
   
   sunGradient.append("stop").attr("offset", "5%").attr("stop-color", "#ffcfc7");
   sunGradient.append("stop").attr("offset", "150%").attr("stop-color", "#ff6347");
 
   var moonGradient = defs.append("radialGradient")
-    .attr("id", "moonGradient")
-    .attr("cx", "75%")
-    .attr("cy", "25%");
+      .attr("id", "moonGradient")
+      .attr("cx", "75%")
+      .attr("cy", "25%");
   
   moonGradient.append("stop").attr("offset", "5%").attr("stop-color", "#f5f5f5");
   moonGradient.append("stop").attr("offset", "150%").attr("stop-color", "#999999");
@@ -279,7 +317,7 @@ if (lat > 0.0) {
       .extentMinor([[-180, -23.536556 - 1e-6], [180, -23.536556 + 1e-6]]);
 
   svg.append("path")
-      .datum(capricorn)
+      .datum(capricorn) // Tropic
       .attr("class", "capricorn");
 
   var cancer = d3.geoGraticule()
@@ -288,7 +326,7 @@ if (lat > 0.0) {
       .extentMinor([[-180, -23.436556 - 1e-6], [180, 23.436556 + 1e-6]]);
 
   svg.append("path")
-      .datum(cancer)
+      .datum(cancer) // Tropic
       .attr("class", "cancer");
 
   var arctic = d3.geoGraticule()
@@ -337,23 +375,25 @@ setInterval(function() {
   svg.append("path").attr("class", "astronomicaltwilight");
 
   svg.append('circle').datum([])
-      .attr('class','sun');
-
-  svg.append('circle').datum([])
       .attr('class','moon');
 
- redraw();
-   
+  svg.append('circle').datum([])
+      .attr('class','sun');
+
+  redraw();
+  
 }
-    
+
 function redraw(now) {
     var now = now || new Date(Date.now());
     var night = d3.selectAll('.night');
     var civil_twilight = d3.selectAll('.civiltwilight');
     var nautical_twilight = d3.selectAll('.nauticaltwilight');
     var astronomical_twilight = d3.selectAll('.astronomicaltwilight');
+
     var sunshine = d3.selectAll('.sun'); 
-    var moonshine = d3.selectAll('.moon');     
+    var moonshine = d3.selectAll('.moon');
+
     var globeMaskCircleSun = d3.selectAll('#globeMaskCircleSun');
     var globeMaskCircleMoon = d3.selectAll('#globeMaskCircleMoon');
 
@@ -423,10 +463,9 @@ function redraw(now) {
     globeMaskCircleSun // (sun mask) naturally rising an setting of the sun behind the globe
       .classed('behind', d => { return degrees_from_center_sun(sunPos) > 90 ? true : false; });
 
-    globeMaskCircleMoon //  (moon mask) naturally rising and setting of the moon behind the globe
+    globeMaskCircleMoon // (moon mask) naturally rising and setting of the moon behind the globe
       .classed('behind', d => { return degrees_from_center_moon(moonPos) > 90 ? true : false; });           
-  }
-
+   }
 });
 
 function degrees_from_center_sun(d) {

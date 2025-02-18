@@ -1,6 +1,6 @@
 <?php 
 include('dvmCombinedData.php');
-include('filepileTextCreate.php');
+//include('filepileTextCreate.php');
 $speedColor = $color["windSpeed"];
 $gustColorMax = $color["windGust_max"];
 ##############################################################################################

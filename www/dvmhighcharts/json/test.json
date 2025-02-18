@@ -1,0 +1,259 @@
+<?php
+?>
+<?php
+$heatData = 
+"[
+{
+date: '2024-10-01',
+temperature: 12.6
+},
+{
+date: '2024-10-02',
+temperature: 15.5
+},
+{
+date: '2024-10-03',
+temperature: 17.5
+},
+{
+date: '2024-10-04',
+temperature: 16.8
+},
+{
+date: '2024-10-05',
+temperature: 17.4
+},
+{
+date: '2024-10-06',
+temperature: 14.4
+},
+{
+date: '2024-10-07',
+temperature: 19.0
+},
+{
+date: '2024-10-08',
+temperature: 17.3
+},
+{
+date: '2024-10-09',
+temperature: 15.6
+},
+{
+date: '2024-10-10',
+temperature: 11.7
+},
+{
+date: '2024-10-11',
+temperature: 13.2
+},
+{
+date: '2024-10-12',
+temperature: 14.4
+},
+{
+date: '2024-10-13',
+temperature: 10.7
+},
+{
+date: '2024-10-14',
+temperature: 11.4
+},
+{
+date: '2024-10-15',
+temperature: 16.3
+},
+{
+date: '2024-10-16',
+temperature: 19.0
+},
+{
+date: '2024-10-17',
+temperature: 18.0
+},
+{
+date: '2024-10-18',
+temperature: 16.1
+},
+{
+date: '2024-10-19',
+temperature: 17.4
+},
+{
+date: '2024-10-20',
+temperature: 17.0
+},
+{
+date: '2024-10-21',
+temperature: 13.6
+},
+{
+date: '2024-10-22',
+temperature: 16.9
+},
+{
+date: '2024-10-23',
+temperature: 16.8
+},
+{
+date: '2024-10-24',
+temperature: 17.7
+},
+{
+date: '2024-10-25',
+temperature: 16.2
+},
+{
+date: '2024-10-26',
+temperature: 14.7
+},
+{
+date: 'null',
+temperature: null
+},
+{
+date: 'null',
+temperature: null
+},
+{
+date: 'null',
+temperature: null
+},
+{
+date: 'null',
+temperature: null
+},
+{
+date: 'null',
+temperature: null
+},
+];";}
+else {
+$heatData = 
+"[
+{
+date: '2024-10-01',
+temperature: 54.7
+},
+{
+date: '2024-10-02',
+temperature: 59.9
+},
+{
+date: '2024-10-03',
+temperature: 63.5
+},
+{
+date: '2024-10-04',
+temperature: 62.2
+},
+{
+date: '2024-10-05',
+temperature: 63.3
+},
+{
+date: '2024-10-06',
+temperature: 57.9
+},
+{
+date: '2024-10-07',
+temperature: 66.2
+},
+{
+date: '2024-10-08',
+temperature: 63.1
+},
+{
+date: '2024-10-09',
+temperature: 60.1
+},
+{
+date: '2024-10-10',
+temperature: 53.1
+},
+{
+date: '2024-10-11',
+temperature: 55.8
+},
+{
+date: '2024-10-12',
+temperature: 57.9
+},
+{
+date: '2024-10-13',
+temperature: 51.3
+},
+{
+date: '2024-10-14',
+temperature: 52.5
+},
+{
+date: '2024-10-15',
+temperature: 61.3
+},
+{
+date: '2024-10-16',
+temperature: 66.2
+},
+{
+date: '2024-10-17',
+temperature: 64.4
+},
+{
+date: '2024-10-18',
+temperature: 61.0
+},
+{
+date: '2024-10-19',
+temperature: 63.3
+},
+{
+date: '2024-10-20',
+temperature: 62.6
+},
+{
+date: '2024-10-21',
+temperature: 56.5
+},
+{
+date: '2024-10-22',
+temperature: 62.4
+},
+{
+date: '2024-10-23',
+temperature: 62.2
+},
+{
+date: '2024-10-24',
+temperature: 63.9
+},
+{
+date: '2024-10-25',
+temperature: 61.2
+},
+{
+date: '2024-10-26',
+temperature: 58.5
+},
+{
+date: 'null',
+temperature: null
+},
+{
+date: 'null',
+temperature: null
+},
+{
+date: 'null',
+temperature: null
+},
+{
+date: 'null',
+temperature: null
+},
+{
+date: 'null',
+temperature: null
+},
+];";
+?>

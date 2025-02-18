@@ -493,6 +493,7 @@ $parts1 = explode("/", $parts[0]);
 $lightning["time_ago"] = time() - strtotime("20" . $parts1[2] . $parts1[1] . $parts1[0] . " " . $parts[1]);
 }
 
+
 //rainfall
 #if $current.rain.has_data
 $rain["units"] = "$unit.label.rain";
@@ -508,12 +509,12 @@ else if($rain["units"] == " in")
 {
 $rain["units"] = "in";
 }
-$rain["rate"] = round($weewxrt[8],1);
-$rain["current"] = round($weewxrt[9],1);
+$rain["rate"] = round($weewxrt[8],2);
+$rain["dayRain"] = round($weewxrt[9],2);
 $rain["total"] = round($day.rain.sum.raw,1);
-$rain["last_hour"] = round($span($hour_delta=1).rain.sum.raw,1);
+$rain["last_hour"] = round($span($hour_delta=1).rain.sum.raw,2);
 $rain["last_10min"] = $span($time_delta=600).rain.sum.raw;
-$rain["last_24hour"] = round($span($hour_delta=24).rain.sum.raw,1);
+$rain["last_24hour"] = round($span($hour_delta=24).rain.sum.raw,2);
 #if $day($days_ago=1).rainRate.has_data
 $rain["24h_rate_max"] = $day($days_ago=1).rainRate.max.raw;
 $rain["24h_rate_maxtime"] = $day($days_ago=1).rainRate.maxtime.raw;
@@ -521,22 +522,25 @@ $rain["yesterday_rate_max"] = $day($days_ago=1).rainRate.max.raw;
 $rain["yesterday_rate_maxtime"] = $day($days_ago=1).rainRate.maxtime.raw;
 $rain["yesterday"] = round($day($days_ago=1)rain.sum.raw,1);
 #end if
-$rain["24h_total"] = round($span($hour_delta=24).rain.sum.raw,1);
-$rain["day"] = round($day.rain.sum.raw,1);
+$rain["24h_total"] = round($span($hour_delta=24).rain.sum.raw,2);
+$rain["day"] = round($current.dayRain.raw,1);
+//$rain["dayRain"] = round($current.dayRain.raw,2);
 $rain["day_rate_max"] = $day.rainRate.max.raw;
 $rain["day_rate_maxtime"] = $day.rainRate.maxtime.raw;
 $rain["day_total"] = $day.rain.sum.raw;
 $rain["month_rate_max"] = $month.rainRate.max.raw;
+$rain["monthRain"] = round($current.monthRain.raw,2);
 $rain["month_rate_maxtime"] = $month.rainRate.maxtime.raw;
-$rain["month_total"] = round($month.rain.sum.raw,1);
+$rain["month_total"] = round($current.monthRain.raw,2);
 $rain["year_rate_max"] = $year.rainRate.max.raw;
 $rain["year_rate_maxtime"] = $year.rainRate.maxtime.raw;
-$rain["year_total"] = round($year.rain.sum.raw,1);
+$rain["year_total"] = round($current.yearRain.raw,2);
+$rain["yearRain"] = round($current.yearRain.raw,2);
 $rain["alltime_rate_max"] = $alltime.rainRate.max.raw;
 $rain["alltime_rate_maxtime"] = $alltime.rainRate.maxtime.raw;
-$rain["alltime_total"] = round($alltime.rain.sum.raw,1);
+$rain["alltime_total"] = round($alltime.rain.sum.raw,2);
 #if $current.stormRain.has_data
-$rainStorm = $current.stormRain.raw;
+$rainStorm = round($current.stormRain.raw,1);
 if(is_numeric($rainStorm) != 1){$rain["storm_rain"] = 0;}
 else{$rain["storm_rain"] = $rainStorm;}
 if($rain["storm_rain"] > 0 ){$rain["storm_rain_start"] = date('D j M H:i',($TS)-($time_since('stormRain=0').raw));}
@@ -1044,6 +1048,6 @@ $Tdc = (($Tc-(14.55+0.114*$Tc)*(1-(0.01*$RH))-pow((2.5+0.007*$Tc)*(1-(0.01*$RH))
 $E = (6.11*pow(10,(7.5*$Tdc/(237.7+$Tdc))));
 $wetbulbcalc = (((0.00066*$P)*$Tc)+((4098*$E)/pow(($Tdc+237.7),2)*$Tdc))/((0.00066*$P)+(4098*$E)/pow(($Tdc+237.7),2));
 $wetbulbx = number_format($wetbulbcalc,1);
-//include ('dvmCustomData.php');  
+
   
 ?>

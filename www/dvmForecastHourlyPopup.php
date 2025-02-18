@@ -38,7 +38,7 @@ else if ($theme === "light")
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>XWeather Hourly Forecast</title>
+  <title>AerisWeather Hourly Forecast</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <!--<link href="css/popup.light.css?version=<?php echo filemtime('css/popup.light.css'); ?>" rel="stylesheet prefetch">//-->
 
@@ -165,7 +165,7 @@ for ($k = 0;$k < 12;$k++)
     {
         echo "<greent>" . $forecastTime[$k] . "h&nbsp;&nbsp;   " . number_format($forecastTempHigh[$k], 0);
     }
-    echo "째" . $tempunit . "</actualtn>";
+    echo "°" . $tempunit . "</actualtn>";
 
     //high temp icon
     if ($forecastnight == 'D')
