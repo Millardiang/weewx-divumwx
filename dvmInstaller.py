@@ -486,7 +486,7 @@ class DVMInstaller:
                     print(f"{yellow}Permission denied when creating {path}. Retrying with sudo...{reset}")
                     try:
                         print(f"{cyan}Attempting to create directory {path} using sudo...{reset}")
-                        subprocess.run(["sudo", "-S", "mkdir", "-p", path], check=True, stdin=subprocess.PIPE)
+                        subprocess.run(["sudo", "mkdir", "-p", path], check=True, stdin=subprocess.PIPE)
                     except subprocess.CalledProcessError as e:
                         logging.debug(f"Failed to create directory with sudo: {e}")
                         return {"success": False, "message": "Failed to create directory with sudo.", "error": str(e)}
@@ -514,8 +514,8 @@ class DVMInstaller:
             logging.debug(f"Permission error on {path}, retrying with sudo.")
             print(f"{yellow}Permission error on {path}. Retrying with sudo...{reset}")
             try:
-                subprocess.run(["sudo", "-S", "chmod", f"{perms:o}", path], check=True, stdin=subprocess.PIPE)
-                subprocess.run(["sudo", "-S", "chown", f"{owner}:{group}", path], check=True, stdin=subprocess.PIPE)
+                subprocess.run(["sudo", "chmod", f"{perms:o}", path], check=True, stdin=subprocess.PIPE)
+                subprocess.run(["sudo", "chown", f"{owner}:{group}", path], check=True, stdin=subprocess.PIPE)
                 logging.debug(f"Fixed {path} with sudo.")
                 print(f"{green}Fixed permissions for {path} using sudo.{reset}")
                 return {"success": True, "message": "Permissions fixed using sudo.", "error": None}

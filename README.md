@@ -11,5 +11,3 @@ To install the template, follow the instructions in the 'installation guide' ([I
 # Version 1.0.00rc1 has been released
 
 As we are still in beta testing, back up your current installation first. You will need to make a full installation over your existing installation, as the critical file divumwx.py has also been updated.
-
-You will also have to add this stanza to your weewx.conf (manually for the time being, but it will be automated in future). This is a reconfiguration of how the Earth and Moon images are downloaded/cached and are only updated every hour. This will prevent denial of service locks from being activated at the fourmilab.ch servers.
