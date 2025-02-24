@@ -8,7 +8,7 @@ Weather Station website skin with Live Data for WeeWX.
 
 To install the template, follow the instructions in the 'installation guide' ([INSTALLATION_GUIDE.md](https://github.com/Millardiang/weewx-divumwx/blob/alpha/INSTALLATION_GUIDE.md)).
 
-# Version 0.9.99.00 Beta 1 has been released
+# Version 1.0.00rc1 has been released
 
 As we are still in beta testing, back up your current installation first. You will need to make a full installation over your existing installation, as the critical file divumwx.py has also been updated.
 
