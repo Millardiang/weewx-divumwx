@@ -258,7 +258,7 @@ echo "<script>const csrfToken = '" . $_SESSION['csrf_token'] . "';</script>";
     <div class="content">
         <div class="container">
             <header>
-                <img src="./img/divumLogo.svg" alt="Myndworx Asylum Logo" class="logo">
+                <img src="./img/divumLogo.svg" alt="DivumWX Logo" class="logo">
                 <div class="banner"><h2>Welcome to the DivumWX Skin Initial Setup.</h2>DivumWX is a skin for the weewx personal weather station software. As this is the first time that you are running this software (as is evidenced by the lack of a userSettings.php file), we are going to run a few checks and set up a few things for you before we get started.</div>
             </header>
             <div class="tabs">

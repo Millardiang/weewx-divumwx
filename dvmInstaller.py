@@ -706,8 +706,8 @@ class DVMInstaller:
         logging.debug(f"AirDensity, stormRain, threshold, cloudcover, is_sunshine & sunshine_time")
         print(f"{white}Updating weewx database with additional columns for DivumWX Skin{reset}")
         print(f"{white}The following columns will be added to the database to support the DivumWX Skin:{reset}")
-        print(f"{cyan}AirDensity, stormRain, threshold, cloudcover, is_sunshine & sunshine_time{reset}")
-        columns = ["AirDensity", "stormRain", "threshold", "cloudcover", "is_sunshine", "sunshine_time", "sunshine_time_hours", "co", "no2", "so2", "o3", "nh3", "aerosol_optical_depth", "dust", "alder_pollen", "birch_pollen", "olive_pollen", "grass_pollen", "mugwort_pollen", "ragweed_pollen", "cloudcover"]
+        print(f"{cyan}AirDensity, stormRain, threshold, cloudcover, is_sunshine, sunshine_time, sunshine_time_hours, co, no2, so2, o3, nh3, aerosol_optical_depth, dust, alder_pollen, birch_pollen, olive_pollen, grass_pollen, mugwort_pollen, ragweed_pollen, cloudcover, lightning_last_det_time{reset}")
+        columns = ["AirDensity, stormRain, threshold, cloudcover, is_sunshine, sunshine_time, sunshine_time_hours, co, no2, so2, o3, nh3, aerosol_optical_depth, dust, alder_pollen, birch_pollen, olive_pollen, grass_pollen, mugwort_pollen, ragweed_pollen, cloudcover, lightning_last_det_time"]
         current_user = os.getenv("USER")
         base_command = f"/home/{current_user}/weewx-venv/bin/weectl database add-column"
 
