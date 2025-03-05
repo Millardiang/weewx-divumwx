@@ -701,24 +701,38 @@ class DVMInstaller:
                         config_data['Engine']['Services']['data_services'] = '""'
 
     def updDatabase(self):
-        logging.debug(f"Updating weewx database with additional columns for DivumWX Skin")
-        logging.debug(f"The following columns will be added to the database to support the DivumWX Skin:")
-        logging.debug(f"AirDensity, stormRain, threshold, cloudcover, is_sunshine & sunshine_time")
+        logging.debug("Updating weewx database with additional columns for DivumWX Skin")
+        logging.debug("The following columns will be added to the database to support the DivumWX Skin:")
+        logging.debug("AirDensity, stormRain, threshold, cloudcover, is_sunshine, sunshine_time, sunshine_time_hours, co, no2, so2, o3, nh3, aerosol_optical_depth, dust, alder_pollen, birch_pollen, olive_pollen, grass_pollen, mugwort_pollen, ragweed_pollen, cloudcover, lightning_last_det_time")
+
         print(f"{white}Updating weewx database with additional columns for DivumWX Skin{reset}")
         print(f"{white}The following columns will be added to the database to support the DivumWX Skin:{reset}")
         print(f"{cyan}AirDensity, stormRain, threshold, cloudcover, is_sunshine, sunshine_time, sunshine_time_hours, co, no2, so2, o3, nh3, aerosol_optical_depth, dust, alder_pollen, birch_pollen, olive_pollen, grass_pollen, mugwort_pollen, ragweed_pollen, cloudcover, lightning_last_det_time{reset}")
-        columns = ["AirDensity, stormRain, threshold, cloudcover, is_sunshine, sunshine_time, sunshine_time_hours, co, no2, so2, o3, nh3, aerosol_optical_depth, dust, alder_pollen, birch_pollen, olive_pollen, grass_pollen, mugwort_pollen, ragweed_pollen, cloudcover, lightning_last_det_time"]
+
+        columns = [
+            "AirDensity", "stormRain", "threshold", "cloudcover", "is_sunshine",
+            "sunshine_time", "sunshine_time_hours", "co", "no2", "so2", "o3", "nh3",
+            "aerosol_optical_depth", "dust", "alder_pollen", "birch_pollen", "olive_pollen",
+            "grass_pollen", "mugwort_pollen", "ragweed_pollen", "cloudcover", "lightning_last_det_time"
+        ]
+
         current_user = os.getenv("USER")
-        base_command = f"/home/{current_user}/weewx-venv/bin/weectl database add-column"
+        weectl_path = f"/home/{current_user}/weewx-venv/bin/weectl"
 
         for column in columns:
             try:
-                command = f"{base_command} {column} -y"
+                if column == "lightning_last_det_time":
+                    command = f"{weectl_path} database add-column {column} --type INTEGER -y"
+                    column_type = "INTEGER"
+                else:
+                    command = f"{weectl_path} database add-column {column} -y"
+                    column_type = "REAL"
+
                 result = subprocess.run(command, shell=True, capture_output=True, text=True)
 
                 if result.returncode == 0:
-                    print(f"New column {column} of type REAL added to database.")
-                    logging.debug(f"New column {column} of type REAL added to database.")
+                    print(f"New column {column} of type {column_type} added to database.")
+                    logging.debug(f"New column {column} of type {column_type} added to database.")
                 else:
                     if "duplicate column name" in result.stderr:
                         logging.debug(f"Column {column} already exists in the database.")
@@ -728,7 +742,8 @@ class DVMInstaller:
                         print(f"Error occurred while adding column {column}: {result.stderr}")
 
             except Exception as e:
-                print(f"An exception occurred: {e}")
+                logging.error(f"An exception occurred while adding column {column}: {e}")
+                print(f"An exception occurred while adding column {column}: {e}")
 
     def ctrlWeewx(self, wxCmd):
         if wxCmd.lower() == "start":
@@ -886,7 +901,7 @@ class DVMInstaller:
             logging.debug(f"mainDocRoot aligned with first entry in siteDocRoots: {mainDocRoot}")
         www_root = os.path.expanduser(d["www_root"])
         print(f"{cyan}+---------------------------------------------------------------------------------------+")
-        print(f" {white}Webserver Information:\n")
+        print(f" {white}Webserver Information:")
         if wsStatus:
             print(f" {wsName} is running under {wsOwner}:{wsGroup}")
         else:
@@ -904,8 +919,15 @@ class DVMInstaller:
         print(f"       skins_path: {skins_path}")
         print(f"weewx_config_file: {weewx_config_file}")
         print(f"         www_root: {www_root}")
+        print(f"      mainDocRoot: {mainDocRoot}")
+        if www_root == mainDocRoot:
+            logging.debug(f"Main DocumentRoot {mainDocRoot} matches www_root {www_root}")
+        else:
+            logging.debug(f"Main DocumentRoot {mainDocRoot} does not match  www_root {www_root}")
+            www_root = mainDocRoot
+            logging.debug(f"Main DocumentRoot is now - {mainDocRoot}  and www_root is now - {www_root}")
         logging.debug(f"+---------------------------------------------------------------------------------------+")
-        logging.debug(f" Webserver Information:\n")
+        logging.debug(f" Webserver Information:")
         if wsStatus:
             logging.debug(f" {wsName} is running under {wsOwner}:{wsGroup}")
         else:
@@ -928,9 +950,14 @@ class DVMInstaller:
         logging.debug(f"Determining if any other skins are also enabled.")
         print(f"{green}Determining if any other skins are also enabled.{reset}")
         allSkins = self.getEnabledSkins(weewx_config_file)
-        enabledSkins = [skin["section"] for skin in allSkins if skin["enabled"] == "true"]
+        enabledSkins = [skin["section"] for skin in allSkins if skin["enabled"] is True]
         print(f"{green}+-------------------------------------------------------------------------------+{reset}")
         print(f"{white}The following skins are enabled on your system:{reset}")
+        if enabledSkins:
+            for skin in enabledSkins:
+                print(f"{green}  - {skin}{reset}")
+        else:
+            print(f"{yellow}  No enabled skins found.{reset}")
         print(f"{green}+-------------------------------------------------------------------------------+{reset}")
         logging.debug(f"+-------------------------------------------------------------------------------+")
         print(f"{white}Your weewx.conf file [StdReport] section has {yellow}{config_data['StdReport'].get('HTML_ROOT')}{white} as your HTML_ROOT setting.{reset}", end="\n")
@@ -959,13 +986,13 @@ class DVMInstaller:
         skins_path_exists = os.path.exists(skins_path)
         html_root_exists = os.path.exists(html_root)
         dirDefaults = {
-            "/var/www/html": {
+            www_root: {
                 "permissions": 0o775,
                 "owner": "www-data",
                 "group": "www-data",
                 "fix": "False"
             },
-            "/var/www/html/divumwx": {
+            f"{www_root}/divumwx": {
                 "permissions": 0o775,
                 "owner": "www-data",
                 "group": self.user,
@@ -1232,43 +1259,43 @@ class DVMInstaller:
         print(f"{white}Performing final directory permissions check")
         logging.debug(f"Performing final directory permissions check")
         dirDefaults = {
-            "/var/www/html": {
+            www_root: {
                 "permissions": 0o755,
                 "owner": "www-data",
                 "group": self.user,
                 "fix": "False"
             },
-            "/var/www/html/divumwx": {
+            f"{www_root}/divumwx": {
                 "permissions": 0o775,
                 "owner": "www-data",
                 "group": self.user,
                 "fix": "False"
             },
-            "/var/www/html/divumwx/admin": {
+            f"{www_root}/divumwx/admin": {
                 "permissions": 0o775,
                 "owner": "www-data",
                 "group": self.user,
                 "fix": "False"
             },
-            "/var/www/html/divumwx/admin/archives": {
+            f"{www_root}/divumwx/admin/archives": {
                 "permissions": 0o775,
                 "owner": "www-data",
                 "group": self.user,
                 "fix": "False"
             },
-            "/var/www/html/divumwx/admin/assets": {
+            f"{www_root}/divumwx/admin/assets": {
                 "permissions": 0o775,
                 "owner": "www-data",
                 "group": self.user,
                 "fix": "False"
             },
-            "/var/www/html/divumwx/admin/db": {
+            f"{www_root}/divumwx/admin/db": {
                 "permissions": 0o775,
                 "owner": "www-data",
                 "group": self.user,
                 "fix": "False"
             },
-            "/var/www/html/divumwx/admin/db/dvmAdmin.db3": {
+            f"{www_root}/divumwx/admin/db/dvmAdmin.db3": {
                 "permissions": 0o644,
                 "owner": "www-data",
                 "group": self.user,
