@@ -678,19 +678,19 @@ $temp["indoor_now_feels"] = number_format($HI, 1);
 $temp["indoor_now_feels_degC"] = (number_format($HI, 1)-32)*5/9;
 
 //uv
+#if $current.UV.has_data
 $uv["now"] = $weewxrt[43];
-$uv["day_max"] = $day.UV.max.format(add_label=False);
+$uv["day_max"] = $day.UV.max.format(format_string="%.1f", None_string="0", add_label=False);
 $uv["day_maxtime"] = date('H:i',$day.UV.maxtime.raw);
-#if $day($days_ago=1).UV.has_data
 $uv["yesterday_max"] = $day($days_ago=1).UV.max.format(add_label=False);
 $uv["yesterday_maxtime"] = date('H:i',$day($days_ago=1).UV.maxtime.raw);
-#end if
 $uv["month_max"] = $month.UV.max.format(add_label=False);
 $uv["month_maxtime"] = date('D j H:i',$month.UV.maxtime.raw);
 $uv["year_max"] = $year.UV.max.format(add_label=False);
 $uv["year_maxtime"] = date('D j M H:i',$year.UV.maxtime.raw);
 $uv["alltime_max"] = $alltime.UV.max.format(add_label=False);
 $uv["alltime_maxtime"] = date('j M Y H:i',$alltime.UV.maxtime.raw);
+#end if
 
 //wind
 #if $current.windSpeed.has_data
