@@ -300,6 +300,8 @@ echo "<script>const csrfToken = '" . $_SESSION['csrf_token'] . "';</script>";
                         </div>
                         <div class="sub-list hidden" id="db-check-details">
                         </div>
+                        <div class="sub-list hidden" id="php-install-details">
+                        </div>
                     </div>
                 </div>
                 <div id="tab2" class="tab">

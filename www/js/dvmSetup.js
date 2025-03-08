@@ -66,38 +66,94 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                 }
 
-                function checkPhpModules() {
+                function checkPhpModules(data) {
                     return new Promise((resolve) => {
                         setTimeout(() => {
                             let phpModulesVerified = true;
                             let phpModulesDetails = '<table><tr><th>Module</th><th>Status</th></tr>';
                             let issuesFound = false;
+                            
                             for (const module in data.php_modules) {
-                                let moduleStatus = data.php_modules[module] === 'Loaded' 
+                                let moduleStatus = data.php_modules[module] === 'Loaded'
                                     ? `<span style="color: green;">${data.php_modules[module]}</span>`
                                     : `<span style="color: red;">${data.php_modules[module]}</span>`;
+                
                                 phpModulesDetails += `<tr><td>${module}</td><td>${moduleStatus}</td></tr>`;
+                
                                 if (data.php_modules[module] !== 'Loaded') {
                                     phpModulesVerified = false;
-                                    issuesFound = true; // ? Mark issues found
+                                    issuesFound = true;
                                 }
                             }
                             phpModulesDetails += '</table>';
-                            document.getElementById('php-modules-details').innerHTML = phpModulesDetails;
-                            if (issuesFound) {
-                                document.getElementById('php-modules-details').classList.remove('hidden'); // ? Show on issues
+                
+                            let installCommandHtml = "";
+                
+                            if (data.missing_php_modules.length > 0) {
+                                installCommandHtml = `
+                                    <p>To install the missing modules, run the following command:</p>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; background-color: #f9f9f9; padding: 5px; border-radius: 5px;">
+                                        <code id="install-command">${data.install_command}</code>
+                                        <i class="fas fa-copy copy-icon" title="Copy Command" data-command="install-command" style="cursor: pointer; color: #007bff; margin-left: 10px;"></i>
+                                    </div>
+                                    <br>
+                                    <p>After installation, restart Apache to load the new modules:</p>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; background-color: #f9f9f9; padding: 5px; border-radius: 5px;">
+                                        <code id="restart-command-1">sudo systemctl restart apache2</code>
+                                        <i class="fas fa-copy copy-icon" title="Copy Command" data-command="restart-command-1" style="cursor: pointer; color: #007bff; margin-left: 10px;"></i>
+                                    </div>
+                                    <br>
+                                    <p>OR, if using <strong>service</strong>:</p>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; background-color: #f9f9f9; padding: 5px; border-radius: 5px;">
+                                        <code id="restart-command-2">sudo service apache2 restart</code>
+                                        <i class="fas fa-copy copy-icon" title="Copy Command" data-command="restart-command-2" style="cursor: pointer; color: #007bff; margin-left: 10px;"></i>
+                                    </div>
+                                `;
+                
+                                document.getElementById('php-install-details').innerHTML = installCommandHtml;
+                                document.getElementById('php-install-details').classList.remove('hidden');
+                
+                                // Attach copy event listener to all copy icons
+                                document.querySelectorAll('.copy-icon').forEach(icon => {
+                                    icon.addEventListener('click', function () {
+                                        let commandId = this.getAttribute("data-command");
+                                        let commandText = document.getElementById(commandId).textContent;
+                
+                                        navigator.clipboard.writeText(commandText).then(() => {
+                                            this.setAttribute("title", "Copied");
+                                            this.style.color = "#28a745";
+                
+                                            setTimeout(() => {
+                                                this.setAttribute("title", "Copy Command");
+                                                this.style.color = "#007bff";
+                                            }, 2000);
+                                        });
+                                    });
+                                });
+                
                             } else {
-                                document.getElementById('php-modules-details').classList.add('hidden'); // ? Hide on success
+                                document.getElementById('php-install-details').classList.add('hidden');
                             }
+                
+                            document.getElementById('php-modules-details').innerHTML = phpModulesDetails;
+                
+                            if (issuesFound) {
+                                document.getElementById('php-modules-details').classList.remove('hidden');
+                            } else {
+                                document.getElementById('php-modules-details').classList.add('hidden');
+                            }
+                
                             if (phpModulesVerified) {
                                 updateStatus('php-modules-status', null, 'Verified', 'success');
                             } else {
                                 allVerified = false;
                             }
+                
                             resolve();
                         }, 1500);
                     });
                 }
+                
 
                 function checkDirectories() {
                     return new Promise((resolve) => {
@@ -166,7 +222,7 @@ document.addEventListener('DOMContentLoaded', function() {
             async function runChecks() {
                 await checkPhpVersion();
                 await checkWeewx();
-                await checkPhpModules();
+                await checkPhpModules(data);
                 await checkDirectories();
                 await checkDatabase();
 
