@@ -14,6 +14,7 @@
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
 $requiredModules = ['intl', 'json', 'mysqli', 'pdo_sqlite', 'random', 'session', 'sqlite3', 'mbstring'];
+$sqlite3_missing = false;
 $chkReqStatusFile = __DIR__ . '/chkReqstatus.json';
 if (file_exists($chkReqStatusFile)) {
     unlink($chkReqStatusFile);
@@ -36,10 +37,29 @@ function checkPHPVersion() {
     return ['status' => version_compare($version, '8.3', '>='), 'version' => $version];
 }
 
+function isModuleInstalled($module) {
+    $output = shell_exec('php -m | grep ' . escapeshellarg($module));
+    return !empty($output);
+}
+
 function checkPHPModules($modules) {
+    global $sqlite3_missing;
     $result = [];
     foreach ($modules as $module) {
-        $result[$module] = extension_loaded($module) ? 'Loaded' : 'Not loaded';
+        $isLoaded = extension_loaded($module);
+        $isInstalled = isModuleInstalled($module);
+        if ($isLoaded) {
+            $result[$module] = 'Loaded';
+        } else {
+            if ($isInstalled) {
+                $result[$module] = 'Installed but not loaded';
+            } else {
+                $result[$module] = 'Not installed';
+            }
+        }
+        if ($module === 'sqlite3' && !$isLoaded) {
+            $sqlite3_missing = true;
+        }
     }
     return $result;
 }
@@ -153,14 +173,6 @@ $directories = [
     ['path' => './admin/db', 'perms' => '0775', 'owner' => $scriptOwner, 'group' => $scriptGroup],
 ];
 
-$results = [
-    'weewx' => checkWeeWXVersion(),
-    'php_version' => checkPHPVersion(),
-    'php_modules' => checkPHPModules($requiredModules),
-    'directories' => [],
-    'running_user' => $currentUser,
-];
-
 $debug = [];
 $errorDetected = false;
 
@@ -172,6 +184,12 @@ foreach ($directories as $dir) {
     }
 }
 function checkDatabaseConnection($dbFile) {
+    global $sqlite3_missing;
+
+    if ($sqlite3_missing) {
+        return ['status' => false, 'message' => 'SQLite3 module is not installed. Database connection cannot proceed.'];
+    }
+
     $result = ['status' => false, 'message' => ''];
     try {
         $db = new SQLite3($dbFile);
@@ -182,6 +200,21 @@ function checkDatabaseConnection($dbFile) {
     }
 
     return $result;
+}
+
+$results = [
+    'weewx' => checkWeeWXVersion(),
+    'php_version' => checkPHPVersion(),
+    'php_modules' => checkPHPModules($requiredModules),
+    'directories' => [],
+    'running_user' => $currentUser,
+];
+
+$missingModules = [];
+foreach ($results['php_modules'] as $module => $status) {
+    if ($status === 'Not installed') {
+        $missingModules[] = $module;
+    }
 }
 
 $dbFileCheck = checkFile('./admin/db/dvmAdmin.db3', '0644', $scriptOwner, $scriptGroup, $debug);
@@ -200,6 +233,15 @@ if (!$dbFileCheck['status']) {
     }
 }
 
+$phpVersion = PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION;
+$installCommand = '';
+if (!empty($missingModules)) {
+    $installCommand = "sudo apt-get install php$phpVersion-" . implode(" php$phpVersion-", $missingModules);
+}
+
+$results['missing_php_modules'] = $missingModules;
+$results['install_command'] = $installCommand;
++
 header('Content-Type: application/json');
 echo json_encode($results);
 
