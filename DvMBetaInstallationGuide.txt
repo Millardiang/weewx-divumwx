@@ -1,22 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 DivumWX Beta 1.0.00rc2
 [Blustery Bear] 
 Installation documentation
@@ -30,7 +11,7 @@ Requirements
 		
 A fresh installation of weewx 5.1.x is installed using the pip method, which successfully generates reports from at least the Seasons skin. You can use the Simulator driver or the appropriate driver for your weather hardware.
 
-Please note that you need a database with at least one dayís worth of data; otherwise, the DivumWX skin will error out because the database contains NULL values.
+Please note that you need a database with at least one day‚Äôs worth of data; otherwise, the DivumWX skin will error out because the database contains NULL values.
 
 A bare, minimum installation should look something like this with the default Seasons skin
 
@@ -48,7 +29,7 @@ Installation Part One
 Setup
 
 Verify that your version of pip is current
-	pip install ñupgrade pip
+	pip install ‚Äìupgrade pip
 
 Download the beta archive from:
        https://www.divumwx.org/files/divumwx1.0.00rc2.tar.gz
@@ -58,7 +39,7 @@ Download the beta archive from:
 and transfer it to your weewx server along with the services.json file that you created at
 
 	https://www.divumwx.org/settingsGen/
-The new Settings Generator is required as the format has changed, and any previous settings file youíve created is no longer usable
+The new Settings Generator is required as the format has changed, and any previous settings file you‚Äôve created is no longer usable
 Log into your weewx server as the same user that installed weewx, and from the command line, enter the following command:
 
 	source ~/weewx-venv/bin/activate
@@ -103,16 +84,16 @@ Change into that directory.
 Python Installer
 
 In the DivumWX1.0.00rc2 directory, enter the following command:
-	python dvmInstaller.py ñdebug
+	python dvmInstaller.py ‚Äìdebug
 
-The ì--debugî parameter IS REQUIRED for beta testers to use, as it generates a needed debug log file.
+The ‚Äú--debug‚Äù parameter IS REQUIRED for beta testers to use, as it generates a needed debug log file.
 
 If you are missing one of the non-standard Python modules required by the installer, you will be prompted to install it.
 
 
 
 
-Responding ìYî will install the necessary module and restart the script.
+Responding ‚ÄúY‚Äù will install the necessary module and restart the script.
 
 
 
@@ -120,7 +101,7 @@ Pressing any key will then display the essential installation document.
 
 
 
-Pressing ìqî will exit the text viewer and proceed to the welcome message.
+Pressing ‚Äúq‚Äù will exit the text viewer and proceed to the welcome message.
 
 
 
@@ -128,48 +109,48 @@ Pressing any key will continue, and the script will verify your Python version a
 
 
 
-Entering ìnî will allow you to manually enter the user and group for file permissions; otherwise, entering ìyî will accept what the script has found.
+Entering ‚Äún‚Äù will allow you to manually enter the user and group for file permissions; otherwise, entering ‚Äúy‚Äù will accept what the script has found.
 
-Next, the script will attempt to locate what software you are using for a web server and what user and group itís run under, again for file permissions:
+Next, the script will attempt to locate what software you are using for a web server and what user and group it‚Äôs run under, again for file permissions:
 
 
 
-Entering ìnî will allow you to enter the web server and user/group manually; otherwise, entering ìyî will proceed.
+Entering ‚Äún‚Äù will allow you to enter the web server and user/group manually; otherwise, entering ‚Äúy‚Äù will proceed.
 
 Next, the script will inform you of the HTML_ROOT setting in the weewx.conf file and ask if you want to use that setting.
 
 
 
-Entering ìyî will accept what the script found; otherwise, entering ìnî will allow you to input the full path for the HTML_ROOT.
+Entering ‚Äúy‚Äù will accept what the script found; otherwise, entering ‚Äún‚Äù will allow you to input the full path for the HTML_ROOT.
 
 HTML_ROOT is the directory where weewx is writing its report files, NOT necessarily the DOCUMENTROOT of your web server. In the case of a stock, standard pip installation, then the HTML_ROOT would be /home/[username]/weewx_data/public_html, and the URL of your weewx page would be however you linked it in your web server
 
-Next, the script will ask you if you wish to change the webserver's document root. Since youíve created reports using the Seasons skin, files will already be in the current document root. Unless youíve deleted those files, it is highly suggested that you enter ìyî to the following question to keep things clean and separate.
+Next, the script will ask you if you wish to change the webserver's document root. Since you‚Äôve created reports using the Seasons skin, files will already be in the current document root. Unless you‚Äôve deleted those files, it is highly suggested that you enter ‚Äúy‚Äù to the following question to keep things clean and separate.
 
 
 
-Entering ìyî will append ìdivumwxî to the current ìHTML_ROOTî setting and answering ìnî will leave it alone.
+Entering ‚Äúy‚Äù will append ‚Äúdivumwx‚Äù to the current ‚ÄúHTML_ROOT‚Äù setting and answering ‚Äún‚Äù will leave it alone.
 
 Next, the script will ask if you want to use the DVM Backup service to back up your weewx database.
 
 
 
-Entering ìyî will allow you to enter the specifics for the DVM Backup service; entering ìnî will bypass this section.
+Entering ‚Äúy‚Äù will allow you to enter the specifics for the DVM Backup service; entering ‚Äún‚Äù will bypass this section.
 
 
-Now the script displays the inputs that it has loaded for you to look over and asks if youíre ready to have it start the installation process:
+Now the script displays the inputs that it has loaded for you to look over and asks if you‚Äôre ready to have it start the installation process:
 
 
 
 
-Once youíve reviewed everything, if you enter ìy,î the installation will proceed; otherwise, entering ìnî will exit the script.
+Once you‚Äôve reviewed everything, if you enter ‚Äúy,‚Äù the installation will proceed; otherwise, entering ‚Äún‚Äù will exit the script.
 
 
 The script will proceed and inform you of the steps as they are completed.
 
 
 
-Youíve completed the command-line Python installation. The next step is to visit the DivumWX Skin's home page and start the web-based initial setup.
+You‚Äôve completed the command-line Python installation. The next step is to visit the DivumWX Skin's home page and start the web-based initial setup.
 
 
 Web Based Installation
@@ -181,23 +162,23 @@ or
 	https://yourdomain.com.au/divumwx
 
 
-Whatever URL youíve assigned to your webserver to deliver your weewx reports, enter that and youíll see the DivumWX Initial Setup page:
+Whatever URL you‚Äôve assigned to your webserver to deliver your weewx reports, enter that and you‚Äôll see the DivumWX Initial Setup page:
 
-Clicking ìNextî will start the verification process
+Clicking ‚ÄúNext‚Äù will start the verification process
 
 
 
 If there are any errors, you will be notified; otherwise, the next button will be enabled. 
 
 
-Click ìNextî and the user settings file tab will be displayed.
+Click ‚ÄúNext‚Äù and the user settings file tab will be displayed.
 
 
 
 
 
 
-This tab will notify you of any issue when the userSettings.php is written. When completed the ìNextî button will be enabled. Click the next button.
+This tab will notify you of any issue when the userSettings.php is written. When completed the ‚ÄúNext‚Äù button will be enabled. Click the next button.
 
 
 
