@@ -713,7 +713,7 @@ class DVMInstaller:
             "AirDensity", "stormRain", "threshold", "cloudcover", "is_sunshine",
             "sunshine_time", "sunshine_time_hours", "co", "no2", "so2", "o3", "nh3",
             "aerosol_optical_depth", "dust", "alder_pollen", "birch_pollen", "olive_pollen",
-            "grass_pollen", "mugwort_pollen", "ragweed_pollen", "cloudcover", "lightning_last_det_time"
+            "grass_pollen", "mugwort_pollen", "ragweed_pollen", "lightning_last_det_time"
         ]
 
         current_user = os.getenv("USER")
