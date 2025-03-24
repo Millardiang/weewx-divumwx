@@ -29,7 +29,6 @@ function openRainCharts(chart) {
       <option value="dvmhighcharts/rainCharts.php?chart='rainplot'&span='yearly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>">Yearly Rainfall</option>
       <option value="dvmhighcharts/rainCharts.php?chart='rainplot'&span='weekly'&temp='<?php echo $temp['units'];?>'&pressure='<?php echo $barom['units'];?>'&wind='<?php echo $wind['units'];?>'&rain='<?php echo $rain['units']?>">Weekly Rainfall</option>
       <option value="dvmhighcharts/dvmStormRainChart.php">Storm Rain</option>
-      <option value="dvmhighcharts/dvmRainSensorChart.php">Rain Sensor Comparisson</option>
       <option selected> -Select Chart- </option>
     </select>
   </div>

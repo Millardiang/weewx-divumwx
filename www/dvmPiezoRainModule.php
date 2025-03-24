@@ -15,7 +15,6 @@ error_reporting(0);
 #    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
-//$p_rain["rate"]=1;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -24,7 +23,6 @@ error_reporting(0);
 <title>weather piezo rain</title>
 <style>
 .piezo-module{position: relative;top:-1px;margin-left: 0px;}
-.rain-current{position: relative;font-size:14px;font-weight:bold;color:#000000;margin-top:-87px;z-index-100;}
 </style>
 </head>
 <body>
@@ -57,13 +55,13 @@ var colorRain = "<?php echo $colorRainDaySum;?>";
 var units = "<?php echo $rain["units"];?>";
 
 if (units == 'in') {
-var stormRain = <?php echo round($p_rain["storm_rain"]/25.4,2);?>;    
+var stormRain = <?php echo round($rain["storm_rain"]/25.4,2);?>;    
 } else {
-    stormRain = <?php echo round($p_rain["storm_rain"],2);?>;
+    stormRain = <?php echo round($rain["storm_rain"],2);?>;
 }
 var currentImage = "img/minusPlus.svg";
 
-var currentRain = "<?php echo round($p_rain["dayRain"],2);?>";
+var currentRain = "<?php echo round($rain["dayRain"],2);?>";
     //currentRain = currentRain || 0;                   
 var stormRainColor ="<?php echo $colorStormRain;?>";
 var rainRateColor = "<?php echo $colorRainRate;?>";
@@ -72,12 +70,12 @@ var last24HoursColor = "<?php echo $colorRain24hrSum;?>";
 var rainMonthColor = "<?php echo $colorRainMonthSum;?>";
 var rainYearColor = "<?php echo $colorRainYearSum;?>";
 
-var stormStart = "<?php echo $p_rain["storm_rain_start"];;?>"; 
-var rainRate = <?php echo round($p_rain["rate"],2);?>;
-var lastHour = <?php echo $p_rain["last_hour"];?>;
-var last24Hours = <?php echo $p_rain["last_24hour"];?>;
-var rainMonth = <?php echo $p_rain["monthRain"];?>; 
-var rainYear = <?php echo $p_rain["yearRain"];?>;
+var stormStart = "<?php echo $rain["storm_rain_start"];;?>"; 
+var rainRate = <?php echo $rain["rate"];?>;
+var lastHour = <?php echo $rain["last_hour"];?>;
+var last24Hours = <?php echo round($rain["last_24hour"],2);?>;
+var rainMonth = <?php echo $rain["monthRain"];?>; 
+var rainYear = <?php echo $rain["yearRain"];?>;
 var month = "<?php echo date('F');?>"; 
 var year = <?php echo date('Y');?>;                   
 
@@ -117,20 +115,9 @@ svg.append("text")
     .style("font-size", "10px")
     .style("text-anchor", "middle")
     .style("font-weight", "normal")
-    .text(d3.format(".2f")(stormRain) + " " + units);
+    .text(stormRain + " " + units);
 
-} else {
-
-svg.append("text") // storm start text
-    .attr("x", 155)
-    .attr("y", 112)
-    .style("fill", baseTextColor)
-    .style("font-family", "Helvetica")
-    .style("font-size", "10px")
-    .style("text-anchor", "middle")
-    .style("font-weight", "normal")
-    .text("No Rain Events");
-}
+} else {}
 
 svg.append("text")
     .attr("x", 35)
@@ -150,7 +137,7 @@ svg.append("text")
     .style("font-size", "10px")
     .style("text-anchor", "middle")
     .style("font-weight", "normal")
-    .text(d3.format(".2f")(last24Hours) + " " + units);
+    .text(last24Hours + " " + units);
 
 svg.append("text")
     .attr("x", 37)
@@ -213,7 +200,7 @@ svg.append("text")
     .text(d3.format(".2f")(rainYear) + " " + units);
 
 svg.append("text")
-    .attr("x", 273)
+    .attr("x", 283)
     .attr("y", 70)
     .style("fill", baseTextColor)
     .style("font-family", "Helvetica")
@@ -223,14 +210,14 @@ svg.append("text")
     .text("Rain Rate");
 
 svg.append("text")
-    .attr("x", 273)
+    .attr("x", 283)
     .attr("y", 82)
     .style("fill", rainRateColor)
     .style("font-family", "Helvetica")
     .style("font-size", "10px")
     .style("text-anchor", "middle")
     .style("font-weight", "normal")
-    .text(d3.format(".2f")(rainRate) + " " + units + "/hr");
+    .text(rainRate + " " + units + "/hr");
 
 svg.append("rect")
     .attr("x", 113)
@@ -270,16 +257,27 @@ svg.append("rect")
 
 svg.append('image') // image output
     .attr('xlink:href', currentImage)
+
     .attr('height', 40)
     .attr('x', 111)
     .attr('y', 19);
 
+svg.append("text")
+    .attr("x", 155)
+    .attr("y", 79)
+    .style("fill", reverseTextColor)
+    .style("font-family", "Helvetica")
+    .style("font-size", "14px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "bold")
+    .text(d3.format(".2f")(currentRain) + " " + rainunits);
+
 </script>
-<div class="rain-current"><?php echo number_format($p_rain["dayRain"],2);?><?php echo $rain["units"];?></div>
-<div id="raindropsX" width="300" height="150" style="margin-top: -90px; left: 0px;"></div>
+
+<div id="raindropsX" width="300" height="150" style="position: relative; top: -156px; left: 0px;"></div>
 <script>
 
-var raining = <?php echo $p_rain["rate"];?>;
+var raining = <?php echo $rain["rate"];?>;
 
 if ( raining > 0 ) {
   
@@ -314,7 +312,7 @@ class Rain {
     this.svg.setAttribute('viewBox', `0 0 ${this.width} ${this.height}`);
     this.svg.setAttribute('xmlns', ns);
     this.svg.setAttribute('xmlns:xlink', xlink);
-    this.svg.setAttribute('id', 'rainp');
+    this.svg.setAttribute('id', 'rain');
 
     this.filters = false;
 
@@ -331,7 +329,7 @@ class Rain {
     blur.setAttribute('stdDeviation', 1);
 
     let filter = document.createElementNS(ns, 'filter');
-    filter.setAttribute('id', `blurp`);
+    filter.setAttribute('id', `blur`);
     filter.setAttribute('height', '300%');
     filter.setAttribute('width', '300%');
     filter.setAttribute('x', '-100%');
@@ -343,7 +341,7 @@ class Rain {
 
   appendTrack() {
     let track = document.createElementNS(ns, 'path');
-    track.setAttribute('id', 'trackp');
+    track.setAttribute('id', 'track');
     track.setAttribute('fill', 'none');
     track.setAttribute('stroke', 'none');
     track.setAttribute('d', `M 0 -${this.height * 0.1} V ${this.height * 1.1}`);
@@ -355,14 +353,14 @@ class Rain {
     let drop = document.createElementNS(ns, 'rect');
     drop.setAttribute('fill', `rgba(59, 156, 172, ${randBetween(1, 3) * 0.4})`);
     drop.setAttribute('height', randBetween(this.dropHeightMin, this.dropHeightMax));
-    drop.setAttribute('id', `dropp-${index}`);
+    drop.setAttribute('id', `drop-${index}`);
     drop.setAttribute('rx', 1);
     drop.setAttribute('width', randBetween(this.dropWidthMin, this.dropWidthMax) * 0.1);
     drop.setAttribute('x', 0);
     drop.setAttribute('y', 0);
 
     if (this.filters) {
-      drop.setAttribute('filter', 'url(#blurp)');
+      drop.setAttribute('filter', 'url(#blur)');
     }
 
     let group = document.createElementNS(ns, 'g');
@@ -374,10 +372,10 @@ class Rain {
 
   makeMotion(index) {
     let motionPath = document.createElementNS(ns, 'mpath');
-    motionPath.setAttribute('xlink:href', '#trackp');
+    motionPath.setAttribute('xlink:href', '#track');
 
     let motion = document.createElementNS(ns, 'animateMotion');
-    motion.setAttribute('xlink:href', `#dropp-${index}`);
+    motion.setAttribute('xlink:href', `#drop-${index}`);
     motion.setAttribute('dur', `${randBetween(this.dropDurationMin, this.dropDurationMax)}ms`);
     motion.setAttribute('begin', `${randBetween(0, this.dropDurationMin)}ms`);
     motion.setAttribute('repeatCount', 'indefinite');
@@ -414,7 +412,7 @@ class Rain {
     ellipse.setAttribute('ry', this.splashRadiusY);
 
     if (this.filters) {
-      ellipse.setAttribute('filter', 'url(#blurp)');
+      ellipse.setAttribute('filter', 'url(#blur)');
     }
 
     ellipse.appendChild(animateStroke);

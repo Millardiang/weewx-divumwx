@@ -13,20 +13,13 @@ if ($theme === "dark") {
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <script src="scripts/jquery-1.12.4.min.js"></script>
-    <script src="scripts/jquerry-ui-1.12.1.min.js"></script>
+    <script src="scripts/jquery.min.js"></script>
     <script src="scripts/highstock.js"></script>
-    <script src="scripts/highcharts-more.js"></script>
-    <script src="scripts/windbarb.js"></script>
     <script src="scripts/boost.js"></script>
+    <script src="scripts/highcharts-more.js"></script>
     <script src="scripts/exporting.js"></script>
-    <script src="scripts/divumwx-<?php echo $theme;?>.js" type="text/javascript"></script>
-    <script src="scripts/plots_config.js" type="text/javascript"></script>
-    <script src="scripts/plots.js" type="text/javascript"></script>
-    <script src="scripts/convert_units.js" type="text/javascript"></script>
-    <script src="../languages/translations.js" type="text/javascript"></script>
-    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
-    <script type="text/javascript">
+    <script src="scripts/export-data.js"></script>
+    <script src="scripts/brand-<?php echo $theme;?>.js" type="text/javascript"></script>
 
 
         window.onload = function() {

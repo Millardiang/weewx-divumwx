@@ -10,7 +10,7 @@ include ('../fixedSettings.php');
 # Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
 #                                                                                                                   #
 #####################################################################################################################
-$json_string = file_get_contents('./json/year.json');
+$json_string = file_get_contents('../dvmhighcharts/json/year.json');
 $parsed_json = json_decode($json_string,true);
 
 $offset = $parsed_json[0]["utcoffset"];
@@ -19,7 +19,6 @@ $utcoffset = json_encode($offset);
 // for column or spline
 $airDensityLast = $parsed_json[0]["airDensityplot"]["series"]["air_density"];
 $airDensity = json_encode($airDensityLast);
-//$theme = "dark";
 ?>
 
 <!DOCTYPE html>
@@ -27,20 +26,16 @@ $airDensity = json_encode($airDensityLast);
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Highcharts Week graph for weewx</title>
-    <script src="./scripts/jquery.min.js"></script>
-    <script src="./scripts//highstock.js"></script>
-    <script src="./scripts//boost.js"></script>
-    <script src="./scripts/highcharts-more.js"></script>
-    <script src="./scripts/exporting.js"></script>
-    <script src="./scripts/export-data.js"></script>
-    <script src="./scripts/divumwx-<?php echo $theme;?>.js" type="text/javascript"></script>
-    <script src="./scripts/accessibility.js"></script>
+    <script src="scripts/jquery.min.js"></script>
+    <script src="scripts/highstock.js"></script>
+    <script src="scripts/boost.js"></script>
+    <script src="scripts/highcharts-more.js"></script>
+    <script src="scripts/exporting.js"></script>
+    <script src="scripts/export-data.js"></script>
+    <script src="scripts/divumwx-<?php echo $theme;?>.js" type="text/javascript"></script>
 </head>
 <body>
-<figure class="highcharts-figure">
-    <div id="container"></div>
-    
-</figure>
+
 <style>
     body {
     background-color: 'transparent',
@@ -308,14 +303,14 @@ Highcharts.chart('airDensity-chart', {
             type: 'all',
             text: 'YTD'
         }],
-            selected: 0
+            selected: 2
      },
     title: {
         text: 'Air Density Chart'
     },
     tooltip: { 
         valueDecimals: 5,
-        backgroundColor: '#FFFFFF' 
+        backgroundColor: '#222328' 
     },
     yAxis: [{
         labels: {
