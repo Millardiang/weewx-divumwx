@@ -13,7 +13,6 @@
 ##    Issues for weewx-divumwx skin template are only addressed via the issues register at    ##
 ##                    https://github.com/Millardiang/weewx-divumwx/issues                     ##
 ################################################################################################
-
 $json_string = file_get_contents('json/alltime.json');
 $parsed_json = json_decode($json_string,true);
 $offset = $parsed_json[0]["utcoffset"];
@@ -41,16 +40,19 @@ if ($theme === "dark") {
 }
 ?>
 <html>
+<head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Highcharts Year graph for weewx</title>
-    <script src="scripts/jquery.min.js"></script>
-    <script src="scripts/highstock.js"></script>
-    <script src="scripts/boost.js"></script>
-    <script src="scripts/highcharts-more.js"></script>
-    <script src="scripts/exporting.js"></script>
-    <script src="scripts/export-data.js"></script>
-    <script src="scripts/divumwx-<?php echo $theme;?>.js" type="text/javascript"></script>
-
+    <title>Highcharts Week graph for weewx</title>
+    <script src="./scripts/jquery.min.js"></script>
+    <script src="./scripts//highstock.js"></script>
+    <script src="./scripts//boost.js"></script>
+    <script src="./scripts/highcharts-more.js"></script>
+    <script src="./scripts/exporting.js"></script>
+    <script src="./scripts/export-data.js"></script>
+    <script src="./scripts/divumwx-<?php echo $theme;?>.js" type="text/javascript"></script>
+    <script src="./scripts/accessibility.js"></script>
+</head>
+    
 <figure class="highcharts-figure">
     <div id="container"></div>
     
@@ -68,6 +70,9 @@ var utcoffset = <?php echo $utcoffset;?>;
 Highcharts.chart('container', {
         time: {
         timezoneOffset: - utcoffset
+    },
+    chart: {
+        backgroundColor: "transparent"
     },
     title: {
         text: 'Pollen Count Week Chart',
@@ -180,7 +185,7 @@ Highcharts.chart('container', {
         },
 
     exporting: {
-        enabled: false
+        enabled: true
     },
     series: [{
         name: 'Alder',

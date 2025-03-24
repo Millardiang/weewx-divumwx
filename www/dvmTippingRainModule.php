@@ -1,5 +1,6 @@
 <?php
 include('dvmCombinedData.php');
+//include('dvmTippingData.php');
 error_reporting(0);
 ##############################################################################################
 #        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     #
@@ -15,16 +16,52 @@ error_reporting(0);
 #    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
-//$p_rain["rate"]=1;
+//$rain["rate"]=1;
+if($rain["rate"]>0)
+{$tipperStyle="width: 50px;
+  height: 8px;
+  background: #5a8dc7;
+  border: 3px solid #967969;
+  border-top: transparent;
+  border-radius: 30px;
+  transform: rotate(-15deg);
+  animation: up-down 4s ease-in-out 1s infinite alternate;";}
+else
+{$tipperStyle="width: 50px;
+  height: 8px;
+  background: transparent;
+  border: 3px solid #967969;
+  border-top: transparent;
+  border-radius: 30px;";
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>weather piezo rain</title>
+<title>weather tipping rain</title>
 <style>
-.piezo-module{position: relative;top:-1px;margin-left: 0px;}
-.rain-current{position: relative;font-size:14px;font-weight:bold;color:#000000;margin-top:-87px;z-index-100;}
+.tipping-module{position: relative;top:-1px;margin-left: 0px;}
+.tipping-current{font-size:14px;font-weight:bold;color:var(--col-6);margin-top:-136px;z-index-100;}
+.slideshow-container {max-width: 80px;position: relative;margin: auto;}
+.tipping-image{margin-top:-136px;z-index-100;}
+.dot {height: 0px;width: 0px;margin: 0 2px;background-color: transparent;border-radius: 50%;display: inline-block;transition: background-color 0.6s ease;}
+tipper-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin-left: 200px;
+
+}
+.tipper {
+<?php echo $tipperStyle;?>}
+@keyframes up-down {
+  from {transform: rotate(-15deg);}
+  to {transform: rotate(15deg);}
+}
+
 </style>
 </head>
 <body>
@@ -32,7 +69,7 @@ error_reporting(0);
 <div class="chartforecast">
 <span class="yearpopup"><a alt="rain charts" title="rain charts" href="dvmRainfallRecords.php" data-lity><?php echo $menucharticonpage;?> Rainfall Records and Charts</a></span>     
 </div>
-<span class='moduletitle'><?php echo $lang['rainfallModule'], " Piezo Sensor (<valuetitleunit>" . $rain["units"];?></valuetitleunit>)</span>
+<span class='moduletitle'><?php echo $lang['rainfallModule'], " Tipping Sensor (<valuetitleunit>" . $rain["units"];?></valuetitleunit>)</span>
 <div class="updatedtime1"><span><?php if (file_exists($livedata)&&time() - filemtime($livedata)>300) echo $offline. '<offline> Offline </offline>'; else echo $online." ".$divum["time"];?></div>
 <div class="rainconverter">
 <?php 
@@ -45,7 +82,7 @@ if ($rain["units"] =='in'){echo "<div class=rainconvertercircle style='backgroun
 </div></div>
 <script src="js/d3.7.9.0.min.js"></script>
 
-<div class="piezo-module"></div>
+<div class="tipping-module"></div>
 <script>
 
 var baseTextColor = "var(--col-6)";
@@ -57,14 +94,13 @@ var colorRain = "<?php echo $colorRainDaySum;?>";
 var units = "<?php echo $rain["units"];?>";
 
 if (units == 'in') {
-var stormRain = <?php echo round($p_rain["storm_rain"]/25.4,2);?>;    
+var stormRain = <?php echo round($rain["storm_rain"]/25.4,2);?>;    
 } else {
-    stormRain = <?php echo round($p_rain["storm_rain"],2);?>;
+    stormRain = <?php echo round($rain["storm_rain"],2);?>;
 }
-var currentImage = "img/minusPlus.svg";
 
-var currentRain = "<?php echo round($p_rain["dayRain"],2);?>";
-    //currentRain = currentRain || 0;                   
+
+                  
 var stormRainColor ="<?php echo $colorStormRain;?>";
 var rainRateColor = "<?php echo $colorRainRate;?>";
 var lastHourColor = "<?php echo $colorRain1hrSum;?>";
@@ -72,16 +108,17 @@ var last24HoursColor = "<?php echo $colorRain24hrSum;?>";
 var rainMonthColor = "<?php echo $colorRainMonthSum;?>";
 var rainYearColor = "<?php echo $colorRainYearSum;?>";
 
-var stormStart = "<?php echo $p_rain["storm_rain_start"];;?>"; 
-var rainRate = <?php echo round($p_rain["rate"],2);?>;
-var lastHour = <?php echo $p_rain["last_hour"];?>;
-var last24Hours = <?php echo $p_rain["last_24hour"];?>;
-var rainMonth = <?php echo $p_rain["monthRain"];?>; 
-var rainYear = <?php echo $p_rain["yearRain"];?>;
+var stormStart = "<?php echo $rain["storm_rain_start"];;?>"; 
+var rainRate = <?php echo round($rain["rate"],2);?>;
+var currentImage = "img/tippingGauge.svg";
+var lastHour = <?php echo $rain["last_hour"];?>;
+var last24Hours = <?php echo $rain["last_24hour"];?>;
+var rainMonth = <?php echo $rain["month_total"];?>; 
+var rainYear = <?php echo $rain["yearRain"];?>;
 var month = "<?php echo date('F');?>"; 
 var year = <?php echo date('Y');?>;                   
 
-var svg = d3.select(".piezo-module")
+var svg = d3.select(".tipping-module")
     .append("svg")
     .attr("width", 310)
     .attr("height", 150);
@@ -213,7 +250,7 @@ svg.append("text")
     .text(d3.format(".2f")(rainYear) + " " + units);
 
 svg.append("text")
-    .attr("x", 273)
+    .attr("x", 283)
     .attr("y", 70)
     .style("fill", baseTextColor)
     .style("font-family", "Helvetica")
@@ -223,7 +260,7 @@ svg.append("text")
     .text("Rain Rate");
 
 svg.append("text")
-    .attr("x", 273)
+    .attr("x", 283)
     .attr("y", 82)
     .style("fill", rainRateColor)
     .style("font-family", "Helvetica")
@@ -232,54 +269,24 @@ svg.append("text")
     .style("font-weight", "normal")
     .text(d3.format(".2f")(rainRate) + " " + units + "/hr");
 
-svg.append("rect")
-    .attr("x", 113)
-    .attr("y", 57)
-    .attr("rx", 2)
-    .attr("width", 85)
-    .attr("height", 28)
-    .style("fill", "none");     
-
-svg.append("rect")
-    .attr("x", 113)
-    .attr("y", 57)
-    .attr("rx", 2)
-    .attr("width", 85)
-    .attr("height", 28)
-    .style("stroke", "var(--col-14")
-    .style("stroke-width", 1.5)
-    .style("fill", "#F5F5DC");
-
-svg.append("rect")
-    .attr("x", 105)
-    .attr("y", 15)
-    .attr("rx", 10)
-    .attr("width", 102)
-    .attr("height", 48)
-    .style("fill", "#F5F5DC");
-
-svg.append("rect")
-    .attr("x", 105)
-    .attr("y", 15)
-    .attr("rx", 10)
-    .attr("width", 102)
-    .attr("height", 48)
-    .style("stroke", "var(--col-14")
-    .style("stroke-width", 1.5)
-    .style("fill", "none");
-
 svg.append('image') // image output
     .attr('xlink:href', currentImage)
-    .attr('height', 40)
+    .attr('height', 80)
     .attr('x', 111)
     .attr('y', 19);
 
 </script>
-<div class="rain-current"><?php echo number_format($p_rain["dayRain"],2);?><?php echo $rain["units"];?></div>
-<div id="raindropsX" width="300" height="150" style="margin-top: -90px; left: 0px;"></div>
+<div class="tipping-current"><?php echo number_format($rain["dayRain"],2);?><?php echo $rain["units"];?></div>
+<div class="tipper-container" style="margin-left:132.5px;margin-top:39px;">
+<div class="tipper">
+</div>
+</div>
+
+<div id="rain-drops-X" width="300" height="150" style="margin-top:-86px;left:0px;"></div>
+
 <script>
 
-var raining = <?php echo $p_rain["rate"];?>;
+var raining = <?php echo $rain["rate"];?>;
 
 if ( raining > 0 ) {
   
@@ -314,7 +321,7 @@ class Rain {
     this.svg.setAttribute('viewBox', `0 0 ${this.width} ${this.height}`);
     this.svg.setAttribute('xmlns', ns);
     this.svg.setAttribute('xmlns:xlink', xlink);
-    this.svg.setAttribute('id', 'rainp');
+    this.svg.setAttribute('id', 'rain');
 
     this.filters = false;
 
@@ -331,7 +338,7 @@ class Rain {
     blur.setAttribute('stdDeviation', 1);
 
     let filter = document.createElementNS(ns, 'filter');
-    filter.setAttribute('id', `blurp`);
+    filter.setAttribute('id', `blur`);
     filter.setAttribute('height', '300%');
     filter.setAttribute('width', '300%');
     filter.setAttribute('x', '-100%');
@@ -343,7 +350,7 @@ class Rain {
 
   appendTrack() {
     let track = document.createElementNS(ns, 'path');
-    track.setAttribute('id', 'trackp');
+    track.setAttribute('id', 'track');
     track.setAttribute('fill', 'none');
     track.setAttribute('stroke', 'none');
     track.setAttribute('d', `M 0 -${this.height * 0.1} V ${this.height * 1.1}`);
@@ -355,14 +362,14 @@ class Rain {
     let drop = document.createElementNS(ns, 'rect');
     drop.setAttribute('fill', `rgba(59, 156, 172, ${randBetween(1, 3) * 0.4})`);
     drop.setAttribute('height', randBetween(this.dropHeightMin, this.dropHeightMax));
-    drop.setAttribute('id', `dropp-${index}`);
+    drop.setAttribute('id', `drop-${index}`);
     drop.setAttribute('rx', 1);
     drop.setAttribute('width', randBetween(this.dropWidthMin, this.dropWidthMax) * 0.1);
     drop.setAttribute('x', 0);
     drop.setAttribute('y', 0);
 
     if (this.filters) {
-      drop.setAttribute('filter', 'url(#blurp)');
+      drop.setAttribute('filter', 'url(#blur)');
     }
 
     let group = document.createElementNS(ns, 'g');
@@ -374,10 +381,10 @@ class Rain {
 
   makeMotion(index) {
     let motionPath = document.createElementNS(ns, 'mpath');
-    motionPath.setAttribute('xlink:href', '#trackp');
+    motionPath.setAttribute('xlink:href', '#track');
 
     let motion = document.createElementNS(ns, 'animateMotion');
-    motion.setAttribute('xlink:href', `#dropp-${index}`);
+    motion.setAttribute('xlink:href', `#drop-${index}`);
     motion.setAttribute('dur', `${randBetween(this.dropDurationMin, this.dropDurationMax)}ms`);
     motion.setAttribute('begin', `${randBetween(0, this.dropDurationMin)}ms`);
     motion.setAttribute('repeatCount', 'indefinite');
@@ -414,7 +421,7 @@ class Rain {
     ellipse.setAttribute('ry', this.splashRadiusY);
 
     if (this.filters) {
-      ellipse.setAttribute('filter', 'url(#blurp)');
+      ellipse.setAttribute('filter', 'url(#blur)');
     }
 
     ellipse.appendChild(animateStroke);
@@ -442,12 +449,12 @@ class Rain {
   }}
 
 
-const el = document.getElementById('raindropsX');
+const el = document.getElementById('rain-drops-X');
 const rain = new Rain(el);
 
 rain.render();
 }
 
-</script>
+</script>                      
 </body>
 </html>

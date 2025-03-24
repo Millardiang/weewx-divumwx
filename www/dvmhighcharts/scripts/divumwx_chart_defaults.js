@@ -1,76 +1,27 @@
-<?php
-####################################################################################################################                                                                                  #                                                                                                                   #
-# weewx-divumwx Skin Template maintained by The DivumWX Team                                                        #
-#                                                                                                                   #
-# Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved                                 #
-#                                                                                                                   #
-# Distributed under terms of the GPLv3. See the file LICENSE.txt for your rights.                                   #
-#                                                                                                                   #
-# Issues for weewx-divumwx skin template should be addressed to https://github.com/Millardiang/weewx-divumwx/issues # 
-#                                                                                                                   #
-#####################################################################################################################
-
-$json_string = file_get_contents('json/lightning_week.json');
-$parsed_json = json_decode($json_string,true);
-$offset = $parsed_json[0]["utcoffset"];
-$utcoffset = json_encode($offset);
-$strikes = $parsed_json[0]["strikeplot"]["series"]["lightning_strike_count"]["name"];
-$distance = $parsed_json[0]["strikeplot"]["series"]["lightning_distance_max"]["name"]; 
-$strikesWeek = json_encode($strikes);
-$distanceWeek = json_encode($distance); 
-
-?>
-
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html>
-
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Highcharts Week graph for weewx</title>
-    <script src="./scripts/jquery.min.js"></script>
-    <script src="./scripts//highstock.js"></script>
-    <script src="./scripts//boost.js"></script>
-    <script src="./scripts/highcharts-more.js"></script>
-    <script src="./scripts/exporting.js"></script>
-    <script src="./scripts/export-data.js"></script>
-    <script src="./scripts/divumwx-<?php echo $theme;?>.js" type="text/javascript"></script>
-    <script src="./scripts/accessibility.js"></script>
-</head>
-    <body>
-
-<style>
-body {
-    background-color: 'transparent',
-}
-#week-chart {
-    width: 100%;
-    height: 345px;
-}
-
-</style>
-<div id="week-chart"></div>
-<script>
-
-var strikesWeek = <?php echo $strikesWeek;?>;
-var distanceWeek = <?php echo $distanceWeek;?>;
-var utcoffset = <?php echo $utcoffset;?>;
-
-Highcharts.chart('week-chart', {
+ 
+Highcharts.setOptions({
+    lang: {
+    thousandsSep: ""
+  }
+});
+Highcharts.chart('divumwx-chart', {
     time: {
-        timezoneOffset: - utcoffset,
+        timezoneOffset: - <?php echo $utcoffset;?>
     },
     chart: {
-        marginRight: 62.5,
+        type: 'column',
+        borderWidth: 0,
+        marginRight: 10,
+        marginLeft: 70,
         backgroundColor: 'transparent',
+        plotBackgroundColor: 'transparent',
         spacing: [15, 20, 10, 0],
         zoomType: 'x'
     },
-  
-    legend: {
-        enabled: true
+    legend: { 
+        enabled: true 
     },
     plotOptions: {
-        backgroundColor: 'transparent',
         area: {
             lineWidth: 1,
             marker: {
@@ -158,6 +109,7 @@ Highcharts.chart('week-chart', {
                 ]
             },
             marker: {
+                enabled: false,
                 radius: 1,
                 symbol: 'circle'
             },
@@ -191,9 +143,9 @@ Highcharts.chart('week-chart', {
                     ]
                 ]
             },
-            lineWidth: 1,
+            lineWidth: 0.5,
             marker: {
-                radius: 1,
+                radius: 0.25,
                 enabled: false,
                 symbol: 'circle'
             },
@@ -206,8 +158,8 @@ Highcharts.chart('week-chart', {
             }
         },
     },
-    rangeSelector: {
-        buttonSpacing: 0,
+    rangeSelector: { 
+        buttonSpacing: 0 
     },
     series: [{
     }],
@@ -215,7 +167,7 @@ Highcharts.chart('week-chart', {
         dateTimeLabelFormats: {
             minute: '%e %B %Y %H:%M',
             hour: '%e %B %Y %H:%M',
-            day: '%A %e %B %Y'
+            day: '%A %e %B %Y',
         },
         shared: true,
         // need to set valueSuffix so we can set it later if needed
@@ -231,6 +183,7 @@ Highcharts.chart('week-chart', {
             x: 0,
             y: 18
         },
+        crosshair: true,
         lineColor: '#555',
         lineWidth: 1,
         minorGridLineWidth: 0,
@@ -244,10 +197,10 @@ Highcharts.chart('week-chart', {
         tickWidth: 1,
         title: {
             style: {
-                font: 'bold 12px Arial'
+                font: 'bold 12px Lucida Grande, Lucida Sans Unicode, Verdana, Arial, Helvetica, sans-serif'
             }
         },
-        type: 'datetime',
+        type: 'datetime'
     },
     yAxis: {
         endOnTick: true,
@@ -255,6 +208,7 @@ Highcharts.chart('week-chart', {
             x: -8,
             y: 3
         },
+        crosshair: true,
         lineColor: '#555',
         lineWidth: 1,
         minorGridLineWidth: 0,
@@ -274,96 +228,29 @@ Highcharts.chart('week-chart', {
         }
     },
     rangeSelector: {
-                enabled: true,
-                inputEnabled: true,
-                inputDateFormat: '%e %b %y',
-                inputEditDateFormat: '%e %b %y',
-                buttons: [{
-                        type: 'hour',
-                        count: 6,
-                        text: '6h'
-                    }, {
-                        type: 'hour',
-                        count: 12,
-                        text: '12h'
-                    }, {
-                        type: 'hour',
-                        count: 24,
-                        text: '24h'
-                    }, {
-                        type: 'hour',
-                        count: 36,
-                        text: '36h'
-                    }, {
-                        type: 'all',
-                        text: '7d'
-                    }],
-                    selected: 3
-                },
-    title: {
-        text: ''
-    },
-    tooltip: {
-        valueDecimals: 0
-    },
-    yAxis: [{
-        labels: {
-            x: -5,
-            y: 3
-        },
-        tickLength: 4,
-        lineWidth: 1,
-        type: 'column',
-        title: {           
-            text: '(Strikes)'
-        }
-    }, {
-        labels: {
-            x: 5,
-            y: 3
-        },
-        tickLength: 4,
-        lineWidth: 1,
-        opposite: true,
-        title: {
-            text: '(Distance km)'
-        }
-    }],
-    plotOptions: {
-        backgroundColor: 'transparent',
-        series: {
-            borderWidth: 0,
-            marker: {
-                enabled: false,
-                states: {
-                    hover: {
-                        enabled: true
-                    }
-                }
-            }
-
-        }
-    },
-    borderRadius: {
-            radius: 0
-        },
-    series: [{
-        name: 'Strikes',
-        type: 'column',
-        data: strikesWeek
-    }, {
-        name: 'Distance',
-        type: 'spline',
-        data: distanceWeek,
-        yAxis: 1
-    }],
-    accessibility: {
-    enabled: false
-  }
-});
-
-
-
-</script>
-</body>
-</html>
+        enabled: true,
+        inputEnabled: true,
+        inputDateFormat: '%e %b %y',
+        inputEditDateFormat: '%e %b %y',
+        buttons: [{
+            type: 'week',
+            count: 1,
+            text: '1w'
+        }, {
+            type: 'month',
+            count: 1,
+            text: '1m'
+        }, {
+            type: 'month',
+            count: 3,
+            text: '3m'
+        }, {
+            type: 'month',
+            count: 6,
+            text: '6m'
+        }, {
+            type: 'all',
+            text: 'YTD'
+        }],
+            selected: 0
+     })
