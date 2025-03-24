@@ -131,7 +131,7 @@ else if($wind["speed_avg"] >= 15){$sky["summary"] = "Breezy Conditions";}
 else if($sky["cloud_cover"] < 7 && $sky["cloud_cover"] > 0) {$sky["summary"] = "Clear Sky";}
 else if ($sky["cloud_cover"] < 7 && $sky["cloud_cover"] > 0) {
 if ($dayPartNatural == "night" ){$sky["summary"] = "Clear Sky";} 
-else $sky["summary"] = "Sunny";
+else $sky["summary"] = "Clear Sky";
 } 
 else if ($sky["cloud_cover"] < 32) {
 if ($dayPartNatural == "night"){$sky["summary"] = "Mostly Clear Conditions";} 
@@ -232,8 +232,8 @@ var text = svg.selectAll(null)
 
 svg.append('image') // image output
     .attr('xlink:href', currentImage)
-    .attr('width', 80)
-    .attr('height', 85)
+
+    .attr('height', 95)
     .attr('x', 117)
     .attr('y', 40);
 
