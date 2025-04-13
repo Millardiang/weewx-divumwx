@@ -29,7 +29,7 @@ $parsed_icon = json_decode($json_icon, true);
 
 switch ($advisoryzoneMapping) {
     case "unitedkingdom":
-        include('advisoryHealth.php');
+        //include('advisoryHealth.php');
         $url = "https://www.metoffice.gov.uk/weather/warnings-and-advice/uk-warnings";
         $json_string = file_get_contents("jsondata/awa.txt");
         $parsed_json = json_decode($json_string, true);
