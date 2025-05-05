@@ -50,7 +50,7 @@ import time
 import weeutil.rsyncupload
 try: import xmltodict
 except: pass
-from distutils.version import StrictVersion
+from packaging.version import Version
 try:
     import urllib2 as urllib
 except ImportError:
@@ -110,10 +110,11 @@ except ImportError:
 
 DIVUMWX_VERSION = "0.0.1"
 
-#REQUIRED_WEEWX = "4.6.0"
-#if StrictVersion(weewx.__version__) < StrictVersion(REQUIRED_WEEWX):
-    #raise weewx.UnsupportedFeature("weewx %s or greater is required, found %s"
-                                   #% (REQUIRED_WEEWX, weewx.__version__))
+REQUIRED_WEEWX = "5.0.1"
+if Version(weewx.__version__) < Version(REQUIRED_WEEWX):
+    raise weewx.UnsupportedFeature(
+        "weewx %s or greater is required, found %s" % (REQUIRED_WEEWX, weewx.__version__)
+    )
 
 COMPASS_POINTS = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
                   'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW', 'N']

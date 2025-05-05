@@ -140,6 +140,10 @@ try:
     from configobj import ConfigObj
 except ImportError:
     modMissing("configobj", force_restart=True)
+try:
+    from packaging.version import Version
+except ImportError:
+    modMissing("packaging", force_restart=True)
 print(f"{green}Python module import complete...{reset}")
 
 class DVMInstaller:
