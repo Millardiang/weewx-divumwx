@@ -1128,7 +1128,16 @@ class DivumWXRealTime(StdService):
         fields.append(self.format(data, 'sunshine_hours', 1))         # 56 *
         fields.append(self.format(data, 'maxSolarRad', 1))            # 57 *
         fields.append(self.format(data, 'windGust', 1))               # 58 *
-        fields.append(self.format(data, 'stormRain', 1))               # 58 *
+        fields.append(self.format(data, 'stormRain', 1))              # 59 *
+        fields.append(self.format(data, 'p_rainRate', r_dp))          # 60 *
+        fields.append(self.format(data, 'p_dayRain', r_dp))           # 61 *
+        fields.append(self.format(data, 'rain_hour', r_dp))           # 62 *
+        fields.append(self.format(data, 'p_rain_month', r_dp))        # 63 *
+        fields.append(self.format(data, 'p_rain_year', r_dp))         # 64 *
+        fields.append(self.format(data, 'p_rain_yesterday', r_dp))    # 65 *
+        fields.append(self.format(data, 'p_stormRain', 1))            # 66 *
+        fields.append(self.format(data, 'vpd', 1))                    # 67 *
+
         return ' '.join(fields)
       
       
