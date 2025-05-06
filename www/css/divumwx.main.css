@@ -1090,7 +1090,7 @@ baro-units{left:140px;font-size:11px;color:var(--col-6);}
 .barometerconverter{margin-left:250px;margin-top:-140.25px;font-size:12px;position:relative;z-index:auto;}
 .barometerconvertercircleblue{display:flex;align-items:center;justify-content:center;height:1rem;width:3.5rem;border:1px solid #38383c;overflow:hidden;border-radius:2px;color:#ffffff;line-height:16px;font-family:weathertext2,Helvetica,system;font-size:0.85em;right:10px;background:0;margin-top:5px;}
 outlook-panel{font-size:0.95em;font-family:Arial,system;top:11px;left:0px;width:210px;height:auto;position:absolute;font-weight:400;overflow:hidden;align-items:center;}
-body{margin:0 auto;max-width:1596px;font-family:var(--font);background-color:var(--col-1);}
+body{margin:0 auto;max-width:958px;font-family:var(--font);background-color:var(--col-1);}
 .card-container{align-items:start;display:grid;grid-gap:4px;grid-template-columns:repeat(auto-fit,315px);justify-content:center;margin-top:4px;margin-bottom:4px;}
 .cardP,.cardE,.card{color:var(--col-6);text-align:center;background-color:var(--col-2);height:195px;border-top:solid var(--col-3) 20px;border-radius:5px;border-bottom:solid var(--col-3) 18px;}
 .theme-switch{display:inline-block;height:17px;position:relative;width:30px;margin-left:-52px;}

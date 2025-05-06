@@ -1,9 +1,9 @@
-# To use add the following to the end of process_services user.dvm_db_backup.DVM_DB_Backup
+# To use add the following to the end of process_services user.w34_db_backup.W34_DB_Backup
 # Next setup the following variables below DATABASES, BACKUPS, BACKUP_TIMES or add the following section to weewx config 
 # CANNOT HAVE A BACKUP DATABASE FILENAME weewx.sdb weewx.frm, weewx.myi, weewx.myd.
 # If multiple databases are to be backup then databases and backups and backup_times are strings with comma between each entry.
 # The number of database filenames must match the number of backup filenames and backup times
-# [DVM_DB_Backup]
+# [W34_DB_Backup]
 #    databases = <Location(s) of your active databases (can be a comma separated string)>
 #    backups = <Location(s) for your backups (can be a comma separated string)>
 #    backup_times = <Time(s) to run backup each day (can be a comma separated string) MUST BE A TIME THAT A WEEWX ARCHIVE EVENT HAPPEENS>
@@ -17,7 +17,7 @@ from datetime import datetime
 import weewx
 from weewx.wxengine import StdService
 
-VERSION = "3.0"
+VERSION = "2.0"
 
 DATABASES    = ["/var/lib/weewx/weewx.sdb"]
 BACKUPS      = ["/media/pi/usb_drive/weewx_backup.sdb"]
@@ -42,7 +42,7 @@ except ImportError:
     import syslog
 
     def logmsg(level, msg):
-        syslog.syslog(level, 'DVM_DB_Backup: %s' % msg)
+        syslog.syslog(level, 'W34_DB_Backup: %s' % msg)
 
     def logdbg(msg):
         logmsg(syslog.LOG_DEBUG, msg)
@@ -53,18 +53,18 @@ except ImportError:
     def logerr(msg):
         logmsg(syslog.LOG_ERR, msg)
 
-class DVM_DB_Backup(StdService):
+class W34_DB_Backup(StdService):
     
     def __init__(self, engine, config_dict):
-        super(DVM_DB_Backup, self).__init__(engine, config_dict)
+        super(W34_DB_Backup, self).__init__(engine, config_dict)
         loginf("Version is %s" % VERSION) 
-        try: self.databases = config_dict['DVM_DB_Backup'].get('databases', DATABASES)
+        try: self.databases = config_dict['W34_DB_Backup'].get('databases', DATABASES)
         except: self.databases = DATABASES
         self.databases = [s.strip() for s in self.databases]
-        try: self.backups = config_dict['DVM_DB_Backup'].get('backups', BACKUPS)
+        try: self.backups = config_dict['W34_DB_Backup'].get('backups', BACKUPS)
         except: self.backups = BACKUPS
         self.backups = [s.strip() for s in self.backups]
-        try: self.backup_times = config_dict['DVM_DB_Backup'].get('backup_times', BACKUP_TIMES)
+        try: self.backup_times = config_dict['W34_DB_Backup'].get('backup_times', BACKUP_TIMES)
         except: self.backup_times = BACKUP_TIMES 
         self.backup_times = [s.strip() for s in self.backup_times]
         if len(self.databases) != len(self.backups) or len(self.databases) != len(self.backup_times): 

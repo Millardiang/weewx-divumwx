@@ -49,6 +49,11 @@ $cycles17 = $parsed_json[$position17]["cycle"];
 $cycles18 = $parsed_json[$position18]["cycle"];
 $cycles19 = $parsed_json[$position19]["cycle"];
 $cycles20 = $parsed_json[$position20]["cycle"];
+$cycles21 = $parsed_json[$position21]["cycle"];
+$cycles22 = $parsed_json[$position22]["cycle"];
+$cycles23 = $parsed_json[$position23]["cycle"];
+$cycles24 = $parsed_json[$position24]["cycle"];
+$cycles25 = $parsed_json[$position25]["cycle"];
 $cycles99 = $parsed_json[$position99]["cycle"];
 
 //$copyYear = 2023;

@@ -30,8 +30,8 @@
         </a>
       </li>
           
-      <li class="header">ADMIN</li>
-        <li><a href="./admin/index.php" title="DvM Admin"><menumarkergreen></menumarkergreen> DvM Admin</a></li>
+      <!--li class="header">ADMIN</li>
+        <li><a href="./admin/index.php" title="DvM Admin"><menumarkergreen></menumarkergreen> DvM Admin</a></li-->
       <!--li class="header">UI THEME</li>
       <li>
         <a href="<?php echo ($theme == 'dark') ? '?theme=light' : '?theme=dark'; ?>">

@@ -31,7 +31,6 @@ $outlookPhrase = str_replace(" degrees","&deg".$temp["units"],$phrase);
 </head>
 <body>
 <div class="chartforecast">
-<span class="yearpopup"><a alt="Weather Station" title="Weather Station" href="https://www.ecowitt.net/home/index?id=180489"><?php echo $chartinfo;?><?php echo ' Ecowitt Weather Station';?>
 </div>
 <span class='moduletitle'><?php echo $lang['timeTop']; ?></valuetitleunit></span>
     

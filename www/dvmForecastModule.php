@@ -42,10 +42,7 @@ $jsonfile="jsondata/awd.txt";if(!file_exists($jsonfile)) {return;}
 
 ?>
     <div class="forecast4">
-      <span class="yearpopup"><a alt="Forecast Menu" title="Forecast Menu" href="dvmForecastHourlyPopup.php" data-lity><?php echo $chartinfo; ?> Forecasts and Meteogram</a></span>
-      <span class="yearpopup"><a alt="rss" title="MetOffice RSS" href="rss.php" data-lity><?php echo $chartinfo; ?> MetOffice RSS</a></span>
- 
-      <span class="yearpopup"><a alt="Health" title="Health" href="alert.html"><?php echo $chartinfo; ?> Weather Health</a></span>      
+      <span class="yearpopup"><a alt="Forecast Menu" title="Forecast Menu" href="dvmForecastHourlyTablePopup.php" data-lity><?php echo $chartinfo; ?> Forecasts and Meteogram</a></span>
 </div>
 <span class='moduletitle'><?php echo $lang[
     "forecastModule"

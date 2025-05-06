@@ -50,7 +50,7 @@ import time
 import weeutil.rsyncupload
 try: import xmltodict
 except: pass
-from distutils.version import StrictVersion
+from packaging.version import Version
 try:
     import urllib2 as urllib
 except ImportError:
@@ -110,10 +110,11 @@ except ImportError:
 
 DIVUMWX_VERSION = "0.0.1"
 
-#REQUIRED_WEEWX = "4.6.0"
-#if StrictVersion(weewx.__version__) < StrictVersion(REQUIRED_WEEWX):
-    #raise weewx.UnsupportedFeature("weewx %s or greater is required, found %s"
-                                   #% (REQUIRED_WEEWX, weewx.__version__))
+REQUIRED_WEEWX = "5.0.1"
+if Version(weewx.__version__) < Version(REQUIRED_WEEWX):
+    raise weewx.UnsupportedFeature(
+        "weewx %s or greater is required, found %s" % (REQUIRED_WEEWX, weewx.__version__)
+    )
 
 COMPASS_POINTS = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
                   'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW', 'N']
@@ -1127,7 +1128,16 @@ class DivumWXRealTime(StdService):
         fields.append(self.format(data, 'sunshine_hours', 1))         # 56 *
         fields.append(self.format(data, 'maxSolarRad', 1))            # 57 *
         fields.append(self.format(data, 'windGust', 1))               # 58 *
-        fields.append(self.format(data, 'stormRain', 1))               # 58 *
+        fields.append(self.format(data, 'stormRain', 1))              # 59 *
+        fields.append(self.format(data, 'p_rainRate', r_dp))          # 60 *
+        fields.append(self.format(data, 'p_dayRain', r_dp))           # 61 *
+        fields.append(self.format(data, 'rain_hour', r_dp))           # 62 *
+        fields.append(self.format(data, 'p_rain_month', r_dp))        # 63 *
+        fields.append(self.format(data, 'p_rain_year', r_dp))         # 64 *
+        fields.append(self.format(data, 'p_rain_yesterday', r_dp))    # 65 *
+        fields.append(self.format(data, 'p_stormRain', 1))            # 66 *
+        fields.append(self.format(data, 'vpd', 1))                    # 67 *
+
         return ' '.join(fields)
       
       
@@ -1868,4 +1878,3 @@ class SunshineDuration(StdService):
         else :
             threshold=0
         return threshold
-

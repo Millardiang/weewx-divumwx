@@ -16,20 +16,13 @@
 //  Ian Millard 05/11/24 added styling to links for popup charts and records                  #
 //                                                                                            #
 //#############################################################################################
-session_start();
 if (!file_exists("userSettings.php")) {
-	if (isset($_SESSION['setupAttempted']) && $_SESSION['setupAttempted'] === true) {
-		echo "An error occurred. Please contact support.";
-		exit;
-	}
-	$_SESSION['canAccessSetup'] = true;
-	header("Location: dvmActSetup.php");
-	exit;
+    copy("initial_userSettings.php", "userSettings.php");
 }
 
+
 include_once ('dvmCombinedData.php');
-include_once ('webserver_ip_address.php');
-require_once ('admin/assets/classes/geoplugin.class.php');
+//include_once ('webserver_ip_address.php');
 include ('dvmUpdater.php');
 
 date_default_timezone_set($TZ);
@@ -128,7 +121,6 @@ echo $manifestShortName;
 
         <?php
 include ("advisoryRegions.php");
-//include ("advisoryFloodsEngland.php");
 error_reporting(0);
 ?>
           
@@ -156,27 +148,6 @@ error_reporting(0);
 
     <div class="cardP"><div class="module"><div id="position9"></div></div></div>
 
-	<div class="cardE"><div class="module"><div id="position10"></div></div></div>
-
-    <div class="cardE"><div class="module"><div id="position11"></div></div></div>
-
-	<div class="cardE"><div class="module"><div id="position12"></div></div></div>
-	
-    <div class="cardE"><div class="module"><div id="position13"></div></div></div>
-
-	<div class="cardE"><div class="module"><div id="position14"></div></div></div>
-
-    <div class="cardE"><div class="module"><div id="position15"></div></div></div>
-
-	<div class="cardE"><div class="module"><div id="position16"></div></div></div>
-
-    <div class="cardE"><div class="module"><div id="position17"></div></div></div>
-
-	<div class="cardE"><div class="module"><div id="position18"></div></div></div>
-    
-    <div class="cardE"><div class="module"><div id="position19"></div></div></div>
-
-	<div class="cardE"><div class="module"><div id="position20"></div></div></div>
 
 </section>
 <!--end of grid section-->
@@ -278,47 +249,6 @@ preload_image("./img/vaisala-xweather-logo-light.svg");
 </body>
 <?php
 include_once ('dvmSideMenu.php');
-      //Add visits by country to admin database. No personal info is kept by this, ip is discarded
-if ($trkVisits) {
-	$geoplugin = new geoPlugin();
-	$geoplugin->locate($_SERVER['REMOTE_ADDR']);
-	$countryCode = $geoplugin->countryCode;
-	$regionName = $geoplugin->regionName;
-	$cityCode = $geoplugin->city;
-	$lat = $geoplugin->latitude;
-	$long = $geoplugin->longitude;
-	$adminDB = __DIR__ . DIRECTORY_SEPARATOR . 'admin' . DIRECTORY_SEPARATOR . 'db' . DIRECTORY_SEPARATOR . 'dvmAdmin.db3';
-	$db = new PDO("sqlite:" . $adminDB);
-	$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-	$regionName = empty($regionName) ? "Unknown" : $regionName;
-	$cityCode = empty($cityCode) ? "Unknown" : $cityCode;
-	$query = $db->prepare("SELECT * FROM visits WHERE countryCode = :countryCode AND regionName = :regionName AND cityName = :cityName");
-	$query->bindValue(':countryCode', $countryCode, PDO::PARAM_STR);
-	$query->bindValue(':regionName', $regionName, PDO::PARAM_STR);
-	$query->bindValue(':cityName', $cityCode, PDO::PARAM_STR);
-	$query->execute();
-	$row = $query->fetch(PDO::FETCH_ASSOC);
-	if ($row) {
-		$updateStmt = $db->prepare(
-			"UPDATE visits SET visit_count = visit_count + 1 WHERE countryCode = :countryCode AND regionName = :regionName AND cityName = :cityName"
-		);
-		$updateStmt->bindValue(':countryCode', $countryCode, PDO::PARAM_STR);
-		$updateStmt->bindValue(':regionName', $regionName, PDO::PARAM_STR);
-		$updateStmt->bindValue(':cityName', $cityCode, PDO::PARAM_STR);
-		$updateStmt->execute();
-	} else {
-		$insertStmt = $db->prepare(
-			"INSERT INTO visits (countryCode, regionName, cityName, lat, long, visit_count) VALUES (:countryCode, :regionName, :cityName, :lat, :long, 1)"
-		);
-		$insertStmt->bindValue(':countryCode', $countryCode, PDO::PARAM_STR);
-		$insertStmt->bindValue(':regionName', $regionName, PDO::PARAM_STR);
-		$insertStmt->bindValue(':cityName', $cityCode, PDO::PARAM_STR);
-		$insertStmt->bindValue(':lat', $lat, PDO::PARAM_STR);
-		$insertStmt->bindValue(':long', $long, PDO::PARAM_STR);
-		$insertStmt->execute();
-	}
-	$db = null;
-}
 ?>
 
 </html>

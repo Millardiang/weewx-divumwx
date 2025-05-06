@@ -1,1 +1,0 @@
-<iframe src="//nerdiedad.com/tools/rss-to-html/?url=https%3A%2F%2Fwww.metoffice.gov.uk%2Fpublic%2Fdata%2FPWSCache%2FWarningsRSS%2FRegion%2Fuk&showicon=true&showempty=true&forceutf8=true&type=html"style="background-color:grey;color:var(--col-6);width:100%;height:100%;border-color:transparent;border-radius:5px;"></iframe>
