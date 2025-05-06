@@ -106,7 +106,7 @@ echo 'Hello world';</code></pre>
 
 <pre class="highlighter"><code class="language-plaintext no-line-numbers">php main.php</code></pre>
 
-<h2 class="wp-block-heading">Install older versions</h2>
+<p>Install older versions</p>
 
 <p>PHP 8.3 is an older version that is still supported. It can be installed by changing <code>php8.4</code> to <code>php8.3</code> in this post presented commands.</p></div>
 
@@ -115,17 +115,13 @@ echo 'Hello world';</code></pre>
 
 * Go to (https://www.divumwx.org/settingsGen/) to complete the pre-install web services settings which which generates 'services.json' in your default Download folder. The new Settings Generator is required as the format has changed, and any previous settings file you’ve created is no longer usable.
 
-* Download the beta archive from:
-       https://www.divumwx.org/files/divumwx1.0.00rc2.tar.gz
-        or
-       https://www.divumwx.org/files/divumwx1.0.00rc2.zip
+* Download the beta archive from: -
+       (https://github.com/Millardiang/weewx-divumwx/archive/refs/heads/divumwxLite.zip)
 
-and transfer it to your weewx server along with the services.json file that you created at
+and transfer it to your weewx server along with the services.json file that you created
 
-	https://www.divumwx.org/settingsGen/
-The new Settings Generator is required as the format has changed, and any previous settings file you’ve created is no longer usable
-Log into your weewx server as the same user that installed weewx, and from the command line, enter the following command:
-
+* Enter your Python Virtual Environment: -
+ 
 	source ~/weewx-venv/bin/activate
 
 You will end up with the prompt as shown below. This indicates that you are in the Python Virtual Environment that weewx was installed to:
