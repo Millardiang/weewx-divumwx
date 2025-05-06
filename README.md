@@ -111,28 +111,130 @@ echo 'Hello world';</code></pre>
 <p>PHP 8.3 is an older version that is still supported. It can be installed by changing <code>php8.4</code> to <code>php8.3</code> in this post presented commands.</p></div>
 
     
-* This install process assumes that your are using one of the officially documented WeeWX installs and a typical Apache2 or Nginx web server configuration with a document root of /var/www/html. In this instance, at the end of the installation process your path to the DivumWX-Lite skin will be /var/www/html/divumLite. If your installation deviates from this, you will need to adjust the paths in your weewx.conf file after the installation process has taken place.
+* This install process assumes that your are using one of the officially documented WeeWX installs and a typical Apache2 or Nginx web server configuration with a document root of /var/www/html. In this instance, at the end of the installation process your path to the DivumWX-Lite skin will be /var/www/html/divumwx. If your installation deviates from this, you will need to adjust the paths in your weewx.conf file after the installation process has taken place.
 
-* I am very gratefully to Jerry Dietrich for writing a new installer which has been adapted for use with DivumWX-Lite. This installer copies everything to the correct places and automatically configures the correct web server ownerships, permissions and groups etc. The whole process is very fast and your skin will be up and running in no time.
+* Go to (https://www.divumwx.org/settingsGen/) to complete the pre-install web services settings which which generates 'services.json' in your default Download folder. The new Settings Generator is required as the format has changed, and any previous settings file you’ve created is no longer usable.
 
-* Go to https://Millardiang.github.io/weewx-DivumWX-Lite to complete the pre-install web services settings which which generates 'services.txt' in your default Download folder. 
+* Download the beta archive from:
+       https://www.divumwx.org/files/divumwx1.0.00rc2.tar.gz
+        or
+       https://www.divumwx.org/files/divumwx1.0.00rc2.zip
 
-* From the command line: - 
-                
-		Download weewx-DivumWX-Lite-master.zip from https://github.com/Millardiang/weewx-DivumWX-Lite/archive/refs/heads/main.zip into your Download folder alongside the services.txt file
-		cd [path_to_your_Download_folder]
-		unzip weewx-DivumWX-Lite-master.zip
-		cd weewx-DivumWX-Lite-master
+and transfer it to your weewx server along with the services.json file that you created at
 
-Find the file named "pip.conf". Open up this file to edit. On lines 2 (in 2 places), 3 and 8 you will see <USER>. You must change this to the login/user ID that you use for your WeeWX installation. For example, if your login/user ID is "fred", line 3 would become "weewx_config_file":"/home/fred/weewx-data/weewx.conf",. 
+	https://www.divumwx.org/settingsGen/
+The new Settings Generator is required as the format has changed, and any previous settings file you’ve created is no longer usable
+Log into your weewx server as the same user that installed weewx, and from the command line, enter the following command:
 
-The default path follows the default document root for Apache2 and Nginx server software, i.e. /var/www/html. If your path differs from this, you must change /var/www/html/divumwx/ on lines 2,4,12,28,44 accordingly.
- 
-Save the file. Then start the installer.
+	source ~/weewx-venv/bin/activate
 
-      sudo python3 dvmInstaller.py
+You will end up with the prompt as shown below. This indicates that you are in the Python Virtual Environment that weewx was installed to:
 
-* Follow the prompts
+
+
+Running the following command will tell what user is running weewx
+	ps aux | grep weewx
+	
+
+
+This shows that the user and group running/owning the weewx process is dietpi: dietpi on this machine. 
+
+
+
+Running the following command will tell what user is running weewx
+	ps aux | grep apache
+
+
+
+This shows that the user and group that runs/owns the apache2 process on this machine is www-data:www-data.
+
+Checking the default pip HTML_ROOT (public_html, which equates to /home/[username]/weewx-data/public_html) will show you where weewx is creating its files, and, as you can see, they are owned by dietpi:dietpi
+
+
+Before proceeding, you must ensure that weewx has been properly installed and producing reports, as shown below. Failure to do so will result in the beta installer failing.
+
+
+Extract the beta archive.
+	tar -xvzf divumwx1.0.00rc2.tar.gz
+	or
+	unzip divumwx1.0.00rc2.zip
+
+This will leave you with a directory DivumWX1.0.00rc2.  Move the services.json file into that new directory as well.
+        mv ./services.json ./ DivumWX1.0.00rc2/services.json
+
+Change into that directory.
+	cd DivumWX1.0.00rc2/
+
+Python Installer
+
+In the DivumWX1.0.00rc2 directory, enter the following command:
+	python dvmInstaller.py –debug
+
+The “--debug” parameter IS REQUIRED for beta testers to use, as it generates a needed debug log file.
+
+If you are missing one of the non-standard Python modules required by the installer, you will be prompted to install it.
+
+
+
+
+Responding “Y” will install the necessary module and restart the script.
+
+
+
+Pressing any key will then display the essential installation document.
+
+
+
+Pressing “q” will exit the text viewer and proceed to the welcome message.
+
+
+
+Pressing any key will continue, and the script will verify your Python version and verify that you are running in the Python virtual environment. Next, it checks the weewx version, then it gets the user running the script and verifies the user and group for file permissions:
+
+
+
+Entering “n” will allow you to manually enter the user and group for file permissions; otherwise, entering “y” will accept what the script has found.
+
+Next, the script will attempt to locate what software you are using for a web server and what user and group it’s run under, again for file permissions:
+
+
+
+Entering “n” will allow you to enter the web server and user/group manually; otherwise, entering “y” will proceed.
+
+Next, the script will inform you of the HTML_ROOT setting in the weewx.conf file and ask if you want to use that setting.
+
+
+
+Entering “y” will accept what the script found; otherwise, entering “n” will allow you to input the full path for the HTML_ROOT.
+
+HTML_ROOT is the directory where weewx is writing its report files, NOT necessarily the DOCUMENTROOT of your web server. In the case of a stock, standard pip installation, then the HTML_ROOT would be /home/[username]/weewx_data/public_html, and the URL of your weewx page would be however you linked it in your web server
+
+Next, the script will ask you if you wish to change the webserver's document root. Since you’ve created reports using the Seasons skin, files will already be in the current document root. Unless you’ve deleted those files, it is highly suggested that you enter “y” to the following question to keep things clean and separate.
+
+
+
+Entering “y” will append “divumwx” to the current “HTML_ROOT” setting and answering “n” will leave it alone.
+
+Next, the script will ask if you want to use the DVM Backup service to back up your weewx database.
+
+
+
+Entering “y” will allow you to enter the specifics for the DVM Backup service; entering “n” will bypass this section.
+
+
+Now the script displays the inputs that it has loaded for you to look over and asks if you’re ready to have it start the installation process:
+
+
+
+
+Once you’ve reviewed everything, if you enter “y,” the installation will proceed; otherwise, entering “n” will exit the script.
+
+
+The script will proceed and inform you of the steps as they are completed.
+
+
+
+You’ve completed the command-line Python installation. The next step is to visit the DivumWX Skin's home page and start the web-based initial setup.
 		
 
 
