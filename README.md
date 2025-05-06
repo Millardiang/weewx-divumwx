@@ -110,7 +110,7 @@ echo 'Hello world';</code></pre>
 
 <p>PHP 8.3 is an older version that is still supported. It can be installed by changing <code>php8.4</code> to <code>php8.3</code> in this post presented commands.</p></div>
 
-<h2 class="wp-block-heading">Main</h2>
+<h2 class="wp-block-heading">Install the Skin</h2>
 
 * This install process assumes that your are using one of the officially documented WeeWX installs and a typical Apache2 or Nginx web server configuration with a document root of /var/www/html. In this instance, at the end of the installation process your path to the DivumWX-Lite skin will be /var/www/html/divumwx. If your installation deviates from this, you will need to adjust the paths in your weewx.conf file after the installation process has taken place.
 
@@ -142,13 +142,13 @@ Before proceeding, you must ensure that weewx has been properly installed and pr
 
 Extract the beta archive.
 
- 	unzip divumwxLite.zip.zip
+ 	unzip weewx-divumwx-divumwxLite.zip
 
-This will leave you with a directory DivumWX1.0.00rc2.  Move the services.json file into that new directory as well.
-        mv ./services.json ./ divumwxLite/services.json
+This will leave you with a directory weewx-divumwx-divumwxLite.  Move the services.json file into that new directory as well.
+        mv ./services.json ./ weewx-divumwx-divumwxLite/services.json
 
 Change into that directory.
-	cd divumwxLite/
+	cd weewx-divumwx-divumwxLite/
 
 Python Installer
 
@@ -160,10 +160,7 @@ The “--debug” parameter IS REQUIRED for beta testers to use, as it generates
 If you are missing one of the non-standard Python modules required by the installer, you will be prompted to install it.
 
 
-
-
 Responding “Y” will install the necessary module and restart the script.
-
 
 
 Pressing any key will then display the essential installation document.
@@ -173,7 +170,6 @@ Pressing any key will then display the essential installation document.
 Pressing “q” will exit the text viewer and proceed to the welcome message.
 
 
-
 Pressing any key will continue, and the script will verify your Python version and verify that you are running in the Python virtual environment. Next, it checks the weewx version, then it gets the user running the script and verifies the user and group for file permissions:
 
 
@@ -181,7 +177,6 @@ Pressing any key will continue, and the script will verify your Python version a
 Entering “n” will allow you to manually enter the user and group for file permissions; otherwise, entering “y” will accept what the script has found.
 
 Next, the script will attempt to locate what software you are using for a web server and what user and group it’s run under, again for file permissions:
-
 
 
 Entering “n” will allow you to enter the web server and user/group manually; otherwise, entering “y” will proceed.
@@ -197,11 +192,9 @@ HTML_ROOT is the directory where weewx is writing its report files, NOT necessar
 Next, the script will ask you if you wish to change the webserver's document root. Since you’ve created reports using the Seasons skin, files will already be in the current document root. Unless you’ve deleted those files, it is highly suggested that you enter “y” to the following question to keep things clean and separate.
 
 
-
 Entering “y” will append “divumwx” to the current “HTML_ROOT” setting and answering “n” will leave it alone.
 
 Next, the script will ask if you want to use the DVM Backup service to back up your weewx database.
-
 
 
 Entering “y” will allow you to enter the specifics for the DVM Backup service; entering “n” will bypass this section.
@@ -210,13 +203,10 @@ Entering “y” will allow you to enter the specifics for the DVM Backup servic
 Now the script displays the inputs that it has loaded for you to look over and asks if you’re ready to have it start the installation process:
 
 
-
-
 Once you’ve reviewed everything, if you enter “y,” the installation will proceed; otherwise, entering “n” will exit the script.
 
 
 The script will proceed and inform you of the steps as they are completed.
-
 
 
 You’ve completed the command-line Python installation. The next step is to visit the DivumWX Skin's home page and start the web-based initial setup.
@@ -233,6 +223,16 @@ You’ve completed the command-line Python installation. The next step is to vis
 This will allow some of the required variable data to be generated immediately without having to wait for the next report generation interval.
 
 * You can now test that the template is working by opening it up in your browser.
+
+<h2 class="wp-block-heading">Edit locationSettings.php File</h2>  
+
+* Finally, in your divumwx folder you will find a file locationSettings.php. Although the main options in this Lite version of DivumWX are fixed, you will need to modify this file to personalise four variables.
+
+      # Open the file for editing
+      sudo nano locationSettings.php
+      # Make the changes as indicated
+      # Save and close the file.
+      # Browse to divumwx page and refresh you browser
 
 * Any problems, please raise an Issue in this repository attaching a debug report, your skin.conf files and a journal report covering at least two archive cycles from startup.
   
