@@ -110,7 +110,8 @@ echo 'Hello world';</code></pre>
 
 <p>PHP 8.3 is an older version that is still supported. It can be installed by changing <code>php8.4</code> to <code>php8.3</code> in this post presented commands.</p></div>
 
-    
+<h2 class="wp-block-heading">Main</h2>
+
 * This install process assumes that your are using one of the officially documented WeeWX installs and a typical Apache2 or Nginx web server configuration with a document root of /var/www/html. In this instance, at the end of the installation process your path to the DivumWX-Lite skin will be /var/www/html/divumwx. If your installation deviates from this, you will need to adjust the paths in your weewx.conf file after the installation process has taken place.
 
 * Go to (https://www.divumwx.org/settingsGen/) to complete the pre-install web services settings which which generates 'services.json' in your default Download folder. The new Settings Generator is required as the format has changed, and any previous settings file you’ve created is no longer usable.
@@ -124,46 +125,34 @@ and transfer it to your weewx server along with the services.json file that you 
  
 	source ~/weewx-venv/bin/activate
 
-You will end up with the prompt as shown below. This indicates that you are in the Python Virtual Environment that weewx was installed to:
-
-
-
 Running the following command will tell what user is running weewx
 	ps aux | grep weewx
 	
-
-
 This shows that the user and group running/owning the weewx process is dietpi: dietpi on this machine. 
-
-
 
 Running the following command will tell what user is running weewx
 	ps aux | grep apache
-
-
 
 This shows that the user and group that runs/owns the apache2 process on this machine is www-data:www-data.
 
 Checking the default pip HTML_ROOT (public_html, which equates to /home/[username]/weewx-data/public_html) will show you where weewx is creating its files, and, as you can see, they are owned by dietpi:dietpi
 
-
 Before proceeding, you must ensure that weewx has been properly installed and producing reports, as shown below. Failure to do so will result in the beta installer failing.
 
 
 Extract the beta archive.
-	tar -xvzf divumwx1.0.00rc2.tar.gz
-	or
-	unzip divumwx1.0.00rc2.zip
+
+ 	unzip divumwxLite.zip.zip
 
 This will leave you with a directory DivumWX1.0.00rc2.  Move the services.json file into that new directory as well.
-        mv ./services.json ./ DivumWX1.0.00rc2/services.json
+        mv ./services.json ./ divumwxLite/services.json
 
 Change into that directory.
-	cd DivumWX1.0.00rc2/
+	cd divumwxLite/
 
 Python Installer
 
-In the DivumWX1.0.00rc2 directory, enter the following command:
+In the divumwxLite directory, enter the following command:
 	python dvmInstaller.py –debug
 
 The “--debug” parameter IS REQUIRED for beta testers to use, as it generates a needed debug log file.
