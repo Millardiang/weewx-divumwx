@@ -31,7 +31,6 @@ $position8 = "dvmEarthDaylightModule.php";
 $position9 = "dvmMoonPhaseModule.php";
 $defaultlanguage = "en";
 $password = "";
-$manifestShortName = "DEMO-UK";
 $linkWUNew = "yes";
 $linkCWOPID = "";
 $linkFindUID = "";
