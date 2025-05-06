@@ -224,7 +224,7 @@ This will allow some of the required variable data to be generated immediately w
 
 * You can now test that the template is working by opening it up in your browser.
 
-<h2 class="wp-block-heading">Edit locationSettings.php File</h2>  
+**Edit locationSettings.php File** 
 
 * Finally, in your divumwx folder you will find a file locationSettings.php. Although the main options in this Lite version of DivumWX are fixed, you will need to modify this file to personalise four variables.
 
