@@ -2122,4 +2122,5 @@ series: [{}],
 	    }
 	});
 display_chart(units, ptype, span, plt_div, dplots, cdates, reload_plot_type_span, realtime, radial);
+accessibility: { enabled: false }
 }

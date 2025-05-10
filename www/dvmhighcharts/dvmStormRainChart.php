@@ -39,12 +39,12 @@ if ($theme === "dark") {
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Highcharts year graph for weewx</title>
-   <script src="https://code.highcharts.com/highcharts.js"></script>
-   <script src="https://code.highcharts.com/modules/data.js"></script>
-   <script src="https://code.highcharts.com/modules/exporting.js"></script>
-   <script src="https://code.highcharts.com/modules/export-data.js"></script>
-   <script src="https://code.highcharts.com/modules/accessibility.js"></script>
-   <script src="scripts/divumwx-<?php echo $theme;?>.js" type="text/javascript"></script>
+   <script src="scripts2/highstock.js"></script>
+   <script src="scripts2/data.js"></script>
+   <script src="scripts2/exporting.js"></script>
+   <script src="scripts2/export-data.js"></script>
+   <script src="scripts2/accessibility.js"></script>
+   <script src="scripts2/Divumwx-<?php echo $theme;?>.js" type="text/javascript"></script>
 </head>
 <body>
 

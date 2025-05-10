@@ -38,10 +38,10 @@ else echo $online,"";echo " ",  date($timeFormat,$forecastime);?>
 </div>
 
 <?php
-$clouds = "Cloudbase";
-if ($windunit == 'mph' || $windunit == 'kts'){$sky["cloud_base"] = round($sky["cloud_base"] * 3.281);}
-if ($windunit == 'mph' || $windunit == 'kts'){$distance = "ft";}
+if ($windunit == 'mph'){$sky["cloud_base"] = round($sky["cloud_base"] * 3.281);}
+if ($windunit == 'mph'){$distance = "ft";}
 else if ($windunit == 'km/h' || $windunit == 'm/s'){$distance = "m";}
+else if ($windunit == 'km/h' || $windunit == 'kts'){$distance = "m";}
 ?>
 
 <?php 
@@ -72,15 +72,15 @@ else if($temp["outside_now"] - $dew["now"] < 0.5 && $temp["outside_now"] > 5){$c
 else if($temp["outside_now"] - $dew["now"] < 0.8 && $dayPartNatural == "night" && $temp["outside_now"] > 5){$current["image"] ="img/meteocons/haze-night.svg";}
 else if($temp["outside_now"] - $dew["now"] < 0.8 && $temp["outside_now"] > 5){$current["image"] = "img/meteocons/haze-day.svg";}
 //windy moderate-divumwx
-else if($wind["speed_avg"] >= 15 && $dayPartNatural == "night" && $sky["cloud_cover"] < 20){$current["image"] = "img/meteocons/wind.svg";}
-else if($wind["speed_avg"] >= 15 && $sky["cloud_cover"] < 20){$current["image"] = "img/meteocons/wind.svg";}
+//else if($wind["speed_avg"] >= 5 && $dayPartNatural == "night" && $sky["cloud_cover"] < 20){$current["image"] = "img/meteocons/windsock.svg";}
+//else if($wind["speed_avg"] >= 5 && $sky["cloud_cover"] < 20){$current["image"] = "img/meteocons/windsock.svg";}
 //windy moderate-divumwx
-else if($wind["speed_avg"] >= 15 && $dayPartNatural == "night"){$current["image"] ="img/meteocons/wind.svg";}
-else if($wind["speed_avg"] >= 15){$current["image"] ="img/meteocons/wind.svg";}
-// snow-divumwx
-else if($snow > 0.0 && $dayPartNatural == "night"){$current["image"] ="img/meteocons/snow.svg";}
-else if($snow > 0.0){$current["image"] ="img/meteocons/snow.svg";}
+else if($wind["speed_avg"] >= 7.5 && $dayPartNatural == "night"){$current["image"] ="img/meteocons/windsock.svg";}
+else if($wind["speed_avg"] >= 7.5){$current["image"] ="img/meteocons/windsock.svg";}
 
+// snow-divumwx
+else if($snow > 0.1 && $dayPartNatural == "night"){$current["image"] ="img/meteocons/snow.svg";}
+else if($snow > 0.1){$current["image"] ="img/meteocons/snow.svg";}
 //cloud-icon
 else if ($sky["cloud_cover"] < 7 && $sky["cloud_cover"] > 0) {
 if ($dayPartNatural == "night" ){$current["image"] ="img/meteocons/clear-night.svg";} 
@@ -102,18 +102,17 @@ else if($sky["cloud_cover"] >= 95) {
 if ($dayPartNatural == "night" ){$current["image"] ="img/meteocons/overcast.svg";} 
 else $current["image"] = "img/meteocons/overcast.svg";
 }
-
 //rain-divumwx
-if($rain["rate"] > 0 && $wind["speed_avg"] > 15){$sky["summary"] = "Rain Showers Windy Conditions";}
+if($rain["rate"] > 0 && $wind["speed_avg"] > 7.5){$sky["summary"] = "Rain Showers Windy Conditions";}
 else if($rain["rate"] >= 20){$sky["summary"] = "Flooding Possible";}
 else if($rain["rate"] >= 10){$sky["summary"] ="Heavy Rain";}
 else if($rain["rate"] >= 5){$sky["summary"] = "Moderate Rain";}
 else if($rain["rate"] >= 1){$sky["summary"] = "Steady Rain";}
 else if($rain["rate"] > 0){$sky["summary"] = "Light Rain";}
 // snow-divumwx
-else if($snow >= 2){$sky["summary"] = "Heavy Snow";}
-else if($snow >= 1){$sky["summary"] = "Moderate Snow";}
-else if($snow > 0){$sky["summary"] = "Light Snow";}
+else if($snow >= 1.5){$sky["summary"] = "Heavy Snow";}
+else if($snow >= 0.75){$sky["summary"] = "Moderate Snow";}
+else if($snow > 0.1){$sky["summary"] = "Light Snow";}
 //fog-divumwx
 else if($temp["outside_now"] - $dew["now"] < 0.5 && $dayPartNatural == "night" && $temp["outside_now"] > 5){$sky["summary"] = "Misty Conditions";}
 else if($temp["outside_now"] - $dew["now"] < 0.5 && $temp["outside_now"] > 5){$sky["summary"] = "Misty Conditions";}
@@ -124,21 +123,19 @@ else if($temp["outside_now"] - $dew["now"] < 0.8 && $temp["outside_now"] > 5){$s
 else if($wind["speed_avg"] >= 40){$sky["summary"] = "Strong Wind Conditions";}
 else if($wind["speed_avg"] >= 30){$sky["summary"] = "Very Windy Conditions";}
 else if($wind["speed_avg"] >= 22){$sky["summary"] = "Moderate Wind Conditions";}
-else if($wind["speed_avg"] >= 15){$sky["summary"] = "Breezy Conditions";}
+else if($wind["speed_avg"] >= 7.5){$sky["summary"] = "Breezy Conditions";}
 //cloud-description
 else if($sky["cloud_cover"] < 7 && $sky["cloud_cover"] > 0) {$sky["summary"] = "Clear Sky";}
 else if ($sky["cloud_cover"] < 7 && $sky["cloud_cover"] > 0) {
 if ($dayPartNatural == "night" ){$sky["summary"] = "Clear Sky";} 
-else $sky["summary"] = "Clear Sky";
+else $sky["summary"] = "Sunny";
 } 
 else if ($sky["cloud_cover"] < 32) {
 if ($dayPartNatural == "night"){$sky["summary"] = "Mostly Clear Conditions";} 
-else $sky["summary"] = "Mostly Sunny Conditions";
-}
+else $sky["summary"] = "Mostly Sunny Conditions";}
 else if($sky["cloud_cover"] < 70) {$sky["summary"] = "Partly Cloudy Conditions";}
 else if($sky["cloud_cover"] < 95) {$sky["summary"] = "Mostly Cloudy Conditions";}
 else if($sky["cloud_cover"] >= 95) {$sky["summary"] = "Overcast Conditions";}
-else if(filesize('jsondata/me.txt') < 160){$sky["summary"] = "Conditions Not Available";} 
 //oktas
 if($sky["cloud_cover"] < 5 && $sky["cloud_cover"] > 0) {$sky["cloud_oktas"] = "0 oktas";}
 else if($sky["cloud_cover"] <= 12.5) {$sky["cloud_oktas"] = "1 okta";}
@@ -197,10 +194,11 @@ if (bearing <= 11.25) {
     bearing = 'NNW';
 } else { bearing = 'North'; }
 
-var tempColor = "<?php echo $color["outTemp_60min_avg"];?>";
+var tempColor = "<?php echo$color["outTemp_60min_avg"];?>";
 var avg_sp_ten_min_color = "<?php echo $color["windSpeed_10min_avg"];?>";
 var max_gust_ten_min_color = "<?php echo $color["windGust_10min_max"];?>";
 var colorRain = "<?php echo $colorRainDaySum;?>";
+var cloudbase = "<?php echo $sky["cloud_base"]." ".$distance;?>";
 
 var windunits = "<?php echo $wind['units'];?>";
 var rainunits = "<?php echo $rain['units'];?>";
@@ -230,25 +228,46 @@ var text = svg.selectAll(null)
 
 svg.append('image') // image output
     .attr('xlink:href', currentImage)
+    .attr('width', 80)
+    .attr('height', 85)
+    .attr('x', 115)
+    .attr('y', 43);
 
-    .attr('height', 95)
-    .attr('x', 117)
-    .attr('y', 40);
+var data = ["Cloud Base " + "-" + cloudbase];
+
+var text = svg.selectAll(null)
+    .data(data)
+    .enter() 
+    .append("text")
+    .attr("x", 155)
+    .attr("y", function(d, i) { return 10 + i * 10; })
+
+    .style("fill", baseTextColor)
+    .style("font-family", "Helvetica") 
+    .style("font-size", "9px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "normal")
+    .text(function(d) { return d.split("-")[0]; })
+
+    .append("tspan")
+    .style("fill", "#ff7c39")
+    .style("font-weight", "normal")
+    .text(function(d) { return d.split("-")[1]; });
 
 var visibility = "<?php echo $visibility;?>";
 
 svg.append("text")
-    .attr("x", 283)
+    .attr("x", 272)
     .attr("y", 70)
     .style("fill", baseTextColor)
     .style("font-family", "Helvetica")
     .style("font-size", "9px")
     .style("text-anchor", "middle")
     .style("font-weight", "normal")
-    .text("Visibility");
+    .text("Natural Visibility");
 
 svg.append("text")
-    .attr("x", 283)
+    .attr("x", 272)
     .attr("y", 80)
     .style("fill", "#ff7c39")
     .style("font-family", "Helvetica")
@@ -278,7 +297,7 @@ svg.append("text")
     .style("font-size", "9px")
     .style("text-anchor", "middle")
     .style("font-weight", "normal")
-    .text(cloud_cover + "% " + " " + cloud_oktas);
+    .text(cloud_cover + "% " + "- " + cloud_oktas);
 
 var outside_day_avg_sixtyM = "<?php echo $temp["outside_day_avg_60mn"];?>";
 
@@ -380,37 +399,16 @@ svg.append("text")
     .style("font-weight", "normal")
     .text("10min Wind Dir");
 
-svg.append("text")
-    .attr("x", 143.5)
-    .attr("y", 146)
-    .style("fill", "#007FFF")
-    .style("font-family", "Helvetica")
-    .style("font-size", "9px")
-    .style("text-anchor", "middle")
-    .style("font-weight", "normal")
-    .text(bearing);
-
-svg.append("text")
-    .attr("x", 166.5)
-    .attr("y", 146)
-    .style("fill", "#ff7c39")
-    .style("font-family", "Helvetica")
-    .style("font-size", "9px")
-    .style("text-anchor", "middle")
-    .style("font-weight", "normal")
-    .text(direction_tenM_avg + "\u00B0");
-
-var cloudbase = "<?php echo $sky["cloud_base"]." ".$distance;?>";
-var data = ["Cloud Base " + "-" + cloudbase];
+var data = [bearing + "-" + " " + direction_tenM_avg + "\u00B0"];
 
 var text = svg.selectAll(null)
     .data(data)
     .enter() 
     .append("text")
     .attr("x", 155)
-    .attr("y", function(d, i) { return 10 + i * 10; })
+    .attr("y", function(d, i) { return 146 + i * 146; })
 
-    .style("fill", baseTextColor)
+    .style("fill", "#007FFF")
     .style("font-family", "Helvetica") 
     .style("font-size", "9px")
     .style("text-anchor", "middle")

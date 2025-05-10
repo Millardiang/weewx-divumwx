@@ -27,14 +27,14 @@ $airDensity = json_encode($airDensityLast);
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Highcharts Week graph for weewx</title>
-    <script src="./scripts/jquery.min.js"></script>
+    <!--script src="./scripts/jquery.min.js"></script-->
     <script src="./scripts//highstock.js"></script>
-    <script src="./scripts//boost.js"></script>
+    <!--script src="./scripts//boost.js"></script-->
     <script src="./scripts/highcharts-more.js"></script>
-    <script src="./scripts/exporting.js"></script>
-    <script src="./scripts/export-data.js"></script>
+    <!--script src="./scripts/exporting.js"></script-->
+    <!--script src="./scripts/export-data.js"></script-->
     <script src="./scripts/divumwx-<?php echo $theme;?>.js" type="text/javascript"></script>
-    <script src="./scripts/accessibility.js"></script>
+    <!--script src="./scripts/accessibility.js"></script-->
 </head>
 <body>
 <figure class="highcharts-figure">

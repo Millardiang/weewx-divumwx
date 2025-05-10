@@ -13,22 +13,14 @@
 #    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
-
-//$themelayout = "5"; //4, 5, tablet
-$TZ = "Europe/London";
+include('locationSettings.php');
 $extralinks = "yes";
 $sbLang = "yes";
+$flag = "gb";
 $dateFormat = "d-m-Y"; //m-d-Y, Y-m-d
 $timeFormat = "H:i:s"; //g:i:s, g:i:s a
 $timeFormatShort = "H:i"; //g:i, g:i a
 $clockformat = "24"; //12, 24
-$advisoryzone = "uk"; //uk, na, eu, au, rw (= UK, North America, Europe, Australia, Rest of World)
-$advisoryregion = "South East England";
-$englishFloodLocation="Padbury"; // english locations only " " for other locations
-$aqInUse = "yes"; // yes, no
-$aqZone = "us"; //uk, us, ei, ci, au, (= UK DAQI, US EPS, Europe EAQI, Europe CAQI, Australia)
-$aqSource = "weewx"; //purple, weewx, sds, openmeteo
-$lightningSource = "1"; // use 'Boltek' or '0'
 $position1 = "dvmClockOutlookModule.php";
 $position3 = "dvmCurrentModule.php";
 $position2 = "dvmForecastModule.php";
@@ -38,23 +30,10 @@ $position6 = "dvmAnemometerModule.php";
 $position7 = "dvmRainfallModule.php";
 $position8 = "dvmEarthDaylightModule.php";
 $position9 = "dvmMoonPhaseModule.php";
-
-$webcamurl = "./img/picam.jpg";
-$videoWeatherCamURL = "";
-$email = "";
-//$twitter = "";
-$since = "2021";
 $defaultlanguage = "en";
 $password = "";
-$flag = "gb";
-$manifestShortName = "SCWX-UK";
-//$notifications = "yes";
-//$notifyWind = "yes";
-//$notifyEarthquake = "yes";
-//$notifyMagnitude = "3";
-//$linkWU = "yes";
+$manifestShortName = "DEMO-UK";
 $linkWUNew = "yes";
-//$WUid = "IYOURWUKWY";
 $linkCWOPID = "";
 $linkFindUID = "";
 $linkNOAA = "yes";
@@ -67,12 +46,11 @@ $linkAmbientWeatherID = "";
 $linkPWSWeatherID = "";
 $linkMetOfficeID = "";
 $linkCustom1Title = "";
-$linkCustom1URL = "https://steepleian.github.io/weewx-divumwx-divumwx/divumwx_settings_txt.html";
+$linkCustom1URL = "";
 $linkCustom2Title = "";
 $linkCustom2URL = "";
 $USAWeatherFinder = "";
 $extraLinkTitle = "";
 $extraLinkColor = "";
 $extraLinkURL = "";
-
 ?>

@@ -453,37 +453,6 @@ $humid["indoors_alltime_maxtime"] = date('j M Y H:i',$alltime.inHumidity.maxtime
 $humid["indoors_alltime_min"] = $alltime.inHumidity.min.format(add_label=False);
 $humid["indoors_alltime_mintime"] = date('j M Y H:i',$alltime.inHumidity.mintime.raw);
 
-//lightning
-$lightning["last_strike_time"] = "$alltime.lightning_last_det_time.lastnonzero.raw";
-$lightning["current_strike_count"] = "$current.lightning_strike_count"; 
-$lightning["hour_strike_count"] ="$hour.lightning_strike_count.sum";  
-$lightning["today_strike_count"] = "$day.lightning_strike_count.sum";
-#if $day($days_ago=1).lightning_strike_count.has_data
-$lightning["yesterday_strike_count"] = "$day($days_ago=1).lightning_strike_count.sum";
-#end if
-$lightning["month_strike_count"] = "$month.lightning_strike_count.sum";
-$lightning["year_strike_count"] = "$year.lightning_strike_count.sum";
-$lightning["last_time"] = "$alltime.lightning_last_det_time.lastnonzero.raw";
-$lightning["alltime_strike_count"] = "$alltime.lightning_strike_count.sum";
-$lightning["last_distance"] = "$alltime.lightning_distance.lastnonzero.format(add_label=False, $localize=False)";
-$lightning["now_energy"] = $weewxrt[59];
-$lightning["now_strike_count"] = $weewxrt[60];
-$lightning["now_noise_count"] = $weewxrt[61];
-$lightning["now_disturber_count"] = $weewxrt[62];
-if (trim($lightning["last_time"]) == 'N/A' || $lightning["last_time"] == '0' || $lightning["last_time"] == 'NULL')
-{
-$lightning["time_ago"] = 0;
-$lightning['last_time'] = time();
-$lightning["last_distance"] = "0";
-}
-else
-{
-$parts = explode(" ", $lightning["last_time"]);
-$parts1 = explode("/", $parts[0]);
-$lightning["time_ago"] = time() - strtotime("20" . $parts1[2] . $parts1[1] . $parts1[0] . " " . $parts[1]);
-}
-
-
 // rainfall
 #if $current.rain.has_data
 $rain["units"] = "$unit.label.rain";
@@ -1032,6 +1001,4 @@ else if($solar["day_lux_max"] > 80000){$colorLuxDay='#FFD301';}
 
 include('dvmUnitConversions.php');
 include('dvmMeteorShowers.php'); 
-$firerisk = number_format((((110-1.373*$divum["humidity"])-0.54*(10.20-$divum["temp"]))*(124*pow(10,(-0.0142*$divum["humidity"]))))/60,0);
-include('dvmCustomData.php');  
 ?>

@@ -31,6 +31,7 @@
 "dvmAnemometerModule.php":{"cycle": "4000"},
 "dvmGreenhouseGasModule.php":{"cycle": "60000"},
 "dvmClockOutlookModule.php":{"cycle": "60000"},
+"dvmBlankModule.php":{"cycle": "60000"},
 "dvmBlankModule1.php":{"cycle": "60000"},
 "dvmBlankModule2.php":{"cycle": "60000"},
 "dvmBlankModule3.php":{"cycle": "60000"},
@@ -38,6 +39,7 @@
 "dvmGeocentricModule.php":{"cycle": "300000"},
 "dvmAdvisoryModule.php":{"cycle": "60000"},
 "dvmSolarEnergyModule.php":{"cycle": "60000"},
+"dvmVpdModule.php":{"cycle": "60000"},
 "dvmEtModule.php":{"cycle": "3600000"},
 "filepileTextCreate.php":{"cycle": "60000"}
 }

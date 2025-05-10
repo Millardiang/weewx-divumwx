@@ -50,7 +50,6 @@ import time
 import weeutil.rsyncupload
 try: import xmltodict
 except: pass
-from packaging.version import Version
 try:
     import urllib2 as urllib
 except ImportError:
@@ -110,11 +109,10 @@ except ImportError:
 
 DIVUMWX_VERSION = "0.0.1"
 
-REQUIRED_WEEWX = "5.0.1"
-if Version(weewx.__version__) < Version(REQUIRED_WEEWX):
-    raise weewx.UnsupportedFeature(
-        "weewx %s or greater is required, found %s" % (REQUIRED_WEEWX, weewx.__version__)
-    )
+#REQUIRED_WEEWX = "4.6.0"
+#if StrictVersion(weewx.__version__) < StrictVersion(REQUIRED_WEEWX):
+    #raise weewx.UnsupportedFeature("weewx %s or greater is required, found %s"
+                                   #% (REQUIRED_WEEWX, weewx.__version__))
 
 COMPASS_POINTS = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
                   'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW', 'N']
@@ -1069,75 +1067,74 @@ class DivumWXRealTime(StdService):
         r_dp = 2 if data['units_rain'] == 'in' else 1
         datefmt = "%%d%s%%m%s%%y" % ("/", "/")
         tstr = time.strftime(datefmt, time.localtime(data['dateTime']))
-        fields.append(tstr)                                           # 1
+        fields.append(tstr)                                           # 0  *
         tstr = time.strftime("%H:%M:%S", time.localtime(data['dateTime']))
-        fields.append(tstr)                                           # 2
-        fields.append(self.format(data, 'outTemp', 1))                # 3
-        fields.append(self.format(data, 'outHumidity', 0))            # 4
-        fields.append(self.format(data, 'dewpoint', 1))               # 5
-        fields.append(self.format(data, 'windSpeed_avg', 1))          # 6  *
-        fields.append(self.format(data, 'windSpeed', 1))              # 7
-        fields.append(self.format(data, 'divumwx_windDir', 0))      # 8
-        fields.append(self.format(data, 'rainRate', r_dp))            # 9
-        fields.append(self.format(data, 'dayRain', r_dp))             # 10
-        fields.append(self.format(data, 'barometer', p_dp))           # 11
-        fields.append(self.format(data, 'windDir_compass'))           # 12 *
-        fields.append(self.format(data, 'windSpeed_beaufort'))        # 13 *
-        fields.append(self.format(data, 'units_wind'))                # 14 *
-        fields.append(self.format(data, 'units_temperature'))         # 15 *
-        fields.append(self.format(data, 'units_pressure'))            # 16 *
-        fields.append(self.format(data, 'units_rain'))                # 17 *
-        fields.append(self.format(data, 'windrun', 1))                # 18 *
-        fields.append(self.format(data, 'pressure_trend', p_dp))      # 19 *
-        fields.append(self.format(data, 'rain_month', r_dp))          # 20 *
-        fields.append(self.format(data, 'rain_year', r_dp))           # 21 *
-        fields.append(self.format(data, 'rain_yesterday', r_dp))      # 22 *
-        fields.append(self.format(data, 'inTemp', 1))                 # 23
-        fields.append(self.format(data, 'inHumidity', 0))             # 24
-        fields.append(self.format(data, 'windchill', 1))              # 25
-        fields.append(self.format(data, 'temperature_trend', 1))      # 26 *
-        fields.append(self.format(data, 'outTemp_max', 1))            # 27 *
-        fields.append(self.format(data, 'outTemp_max_time'))          # 28 *
-        fields.append(self.format(data, 'outTemp_min', 1))            # 29 *
-        fields.append(self.format(data, 'outTemp_min_time'))          # 30 *
-        fields.append(self.format(data, 'windSpeed_max', 1))          # 31 *
-        fields.append(self.format(data, 'windSpeed_max_time'))        # 32 *
-        fields.append(self.format(data, 'windGust_max', 1))           # 33 *
-        fields.append(self.format(data, 'windGust_max_time'))         # 34 *
-        fields.append(self.format(data, 'pressure_max', p_dp))        # 35 *
-        fields.append(self.format(data, 'pressure_max_time'))         # 36 *
-        fields.append(self.format(data, 'pressure_min', p_dp))        # 37 *
-        fields.append(self.format(data, 'pressure_min_time'))         # 38 *
-        fields.append('%s' % weewx.__version__)                       # 39
-        fields.append('0')                                            # 40
-        fields.append(self.format(data, '10min_high_gust', 1))        # 41 *
-        fields.append(self.format(data, 'heatindex', 1))              # 42 *
-        fields.append(self.format(data, 'humidex', 1))                # 43 *
-        fields.append(self.format(data, 'UV', 1))                     # 44
-        fields.append(self.format(data, 'ET_today', r_dp))            # 45 *
-        fields.append(self.format(data, 'radiation', 0))              # 46
-        fields.append(self.format(data, '10min_avg_wind_bearing', 0)) # 47 *
-        fields.append(self.format(data, 'rain_hour', r_dp))           # 48 *
-        fields.append(self.format(data, 'zambretti_code'))            # 49 *
-        fields.append(self.format(data, 'is_daylight'))               # 50 *
-        fields.append(self.format(data, 'lost_sensors_contact'))      # 51 *
-        fields.append(self.format(data, 'avg_wind_dir'))              # 52 *
-        fields.append(self.format(data, 'cloudbase', 0))              # 53 *
-        fields.append(self.format(data, 'units_cloudbase'))           # 54 *
-        fields.append(self.format(data, 'appTemp', 1))                # 55 *
-        fields.append(self.format(data, 'sunshine_hours', 1))         # 56 *
-        fields.append(self.format(data, 'maxSolarRad', 1))            # 57 *
-        fields.append(self.format(data, 'windGust', 1))               # 58 *
-        fields.append(self.format(data, 'stormRain', 1))              # 59 *
-        fields.append(self.format(data, 'p_rainRate', r_dp))          # 60 *
-        fields.append(self.format(data, 'p_dayRain', r_dp))           # 61 *
-        fields.append(self.format(data, 'rain_hour', r_dp))           # 62 *
-        fields.append(self.format(data, 'p_rain_month', r_dp))        # 63 *
-        fields.append(self.format(data, 'p_rain_year', r_dp))         # 64 *
-        fields.append(self.format(data, 'p_rain_yesterday', r_dp))    # 65 *
-        fields.append(self.format(data, 'p_stormRain', 1))            # 66 *
-        fields.append(self.format(data, 'vpd', 1))                    # 67 *
-
+        fields.append(tstr)                                           # 1  *
+        fields.append(self.format(data, 'outTemp', 1))                # 2  *
+        fields.append(self.format(data, 'outHumidity', 0))            # 3  *
+        fields.append(self.format(data, 'dewpoint', 1))               # 4  *
+        fields.append(self.format(data, 'windSpeed_avg', 1))          # 5  *
+        fields.append(self.format(data, 'windSpeed', 1))              # 6  *
+        fields.append(self.format(data, 'divumwx_windDir', 0))        # 7  *
+        fields.append(self.format(data, 'rainRate', r_dp))            # 8  *
+        fields.append(self.format(data, 'dayRain', r_dp))             # 9  *
+        fields.append(self.format(data, 'barometer', p_dp))           # 10 *
+        fields.append(self.format(data, 'windDir_compass'))           # 11 *
+        fields.append(self.format(data, 'windSpeed_beaufort'))        # 12 *
+        fields.append(self.format(data, 'units_wind'))                # 13 *
+        fields.append(self.format(data, 'units_temperature'))         # 14 *
+        fields.append(self.format(data, 'units_pressure'))            # 15 *
+        fields.append(self.format(data, 'units_rain'))                # 16 *
+        fields.append(self.format(data, 'windrun', 1))                # 17 *
+        fields.append(self.format(data, 'pressure_trend', p_dp))      # 18 *
+        fields.append(self.format(data, 'rain_month', r_dp))          # 19 *
+        fields.append(self.format(data, 'rain_year', r_dp))           # 20 *
+        fields.append(self.format(data, 'rain_yesterday', r_dp))      # 21 *
+        fields.append(self.format(data, 'inTemp', 1))                 # 22 *
+        fields.append(self.format(data, 'inHumidity', 0))             # 23 *
+        fields.append(self.format(data, 'windchill', 1))              # 24 *
+        fields.append(self.format(data, 'temperature_trend', 1))      # 25 *
+        fields.append(self.format(data, 'outTemp_max', 1))            # 26 *
+        fields.append(self.format(data, 'outTemp_max_time'))          # 27 *
+        fields.append(self.format(data, 'outTemp_min', 1))            # 28 *
+        fields.append(self.format(data, 'outTemp_min_time'))          # 29 *
+        fields.append(self.format(data, 'windSpeed_max', 1))          # 30 *
+        fields.append(self.format(data, 'windSpeed_max_time'))        # 31 *
+        fields.append(self.format(data, 'windGust_max', 1))           # 32 *
+        fields.append(self.format(data, 'windGust_max_time'))         # 33 *
+        fields.append(self.format(data, 'pressure_max', p_dp))        # 34 *
+        fields.append(self.format(data, 'pressure_max_time'))         # 35 *
+        fields.append(self.format(data, 'pressure_min', p_dp))        # 36 *
+        fields.append(self.format(data, 'pressure_min_time'))         # 37 *
+        fields.append('%s' % weewx.__version__)                       # 38 *
+        fields.append('0')                                            # 39 *
+        fields.append(self.format(data, '10min_high_gust', 1))        # 40 *
+        fields.append(self.format(data, 'heatindex', 1))              # 41 *
+        fields.append(self.format(data, 'humidex', 1))                # 42 *
+        fields.append(self.format(data, 'UV', 1))                     # 43 *
+        fields.append(self.format(data, 'ET_today', r_dp))            # 44 *
+        fields.append(self.format(data, 'radiation', 0))              # 45 *
+        fields.append(self.format(data, '10min_avg_wind_bearing', 0)) # 46 *
+        fields.append(self.format(data, 'rain_hour', r_dp))           # 47 *
+        fields.append(self.format(data, 'zambretti_code'))            # 48 *
+        fields.append(self.format(data, 'is_daylight'))               # 49 *
+        fields.append(self.format(data, 'lost_sensors_contact'))      # 50 *
+        fields.append(self.format(data, 'avg_wind_dir'))              # 51 *
+        fields.append(self.format(data, 'cloudbase', 0))              # 52 *
+        fields.append(self.format(data, 'units_cloudbase'))           # 53 *
+        fields.append(self.format(data, 'appTemp', 1))                # 54 *
+        fields.append(self.format(data, 'sunshine_hours', 1))         # 55 *
+        fields.append(self.format(data, 'maxSolarRad', 1))            # 56 *
+        fields.append(self.format(data, 'windGust', 1))               # 57 *
+        fields.append(self.format(data, 'stormRain', 1))              # 58 *
+        fields.append(self.format(data, 'p_rainRate', r_dp))          # 59 *
+        fields.append(self.format(data, 'p_dayRain', r_dp))           # 60 *
+        fields.append(self.format(data, 'rain_hour', r_dp))           # 61 *
+        fields.append(self.format(data, 'p_rain_month', r_dp))        # 62 *
+        fields.append(self.format(data, 'p_rain_year', r_dp))         # 63 *
+        fields.append(self.format(data, 'p_rain_yesterday', r_dp))    # 64 *
+        fields.append(self.format(data, 'p_stormRain', 1))            # 65 *
+ 
         return ' '.join(fields)
       
       
@@ -1768,6 +1765,102 @@ class AirDensityService(StdService):
         # Remove the registered instance:
         weewx.xtypes.xtypes.remove(self.ad)
 
+""" Vapour Pressure Deficit """
+
+# Tell the unit system what group our new observation type, 'vpd', belongs to:
+weewx.units.obs_group_dict['vpd'] = "group_pressure"
+
+class vpd(weewx.xtypes.XType):
+
+    def __init__(self, algorithm='simple'):
+        # Save the algorithm to be used.
+        self.algorithm = algorithm.lower()
+
+    def get_scalar(self, obs_type, record, db_manager):
+        # We only know how to calculate 'vpd. For everything else, raise an exception UnknownType
+        if obs_type != 'vpd':
+            raise weewx.UnknownType(obs_type)
+
+        # out humidity in %
+        if 'outHumidity' not in record or record['outHumidity'] is None:
+            raise weewx.CannotCalculate(obs_type)
+        unit_and_group = weewx.units.getStandardUnitType(record['usUnits'], 'outHumidity')
+        outHumidity_vt = ValueTuple(record['outHumidity'], *unit_and_group)
+        outHumidity = outHumidity_vt[0]        
+
+        # out temp in °C
+        if 'outTemp' not in record or record['outTemp'] is None:
+            raise weewx.CannotCalculate(obs_type)        
+        unit_and_group = weewx.units.getStandardUnitType(record['usUnits'], 'outTemp')
+        outTemp_vt = ValueTuple(record['outTemp'], *unit_and_group)
+        outTemp_C_vt = weewx.units.convert(outTemp_vt, 'degree_C')
+        outTemp_C = outTemp_C_vt[0]
+
+        if self.algorithm == 'simple':
+            # "simple" algorithm.
+
+            T = outTemp_C
+            H = outHumidity
+
+            # vapour pressure of leaf
+            a = (17.27 * T) / (T + 237.3)
+            vpl = 0.61078 * math.exp(a)
+
+            # vapour pressure of air
+            b = (17.27 * T) / (T + 237.3) 
+            vpa = 0.61078 * math.exp(b) * (H / 100.0)
+
+            vpd_inHg = vpl - vpa
+
+            # Form a ValueTuple
+            vpd = ValueTuple(vpd_inHg, 'inHg', 'group_pressure')
+
+        elif self.algorithm == 'tetens':
+            # Use teten's algorithm.
+
+            T = outTemp_C
+            H = outHumidity
+
+            # Use the formula. Results will be in kPa:
+
+            # vapour pressure of leaf
+            a = (17.27 * T) / (T + 237.3)
+            vpl = 0.61078 * math.exp(a)
+
+            # vapour pressure of air
+            b = (17.27 * T) / (T + 237.3) 
+            vpa = 0.61078 * math.exp(b) * (H / 100.0)
+
+            vpd_kPa = vpl - vpa
+
+            # Form a ValueTuple
+            vpd = ValueTuple(vpd_kPa, 'kPa', 'group_pressure')
+        else:
+            # Don't recognize the exception. Fail hard:
+            raise ValueError(self.algorithm)
+
+        return vpd
+
+class vpdService(StdService):
+
+    def __init__(self, engine, config_dict):
+        super(vpdService, self).__init__(engine, config_dict)
+
+        # Get the desired algorithm. Default to "simple".
+        try:
+            algorithm = config_dict['vpd']['algorithm']
+        except KeyError:
+            algorithm = 'simple'
+
+        # Instantiate an instance of Vapor Pressure Deficit:
+        self.vpdx = vpd(algorithm)
+        # Register it:
+        weewx.xtypes.xtypes.append(self.vpdx)
+
+    def shutDown(self):
+        # Remove the registered instance:
+        weewx.xtypes.xtypes.remove(self.vpdx)
+
 """ sunshine duration """
 
 import syslog
@@ -1878,3 +1971,4 @@ class SunshineDuration(StdService):
         else :
             threshold=0
         return threshold
+

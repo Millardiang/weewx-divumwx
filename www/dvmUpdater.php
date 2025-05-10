@@ -120,7 +120,7 @@ var b=setInterval(function(){c.load("<?php echo $position21; ?>")},<?php echo $c
 //update the modules position 22
 (function(a){a(document).ready(function(){a.ajaxSetup({cache:true,success:function(){a("#position22").show()}});var c=a("#position22");c.load("<?php echo $position22; ?>");
 var b=setInterval(function(){c.load("<?php echo $position22; ?>")},<?php echo $cycles22; ?>)})})(jQuery); // 60 seconds
-
+/*
 //update the webcam image file
 var refreshId;$(document).ready(function(){webcamcron()});function webcamcron(){$.ajax({cache:false,
   success:function(a){$("#blank")
@@ -136,7 +136,7 @@ var refreshId;$(document).ready(function(){stationcron()});function stationcron(
   echo 'setTimeout(stationcron,' . 1000*$filepileRefresh.')';}?>},
   contentType: "application/x-www-form-urlencoded;charset=ISO-8859-15",
   type:"GET",url:"filepileTextCreate.php"})};
-
+*/
 </script>
 
 <!-- end updater.php -->

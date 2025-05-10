@@ -14,7 +14,6 @@
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
 include('dvmCombinedData.php');
-include('dvmTippingData.php');
 ?>
 
 <!DOCTYPE html>
@@ -28,9 +27,9 @@ include('dvmTippingData.php');
 <div class="rainconverter">
 <?php 
 if($theme == 'dark') {
-if ($rainunit =='in'){echo "<div class=rainconvertercircle style='color:$colorRainDaySum;'>".number_format($rain["dayRain"]*25.400013716,1)." <smallrainunit>mm";} else if ($rainunit =='mm'){echo "<div class=rainconvertercircle style='color:$colorRainDaySum;'>".number_format($rain["dayRain"]*0.0393701,2)." <smallrainunit>in";}
+if ($rainunit =='in'){echo "<div class=rainconvertercircle style='color:$colorRainDaySum;'>".number_format($rain["day"]*25.400013716,1)." <smallrainunit>mm";} else if ($rainunit =='mm'){echo "<div class=rainconvertercircle style='color:$colorRainDaySum;'>".number_format($rain["day"]*0.0393701,2)." <smallrainunit>in";}
 } else {
-if ($rainunit =='in'){echo "<div class=rainconvertercircle style='background:$colorRainDaySum;'>".number_format($rain["dayRain"]*25.400013716,1)." <smallrainunit>mm";} else if ($rainunit =='mm'){echo "<div class=rainconvertercircle style='background:$colorRainDaySum;'>".number_format($rain["dayRain"]*0.0393701,2)." <smallrainunit>in";}
+if ($rainunit =='in'){echo "<div class=rainconvertercircle style='background:$colorRainDaySum;'>".number_format($rain["day"]*25.400013716,1)." <smallrainunit>mm";} else if ($rainunit =='mm'){echo "<div class=rainconvertercircle style='background:$colorRainDaySum;'>".number_format($rain["day"]*0.0393701,2)." <smallrainunit>in";}
 }
 ?></span>
 </div></div>
@@ -38,14 +37,14 @@ if ($rainunit =='in'){echo "<div class=rainconvertercircle style='background:$co
 <script src="js/d3.7.9.0.min.js"></script>
 
 <div class="rainposs">
-<div id="raingaugex"></div>
+<div class="raingaugex"></div>
 </div>
         
     <script>
 
     var theme = "<?php echo $theme;?>";
 
-    var currentRain = "<?php echo $rain["dayRain"];?>";
+    var currentRain = "<?php echo $rain["day"];?>";
     currentRain = currentRain || 0;
     
     var maxRain = currentRain;
@@ -68,7 +67,7 @@ var bulb_cy = bottomY - bulbRadius,
     bulb_cx = width / 2,
     top_cy = topY + tubeWidth / 2;
 
-var svg = d3.select("#raingaugex")
+var svg = d3.select(".raingaugex")
     .append("svg")
     .attr("width", width)
     .attr("height", height);
@@ -145,7 +144,7 @@ svg.append("rect")
     .attr("height", 11.5)
     .style("fill", "var(--col-10)");
     
-var units = "<?php echo $rainunit;?>";
+var units = "<?php echo $rain["units"];?>";
 
 if (units == 'mm') {    
     var step = 5;
@@ -274,7 +273,7 @@ var svg = d3.select(".stormRain")
     .attr("width", 180)
     .attr("height", 150);
 
-var units = "<?php echo $rainunit;?>";
+var units = "<?php echo $rain["units"];?>";
 
 if (units == 'in') {
 var stormRain = <?php echo $rain["storm_rain"]/25.4;?>;    
@@ -289,14 +288,15 @@ var last24HoursColor = "<?php echo $colorRain24hrSum;?>";
 var rainMonthColor = "<?php echo $colorRainMonthSum;?>";
 var rainYearColor = "<?php echo $colorRainYearSum;?>";
 
-var stormStart = "<?php echo $rain["storm_rain_start"];?>"; 
+var stormStart = "<?php echo $rain["storm_start"];?>"; 
 var rainRate = <?php echo $rain["rate"];?>;
 var lastHour = <?php echo $rain["last_hour"];?>;
-var last24Hours = <?php echo $rain["last_24hour"];?>;
-var rainMonth = <?php echo $rain["monthRain"];?>; 
-var rainYear = <?php echo $rain["yearRain"];?>;
-var month = '<?php echo date('F');?>'; 
+var last24Hours = <?php echo $rain["24h_total"];?>;
+var rainMonth = <?php echo $rain["month_total"];?>; 
+var rainYear = <?php echo $rain["year_total"];?>;
+var month = "<?php echo date('F');?>"; 
 var year = <?php echo date('Y');?>;
+
 
 if (stormRain > 0.0) {
 
@@ -803,7 +803,6 @@ var text = svg.selectAll(null)
     .style("font-weight", "normal")
     .text(function(d) {return d.split("-")[0];})
 
-
     .append("tspan")
     .style("fill", baseTextColor)
     .text(function(d) {return d.split("-")[1];});
@@ -861,7 +860,7 @@ var text = svg.selectAll(null)
 
 </script>
 
-<div id="raindrops" width="300" height="150" style="position: relative; top: -153px; left: 0px;"></div>
+<div id="raindropsM" width="300" height="150" style="position: relative; top: -153px; left: 0px;"></div>
 
 <script>
 
@@ -991,7 +990,7 @@ class Rain {
     animateRadiusX.setAttribute('begin', `${begin}ms`);
 
     let ellipse = document.createElementNS(ns, 'ellipse');
-    ellipse.setAttribute('stroke', `<?php echo $colorRainRate;?>`);
+    ellipse.setAttribute('stroke', `rgba(59, 156, 172, 0.4)`);
     ellipse.setAttribute('stroke-width', 1);
     ellipse.setAttribute('fill', 'none');
     ellipse.setAttribute('cx', randBetween(0, this.width));
@@ -1028,8 +1027,8 @@ class Rain {
   }}
 
 
-const el = document.getElementById('raindrops');
-const rain = new Rain(el);
+var el = document.getElementById('raindropsM');
+var rain = new Rain(el);
 
 rain.render();
 }

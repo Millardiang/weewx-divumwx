@@ -15,7 +15,6 @@
 ##############################################################################################
 $templateversion = "DivumWX-Lite 0.0.1";
 $os = shell_exec('lsb_release -d');
-
 if (str_contains($os, "Manjaro")) {$osLogo = $archLogo;}
 else if (str_contains($os, "Debian")) {$osLogo = $DebianLogo;}
 else if (str_contains($os, "Ubuntu")) {$osLogo = $ubuntuLogo;}

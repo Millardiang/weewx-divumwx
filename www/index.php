@@ -22,7 +22,7 @@ if (!file_exists("userSettings.php")) {
 
 
 include_once ('dvmCombinedData.php');
-//include_once ('webserver_ip_address.php');
+include_once ('webserver_ip_address.php');
 include ('dvmUpdater.php');
 
 date_default_timezone_set($TZ);
@@ -56,7 +56,7 @@ echo $stationlocation;
   <link rel="shortcut icon" href="/my-favicon/favicon.ico" />
   <link rel="apple-touch-icon" sizes="180x180" href="/my-favicon/apple-touch-icon.png" />
   <meta name="apple-mobile-web-app-title" content="DivumWX" />
-  <link rel="manifest" href="/my-favicon/site.webmanifest" />  
+  <!--link rel="manifest" href="/site.webmanifest" /-->  
 <!--title>DivumWX - Proposed Responsive CSS Grid Layout Scheme</title-->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="stylesheet" href="./css/divumwx.main.css?version=<?php
@@ -93,7 +93,8 @@ echo filemtime('./css/divumwx.themes.css');
   </div>
 <!-- end of theme switch -->      
 
-  <div class="titlebar"style="background-color:transparent;">
+  <div class="titlebar">
+<!--div class="titlebar"style="background-color:transparent;"-->
   <div class="titlebar-item">
    </div>
   <div class="titlebar-item-center">
@@ -181,7 +182,7 @@ echo " - WeeWX";
 ?>(<?php
 echo $divum["swversion"];
 ?>)  - OS- <?php
-echo " " . $os_version." - PHP( " . substr($phpVersion, 0, 7);
+echo " " . $os_version." - PHP(" . substr($phpVersion, 0, 7);
 ?>)</value></p>        
 <div class="stationLongname" ><a href="https://www.xweather.com/" target="_blank" title="Forecasts Powered by Vaisala Xweather"><?php echo $vaisalaLogo;?></a><a href="https://developer.yr.no/featured-products/forecast/">    Meteogram Data by <img src="img/yr.svg" width="14px"></a><a href="https://bas.dev/work/meteocons">     Animated Icons by <img src="img/bm.svg" width="14px"></p>
 </div>        

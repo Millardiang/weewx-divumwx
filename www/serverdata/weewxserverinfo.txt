@@ -1,1 +1,1 @@
-192.168.1.127:25252::/home/divum5/weewx-data/bin
+192.168.200.200:25252::/home/weathertest/weewx-data/bin
