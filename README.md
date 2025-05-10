@@ -224,15 +224,11 @@ This will allow some of the required variable data to be generated immediately w
 
 * You can now test that the template is working by opening it up in your browser.
 
-**Edit locationSettings.php File** 
+<h2 class="wp-block-heading">Location Settings</h2> 
 
-* Finally, in your divumwx folder you will find a file locationSettings.php. Although the main options in this Lite version of DivumWX are fixed, you will need to modify this file to personalise four variables.
+* Finally, you need to set your location settings.
 
-      # Open the file for editing
-      sudo nano locationSettings.php
-      # Make the changes as indicated
-      # Save and close the file.
-      # Browse to divumwx page and refresh you browser
+Click on the side menu 'hamburger', top rigt of your weather page. and then click on the first item, Location Settings. You will be presented with a login screen. Leave the password empty for the initial login. Click on the button and enter the location settings screen. Create a password, complete the other fields and save. Browse back to the main page and refresh the screen. This completes the installation process.
 
 * Any problems, please raise an Issue in this repository attaching a debug report, your skin.conf files and a journal report covering at least two archive cycles from startup.
   
