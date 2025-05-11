@@ -114,7 +114,7 @@ echo 'Hello world';</code></pre>
 
 * This install process assumes that your are using one of the officially documented WeeWX installs and a typical Apache2 or Nginx web server configuration with a document root of /var/www/html. In this instance, at the end of the installation process your path to the DivumWX-Lite skin will be /var/www/html/divumwx. If your installation deviates from this, you will need to adjust the paths in your weewx.conf file after the installation process has taken place.
 
-* Go to (https://millardiang.github.io/services-generator/) to complete the pre-install web services settings which which generates 'services.json' in your default Download folder. The new Settings Generator is required as the format has changed, and any previous settings file you’ve created is no longer usable.
+* Go to (https://millardiang.github.io/services-generator/) to complete the pre-install web services settings which which generates 'services.json' in your default Download folder. The new Settings Generator is required as the format has changed, and any previous settings files you’ve created are no longer usable.
 
 * Download the beta archive from: -
        (https://github.com/Millardiang/weewx-divumwx/archive/refs/heads/divumwxLite.zip)
