@@ -173,9 +173,6 @@ echo '<a>Copyright &copy; 2022-' . date('Y') . '<br>Team DivumWX<br>All rights r
         <p><red><?php
 echo "Never base important decisions that could result in harm to people or property on this weather information." ?></red></p>
 <p><?php
-echo "Operational Since " . $divum["since"] . " - ";
-$info;
-?> <?php
 echo $templateversion;
 ?> <?php
 echo " - WeeWX";
