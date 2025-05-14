@@ -236,10 +236,10 @@ Click on the side menu 'hamburger', top rigt of your weather page. and then clic
   
 		#from the command line, go to your document root folder (normally /var/www/html is default for Apache2 or Nginx)
 		cd /var/www/html
-		#set ownership and group
-                sudo chown -R www-data:your_userID_here divumwx
+		#set ownership and group (replace your userID with your own user name used to login to your server)
+                sudo chown -R www-data:your_userID divumwx
 		#set permissions
-		sudo chmod -R 755 divumwx
+		sudo chmod -R 775 divumwx
                 #restart weewx
                 sudo systemctl restart weewx
                 
