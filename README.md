@@ -206,20 +206,14 @@ Now the script displays the inputs that it has loaded for you to look over and a
 Once you’ve reviewed everything, if you enter “y,” the installation will proceed; otherwise, entering “n” will exit the script.
 
 
-The script will proceed and inform you of the steps as they are completed.
+The script will proceed and inform you of the steps as they are completed. Then run reports to get a head start
+
+      #run reports
+      weectl report run
 
 
 You’ve completed the command-line Python installation. The next step is to visit the DivumWX Skin's home page and start the web-based initial setup.
 		
-
-
-* When the installation process completes, restart WeeWX and from command line run: -
-            	
-      # Activate the WeeWX virtual environment
-      source ~/weewx-venv/bin/activate
-      # Run all enabled reports:    
-      weectl report run
-
 This will allow some of the required variable data to be generated immediately without having to wait for the next report generation interval.
 
 * You can now test that the template is working by opening it up in your browser.
@@ -234,14 +228,14 @@ Click on the side menu 'hamburger', top rigt of your weather page. and then clic
 
 * You need to carry out a final clean up of Ownership and Permissions.
   
-		#from the command line, go to your document root folder (normally /var/www/html is default for Apache2 or Nginx)
-		cd /var/www/html
-		#set ownership and group (replace your userID with your own user name used to login to your server)
-                sudo chown -R www-data:your_userID divumwx
-		#set permissions
-		sudo chmod -R 775 divumwx
-                #restart weewx
-                sudo systemctl restart weewx
+      #from the command line, go to your document root folder (normally /var/www/html is default for Apache2 or Nginx)
+      cd /var/www/html
+      #set ownership and group (replace your userID with your own user name used to login to your server)
+      sudo chown -R www-data:your_userID divumwx
+      #set permissions
+      sudo chmod -R 775 divumwx
+      #restart weewx
+      sudo systemctl restart weewx
                 
 
 * Any problems, please raise an Issue in this repository attaching a debug report, your skin.conf files and a journal report covering at least two archive cycles from startup.
