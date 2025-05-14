@@ -411,10 +411,12 @@ $humid["day_max"] = $day.outHumidity.max.format(add_label=False);
 $humid["day_maxtime"] = date('H:i',$day.outHumidity.maxtime.raw);
 $humid["day_min"] = $day.outHumidity.min.format(add_label=False);
 $humid["day_mintime"] = date('H:i',$day.outHumidity.mintime.raw);
+#if $day($days_ago=1).outHumidity.has_data
 $humid["yesterday_max"] = $day($days_ago=1).outHumidity.max.format(add_label=False);
 $humid["yesterday_maxtime"] = date('H:i',$day($days_ago=1).outHumidity.maxtime.raw);
 $humid["yesterday_min"] = $day($days_ago=1).outHumidity.min.format(add_label=False);
 $humid["yesterday_mintime"] = date('H:i',$day($days_ago=1).outHumidity.mintime.raw);
+#end if
 $humid["month_max"] = $month.outHumidity.max.format(add_label=False);
 $humid["month_maxtime"] = date('D j H:i',$month.outHumidity.maxtime.raw);
 $humid["month_min"] = $month.outHumidity.min.format(add_label=False);
@@ -436,10 +438,12 @@ $humid["indoors_day_max"] = $day.inHumidity.max.format(add_label=False);
 $humid["indoors_day_maxtime"] = date('H:i',$day.inHumidity.maxtime.raw);
 $humid["indoors_day_min"] = $day.inHumidity.min.format(add_label=False);
 $humid["indoors_day_mintime"] = date('H:i',$day.inHumidity.mintime.raw);
+#if $day($days_ago=1).inHumidity.has_data
 $humid["indoors_yesterday_max"] = $day($days_ago=1).inHumidity.max.format(add_label=False);
 $humid["indoors_yesterday_maxtime"] = date('H:i',$day($days_ago=1).inHumidity.maxtime.raw);
 $humid["indoors_yesterday_min"] = $day($days_ago=1).inHumidity.min.format(add_label=False);
 $humid["indoors_yesterday_mintime"] = date('H:i',$day($days_ago=1).inHumidity.mintime.raw);
+#end if
 $humid["indoors_month_max"] = $month.inHumidity.max.format(add_label=False);
 $humid["indoors_month_maxtime"] = date('D j H:i',$month.inHumidity.maxtime.raw);
 $humid["indoors_month_min"] = $month.inHumidity.min.format(add_label=False);
@@ -476,9 +480,11 @@ $rain["last_10min"] = $span($time_delta=600).rain.sum.raw;
 $rain["last_24hour"] = round($span($hour_delta=24).rain.sum.raw,1);
 $rain["24h_rate_max"] = $day($days_ago=1).rainRate.max.raw;
 $rain["24h_rate_maxtime"] = $day($days_ago=1).rainRate.maxtime.raw;
+#if $day($days_ago=1).rainRate.has_data
 $rain["yesterday_rate_max"] = $day($days_ago=1).rainRate.max.raw;
 $rain["yesterday_rate_maxtime"] = $day($days_ago=1).rainRate.maxtime.raw;
 $rain["yesterday"] = round($day($days_ago=1)rain.sum.raw,1);
+#end if
 $rain["24h_total"] = round($span($hour_delta=24).rain.sum.raw,1);
 $rain["day"] = round($day.rain.sum.raw,1);
 $rain["day_rate_max"] = $day.rainRate.max.raw;
@@ -493,7 +499,7 @@ $rain["year_total"] = round($year.rain.sum.raw,1);
 $rain["alltime_rate_max"] = $alltime.rainRate.max.raw;
 $rain["alltime_rate_maxtime"] = $alltime.rainRate.maxtime.raw;
 $rain["alltime_total"] = round($alltime.rain.sum.raw,1);
-$rain["last_rain"] = date('D j M H:i',$time_at('rain > 0').raw);
+//$rain["last_rain"] = date('D j M H:i',$time_at('rain > 0').raw);
 #end if
 
 #if $current.stormRain.has_data
@@ -514,8 +520,10 @@ if(is_numeric($sky["cloud_cover"]) != 1){$sky["cloud_cover"] = 0;}
 $solar["now"] = $current.radiation.format($localize=False,add_label=False);
 $solar["day_max"] = $day.radiation.max.format($localize=False,add_label=False);
 $solar["day_maxtime"] = date('H:i',$day.radiation.maxtime.raw);
+#if $day($days_ago=1).radiation.has_data
 $solar["yesterday_max"] = $day($days_ago=1).radiation.max.format($localize=False,add_label=False);
 $solar["yesterday_maxtime"] = date('H:i',$day($days_ago=1).radiation.maxtime.raw);
+#end if
 $solar["month_max"] = $month.radiation.max.format($localize=False,add_label=False);
 $solar["month_maxtime"] = date('D j H:i',$month.radiation.maxtime.raw);
 $solar["year_max"] = $year.radiation.max.format($localize=False,add_label=False);
@@ -528,9 +536,11 @@ $solar["alltime_maxtime"] = date('j M Y H:i',$alltime.radiation.maxtime.raw);
 $solar["threshold"] = round($current.threshold.raw,0,PHP_ROUND_HALF_UP);
 $solar["sun_duration_minutes"] = $day.sunshine_time.sum.raw;
 $solar["sun_duration_hours_minutes"] = intdiv($solar["sun_duration_minutes"], 60).' hrs '. ($solar["sun_duration_minutes"] % 60).' mins';
+#if $day($days_ago=1).sunshine_time.has_data
 $solar["sunshine_hours_yesterday"] = $day($days_ago=1).sunshine_time.sum.raw;
 $solar["sunshine_minutes_yesterday"] = $solar["sunshine_hours_yesterday"] * 60;
 $solar["sunshine_hours_minutes_yesterday"] = intdiv($solar["sunshine_minutes_yesterday"], 60).' hrs '. ($solar["sunshine_minutes_yesterday"] % 60).' mins';
+#end if
 #end if
 
 //temperature
@@ -570,10 +580,12 @@ $temp["outside_day_avg_60mn"] = $span($time_delta=3600).outTemp.avg.format(add_l
 $temp["outside_24h_maxtime"] = date('H:i',$day($days_ago=1).outTemp.maxtime.raw);
 $temp["outside_24h_min"] = $day($days_ago=1).outTemp.min.format(add_label=False);
 $temp["outside_24h_mintime"] = date('H:i',$day($days_ago=1).outTemp.mintime.raw);
+#if $day($days_ago=1).outTemp.has_data
 $temp["outside_yesterday_max"] = $day($days_ago=1).outTemp.max.format(add_label=False);
 $temp["outside_yesterday_maxtime"] = date('H:i',$day($days_ago=1).outTemp.maxtime.raw);
 $temp["outside_yesterday_min"] = $day($days_ago=1).outTemp.min.format(add_label=False);
 $temp["outside_yesterday_mintime"] = date('H:i',$day($days_ago=1).outTemp.mintime.raw);
+#end if
 #end if
 $temp["outside_day_avg"] = $day.outTemp.avg.format(add_label=False);
 $temp["outside_day_max"] = $day.outTemp.max.format(add_label=False);
@@ -615,8 +627,10 @@ $temp["indoor_now_feels_degC"] = (number_format($HI, 1)-32)*5/9;
 $uv["now"] = $weewxrt[43];
 $uv["day_max"] = $day.UV.max.format(format_string="%.1f", None_string="0", add_label=False);
 $uv["day_maxtime"] = date('H:i',$day.UV.maxtime.raw);
+#if $day($days_ago=1).UV.has_data
 $uv["yesterday_max"] = $day($days_ago=1).UV.max.format(add_label=False);
 $uv["yesterday_maxtime"] = date('H:i',$day($days_ago=1).UV.maxtime.raw);
+#end if
 $uv["month_max"] = $month.UV.max.format(add_label=False);
 $uv["month_maxtime"] = date('D j H:i',$month.UV.maxtime.raw);
 $uv["year_max"] = $year.UV.max.format(add_label=False);
@@ -633,11 +647,13 @@ $vpd["day_min"] = number_format($day.vpd.min.kPa.format(add_label=False),4);
 $vpd["day_avg"] = number_format($day.vpd.avg.kPa.format(add_label=False),4);
 $vpd["day_maxtime"] = date('H:i',$day.vpd.maxtime.raw);
 $vpd["day_mintime"] = date('H:i',$day.vpd.mintime.raw);
+#if $day($days_ago=1).vpd.has_data
 $vpd["yesterday_max"] = number_format($day($days_ago=1).vpd.max.kPa.format(add_label=False),4);
 $vpd["yesterday_min"] = number_format($day($days_ago=1).vpd.min.kPa.format(add_label=False),4);
 $vpd["yesterday_avg"] = number_format($day($days_ago=1).vpd.avg.kPa.format(add_label=False),4);
 $vpd["yesterday_maxtime"] = date('H:i',$day($days_ago=1).vpd.maxtime.raw);
 $vpd["yesterday_mintime"] = date('H:i',$day($days_ago=1).vpd.mintime.raw);
+#end if
 $vpd["week_min"] = number_format($week.vpd.min.kPa.format(add_label=False),4);
 $vpd["week_max"] = number_format($week.vpd.max.kPa.format(add_label=False),4);
 $vpd["week_avg"] = number_format($week.vpd.avg.kPa.format(add_label=False),4);
