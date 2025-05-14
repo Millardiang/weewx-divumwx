@@ -226,9 +226,23 @@ This will allow some of the required variable data to be generated immediately w
 
 <h2 class="wp-block-heading">Location Settings</h2> 
 
-* Finally, you need to set your location settings.
+* You need to set your location settings.
 
 Click on the side menu 'hamburger', top rigt of your weather page. and then click on the first item, Location Settings. You will be presented with a login screen. Leave the password empty for the initial login. Click on the button and enter the location settings screen. Create a password, complete the other fields and save. Browse back to the main page and refresh the screen. This completes the installation process.
+
+<h2 class="wp-block-heading">Ownership and Permissions</h2> 
+
+* You need to carry out a final clean up of Ownership and Permissions.
+  
+		#from the command line, go to your document root folder (normally /var/www/html is default for Apache2 or Nginx)
+		cd /var/www/html
+		#set ownership and group
+                sudo chown -R www-data:your_userID_here divumwx
+		#set permissions
+		sudo chmod -R 755 divumwx
+                #restart weewx
+                sudo systemctl restart weewx
+                
 
 * Any problems, please raise an Issue in this repository attaching a debug report, your skin.conf files and a journal report covering at least two archive cycles from startup.
   
