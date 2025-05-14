@@ -1,0 +1,68 @@
+<?php
+##errorCatcher Echo
+##
+################################################################################################
+##        ________   __  ___      ___  ____  ____  ___      ___    __   __  ___  ___  ___     ##
+##       |"      "\ |" \|"  \    /"  |("  _||_ " ||"  \    /"  |  |"  |/  \|  "||"  \/"  |    ##
+##       (.  ___  :)||  |\   \  //  / |   (  ) : | \   \  //   |  |'  /    \:  | \   \  /     ##
+##       |: \   ) |||:  | \\  \/. ./  (:  |  | . ) /\\  \/.    |  |: /'        |  \\  \/      ##
+##       (| (___\ |||.  |  \.    //    \\ \__/ // |: \.        |   \//  /\'    |  /\.  \      ##
+##       |:       :)/\  |\  \\   /     /\\ __ //\ |.  \    /:  |   /   /  \\   | /  \   \     ##
+##       (________/(__\_|_)  \__/     (__________)|___|\__/|___|  |___/    \___||___/\___|    ##
+##                                                                                            ##
+##     Copyright (C) 2023 Ian Millard, Steven Sheeley, Sean Balfour. All rights reserved      ##
+##      Distributed under terms of the GPLv3.  See the file LICENSE.txt for your rights.      ##
+##    Issues for weewx-divumwx skin template are only addressed via the issues register at    ##
+##                    https://github.com/Millardiang/weewx-divumwx/issues                     ##
+################################################################################################
+?>
+##
+#errorCatcher Echo
+#set $YM="%Y-%m-%d"
+#set $MY="%B %Y"
+#set $Y="%Y"
+#set $D="  %d"
+#set $M=" %b"
+#set $NODAY="null"
+#set $Temp="%2.1f"
+#set $Wind="%6.1f"
+#set $Dir="%6.0f"
+#set $Count="%6d"
+#set $NONE=$month.outTemp.avg.format(add_label=False)
+<?php
+$heatData = 
+"[
+#for $day in $month.days
+#if $day.outTemp.has_data
+{
+date: '$day.dateTime.format($YM)',
+temperature: $day.outTemp.max.degree_C.format($Temp,add_label=False)
+},
+#else 
+{
+date: '$NODAY',
+temperature: $NODAY
+},
+#slurp
+#end if
+#end for
+];";}
+else {
+$heatData = 
+"[
+#for $day in $month.days
+#if $day.outTemp.has_data
+{
+date: '$day.dateTime.format($YM)',
+temperature: $day.outTemp.max.degree_F.format($Temp,add_label=False)
+},
+#else 
+{
+date: '$NODAY',
+temperature: $NODAY
+},
+#slurp
+#end if
+#end for
+];";
+?>
