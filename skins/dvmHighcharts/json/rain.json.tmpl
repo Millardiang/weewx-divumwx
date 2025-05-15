@@ -21,9 +21,7 @@
 ##
 "rainPlot": {"series":
 {"dailyRainMax_mm": $year.rain.series(aggregate_type='max', aggregate_interval='day', time_series='start', time_unit='unix_epoch_ms').mm.round(2).json,
-"dailyPiezoRainMax_mm": $year.p_rain.series(aggregate_type='max', aggregate_interval='day', time_series='start', time_unit='unix_epoch_ms').mm.round(2).json,
-"dailyRainMax_inch": $year.rain.series(aggregate_type='max', aggregate_interval='day', time_series='start', time_unit='unix_epoch_ms').inch.round(2).json,
-"dailyPiezoRainMax_inch": $year.p_rain.series(aggregate_type='max', aggregate_interval='day', time_series='start', time_unit='unix_epoch_ms').inch.round(2).json},
+"dailyRainMax_inch": $year.rain.series(aggregate_type='max', aggregate_interval='day', time_series='start', time_unit='unix_epoch_ms').inch.round(2).json},
 "units": "$unit.label.rain"#slurp
 }
 }]
