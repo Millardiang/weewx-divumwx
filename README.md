@@ -153,9 +153,7 @@ Change into that directory.
 Python Installer
 
 In the divumwxLite directory, enter the following command:
-	python dvmInstaller.py –debug
-
-The “--debug” parameter IS REQUIRED for beta testers to use, as it generates a needed debug log file.
+	python dvmInstaller.py
 
 If you are missing one of the non-standard Python modules required by the installer, you will be prompted to install it.
 
@@ -164,6 +162,10 @@ Responding “Y” will install the necessary module and restart the script.
 
 
 Pressing any key will then display the essential installation document.
+
+During the this next stage, if by any chance the following window appears, pressing any key will clear the error and continue to the next stage.
+
+
 
 
 
