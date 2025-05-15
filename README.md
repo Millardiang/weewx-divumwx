@@ -157,7 +157,7 @@ During the this next stage, if by any chance the following window appears, press
 <img width="434" alt="Screenshot 2025-05-15 at 08 28 18" src="https://github.com/user-attachments/assets/7e501567-43db-4525-8fea-f57232588373" />
 
 
-In the divumwxLite directory, enter the following command:
+In the weewx-divumwx-divumwxLite directory, enter the following command:
 	python dvmInstaller.py
 
 If you are missing one of the non-standard Python modules required by the installer, you will be prompted to install it.
