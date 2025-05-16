@@ -149,7 +149,7 @@ print(f"{green}Python module import complete...{reset}")
 class DVMInstaller:
     def __init__(self, conf_file=None):
         self.waitFKP()
-        self.viewFile('./README.md', 40)
+        self.viewFile('./INSTALLATION_GUIDE.md', 40)
         self.services_file = self.chkSvcFile()
         self.prnWelMsg()
         self.conf_files = {}
