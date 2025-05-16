@@ -152,11 +152,6 @@ Change into that directory.
 
 <h2 class="wp-block-heading">Python Installer</h2>
 
-During the this next stage, if by any chance the following window appears, pressing any key will clear the error and continue to the next stage.
-
-<img width="434" alt="Screenshot 2025-05-15 at 08 28 18" src="https://github.com/user-attachments/assets/7e501567-43db-4525-8fea-f57232588373" />
-
-
 In the weewx-divumwx-divumwxLite directory, enter the following command:
 	python dvmInstaller.py
 
