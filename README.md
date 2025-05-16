@@ -116,7 +116,7 @@ echo 'Hello world';</code></pre>
 
 * Go to (https://millardiang.github.io/services-generator/) to complete the pre-install web services settings which which generates 'services.json' in your default Download folder. The new Settings Generator is required as the format has changed, and any previous settings files you’ve created are no longer usable.
 
-* Download the beta archive from: -
+* Download the archive from: -
        (https://github.com/Millardiang/weewx-divumwx/archive/refs/heads/divumwxLite.zip)
 
 and transfer it to your weewx server along with the services.json file that you created
@@ -137,10 +137,10 @@ This shows that the user and group that runs/owns the apache2 process on this ma
 
 Checking the default pip HTML_ROOT (public_html, which equates to /home/[username]/weewx-data/public_html) will show you where weewx is creating its files, and, as you can see, they are owned by dietpi:dietpi
 
-Before proceeding, you must ensure that weewx has been properly installed and producing reports, as shown below. Failure to do so will result in the beta installer failing.
+Before proceeding, you must ensure that weewx has been properly installed and producing reports, as shown below. Failure to do so will result in the installer failing.
 
 
-Extract the beta archive.
+Extract the archive.
 
  	unzip weewx-divumwx-divumwxLite.zip
 
