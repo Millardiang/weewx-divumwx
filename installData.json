@@ -162,8 +162,8 @@
         "StdCalibrate": {
             "Corrections": {
                 "lightning_strike_count": "lightning_strike_count if lightning_strike_count > 0 else 0",
-                "lightning_distance": "None if lightning_strike_count is 0 else lightning_distance",
-                "stormRain": "0 if stormRain is NULL else stormRain"
+                "lightning_distance": "None if lightning_strike_count == 0 else lightning_distance",
+                "stormRain": "0 if stormRain == None else stormRain"
             }
         }
     },
