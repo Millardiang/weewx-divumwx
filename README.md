@@ -33,7 +33,7 @@ Currently, Divumwx-Lite only supports WeeWX 5.1 or later, installed by Pip into 
     # Activate the WeeWX virtual environment
     source ~/weewx-venv/bin/activate
     # Verify that your version of pip is current
-    pip3 install –upgrade pip
+    pip3 install --upgrade pip
     # Install packaging.py
     pip3 install packaging
 
