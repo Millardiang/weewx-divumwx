@@ -8,7 +8,7 @@ Live example of DivumWX https://claydonsweather.org.uk/
 
 In the meantime, as development and testing is still ongoing, we have decided to release a "lite Version", DivumWX-Lite. This is fully functioning but only in a 3 x 3 grid format. We have pre-selected a range of sensors that we would expect to find as a minimum on any home weather station. The layout is responsive but it is particularly suitable to use on tablet size screens for desktop or wall displays.
 <img width="1067" alt="DivumWX_Lite" src="https://github.com/user-attachments/assets/121bad7f-8bb4-482a-8ee2-34d7ceefee0c" />
-Live example of DivumWX-Lite https://claydonsweather.org.uk/divumLite/
+Live example of DivumWX-Lite (https://weathertest.mdmi.co.uk/divumwx/)
 
 # DivumWX-Lite Skin Template for WeeWX
 
