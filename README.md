@@ -70,7 +70,7 @@ IMPORTANT DivumWX-Lite requires PHP8.2 or later. Please make sure you install al
 
 <p>To use PHP with MySQL or MariaDB database, we need to install the following extension:</p>
 
-<pre class="highlighter"><code class="language-plaintext no-line-numbers">sudo apt install -y php8.4-mysql</code></pre>
+<pre class="highlighter"><code class="language-plaintext no-line-numbers">sudo apt install -y php8.3-mysql</code></pre>
 
 <h2 class="wp-block-heading">PHP integration with Apache</h2>
 
