@@ -25,8 +25,8 @@ function openPowerCharts(chart) {
 <div id="title_bar" style="margin-top: 10px; margin-bottom: 7px;">
   <div id="reports">
     <select name="charts" onchange="openPowerCharts(value)"  style="background-color: rgb(194,102,58); color: white; border: 2px solid rgb(194,102,58); border-radius: 5px;">
-      <option value="dvmPowerPeakChart.php">Grid Usage Peaks</option>
-      <option value="powerBellChart.php">Solar Power Generation</option>
+      <option value="dvmSolarEnergyChart.php">Solar Generation and Export</option>
+      <option value="dvmSolarEfficiencyChart.php">Solar Efficiency</option>
       <option selected> -Select Chart- </option>
     </select>
   </div>

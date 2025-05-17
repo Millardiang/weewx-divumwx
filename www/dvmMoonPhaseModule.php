@@ -55,6 +55,7 @@ foreach ($meteor_events as $meteor_check) {
 <body>
 <div class="chartforecast">
 <span class="yearpopup"><a alt="Moon Info" title="Moon Info" href="dvmMenuCelestialPopup.php" data-lity><?php echo $info;?> Celestial Data</a></span>
+<span class="yearpopup"><a alt="AuroraWatch" title="AuroraWatch" href="dvmAuroraWatchPopup.php" data-lity><?php echo $info;?> Aurora Watch</a></span>
 </div>
 <span class='moduletitle'><?php echo $lang['moonPhaseModule'];?></span>
 <div class="updatedtime1"><span>

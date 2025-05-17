@@ -41,7 +41,7 @@ if ($theme === "dark") {
     <script src="dvmhighcharts/scripts/highcharts-more.js"></script>
     <script src="dvmhighcharts/scripts/exporting.js"></script>
     <script src="dvmhighcharts/scripts/export-data.js"></script>
-    <script src="dvmhighcharts/scripts/divumwx-<?php echo $theme;?>.js" type="text/javascript"></script>
+    <script src="dvmhighcharts/scripts/Divumwx-<?php echo $theme;?>.js" type="text/javascript"></script>
 </head>
 <body>
 

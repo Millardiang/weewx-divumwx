@@ -26,9 +26,11 @@ if ($advisoryzone == "eu") {
 }
 $json_icon = file_get_contents("jsondata/lookupTable.json");
 $parsed_icon = json_decode($json_icon, true);
-
+//include('advisoryImpacts.php');
 switch ($advisoryzoneMapping) {
     case "unitedkingdom":
+
+        include('advisoryAurora.php');
         include('advisoryHealth.php');
         $url = "https://www.metoffice.gov.uk/weather/warnings-and-advice/uk-warnings";
         $json_string = file_get_contents("jsondata/awa.txt");
@@ -41,7 +43,7 @@ switch ($advisoryzoneMapping) {
         echo '<div id="alert">';
         //$cnt = 0;
         //$fCnt = 1;
-        if ($cnt==0 && $fCnt==0 && $healthAlertID == "0") 
+        if ($cnt==0 && $fCnt==0 && $healthAlertID == "0" && $auroraBackground == "#35FF28") 
         { ?>
  
       <section>

@@ -1,13 +1,14 @@
 <?php
-include('sunsynkData.php');
-$solarGeneration = (int)$sunsynkData[2];
-$solarBattery = (int)$sunsynkData[1];
-$gridProduction = (int)$sunsynkData[0];
-if($solarBattery<0){$batteryCharge=abs($solarBattery);}
-else{$batteryCharge=0;}
-if($gridProduction<0){$gridExport=abs($gridProduction);}
-else{$gridExport=0;}
-$kwh = $solarGeneration * 24 / 1000;
+$json_power = file_get_contents("jsondata/homeassistant.txt");
+$parsed_power = json_decode($json_power, true);
+$batteryPower = $parsed_power[28]["state"];
+$batterySOC = $parsed_power[29]["state"];
+$dailySolarExport = $parsed_power[42]["state"];
+$dailySolarEnergy = $parsed_power[45]["state"];
+$gridPower = $parsed_power[48]["state"];
+$loadTotalPower = $parsed_power[59]["state"];
+$solarPower = $parsed_power[65]["state"];
+$solarEfficiency = round($solarPower/4040*100,1);
 $json_cloud = file_get_contents("/var/www/html/divumwx/jsondata/awc.txt");
 $cloud = json_decode($json_cloud, true);
 $cloudcover = $cloud['response'][0]['periods'][0]['sky'];

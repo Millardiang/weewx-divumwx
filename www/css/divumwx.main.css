@@ -1,6 +1,8 @@
 /*--col-6 for silver */
 :root{--col-1:#151819;--col-2:#1f2024;--col-3:#26282c;--col-4:#2e8b57;--col-5:#488fcc;--col-6:#ffffff;--col-7:#000000;--col-8:#00FF00;--col-9:#FF0000;--col-10:#2d2f32;--col-11:#ffffff;--col-12:#47494d;--col-13:#393d40;--col-14:#999999;--col-15:#393d40;--col-16:#3b3c3f;--col-17:#ffffff;--col-18:#38383c;--col-19:#000000;--col-20:#b9cff7;--col-21:#c0c0c0;--col-22:#26282c;--col-23:#3b3c3f;--col-100:#292E35;--font:Arial,Helvetica,sans-serif;}
 [data-theme="light"]{--col-1:#e0eafb;--col-2:#c9daf9;--col-3:#b9cff7;--col-4:#488fcc;--col-5:#488fcc;--col-6:#1c4263;--col-7:#ffffff;--col-8:#00FF00;--col-9:#FF0000;--col-10:#e0eafb;--col-11:#ffffff;--col-12:#898990;--col-13:#393d40;--col-14:#999999;--col-15:#e9ebf1;--col-16:#e6e8ef;--col-17:#777777;--col-19:#1c4263;--col-18:#898990;--col-20:#cccccc;--col-21:#808080;--col-22:#b9cff7;--col-23:#c0c0c0;--col-100:#ffffff;--font:Arial,Helvetica,sans-serif;
+
+/*:root { color-scheme: dark light; }*/
 .divumwxbeaufort0{background:#85a3aa;}
 .divumwxbeaufort1{background:#7e98bb;}
 .divumwxbeaufort2{background:#6e90d0;}

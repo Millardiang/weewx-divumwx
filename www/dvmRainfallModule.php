@@ -14,6 +14,7 @@
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
 include('dvmCombinedData.php');
+//include('dvmTippingData.php');
 ?>
 
 <!DOCTYPE html>
@@ -27,9 +28,9 @@ include('dvmCombinedData.php');
 <div class="rainconverter">
 <?php 
 if($theme == 'dark') {
-if ($rain["units"] =='in'){echo "<div class=rainconvertercircle style='color:$colorRainDaySum;'>".number_format($rain["day"]*25.400013716,1)." <smallrainunit>mm";} else if ($rain["units"] =='mm'){echo "<div class=rainconvertercircle style='color:$colorRainDaySum;'>".number_format($rain["day"]*0.0393701,2)." <smallrainunit>in";}
+if ($rainunit =='in'){echo "<div class=rainconvertercircle style='color:$colorRainDaySum;'>".number_format($rain["day"]*25.400013716,1)." <smallrainunit>mm";} else if ($rainunit =='mm'){echo "<div class=rainconvertercircle style='color:$colorRainDaySum;'>".number_format($rain["day"]*0.0393701,2)." <smallrainunit>in";}
 } else {
-if ($rain["units"] =='in'){echo "<div class=rainconvertercircle style='background:$colorRainDaySum;'>".number_format($rain["day"]*25.400013716,1)." <smallrainunit>mm";} else if ($rain["units"] =='mm'){echo "<div class=rainconvertercircle style='background:$colorRainDaySum;'>".number_format($rain["day"]*0.0393701,2)." <smallrainunit>in";}
+if ($rainunit =='in'){echo "<div class=rainconvertercircle style='background:$colorRainDaySum;'>".number_format($rain["day"]*25.400013716,1)." <smallrainunit>mm";} else if ($rainunit =='mm'){echo "<div class=rainconvertercircle style='background:$colorRainDaySum;'>".number_format($rain["day"]*0.0393701,2)." <smallrainunit>in";}
 }
 ?></span>
 </div></div>
@@ -44,7 +45,7 @@ if ($rain["units"] =='in'){echo "<div class=rainconvertercircle style='backgroun
 
     var theme = "<?php echo $theme;?>";
 
-    var currentRain = "<?php echo $rain["day"];?>";
+    var currentRain = "<?php echo $rain["current"];?>";
     currentRain = currentRain || 0;
     
     var maxRain = currentRain;
@@ -144,7 +145,7 @@ svg.append("rect")
     .attr("height", 11.5)
     .style("fill", "var(--col-10)");
     
-var units = "<?php echo $rain["units"];?>";
+var units = "<?php echo $rainunit;?>";
 
 if (units == 'mm') {    
     var step = 5;
@@ -273,7 +274,7 @@ var svg = d3.select(".stormRain")
     .attr("width", 180)
     .attr("height", 150);
 
-var units = "<?php echo $rain["units"];?>";
+var units = "<?php echo $rainunit;?>";
 
 if (units == 'in') {
 var stormRain = <?php echo $rain["storm_rain"]/25.4;?>;    
@@ -288,13 +289,13 @@ var last24HoursColor = "<?php echo $colorRain24hrSum;?>";
 var rainMonthColor = "<?php echo $colorRainMonthSum;?>";
 var rainYearColor = "<?php echo $colorRainYearSum;?>";
 
-var stormStart = "<?php echo $rain["storm_start"];?>"; 
+var stormStart = "<?php echo $rain["storm_rain_start"];?>"; 
 var rainRate = <?php echo $rain["rate"];?>;
 var lastHour = <?php echo $rain["last_hour"];?>;
-var last24Hours = <?php echo $rain["24h_total"];?>;
+var last24Hours = <?php echo $rain["last_24hour"];?>;
 var rainMonth = <?php echo $rain["month_total"];?>; 
 var rainYear = <?php echo $rain["year_total"];?>;
-var month = "<?php echo date('F');?>"; 
+var month = '<?php echo date('F');?>'; 
 var year = <?php echo date('Y');?>;
 
 if (stormRain > 0.0) {

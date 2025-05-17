@@ -16,16 +16,6 @@
 //  Ian Millard 05/11/24 added styling to links for popup charts and records                  #
 //                                                                                            #
 //#############################################################################################
-session_start();
-if (!file_exists("userSettings.php")) {
-	if (isset($_SESSION['setupAttempted']) && $_SESSION['setupAttempted'] === true) {
-		echo "An error occurred. Please contact support.";
-		exit;
-	}
-	$_SESSION['canAccessSetup'] = true;
-	header("Location: dvmActSetup.php");
-	exit;
-}
 
 include_once ('dvmCombinedData.php');
 include_once ('webserver_ip_address.php');
@@ -128,7 +118,6 @@ echo $manifestShortName;
 
         <?php
 include ("advisoryRegions.php");
-//include ("advisoryFloodsEngland.php");
 error_reporting(0);
 ?>
           
@@ -177,6 +166,16 @@ error_reporting(0);
     <div class="cardE"><div class="module"><div id="position19"></div></div></div>
 
 	<div class="cardE"><div class="module"><div id="position20"></div></div></div>
+
+	<!--div class="cardE"><div class="module"><div id="position21"></div></div></div>
+
+    <div class="cardE"><div class="module"><div id="position22"></div></div></div>
+
+	<div class="cardE"><div class="module"><div id="position23"></div></div></div>
+    
+    <div class="cardE"><div class="module"><div id="position24"></div></div></div>
+
+	<div class="cardE"><div class="module"><div id="position25"></div></div></div-->
 
 </section>
 <!--end of grid section-->

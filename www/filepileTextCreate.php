@@ -88,17 +88,22 @@ $txt = "ragweed = $ragweed\n";
 fwrite($myfile, $txt);
 $txt = "cloudCover = $cloudcover\n";
 fwrite($myfile, $txt);
-$txt = "kWh = $kwh\n";
+$txt = "batteryPower = $batteryPower\n";
 fwrite($myfile, $txt);
-$txt = "gridProduction = $gridProduction\n";
+$txt = "batterySOC = $batterySOC\n";
 fwrite($myfile, $txt);
-$txt = "solarBattery = $solarBattery\n";
+$txt = "dailySolarExport = $dailySolarExport\n";
 fwrite($myfile, $txt);
-$txt = "gridExport = $gridExport\n";
+$txt = "dailySolarEnergy = $dailySolarEnergy\n";
 fwrite($myfile, $txt);
-$txt = "batteryCharge = $batteryCharge\n";
+$txt = "gridPower = $gridPower\n";
 fwrite($myfile, $txt);
-$txt = "solarGeneration = $solarGeneration";
+$txt = "loadTotalPower = $loadTotalPower\n";
 fwrite($myfile, $txt);
-fclose($myfile);
+$txt = "solarPower = $solarPower\n";
+fwrite($myfile, $txt);
+$txt = "solarEfficiency = $solarEfficiency";
+fwrite($myfile, $txt);fclose($myfile);
 ?>
+
+

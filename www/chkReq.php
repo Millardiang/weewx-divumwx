@@ -13,8 +13,6 @@
 #    Issues for weewx-divumwx skin template are only addressed via the issues register at    #
 #                    https://github.com/Millardiang/weewx-divumwx/issues                     #
 ##############################################################################################
-$requiredModules = ['intl', 'json', 'mysqli', 'pdo_sqlite', 'random', 'session', 'sqlite3', 'mbstring'];
-$sqlite3_missing = false;
 $chkReqStatusFile = __DIR__ . '/chkReqstatus.json';
 if (file_exists($chkReqStatusFile)) {
     unlink($chkReqStatusFile);
@@ -37,29 +35,10 @@ function checkPHPVersion() {
     return ['status' => version_compare($version, '8.3', '>='), 'version' => $version];
 }
 
-function isModuleInstalled($module) {
-    $output = shell_exec('php -m | grep ' . escapeshellarg($module));
-    return !empty($output);
-}
-
 function checkPHPModules($modules) {
-    global $sqlite3_missing;
     $result = [];
     foreach ($modules as $module) {
-        $isLoaded = extension_loaded($module);
-        $isInstalled = isModuleInstalled($module);
-        if ($isLoaded) {
-            $result[$module] = 'Loaded';
-        } else {
-            if ($isInstalled) {
-                $result[$module] = 'Installed but not loaded';
-            } else {
-                $result[$module] = 'Not installed';
-            }
-        }
-        if ($module === 'sqlite3' && !$isLoaded) {
-            $sqlite3_missing = true;
-        }
+        $result[$module] = extension_loaded($module) ? 'Loaded' : 'Not loaded';
     }
     return $result;
 }
@@ -83,7 +62,7 @@ function getGroupName($groupId) {
 function checkDirectory($path, $expectedPerms, $expectedOwner, $expectedGroup, &$debug) {
     // Skip directories that start with a dot
     if (strpos(basename($path), '.') === 0) {
-        return ['status' => true, 'perms' => null, 'owner' => null, 'group' => null];
+        return ['status' => true, 'perms' => null, 'owner' => null, 'group' => null]; // Assume success for hidden directories
     }
 
     if (!is_dir($path)) {
@@ -111,41 +90,37 @@ function checkDirectory($path, $expectedPerms, $expectedOwner, $expectedGroup, &
 }
 
 function checkFile($path, $expectedPerms, $expectedOwner, $expectedGroup, &$debug) {
-    // Skip hidden files unless it's the database file
-    if (strpos(basename($path), '.') === 0 && basename($path) !== 'dvmAdmin.db3') {
-        return ['status' => true, 'perms' => null, 'owner' => null, 'group' => null, 'message' => 'Skipped hidden file.'];
+    // Skip files that start with a dot
+    if (strpos(basename($path), '.') === 0) {
+        return ['status' => true, 'perms' => null, 'owner' => null, 'group' => null]; // Assume success for hidden files
     }
 
     if (!is_file($path)) {
-        return [
-            'status' => false,
-            'perms' => null,
-            'owner' => null,
-            'group' => null,
-            'message' => 'Database file is missing.'
-        ];
+        $debug[$path] = "File does not exist.";
+        return ['status' => false, 'perms' => null, 'owner' => null, 'group' => null];
     }
     $perms = substr(sprintf('%o', fileperms($path)), -4);
     $owner = getOwnerName(fileowner($path));
     $group = getGroupName(filegroup($path));
-    $message = '';
-    if ($perms !== $expectedPerms) {
-        $message .= "Expected permissions $expectedPerms, found $perms. ";
+    if ($perms != $expectedPerms) {
+        $debug[$path] = "Permissions are $perms, expected $expectedPerms.";
     }
-    if ($owner !== $expectedOwner) {
-        $message .= "Expected owner $expectedOwner, found $owner. ";
+    if ($owner != $expectedOwner) {
+        $debug[$path] = "Owner is $owner, expected $expectedOwner.";
     }
-    if ($group !== $expectedGroup) {
-        $message .= "Expected group $expectedGroup, found $group. ";
+    if ($group != $expectedGroup) {
+        $debug[$path] = "Group is $group, expected $expectedGroup.";
     }
     return [
-        'status' => ($perms === $expectedPerms && $owner === $expectedOwner && $group === $expectedGroup),
+        'status' => $perms == $expectedPerms && $owner == $expectedOwner && $group == $expectedGroup,
         'perms' => $perms,
         'owner' => $owner,
-        'group' => $group,
-        'message' => $message ?: 'File exists but permissions may need adjustment.'
+        'group' => $group
     ];
 }
+
+$requiredModules = ['intl', 'json', 'mysqli', 'pdo_sqlite', 'random', 'session', 'sqlite3'];
+
 function getScriptOwnerAndGroup() {
     $scriptPath = __DIR__;
     $owner = getOwnerName(fileowner($scriptPath));
@@ -173,6 +148,14 @@ $directories = [
     ['path' => './admin/db', 'perms' => '0775', 'owner' => $scriptOwner, 'group' => $scriptGroup],
 ];
 
+$results = [
+    'weewx' => checkWeeWXVersion(),
+    'php_version' => checkPHPVersion(),
+    'php_modules' => checkPHPModules($requiredModules),
+    'directories' => [],
+    'running_user' => $currentUser,
+];
+
 $debug = [];
 $errorDetected = false;
 
@@ -183,14 +166,25 @@ foreach ($directories as $dir) {
         $errorDetected = true;
     }
 }
-function checkDatabaseConnection($dbFile) {
-    global $sqlite3_missing;
 
-    if ($sqlite3_missing) {
-        return ['status' => false, 'message' => 'SQLite3 module is not installed. Database connection cannot proceed.'];
+$dbFileCheck = checkFile('./admin/db/dvmAdmin.db3', '0666', $scriptOwner, $scriptGroup, $debug);
+$results['db_file'] = $dbFileCheck;
+if (!$dbFileCheck['status']) {
+    $errorDetected = true;
+} else {
+    $dbConnectionCheck = checkDatabaseConnection('./admin/db/dvmAdmin.db3');
+    $results['db_connection'] = $dbConnectionCheck;
+    if (!$dbConnectionCheck['status']) {
+        $errorDetected = true;
     }
+}
 
+header('Content-Type: application/json');
+echo json_encode($results);
+
+function checkDatabaseConnection($dbFile) {
     $result = ['status' => false, 'message' => ''];
+
     try {
         $db = new SQLite3($dbFile);
         $result['status'] = true;
@@ -201,49 +195,6 @@ function checkDatabaseConnection($dbFile) {
 
     return $result;
 }
-
-$results = [
-    'weewx' => checkWeeWXVersion(),
-    'php_version' => checkPHPVersion(),
-    'php_modules' => checkPHPModules($requiredModules),
-    'directories' => [],
-    'running_user' => $currentUser,
-];
-
-$missingModules = [];
-foreach ($results['php_modules'] as $module => $status) {
-    if ($status === 'Not installed') {
-        $missingModules[] = $module;
-    }
-}
-
-$dbFileCheck = checkFile('./admin/db/dvmAdmin.db3', '0644', $scriptOwner, $scriptGroup, $debug);
-$results['db_file'] = $dbFileCheck;
-if (!$dbFileCheck['status']) {
-    $results['db_connection'] = [
-        'status' => false,
-        'message' => 'Database connection was not tested due to file permission errors.'
-    ];
-    $errorDetected = true;
-} else {
-    $dbConnectionCheck = checkDatabaseConnection('./admin/db/dvmAdmin.db3');
-    $results['db_connection'] = $dbConnectionCheck;
-    if (!$dbConnectionCheck['status']) {
-        $errorDetected = true;
-    }
-}
-
-$phpVersion = PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION;
-$installCommand = '';
-if (!empty($missingModules)) {
-    $installCommand = "sudo apt-get install php$phpVersion-" . implode(" php$phpVersion-", $missingModules);
-}
-
-$results['missing_php_modules'] = $missingModules;
-$results['install_command'] = $installCommand;
-+
-header('Content-Type: application/json');
-echo json_encode($results);
 
 file_put_contents(__DIR__ . '/chkReqstatus.json', json_encode($results, JSON_PRETTY_PRINT));
 
