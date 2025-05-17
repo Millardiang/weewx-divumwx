@@ -72,7 +72,7 @@ IMPORTANT DivumWX-Lite requires PHP8.2 or later. Please make sure you install al
 
 <p>If we want to integrate PHP with Apache HTTP server, then install the following extension:</p>
 
-<pre class="highlighter"><code class="language-plaintext no-line-numbers">sudo apt install -y libapache2-mod-php8.4</code></pre>
+<pre class="highlighter"><code class="language-plaintext no-line-numbers">sudo apt install -y libapache2-mod-php8.4 php8.4-sqlite3</code></pre>
 
 <p>Once installation is complete, restart Apache:</p>
 
