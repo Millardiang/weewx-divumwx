@@ -42,21 +42,13 @@ IMPORTANT DivumWX-Lite requires PHP8.2 or later. Please make sure you install al
 
 <pre class="highlighter"><code class="language-plaintext no-line-numbers">sudo apt update</code></pre>
 
-<p>Next, install PHP 8.4 with command line interface (CLI):</p>
+<p>Next, install PHP 8.3 with command line interface (CLI):</p>
 
-<pre class="highlighter"><code class="language-plaintext no-line-numbers">sudo apt install -y php8.4-common php8.4-cli php8.4-sqlite3</code></pre>
+<pre class="highlighter"><code class="language-plaintext no-line-numbers">sudo apt install -y php8.3-common php8.3-curl php8.3-gd php8.3-mbstring php8.3-xml php8.3-zip php8.3-cli php8.3-sqlite3 php8.3-mysqli php8.3-pdo php8.3-sqlite</code></pre>
 
 <p>Check PHP version when installation was finished:</p>
 
 <pre class="highlighter"><code class="language-plaintext no-line-numbers">php --version</code></pre>
-
-<p>There are various PHP extensions that provide additional functionality. PHP extensions can be installed using the following syntax:</p>
-
-<pre class="highlighter"><code class="language-plaintext no-line-numbers">sudo apt install -y php8.4-extension_name</code></pre>
-
-<p> Execute the following command to install commonly used PHP extensions:</p>
-
-<pre class="highlighter"><code class="language-plaintext no-line-numbers">sudo apt install -y php8.4-common php8.4-curl php8.4-gd php8.4-mbstring php8.4-xml php8.4-zip php8.4-sqlite3</code></pre>
 
 <p>We can use <code>-m</code> option to check what extensions are installed.</p>
 
@@ -72,7 +64,7 @@ IMPORTANT DivumWX-Lite requires PHP8.2 or later. Please make sure you install al
 
 <p>If we want to integrate PHP with Apache HTTP server, then install the following extension:</p>
 
-<pre class="highlighter"><code class="language-plaintext no-line-numbers">sudo apt install -y libapache2-mod-php8.4 php8.4-sqlite3</code></pre>
+<pre class="highlighter"><code class="language-plaintext no-line-numbers">sudo apt install -y libapache2-mod-php8.3</code></pre>
 
 <p>Once installation is complete, restart Apache:</p>
 
@@ -93,10 +85,6 @@ echo 'Hello world';</code></pre>
 <p>Run the following command to test a script:</p>
 
 <pre class="highlighter"><code class="language-plaintext no-line-numbers">php main.php</code></pre>
-
-<p>Install older versions</p>
-
-<p>PHP 8.3 is an older version that is still supported. It can be installed by changing <code>php8.4</code> to <code>php8.3</code> in this post presented commands.</p></div>
 
 <h2 class="wp-block-heading">Install the Skin</h2>
 
