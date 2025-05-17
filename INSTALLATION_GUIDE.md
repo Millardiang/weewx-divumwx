@@ -56,7 +56,7 @@ IMPORTANT DivumWX-Lite requires PHP8.2 or later. Please make sure you install al
 
 <p> Execute the following command to install commonly used PHP extensions:</p>
 
-<pre class="highlighter"><code class="language-plaintext no-line-numbers">sudo apt install -y php8.4-common php8.4-curl php8.4-gd php8.4-mbstring php8.4-xml php8.4-zip</code></pre>
+<pre class="highlighter"><code class="language-plaintext no-line-numbers">sudo apt install -y php8.4-common php8.4-curl php8.4-gd php8.4-mbstring php8.4-xml php8.4-zip php8.4-sqlite3</code></pre>
 
 <p>We can use <code>-m</code> option to check what extensions are installed.</p>
 
