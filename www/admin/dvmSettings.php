@@ -40,14 +40,6 @@ require_once './admVersion.php';
 $usrSettingsFile = '../userSettings.php';
 $usrSettings = ldusrSettings($usrSettingsFile);
 extract($usrSettings);
-$topRowOptions = [
-	'' => 'None',
-	'dvmAirqualityTop.php' => 'Air Quality Summary',
-	'dvmLightningTop.php' => 'Lightning Summary',
-	'dvmRainfallMonthYearTop.php' => 'Rainfall Stats',
-	'dvmTemperatureYearTop.php' => 'Temperature Stats',
-	'dvmWindGustYearTop.php' => 'Wind Stats'
-];
 $otherRowOptions = [
 	'' => 'None',
 	'dvmAirqualityModule.php' => 'Air Quality',
@@ -57,16 +49,22 @@ $otherRowOptions = [
 	'dvmEarthDaylightModule.php' => 'Earth Image',
 	'dvmEarthquakeModule.php' => 'World Earthquakes',
 	'dvmForecastModule.php' => 'Forecast',
-	'dvmIndoorTemperatureModule.php' => 'Indoor Conditions',
+        'dvmGeocentricModule.php' => 'Geocentric',
+	'dvmGreenhouseGasModule.php' => 'Greenhouse Gases',
+        'dvmIndoorTemperatureModule.php' => 'Indoor Conditions',
 	'dvmLightningModule.php' => 'Lightning Strikes',
 	'dvmMoonPhaseModule.php' => 'Moon Phase Image',
 	'dvmPollenModule.php' => 'Pollen Risk',
-	'dvmRainfallModule.php' => 'Rainfall',
+        'dvmRainfallModule.php' => 'Rain Gauge Generic',
 	'dvmSolarDialModule.php' => 'Solar Dial',
 	'dvmSolarUvLuxModule.php' => 'Solar | UV | Lux',
 	'dvmTemperatureModule.php' => 'Outdoor Temperature',
-	'dvmWebcamModule.php' => 'Weather Web Cam',
-	'dvmWindModule.php' => 'Wind Compass'
+        'dvmWebcamModule.php' => 'Weather Web Cam',
+	'dvmWindModule.php' => 'Wind Compass',
+        'dvmBlank1Module.php' => 'Blank 1',
+        'dvmBlank2Module.php' => 'Blank 2',
+        'dvmBlank3Module.php' => 'Blank 3',
+        'dvmBlank4Module.php' => 'Blank 4'
 ];
 ?>
 <!DOCTYPE html>
@@ -147,39 +145,42 @@ $otherRowOptions = [
 													<table class="table table-bordered mb-0">
 														<thead>
 															<tr>
-																<td colspan="12"><figure class="text-center">Use this area to determine which modules are positioned where on your site. As you can see below, the system uses a 12 column grid, divided into 6 rows. The top row consists of 4 boxes, or 'positions' each spanning 3 columns of the grid. The next 5 rows each consist of 3 boxes, or 'positions', each spanning 4 columns of the grid, as you can see in the layout below. The numbering starts from the upper left position, labeled 'Position 1' and proceeds to the right, first row positions 1 thru 4, second row positions 5 thru 7, third row, positions 8 thru 10, fourth row, positions 11 thru 13, fifth row, positions 14 thru 16, sixth row, positions 17 thru 19.<br />Position #1 and Position #4 are hardcoded and can not be changed. All the rest can be. Each position below lists the existing selected module and offers a dropdown selector for you to choose what you want displayed there. Click <a href="#modalEdit" data-bs-toggle="modal">here</a> for a list of the top modules and <a href="#modalEdit" data-bs-toggle="modal">here</a> for a list of the main modules.</figure></td>
+																<td colspan="20"><figure class="text-center">Use this area to determine which modules are positioned where on your site. The numbering starts from the upper left position, labeled 'Position 1' and proceeds to the right, first row positions 1 thru 5, second row positions 6 thru 10, third row, positions 11 thru 15, fourth row, positions 16 thru 20.<br />Position #1 is hardcoded and can not be changed. All the rest can be. Each position below lists the existing selected module and offers a dropdown selector for you to choose what you want displayed there. If you do not have sufficient modules to complete the grid, you must use one of the blanks from the dropdown selection. DO NOT DUPLICATE MODULES.</figure></td>
 															</tr>
 														</thead>
 														<tr>
-															<td colspan="3"><p class="text-center">Position 1<br />Station Time<br /><span class="badge bg-danger">Unchangeable</span></td>
-															<td colspan="3"><p class="text-center">Position 2<br /><?php echo createDropdown('position2', $topRowOptions, $position2, 2); ?></td>
-															<td colspan="3"><p class="text-center">Position 3<br /><?php echo createDropdown('position3', $topRowOptions, $position3, 3); ?></td>
-															<td colspan="3"><p class="text-center">Position 4<br />Weather Advisories<br /><span class="badge bg-danger">Unchangeable</span></td>
-														</tr>
-														<tr>
+															<td colspan="4"><p class="text-center">Position 1 Time<br /><span class="badge bg-danger">Unchangeable</span></td>
+															<td colspan="4"><p class="text-center">Position 2<br /><?php echo createDropdown('position2', $otherRowOptions, $position2, 2); ?></td>
+															<td colspan="4"><p class="text-center">Position 3<br /><?php echo createDropdown('position3', $otherRowOptions, $position3, 3); ?></td>
+															<td colspan="4"><p class="text-center">Position 4<br /><?php echo createDropdown('position4', $otherRowOptions, $position4, 4); ?></td>
 															<td colspan="4"><p class="text-center">Position 5<br /><?php echo createDropdown('position5', $otherRowOptions, $position5, 5); ?></td>
-															<td colspan="4"><p class="text-center">Position 6<br /><?php echo createDropdown('position6', $otherRowOptions, $position6, 6); ?></td>
+
+    													</tr>
+														<tr>
+    														<td colspan="4"><p class="text-center">Position 6<br /><?php echo createDropdown('position6', $otherRowOptions, $position6, 6); ?></td>
 															<td colspan="4"><p class="text-center">Position 7<br /><?php echo createDropdown('position7', $otherRowOptions, $position7, 7); ?></td>
-														</tr>
-														<tr>
 															<td colspan="4"><p class="text-center">Position 8<br /><?php echo createDropdown('position8', $otherRowOptions, $position8, 8); ?></td>
-															<td colspan="4"><p class="text-center">Position 9<br /><?php echo createDropdown('position9', $otherRowOptions, $position9, 9); ?></td>
+															<td colspan="4"><p class="text-center">Position 9<br /><?php echo createDropdown('position9', $otherRowOptions, $position7, 9); ?></td>
 															<td colspan="4"><p class="text-center">Position 10<br /><?php echo createDropdown('position10', $otherRowOptions, $position10, 10); ?></td>
-														</tr>
-														<tr>
+
+    													</tr>
 														<tr>
 															<td colspan="4"><p class="text-center">Position 11<br /><?php echo createDropdown('position11', $otherRowOptions, $position11, 11); ?></td>
 															<td colspan="4"><p class="text-center">Position 12<br /><?php echo createDropdown('position12', $otherRowOptions, $position12, 12); ?></td>
 															<td colspan="4"><p class="text-center">Position 13<br /><?php echo createDropdown('position13', $otherRowOptions, $position13, 13); ?></td>
-														</tr>
-														<tr>
-															<td colspan="4"><p class="text-center">Position 14<br /><?php echo createDropdown('position14', $otherRowOptions, $position14, 14); ?></td>
+															<td colspan="4"><p class="text-center">Position 14<br /><?php echo createDropdown('position14', $otherRowOptions, $position11, 14); ?></td>
 															<td colspan="4"><p class="text-center">Position 15<br /><?php echo createDropdown('position15', $otherRowOptions, $position15, 15); ?></td>
-															<td colspan="4"><p class="text-center">Position 16<br /><?php echo createDropdown('position16', $otherRowOptions, $position16, 16); ?></td>
+	
+    													</tr>
+														
 														<tr>
+    														<td colspan="4"><p class="text-center">Position 16<br /><?php echo createDropdown('position16', $otherRowOptions, $position16, 16); ?></td>
+
 															<td colspan="4"><p class="text-center">Position 17<br /><?php echo createDropdown('position17', $otherRowOptions, $position17, 17); ?></td>
 															<td colspan="4"><p class="text-center">Position 18<br /><?php echo createDropdown('position18', $otherRowOptions, $position18, 18); ?></td>
-															<td colspan="4"><p class="text-center">Position 19<br /><?php echo createDropdown('position19', $otherRowOptions, $position19, 19); ?></td>
+															<td colspan="4"><p class="text-center">Position 19<br /><?php echo createDropdown('position19', $otherRowOptions, $position16, 19); ?></td>
+														
+															<td colspan="4"><p class="text-center">Position 20<br /><?php echo createDropdown('position20', $otherRowOptions, $position20, 20); ?></td>
 														</tr>
 													</table>
 												</div>
@@ -197,7 +198,7 @@ $otherRowOptions = [
 										<p>Misc System Settings</p>
 										<div class="card">
 											<div class="list-group list-group-flush">
-												<div class="list-group-item d-flex align-items-center">
+												<!--div class="list-group-item d-flex align-items-center">
 													<div class="flex-1 text-break">
 														<div>Enable anonymous site visitation tracking?</div>
 													</div>
@@ -215,7 +216,7 @@ $otherRowOptions = [
 															</label>
 														</div>
 													</div>
-												</div>
+												</div-->
 												<div class="list-group-item d-flex align-items-center">
 													<div class="flex-1 text-break">
 														<div>Which web server are you running?</div>
@@ -234,7 +235,7 @@ $otherRowOptions = [
 														</div>
 													</div>
 												</div>
-												<div class="list-group-item d-flex align-items-center">
+												<!--div class="list-group-item d-flex align-items-center">
 													<div class="flex-1 text-break">
 														<div>Block Your IP from Site Visits count?</div>
 													</div>
@@ -252,7 +253,7 @@ $otherRowOptions = [
 															</label>
 														</div>
 													</div>
-												</div>
+												</div-->
 												<div class="list-group-item d-flex align-items-center">
 													<div class="col-4">
 														<div>Your Local IP</div>
