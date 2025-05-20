@@ -429,6 +429,7 @@ $humid["alltime_max"] = $alltime.outHumidity.max.format(add_label=False);
 $humid["alltime_maxtime"] = date('j M Y H:i',$alltime.outHumidity.maxtime.raw);
 $humid["alltime_min"] = $alltime.outHumidity.min.format(add_label=False);
 $humid["alltime_mintime"] = date('j M Y H:i',$alltime.outHumidity.mintime.raw);
+#if $current.inHumidity.has_data
 $humid["indoors_now"] = $weewxrt[23];
 #if $trend.inHumidity.has_data
 $humid["indoors_trend"] = round($trend.inHumidity.format(add_label=False),1);
@@ -456,7 +457,7 @@ $humid["indoors_alltime_max"] = $alltime.inHumidity.max.format(add_label=False);
 $humid["indoors_alltime_maxtime"] = date('j M Y H:i',$alltime.inHumidity.maxtime.raw);
 $humid["indoors_alltime_min"] = $alltime.inHumidity.min.format(add_label=False);
 $humid["indoors_alltime_mintime"] = date('j M Y H:i',$alltime.inHumidity.mintime.raw);
-
+#end if
 // rainfall
 #if $current.rain.has_data
 $rain["units"] = "$unit.label.rain";
@@ -554,7 +555,7 @@ else if($temp["units"] == " F")
 $temp["units"] = "F";
 }
 // indoor temp
-#if $current.outTemp.has_data
+#if $current.inTemp.has_data
 $temp["indoor_now"] = $weewxrt[22];
 #if $trend.inTemp.has_data
 $temp["indoor_trend"] = round($trend.inTemp.raw,1);
@@ -609,6 +610,7 @@ $temp["outside_alltime_mintime"] = date('j M Y H:i',$alltime.outTemp.mintime.raw
 #end if
 
 //feels like indoors
+#if $current.inTemp.has_data
 $Temp = $temp["indoor_now"];
 $Humidity = $humid["indoors_now"];
 $T = $Temp*9/5+32;
@@ -621,7 +623,7 @@ else if ($RH>85&&$T>=80&&$T<=87){$adjust=(($RH-85)/10)*((87-$T)/5);$HI=$HI+$adju
 else if ($T<80){$HI=0.5*($T+61.0+(($T-68.0)*1.2)+($RH*0.094));}
 $temp["indoor_now_feels"] = number_format($HI, 1);
 $temp["indoor_now_feels_degC"] = (number_format($HI, 1)-32)*5/9;
-
+#end if
 //uv
 #if $current.UV.has_data
 $uv["now"] = $weewxrt[43];
