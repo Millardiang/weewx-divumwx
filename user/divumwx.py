@@ -1879,3 +1879,135 @@ class SunshineDuration(StdService):
             threshold=0
         return threshold
 
+#
+#    Copyright (c) 2025 Sean Balfour <seanbalfourdresden@googlemail.com>
+#
+"""This example shows how to extend the XTypes system with a new type, Vapour Pressure Deficit (vpd) in kPa 
+
+REQUIRES WeeWX V5 OR LATER!
+
+To use:
+    1. Stop weewx 
+    2. Put the vpd.py file in your user subdirectory.
+    3. In weewx.conf, subsection [Engine][[Services]], 
+    add vpdService to the list
+    "xtype_services". For example, this means changing this
+
+        [Engine]
+            [[Services]]
+                xtype_services = weewx.wxxtypes.StdWXXTypes, weewx.wxxtypes.StdPressureCooker, weewx.wxxtypes.StdRainRater
+
+    to this:
+        [Engine]
+            [[Services]]
+                xtype_services = weewx.wxxtypes.StdWXXTypes, weewx.wxxtypes.StdPressureCooker, weewx.wxxtypes.StdRainRater, user.vpd.vpdService
+
+
+    4. Add the following stanza to your weewx.conf:
+
+#############################################
+
+    [vpd]
+        algorithm = tetens  # in kPa
+
+#############################################
+
+    5. Restart weewx
+"""
+
+""" Vapour Pressure Deficit """
+
+# Tell the unit system what group our new observation type, 'vpd', belongs to:
+weewx.units.obs_group_dict['vpd'] = "group_pressure"
+
+class vpd(weewx.xtypes.XType):
+
+    def __init__(self, algorithm='simple'):
+        # Save the algorithm to be used.
+        self.algorithm = algorithm.lower()
+
+    def get_scalar(self, obs_type, record, db_manager):
+        # We only know how to calculate 'vpd. For everything else, raise an exception UnknownType
+        if obs_type != 'vpd':
+            raise weewx.UnknownType(obs_type)
+
+        # out humidity in %
+        if 'outHumidity' not in record or record['outHumidity'] is None:
+            raise weewx.CannotCalculate(obs_type)
+        unit_and_group = weewx.units.getStandardUnitType(record['usUnits'], 'outHumidity')
+        outHumidity_vt = ValueTuple(record['outHumidity'], *unit_and_group)
+        outHumidity = outHumidity_vt[0]        
+
+        # out temp in °C
+        if 'outTemp' not in record or record['outTemp'] is None:
+            raise weewx.CannotCalculate(obs_type)        
+        unit_and_group = weewx.units.getStandardUnitType(record['usUnits'], 'outTemp')
+        outTemp_vt = ValueTuple(record['outTemp'], *unit_and_group)
+        outTemp_C_vt = weewx.units.convert(outTemp_vt, 'degree_C')
+        outTemp_C = outTemp_C_vt[0]
+
+        if self.algorithm == 'simple':
+            # "simple" algorithm.
+
+            T = outTemp_C
+            H = outHumidity
+
+            # vapour pressure of leaf
+            a = (17.27 * T) / (T + 237.3)
+            vpl = 0.61078 * math.exp(a)
+
+            # vapour pressure of air
+            b = (17.27 * T) / (T + 237.3) 
+            vpa = 0.61078 * math.exp(b) * (H / 100.0)
+
+            vpd_inHg = vpl - vpa
+
+            # Form a ValueTuple
+            vpd = ValueTuple(vpd_inHg, 'inHg', 'group_pressure')
+
+        elif self.algorithm == 'tetens':
+            # Use teten's algorithm.
+
+            T = outTemp_C
+            H = outHumidity
+
+            # Use the formula. Results will be in kPa:
+
+            # vapour pressure of leaf
+            a = (17.27 * T) / (T + 237.3)
+            vpl = 0.61078 * math.exp(a)
+
+            # vapour pressure of air
+            b = (17.27 * T) / (T + 237.3) 
+            vpa = 0.61078 * math.exp(b) * (H / 100.0)
+
+            vpd_kPa = vpl - vpa
+
+            # Form a ValueTuple
+            vpd = ValueTuple(vpd_kPa, 'kPa', 'group_pressure')
+        else:
+            # Don't recognize the exception. Fail hard:
+            raise ValueError(self.algorithm)
+
+        return vpd
+
+class vpdService(StdService):
+
+    def __init__(self, engine, config_dict):
+        super(vpdService, self).__init__(engine, config_dict)
+
+        # Get the desired algorithm. Default to "simple".
+        try:
+            algorithm = config_dict['vpd']['algorithm']
+        except KeyError:
+            algorithm = 'simple'
+
+        # Instantiate an instance of Vapor Pressure Deficit:
+        self.vpdx = vpd(algorithm)
+        # Register it:
+        weewx.xtypes.xtypes.append(self.vpdx)
+
+    def shutDown(self):
+        # Remove the registered instance:
+        weewx.xtypes.xtypes.remove(self.vpdx)
+
