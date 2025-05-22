@@ -306,6 +306,7 @@ $aqi["pm2_5"] = $current.pm2_5.raw;
 $aqi["pm10_0"] = $current.pm10_0.raw;
 #end if
 
+//pressure units
 //barometer
 #if $current.barometer.has_data
 $barom["units"] = "$unit.label.barometer";
@@ -366,6 +367,42 @@ $barom["alltime_maxtime"] = date('j M Y H:i',$alltime.barometer.maxtime.raw);
 $barom["alltime_min"] = $alltime.barometer.min.format(add_label=False);
 $barom["alltime_mintime"] = date('j M Y H:i',$alltime.barometer.mintime.raw);
 #end if
+#if $current.vpd.has_data
+$barom["vpd_current"] = $current.vpd.kPa.format(add_label=False);
+if(is_numeric($barom["vpd_current"]) != 1){$barom["vpd_current"] = 0;}
+$barom["vpd_day_max"] = number_format($day.vpd.max.kPa.format(add_label=False),4);
+$barom["vpd_day_min"] = number_format($day.vpd.min.kPa.format(add_label=False),4);
+$barom["vpd_day_avg"] = number_format($day.vpd.avg.kPa.format(add_label=False),4);
+$barom["vpd_day_maxtime"] = date('H:i',$day.vpd.maxtime.raw);
+$barom["vpd_day_mintime"] = date('H:i',$day.vpd.mintime.raw);
+#if $day($days_ago=1).vpd.has_data
+$barom["vpd_yesterday_max"] = number_format($day($days_ago=1).vpd.max.kPa.format(add_label=False),4);
+$barom["vpd_yesterday_min"] = number_format($day($days_ago=1).vpd.min.kPa.format(add_label=False),4);
+$barom["vpd_yesterday_avg"] = number_format($day($days_ago=1).vpd.avg.kPa.format(add_label=False),4);
+$barom["vpd_yesterday_maxtime"] = date('H:i',$day($days_ago=1).vpd.maxtime.raw);
+$barom["vpd_yesterday_mintime"] = date('H:i',$day($days_ago=1).vpd.mintime.raw);
+#end if
+$barom["vpd_week_min"] = number_format($week.vpd.min.kPa.format(add_label=False),4);
+$barom["vpd_week_max"] = number_format($week.vpd.max.kPa.format(add_label=False),4);
+$barom["vpd_week_avg"] = number_format($week.vpd.avg.kPa.format(add_label=False),4);
+$barom["vpd_week_maxtime"] = date('j M H:i',$week.vpd.maxtime.raw);
+$barom["vpd_week_mintime"] = date('j M H:i',$week.vpd.mintime.raw);
+$barom["vpd_month_max"] = number_format($month.vpd.max.kPa.format(add_label=False),4);
+$barom["vpd_month_min"] = number_format($month.vpd.min.kPa.format(add_label=False),4);
+$barom["vpd_month_avg"] = number_format($month.vpd.avg.kPa.format(add_label=False),4);
+$barom["vpd_month_maxtime"] = date('j M H:i',$month.vpd.maxtime.raw);
+$barom["vpd_month_mintime"] = date('j M H:i',$month.vpd.mintime.raw);
+$barom["vpd_year_max"] = number_format($year.vpd.max.kPa.format(add_label=False),4);
+$barom["vpd_year_min"] = number_format($year.vpd.min.kPa.format(add_label=False),4);
+$barom["vpd_year_avg"] = number_format($year.vpd.avg.kPa.format(add_label=False),4);
+$barom["vpd_year_maxtime"] = date('j M H:i',$year.vpd.maxtime.raw);
+$barom["vpd_year_mintime"] = date('j M H:i',$year.vpd.mintime.raw);
+$barom["vpd_alltime_max"] = number_format($alltime.vpd.max.kPa.format(add_label=False),4);
+$barom["vpd_alltime_min"] = number_format($alltime.vpd.min.kPa.format(add_label=False),4);
+$barom["vpd_alltime_avg"] = number_format($alltime.vpd.avg.kPa.format(add_label=False),4);
+$barom["vpd_alltime_maxtime"] = date('j M Y H:i',$alltime.vpd.maxtime.raw);
+$barom["vpd_alltime_mintime"] = date('j M Y H:i',$alltime.vpd.mintime.raw);
+#end if
 
 //dewpoint
 $dew["now"] = $weewxrt[4];
@@ -396,18 +433,6 @@ $dew["alltime_max"] = $alltime.dewpoint.max.format(add_label=False);
 $dew["alltime_maxtime"] = date('j M Y H:i',$alltime.dewpoint.maxtime.raw);
 $dew["alltime_min"] = $alltime.dewpoint.min.format(add_label=False);
 $dew["alltime_mintime"] = date('j M Y H:i',$alltime.dewpoint.mintime.raw);
-
-// evapotranspiration
-#if $current.ET.has_data
-$rain["et_current"] = $current.ET.format(format_string="%.2f", None_string="0", add_label=False);
-$rain["et_hour"] = $span($hour_delta=1).ET.sum.format(format_string="%.2f", None_string="0", add_label=False);
-$rain["et_day"] = $day.ET.sum.format(format_string="%.2f", None_string="0", add_label=False);
-$rain["et_24hr"] = $span($hour_delta=24).ET.sum.format(format_string="%.2f", None_string="0", add_label=False);
-$rain["et_week"] = $week.ET.sum.format(format_string="%.2f", None_string="0", add_label=False);
-$rain["et_month"] = $month.ET.sum.format(format_string="%.2f", None_string="0", add_label=False);
-$rain["et_year"] = $year.ET.sum.format(format_string="%.2f", None_string="0", add_label=False);
-$rain["et_alltime"] = $alltime.ET.sum.format(format_string="%.2f", None_string="0", add_label=False);
-#end if
 
 // humidity
 $humid["now"] = $weewxrt[3];
@@ -466,6 +491,8 @@ $humid["indoors_alltime_maxtime"] = date('j M Y H:i',$alltime.inHumidity.maxtime
 $humid["indoors_alltime_min"] = $alltime.inHumidity.min.format(add_label=False);
 $humid["indoors_alltime_mintime"] = date('j M Y H:i',$alltime.inHumidity.mintime.raw);
 #end if
+
+//rain units
 // rainfall
 #if $current.rain.has_data
 $rain["units"] = "$unit.label.rain";
@@ -510,12 +537,23 @@ $rain["alltime_rate_maxtime"] = $alltime.rainRate.maxtime.raw;
 $rain["alltime_total"] = round($alltime.rain.sum.raw,1);
 $rain["last_rain"] = date('D j M H:i',$time_at('rain > 0').raw);
 #end if
-
 #if $current.stormRain.has_data
 $rain["storm_rain"] = $current.stormRain.raw;
 if(is_numeric($rain["storm_rain"]) != 1){$rain["storm_rain"] = 0;}
 if($rain["storm_rain"] > 0 ){$rain["storm_start"] = date('H:i D j M',($TS)-($time_since('stormRain = 0').raw));}
 #end if
+// evapotranspiration
+#if $current.ET.has_data
+$rain["et_current"] = $current.ET.format(format_string="%.2f", None_string="0", add_label=False);
+$rain["et_hour"] = $span($hour_delta=1).ET.sum.format(format_string="%.2f", None_string="0", add_label=False);
+$rain["et_day"] = $day.ET.sum.format(format_string="%.2f", None_string="0", add_label=False);
+$rain["et_24hr"] = $span($hour_delta=24).ET.sum.format(format_string="%.2f", None_string="0", add_label=False);
+$rain["et_week"] = $week.ET.sum.format(format_string="%.2f", None_string="0", add_label=False);
+$rain["et_month"] = $month.ET.sum.format(format_string="%.2f", None_string="0", add_label=False);
+$rain["et_year"] = $year.ET.sum.format(format_string="%.2f", None_string="0", add_label=False);
+$rain["et_alltime"] = $alltime.ET.sum.format(format_string="%.2f", None_string="0", add_label=False);
+#end if
+
 
 // sky
 $sky["cloud_base"] = $weewxrt[52];
@@ -647,43 +685,6 @@ $uv["year_max"] = $year.UV.max.format(add_label=False);
 $uv["year_maxtime"] = date('D j M H:i',$year.UV.maxtime.raw);
 $uv["alltime_max"] = $alltime.UV.max.format(add_label=False);
 $uv["alltime_maxtime"] = date('j M Y H:i',$alltime.UV.maxtime.raw);
-#end if
-
-#if $current.vpd.has_data
-$barom["vpd_current"] = $current.vpd.kPa.format(add_label=False);
-if(is_numeric($barom["vpd_current"]) != 1){$barom["vpd_current"] = 0;}
-$barom["vpd_day_max"] = number_format($day.vpd.max.kPa.format(add_label=False),4);
-$barom["vpd_day_min"] = number_format($day.vpd.min.kPa.format(add_label=False),4);
-$barom["vpd_day_avg"] = number_format($day.vpd.avg.kPa.format(add_label=False),4);
-$barom["vpd_day_maxtime"] = date('H:i',$day.vpd.maxtime.raw);
-$barom["vpd_day_mintime"] = date('H:i',$day.vpd.mintime.raw);
-#if $day($days_ago=1).vpd.has_data
-$barom["vpd_yesterday_max"] = number_format($day($days_ago=1).vpd.max.kPa.format(add_label=False),4);
-$barom["vpd_yesterday_min"] = number_format($day($days_ago=1).vpd.min.kPa.format(add_label=False),4);
-$barom["vpd_yesterday_avg"] = number_format($day($days_ago=1).vpd.avg.kPa.format(add_label=False),4);
-$barom["vpd_yesterday_maxtime"] = date('H:i',$day($days_ago=1).vpd.maxtime.raw);
-$barom["vpd_yesterday_mintime"] = date('H:i',$day($days_ago=1).vpd.mintime.raw);
-#end if
-$barom["vpd_week_min"] = number_format($week.vpd.min.kPa.format(add_label=False),4);
-$barom["vpd_week_max"] = number_format($week.vpd.max.kPa.format(add_label=False),4);
-$barom["vpd_week_avg"] = number_format($week.vpd.avg.kPa.format(add_label=False),4);
-$barom["vpd_week_maxtime"] = date('j M H:i',$week.vpd.maxtime.raw);
-$barom["vpd_week_mintime"] = date('j M H:i',$week.vpd.mintime.raw);
-$barom["vpd_month_max"] = number_format($month.vpd.max.kPa.format(add_label=False),4);
-$barom["vpd_month_min"] = number_format($month.vpd.min.kPa.format(add_label=False),4);
-$barom["vpd_month_avg"] = number_format($month.vpd.avg.kPa.format(add_label=False),4);
-$barom["vpd_month_maxtime"] = date('j M H:i',$month.vpd.maxtime.raw);
-$barom["vpd_month_mintime"] = date('j M H:i',$month.vpd.mintime.raw);
-$barom["vpd_year_max"] = number_format($year.vpd.max.kPa.format(add_label=False),4);
-$barom["vpd_year_min"] = number_format($year.vpd.min.kPa.format(add_label=False),4);
-$barom["vpd_year_avg"] = number_format($year.vpd.avg.kPa.format(add_label=False),4);
-$barom["vpd_year_maxtime"] = date('j M H:i',$year.vpd.maxtime.raw);
-$barom["vpd_year_mintime"] = date('j M H:i',$year.vpd.mintime.raw);
-$barom["vpd_alltime_max"] = number_format($alltime.vpd.max.kPa.format(add_label=False),4);
-$barom["vpd_alltime_min"] = number_format($alltime.vpd.min.kPa.format(add_label=False),4);
-$barom["vpd_alltime_avg"] = number_format($alltime.vpd.avg.kPa.format(add_label=False),4);
-$barom["vpd_alltime_maxtime"] = date('j M Y H:i',$alltime.vpd.maxtime.raw);
-$barom["vpd_alltime_mintime"] = date('j M Y H:i',$alltime.vpd.mintime.raw);
 #end if
 
 //wind
