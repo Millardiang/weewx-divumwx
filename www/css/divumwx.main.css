@@ -1404,6 +1404,7 @@ archblue{color:#007fff;}
 .quakes{position:relative;margin-top:-1.5px;margin-left:0px;z-index:auto;}
 .house{position:relative; margin-top:-18.5px; margin-left:0px;}.idtemppos{margin-top:-148px;margin-left:-135.5px;}
 .aqi{position:relative;margin-top:-2.5px;margin-left:0px;}
+.aqireg{position:relative;margin-top:-2.5px;margin-left:0px;}
 serverup{color:#ffff00;}
 .Orrery{position:relative;margin-top:10px;margin-left:-10px;}
 valuetextpwsbold{font-family:weathertext2;font-size:0.65em;font-weight:bold;color:var(--col-6);}
