@@ -506,7 +506,7 @@ $rain["alltime_total"] = round($alltime.rain.sum.raw,1);
 #if $current.stormRain.has_data
 $rain["storm_rain"] = $current.stormRain.raw;
 if(is_numeric($rain["storm_rain"]) != 1){$rain["storm_rain"] = 0;}
-if($rain["storm_rain"] > 0 ){$rain["storm_start"] = date('H:i D j M',($TS)-($time_since('stormRain = 0').raw));}
+if($rain["storm_rain"] > 0 ){$rain["storm_rain_start"] = date('H:i D j M',($TS)-($time_since('stormRain = 0').raw));}
 #end if
 
 // sky
