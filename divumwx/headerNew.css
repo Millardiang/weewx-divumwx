@@ -1,0 +1,293 @@
+/*
+##############################################################################################
+# headerNew.css version 0.0.1
+#  Fork of header.css for indexNew.html only — other pages keep header.css untouched.
+#  Same selectors/structure; the hardcoded colours that used to bypass the theme
+#  variables (dark header/menu bg, unit-select option colours, menu-btn accent) now
+#  read the shared variables instead, and nav typography picks up the Skyfield serif/
+#  small-caps look. Seasonal accent palette below is unchanged from header.css.
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  GPLv3
+##############################################################################################
+*/
+
+:root {
+  --header-height: 60px;
+}
+
+/*
+ ---- Seasonal accent palette (shared by every page) ----
+*/
+body.season-winter {
+  --dark-bg: #b3242c; --light-card: #e9f2ec; --card-bg: #e9f2ec;
+  --light-body: #f4f8f6; --bs-body-bg: #f4f8f6;
+}
+body.dark.season-winter, html[data-bs-theme="dark"] body.season-winter {
+  --dark-bg: #5c1a1d; --card-bg: #24312a; --dark-body: #16201b; --bs-body-bg: #16201b;
+}
+
+body.season-spring {
+  --dark-bg: #8bc34a; --light-card: #eef7e3; --card-bg: #eef7e3;
+  --light-body: #f7fbf1; --bs-body-bg: #f7fbf1;
+}
+body.dark.season-spring, html[data-bs-theme="dark"] body.season-spring {
+  --dark-bg: #3f5c2a; --card-bg: #26301f; --dark-body: #171f13; --bs-body-bg: #171f13;
+}
+
+body.season-summer {
+  --dark-bg: #FFE000; --light-card: #fff6d9; --card-bg: #fff6d9;
+  --light-body: #fffbf0; --bs-body-bg: #fffbf0;
+}
+body.dark.season-summer, html[data-bs-theme="dark"] body.season-summer {
+  --dark-bg: #7a5f10; --card-bg: #332c16; --dark-body: #1f1a0d; --bs-body-bg: #1f1a0d;
+}
+
+body.season-autumn {
+  --dark-bg: #6b8e23; --light-card: #f2e6d8; --card-bg: #f2e6d8;
+  --light-body: #f9f1ea; --bs-body-bg: #f9f1ea;
+}
+body.dark.season-autumn, html[data-bs-theme="dark"] body.season-autumn {
+  --dark-bg: #3c4d13; --card-bg: #2c2118; --dark-body: #1a130d; --bs-body-bg: #1a130d;
+}
+
+body.season-winter { background: #f4f8f6 !important; }
+body.dark.season-winter, html[data-bs-theme="dark"] body.season-winter { background: #16201b !important; }
+body.season-spring { background: #f7fbf1 !important; }
+body.dark.season-spring, html[data-bs-theme="dark"] body.season-spring { background: #171f13 !important; }
+body.season-summer { background: #fffbf0 !important; }
+body.dark.season-summer, html[data-bs-theme="dark"] body.season-summer { background: #1f1a0d !important; }
+body.season-autumn { background: #f9f1ea !important; }
+body.dark.season-autumn, html[data-bs-theme="dark"] body.season-autumn { background: #1a130d !important; }
+
+header {
+  grid-column: 1 / -1;
+  background: var(--dark-bg, rgb(189,206,244));
+  border: 1px solid var(--bs-border-color, rgba(0,0,0,0.15));
+  border-radius: 5px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  box-sizing: border-box;
+  transition: background 0.3s, border-color 0.3s;
+  min-height: var(--header-height);
+  z-index: 1100;
+  position: relative;
+}
+body.dark header, [data-bs-theme="dark"] header {
+  background: var(--dark-bg);
+}
+body.dark.season-winter header, body.dark.season-spring header,
+body.dark.season-summer header, body.dark.season-autumn header,
+html[data-bs-theme="dark"] body.season-winter header, html[data-bs-theme="dark"] body.season-spring header,
+html[data-bs-theme="dark"] body.season-summer header, html[data-bs-theme="dark"] body.season-autumn header {
+  background: var(--dark-bg);
+}
+
+.container-xl header {
+  margin-bottom: 20px;
+}
+
+.site-title {
+  flex: 0 0 auto;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-variant-caps: small-caps;
+  letter-spacing: .08em;
+  font-size: 1.15rem;
+  font-weight: 600;
+  white-space: nowrap;
+  color: inherit;
+  text-decoration: none;
+}
+.site-title:hover {
+  text-decoration: underline;
+}
+
+.nav-wrap {
+  flex: 1 1 auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  min-width: 0;
+}
+
+.site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 18px;
+  row-gap: 8px;
+}
+.site-nav.site-nav--menu {
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+}
+.site-nav.site-nav--menu .site-nav-link {
+  width: 100%;
+  padding: 8px 4px;
+  box-sizing: border-box;
+  text-align: center;
+}
+.site-nav.site-nav--menu #unitSystem,
+.site-nav.site-nav--menu #themeToggle,
+.site-nav.site-nav--menu #seasonToggle {
+  margin-top: 8px;
+}
+
+.site-nav-link {
+  color: inherit;
+  font-family: Georgia, 'Times New Roman', serif;
+  letter-spacing: .03em;
+  text-decoration: none;
+  font-size: 14.2px;
+  opacity: 0.85;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+}
+.site-nav-link:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+.site-nav-home {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+.site-nav-home:hover {
+  text-decoration: none;
+  color: var(--bw-accent, orange);
+}
+.site-nav.site-nav--menu .site-nav-home {
+  justify-content: center;
+}
+
+.menu-btn {
+  display: none;
+  flex: 0 0 auto;
+  width: 30px;
+  height: 22px;
+  position: relative;
+  cursor: pointer;
+  flex-direction: column;
+  justify-content: space-between;
+  background: none;
+  border: none;
+  padding: 0;
+}
+.menu-btn span {
+  height: 3px;
+  width: 100%;
+  background: var(--bw-accent, orange);
+  border-radius: 2px;
+  transition: 0.4s ease;
+  transform-origin: center;
+}
+body.menu-open .menu-btn span:nth-child(1) {
+  transform: rotate(45deg) translateY(9px);
+}
+body.menu-open .menu-btn span:nth-child(2) {
+  opacity: 0;
+}
+body.menu-open .menu-btn span:nth-child(3) {
+  transform: rotate(-45deg) translateY(-9px);
+}
+
+.select-wrap {
+  position: relative;
+  display: inline-block;
+}
+.select-wrap select {
+  color: transparent !important;
+}
+.select-wrap select option {
+  color: initial !important;
+}
+.select-label {
+  position: absolute;
+  left: calc(50% - 8px);
+  top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  font-size: 13px;
+  color: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: calc(100% - 26px);
+  text-align: center;
+}
+
+#unitSystem {
+  font-family: inherit;
+  font-size: 13px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(128,128,128,0.4);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+#unitSystem {
+  width: 232px;
+}
+#unitSystem option {
+  background: var(--light-card, rgb(204,218,246));
+  color: var(--light-text, #222);
+}
+body.dark #unitSystem option, [data-bs-theme="dark"] #unitSystem option {
+  background: var(--card-bg, #2b2b2b);
+  color: var(--dark-text, #f5f5f5);
+}
+
+#themeToggle {
+  font-size: 22px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  line-height: 1;
+}
+#seasonToggle {
+  font-size: 22px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  line-height: 1;
+  opacity: .55;
+}
+#seasonToggle[aria-pressed="true"] {
+  opacity: 1;
+}
+
+.menu {
+  grid-column: 1 / -1;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+  background: var(--dark-bg, rgb(189,206,244));
+  border: 1px solid var(--bs-border-color, rgba(0,0,0,0.15));
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+body.dark .menu, [data-bs-theme="dark"] .menu {
+  background: var(--dark-bg);
+}
+body.dark.season-winter .menu, body.dark.season-spring .menu,
+body.dark.season-summer .menu, body.dark.season-autumn .menu,
+html[data-bs-theme="dark"] body.season-winter .menu, html[data-bs-theme="dark"] body.season-spring .menu,
+html[data-bs-theme="dark"] body.season-summer .menu, html[data-bs-theme="dark"] body.season-autumn .menu {
+  background: var(--dark-bg);
+}
+body.menu-open .menu {
+  max-height: 500px;
+}
+.menu-inner {
+  padding: 16px 20px;
+  box-sizing: border-box;
+}

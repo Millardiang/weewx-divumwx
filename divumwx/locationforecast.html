@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<!--
+##############################################################################################
+# locationforecast.html version 0.0.1
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  GPLv3
+##############################################################################################
+-->
+<html lang="en" data-bs-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>DivumWX Weather</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="header.css?v=s3n2026i">
+<style>
+/* ===================== Shared palette/components (from index.html's <head>) ===================== */
+:root,
+[data-bs-theme="light"]{
+  --bw-accent:#B45309;
+  --bw-accent-soft:#3A2E1A;
+  --bw-lime:#C9DA1E;
+  --bw-lime-soft:#2E331A;
+  --bw-sky:#6FB6DD;
+  --bw-sky-soft:#1C2E38;
+  --bw-good:#5BBB8A;
+  --bw-danger:#E36B57;
+  --bw-danger-soft:#3A2220;
+  --bw-yellow:#D6BE4E;
+  --bw-yellow-soft:#3A341A;
+  --bw-line:#2C5478;
+  --bw-instrument-headspace:#495E74;
+  --bw-instrument-border:#E8EEF5;
+  --bw-radius:18px;
+  --bw-radius-sm:10px;
+  --bw-shadow:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.5);
+
+  --bs-body-bg: #EFECE2;
+  --bs-body-color: #1D2C4E;
+  --bs-secondary-color: #5C6672;
+  --bs-tertiary-bg: #FFFFFF;
+  --bs-secondary-bg: #FFFFFF;
+  --bs-border-color: #C9CFD8;
+  --bs-border-color-translucent: rgba(0,0,0,0.15);
+  --bs-card-bg: #FFFFFF;
+  --bs-emphasis-color: #000;
+  --bs-primary:#B45309;
+  --bs-primary-rgb:180,83,9;
+  --bs-link-color:#B45309;
+  --bs-link-hover-color:#F2BC6B;
+  --bs-warning-rgb:180,83,9;
+  --bs-font-sans-serif:'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+[data-bs-theme="dark"]{
+  --bw-instrument-headspace:#222A2E;
+  --bw-instrument-border:#343E43;
+  --bw-accent:#D3A94C;
+  --bw-accent-soft:#3A2E1A;
+  --bw-sky:#6FB6DD;
+  --bw-sky-soft:#1C2E38;
+  --bw-good:#5BBB8A;
+  --bw-danger:#E36B57;
+  --bw-danger-soft:#3A2220;
+  --bw-yellow:#D6BE4E;
+  --bw-yellow-soft:#3A341A;
+  --bw-line:#343E43;
+  --bw-shadow:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.5);
+
+  --bs-body-bg: #0A0F22;
+  --bs-body-color: #E9E4D4;
+  --bs-secondary-color: #8B93B8;
+  --bs-tertiary-bg: #111834;
+  --bs-secondary-bg: #111834;
+  --bs-border-color: #2A3358;
+  --bs-border-color-translucent: rgba(255,255,255,0.15);
+  --bs-card-bg: #111834;
+  --bs-emphasis-color: #fff;
+  --bs-primary:#D3A94C;
+  --bs-primary-rgb:211,169,76;
+  --bs-link-color:#D3A94C;
+  --bs-link-hover-color:#F2BC6B;
+
+}
+
+html{scroll-behavior:smooth;}
+body{
+  font-family:var(--bs-font-sans-serif);
+  padding-bottom:48px;
+  transition:background-color .25s ease, color .25s ease;
+}
+.font-mono{font-family:'JetBrains Mono','Courier New',monospace;}
+.card{background:var(--bs-card-bg); border-radius:var(--bw-radius-sm); box-shadow:var(--bw-shadow);}
+/* Seasonal accent theming removed entirely (retired site-wide -- see
+   header.js's applySeasonClass() for the full rationale). --bs-card-bg,
+   --bs-body-bg, and --bs-tertiary-bg now always resolve to their plain
+   :root/[data-bs-theme] values, regardless of any body.season-* class --
+   this page no longer has any CSS that reacts to one at all, so it's
+   correct even if a stray season-* class somehow still ends up on
+   <body> rather than depending on the JS side never adding it. */
+.shadow-card{box-shadow:var(--bw-shadow) !important;}
+
+/* ---------- Birch bark signature motif ---------- */
+.bark-rule{height:14px;width:100%;overflow:hidden;opacity:.55;}
+.bark-rule svg{display:block;width:100%;height:100%;}
+.bark-rule .lenticel{stroke:var(--bw-line);stroke-width:1.5;}
+
+/* ---------- Top bar ---------- */
+.nav-btn{color:var(--bs-body-color);border-color:var(--bs-body-color);background-color:var(--bs-tertiary-bg);font-weight:600;font-size:15px;white-space:nowrap;}
+.nav-btn:hover,.nav-btn:focus,.nav-btn.show{color:var(--bs-body-color);border-color:var(--bw-accent);background-color:var(--bs-secondary-bg);}
+
+/* ---------- Warning banner ---------- */
+.warning-banner{
+  --alert-color: var(--bw-accent);
+  --alert-color-soft: var(--bw-accent-soft);
+  background:linear-gradient(135deg, var(--alert-color-soft), transparent);
+  border:1px solid var(--alert-color);
+  border-left:5px solid var(--alert-color);
+  border-radius:var(--bw-radius-sm);
+  font-size:.84em;
+  line-height:1.3;
+}
+.warning-banner--red{ --alert-color: var(--bw-danger); --alert-color-soft: var(--bw-danger-soft); }
+.warning-banner--yellow{ --alert-color: var(--bw-yellow); --alert-color-soft: var(--bw-yellow-soft); }
+.warning-banner strong{color:var(--alert-color);}
+.warning-banner a{color:var(--bw-sky);text-decoration:underline;font-weight:600;word-break:break-all;}
+.warning-banner ul, .warning-banner ol{margin-bottom:0;padding-left:1.2em;}
+.warning-banner li{margin-bottom:4px;}
+.warning-banner p:last-child{margin-bottom:0;}
+.alert-more-btn{padding:1px 8px;font-size:.78em;line-height:1.4;}
+
+/* ---------- Current conditions: tidy card grid ---------- */
+.cc-grid{
+  display:grid;
+  grid-template-columns: minmax(0,1.4fr) minmax(0,1fr);
+  grid-template-rows:auto auto;
+  gap:16px;
+  align-items:stretch;
+}
+.cc-main{grid-column:1;grid-row:1 / span 2;border-radius:var(--bw-radius);}
+.cc-mini-grid{
+  grid-column:2;grid-row:1;
+  display:grid;grid-template-columns:1fr 1fr;gap:12px;
+}
+.cc-wind{grid-column:2;grid-row:2;border-radius:var(--bw-radius-sm);}
+@media (max-width:767.98px){
+  .cc-grid{grid-template-columns:1fr;grid-template-rows:auto;}
+  .cc-main, .cc-mini-grid, .cc-wind{grid-column:1;grid-row:auto;}
+}
+.hero-now-label{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--bs-secondary-color);}
+.hero-temp{font-weight:700;font-size:clamp(50px,7.2vw,76px);line-height:1;}
+.hero-icon{width:74px;height:74px;flex-shrink:0;object-fit:contain;}
+.hero-cond{font-size:17px;}
+.cc-stats-row{border-top:1px solid var(--bs-border-color);}
+.cc-stat{display:flex;flex-direction:column;gap:2px;}
+.cc-stat-label{font-size:11.5px;color:var(--bs-secondary-color);text-transform:uppercase;letter-spacing:.03em;}
+.cc-stat-value{font-size:18px;font-weight:700;font-family:'JetBrains Mono',monospace;}
+.cc-mini{display:flex;flex-direction:column;justify-content:center;}
+.cc-mini-label{font-size:12px;color:var(--bs-secondary-color);margin-bottom:4px;}
+.cc-mini-value{font-size:20px;font-weight:700;font-family:'JetBrains Mono',monospace;}
+.cc-mini-sub{font-size:11.5px;color:var(--bs-secondary-color);margin-top:2px;}
+.cc-mini-sub b{color:var(--bs-body-color);font-weight:600;}
+.cc-wind .cc-stat-value{font-size:16px;}
+.aqi-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:12px;font-weight:600;padding:5px 12px;border-radius:20px;
+}
+.aqi-pill--low{background:rgba(91,187,138,.15);color:var(--bw-good);}
+.aqi-pill--mod{background:rgba(214,190,78,.15);color:var(--bw-yellow);}
+.aqi-pill--high{background:rgba(227,107,87,.15);color:var(--bw-danger);}
+.uv-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:12px;font-weight:600;padding:5px 12px;border-radius:20px;
+}
+.uv-pill--low{background:rgba(91,187,138,.15);color:var(--bw-good);}
+.uv-pill--mod{background:rgba(214,190,78,.15);color:var(--bw-yellow);}
+.uv-pill--high{background:rgba(227,107,87,.15);color:var(--bw-danger);}
+.hero-suntimes{border-top:1px solid var(--bs-border-color);}
+.hero-suntime{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:13.5px;color:var(--bs-body-color);}
+.hero-suntime-icon{display:inline-flex;line-height:0;flex-shrink:0;}
+.hero-suntime-icon--sun-rise,.hero-suntime-icon--sun-set{color:var(--bw-accent);}
+.hero-suntime-icon--moon{color:var(--bs-secondary-color);}
+
+/* ---------- Wind direction mini-compass ---------- */
+.wind-compass-mini{position:relative;width:64px;height:64px;flex-shrink:0;}
+.wind-compass-mini-ring{width:100%;height:100%;display:block;}
+.wind-compass-mini-arrow{
+  transform-origin:40px 40px;
+  transition:transform .6s cubic-bezier(.4,0,.2,1);
+}
+.wind-compass-mini-label{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;line-height:1.15;pointer-events:none;
+}
+.wind-compass-mini-label span:first-child{font-size:13px;font-weight:700;}
+.wind-compass-mini-label span:last-child{font-size:9.5px;color:var(--bs-secondary-color);}
+.pollen-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--bw-sky-soft);color:var(--bw-sky);
+  font-size:12px;font-weight:600;padding:5px 12px;border-radius:20px;
+}
+
+/* ---------- Instruments ---------- */
+.instrument-row{align-items:stretch;}
+.instrument-col{flex:1 1 150px;min-width:120px;}
+.instrument-col--narrow{flex:0.72 1 110px;min-width:90px;}
+.instrument-col--narrow.dual{flex:1.25 1 175px;min-width:140px;}
+@media (max-width:767.98px){
+  .instrument-col, .instrument-col--narrow, .instrument-col--narrow.dual{flex:1 1 100%;}
+}
+.instrument-card{display:flex;align-items:center;justify-content:center;padding:18px 8px;}
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;}
+.gauge-wrap canvas{width:200px!important;max-width:100%;height:auto!important;aspect-ratio:1/1;display:block;}
+.wind-compass-wrap{width:200px;max-width:100%;aspect-ratio:1/1;}
+.wind-compass-wrap svg{width:100%;height:100%;display:block;}
+.gauge-caption{font-size:11px;color:var(--bs-secondary-color);}
+.gauge-value-big{font-size:20px;font-weight:700;color:var(--bw-good);margin-top:2px;}
+
+/* ---------- Thermometer (SVG, not canvas-gauges — it has no bulb/linear gauge type) ---------- */
+.thermo-svg{width:130px;max-width:100%;height:auto;aspect-ratio:130/200;display:block;}
+#thermoMercury{transition:y .8s ease, height .8s ease, fill .8s ease;}
+#thermoBulb{transition:fill .8s ease;}
+
+/* ---------- Rain gauge (measuring cylinder, same SVG-not-canvas reasoning as the thermometer) ---------- */
+.raingauge-svg{width:130px;max-width:100%;height:auto;aspect-ratio:130/200;display:block;}
+.raingauge-svg.dual{width:220px;aspect-ratio:220/200;}
+#rainFill{transition:y .8s ease, height .8s ease;}
+#rainMeniscus{transition:cy .8s ease;}
+
+.day-card{
+  flex:1 1 110px;min-width:90px;padding:14px 8px;text-align:center;
+  cursor:pointer;position:relative;
+}
+.day-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:transparent;}
+.day-card.active::before{background:var(--bw-lime);}
+.day-card .dname{font-size:12.5px;font-weight:700;color:var(--bs-secondary-color);text-transform:uppercase;letter-spacing:.03em;}
+.day-card .dicon{width:38px;height:38px;margin:8px auto 4px;display:block;object-fit:contain;}
+.day-card .dcond{font-size:11.5px;color:var(--bs-secondary-color);height:28px;display:flex;align-items:center;justify-content:center;}
+.day-card .dtemps{font-family:'JetBrains Mono',monospace;font-size:14px;margin-top:4px;}
+.day-card .dtemps .lo{color:var(--bs-secondary-color);}
+.day-card .dwarn{position:absolute;top:6px;right:6px;display:block;}
+.day-card.active{background:var(--bs-tertiary-bg);}
+/* Hourly panel now matches the active day-card's background (both use
+   --bs-tertiary-bg) instead of the generic .card background
+   (--bs-card-bg), which under the seasonal theme overrides above reads
+   as a much warmer "parchment" tone -- was visually inconsistent with
+   the day strip's own highlighted state directly above it. */
+.card.hourly-panel{background:var(--bs-tertiary-bg);}
+.day-card.active .dname{color:var(--bw-accent);}
+
+/* ---------- Section labels ---------- */
+.section-label{
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--bs-secondary-color);
+  margin:30px 0 12px;display:flex;align-items:center;gap:10px;
+}
+.section-label::after{content:"";flex:1;height:1px;background:var(--bs-border-color);}
+
+/* ---------- Metric cards ---------- */
+.metric-card .mlabel{font-size:12px;color:var(--bs-secondary-color);display:flex;align-items:center;gap:6px;margin-bottom:8px;}
+.metric-card .mvalue{font-size:26px;font-weight:700;}
+.metric-card .mvalue small{font-size:13px;color:var(--bs-secondary-color);font-weight:400;}
+.metric-card .msub{font-size:12.5px;color:var(--bs-secondary-color);margin-top:4px;}
+.beaufort-chip{display:inline-block;margin-top:6px;font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--bw-sky-soft);color:var(--bw-sky);padding:2px 8px;border-radius:10px;}
+.mlabel-icon{width:14px;height:14px;object-fit:contain;}
+
+/* ---------- Temperature feature card (Today's Observations) ---------- */
+.metric-card--feature{padding:18px;}
+.feature-icon{width:30px;height:30px;flex:none;}
+.feature-icon svg{width:100%;height:100%;display:block;}
+.feature-title{font-size:16px;font-weight:700;}
+.feature-current{font-size:34px;font-weight:700;line-height:1;}
+.obs-subcol{border-top:1px solid var(--bs-border-color);padding-top:12px;margin-top:4px;}
+@media (min-width:768px){
+  .obs-subcol{border-top:none;border-left:1px solid var(--bs-border-color);padding-top:0;margin-top:0;padding-left:18px;}
+  .obs-subcol:first-child{border-left:none;padding-left:0;}
+}
+.obs-subcol-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--bs-secondary-color);margin-bottom:8px;}
+.obs-stat-row{display:flex;justify-content:space-between;align-items:baseline;font-size:13.5px;padding:3px 0;gap:8px;}
+.obs-stat-row .obs-stat-label{color:var(--bs-secondary-color);}
+.obs-stat-row .obs-stat-value{font-family:'JetBrains Mono',monospace;font-weight:600;text-align:right;}
+.obs-stat-time{font-size:10.5px;color:var(--bs-secondary-color);font-weight:400;margin-left:4px;}
+.obs-trend-rising{color:#E8826F;}
+.obs-trend-falling{color:var(--bw-sky);}
+.obs-trend-steady{color:var(--bs-secondary-color);}
+.obs-footnote{font-size:11px;color:var(--bs-secondary-color);font-style:italic;margin-top:12px;}
+.metric-card--feature-half .obs-stat-row{font-size:14px;}
+.obs-unsupported{font-family:var(--bs-font-sans-serif);font-weight:400;font-style:italic;font-size:12px;color:var(--bs-secondary-color);}
+
+/* ---------- Hourly table ---------- */
+.hourly-title h2{font-size:18px;font-weight:700;margin:0;}
+.hourly-title span{font-size:12px;color:var(--bs-secondary-color);}
+/* Bootstrap's own .table component defaults --bs-table-bg to
+   var(--bs-body-bg) and paints that directly onto every <td>/<th> cell,
+   independent of the parent .card -- this was the actual, entire cause
+   of the table area showing a different (parchment) colour than the
+   surrounding panel this whole time, nothing to do with seasonal
+   theming at all. Overriding it to transparent here lets the parent
+   .card.hourly-panel's own background (--bs-tertiary-bg) show through
+   uniformly instead. */
+table.hourly{ --bs-table-bg: transparent; }
+table.hourly{min-width:760px;}
+table.hourly th, table.hourly td{text-align:center;font-size:13px;vertical-align:middle;}
+table.hourly th{font-size:11px;color:var(--bs-secondary-color);text-transform:uppercase;letter-spacing:.03em;font-weight:600;border-bottom:1px solid var(--bs-border-color);}
+table.hourly td.rowlabel, table.hourly th.rowlabel{text-align:left;position:sticky;left:0;background:var(--bs-tertiary-bg);font-weight:700;color:var(--bs-secondary-color);}
+table.hourly img.hicon{width:28px;height:28px;display:block;margin:0 auto 4px;object-fit:contain;}
+
+/* ---------- Hourly temperature track (icons/temps riding an invisible plot line) ---------- */
+table.hourly tr.track-row td.track-cell{
+  position:relative;
+  height:128px;
+  padding:0;
+  vertical-align:top;
+}
+table.hourly .track-marker{
+  position:absolute;
+  top:0;left:0;right:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:2px;
+  transition:top .4s ease;
+}
+table.hourly .track-marker img.hicon{margin-bottom:2px;}
+
+/* ---------- Wind-gust direction badge ---------- */
+.wind-badge{
+  position:relative;
+  width:44px;height:44px;
+  margin:0 auto;
+  display:flex;align-items:center;justify-content:center;
+}
+.wind-badge-ring{
+  position:absolute;inset:0;width:100%;height:100%;
+  transition:transform .4s ease;
+}
+.wind-badge-value{
+  position:relative;
+  font-family:'JetBrains Mono',monospace;
+  font-size:9.5px;font-weight:700;
+  color:var(--wind-col, var(--bs-secondary-color));
+}
+
+/* ---------- Meteocons contrast filter, light theme only ---------- */
+[data-bs-theme="light"] .hero-icon,
+[data-bs-theme="light"] .dicon,
+[data-bs-theme="light"] .hicon,
+[data-bs-theme="light"] .mlabel-icon{
+  filter:
+    brightness(0.88) contrast(1.12) saturate(1.08)
+    drop-shadow(0 0.5px 1px rgba(20,24,27,.40))
+    drop-shadow(0 1.5px 4px rgba(20,24,27,.26))
+    drop-shadow(0 4px 7px rgba(20,24,27,.18));
+}
+
+/* ---------- Meteocons contrast filter, dark theme only ---------- */
+[data-bs-theme="dark"] .hero-icon,
+[data-bs-theme="dark"] .dicon,
+[data-bs-theme="dark"] .hicon,
+[data-bs-theme="dark"] .mlabel-icon{
+  filter:
+    brightness(1.45) contrast(1.2)
+    drop-shadow(0 0 2px rgba(255,255,255,.32))
+    drop-shadow(0 0 8px rgba(255,255,255,.18));
+}
+table.hourly .temp-cell{font-family:'JetBrains Mono',monospace;font-weight:600;}
+table.hourly .rain-cell{color:var(--bw-sky);font-family:'JetBrains Mono',monospace;font-size:12px;}
+
+/* ---------- Sun/pollen/aq strip ---------- */
+.strip-card .slabel{font-size:12px;color:var(--bs-secondary-color);margin-bottom:10px;display:flex;justify-content:space-between;}
+.level-badge{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:20px;}
+.level-dot{width:10px;height:10px;border-radius:50%;}
+.level-low{background:var(--bw-good);} .level-mod{background:var(--bw-accent);} .level-high{background:var(--bw-danger);}
+.strip-detail{font-size:13px;color:var(--bs-secondary-color);margin-top:6px;}
+.species-breakdown{margin-top:12px;padding-top:10px;border-top:1px solid var(--bs-border-color);display:flex;flex-direction:column;gap:6px;}
+.species-row{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12.5px;}
+.species-row .species-name{color:var(--bs-secondary-color);display:flex;align-items:center;gap:6px;}
+.species-row .species-name .level-dot{width:7px;height:7px;flex:none;}
+.species-row .species-value{font-family:'JetBrains Mono',monospace;font-weight:600;text-align:right;}
+
+footer{font-size:12px;color:var(--bs-secondary-color);}
+
+.live-status-wrap{position:relative;display:inline-flex;width:8px;height:8px;flex-shrink:0;}
+#liveStatusDot{width:8px;height:8px;border-radius:50%;display:block;position:relative;z-index:1;}
+.live-status-ripple{
+  position:absolute;top:50%;left:50%;
+  width:8px;height:8px;margin:-4px 0 0 -4px;
+  border-radius:50%;
+  background:radial-gradient(circle, var(--bw-good) 0%, var(--bw-good) 30%, transparent 72%);
+  opacity:0;pointer-events:none;
+  filter:blur(.5px);
+}
+.live-status-ripple.ping{ animation: dot-ripple 1.3s ease-out; }
+@keyframes dot-ripple{
+  0%   { width:8px;  height:8px;  margin:-4px 0 0 -4px;   opacity:.55; }
+  100% { width:72px; height:72px; margin:-36px 0 0 -36px; opacity:0; }
+}
+</style>
+<style>
+/* ===================== Location-search UI (new to this page) ===================== */
+.loc-search-card{max-width:900px;}
+.loc-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
+.loc-tab-btn{
+  font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;
+  padding:7px 14px;border-radius:20px;border:1px solid var(--bs-border-color);
+  background:var(--bs-tertiary-bg);color:var(--bs-secondary-color);
+}
+.loc-tab-btn:hover{border-color:var(--bw-accent);color:var(--bs-body-color);}
+.loc-tab-btn.active{background:var(--bw-accent);border-color:var(--bw-accent);color:#1B3A57;}
+.loc-tab-panel{display:none;}
+.loc-tab-panel.active{display:block;}
+.loc-field-row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;}
+.loc-field-row .form-control, .loc-field-row .form-label{font-family:'JetBrains Mono',monospace;}
+.loc-field-row label{font-size:11.5px;color:var(--bs-secondary-color);text-transform:uppercase;letter-spacing:.03em;display:block;margin-bottom:4px;}
+.loc-coord-field{width:160px;}
+.loc-hint{font-size:12px;color:var(--bs-secondary-color);margin-top:8px;}
+.loc-status{font-size:13px;margin-top:10px;color:var(--bs-secondary-color);min-height:1.2em;}
+.loc-status.is-error{color:var(--bw-danger);}
+.loc-status.is-busy::before{content:'⏳ ';}
+.loc-suggestions{display:none;margin-top:12px;display:flex;flex-direction:column;gap:6px;max-height:280px;overflow-y:auto;}
+.loc-suggestion-item{
+  display:flex;justify-content:space-between;gap:10px;align-items:baseline;
+  text-align:left;width:100%;padding:9px 14px;border-radius:var(--bw-radius-sm);
+  border:1px solid var(--bs-border-color);background:var(--bs-tertiary-bg);color:var(--bs-body-color);
+}
+.loc-suggestion-item:hover{border-color:var(--bw-accent);background:var(--bs-secondary-bg);}
+.loc-suggestion-name{font-weight:600;}
+.loc-suggestion-country{font-size:12px;color:var(--bs-secondary-color);font-family:'JetBrains Mono',monospace;flex-shrink:0;}
+.loc-recent{font-size:12px;color:var(--bs-secondary-color);margin-top:10px;}
+.loc-recent button{font-family:'JetBrains Mono',monospace;}
+#locEmptyState p{font-size:15px;}
+</style>
+</head>
+<body>
+
+<div class="container-xl mt-3">
+
+  <div w3-include-html="navbar.html"></div>
+
+  <h1 class="fw-bold fs-2 mb-1">Forecasts</h1>
+  <p class="mb-4" style="color:var(--bs-secondary-color);max-width:640px;">
+    Look up the forecast for anywhere — not just this station. Use your
+    device's location, search by place name or postcode/ZIP, or enter
+    coordinates directly.
+  </p>
+
+  <div class="card loc-search-card p-3 p-md-4 mb-4">
+    <div class="loc-tabs" role="tablist">
+      <button type="button" class="loc-tab-btn active" data-tab="geo">My Location</button>
+      <button type="button" class="loc-tab-btn" data-tab="name">Place name</button>
+      <button type="button" class="loc-tab-btn" data-tab="postcode">Postcode / ZIP</button>
+      <button type="button" class="loc-tab-btn" data-tab="coords">Coordinates</button>
+    </div>
+
+    <div id="tab-geo" class="loc-tab-panel active">
+      <button type="button" id="geoBtn" class="btn btn-sm" style="background:var(--bw-accent);color:#1B3A57;font-weight:600;">Use my current location</button>
+      <div class="loc-hint">Your browser will ask permission before sharing your location. Nothing is sent anywhere except the forecast lookup itself.</div>
+      <div id="status-geo" class="loc-status"></div>
+    </div>
+
+    <div id="tab-name" class="loc-tab-panel">
+      <form id="nameForm" class="loc-field-row">
+        <div class="flex-grow-1" style="min-width:220px;">
+          <label for="nameInput">Town or city</label>
+          <input type="text" id="nameInput" class="form-control form-control-sm" placeholder="e.g. Steeple Claydon, or Paris">
+        </div>
+        <button type="submit" class="btn btn-sm btn-outline-secondary nav-btn">Search</button>
+      </form>
+      <div id="status-name" class="loc-status"></div>
+    </div>
+
+    <div id="tab-postcode" class="loc-tab-panel">
+      <form id="postcodeForm" class="loc-field-row">
+        <div class="flex-grow-1" style="min-width:220px;">
+          <label for="postcodeInput">Postcode / ZIP</label>
+          <input type="text" id="postcodeInput" class="form-control form-control-sm" placeholder="e.g. 90210, or MK18">
+        </div>
+        <button type="submit" class="btn btn-sm btn-outline-secondary nav-btn">Search</button>
+      </form>
+      <div class="loc-hint">Best results with US ZIP codes and the outward/area part of other postcodes (e.g. "MK18" rather than the full "MK18 1AB") — the lookup matches places, not a dedicated postcode index. If it can't find yours, try the place name or Coordinates tab instead.</div>
+      <div id="status-postcode" class="loc-status"></div>
+    </div>
+
+    <div id="tab-coords" class="loc-tab-panel">
+      <form id="coordsForm" class="loc-field-row">
+        <div>
+          <label for="latInput">Latitude</label>
+          <input type="number" id="latInput" class="form-control form-control-sm loc-coord-field" step="any" min="-90" max="90" placeholder="51.9573">
+        </div>
+        <div>
+          <label for="lonInput">Longitude</label>
+          <input type="number" id="lonInput" class="form-control form-control-sm loc-coord-field" step="any" min="-180" max="180" placeholder="-1.0807">
+        </div>
+        <button type="submit" class="btn btn-sm btn-outline-secondary nav-btn">Go</button>
+      </form>
+      <div id="status-coords" class="loc-status"></div>
+    </div>
+
+    <div id="locSuggestions" class="loc-suggestions"></div>
+    <div id="locRecent" class="loc-recent" style="display:none;"></div>
+  </div>
+
+  <div id="forecastWrap" style="display:none;">
+    <div class="d-flex align-items-baseline justify-content-between flex-wrap gap-2 mb-3">
+      <h2 class="fw-bold fs-3 mb-0" id="locTitle">—</h2>
+      <button type="button" id="locClearBtn" class="btn btn-sm btn-outline-secondary nav-btn">Search another location</button>
+    </div>
+
+    <div class="section-label">Forecast</div>
+    <div class="day-strip d-flex flex-wrap gap-3" id="locDayStrip"></div>
+
+    <div class="card hourly-panel mt-4 p-4">
+      <div class="hourly-title d-flex align-items-baseline justify-content-between mb-3">
+        <h2 id="locHourlyTitle">Today — hourly</h2>
+        <span>Forecast source: Open‑Meteo</span>
+      </div>
+      <div class="table-responsive">
+        <table class="hourly table table-borderless mb-0" id="locHourlyTable"></table>
+      </div>
+    </div>
+  </div>
+
+  <div id="locEmptyState" class="text-center py-5" style="color:var(--bs-secondary-color);">
+    <p>Search for a location above to see its forecast.</p>
+  </div>
+
+</div>
+
+<footer class="container-xl mt-5 pt-3 border-top d-flex justify-content-between flex-wrap gap-2">
+  <span>DivumWX</span>
+  <span>Forecast &amp; place search: Open‑Meteo · Device-location lookup: OpenStreetMap Nominatim</span>
+</footer>
+
+<script src="header.js?v=s3n2026q"></script>
+<script src="units.js"></script>
+<script>
+// =====================================================================
+
+function round1(v){ return v==null ? null : Math.round(v*10)/10; }
+function round2(v){ return v==null ? null : Math.round(v*100)/100; }
+function fmtTemp(c, unit){ return c==null ? '--' : (unit==='F' ? round1(C2F(c))+'°F' : round1(c)+'°C'); }
+
+const TEMP_COLOR_STOPS = [
+  [-10, [91,127,227]], [0,[79,168,208]], [10,[79,184,155]], [18,[111,184,90]],
+  [24,[201,178,62]], [30,[224,138,61]], [36,[216,90,61]], [42,[184,48,42]],
+];
+function tempColor(c){
+  if(c==null) return null;
+  const stops = TEMP_COLOR_STOPS;
+  if(c <= stops[0][0]) return `rgb(${stops[0][1].join(',')})`;
+  if(c >= stops[stops.length-1][0]) return `rgb(${stops[stops.length-1][1].join(',')})`;
+  for(let i=0;i<stops.length-1;i++){
+    const [t0,c0] = stops[i], [t1,c1] = stops[i+1];
+    if(c>=t0 && c<=t1){
+      const f = (c-t0)/(t1-t0);
+      return `rgb(${c0.map((v,idx)=>Math.round(v+(c1[idx]-v)*f)).join(',')})`;
+    }
+  }
+}
+function tempSpan(c, unit){ return `<span style="color:${tempColor(c)};">${fmtTemp(c, unit)}</span>`; }
+
+function fmtWind(ms, unit){
+  if(ms==null) return '--';
+  switch(unit){
+    case 'mph': return round1(ms2mph(ms))+' mph';
+    case 'kmh': return round1(ms2kmh(ms))+' km/h';
+    case 'kt':  return round1(ms2kt(ms))+' kt';
+    case 'ms':  return round1(ms)+' m/s';
+    case 'bf': { const b=beaufort(ms); return 'F'+b.force+' · '+b.label; }
+    default: return round1(ms)+' m/s';
+  }
+}
+const WIND_COLOR_STOPS = [
+  [0.0,[125,150,165]],[0.5,[110,168,189]],[1.5,[97,184,178]],[3.3,[99,184,114]],
+  [5.5,[156,182,80]],[7.9,[205,171,62]],[10.7,[224,138,61]],[13.8,[217,98,61]],
+  [17.1,[195,62,48]],[20.7,[170,45,60]],[24.4,[150,40,90]],[28.4,[120,40,120]],[32.6,[90,40,140]],
+];
+function windColor(ms){
+  if(ms==null) return null;
+  const stops = WIND_COLOR_STOPS;
+  if(ms <= stops[0][0]) return `rgb(${stops[0][1].join(',')})`;
+  if(ms >= stops[stops.length-1][0]) return `rgb(${stops[stops.length-1][1].join(',')})`;
+  for(let i=0;i<stops.length-1;i++){
+    const [s0,c0] = stops[i], [s1,c1] = stops[i+1];
+    if(ms>=s0 && ms<=s1){
+      const f = (ms-s0)/(s1-s0);
+      return `rgb(${c0.map((v,idx)=>Math.round(v+(c1[idx]-v)*f)).join(',')})`;
+    }
+  }
+}
+function fmtWindValueOnly(ms, unit){
+  if(ms==null) return '--';
+  switch(unit){
+    case 'mph': return round1(ms2mph(ms));
+    case 'kmh': return round1(ms2kmh(ms));
+    case 'kt':  return round1(ms2kt(ms));
+    case 'ms':  return round1(ms);
+    case 'bf':  return beaufort(ms).force;
+    default:    return round1(ms);
+  }
+}
+function windUnitAbbr(unit){
+  switch(unit){
+    case 'mph': return 'mph'; case 'kmh': return 'km/h'; case 'kt': return 'kt';
+    case 'ms': return 'm/s'; case 'bf': return 'Bf'; default: return 'm/s';
+  }
+}
+function windDirBadge(dirDeg, gustMs, unit){
+  const col = windColor(gustMs) || 'var(--bs-secondary-color)';
+  const val = fmtWindValueOnly(gustMs, unit);
+  const arrow = dirDeg!=null ? `
+      <svg viewBox="0 0 44 44" class="wind-badge-ring" aria-hidden="true">
+        <circle cx="22" cy="22" r="13" fill="none" stroke="${col}" stroke-width="1.5" opacity=".35"/>
+        <g transform="rotate(${dirDeg} 22 22)">
+          <path d="M22 1 L31.5 10.4 L22 5 L12.5 10.4 Z" fill="${col}"/>
+        </g>
+      </svg>` : '';
+  return `<div class="wind-badge" style="--wind-col:${col}" title="${dirDeg!=null ? 'From '+degToCompass(dirDeg) : ''}">
+      ${arrow}<span class="wind-badge-value">${val}</span>
+    </div>`;
+}
+function fmtRain(mm, unit){ if(mm==null) return '--'; return unit==='in' ? round2(mm2in(mm))+' in' : round2(mm)+' mm'; }
+function degToCompass(deg){
+  if(deg==null) return '—';
+  const dirs=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+  return dirs[Math.round(deg/22.5)%16];
+}
+
+// ===================== Icons (mirrors allseasons.js's ICON_MAP) =====================
+const METEOCONS_BASE = 'https://cdn.meteocons.com/3.0.0-next.10/svg/fill/';
+const ICON_MAP = {
+  sun:'clear-day', moon:'clear-night', partly:'partly-cloudy-day', partlyNight:'partly-cloudy-night',
+  cloud:'cloudy', rain:'rain', drizzle:'drizzle', snow:'snow', sleet:'sleet',
+  thunder:'thunderstorms-day', thunderNight:'thunderstorms-night', fog:'fog-day', fogNight:'fog-night',
+};
+function iconUrl(name){ return METEOCONS_BASE + (ICON_MAP[name] || ICON_MAP.partly) + '.svg'; }
+function iconImg(name, cls, label){ return `<img class="${cls}" src="${iconUrl(name)}" alt="${label||name}" loading="lazy">`; }
+
+// ===================== WMO weather-code mapping (mirrors forecast.js) =====================
+const WMO_TEXT = {
+  0:'Clear sky', 1:'Mainly clear', 2:'Partly cloudy', 3:'Overcast',
+  45:'Fog', 48:'Freezing fog',
+  51:'Light drizzle', 53:'Drizzle', 55:'Dense drizzle',
+  56:'Light freezing drizzle', 57:'Freezing drizzle',
+  61:'Light rain', 63:'Rain', 65:'Heavy rain',
+  66:'Light freezing rain', 67:'Freezing rain',
+  71:'Light snow', 73:'Snow', 75:'Heavy snow', 77:'Snow grains',
+  80:'Rain showers', 81:'Rain showers', 82:'Violent rain showers',
+  85:'Snow showers', 86:'Heavy snow showers',
+  95:'Thunderstorm', 96:'Thunderstorm with hail', 99:'Severe thunderstorm with hail',
+};
+function wmoText(code){ return WMO_TEXT[code] || 'Unknown'; }
+function wmoToIconKey(code, isDay){
+  if(code===0 || code===1) return isDay ? 'sun' : 'moon';
+  if(code===2) return isDay ? 'partly' : 'partlyNight';
+  if(code===3) return 'cloud';
+  if(code===45 || code===48) return isDay ? 'fog' : 'fogNight';
+  if(code===51 || code===53 || code===55) return 'drizzle';
+  if(code===56 || code===57 || code===66 || code===67) return 'sleet';
+  if(code===61 || code===63 || code===65 || code===80 || code===81 || code===82) return 'rain';
+  if(code===71 || code===73 || code===75 || code===77 || code===85 || code===86) return 'snow';
+  if(code===95 || code===96 || code===99) return isDay ? 'thunder' : 'thunderNight';
+  return isDay ? 'partly' : 'partlyNight';
+}
+function dayLabel(dateStr, index){
+  if(index===0) return 'Today';
+  const d = new Date(dateStr+'T00:00:00');
+  return d.toLocaleDateString('en-GB', {weekday:'short'}) + ' ' + d.getDate();
+}
+function escapeHtml(s){ return (s==null?'':String(s)).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// ===================== State =====================
+let currentSystem = (localStorage.getItem('dashboardUnitSystem') && SYSTEMS[localStorage.getItem('dashboardUnitSystem')]) ? localStorage.getItem('dashboardUnitSystem') : 'uk';
+let activeDay = 0;
+let currentLocation = null;
+let forecastData = null;
+const RECENT_KEY = 'cw-locfc-recent';
+const MAX_RECENT = 5;
+
+// ===================== Geocoding (Open-Meteo) =====================
+
+async function geocodeSearch(query){
+  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=8&language=en&format=json`;
+  const res = await fetch(url);
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  const j = await res.json();
+  return j.results || [];
+}
+function resultToLocation(r){
+  const parts = [r.name, r.admin1, r.country].filter((v,i,arr)=> v && arr.indexOf(v)===i);
+  return { label: parts.join(', '), latitude:r.latitude, longitude:r.longitude, source:'geocode' };
+}
+
+async function reverseGeocode(lat, lon){
+  try{
+    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&addressdetails=1`;
+    const res = await fetch(url, {headers:{'Accept':'application/json'}});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const j = await res.json();
+    const a = j.address || {};
+    const place = a.city || a.town || a.village || a.suburb || a.county || j.name;
+    const region = a.state || a.county || '';
+    const country = a.country || '';
+    return [place, region, country].filter(Boolean).join(', ') || null;
+  }catch(e){
+    console.warn('Sǣl: reverse geocode failed —', e.message);
+    return null;
+  }
+}
+
+// ===================== Forecast (Open-Meteo) =====================
+async function fetchForecastFor(lat, lon){
+  const params = new URLSearchParams({
+    latitude: lat, longitude: lon,
+
+
+
+    current: 'weather_code',
+    hourly: 'temperature_2m,weather_code,precipitation,wind_speed_10m,wind_gusts_10m,wind_direction_10m,is_day',
+    daily: 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max',
+    timezone: 'auto',
+    forecast_days: '7',
+  });
+  const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`);
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  return res.json();
+}
+function parseForecastJson(j){
+  const fallbackWeatherCode = (j.current || {}).weather_code;
+  const h = j.hourly || {};
+  const hourlyByDate = {};
+  (h.time || []).forEach((iso, i) => {
+    const dateStr = iso.slice(0,10);
+    const hour = parseInt(iso.slice(11,13), 10);
+    (hourlyByDate[dateStr] = hourlyByDate[dateStr] || []).push({
+      h: hour,
+      tempC: h.temperature_2m ? h.temperature_2m[i] : null,
+      icon: wmoToIconKey(h.weather_code ? h.weather_code[i] : fallbackWeatherCode,
+        (h.is_day && h.is_day[i] != null) ? h.is_day[i] === 1 : (hour>=6 && hour<20)),
+      rainMm: h.precipitation ? h.precipitation[i] : 0,
+      windMs: h.wind_speed_10m ? kmh2ms(h.wind_speed_10m[i]) : null,
+      gustMs: h.wind_gusts_10m ? kmh2ms(h.wind_gusts_10m[i]) : null,
+      windDirDeg: h.wind_direction_10m ? h.wind_direction_10m[i] : null,
+    });
+  });
+  const d = j.daily || {};
+  const dailyDates = d.time || [];
+  const days = dailyDates.map((dateStr, i) => {
+    const code = d.weather_code ? d.weather_code[i] : 0;
+    return {
+      dateStr, name: dayLabel(dateStr, i),
+      icon: wmoToIconKey(code, true), cond: wmoText(code),
+      hi: d.temperature_2m_max ? d.temperature_2m_max[i] : null,
+      lo: d.temperature_2m_min ? d.temperature_2m_min[i] : null,
+      rainProbPct: d.precipitation_probability_max ? d.precipitation_probability_max[i] : null,
+    };
+  });
+  return { days, hourlyByDay: dailyDates.map(dateStr => hourlyByDate[dateStr] || []) };
+}
+
+// ===================== Status / suggestions UI =====================
+function setStatus(tab, text, isError, isBusy){
+  const el = document.getElementById('status-'+tab);
+  if(!el) return;
+  el.textContent = text || '';
+  el.classList.toggle('is-error', !!isError);
+  el.classList.toggle('is-busy', !!isBusy && !isError);
+}
+function clearAllStatus(){ ['geo','name','postcode','coords'].forEach(t=>setStatus(t,'',false,false)); }
+function clearSuggestions(){
+  const wrap = document.getElementById('locSuggestions');
+  wrap.style.display = 'none'; wrap.innerHTML = '';
+}
+function showSuggestions(results){
+  const wrap = document.getElementById('locSuggestions');
+  wrap.style.display = 'flex';
+  wrap.innerHTML = results.map((r,i)=>`
+    <button type="button" class="loc-suggestion-item" data-i="${i}">
+      <span class="loc-suggestion-name">${escapeHtml(r.name)}${r.admin1 ? ', '+escapeHtml(r.admin1) : ''}</span>
+      <span class="loc-suggestion-country">${escapeHtml(r.country||'')}</span>
+    </button>`).join('');
+  wrap.querySelectorAll('.loc-suggestion-item').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const r = results[parseInt(btn.dataset.i,10)];
+      clearSuggestions();
+      selectLocation(resultToLocation(r));
+    });
+  });
+}
+
+// ===================== Recent locations (localStorage) =====================
+function loadRecent(){
+  try{ return JSON.parse(localStorage.getItem(RECENT_KEY)) || []; }catch(e){ return []; }
+}
+function saveRecent(loc){
+  const list = loadRecent().filter(l => !(Math.abs(l.latitude-loc.latitude)<0.001 && Math.abs(l.longitude-loc.longitude)<0.001));
+  list.unshift({label:loc.label, latitude:loc.latitude, longitude:loc.longitude, source:loc.source});
+  localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, MAX_RECENT)));
+  renderRecent();
+}
+function renderRecent(){
+  const list = loadRecent();
+  const wrap = document.getElementById('locRecent');
+  if(!list.length){ wrap.style.display='none'; wrap.innerHTML=''; return; }
+  wrap.style.display='block';
+  wrap.innerHTML = 'Recent: ' + list.map((l,i)=>
+    `<button type="button" class="btn btn-sm btn-link p-0 me-3 align-baseline" data-i="${i}" style="color:var(--bw-sky);">${escapeHtml(l.label)}</button>`
+  ).join('');
+  wrap.querySelectorAll('button').forEach(btn=>{
+    btn.addEventListener('click', ()=> selectLocation(list[parseInt(btn.dataset.i,10)]));
+  });
+}
+
+// ===================== Selecting a location → loading its forecast =====================
+function selectLocation(loc){
+  currentLocation = loc;
+  clearAllStatus();
+  clearSuggestions();
+  saveRecent(loc);
+  loadForecast();
+}
+async function loadForecast(){
+  document.getElementById('locEmptyState').style.display = 'none';
+  document.getElementById('forecastWrap').style.display = '';
+  document.getElementById('locTitle').textContent = currentLocation.label;
+  document.getElementById('locDayStrip').innerHTML = `<div class="text-center py-4 w-100" style="color:var(--bs-secondary-color);">Loading forecast for ${escapeHtml(currentLocation.label)}…</div>`;
+  document.getElementById('locHourlyTable').innerHTML = '';
+  try{
+    const json = await fetchForecastFor(currentLocation.latitude, currentLocation.longitude);
+    forecastData = parseForecastJson(json);
+    activeDay = 0;
+    renderForecast();
+  }catch(e){
+    console.warn('Sǣl: location forecast fetch failed —', e.message);
+    document.getElementById('locDayStrip').innerHTML = `<div class="text-center py-4 w-100" style="color:var(--bw-danger);">Couldn't load the forecast for this location — check your connection and try again.</div>`;
+  }
+}
+
+function renderForecast(){
+  if(!forecastData) return;
+  const sys = SYSTEMS[currentSystem];
+  const days = forecastData.days;
+  const hrs = forecastData.hourlyByDay[activeDay] || [];
+
+  const strip = document.getElementById('locDayStrip');
+  strip.innerHTML = days.map((d,i)=>`
+    <div class="day-card card ${i===activeDay?'active':''}" data-i="${i}">
+      <div class="dname">${d.name}</div>
+      ${iconImg(d.icon,'dicon',d.cond)}
+      <div class="dcond">${d.cond}</div>
+      <div class="dtemps">${tempSpan(d.hi,sys.temp)} <span class="lo">${tempSpan(d.lo,sys.temp)}</span></div>
+    </div>`).join('');
+  strip.querySelectorAll('.day-card').forEach(el=>{
+    el.addEventListener('click', ()=>{ activeDay = parseInt(el.dataset.i,10); renderForecast(); });
+  });
+
+  document.getElementById('locHourlyTitle').textContent = days[activeDay].name + ' — hourly';
+  const table = document.getElementById('locHourlyTable');
+  const fmtHour = h => h===0?'12am':h===12?'12pm':h>12?(h-12)+'pm':h+'am';
+  const TRACK_RANGE = 56;
+  const trackTemps = hrs.map(h=>h.tempC).filter(t=>t!=null);
+  const tMin = trackTemps.length ? Math.min(...trackTemps) : 0;
+  const tMax = trackTemps.length ? Math.max(...trackTemps) : 1;
+  const tempOffset = t => (t==null || tMax===tMin) ? TRACK_RANGE/2 : Math.round((1-(t-tMin)/(tMax-tMin))*TRACK_RANGE);
+
+  table.innerHTML = `
+    <tr><th class="rowlabel">Time</th>${hrs.map(h=>`<th>${fmtHour(h.h)}</th>`).join('')}</tr>
+    <tr class="track-row">
+      <td class="rowlabel">Weather</td>
+      ${hrs.map(h=>`<td class="track-cell"><div class="track-marker" style="top:${tempOffset(h.tempC)}px">${iconImg(h.icon,'hicon')}<span class="temp-cell">${tempSpan(h.tempC, sys.temp)}</span></div></td>`).join('')}
+    </tr>
+    <tr><td class="rowlabel">Rain</td>${hrs.map(h=>`<td class="rain-cell">${h.rainMm>0 ? fmtRain(h.rainMm, sys.rain) : '—'}</td>`).join('')}</tr>
+    <tr>
+      <td class="rowlabel">Gust (${windUnitAbbr(sys.wind)})</td>
+      ${hrs.map(h=>`<td>${windDirBadge(h.windDirDeg, h.gustMs ?? h.windMs, sys.wind)}</td>`).join('')}
+    </tr>`;
+}
+
+// ===================== Tab switching =====================
+document.querySelectorAll('.loc-tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.loc-tab-btn').forEach(b=>b.classList.toggle('active', b===btn));
+    document.querySelectorAll('.loc-tab-panel').forEach(p=>p.classList.toggle('active', p.id==='tab-'+btn.dataset.tab));
+    clearSuggestions();
+  });
+});
+
+// ===================== Tab 1: My Location =====================
+document.getElementById('geoBtn').addEventListener('click', ()=>{
+  if(!('geolocation' in navigator)){
+    setStatus('geo', "This browser doesn't support automatic location lookup — try Coordinates instead.", true);
+    return;
+  }
+  setStatus('geo', 'Locating your device…', false, true);
+  navigator.geolocation.getCurrentPosition(async (pos)=>{
+    const {latitude, longitude} = pos.coords;
+    setStatus('geo', 'Got your location — loading forecast…', false, true);
+    const label = await reverseGeocode(latitude, longitude);
+    selectLocation({
+      label: label || `Your location (${latitude.toFixed(3)}, ${longitude.toFixed(3)})`,
+      latitude, longitude, source:'device',
+    });
+  }, (err)=>{
+    const msgs = {1:'Location permission was denied — allow it in your browser settings, or use one of the other tabs.', 2:'Your location is unavailable right now — try again, or use one of the other tabs.', 3:'Locating your device timed out — try again, or use one of the other tabs.'};
+    setStatus('geo', msgs[err.code] || 'Could not get your location.', true);
+  }, {enableHighAccuracy:false, timeout:12000, maximumAge:5*60*1000});
+});
+
+// ===================== Tab 2 & 3: Place name / Postcode (same lookup) =====================
+async function runSearch(tab, query){
+  if(!query){ setStatus(tab, 'Type something to search for.', true); return; }
+  setStatus(tab, 'Searching…', false, true);
+  clearSuggestions();
+  try{
+    const results = await geocodeSearch(query);
+    if(!results.length){
+      setStatus(tab, `No matches found for "${query}". Try a different spelling, or use the Coordinates tab.`, true);
+      return;
+    }
+    if(results.length===1){
+      setStatus(tab, '', false);
+      selectLocation(resultToLocation(results[0]));
+    } else {
+      setStatus(tab, `${results.length} matches — pick one below:`, false);
+      showSuggestions(results);
+    }
+  }catch(e){
+    console.warn('Sǣl: geocoding failed —', e.message);
+    setStatus(tab, 'Search failed — check your connection and try again.', true);
+  }
+}
+document.getElementById('nameForm').addEventListener('submit', e=>{
+  e.preventDefault();
+  runSearch('name', document.getElementById('nameInput').value.trim());
+});
+document.getElementById('postcodeForm').addEventListener('submit', e=>{
+  e.preventDefault();
+  runSearch('postcode', document.getElementById('postcodeInput').value.trim());
+});
+
+// ===================== Tab 4: Coordinates =====================
+document.getElementById('coordsForm').addEventListener('submit', e=>{
+  e.preventDefault();
+  const lat = parseFloat(document.getElementById('latInput').value);
+  const lon = parseFloat(document.getElementById('lonInput').value);
+  if(Number.isNaN(lat) || Number.isNaN(lon) || lat<-90 || lat>90 || lon<-180 || lon>180){
+    setStatus('coords', 'Enter a valid latitude (-90 to 90) and longitude (-180 to 180).', true);
+    return;
+  }
+  setStatus('coords', '', false);
+  selectLocation({label:`${lat.toFixed(4)}, ${lon.toFixed(4)}`, latitude:lat, longitude:lon, source:'coords'});
+});
+
+// ===================== "Search another location" =====================
+document.getElementById('locClearBtn').addEventListener('click', ()=>{
+  currentLocation = null; forecastData = null;
+  document.getElementById('forecastWrap').style.display = 'none';
+  document.getElementById('locEmptyState').style.display = '';
+});
+
+renderRecent();
+
+// ===================== HTML includes (w3-include-html) =====================
+function includeHTML(callback){
+  const elements = document.querySelectorAll('[w3-include-html]');
+  let pending = elements.length;
+  if(pending === 0){ if(callback) callback(); return; }
+  elements.forEach(el => {
+    const file = el.getAttribute('w3-include-html');
+    fetch(file, {cache:'no-store'})
+      .then(res => { if(!res.ok) throw new Error('HTTP '+res.status); return res.text(); })
+      .then(html => { el.innerHTML = html; el.removeAttribute('w3-include-html'); })
+      .catch(e => {
+        console.warn('dashboard locationforecast: include failed for', file, '—', e.message);
+        el.innerHTML = '';
+      })
+      .finally(() => { pending--; if(pending === 0 && callback) callback(); });
+  });
+}
+
+const STATION_TITLE_JSON_URL = './jsondata/archive.json';
+function setStationTitle(){
+  fetch(STATION_TITLE_JSON_URL + ((STATION_TITLE_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'})
+    .then(r => { if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    .then(data => {
+      const loc = data && data.meta && data.meta.station_location;
+      const el = document.querySelector('.brand-text');
+      if(loc && el) el.textContent = loc;
+    })
+    .catch(e => console.warn('dashboard locationforecast: station_location fetch failed —', e.message));
+}
+
+// ===================== Theme: Auto / Light / Dark =====================
+const root = document.documentElement;
+let themeMode = localStorage.getItem('dashboardThemeMode') || 'auto';
+let lastIsDay = null;
+const LOOP_JSON_URL_FOR_THEME = './jsondata/loop.json';
+const THEME_ISDAY_POLL_MS = 5 * 60 * 1000;
+
+const THEME_ICONS = { auto: '\u{1F313}', light: '\u2600\uFE0F', dark: '\u{1F319}' };
+const THEME_ORDER = ['dark', 'light', 'auto'];
+if (!THEME_ORDER.includes(themeMode)) themeMode = 'dark';
+let currentSeason = null;
+function resolveAutoIsDay(){
+  if(lastIsDay != null) return !!lastIsDay;
+  return !window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+function resolveTheme(){
+  // Seasonal is a fixed standalone theme, never affected by day/night auto-switching.
+  if (themeMode === 'seasonal') return 'light';
+  return themeMode==='light' ? 'light' : themeMode==='dark' ? 'dark' : (resolveAutoIsDay() ? 'light' : 'dark');
+}
+function applyTheme(){
+  root.setAttribute('data-bs-theme', resolveTheme());
+  currentSeason = applySeasonClass(themeMode);
+  syncThemeNavUI();
+}
+function syncThemeNavUI(){
+  const btn = document.getElementById('themeToggle');
+  if(!btn) return;
+  const resolved = resolveTheme();
+  if (themeMode === 'seasonal') {
+    btn.textContent = SEASON_ICONS[currentSeason];
+    btn.title = 'Seasonal (' + seasonLabel(currentSeason) + ')';
+  } else {
+    btn.textContent = THEME_ICONS[themeMode];
+    btn.title = themeMode === 'auto' ? ('Auto (currently ' + resolved + ')') : (themeMode.charAt(0).toUpperCase() + themeMode.slice(1));
+  }
+}
+const ASTRO_JSON_URL_FOR_THEME = './jsondata/almanac.json';
+function pollIsDayForTheme(){
+  // Primary source: almanac.json's actual sun altitude -- "day" is
+  // precisely "between sunrise and sunset" by definition (sun above
+  // the horizon), astronomically exact regardless of what loop.json's
+  // hardware-derived isDay flag happens to mean. Falls back to
+  // loop.json's own observations.isDay only if almanac.json's fetch
+  // fails or its own value is missing.
+  fetch(ASTRO_JSON_URL_FOR_THEME + ((ASTRO_JSON_URL_FOR_THEME).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'})
+    .then(res => { if(!res.ok) throw new Error('HTTP '+res.status); return res.json(); })
+    .then(alm => {
+      const sunAlt = alm['almanac.sun.alt'];
+      if(typeof sunAlt === 'number' && !isNaN(sunAlt)){
+        lastIsDay = sunAlt > 0;
+        if(themeMode==='auto') applyTheme();
+      } else {
+        pollIsDayForThemeFallback();
+      }
+    })
+    .catch(e => { console.warn('dashboard locationforecast: almanac.json poll (theme) failed —', e.message); pollIsDayForThemeFallback(); });
+}
+function pollIsDayForThemeFallback(){
+  fetch(LOOP_JSON_URL_FOR_THEME + ((LOOP_JSON_URL_FOR_THEME).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'})
+    .then(res => { if(!res.ok) throw new Error('HTTP '+res.status); return res.json(); })
+    .then(j => {
+      const o = (j && j.observations) || {};
+      if(o.isDay != null){
+        lastIsDay = o.isDay;
+        if(themeMode==='auto') applyTheme();
+      }
+    })
+    .catch(e => console.warn('dashboard locationforecast: loop.json poll (theme) failed —', e.message));
+}
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', ()=>{
+  if(themeMode==='auto') applyTheme();
+});
+window.addEventListener('storage', (e)=>{
+  if(e.key === 'dashboardThemeMode'){
+    themeMode = e.newValue || 'auto';
+    applyTheme();
+  }
+});
+applyTheme();
+pollIsDayForTheme();
+setInterval(pollIsDayForTheme, THEME_ISDAY_POLL_MS);
+
+includeHTML(() => {
+  initSharedHeader();
+  setStationTitle();
+  if(!document.getElementById('unitSystem')) return;
+  document.getElementById('unitSystem').value = currentSystem;
+  document.getElementById('unitSystem').addEventListener('change', e=>{
+    currentSystem = e.target.value;
+    localStorage.setItem('dashboardUnitSystem', currentSystem);
+    renderForecast();
+  });
+  const themeBtn = document.getElementById('themeToggle');
+  if(themeBtn){
+    themeBtn.addEventListener('click', () => {
+      themeMode = THEME_ORDER[(THEME_ORDER.indexOf(themeMode) + 1) % THEME_ORDER.length];
+      localStorage.setItem('dashboardThemeMode', themeMode);
+      applyTheme();
+    });
+  }
+  syncThemeNavUI();
+});
+</script>
+</body>
+</html>

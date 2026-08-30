@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<!--
+##############################################################################################
+# kiosk.html version 0.3.0
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  GPLv3
+##############################################################################################
+#
+# A fixed, 9-card "wall display" page — Clock/Outlook, Current, Forecast,
+# Temperature, Barometer, Wind Compass, Anemometer, Rain, UV (or Humidity,
+# see below). Deliberately stripped down from index.html: no navbar/menu,
+# no theme-toggle button, no drag-and-drop reordering, no incomplete-row
+# hiding — a kiosk is meant to sit untouched on a wall/tablet showing the
+# same 9 cards every time.
+#
+# A small fixed close (×) button, top-right, is the only way back to
+# index.html — v0.2.0 used Escape / click-outside-the-grid for this, but
+# that's a poor fit for what's usually a touchscreen kiosk with no
+# keyboard, and index.html itself no longer has a navbar to signal "this
+# is home" either way. A visible button doesn't depend on either.
+#
+# Still shares localStorage with the main dashboard (same THEME_KEY/UNIT_KEY
+# names), so if the station operator has already picked dark/seasonal mode
+# or a unit system on index.html, this page picks it up automatically —
+# nothing to configure twice. Falls back to the same defaults index.html
+# itself uses when nothing is stored yet (dark theme, UK units).
+#
+# Two card slots are a runtime, hardware-driven choice rather than a fixed
+# card, each shipping both candidates in the markup and resolving to one
+# via the script near the bottom of the file:
+#
+#   Slot 8 (rain): both piezo + tipping enabled -> piezo
+#                  piezo only                   -> piezo
+#                  tipping (rainfall) only       -> rainfall
+#
+#   Slot 9:        UV enabled                    -> UV
+#                  UV not enabled                 -> Humidity
+#
+# Both pairs use the .card-not-enabled class (display:none !important)
+# rather than element.style.display, since every card's own script in
+# cardsBundle.js unconditionally sets mount.style.display = 'flex' the
+# moment it runs — a plain inline style loses that race and can leave
+# both cards of a pair visible at once; !important reliably wins instead.
+##############################################################################################
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DivumWX Kiosk</title>
+<link rel="stylesheet" href="header.css?v=s3n2026i">
+<style>
+:root {
+  --light-body: #EFECE2;
+  --dark-body: #0A0F22;
+  --light-bg: #EFECE2;
+  --light-card: #FFFFFF;
+  --light-text: #1D2C4E;
+  --dark-bg: #FFFFFF;
+  --dark-card: #111834;
+  --dark-text: #E9E4D4;
+  --card-width: 315px;
+  --card-height: 195px;
+  --card-bg: var(--light-card);
+
+  --bs-body-color: var(--light-text);
+  --bs-secondary-color: #5C6672;
+  --bs-tertiary-bg: var(--dark-bg);
+  --bs-border-color: #C9CFD8;
+  --bw-accent: #B45309;
+  --bw-good: #39a239;
+  --bw-sky: #4a90d9;
+}
+
+body.light {
+  background: var(--light-body);
+  color: var(--light-text);
+}
+body.dark {
+  background: var(--dark-body);
+  color: var(--dark-text);
+  --bs-body-color: var(--dark-text);
+  --bs-secondary-color: #8B93B8;
+  --bw-accent: #D3A94C;
+  --bs-border-color: #2A3358;
+  --dark-bg: #111834;
+  --card-bg: #111834;
+}
+
+body {
+  margin: 0;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  transition: background 0.3s, color 0.3s;
+  overflow-x: hidden;
+}
+
+.wrapper {
+  display: grid;
+  justify-content: center;
+  grid-template-columns: repeat(auto-fit, var(--card-width));
+  gap: 4px;
+  margin: 10px auto;
+  max-width: calc(var(--card-width) * 3 + 4px * 2);
+}
+
+.alertbar-mount {
+  grid-column: 1 / -1;
+  display: none;
+  margin-top: -4px;
+}
+.alertbar-mount.has-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.alertbar {
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-weight: 500;
+  font-size: 12px;
+  box-sizing: border-box;
+}
+.alertbar a:link, .alertbar a:visited { color: inherit; text-decoration: underline; }
+.alertbar a:hover { color: #0645ad; text-decoration: underline; }
+.alertbar a:active { color: green; text-decoration: underline; }
+.alertbar .alert-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.alertbar .alert-icon {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+.alertbar .alert-headline {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.alertbar .alert-more { display: none; margin-top: 8px; }
+.alertbar .alert-more p { margin: 0; }
+.alertbar .alert-read {
+  display: inline-block;
+  vertical-align: baseline;
+  margin-left: 10px;
+  border: none;
+  background: rgba(0,0,0,0.08);
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.alertbar .alert-less-btn {
+  display: inline-block;
+  margin-left: 0;
+  margin-top: 8px;
+}
+
+.card {
+  width: var(--card-width);
+  height: var(--card-height);
+  box-sizing: border-box;
+  border-radius: 5px;
+  background: var(--light-card);
+  border-top: 20px solid var(--dark-bg);
+  border-bottom: 18px solid var(--dark-bg);
+  transition: background 0.3s, border-color 0.3s;
+  user-select: none;
+}
+.card a:hover,
+.card a:focus,
+.card a:focus-visible {
+  color: #e74c3c !important;
+  transition: color 0.15s ease;
+}
+body.dark .card {
+  background: var(--card-bg);
+  border-color: var(--dark-bg);
+}
+
+.chart-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s;
+  z-index: 1200;
+}
+.chart-modal-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+.chart-modal-box {
+  background: var(--light-card);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  max-width: 1400px;
+  max-height: 92vh;
+  overflow: hidden;
+  transform: scale(0.97);
+  opacity: 0;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+.chart-modal-overlay.open .chart-modal-box {
+  transform: scale(1);
+  opacity: 1;
+}
+body.dark .chart-modal-box {
+  background: var(--card-bg);
+}
+.chart-modal-header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  background: var(--dark-bg);
+}
+body.dark .chart-modal-header {
+  background: var(--dark-bg);
+}
+body.dark.season-winter .chart-modal-header, body.dark.season-spring .chart-modal-header,
+body.dark.season-summer .chart-modal-header, body.dark.season-autumn .chart-modal-header {
+  background: var(--dark-bg);
+}
+.chart-modal-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--light-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+body.dark .chart-modal-title {
+  color: var(--dark-text);
+}
+.chart-modal-close {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+.chart-modal-close:hover,
+.chart-modal-close:focus {
+  color: #fff;
+  background: #e74c3c;
+}
+.chart-modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.chart-modal-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+  background: var(--light-body);
+}
+body.dark .chart-modal-iframe {
+  background: var(--dark-body);
+}
+@media (max-width: 600px) {
+  .chart-modal-overlay { padding: 0; }
+  .chart-modal-box { max-width: none; max-height: none; border-radius: 0; }
+}
+.card-not-enabled {
+  display: none !important;
+}
+
+.kiosk-close-btn {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: var(--dark-bg);
+  color: var(--bs-body-color);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0.8;
+  transition: opacity 0.15s, background 0.15s, color 0.15s;
+}
+.kiosk-close-btn:hover,
+.kiosk-close-btn:focus {
+  opacity: 1;
+  background: #e74c3c;
+  color: #fff;
+}
+</style>
+</head>
+<body class="light">
+<script>
+// ==== THEME (day/night + seasonal only — no toggle button on a kiosk) ====
+
+const STATION_LAT = 51.94;
+const STATION_LON = -0.987;
+const THEME_KEY = 'dashboardThemeMode';
+const SEASON_CLASSES = ['season-winter', 'season-spring', 'season-summer', 'season-autumn'];
+const NORTHERN_SEASON_BY_MONTH = [
+  'winter', 'winter', 'spring', 'spring', 'spring', 'summer',
+  'summer', 'summer', 'autumn', 'autumn', 'autumn', 'winter'
+];
+const SEASON_SWAP_SOUTH = { winter: 'summer', summer: 'winter', spring: 'autumn', autumn: 'spring' };
+function getMeteorologicalSeason(date, lat) {
+  const season = NORTHERN_SEASON_BY_MONTH[date.getMonth()];
+  return (lat >= 0) ? season : SEASON_SWAP_SOUTH[season];
+}
+
+let lastIsDay = null;
+const LOOP_JSON_URL_FOR_THEME = './jsondata/loop.json';
+const THEME_ISDAY_POLL_MS = 60 * 1000;
+
+function getSunTimes(date, lat, lon) {
+  const rad = Math.PI / 180;
+  const msPerDay = 86400000;
+  const J1970 = 2440588, J2000 = 2451545;
+  const toJulian = d => d.valueOf() / msPerDay - 0.5 + J1970;
+  const fromJulian = j => new Date((j + 0.5 - J1970) * msPerDay);
+  const toDays = d => toJulian(d) - J2000;
+
+  const obliquity = rad * 23.4397;
+  const meanAnomaly = d => rad * (357.5291 + 0.98560028 * d);
+  const eclipticLon = M => {
+    const C = rad * (1.9148 * Math.sin(M) + 0.02 * Math.sin(2 * M) + 0.0003 * Math.sin(3 * M));
+    const perihelion = rad * 102.9372;
+    return M + C + perihelion + Math.PI;
+  };
+  const declination = L => Math.asin(Math.sin(L) * Math.sin(obliquity));
+  const julianCycle = (d, lw) => Math.round(d - 0.0009 - lw / (2 * Math.PI));
+  const approxTransit = (Ht, lw, n) => 0.0009 + (Ht + lw) / (2 * Math.PI) + n;
+  const solarTransitJ = (ds, M, L) => J2000 + ds + 0.0053 * Math.sin(M) - 0.0069 * Math.sin(2 * L);
+  const hourAngle = (h, phi, dec) => Math.acos((Math.sin(h) - Math.sin(phi) * Math.sin(dec)) / (Math.cos(phi) * Math.cos(dec)));
+
+  const lw = rad * -lon, phi = rad * lat;
+  const d = toDays(date);
+  const n = julianCycle(d, lw);
+  const ds = approxTransit(0, lw, n);
+  const M = meanAnomaly(ds);
+  const L = eclipticLon(M);
+  const dec = declination(L);
+  const Jnoon = solarTransitJ(ds, M, L);
+
+  const h0 = -0.833 * rad;
+  const H = hourAngle(h0, phi, dec);
+  if (isNaN(H)) return null;
+
+  const Jset = solarTransitJ(approxTransit(H, lw, n), M, L);
+  const Jrise = Jnoon - (Jset - Jnoon);
+  return { sunrise: fromJulian(Jrise), sunset: fromJulian(Jset) };
+}
+
+function getThemeMode() {
+  const stored = localStorage.getItem(THEME_KEY);
+  return ['dark', 'light', 'auto'].includes(stored) ? stored : 'auto';
+}
+function effectiveTheme(mode) {
+  if (mode === 'light' || mode === 'dark') return mode;
+  if (mode === 'seasonal') return 'light';
+  if (lastIsDay != null) return lastIsDay ? 'light' : 'dark';
+  const now = new Date();
+  const sun = getSunTimes(now, STATION_LAT, STATION_LON);
+  if (!sun) return 'light';
+  return (now >= sun.sunrise && now < sun.sunset) ? 'light' : 'dark';
+}
+
+let lastAppliedTheme = null;
+function applyDashboardTheme() {
+  const mode = getThemeMode();
+  const resolved = effectiveTheme(mode);
+  document.body.classList.remove('light', 'dark');
+  document.body.classList.add(resolved);
+
+  document.body.classList.remove.apply(document.body.classList, SEASON_CLASSES);
+  // Seasonal accent mode retired site-wide -- see header.js's
+  // applySeasonClass() for the full rationale. This page has its own
+  // independent implementation (doesn't call the shared header.js
+  // function at all), so it needed the identical no-op treatment
+  // applied directly here.
+
+  if (resolved !== lastAppliedTheme) {
+    lastAppliedTheme = resolved;
+    window.dispatchEvent(new CustomEvent('themechange', { detail: { theme: resolved } }));
+  }
+}
+
+function pollIsDayForTheme() {
+  fetch(LOOP_JSON_URL_FOR_THEME + ((LOOP_JSON_URL_FOR_THEME).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), { cache: 'no-store' })
+    .then(res => { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
+    .then(j => {
+      const o = (j && j.observations) || {};
+      if (o.isDay != null) {
+        lastIsDay = o.isDay;
+        if (getThemeMode() === 'auto') applyDashboardTheme();
+      }
+    })
+    .catch(e => console.warn('kiosk: loop.json poll (theme) failed —', e.message));
+}
+
+applyDashboardTheme();
+pollIsDayForTheme();
+setInterval(pollIsDayForTheme, THEME_ISDAY_POLL_MS);
+setInterval(() => {
+  const m = getThemeMode();
+  if (m === 'auto' || m === 'seasonal') applyDashboardTheme();
+}, 60 * 1000);
+window.addEventListener('storage', e => {
+  if (e.key === THEME_KEY) applyDashboardTheme();
+});
+</script>
+
+<button type="button" class="kiosk-close-btn" id="kioskCloseBtn" title="Close kiosk (return to dashboard)" aria-label="Close kiosk, return to dashboard">&times;</button>
+
+<div class="chart-modal-overlay" id="chartModalOverlay" role="dialog" aria-modal="true" aria-labelledby="chartModalTitle">
+  <div class="chart-modal-box" id="chartModalBox">
+    <div class="chart-modal-header">
+      <span class="chart-modal-title" id="chartModalTitle"></span>
+      <button type="button" class="chart-modal-close" id="chartModalClose" aria-label="Close">&times;</button>
+    </div>
+    <div class="chart-modal-body">
+      <iframe id="chartModalIframe" class="chart-modal-iframe" title="Chart" src="about:blank"></iframe>
+    </div>
+  </div>
+</div>
+
+<div class="wrapper">
+  <div id="alertBarMount" class="alertbar-mount"></div>
+
+  <div id="stationTimeClock" data-card-id="cardClockOutlook" class="card fixed" draggable="false"></div>
+
+  <div id="currentModule" data-card-id="cardCurrent" class="card" draggable="false"></div>
+
+  <div id="forecastCard4" data-card-id="cardForecast" class="card" draggable="false"></div>
+
+  <div id="thermometerCard3" data-card-id="cardTemperature" class="card" draggable="false"></div>
+
+  <div id="barometerCard7" data-card-id="cardBarometer" class="card" draggable="false"></div>
+
+  <div id="compassCard6" data-card-id="cardWindCompass" class="card" draggable="false"></div>
+
+  <div id="anemometerCard5" data-card-id="cardAnemometer" class="card" draggable="false"></div>
+
+  <div id="rainCard8" data-card-id="cardPiezoRain" class="card card-not-enabled" draggable="false"></div>
+  <div id="rainCard9" data-card-id="cardRainfall" class="card" draggable="false"></div>
+
+  <div id="uvCard11" data-card-id="cardUvIndex" class="card" draggable="false"></div>
+  <div id="humidityCard12" data-card-id="cardHumidity" class="card card-not-enabled" draggable="false"></div>
+</div>
+
+<script src="units.js"></script>
+<script src="stationTime.js"></script>
+<script>
+
+const UNIT_KEY = 'dashboardUnitSystem';
+function broadcastUnitSystem() {
+  const system = localStorage.getItem(UNIT_KEY) || 'uk';
+  window.dispatchEvent(new CustomEvent('unitsystemchange', {
+    detail: { system: system, config: (typeof SYSTEMS !== 'undefined' ? SYSTEMS[system] : null) }
+  }));
+}
+broadcastUnitSystem();
+
+const chartModalOverlay = document.getElementById('chartModalOverlay');
+const chartModalBox = document.getElementById('chartModalBox');
+const chartModalTitle = document.getElementById('chartModalTitle');
+const chartModalIframe = document.getElementById('chartModalIframe');
+const chartModalClose = document.getElementById('chartModalClose');
+let chartModalLastFocused = null;
+
+function chartModalOpen(link) {
+  const rawUrl = link.getAttribute('href');
+  if (!rawUrl || rawUrl === '#') return;
+
+  const url = rawUrl + (rawUrl.indexOf('?') > -1 ? '&' : '?') + '_=' + Date.now();
+
+  chartModalLastFocused = document.activeElement;
+  chartModalTitle.textContent = link.getAttribute('data-title') || link.getAttribute('data-modal') || '';
+
+  const w = parseInt(link.getAttribute('data-modal-width'), 10);
+  chartModalBox.style.maxWidth = w ? w + 'px' : '';
+
+  const h = parseInt(link.getAttribute('data-modal-height'), 10);
+  if (h) {
+    const headerEl = chartModalBox.querySelector('.chart-modal-header');
+    const headerH = headerEl ? headerEl.offsetHeight : 0;
+    chartModalBox.style.height = (h + headerH) + 'px';
+    chartModalBox.style.maxHeight = (h + headerH) + 'px';
+  } else {
+    chartModalBox.style.height = '';
+    chartModalBox.style.maxHeight = '';
+  }
+  chartModalBox.style.width = '';
+
+  chartModalIframe.src = url;
+  document.body.style.overflow = 'hidden';
+  chartModalOverlay.classList.add('open');
+  chartModalClose.focus();
+}
+function chartModalClose_() {
+  chartModalOverlay.classList.remove('open');
+  document.body.style.overflow = '';
+  chartModalIframe.src = 'about:blank';
+  chartModalBox.style.height = '';
+  chartModalBox.style.maxHeight = '';
+  chartModalBox.style.width = '';
+  if (chartModalLastFocused && typeof chartModalLastFocused.focus === 'function') {
+    chartModalLastFocused.focus();
+  }
+}
+window.addEventListener('message', (e) => {
+  if (!e.data || e.data.type !== 'chartModalContentHeight') return;
+  if (!chartModalOverlay.classList.contains('open')) return;
+  const headerEl = chartModalBox.querySelector('.chart-modal-header');
+  const headerH = headerEl ? headerEl.offsetHeight : 0;
+  const target = Math.min(e.data.height + headerH, window.innerHeight * 0.92);
+  chartModalBox.style.height = target + 'px';
+  if (typeof e.data.width === 'number' && e.data.width > 0) {
+    const targetW = Math.min(e.data.width, window.innerWidth * 0.96);
+    chartModalBox.style.width = targetW + 'px';
+    chartModalBox.style.maxWidth = targetW + 'px';
+  }
+});
+document.addEventListener('click', (e) => {
+  const link = e.target.closest('a[data-type="iframe"]');
+  if (!link) return;
+  const url = link.getAttribute('href');
+  if (!url || url === '#') return;
+  e.preventDefault();
+  chartModalOpen(link);
+});
+chartModalClose.addEventListener('click', chartModalClose_);
+chartModalOverlay.addEventListener('click', (e) => {
+  if (e.target === chartModalOverlay) chartModalClose_();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && chartModalOverlay.classList.contains('open')) chartModalClose_();
+});
+
+// ==== RETURN TO HOME PAGE ====
+
+document.getElementById('kioskCloseBtn').addEventListener('click', () => {
+  window.location.href = 'index.html';
+});
+
+// ==== HARDWARE-DRIVEN CARD SWAPS: rain (piezo/rainfall), UV/humidity ====
+
+(function(){
+  fetch('./jsondata/archive.json' + '?_=' + Date.now(), { cache: 'no-store' })
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(data){
+      var enabled = data && data.meta && data.meta.enabled_cards;
+      if (!Array.isArray(enabled) || enabled.length === 0) return;
+
+      var piezoEl = document.getElementById('rainCard8');
+      var rainfallEl = document.getElementById('rainCard9');
+      if (enabled.indexOf('cardPiezoRain') !== -1) {
+        if (piezoEl) piezoEl.classList.remove('card-not-enabled');
+        if (rainfallEl) rainfallEl.classList.add('card-not-enabled');
+      } else {
+        if (piezoEl) piezoEl.classList.add('card-not-enabled');
+        if (rainfallEl) rainfallEl.classList.remove('card-not-enabled');
+      }
+
+      var uvEl = document.getElementById('uvCard11');
+      var humidityEl = document.getElementById('humidityCard12');
+      if (enabled.indexOf('cardUvIndex') !== -1) {
+        if (uvEl) uvEl.classList.remove('card-not-enabled');
+        if (humidityEl) humidityEl.classList.add('card-not-enabled');
+      } else {
+        if (uvEl) uvEl.classList.add('card-not-enabled');
+        if (humidityEl) humidityEl.classList.remove('card-not-enabled');
+      }
+    })
+    .catch(function(){  });
+})();
+</script>
+<script src="js/d3.7.9.0.min.js"></script>
+<script src="cardsBundleNew.js?v=c99e7d44"></script>
+</body>
+</html>
