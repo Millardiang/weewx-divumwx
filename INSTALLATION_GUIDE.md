@@ -23,7 +23,7 @@ Make sure you have to hand: -
 
           sudo mkdir -p /var/www/html/divumwx && sudo chown -R $(whoami) /var/www/html/divumwx
           source ~/weewx-venv/bin/activate
-          weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/heads/dev.zip
+          weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/heads/main.zip
           sudo systemctl restart weewx
 
 ## Uninstall process
@@ -55,7 +55,7 @@ Make sure you have to hand: -
 * If you live in England, your [Location Code](https://geoportal.statistics.gov.uk/datasets/6c968989f5d2405791d17feb27c7629e/explore). Example South East is E12000008
 
           sudo mkdir -p /var/www/html/divumwx && sudo chown -R weewx:weewx /var/www/html/divumwx
-          sudo weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/heads/dev.zip
+          sudo weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/heads/main.zip
           sudo systemctl restart weewx
 
 ## Uninstall process
