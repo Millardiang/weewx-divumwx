@@ -1,0 +1,553 @@
+#errorCatcher Echo
+##
+## archive.json.tmpl — flat JSON snapshot of current/today/trend observation
+## data, converted from the real dvmCombinedData PHP module. This replaces
+## that PHP file's job for the front-end: instead of the JS guessing units
+## from charts.json's hourly series (which is how the wind-speed/gust bug
+## happened — those fields come through in the report's configured display
+## unit, not bare m/s, and the front-end was assuming m/s), every value
+## here goes through WeeWX's own $obj.format(...)/$unit.label tags, so it's
+## already correctly converted to the report's real unit system. No more
+## guessing.
+##
+## Deliberate differences from the original PHP, flagged rather than done
+## quietly:
+##   1. Missing-data fields use the JSON literal `null` (None_string="null")
+##      instead of the PHP version's "0" — "0" reads as a real zero
+##      reading, which isn't true when a sensor has no data at all.
+##   2. Every *_time / *_maxtime / *_mintime field is a raw unix_epoch_ms
+##      integer, not a server-formatted string like PHP's date('H:i', ...).
+##      The PHP baked one fixed format per field (some 'H:i', some
+##      'D j M H:i', some 'j M Y H:i') — formatting that client-side from
+##      a raw timestamp is more flexible and matches how charts.json
+##      already works throughout the rest of this project.
+##   3. Found and fixed a real bug in the original barometer trend
+##      cascade: the negative-side checks were ordered <0, then <-1, then
+##      <-2, then <-3 — since <0 catches every negative value first and
+##      the chain stops on first match, "Falling", "Falling Quickly" and
+##      "Falling Very Rapidly" could never actually be reached; everything
+##      negative collapsed to "Falling Slowly". Reordered to check the
+##      most extreme case first, mirroring how the positive side already
+##      did it correctly.
+##   4. Fixed a second real bug, in the rain block: the "event" field's
+##      $current.eventRain.format(...) call sat OUTSIDE the #try/#except
+##      that was meant to guard storm_start_val above it. When eventRain
+##      threw (not a recognised obs type for this binding), #errorCatcher
+##      Echo's own placeholder syntax — ?'eventRain'? — leaked straight
+##      into the JSON output as a bare token, which isn't valid JSON and
+##      broke parsing of the entire file for every consumer. The format()
+##      call now lives inside the same #try, with a safe "0" default set
+##      beforehand, exactly like storm_start_val's own fallback.
+##
+## Page-theme/almanac concerns from the original file (ephem sun/moon
+## ecliptic calculations, daylight-length, day/night body theme) are left
+## out on purpose — they're not observation data, and astronomical.json
+## already covers that ground (see the project's continuity notes). The
+## trailing PHP includes (dvmColorMap.php, dvmAlmanacData.php,
+## dvmUnitConversions.php, the commented-out meteor showers include) are
+## likewise out of scope for an observations feed.
+##
+#import time
+#import math
+#import platform
+##
+## safeMs — guards every int(raw * 1000) timestamp conversion below.
+## $X.raw can legitimately come back None (derived/extension obs types like
+## vpd don't always track maxtime/mintime; any obs can be None if a station
+## has never recorded a value for that aggregation window) and int(None*1000)
+## crashes the whole template generation per the archive.json ERROR log —
+## Cheetah's #errorCatcher Echo only guards individual $var placeholders,
+## not arithmetic inside a $(...) Python expression block, so one None here
+## takes out the entire file rather than just this one field.
+#def safeMs($val)
+#if $val is not None
+$int($val * 1000)
+#else
+null
+#end if
+#end def
+##
+{
+"meta": {
+"generated": $(int(time.time() * 1000)),
+"station_location": "$station.location",#slurp
+"station_hardware": "$station.hardware",#slurp
+"station_url": "$station.station_url",#slurp
+"software_version": "$station.version",#slurp
+#set $pythonVersion = platform.python_version()
+"python_version": "$pythonVersion",#slurp
+#try
+#set $osVersion = dict(line.strip().split('=', 1) for line in open('/etc/os-release') if '=' in line).get('PRETTY_NAME', '').strip('"')
+#if not $osVersion
+#set $osVersion = platform.platform()
+#end if
+#except
+#set $osVersion = platform.platform()
+#end try
+"os_version": "$osVersion",#slurp
+"latitude": $station.stn_info.latitude_f,
+"longitude": $station.stn_info.longitude_f,
+"elevation_m": $station.altitude.meter.raw,
+#try
+#set $stationSince = int($alltime.outTemp.firsttime.raw * 1000)
+#except
+#set $stationSince = "null"
+#end try
+"station_since": $stationSince,
+"os_uptime": $station.os_uptime.raw,
+"uptime_seconds": $station.uptime.raw,
+"enabled_cards": $divumwx_enabled_cards,
+#set $baromUnitsRaw = str($unit.label.barometer).strip()
+#set $rainUnitsRaw = str($unit.label.rain).strip()
+#set $windUnitsRaw = str($unit.label.windSpeed).strip()
+#set $tempUnitsRaw = str($unit.label.outTemp).strip()
+"barometer_units": "$baromUnitsRaw",#slurp
+"rain_units": "$rainUnitsRaw",#slurp
+"wind_units": "$windUnitsRaw",#slurp
+"temp_units": "$tempUnitsRaw",#slurp
+"webcam_title": $divumwx_webcam_title,#slurp
+"webcam_image": $divumwx_webcam_image,#slurp
+"station_image_title": $divumwx_station_image_title,#slurp
+"station_image_path": $divumwx_station_image_path#slurp
+},
+
+"air_density": {
+#if $current.AirDensity.has_data
+"avg": $day.AirDensity.avg.format(format_string="%.4f", None_string="null", add_label=False),
+"max": $day.AirDensity.max.format(format_string="%.4f", None_string="null", add_label=False),
+"min": $day.AirDensity.min.format(format_string="%.4f", None_string="null", add_label=False),
+"current": $current.AirDensity.format(format_string="%.4f", None_string="null", add_label=False)
+#else
+"current": null
+#end if
+},
+
+"aqi": {
+"pm1_0": $current.pm1_0.format(format_string="%.1f", None_string="null", add_label=False),
+"pm2_5": $current.pm2_5.format(format_string="%.1f", None_string="null", add_label=False),
+"pm4_0": $current.pm4_0.format(format_string="%.1f", None_string="null", add_label=False),
+"pm10_0": $current.pm10_0.format(format_string="%.1f", None_string="null", add_label=False)
+},
+
+"barom": {
+#if $current.barometer.has_data
+#set $baromTrendRaw = $trend.barometer.format(format_string="%.4f", None_string="0", add_label=False)
+#try
+#set $baromTrendCode = int(round(float($baromTrendRaw)))
+#except
+#set $baromTrendCode = 0
+#end try
+## Most-extreme-first on BOTH sides — this is the ordering bug fix
+## described at the top of the file.
+#if $baromTrendCode > 3
+#set $baromTrendDesc = "Rising Very Rapidly"
+#set $baromTrendCode = 4
+#elif $baromTrendCode > 2
+#set $baromTrendDesc = "Rising Quickly"
+#set $baromTrendCode = 3
+#elif $baromTrendCode > 1
+#set $baromTrendDesc = "Rising"
+#set $baromTrendCode = 2
+#elif $baromTrendCode > 0
+#set $baromTrendDesc = "Rising Slowly"
+#set $baromTrendCode = 1
+#elif $baromTrendCode < -3
+#set $baromTrendDesc = "Falling Very Rapidly"
+#set $baromTrendCode = -4
+#elif $baromTrendCode < -2
+#set $baromTrendDesc = "Falling Quickly"
+#set $baromTrendCode = -3
+#elif $baromTrendCode < -1
+#set $baromTrendDesc = "Falling"
+#set $baromTrendCode = -2
+#elif $baromTrendCode < 0
+#set $baromTrendDesc = "Falling Slowly"
+#set $baromTrendCode = -1
+#else
+#set $baromTrendDesc = "Steady"
+#set $baromTrendCode = 0
+#end if
+"current": $current.barometer.format(format_string="%.2f", None_string="null", add_label=False),
+"day_avg": $day.barometer.avg.format(format_string="%.2f", None_string="null", add_label=False),
+"day_max": $day.barometer.max.format(format_string="%.2f", None_string="null", add_label=False),
+"day_maxtime": $safeMs($day.barometer.maxtime.raw),
+"day_min": $day.barometer.min.format(format_string="%.2f", None_string="null", add_label=False),
+"day_mintime": $safeMs($day.barometer.mintime.raw),
+"trend_code": $baromTrendCode,
+"trend_desc": "$baromTrendDesc"#slurp
+#else
+"current": null
+#end if
+},
+
+"dew": {
+#if $current.dewpoint.has_data
+#set $dewTrendRaw = $trend.dewpoint.format(format_string="%.2f", None_string="0", add_label=False)
+#try
+#set $dewTrend = int(float($dewTrendRaw))
+#except
+#set $dewTrend = 0
+#end try
+"current": $current.dewpoint.format(format_string="%.2f", None_string="null", add_label=False),
+"trend": $dewTrend,
+"day_max": $day.dewpoint.max.format(format_string="%.2f", None_string="null", add_label=False),
+"day_maxtime": $safeMs($day.dewpoint.maxtime.raw),
+"day_min": $day.dewpoint.min.format(format_string="%.2f", None_string="null", add_label=False),
+"day_mintime": $safeMs($day.dewpoint.mintime.raw),
+"yesterday_max": $day($days_ago=1).dewpoint.max.format(format_string="%.2f", None_string="null", add_label=False),
+"yesterday_maxtime": $safeMs($day($days_ago=1).dewpoint.maxtime.raw),
+"yesterday_min": $day($days_ago=1).dewpoint.min.format(format_string="%.2f", None_string="null", add_label=False),
+"yesterday_mintime": $safeMs($day($days_ago=1).dewpoint.mintime.raw),
+"month_max": $month.dewpoint.max.format(format_string="%.2f", None_string="null", add_label=False),
+"month_maxtime": $safeMs($month.dewpoint.maxtime.raw),
+"month_min": $month.dewpoint.min.format(format_string="%.2f", None_string="null", add_label=False),
+"month_mintime": $safeMs($month.dewpoint.mintime.raw),
+"year_max": $year.dewpoint.max.format(format_string="%.2f", None_string="null", add_label=False),
+"year_maxtime": $safeMs($year.dewpoint.maxtime.raw),
+"year_min": $year.dewpoint.min.format(format_string="%.2f", None_string="null", add_label=False),
+"year_mintime": $safeMs($year.dewpoint.mintime.raw),
+"alltime_max": $alltime.dewpoint.max.format(format_string="%.2f", None_string="null", add_label=False),
+"alltime_maxtime": $safeMs($alltime.dewpoint.maxtime.raw),
+"alltime_min": $alltime.dewpoint.min.format(format_string="%.2f", None_string="null", add_label=False),
+"alltime_mintime": $safeMs($alltime.dewpoint.mintime.raw)
+#else
+"current": null
+#end if
+},
+
+"et": {
+#if $current.ET.has_data
+"current": $current.ET.format(format_string="%.4f", None_string="null", add_label=False),
+"hour": $span($hour_delta=1).ET.sum.format(format_string="%.4f", None_string="null", add_label=False),
+"day": $day.ET.sum.format(format_string="%.4f", None_string="null", add_label=False),
+"last24h": $span($hour_delta=24).ET.sum.format(format_string="%.4f", None_string="null", add_label=False),
+"week": $week.ET.sum.format(format_string="%.4f", None_string="null", add_label=False),
+"month": $month.ET.sum.format(format_string="%.4f", None_string="null", add_label=False),
+"year": $year.ET.sum.format(format_string="%.4f", None_string="null", add_label=False),
+"alltime": $alltime.ET.sum.format(format_string="%.4f", None_string="null", add_label=False)
+#else
+"current": null
+#end if
+},
+
+"humid": {
+#if $current.outHumidity.has_data
+#set $humidTrendRaw = $trend.outHumidity.format(format_string="%.2f", None_string="0", add_label=False)
+#try
+#set $humidTrend = float($humidTrendRaw)
+#except
+#set $humidTrend = 0
+#end try
+"current": $current.outHumidity.format(format_string="%.2f", None_string="null", add_label=False),
+"trend": $humidTrend,
+"day_max": $day.outHumidity.max.format(format_string="%.2f", None_string="null", add_label=False),
+"day_maxtime": $safeMs($day.outHumidity.maxtime.raw),
+"day_avg": $day.outHumidity.avg.format(format_string="%.2f", None_string="null", add_label=False),
+"day_min": $day.outHumidity.min.format(format_string="%.2f", None_string="null", add_label=False),
+"day_mintime": $safeMs($day.outHumidity.mintime.raw),
+"yesterday_max": $day($days_ago=1).outHumidity.max.format(format_string="%.2f", None_string="null", add_label=False),
+"yesterday_maxtime": $safeMs($day($days_ago=1).outHumidity.maxtime.raw),
+"yesterday_min": $day($days_ago=1).outHumidity.min.format(format_string="%.2f", None_string="null", add_label=False),
+"yesterday_mintime": $safeMs($day($days_ago=1).outHumidity.mintime.raw),
+"month_max": $month.outHumidity.max.format(format_string="%.2f", None_string="null", add_label=False),
+"month_maxtime": $safeMs($month.outHumidity.maxtime.raw),
+"month_min": $month.outHumidity.min.format(format_string="%.2f", None_string="null", add_label=False),
+"month_mintime": $safeMs($month.outHumidity.mintime.raw),
+"year_max": $year.outHumidity.max.format(format_string="%.2f", None_string="null", add_label=False),
+"year_maxtime": $safeMs($year.outHumidity.maxtime.raw),
+"year_min": $year.outHumidity.min.format(format_string="%.2f", None_string="null", add_label=False),
+"year_mintime": $safeMs($year.outHumidity.mintime.raw),
+"alltime_max": $alltime.outHumidity.max.format(format_string="%.2f", None_string="null", add_label=False),
+"alltime_maxtime": $safeMs($alltime.outHumidity.maxtime.raw),
+"alltime_min": $alltime.outHumidity.min.format(format_string="%.2f", None_string="null", add_label=False),
+"alltime_mintime": $safeMs($alltime.outHumidity.mintime.raw),
+"indoors_current": $($current.inHumidity.format(format_string="%.2f", None_string="null", add_label=False) if $current.inTemp.has_data else "null"),
+"indoors_day_max": $day.inHumidity.max.format(format_string="%.2f", None_string="null", add_label=False),
+"indoors_day_maxtime": $safeMs($day.inHumidity.maxtime.raw),
+"indoors_day_min": $day.inHumidity.min.format(format_string="%.2f", None_string="null", add_label=False),
+"indoors_day_mintime": $safeMs($day.inHumidity.mintime.raw),
+"indoors_alltime_max": $alltime.inHumidity.max.format(format_string="%.2f", None_string="null", add_label=False),
+"indoors_alltime_maxtime": $safeMs($alltime.inHumidity.maxtime.raw),
+"indoors_alltime_min": $alltime.inHumidity.min.format(format_string="%.2f", None_string="null", add_label=False),
+"indoors_alltime_mintime": $safeMs($alltime.inHumidity.mintime.raw)
+#else
+"current": null
+#end if
+},
+
+"lightning": {
+#if $current.lightning_strike_count.has_data
+"day_strike_count": $day.lightning_strike_count.sum.format(None_string="0", add_label=False),
+"hour_strike_count": $hour($hours_ago=1).lightning_strike_count.sum.format(None_string="0", add_label=False),
+"current_strike_count": $current.lightning_strike_count.format(None_string="0", add_label=False),
+"month_strike_count": $month.lightning_strike_count.sum.format(None_string="0", add_label=False),
+"year_strike_count": $year.lightning_strike_count.sum.format(None_string="0", add_label=False),
+"alltime_strike_count": $alltime.lightning_strike_count.sum.format(None_string="0", add_label=False),
+"last_distance": $alltime.lightning_distance.lastnonzero.format(add_label=False, localize=False),
+#try
+#set $lastStrikeTs = $time_at('lightning_distance>0').raw
+"last_time": $(int($lastStrikeTs * 1000)),
+"time_ago_seconds": $(int(time.time() - $lastStrikeTs))
+#except
+"last_time": null,
+"time_ago_seconds": null
+#end try
+#else
+"current_strike_count": 0
+#end if
+},
+
+"rain": {
+#if $current.rain.has_data
+  "rate": $current.rainRate.format(format_string="%.2f", None_string="null", add_label=False),
+  "maxRate": $day.rainRate.max.format(format_string="%.2f", None_string="null", add_label=False),
+  "hour": $span($hour_delta=1).rain.sum.format(format_string="%.2f", None_string="0", add_label=False),
+  "last24h": $span($hour_delta=24).rain.sum.format(format_string="%.2f", None_string="0", add_label=False),
+  "yesterday": $yesterday.rain.sum.format(format_string="%.2f", None_string="0", add_label=False),
+  "day": $day.rain.sum.format(format_string="%.2f", None_string="0", add_label=False),
+  "week": $week.rain.sum.format(format_string="%.2f", None_string="0", add_label=False),
+  "month": $month.rain.sum.format(format_string="%.2f", None_string="0", add_label=False),
+  "year": $year.rain.sum.format(format_string="%.2f", None_string="0", add_label=False),
+  #set $storm_start_val = None
+  #if $current.stormRain.has_data
+    #set $eventRainStr = "0"
+    #try
+      #set $storm_start_ts = $time_since('stormRain=0').raw
+      #if $storm_start_ts is not None
+        #set $storm_start_val = int($storm_start_ts * 1000)
+      #end if
+      #set $eventRainStr = $current.stormRain.format(format_string="%.2f", None_string="0", add_label=False)
+    #except
+      #set $storm_start_val = None
+    #end try
+    "event": $eventRainStr,
+  #else
+    #set $eventRainStr = "0"
+    #try
+      #set $eventRainRaw = $current.eventRain.raw
+      #if $eventRainRaw is not None and $eventRainRaw > 0
+        #set $storm_start_ts = $time_since('eventRain=0').raw
+        #if $storm_start_ts is not None
+          #set $storm_start_val = int((time.time() - $storm_start_ts) * 1000)
+        #end if
+      #end if
+      #set $eventRainStr = $current.eventRain.format(format_string="%.2f", None_string="0", add_label=False)
+    #except
+      #set $storm_start_val = None
+    #end try
+    "event": $eventRainStr,
+  #end if
+  "storm_start":
+  #if $storm_start_val is not None
+    $storm_start_val
+  #else
+    null
+  #end if
+#else
+  "rate": null
+#end if
+},
+
+#if $current.hail.has_data
+"p_rain": {
+"rate": $current.hailRate.format(format_string="%.2f", None_string="null", add_label=False),
+"hour": $span($hour_delta=1).hail.sum.format(format_string="%.2f", None_string="0", add_label=False),
+"last24h": $span($hour_delta=24).hail.sum.format(format_string="%.2f", None_string="0", add_label=False),
+"yesterday": $yesterday.hail.sum.format(format_string="%.2f", None_string="0", add_label=False),
+"day": $day.hail.sum.format(format_string="%.2f", None_string="0", add_label=False),
+"week": $week.hail.sum.format(format_string="%.2f", None_string="0", add_label=False),
+"month": $month.hail.sum.format(format_string="%.2f", None_string="0", add_label=False),
+"year": $year.hail.sum.format(format_string="%.2f", None_string="0", add_label=False),
+"event": $current.erain_piezo.format(format_string="%.2f", None_string="0", add_label=False)
+},
+#end if
+
+"sky": {
+"cloud_base": $current.cloudbase.format(format_string="%.0f", None_string="null", add_label=False),
+"cloud_cover": $current.cloudcover.format(format_string="%.0f", None_string="0", add_label=False)
+},
+
+"solar": {
+#if $current.radiation.has_data
+"current": $current.radiation.format(format_string="%.1f", None_string="null", add_label=False),
+"day_max": $day.radiation.max.format(format_string="%.1f", None_string="null", add_label=False),
+"day_maxtime": $safeMs($day.radiation.maxtime.raw),
+#if $day($days_ago=1).radiation.has_data
+"yesterday_max": $day($days_ago=1).radiation.max.format(format_string="%.1f", None_string="null", add_label=False),
+"yesterday_maxtime": $safeMs($day($days_ago=1).radiation.maxtime.raw),
+#end if
+"month_max": $month.radiation.max.format(format_string="%.1f", None_string="null", add_label=False),
+"month_maxtime": $safeMs($month.radiation.maxtime.raw),
+"year_max": $year.radiation.max.format(format_string="%.1f", None_string="null", add_label=False),
+"year_maxtime": $safeMs($year.radiation.maxtime.raw),
+"alltime_max": $alltime.radiation.max.format(format_string="%.1f", None_string="null", add_label=False),
+"alltime_maxtime": $safeMs($alltime.radiation.maxtime.raw),
+"lux": $current.luminosity.format(format_string="%.1f", None_string="null", add_label=False),
+"day_lux_max": $day.luminosity.max.format(format_string="%.1f", None_string="null", add_label=False),
+"day_lux_maxtime": $safeMs($day.luminosity.maxtime.raw),
+"threshold": $current.threshold.format(format_string="%.1f", None_string="null", add_label=False),
+"sun_duration_minutes": $day.sunshine_time.sum.format(format_string="%.1f", None_string="0", add_label=False),
+"sunshine_minutes_yesterday": $(float($yesterday.sunshine_time.sum.raw or 0) * 60)
+#else
+"current": null
+#end if
+},
+
+"temp": {
+#if $current.inTemp.has_data
+"indoor_current": $current.inTemp.format(format_string="%.1f", None_string="null", add_label=False),
+#set $indoorTrendRaw = $trend.inTemp.format(format_string="%.1f", None_string="0", add_label=False)
+#try
+#set $indoorTrend = float($indoorTrendRaw)
+#except
+#set $indoorTrend = 0
+#end try
+"indoor_trend": $indoorTrend,
+"indoor_day_max": $day.inTemp.max.format(format_string="%.2f", None_string="null", add_label=False),
+"indoor_day_min": $day.inTemp.min.format(format_string="%.2f", None_string="null", add_label=False),
+## Indoor "feels like" — NWS heat-index formula, same as the original PHP,
+## just translated to Cheetah's embedded Python rather than re-derived.
+#set $indoorTC = float($current.inTemp.raw or 0)
+#set $indoorRH = float($current.inHumidity.raw or 0)
+#set $indoorTF = $indoorTC * 9.0/5.0 + 32.0
+#if $indoorTF <= 40.0
+#set $indoorHI = $indoorTF
+#elif $indoorTF < 80.0
+## The original PHP used this simpler approximation for the whole
+## 40-80°F band rather than the Rothfusz regression below — and since
+## indoor temperatures are almost always in this range, this branch
+## covers the overwhelming majority of real readings, not an edge case.
+#set $indoorHI = 0.5*($indoorTF+61.0+(($indoorTF-68.0)*1.2)+($indoorRH*0.094))
+#else
+#set $indoorHI = -42.379 + (2.04901523*$indoorTF) + (10.14333127*$indoorRH) - (0.22475541*$indoorTF*$indoorRH) - (0.00683783*$indoorTF*$indoorTF) - (0.05481717*$indoorRH*$indoorRH) + (0.00122874*$indoorTF*$indoorTF*$indoorRH) + (0.00085282*$indoorTF*$indoorRH*$indoorRH) - (0.00000199*$indoorTF*$indoorTF*$indoorRH*$indoorRH)
+#if $indoorRH < 13 and $indoorTF <= 112
+#set $indoorHI = $indoorHI - (((13-$indoorRH)/4.0) * math.sqrt(17 - abs($indoorTF-95)/17.0))
+#elif $indoorRH > 85 and $indoorTF <= 87
+#set $indoorHI = $indoorHI + ((($indoorRH-85)/10.0) * ((87-$indoorTF)/5.0))
+#end if
+#end if
+"indoor_feels_like_f": $(round($indoorHI, 1)),
+"indoor_feels_like_c": $(round(($indoorHI - 32.0) * 5.0/9.0, 1))
+#else
+"indoor_current": null
+#end if
+,
+#if $current.outTemp.has_data
+#set $outTempTrendRaw = $trend.outTemp.format(format_string="%.1f", None_string="0", add_label=False)
+#try
+#set $outTempTrend = float($outTempTrendRaw)
+#except
+#set $outTempTrend = 0
+#end try
+"outside_current": $current.outTemp.format(format_string="%.2f", None_string="null", add_label=False),
+"outside_trend": $outTempTrend,
+"feels_like": $current.appTemp.format(format_string="%.2f", None_string="null", add_label=False),
+"heat_index": $current.heatindex.format(format_string="%.2f", None_string="null", add_label=False),
+"wind_chill": $current.windchill.format(format_string="%.2f", None_string="null", add_label=False),
+"humidex": $current.humidex.format(format_string="%.2f", None_string="null", add_label=False),
+"day_avg": $day.outTemp.avg.format(format_string="%.2f", None_string="null", add_label=False),
+"day_avg_last_hour": $span($time_delta=3600).outTemp.avg.format(format_string="%.2f", None_string="null", add_label=False),
+"day_max": $day.outTemp.max.format(format_string="%.2f", None_string="null", add_label=False),
+"day_maxtime": $safeMs($day.outTemp.maxtime.raw),
+"day_min": $day.outTemp.min.format(format_string="%.2f", None_string="null", add_label=False),
+"day_mintime": $safeMs($day.outTemp.mintime.raw),
+"yesterday_max": $day($days_ago=1).outTemp.max.format(format_string="%.2f", None_string="null", add_label=False),
+"yesterday_maxtime": $safeMs($day($days_ago=1).outTemp.maxtime.raw),
+"yesterday_min": $day($days_ago=1).outTemp.min.format(format_string="%.2f", None_string="null", add_label=False),
+"yesterday_mintime": $safeMs($day($days_ago=1).outTemp.mintime.raw),
+"month_max": $month.outTemp.max.format(format_string="%.2f", None_string="null", add_label=False),
+"month_maxtime": $safeMs($month.outTemp.maxtime.raw),
+"month_min": $month.outTemp.min.format(format_string="%.2f", None_string="null", add_label=False),
+"month_mintime": $safeMs($month.outTemp.mintime.raw),
+"year_max": $year.outTemp.max.format(format_string="%.2f", None_string="null", add_label=False),
+"year_maxtime": $safeMs($year.outTemp.maxtime.raw),
+"year_min": $year.outTemp.min.format(format_string="%.2f", None_string="null", add_label=False),
+"year_mintime": $safeMs($year.outTemp.mintime.raw),
+"alltime_max": $alltime.outTemp.max.format(format_string="%.2f", None_string="null", add_label=False),
+"alltime_maxtime": $safeMs($alltime.outTemp.maxtime.raw),
+"alltime_min": $alltime.outTemp.min.format(format_string="%.2f", None_string="null", add_label=False),
+"alltime_mintime": $safeMs($alltime.outTemp.mintime.raw),
+"heat_index_avg_3h": $hour($hours_ago=3).heatindex.avg.format(format_string="%.1f", None_string="null", add_label=False),
+"feels_like_avg_3h": $hour($hours_ago=3).appTemp.avg.format(format_string="%.1f", None_string="null", add_label=False),
+"wind_chill_avg_3h": $hour($hours_ago=3).windchill.avg.format(format_string="%.1f", None_string="null", add_label=False),
+"outside_avg_3h": $hour($hours_ago=3).outTemp.avg.format(format_string="%.1f", None_string="null", add_label=False)
+#else
+"outside_current": null
+#end if
+},
+
+"uv": {
+#if $current.UV.has_data
+"current": $current.UV.format(format_string="%.1f", None_string="null", add_label=False),
+"day_max": $day.UV.max.format(format_string="%.1f", None_string="null", add_label=False),
+"day_maxtime": $safeMs($day.UV.maxtime.raw),
+"yesterday_max": $day($days_ago=1).UV.max.format(format_string="%.1f", None_string="null", add_label=False),
+"yesterday_maxtime": $safeMs($day($days_ago=1).UV.maxtime.raw),
+"month_max": $month.UV.max.format(format_string="%.1f", None_string="null", add_label=False),
+"month_maxtime": $safeMs($month.UV.maxtime.raw),
+"year_max": $year.UV.max.format(format_string="%.1f", None_string="null", add_label=False),
+"year_maxtime": $safeMs($year.UV.maxtime.raw),
+"alltime_max": $alltime.UV.max.format(format_string="%.1f", None_string="null", add_label=False),
+"alltime_maxtime": $safeMs($alltime.UV.maxtime.raw)
+#else
+"current": null
+#end if
+},
+
+"vpd": {
+#if $current.vpd.has_data
+"current": $current.vpd.kPa.format(format_string="%.4f", None_string="0", add_label=False),
+"day_max": $day.vpd.max.kPa.format(format_string="%.4f", None_string="null", add_label=False),
+"day_min": $day.vpd.min.kPa.format(format_string="%.4f", None_string="null", add_label=False),
+"day_avg": $day.vpd.avg.kPa.format(format_string="%.4f", None_string="null", add_label=False),
+"day_maxtime": $safeMs($day.vpd.maxtime.raw),
+"day_mintime": $safeMs($day.vpd.mintime.raw),
+"month_max": $month.vpd.max.kPa.format(format_string="%.4f", None_string="null", add_label=False),
+"month_min": $month.vpd.min.kPa.format(format_string="%.4f", None_string="null", add_label=False),
+"month_avg": $month.vpd.avg.kPa.format(format_string="%.4f", None_string="null", add_label=False),
+"year_max": $year.vpd.max.kPa.format(format_string="%.4f", None_string="null", add_label=False),
+"year_min": $year.vpd.min.kPa.format(format_string="%.4f", None_string="null", add_label=False),
+"year_avg": $year.vpd.avg.kPa.format(format_string="%.4f", None_string="null", add_label=False)
+#else
+"current": null
+#end if
+},
+
+"wind": {
+#if $current.windSpeed.has_data and $current.windGust.has_data
+"direction": $current.windDir.format(format_string="%.0f", None_string="null", add_label=False),
+"direction_10m_avg": $span($time_delta=600).windDir.avg.format(format_string="%.0f", None_string="null", add_label=False),
+"speed": $current.windSpeed.format(format_string="%.1f", None_string="null", add_label=False),
+"gust": $current.windGust.format(format_string="%.1f", None_string="null", add_label=False),
+"speed_avg": $day.windSpeed.avg.format(format_string="%.1f", None_string="null", add_label=False),
+"speed_max": $day.windSpeed.max.format(format_string="%.1f", None_string="null", add_label=False),
+"speed_maxtime": $safeMs($day.windSpeed.maxtime.raw),
+"gust_max": $day.windGust.max.format(format_string="%.1f", None_string="null", add_label=False),
+"gust_maxtime": $safeMs($day.windGust.maxtime.raw),
+## Wind run — WeeWX's own running total, in the report's distance unit
+## (no more reconstructing it client-side from hourly-max samples).
+"wind_run": $day.windrun.sum.format(format_string="%.1f", None_string="null", add_label=False),
+"speed_10m_avg": $span($time_delta=600).windSpeed.avg.format(format_string="%.1f", None_string="null", add_label=False),
+"speed_10m_max": $span($time_delta=600).windSpeed.max.format(format_string="%.1f", None_string="null", add_label=False),
+"gust_10m_max": $span($time_delta=600).windGust.max.format(format_string="%.1f", None_string="null", add_label=False),
+"speed_yesterday_max": $day($days_ago=1).windSpeed.max.format(format_string="%.1f", None_string="null", add_label=False),
+"speed_yesterday_maxtime": $safeMs($day($days_ago=1).windSpeed.maxtime.raw),
+"gust_yesterday_max": $day($days_ago=1).windGust.max.format(format_string="%.1f", None_string="null", add_label=False),
+"gust_yesterday_maxtime": $safeMs($day($days_ago=1).windGust.maxtime.raw),
+"speed_month_max": $month.windSpeed.max.format(format_string="%.1f", None_string="null", add_label=False),
+"speed_month_maxtime": $safeMs($month.windSpeed.maxtime.raw),
+"gust_month_max": $month.windGust.max.format(format_string="%.1f", None_string="null", add_label=False),
+"gust_month_maxtime": $safeMs($month.windGust.maxtime.raw),
+"speed_year_max": $year.windSpeed.max.format(format_string="%.1f", None_string="null", add_label=False),
+"speed_year_maxtime": $safeMs($year.windSpeed.maxtime.raw),
+"gust_year_max": $year.windGust.max.format(format_string="%.1f", None_string="null", add_label=False),
+"gust_year_maxtime": $safeMs($year.windGust.maxtime.raw),
+"speed_alltime_max": $alltime.windSpeed.max.format(format_string="%.1f", None_string="null", add_label=False),
+"speed_alltime_maxtime": $safeMs($alltime.windSpeed.maxtime.raw),
+"gust_alltime_max": $alltime.windGust.max.format(format_string="%.1f", None_string="null", add_label=False),
+"gust_alltime_maxtime": $safeMs($alltime.windGust.maxtime.raw)
+#else
+"speed": null
+#end if
+}
+}
