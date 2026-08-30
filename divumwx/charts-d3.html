@@ -1,0 +1,2348 @@
+<!DOCTYPE html>
+<!--
+##############################################################################################
+# charts.html version 0.0.1
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  GPLv3
+##############################################################################################
+-->
+<html lang="en" data-bs-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Weather Charts (D3)</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="header.css?v=s3n2026i">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+  document.documentElement.dataset.embed = (new URL(location.href).searchParams.get('embed') === '1') ? '1' : '0';
+</script>
+<style>
+
+:root,
+[data-bs-theme="light"]{
+  --bw-accent:#B45309;
+  --bw-accent-soft:#3A2E1A;
+  --bw-lime:#C9DA1E;
+  --bw-lime-soft:#2E331A;
+  --bw-sky:#6FB6DD;
+  --bw-sky-soft:#1C2E38;
+  --bw-good:#5BBB8A;
+  --bw-danger:#E36B57;
+  --bw-danger-soft:#3A2220;
+  --bw-yellow:#D6BE4E;
+  --bw-yellow-soft:#3A341A;
+  --bw-line:#2C5478;
+  --bw-instrument-headspace:#495E74;
+  --bw-instrument-border:#E8EEF5;
+  --bw-radius:18px;
+  --bw-radius-sm:10px;
+  --bw-shadow:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.5);
+
+  --bs-body-bg: #EFECE2;
+  --bs-body-color: #1D2C4E;
+  --bs-secondary-color: #5C6672;
+  --bs-tertiary-bg: #FFFFFF;
+  --bs-secondary-bg: #FFFFFF;
+  --bs-border-color: #C9CFD8;
+  --bs-border-color-translucent: rgba(0,0,0,0.15);
+  --bs-card-bg: #FFFFFF;
+  --bs-emphasis-color: #111;
+  --bs-primary:#B45309;
+  --bs-primary-rgb:180,83,9;
+  --bs-link-color:#B45309;
+  --bs-link-hover-color:#D3A94C;
+  --bs-warning-rgb:180,83,9;
+  --bs-font-sans-serif:'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+[data-bs-theme="dark"]{
+  --bw-instrument-headspace:#222A2E;
+  --bw-instrument-border:#343E43;
+  --bw-accent:#D3A94C;
+  --bw-accent-soft:#3A2E1A;
+  --bw-sky:#6FB6DD;
+  --bw-sky-soft:#1C2E38;
+  --bw-good:#5BBB8A;
+  --bw-danger:#E36B57;
+  --bw-danger-soft:#3A2220;
+  --bw-yellow:#D6BE4E;
+  --bw-yellow-soft:#3A341A;
+  --bw-line:#343E43;
+  --bw-shadow:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.5);
+
+  --bs-body-bg:#0A0F22;
+  --bs-body-color:#E9E4D4;
+  --bs-secondary-color:#8B93B8;
+  --bs-tertiary-bg:#111834;
+  --bs-secondary-bg:#111834;
+  --bs-border-color:#2A3358;
+  --bs-border-color-translucent:#2A3358;
+  --bs-card-bg:#111834;
+  --bs-emphasis-color:#FFFFFF;
+  --bs-primary:#D3A94C;
+  --bs-primary-rgb:211,169,76;
+  --bs-link-color:#D3A94C;
+  --bs-link-hover-color:#E8C578;
+}
+
+/* Seasonal accent mode — inactive buttons (.records-tab, .chart-tf-btn,
+   .chart-hist-select) and panels (.records-period-card, .rose-panel,
+   .extreme-values-container) all read --bs-tertiary-bg, so aliasing it
+   to the site's seasonal card tint (--card-bg, from header.css) covers
+   all of them in one place. */
+body.season-winter, body.season-spring, body.season-summer, body.season-autumn {
+  --bs-tertiary-bg: var(--card-bg);
+}
+
+[data-embed="1"] .records-tabs{ display:none; }
+
+[data-embed="1"] .records-page-title{ display:none; }
+
+/* Strip the card chrome (border/shadow/background/padding) in embed
+   mode so the chart stretches flush to the full width of whatever page
+   is embedding it, instead of sitting inset inside a bordered card —
+   the ID selector + !important is needed to beat Bootstrap's own
+   !important on the .p-4 utility class. */
+[data-embed="1"] #chartCard{
+  border: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  margin-bottom: 0 !important;
+}
+/* The meteogram's own caption line is redundant once the embedding page
+   has already labelled the chart itself (e.g. stationforecast.html's
+   "7-Day Meteogram" heading above it). */
+[data-embed="1"] #meteogramToolbar{ display:none; }
+
+[data-embed="1"] .site-navbar-include{ display:none; }
+
+body{
+  font-family:var(--bs-font-sans-serif);
+  padding-bottom:48px;
+  transition:background-color .25s ease, color .25s ease;
+}
+.font-mono{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;}
+.card{background:var(--bs-card-bg); border-radius:var(--bw-radius-sm); box-shadow:var(--bw-shadow);}
+/* Seasonal accent mode — tints the card background the same way index.html's
+   dashboard does, using the same palette (kept in sync with header.css). */
+body.season-winter { --bs-card-bg: #e9f2ec; }
+[data-bs-theme="dark"] body.season-winter { --bs-card-bg: #24312a; }
+body.season-spring { --bs-card-bg: #eef7e3; }
+[data-bs-theme="dark"] body.season-spring { --bs-card-bg: #26301f; }
+body.season-summer { --bs-card-bg: #fff6d9; }
+[data-bs-theme="dark"] body.season-summer { --bs-card-bg: #332c16; }
+body.season-autumn { --bs-card-bg: #f2e6d8; }
+[data-bs-theme="dark"] body.season-autumn { --bs-card-bg: #2c2118; }
+
+/* ---------- Top bar ---------- */
+
+/* ---------- Charts page ---------- */
+.records-page-title{font-size:32px;font-weight:700;margin:0 0 4px;}
+.records-page-sub{color:var(--bs-secondary-color);font-size:15px;margin-bottom:18px;}
+
+.records-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;}
+.records-tab{
+  font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:13px;font-weight:600;
+  padding:9px 18px;border-radius:999px;border:1px solid var(--bs-border-color);
+  background-color:var(--bs-tertiary-bg);color:var(--bs-body-color);
+  cursor:pointer;transition:.15s;
+}
+.records-tab:hover{border-color:var(--bw-accent);}
+.records-tab.active{background-color:var(--bw-accent);color:#1B1407;border-color:var(--bw-accent);}
+
+.chart-toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;}
+.chart-timeframes{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.chart-tf-btn{
+  font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12.5px;font-weight:600;
+  padding:7px 14px;border-radius:999px;border:1px solid var(--bs-border-color);
+  background-color:var(--bs-tertiary-bg);color:var(--bs-body-color);
+  cursor:pointer;transition:.15s;
+}
+.chart-tf-btn:hover{border-color:var(--bw-accent);}
+.chart-tf-btn.active{background-color:var(--bw-accent);color:#1B1407;border-color:var(--bw-accent);}
+.chart-hist-select{
+  font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12.5px;font-weight:600;
+  background-color:var(--bs-tertiary-bg);color:var(--bs-body-color);border:1px solid var(--bs-border-color);
+  border-radius:999px;padding:7px 14px;
+}
+.chart-hist-select option{color:#000;background-color:#fff;}
+.chart-hist-select.active{border-color:var(--bw-accent);background-color:var(--bw-accent-soft);color:var(--bw-accent);}
+.chart-data-info{font-size:11.5px;color:var(--bs-secondary-color);font-style:italic;}
+
+.chart-container{width:100%;height:420px;}
+.chart-category-note{font-size:12.5px;color:var(--bs-secondary-color);margin:10px 0 0;font-style:italic;}
+
+.aurora-toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;}
+.aurora-badge{font-size:12px;padding:5px 12px;border-radius:6px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;}
+.aurora-green {background:#1a7f3c;color:#d4fce4;}
+.aurora-yellow{background:#a07800;color:#fff8dc;}
+.aurora-amber {background:#b85c00;color:#fff0d0;}
+.aurora-red   {background:#8b0000;color:#ffe0e0;}
+.aurora-thresh-legend{display:flex;flex-wrap:wrap;gap:8px;padding-top:10px;font-size:11.5px;align-items:center;}
+.aurora-thresh-item{display:flex;align-items:center;gap:5px;}
+.aurora-thresh-swatch{width:13px;height:13px;border-radius:2px;flex-shrink:0;}
+
+.meteogram-toolbar{display:flex;align-items:center;margin-bottom:14px;}
+.meteogram-wrap{width:100%;overflow-x:auto;}
+#meteogramContainer{min-width:1260px;max-width:1820px;height:520px;margin:0 auto;}
+/* Embedded (e.g. inside stationforecast.html) has no page chrome fighting
+   it for space, so let the chart fill whatever width it's given instead
+   of holding to the standalone page's fixed min/max-width and scrolling. */
+[data-embed="1"] #meteogramContainer{ min-width:0; max-width:none; width:100%; }
+
+.records-periods-row{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:14px;
+}
+.records-period-card{
+  background-color:var(--bs-tertiary-bg);border:1px solid var(--bw-instrument-border,var(--bs-border-color));
+  border-radius:12px;padding:16px 12px;text-align:center;
+}
+.records-period-label{
+  font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--bs-secondary-color);margin-bottom:12px;padding-bottom:8px;
+  border-bottom:1px solid var(--bs-border-color);
+}
+.records-grid{display:flex;flex-direction:column;gap:16px;}
+.records-label{font-size:12.5px;color:var(--bs-secondary-color);margin-bottom:3px;}
+.records-value{font-size:20px;font-weight:600;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;line-height:1.15;}
+.records-value-date{font-size:11px;color:var(--bs-secondary-color);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;margin-top:2px;}
+.records-section-title{font-size:20px;font-weight:700;margin:28px 0 14px;}
+
+@media (max-width:900px){
+  .records-periods-row{grid-template-columns:repeat(3,1fr);}
+}
+@media (max-width:600px){
+  .records-periods-row{grid-template-columns:repeat(2,1fr);}
+  .chart-container{height:340px;}
+}
+@media (max-width:420px){
+  .records-periods-row{grid-template-columns:1fr;}
+}
+
+footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;}
+
+.pollen-label{display:inline-flex;align-items:center;gap:6px;}
+.pollen-dot{width:12px;height:12px;border-radius:50%;display:inline-block;}
+
+.pollen-very-high{color:#D8001D;}
+.pollen-high{color:#F85900;}
+.pollen-moderate{color:#F7E400;}
+.pollen-low{color:#1F8C3F;}
+
+.vis-excellent{color:#5BBB8A;}
+.vis-good{color:#6FB6DD;}
+.vis-moderate{color:#D6BE4E;}
+.vis-poor{color:#E36B57;}
+.vis-very-poor{color:#D8001D;}
+
+.uv-0{color:#7F7F7F;}
+.uv-1{color:#1F8C3F;}
+.uv-2{color:#1F8C3F;}
+.uv-3{color:#F7E400;}
+.uv-4{color:#F7E400;}
+.uv-5{color:#F7E400;}
+.uv-6{color:#F85900;}
+.uv-7{color:#F85900;}
+.uv-8{color:#D8001D;}
+.uv-9{color:#D8001D;}
+.uv-10{color:#D8001D;}
+.uv-11{color:#6B49C8;}
+
+.aqi-good{color:#5BBB8A;}
+.aqi-moderate{color:#F7E400;}
+.aqi-unhealthy-sensitive{color:#F85900;}
+.aqi-unhealthy{color:#D8001D;}
+
+.ltg-very-close{color:#D8001D;}
+.ltg-close{color:#E36B57;}
+.ltg-moderate{color:#F7E400;}
+.ltg-far{color:#6FB6DD;}
+
+.gas-co{color:#6FB6DD;}
+.gas-co2{color:#8C9A95;}
+.gas-nh3{color:#D6BE4E;}
+.gas-no2{color:#E36B57;}
+.gas-o3{color:#5BBB8A;}
+.gas-so2{color:#C9DA1E;}
+
+/* ---------- D3 engine chrome (new for this page) ---------- */
+.d3-badge{
+  display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  padding:3px 9px;border-radius:999px;background:var(--bw-accent-soft);color:var(--bw-accent);margin-left:8px;
+  vertical-align:middle;
+}
+.d3-legend{display:flex;flex-wrap:wrap;gap:12px 16px;margin:2px 0 10px;font-size:12.5px;}
+.d3-legend-item{display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none;}
+.d3-legend-item.d3-legend-off{opacity:.35;}
+.d3-legend-swatch{width:11px;height:11px;border-radius:3px;flex-shrink:0;}
+.chart-tooltip{
+  position:fixed;pointer-events:none;font-size:12px;line-height:1.5;z-index:9999;
+  background:var(--bs-card-bg);border:1px solid var(--bs-border-color);border-radius:8px;
+  padding:8px 11px;box-shadow:var(--bw-shadow);color:var(--bs-body-color);display:none;white-space:nowrap;
+}
+.d3-hover-line{stroke:var(--bs-secondary-color);stroke-width:1;stroke-dasharray:3,3;pointer-events:none;}
+.d3-axis path,.d3-axis line{stroke:var(--bs-border-color);}
+.d3-axis text{fill:var(--bs-body-color);font-size:10.5px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;}
+.d3-gridline line{stroke:var(--bs-border-color);stroke-opacity:.35;}
+.d3-gridline path{stroke:none;}
+.chart-container svg{width:100%;height:100%;display:block;overflow:visible;}
+
+/* ---------- Wind Rose panels (adapted from modalWindRose.html) ---------- */
+.roses-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:14px;}
+.rose-panel{
+  flex:1 1 320px;max-width:440px;background:var(--bs-tertiary-bg);
+  border-radius:var(--bw-radius-sm);box-shadow:var(--bw-shadow);overflow:visible;position:relative;
+}
+.rose-panel-header{
+  padding:8px 14px;border-bottom:1px solid var(--bs-border-color);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.rose-panel-title{font-weight:700;font-size:13.5px;}
+.rose-panel-sub{font-size:10.5px;color:var(--bs-secondary-color);}
+.rose-svg-wrap{display:block;width:100%;aspect-ratio:1;cursor:crosshair;}
+.rose-svg-wrap svg{width:100%;height:100%;display:block;overflow:visible;}
+.rose-empty{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  text-align:center;padding:20px;font-size:12px;color:var(--bs-secondary-color);
+}
+.rose-legend{
+  padding:8px 12px;border-top:1px solid var(--bs-border-color);
+  display:flex;flex-wrap:wrap;gap:4px 12px;justify-content:center;
+}
+.leg-item{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--bs-secondary-color);}
+.leg-swatch{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+.extreme-values-container{
+  background:var(--bs-tertiary-bg);border-radius:var(--bw-radius-sm);box-shadow:var(--bw-shadow);
+  padding:14px 18px;margin-top:14px;
+}
+.extreme-values-title{
+  text-align:center;margin:0 0 12px;font-size:13px;font-weight:700;
+  letter-spacing:.05em;text-transform:uppercase;opacity:.85;
+  padding-bottom:8px;border-bottom:1px solid var(--bs-border-color);
+}
+.extreme-values-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;text-align:center;}
+.extreme-period{background:var(--bs-body-bg);border-radius:8px;padding:8px 6px;}
+.period-label{font-size:10.5px;font-weight:700;color:var(--bs-secondary-color);margin-bottom:6px;text-transform:uppercase;letter-spacing:.03em;}
+.metric-box{margin-bottom:6px;}
+.metric-box:last-child{margin-bottom:0;}
+.metric-value{font-size:11px;font-weight:700;line-height:1.2;}
+.metric-date{font-size:9px;color:var(--bs-secondary-color);margin-top:1px;}
+.metric-unit{font-size:9px;color:var(--bs-secondary-color);margin-left:1px;}
+.wind-speed-max .metric-value{color:#FF6B6B;}
+.wind-gust-max .metric-value{color:var(--bw-accent);}
+.wind-dir-prev .metric-value{color:#9D4EDD;}
+.extreme-values-note{text-align:center;font-size:9.5px;color:var(--bs-secondary-color);margin-top:10px;font-style:italic;padding-top:8px;border-top:1px solid var(--bs-border-color);}
+@media (max-width:900px){ .extreme-values-grid{grid-template-columns:repeat(3,1fr);} }
+@media (max-width:600px){ .extreme-values-grid{grid-template-columns:repeat(2,1fr);} }
+@media (max-width:400px){ .extreme-values-grid{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+
+<div class="container-xl">
+  <div class="site-navbar-include" w3-include-html="navbar.html"></div>
+
+  <div class="chart-tooltip" id="chartTooltip"></div>
+
+  <h1 class="records-page-title" id="pageTitle">Weather Charts<span class="d3-badge">D3</span></h1>
+
+  <div id="cloudCrossLinkBar" style="display:none;justify-content:flex-end;margin:-8px 0 12px;">
+    <button type="button" id="openMetarBtn" class="chart-tf-btn">METAR</button>
+  </div>
+ 
+  <div class="records-tabs" id="recordsTabs">
+    <button class="records-tab" data-cat="temperature">Temperature</button>
+    <button class="records-tab" data-cat="wind">Wind &amp; Gust</button>
+    <button class="records-tab" data-cat="rain">Rain &amp; Rain Rate</button>
+    <button class="records-tab" data-cat="barometer">Barometer</button>
+    <button class="records-tab" data-cat="solaruv">Solar &amp; UV</button>
+    <button class="records-tab" data-cat="cloud">Cloud &amp; Visibility</button>
+    <button class="records-tab" data-cat="lightning">Lightning</button>
+    <button class="records-tab" data-cat="pollen">Pollen</button>
+    <button class="records-tab" data-cat="airquality">Air Quality</button>
+    <button class="records-tab" data-cat="gases">Greenhouse Gases</button>
+    <button class="records-tab" data-cat="aurora">Aurora Activity</button>
+    <button class="records-tab" data-cat="meteogram">Meteogram</button>
+    <button class="records-tab" data-cat="windrose">Wind Rose</button>
+  </div>
+
+  <div class="card p-4 mb-4" id="chartCard">
+    <div class="chart-toolbar" id="chartToolbarStandard">
+      <div class="chart-timeframes" id="chartTimeframes">
+        <button class="chart-tf-btn" data-tf="day">Day</button>
+        <button class="chart-tf-btn" data-tf="week">Week</button>
+        <button class="chart-tf-btn" data-tf="month">Month</button>
+        <button class="chart-tf-btn" data-tf="year">Year</button>
+        <select class="chart-hist-select" id="chartHistYear" title="Historical year"></select>
+      </div>
+      <span class="chart-data-info" id="chartDataInfo"></span>
+    </div>
+    <div class="aurora-toolbar" id="auroraToolbar" style="display:none;">
+      <span class="font-mono small" style="color:var(--bs-secondary-color);">Live geomagnetic activity — AuroraWatch UK</span>
+      <span class="aurora-badge aurora-green" id="auroraBadge">Loading…</span>
+    </div>
+    <div class="d3-legend" id="chartLegend"></div>
+    <div class="chart-container" id="chartContainer"></div>
+    <div class="chart-category-note" id="chartCategoryNote"></div>
+    <div class="aurora-thresh-legend" id="auroraLegend" style="display:none;">
+      <span class="aurora-thresh-item"><span class="aurora-thresh-swatch" style="background:#22c55e"></span><span><b>Green</b> — No significant activity (&lt;50 nT)</span></span>
+      <span class="aurora-thresh-item"><span class="aurora-thresh-swatch" style="background:#facc15"></span><span><b>Yellow</b> — Minor activity (50–100 nT) — aurora possible from northern Scotland</span></span>
+      <span class="aurora-thresh-item"><span class="aurora-thresh-swatch" style="background:#f97316"></span><span><b>Amber</b> — Moderate activity (100–200 nT) — aurora likely from Scotland, possible further south</span></span>
+      <span class="aurora-thresh-item"><span class="aurora-thresh-swatch" style="background:#ef4444"></span><span><b>Red</b> — Strong activity (&gt;200 nT) — aurora visible across much of UK</span></span>
+    </div>
+    <div class="meteogram-toolbar" id="meteogramToolbar" style="display:none;">
+      <span class="font-mono small" style="color:var(--bs-secondary-color);">7-day hourly forecast — temperature, precipitation, pressure &amp; wind</span>
+    </div>
+    <div class="meteogram-wrap" id="meteogramWrap" style="display:none;">
+      <div class="d3-legend" id="meteogramLegend"></div>
+      <div id="meteogramContainer"></div>
+    </div>
+    <div class="chart-toolbar" id="windroseToolbar" style="display:none;">
+      <div class="chart-timeframes">
+        <button class="chart-tf-btn" data-wrperiod="week">Week</button>
+        <button class="chart-tf-btn" data-wrperiod="month">Month</button>
+        <button class="chart-tf-btn" data-wrperiod="year">Year</button>
+      </div>
+      <span class="chart-data-info" id="windroseUnitDisplay"></span>
+    </div>
+    <div id="windroseWrap" style="display:none;">
+      <div class="roses-row">
+        <div class="rose-panel">
+          <div class="rose-panel-header">
+            <span class="rose-panel-title" style="color:#FF6B6B;">Wind Speed</span>
+            <span class="rose-panel-sub" id="wrCalmSpeed"></span>
+          </div>
+          <div class="rose-svg-wrap" id="roseSpeed"></div>
+          <div class="rose-empty" id="roseSpeedEmpty" style="display:none;"></div>
+          <div class="rose-legend" id="legendSpeed"></div>
+        </div>
+        <div class="rose-panel">
+          <div class="rose-panel-header">
+            <span class="rose-panel-title" style="color:var(--bw-accent);">Wind Gust</span>
+            <span class="rose-panel-sub" id="wrCalmGust"></span>
+          </div>
+          <div class="rose-svg-wrap" id="roseGust"></div>
+          <div class="rose-empty" id="roseGustEmpty" style="display:none;"></div>
+          <div class="rose-legend" id="legendGust"></div>
+        </div>
+      </div>
+      <div class="extreme-values-container">
+        <div class="extreme-values-title">Wind Speed, Gust &amp; Prevailing Direction</div>
+        <div class="extreme-values-grid" id="wrExtremeGrid"></div>
+        <div class="extreme-values-note">Maximum values shown for each period. Prevailing direction uses vector averaging.</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="recordsSection">
+  <h2 class="records-section-title">Records</h2>
+  <div class="card p-4 mb-4">
+    <div class="records-periods-row" id="recordsPeriodsRow"></div>
+  </div>
+  </div>
+
+  <footer class="text-center py-3">DivumWX — Charts</footer>
+</div>
+
+
+<script src="units.js"></script>
+<script src="header.js?v=s3n2026q"></script>
+<script>
+
+function round1(v){ return v==null ? null : Math.round(v*10)/10; }
+function round2(v){ return v==null ? null : Math.round(v*100)/100; }
+function fmtTemp(c, unit){ return unit==='F' ? round1(C2F(c))+'°F' : round1(c)+'°C'; }
+function fmtWind(ms, unit){
+  switch(unit){
+    case 'mph': return round1(ms2mph(ms))+' mph';
+    case 'kmh': return round1(ms2kmh(ms))+' km/h';
+    case 'kt':  return round1(ms2kt(ms))+' kt';
+    case 'ms':  return round1(ms)+' m/s';
+    case 'bf': { const b=beaufort(ms); return 'F'+b.force+' · '+b.label; }
+    default: return round1(ms)+' m/s';
+  }
+}
+function fmtPressure(hpa, unit){
+  switch(unit){
+    case 'inhg': return round1(hpa2inhg(hpa))+' inHg';
+    case 'mmhg': return round1(hpa2mmhg(hpa))+' mmHg';
+    case 'kpa':  return round1(hpa2kpa(hpa))+' kPa';
+    case 'mbar': return round1(hpa)+' mbar';
+    default: return round1(hpa)+' hPa';
+  }
+}
+function fmtRain(mm, unit){ return unit==='in' ? round2(mm2in(mm))+' in' : round2(mm)+' mm'; }
+function fmtDist(km, unit){
+  switch(unit){
+    case 'mi': return round1(km2mi(km))+' mi';
+    case 'nm': return round1(km2nm(km))+' nm';
+    default: return round1(km)+' km';
+  }
+}
+function fmtPollen(v){ return round1(v); }
+function fmtConc(v, unit){ return round1(v)+' '+unit; }
+function fmtLightningCount(v){ return v >= 1 ? Math.round(v)+' strikes' : 'None'; }
+function fmtCloudPercent(v){ return round1(v)+'%'; }
+
+function convTemp(c, unit){ return unit==='F' ? C2F(c) : c; }
+function convWind(ms, unit){
+  switch(unit){
+    case 'mph': return ms2mph(ms);
+    case 'kmh': return ms2kmh(ms);
+    case 'kt':  return ms2kt(ms);
+    case 'bf':  return beaufort(ms).force;
+    default:    return ms;
+  }
+}
+function convPressure(hpa, unit){
+  switch(unit){
+    case 'inhg': return hpa2inhg(hpa);
+    case 'mmhg': return hpa2mmhg(hpa);
+    case 'kpa':  return hpa2kpa(hpa);
+    default:     return hpa;
+  }
+}
+function convRain(mm, unit){ return unit==='in' ? mm2in(mm) : mm; }
+function convDist(km, unit){
+  switch(unit){
+    case 'mi': return km2mi(km);
+    case 'nm': return km2nm(km);
+    default: return km;
+  }
+}
+function convPollen(v, sys){ return v; }
+function convConc(v, sys){ return v; }
+
+function tempUnitLabel(sys){ return sys.temp==='F' ? '°F' : '°C'; }
+function windUnitLabel(sys){ return {mph:'mph', kmh:'km/h', kt:'kt', ms:'m/s', bf:'Bft'}[sys.wind] || sys.wind; }
+function pressureUnitLabel(sys){ return {inhg:'inHg', mmhg:'mmHg', kpa:'kPa', hpa:'hPa', mbar:'mbar'}[sys.pressure] || sys.pressure; }
+function rainUnitLabel(sys){ return sys.rain==='in' ? 'in' : 'mm'; }
+function distUnitLabel(sys){ return {mi:'mi', nm:'nm', km:'km'}[sys.dist] || sys.dist; }
+function pollenUnitLabel(){ return 'grains/m³'; }
+function concUnitLabel(sys){ return sys.conc || 'µg/m³'; }
+
+let currentSystem = (function(){
+  var stored = localStorage.getItem('dashboardUnitSystem');
+  return (stored && SYSTEMS[stored]) ? stored : 'uk';
+})();
+
+const CHARTS_JSON_URL = './jsondata/charts.json';
+const CHARTS_POLL_MS = 60*60*1000;
+let dataSeries = null;
+
+function dataSlice(seriesArr, days){
+  if(!Array.isArray(seriesArr)) return [];
+  const valid = seriesArr.filter(pt => pt && pt[1] !== null && pt[1] !== undefined);
+  valid.sort((a,b)=>a[0]-b[0]);
+  const n = isFinite(days) ? Math.min(days, valid.length) : valid.length;
+  return n > 0 ? valid.slice(valid.length - n) : [];
+}
+function dataAggregate(slice, agg){
+  if(!slice.length) return {value:null, date:null};
+  if(agg === 'max'){ let best=slice[0]; for(const pt of slice) if(pt[1] > best[1]) best=pt; return {value:best[1], date:best[0]}; }
+  if(agg === 'min'){ let best=slice[0]; for(const pt of slice) if(pt[1] < best[1]) best=pt; return {value:best[1], date:best[0]}; }
+  if(agg === 'sum'){ return {value: slice.reduce((s,pt)=>s+pt[1], 0), date:null}; }
+  return {value: slice.reduce((s,pt)=>s+pt[1], 0) / slice.length, date:null};
+}
+function fmtDateOnly(ts){
+  return ts==null ? '' : new Date(ts).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
+}
+
+async function fetchChartsJson(){
+  const res = await fetch(CHARTS_JSON_URL + ((CHARTS_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'});
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  const json = await res.json();
+  const series = json && json[0] && json[0].chartPlot && json[0].chartPlot.series;
+  if(!series) throw new Error('Unexpected charts.json shape — no chartPlot.series found');
+  return series;
+}
+async function pollChartsJson(){
+  try{
+    dataSeries = await fetchChartsJson();
+    document.getElementById('chartDataInfo').textContent = 'Live data';
+  }catch(e){
+    console.warn('Re-ImaginedWX charts: poll failed —', e.message);
+    document.getElementById('chartDataInfo').textContent = 'Data unavailable';
+  }
+  populateHistoricalYears();
+  renderChart();
+  renderRecordsPanel();
+}
+
+const AURORA_URL = './jsondata/aurora.txt';
+const AURORA_POLL_MS = 5*60*1000;
+let auroraData = null;
+
+const AURORA_STATUS = {
+  green:  {label:'No significant activity',         color:'#22c55e', badgeClass:'aurora-green'},
+  yellow: {label:'Minor geomagnetic activity',       color:'#facc15', badgeClass:'aurora-yellow'},
+  amber:  {label:'Moderate geomagnetic activity',    color:'#f97316', badgeClass:'aurora-amber'},
+  red:    {label:'Strong geomagnetic activity',      color:'#ef4444', badgeClass:'aurora-red'},
+};
+function auroraStatusForValue(v){
+  if(v < 50) return 'green';
+  if(v < 100) return 'yellow';
+  if(v < 200) return 'amber';
+  return 'red';
+}
+function parseAuroraXML(xmlText){
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(xmlText, 'application/xml');
+
+  const thresholds = {};
+  doc.querySelectorAll('lower_threshold').forEach(el => {
+    thresholds[el.getAttribute('status_id')] = parseFloat(el.textContent);
+  });
+
+  const updatedEl = doc.querySelector('updated datetime');
+  const updatedAt = updatedEl ? updatedEl.textContent : null;
+
+  const readings = [];
+  doc.querySelectorAll('activity').forEach(el => {
+    const dtEl = el.querySelector('datetime');
+    const valEl = el.querySelector('value');
+    if(dtEl && valEl){
+      readings.push({datetime: dtEl.textContent, value: parseFloat(valEl.textContent), status_id: el.getAttribute('status_id')});
+    }
+  });
+  readings.sort((a,b) => a.datetime < b.datetime ? -1 : 1);
+  return {thresholds, updatedAt, readings};
+}
+async function pollAurora(){
+  try{
+    const res = await fetch(AURORA_URL + ((AURORA_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const xml = await res.text();
+    auroraData = parseAuroraXML(xml);
+  }catch(e){
+    console.warn('Re-ImaginedWX charts: aurora.txt poll failed —', e.message);
+    auroraData = null;
+  }
+  if(currentCategory === 'aurora') renderChart();
+}
+
+const METEOGRAM_URL = './jsondata/forecastcard.txt';
+const METEOGRAM_POLL_MS = 15*60*1000;
+const METEOGRAM_HOURS = 168;
+let meteogramData = null;
+
+const METEOGRAM_ICON_PATH = './meteocons/fill/svg/';
+const METEOGRAM_WMO = {
+  0:  {icon:{day:'clear-day',               night:'clear-night'},               text:'Clear sky'},
+  1:  {icon:{day:'mostly-clear-day',        night:'mostly-clear-night'},        text:'Mainly clear'},
+  2:  {icon:{day:'partly-cloudy-day',       night:'partly-cloudy-night'},       text:'Partly cloudy'},
+  3:  {icon:{day:'overcast-day',            night:'overcast-night'},           text:'Overcast'},
+  45: {icon:{day:'fog-day',                 night:'fog-night'},                 text:'Fog'},
+  48: {icon:{day:'fog-day',                 night:'fog-night'},                 text:'Icy fog'},
+  51: {icon:{day:'partly-cloudy-day-drizzle', night:'partly-cloudy-night-drizzle'}, text:'Light drizzle'},
+  53: {icon:{day:'overcast-day-drizzle',    night:'overcast-night-drizzle'},    text:'Drizzle'},
+  55: {icon:{day:'overcast-day-drizzle',    night:'overcast-night-drizzle'},    text:'Heavy drizzle'},
+  56: {icon:{day:'partly-cloudy-day-sleet', night:'partly-cloudy-night-sleet'}, text:'Light freezing drizzle'},
+  57: {icon:{day:'overcast-day-sleet',      night:'overcast-night-sleet'},      text:'Freezing drizzle'},
+  61: {icon:{day:'partly-cloudy-day-rain',  night:'partly-cloudy-night-rain'},  text:'Light rain'},
+  63: {icon:{day:'overcast-day-rain',       night:'overcast-night-rain'},       text:'Rain'},
+  65: {icon:{day:'extreme-day-rain',        night:'extreme-night-rain'},        text:'Heavy rain'},
+  66: {icon:{day:'partly-cloudy-day-sleet', night:'partly-cloudy-night-sleet'}, text:'Light freezing rain'},
+  67: {icon:{day:'overcast-day-sleet',      night:'overcast-night-sleet'},      text:'Freezing rain'},
+  71: {icon:{day:'partly-cloudy-day-snow',  night:'partly-cloudy-night-snow'},  text:'Light snow'},
+  73: {icon:{day:'overcast-day-snow',       night:'overcast-night-snow'},       text:'Snow'},
+  75: {icon:{day:'extreme-day-snow',        night:'extreme-night-snow'},        text:'Heavy snow'},
+  77: {icon:{day:'overcast-day-snow',       night:'overcast-night-snow'},       text:'Snow grains'},
+  80: {icon:{day:'partly-cloudy-day-rain',  night:'partly-cloudy-night-rain'},  text:'Light showers'},
+  81: {icon:{day:'overcast-day-rain',       night:'overcast-night-rain'},       text:'Showers'},
+  82: {icon:{day:'extreme-day-rain',        night:'extreme-night-rain'},        text:'Heavy showers'},
+  85: {icon:{day:'partly-cloudy-day-snow',  night:'partly-cloudy-night-snow'},  text:'Snow showers'},
+  86: {icon:{day:'extreme-day-snow',        night:'extreme-night-snow'},        text:'Heavy snow showers'},
+  95: {icon:{day:'thunderstorms-day',       night:'thunderstorms-night'},       text:'Thunderstorm'},
+  96: {icon:{day:'thunderstorms-day-rain',  night:'thunderstorms-night-rain'},  text:'Thunderstorm with hail'},
+  99: {icon:{day:'thunderstorms-extreme-day-rain', night:'thunderstorms-extreme-night-rain'}, text:'Thunderstorm with heavy hail'},
+};
+const METEOGRAM_COMPASS = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+function meteogramBearing(deg){ return METEOGRAM_COMPASS[Math.round(deg / 22.5) % 16]; }
+
+function parseMeteogramData(json){
+  if(!json || !json.hourly) return null;
+  const h = json.hourly;
+  const startTime = Date.parse(h.time[0]);
+  const endTime = startTime + METEOGRAM_HOURS * 36e5;
+
+  const times = [], temps = [], precip = [], pressure = [], wind = [], weatherCode = [];
+  h.time.forEach((timeStr, i) => {
+    const x = Date.parse(timeStr);
+    if(x > endTime) return;
+    times.push(x);
+    temps.push(h.temperature_2m[i]);
+    precip.push(h.precipitation[i]);
+    pressure.push(h.pressure_msl[i]);
+    wind.push({
+      speed: h.wind_speed_10m[i] / 3.6,
+      gust:  h.wind_gusts_10m[i] / 3.6,
+      dir:   h.wind_direction_10m[i],
+    });
+    weatherCode.push(h.weather_code[i]);
+  });
+  return {times, temps, precip, pressure, wind, weatherCode};
+}
+
+async function pollMeteogram(){
+  try{
+    const res = await fetch(METEOGRAM_URL + ((METEOGRAM_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const json = await res.json();
+    meteogramData = parseMeteogramData(json);
+  }catch(e){
+    console.warn('Re-ImaginedWX charts: forecastcard.txt poll failed —', e.message);
+    meteogramData = null;
+  }
+  if(currentCategory === 'meteogram') renderChart();
+}
+
+function drawWindBarbD3(g, px, py, w, barbColor){
+  const speedKt = Math.round(w.speed * 1.94384);
+  const rotationDeg = w.dir + 180; // SVG rotate() takes degrees directly — no radian conversion needed, unlike the ECharts graphic 'rotation' prop
+  const bg = g.append('g').attr('transform', `translate(${px},${py}) rotate(${rotationDeg})`);
+  bg.append('line').attr('x1',0).attr('y1',-10).attr('x2',0).attr('y2',10).attr('stroke',barbColor).attr('stroke-width',1.5);
+  bg.append('polygon').attr('points','-3,-10 0,-15 3,-10').attr('fill',barbColor);
+
+  let featherY = 8;
+  if(speedKt >= 50){
+    bg.append('polygon').attr('points', `0,${featherY} 8,${featherY-4} 0,${featherY-8}`).attr('fill',barbColor);
+    featherY -= 9;
+  }
+  let remaining = speedKt % 50;
+  while(remaining >= 10){
+    bg.append('line').attr('x1',0).attr('y1',featherY).attr('x2',8).attr('y2',featherY-4).attr('stroke',barbColor).attr('stroke-width',1.5);
+    featherY -= 3;
+    remaining -= 10;
+  }
+  if(remaining >= 5){
+    bg.append('line').attr('x1',0).attr('y1',featherY).attr('x2',4).attr('y2',featherY-2).attr('stroke',barbColor).attr('stroke-width',1.5);
+  }
+  if(speedKt < 3){
+    bg.append('circle').attr('cx',0).attr('cy',0).attr('r',3).attr('stroke',barbColor).attr('fill','none').attr('stroke-width',1.5);
+  }
+}
+
+function renderMeteogramLegendD3(defs){
+  const legend = d3.select('#meteogramLegend');
+  legend.selectAll('*').remove();
+  legend.selectAll('.d3-legend-item').data(defs).join('div').attr('class','d3-legend-item')
+    .each(function(d){
+      const item = d3.select(this);
+      item.append('span').attr('class','d3-legend-swatch').style('background', d.color);
+      item.append('span').text(d.name);
+    });
+}
+
+function attachMeteogramHover(g, svg, ctx){
+  const {x, innerW, innerH, margin, times, tempData, precipData, pressureData, wind, weatherCode, sys, tempColor, precipColor, pressureColor} = ctx;
+  const hoverLine = g.append('line').attr('class','d3-hover-line').attr('y1',0).attr('y2',innerH).style('opacity',0);
+  const bisect = d3.bisector(d => d).left;
+
+  svg.selectAll('.hover-capture').remove();
+  svg.append('rect').attr('class','hover-capture')
+    .attr('x', margin.left).attr('y', margin.top).attr('width', innerW).attr('height', innerH)
+    .attr('fill','transparent')
+    .on('mousemove', function(event){
+      const [mx] = d3.pointer(event, g.node());
+      const t = x.invert(mx).getTime();
+      let i = bisect(times, t);
+      if(i > 0 && (i >= times.length || Math.abs(times[i-1]-t) < Math.abs(times[i]-t))) i--;
+      i = Math.min(times.length-1, Math.max(0, i));
+
+      const dt = new Date(times[i]);
+      const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const next = new Date(dt.getTime() + 3600000);
+      const pad = n => String(n).padStart(2,'0');
+      const hdr = `${days[dt.getDay()]}, ${months[dt.getMonth()]} ${dt.getDate()}, `
+        + `${pad(dt.getHours())}:${pad(dt.getMinutes())} - ${pad(next.getHours())}:${pad(next.getMinutes())}`;
+      const wmo = METEOGRAM_WMO[weatherCode[i]] || {text:'Unknown'};
+
+      let html = `<small>${hdr}</small><br><strong>${wmo.text}</strong><br>`;
+      html += `<div><span style="color:${tempColor};">●</span> Temperature: <strong>${tempData[i].v}${tempUnitLabel(sys)}</strong></div>`;
+      if(precipData[i].v > 0) html += `<div><span style="color:${precipColor};">●</span> Precipitation: <strong>${precipData[i].v} ${rainUnitLabel(sys)}</strong></div>`;
+      html += `<div><span style="color:${pressureColor};">●</span> Barometer: <strong>${pressureData[i].v} ${pressureUnitLabel(sys)}</strong></div>`;
+      const w = wind[i];
+      if(w){
+        const b = beaufort(w.speed);
+        const speedDisp = Math.round(convWind(w.speed, sys.wind));
+        const gustDisp = Math.round(convWind(w.gust || 0, sys.wind));
+        html += `<div><span style="color:#DD8C1E;">●</span> Wind: <strong>${speedDisp} ${windUnitLabel(sys)}</strong> `
+          + `(F${b.force} · ${b.label}) from <strong>${meteogramBearing(w.dir)}</strong> (${Math.round(w.dir)}°)`;
+        if(gustDisp > speedDisp) html += ` gusts <strong>${gustDisp}</strong>`;
+        html += `</div>`;
+      }
+      showTip(html, event);
+      hoverLine.attr('x1', x(dt)).attr('x2', x(dt)).style('opacity',1);
+    })
+    .on('mouseleave', () => { hideTip(); hoverLine.style('opacity',0); });
+}
+
+function renderMeteogramD3(){
+  const container = document.getElementById('meteogramContainer');
+  const colors = chartColors();
+  const sys = SYSTEMS[currentSystem];
+  container.innerHTML = '';
+
+  if(!meteogramData || !meteogramData.times.length){
+    d3.select('#meteogramLegend').selectAll('*').remove();
+    emptyMsg(container, colors, meteogramData ? 'No forecast data available' : 'Loading…');
+    return;
+  }
+
+  const {times, temps, precip, pressure, wind, weatherCode} = meteogramData;
+  const startTime = times[0];
+  const endTime = startTime + METEOGRAM_HOURS * 36e5;
+
+  const tempData = times.map((t,i) => ({t, v: round1(convTemp(temps[i], sys.temp))}));
+  const precipData = times.map((t,i) => ({t, v: round2(convRain(precip[i], sys.rain))}));
+  const pressureData = times.map((t,i) => ({t, v: round1(convPressure(pressure[i], sys.pressure))}));
+
+  const maxPrecip = Math.max(10, ...precipData.map(d => d.v));
+  const pressConv = pressureData.map(d => d.v);
+  const minPressure = Math.floor(Math.min(...pressConv)/5)*5 - 5;
+  const maxPressure = Math.ceil(Math.max(...pressConv)/5)*5 + 5;
+
+  const tempColor = '#FF3333';
+  const precipColor = '#68CFE8';
+  const pressureColor = colors.tempAvg;
+  const barbColor = '#DD8C1E';
+
+  const {width, height} = container.getBoundingClientRect();
+  const margin = {top:70, right:60, bottom:130, left:55};
+  const innerW = Math.max(10, width - margin.left - margin.right);
+  const innerH = Math.max(10, height - margin.top - margin.bottom);
+
+  const svg = d3.select(container).append('svg').attr('viewBox', `0 0 ${width} ${height}`);
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const x = d3.scaleTime().domain([new Date(startTime), new Date(endTime)]).range([0, innerW]);
+  const tempExtent = d3.extent(tempData.map(d => d.v));
+  const yTemp = d3.scaleLinear().domain(tempExtent).nice().range([innerH, 0]);
+  const yPrecip = d3.scaleLinear().domain([0, maxPrecip]).range([innerH, 0]);
+  const yPress = d3.scaleLinear().domain([minPressure, maxPressure]).range([innerH, 0]);
+
+  g.append('g').attr('class','d3-gridline').call(d3.axisLeft(yTemp).tickSize(-innerW).tickFormat(''));
+
+  const xAxisG = g.append('g').attr('class','d3-axis').attr('transform', `translate(0,${innerH})`)
+    .call(d3.axisBottom(x).ticks(d3.timeHour.every(3)).tickFormat(d => d.getHours()===0 ? d3.timeFormat('%a')(d) : d3.timeFormat('%H')(d)));
+  xAxisG.selectAll('text').style('font-weight', d => d.getHours()===0 ? 'bold' : 'normal');
+
+  g.append('g').attr('class','d3-axis').call(d3.axisLeft(yTemp).ticks(6).tickFormat(v => round1(v)+tempUnitLabel(sys)));
+  g.append('g').attr('class','d3-axis').attr('transform', `translate(${innerW},0)`).call(d3.axisRight(yPress).ticks(5))
+    .call(sel => sel.selectAll('text').attr('fill', pressureColor))
+    .call(sel => sel.selectAll('path,line').attr('stroke', pressureColor));
+  g.append('text').attr('x', innerW).attr('y', -12).attr('text-anchor','end')
+    .attr('font-size',10).attr('fill', pressureColor).text(pressureUnitLabel(sys));
+
+  // Precipitation bars (against the hidden 0..maxPrecip scale, same as the ECharts version's secondary axis)
+  const barW = Math.max(1, (innerW/times.length) * 0.7);
+  g.selectAll('.precip-bar').data(precipData).join('rect')
+    .attr('x', d => x(new Date(d.t)) - barW/2).attr('width', barW)
+    .attr('y', d => yPrecip(d.v)).attr('height', d => innerH - yPrecip(d.v))
+    .attr('fill', precipColor).attr('opacity', 0.85);
+
+  // Barometer (dashed, drawn under the temperature line)
+  const pressLine = d3.line().x(d => x(new Date(d.t))).y(d => yPress(d.v)).curve(d3.curveMonotoneX);
+  g.append('path').datum(pressureData).attr('fill','none').attr('stroke', pressureColor)
+    .attr('stroke-width',1.5).attr('stroke-dasharray','4,4').attr('d', pressLine);
+
+  // Temperature (on top)
+  const tempLine = d3.line().x(d => x(new Date(d.t))).y(d => yTemp(d.v));
+  g.append('path').datum(tempData).attr('fill','none').attr('stroke', tempColor).attr('stroke-width',2).attr('d', tempLine);
+
+  // Weather icons every 2 hours, floated above the temperature line
+  times.forEach((t,i) => {
+    if(i % 2 !== 0) return;
+    const hour = new Date(t).getHours();
+    const isDay = hour >= 6 && hour < 20;
+    const wmo = METEOGRAM_WMO[weatherCode[i]] || METEOGRAM_WMO[3];
+    const icon = isDay ? wmo.icon.day : wmo.icon.night;
+    const px = x(new Date(t)), py = yTemp(tempData[i].v);
+    g.append('image').attr('href', METEOGRAM_ICON_PATH+icon+'.svg')
+      .attr('x', px-15).attr('y', py-45).attr('width',30).attr('height',30);
+  });
+
+  // Day/night tick blocks along the bottom (taller on the hour, matching the original)
+  times.forEach((t,i) => {
+    const px = x(new Date(t));
+    const tickLen = i % 2 === 0 ? 20 : 6;
+    g.append('line').attr('x1',px).attr('x2',px).attr('y1',innerH).attr('y2',innerH+tickLen)
+      .attr('stroke', colors.grid).attr('stroke-width',1);
+  });
+
+  // Wind barbs every 2 hours
+  const barbY = innerH + 55;
+  wind.forEach((w,i) => {
+    if(i % 2 !== 0 || !w) return;
+    drawWindBarbD3(g, x(new Date(times[i])), barbY, w, barbColor);
+  });
+
+  renderMeteogramLegendD3([
+    {name:'Temperature', color: tempColor},
+    {name:'Precipitation', color: precipColor},
+    {name:'Barometer', color: pressureColor},
+  ]);
+
+  attachMeteogramHover(g, svg, {x, innerW, innerH, margin, times, tempData, precipData, pressureData, wind, weatherCode, sys, tempColor, precipColor, pressureColor});
+}
+
+new ResizeObserver(() => { if(currentCategory === 'meteogram') renderMeteogramD3(); }).observe(document.getElementById('meteogramContainer'));
+
+
+const RECORDS_CATEGORIES = {
+  temperature: {
+    note: 'Daily high / low / average outdoor temperature.',
+    metrics: [
+      {label:'Highest', series:'outTempMax', agg:'max', fmt:(v,sys)=>fmtTemp(v, sys.temp), withDate:true},
+      {label:'Lowest',  series:'outTempMin', agg:'min', fmt:(v,sys)=>fmtTemp(v, sys.temp), withDate:true},
+      {label:'Average', series:'outTempAvg', agg:'avg', fmt:(v,sys)=>fmtTemp(v, sys.temp), withDate:false},
+    ],
+  },
+  wind: {
+    note: 'Average wind speed, highest sustained wind, and highest gust.',
+    metrics: [
+      {label:'Average Wind', series:'windSpeedAvg', agg:'avg', fmt:(v,sys)=>fmtWind(v, sys.wind), withDate:false},
+      {label:'Highest Wind',  series:'windSpeedMax', agg:'max', fmt:(v,sys)=>fmtWind(v, sys.wind), withDate:true},
+      {label:'Highest Gust',  series:'windGustMax',  agg:'max', fmt:(v,sys)=>fmtWind(v, sys.wind), withDate:true},
+    ],
+  },
+  rain: {
+    note: '"Highest Rate" isn\'t available — charts.json\'s rainRate field duplicates the daily total rather than a true rate. Showing Wettest Day instead.',
+    metrics: [
+      {label:'Total Rain',  series:'rain', agg:'sum', fmt:(v,sys)=>fmtRain(v, sys.rain), withDate:false},
+      {label:'Wettest Day', series:'rain', agg:'max', fmt:(v,sys)=>fmtRain(v, sys.rain), withDate:true},
+    ],
+  },
+  barometer: {
+    note: 'Daily high / low / average barometric pressure.',
+    metrics: [
+      {label:'Highest', series:'baromMax', agg:'max', fmt:(v,sys)=>fmtPressure(v, sys.pressure), withDate:true},
+      {label:'Lowest',  series:'baromMin', agg:'min', fmt:(v,sys)=>fmtPressure(v, sys.pressure), withDate:true},
+      {label:'Average', series:'baromAvg', agg:'avg', fmt:(v,sys)=>fmtPressure(v, sys.pressure), withDate:false},
+    ],
+  },
+  solaruv: {
+    note: 'UV Index (0-11+) and solar radiation. UV Index categories: 0-2 Low, 3-5 Moderate, 6-7 High, 8-10 Very High, 11+ Extreme.',
+    metrics: [
+      {label:'Max UV Index', series:'UVMax', agg:'max', fmt:(v,sys)=>round1(v)+' UV', withDate:true},
+      {label:'Max Solar',    series:'solarMax', agg:'max', fmt:(v,sys)=>round1(v)+' W/m²', withDate:true},
+      {label:'Avg Solar',    series:'solarAvg', agg:'avg', fmt:(v,sys)=>round1(v)+' W/m²', withDate:false},
+    ],
+  },
+  cloud: {
+    note: 'Cloud cover (%), visibility distance, and estimated cloud base. Visibility categories: <1km Very Poor, 1-4km Poor, 4-10km Moderate, 10-20km Good, >20km Excellent.',
+    metrics: [
+      {label:'Avg Cloud Cover', series:'cloudCover', agg:'avg', fmt:(v,sys)=>round1(v)+'%', withDate:false},
+      {label:'Best Visibility', series:'lightDist', agg:'max', fmt:(v,sys)=>fmtDist(v, sys.dist), withDate:true},
+      {label:'Worst Visibility', series:'lightDist', agg:'min', fmt:(v,sys)=>fmtDist(v, sys.dist), withDate:true},
+    ],
+  },
+  lightning: {
+    note: 'Lightning strike count and closest distance. Distance categories: <5km Very Close (⚡ DANGER), 5-10km Close, 10-20km Moderate, >20km Far.',
+    metrics: [
+      {label:'Total Strikes',  series:'lightCount', agg:'sum', fmt:(v,sys)=>fmtLightningCount(v), withDate:false},
+      {label:'Most Strikes',   series:'lightCount', agg:'max', fmt:(v,sys)=>fmtLightningCount(v), withDate:true},
+      {label:'Closest Strike', series:'lightDist',  agg:'min', fmt:(v,sys)=>fmtDist(v, sys.dist), withDate:true},
+    ],
+  },
+  pollen: {
+    note: 'Pollen counts (grains/m³) for six common pollen types. Severity: 0-10 Low, 10-50 Moderate, 50-200 High, 200+ Very High.',
+    metrics: [
+      {label:'Alder (max)', series:'alder', agg:'max', fmt:(v,sys)=>fmtPollen(v), withDate:true},
+      {label:'Birch (max)', series:'birch', agg:'max', fmt:(v,sys)=>fmtPollen(v), withDate:true},
+      {label:'Grass (max)', series:'grass', agg:'max', fmt:(v,sys)=>fmtPollen(v), withDate:true},
+    ],
+  },
+  airquality: {
+    note: 'Particulate matter (PM) concentrations in µg/m³. PM2.5 and PM10 are the main regulatory metrics. PM1.0 and PM4.0 shown for additional context.',
+    metrics: [
+      {label:'PM2.5 (max)', series:'pm2_5', agg:'max', fmt:(v,sys)=>fmtConc(v, sys.conc), withDate:true},
+      {label:'PM10 (max)', series:'pm10_0', agg:'max', fmt:(v,sys)=>fmtConc(v, sys.conc), withDate:true},
+      {label:'PM2.5 (avg)', series:'pm2_5', agg:'avg', fmt:(v,sys)=>fmtConc(v, sys.conc), withDate:false},
+    ],
+  },
+  gases: {
+    note: 'Greenhouse gas and air pollutant concentrations. CO₂ in ppm, all others in µg/m³.',
+    metrics: [
+      {label:'CO₂ (max)', series:'co2Max', agg:'max', fmt:(v,sys)=>round1(v)+' ppm', withDate:true},
+      {label:'O₃ (max)',  series:'o3Max',  agg:'max', fmt:(v,sys)=>fmtConc(v, sys.conc), withDate:true},
+      {label:'NO₂ (max)', series:'no2Max', agg:'max', fmt:(v,sys)=>fmtConc(v, sys.conc), withDate:true},
+    ],
+  },
+};
+
+const RECORDS_PERIODS = [
+  {key:'day',     label:'Day',      days:1},
+  {key:'week',    label:'Week',     days:7},
+  {key:'month',   label:'Month',    days:30},
+  {key:'year',    label:'Year',     days:365},
+  {key:'alltime', label:'All-time', days:Infinity},
+];
+
+function renderRecordsPanel(){
+  const sys = SYSTEMS[currentSystem];
+  const category = RECORDS_CATEGORIES[currentCategory];
+  const row = document.getElementById('recordsPeriodsRow');
+  if(!category){
+    row.innerHTML = '<div class="text-center">Select a category to see records.</div>';
+    return;
+  }
+  row.innerHTML = RECORDS_PERIODS.map(period => {
+    const tiles = category.metrics.map(metric => {
+      if(!dataSeries){
+        return `<div class="records-tile"><div class="records-label">${metric.label}</div><div class="records-value">--</div></div>`;
+      }
+      const slice = dataSlice(dataSeries[metric.series], period.days);
+      const {value, date} = dataAggregate(slice, metric.agg);
+      const valueHtml = value!=null ? metric.fmt(value, sys) : '--';
+      const dateHtml = (metric.withDate && date!=null) ? `<div class="records-value-date">${fmtDateOnly(date)}</div>` : '';
+      return `<div class="records-tile"><div class="records-label">${metric.label}</div><div class="records-value">${valueHtml}</div>${dateHtml}</div>`;
+    }).join('');
+    return `<div class="records-period-card"><div class="records-period-label">${period.label}</div><div class="records-grid">${tiles}</div></div>`;
+  }).join('');
+}
+
+const POLLEN_TYPES = [
+  {name:'Alder',    series:'alder',    color:'#E8A33D', emoji:'🌳'},
+  {name:'Birch',    series:'birch',    color:'#6FB6DD', emoji:'🌳'},
+  {name:'Olive',    series:'olive',    color:'#5BBB8A', emoji:'🌿'},
+  {name:'Grass',    series:'grass',    color:'#C9DA1E', emoji:'🌾'},
+  {name:'Mugwort',  series:'mugwort',  color:'#D6BE4E', emoji:'🌱'},
+  {name:'Ragweed',  series:'ragweed',  color:'#E36B57', emoji:'🌿'},
+];
+
+const PARTICLE_TYPES = [
+  {name:'PM1.0',  series:'pm1_0',  color:'#6FB6DD', emoji:'🟦', size:'≤1.0µm'},
+  {name:'PM2.5',  series:'pm2_5',  color:'#E8A33D', emoji:'🟨', size:'≤2.5µm'},
+  {name:'PM4.0',  series:'pm4_0',  color:'#D6BE4E', emoji:'🟡', size:'≤4.0µm'},
+  {name:'PM10',   series:'pm10_0', color:'#E36B57', emoji:'🟧', size:'≤10µm'},
+];
+
+const GAS_TYPES = [
+  {name:'CO',   series:'co',   color:'#6FB6DD', unit:'µg/m³', emoji:'💨', label:'Carbon Monoxide'},
+  {name:'CO₂',  series:'co2',  color:'#8C9A95', unit:'ppm',   emoji:'🌫️', label:'Carbon Dioxide'},
+  {name:'NH₃',  series:'nh3',  color:'#D6BE4E', unit:'µg/m³', emoji:'🧪', label:'Ammonia'},
+  {name:'NO₂',  series:'no2',  color:'#E36B57', unit:'µg/m³', emoji:'🚗', label:'Nitrogen Dioxide'},
+  {name:'O₃',   series:'o3',   color:'#5BBB8A', unit:'µg/m³', emoji:'☀️', label:'Ozone'},
+  {name:'SO₂',  series:'so2',  color:'#C9DA1E', unit:'µg/m³', emoji:'🏭', label:'Sulfur Dioxide'},
+];
+
+const GAS_DAILY_SERIES = {
+  'CO':   'coMax',
+  'CO₂':  'co2Max',
+  'NH₃':  'nh3Max',
+  'NO₂':  'no2Max',
+  'O₃':   'o3Max',
+  'SO₂':  'so2Max',
+};
+
+const GAS_HOURLY_SERIES = {
+  'CO':   'coHourly',
+  'CO₂':  'co2Hourly',
+  'NH₃':  'nh3Hourly',
+  'NO₂':  'no2Hourly',
+  'O₃':   'o3Hourly',
+  'SO₂':  'so2Hourly',
+};
+
+const CHART_CATEGORIES = {
+  temperature: {
+    note: '',
+    dailyType: 'line',
+    daily: [
+      {name:'High', series:'outTempMax', kind:'temp', color:'tempHigh'},
+      {name:'Low',  series:'outTempMin', kind:'temp', color:'tempLow'},
+      {name:'Avg',  series:'outTempAvg', kind:'temp', color:'tempAvg'},
+    ],
+    hourly: [
+      {name:'Temp',     series:'outTempHourly',  kind:'temp',  color:'tempAvg'},
+      {name:'Dew Point',series:'outDewHourly',   kind:'temp',  color:'dew', area:true},
+      {name:'Humidity', series:'outHumidHourly', kind:'humid', color:'humid', yAxisIndex:1},
+    ],
+    yAxes: ['temp','humid'],
+  },
+  wind: {
+    note: '',
+    dailyType: 'line',
+    daily: [
+      {name:'Average Wind', series:'windSpeedAvg', kind:'wind', color:'tempAvg'},
+      {name:'Highest Wind',  series:'windSpeedMax', kind:'wind', color:'tempHigh'},
+      {name:'Highest Gust',  series:'windGustMax',  kind:'wind', color:'dew'},
+    ],
+    hourly: [
+      {name:'Wind Speed', series:'windSpeedHourly', kind:'wind', color:'tempAvg'},
+      {name:'Gust',        series:'windGustHourly',  kind:'wind', color:'dew'},
+    ],
+    yAxes: ['wind'],
+  },
+  rain: {
+    note: 'Only a daily TOTAL is available from charts.json for Week/Month/Year/Historical — there\'s no genuine daily rain-RATE field (see Records panel below for why). The 24-hour view can show a true hourly rate, since rainRateHourly is a real, distinct field.',
+    dailyType: 'bar',
+    daily: [
+      {name:'Total Rain', series:'rain', kind:'rain', color:'tempAvg'},
+    ],
+    hourly: [
+      {name:'Rain', series:'rainHourly', kind:'rain', color:'tempAvg', type:'bar'},
+      {name:'Rate (per hr)', series:'rainRateHourly', kind:'rain', color:'dew', yAxisIndex:1},
+    ],
+    yAxes: ['rain','rain2'],
+  },
+  barometer: {
+    note: '',
+    dailyType: 'line',
+    daily: [
+      {name:'High', series:'baromMax', kind:'pressure', color:'tempHigh'},
+      {name:'Low',  series:'baromMin', kind:'pressure', color:'tempLow'},
+      {name:'Avg',  series:'baromAvg', kind:'pressure', color:'tempAvg'},
+    ],
+    hourly: [
+      {name:'High', series:'baromMaxHourly', kind:'pressure', color:'tempHigh'},
+      {name:'Low',  series:'baromMinHourly', kind:'pressure', color:'tempLow'},
+      {name:'Avg',  series:'baromAvgHourly', kind:'pressure', color:'tempAvg'},
+    ],
+    yAxes: ['pressure'],
+  },
+  solaruv: {
+    note: 'UV Index (0-11+) and solar radiation. UV Index categories: 0-2 Low (green), 3-5 Moderate (yellow), 6-7 High (orange), 8-10 Very High (red), 11+ Extreme (purple).',
+    dailyType: 'line',
+    daily: [
+      {name:'Max UV Index', series:'UVMax', kind:'uv', color:'uvHigh'},
+      {name:'Max Solar',    series:'solarMax', kind:'solar', color:'tempHigh'},
+      {name:'Avg Solar',    series:'solarAvg', kind:'solar', color:'tempAvg'},
+    ],
+    hourly: [
+      {name:'UV Index',      series:'uvHourly', kind:'uv', color:'uvHigh', yAxisIndex:0},
+      {name:'Solar Rad.',    series:'solarRadiationHourly', kind:'solar', color:'tempHigh', yAxisIndex:1},
+    ],
+    yAxes: ['uv','solar'],
+  },
+  cloud: {
+    note: 'Cloud cover (0-100%), visibility distance, and estimated cloud base height. Visibility: <1km Very Poor, 1-4km Poor, 4-10km Moderate, 10-20km Good, >20km Excellent.',
+    dailyType: 'line',
+    daily: [
+      {name:'Avg Cloud Cover', series:'cloudCover', kind:'cloud', color:'cloud'},
+      {name:'Best Visibility', series:'lightDist', kind:'dist', color:'visGood'},
+      {name:'Worst Visibility', series:'lightDist', kind:'dist', color:'visPoor'},
+    ],
+    hourly: [
+      {name:'Cloud Cover',    series:'cloudCover', kind:'cloud', color:'cloud', yAxisIndex:0, type:'bar'},
+      {name:'Visibility',     series:'lightDist',  kind:'dist',  color:'visGood', yAxisIndex:1, area:true},
+    ],
+    yAxes: ['cloud','dist'],
+  },
+  lightning: {
+    note: 'Lightning strike count (bar) and distance to nearest strike (line, right axis). Distance categories: <5km Very Close (⚡ DANGER), 5-10km Close, 10-20km Moderate, >20km Far.',
+    dailyType: 'bar',
+    daily: [
+      {name:'Strikes', series:'lightCount', kind:'count', color:'ltgCount'},
+      {name:'Nearest', series:'lightDist',  kind:'dist',  color:'ltgDist'},
+    ],
+    hourly: [
+      {name:'Strikes',  series:'lightCountHourly', kind:'count', color:'ltgCount', type:'bar', yAxisIndex:0},
+      {name:'Distance', series:'lightDistHourly',  kind:'dist',  color:'ltgDist', yAxisIndex:1, area:true},
+    ],
+    yAxes: ['count','dist'],
+  },
+  pollen: {
+    note: 'Pollen counts (grains/m³) for six common pollen types. Severity guide: 0-10 Low (green), 10-50 Moderate (yellow), 50-200 High (orange), 200+ Very High (red).',
+    dailyType: 'line',
+    daily: POLLEN_TYPES.map(p => ({
+      name: p.name,
+      series: p.series,
+      kind: 'pollen',
+      color: p.color,
+    })),
+    hourly: POLLEN_TYPES.map(p => ({
+      name: p.name,
+      series: p.series+'Hourly',
+      kind: 'pollen',
+      color: p.color,
+      area: false,
+    })),
+    yAxes: ['pollen'],
+  },
+  airquality: {
+    note: 'Particulate matter (PM) concentrations in µg/m³. PM2.5 and PM10 are the main regulatory metrics. PM1.0 and PM4.0 shown for additional context. Higher values indicate more particles in the air.',
+    dailyType: 'line',
+    daily: PARTICLE_TYPES.map(p => ({
+      name: p.name,
+      series: p.series,
+      kind: 'conc',
+      color: p.color,
+    })),
+    hourly: PARTICLE_TYPES.map(p => ({
+      name: p.name,
+      series: p.series+'Hourly',
+      kind: 'conc',
+      color: p.color,
+      area: false,
+    })),
+    yAxes: ['conc'],
+  },
+  gases: {
+    note: 'Greenhouse gas and air pollutant concentrations. CO₂ in ppm (parts per million), all others in µg/m³. These gases affect air quality and climate.',
+    dailyType: 'line',
+    daily: GAS_TYPES.map(g => ({
+      name: g.name,
+      series: GAS_DAILY_SERIES[g.name],
+      kind: 'gas',
+      color: g.color,
+      unit: g.unit,
+    })),
+    hourly: GAS_TYPES.map(g => ({
+      name: g.name,
+      series: GAS_HOURLY_SERIES[g.name],
+      kind: 'gas',
+      color: g.color,
+      unit: g.unit,
+      area: false,
+    })),
+    yAxes: ['gas'],
+  },
+};
+
+const CONVERTERS = {
+  temp:     (v,sys)=>convTemp(v, sys.temp),
+  wind:     (v,sys)=>convWind(v, sys.wind),
+  pressure: (v,sys)=>convPressure(v, sys.pressure),
+  rain:     (v,sys)=>convRain(v, sys.rain),
+  humid:    (v,sys)=>v,
+  uv:       (v,sys)=>v,
+  solar:    (v,sys)=>v,
+  cloud:    (v,sys)=>v,
+  dist:     (v,sys)=>convDist(v, sys.dist),
+  count:    (v,sys)=>v,
+  pollen:   (v,sys)=>v,
+  conc:     (v,sys)=>v,
+  gas:      (v,sys)=>v,
+};
+const UNIT_LABELS = {
+  temp:     sys=>tempUnitLabel(sys),
+  wind:     sys=>windUnitLabel(sys),
+  pressure: sys=>pressureUnitLabel(sys),
+  rain:     sys=>rainUnitLabel(sys),
+  humid:    ()=>'%',
+  uv:       ()=>'UV Index',
+  solar:    ()=>'W/m²',
+  cloud:    ()=>'%',
+  dist:     sys=>distUnitLabel(sys),
+  count:    ()=>'Strikes',
+  pollen:   ()=>'grains/m³',
+  conc:     sys=>concUnitLabel(sys),
+  gas:      ()=>'',
+};
+
+// ===================== Theme-aware chart palette =====================
+function isDarkTheme(){ return document.documentElement.getAttribute('data-bs-theme') === 'dark'; }
+function chartColors(){
+  const cssVar = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return {
+    text: cssVar('--bs-body-color'),
+
+
+
+    grid: isDarkTheme() ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)',
+    tempHigh: cssVar('--bw-danger'),
+    tempLow:  cssVar('--bw-sky'),
+    tempAvg:  cssVar('--bw-accent'),
+    dew:      cssVar('--bw-lime'),
+    humid:    cssVar('--bw-good'),
+    uvHigh:   '#D8001D',
+    uvMod:    '#F7E400',
+    uvLow:    '#1F8C3F',
+    uvExtreme:'#6B49C8',
+    cloud:    '#8C9A95',
+    visGood:  '#5BBB8A',
+    visPoor:  '#E36B57',
+    ltgCount: '#F7E400',
+    ltgDist:  '#E36B57',
+  };
+}
+
+function getTooltipBgColor() {
+  if (isDarkTheme()) {
+    return 'rgba(20,20,25,0.9)';
+  }
+
+
+  return 'rgba(204,218,246,0.97)';
+}
+
+
+const VALID_CATS = [...Object.keys(CHART_CATEGORIES), 'aurora', 'meteogram', 'windrose'];
+function getInitialCategory(){
+  const url = new URL(window.location.href);
+  const t = url.searchParams.get('type');
+  return VALID_CATS.includes(t) ? t : 'temperature';
+}
+let currentCategory = getInitialCategory();
+let currentTimeframe = 'day';
+let historicalYear = null;
+let chart = null;
+
+const CATEGORY_LABELS = {
+  temperature: 'Temperature',
+  wind: 'Wind & Gust',
+  rain: 'Rain & Rain Rate',
+  barometer: 'Barometer',
+  solaruv: 'Solar & UV',
+  cloud: 'Cloud & Visibility',
+  lightning: 'Lightning',
+  pollen: 'Pollen',
+  airquality: 'Air Quality',
+  gases: 'Greenhouse Gases',
+  aurora: 'Aurora Activity',
+  meteogram: 'Meteogram',
+  windrose: 'Wind Rose',
+};
+function updatePageTitle(){
+  const label = CATEGORY_LABELS[currentCategory] || 'Weather';
+  document.getElementById('pageTitle').innerHTML = label + ' Charts<span class="d3-badge">D3</span>';
+  document.title = label + ' Charts (D3) — Responsive Dashboard';
+}
+updatePageTitle();
+
+// METAR cross-link — only relevant (and only shown) when this page is
+// loaded embedded as the Cloud & Visibility chart modal, mirroring the
+// same button added to modalMetar.html. Reuses the parent page's own
+// chartModalOpen(link) function rather than window.open, so it swaps the
+// shared chart-modal iframe in place instead of stacking a second modal.
+(function setUpMetarCrossLink(){
+  if (document.documentElement.dataset.embed !== '1' || currentCategory !== 'cloud') return;
+  var bar = document.getElementById('cloudCrossLinkBar');
+  if (!bar) return;
+  bar.style.display = 'flex';
+  document.getElementById('openMetarBtn').addEventListener('click', function(){
+    try {
+      var p = window.parent;
+      if (!p || typeof p.chartModalOpen !== 'function') return;
+      var a = p.document.createElement('a');
+      a.href = 'modalMetar.html';
+      a.setAttribute('data-title', 'Nearby METAR');
+      a.setAttribute('data-modal-width', '900px');
+      a.setAttribute('data-modal-height', '700px');
+      p.chartModalOpen(a);
+    } catch (e) {
+      console.warn('charts-d3 (cloud): could not open METAR —', e.message);
+    }
+  });
+})();
+
+
+function populateHistoricalYears(){
+  const sel = document.getElementById('chartHistYear');
+  if(!dataSeries) return;
+  const cat = CHART_CATEGORIES[currentCategory];
+  if(!cat || !cat.daily || !cat.daily.length){
+    sel.innerHTML = '';
+    return;
+  }
+  const baseSeries = dataSeries[cat.daily[0].series] || [];
+  const years = Array.from(new Set(
+    baseSeries.filter(pt=>pt && pt[1]!=null).map(pt => new Date(pt[0]).getFullYear())
+  )).sort((a,b)=>b-a);
+  const prevValue = historicalYear;
+  sel.innerHTML = years.map(y=>`<option value="${y}">${y}</option>`).join('');
+  if(years.length){
+    historicalYear = years.includes(prevValue) ? prevValue : years[0];
+    sel.value = historicalYear;
+  }
+}
+
+
+function setActiveTimeframeButton(){
+  document.querySelectorAll('.chart-tf-btn').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.tf === currentTimeframe);
+  });
+  document.getElementById('chartHistYear').classList.toggle('active', currentTimeframe === 'historical');
+}
+
+
+// ===================== D3 rendering engine =====================
+// Replaces the ECharts renderHourly/renderDaily/renderAuroraChart/getChart from charts.html.
+// Meteogram's D3 renderer (renderMeteogramD3) lives further up, right after its data-parsing
+// code — it re-implements the weather icons, day/night ticks, and wind barbs that the ECharts
+// version built via convertToPixel graphics, using SVG coordinates directly instead.
+
+let hiddenSeries = new Set(); // legend toggles, keyed by series name, reset per category switch
+
+function seriesColor(d, colors){ return (d.color && d.color.startsWith('#')) ? d.color : (colors[d.color] || colors.tempAvg); }
+
+function barColorForCount(val){
+  if(val === 0 || val == null) return '#4a4a4a';
+  if(val < 5) return '#D6BE4E';
+  if(val < 20) return '#F7E400';
+  if(val < 50) return '#F85900';
+  return '#D8001D';
+}
+
+function unitForDef(d, sys){
+  if(d.unit) return ''; // gases already carry their unit in the series name
+  return UNIT_LABELS[d.kind] ? UNIT_LABELS[d.kind](sys) : '';
+}
+
+// Mirrors the special-cased branches from charts.html's tooltipFormatter (both the daily
+// and hourly versions collapsed into one — the branches that don't add real information
+// beyond "value + unit" were dropped since they're equivalent to the fallback anyway).
+function tooltipRowHTML(name, val, unit, color){
+  if(val == null) return `<div><span style="color:${color};font-weight:600;">${name}</span>: <strong>&mdash;</strong></div>`;
+  const u = unit ? (unit.startsWith('°') || unit === '%' ? unit : ' ' + unit) : '';
+  let displayVal = round1(val);
+  let extra = '';
+  if(name === 'UV Index'){
+    extra = val<=2?'🟢 Low':val<=5?'🟡 Moderate':val<=7?'🟠 High':val<=10?'🔴 Very High':'🟣 Extreme';
+  } else if(['Alder','Birch','Olive','Grass','Mugwort','Ragweed'].includes(name)){
+    extra = val<=10?'🟢 Low':val<=50?'🟡 Moderate':val<=200?'🟠 High':'🔴 Very High';
+  } else if(name.includes('PM2.5')){
+    extra = val<=12?'🟢 Good':val<=35?'🟡 Moderate':val<=55?'🟠 Unhealthy (Sensitive)':val<=150?'🔴 Unhealthy':val<=250?'🟣 Very Unhealthy':'⚫ Hazardous';
+  } else if(name.includes('PM10')){
+    extra = val<=54?'🟢 Good':val<=154?'🟡 Moderate':val<=254?'🟠 Unhealthy (Sensitive)':val<=354?'🔴 Unhealthy':val<=424?'🟣 Very Unhealthy':'⚫ Hazardous';
+  } else if(name === 'Strikes'){
+    displayVal = Math.round(val);
+    extra = val===0?'⚡':val<5?'⚡':val<20?'⚡⚡':'⚡⚡⚡';
+  } else if(name === 'Distance' || name === 'Nearest'){
+    extra = val<5?'🔴 VERY CLOSE!':val<10?'🟠 Close':val<20?'🟡 Moderate':'🟢 Far';
+  } else if(name === 'Cloud Cover'){
+    extra = val<=10?'☀️ Clear':val<=30?'🌤️ Mostly Clear':val<=60?'⛅ Partly Cloudy':val<=85?'☁️ Mostly Cloudy':'🌧️ Overcast';
+  } else if(name === 'Visibility'){
+    extra = val<1?'🔴 Very Poor':val<4?'🟠 Poor':val<10?'🟡 Moderate':val<20?'🟢 Good':'🌟 Excellent';
+  } else if(/rain|rate/i.test(name)){
+    displayVal = round2(val);
+  }
+  return `<div><span style="color:${color};font-weight:600;">${name}</span>: <strong>${displayVal}</strong>${u}${extra?' '+extra:''}</div>`;
+}
+
+// Colour-band backgrounds — mirrors the markArea blocks in charts.html's renderHourly.
+// Only ever used in the hourly view, matching the original (renderDaily never set markArea).
+function bandsFor(d){
+  let bands = null;
+  if(d.kind === 'uv') bands = [[0,3,'#1F8C3F'],[3,6,'#F7E400'],[6,8,'#F85900'],[8,11,'#D8001D'],[11,15,'#6B49C8']];
+  else if(d.kind === 'dist') bands = [[0,1,'#D8001D'],[1,4,'#E36B57'],[4,10,'#D6BE4E'],[10,20,'#6FB6DD'],[20,999,'#5BBB8A']];
+  if(d.name === 'Distance') bands = [[0,5,'#D8001D'],[5,10,'#E36B57'],[10,20,'#D6BE4E'],[20,999,'#6FB6DD']]; // overrides the generic dist bands, same precedence as the original
+  return bands;
+}
+function drawBands(g, d, yScale, innerW){
+  const bands = bandsFor(d);
+  if(!bands) return;
+  const [dMin, dMax] = yScale.domain();
+  bands.forEach(([y0,y1,color]) => {
+    const yy0 = Math.max(y0, dMin), yy1 = Math.min(y1, dMax);
+    if(yy1 <= yy0) return;
+    g.append('rect').attr('x',0).attr('y',yScale(yy1)).attr('width',innerW)
+      .attr('height', yScale(yy0)-yScale(yy1)).attr('fill', color).attr('opacity', 0.10);
+  });
+}
+
+function emptyMsg(container, colors, text){
+  container.innerHTML = '';
+  d3.select(container).append('div').attr('class','text-center pt-5')
+    .style('color', colors.text).style('font-style','italic').text(text);
+}
+
+function clearChartArea(){
+  document.getElementById('chartContainer').innerHTML = '';
+}
+
+function renderLegend(defs){
+  const colors = chartColors();
+  const legend = d3.select('#chartLegend');
+  legend.selectAll('*').remove();
+  legend.selectAll('.d3-legend-item')
+    .data(defs)
+    .join('div')
+    .attr('class', d => 'd3-legend-item' + (hiddenSeries.has(d.name) ? ' d3-legend-off' : ''))
+    .on('click', (event, d) => {
+      if(hiddenSeries.has(d.name)) hiddenSeries.delete(d.name); else hiddenSeries.add(d.name);
+      renderChart();
+    })
+    .each(function(d){
+      const item = d3.select(this);
+      item.append('span').attr('class','d3-legend-swatch').style('background', seriesColor(d, colors));
+      item.append('span').text(d.unit ? `${d.name} (${d.unit})` : d.name);
+    });
+}
+
+function showTip(html, event){
+  const el = document.getElementById('chartTooltip');
+  el.innerHTML = html;
+  el.style.display = 'block';
+  const TW = 230, TH = 130;
+  let tx = event.clientX + 14, ty = event.clientY - 10;
+  if(tx + TW > window.innerWidth) tx = event.clientX - TW - 14;
+  if(ty + TH > window.innerHeight) ty = event.clientY - TH - 10;
+  el.style.left = tx + 'px';
+  el.style.top = ty + 'px';
+}
+function hideTip(){ document.getElementById('chartTooltip').style.display = 'none'; }
+
+// Shared axis-hover overlay (vertical guideline + dot per visible series + tooltip),
+// used by both renderDailyD3 and renderHourlyD3. `yFor(def)` returns the y-scale for a
+// given series definition, so callers with a single axis just return the same scale for all.
+function attachAxisHover(g, svg, {x, seriesData, innerW, innerH, margin, sys, dateFmt, yFor}){
+  const domain = x.domain();
+  const bisectIndex = (mx) => {
+    let best = domain[0], bestDist = Infinity;
+    domain.forEach(i => { const d = Math.abs(x(i)-mx); if(d < bestDist){ bestDist = d; best = i; } });
+    return best;
+  };
+  const colors = chartColors();
+  const hoverLine = g.append('line').attr('class','d3-hover-line').attr('y1',0).attr('y2',innerH).style('opacity',0);
+  const hoverDots = g.selectAll('.hover-dot-x').data(seriesData).join('circle')
+    .attr('class','hover-dot-x').attr('r',4)
+    .attr('fill', s => seriesColor(s.def, colors)).style('opacity',0);
+
+  svg.selectAll('.hover-capture').remove();
+  svg.append('rect').attr('class','hover-capture')
+    .attr('x', margin.left).attr('y', margin.top).attr('width', innerW).attr('height', innerH)
+    .attr('fill','transparent')
+    .on('mousemove', function(event){
+      const [mx] = d3.pointer(event, g.node());
+      const i = bisectIndex(mx);
+      const rows = seriesData.map(s => {
+        const val = s.values[i];
+        const color = seriesColor(s.def, colors);
+        const unit = unitForDef(s.def, sys);
+        const label = s.def.unit ? `${s.def.name} (${s.def.unit})` : s.def.name;
+        return tooltipRowHTML(label, val, unit, color);
+      }).join('');
+      showTip(`<strong>${dateFmt(i)}</strong>${rows}`, event);
+      hoverLine.attr('x1', x(i)).attr('x2', x(i)).style('opacity',1);
+      hoverDots.each(function(s){
+        const val = s.values[i];
+        const yScale = yFor(s.def);
+        d3.select(this).attr('cx', x(i)).attr('cy', val==null ? -9999 : yScale(val)).style('opacity', val==null ? 0 : 1);
+      });
+    })
+    .on('mouseleave', () => { hideTip(); hoverLine.style('opacity',0); hoverDots.style('opacity',0); });
+}
+
+function renderDailyD3(sys, cat, {trailingDays, historicalYear}={}){
+  clearChartArea();
+  const colors = chartColors();
+  const allDefs = cat.daily;
+  renderLegend(allDefs);
+  const container = document.getElementById('chartContainer');
+
+  const base = (dataSeries[allDefs[0].series] || []).filter(pt => pt && pt[1] != null);
+  if(!base.length){ emptyMsg(container, colors, 'No data available yet.'); return; }
+
+  let points;
+  if(historicalYear != null){
+    points = base.filter(pt => new Date(pt[0]).getFullYear() === Number(historicalYear));
+  } else {
+    points = trailingDays ? base.slice(Math.max(0, base.length - trailingDays)) : base;
+  }
+  if(!points.length){ emptyMsg(container, colors, 'No data for this period.'); return; }
+
+  const dates = points.map(pt => pt[0]);
+  const labels = dates.map(ts => new Date(ts).toLocaleDateString('en-GB', {day:'numeric', month:'short'}));
+
+  const defs = allDefs.filter(d => !hiddenSeries.has(d.name));
+  if(!defs.length){ emptyMsg(container, colors, 'All series hidden — click a legend item to re-enable.'); return; }
+
+  const seriesData = defs.map(d => {
+    const arr = dataSeries[d.series] || [];
+    const byDate = new Map(arr.filter(pt => pt && pt[1] != null).map(pt => [pt[0], pt[1]]));
+    const values = dates.map(t => {
+      const raw = byDate.get(t);
+      return raw == null ? null : CONVERTERS[d.kind](raw, sys);
+    });
+    return {def: d, values};
+  });
+
+  const {width, height} = container.getBoundingClientRect();
+  const margin = {top:20, right:20, bottom: dates.length>20 ? 46 : 34, left:52};
+  const innerW = Math.max(10, width - margin.left - margin.right);
+  const innerH = Math.max(10, height - margin.top - margin.bottom);
+
+  const svg = d3.select(container).append('svg').attr('viewBox', `0 0 ${width} ${height}`);
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const x = d3.scalePoint().domain(d3.range(dates.length)).range([0, innerW]).padding(0.5);
+
+  const allVals = seriesData.flatMap(s => s.values).filter(v => v != null);
+  const yExtent = d3.extent(allVals.length ? allVals : [0,1]);
+  const yPad = (yExtent[1]-yExtent[0]) * 0.1 || 1;
+  const y = d3.scaleLinear().domain([yExtent[0]-yPad, yExtent[1]+yPad]).range([innerH, 0]).nice();
+
+  g.append('g').attr('class','d3-gridline').call(d3.axisLeft(y).tickSize(-innerW).tickFormat(''));
+
+  const tickEvery = Math.max(1, Math.ceil(dates.length/12));
+  g.append('g').attr('class','d3-axis').attr('transform', `translate(0,${innerH})`)
+    .call(d3.axisBottom(x).tickValues(x.domain().filter((d,i) => i % tickEvery === 0)).tickFormat(i => labels[i]))
+    .selectAll('text').attr('transform', dates.length>20 ? 'rotate(-40)' : null).style('text-anchor', dates.length>20 ? 'end' : 'middle');
+
+  const yLabel = UNIT_LABELS[allDefs[0].kind] ? '('+UNIT_LABELS[allDefs[0].kind](sys)+')' : '';
+  g.append('g').attr('class','d3-axis').call(d3.axisLeft(y).ticks(6));
+  if(yLabel){
+    g.append('text').attr('x', 4).attr('y', -8)
+      .attr('font-size', 10).attr('fill', colors.text).text(yLabel);
+  }
+
+  const line = d3.line().defined(v => v != null).x((v,i) => x(i)).y(v => y(v)).curve(d3.curveMonotoneX);
+
+  seriesData.forEach(s => {
+    const color = seriesColor(s.def, colors);
+    const isCount = s.def.kind === 'count';
+    const type = isCount ? 'bar' : cat.dailyType;
+    if(type === 'bar'){
+      const bw = Math.max(2, (innerW/dates.length) * 0.6);
+      g.selectAll(null).data(s.values.map((v,i) => ({v,i}))).join('rect')
+        .filter(dd => dd.v != null)
+        .attr('x', dd => x(dd.i) - bw/2).attr('width', bw)
+        .attr('y', dd => dd.v >= 0 ? y(dd.v) : y(0))
+        .attr('height', dd => Math.abs(y(dd.v) - y(0)))
+        .attr('fill', isCount ? (dd => barColorForCount(dd.v)) : color)
+        .attr('opacity', 0.9);
+    } else {
+      g.append('path').datum(s.values).attr('fill','none').attr('stroke', color).attr('stroke-width',2).attr('d', line);
+    }
+  });
+
+  attachAxisHover(g, svg, {x, seriesData, innerW, innerH, margin, sys, dateFmt: i => labels[i], yFor: () => y});
+}
+
+function renderHourlyD3(sys, cat){
+  clearChartArea();
+  const colors = chartColors();
+  const allDefs = cat.hourly;
+  const container = document.getElementById('chartContainer');
+
+  if(!allDefs || !allDefs.length){
+    d3.select('#chartLegend').selectAll('*').remove();
+    emptyMsg(container, colors, 'No 24-hour data available for this category.');
+    return;
+  }
+  renderLegend(allDefs);
+
+  const base = (dataSeries[allDefs[0].series] || []).filter(pt => pt && pt[1] != null);
+  if(!base.length){ emptyMsg(container, colors, 'No 24-hour data available yet.'); return; }
+  const dates = base.map(pt => pt[0]);
+  const labels = dates.map(t => new Date(t).getHours().toString().padStart(2,'0') + ':00');
+
+  const defs = allDefs.filter(d => !hiddenSeries.has(d.name));
+  if(!defs.length){ emptyMsg(container, colors, 'All series hidden — click a legend item to re-enable.'); return; }
+
+  const seriesData = defs.map(d => {
+    const arr = dataSeries[d.series] || [];
+    const byDate = new Map(arr.filter(pt => pt && pt[1] != null).map(pt => [pt[0], pt[1]]));
+    const values = dates.map(t => {
+      const raw = byDate.get(t);
+      return raw == null ? null : CONVERTERS[d.kind](raw, sys);
+    });
+    return {def: d, values};
+  });
+
+  const hasDual = defs.some(d => d.yAxisIndex === 1);
+  const {width, height} = container.getBoundingClientRect();
+  const margin = {top:20, right: hasDual ? 54 : 20, bottom:40, left:52};
+  const innerW = Math.max(10, width - margin.left - margin.right);
+  const innerH = Math.max(10, height - margin.top - margin.bottom);
+
+  const svg = d3.select(container).append('svg').attr('viewBox', `0 0 ${width} ${height}`);
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const x = d3.scalePoint().domain(d3.range(dates.length)).range([0, innerW]).padding(0.5);
+
+  const axis0 = seriesData.filter(s => (s.def.yAxisIndex||0) === 0);
+  const axis1 = seriesData.filter(s => s.def.yAxisIndex === 1);
+
+  function buildScale(list){
+    const vals = list.flatMap(s => s.values).filter(v => v != null);
+    let min = 0, max = 1;
+    if(vals.length){ min = Math.min(...vals); max = Math.max(...vals); }
+    const isCloud = list.some(s => s.def.kind === 'cloud');
+    const isDistOrCount = list.some(s => s.def.kind === 'dist' || s.def.kind === 'count');
+    if(isCloud){ min = 0; max = 100; }
+    else if(isDistOrCount){ min = Math.min(0, min); const pad = (max-min)*0.1 || 1; max += pad; }
+    else { const pad = (max-min)*0.1 || 1; min -= pad; max += pad; }
+    return d3.scaleLinear().domain([min, max]).range([innerH, 0]).nice();
+  }
+  const y0 = buildScale(axis0.length ? axis0 : seriesData);
+  const y1 = axis1.length ? buildScale(axis1) : null;
+  const yFor = d => (d.yAxisIndex === 1 && y1) ? y1 : y0;
+
+  g.append('g').attr('class','d3-gridline').call(d3.axisLeft(y0).tickSize(-innerW).tickFormat(''));
+
+  const tickEvery = Math.max(1, Math.ceil(dates.length/12));
+  g.append('g').attr('class','d3-axis').attr('transform', `translate(0,${innerH})`)
+    .call(d3.axisBottom(x).tickValues(x.domain().filter((d,i) => i % tickEvery === 0)).tickFormat(i => labels[i]));
+  g.append('g').attr('class','d3-axis').call(d3.axisLeft(y0).ticks(6));
+  if(y1){
+    g.append('g').attr('class','d3-axis').attr('transform', `translate(${innerW},0)`).call(d3.axisRight(y1).ticks(5));
+  }
+
+  const axisLabel0 = (cat.yAxes && cat.yAxes[0] && UNIT_LABELS[cat.yAxes[0]]) ? '('+UNIT_LABELS[cat.yAxes[0]](sys)+')' : '';
+  const axisLabel1 = (cat.yAxes && cat.yAxes[1] && UNIT_LABELS[cat.yAxes[1]]) ? '('+UNIT_LABELS[cat.yAxes[1]](sys)+')' : '';
+  if(axisLabel0){
+    g.append('text').attr('x', 4).attr('y', -8).attr('font-size',10).attr('fill', colors.text).text(axisLabel0);
+  }
+  if(axisLabel1 && y1){
+    g.append('text').attr('x', innerW-4).attr('y', -8).attr('text-anchor','end').attr('font-size',10).attr('fill', colors.text).text(axisLabel1);
+  }
+
+  // Colour bands sit behind the data
+  seriesData.forEach(s => drawBands(g, s.def, yFor(s.def), innerW));
+
+  const lineGen = yScale => d3.line().defined(v => v != null).x((v,i) => x(i)).y(v => yScale(v)).curve(d3.curveMonotoneX);
+  const areaGen = yScale => d3.area().defined(v => v != null).x((v,i) => x(i)).y0(innerH).y1(v => yScale(v)).curve(d3.curveMonotoneX);
+
+  seriesData.forEach(s => {
+    const d = s.def;
+    const color = seriesColor(d, colors);
+    const yScale = yFor(d);
+    const isCount = d.kind === 'count';
+    const isBar = d.type === 'bar' || isCount;
+    if(isBar){
+      const bw = Math.max(2, (innerW/dates.length) * 0.7);
+      g.selectAll(null).data(s.values.map((v,i) => ({v,i}))).join('rect')
+        .filter(dd => dd.v != null)
+        .attr('x', dd => x(dd.i) - bw/2).attr('width', bw)
+        .attr('y', dd => dd.v >= 0 ? yScale(dd.v) : yScale(0))
+        .attr('height', dd => Math.abs(yScale(dd.v) - yScale(0)))
+        .attr('fill', isCount ? (dd => barColorForCount(dd.v)) : color)
+        .attr('opacity', 0.9);
+    } else {
+      const isArea = d.area || d.kind === 'dist';
+      if(isArea){
+        g.append('path').datum(s.values).attr('fill', color).attr('opacity',0.15).attr('d', areaGen(yScale));
+      }
+      g.append('path').datum(s.values).attr('fill','none').attr('stroke', color).attr('stroke-width',2).attr('d', lineGen(yScale));
+    }
+  });
+
+  attachAxisHover(g, svg, {x, seriesData, innerW, innerH, margin, sys, dateFmt: i => labels[i], yFor});
+}
+
+function renderAuroraD3(){
+  const container = document.getElementById('chartContainer');
+  const colors = chartColors();
+  const badgeEl = document.getElementById('auroraBadge');
+  const noteEl = document.getElementById('chartCategoryNote');
+  clearChartArea();
+  d3.select('#chartLegend').selectAll('*').remove();
+
+  if(!auroraData || !auroraData.readings || !auroraData.readings.length){
+    badgeEl.textContent = 'Data unavailable';
+    badgeEl.className = 'aurora-badge aurora-green';
+    noteEl.textContent = '';
+    emptyMsg(container, colors, 'No aurora data available');
+    return;
+  }
+
+  const {thresholds, updatedAt, readings} = auroraData;
+  const latest = readings[readings.length - 1];
+  const latestStatus = latest.status_id || auroraStatusForValue(latest.value);
+  const latestCfg = AURORA_STATUS[latestStatus] || AURORA_STATUS.green;
+  badgeEl.textContent = latestCfg.label;
+  badgeEl.className = `aurora-badge ${latestCfg.badgeClass}`;
+  noteEl.textContent = updatedAt
+    ? `Updated: ${new Date(updatedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})} `
+      + `${new Date(updatedAt).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})} UTC · Source: AuroraWatch UK / Lancaster University`
+    : '';
+
+  const maxVal = Math.max(...readings.map(r => r.value));
+  const yMax = Math.max(250, Math.ceil(maxVal * 1.2 / 50) * 50);
+
+  const {width, height} = container.getBoundingClientRect();
+  const margin = {top:20, right:20, bottom:44, left:52};
+  const innerW = Math.max(10, width - margin.left - margin.right);
+  const innerH = Math.max(10, height - margin.top - margin.bottom);
+
+  const svg = d3.select(container).append('svg').attr('viewBox', `0 0 ${width} ${height}`);
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const x = d3.scalePoint().domain(d3.range(readings.length)).range([0, innerW]).padding(0.5);
+  const y = d3.scaleLinear().domain([0, yMax]).range([innerH, 0]);
+
+  const zoneBands = [
+    [0, thresholds.yellow || 50, 'rgba(34,197,94,0.05)'],
+    [thresholds.yellow || 50, thresholds.amber || 100, 'rgba(250,204,21,0.06)'],
+    [thresholds.amber || 100, thresholds.red || 200, 'rgba(249,115,22,0.06)'],
+    [thresholds.red || 200, yMax, 'rgba(239,68,68,0.07)'],
+  ];
+  zoneBands.forEach(([y0,y1,color]) => {
+    if(y1 <= y0) return;
+    g.append('rect').attr('x',0).attr('y', y(Math.min(y1,yMax))).attr('width', innerW)
+      .attr('height', y(Math.max(y0,0)) - y(Math.min(y1,yMax))).attr('fill', color);
+  });
+
+  g.append('g').attr('class','d3-gridline').call(d3.axisLeft(y).tickSize(-innerW).tickFormat(''));
+  const tickEvery = Math.max(1, Math.ceil(readings.length/12));
+  g.append('g').attr('class','d3-axis').attr('transform', `translate(0,${innerH})`)
+    .call(d3.axisBottom(x).tickValues(x.domain().filter((d,i) => i % tickEvery === 0))
+      .tickFormat(i => new Date(readings[i].datetime).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})));
+  g.append('g').attr('class','d3-axis').call(d3.axisLeft(y).ticks(6));
+  g.append('text').attr('x', 4).attr('y', -8).attr('font-size',10).attr('fill', colors.text).text('Activity (nT)');
+
+  [{v: thresholds.yellow||50, label:'Minor', color:'#facc15'},
+   {v: thresholds.amber||100, label:'Moderate', color:'#f97316'},
+   {v: thresholds.red||200, label:'Strong', color:'#ef4444'}]
+    .filter(t => t.v <= yMax)
+    .forEach(t => {
+      g.append('line').attr('x1',0).attr('x2',innerW).attr('y1',y(t.v)).attr('y2',y(t.v))
+        .attr('stroke', t.color).attr('stroke-dasharray','4,3').attr('stroke-width',1).attr('opacity',0.7);
+      g.append('text').attr('x', innerW-4).attr('y', y(t.v)-4).attr('text-anchor','end')
+        .attr('font-size',9).attr('fill', t.color).text(t.label);
+    });
+
+  const barW = Math.max(2, (innerW/readings.length) * 0.7);
+  g.selectAll('.aurora-bar').data(readings).join('rect')
+    .attr('x', (d,i) => x(i) - barW/2).attr('width', barW)
+    .attr('y', d => y(d.value)).attr('height', d => innerH - y(d.value))
+    .attr('rx',3).attr('ry',3)
+    .attr('fill', d => {
+      const sid = d.status_id || auroraStatusForValue(d.value);
+      return (AURORA_STATUS[sid] || AURORA_STATUS.green).color;
+    })
+    .on('mousemove', (event,d) => {
+      const sid = d.status_id || auroraStatusForValue(d.value);
+      const cfg = AURORA_STATUS[sid] || AURORA_STATUS.green;
+      const dt = new Date(d.datetime);
+      const hdr = dt.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})
+        + ' ' + dt.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) + ' UTC';
+      showTip(`<strong>${hdr}</strong>`
+        + `<div><span style="color:${cfg.color};font-weight:600;">●</span> Activity: <strong>${round1(d.value)} nT</strong></div>`
+        + `<div style="font-size:11px;opacity:.8;">${cfg.label}</div>`, event);
+    })
+    .on('mouseleave', hideTip);
+}
+
+function renderChart(){
+  const isAurora = currentCategory === 'aurora';
+  const isMeteogram = currentCategory === 'meteogram';
+  const isWindrose = currentCategory === 'windrose';
+  const isSpecial = isAurora || isMeteogram || isWindrose;
+
+  document.getElementById('chartToolbarStandard').style.display = isSpecial ? 'none' : '';
+  document.getElementById('auroraToolbar').style.display = isAurora ? '' : 'none';
+  document.getElementById('auroraLegend').style.display = isAurora ? '' : 'none';
+  document.getElementById('meteogramToolbar').style.display = isMeteogram ? '' : 'none';
+  document.getElementById('meteogramWrap').style.display = isMeteogram ? '' : 'none';
+  document.getElementById('windroseToolbar').style.display = isWindrose ? '' : 'none';
+  document.getElementById('windroseWrap').style.display = isWindrose ? '' : 'none';
+  document.getElementById('chartContainer').style.display = (isMeteogram || isWindrose) ? 'none' : '';
+  document.getElementById('chartLegend').style.display = isSpecial ? 'none' : '';
+  document.getElementById('recordsSection').style.display = isSpecial ? 'none' : '';
+
+  if(isAurora){
+    document.getElementById('chartCategoryNote').textContent = '';
+    renderAuroraD3();
+    return;
+  }
+  if(isMeteogram){
+    document.getElementById('chartCategoryNote').textContent = '';
+    renderMeteogramD3();
+    return;
+  }
+  if(isWindrose){
+    document.getElementById('chartCategoryNote').textContent = '';
+    renderWindRoseD3();
+    return;
+  }
+
+  const sys = SYSTEMS[currentSystem];
+  const cat = CHART_CATEGORIES[currentCategory];
+  document.getElementById('chartCategoryNote').textContent = cat ? cat.note : '';
+  setActiveTimeframeButton();
+
+  if(!dataSeries || !cat){
+    clearChartArea();
+    d3.select('#chartLegend').selectAll('*').remove();
+    emptyMsg(document.getElementById('chartContainer'), chartColors(), dataSeries ? 'No category data' : 'Loading…');
+    return;
+  }
+
+  if(currentTimeframe === 'day'){
+    renderHourlyD3(sys, cat);
+  } else {
+    const daysMap = {week:7, month:30, year:365};
+    if(currentTimeframe === 'historical'){
+      renderDailyD3(sys, cat, {historicalYear});
+    } else {
+      renderDailyD3(sys, cat, {trailingDays: daysMap[currentTimeframe]});
+    }
+  }
+}
+
+// Redraw the D3 chart on container resize (D3 has no chart.resize() equivalent).
+// Meteogram manages its own resize via the ECharts instance's window listener, so skip it here.
+new ResizeObserver(() => { if(currentCategory !== 'meteogram') renderChart(); }).observe(document.getElementById('chartContainer'));
+
+
+// ===================== Wind Rose (adapted from modalWindRose-d3.html) =====================
+// Reuses the same dataSeries this page already fetches from charts.json, rather than a
+// separate fetch — the modal version loaded charts.json on its own since it's a standalone
+// popup, but here we're already polling it for the other tabs.
+const WR_DIR_FIELD_CANDIDATES = ['windDirAvg', 'windDirVecAvg', 'windDir'];
+const WR_BINS = [
+  { label:'< 1.5',  cs:'rgba(255,107,107,0.22)', cg:'rgba(232,163,61,0.28)' },
+  { label:'1.5–3',  cs:'rgba(255,107,107,0.40)', cg:'rgba(232,163,61,0.42)' },
+  { label:'3–5.5',  cs:'rgba(255,107,107,0.58)', cg:'rgba(232,163,61,0.58)' },
+  { label:'5.5–8',  cs:'rgba(255,107,107,0.75)', cg:'rgba(232,163,61,0.74)' },
+  { label:'8–11',   cs:'rgba(220,55,55,0.90)',   cg:'rgba(196,120,20,0.90)' },
+  { label:'> 11',   cs:'rgba(155,15,15,1.00)',   cg:'rgba(150,85,0,1.00)' },
+];
+const WR_BIN_MAX = [1.5, 3.3, 5.5, 8.0, 11.0, Infinity];
+const WR_DIRS_16 = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+const WR_COMPASS_8 = ['N','NE','E','SE','S','SW','W','NW'];
+// Beaufort has no sensible "×factor" mapping onto a speed-range bin label, so the rose
+// deliberately falls back to displaying m/s when the dashboard's unit system is Beaufort —
+// matching the original modal's behaviour.
+const WR_CONV_FACTOR = { mph: 2.23694, kmh: 3.6, kt: 1.94384, ms: 1, bf: 1 };
+const WR_CONV_LABEL  = { mph: 'mph', kmh: 'km/h', kt: 'kt', ms: 'm/s', bf: 'm/s' };
+
+let windrosePeriod = 'week';
+function wrWindUnit(){ return SYSTEMS[currentSystem].wind; }
+function wrConv(){ return WR_CONV_FACTOR[wrWindUnit()] || 1; }
+function wrUlbl(){ return WR_CONV_LABEL[wrWindUnit()] || 'm/s'; }
+function wrFmtV(ms){ return (ms * wrConv()).toFixed(1); }
+
+function wrThemeColors(){
+  const light = !isDarkTheme();
+  return light ? {
+    ring:'rgba(0,0,0,0.18)', ringTxt:'rgba(0,0,0,0.55)',
+    spokeMaj:'rgba(0,0,0,0.18)', spokeMin:'rgba(0,0,0,0.08)',
+    cardTxt:'rgba(0,0,0,0.70)', petalStroke:'rgba(0,0,0,0.20)',
+    calm: isGust => isGust ? 'rgba(196,120,20,0.15)' : 'rgba(200,50,50,0.12)',
+    calmStr: isGust => isGust ? 'rgba(196,120,20,0.50)' : 'rgba(180,40,40,0.45)',
+  } : {
+    ring:'rgba(230,234,249,0.10)', ringTxt:'rgba(230,234,249,0.35)',
+    spokeMaj:'rgba(230,234,249,0.12)', spokeMin:'rgba(230,234,249,0.05)',
+    cardTxt:'rgba(230,234,249,0.75)', petalStroke:'rgba(0,0,0,0.25)',
+    calm: isGust => isGust ? 'rgba(232,163,61,0.14)' : 'rgba(255,107,107,0.12)',
+    calmStr: isGust => isGust ? 'rgba(232,163,61,0.5)' : 'rgba(255,107,107,0.45)',
+  };
+}
+
+function getWindRoseData(){
+  if(!dataSeries) return {allData: [], dirFieldMissing: true};
+  const dirField = WR_DIR_FIELD_CANDIDATES.find(f => Array.isArray(dataSeries[f]) && dataSeries[f].some(p => p && p[1] != null));
+  const dirFieldMissing = !dirField;
+  const byTs = new Map();
+  (dataSeries.windSpeedAvg || []).forEach(p => {
+    if(p && p[1] != null) byTs.set(p[0], {ts:p[0], speedMs:parseFloat(p[1]), gustMs:null, dirDeg:null});
+  });
+  (dataSeries.windGustMax || []).forEach(p => {
+    if(p && p[1] != null && byTs.has(p[0])) byTs.get(p[0]).gustMs = parseFloat(p[1]);
+  });
+  if(dirField){
+    (dataSeries[dirField] || []).forEach(p => {
+      if(p && p[1] != null && byTs.has(p[0])) byTs.get(p[0]).dirDeg = parseFloat(p[1]);
+    });
+  }
+  const allData = Array.from(byTs.values()).sort((a,b) => a.ts - b.ts);
+  return {allData, dirFieldMissing};
+}
+
+function wrGetSubset(allData){
+  if(windrosePeriod === 'year') return allData;
+  return allData.slice(-(windrosePeriod === 'month' ? 30 : 7));
+}
+
+function buildRoseData(subset, useGust){
+  const sectors = Array.from({length:16}, () => new Array(WR_BINS.length).fill(0));
+  let calm = 0, counted = 0;
+  subset.forEach(d => {
+    if(d.dirDeg == null) return;
+    const val = useGust ? (d.gustMs != null ? d.gustMs : d.speedMs) : d.speedMs;
+    if(val == null) return;
+    counted++;
+    if(val <= 0.5){ calm++; return; }
+    const di = Math.round(d.dirDeg / 22.5) % 16;
+    const bi = WR_BIN_MAX.findIndex(mx => val < mx);
+    sectors[di][bi === -1 ? WR_BINS.length-1 : bi]++;
+  });
+  return {sectors, calm, total: counted};
+}
+
+function wrShowEmpty(containerId, msg){
+  document.getElementById(containerId).style.display = 'none';
+  const el = document.getElementById(containerId + 'Empty');
+  el.textContent = msg;
+  el.style.display = 'flex';
+  const legendId = containerId === 'roseSpeed' ? 'legendSpeed' : 'legendGust';
+  document.getElementById(legendId).style.display = 'none';
+}
+function wrHideEmpty(containerId){
+  document.getElementById(containerId).style.display = 'block';
+  document.getElementById(containerId + 'Empty').style.display = 'none';
+  const legendId = containerId === 'roseSpeed' ? 'legendSpeed' : 'legendGust';
+  document.getElementById(legendId).style.display = '';
+}
+
+function drawRoseD3(containerId, roseData, isGust, dataReady, dirFieldMissing){
+  const container = document.getElementById(containerId);
+  if(!dataReady){ wrShowEmpty(containerId, 'No wind data available yet.'); return; }
+  if(dirFieldMissing){ wrShowEmpty(containerId, 'Direction data unavailable in charts.json — rose cannot be drawn.'); return; }
+  if(roseData.total === 0){ wrShowEmpty(containerId, 'No observations for this period.'); return; }
+  wrHideEmpty(containerId);
+
+  const TC = wrThemeColors();
+  const W = 420, H = 420, cx = W/2, cy = H/2;
+  const maxR = Math.min(cx,cy) - 38;
+
+  container.innerHTML = '';
+  const svg = d3.select(container).append('svg').attr('viewBox', `0 0 ${W} ${H}`);
+  const g = svg.append('g').attr('transform', `translate(${cx},${cy})`);
+
+  const {sectors, calm, total} = roseData;
+  const dirTotals = sectors.map(s => s.reduce((a,b) => a+b, 0));
+  const maxCount = Math.max(...dirTotals, 1);
+
+  for(let i=1; i<=4; i++){
+    const r = (i/4) * maxR;
+    g.append('circle').attr('r',r).attr('fill','none').attr('stroke',TC.ring).attr('stroke-width',0.8);
+    const pct = Math.round((i/4) * (maxCount/total) * 100);
+    g.append('text').attr('x',0).attr('y',-r-4).attr('text-anchor','middle')
+      .attr('font-size',9).attr('font-family','system-ui, sans-serif').attr('fill',TC.ringTxt).text(pct + '%');
+  }
+  for(let i=0; i<16; i++){
+    const a = (i/16) * 2 * Math.PI;
+    g.append('line').attr('x1',0).attr('y1',0)
+      .attr('x2', Math.sin(a)*maxR).attr('y2', -Math.cos(a)*maxR)
+      .attr('stroke', i%2===0 ? TC.spokeMaj : TC.spokeMin).attr('stroke-width', i%2===0 ? 0.8 : 0.4);
+  }
+
+  const sW = (2*Math.PI/16) * 0.88;
+  const arcGen = d3.arc();
+  for(let di=0; di<16; di++){
+    const base = (di/16) * 2 * Math.PI;
+    let cumR = 0;
+    for(let bi=0; bi<WR_BINS.length; bi++){
+      const cnt = sectors[di][bi]; if(!cnt) continue;
+      const seg = (cnt/maxCount) * maxR;
+      const d = arcGen({innerRadius:Math.max(cumR,0.5), outerRadius:cumR+seg, startAngle:base-sW/2, endAngle:base+sW/2});
+      g.append('path').attr('d',d)
+        .attr('fill', isGust ? WR_BINS[bi].cg : WR_BINS[bi].cs)
+        .attr('stroke', TC.petalStroke).attr('stroke-width',0.4)
+        .on('mousemove', (event) => wrShowRoseTooltip({di,bi,cnt,total,isGust,roseData}, event))
+        .on('mouseleave', hideTip);
+      cumR += seg;
+    }
+  }
+
+  const cr = Math.max(3, (calm/total) * maxR * 0.5);
+  g.append('circle').attr('r',cr).attr('fill', TC.calm(isGust)).attr('stroke', TC.calmStr(isGust)).attr('stroke-width',1)
+    .on('mousemove', (event) => wrShowCalmTooltip(calm, total, isGust, event))
+    .on('mouseleave', hideTip);
+
+  const labR = maxR + 20;
+  WR_COMPASS_8.forEach((lbl,i) => {
+    const a = (i/8) * 2 * Math.PI;
+    g.append('text').attr('x', Math.sin(a)*labR).attr('y', -Math.cos(a)*labR)
+      .attr('text-anchor','middle').attr('dominant-baseline','middle')
+      .attr('font-family','system-ui, sans-serif')
+      .attr('font-size', lbl==='N' ? 13 : 11).attr('font-weight', lbl==='N' ? 'bold' : 'normal')
+      .attr('fill', lbl==='N' ? (isGust?'#D3A94C':'#FF6B6B') : TC.cardTxt)
+      .text(lbl);
+  });
+  g.append('circle').attr('r',3).attr('fill', isGust ? '#D3A94C' : '#FF6B6B');
+
+  document.getElementById(isGust ? 'wrCalmGust' : 'wrCalmSpeed').textContent =
+    'Calm: ' + ((calm/total) * 100).toFixed(1) + '%';
+}
+
+function wrShowRoseTooltip({di,bi,cnt,total,isGust,roseData}, event){
+  const dir = WR_DIRS_16[di];
+  const dirCount = roseData.sectors[di].reduce((a,b) => a+b, 0);
+  const freq = total > 0 ? ((dirCount/total)*100).toFixed(1) : '0.0';
+  const titleColor = isGust ? '#D3A94C' : '#FF6B6B';
+  const binLabel = WR_BINS[bi].label.replace(/[\d.]+/g, n => (parseFloat(n)*wrConv()).toFixed(wrConv()===1?1:0)) + ' ' + wrUlbl();
+  const binCount = total > 0 ? ((cnt/total)*100).toFixed(1)+'%' : '—';
+  showTip(
+    `<strong style="color:${titleColor};">${dir} — ${isGust?'Gust':'Speed'}</strong>` +
+    `<div>Direction freq.: <strong>${freq}%</strong></div>` +
+    `<div>Speed band: <strong>${binLabel}</strong></div>` +
+    `<div>Band share: <strong>${binCount}</strong></div>` +
+    `<div>Obs. in sector: <strong>${dirCount}</strong></div>`,
+    event
+  );
+}
+function wrShowCalmTooltip(calm, total, isGust, event){
+  const titleColor = isGust ? '#D3A94C' : '#FF6B6B';
+  const pct = total > 0 ? ((calm/total)*100).toFixed(1) : '0.0';
+  showTip(
+    `<strong style="color:${titleColor};">Calm</strong>` +
+    `<div>Below: <strong>${(0.5*wrConv()).toFixed(1)} ${wrUlbl()}</strong></div>` +
+    `<div>Share of obs.: <strong>${pct}%</strong></div>`,
+    event
+  );
+}
+
+function wrBuildLegend(containerId, isGust){
+  const el = document.getElementById(containerId); el.innerHTML = '';
+  WR_BINS.forEach(b => {
+    const color = isGust ? b.cg : b.cs;
+    const lbl = b.label.replace(/[\d.]+/g, n => (parseFloat(n)*wrConv()).toFixed(wrConv()===1?1:0));
+    const d = document.createElement('div'); d.className = 'leg-item';
+    d.innerHTML = '<div class="leg-swatch" style="background:' + color + '"></div><span>' + lbl + ' ' + wrUlbl() + '</span>';
+    el.appendChild(d);
+  });
+}
+
+function wrPrevailingDir(slice){
+  let sx=0, sy=0, n=0;
+  slice.forEach(d => {
+    if(d.dirDeg == null) return;
+    const r = d.dirDeg * Math.PI / 180;
+    sx += Math.cos(r); sy += Math.sin(r); n++;
+  });
+  if(!n) return {deg:null, abbr:'N/A'};
+  let deg = Math.atan2(sy/n, sx/n) * 180/Math.PI;
+  if(deg < 0) deg += 360;
+  deg = Math.round(deg);
+  return {deg, abbr: WR_DIRS_16[Math.round(deg/22.5) % 16]};
+}
+function wrFmtDate(ts){ return new Date(ts).toLocaleDateString('en-GB', {day:'2-digit', month:'short'}); }
+
+function wrBuildExtremes(allData, dirFieldMissing){
+  const grid = document.getElementById('wrExtremeGrid'); grid.innerHTML = '';
+  if(!allData.length){
+    grid.innerHTML = '<div class="extreme-period" style="grid-column:1/-1;color:var(--bs-secondary-color);">No data available.</div>';
+    return;
+  }
+  const periods = [
+    {label:'Daily', days:1}, {label:'Weekly', days:7}, {label:'Monthly', days:30},
+    {label:'Yearly', days:365}, {label:'All-time', days:allData.length},
+  ];
+  periods.forEach(p => {
+    const slice = allData.slice(-Math.min(p.days, allData.length));
+    const maxSpd = slice.filter(d => d.speedMs != null).reduce((a,b) => b.speedMs > a.speedMs ? b : a, {speedMs:-Infinity, ts:null});
+    const maxGst = slice.filter(d => d.gustMs != null).reduce((a,b) => (b.gustMs||0) > (a.gustMs||0) ? b : a, {gustMs:-Infinity, ts:null});
+    const dir = dirFieldMissing ? {deg:null, abbr:'N/A'} : wrPrevailingDir(slice);
+    const col = document.createElement('div'); col.className = 'extreme-period';
+    col.innerHTML =
+      '<div class="period-label">' + p.label + '</div>' +
+      '<div class="metric-box wind-speed-max">' +
+        (maxSpd.ts ? '<div class="metric-value">' + wrFmtV(maxSpd.speedMs) + '<span class="metric-unit">' + wrUlbl() + '</span></div><div class="metric-date">' + wrFmtDate(maxSpd.ts) + ' (speed)</div>'
+          : '<div class="metric-value" style="opacity:.5;">N/A</div>') +
+      '</div>' +
+      '<div class="metric-box wind-gust-max">' +
+        (maxGst.ts && maxGst.gustMs > 0 ? '<div class="metric-value">' + wrFmtV(maxGst.gustMs) + '<span class="metric-unit">' + wrUlbl() + '</span></div><div class="metric-date">' + wrFmtDate(maxGst.ts) + ' (gust)</div>'
+          : '<div class="metric-value" style="opacity:.5;">N/A</div>') +
+      '</div>' +
+      '<div class="metric-box wind-dir-prev">' +
+        (dir.deg != null ? '<div class="metric-value">' + dir.abbr + '<span class="metric-unit"> (' + dir.deg + '°)</span></div><div class="metric-date">prevailing</div>'
+          : '<div class="metric-value" style="opacity:.5;">N/A</div>') +
+      '</div>';
+    grid.appendChild(col);
+  });
+}
+
+function wrUpdateUnitDisplay(){
+  document.getElementById('windroseUnitDisplay').textContent = 'Units: ' + wrUlbl() +
+    (wrWindUnit() === 'bf' ? ' (Beaufort shown as m/s here)' : '');
+}
+
+function renderWindRoseD3(){
+  const {allData, dirFieldMissing} = getWindRoseData();
+  const dataReady = allData.length > 0;
+  wrUpdateUnitDisplay();
+  const sub = wrGetSubset(allData);
+  const spd = buildRoseData(sub, false);
+  const gst = buildRoseData(sub, true);
+  drawRoseD3('roseSpeed', spd, false, dataReady, dirFieldMissing);
+  drawRoseD3('roseGust', gst, true, dataReady, dirFieldMissing);
+  wrBuildLegend('legendSpeed', false);
+  wrBuildLegend('legendGust', true);
+  wrBuildExtremes(allData, dirFieldMissing);
+  document.getElementById('windroseUnitDisplay').textContent += dirFieldMissing ? ' · Direction data unavailable' : '';
+}
+
+document.querySelectorAll('.chart-tf-btn[data-wrperiod]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.chart-tf-btn[data-wrperiod]').forEach(b => b.classList.toggle('active', b===btn));
+    windrosePeriod = btn.dataset.wrperiod;
+    renderWindRoseD3();
+  });
+});
+document.querySelector('.chart-tf-btn[data-wrperiod="week"]').classList.add('active');
+
+new ResizeObserver(() => { if(currentCategory === 'windrose') renderWindRoseD3(); }).observe(document.getElementById('windroseWrap'));
+
+
+// ===================== Wiring =====================
+document.querySelectorAll('.records-tab').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    currentCategory = btn.dataset.cat;
+    hiddenSeries.clear();
+    const url = new URL(window.location.href);
+    url.searchParams.set('type', currentCategory);
+    history.replaceState(null, '', url);
+    document.querySelectorAll('.records-tab').forEach(b=>b.classList.toggle('active', b===btn));
+    updatePageTitle();
+    populateHistoricalYears();
+    renderChart();
+    renderRecordsPanel();
+  });
+});
+document.querySelectorAll('.chart-tf-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    currentTimeframe = btn.dataset.tf;
+    renderChart();
+  });
+});
+document.getElementById('chartHistYear').addEventListener('change', e=>{
+  historicalYear = e.target.value;
+  currentTimeframe = 'historical';
+  setActiveTimeframeButton();
+  renderChart();
+});
+document.getElementById('chartHistYear').addEventListener('click', ()=>{
+  currentTimeframe = 'historical';
+  setActiveTimeframeButton();
+  renderChart();
+});
+document.querySelectorAll('.records-tab').forEach(b=>b.classList.toggle('active', b.dataset.cat===currentCategory));
+
+
+const root = document.documentElement;
+let themeMode = localStorage.getItem('dashboardThemeMode') || 'auto';
+let lastIsDay = null;
+const LOOP_JSON_URL_FOR_THEME = './jsondata/loop.json';
+const THEME_ISDAY_POLL_MS = 60 * 1000;
+
+const THEME_ICONS = { auto: '\u{1F313}', light: '\u2600\uFE0F', dark: '\u{1F319}' };
+const THEME_ORDER = ['dark', 'light', 'auto'];
+if (!THEME_ORDER.includes(themeMode)) themeMode = 'dark';
+let currentSeason = null;
+
+function resolveAutoIsDay(){
+  if(lastIsDay != null) return !!lastIsDay;
+  return !window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+function resolveTheme(){
+  // Seasonal is a fixed standalone theme, never affected by day/night auto-switching.
+  if (themeMode === 'seasonal') return 'light';
+  return themeMode==='light' ? 'light' : themeMode==='dark' ? 'dark' : (resolveAutoIsDay() ? 'light' : 'dark');
+}
+function applyTheme(){
+  root.setAttribute('data-bs-theme', resolveTheme());
+  currentSeason = applySeasonClass(themeMode);
+  syncThemeNavUI();
+  renderChart();
+}
+function syncThemeNavUI(){
+  const btn = document.getElementById('themeToggle');
+  if(!btn) return;
+  const resolved = resolveTheme();
+  if (themeMode === 'seasonal') {
+    btn.textContent = SEASON_ICONS[currentSeason];
+    btn.title = 'Seasonal (' + seasonLabel(currentSeason) + ')';
+  } else {
+    btn.textContent = THEME_ICONS[themeMode];
+    btn.title = themeMode === 'auto' ? ('Auto (currently ' + resolved + ')') : (themeMode.charAt(0).toUpperCase() + themeMode.slice(1));
+  }
+}
+function pollIsDayForTheme(){
+  fetch(LOOP_JSON_URL_FOR_THEME + ((LOOP_JSON_URL_FOR_THEME).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'})
+    .then(res => { if(!res.ok) throw new Error('HTTP '+res.status); return res.json(); })
+    .then(j => {
+      const o = (j && j.observations) || {};
+      if(o.isDay != null){
+        lastIsDay = o.isDay;
+        if(themeMode==='auto') applyTheme();
+      }
+    })
+    .catch(e => console.warn('Re-ImaginedWX charts: loop.json poll (theme) failed —', e.message));
+}
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', ()=>{
+  if(themeMode==='auto') applyTheme();
+});
+window.addEventListener('storage', (e)=>{
+  if(e.key === 'dashboardThemeMode'){
+    themeMode = e.newValue || 'auto';
+    applyTheme();
+  }
+  if(e.key === 'dashboardUnitSystem'){
+    currentSystem = (e.newValue && SYSTEMS[e.newValue]) ? e.newValue : 'uk';
+    const unitSelect = document.getElementById('unitSystem');
+    if(unitSelect) unitSelect.value = currentSystem;
+    renderChart();
+    renderRecordsPanel();
+  }
+});
+applyTheme();
+pollIsDayForTheme();
+setInterval(pollIsDayForTheme, THEME_ISDAY_POLL_MS);
+
+const STATION_TITLE_JSON_URL = './jsondata/archive.json';
+function setStationTitle(){
+  fetch(STATION_TITLE_JSON_URL + ((STATION_TITLE_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'})
+    .then(r => { if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    .then(data => {
+      const loc = data && data.meta && data.meta.station_location;
+      const el = document.querySelector('.brand-text');
+      if(loc && el) el.textContent = loc;
+    })
+    .catch(e => console.warn('Re-ImaginedWX charts: station_location fetch failed —', e.message));
+}
+
+function includeHTML(callback){
+  const elements = document.querySelectorAll('[w3-include-html]');
+  let pending = elements.length;
+  if(pending === 0){ if(callback) callback(); return; }
+  elements.forEach(el => {
+    const file = el.getAttribute('w3-include-html');
+    fetch(file, {cache:'no-store'})
+      .then(res => { if(!res.ok) throw new Error('HTTP '+res.status); return res.text(); })
+      .then(html => { el.innerHTML = html; el.removeAttribute('w3-include-html'); })
+      .catch(e => {
+        console.warn('Re-ImaginedWX charts: include failed for', file, '—', e.message);
+        el.innerHTML = '';
+      })
+      .finally(() => { pending--; if(pending === 0 && callback) callback(); });
+  });
+}
+
+includeHTML(() => {
+  initSharedHeader();
+  setStationTitle();
+  if(!document.getElementById('unitSystem')) return;
+  const unitSelect = document.getElementById('unitSystem');
+  unitSelect.value = currentSystem;
+  unitSelect.addEventListener('change', e=>{
+    currentSystem = e.target.value;
+    localStorage.setItem('dashboardUnitSystem', currentSystem);
+    renderChart();
+    renderRecordsPanel();
+  });
+  const themeBtn = document.getElementById('themeToggle');
+  if(themeBtn){
+    themeBtn.addEventListener('click', ()=>{
+      themeMode = THEME_ORDER[(THEME_ORDER.indexOf(themeMode) + 1) % THEME_ORDER.length];
+      localStorage.setItem('dashboardThemeMode', themeMode);
+      applyTheme();
+    });
+  }
+  syncThemeNavUI();
+});
+
+// ===================== Bootstrap =====================
+setActiveTimeframeButton();
+renderChart();
+pollChartsJson();
+setInterval(pollChartsJson, CHARTS_POLL_MS);
+pollAurora();
+setInterval(pollAurora, AURORA_POLL_MS);
+pollMeteogram();
+setInterval(pollMeteogram, METEOGRAM_POLL_MS);
+</script>
+<script>
+
+(function(){
+  if (window.parent === window) return;
+  function reportHeight(){
+    window.parent.postMessage({ type: 'chartModalContentHeight', height: document.body.scrollHeight }, '*');
+  }
+  new ResizeObserver(reportHeight).observe(document.body);
+  window.addEventListener('load', reportHeight);
+  reportHeight();
+})();
+</script>
+</body>
+</html>

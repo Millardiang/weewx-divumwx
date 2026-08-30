@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nothing to see here</title>
+  <!-- minimal style – clean, centered, subtle -->
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #f8f6f2;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      padding: 1.5rem;
+    }
+
+    .card {
+      max-width: 720px;
+      width: 100%;
+      background: rgba(255, 250, 240, 0.7);
+      backdrop-filter: blur(2px);
+      border-radius: 3.5rem 1rem 3.5rem 1rem;
+      box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.15),
+                  0 4px 18px rgba(0, 0, 0, 0.05);
+      padding: 3rem 2.5rem;
+      transition: all 0.2s ease;
+      border: 1px solid #eae3d7;
+    }
+
+    h1 {
+      font-size: 2.8rem;
+      font-weight: 320;
+      letter-spacing: -0.02em;
+      color: #2c2b28;
+      text-align: center;
+      border-bottom: 2px dashed #d6cdbc;
+      padding-bottom: 0.85rem;
+      margin-bottom: 2rem;
+      font-family: 'Times New Roman', Georgia, serif;
+    }
+
+    .language-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+    }
+
+    .lang-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      padding: 0.6rem 0.8rem;
+      border-radius: 60px;
+      background: rgba(255, 248, 235, 0.4);
+      transition: background 0.15s;
+    }
+
+    .lang-row:hover {
+      background: rgba(220, 210, 190, 0.2);
+    }
+
+    .lang-label {
+      font-size: 0.9rem;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      color: #6b6256;
+      min-width: 80px;
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+    }
+
+    .lang-message {
+      font-size: 1.5rem;
+      font-weight: 340;
+      color: #1f1e1b;
+      text-align: right;
+      word-break: break-word;
+      padding-left: 1rem;
+    }
+
+    /* small tweaks for scripts that need more space */
+    .lang-message[lang="el"] {
+      font-size: 1.6rem;
+      letter-spacing: 0.02em;
+    }
+
+    .lang-message[lang="ru"] {
+      font-size: 1.5rem;
+    }
+
+    .lang-message[lang="zh"] {
+      font-size: 1.6rem;
+      font-weight: 350;
+    }
+
+    .footnote {
+      margin-top: 2.4rem;
+      font-size: 0.85rem;
+      color: #93897b;
+      text-align: center;
+      border-top: 1px solid #e0d7ca;
+      padding-top: 1.6rem;
+      letter-spacing: 0.02em;
+    }
+
+    .footnote span {
+      background: #ede8df;
+      padding: 0.2rem 1rem;
+      border-radius: 40px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.8rem;
+    }
+
+    @media (max-width: 480px) {
+      .card {
+        padding: 2rem 1.2rem;
+      }
+      h1 {
+        font-size: 2.2rem;
+      }
+      .lang-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.2rem;
+        padding: 0.8rem 0.6rem;
+        border-radius: 1.5rem;
+      }
+      .lang-message {
+        text-align: left;
+        padding-left: 0;
+        font-size: 1.3rem;
+      }
+      .lang-label {
+        min-width: auto;
+        font-size: 0.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>✦ nothing to see here ✦</h1>
+
+    <div class="language-grid">
+      <!-- English -->
+      <div class="lang-row">
+        <span class="lang-label">English</span>
+        <span class="lang-message" lang="en">Nothing to see here</span>
+      </div>
+      <!-- French -->
+      <div class="lang-row">
+        <span class="lang-label">Français</span>
+        <span class="lang-message" lang="fr">Rien à voir ici</span>
+      </div>
+      <!-- German -->
+      <div class="lang-row">
+        <span class="lang-label">Deutsch</span>
+        <span class="lang-message" lang="de">Hier gibt es nichts zu sehen</span>
+      </div>
+      <!-- Spanish -->
+      <div class="lang-row">
+        <span class="lang-label">Español</span>
+        <span class="lang-message" lang="es">No hay nada que ver aquí</span>
+      </div>
+      <!-- Mandarin (Chinese) -->
+      <div class="lang-row">
+        <span class="lang-label">中文</span>
+        <span class="lang-message" lang="zh">这里没什么可看的</span>
+      </div>
+      <!-- Russian -->
+      <div class="lang-row">
+        <span class="lang-label">Русский</span>
+        <span class="lang-message" lang="ru">Здесь не на что смотреть</span>
+      </div>
+      <!-- Greek -->
+      <div class="lang-row">
+        <span class="lang-label">Ελληνικά</span>
+        <span class="lang-message" lang="el">Δεν υπάρχει τίποτα να δεις εδώ</span>
+      </div>
+    </div>
+
+    <div class="footnote">
+      <span>· 8 languages ·</span>
+    </div>
+  </div>
+</body>
+</html>

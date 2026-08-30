@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<!--
+##############################################################################################
+# climate.html version 0.0.1
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  GPLv3
+##############################################################################################
+-->
+<html lang="en" data-bs-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>DivumWX Weather</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="header.css?v=s3n2026i">
+<script>
+  document.documentElement.dataset.embed = (new URL(location.href).searchParams.get('embed') === '1') ? '1' : '0';
+</script>
+<style>
+
+[data-embed="1"] .site-navbar-include{ display:none; }
+
+:root,
+[data-bs-theme="light"]{
+  --bw-accent:#B45309;
+  --bw-accent-soft:#3A2E1A;
+  --bw-lime:#C9DA1E;
+  --bw-sky:#6FB6DD;
+  --bw-good:#5BBB8A;
+  --bw-danger:#E36B57;
+  --bw-yellow:#D6BE4E;
+  --bw-radius-sm:10px;
+  --bw-shadow:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.5);
+
+  --bs-body-bg: #EFECE2;
+  --bs-body-color: #1D2C4E;
+  --bs-secondary-color: #5C6672;
+  --bs-tertiary-bg: #FFFFFF;
+  --bs-secondary-bg: #FFFFFF;
+  --bs-border-color: #C9CFD8;
+  --bs-card-bg: #FFFFFF;
+  --bs-font-sans-serif:'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+[data-bs-theme="dark"]{
+  --bw-accent:#D3A94C;
+  --bw-accent-soft:#3A2E1A;
+  --bw-sky:#6FB6DD;
+  --bw-good:#5BBB8A;
+  --bw-danger:#E36B57;
+  --bw-yellow:#D6BE4E;
+  --bw-shadow:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.5);
+
+  --bs-body-bg: #0A0F22;
+  --bs-body-color: #E9E4D4;
+  --bs-secondary-color: #8B93B8;
+  --bs-tertiary-bg: #111834;
+  --bs-secondary-bg: #111834;
+  --bs-border-color: #2A3358;
+  --bs-card-bg: #111834;
+}
+
+body{
+  font-family:var(--bs-font-sans-serif);
+  padding-bottom:48px;
+  transition:background-color .25s ease, color .25s ease;
+}
+.font-mono{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;}
+.card{background:var(--bs-card-bg); border-radius:var(--bw-radius-sm); box-shadow:var(--bw-shadow);}
+/* Seasonal accent mode — tints the card background the same way index.html's
+   dashboard does, using the same palette (kept in sync with header.css). */
+body.season-winter { --bs-card-bg: #e9f2ec; }
+[data-bs-theme="dark"] body.season-winter { --bs-card-bg: #24312a; }
+body.season-spring { --bs-card-bg: #eef7e3; }
+[data-bs-theme="dark"] body.season-spring { --bs-card-bg: #26301f; }
+body.season-summer { --bs-card-bg: #fff6d9; }
+[data-bs-theme="dark"] body.season-summer { --bs-card-bg: #332c16; }
+body.season-autumn { --bs-card-bg: #f2e6d8; }
+[data-bs-theme="dark"] body.season-autumn { --bs-card-bg: #2c2118; }
+
+/* ---------- Top bar ---------- */
+
+.records-page-title{font-size:32px;font-weight:700;margin:0 0 4px;}
+.records-page-sub{color:var(--bs-secondary-color);font-size:15px;margin-bottom:18px;}
+
+[data-bs-theme="light"]{
+  --noaa-navy:#1a3a5c; --noaa-mid:#B45309; --noaa-bg:#FFFFFF;
+  --noaa-text-accent:#1a3a5c;
+  --noaa-bdr:#C9CFD8; --noaa-fg:#1D2C4E;
+  --noaa-temp:#fce4d6; --noaa-rain:#e2f0d9; --noaa-wind:#dae8fc;
+  --noaa-wdir:#ede8f5; --noaa-hdd:#e6f0ff; --noaa-summ:#fff9e6;
+  --noaa-dc-bg:#f0f5fb; --noaa-row-hover:#d0e8ff; --noaa-am:#d4edda;
+}
+[data-bs-theme="dark"]{
+  --noaa-navy:#0e2236; --noaa-mid:#D3A94C; --noaa-bg:#111834;
+  --noaa-text-accent:#8fc7ec;
+  --noaa-bdr:#2A3358; --noaa-fg:#E9E4D4;
+  --noaa-temp:#3a2a22; --noaa-rain:#22301f; --noaa-wind:#1c2a3a;
+  --noaa-wdir:#2a223a; --noaa-hdd:#1c2838; --noaa-summ:#3a3520;
+  --noaa-dc-bg:#1d2733; --noaa-row-hover:#23456b; --noaa-am:#1f3a26;
+}
+/* Seasonal accent mode — the table background (--noaa-bg) follows the same
+   seasonal card tint as the rest of the page (--bs-card-bg, set just above
+   in the body.season-* rules). --noaa-mid (the accent used for
+   .noaa-controls/.noaa-tab-btn — brass/gold, matching --bw-accent
+   elsewhere on the site) previously aliased to --dark-bg/--card-bg —
+   neither of which this page (or any data-bs-theme-convention page) ever
+   defines, so in seasonal mode both variables were silently resolving to
+   nothing. --noaa-bg now points at the variable that actually exists here;
+   --noaa-mid is left at its own fixed accent value in seasonal mode
+   rather than pointing at another undefined alias. */
+body.season-winter, body.season-spring, body.season-summer, body.season-autumn {
+  --noaa-bg: var(--bs-card-bg);
+}
+.noaa-report{font-family:'Courier New',Courier,monospace;background:var(--noaa-bg);color:var(--noaa-fg);
+  border-radius:var(--bw-radius-sm);overflow:hidden;}
+.noaa-controls{background:var(--noaa-mid);background:color-mix(in srgb, var(--noaa-mid) 18%, var(--noaa-bg));
+  border-bottom:2px solid var(--noaa-mid);padding:12px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.noaa-controls label{font-weight:bold;font-size:12px;color:var(--noaa-text-accent);}
+.noaa-controls select{font-family:inherit;font-size:12px;padding:5px 10px;
+  border:1px solid var(--noaa-bdr);border-radius:3px;background:var(--noaa-bg);color:var(--noaa-fg);cursor:pointer;}
+.noaa-sep{color:var(--noaa-bdr);font-size:20px;}
+.noaa-stn{padding:8px 18px;background:var(--noaa-bg);border-bottom:1px solid var(--noaa-bdr);
+  font-size:11px;color:var(--noaa-fg);opacity:.85;display:flex;gap:24px;flex-wrap:wrap;}
+.noaa-page{padding:14px 18px;}
+.noaa-tabs{display:flex;gap:2px;}
+.noaa-tab-btn{padding:6px 20px;border:1px solid var(--noaa-bdr);border-bottom:none;
+  background:color-mix(in srgb, var(--noaa-mid) 25%, var(--noaa-bg));color:var(--noaa-text-accent);font-size:12px;
+  cursor:pointer;border-radius:4px 4px 0 0;}
+.noaa-tab-btn.active{background:var(--noaa-bg);font-weight:bold;border-color:var(--noaa-text-accent);}
+.noaa-tab-panel{display:none;}
+.noaa-tab-panel.active{display:block;}
+.noaa-sec-title{font-size:13px;font-weight:bold;text-align:center;letter-spacing:.5px;margin:8px 0 3px;color:var(--noaa-text-accent);}
+.noaa-sec-sub{font-size:10px;text-align:center;color:var(--noaa-fg);opacity:.7;margin-bottom:6px;}
+.noaa-table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.noaa-table{border-collapse:collapse;font-size:11.5px;width:100%;margin-bottom:8px;}
+.noaa-table th{background:var(--noaa-navy);color:#fff;border:1px solid var(--noaa-bdr);
+  padding:4px 6px;text-align:center;white-space:normal;word-break:break-word;}
+.noaa-table th.sub{font-size:10px;background:color-mix(in srgb, var(--noaa-navy) 80%, var(--noaa-mid));}
+.noaa-table th.t-tp{background:#7a3020 !important;} .noaa-table th.t-hd{background:#2a4070 !important;}
+.noaa-table th.t-rn{background:#2a5c2a !important;} .noaa-table th.t-wn{background:#1e4c6e !important;}
+.noaa-table th.t-wd{background:#3d2a6b !important;}
+.noaa-table td{border:1px solid var(--noaa-bdr);padding:2px 6px;text-align:right;white-space:nowrap;color:var(--noaa-fg);}
+@media(max-width:700px){.noaa-table td{white-space:normal;word-break:break-word;}}
+.noaa-table td.dc{text-align:center;font-weight:bold;color:var(--noaa-text-accent);background:var(--noaa-dc-bg);}
+.noaa-table td.temp{background:var(--noaa-temp);} .noaa-table td.rain{background:var(--noaa-rain);}
+.noaa-table td.wind{background:var(--noaa-wind);} .noaa-table td.wdir{background:var(--noaa-wdir);}
+.noaa-table td.hdd{background:var(--noaa-hdd);}
+.noaa-table tr:hover td{filter:brightness(.96);}
+.noaa-table tr.sr td{background:var(--noaa-summ) !important;font-weight:bold;border-top:2px solid var(--noaa-text-accent);}
+.noaa-table tr.am td{background:var(--noaa-am) !important;font-weight:bold;}
+.noaa-table tr.cl{cursor:pointer;}
+.noaa-table tr.cl:hover td{background:var(--noaa-row-hover) !important;}
+.noaa-err{background:#ffebee;border:1px solid #e57373;padding:12px 16px;margin:0 0 12px;border-radius:4px;font-size:12px;color:#b71c1c;}
+[data-bs-theme="dark"] .noaa-err{background:#3a1f22;border-color:#8f4a4a;color:#f3a9a9;}
+@media(max-width:900px){
+  .noaa-report{font-size:11px;} .noaa-table{font-size:10px;} .noaa-table td,.noaa-table th{padding:2px 3px;}
+}
+@media(max-width:600px){
+  .noaa-controls{gap:8px;} .noaa-controls select{font-size:11px;padding:4px 6px;}
+}
+
+footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;}
+</style>
+</head>
+<body>
+
+<div class="container-xl">
+  <div class="site-navbar-include" w3-include-html="navbar.html"></div>
+
+  <h1 class="records-page-title">Climate Report</h1>
+
+  <div class="noaa-report">
+    <div class="noaa-controls">
+      <label for="moSel">Monthly Report:</label>
+      <select id="moSel"></select>
+      <span class="noaa-sep">|</span>
+      <label for="yrSel">Yearly Report:</label>
+      <select id="yrSel"></select>
+    </div>
+
+    <div class="noaa-stn">
+      <span><b>NAME:</b> Steeple Claydon, Buckinghamshire</span>
+      <span><b>LAT:</b> 51&deg; 57.0' N</span>
+      <span><b>LONG:</b> 1&deg; 04.8' W</span>
+      <span style="opacity:.6"><b>ELEV / HW:</b> not yet configured — add real values when known</span>
+    </div>
+
+    <div id="noaaErr" class="noaa-err mx-3 mt-3" style="display:none;"></div>
+
+    <div class="noaa-page">
+      <div class="noaa-tabs">
+        <button class="noaa-tab-btn active" data-tab="tab-mo" id="tabBtnMonthly">Monthly</button>
+        <button class="noaa-tab-btn" data-tab="tab-yr" id="tabBtnYearly">Yearly</button>
+      </div>
+
+      <div id="tab-mo" class="noaa-tab-panel active">
+        <div class="noaa-sec-title" id="moTitle"></div>
+        <div class="noaa-sec-sub" id="moSub"></div>
+        <div class="noaa-table-wrap"><table class="noaa-table">
+          <thead>
+            <tr>
+              <th rowspan="2">DAY</th>
+              <th colspan="3" class="t-tp" id="moTempHeader">TEMPERATURE</th>
+              <th colspan="2" class="t-hd">DEGREE DAYS</th>
+              <th rowspan="2" class="t-rn" id="moRainHeader">RAIN</th>
+              <th colspan="2" class="t-wn" id="moWindHeader">WIND SPEED</th>
+              <th colspan="2" class="t-wd">WIND DIR</th>
+            </tr>
+            <tr>
+              <th class="sub t-tp">MEAN</th><th class="sub t-tp">HIGH</th><th class="sub t-tp">LOW</th>
+              <th class="sub t-hd">HDD</th><th class="sub t-hd">CDD</th>
+              <th class="sub t-wn">AVG</th><th class="sub t-wn">MAX</th>
+              <th class="sub t-wd">DEG</th><th class="sub t-wd">DIR</th>
+            </tr>
+          </thead>
+          <tbody id="moBody"></tbody>
+        </table></div>
+      </div>
+
+      <div id="tab-yr" class="noaa-tab-panel">
+        <div class="noaa-sec-title" id="yrTitle"></div>
+        <div class="noaa-sec-sub">Click any row to view that month's daily detail &nbsp;|&nbsp; Green = currently selected month</div>
+        <div class="noaa-table-wrap"><table class="noaa-table">
+          <thead>
+            <tr>
+              <th>MONTH</th>
+              <th colspan="3" class="t-tp" id="yrTempHeader">TEMPERATURE</th>
+              <th colspan="2" class="t-hd">DEGREE DAYS</th>
+              <th class="t-rn" id="yrRainHeader">RAIN</th>
+              <th colspan="2" class="t-wn" id="yrWindHeader">WIND</th>
+              <th>DATA</th>
+            </tr>
+            <tr>
+              <th class="sub"></th>
+              <th class="sub t-tp">MEAN</th><th class="sub t-tp">HIGH</th><th class="sub t-tp">LOW</th>
+              <th class="sub t-hd">HDD</th><th class="sub t-hd">CDD</th>
+              <th class="sub t-rn">TOTAL</th>
+              <th class="sub t-wn">AVG</th><th class="sub t-wn">MAX</th>
+              <th class="sub">DAYS</th>
+            </tr>
+          </thead>
+          <tbody id="yrBody"></tbody>
+        </table></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="records-page-sub mt-3" style="font-size:12.5px;font-style:italic;">
+    Degree days use base 15.5&deg;C (the UK convention), computed from daily mean temperature, regardless of the unit system selected above.
+    The Yearly tab's monthly HDD/CDD figures use the month's mean temperature &times; day count — a coarser approximation than summing each
+    day's own HDD/CDD (which the Monthly tab does) — carried over as-is from the original report.
+  </p>
+
+  <footer class="text-center py-3">DivumWX — Climate Report</footer>
+</div>
+
+<script src="units.js"></script>
+<script src="header.js?v=s3n2026q"></script>
+<script>
+function convTemp(c, unit){ return unit==='F' ? C2F(c) : c; }
+function convWind(ms, unit){
+  switch(unit){ case 'mph': return ms2mph(ms); case 'kmh': return ms2kmh(ms); case 'kt': return ms2kt(ms); case 'bf': return beaufort(ms).force; default: return ms; }
+}
+function convRain(mm, unit){ return unit==='in' ? mm2in(mm) : mm; }
+function tempUnitLabel(sys){ return sys.temp==='F' ? '°F' : '°C'; }
+function windUnitLabel(sys){ return {mph:'mph', kmh:'km/h', kt:'kt', ms:'m/s', bf:'Bft'}[sys.wind] || sys.wind; }
+function rainUnitLabel(sys){ return sys.rain==='in' ? 'in' : 'mm'; }
+
+let currentSystem = (function(){
+  const stored = localStorage.getItem('dashboardUnitSystem');
+  return (stored && SYSTEMS[stored]) ? stored : 'uk';
+})();
+
+function fmtN(v, dec=1){ return v!=null ? v.toFixed(dec) : '—'; }
+function fmtT(v, sys){ return v!=null ? fmtN(convTemp(v, sys.temp)) : '—'; }
+function fmtR(v, sys){ return v!=null ? fmtN(convRain(v, sys.rain), 2) : '—'; }
+function fmtW(v, sys){ return v!=null ? fmtN(convWind(v, sys.wind)) : '—'; }
+function compass(deg){
+  if(deg==null) return '—';
+  const dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+  return dirs[Math.round(deg/22.5)%16];
+}
+
+const CHARTS_JSON_URL = './jsondata/charts.json';
+let sTmax={}, sTmin={}, sTavg={}, sRain={}, sWsav={}, sWsmx={}, sWdir={};
+let firstYear = new Date().getFullYear(), lastYear = new Date().getFullYear();
+
+function dateKey(ts){
+  const d = new Date(ts);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function parseSeries(series, key){
+  const out = {};
+  const arr = series && series[key];
+  if(!Array.isArray(arr)) return out;
+  arr.forEach(item=>{
+    if(!Array.isArray(item) || item.length<2 || item[1]==null) return;
+    out[dateKey(item[0])] = parseFloat(item[1]);
+  });
+  return out;
+}
+
+async function loadClimateData(){
+  const errEl = document.getElementById('noaaErr');
+  try{
+    const res = await fetch(CHARTS_JSON_URL + ((CHARTS_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const json = await res.json();
+    const series = json && json[0] && json[0].chartPlot && json[0].chartPlot.series;
+    if(!series) throw new Error('Unexpected charts.json shape — no chartPlot.series found');
+
+    sTmax = parseSeries(series, 'outTempMax');
+    sTmin = parseSeries(series, 'outTempMin');
+    sTavg = parseSeries(series, 'outTempAvg');
+    sRain = parseSeries(series, 'rain');
+    sWsav = parseSeries(series, 'windSpeedAvg');
+    sWsmx = parseSeries(series, 'windSpeedMax');
+    sWdir = parseSeries(series, 'windDirAvg');
+
+    const allDates = Object.keys(sTavg).sort();
+    if(allDates.length){
+      firstYear = parseInt(allDates[0].slice(0,4), 10);
+      lastYear  = parseInt(allDates[allDates.length-1].slice(0,4), 10);
+    }
+    errEl.style.display = 'none';
+  }catch(e){
+    console.warn('Re-ImaginedWX climate report: load failed —', e.message);
+    errEl.textContent = 'Cannot load data: ' + e.message;
+    errEl.style.display = '';
+  }
+}
+
+function getInitialState(){
+  const url = new URL(window.location.href);
+  const y = parseInt(url.searchParams.get('year'), 10);
+  const m = parseInt(url.searchParams.get('month'), 10);
+  return {
+    year: Number.isFinite(y) ? y : null,
+    month: Number.isFinite(m) && m>=1 && m<=12 ? m : (new Date().getMonth()+1),
+  };
+}
+let { year: selYear, month: selMonth } = getInitialState();
+
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MONTH_SHORT = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+
+function daysInMonth(year, month){ return new Date(year, month, 0).getDate(); }
+
+function buildDailyRecords(year, month){
+  const n = daysInMonth(year, month);
+  const recs = [];
+  for(let dn=1; dn<=n; dn++){
+    const dk = year+'-'+String(month).padStart(2,'0')+'-'+String(dn).padStart(2,'0');
+    const mean = sTavg[dk] ?? null;
+    const high = sTmax[dk] ?? null;
+    const low  = sTmin[dk] ?? null;
+    const rain = (sRain[dk] != null && sRain[dk] <= 200) ? sRain[dk] : null;
+    const wsav = sWsav[dk] ?? null;
+    const wsmx = sWsmx[dk] ?? null;
+    const wdir = sWdir[dk] ?? null;
+    const hdd = mean!=null ? Math.max(0, Math.round((15.5-mean)*10)/10) : null;
+    const cdd = mean!=null ? Math.max(0, Math.round((mean-15.5)*10)/10) : null;
+    recs.push({dn, mean, high, low, hdd, cdd, rain, wsav, wsmx, wdir});
+  }
+  return recs;
+}
+
+function buildMonthlyRecords(year){
+  const recs = [];
+  for(let mo=1; mo<=12; mo++){
+    const moDays = daysInMonth(year, mo);
+    const means=[], highs=[], lows=[], wsavs=[], wsmxs=[];
+    let rain = 0;
+    for(let dn=1; dn<=moDays; dn++){
+      const dk = year+'-'+String(mo).padStart(2,'0')+'-'+String(dn).padStart(2,'0');
+      if(sTavg[dk]!=null) means.push(sTavg[dk]);
+      if(sTmax[dk]!=null) highs.push(sTmax[dk]);
+      if(sTmin[dk]!=null) lows.push(sTmin[dk]);
+      if(sRain[dk]!=null && sRain[dk]<=200) rain += sRain[dk];
+      if(sWsav[dk]!=null) wsavs.push(sWsav[dk]);
+      if(sWsmx[dk]!=null) wsmxs.push(sWsmx[dk]);
+    }
+    const meanT = means.length ? means.reduce((a,b)=>a+b,0)/means.length : null;
+    recs.push({
+      month: mo,
+      days: means.length,
+      meanTemp: meanT!=null ? Math.round(meanT*10)/10 : null,
+      maxTemp: highs.length ? Math.max(...highs) : null,
+      minTemp: lows.length ? Math.min(...lows) : null,
+      totalRain: Math.round(rain*10)/10,
+      wsAvg: wsavs.length ? Math.round((wsavs.reduce((a,b)=>a+b,0)/wsavs.length)*10)/10 : null,
+      wsMax: wsmxs.length ? Math.max(...wsmxs) : null,
+      hdd: meanT!=null ? Math.round(Math.max(0, 15.5-meanT)*means.length*10)/10 : null,
+      cdd: meanT!=null ? Math.round(Math.max(0, meanT-15.5)*means.length*10)/10 : null,
+    });
+  }
+  return recs;
+}
+
+function populateSelectors(){
+  const moSel = document.getElementById('moSel');
+  const yrSel = document.getElementById('yrSel');
+  moSel.innerHTML = MONTH_NAMES.map((mn,i)=>`<option value="${i+1}">${mn}</option>`).join('');
+  let yrOpts = '';
+  for(let yr=lastYear; yr>=firstYear; yr--) yrOpts += `<option value="${yr}">${yr}</option>`;
+  yrSel.innerHTML = yrOpts;
+
+  selYear = Math.max(firstYear, Math.min(lastYear, selYear ?? lastYear));
+  moSel.value = selMonth;
+  yrSel.value = selYear;
+}
+
+function updateUrl(){
+  const url = new URL(window.location.href);
+  url.searchParams.set('year', selYear);
+  url.searchParams.set('month', selMonth);
+  history.replaceState(null, '', url);
+}
+
+function renderMonthly(){
+  const sys = SYSTEMS[currentSystem];
+  const tUnit = tempUnitLabel(sys), wUnit = windUnitLabel(sys), rUnit = rainUnitLabel(sys);
+  document.getElementById('moTempHeader').textContent = `TEMPERATURE (${tUnit})`;
+  document.getElementById('moRainHeader').innerHTML = `RAIN<br>${rUnit}`;
+  document.getElementById('moWindHeader').textContent = `WIND SPEED (${wUnit})`;
+  const monthYearStr = (MONTH_NAMES[selMonth-1]+' '+selYear).toUpperCase();
+  document.getElementById('moTitle').textContent = 'MONTHLY CLIMATOLOGICAL SUMMARY FOR '+monthYearStr;
+  document.getElementById('moSub').textContent = `TEMPERATURE (${tUnit}) | RAIN (${rUnit}) | WIND SPEED (${wUnit}) | DEGREE DAYS BASE 15.5°C`;
+
+  const recs = buildDailyRecords(selYear, selMonth);
+  let sMn=0,nMn=0,hiH=null,loL=null,sRn=0,sWa=0,nWa=0,hiW=null,sHdd=0,sCdd=0;
+  const rows = recs.map(r=>{
+    if(r.mean!=null){ sMn+=r.mean; nMn++; }
+    if(r.high!=null && (hiH===null||r.high>hiH)) hiH=r.high;
+    if(r.low!=null  && (loL===null||r.low<loL))  loL=r.low;
+    if(r.rain!=null) sRn+=r.rain;
+    if(r.wsav!=null){ sWa+=r.wsav; nWa++; }
+    if(r.wsmx!=null && (hiW===null||r.wsmx>hiW)) hiW=r.wsmx;
+    if(r.hdd!=null) sHdd+=r.hdd;
+    if(r.cdd!=null) sCdd+=r.cdd;
+    return `<tr>
+      <td class="dc">${String(r.dn).padStart(2,'0')}</td>
+      <td class="temp">${fmtT(r.mean,sys)}</td>
+      <td class="temp">${fmtT(r.high,sys)}</td>
+      <td class="temp">${fmtT(r.low,sys)}</td>
+      <td class="hdd">${fmtN(r.hdd)}</td>
+      <td class="hdd">${fmtN(r.cdd)}</td>
+      <td class="rain">${fmtR(r.rain,sys)}</td>
+      <td class="wind">${fmtW(r.wsav,sys)}</td>
+      <td class="wind">${fmtW(r.wsmx,sys)}</td>
+      <td class="wdir">${r.wdir!=null ? fmtN(r.wdir) : '—'}</td>
+      <td class="wdir">${compass(r.wdir)}</td>
+    </tr>`;
+  }).join('');
+
+  const summaryRow = `<tr class="sr">
+    <td class="dc">&Sigma;/AVG</td>
+    <td class="temp">${nMn>0 ? fmtT(sMn/nMn,sys) : '—'}</td>
+    <td class="temp">${fmtT(hiH,sys)}</td>
+    <td class="temp">${fmtT(loL,sys)}</td>
+    <td class="hdd">${sHdd.toFixed(1)}</td>
+    <td class="hdd">${sCdd.toFixed(1)}</td>
+    <td class="rain">${fmtR(sRn,sys)}</td>
+    <td class="wind">${nWa>0 ? fmtW(sWa/nWa,sys) : '—'}</td>
+    <td class="wind">${fmtW(hiW,sys)}</td>
+    <td class="wdir">—</td>
+    <td class="wdir">—</td>
+  </tr>`;
+
+  document.getElementById('moBody').innerHTML = rows + summaryRow;
+}
+
+function renderYearly(){
+  const sys = SYSTEMS[currentSystem];
+  const tUnit = tempUnitLabel(sys), wUnit = windUnitLabel(sys), rUnit = rainUnitLabel(sys);
+  document.getElementById('yrTempHeader').textContent = `TEMPERATURE (${tUnit})`;
+  document.getElementById('yrRainHeader').textContent = `RAIN (${rUnit})`;
+  document.getElementById('yrWindHeader').textContent = `WIND (${wUnit})`;
+  document.getElementById('yrTitle').textContent = 'YEARLY CLIMATOLOGICAL SUMMARY FOR '+selYear;
+
+  const recs = buildMonthlyRecords(selYear);
+  let ysMn=0,ynMn=0,yhiH=null,yloL=null,ysRn=0,ysHdd=0,ysCdd=0,ysWa=0,ynWa=0,yhiW=null;
+  const rows = recs.map(mr=>{
+    const act = mr.month === selMonth;
+    if(mr.meanTemp!=null){ ysMn+=mr.meanTemp; ynMn++; }
+    if(mr.maxTemp!=null && (yhiH===null||mr.maxTemp>yhiH)) yhiH=mr.maxTemp;
+    if(mr.minTemp!=null && (yloL===null||mr.minTemp<yloL)) yloL=mr.minTemp;
+    ysRn += mr.totalRain;
+    if(mr.hdd!=null) ysHdd+=mr.hdd;
+    if(mr.cdd!=null) ysCdd+=mr.cdd;
+    if(mr.wsAvg!=null){ ysWa+=mr.wsAvg; ynWa++; }
+    if(mr.wsMax!=null && (yhiW===null||mr.wsMax>yhiW)) yhiW=mr.wsMax;
+    return `<tr class="cl${act?' am':''}" data-month="${mr.month}">
+      <td class="dc">${MONTH_SHORT[mr.month-1]}</td>
+      <td class="temp">${fmtT(mr.meanTemp,sys)}</td>
+      <td class="temp">${fmtT(mr.maxTemp,sys)}</td>
+      <td class="temp">${fmtT(mr.minTemp,sys)}</td>
+      <td class="hdd">${fmtN(mr.hdd)}</td>
+      <td class="hdd">${fmtN(mr.cdd)}</td>
+      <td class="rain">${fmtR(mr.totalRain,sys)}</td>
+      <td class="wind">${fmtW(mr.wsAvg,sys)}</td>
+      <td class="wind">${fmtW(mr.wsMax,sys)}</td>
+      <td class="dc" style="font-weight:normal;font-size:10px">${mr.days>0 ? mr.days+'d' : '—'}</td>
+    </tr>`;
+  }).join('');
+
+  const summaryRow = `<tr class="sr">
+    <td class="dc">ANNUAL</td>
+    <td class="temp">${ynMn>0 ? fmtT(ysMn/ynMn,sys) : '—'}</td>
+    <td class="temp">${fmtT(yhiH,sys)}</td>
+    <td class="temp">${fmtT(yloL,sys)}</td>
+    <td class="hdd">${ysHdd.toFixed(1)}</td>
+    <td class="hdd">${ysCdd.toFixed(1)}</td>
+    <td class="rain">${fmtR(ysRn,sys)}</td>
+    <td class="wind">${ynWa>0 ? fmtW(ysWa/ynWa,sys) : '—'}</td>
+    <td class="wind">${fmtW(yhiW,sys)}</td>
+    <td class="dc">—</td>
+  </tr>`;
+
+  document.getElementById('yrBody').innerHTML = rows + summaryRow;
+  document.querySelectorAll('#yrBody tr.cl').forEach(tr=>{
+    tr.addEventListener('click', ()=>{
+      selMonth = parseInt(tr.dataset.month, 10);
+      document.getElementById('moSel').value = selMonth;
+      switchTab('tab-mo');
+      updateUrl();
+      renderMonthly();
+      renderYearly();
+    });
+  });
+}
+
+function renderAll(){
+  renderMonthly();
+  renderYearly();
+}
+
+function switchTab(tabId){
+  document.querySelectorAll('.noaa-tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tabId));
+  document.querySelectorAll('.noaa-tab-panel').forEach(p=>p.classList.toggle('active', p.id===tabId));
+}
+
+document.querySelectorAll('.noaa-tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>switchTab(btn.dataset.tab));
+});
+document.getElementById('moSel').addEventListener('change', e=>{
+  selMonth = parseInt(e.target.value, 10);
+  switchTab('tab-mo');
+  updateUrl();
+  renderAll();
+});
+document.getElementById('yrSel').addEventListener('change', e=>{
+  selYear = parseInt(e.target.value, 10);
+  updateUrl();
+  renderAll();
+});
+
+const STATION_TITLE_JSON_URL = './jsondata/archive.json';
+function setStationTitle(){
+  fetch(STATION_TITLE_JSON_URL + ((STATION_TITLE_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'})
+    .then(r => { if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    .then(data => {
+      const loc = data && data.meta && data.meta.station_location;
+      const el = document.querySelector('.brand-text');
+      if(loc && el) el.textContent = loc;
+    })
+    .catch(e => console.warn('Re-ImaginedWX climate: station_location fetch failed —', e.message));
+}
+
+function includeHTML(callback){
+  const elements = document.querySelectorAll('[w3-include-html]');
+  let pending = elements.length;
+  if(pending === 0){ if(callback) callback(); return; }
+  elements.forEach(el => {
+    const file = el.getAttribute('w3-include-html');
+    fetch(file, {cache:'no-store'})
+      .then(res => {
+        if(!res.ok) throw new Error('HTTP '+res.status);
+        return res.text();
+      })
+      .then(html => {
+        el.innerHTML = html;
+        el.removeAttribute('w3-include-html');
+      })
+      .catch(e => {
+        console.warn('Re-ImaginedWX climate: include failed for', file, '—', e.message);
+        el.innerHTML = '';
+      })
+      .finally(() => {
+        pending--;
+        if(pending === 0 && callback) callback();
+      });
+  });
+}
+
+const root = document.documentElement;
+let themeMode = localStorage.getItem('dashboardThemeMode') || 'auto';
+let lastIsDay = null;
+const LOOP_JSON_URL_FOR_THEME = './jsondata/loop.json';
+const THEME_ISDAY_POLL_MS = 60 * 1000;
+
+const THEME_ICONS = { auto: '\u{1F313}', light: '\u2600\uFE0F', dark: '\u{1F319}' };
+const THEME_ORDER = ['dark', 'light', 'auto'];
+if (!THEME_ORDER.includes(themeMode)) themeMode = 'dark';
+let currentSeason = null;
+
+function resolveAutoIsDay(){
+  if(lastIsDay != null) return !!lastIsDay;
+  return !window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+function resolveTheme(){
+  // Seasonal is a fixed standalone theme, never affected by day/night auto-switching.
+  if (themeMode === 'seasonal') return 'light';
+  return themeMode==='light' ? 'light' : themeMode==='dark' ? 'dark' : (resolveAutoIsDay() ? 'light' : 'dark');
+}
+function applyTheme(){
+  root.setAttribute('data-bs-theme', resolveTheme());
+  currentSeason = applySeasonClass(themeMode);
+  syncThemeNavUI();
+}
+function syncThemeNavUI(){
+  const btn = document.getElementById('themeToggle');
+  if(!btn) return;
+  const resolved = resolveTheme();
+  if (themeMode === 'seasonal') {
+    btn.textContent = SEASON_ICONS[currentSeason];
+    btn.title = 'Seasonal (' + seasonLabel(currentSeason) + ')';
+  } else {
+    btn.textContent = THEME_ICONS[themeMode];
+    btn.title = themeMode === 'auto' ? ('Auto (currently ' + resolved + ')') : (themeMode.charAt(0).toUpperCase() + themeMode.slice(1));
+  }
+}
+function pollIsDayForTheme(){
+  fetch(LOOP_JSON_URL_FOR_THEME + ((LOOP_JSON_URL_FOR_THEME).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'})
+    .then(res => { if(!res.ok) throw new Error('HTTP '+res.status); return res.json(); })
+    .then(j => {
+      const o = (j && j.observations) || {};
+      if(o.isDay != null){
+        lastIsDay = o.isDay;
+        if(themeMode==='auto') applyTheme();
+      }
+    })
+    .catch(e => console.warn('Re-ImaginedWX climate: loop.json poll (theme) failed —', e.message));
+}
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', ()=>{
+  if(themeMode==='auto') applyTheme();
+});
+window.addEventListener('storage', (e)=>{
+  if(e.key === 'dashboardThemeMode'){
+    themeMode = e.newValue || 'auto';
+    applyTheme();
+  }
+
+
+
+  if(e.key === 'dashboardUnitSystem'){
+    currentSystem = (e.newValue && SYSTEMS[e.newValue]) ? e.newValue : 'uk';
+    const unitSelect = document.getElementById('unitSystem');
+    if(unitSelect) unitSelect.value = currentSystem;
+    renderAll();
+  }
+});
+applyTheme();
+pollIsDayForTheme();
+setInterval(pollIsDayForTheme, THEME_ISDAY_POLL_MS);
+
+(async function init(){
+  await loadClimateData();
+  populateSelectors();
+  renderAll();
+})();
+
+includeHTML(() => {
+  initSharedHeader();
+  setStationTitle();
+  if(!document.getElementById('unitSystem')) return;
+  const unitSelect = document.getElementById('unitSystem');
+  unitSelect.value = currentSystem;
+  unitSelect.addEventListener('change', e=>{
+    currentSystem = e.target.value;
+    localStorage.setItem('dashboardUnitSystem', currentSystem);
+    renderAll();
+  });
+  const themeBtn = document.getElementById('themeToggle');
+  if(themeBtn){
+    themeBtn.addEventListener('click', ()=>{
+      themeMode = THEME_ORDER[(THEME_ORDER.indexOf(themeMode) + 1) % THEME_ORDER.length];
+      localStorage.setItem('dashboardThemeMode', themeMode);
+      applyTheme();
+    });
+  }
+  syncThemeNavUI();
+});
+</script>
+<script>
+
+(function(){
+  if (window.parent === window) return;
+  function reportHeight(){
+    window.parent.postMessage({ type: 'chartModalContentHeight', height: document.body.scrollHeight }, '*');
+  }
+  new ResizeObserver(reportHeight).observe(document.body);
+  window.addEventListener('load', reportHeight);
+  reportHeight();
+})();
+</script>
+</body>
+</html>

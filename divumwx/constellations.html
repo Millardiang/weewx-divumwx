@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<!--
+##############################################################################################
+# constellations.html version 0.1.0
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  GPLv3
+##############################################################################################
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Constellations — DivumWX</title>
+<link rel="stylesheet" href="header.css?v=s3n2026i">
+<style>
+
+:root {
+  --light-body: #EFECE2;
+  --dark-body: #0A0F22;
+  --light-card: #FFFFFF;
+  --light-text: #1D2C4E;
+  --dark-bg: #FFFFFF;
+  --dark-card: #111834;
+  --dark-text: #E9E4D4;
+
+  --bs-body-color: var(--light-text);
+  --bs-secondary-color: #5C6672;
+  --bs-tertiary-bg: var(--dark-bg);
+  --bs-card-bg: var(--dark-bg);
+  --bs-border-color: #C9CFD8;
+  --bw-accent: #B45309;
+  --bw-good: #39a239;
+  --bw-sky: #4a90d9;
+  --bw-radius-sm: 10px;
+  --bw-shadow: 0 1px 2px rgba(0,0,0,0.12), 0 8px 20px -8px rgba(0,0,0,0.25);
+}
+body.light {
+  background: var(--light-body);
+  color: var(--light-text);
+}
+body.dark {
+  background: var(--dark-body);
+  color: var(--dark-text);
+  --bs-body-color: var(--dark-text);
+  --bs-secondary-color: #8B93B8;
+  --bw-accent: #D3A94C;
+  --bs-border-color: #2A3358;
+  --dark-bg: var(--dark-card);
+  --bs-card-bg: var(--dark-card);
+  --bw-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.5);
+}
+body.dark.season-winter { --dark-card: #24312a; }
+body.dark.season-spring { --dark-card: #26301f; }
+body.dark.season-summer { --dark-card: #332c16; }
+body.dark.season-autumn { --dark-card: #2c2118; }
+body {
+  margin: 0;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  transition: background 0.3s, color 0.3s;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 10px auto;
+  padding: 0 10px 40px;
+  box-sizing: border-box;
+}
+
+.page-title {
+  margin: 20px 0 4px;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+.page-subtitle {
+  margin: 0 0 20px;
+  font-size: 0.9rem;
+  color: var(--bs-secondary-color);
+}
+/* ---- "Right now" card: Sun/Moon among the real constellations ---- */
+.const-card{
+  background:var(--bs-card-bg);
+  border-radius:var(--bw-radius-sm);
+  box-shadow:var(--bw-shadow);
+  padding:16px;
+}
+.const-card-title{
+  font-size:12px; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
+  color:var(--bs-secondary-color); margin:0 0 12px;
+}
+
+.const-badge-row{ display:flex; gap:20px; flex-wrap:wrap; }
+.const-badge{ display:flex; align-items:center; gap:10px; }
+.const-badge-glyph{
+  width:44px; height:44px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--bs-tertiary-bg); border:1px solid var(--bs-border-color);
+  font-size:24px; color:var(--bw-accent);
+}
+.const-badge-body{ font-size:11px; color:var(--bs-secondary-color); text-transform:uppercase; letter-spacing:.03em; }
+.const-badge-sign{ font-size:15px; font-weight:700; }
+
+.const-note{ font-size:11px; color:var(--bs-secondary-color); margin-top:14px; }
+
+/* ---- The 13 real ecliptic constellations, as symbol cards ---- */
+/* ---- The 13 real ecliptic constellations, as symbol cards -- sized
+   and spaced for real "card" presence rather than small grid tiles,
+   auto-wrapping from a single column on narrow screens up to several
+   per row on wide ones. ---- */
+.const-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(210px, 1fr));
+  gap:14px;
+}
+.zodiac-card{
+  background:var(--bs-card-bg);
+  border-radius:var(--bw-radius-sm);
+  box-shadow:var(--bw-shadow);
+  padding:20px 16px;
+  text-align:center;
+  border-top:3px solid var(--bw-accent);
+  transition:transform .15s ease, box-shadow .15s ease;
+}
+.zodiac-card:hover{ transform:translateY(-2px); box-shadow:0 4px 10px rgba(0,0,0,0.18), 0 14px 28px -10px rgba(0,0,0,0.3); }
+.zodiac-card.zodiac-current{ outline:2px solid var(--bw-accent); outline-offset:-2px; }
+.zodiac-glyph{ font-size:42px; color:var(--bw-accent); line-height:1; margin-bottom:10px; }
+.zodiac-name{ font-size:15px; font-weight:700; margin:0 0 2px; }
+.zodiac-abbr{ font-size:10.5px; color:var(--bs-secondary-color); text-transform:uppercase; letter-spacing:.04em; margin:0 0 8px; }
+.zodiac-dates{ font-size:11.5px; color:var(--bs-secondary-color); }
+.zodiac-occupants{ margin-top:10px; font-size:11px; color:var(--bw-accent); font-weight:600; min-height:14px; }
+
+.const-updated{ font-size:11px; color:var(--bs-secondary-color); font-style:italic; margin-top:10px; }
+</style>
+</head>
+<body class="light">
+<script>
+// ==== THEME HANDLING ====
+// Copied verbatim from records.html's own boilerplate — same station
+// coordinates, same auto/seasonal logic, same "run before .container
+// paints" ordering to avoid a flash of the wrong theme.
+const STATION_LAT = 51.94;
+const STATION_LON = -0.987;
+const THEME_KEY = 'dashboardThemeMode';
+const THEME_ICONS = { auto: '\u{1F313}', light: '\u2600\uFE0F', dark: '\u{1F319}' };
+const THEME_ORDER = ['dark', 'light', 'auto'];
+const SEASON_ICONS = { winter: '\u2744\uFE0F', spring: '\u{1F338}', summer: '\u{1F33B}', autumn: '\u{1F342}' };
+const SEASON_CLASSES = ['season-winter', 'season-spring', 'season-summer', 'season-autumn'];
+const NORTHERN_SEASON_BY_MONTH = [
+  'winter', 'winter', 'spring', 'spring', 'spring', 'summer',
+  'summer', 'summer', 'autumn', 'autumn', 'autumn', 'winter'
+];
+const SEASON_SWAP_SOUTH = { winter: 'summer', summer: 'winter', spring: 'autumn', autumn: 'spring' };
+function getMeteorologicalSeason(date, lat) {
+  const season = NORTHERN_SEASON_BY_MONTH[date.getMonth()];
+  return (lat >= 0) ? season : SEASON_SWAP_SOUTH[season];
+}
+function seasonLabel(season) {
+  if (season === 'autumn' && (localStorage.getItem('dashboardUnitSystem') || 'uk') === 'us') return 'Fall';
+  return season.charAt(0).toUpperCase() + season.slice(1);
+}
+let lastIsDay = null;
+const LOOP_JSON_URL_FOR_THEME = './jsondata/loop.json';
+const THEME_ISDAY_POLL_MS = 60 * 1000;
+
+function getSunTimes(date, lat, lon) {
+  const rad = Math.PI / 180;
+  const msPerDay = 86400000;
+  const J1970 = 2440588, J2000 = 2451545;
+  const toJulian = d => d.valueOf() / msPerDay - 0.5 + J1970;
+  const fromJulian = j => new Date((j + 0.5 - J1970) * msPerDay);
+  const toDays = d => toJulian(d) - J2000;
+  const obliquity = rad * 23.4397;
+  const meanAnomaly = d => rad * (357.5291 + 0.98560028 * d);
+  const eclipticLon = M => {
+    const C = rad * (1.9148 * Math.sin(M) + 0.02 * Math.sin(2 * M) + 0.0003 * Math.sin(3 * M));
+    const perihelion = rad * 102.9372;
+    return M + C + perihelion + Math.PI;
+  };
+  const declination = L => Math.asin(Math.sin(L) * Math.sin(obliquity));
+  const julianCycle = (d, lw) => Math.round(d - 0.0009 - lw / (2 * Math.PI));
+  const approxTransit = (Ht, lw, n) => 0.0009 + (Ht + lw) / (2 * Math.PI) + n;
+  const solarTransitJ = (ds, M, L) => J2000 + ds + 0.0053 * Math.sin(M) - 0.0069 * Math.sin(2 * L);
+  const hourAngle = (h, phi, dec) => Math.acos((Math.sin(h) - Math.sin(phi) * Math.sin(dec)) / (Math.cos(phi) * Math.cos(dec)));
+  const lw = rad * -lon, phi = rad * lat;
+  const d = toDays(date);
+  const n = julianCycle(d, lw);
+  const ds = approxTransit(0, lw, n);
+  const M = meanAnomaly(ds);
+  const L = eclipticLon(M);
+  const dec = declination(L);
+  const Jnoon = solarTransitJ(ds, M, L);
+  const h0 = -0.833 * rad;
+  const H = hourAngle(h0, phi, dec);
+  if (isNaN(H)) return null;
+  const Jset = solarTransitJ(approxTransit(H, lw, n), M, L);
+  const Jrise = Jnoon - (Jset - Jnoon);
+  return { sunrise: fromJulian(Jrise), sunset: fromJulian(Jset) };
+}
+function getThemeMode() {
+  const stored = localStorage.getItem(THEME_KEY);
+  return THEME_ORDER.includes(stored) ? stored : 'auto';
+}
+function effectiveTheme(mode) {
+  if (mode === 'light' || mode === 'dark') return mode;
+  if (mode === 'seasonal') return 'light';
+  if (lastIsDay != null) return lastIsDay ? 'light' : 'dark';
+  const now = new Date();
+  const sun = getSunTimes(now, STATION_LAT, STATION_LON);
+  if (!sun) return 'light';
+  return (now >= sun.sunrise && now < sun.sunset) ? 'light' : 'dark';
+}
+function applyDashboardTheme() {
+  const mode = getThemeMode();
+  const resolved = effectiveTheme(mode);
+  document.body.classList.remove('light', 'dark');
+  document.body.classList.add(resolved);
+
+  // Seasonal accent mode retired site-wide -- see header.js's
+  // applySeasonClass() for the full rationale. This page has its own
+  // independent inline implementation (doesn't call the shared
+  // header.js function at all), so it needed the identical no-op
+  // treatment applied directly here. currentSeason kept as a variable
+  // (always null now) since it's still referenced below (themechange
+  // event detail, theme-toggle button label) and those call sites
+  // already handle null correctly -- every other themeMode already
+  // exercises that same null path today.
+  const currentSeason = null;
+
+  const btn = document.getElementById('themeToggle');
+  if (!btn) return;
+  if (mode === 'seasonal') {
+    btn.textContent = SEASON_ICONS[currentSeason];
+    btn.title = 'Seasonal (' + seasonLabel(currentSeason) + ')';
+  } else {
+    btn.textContent = THEME_ICONS[mode];
+    btn.title = mode === 'auto' ? ('Auto (currently ' + resolved + ')') : mode.charAt(0).toUpperCase() + mode.slice(1);
+  }
+}
+function pollIsDayForTheme() {
+  fetch(LOOP_JSON_URL_FOR_THEME + '?_=' + Date.now(), { cache: 'no-store' })
+    .then(res => { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
+    .then(j => {
+      const o = (j && j.observations) || {};
+      if (o.isDay != null) {
+        lastIsDay = o.isDay;
+        if (getThemeMode() === 'auto') applyDashboardTheme();
+      }
+    })
+    .catch(e => console.warn('meteorShowers: loop.json poll (theme) failed —', e.message));
+}
+
+applyDashboardTheme();
+pollIsDayForTheme();
+setInterval(pollIsDayForTheme, THEME_ISDAY_POLL_MS);
+setInterval(() => {
+  const m = getThemeMode();
+  if (m === 'auto' || m === 'seasonal') applyDashboardTheme();
+}, 60 * 1000);
+</script>
+
+<div class="container">
+  <div class="site-header-include" w3-include-html="astronomyNavbar.html"></div>
+
+  <h1 class="page-title">Constellations</h1>
+  <p class="page-subtitle">The 13 real IAU constellations along the ecliptic, and which ones the Sun and Moon are in right now.</p>
+
+  <section class="const-section">
+    <h2 class="const-section-title">Right Now</h2>
+    <p class="const-section-sub"><span id="rightNowUpdated">&mdash;</span></p>
+    <div class="const-card">
+      <div class="const-card-title">Sun &amp; Moon Among the Real Constellations</div>
+      <div class="const-badge-row" id="zodiacBadges">
+        <div class="const-badge">
+          <div class="const-badge-glyph">&mdash;</div>
+          <div>
+            <div class="const-badge-body">Sun</div>
+            <div class="const-badge-sign">&mdash;</div>
+          </div>
+        </div>
+        <div class="const-badge">
+          <div class="const-badge-glyph">&mdash;</div>
+          <div>
+            <div class="const-badge-body">Moon</div>
+            <div class="const-badge-sign">&mdash;</div>
+          </div>
+        </div>
+      </div>
+      <p class="const-note">Based on the real, unevenly-sized IAU constellation boundaries the
+        ecliptic actually passes through &mdash; not the 12 equal 30&deg; bands of the popular
+        (tropical) zodiac. Boundary crossings shown here are approximate ecliptic longitudes
+        derived from the widely-published modern entry dates &mdash; accurate to roughly a day,
+        not survey-grade precision.</p>
+    </div>
+  </section>
+
+  <section class="const-section">
+    <h2 class="const-section-title">The Constellations of the Ecliptic</h2>
+    <p class="const-section-sub">The 13 IAU constellations the Sun, Moon, and planets actually pass
+      through &mdash; including Ophiuchus, which has no popular zodiac sign at all.</p>
+    <div class="const-grid" id="zodiacGrid"></div>
+    <p class="const-note">
+      Constellation boundaries were formally fixed by the IAU in 1930 (Eug&egrave;ne Delporte) and
+      don't move &mdash; but the dates the Sun crosses each one drift slowly over centuries due to
+      precession. The entry dates and derived longitudes above reflect the present epoch and will
+      have shifted noticeably in a few hundred years.
+    </p>
+    <p class="const-updated" id="lastUpdated"></p>
+  </section>
+
+
+</div>
+
+<script>
+function cardsPerRowStub() {
+  return Math.max(1, Math.floor((window.innerWidth - 20) / 319));
+}
+function updateNavCollapse() {
+  const navbar = document.getElementById('navbar');
+  const navWrap = document.querySelector('.nav-wrap');
+  const menuInner = document.querySelector('.menu-inner');
+  const menuBtn = document.getElementById('menuBtn');
+  if (!navbar || !navWrap || !menuInner || !menuBtn) return;
+  const collapsed = cardsPerRowStub() <= 3;
+  if (collapsed && navbar.parentElement !== menuInner) {
+    navbar.classList.add('site-nav--menu');
+    menuInner.appendChild(navbar);
+  } else if (!collapsed && navbar.parentElement !== navWrap) {
+    navbar.classList.remove('site-nav--menu');
+    navWrap.insertBefore(navbar, menuBtn);
+  }
+  menuBtn.style.display = collapsed ? 'flex' : 'none';
+}
+
+const ARCHIVE_JSON_URL = './jsondata/archive.json';
+function setStationTitle() {
+  fetch(ARCHIVE_JSON_URL + '?_=' + Date.now(), { cache: 'no-store' })
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(data => {
+      const loc = data && data.meta && data.meta.station_location;
+      const el = document.querySelector('.brand-text');
+      if (loc && el) el.textContent = loc;
+    })
+    .catch(e => console.warn('meteorShowers: station_location fetch failed —', e.message));
+}
+
+function includeHTML(callback) {
+  const elements = document.querySelectorAll('[w3-include-html]');
+  let pending = elements.length;
+  if (pending === 0) { if (callback) callback(); return; }
+  elements.forEach(el => {
+    const file = el.getAttribute('w3-include-html');
+    fetch(file, { cache: 'no-store' })
+      .then(res => { if (!res.ok) throw new Error('HTTP ' + res.status); return res.text(); })
+      .then(html => { el.innerHTML = html; el.removeAttribute('w3-include-html'); })
+      .catch(e => { console.warn('meteorShowers: include failed for', file, '—', e.message); el.innerHTML = ''; })
+      .finally(() => { pending--; if (pending === 0 && callback) callback(); });
+  });
+}
+
+// astronomyNavbar.html ships with its links hardcoded to "/divumwx/..."
+// (the common case: DivumWX nested under a "divumwx" subdirectory of a
+// shared HTML_ROOT). That's wrong for the other supported deployment
+// mode -- a dedicated docroot where HTML_ROOT IS the DivumWX root, so
+// there's no "/divumwx" segment in the URL at all -- and would also be
+// wrong for any deployment where the subdirectory happens to be named
+// something other than "divumwx". Rather than hardcoding one mode and
+// needing a manual re-fix if the deployment differs, this derives the
+// actual DivumWX root from the CURRENT page's own URL and rewrites the
+// navbar's links to match, whatever that root actually is.
+//
+// This works because every page that includes astronomyNavbar.html is
+// either AT the DivumWX root (astronomy.html, constellations.html,
+// meteorShowers.html, visualisations.html) or exactly one level below
+// it, in a known-named subdirectory (skyfield/, celestial/) -- so
+// stripping a trailing filename segment, then a trailing "deep
+// directory" segment if present, always leaves exactly the DivumWX
+// root's own path, regardless of what (if anything) precedes it.
+function fixDivumwxNavLinks(navHost) {
+  if (!navHost) return;
+  const DEEP_DIRS = ['skyfield', 'celestial'];
+  const segments = window.location.pathname.split('/').filter(Boolean);
+  if (segments.length && segments[segments.length - 1].indexOf('.') !== -1) {
+    segments.pop(); // trailing filename, e.g. "index.html"
+  }
+  if (segments.length && DEEP_DIRS.indexOf(segments[segments.length - 1]) !== -1) {
+    segments.pop(); // trailing "skyfield" or "celestial"
+  }
+  const root = segments.length ? '/' + segments.join('/') : '';
+  navHost.querySelectorAll('a[href^="/divumwx/"], a[href="/divumwx"]').forEach(a => {
+    const href = a.getAttribute('href');
+    a.setAttribute('href', root + href.slice('/divumwx'.length));
+  });
+}
+
+function hideCurrentPageNavLink() {
+  // Same logic as header.js's initSharedHeader() -- this page has its
+  // own separate navbar wiring (predates the shared header.js/
+  // astronomyNavbar.html system) rather than calling initSharedHeader()
+  // itself, so it needs its own copy of this one piece rather than
+  // silently missing it.
+  function normalizePath(path) {
+    path = path.replace(/\/+$/, '') || '/';
+    if (!/\.[a-z0-9]+$/i.test(path)) path += '/index.html';
+    return path.toLowerCase();
+  }
+  const herePath = normalizePath(window.location.pathname);
+  document.querySelectorAll('.site-nav-link[href]').forEach(a => {
+    if (normalizePath(a.pathname) === herePath) a.style.display = 'none';
+  });
+}
+
+window.addEventListener('resize', updateNavCollapse);
+window.addEventListener('storage', e => {
+  if (e.key === THEME_KEY) applyDashboardTheme();
+});
+includeHTML(() => {
+  fixDivumwxNavLinks(document.querySelector('.site-header-include'));
+  document.getElementById('menuBtn').onclick = () => { document.body.classList.toggle('menu-open'); };
+  document.getElementById('themeToggle').onclick = () => {
+    const next = THEME_ORDER[(THEME_ORDER.indexOf(getThemeMode()) + 1) % THEME_ORDER.length];
+    localStorage.setItem(THEME_KEY, next);
+    applyDashboardTheme();
+  };
+  applyDashboardTheme();
+  updateNavCollapse();
+  hideCurrentPageNavLink();
+  setStationTitle();
+});
+</script>
+
+<script>
+(function(){
+  var ASTRO_JSON_URL = './jsondata/almanac.json';
+  var POLL_MS = 60000;
+
+  // The 13 IAU constellations the ecliptic actually passes through,
+  // in order, with the real (unevenly-sized) boundary each one starts
+  // at. `startLonDeg` is an approximate ecliptic longitude for each
+  // boundary crossing, derived from the widely-published modern Sun
+  // entry dates via the standard mean solar longitude formula -- see
+  // the note on the page itself. Good to roughly a day/degree, not
+  // survey-grade precision, but real IAU boundaries rather than the
+  // tropical zodiac's fictional equal 30-degree bands.
+  var CONSTELLATIONS = [
+    { name:'Sagittarius', abbr:'Sgr', glyph:'\u2650', startLonDeg:267.1, dates:'18 Dec \u2013 18 Jan' },
+    { name:'Capricornus', abbr:'Cap', glyph:'\u2651', startLonDeg:298.9, dates:'19 Jan \u2013 15 Feb' },
+    { name:'Aquarius',    abbr:'Aqr', glyph:'\u2652', startLonDeg:326.5, dates:'16 Feb \u2013 11 Mar' },
+    { name:'Pisces',      abbr:'Psc', glyph:'\u2653', startLonDeg:350.1, dates:'12 Mar \u2013 18 Apr' },
+    { name:'Aries',       abbr:'Ari', glyph:'\u2648', startLonDeg:27.6,  dates:'19 Apr \u2013 13 May' },
+    { name:'Taurus',      abbr:'Tau', glyph:'\u2649', startLonDeg:52.2,  dates:'14 May \u2013 19 Jun' },
+    { name:'Gemini',      abbr:'Gem', glyph:'\u264A', startLonDeg:88.7,  dates:'20 Jun \u2013 20 Jul' },
+    { name:'Cancer',      abbr:'Cnc', glyph:'\u264B', startLonDeg:119.3, dates:'21 Jul \u2013 9 Aug' },
+    { name:'Leo',         abbr:'Leo', glyph:'\u264C', startLonDeg:139.0, dates:'10 Aug \u2013 15 Sep' },
+    { name:'Virgo',       abbr:'Vir', glyph:'\u264D', startLonDeg:175.5, dates:'16 Sep \u2013 30 Oct' },
+    { name:'Libra',       abbr:'Lib', glyph:'\u264E', startLonDeg:219.8, dates:'31 Oct \u2013 22 Nov' },
+    { name:'Scorpius',    abbr:'Sco', glyph:'\u264F', startLonDeg:242.5, dates:'23 Nov \u2013 29 Nov' },
+    { name:'Ophiuchus',   abbr:'Oph', glyph:'\u26CE', startLonDeg:249.4, dates:'30 Nov \u2013 17 Dec' }
+  ];
+  // Sorted ascending by startLonDeg for the lookup below (already in
+  // that order above except for the Sagittarius/Capricornus wrap at
+  // 0deg -- build the sorted version once here rather than assuming).
+  var SORTED = CONSTELLATIONS.slice().sort(function(a, b){ return a.startLonDeg - b.startLonDeg; });
+
+  function constellationFromLongitude(lonDeg){
+    // A single modulo (only adding 360 if negative) rather than the more
+    // common "((x % 360) + 360) % 360" idiom -- that double-modulo adds
+    // an extra floating-point rounding pass that (confirmed by testing)
+    // can shift an exact boundary value like 249.4 down to
+    // 249.39999999999998, silently misclassifying anything landing
+    // precisely on a constellation's start longitude.
+    var lon = lonDeg % 360;
+    if (lon < 0) lon += 360;
+    var result = SORTED[SORTED.length - 1];
+    for (var i = 0; i < SORTED.length; i++) {
+      if (SORTED[i].startLonDeg > lon) break;
+      result = SORTED[i];
+    }
+    return result;
+  }
+
+  // Build the 13 reference cards once -- these don't depend on live data.
+  var gridHost = document.getElementById('zodiacGrid');
+  CONSTELLATIONS.forEach(function(c){
+    var card = document.createElement('div');
+    card.className = 'zodiac-card';
+    card.id = 'zodiacCard-' + c.abbr;
+    card.innerHTML =
+      '<div class="zodiac-glyph">' + c.glyph + '</div>' +
+      '<div class="zodiac-name">' + c.name + '</div>' +
+      '<div class="zodiac-abbr">IAU ' + c.abbr + '</div>' +
+      '<div class="zodiac-dates">' + c.dates + '</div>' +
+      '<div class="zodiac-occupants"></div>';
+    gridHost.appendChild(card);
+  });
+
+  function setBadge(badgeEl, sign){
+    var glyphEl = badgeEl.querySelector('.const-badge-glyph');
+    var signEl = badgeEl.querySelector('.const-badge-sign');
+    if (sign) {
+      glyphEl.textContent = sign.glyph;
+      signEl.textContent = sign.name + ' (' + sign.abbr + ')';
+    } else {
+      glyphEl.textContent = '\u2014';
+      signEl.textContent = '\u2014';
+    }
+  }
+
+  function fmtUpdated(ts){
+    if (ts == null) return '\u2014';
+    var opts = { hour: '2-digit', minute: '2-digit', hour12: false };
+    try { if (window.StationTime) opts.timeZone = window.StationTime.getTZ(); } catch (e) {}
+    return new Date(ts * 1000).toLocaleTimeString(undefined, opts);
+  }
+
+  function refresh(){
+    fetch(ASTRO_JSON_URL + (ASTRO_JSON_URL.indexOf('?') > -1 ? '&' : '?') + '_=' + Date.now(), { cache: 'no-store' })
+      .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function(alm){
+        var sunLon = alm['ecliptic_longitude_sun'];
+        var moonLon = alm['ecliptic_longitude_moon'];
+        var sunSign = typeof sunLon === 'number' ? constellationFromLongitude(sunLon) : null;
+        var moonSign = typeof moonLon === 'number' ? constellationFromLongitude(moonLon) : null;
+
+        var badges = document.querySelectorAll('#zodiacBadges .const-badge');
+        setBadge(badges[0], sunSign);
+        setBadge(badges[1], moonSign);
+
+        // Highlight current occupant(s) on the reference grid below.
+        CONSTELLATIONS.forEach(function(c){
+          var card = document.getElementById('zodiacCard-' + c.abbr);
+          card.classList.remove('zodiac-current');
+          card.querySelector('.zodiac-occupants').textContent = '';
+        });
+        var occupants = {};
+        if (sunSign) (occupants[sunSign.abbr] = occupants[sunSign.abbr] || []).push('Sun');
+        if (moonSign) (occupants[moonSign.abbr] = occupants[moonSign.abbr] || []).push('Moon');
+        Object.keys(occupants).forEach(function(abbr){
+          var card = document.getElementById('zodiacCard-' + abbr);
+          card.classList.add('zodiac-current');
+          card.querySelector('.zodiac-occupants').textContent = occupants[abbr].join(' & ') + ' here now';
+        });
+
+        var updatedText = 'Updated ' + fmtUpdated(alm['current.dateTime.raw']);
+        document.getElementById('rightNowUpdated').textContent = updatedText;
+        document.getElementById('lastUpdated').textContent = updatedText;
+      })
+      .catch(function(e){
+        console.warn('constellations: refresh failed \u2014', e.message);
+        document.getElementById('rightNowUpdated').textContent = 'Live data unavailable';
+      });
+  }
+  refresh();
+  setInterval(refresh, POLL_MS);
+
+  function reportHeight(){
+    if (window.parent === window || !document.body) return;
+    window.parent.postMessage({ type: 'chartModalContentHeight', height: document.body.scrollHeight, width: document.body.scrollWidth }, '*');
+  }
+  if (window.parent !== window) {
+    window.addEventListener('load', function(){
+      reportHeight();
+      new ResizeObserver(reportHeight).observe(document.body);
+    });
+  }
+})();
+</script>
+</body>
+</html>
