@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<!--
+##############################################################################################
+# visualisations.html version 0.0.1
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  GPLv3
+##############################################################################################
+-->
+<html lang="en" data-bs-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Visualisations</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="header.css?v=s3n2026i">
+<style>
+
+:root,
+[data-bs-theme="light"]{
+  --bw-accent:#B45309;
+  --bw-accent-soft:#3A2E1A;
+  --bw-radius:18px;
+  --bw-radius-sm:10px;
+  --bw-shadow:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.5);
+
+  --bs-body-bg: #EFECE2;
+  --bs-body-color: #1D2C4E;
+  --bs-secondary-color: #5C6672;
+  --bs-tertiary-bg: #FFFFFF;
+  --bs-secondary-bg: #FFFFFF;
+  --bs-border-color: #C9CFD8;
+  --bs-border-color-translucent: rgba(0,0,0,0.15);
+  --bs-card-bg: #FFFFFF;
+  --bs-emphasis-color: #111;
+  --bs-primary:#B45309;
+  --bs-primary-rgb:180,83,9;
+  --bs-link-color:#B45309;
+  --bs-link-hover-color:#D3A94C;
+  --bs-font-sans-serif:'Helvetica Neue', Helvetica, Arial, sans-serif;
+
+  /* header.css's shared navbar reads --dark-bg/--card-bg for its own
+     background, but only ever DEFINES them inside its body.season-*
+     blocks -- there's no plain, non-seasonal default in that file at
+     all. Every page is expected to supply its own mapping (this is
+     what sky.css already does for Skyfield); without it, the navbar
+     silently falls through to header.css's generic placeholder
+     fallback (rgb(189,206,244)) instead of this page's actual light
+     palette. Pointing both at --bs-tertiary-bg keeps the navbar
+     visually consistent with this page's own card backgrounds. */
+  --dark-bg: var(--bs-tertiary-bg);
+  --card-bg: var(--bs-tertiary-bg);
+}
+[data-bs-theme="dark"]{
+  --bw-accent:#D3A94C;
+  --bw-accent-soft:#3A2E1A;
+  --bw-shadow:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.5);
+
+  --bs-body-bg:#0A0F22;
+  --bs-body-color:#E9E4D4;
+  --bs-secondary-color:#8B93B8;
+  --bs-tertiary-bg:#111834;
+  --bs-secondary-bg:#111834;
+  --bs-border-color:#2A3358;
+  --bs-border-color-translucent:#2A3358;
+  --bs-card-bg:#111834;
+  --bs-emphasis-color:#FFFFFF;
+  --bs-primary:#D3A94C;
+  --bs-primary-rgb:211,169,76;
+  --bs-link-color:#D3A94C;
+  --bs-link-hover-color:#E8C578;
+
+  /* Same mapping, dark palette -- see the light-mode comment above. */
+  --dark-bg: var(--bs-tertiary-bg);
+  --card-bg: var(--bs-tertiary-bg);
+}
+
+body.season-winter, body.season-spring, body.season-summer, body.season-autumn {
+  --bs-tertiary-bg: var(--card-bg);
+}
+
+html{
+  overflow-y: scroll; /* fallback for browsers without scrollbar-gutter */
+  scrollbar-gutter: stable;
+}
+
+body{
+  font-family:var(--bs-font-sans-serif);
+  padding-bottom:48px;
+  transition:background-color .25s ease, color .25s ease;
+}
+.card{background:var(--bs-card-bg); border-radius:var(--bw-radius-sm); box-shadow:var(--bw-shadow);}
+body.season-winter { --bs-card-bg: #e9f2ec; }
+[data-bs-theme="dark"] body.season-winter { --bs-card-bg: #24312a; }
+body.season-spring { --bs-card-bg: #eef7e3; }
+[data-bs-theme="dark"] body.season-spring { --bs-card-bg: #26301f; }
+body.season-summer { --bs-card-bg: #fff6d9; }
+[data-bs-theme="dark"] body.season-summer { --bs-card-bg: #332c16; }
+body.season-autumn { --bs-card-bg: #f2e6d8; }
+[data-bs-theme="dark"] body.season-autumn { --bs-card-bg: #2c2118; }
+
+/* ---------- Page header ---------- */
+.records-page-title{font-size:32px;font-weight:700;margin:0 0 4px;}
+.records-page-sub{color:var(--bs-secondary-color);font-size:15px;margin-bottom:18px;}
+
+/* ---------- Visualisation picker ---------- */
+.records-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;}
+.records-tab{
+  font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:13px;font-weight:600;
+  padding:9px 18px;border-radius:999px;border:1px solid var(--bs-border-color);
+  background-color:var(--bs-tertiary-bg);color:var(--bs-body-color);
+  cursor:pointer;transition:.15s;
+}
+.records-tab:hover{border-color:var(--bw-accent);}
+.records-tab.active{background-color:var(--bw-accent);color:#1B1407;border-color:var(--bw-accent);}
+
+/* ---------- Visualisation panel ---------- */
+#visCard{position:relative;padding:0;overflow:hidden;}
+
+/* The wrapper always fills the card. The iframe inside it is drawn at
+   the visualisation's own natural pixel size (each modal page is a
+   fixed-size D3/SVG drawing, not a fluid layout) and then scaled down
+   with a CSS transform to fit whatever width is available — see
+   applyVisFit() below. This is what makes the content itself shrink as
+   the page narrows, rather than just clipping or scrolling. */
+.vis-frame-wrap{
+  position:relative;
+  width:100%;
+  max-width:100%;
+  height:600px;
+  overflow:hidden;
+  background:var(--bs-tertiary-bg);
+  transition:height .25s ease;
+}
+.vis-frame{
+  position:absolute;
+  top:0;
+  left:50%;
+  border:0;
+  transform-origin:top left;
+}
+
+/* Title floats over the visualisation itself, pinned to the card's
+   top-left corner, rather than sitting in a toolbar row above it. */
+.vis-title-overlay{
+  position:absolute;
+  top:14px;
+  left:16px;
+  z-index:5;
+  max-width:calc(100% - 32px);
+  padding:6px 14px;
+  border-radius:999px;
+  background:var(--bs-tertiary-bg);
+  color:var(--bs-body-color);
+  box-shadow:var(--bw-shadow);
+  font-size:14px;
+  font-weight:600;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  pointer-events:none;
+}
+
+@media (max-width:600px){
+  .vis-title-overlay{font-size:12.5px;padding:5px 12px;}
+}
+
+footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;}
+
+</style>
+</head>
+<body>
+
+<div class="container-xl">
+  <div class="site-navbar-include" w3-include-html="astronomyNavbar.html"></div>
+
+  <h1 class="records-page-title" id="pageTitle">Visualisation by Sean Balfour</h1>
+
+  <div class="records-tabs" id="visTabs">
+    <button type="button" class="records-tab active" data-vis="modalAstroclock.html" data-title="Astronomical Clock" data-width="840" data-height="600">Astronomical Clock</button>
+    <button type="button" class="records-tab" data-vis="modalAuroraTerminator.html" data-title="Geomagnetic Disturbance" data-width="800" data-height="600">Aurora Terminator</button>
+    <button type="button" class="records-tab" data-vis="modalGeocentricUniverse.html" data-title="Geocentric Universe" data-width="810" data-height="700">Geocentric Universe</button>
+    <button type="button" class="records-tab" data-vis="modalMeeusLive.html" data-title="Live Meeus Calculation" data-width="1600" data-height="1400">Meeus Live</button>
+    <button type="button" class="records-tab" data-vis="modalSolarTerminator.html" data-title="Solar Terminator" data-width="790" data-height="500">Solar Terminator</button>
+    <button type="button" class="records-tab" data-vis="modalOrrery.html" data-title="Solar System Orrery" data-width="780" data-height="500">Solar System Orrery</button>
+  </div>
+
+  <div class="card mb-4" id="visCard">
+    <span class="vis-title-overlay" id="visSubtitle">Astronomical Clock</span>
+    <div class="vis-frame-wrap" id="visFrameWrap">
+      <iframe id="visFrame" class="vis-frame" title="Astronomical Clock" src="modalAstroclock.html" loading="lazy"></iframe>
+    </div>
+  </div>
+
+  <footer class="text-center py-3">DivumWX — Visualisations</footer>
+</div>
+
+<script src="units.js"></script>
+<script src="header.js?v=s3n2026q"></script>
+<script>
+
+// ==== VISUALISATION PICKER ====
+const visTabs = document.querySelectorAll('#visTabs .records-tab');
+const visFrame = document.getElementById('visFrame');
+const visFrameWrap = document.getElementById('visFrameWrap');
+const visSubtitle = document.getElementById('visSubtitle');
+
+// Each visualisation is drawn by its own page at a fixed pixel size (a
+// D3/SVG drawing, not a fluid layout) — "natural" tracks that size, seeded
+// from the picker button's data-width/data-height as a best guess before
+// the iframe has loaded, then refined by the postMessage below once the
+// page reports its real content box.
+let visNatural = { width: 840, height: 600 };
+
+// Some visualisations measure their own content dynamically at runtime
+// (e.g. modalMeeusLive.html unions several elements' bounding rects) and
+// can't be seeded exactly from a static data-width/data-height guess.
+// When the seed doesn't closely match the real size, .vis-frame-wrap
+// visibly snaps to the correct size once the real postMessage arrives —
+// and on macOS in particular, ANY change in scrollable page height
+// flashes the overlay scrollbar briefly, regardless of overflow-y /
+// scrollbar-gutter CSS (that's OS-level scrollbar behaviour, not
+// something page CSS can suppress). So rather than chasing every
+// visualisation's exact pixel size, the frame now stays hidden until the
+// FIRST real size is known, then reveals already at the correct size —
+// nothing visible changes size after being shown, so there's no snap for
+// the scrollbar to react to. A timeout reveals it anyway if a modal never
+// reports back, so a broken/slow page doesn't stay hidden forever.
+let awaitingFirstFit = true;
+let revealTimer = null;
+
+function hideForReload(){
+  awaitingFirstFit = true;
+  visFrameWrap.style.visibility = 'hidden';
+  clearTimeout(revealTimer);
+  revealTimer = setTimeout(reveal, 1200);
+}
+function reveal(){
+  if (!awaitingFirstFit) return;
+  awaitingFirstFit = false;
+  clearTimeout(revealTimer);
+  // Snap to the final height instantly for this first reveal — the wrap's
+  // own CSS transition (used for later, already-visible resizes) may
+  // still be mid-animation from the seeded/wrong height at this point;
+  // disabling it for one frame stops that catch-up animation from being
+  // visible the moment the frame appears.
+  visFrameWrap.style.transition = 'none';
+  visFrameWrap.style.visibility = 'visible';
+  void visFrameWrap.offsetHeight; // force reflow so 'none' actually applies
+  visFrameWrap.style.transition = '';
+}
+
+// Scales the iframe down (never up — Math.min caps it at 1) to fit
+// whatever width the card currently has, and centres it. This is what
+// makes each visualisation's own content responsive as the page narrows,
+// rather than just clipping it or leaving it to scroll.
+function applyVisFit(){
+  const available = visFrameWrap.clientWidth;
+  const scale = Math.min(1, available / visNatural.width);
+
+  visFrame.style.width = visNatural.width + 'px';
+  visFrame.style.height = visNatural.height + 'px';
+  visFrame.style.transform = 'scale(' + scale + ')';
+  visFrame.style.marginLeft = -(visNatural.width * scale / 2) + 'px';
+
+  visFrameWrap.style.height = Math.round(visNatural.height * scale) + 'px';
+}
+
+function selectVisualisation(btn, forceReload){
+  visTabs.forEach(b => b.classList.toggle('active', b === btn));
+  const url = btn.dataset.vis;
+  const title = btn.dataset.title || btn.textContent.trim();
+
+  visSubtitle.textContent = title;
+  visFrame.title = title;
+  visNatural = {
+    width: parseInt(btn.dataset.width, 10) || 800,
+    height: parseInt(btn.dataset.height, 10) || 600
+  };
+
+  if (forceReload || visFrame.getAttribute('src') !== url) {
+    hideForReload();
+    applyVisFit();
+    visFrame.src = url;
+  } else {
+    applyVisFit();
+  }
+}
+
+visTabs.forEach(btn => {
+  btn.addEventListener('click', () => selectVisualisation(btn, true));
+});
+
+// Each visualisation reports its own natural content size back via
+// postMessage (the same 'chartModalContentHeight' message used by the
+// dashboard's chart-modal popup) once it has actually rendered, so this
+// refines the seeded guess above to the real size.
+window.addEventListener('message', (e) => {
+  if (!e.data || e.data.type !== 'chartModalContentHeight') return;
+  if (e.source !== visFrame.contentWindow) return;
+
+  visNatural = {
+    width: e.data.width || visNatural.width,
+    height: Math.min(e.data.height || visNatural.height, Math.round(window.innerHeight * 0.85))
+  };
+  applyVisFit();
+  reveal();
+});
+
+window.addEventListener('resize', applyVisFit);
+hideForReload();
+applyVisFit();
+
+// ==== THEME (dark / light / seasonal / auto) ====
+const root = document.documentElement;
+let themeMode = localStorage.getItem('dashboardThemeMode') || 'auto';
+let lastIsDay = null;
+const LOOP_JSON_URL_FOR_THEME = './jsondata/loop.json';
+const THEME_ISDAY_POLL_MS = 60 * 1000;
+
+const THEME_ICONS = { auto: '\u{1F313}', light: '\u2600\uFE0F', dark: '\u{1F319}' };
+const THEME_ORDER = ['dark', 'light', 'auto'];
+if (!THEME_ORDER.includes(themeMode)) themeMode = 'dark';
+let currentSeason = null;
+
+function resolveAutoIsDay(){
+  if (lastIsDay != null) return !!lastIsDay;
+  return !window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+function resolveTheme(){
+  if (themeMode === 'seasonal') return 'light';
+  return themeMode === 'light' ? 'light' : themeMode === 'dark' ? 'dark' : (resolveAutoIsDay() ? 'light' : 'dark');
+}
+function applyTheme(){
+  root.setAttribute('data-bs-theme', resolveTheme());
+  currentSeason = applySeasonClass(themeMode);
+  syncThemeNavUI();
+}
+function syncThemeNavUI(){
+  const btn = document.getElementById('themeToggle');
+  if (!btn) return;
+  const resolved = resolveTheme();
+  if (themeMode === 'seasonal') {
+    btn.textContent = SEASON_ICONS[currentSeason];
+    btn.title = 'Seasonal (' + seasonLabel(currentSeason) + ')';
+  } else {
+    btn.textContent = THEME_ICONS[themeMode];
+    btn.title = themeMode === 'auto' ? ('Auto (currently ' + resolved + ')') : (themeMode.charAt(0).toUpperCase() + themeMode.slice(1));
+  }
+}
+function pollIsDayForTheme(){
+  fetch(LOOP_JSON_URL_FOR_THEME + ((LOOP_JSON_URL_FOR_THEME).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'})
+    .then(res => { if (!res.ok) throw new Error('HTTP '+res.status); return res.json(); })
+    .then(j => {
+      const o = (j && j.observations) || {};
+      if (o.isDay != null) {
+        lastIsDay = o.isDay;
+        if (themeMode === 'auto') applyTheme();
+      }
+    })
+    .catch(e => console.warn('Re-ImaginedWX visualisations: loop.json poll (theme) failed —', e.message));
+}
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+  if (themeMode === 'auto') applyTheme();
+});
+window.addEventListener('storage', (e) => {
+  if (e.key === 'dashboardThemeMode') {
+    themeMode = e.newValue || 'auto';
+    applyTheme();
+  }
+});
+applyTheme();
+pollIsDayForTheme();
+setInterval(pollIsDayForTheme, THEME_ISDAY_POLL_MS);
+setInterval(() => {
+  const m = themeMode;
+  if (m === 'auto' || m === 'seasonal') applyTheme();
+}, 60 * 1000);
+
+// ==== SHARED NAVBAR INCLUDE ====
+function includeHTML(callback){
+  const elements = document.querySelectorAll('[w3-include-html]');
+  let pending = elements.length;
+  if (pending === 0) { if (callback) callback(); return; }
+  elements.forEach(el => {
+    const file = el.getAttribute('w3-include-html');
+    fetch(file, {cache:'no-store'})
+      .then(res => { if (!res.ok) throw new Error('HTTP '+res.status); return res.text(); })
+      .then(html => { el.innerHTML = html; el.removeAttribute('w3-include-html'); })
+      .catch(e => {
+        console.warn('Re-ImaginedWX visualisations: include failed for', file, '—', e.message);
+        el.innerHTML = '';
+      })
+      .finally(() => { pending--; if (pending === 0 && callback) callback(); });
+  });
+}
+
+// astronomyNavbar.html ships with its links hardcoded to "/divumwx/..."
+// (the common case: DivumWX nested under a "divumwx" subdirectory of a
+// shared HTML_ROOT). That's wrong for the other supported deployment
+// mode -- a dedicated docroot where HTML_ROOT IS the DivumWX root, so
+// there's no "/divumwx" segment in the URL at all -- and would also be
+// wrong for any deployment where the subdirectory happens to be named
+// something other than "divumwx". Rather than hardcoding one mode and
+// needing a manual re-fix if the deployment differs, this derives the
+// actual DivumWX root from the CURRENT page's own URL and rewrites the
+// navbar's links to match, whatever that root actually is.
+//
+// This works because every page that includes astronomyNavbar.html is
+// either AT the DivumWX root (astronomy.html, constellations.html,
+// meteorShowers.html, visualisations.html) or exactly one level below
+// it, in a known-named subdirectory (skyfield/, celestial/) -- so
+// stripping a trailing filename segment, then a trailing "deep
+// directory" segment if present, always leaves exactly the DivumWX
+// root's own path, regardless of what (if anything) precedes it.
+function fixDivumwxNavLinks(navHost) {
+  if (!navHost) return;
+  const DEEP_DIRS = ['skyfield', 'celestial'];
+  const segments = window.location.pathname.split('/').filter(Boolean);
+  if (segments.length && segments[segments.length - 1].indexOf('.') !== -1) {
+    segments.pop(); // trailing filename, e.g. "index.html"
+  }
+  if (segments.length && DEEP_DIRS.indexOf(segments[segments.length - 1]) !== -1) {
+    segments.pop(); // trailing "skyfield" or "celestial"
+  }
+  const root = segments.length ? '/' + segments.join('/') : '';
+  navHost.querySelectorAll('a[href^="/divumwx/"], a[href="/divumwx"]').forEach(a => {
+    const href = a.getAttribute('href');
+    a.setAttribute('href', root + href.slice('/divumwx'.length));
+  });
+}
+
+// ==== SITE TITLE ====
+const ARCHIVE_JSON_URL = './jsondata/archive.json';
+function setStationTitle(){
+  fetch(ARCHIVE_JSON_URL + ((ARCHIVE_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'})
+    .then(r => { if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    .then(data => {
+      const loc = data && data.meta && data.meta.station_location;
+      const el = document.querySelector('.brand-text');
+      if(loc && el) el.textContent = loc;
+    })
+    .catch(e => console.warn('Re-ImaginedWX visualisations: station_location fetch failed —', e.message));
+}
+
+includeHTML(() => {
+  fixDivumwxNavLinks(document.querySelector('.site-navbar-include'));
+  initSharedHeader();
+  setStationTitle();
+  const unitSelect = document.getElementById('unitSystem');
+  if (unitSelect) {
+    unitSelect.value = localStorage.getItem('dashboardUnitSystem') || 'uk';
+    unitSelect.addEventListener('change', e => {
+      localStorage.setItem('dashboardUnitSystem', e.target.value);
+      if (themeMode === 'seasonal') applyTheme();
+    });
+  }
+  const themeBtn = document.getElementById('themeToggle');
+  if (themeBtn) {
+    themeBtn.addEventListener('click', () => {
+      themeMode = THEME_ORDER[(THEME_ORDER.indexOf(themeMode) + 1) % THEME_ORDER.length];
+      localStorage.setItem('dashboardThemeMode', themeMode);
+      applyTheme();
+    });
+  }
+  syncThemeNavUI();
+});
+
+</script>
+</body>
+</html>

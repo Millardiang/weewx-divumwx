@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<!--
+##############################################################################################
+# skyfield.html version 0.1.0
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  GPLv3
+##############################################################################################
+#
+# A home for Skyfield-powered views, laid out the same way charts-d3.html
+# and heatmaps.html are: navbar, then a row of pill buttons
+# (.records-tabs/.records-tab -- the exact same classes/CSS those two
+# pages use, copied verbatim for visual consistency) that switch which
+# view is showing below. Each view is a full standalone page loaded into
+# an <iframe> rather than reimplemented inline here, since that's what
+# celestial/index.html already is.
+#
+# Only one button exists so far: "Live" -> ./celestial/index.html. Adding
+# another view later is just one more <button class="records-tab"
+# data-src="...">Label</button> in #skyfieldTabs -- the click handler at
+# the bottom of the file is generic over however many there are.
+##############################################################################################
+-->
+<html lang="en" data-bs-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Skyfield</title>
+<script>
+
+(function(){
+  var THEME_KEY = 'dashboardThemeMode';
+  var THEME_ORDER = ['dark', 'light', 'auto'];
+  var mode = localStorage.getItem(THEME_KEY);
+  if (THEME_ORDER.indexOf(mode) === -1) mode = 'dark';
+  var resolved;
+  if (mode === 'light' || mode === 'seasonal') {
+    resolved = 'light';
+  } else if (mode === 'dark') {
+    resolved = 'dark';
+  } else {
+
+    resolved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  document.documentElement.setAttribute('data-bs-theme', resolved);
+})();
+</script>
+<link href="css/bootstrap.5.3.8.min.css" rel="stylesheet">
+<link rel="stylesheet" href="header.css?v=s3n2026i">
+<script>
+  document.documentElement.dataset.embed = (new URL(location.href).searchParams.get('embed') === '1') ? '1' : '0';
+</script>
+<style>
+
+:root,
+[data-bs-theme="light"]{
+  --bw-accent:#B45309;
+  --bw-accent-soft:#3A2E1A;
+  --bw-sky:#6FB6DD;
+  --bw-sky-soft:#1C2E38;
+  --bw-good:#5BBB8A;
+  --bw-danger:#E36B57;
+  --bw-danger-soft:#3A2220;
+  --bw-yellow:#D6BE4E;
+  --bw-yellow-soft:#3A341A;
+  --bw-line:#2C5478;
+  --bw-radius:18px;
+  --bw-radius-sm:10px;
+  --bw-shadow:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.5);
+
+  --bs-body-bg: #EFECE2;
+  --bs-body-color: #1D2C4E;
+  --bs-secondary-color: #5C6672;
+  --bs-tertiary-bg: #FFFFFF;
+  --bs-secondary-bg: #FFFFFF;
+  --bs-border-color: #C9CFD8;
+  --bs-border-color-translucent: rgba(0,0,0,0.15);
+  --bs-card-bg: #FFFFFF;
+  --bs-emphasis-color: #111;
+  --bs-primary:#B45309;
+  --bs-primary-rgb:180,83,9;
+  --bs-link-color:#B45309;
+  --bs-link-hover-color:#F2BC6B;
+  --bs-warning-rgb:180,83,9;
+  --bs-font-sans-serif:'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+[data-bs-theme="dark"]{
+  --bw-accent:#D3A94C;
+  --bw-accent-soft:#3A2E1A;
+  --bw-sky:#6FB6DD;
+  --bw-sky-soft:#1C2E38;
+  --bw-good:#5BBB8A;
+  --bw-danger:#E36B57;
+  --bw-danger-soft:#3A2220;
+  --bw-yellow:#D6BE4E;
+  --bw-yellow-soft:#3A341A;
+  --bw-line:#343E43;
+  --bw-shadow:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.5);
+
+  --bs-body-bg:#14181B;
+  --bs-body-color:#EAEFE9;
+  --bs-secondary-color:#8C9A95;
+  --bs-tertiary-bg:#222A2E;
+  --bs-secondary-bg:#2A3338;
+  --bs-border-color:#343E43;
+  --bs-border-color-translucent:#343E43;
+  --bs-card-bg:#1B2125;
+  --bs-emphasis-color:#FFFFFF;
+  --bs-primary:#D3A94C;
+  --bs-primary-rgb:211,169,76;
+  --bs-link-color:#D3A94C;
+  --bs-link-hover-color:#F2BC6B;
+}
+
+body.season-winter, body.season-spring, body.season-summer, body.season-autumn {
+  --bs-tertiary-bg: var(--card-bg);
+}
+body.season-winter { --bs-card-bg: #e9f2ec; }
+[data-bs-theme="dark"] body.season-winter { --bs-card-bg: #24312a; }
+body.season-spring { --bs-card-bg: #eef7e3; }
+[data-bs-theme="dark"] body.season-spring { --bs-card-bg: #26301f; }
+body.season-summer { --bs-card-bg: #fff6d9; }
+[data-bs-theme="dark"] body.season-summer { --bs-card-bg: #332c16; }
+body.season-autumn { --bs-card-bg: #f2e6d8; }
+[data-bs-theme="dark"] body.season-autumn { --bs-card-bg: #2c2118; }
+
+[data-embed="1"] .records-tabs{ display:none; }
+[data-embed="1"] .site-navbar-include{ display:none; }
+
+body{
+  font-family:var(--bs-font-sans-serif);
+  background-color:var(--bs-body-bg);
+  color:var(--bs-body-color);
+  padding-bottom:48px;
+  transition:background-color .25s ease, color .25s ease;
+}
+
+.records-page-title{font-size:32px;font-weight:700;margin:0 0 4px;}
+.records-page-sub{color:var(--bs-secondary-color);font-size:15px;margin-bottom:18px;}
+
+.records-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;}
+.records-tab{
+  font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:13px;font-weight:600;
+  padding:9px 18px;border-radius:999px;border:1px solid var(--bs-border-color);
+  background-color:var(--bs-tertiary-bg);color:var(--bs-body-color);
+  cursor:pointer;transition:.15s;
+}
+.records-tab:hover{border-color:var(--bw-accent);}
+.records-tab.active{background-color:var(--bw-accent);color:#1B1407;border-color:var(--bw-accent);}
+
+.skyfield-frame-wrap{
+  background:var(--bs-card-bg);
+  border-radius:var(--bw-radius-sm);
+  box-shadow:var(--bw-shadow);
+  overflow:hidden;
+
+  width:100%;
+  height:min(82vh, 860px);
+}
+.skyfield-frame{
+  width:100%;
+  height:100%;
+  border:none;
+  display:block;
+  background:var(--bs-body-bg);
+}
+.skyfield-empty{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:100%;
+  color:var(--bs-secondary-color);
+  font-size:14px;
+  text-align:center;
+  padding:24px;
+}
+</style>
+</head>
+<body>
+
+<div class="container-xl">
+  <div class="site-navbar-include" w3-include-html="navbar.html"></div>
+
+  <h1 class="records-page-title">Skyfield</h1>
+  <p class="records-page-sub">Live sky views and other Skyfield-powered pages, in one place.</p>
+
+  <div class="records-tabs" id="skyfieldTabs">
+    <button class="records-tab" data-src="./celestial/index.html">Live</button>
+  </div>
+
+  <div class="skyfield-frame-wrap">
+    <iframe class="skyfield-frame" id="skyfieldFrame" title="Skyfield" src="about:blank"></iframe>
+  </div>
+</div>
+
+<script src="units.js"></script>
+<script src="header.js?v=s3n2026q"></script>
+<script>
+
+applySeasonClass(localStorage.getItem('dashboardThemeMode') || 'auto', 51.94);
+
+// ==== Tab switching: click a .records-tab, load its data-src into the frame ====
+var skyfieldFrame = document.getElementById('skyfieldFrame');
+var skyfieldTabs = document.querySelectorAll('#skyfieldTabs .records-tab[data-src]');
+skyfieldTabs.forEach(function(btn){
+  btn.addEventListener('click', function(){
+    skyfieldTabs.forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    skyfieldFrame.src = btn.dataset.src;
+  });
+});
+if (skyfieldTabs.length) skyfieldTabs[0].click();
+
+// ==== Shared navbar/menu behaviour (same as every other page) ====
+function includeHTML(callback) {
+  var elements = document.querySelectorAll('[w3-include-html]');
+  var remaining = elements.length;
+  if (!remaining) { callback(); return; }
+  elements.forEach(function(el){
+    var file = el.getAttribute('w3-include-html');
+    fetch(file)
+      .then(function(res){ return res.ok ? res.text() : Promise.reject(res.status); })
+      .then(function(html){ el.innerHTML = html; el.removeAttribute('w3-include-html'); })
+      .catch(function(e){ console.warn('skyfield: include failed --', file, e); })
+      .finally(function(){ if (--remaining === 0) callback(); });
+  });
+}
+includeHTML(function(){
+  initSharedHeader();
+  document.getElementById('themeToggle').onclick = function(){
+    var THEME_ORDER = ['dark', 'light', 'auto'];
+    var THEME_KEY = 'dashboardThemeMode';
+    var current = localStorage.getItem(THEME_KEY) || 'dark';
+    var next = THEME_ORDER[(THEME_ORDER.indexOf(current) + 1) % THEME_ORDER.length];
+    localStorage.setItem(THEME_KEY, next);
+    var resolved = (next === 'light' || next === 'seasonal') ? 'light' : next;
+    if (next === 'auto') {
+      resolved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    document.documentElement.setAttribute('data-bs-theme', resolved);
+    applySeasonClass(next, 51.94);
+  };
+});
+</script>
+</body>
+</html>

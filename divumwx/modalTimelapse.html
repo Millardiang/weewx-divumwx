@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<!--
+##############################################################################################
+# modalTimelapse.html version 0.0.2
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  GPLv3
+##############################################################################################
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Timelapse</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root, [data-theme="light"]{
+  --bw-accent:#B45309;
+  --bw-good:#5BBB8A;
+  --bw-danger:#E36B57;
+  --bw-amber:#D97706;
+  --bw-radius:14px;
+  --bw-radius-sm:10px;
+  --bw-shadow:0 1px 2px rgba(0,0,0,0.12), 0 8px 20px -8px rgba(0,0,0,0.25);
+  --bs-body-bg:#EFECE2;
+  --bs-body-color:#1D2C4E;
+  --bs-secondary-color:#5C6672;
+  --bs-card-bg:#FFFFFF;
+  --bs-tertiary-bg:#F4F1E9;
+  --bs-border-color:#C9CFD8;
+}
+[data-theme="dark"]{
+  --bw-accent:#D3A94C;
+  --bw-good:#5BBB8A;
+  --bw-danger:#E36B57;
+  --bw-amber:#D97706;
+  --bw-shadow:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.5);
+  --bs-body-bg:#0A0F22;
+  --bs-body-color:#E9E4D4;
+  --bs-secondary-color:#8B93B8;
+  --bs-card-bg:#111834;
+  --bs-tertiary-bg:#161F3C;
+  --bs-border-color:#2A3358;
+}
+/* Seasonal accent mode — detected from the parent dashboard via the JS at
+   the end of <body>, kept in sync with header.css's seasonal palette. */
+:root[data-season="winter"]{ --bs-body-bg:#e9f2ec; --bs-card-bg:#f4f9f6; }
+:root[data-season="spring"]{ --bs-body-bg:#eef7e3; --bs-card-bg:#f5faef; }
+:root[data-season="summer"]{ --bs-body-bg:#fff6d9; --bs-card-bg:#fffbef; }
+:root[data-season="autumn"]{ --bs-body-bg:#f2e6d8; --bs-card-bg:#f8f0e7; }
+
+*{ box-sizing:border-box; }
+html, body{ margin:0; padding:0; }
+body{
+  background:var(--bs-body-bg);
+  color:var(--bs-body-color);
+  font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size:13.5px;
+  line-height:1.5;
+  transition:background-color .2s, color .2s;
+}
+
+.tl-page{ padding:12px 14px 14px; max-width:640px; margin:0 auto; transition:max-width .2s; }
+
+.tl-stage{
+  position:relative;
+  width:100%;
+  height:220px; /* fallback until the video's real dimensions are known */
+  background:var(--bs-tertiary-bg);
+  border-radius:var(--bw-radius);
+  overflow:hidden;
+  box-shadow:var(--bw-shadow);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:height .15s;
+}
+.tl-video{ display:none; width:100%; height:100%; object-fit:contain; background:#000; }
+.tl-video.show{ display:block; }
+
+.tl-status{
+  position:absolute; right:12px; top:12px;
+  display:flex; align-items:center; gap:6px;
+  padding:3px 9px; border-radius:999px;
+  background:rgba(0,0,0,.55); color:#fff;
+  font-size:11px; white-space:nowrap;
+}
+.tl-status-dot{ width:7px; height:7px; border-radius:50%; background:#999; flex-shrink:0; }
+.tl-status-dot.live{ background:var(--bw-good); animation:tlPulse 1.6s ease-in-out infinite; }
+.tl-status-dot.paused{ background:var(--bw-amber); }
+.tl-status-dot.error{ background:var(--bw-danger); }
+@keyframes tlPulse{ 0%,100%{ opacity:1; } 50%{ opacity:.35; } }
+
+.tl-date{
+  position:absolute; right:12px; bottom:12px;
+  padding:3px 9px; border-radius:999px;
+  background:rgba(0,0,0,.55); color:#fff;
+  font-size:11px; font-weight:600; white-space:nowrap;
+  letter-spacing:.2px;
+}
+
+.tl-empty{
+  position:absolute; inset:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:10px; color:var(--bs-secondary-color); text-align:center; padding:20px;
+}
+.tl-empty-dot{ width:10px; height:10px; border-radius:50%; background:var(--bw-accent); animation:tlPulse 1.4s ease-in-out infinite; }
+.tl-empty-title{ font-weight:700; color:var(--bs-body-color); font-size:14px; }
+.tl-empty-sub{ font-size:12px; max-width:360px; }
+
+.tl-tabs{ display:flex; gap:6px; margin-bottom:8px; flex-wrap:wrap; }
+.tl-tab{
+  font-size:11px; font-weight:700; padding:5px 12px; border-radius:999px;
+  border:1px solid var(--bs-border-color); background:var(--bs-tertiary-bg);
+  color:var(--bs-secondary-color); cursor:pointer;
+}
+.tl-tab:hover:not(.active){ border-color:var(--bw-accent); color:var(--bw-accent); }
+.tl-tab.active{ background:var(--bw-accent); border-color:var(--bw-accent); color:#fff; }
+
+.tl-controls{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  margin-top:8px; padding:7px 10px;
+  background:var(--bs-card-bg); border:1px solid var(--bs-border-color);
+  border-radius:var(--bw-radius-sm); box-shadow:var(--bw-shadow);
+  flex-wrap:wrap;
+}
+.tl-updated{ font-size:11px; color:var(--bs-secondary-color); white-space:nowrap; }
+.tl-speeds{ display:flex; gap:4px; }
+.tl-speed-btn{
+  font-size:10.5px; font-weight:700; padding:4px 8px; border-radius:999px;
+  border:1px solid var(--bs-border-color); background:var(--bs-tertiary-bg);
+  color:var(--bs-secondary-color); cursor:pointer;
+}
+.tl-speed-btn:hover:not(.active){ border-color:var(--bw-accent); color:var(--bw-accent); }
+.tl-speed-btn.active{ background:var(--bw-accent); border-color:var(--bw-accent); color:#fff; }
+.tl-download{
+  display:inline-flex; align-items:center; gap:5px;
+  font-size:11px; font-weight:700; text-decoration:none;
+  padding:5px 10px; border-radius:8px;
+  border:1px solid var(--bs-border-color); background:var(--bs-tertiary-bg);
+  color:var(--bs-body-color); white-space:nowrap;
+}
+.tl-download:hover{ border-color:var(--bw-accent); color:var(--bw-accent); }
+.tl-download[aria-disabled="true"]{ opacity:.4; pointer-events:none; }
+
+.tl-note{ margin-top:6px; font-size:10.5px; color:var(--bs-secondary-color); line-height:1.4; }
+.tl-note b{ color:var(--bs-body-color); }
+</style>
+</head>
+<body>
+
+<div class="tl-page">
+
+  <div class="tl-tabs" id="tlTabs">
+    <button class="tl-tab active" data-bucket="day">Day</button>
+    <button class="tl-tab" data-bucket="week">Week</button>
+    <button class="tl-tab" data-bucket="month">Month</button>
+    <button class="tl-tab" data-bucket="year">Year</button>
+    <button class="tl-tab" data-bucket="alltime">All&#8209;time</button>
+  </div>
+
+  <div class="tl-stage" id="tlStage">
+    <video class="tl-video" id="tlVideo" muted autoplay playsinline controls></video>
+    <div class="tl-status">
+      <span class="tl-status-dot" id="tlStatusDot"></span>
+      <span id="tlStatusText">Starting&hellip;</span>
+    </div>
+    <div class="tl-date" id="tlDate">&nbsp;</div>
+    <div class="tl-empty" id="tlEmpty">
+      <div class="tl-empty-dot"></div>
+      <div class="tl-empty-title" id="tlEmptyTitle">Building today&rsquo;s timelapse&hellip;</div>
+      <div class="tl-empty-sub">Frames are captured automatically by the station's own software — the first one should already be on its way.</div>
+    </div>
+  </div>
+
+  <div class="tl-controls">
+    <span class="tl-updated" id="tlUpdated">&nbsp;</span>
+    <div class="tl-speeds" id="tlSpeeds">
+      <button class="tl-speed-btn active" data-speed="1">1x</button>
+      <button class="tl-speed-btn" data-speed="2">2x</button>
+      <button class="tl-speed-btn" data-speed="4">4x</button>
+      <button class="tl-speed-btn" data-speed="8">8x</button>
+    </div>
+    <a class="tl-download" id="tlDownload" aria-disabled="true" download>Download this video</a>
+  </div>
+
+  <p class="tl-note" id="tlNote">
+    <b>Resets daily</b> — today's timelapse builds up as the day goes on; a fresh one starts each midnight.
+  </p>
+
+</div>
+
+<script src="stationTime.js"></script>
+<script>
+(function(){
+
+  // ---- Theme (matches the parent dashboard, or falls back to stored/OS preference) ----
+  function fromParentTheme(){
+    try {
+      var b = window.parent && window.parent.document && window.parent.document.body;
+      if (b && (b.classList.contains('dark') || b.classList.contains('light'))) {
+        return b.classList.contains('dark') ? 'dark' : 'light';
+      }
+    } catch (e) {}
+    return null;
+  }
+  function applyTheme(){
+    var resolved = fromParentTheme();
+    if (!resolved) {
+      var mode = localStorage.getItem('dashboardThemeMode') || 'auto';
+      resolved = mode === 'light' ? 'light' : mode === 'dark' ? 'dark'
+        : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    }
+    document.documentElement.setAttribute('data-theme', resolved);
+  }
+  applyTheme();
+  window.addEventListener('storage', function(e){ if (e.key === 'dashboardThemeMode') applyTheme(); });
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+  try {
+    var __pb = window.parent && window.parent.document && window.parent.document.body;
+    if (__pb) new MutationObserver(applyTheme).observe(__pb, { attributes: true, attributeFilter: ['class'] });
+  } catch (e) {}
+
+  // ---- Config ----
+  // Capture happens entirely inside WeeWX's own process (see
+  // user/timelapse.py) — the same mechanism that already produces
+  // archive.json/loop.json. It maintains five independently-sampled
+  // videos (day/week/month/year/alltime); this page just plays whichever
+  // one is selected and checks periodically for it having grown.
+  var POLL_MS = 30 * 1000;
+  var BUCKET_INFO = {
+    day:     { label: 'today\u2019s',     note: '<b>Resets daily</b> \u2014 builds up as the day goes on; a fresh one starts each midnight.' },
+    week:    { label: 'this week\u2019s', note: '<b>Resets weekly</b> \u2014 builds up from Monday; a fresh one starts each week.' },
+    month:   { label: 'this month\u2019s', note: '<b>Resets monthly</b> \u2014 builds up from the 1st; a fresh one starts each month.' },
+    year:    { label: 'this year\u2019s', note: '<b>Resets yearly</b> \u2014 builds up from 1 January; a fresh one starts each year.' },
+    alltime: { label: 'the all\u2011time', note: '<b>Never resets</b> \u2014 one frame a day for as long as the station has been running.' }
+  };
+  function videoUrlFor(bucket){ return './webcam-timelapse/' + bucket + '.mp4'; }
+
+  function tz(){
+    try { if (window.StationTime) return StationTime.getTZ(); } catch (e) {}
+    try { return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; } catch (e) { return 'UTC'; }
+  }
+  function timeLabel(date){
+    var parts = {};
+    new Intl.DateTimeFormat('en-GB', {
+      timeZone: tz(), hourCycle: 'h23', hour: '2-digit', minute: '2-digit', second: '2-digit'
+    }).formatToParts(date).forEach(function(p){ parts[p.type] = p.value; });
+    return parts.hour + ':' + parts.minute + ':' + parts.second;
+  }
+  function dateLabel(date){
+    return new Intl.DateTimeFormat('en-GB', {
+      timeZone: tz(), day: '2-digit', month: 'short', year: 'numeric'
+    }).format(date);
+  }
+
+  var video = document.getElementById('tlVideo');
+  var stageEl = document.getElementById('tlStage');
+  var stageEmpty = document.getElementById('tlEmpty');
+  var emptyTitle = document.getElementById('tlEmptyTitle');
+  var statusDot = document.getElementById('tlStatusDot');
+  var statusText = document.getElementById('tlStatusText');
+  var dateEl = document.getElementById('tlDate');
+  var updatedEl = document.getElementById('tlUpdated');
+  var downloadLink = document.getElementById('tlDownload');
+  var noteEl = document.getElementById('tlNote');
+  var tabsEl = document.getElementById('tlTabs');
+  var speedsEl = document.getElementById('tlSpeeds');
+  var pageEl = document.querySelector('.tl-page');
+
+  // The stage otherwise always spans the full page width with no definite
+  // height, which leaves height:100% on the video with nothing to resolve
+  // against — it then renders at an unpredictable size and can clip the
+  // video's own native control bar (fullscreen button included) against
+  // overflow:hidden. Once the video's real dimensions are known, set an
+  // explicit pixel height here so it renders correctly and in full.
+  video.addEventListener('loadedmetadata', function(){
+    if (video.videoWidth && video.videoHeight) {
+      var w = Math.max(320, Math.min(video.videoWidth, 720));
+      pageEl.style.maxWidth = w + 'px';
+      var h = Math.round(w * video.videoHeight / video.videoWidth);
+      var capped = Math.min(h, Math.round(window.innerHeight * 0.6), 480);
+      stageEl.style.height = capped + 'px';
+    }
+  });
+
+  function setStatus(mode, text){
+    statusDot.className = 'tl-status-dot' + (mode ? ' ' + mode : '');
+    statusText.textContent = text;
+  }
+  setStatus('', 'Starting\u2026');
+
+  var currentBucket = 'day';
+  var lastModifiedSeen = null;
+  var loaded = false;
+  var currentSpeed = 1;
+
+  function setSpeed(x){
+    currentSpeed = x;
+    video.playbackRate = x;
+    Array.prototype.forEach.call(speedsEl.querySelectorAll('.tl-speed-btn'), function(btn){
+      btn.classList.toggle('active', Number(btn.getAttribute('data-speed')) === x);
+    });
+  }
+  speedsEl.addEventListener('click', function(e){
+    var btn = e.target.closest('.tl-speed-btn');
+    if (btn) setSpeed(Number(btn.getAttribute('data-speed')));
+  });
+
+  // Applies a timestamp to both the "Updated" text and the date badge.
+  // headerValue is the video's own Last-Modified response header — i.e.
+  // the real time its most recent frame was appended — not the browser's
+  // clock at poll time, so this reflects the actual capture time rather
+  // than drifting by however long the 30s poll cycle + request took.
+  // Falls back to the browser's current time only if that header is
+  // missing or unparseable (fail open, same pattern as the webcam card's
+  // own staleness check).
+  function applyFrameTimestamp(headerValue){
+    var d = headerValue ? new Date(headerValue) : null;
+    if (!d || isNaN(d.getTime())) d = new Date();
+    var label = timeLabel(d);
+    updatedEl.textContent = 'Updated ' + label;
+    updatedEl.dataset.lastLabel = label;
+    dateEl.textContent = dateLabel(d);
+    return label;
+  }
+
+  function checkForUpdate(){
+    var videoUrl = videoUrlFor(currentBucket);
+    var bucketAtRequest = currentBucket;
+    fetch(videoUrl, { method: 'HEAD', cache: 'no-store' }).then(function(r){
+      if (bucketAtRequest !== currentBucket) return; // user switched tabs while this was in flight
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      var lm = r.headers.get('Last-Modified');
+      if (lm === lastModifiedSeen && loaded) {
+        setStatus('live', 'Live \u2014 last updated ' + updatedEl.dataset.lastLabel);
+        return;
+      }
+      lastModifiedSeen = lm;
+      var bust = videoUrl + '?v=' + Date.now();
+      video.src = bust;
+      video.classList.add('show');
+      stageEmpty.style.display = 'none';
+      video.load();
+      video.playbackRate = currentSpeed;
+      video.play().catch(function(){ /* autoplay can be blocked — controls are still there */ });
+      downloadLink.href = bust;
+      downloadLink.removeAttribute('aria-disabled');
+      loaded = true;
+      var label = applyFrameTimestamp(lm);
+      setStatus('live', 'Live \u2014 last updated ' + label);
+    }).catch(function(e){
+      if (bucketAtRequest !== currentBucket) return;
+      if (!loaded) {
+        setStatus('', 'Waiting for the first frame\u2026');
+      } else {
+        setStatus('error', 'Can\u2019t reach the timelapse video');
+      }
+      console.warn('modalTimelapse: check failed —', e.message);
+    });
+  }
+
+  function selectBucket(bucket){
+    if (bucket === currentBucket) return;
+    currentBucket = bucket;
+    lastModifiedSeen = null;
+    loaded = false;
+    video.pause();
+    video.removeAttribute('src');
+    video.classList.remove('show');
+    downloadLink.setAttribute('aria-disabled', 'true');
+    updatedEl.textContent = '\u00a0';
+    dateEl.textContent = '\u00a0';
+    stageEmpty.style.display = 'flex';
+    var info = BUCKET_INFO[bucket];
+    emptyTitle.textContent = 'Building ' + info.label + ' timelapse\u2026';
+    noteEl.innerHTML = info.note;
+    setStatus('', 'Starting\u2026');
+
+    Array.prototype.forEach.call(tabsEl.querySelectorAll('.tl-tab'), function(btn){
+      btn.classList.toggle('active', btn.getAttribute('data-bucket') === bucket);
+    });
+
+    checkForUpdate();
+  }
+
+  tabsEl.addEventListener('click', function(e){
+    var btn = e.target.closest('.tl-tab');
+    if (btn) selectBucket(btn.getAttribute('data-bucket'));
+  });
+
+  checkForUpdate();
+  setInterval(checkForUpdate, POLL_MS);
+
+  // ---- Size reporting to the parent dashboard's modal box ----
+  function reportSize(){
+    if (window.parent === window) return;
+    window.parent.postMessage({
+      type: 'chartModalContentHeight',
+      height: document.body.scrollHeight,
+      width: document.body.scrollWidth
+    }, '*');
+  }
+  if (window.parent !== window) {
+    new ResizeObserver(reportSize).observe(document.body);
+    window.addEventListener('load', reportSize);
+    setTimeout(reportSize, 500);
+    setTimeout(reportSize, 1500);
+  }
+})();
+</script>
+<script>
+(function applySeasonFromParent(){
+  function apply(){
+    try {
+      var b = window.parent && window.parent.document && window.parent.document.body;
+      var m = b && /season-(winter|spring|summer|autumn)/.exec(b.className);
+      if (m) document.documentElement.setAttribute('data-season', m[1]);
+      else document.documentElement.removeAttribute('data-season');
+    } catch (e) {}
+  }
+  apply();
+  try {
+    var pb = window.parent && window.parent.document && window.parent.document.body;
+    if (pb) new MutationObserver(apply).observe(pb, { attributes: true, attributeFilter: ['class'] });
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>

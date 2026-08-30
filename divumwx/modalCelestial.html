@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<!--
+##############################################################################################
+# modalCelestial.html version 0.0.2
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  GPLv3
+##############################################################################################
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Celestial Data</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root, [data-theme="light"]{
+  --bw-accent:#B45309;
+  --bw-good:#5BBB8A;
+  --bw-danger:#E36B57;
+  --bw-amber:#D97706;
+  --bw-yellow:#D6BE4E;
+  --bw-radius:14px;
+  --bw-radius-sm:10px;
+  --bw-shadow:0 1px 2px rgba(0,0,0,0.12), 0 8px 20px -8px rgba(0,0,0,0.25);
+  --bs-body-bg:#EFECE2;
+  --bs-body-color:#1D2C4E;
+  --bs-secondary-color:#5C6672;
+  --bs-card-bg:#FFFFFF;
+  --bs-tertiary-bg:#F4F1E9;
+  --bs-border-color:#C9CFD8;
+}
+[data-theme="dark"]{
+  --bw-accent:#D3A94C;
+  --bw-good:#5BBB8A;
+  --bw-danger:#E36B57;
+  --bw-amber:#D97706;
+  --bw-yellow:#D6BE4E;
+  --bw-shadow:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.5);
+  --bs-body-bg:#0A0F22;
+  --bs-body-color:#E9E4D4;
+  --bs-secondary-color:#8B93B8;
+  --bs-card-bg:#111834;
+  --bs-tertiary-bg:#161F3C;
+  --bs-border-color:#2A3358;
+}
+/* Seasonal accent mode — detected from the parent dashboard via the JS at
+   the end of <body>, which sets data-season on this document's <html>
+   element. Seasonal mode always resolves the parent to the light theme,
+   so no dark-mode variant is needed here — kept in sync with header.css's
+   seasonal palette. */
+:root[data-season="winter"]{ --bs-body-bg:#e9f2ec; --bs-card-bg:#f4f9f6; }
+:root[data-season="spring"]{ --bs-body-bg:#eef7e3; --bs-card-bg:#f5faef; }
+:root[data-season="summer"]{ --bs-body-bg:#fff6d9; --bs-card-bg:#fffbef; }
+:root[data-season="autumn"]{ --bs-body-bg:#f2e6d8; --bs-card-bg:#f8f0e7; }
+
+*{ box-sizing:border-box; }
+html, body{ margin:0; padding:0; }
+body{
+  background:var(--bs-body-bg);
+  color:var(--bs-body-color);
+  font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size:13.5px;
+  line-height:1.5;
+  transition:background-color .2s, color .2s;
+}
+
+.cel-page{ padding:18px 20px 26px; max-width:1400px; margin:0 auto; }
+
+.cel-section{ margin-bottom:30px; }
+.cel-section:last-child{ margin-bottom:0; }
+.cel-section-title{
+  font-family:Georgia, 'Times New Roman', serif;
+  font-variant-caps:small-caps;
+  letter-spacing:.04em;
+  font-size:20px;
+  font-weight:700;
+  margin:0 0 4px;
+}
+.cel-section-sub{
+  color:var(--bs-secondary-color);
+  font-size:12px;
+  margin:0 0 14px;
+}
+
+.cel-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(230px, 1fr));
+  gap:12px;
+}
+.cel-card{
+  background:var(--bs-card-bg);
+  border-radius:var(--bw-radius-sm);
+  box-shadow:var(--bw-shadow);
+  padding:16px;
+}
+.cel-card-title{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.03em;
+  text-transform:uppercase;
+  color:var(--bs-secondary-color);
+  margin:0 0 10px;
+}
+.cel-card-title svg{ flex-shrink:0; opacity:.8; }
+.cel-card p{ margin:0 0 8px; }
+.cel-card p:last-child{ margin-bottom:0; }
+.cel-card a{ color:var(--bw-accent); text-decoration:none; }
+.cel-card a:hover{ text-decoration:underline; }
+
+/* Wide info/guide cards read better spanning more columns on larger screens */
+.cel-card.cel-wide{ grid-column:span 2; }
+@media (max-width:560px){ .cel-card.cel-wide{ grid-column:span 1; } }
+
+.cel-accent{ color:var(--bw-accent); font-weight:700; }
+.cel-accent-good{ color:var(--bw-good); font-weight:700; }
+.cel-accent-danger{ color:var(--bw-danger); font-weight:700; }
+
+/* ---- KP / A-Index badges — same green/yellow/amber/red language as the
+   dashboard's Aurora chart (see charts-d3.html's .aurora-badge). ---- */
+.cel-index-row{ display:flex; align-items:baseline; gap:10px; margin-bottom:10px; }
+.cel-index-badge{
+  font-size:26px; font-weight:700; line-height:1;
+  padding:10px 16px; border-radius:var(--bw-radius-sm);
+  font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+.cel-index-badge small{ display:block; font-size:10px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; margin-top:3px; opacity:.85; }
+.cel-index-quiet{ background:#1a7f3c; color:#d4fce4; }
+.cel-index-active{ background:#a07800; color:#fff8dc; }
+.cel-index-amber{ background:#b85c00; color:#fff0d0; }
+.cel-index-storm{ background:#8b0000; color:#ffe0e0; }
+.cel-index-caution{ font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--bs-secondary-color); }
+.cel-storm-line{ font-size:12.5px; color:var(--bs-secondary-color); }
+
+.cel-updated{ font-size:11px; color:var(--bs-secondary-color); font-style:italic; margin-top:10px; }
+
+/* ---- Meteor shower list ---- */
+.cel-shower-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:7px; }
+.cel-shower-list li{ display:flex; justify-content:space-between; gap:10px; font-size:13px; border-bottom:1px solid var(--bs-border-color); padding-bottom:6px; }
+.cel-shower-list li:last-child{ border-bottom:0; padding-bottom:0; }
+.cel-shower-list .cel-shower-name{ font-weight:700; color:var(--bw-accent); }
+.cel-shower-list .cel-shower-dates{ color:var(--bs-secondary-color); white-space:nowrap; }
+
+/* ---- Simple bulleted guide lists (facts, tips) ---- */
+.cel-bullets{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+.cel-bullets li{ display:flex; align-items:flex-start; gap:8px; }
+.cel-bullets li svg{ flex-shrink:0; margin-top:3px; }
+
+/* ---- Moon phase hero ---- */
+.cel-moon-hero{ display:flex; align-items:center; gap:16px; }
+.cel-moon-disc{ width:96px; height:96px; flex-shrink:0; }
+.cel-moon-headline{ font-size:16px; font-weight:700; }
+.cel-moon-headline-sub{ font-size:12px; color:var(--bs-secondary-color); }
+
+/* ---- Moon data rows ---- */
+.cel-datarows{ display:flex; flex-direction:column; gap:0; }
+.cel-datarow{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:7px 0; border-bottom:1px solid var(--bs-border-color); font-size:12.5px;
+}
+.cel-datarow:last-child{ border-bottom:0; padding-bottom:0; }
+.cel-datarow:first-child{ padding-top:0; }
+.cel-datarow-label{ display:flex; align-items:center; gap:7px; color:var(--bs-secondary-color); }
+.cel-datarow-dot{ width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.cel-datarow-value{ font-weight:600; text-align:right; }
+
+.cel-credit{ font-size:11px; color:var(--bs-secondary-color); }
+.cel-credit svg{ opacity:.7; }
+</style>
+</head>
+<body>
+<script>
+(function(){
+  function syncFetchJSON(url){
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url + '?_=' + Date.now(), false);
+    xhr.send(null);
+    if (xhr.status !== 200) throw new Error('HTTP ' + xhr.status + ' for ' + url);
+    return JSON.parse(xhr.responseText);
+  }
+  var kp = 0;
+  try {
+    var kiArr = syncFetchJSON('./jsondata/ki.txt');
+    var lastEntry = kiArr[kiArr.length - 1];
+    kp = Number(lastEntry && lastEntry.kp) || 0;
+  } catch (e) { console.warn('modalCelestial: ki.txt fetch failed —', e.message); }
+
+  var archive = {}, alm = {};
+  try { archive = syncFetchJSON('./jsondata/archive.json'); } catch (e) { console.warn('modalCelestial: archive.json fetch failed —', e.message); }
+  try { alm = syncFetchJSON('./jsondata/almanac.json'); } catch (e) { console.warn('modalCelestial: almanac.json fetch failed —', e.message); }
+
+  function fromParentTheme(){
+    try {
+      var b = window.parent && window.parent.document && window.parent.document.body;
+      if (b && (b.classList.contains('dark') || b.classList.contains('light'))) {
+        return b.classList.contains('dark') ? 'dark' : 'light';
+      }
+    } catch (e) {}
+    return null;
+  }
+  function applyTheme(){
+    var resolved = fromParentTheme();
+    if (!resolved) {
+      var mode = localStorage.getItem('dashboardThemeMode') || 'auto';
+      resolved = mode === 'light' ? 'light' : mode === 'dark' ? 'dark'
+        : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    }
+    document.documentElement.setAttribute('data-theme', resolved);
+    return resolved;
+  }
+  var theme = applyTheme();
+  try {
+    var __pb = window.parent && window.parent.document && window.parent.document.body;
+    if (__pb) new MutationObserver(function(){ theme = applyTheme(); }).observe(__pb, { attributes: true, attributeFilter: ['class'] });
+  } catch (e) {}
+
+  function reportHeight(){
+    if (window.parent === window || !document.body) return;
+    window.parent.postMessage({ type: 'chartModalContentHeight', height: document.body.scrollHeight, width: document.body.scrollWidth }, '*');
+  }
+  if (window.parent !== window) {
+    window.addEventListener('load', function(){
+      reportHeight();
+      new ResizeObserver(reportHeight).observe(document.body);
+    });
+  }
+
+  window.__celestial = {
+    kp: kp,
+    alm: alm,
+    meta: archive.meta || {},
+    theme: theme
+  };
+})();
+</script>
+
+<div class="cel-page">
+
+  <section class="cel-section">
+    <h2 class="cel-section-title">Geomagnetic Activity &amp; Aurora</h2>
+    <p class="cel-section-sub">Estimated 3-hour planetary Kp-index, from ground-based magnetometers.</p>
+    <div class="cel-grid">
+
+      <div class="cel-card">
+        <div class="cel-card-title">
+          <svg viewBox="0 0 32 32" width="12" height="12" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%"><path d="M16 14 L16 23 M16 8 L16 10"/><circle cx="16" cy="16" r="14" fill="none"/></svg>
+          Kp-Index
+        </div>
+        <div class="cel-index-row" id="kpIndexRow"></div>
+        <div class="cel-index-caution" id="kpCautionText"></div>
+        <div class="cel-storm-line" id="kpStormText"></div>
+      </div>
+
+      <div class="cel-card">
+        <div class="cel-card-title">
+          <svg viewBox="0 0 32 32" width="12" height="12" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%"><path d="M16 14 L16 23 M16 8 L16 10"/><circle cx="16" cy="16" r="14" fill="none"/></svg>
+          A-Index
+        </div>
+        <div class="cel-index-row" id="aIndexRow"></div>
+        <div class="cel-index-caution" id="aCautionText"></div>
+        <div class="cel-storm-line" id="aStormText"></div>
+      </div>
+
+      <div class="cel-card">
+        <div class="cel-card-title">Guide — Kp-Index</div>
+        <p>The <span class="cel-accent">Kp-Index</span> is a good indicator of the likelihood of viewing the <span class="cel-accent">Aurora Borealis</span> (Northern Lights) — the higher the figure, the greater the probability.</p>
+      </div>
+
+      <div class="cel-card">
+        <div class="cel-card-title">Guide — A-Index</div>
+        <p>The <span class="cel-accent">A-Index</span> indicates possible enhanced VHF radio propagation at ranges up to 1000 miles or more. During strong activity, frequencies from 28&ndash;433MHz (or higher) can support communication at mid to high latitudes.</p>
+      </div>
+
+      <div class="cel-card">
+        <div class="cel-card-title">Radio Ham Guide</div>
+        <p>Aurora communications can be used by VHF enthusiasts via aurora scatter propagation, using specialised operating techniques to reach distances of 2000km or more on 28/50/144/433MHz.</p>
+      </div>
+
+      <div class="cel-card">
+        <div class="cel-card-title">&copy; Information</div>
+        <p class="cel-credit">Data provided by <a href="https://www.swpc.noaa.gov/products/station-k-and-indices" target="_blank" rel="noopener">National Oceanic and Atmospheric Administration</a></p>
+        <div class="cel-updated">Last updated: <span id="kiLastUpdated">&mdash;</span></div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="cel-section">
+    <h2 class="cel-section-title">Meteor Showers</h2>
+    <p class="cel-section-sub"><span id="todayDateStr"></span><span id="meteorDefaultText"></span><span id="meteorNextEventText"></span></p>
+    <div class="cel-grid">
+
+      <div class="cel-card">
+        <div class="cel-card-title">Guide — <span id="currentYearStr"></span> Major Meteor Showers</div>
+        <ul class="cel-shower-list">
+          <li><span class="cel-shower-name">Quadrantids</span><span class="cel-shower-dates">Dec 28 &ndash; Jan 12</span></li>
+          <li><span class="cel-shower-name">Lyrids</span><span class="cel-shower-dates">Apr 18 &ndash; Apr 25</span></li>
+          <li><span class="cel-shower-name">Perseids</span><span class="cel-shower-dates">Jul 13 &ndash; Aug 26</span></li>
+          <li><span class="cel-shower-name">Leonids</span><span class="cel-shower-dates">Nov 05 &ndash; Dec 03</span></li>
+          <li><span class="cel-shower-name">Geminids</span><span class="cel-shower-dates">Nov 30 &ndash; Dec 17</span></li>
+          <li><span class="cel-shower-name">Ursids</span><span class="cel-shower-dates">Dec 17 &ndash; Dec 24</span></li>
+        </ul>
+      </div>
+
+      <div class="cel-card">
+        <div class="cel-card-title">Viewing Guide</div>
+        <p>Meteors are best viewed during the night, though they can enter the atmosphere at any time of day — just harder to see except around dawn and dusk. Nearby ambient light and moonlight can make viewing difficult; showers are best seen away from city lights.</p>
+      </div>
+
+      <div class="cel-card">
+        <div class="cel-card-title">Radio Ham Guide</div>
+        <p>Meteor scatter communications can be used by VHF enthusiasts and commercial operators alike, using specialised techniques to reach distances of 2000km or more on VHF frequencies.</p>
+      </div>
+
+      <div class="cel-card">
+        <div class="cel-card-title">&copy; Information</div>
+        <p class="cel-credit">Data provided by <a href="https://en.wikipedia.org/wiki/Meteor_shower" target="_blank" rel="noopener">International Meteor Organization</a></p>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="cel-section">
+    <h2 class="cel-section-title">The Moon</h2>
+    <div class="cel-grid">
+
+      <div class="cel-card">
+        <div class="cel-card-title">Current Phase</div>
+        <div class="cel-moon-hero">
+          <div class="cel-moon-disc" id="moonDiscMount"></div>
+          <div>
+            <div class="cel-moon-headline" id="moonPhaseHeadline">&mdash;</div>
+            <div class="cel-moon-headline-sub">Updated live from the station's almanac</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cel-card cel-wide">
+        <div class="cel-card-title">Moon Rise / Set &amp; Data</div>
+        <div class="cel-datarows">
+          <div class="cel-datarow"><span class="cel-datarow-label"><span class="cel-datarow-dot" style="background:#39739f"></span>Moonrise</span><span class="cel-datarow-value" id="moonriseText">&mdash;</span></div>
+          <div class="cel-datarow"><span class="cel-datarow-label"><span class="cel-datarow-dot" style="background:#D46842"></span>Moonset</span><span class="cel-datarow-value" id="moonsetText">&mdash;</span></div>
+          <div class="cel-datarow"><span class="cel-datarow-label"><span class="cel-datarow-dot" style="background:#ff8841"></span>Next Full Moon</span><span class="cel-datarow-value" id="fullMoonText">&mdash;</span></div>
+          <div class="cel-datarow"><span class="cel-datarow-label"><span class="cel-datarow-dot" style="background:#777"></span>Next New Moon</span><span class="cel-datarow-value" id="newMoonText">&mdash;</span></div>
+          <div class="cel-datarow"><span class="cel-datarow-label"><span class="cel-datarow-dot" style="background:#9aba2f"></span>Current Cycle Age</span><span class="cel-datarow-value"><span id="moonAgeText">&mdash;</span> days</span></div>
+          <div class="cel-datarow"><span class="cel-datarow-label"><span class="cel-datarow-dot" style="background:#007fff"></span>Luminance</span><span class="cel-datarow-value"><span id="luminanceText">&mdash;</span>%</span></div>
+          <div class="cel-datarow"><span class="cel-datarow-label"><span class="cel-datarow-dot" style="background:#9bf"></span>Moon Phase</span><span class="cel-datarow-value" id="moonphaseText">&mdash;</span></div>
+          <div class="cel-datarow"><span class="cel-datarow-label"><span class="cel-datarow-dot" style="background:#ff8841"></span>Moon Distance</span><span class="cel-datarow-value"><span id="moonDistanceText">&mdash;</span> km</span></div>
+          <div class="cel-datarow"><span class="cel-datarow-label"><span class="cel-datarow-dot" style="background:#9bf"></span>Ecliptic Longitude</span><span class="cel-datarow-value"><span id="eclipticLonText">&mdash;</span>&deg;</span></div>
+          <div class="cel-datarow"><span class="cel-datarow-label"><span class="cel-datarow-dot" style="background:#9bf"></span>Parallactic Angle</span><span class="cel-datarow-value"><span id="parallacticAngleText">&mdash;</span>&deg;</span></div>
+        </div>
+      </div>
+
+      <div class="cel-card">
+        <div class="cel-card-title">Moon Facts — Did You Know?</div>
+        <ul class="cel-bullets">
+          <li><svg viewBox="0 0 32 32" width="9" height="9" fill="#3b9cac" stroke="#3b9cac" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%"><circle cx="16" cy="16" r="14"/><path d="M6 6 L26 26"/></svg><span>The Moon formed approximately 4.5 billion years ago.</span></li>
+          <li><svg viewBox="0 0 32 32" width="9" height="9" fill="#3b9cac" stroke="#3b9cac" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%"><circle cx="16" cy="16" r="14"/><path d="M6 6 L26 26"/></svg><span>High and low tides are caused by the Moon's gravitational pull.</span></li>
+          <li><svg viewBox="0 0 32 32" width="9" height="9" fill="#3b9cac" stroke="#3b9cac" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%"><circle cx="16" cy="16" r="14"/><path d="M6 6 L26 26"/></svg><span>The Moon orbits the Earth roughly every 29.53 days.</span></li>
+          <li><svg viewBox="0 0 32 32" width="9" height="9" fill="#3b9cac" stroke="#3b9cac" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%"><circle cx="16" cy="16" r="14"/><path d="M6 6 L26 26"/></svg><span>Sunlit surface temperatures can reach 260&deg;F (127&deg;C).</span></li>
+          <li><svg viewBox="0 0 32 32" width="9" height="9" fill="#3b9cac" stroke="#3b9cac" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%"><circle cx="16" cy="16" r="14"/><path d="M6 6 L26 26"/></svg><span>On the dark side, temperatures can drop to &minus;280&deg;F (&minus;173&deg;C).</span></li>
+        </ul>
+      </div>
+
+      <div class="cel-card">
+        <div class="cel-card-title">Moon Photography Guide</div>
+        <ul class="cel-bullets">
+          <li><svg viewBox="0 0 32 32" width="9" height="9" fill="#3b9cac" stroke="#3b9cac" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%"><circle cx="16" cy="16" r="14"/><path d="M6 6 L26 26"/></svg><span>Use a tripod</span></li>
+          <li><svg viewBox="0 0 32 32" width="9" height="9" fill="#3b9cac" stroke="#3b9cac" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%"><circle cx="16" cy="16" r="14"/><path d="M6 6 L26 26"/></svg><span>Use a zoom lens</span></li>
+          <li><svg viewBox="0 0 32 32" width="9" height="9" fill="#3b9cac" stroke="#3b9cac" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%"><circle cx="16" cy="16" r="14"/><path d="M6 6 L26 26"/></svg><span>Measure the exposure carefully</span></li>
+          <li><svg viewBox="0 0 32 32" width="9" height="9" fill="#3b9cac" stroke="#3b9cac" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%"><circle cx="16" cy="16" r="14"/><path d="M6 6 L26 26"/></svg><span>Avoid nearby ambient lighting</span></li>
+          <li><svg viewBox="0 0 32 32" width="9" height="9" fill="#3b9cac" stroke="#3b9cac" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%"><circle cx="16" cy="16" r="14"/><path d="M6 6 L26 26"/></svg><span>Use a shutter remote release</span></li>
+          <li><svg viewBox="0 0 32 32" width="9" height="9" fill="#3b9cac" stroke="#3b9cac" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%"><circle cx="16" cy="16" r="14"/><path d="M6 6 L26 26"/></svg><span>Always shoot RAW for post-processing</span></li>
+        </ul>
+      </div>
+
+      <div class="cel-card">
+        <div class="cel-card-title">Radio Ham Guide (EME)</div>
+        <p>Earth&ndash;Moon&ndash;Earth (<span class="cel-accent">EME</span>), also known as Moon bounce, is a technique that relies on radio waves reflecting off the Moon's surface between two Earth-based stations, using VHF and UHF amateur radio bands.</p>
+      </div>
+
+      <div class="cel-card">
+        <div class="cel-card-title">&copy; Information</div>
+        <p class="cel-credit">Moon data generated from python-pyephem.</p>
+      </div>
+
+    </div>
+  </section>
+
+</div>
+
+<script src="moonDisc.js"></script>
+<script>
+(function(){
+  var c = window.__celestial || { kp: 0, alm: {}, meta: {} };
+  var kp = c.kp;
+  var alm = c.alm;
+
+  function setText(id, text){
+    var el = document.getElementById(id);
+    if (el) el.textContent = text;
+  }
+  function setHtml(id, html){
+    var el = document.getElementById(id);
+    if (el) el.innerHTML = html;
+  }
+  function fmt(v, decimals){
+    var n = Number(v);
+    return isNaN(n) ? '\u2014' : n.toFixed(decimals);
+  }
+  // almanac.json now gives raw unix_epoch timestamps rather than
+  // pre-formatted strings for rise/set/full-moon/new-moon -- format
+  // client-side, in the station's own timezone where known.
+  function fmtEpochTime(ts, withSeconds){
+    if (ts == null) return '\u2014';
+    var opts = { hour: '2-digit', minute: '2-digit', hour12: false };
+    if (withSeconds) opts.second = '2-digit';
+    try { if (window.StationTime) opts.timeZone = window.StationTime.getTZ(); } catch (e) {}
+    return new Date(ts * 1000).toLocaleTimeString(undefined, opts);
+  }
+  function fmtEpochDate(ts){
+    if (ts == null) return '\u2014';
+    var opts = { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false };
+    try { if (window.StationTime) opts.timeZone = window.StationTime.getTZ(); } catch (e) {}
+    return new Date(ts * 1000).toLocaleString(undefined, opts);
+  }
+
+  // ---- Kp / A-Index badges + captions ----
+  function indexClass(kpVal){
+    if (kpVal > 6) return 'cel-index-storm';
+    if (kpVal > 5) return 'cel-index-amber';
+    if (kpVal > 4) return 'cel-index-active';
+    if (kpVal > 0) return 'cel-index-quiet';
+    return '';
+  }
+
+  var kpBoxHtml = '';
+  if (kp > 0) kpBoxHtml = '<div class="cel-index-badge ' + indexClass(kp) + '">' + kp.toFixed(1) + '<small>Kp-Index</small></div>';
+  setHtml('kpIndexRow', kpBoxHtml);
+
+  var kpCaution = '';
+  if (kp > 6) kpCaution = 'Storm';
+  else if (kp > 4) kpCaution = 'Active';
+  else if (kp >= 0) kpCaution = 'Quiet';
+  setText('kpCautionText', kpCaution);
+
+  var kpStormHtml = '';
+  if (kp >= 9) kpStormHtml = '<span class="cel-accent-danger">G5 Geomagnetic Severe Storm</span> &mdash; Kp-Planetary Index';
+  else if (kp >= 8) kpStormHtml = '<span class="cel-accent-danger">G4 Geomagnetic Major Storm</span> &mdash; Kp-Planetary Index';
+  else if (kp >= 7) kpStormHtml = '<span class="cel-accent-danger">G3 Geomagnetic Major Storm</span> &mdash; Kp-Planetary Index';
+  else if (kp >= 6) kpStormHtml = '<span class="cel-accent-danger">G2 Geomagnetic Storm</span> &mdash; Kp-Planetary Index';
+  else if (kp >= 5) kpStormHtml = '<span class="cel-accent">G1 Geomagnetic Storm</span> &mdash; Kp-Planetary Index';
+  else if (kp >= 4) kpStormHtml = '<span class="cel-accent">Minor G1 Geomagnetic Storm</span> &mdash; Kp-Planetary Index';
+  else if (kp >= 3.5) kpStormHtml = '<span class="cel-accent-good">Weak Geomagnetic Storm</span> &mdash; Kp-Planetary Index';
+  else if (kp >= 0) kpStormHtml = '<span class="cel-accent-good">Quiet — No Geomagnetic Storm</span> &mdash; Kp-Planetary Index';
+  setHtml('kpStormText', kpStormHtml);
+
+  // ---- A-Index (derived from Kp, same thresholds/estimates as before) ----
+  var aValue = null;
+  if (kp > 8.9) aValue = 400;
+  else if (kp > 7.9) aValue = 208;
+  else if (kp > 6.9) aValue = 132;
+  else if (kp > 6) aValue = 80;
+  else if (kp > 4.9) aValue = Math.round(kp * 6);
+  else if (kp > 3.9) aValue = Math.round(kp * 5);
+  else if (kp > 0) aValue = Math.round(kp * 2);
+  var aBoxHtml = '';
+  if (aValue != null) aBoxHtml = '<div class="cel-index-badge ' + indexClass(kp) + '">' + aValue + '<small>A-Index</small></div>';
+  setHtml('aIndexRow', aBoxHtml);
+
+  var aCaution = '';
+  if (kp > 6) aCaution = 'Storm';
+  else if (kp > 4) aCaution = 'Active';
+  else if (kp >= 0) aCaution = 'Quiet';
+  setText('aCautionText', aCaution);
+
+  var aStormHtml = '';
+  if (kp >= 9) aStormHtml = '<span class="cel-accent-danger">G5 Severe Storm</span> &mdash; Radio Aurora <span class="cel-accent">Active</span>';
+  else if (kp >= 8) aStormHtml = '<span class="cel-accent-danger">G4 Major Storm</span> &mdash; Radio Aurora <span class="cel-accent">Active</span>';
+  else if (kp >= 7) aStormHtml = '<span class="cel-accent-danger">G3 Major Storm</span> &mdash; Radio Aurora <span class="cel-accent">Active</span>';
+  else if (kp >= 6) aStormHtml = '<span class="cel-accent-danger">G2 Storm</span> &mdash; Radio Aurora <span class="cel-accent">Active</span>';
+  else if (kp >= 5) aStormHtml = '<span class="cel-accent">G1 Storm</span> &mdash; Radio Aurora <span class="cel-accent">Active</span>';
+  else if (kp >= 4) aStormHtml = '<span class="cel-accent">Minor G1 Storm</span> &mdash; Radio Aurora <span class="cel-accent">Active</span>';
+  else if (kp >= 3.5) aStormHtml = '<span class="cel-accent-good">Weak Storm</span> &mdash; Radio Aurora <span class="cel-accent">Active</span>';
+  else if (kp > 0) aStormHtml = '<span class="cel-accent-good">Quiet — No Storms</span> &mdash; Not Active';
+  setHtml('aStormText', aStormHtml);
+
+  setText('kiLastUpdated', new Date().toLocaleTimeString());
+
+  // ---- Meteor showers ----
+  // meteorDefaultText/meteorNextEventText are populated as empty strings —
+  // "currently visible" shower detection was never implemented upstream of
+  // this page (kept as-is rather than inventing new logic in a redesign).
+  setText('meteorDefaultText', '');
+  setText('meteorNextEventText', '');
+  setText('todayDateStr', new Date().toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }));
+  setText('currentYearStr', String(new Date().getFullYear()));
+
+  // ---- Moon data + phase disc ----
+  setHtml('moonPhaseHeadline', alm['almanac.moon.phase_name'] != null ? String(alm['almanac.moon.phase_name']) : '\u2014');
+  setText('moonriseText', fmtEpochTime(alm['almanac.moon.next_rising.unix_epoch.raw'], false));
+  setText('moonsetText', fmtEpochTime(alm['almanac.moon.next_setting.unix_epoch.raw'], false));
+  setText('fullMoonText', fmtEpochDate(alm['almanac.next_full_moon.unix_epoch.raw']));
+  setText('newMoonText', fmtEpochDate(alm['almanac.next_new_moon.unix_epoch.raw']));
+  setText('moonAgeText', fmt(alm['almanac.moon.age_days'], 2));
+  setText('luminanceText', fmt(alm['almanac.moon.phase'], 2));
+  setText('moonphaseText', alm['almanac.moon.phase_name'] != null ? String(alm['almanac.moon.phase_name']) : '\u2014');
+  // almanac.moon.earth_distance is in AU (standardised schema); this
+  // page's label is hardcoded "km" (see the datarow markup), so convert
+  // here rather than silently showing an AU figure under a km label.
+  setText('moonDistanceText', fmt(alm['almanac.moon.earth_distance'] != null ? alm['almanac.moon.earth_distance'] * 149597870.7 : null, 2));
+  setText('eclipticLonText', fmt(alm['almanac.moon.ecliptic_angle'], 4));
+  setText('parallacticAngleText', fmt(alm['almanac.moon.parallactic_angle'], 4));
+
+  var mount = document.getElementById('moonDiscMount');
+  if (mount && window.DivumWXMoonDisc) {
+    DivumWXMoonDisc.render(mount, {
+      phasex: Number(alm['almanac.moon.ecliptic_angle']) || 0,
+      tiltDeg: Number(alm['almanac.moon.parallactic_angle']) || 0,
+      size: 96
+    });
+  }
+})();
+</script>
+<script>
+(function applySeasonFromParent(){
+  function apply(){
+    try {
+      var b = window.parent && window.parent.document && window.parent.document.body;
+      var m = b && /season-(winter|spring|summer|autumn)/.exec(b.className);
+      if (m) document.documentElement.setAttribute('data-season', m[1]);
+      else document.documentElement.removeAttribute('data-season');
+    } catch (e) {}
+  }
+  apply();
+  try {
+    var pb = window.parent && window.parent.document && window.parent.document.body;
+    if (pb) new MutationObserver(apply).observe(pb, { attributes: true, attributeFilter: ['class'] });
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<!--
+##############################################################################################
+# modalDaylightMap.html version 0.0.1
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  GPLv3
+##############################################################################################
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>World daylight map</title>
+
+<style>
+:root{
+  --bs-body-bg: #FFFFFF;
+}
+[data-theme="dark"]{
+  --bs-body-bg: #111834;
+}
+html, body { margin: 0; }
+body {
+  background: var(--bs-body-bg);
+  transition: background-color .2s;
+}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+<link rel="stylesheet" href="css/daylightmap.css">
+<style>
+
+#daylight-map {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+}
+.container {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+</style>
+<style>
+/* Seasonal accent mode — detected from the parent dashboard (index.html)
+   via the JS snippet at the end of <body>, which sets data-season on
+   this document's <html> element. Overrides whichever of the various
+   background variable names this modal happens to use, with the
+   seasonal light card tint — background and panels alike, per season. */
+[data-season="winter"] {
+  --card-bg: #e9f2ec; --card-bg-dark: #e9f2ec; --card-bg-light: #e9f2ec;
+  --bg-color: #e9f2ec; --bg-color-dark: #e9f2ec; --bg-color-light: #e9f2ec;
+  --bs-body-bg: #e9f2ec; --bs-card-bg: #e9f2ec; --bg: #e9f2ec;
+}
+[data-season="spring"] {
+  --card-bg: #eef7e3; --card-bg-dark: #eef7e3; --card-bg-light: #eef7e3;
+  --bg-color: #eef7e3; --bg-color-dark: #eef7e3; --bg-color-light: #eef7e3;
+  --bs-body-bg: #eef7e3; --bs-card-bg: #eef7e3; --bg: #eef7e3;
+}
+[data-season="summer"] {
+  --card-bg: #fff6d9; --card-bg-dark: #fff6d9; --card-bg-light: #fff6d9;
+  --bg-color: #fff6d9; --bg-color-dark: #fff6d9; --bg-color-light: #fff6d9;
+  --bs-body-bg: #fff6d9; --bs-card-bg: #fff6d9; --bg: #fff6d9;
+}
+[data-season="autumn"] {
+  --card-bg: #f2e6d8; --card-bg-dark: #f2e6d8; --card-bg-light: #f2e6d8;
+  --bg-color: #f2e6d8; --bg-color-dark: #f2e6d8; --bg-color-light: #f2e6d8;
+  --bs-body-bg: #f2e6d8; --bs-card-bg: #f2e6d8; --bg: #f2e6d8;
+}
+html[data-season="winter"] body, html[data-season="spring"] body,
+html[data-season="summer"] body, html[data-season="autumn"] body {
+  background-color: var(--bg-color, var(--card-bg));
+}
+</style>
+</head>
+<body>
+
+<div class="container" style="top: 80px;">
+  <svg id="daylight-map"></svg>
+  <div class="controls"></div>
+</div>
+
+<script>
+(function(){
+  function fromParentTheme(){
+    try {
+      var b = window.parent && window.parent.document && window.parent.document.body;
+      if (b && (b.classList.contains('dark') || b.classList.contains('light'))) {
+        return b.classList.contains('dark') ? 'dark' : 'light';
+      }
+    } catch (e) {}
+    return null;
+  }
+  function applyTheme(){
+    var resolved = fromParentTheme();
+    if (!resolved) {
+      const mode = localStorage.getItem('dashboardThemeMode') || 'auto';
+      resolved = mode === 'light' ? 'light' : mode === 'dark' ? 'dark'
+        : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    }
+    document.documentElement.setAttribute('data-theme', resolved);
+  }
+  applyTheme();
+  window.addEventListener('storage', function(e){ if (e.key === 'dashboardThemeMode') applyTheme(); });
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+  try {
+    var __pb = window.parent && window.parent.document && window.parent.document.body;
+    if (__pb) new MutationObserver(applyTheme).observe(__pb, { attributes: true, attributeFilter: ['class'] });
+  } catch (e) {}
+
+  // ---- Make the map itself responsive ----
+  // js/daylightMap.js (third-party) draws the SVG at a fixed pixel
+  // width/height and never revisits it -- fine at its own native size, but
+  // it doesn't shrink to fit a narrower card/modal, so on small screens
+  // the map either overflows or gets cropped. Rather than touch that
+  // library, this retrofits the responsiveness once the library has set
+  // its width/height attributes: converts them into a viewBox (so the
+  // drawing's own coordinate system is preserved) and switches to a
+  // percentage width/height, which the browser then scales fluidly on
+  // any resize with no further JS needed.
+  function makeMapResponsive(){
+    var svg = document.getElementById('daylight-map');
+    if (!svg || svg.hasAttribute('viewBox')) return false;
+    var w = parseFloat(svg.getAttribute('width'));
+    var h = parseFloat(svg.getAttribute('height'));
+    if (!w || !h) return false;
+    svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    svg.removeAttribute('width');
+    svg.removeAttribute('height');
+    return true;
+  }
+  var daylightMapEl = document.getElementById('daylight-map');
+  if (daylightMapEl) {
+    var mapObserver = new MutationObserver(function(){
+      if (makeMapResponsive()) mapObserver.disconnect();
+    });
+    mapObserver.observe(daylightMapEl, { attributes: true, attributeFilter: ['width', 'height'] });
+  }
+  if (!makeMapResponsive()) {
+    [100, 300, 800, 1500, 3000].forEach(function(delay){ setTimeout(makeMapResponsive, delay); });
+  }
+
+  function measureContent(){
+    var svgEl = document.getElementById('daylight-map');
+    var controlsEl = document.querySelector('.controls');
+    var maxRight = 0, maxBottom = 0;
+    [svgEl, controlsEl].forEach(function(el){
+      if (!el) return;
+      var r = el.getBoundingClientRect();
+      if (r.width === 0 && r.height === 0) return;
+      maxRight = Math.max(maxRight, r.right);
+      maxBottom = Math.max(maxBottom, r.bottom);
+    });
+    if (maxRight === 0 || maxBottom === 0) {
+
+      return { width: document.body.scrollWidth, height: document.body.scrollHeight };
+    }
+    return { width: Math.ceil(maxRight), height: Math.ceil(maxBottom) };
+  }
+  function reportSize(){
+    if (window.parent === window) return;
+    var size = measureContent();
+    window.parent.postMessage({
+      type: 'chartModalContentHeight',
+      height: size.height,
+      width: size.width
+    }, '*');
+  }
+  if (window.parent !== window) {
+    new ResizeObserver(reportSize).observe(document.body);
+    window.addEventListener('load', reportSize);
+
+
+    setTimeout(reportSize, 500);
+    setTimeout(reportSize, 1500);
+  }
+})();
+</script>
+
+<script src='https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.20/topojson.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/d3-geo-projection/0.2.16/d3.geo.projection.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.12.0/moment.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.1/moment-timezone.min.js'></script>
+<script src='https://s3-us-west-2.amazonaws.com/s.cdpn.io/215059/suncalc.js'></script>
+<script src="js/daylightMap.js"></script>
+
+<script>
+(function applySeasonFromParent(){
+  function apply(){
+    try {
+      var b = window.parent && window.parent.document && window.parent.document.body;
+      var m = b && /season-(winter|spring|summer|autumn)/.exec(b.className);
+      if (m) document.documentElement.setAttribute('data-season', m[1]);
+      else document.documentElement.removeAttribute('data-season');
+    } catch (e) {}
+  }
+  apply();
+  try {
+    var pb = window.parent && window.parent.document && window.parent.document.body;
+    if (pb) new MutationObserver(apply).observe(pb, { attributes: true, attributeFilter: ['class'] });
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>

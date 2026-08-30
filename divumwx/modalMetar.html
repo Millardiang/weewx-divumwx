@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<!--
+##############################################################################################
+# modalMetar.html version 0.1.0
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  GPLv3
+##############################################################################################
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Nearby METAR</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root, [data-theme="light"]{
+  --bw-accent:#B45309;
+  --bw-good:#5BBB8A;
+  --bw-danger:#E36B57;
+  --bw-amber:#D97706;
+  --bw-radius:14px;
+  --bw-radius-sm:10px;
+  --bw-shadow:0 1px 2px rgba(0,0,0,0.12), 0 8px 20px -8px rgba(0,0,0,0.25);
+  --bs-body-bg:#EFECE2;
+  --bs-body-color:#1D2C4E;
+  --bs-secondary-color:#5C6672;
+  --bs-card-bg:#FFFFFF;
+  --bs-tertiary-bg:#F4F1E9;
+  --bs-border-color:#C9CFD8;
+  --metar-gauge-line:#c0c0c0;
+  --metar-gauge-major:#1c4263;
+  --metar-gauge-ring:#e0eafb;
+  --metar-gauge-tube:#999999;
+}
+[data-theme="dark"]{
+  --bw-accent:#D3A94C;
+  --bw-good:#5BBB8A;
+  --bw-danger:#E36B57;
+  --bw-amber:#D97706;
+  --bw-shadow:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.5);
+  --bs-body-bg:#0A0F22;
+  --bs-body-color:#E9E4D4;
+  --bs-secondary-color:#8B93B8;
+  --bs-card-bg:#111834;
+  --bs-tertiary-bg:#161F3C;
+  --bs-border-color:#2A3358;
+  --metar-gauge-line:#3b3c3f;
+  --metar-gauge-major:silver;
+  --metar-gauge-ring:#2d2f32;
+  --metar-gauge-tube:#999999;
+}
+/* Seasonal accent mode — detected from the parent dashboard, same mechanism
+   as every other modal on this site (kept in sync with header.css). */
+:root[data-season="winter"]{ --bs-body-bg:#e9f2ec; --bs-card-bg:#f4f9f6; }
+:root[data-season="spring"]{ --bs-body-bg:#eef7e3; --bs-card-bg:#f5faef; }
+:root[data-season="summer"]{ --bs-body-bg:#fff6d9; --bs-card-bg:#fffbef; }
+:root[data-season="autumn"]{ --bs-body-bg:#f2e6d8; --bs-card-bg:#f8f0e7; }
+
+*{ box-sizing:border-box; }
+html, body{ margin:0; padding:0; }
+body{
+  background:var(--bs-body-bg);
+  color:var(--bs-body-color);
+  font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size:13.5px;
+  line-height:1.5;
+  transition:background-color .2s, color .2s;
+}
+
+.metar-page{ padding:18px 20px 26px; max-width:1400px; margin:0 auto; }
+
+.metar-toolbar{ display:flex; justify-content:flex-end; margin-bottom:4px; }
+.metar-toolbar-btn{
+  font-size:11px; font-weight:700; text-decoration:none;
+  padding:5px 12px; border-radius:999px;
+  border:1px solid var(--bs-border-color); background:var(--bs-tertiary-bg);
+  color:var(--bs-body-color); cursor:pointer; font-family:inherit;
+}
+.metar-toolbar-btn:hover{ border-color:var(--bw-accent); color:var(--bw-accent); }
+
+.metar-section{ margin-bottom:30px; }
+.metar-section:last-child{ margin-bottom:0; }
+.metar-section-title{
+  font-family:Georgia, 'Times New Roman', serif;
+  font-variant-caps:small-caps;
+  letter-spacing:.04em;
+  font-size:20px;
+  font-weight:700;
+  margin:0 0 4px;
+}
+.metar-section-sub{
+  color:var(--bs-secondary-color);
+  font-size:12px;
+  margin:0 0 14px;
+}
+
+.metar-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(230px, 1fr));
+  gap:12px;
+}
+.metar-card{
+  background:var(--bs-card-bg);
+  border-radius:var(--bw-radius-sm);
+  box-shadow:var(--bw-shadow);
+  padding:16px;
+}
+.metar-card-title{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.03em;
+  text-transform:uppercase;
+  color:var(--bs-secondary-color);
+  margin:0 0 10px;
+}
+.metar-card-title svg{ flex-shrink:0; opacity:.8; }
+.metar-card p{ margin:0 0 8px; }
+.metar-card p:last-child{ margin-bottom:0; }
+.metar-card a{ color:var(--bw-accent); text-decoration:none; }
+.metar-card a:hover{ text-decoration:underline; }
+
+.metar-card.metar-wide{ grid-column:span 2; }
+@media (max-width:560px){ .metar-card.metar-wide{ grid-column:span 1; } }
+
+.metar-accent{ color:var(--bw-accent); font-weight:700; }
+.metar-credit{ font-size:11px; color:var(--bs-secondary-color); }
+.metar-updated{ font-size:11px; color:var(--bs-secondary-color); font-style:italic; margin-top:10px; }
+
+/* ---- Data rows (station info, pressure/visibility) ---- */
+.metar-datarows{ display:flex; flex-direction:column; gap:0; }
+.metar-datarow{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:7px 0; border-bottom:1px solid var(--bs-border-color); font-size:12.5px;
+}
+.metar-datarow:last-child{ border-bottom:0; padding-bottom:0; }
+.metar-datarow:first-child{ padding-top:0; }
+.metar-datarow-label{ color:var(--bs-secondary-color); }
+.metar-datarow-value{ font-weight:600; text-align:right; }
+
+/* ---- Sky condition hero (icon + description) ---- */
+.metar-sky-hero{ display:flex; align-items:center; gap:14px; margin-bottom:10px; }
+.metar-sky-icon{ width:52px; height:52px; flex-shrink:0; }
+.metar-sky-desc{ font-size:15px; font-weight:700; }
+
+/* ---- Raw METAR text block ---- */
+.metar-raw{
+  font-family:'IBM Plex Mono', ui-monospace, monospace;
+  font-size:11.5px; line-height:1.6; word-break:break-all;
+  background:var(--bs-tertiary-bg); border-radius:8px; padding:10px 12px;
+}
+
+/* ---- Widget mounts (D3-rendered SVGs) — sizing/positioning only; the
+   drawing itself is untouched from before. ---- */
+.metar-widget-row{ display:flex; align-items:flex-end; justify-content:center; gap:4px; }
+.metarThermometer{ position:relative; }
+.metarBox{ position:relative; margin-left:-8px; }
+.metar-anemometer-mount{ display:flex; justify-content:center; }
+.metar-compass-wrap{
+  position:relative; width:157px; height:157px; margin:0 auto;
+  display:flex; align-items:center; justify-content:center; overflow:hidden;
+}
+
+/* ---- Legacy D3-gauge theme hooks (read by the render functions below via
+   getComputedStyle-equivalent CSS var lookups) ---- */
+.gauge .domain{ stroke-width:0; }
+.gauge .tick line{ stroke:rgba(255,99,71,1); stroke-width:1px; stroke-linecap:round; }
+.gauge line{ stroke:var(--metar-gauge-line); stroke-width:0.75px; stroke-linecap:round; }
+.gauge .arc, .gauge .cursor{ stroke:rgba(59,60,63,0); stroke-width:2px; fill:rgba(59,60,63,0); }
+.gauge .major{ fill:var(--metar-gauge-major); font-size:8px; font-family:Arial; font-weight:normal; letter-spacing:0.015rem; }
+.gauge .indicator{ stroke:rgba(255,0,0,1); fill:#000; stroke-width:1px; }
+.gauge circle{ stroke:var(--bs-tertiary-bg); fill:var(--bs-tertiary-bg); }
+</style>
+</head>
+<body>
+
+<script src="stationTime.js"></script>
+<script src="units.js"></script>
+<script>
+(function(){
+  function fromParentTheme(){
+    try {
+      var b = window.parent && window.parent.document && window.parent.document.body;
+      if (b && (b.classList.contains('dark') || b.classList.contains('light'))) {
+        return b.classList.contains('dark') ? 'dark' : 'light';
+      }
+    } catch (e) {}
+    return null;
+  }
+  function applyTheme(){
+    var resolved = fromParentTheme();
+    if (!resolved) {
+      var mode = localStorage.getItem('dashboardThemeMode') || 'auto';
+      resolved = mode === 'light' ? 'light' : mode === 'dark' ? 'dark'
+        : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    }
+    document.documentElement.setAttribute('data-theme', resolved);
+    return resolved;
+  }
+  applyTheme();
+  try {
+    var __pb = window.parent && window.parent.document && window.parent.document.body;
+    if (__pb) new MutationObserver(applyTheme).observe(__pb, { attributes: true, attributeFilter: ['class'] });
+  } catch (e) {}
+})();
+</script>
+
+<div class="metar-page">
+
+  <div class="metar-toolbar">
+    <button type="button" class="metar-toolbar-btn" id="openCloudChartBtn">Cloud Chart</button>
+  </div>
+
+  <section class="metar-section">
+    <h2 class="metar-section-title">Current Conditions</h2>
+    <p class="metar-section-sub">Live surface observation from the nearest reporting airport.</p>
+    <div class="metar-grid">
+
+      <div class="metar-card">
+        <div class="metar-card-title">
+          <svg viewBox="0 0 32 32" width="12" height="12" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%"><circle cx="16" cy="16" r="14"/></svg>
+          Sky &amp; Visibility
+        </div>
+        <div class="metar-sky-hero">
+          <img class="metar-sky-icon" id="skyIcon" src="" alt="Weather icon">
+          <div class="metar-sky-desc" id="skyDesc"></div>
+        </div>
+        <div class="metar-datarows">
+          <div class="metar-datarow"><span class="metar-datarow-label">Pressure</span><span class="metar-datarow-value" id="pressureLine">&mdash;</span></div>
+          <div class="metar-datarow"><span class="metar-datarow-label">Visibility</span><span class="metar-datarow-value" id="visibilityLine">&mdash;</span></div>
+        </div>
+      </div>
+
+      <div class="metar-card">
+        <div class="metar-card-title">
+          <svg viewBox="0 0 32 32" width="12" height="12" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%"><rect x="12" y="4" width="8" height="20" rx="4"/><circle cx="16" cy="26" r="4"/></svg>
+          Temperature &amp; Humidity
+        </div>
+        <div class="metar-widget-row">
+          <div class="metarThermometer"></div>
+          <div class="metarBox"></div>
+        </div>
+      </div>
+
+      <div class="metar-card">
+        <div class="metar-card-title">Guide &mdash; Reading METAR</div>
+        <p>Raw <span class="metar-accent">METAR</span> is the most common format in the world for the transmission of observational weather data. It's highly standardised through the International Civil Aviation Organization (ICAO), which allows it to be understood throughout most of the world.</p>
+      </div>
+
+      <div class="metar-card">
+        <div class="metar-card-title">&copy; Information</div>
+        <p class="metar-credit">Data provided by <a href="https://aviationweather.gov/" target="_blank" rel="noopener">Aviation Weather Center</a>. Icons by <a href="https://bas.dev/work/meteocons" target="_blank" rel="noopener">Meteocons</a>.</p>
+        <div class="metar-updated">Report time: <span id="reportTimeLine">&mdash;</span></div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="metar-section">
+    <h2 class="metar-section-title">Wind</h2>
+    <p class="metar-section-sub">Surface wind speed and direction, as reported in the raw observation.</p>
+    <div class="metar-grid">
+
+      <div class="metar-card">
+        <div class="metar-card-title">
+          <svg viewBox="0 0 32 32" width="12" height="12" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%"><path d="M4 10 H22 a4 4 0 1 0 -4 -4"/><path d="M4 22 H24 a4 4 0 1 1 -4 4"/></svg>
+          Wind Speed
+        </div>
+        <div class="metar-anemometer-mount"><div class="metarAnemometer"></div></div>
+      </div>
+
+      <div class="metar-card">
+        <div class="metar-card-title">
+          <svg viewBox="0 0 32 32" width="12" height="12" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%"><circle cx="16" cy="16" r="14"/><path d="M16 6 L16 26 M6 16 L26 16"/></svg>
+          Wind Direction
+        </div>
+        <div class="metar-compass-wrap">
+          <svg id="Metarcompass" width="140" height="140" xmlns="http://www.w3.org/2000/svg"></svg>
+        </div>
+      </div>
+
+      <div class="metar-card">
+        <div class="metar-card-title">Guide &mdash; Wind Reporting</div>
+        <p>METAR wind is reported in <span class="metar-accent">knots</span>, as a direction measured in degrees <span class="metar-accent">true</span> (not magnetic) that the wind is blowing <em>from</em>. This page converts it to the dashboard's own preferred wind unit alongside the original.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="metar-section">
+    <h2 class="metar-section-title">Station &amp; Report</h2>
+    <p class="metar-section-sub">Which airport this observation came from, and the raw text it was decoded from.</p>
+    <div class="metar-grid">
+
+      <div class="metar-card">
+        <div class="metar-card-title">
+          <svg viewBox="0 0 32 32" width="12" height="12" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%"><path d="M4 28 L28 28 M6 28 L6 12 L16 6 L26 12 L26 28"/></svg>
+          Airport Data
+        </div>
+        <div class="metar-datarows">
+          <div class="metar-datarow"><span class="metar-datarow-label">Station</span><span class="metar-datarow-value" id="stationIdText">&mdash;</span></div>
+          <div class="metar-datarow"><span class="metar-datarow-label">Location</span><span class="metar-datarow-value" id="locationLine">&mdash;</span></div>
+        </div>
+      </div>
+
+      <div class="metar-card metar-wide">
+        <div class="metar-card-title">Raw METAR</div>
+        <div class="metar-raw" id="rawMetarLine">&mdash;</div>
+      </div>
+
+      <div class="metar-card">
+        <div class="metar-card-title">&copy; Information</div>
+        <p class="metar-credit">Guide: <a href="https://en.wikipedia.org/wiki/METAR" target="_blank" rel="noopener">METAR &ndash; Wikipedia</a></p>
+      </div>
+
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+
+  function loadScript(src){
+    return new Promise(function(resolve, reject){
+      var s = document.createElement('script');
+      s.src = src;
+      s.onload = resolve;
+      s.onerror = function(){ reject(new Error('failed to load ' + src)); };
+      document.body.appendChild(s);
+    });
+  }
+
+  document.getElementById('openCloudChartBtn').addEventListener('click', function(){
+    try {
+      var p = window.parent;
+      if (!p || typeof p.chartModalOpen !== 'function') return;
+      var a = p.document.createElement('a');
+      a.href = 'charts-d3.html?type=cloud&embed=1';
+      a.setAttribute('data-title', 'Cloud & Visibility Chart & Records');
+      a.setAttribute('data-modal-width', '1400px');
+      a.setAttribute('data-modal-height', '700px');
+      p.chartModalOpen(a);
+    } catch (e) {
+      console.warn('modalMetar: could not open Cloud Chart —', e.message);
+    }
+  });
+
+  function getSunTimes(date, lat, lon){
+    var rad = Math.PI / 180;
+    var msPerDay = 86400000;
+    var J1970 = 2440588, J2000 = 2451545;
+    var toJulian = function(d){ return d.valueOf() / msPerDay - 0.5 + J1970; };
+    var fromJulian = function(j){ return new Date((j + 0.5 - J1970) * msPerDay); };
+    var toDays = function(d){ return toJulian(d) - J2000; };
+    var obliquity = rad * 23.4397;
+    var meanAnomaly = function(d){ return rad * (357.5291 + 0.98560028 * d); };
+    var eclipticLon = function(M){
+      var C = rad * (1.9148 * Math.sin(M) + 0.02 * Math.sin(2 * M) + 0.0003 * Math.sin(3 * M));
+      var perihelion = rad * 102.9372;
+      return M + C + perihelion + Math.PI;
+    };
+    var declination = function(L){ return Math.asin(Math.sin(L) * Math.sin(obliquity)); };
+    var julianCycle = function(d, lw){ return Math.round(d - 0.0009 - lw / (2 * Math.PI)); };
+    var approxTransit = function(Ht, lw, n){ return 0.0009 + (Ht + lw) / (2 * Math.PI) + n; };
+    var solarTransitJ = function(ds, M, L){ return J2000 + ds + 0.0053 * Math.sin(M) - 0.0069 * Math.sin(2 * L); };
+    var hourAngle = function(h, phi, dec){ return Math.acos((Math.sin(h) - Math.sin(phi) * Math.sin(dec)) / (Math.cos(phi) * Math.cos(dec))); };
+
+    var lw = rad * -lon, phi = rad * lat;
+    var d = toDays(date);
+    var n = julianCycle(d, lw);
+    var ds = approxTransit(0, lw, n);
+    var M = meanAnomaly(ds);
+    var L = eclipticLon(M);
+    var dec = declination(L);
+    var Jnoon = solarTransitJ(ds, M, L);
+    var h0 = -0.833 * rad;
+    var H = hourAngle(h0, phi, dec);
+    if (isNaN(H)) return null;
+    var Jset = solarTransitJ(approxTransit(H, lw, n), M, L);
+    var Jrise = Jnoon - (Jset - Jnoon);
+    return { sunrise: fromJulian(Jrise), sunset: fromJulian(Jset) };
+  }
+
+  function haversineKm(lat1, lon1, lat2, lon2){
+    var R = 6371;
+    var toRad = function(d){ return d * Math.PI / 180; };
+    var dLat = toRad(lat2 - lat1), dLon = toRad(lon2 - lon1);
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  function ordinalSuffix(day){
+    if (day % 10 === 1 && day !== 11) return 'st';
+    if (day % 10 === 2 && day !== 12) return 'nd';
+    if (day % 10 === 3 && day !== 13) return 'rd';
+    return 'th';
+  }
+  function stationParts(date){
+    var tz = (window.StationTime && StationTime.getTZ) ? StationTime.getTZ() : undefined;
+    var parts = {};
+    new Intl.DateTimeFormat('en-GB', {
+      timeZone: tz, hourCycle: 'h23',
+      year: 'numeric', month: 'short', day: '2-digit',
+      hour: '2-digit', minute: '2-digit'
+    }).formatToParts(date).forEach(function(p){ parts[p.type] = p.value; });
+    return parts;
+  }
+
+  var unitKey = localStorage.getItem('dashboardUnitSystem') || 'uk';
+  var units = (typeof SYSTEMS !== 'undefined' && SYSTEMS[unitKey]) ? SYSTEMS[unitKey] : { temp: 'C', wind: 'mph', rain: 'mm' };
+  var pressureUnit = 'hPa';
+  var distancePrimary = 'km';
+  var visibilityMode = (unitKey === 'us') ? 'us' : 'international';
+
+  var CONDITIONS = {
+    '-SHRA':   ['rain.svg',                      'rain.svg',                      'Light Rain Showers'],
+    'SHRA':    ['rain.svg',                      'rain.svg',                      'Light Rain Showers'],
+    '+SHRA':   ['extreme-rain.svg',              'extreme-night-rain.svg',        'Heavy Rain Showers'],
+    '-RA':     ['rain.svg',                      'rain.svg',                      'Light Rain Showers'],
+    '+RA':     ['overcast-rain.svg',             'overcast-rain.svg',             'Moderate Rain Showers'],
+    'RA':      ['overcast-rain.svg',              'overcast-rain.svg',            'Light Rain Showers'],
+    'SQ':      ['extreme-rain.svg',              'extreme-rain.svg',              'Rain Squall Showers'],
+    '-SN':     ['snow.svg',                      'snow.svg',                      'Light Snow Showers'],
+    '+SN':     ['snow.svg',                      'snow.svg',                      'Moderate Snow Showers'],
+    'SN':      ['snow.svg',                      'snow.svg',                      'Snow Showers'],
+    'SG':      ['snow.svg',                      'snow.svg',                      'Snow Grains'],
+    'SNINCR':  ['snow.svg',                      'snow.svg',                      'Snow Showers'],
+    'IP':      ['sleet.svg',                     'sleet.svg',                     'Sleet Showers'],
+    'IC':      ['extreme-day-hail.svg',          'extreme-day-hail.svg',          'Ice Crystals'],
+    'PL':      ['extreme-day-hail.svg',          'extreme-day-hail.svg',          'Ice Pellets'],
+    'GR':      ['hail.svg',                      'hail.svg',                      'Hail and Rain Conditions'],
+    'GS':      ['hail.svg',                      'hail.svg',                      'Hail Conditions'],
+    'HZ':      ['haze-day.svg',                  'haze-night.svg',                'Hazy Conditions'],
+    'BCFG':    ['fog-day.svg',                   'fog-night.svg',                 'Foggy Conditions'],
+    'FG':      ['fog-day.svg',                   'fog-night.svg',                 'Foggy Conditions'],
+    'NFG':     ['fog-night.svg',                 'fog-night.svg',                 'Foggy Conditions'],
+    'BR':      ['mist.svg',                      'mist.svg',                      'Misty Conditions'],
+    'NBR':     ['mist.svg',                      'mist.svg',                      'Misty Conditions'],
+    'TS':      ['thunderstorms.svg',             'thunderstorms.svg',             'Thunderstorm Conditions'],
+    '-TS':     ['thunderstorms.svg',             'thunderstorms.svg',             'Thunderstorm Conditions'],
+    '+TS':     ['thunderstorms-day-extreme.svg', 'thunderstorms-day-extreme.svg', 'Heavy Thunderstorms'],
+    'TSRA':    ['thunderstorms.svg',             'thunderstorms.svg',             'Thunderstorm Conditions'],
+    'SCTTSRA': ['thunderstorms-day.svg',         'thunderstorms-day.svg',         'Scattered Thunderstorms'],
+    'NTSRA':   ['thunderstorms-day.svg',         'thunderstorms-day.svg',         'Scattered Thunderstorms'],
+    'DS':      ['dust-day.svg',                  'dust-night.svg',                'Dust Storm Conditions'],
+    'DU':      ['dust-day.svg',                  'dust-night.svg',                'Widespread Dust Conditions'],
+    'PO':      ['dust-day.svg',                  'dust-night.svg',                'Dust-Sand Whirls Conditions'],
+    'SA':      ['dust-day.svg',                  'dust-night.svg',                'Dust-Sand Conditions'],
+    'SS':      ['dust-day.svg',                  'dust-night.svg',                'Sandstorm Conditions'],
+    'VA':      ['dust-day.svg',                  'dust-night.svg',                'Volcanic Ash Conditions'],
+    '+FC':     ['tornado.svg',                   'tornado.svg',                   'Tornado / Water Spout'],
+    'SKC':     ['clear-day.svg',                 'clear-night.svg',               'Clear Conditions'],
+    'CLR':     ['clear-day.svg',                 'clear-night.svg',               'Clear Conditions'],
+    'CAVOK':   ['clear-day.svg',                 'clear-night.svg',               'Clear Conditions'],
+    'FEW':     ['partly-cloudy-day.svg',         'partly-cloudy-night.svg',       'Partly Cloudy Conditions'],
+    'SCT':     ['partly-cloudy-day.svg',         'partly-cloudy-night.svg',       'Mostly Scattered Clouds'],
+    'BKN':     ['overcast-day.svg',              'overcast-night.svg',            'Mostly Cloudy Conditions'],
+    'OVC':     ['overcast-day.svg',              'overcast-night.svg',            'Overcast Conditions'],
+    'OVX':     ['overcast-day.svg',              'overcast-night.svg',            'Overcast Conditions']
+  };
+
+  var windBandsByLegacyUnit = {
+    'm/s':  [[0,1,'#85a3aa'],[1,2,'#7e98bb'],[2,3,'#6e90d0'],[3,5,'#0f94a7'],
+              [5,8,'#39a239'],[8,11,'#c2863e'],[11,14,'#c8420d'],[14,17,'#d20032'],
+              [17,21,'#af5088'],[21,24,'#754a92'],[24,28,'#754a92'],[28,33,'#45698d'],
+              [33,36,'#c1fc77'],[36,Infinity,'#f1ff6c']],
+    'km/h': [[0,3.6,'#85a3aa'],[3.6,7.2,'#7e98bb'],[7.2,10.8,'#6e90d0'],[10.8,18,'#0f94a7'],
+              [18,28.8,'#39a239'],[28.8,39.6,'#c2863e'],[39.6,50.4,'#c8420d'],[50.4,61.2,'#d20032'],
+              [61.2,75.6,'#af5088'],[75.6,86.4,'#754a92'],[86.4,100.8,'#754a92'],[100.8,118.8,'#45698d'],
+              [118.8,129.6,'#c1fc77'],[129.6,Infinity,'#f1ff6c']],
+    'mph':  [[0,2.24,'#85a3aa'],[2.24,4.47,'#7e98bb'],[4.47,6.71,'#6e90d0'],[6.71,11.18,'#0f94a7'],
+              [11.18,17.9,'#39a239'],[17.9,24.61,'#c2863e'],[24.61,31.32,'#c8420d'],[31.32,38.03,'#d20032'],
+              [38.03,46.98,'#af5088'],[46.98,53.69,'#754a92'],[53.69,62.63,'#754a92'],[62.63,73.82,'#45698d'],
+              [73.82,80.53,'#c1fc77'],[80.53,Infinity,'#f1ff6c']],
+    'kts':  [[0,1.94,'#85a3aa'],[1.94,3.89,'#7e98bb'],[3.89,5.83,'#6e90d0'],[5.83,9.72,'#0f94a7'],
+              [9.72,15.55,'#39a239'],[15.55,21.38,'#c2863e'],[21.38,27.21,'#c8420d'],[27.21,33.05,'#d20032'],
+              [33.05,40.82,'#af5088'],[40.82,46.65,'#754a92'],[46.65,54.43,'#754a92'],[54.43,64.15,'#45698d'],
+              [64.15,69.98,'#c1fc77'],[69.98,Infinity,'#f1ff6c']]
+  };
+
+  var WIND_UNIT_TO_LEGACY = { mph: 'mph', kmh: 'km/h', kt: 'kts', ms: 'm/s' };
+
+  function num(x, fallback){ return (typeof x === 'number' && !isNaN(x)) ? x : (fallback !== undefined ? fallback : ''); }
+
+  function fetchJson(url){
+    return fetch(url + (url.indexOf('?') > -1 ? '&' : '?') + '_=' + Date.now(), { cache: 'no-store' })
+      .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+  }
+
+  Promise.allSettled([
+    fetchJson('./jsondata/me.txt'),
+    fetchJson('./jsondata/archive.json'),
+    fetchJson('./jsondata/loop.json')
+  ]).then(function(results){
+    var meResult = results[0], archResult = results[1], loopResult = results[2];
+    if (meResult.status === 'rejected') console.warn('modalMetar: me.txt fetch failed —', meResult.reason.message);
+    if (archResult.status === 'rejected') console.warn('modalMetar: archive.json fetch failed —', archResult.reason.message);
+    if (loopResult.status === 'rejected') console.warn('modalMetar: loop.json fetch failed —', loopResult.reason.message);
+
+    var me = meResult.status === 'fulfilled' ? meResult.value : [];
+    var arch = archResult.status === 'fulfilled' ? archResult.value : {};
+    var loop = loopResult.status === 'fulfilled' ? loopResult.value : {};
+    var meta = arch.meta || {};
+    var d = (me && me[0]) ? me[0] : {};
+
+    var stationLat = num(meta.latitude, 51.94), stationLon = num(meta.longitude, -0.987);
+
+    // -- Derived METAR fields, mirroring the previous version's math exactly --
+    var metarStationId   = d.icaoId || '';
+    var metarStationName = d.name || '';
+    var metarLat         = num(d.lat, 0), metarLon = num(d.lon, 0);
+    var airport1dist     = Math.round(haversineKm(stationLat, stationLon, metarLat, metarLon));
+    var metarTime          = d.reportTime || '';
+    var metarRaw            = d.rawOb || '';
+    var metarTemperatureC = (typeof d.temp === 'number') ? d.temp : '';
+    var metarTemperatureF = metarTemperatureC !== '' ? Math.round((metarTemperatureC * 9 / 5 + 32) * 10) / 10 : '';
+    var metarDewpointC    = (typeof d.dewp === 'number') ? d.dewp : '';
+    var metarDewpointF    = metarDewpointC !== '' ? Math.round((metarDewpointC * 9 / 5 + 32) * 10) / 10 : '';
+    var metarHumidity = '';
+    if (metarTemperatureC !== '' && metarDewpointC !== ''){
+      metarHumidity = Math.round(
+        100 * Math.exp((17.625 * metarDewpointC) / (243.04 + metarDewpointC))
+            / Math.exp((17.625 * metarTemperatureC) / (243.04 + metarTemperatureC))
+      );
+    }
+    var metarWindDir       = num(d.wdir, 0);
+    var metarWindSpeedKts  = num(d.wspd, 0);
+    var metarWindSpeedMph  = Math.round(metarWindSpeedKts * 1.15078 * 10) / 10;
+    var metarWindSpeedKmh  = Math.round(metarWindSpeedKts * 1.852 * 10) / 10;
+    var metarWindSpeedMs   = Math.round(metarWindSpeedKts * 0.514444 * 10) / 10;
+
+    var metarVisMilesRaw = (d.visib !== undefined && d.visib !== null) ? String(d.visib) : '';
+    var visibUnlimited   = metarVisMilesRaw !== '' && metarVisMilesRaw.indexOf('+') !== -1;
+    var metarVisMiles    = metarVisMilesRaw !== '' ? parseFloat(metarVisMilesRaw) : '';
+    var metarVisibility  = metarVisMiles !== '' ? Math.round(metarVisMiles * 1609.34) : '';
+    var metarVisStrUs = '', metarVisStrInt = '';
+    if (metarVisMilesRaw !== ''){
+      metarVisStrUs  = visibUnlimited ? ('> ' + Math.trunc(metarVisMiles) + ' miles') : (metarVisMilesRaw + ' miles');
+      metarVisStrInt = visibUnlimited ? '> 9,999 m' : (metarVisibility.toLocaleString('en-GB') + ' m');
+    }
+
+    var metarPressureMb = (typeof d.altim === 'number') ? d.altim : '';
+    var metarPressureHg = metarPressureMb !== '' ? Math.round(metarPressureMb * 0.02953 * 100) / 100 : '';
+    var metarClouds = d.cover || '';
+
+    // -- Day/night + sky icon --
+    var isDay = (loop.observations && loop.observations.isDay === 1);
+    if (loopResult.status !== 'fulfilled' || loop.observations === undefined || loop.observations.isDay === undefined){
+      var sun = getSunTimes(new Date(), stationLat, stationLon);
+      if (sun) {
+        var now = new Date();
+        isDay = (now >= sun.sunrise && now < sun.sunset);
+      } else {
+        isDay = true;
+      }
+    }
+    var cond = CONDITIONS[metarClouds];
+    var skyIcon, skyDesc;
+    if (cond) {
+      skyIcon = isDay ? cond[0] : cond[1];
+      skyDesc = cond[2];
+    } else {
+      skyIcon = 'not-available.svg';
+      skyDesc = 'Data Offline';
+    }
+
+    var metdist1, metdist2, metunit1, metunit2;
+    if (distancePrimary === 'km') {
+      metdist1 = airport1dist.toLocaleString('en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+      metdist2 = (airport1dist / 1.609).toLocaleString('en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+      metunit1 = 'km'; metunit2 = 'mi';
+    } else {
+      metdist1 = (airport1dist / 1.609).toLocaleString('en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+      metdist2 = airport1dist.toLocaleString('en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+      metunit1 = 'mi'; metunit2 = 'km';
+    }
+
+    // -- Populate static text --
+    document.getElementById('skyIcon').src = 'img/meteocons/' + skyIcon;
+    document.getElementById('skyDesc').textContent = skyDesc;
+
+    var pressureLine = ['mbar', 'hPa', 'kPa'].indexOf(pressureUnit) !== -1
+      ? (metarPressureMb + ' ' + pressureUnit + ' \u2013 ' + metarPressureHg + ' inHg')
+      : (metarPressureHg + ' inHg \u2013 ' + metarPressureMb + ' mbar');
+    document.getElementById('pressureLine').textContent = pressureLine;
+    document.getElementById('visibilityLine').textContent = visibilityMode === 'us' ? metarVisStrUs : metarVisStrInt;
+
+    document.getElementById('stationIdText').textContent = metarStationId || '\u2014';
+    var locHtml = (metarStationName || '\u2014') + ' &mdash; <span class="metar-accent">' + metdist1 + '</span> ' + metunit1 +
+      ' (' + metdist2 + ' ' + metunit2 + ')';
+    document.getElementById('locationLine').innerHTML = locHtml;
+    document.getElementById('rawMetarLine').textContent = metarRaw || '\u2014';
+    if (metarTime) {
+      var td = new Date(metarTime);
+      if (!isNaN(td.getTime())) {
+        var p = stationParts(td);
+        document.getElementById('reportTimeLine').textContent =
+          (+p.day) + ordinalSuffix(+p.day) + ' ' + p.month + ' ' + p.hour + ':' + p.minute;
+      }
+    }
+
+    loadScript('js/d3.7.9.0.min.js').then(function(){
+      renderTemperature();
+      return loadScript('js/d3.v3.min.js');
+    }).then(function(){
+      return loadScript('js/iopctrl.js');
+    }).then(function(){
+      renderWindSpeed();
+      renderCompass();
+      reportSizeSoon();
+    }).catch(function(e){
+      console.warn('modalMetar: widget script load failed —', e.message);
+      reportSizeSoon();
+    });
+
+    function reportSize(){
+      var pageEl = document.querySelector('.metar-page');
+      var w = pageEl ? Math.ceil(pageEl.getBoundingClientRect().width) : Math.ceil(document.body.scrollWidth);
+      var h = Math.ceil(document.body.scrollHeight);
+      window.parent.postMessage({ type: 'chartModalContentHeight', height: h, width: w }, '*');
+    }
+
+    function reportSizeSoon(){
+      reportSize();
+      setTimeout(reportSize, 200);
+      setTimeout(reportSize, 800);
+    }
+    if (window.ResizeObserver) {
+      new ResizeObserver(function(){ reportSize(); }).observe(document.body);
+    } else {
+      window.addEventListener('resize', reportSize);
+    }
+
+    // ---- Temperature widget (unchanged drawing logic) ----
+    function renderTemperature(){
+      var theme = document.documentElement.getAttribute('data-theme') || 'dark';
+      var baseTextColor = (theme === 'dark') ? 'silver' : '#1c4263';
+      var ringColor      = (theme === 'dark') ? '#2d2f32' : '#e0eafb';
+
+      var width = 80, height = 150;
+      var tempUnits = units.temp || 'C';
+      var currentTemp = tempUnits === 'C' ? (num(metarTemperatureC, 0)) : (num(metarTemperatureF, 0));
+      var dewpoint    = tempUnits === 'C' ? (num(metarDewpointC, 0))    : (num(metarDewpointF, 0));
+
+      var minTemp = currentTemp - 5;
+      var maxTemp = currentTemp;
+
+      var mercuryColor = '#ff7c39';
+      var bottomY = height - 5, topY = 5, bulbRadius = 25.5, tubeWidth = 25.5;
+      var tubeBorderColor = '#999999';
+      var bulb_cy = bottomY - bulbRadius, bulb_cx = width / 2, top_cy = topY + tubeWidth / 2;
+
+      var svg = d3.select('.metarThermometer').append('svg').attr('width', width).attr('height', height);
+      var defs = svg.append('defs');
+      var bulbGradient = defs.append('radialGradient').attr('id', 'bulbGradientMetar')
+        .attr('cx', '50%').attr('cy', '50%').attr('r', '50%').attr('fx', '50%').attr('fy', '50%');
+      bulbGradient.append('stop').attr('offset', '0%').style('stop-color', 'rgb(230, 200, 200)');
+      bulbGradient.append('stop').attr('offset', '90%').style('stop-color', mercuryColor);
+
+      svg.append('line').attr('x1', width / 2).attr('x2', width / 2).attr('y1', 15).attr('y2', 120)
+        .style('stroke', tubeBorderColor).style('stroke-width', '15.75px').style('stroke-linecap', 'round');
+      svg.append('line').attr('x1', width / 2).attr('x2', width / 2).attr('y1', 15).attr('y2', 120)
+        .style('stroke', ringColor).style('stroke-width', '14.75px').style('stroke-linecap', 'round');
+
+      var step = 5;
+      var domain = [step * Math.floor(minTemp / step), step * Math.ceil(maxTemp / step)];
+      if (minTemp - domain[0] < 0.66 * step) domain[0] -= step;
+      if (domain[1] - maxTemp < 0.66 * step) domain[1] += step;
+
+      var scale = d3.scaleLinear().range([bulb_cy - bulbRadius / 2 - 8.5, top_cy]).domain(domain);
+
+      [minTemp, maxTemp].forEach(function(t){
+        var isMax = (t === maxTemp);
+        var label = isMax ? 'Max' : 'Min';
+        var textOffset = isMax ? -3 : 3;
+        svg.append('line')
+          .attr('x1', width / 2 + 25 - tubeWidth / 2).attr('x2', width / 2 + 25 + tubeWidth / 2 - 8)
+          .attr('y1', scale(t)).attr('y2', scale(t))
+          .style('stroke', tubeBorderColor).style('stroke-width', '1px').style('stroke-linecap', 'round');
+        svg.append('text')
+          .attr('x', width / 2 + tubeWidth / 2 + 1).attr('y', scale(t) + textOffset)
+          .attr('dy', isMax ? null : '0.75em').text(label)
+          .style('fill', baseTextColor).style('font-family', 'Helvetica').style('font-size', '8px');
+      });
+
+      svg.append('rect')
+        .attr('x', width / 2 - (tubeWidth - 10) / 2).attr('y', scale(currentTemp))
+        .attr('width', tubeWidth - 10).attr('height', bulb_cy - scale(currentTemp))
+        .style('fill', mercuryColor);
+
+      svg.append('circle').attr('r', bulbRadius - 6).attr('cx', bulb_cx).attr('cy', bulb_cy)
+        .style('fill', 'url(#bulbGradientMetar)').style('stroke', mercuryColor).style('stroke-width', '2px');
+
+      var tickValues = d3.range((domain[1] - domain[0]) / step + 1).map(function(v){ return domain[0] + v * step; });
+      var axis = d3.axisLeft(scale).tickSize(7).tickValues(tickValues);
+      var svgAxis = svg.append('g').attr('id', 'tempScale')
+        .attr('transform', 'translate(' + (width / 2 - tubeWidth / 2) + ', 0)').call(axis);
+      svgAxis.selectAll('.tick text').style('fill', baseTextColor).style('font-family', 'Helvetica').style('font-size', '8px');
+      svgAxis.select('path').style('stroke', 'none').style('fill', 'none');
+      svgAxis.selectAll('.tick line').style('stroke', tubeBorderColor).style('stroke-linecap', 'round').style('stroke-width', '2px');
+
+      svg.append('text')
+        .text(d3.format('.0f')(currentTemp) + '\u00B0' + tempUnits)
+        .attr('x', width / 2).attr('y', 126).attr('text-anchor', 'middle')
+        .style('font-size', '15px').style('font-family', 'Helvetica').style('font-weight', '600')
+        .style('fill', 'rgba(30, 32, 36, 1)');
+
+      var boxColor = (theme === 'dark') ? '#393d40' : '#c0c0c0';
+      var humidity = num(metarHumidity, 0);
+      var humidityColor = '#3498db';
+      var dewpointColor = '#01a4b4';
+
+      var svgBox = d3.select('.metarBox').append('svg').attr('width', 100).attr('height', 150);
+
+      svgBox.selectAll(null).data([d3.format('.0f')(humidity) + '-' + ' %']).enter().append('text')
+        .attr('x', 43).attr('y', function(dd, i){ return 42 + i * 42; })
+        .style('fill', humidityColor).style('font-family', 'Helvetica').style('font-size', '9px').style('text-anchor', 'middle')
+        .text(function(dd){ return dd.split('-')[0]; })
+        .append('tspan').style('fill', baseTextColor).text(function(dd){ return dd.split('-')[1]; });
+
+      var arc = d3.arc().innerRadius(10).outerRadius(10).cornerRadius(0);
+      svgBox.append('path').attr('fill', '#555').attr('stroke', '#555').attr('stroke-width', 1)
+        .attr('d', arc({ startAngle: -135 * Math.PI / 180, endAngle: 68 * Math.PI / 180 }))
+        .attr('transform', 'translate(70,39)');
+
+      var posX = 70, posY = 40, Radius = 8;
+      var pointerX = posX + Radius * Math.sin((-135 + humidity * 2) * Math.PI / 180);
+      var pointerY = posY - Radius * Math.cos((-135 + humidity * 2) * Math.PI / 180);
+      svgBox.append('line').attr('x1', posX).attr('x2', pointerX).attr('y1', posY).attr('y2', pointerY)
+        .style('stroke', '#007fff').style('stroke-width', 1).style('stroke-linecap', 'round');
+      svgBox.append('circle').attr('cx', 70).attr('cy', 40).attr('r', 1.5)
+        .attr('fill', '#555').style('stroke', '#555').style('stroke-width', 0.5);
+
+      var arcDrop = d3.arc().innerRadius(3).outerRadius(3).cornerRadius(0);
+      svgBox.append('path').attr('fill', '#007fff').attr('stroke', '#007fff').attr('stroke-width', 0.5)
+        .attr('d', arcDrop({ startAngle: -90 * Math.PI / 180, endAngle: 90 * Math.PI / 180 }))
+        .attr('transform', 'translate(80,45) rotate(180)');
+      svgBox.append('line').attr('x1', 80).attr('y1', 37).attr('x2', 83).attr('y2', 45)
+        .style('stroke', '#007fff').style('stroke-width', 0.5).style('stroke-linecap', 'round');
+      svgBox.append('line').attr('x1', 80).attr('y1', 37).attr('x2', 77).attr('y2', 45)
+        .style('stroke', '#007fff').style('stroke-width', 0.5).style('stroke-linecap', 'round');
+
+      svgBox.append('text').attr('x', 70).attr('y', 49).attr('text-anchor', 'middle')
+        .style('font-size', '4.5px').style('font-family', 'Helvetica').style('fill', baseTextColor).text('RH');
+
+      [[35, 87, 35, 105.5], [41, 87, 41, 105.5]].forEach(function(c){
+        svgBox.append('line').attr('x1', c[0]).attr('y1', c[1]).attr('x2', c[2]).attr('y2', c[3])
+          .style('stroke', '#555').style('stroke-width', 0.5);
+      });
+
+      var arcTube = d3.arc().innerRadius(3).outerRadius(3);
+      svgBox.append('path').attr('fill', 'none').attr('stroke', '#555').attr('stroke-width', 0.5)
+        .attr('d', arcTube({ startAngle: -90 * Math.PI / 180, endAngle: 90 * Math.PI / 180 }))
+        .attr('transform', 'translate(38,87)');
+
+      var arcBulb = d3.arc().innerRadius(5.5).outerRadius(5.5);
+      svgBox.append('path').attr('fill', 'none').attr('stroke', '#555').attr('stroke-width', 0.5)
+        .attr('d', arcBulb({ startAngle: -145 * Math.PI / 180, endAngle: 145 * Math.PI / 180 }))
+        .attr('transform', 'translate(38,110) rotate(180)');
+
+      svgBox.append('circle').attr('cx', 38).attr('cy', 110).attr('r', 4)
+        .attr('fill', dewpointColor).style('stroke', dewpointColor).style('stroke-width', 0.5);
+
+      [[89], [91.5], [94], [96.5], [99], [101.5]].forEach(function(row){
+        svgBox.append('line').attr('x1', 30).attr('y1', row[0]).attr('x2', 32.5).attr('y2', row[0])
+          .style('stroke', '#555').style('stroke-width', 0.5).style('stroke-linecap', 'round');
+      });
+
+      svgBox.append('line').attr('x1', 38).attr('y1', 95.5).attr('x2', 38).attr('y2', 108)
+        .style('stroke', dewpointColor).style('stroke-width', 4).style('stroke-linecap', 'round');
+
+      svgBox.selectAll(null).data([d3.format('.0f')(dewpoint) + '-' + '\u00B0' + tempUnits]).enter().append('text')
+        .attr('x', 58).attr('y', function(dd, i){ return 102.5 + i * 102.5; })
+        .style('fill', dewpointColor).style('font-family', 'Helvetica').style('font-size', '9px').style('text-anchor', 'middle')
+        .text(function(dd){ return dd.split('-')[0]; })
+        .append('tspan').style('fill', baseTextColor).text(function(dd){ return dd.split('-')[1]; });
+
+      svgBox.append('path').attr('fill', '#007fff').attr('stroke', '#007fff').attr('stroke-width', 0.5)
+        .attr('d', arcDrop({ startAngle: -90 * Math.PI / 180, endAngle: 90 * Math.PI / 180 }))
+        .attr('transform', 'translate(78,103) rotate(180)');
+      svgBox.append('line').attr('x1', 78).attr('y1', 94).attr('x2', 81).attr('y2', 103)
+        .style('stroke', '#007fff').style('stroke-width', 0.5).style('stroke-linecap', 'round');
+      svgBox.append('line').attr('x1', 78).attr('y1', 94).attr('x2', 75).attr('y2', 103)
+        .style('stroke', '#007fff').style('stroke-width', 0.5).style('stroke-linecap', 'round');
+      svgBox.append('circle').attr('cx', 84).attr('cy', 95).attr('r', 2)
+        .attr('fill', '#007fff').style('stroke', '#007fff').style('stroke-width', 0.5);
+
+      [{ x: 25, y: 19 }, { x: 25, y: 79 }].forEach(function(r){
+        svgBox.append('rect').attr('x', r.x).attr('y', r.y).attr('rx', 4).attr('width', 70).attr('height', 40)
+          .style('stroke', boxColor).style('fill', 'none');
+      });
+    }
+
+    // ---- Wind speed widget (unchanged drawing logic) ----
+    function renderWindSpeed(){
+      var legacyUnit = WIND_UNIT_TO_LEGACY[units.wind] || 'km/h';
+      var metarWindSpeed;
+      switch (legacyUnit) {
+        case 'km/h': metarWindSpeed = parseFloat(metarWindSpeedKmh.toFixed(0)) || 0; break;
+        case 'mph':  metarWindSpeed = parseFloat(metarWindSpeedMph.toFixed(0)) || 0; break;
+        case 'kts':  metarWindSpeed = parseFloat(metarWindSpeedKts.toFixed(0)) || 0; break;
+        case 'm/s':  metarWindSpeed = parseFloat(metarWindSpeedMs.toFixed(0))  || 0; break;
+        default:     metarWindSpeed = 0;
+      }
+
+      var wind_speed_color = '#85a3aa';
+      var bands = windBandsByLegacyUnit[legacyUnit] || [];
+      for (var i = 0; i < bands.length; i++){
+        if (metarWindSpeed >= bands[i][0] && metarWindSpeed < bands[i][1]) { wind_speed_color = bands[i][2]; break; }
+      }
+
+      var svg = d3.select('.metarAnemometer').append('svg').attr('width', 150).attr('height', 150);
+      var anglePercentage = d3.scale.linear().domain([0, 36]).range([-135 * Math.PI / 180, 135 * Math.PI / 180]);
+      var color = d3.scale.ordinal().range([
+        '#f1ff6c','#c1fc77','#45698d','#754a92','#af5088',
+        '#d20032','#c8420d','#c2863e','#39a239','#0f94a7',
+        '#6e90d0','#7e98bb','#85a3aa'
+      ]);
+      var windy = [
+        [33,36,0],[28,33,1],[24,28,2],[21,24,3],[17,21,4],
+        [14,17,5],[11,14,6],[8,11,7],[5,8,8],[3,5,9],
+        [2,3,10],[1,2,11],[0,1,12]
+      ];
+      var arc = d3.svg.arc().innerRadius(45).outerRadius(50)
+        .startAngle(function(dd){ return anglePercentage(dd[0]); })
+        .endAngle(function(dd){ return anglePercentage(dd[1]); });
+
+      svg.selectAll('path.windy').data(windy).enter().append('path').attr('class', 'windy')
+        .attr('d', arc).style('fill', function(dd){ return color(dd[2]); })
+        .attr('transform', 'translate(75,73.5)');
+
+      svg.append('text').attr('x', 75).attr('y', 127)
+        .style('fill', wind_speed_color).style('font-family', 'Helvetica').style('font-size', '11px').style('text-anchor', 'middle')
+        .text(metarWindSpeed + ' ' + legacyUnit);
+
+      var gaugeConfig = {
+        'km/h': { ticks: 12, domain: [0, 130] },
+        'mph':  { ticks: 12, domain: [0, 80] },
+        'm/s':  { ticks: 9,  domain: [0, 35] },
+        'kts':  { ticks: 9,  domain: [0, 70] }
+      };
+      var cfg = gaugeConfig[legacyUnit] || gaugeConfig['km/h'];
+
+      var gauge = iopctrl.arcslider().radius(52.5).events(false).transitionDuration(0)
+        .indicator(function(g){
+          g.append('polyline').attr('points', '1.5 11 0 -56 -1.5 11 0 11 1.5 11 -1.5 0')
+            .style('fill', 'rgba(0,127,255,1)').style('stroke', 'rgba(0,127,255,1)')
+            .style('stroke-width', 0.5).style('stroke-linecap', 'round');
+          g.append('circle').attr('cx', 0).attr('cy', 0).attr('r', 5);
+        });
+
+      gauge.axis().orient('out').tickFormat(d3.format('d')).normalize(false)
+        .ticks(cfg.ticks).tickSubdivide(10).tickSize(7, 7, 10).tickPadding(3)
+        .scale(d3.scale.linear().domain(cfg.domain).range([-3 * Math.PI / 4, 3 * Math.PI / 4]));
+
+      svg.append('g').attr('class', 'gauge').attr('transform', 'translate(-27.5, -29)').call(gauge);
+      gauge.value(metarWindSpeed);
+    }
+
+    // ---- Wind direction compass (unchanged drawing logic) ----
+    function renderCompass(){
+      var theme = document.documentElement.getAttribute('data-theme') || 'dark';
+      var baseTextColor = (theme === 'dark') ? 'silver' : '#1c4263';
+      var ringColor      = (theme === 'dark') ? '#3b3c3f' : '#c0c0c0';
+
+      var svgNS = 'http://www.w3.org/2000/svg';
+      var svgEl = document.getElementById('Metarcompass');
+      var angle = num(metarWindDir, 0);
+      var bearing = angle;
+
+      var bearingBands = [
+        [11.25, 'North'], [33.75, 'NNE'], [56.25, 'NE'],
+        [78.75, 'ENE'], [101.25, 'East'], [123.75, 'ESE'],
+        [146.25, 'SE'], [168.75, 'SSE'], [191.25, 'South'],
+        [213.75, 'SSW'], [236.25, 'SW'], [281.25, 'West'],
+        [303.75, 'WNW'], [326.25, 'NW'], [348.75, 'NNW']
+      ];
+      var bearingLabel = 'North';
+      for (var b = 0; b < bearingBands.length; b++){
+        if (bearing <= bearingBands[b][0]) { bearingLabel = bearingBands[b][1]; break; }
+      }
+
+      function makeText(x, y, text, opts){
+        var el = document.createElementNS(svgNS, 'text');
+        el.setAttributeNS(null, 'x', x);
+        el.setAttributeNS(null, 'y', y);
+        el.setAttributeNS(null, 'font-size', opts.size || '8px');
+        el.setAttributeNS(null, 'font-family', 'Helvetica');
+        el.setAttributeNS(null, 'fill', opts.fill || baseTextColor);
+        if (opts.anchor) el.setAttributeNS(null, 'text-anchor', opts.anchor);
+        if (opts.weight) el.setAttributeNS(null, 'font-weight', opts.weight);
+        if (opts.spacing) el.setAttributeNS(null, 'style', 'letter-spacing:' + opts.spacing);
+        el.appendChild(document.createTextNode(text));
+        svgEl.appendChild(el);
+      }
+
+      makeText(70, 80, bearingLabel, { size: '12px', anchor: 'middle' });
+      makeText(70, 65, angle + '\u00B0', { size: '12px', anchor: 'middle' });
+      makeText(66.75, 29, 'N', { size: '9px', fill: 'red', weight: 'bold' });
+      makeText(111, 72.75, 'E', { size: '8px' });
+      makeText(67, 116, 'S', { size: '8px' });
+      makeText(23, 72.75, 'W', { size: '8px' });
+
+      for (var i = 0; i < 360; i += 2){
+        var stroke = ringColor, sw = 0.75, y2 = 17;
+        if (i === 0 || i % 30 === 0) { sw = 1; stroke = 'rgba(255,99,71,1)'; }
+
+        var tick = document.createElementNS(svgNS, 'line');
+        tick.setAttributeNS(null, 'x1', 70);
+        tick.setAttributeNS(null, 'y1', 10);
+        tick.setAttributeNS(null, 'x2', 70);
+        tick.setAttributeNS(null, 'y2', y2);
+        tick.setAttributeNS(null, 'stroke', stroke);
+        tick.setAttributeNS(null, 'stroke-width', sw);
+        tick.setAttributeNS(null, 'stroke-linecap', 'round');
+        tick.setAttributeNS(null, 'transform', 'rotate(' + i + ',70,70)');
+        svgEl.appendChild(tick);
+
+        if (i % 30 === 0){
+          var labelX = (i > 100) ? 62.5 : (i > 0) ? 65 : 67.75;
+          makeText(labelX, 7, i, { fill: baseTextColor, spacing: '1.0' });
+          svgEl.lastChild.setAttributeNS(null, 'transform', 'rotate(' + i + ',70,70)');
+        }
+      }
+
+      var poly = document.createElementNS(svgNS, 'polygon');
+      poly.setAttributeNS(null, 'points', '70,22 75,2 70,8 65,2');
+      poly.setAttributeNS(null, 'fill', 'rgba(0,127,255,1)');
+      poly.setAttributeNS(null, 'transform', 'rotate(' + angle + ',70,70)');
+      svgEl.appendChild(poly);
+    }
+  });
+})();
+</script>
+
+<script>
+(function applySeasonFromParent(){
+  function apply(){
+    try {
+      var b = window.parent && window.parent.document && window.parent.document.body;
+      var m = b && /season-(winter|spring|summer|autumn)/.exec(b.className);
+      if (m) document.documentElement.setAttribute('data-season', m[1]);
+      else document.documentElement.removeAttribute('data-season');
+    } catch (e) {}
+  }
+  apply();
+  try {
+    var pb = window.parent && window.parent.document && window.parent.document.body;
+    if (pb) new MutationObserver(apply).observe(pb, { attributes: true, attributeFilter: ['class'] });
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>

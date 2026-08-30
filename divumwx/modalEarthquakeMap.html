@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<!--
+##############################################################################################
+# modalEarthquake.html version 0.1.0
+#  Combines the former modalEarthquake.html (recent-earthquakes card grid) and
+#  modalEarthquakeMap.html (live D3 world map) into one modal, map at top.
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  GPLv3
+##############################################################################################
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Recent Worldwide Earthquakes</title>
+<link rel="stylesheet" href="css/reset.min.css">
+<meta name="viewport" content="width = device-width, initial-scale = 1, shrink-to-fit = yes">
+<script src="stationTime.js"></script>
+<style>
+:root {
+  --bg-color: #0A0F22;
+  --card-bg: #111834;
+  --text-color: #E9E4D4;
+  --muted-text: #8B93B8;
+  --border-color: #2A3358;
+  --time-color: #3498db;
+  --bg-color-dark: #111834;
+  --bg-color-light: #FFFFFF;
+}
+[data-theme="light"] {
+  --bg-color: #EFECE2;
+  --card-bg: #FFFFFF;
+  --text-color: #1D2C4E;
+  --muted-text: #5C6672;
+  --border-color: #C9CFD8;
+  --time-color: #2980b9;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: all 0.3s ease;
+}
+
+.earthquake-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 10px;
+}
+
+/* ---- Map (was modalEarthquakeMap.html's own page) ---- */
+.map-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.map {
+  position: relative;
+  margin: 16px auto 0;
+  width: 780px;
+  max-width: 100%;
+}
+.map svg {
+  margin: 0 auto;
+  display: block;
+}
+.sphere {
+  fill: #bbb;
+}
+.land {
+  fill: #2e8b57;
+}
+.boundry {
+  fill: none;
+  stroke: #292E35;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  stroke-width: 0.5px;
+}
+.overlay {
+  fill: none;
+  pointer-events: all;
+}
+.axisSilver line{
+  stroke: #2e8b57;
+}
+.axisSilver path{
+  stroke: #2e8b57;
+}
+.axisSilver text{
+  fill: #2e8b57;
+}
+.mapLoadError {
+  color: #e74c3c;
+  text-align: center;
+  padding: 40px;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 13px;
+}
+
+/* ---- Recent-earthquakes card grid (was modalEarthquake.html's own page) ---- */
+.earthquake-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+  margin-top: 20px;
+}
+
+.quake-card {
+  background: var(--card-bg);
+  border-radius: 4px;
+  padding: 10px;
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  position: relative;
+}
+
+.quake-card:hover {
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+}
+
+.quake-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.magnitude-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+  color: white;
+  flex-shrink: 0;
+}
+
+.mag-1-3 { background: #27ae60; }
+.mag-4-5 { background: #f39c12; }
+.mag-6-8 { background: #e74c3c; }
+.mag-9-10 { background: #c0392b; }
+
+.intensity-label {
+  font-size: 10px;
+  color: var(--muted-text);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.quake-details {
+  flex-grow: 1;
+  overflow: hidden;
+}
+
+.datetime-container {
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+.full-date {
+  font-size: 10px;
+  color: var(--muted-text);
+  margin-bottom: 2px;
+}
+
+.time {
+  color: var(--time-color);
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.location {
+  font-weight: 600;
+  font-size: 11px;
+  line-height: 1.3;
+  margin-bottom: 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  min-height: 2.4em;
+}
+
+.depth {
+  font-size: 10px;
+  color: var(--muted-text);
+  margin-bottom: 3px;
+}
+
+.distance {
+  font-size: 10px;
+  color: var(--text-color);
+  margin-top: auto;
+  opacity: 0.9;
+}
+
+.regional-warning {
+  color: #e67e22;
+  font-weight: bold;
+  font-size: 9px;
+  display: inline-block;
+  background: rgba(230, 126, 34, 0.1);
+  padding: 1px 3px;
+  border-radius: 2px;
+  margin-left: 4px;
+}
+
+.footer {
+  grid-column: 1 / -1;
+  background: var(--card-bg);
+  padding: 10px;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 10px;
+  color: var(--muted-text);
+  margin-top: 10px;
+}
+
+.footer a {
+  color: var(--time-color);
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+.datetime-tooltip {
+  position: relative;
+  display: inline-block;
+  cursor: help;
+}
+
+.datetime-tooltip:hover::after {
+  content: attr(data-datetime);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.8);
+  color: white;
+  padding: 5px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  white-space: nowrap;
+  z-index: 1000;
+  margin-bottom: 5px;
+}
+
+.loadError {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 30px;
+  color: var(--muted-text);
+}
+
+@media (max-width: 1200px) {
+  .earthquake-grid { grid-template-columns: repeat(5, 1fr); }
+}
+@media (max-width: 992px) {
+  .earthquake-grid { grid-template-columns: repeat(4, 1fr); }
+}
+@media (max-width: 768px) {
+  .earthquake-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .quake-card { padding: 8px; min-height: 140px; }
+}
+@media (max-width: 576px) {
+  .earthquake-grid { grid-template-columns: repeat(2, 1fr); }
+  body { font-size: 12px; }
+  .magnitude-circle { width: 32px; height: 32px; font-size: 13px; }
+}
+@media (max-width: 400px) {
+  .earthquake-grid { grid-template-columns: 1fr; }
+  .quake-card { min-height: 135px; }
+}
+</style>
+<style>
+
+[data-season="winter"] {
+  --card-bg: #e9f2ec; --card-bg-dark: #e9f2ec; --card-bg-light: #e9f2ec;
+  --bg-color: #e9f2ec; --bg-color-dark: #e9f2ec; --bg-color-light: #e9f2ec;
+  --bs-body-bg: #e9f2ec; --bs-card-bg: #e9f2ec; --bg: #e9f2ec;
+}
+[data-season="spring"] {
+  --card-bg: #eef7e3; --card-bg-dark: #eef7e3; --card-bg-light: #eef7e3;
+  --bg-color: #eef7e3; --bg-color-dark: #eef7e3; --bg-color-light: #eef7e3;
+  --bs-body-bg: #eef7e3; --bs-card-bg: #eef7e3; --bg: #eef7e3;
+}
+[data-season="summer"] {
+  --card-bg: #fff6d9; --card-bg-dark: #fff6d9; --card-bg-light: #fff6d9;
+  --bg-color: #fff6d9; --bg-color-dark: #fff6d9; --bg-color-light: #fff6d9;
+  --bs-body-bg: #fff6d9; --bs-card-bg: #fff6d9; --bg: #fff6d9;
+}
+[data-season="autumn"] {
+  --card-bg: #f2e6d8; --card-bg-dark: #f2e6d8; --card-bg-light: #f2e6d8;
+  --bg-color: #f2e6d8; --bg-color-dark: #f2e6d8; --bg-color-light: #f2e6d8;
+  --bs-body-bg: #f2e6d8; --bs-card-bg: #f2e6d8; --bg: #f2e6d8;
+}
+html[data-season="winter"] body, html[data-season="spring"] body,
+html[data-season="summer"] body, html[data-season="autumn"] body {
+  background-color: var(--bg-color, var(--card-bg));
+}
+</style>
+</head>
+<body>
+
+<script>
+(function applyTheme(){
+
+  function fromParent(){
+    try {
+      var b = window.parent && window.parent.document && window.parent.document.body;
+      if (b && (b.classList.contains('dark') || b.classList.contains('light'))) {
+        return b.classList.contains('dark') ? 'dark' : 'light';
+      }
+    } catch (e) {}
+    return null;
+  }
+  function fromLocal(){
+    var mode = localStorage.getItem('dashboardThemeMode') || 'auto';
+    return mode === 'light' ? 'light' : mode === 'dark' ? 'dark'
+      : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  }
+  function apply(){
+    document.documentElement.setAttribute('data-theme', fromParent() || fromLocal());
+  }
+  apply();
+
+  try {
+    var pb = window.parent && window.parent.document && window.parent.document.body;
+    if (pb) new MutationObserver(apply).observe(pb, { attributes: true, attributeFilter: ['class'] });
+  } catch (e) {}
+})();
+</script>
+
+<div class="earthquake-container">
+  <div class="map-wrap"><div class="map"></div></div>
+  <div class="earthquake-grid" id="earthquakeGrid"></div>
+</div>
+
+<script src='js/d3.4.2.2.min.js'></script>
+<script src="js/topojson.min.js"></script>
+
+<script>
+// ==== Live world map (was modalEarthquakeMap.html) ====
+var margin = {top: 20, right: 20, bottom: 20, left: 20},
+    width = 780 - margin.left - margin.right,
+    height = 550 - margin.top - margin.bottom;
+
+var projection = d3.geoMercator().translate([width / 2, height / 1.5]).scale((width - 1) / 2 / Math.PI);
+
+var path = d3.geoPath().projection(projection);
+
+var svg = d3.select(".map")
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+var g = svg.append('g').attr('id', 'world-map');
+
+g.append('clipPath')
+ .attr('id', 'clip-path')
+ .append('rect')
+ .attr('x', 0)
+ .attr('y', 30)
+ .attr('width', width)
+ .attr('height', height - 30)
+
+var gQuakes = svg.append('g').attr('id', 'all-quakes');
+
+  d3.json('./jsondata/worldmap.json', function(error, world) {
+  if (error) {
+    console.warn('modalEarthquake (map): worldmap.json fetch failed \u2014', error.message || error);
+    d3.select('.map').append('div').attr('class', 'mapLoadError').text('Map data failed to load.');
+    return;
+  }
+
+  var worldMap = g.append('path')
+   .attr('clip-path', 'url(#clip-path)')
+   .datum(topojson.merge(world, world.objects.countries.geometries))
+   .attr('class', 'land')
+   .attr('d', path)
+
+  g.append('path')
+   .datum(topojson.mesh(world, world.objects.countries, function(a, b) { return a !== b; }))
+   .attr('class', 'boundry')
+   .attr('d', path);
+
+  var dateObj = new Date();
+  dateObj.setDate(dateObj.getDate() - 1);
+
+  var x = d3.scaleTime()
+      .domain([dateObj, new Date()])
+      .range([0, width - margin.right - margin.left]);
+
+  var formatTime = d3.timeFormat("%H:%M");
+
+  var xAxis = svg.append('g')
+      .attr('id', 'xAxis')
+      .attr("class", "axisSilver")
+      .attr('transform', 'translate(20, 20)')
+      .call(d3.axisTop(x).tickFormat(formatTime));
+
+  d3.json('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson', function(error, data) {
+    if (error) {
+      console.warn('modalEarthquake (map): USGS feed fetch failed \u2014', error.message || error);
+      d3.select('.map').append('div').attr('class', 'mapLoadError').text('Live earthquake feed unavailable.');
+      return;
+    }
+    var quake = data.features.reverse();
+
+    var earthquakeGroups = gQuakes.selectAll('g')
+       .data(quake)
+       .enter().append('g')
+       .attr('id', function(d) {
+           return d.id;
+       })
+       .attr('class', 'quake-group');
+
+    gQuakes.selectAll('.quake-group')
+       .append('circle')
+       .attr('class', 'circle pulse-circle')
+       .attr('cx', function(d) {
+           return projection([d.geometry.coordinates[0], d.geometry.coordinates[1]])[0];
+       })
+       .attr('cy', function(d) {
+           return projection([d.geometry.coordinates[0], d.geometry.coordinates[1]])[1];
+       })
+       .attr('r', function(d) {
+           return 0;
+       })
+       .attr('fill', '#fff');
+
+    gQuakes.selectAll('.quake-group')
+      .append('circle')
+      .attr('cx', function(d) {
+           return projection([d.geometry.coordinates[0], d.geometry.coordinates[1]])[0];
+       })
+      .attr('cy', function(d) {
+           return projection([d.geometry.coordinates[0], d.geometry.coordinates[1]])[1];
+       })
+      .attr('r', 0 )
+      .attr('class', 'circle quake-circle')
+      .style('fill', 'red')
+      .style('opacity', 0.75)
+      .append('title')
+      .text(function(d) {
+        return 'Magnitue ' + d.properties.mag + ' ' + d.properties.place;
+      });
+
+    var setQuakeDelay = function() {
+      for(var i = 0, max = quake.length; i < max; i++){
+        var timeDiff = quake[i].properties.time - dateObj;
+        var timeDiffObj = new Date(timeDiff);
+        quake[i].delay = Date.parse(timeDiffObj) / 5000;
+      }
+    }
+    setQuakeDelay();
+
+    var longestDelay = quake[quake.length - 1].delay;
+
+    var quakeCircles = svg.selectAll('.quake-circle')
+       .data(quake)
+       .transition()
+       .delay(function(d) {
+         return d.delay;
+       })
+       .duration(1000)
+       .attr('r', function(d) {
+         if(d.properties.mag < 0) {
+           return 0.1;
+         } else {
+           return d.properties.mag
+         }
+       });
+
+    var pulseCircles = svg.selectAll('.pulse-circle')
+       .data(quake)
+       .transition()
+       .delay(function(d) {
+         return d.delay;
+       })
+       .duration(2000)
+       .attr('r', function(d) {
+         if(d.properties.mag < 0) {
+           return 0.1 * 8;
+         } else {
+           return d.properties.mag * 8;
+         }
+       })
+       .style('opacity', 0)
+       .remove()
+
+    var timeline = xAxis.append('circle')
+         .attr('class', 'transition-circle')
+         .attr('cx', 0)
+         .attr('cy', 0)
+         .attr('r', 3)
+         .style('fill', 'red')
+         .transition()
+         .ease(d3.easeLinear)
+         .duration(longestDelay + 1000)
+         .attr('cx', 701)
+  })
+})
+
+svg.append("text")
+    .attr("x", 390)
+    .attr("y", 480)
+    .attr("text-anchor", "middle")
+    .style("font-size", "12px")
+    .style("font-family", "Helvetica")
+    .style("font-weight", "normal")
+    .style("fill", "#2E8B57")
+    .text("Rendered using D3.js");
+
+</script>
+
+<script>
+// ==== Recent-earthquakes card grid (was modalEarthquake.html) ====
+function haversineKm(lat1, lon1, lat2, lon2){
+  var R = 6371;
+  var toRad = function(d){ return d * Math.PI / 180; };
+  var dLat = toRad(lat2 - lat1), dLon = toRad(lon2 - lon1);
+  var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+function num(x, fallback){ return (typeof x === 'number' && !isNaN(x)) ? x : (fallback || 0); }
+
+function stationParts(date, tz){
+  var parts = {};
+  new Intl.DateTimeFormat('en-GB', {
+    timeZone: tz, hourCycle: 'h23',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit'
+  }).formatToParts(date).forEach(function(p){ parts[p.type] = p.value; });
+  return parts;
+}
+function dmy(p){ return p.day + '-' + p.month + '-' + p.year; }
+function hm(p){ return p.hour + ':' + p.minute; }
+function hms(p){ return p.hour + ':' + p.minute + ':' + p.second; }
+
+var tz = (window.StationTime && StationTime.getTZ) ? StationTime.getTZ() : undefined;
+
+function magClassFor(mag){
+  if (mag >= 9) return 'mag-9-10';
+  if (mag >= 6) return 'mag-6-8';
+  if (mag >= 4) return 'mag-4-5';
+  return 'mag-1-3';
+}
+function intensityFor(mag){
+  if (mag >= 7) return 'Major';
+  if (mag >= 6) return 'Strong';
+  if (mag >= 5) return 'Moderate';
+  return 'Minor';
+}
+
+function buildCard(f, stationLat, stationLon, stationLocation){
+  var props = f.properties || {};
+  var mag = props.mag;
+  var title = props.flynn_region;
+  if (!mag && mag !== 0) return null;
+  if (mag === 0) return null;
+  if (!title) return null;
+
+  var lat = num(props.lat, 0), lon = num(props.lon, 0);
+  var depthKm = Math.round(num(props.depth, 0));
+  var eqDistKm = Math.round(haversineKm(stationLat, stationLon, lat, lon));
+  var isRegional = eqDistKm < 2100;
+  var formattedDistance = eqDistKm + ' km from ' + stationLocation;
+
+  var d = props.time ? new Date(props.time) : null;
+  var validDate = d && !isNaN(d.getTime());
+  var p = validDate ? stationParts(d, tz) : null;
+  var eventDate = validDate ? dmy(p) : '\u2014';
+  var eventTime = validDate ? hm(p) : '\u2014';
+  var fullDateTime = validDate ? (hms(p) + ' ' + dmy(p)) : '\u2014';
+
+  var card = document.createElement('div');
+  card.className = 'quake-card';
+
+  var header = document.createElement('div');
+  header.className = 'quake-header';
+  var magCircle = document.createElement('div');
+  magCircle.className = 'magnitude-circle ' + magClassFor(mag);
+  magCircle.textContent = mag.toFixed(1);
+  var intensity = document.createElement('div');
+  intensity.className = 'intensity-label';
+  intensity.textContent = intensityFor(mag);
+  header.appendChild(magCircle);
+  header.appendChild(intensity);
+
+  var details = document.createElement('div');
+  details.className = 'quake-details';
+
+  var dtContainer = document.createElement('div');
+  dtContainer.className = 'datetime-container';
+  var fullDateEl = document.createElement('div');
+  fullDateEl.className = 'full-date';
+  fullDateEl.textContent = eventDate;
+  var tooltip = document.createElement('div');
+  tooltip.className = 'datetime-tooltip';
+  tooltip.setAttribute('data-datetime', fullDateTime);
+  var timeSpan = document.createElement('span');
+  timeSpan.className = 'time';
+  timeSpan.textContent = eventTime;
+  if (isRegional){
+    var badge = document.createElement('span');
+    badge.className = 'regional-warning';
+    badge.textContent = '*Regional';
+    timeSpan.appendChild(badge);
+  }
+  tooltip.appendChild(timeSpan);
+  dtContainer.appendChild(fullDateEl);
+  dtContainer.appendChild(tooltip);
+
+  var locationEl = document.createElement('div');
+  locationEl.className = 'location';
+  locationEl.textContent = title;
+
+  var depthEl = document.createElement('div');
+  depthEl.className = 'depth';
+  depthEl.textContent = 'Depth ' + depthKm + 'km';
+
+  var distanceEl = document.createElement('div');
+  distanceEl.className = 'distance';
+  distanceEl.textContent = formattedDistance;
+
+  details.appendChild(dtContainer);
+  details.appendChild(locationEl);
+  details.appendChild(depthEl);
+  details.appendChild(distanceEl);
+
+  card.appendChild(header);
+  card.appendChild(details);
+  return card;
+}
+
+function render(eq, arch){
+  var grid = document.getElementById('earthquakeGrid');
+  grid.innerHTML = '';
+
+  var meta = arch.meta || {};
+  var stationLat = num(meta.latitude, 51.94);
+  var stationLon = num(meta.longitude, -0.987);
+  var stationLocation = meta.station_location || '';
+
+  var features = (eq.features || []);
+  var maxEarthquakes = 48;
+  var displayed = 0;
+  for (var j = 0; j < features.length && displayed < maxEarthquakes; j++){
+    var card = buildCard(features[j], stationLat, stationLon, stationLocation);
+    if (!card) continue;
+    grid.appendChild(card);
+    displayed++;
+  }
+
+  var footer = document.createElement('div');
+  footer.className = 'footer';
+  footer.innerHTML = 'Data \u00A9 ' + new Date().getFullYear() + ' EMSC-CSEM | <a href="http://www.emsc-csem.org" target="_blank" rel="noopener">www.emsc-csem.org</a>';
+  grid.appendChild(footer);
+}
+
+function showError(msg){
+  var grid = document.getElementById('earthquakeGrid');
+  grid.innerHTML = '';
+  var err = document.createElement('div');
+  err.className = 'loadError';
+  err.textContent = msg;
+  grid.appendChild(err);
+}
+
+Promise.allSettled([
+  fetch('./jsondata/eq.txt?_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
+  fetch('./jsondata/archive.json?_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+]).then(function(results){
+  var eqResult = results[0], archResult = results[1];
+  if (eqResult.status === 'rejected'){
+    console.warn('modalEarthquake: eq.txt fetch failed \u2014', eqResult.reason.message);
+    showError('Earthquake data failed to load.');
+    return;
+  }
+  if (archResult.status === 'rejected'){
+    console.warn('modalEarthquake: archive.json fetch failed \u2014', archResult.reason.message);
+  }
+  var arch = archResult.status === 'fulfilled' ? archResult.value : {};
+  render(eqResult.value, arch);
+});
+</script>
+
+<script>
+(function applySeasonFromParent(){
+  function apply(){
+    try {
+      var b = window.parent && window.parent.document && window.parent.document.body;
+      var m = b && /season-(winter|spring|summer|autumn)/.exec(b.className);
+      if (m) document.documentElement.setAttribute('data-season', m[1]);
+      else document.documentElement.removeAttribute('data-season');
+    } catch (e) {}
+  }
+  apply();
+  try {
+    var pb = window.parent && window.parent.document && window.parent.document.body;
+    if (pb) new MutationObserver(apply).observe(pb, { attributes: true, attributeFilter: ['class'] });
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>

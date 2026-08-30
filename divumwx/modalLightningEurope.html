@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<!--
+##############################################################################################
+# modalLightningEurope.html version 0.0.1
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  GPLv3
+##############################################################################################
+-->
+<html lang="en">
+<meta charset="utf-8">
+<style>
+:root {
+  --bg-color-dark: #111834;
+  --bg-color-light: #FFFFFF;
+}
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg-color-dark);
+  margin: 8px;
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+  font-size: 11px;
+  box-sizing: border-box;
+}
+[data-theme="light"] body { background: var(--bg-color-light); }
+
+.roundcornerframe {
+  position: relative;
+  width: 790px;
+  height: 520px;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.roundcornerframe iframe { border: 0; display: block; width: 790px; height: 520px; }
+</style>
+
+<style>
+
+[data-season="winter"] {
+  --card-bg: #e9f2ec; --card-bg-dark: #e9f2ec; --card-bg-light: #e9f2ec;
+  --bg-color: #e9f2ec; --bg-color-dark: #e9f2ec; --bg-color-light: #e9f2ec;
+  --bs-body-bg: #e9f2ec; --bs-card-bg: #e9f2ec; --bg: #e9f2ec;
+}
+[data-season="spring"] {
+  --card-bg: #eef7e3; --card-bg-dark: #eef7e3; --card-bg-light: #eef7e3;
+  --bg-color: #eef7e3; --bg-color-dark: #eef7e3; --bg-color-light: #eef7e3;
+  --bs-body-bg: #eef7e3; --bs-card-bg: #eef7e3; --bg: #eef7e3;
+}
+[data-season="summer"] {
+  --card-bg: #fff6d9; --card-bg-dark: #fff6d9; --card-bg-light: #fff6d9;
+  --bg-color: #fff6d9; --bg-color-dark: #fff6d9; --bg-color-light: #fff6d9;
+  --bs-body-bg: #fff6d9; --bs-card-bg: #fff6d9; --bg: #fff6d9;
+}
+[data-season="autumn"] {
+  --card-bg: #f2e6d8; --card-bg-dark: #f2e6d8; --card-bg-light: #f2e6d8;
+  --bg-color: #f2e6d8; --bg-color-dark: #f2e6d8; --bg-color-light: #f2e6d8;
+  --bs-body-bg: #f2e6d8; --bs-card-bg: #f2e6d8; --bg: #f2e6d8;
+}
+html[data-season="winter"] body, html[data-season="spring"] body,
+html[data-season="summer"] body, html[data-season="autumn"] body {
+  background-color: var(--bg-color, var(--card-bg));
+}
+</style>
+<body>
+
+<script>
+(function applyTheme(){
+
+  function fromParent(){
+    try {
+      var b = window.parent && window.parent.document && window.parent.document.body;
+      if (b && (b.classList.contains('dark') || b.classList.contains('light'))) {
+        return b.classList.contains('dark') ? 'dark' : 'light';
+      }
+    } catch (e) {}
+    return null;
+  }
+  function fromLocal(){
+    var mode = localStorage.getItem('dashboardThemeMode') || 'auto';
+    return mode === 'light' ? 'light' : mode === 'dark' ? 'dark'
+      : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  }
+  function apply(){
+    document.documentElement.setAttribute('data-theme', fromParent() || fromLocal());
+  }
+  apply();
+
+  try {
+    var pb = window.parent && window.parent.document && window.parent.document.body;
+    if (pb) new MutationObserver(apply).observe(pb, { attributes: true, attributeFilter: ['class'] });
+  } catch (e) {}
+})();
+</script>
+
+<div class="roundcornerframe">
+  <iframe src="https://map.blitzortung.org/index.php?interactive=0&amp;NavigationControl=0&amp;FullScreenControl=0&amp;Cookies=0&amp;InfoDiv=1&amp;MenuButtonDiv=1&amp;ScaleControl=1&amp;LinksCheckboxChecked=1&amp;LinksRangeValue=10&amp;MapStyle=1&amp;MapStyleRangeValue=0&amp;Advertisment=0#3.0/51.076/13.767" width="791" height="520" frameborder="0"></iframe>
+</div>
+
+<script>
+(function applySeasonFromParent(){
+  function apply(){
+    try {
+      var b = window.parent && window.parent.document && window.parent.document.body;
+      var m = b && /season-(winter|spring|summer|autumn)/.exec(b.className);
+      if (m) document.documentElement.setAttribute('data-season', m[1]);
+      else document.documentElement.removeAttribute('data-season');
+    } catch (e) {}
+  }
+  apply();
+  try {
+    var pb = window.parent && window.parent.document && window.parent.document.body;
+    if (pb) new MutationObserver(apply).observe(pb, { attributes: true, attributeFilter: ['class'] });
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>

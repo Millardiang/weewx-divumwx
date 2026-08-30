@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<!--
+##############################################################################################
+# modalAuroraTerminator.html version 0.0.1
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  GPLv3
+##############################################################################################
+-->
+<html lang='en'>
+<meta charset='utf-8'>
+<style>
+:root {
+  --bg-color-light: #FFFFFF;
+  --bg-color-dark: #111834;
+}
+html { overflow: hidden; }
+body { background: var(--bg-color-dark); margin: 0; width: 100%; min-width: 790px; box-sizing: border-box; overflow: hidden; }
+[data-theme="light"] body { background: var(--bg-color-light); }
+.auroraTerminator { display:flex; justify-content:center; align-items:center; margin-top:33px; margin-left:0px; min-width: 790px; min-height: 500px; }
+.ocean { fill: url(#oceanGradient); }
+.graticule { fill: none; stroke: #444; stroke-width: 0.2px; stroke-opacity: 1.0; }
+.land { fill: url(#landGradient); }
+.borders { fill: none; stroke: #292E35; stroke-width: 0.2px; }
+.night { stroke-width: 0.1px; stroke: #292e35; fill: #292e35; fill-opacity: 0.2; }
+.civiltwilight { stroke-width: 0.1px; stroke: #292e35; fill: #292e35; fill-opacity: 0.35; }
+.nauticaltwilight { stroke-width: 0.1px; stroke: #292e35; fill: #292e35; fill-opacity: 0.5; }
+.astronomicaltwilight { stroke-width: 0.1px; stroke: #292e35; fill: #292e35; fill-opacity: 0.6; }
+
+.dot { fill: red; }
+.ring { fill: none; stroke: red; stroke-width: 1px; }
+
+.meridian180 { stroke: red; stroke-width: 0.5px; fill: none; }
+.gmt_meridian { stroke: red; stroke-width: 0.5px; fill: none; }
+.equator { stroke: red; stroke-width: 0.5px; fill: none; }
+.capricorn { stroke: blue; stroke-width: 0.5px; fill: none; stroke-dasharray: 3, 3; }
+.cancer { stroke: blue; stroke-width: 0.5px; fill: none; stroke-dasharray: 3, 3; }
+.arctic { stroke: magenta; stroke-width: 0.5px; fill: none; stroke-dasharray: 3, 3; }
+.antarctic { stroke: magenta; stroke-width: 0.5px; fill: none; stroke-dasharray: 3, 3; }
+.ecliptic { stroke: yellow; stroke-width: 0.5px; fill: none; }
+
+.sun { mask: url(#globeMaskSun); }
+.sun { fill: url(#sunGradient); }
+.moon { mask: url(#globeMaskMoon); }
+.moon { fill: url(#moonGradient); }
+
+#globeMaskSun rect { fill: #fff; }
+#globeMaskMoon rect { fill: #fff; }
+#globeMaskCircleSun { fill: #000; opacity: 0.0; }
+#globeMaskCircleMoon { fill: #000; opacity: 0.0; }
+#globeMaskCircleSun.behind { opacity: 1.0; }
+#globeMaskCircleMoon.behind { opacity: 1.0; }
+</style>
+
+<style>
+
+[data-season="winter"] {
+  --card-bg: #e9f2ec; --card-bg-dark: #e9f2ec; --card-bg-light: #e9f2ec;
+  --bg-color: #e9f2ec; --bg-color-dark: #e9f2ec; --bg-color-light: #e9f2ec;
+  --bs-body-bg: #e9f2ec; --bs-card-bg: #e9f2ec; --bg: #e9f2ec;
+}
+[data-season="spring"] {
+  --card-bg: #eef7e3; --card-bg-dark: #eef7e3; --card-bg-light: #eef7e3;
+  --bg-color: #eef7e3; --bg-color-dark: #eef7e3; --bg-color-light: #eef7e3;
+  --bs-body-bg: #eef7e3; --bs-card-bg: #eef7e3; --bg: #eef7e3;
+}
+[data-season="summer"] {
+  --card-bg: #fff6d9; --card-bg-dark: #fff6d9; --card-bg-light: #fff6d9;
+  --bg-color: #fff6d9; --bg-color-dark: #fff6d9; --bg-color-light: #fff6d9;
+  --bs-body-bg: #fff6d9; --bs-card-bg: #fff6d9; --bg: #fff6d9;
+}
+[data-season="autumn"] {
+  --card-bg: #f2e6d8; --card-bg-dark: #f2e6d8; --card-bg-light: #f2e6d8;
+  --bg-color: #f2e6d8; --bg-color-dark: #f2e6d8; --bg-color-light: #f2e6d8;
+  --bs-body-bg: #f2e6d8; --bs-card-bg: #f2e6d8; --bg: #f2e6d8;
+}
+html[data-season="winter"] body, html[data-season="spring"] body,
+html[data-season="summer"] body, html[data-season="autumn"] body {
+  background-color: var(--bg-color, var(--card-bg));
+}
+</style>
+<body>
+
+<script src='js/d3.7.9.0.min.js'></script>
+<script src='js/d3-geo-projection.4.0.0.min.js'></script>
+<script src='js/topojson.3.0.2.min.js'></script>
+<div class='auroraTerminator'></div>
+<script>
+
+function syncFetchJSON(url){
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', url + '?_=' + Date.now(), false);
+  xhr.send(null);
+  if (xhr.status !== 200) throw new Error('HTTP ' + xhr.status + ' for ' + url);
+  return JSON.parse(xhr.responseText);
+}
+var __archive = {}, __alm = {};
+try { __archive = syncFetchJSON('./jsondata/archive.json'); } catch (e) { console.warn('modalAuroraTerminator: archive.json fetch failed —', e.message); }
+try { __alm = syncFetchJSON('./jsondata/almanac.json'); } catch (e) { console.warn('modalAuroraTerminator: almanac.json fetch failed —', e.message); }
+var __meta = __archive.meta || {};
+
+(function applyTheme(){
+
+  function fromParent(){
+    try {
+      var b = window.parent && window.parent.document && window.parent.document.body;
+      if (b && (b.classList.contains('dark') || b.classList.contains('light'))) {
+        return b.classList.contains('dark') ? 'dark' : 'light';
+      }
+    } catch (e) {}
+    return null;
+  }
+  function fromLocal(){
+    var mode = localStorage.getItem('dashboardThemeMode') || 'auto';
+    return mode === 'light' ? 'light' : mode === 'dark' ? 'dark'
+      : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  }
+  function apply(){
+    document.documentElement.setAttribute('data-theme', fromParent() || fromLocal());
+  }
+  apply();
+
+  try {
+    var pb = window.parent && window.parent.document && window.parent.document.body;
+    if (pb) new MutationObserver(apply).observe(pb, { attributes: true, attributeFilter: ['class'] });
+  } catch (e) {}
+})();
+var theme = document.documentElement.getAttribute('data-theme');
+
+  if (theme === 'dark') {
+    var baseTextColor = 'white';
+  } else {
+    baseTextColor = '#1c4263';
+  }
+
+  var π = Math.PI;
+
+function toDegrees(x) {
+  return x * (180.0 / π);
+}
+
+function toRadians(x) {
+  return x * (π / 180.0);
+}
+
+  var moonDec = Number(__alm['almanac.moon.dec']) || 0;
+  var ecliptic = Number(__alm['almanac.ecliptic_obliquity']) || 23.44;
+  var lunarTerminator = Number(__alm['almanac.moon.ecliptic_angle']) || 0;
+
+  var lat = Number(__meta.latitude) || 0;
+  var long = Number(__meta.longitude) || 0;
+
+  var w = 790;
+  var h = 500;
+
+if (lat > 0.0) {
+
+  var earth = d3.geoOrthographic()
+    .scale(200)
+    .translate([w/2, h/2])
+    .clipAngle(90)
+    .rotate([-long, -90, 0])
+    .precision(0.1);
+
+  var skynet = d3.geoOrthographic()
+    .scale(235)
+    .rotate([-long, -90, 0])
+    .translate(earth.translate());
+
+  var lunar = d3.geoOrthographic()
+    .scale(213)
+    .rotate([-long, -90, 0])
+    .translate(earth.translate());
+} else {
+
+  var earth = d3.geoOrthographic()
+    .scale(200)
+    .translate([w/2, h/2])
+    .clipAngle(90)
+    .rotate([-long, 90, 0])
+    .precision(0.1);
+
+  var skynet = d3.geoOrthographic()
+    .scale(235)
+    .rotate([-long, 90, 0])
+    .translate(earth.translate());
+
+  var lunar = d3.geoOrthographic()
+    .scale(213)
+    .rotate([-long, 90, 0])
+    .translate(earth.translate());
+}
+
+  var circle0 = d3.geoCircle().radius(90);
+  var circle1 = d3.geoCircle().radius(84);
+  var circle2 = d3.geoCircle().radius(78);
+  var circle3 = d3.geoCircle().radius(72);
+
+  var path = d3.geoPath().projection(earth);
+  var graticule = d3.geoGraticule();
+
+  var center = [w/2, h/2];
+
+  var svg = d3.select('.auroraTerminator')
+      .append('svg')
+
+      .attr('width', w)
+      .attr('height', h);
+
+  var dots = 75;
+  var stars = (function() {
+  var result = [];
+  for(var i = 0; i < 1 * dots; i++) {
+      result.push({
+          id: 1,
+          position: [Math.random() * w, Math.random() * h],
+          color: d3.rgb(0,150,250),
+          radius: 0.5,
+          fillOpacity: 1,
+          stroke: d3.rgb(0,150,250)
+      });
+      result.push({
+          id: 1,
+          position: [Math.random() * w, Math.random() * h],
+          color: d3.rgb(0,150,250),
+          radius: 0.5,
+          fillOpacity: 1,
+          stroke: d3.rgb(0,150,250)
+        });
+      }
+      return result;
+    });
+
+  svg.selectAll('stars')
+      .data(stars).enter()
+      .append('circle')
+      .attr('class', 'stars')
+      .attr('id', (d, i) => { return 'stars' + i; })
+      .attr('r', d => { return d.radius; })
+      .attr('cx', d => { return d.position[0]; })
+      .attr('cy', d => { return d.position[1]; })
+      .style('fill', d => { return d.color; })
+      .style('fill-opacity', d => { return d.fillOpacity; })
+      .style('stroke', d => { return d.stroke; });
+
+var borealis;
+if (lat > 0.0) {
+  borealis = 'Aurora Borealis Northern Lights';
+} else {
+  borealis = 'Aurora Australis Southern Lights';
+}
+  svg.append('text')
+    .attr('x', 395)
+    .attr('y', 15)
+    .attr('text-anchor', 'middle')
+    .style('font-size', '18px')
+    .style('font-family', 'Helvetica')
+    .style('font-weight', 'Bold')
+    .style('fill', baseTextColor)
+    .text(borealis);
+
+  var defs = svg.append('defs');
+
+  var sunScale = d3.scaleLinear().domain([0,1]).range([5,25]);
+  var moonScale = d3.scaleLinear().domain([0,1]).range([2,8]);
+
+  d3.json('./jsondata/worldmap.json').then(world => {
+
+  buildDefs();
+  buildGlobe();
+
+  function buildDefs() {
+
+  defs.append('path')
+      .datum({type: 'Sphere'})
+      .attr('id', 'sphere')
+      .attr('d', path);
+
+  var globeMaskSun = defs.append('mask')
+      .attr('id', 'globeMaskSun')
+      .attr('x',0).attr('y',0)
+      .attr('width', w)
+      .attr('height', h);
+
+  globeMaskSun.append('rect')
+      .attr('x',0).attr('y',0)
+      .attr('width', w)
+      .attr('height', h);
+
+  globeMaskSun.append('use')
+      .attr('id', 'globeMaskCircleSun')
+      .attr('xlink:href', '#sphere');
+
+  var globeMaskMoon = defs.append('mask')
+      .attr('id', 'globeMaskMoon')
+      .attr('x',0).attr('y',0)
+      .attr('width', w)
+      .attr('height', h);
+
+  globeMaskMoon.append('rect')
+      .attr('x',0).attr('y',0)
+      .attr('width', w)
+      .attr('height', h);
+
+  globeMaskMoon.append('use')
+      .attr('id', 'globeMaskCircleMoon')
+      .attr('xlink:href', '#sphere');
+
+  var sunGradient = defs.append('radialGradient')
+      .attr('id', 'sunGradient')
+      .attr('cx', '75%')
+      .attr('cy', '25%');
+
+  sunGradient.append('stop').attr('offset', '5%').attr('stop-color', '#ffcfc7');
+  sunGradient.append('stop').attr('offset', '150%').attr('stop-color', '#ff5555');
+
+  var moonGradient = defs.append('radialGradient')
+      .attr('id', 'moonGradient')
+      .attr('cx', '75%')
+      .attr('cy', '25%');
+
+  moonGradient.append('stop').attr('offset', '5%').attr('stop-color', '#f5f5f5');
+  moonGradient.append('stop').attr('offset', '150%').attr('stop-color', '#999999');
+
+  var oceanGradient = defs.append('radialGradient')
+      .attr('id', 'oceanGradient')
+      .attr('cx', '75%')
+      .attr('cy', '25%');
+
+  oceanGradient.append('stop').attr('offset', '5%').attr('stop-color', '#d4e2ff');
+  oceanGradient.append('stop').attr('offset', '150%').attr('stop-color', '#99bbff');
+
+  var landGradient = defs.append('radialGradient')
+      .attr('id', 'landGradient')
+      .attr('cx', '75%')
+      .attr('cy', '25%');
+
+  landGradient.append('stop').attr('offset', '5%').attr('stop-color', '#44c17b');
+  landGradient.append('stop').attr('offset', '150%').attr('stop-color', '#2e8b57');
+
+}
+
+  function buildGlobe() {
+
+  var land = topojson.feature(world, world.objects.land);
+  var borders = topojson.mesh(world, world.objects.countries, (a, b) => { return a !== b; });
+
+  svg.append('use')
+      .attr('class', 'ocean')
+      .attr('xlink:href', '#sphere');
+
+  svg.append('path')
+      .datum(land)
+      .attr('class', 'land');
+
+  svg.append('path')
+      .datum(borders)
+      .attr('class', 'borders');
+
+  svg.append('path')
+      .datum(graticule)
+      .attr('class', 'graticule');
+
+  var meridian180 = d3.geoGraticule()
+      .step([179.9999, 0])
+      .extentMajor([[179.9999, -90 + 1e-6], [180, 90 - 1e-6]])
+      .extentMinor([[179.9999, -90 - 1e-6], [180, 90 + 1e-6]]);
+
+  svg.append('path')
+      .datum(meridian180)
+      .attr('class', 'meridian180');
+
+  var gmt_meridian = d3.geoGraticule()
+      .step([90, 0])
+      .extent([[-0.1, -90 -1e-6], [0.1, 90 +1e-6]]);
+
+  svg.append('path')
+      .datum(gmt_meridian)
+      .attr('class', 'gmt_meridian');
+
+  var equator = d3.geoGraticule()
+      .step([0, 90])
+      .extent([[-180, -1], [180, 1]]);
+
+  svg.append('path')
+      .datum(equator)
+      .attr('class', 'equator');
+
+  var capricorn = d3.geoGraticule()
+      .step([0, 23.436556])
+      .extentMajor([[-180, -23.536556 + 1e-6], [180, 0]])
+      .extentMinor([[-180, -23.536556 - 1e-6], [180, -23.536556 + 1e-6]]);
+
+  svg.append('path')
+      .datum(capricorn)
+      .attr('class', 'capricorn');
+
+  var cancer = d3.geoGraticule()
+      .step([0, 23.436556])
+      .extentMajor([[-180,  23.436556 + 1e-6], [180, 23.436556 - 1e-6]])
+      .extentMinor([[-180, -23.436556 - 1e-6], [180, 23.436556 + 1e-6]]);
+
+  svg.append('path')
+      .datum(cancer)
+      .attr('class', 'cancer');
+
+  var arctic = d3.geoGraticule()
+      .step([0, 66.563444])
+      .extentMajor([[-180, 66.563444 + 1e-6], [180, 66.563444 - 1e-6]])
+      .extentMinor([[-180, 0], [180, 0]]);
+
+  svg.append('path')
+      .datum(arctic)
+      .attr('class', 'arctic');
+
+  var antarctic = d3.geoGraticule()
+      .step([0, 66.563444])
+      .extentMajor([[-180, -66.563444], [180, 0]])
+      .extentMinor([[-180, -66.563444 - 1e-6], [180, -66.563444 + 1e-6]]);
+
+  svg.append('path')
+      .datum(antarctic)
+      .attr('class', 'antarctic');
+
+setInterval(function() {
+  svg.append('circle')
+      .attr('class', 'dot')
+      .attr('transform', 'translate(' + earth([long, lat]) + ')')
+      .attr('r', 1);
+  svg.append('circle')
+      .attr('class', 'ring')
+      .attr('transform', 'translate(' + earth([long, lat]) + ')')
+      .attr('r', 2)
+      .transition()
+      .ease(d3.easeLinear)
+      .duration(6000)
+      .style('stroke-opacity', 1e-6)
+      .attr('r', 20)
+      .remove();
+ }, 1000);
+
+  svg.append('path').attr('class', 'night');
+  svg.append('path').attr('class', 'civiltwilight');
+  svg.append('path').attr('class', 'nauticaltwilight');
+  svg.append('path').attr('class', 'astronomicaltwilight');
+
+    svg.append('circle').datum([])
+        .attr('class', 'moon');
+
+    svg.append('circle').datum([])
+        .attr('class', 'sun');
+
+  redraw();
+}
+
+d3.json('jsondata/ovation.txt').then(data => {
+
+if (lat > 0.0) {
+  data.coordinates = data.coordinates.filter(d => d[1] > 0.0);
+} else {
+  data.coordinates = data.coordinates.filter(d => d[1] < 0.0);
+}
+
+  let ovation = data.coordinates.map(d => {
+  let aurora = d[2];
+  let projcoords = earth([d[0], d[1]]);
+  let type = 'Point';
+  let coordinates = [d[0], d[1]];
+  let geometry = '';
+  let properties = '';
+  geometry = {type, coordinates},
+  properties = {aurora}
+  return {
+    'type': 'Feature',
+    properties,
+    projcoords,
+    geometry
+    };
+});
+
+var ergs = d3.max(data.coordinates.map(d => d[2]));
+
+var data = ['Aurora Probability ' + '-' + ergs + '%' + '-' + ' (erg/s*cm²)'];
+var text = svg.selectAll(null)
+    .data(data)
+    .enter()
+    .append('text')
+    .attr('x', 395)
+    .attr('y', (d, i) => { return 30 + i * 30; })
+
+    .style('fill', baseTextColor)
+    .style('font-family', 'Helvetica')
+    .style('font-size', '11px')
+    .style('text-anchor', 'middle')
+    .style('font-weight', 'normal')
+    .text(d => { return d.split('-')[0]; })
+
+    .append('tspan')
+    .style('fill', '#007fff')
+    .style('font-weight', 'normal')
+    .text(d => { return d.split('-')[1]; })
+
+    .append('tspan')
+    .style('fill', baseTextColor)
+    .style('font-weight', 'normal')
+    .text(d => { return d.split("-")[2]; });
+
+var blender = ['#35ff28', '#f6eb14', '#ff9600', '#ff0000'];
+
+let aurora = svg.append('g');
+
+var color = d3.scaleQuantize([0, 100], blender);
+var radius = d3.scaleSqrt([0, d3.max(ovation, d => d.properties.aurora)],[0, 14]);
+
+  aurora
+    .selectAll('circle')
+    .data(ovation)
+    .join('circle')
+    .attr('fill', d => color(d.properties.aurora))
+    .attr('r', d => radius(d.properties.aurora))
+    .style('opacity', 0.011)
+    .attr('transform', d => 'translate(' + earth(d.geometry.coordinates) + ')');
+
+});
+
+function redraw(now) {
+    var now = now || new Date(Date.now());
+    var night = d3.selectAll('.night');
+    var civil_twilight = d3.selectAll('.civiltwilight');
+    var nautical_twilight = d3.selectAll('.nauticaltwilight');
+    var astronomical_twilight = d3.selectAll('.astronomicaltwilight');
+
+    var sunshine = d3.selectAll('.sun');
+    var moonshine = d3.selectAll('.moon');
+
+    var globeMaskCircleSun = d3.selectAll('#globeMaskCircleSun');
+    var globeMaskCircleMoon = d3.selectAll('#globeMaskCircleMoon');
+
+    var sunPos = solarPosition(now),
+      antiSunPos = antipode(sunPos);
+
+    var moonPos = [sunPos[0] + lunarTerminator, 0],
+      antiSunPos = antipode(sunPos);
+
+    var noonSun = {
+      earth: earth(sunPos),
+      skynet: skynet(sunPos)
+    };
+
+    var noonMoon = {
+      earth: earth(moonPos),
+      lunar: lunar(moonPos)
+    };
+
+    night.datum(circle0.center(antiSunPos)).attr('d', path);
+
+    civil_twilight.datum(circle1.center(antiSunPos)).attr('d', path);
+
+    nautical_twilight.datum(circle2.center(antiSunPos)).attr('d', path);
+
+    astronomical_twilight.datum(circle3.center(antiSunPos)).attr('d', path);
+
+    d3.select('#oceanGradient')
+    .attr('cx', ((noonSun.earth[0] - (w - h) / 2) / h * 100) + '%')
+    .attr('cy', (noonSun.earth[1] / h * 100) + '%');
+
+    d3.select('#landGradient')
+    .attr('cx', ((noonSun.earth[0] - (w - h) / 2) / h * 100) + '%')
+    .attr('cy', (noonSun.earth[1] / h * 100) + '%');
+
+    var sunSizeFactor = 1 - (degrees_from_center_sun(sunPos) / 180);
+
+    var moonSizeFactor = 1 - (degrees_from_center_moon(moonPos) / 180);
+
+    sunshine
+      .attr('cx', noonSun.skynet[0])
+      .attr('cy', noonSun.skynet[1])
+      .attr('r', sunScale(sunSizeFactor));
+
+    moonshine
+      .attr('cx', noonMoon.lunar[0])
+      .attr('cy', noonMoon.lunar[1])
+      .attr('r', moonScale(moonSizeFactor));
+
+    d3.selectAll('.land').attr('d',path);
+    d3.selectAll('.borders').attr('d',path);
+    d3.selectAll('.graticule').attr('d', path);
+    d3.selectAll('.meridian180').attr('d', path);
+    d3.selectAll('.gmt_meridian').attr('d', path);
+    d3.selectAll('.equator').attr('d', path);
+    d3.selectAll('.capricorn').attr('d', path);
+    d3.selectAll('.cancer').attr('d', path);
+    d3.selectAll('.arctic').attr('d', path);
+    d3.selectAll('.antarctic').attr('d', path);
+
+    globeMaskCircleSun
+      .classed('behind', d => { return degrees_from_center_sun(sunPos) > 90 ? true : false; });
+
+    globeMaskCircleMoon
+      .classed('behind', d => { return degrees_from_center_moon(moonPos) > 90 ? true : false; });
+   }
+}).catch(function(e){
+  console.warn('modalAuroraTerminator: worldmap.json failed to load —', e.message);
+  d3.select('.auroraTerminator').append('div')
+    .style('color', 'currentColor').style('font-size', '11px').style('opacity', '0.75')
+    .text('Globe unavailable: could not load worldmap.json');
+});
+
+function degrees_from_center_sun(d) {
+    var distanceBetweenSun = d3.geoDistance
+    centerPos = skynet.invert(center);
+  return toDegrees(distanceBetweenSun(d,centerPos));
+}
+
+function degrees_from_center_moon(d) {
+    var distanceBetweenMoon = d3.geoDistance
+    centerPos = lunar.invert(center);
+  return toDegrees(distanceBetweenMoon(d,centerPos));
+}
+
+function fade_at_edge_sun(d) {
+  var sunPos = d;
+  var sunDistance = degrees_from_center_sun(sunPos);
+  var fadeRangeSun = 6;
+  var sunFade = d3.scaleLinear()
+    .domain([90 + fadeRangeSun, 90 - fadeRangeSun])
+    .range([0.1, 1])
+    .clamp(true);
+
+  return sunFade(sunDistance);
+}
+
+function fade_at_edge_moon(d) {
+  var moonPos = d;
+  var moonDistance = degrees_from_center_moon(moonPos);
+  var fadeRangeMoon = 6;
+  var moonFade = d3.scaleLinear()
+    .domain([90 + fadeRangeMoon, 90 - fadeRangeMoon])
+    .range([0.1, 1])
+    .clamp(true);
+
+  return moonFade(moonDistance);
+}
+
+function antipode(position) {
+  return [position[0] + 180.0, - position[1]];
+}
+
+function solarPosition(time) {
+      var T = (time - Date.UTC(2000, 0, 1, 12)) / 864e5 / 36525,
+        longitude = (d3.utcDay.floor(time) - time) / 864e5 * 360 - 180.0;
+      return [
+        longitude - toDegrees(equationOfTime(T)),
+        toDegrees(solarDeclination(T))
+    ];
+ }
+
+function equationOfTime(T) {
+    var e = eccentricityEarthOrbit(T),
+        m = solarGeometricMeanAnomaly(T),
+        l = solarGeometricMeanLongitude(T),
+        y = Math.tan(obliquityCorrection(T) / 2);
+    y *= y;
+    return y * Math.sin(2 * l) - 2 * e * Math.sin(m) + 4 * e * y * Math.sin(m) * Math.cos(2 * l) - 0.5 * y * y * Math.sin(4 * l) - 1.25 * e * e * Math.sin(2 * m);
+ }
+
+function solarDeclination(T) {
+    return Math.asin(Math.sin(obliquityCorrection(T)) * Math.sin(solarApparentLongitude(T)));
+ }
+
+function solarApparentLongitude(T) {
+    return solarTrueLongitude(T) - toRadians((0.00569 + 0.00478 * Math.sin((125.04 - 1934.136 * T) * π / 180.0)));
+ }
+
+function solarTrueLongitude(T) {
+    return solarGeometricMeanLongitude(T) + solarEquationOfCenter(T);
+ }
+
+function solarGeometricMeanAnomaly(T) {
+    return toRadians((357.52911 + T * (35999.05029 - 0.0001537 * T)));
+ }
+
+function solarGeometricMeanLongitude(T) {
+    var l = (280.46646 + T * (36000.76983 + T * 0.0003032)) % 360;
+    return (l < 0 ? l + 360 : l) / 180.0 * π;
+ }
+
+function solarEquationOfCenter(T) {
+    var m = solarGeometricMeanAnomaly(T);
+    return toRadians((Math.sin(m) * (1.914602 - T * (0.004817 + 0.000014 * T)) + Math.sin(m + m) * (0.019993 - 0.000101 * T) + Math.sin(m + m + m) * 0.000289));
+ }
+
+function obliquityCorrection(T) {
+    return meanObliquityOfEcliptic(T) + 0.00256 * toRadians(Math.cos((125.04 - 1934.136 * T) * π / 180.0));
+ }
+
+function meanObliquityOfEcliptic(T) {
+    return toRadians((23 + (26 + (21.448 - T * (46.8150 + T * (0.00059 - T * 0.001813))) / 60) / 60));
+ }
+
+function eccentricityEarthOrbit(T) {
+    return 0.016708634 - T * (0.000042037 + 0.0000001267 * T);
+ }
+
+(function(){
+  function reportHeight(){
+    if (window.parent === window) return;
+    var w = Math.max(document.body.scrollWidth, document.documentElement.scrollWidth);
+    var h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+    window.parent.postMessage({ type: 'chartModalContentHeight', height: h, width: w }, '*');
+  }
+  if (window.parent !== window) {
+    new ResizeObserver(reportHeight).observe(document.body);
+
+    reportHeight();
+    [200, 500, 1000, 2000, 3500].forEach(function(delay){
+      setTimeout(reportHeight, delay);
+    });
+  }
+})();
+</script>
+<script>
+(function applySeasonFromParent(){
+  function apply(){
+    try {
+      var b = window.parent && window.parent.document && window.parent.document.body;
+      var m = b && /season-(winter|spring|summer|autumn)/.exec(b.className);
+      if (m) document.documentElement.setAttribute('data-season', m[1]);
+      else document.documentElement.removeAttribute('data-season');
+    } catch (e) {}
+  }
+  apply();
+  try {
+    var pb = window.parent && window.parent.document && window.parent.document.body;
+    if (pb) new MutationObserver(apply).observe(pb, { attributes: true, attributeFilter: ['class'] });
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>

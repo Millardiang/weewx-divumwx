@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Animated Sun with Sunspots · D3</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; }
+        body {
+            background: #0b0e1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: system-ui, sans-serif;
+        }
+        #sun-container {
+            background: radial-gradient(circle at 30% 30%, #1a1f2e, #05070c);
+            border-radius: 32px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+        }
+        svg {
+            display: block;
+            width: 600px;
+            height: 600px;
+            border-radius: 28px;
+            box-shadow: inset 0 0 0 1px rgba(255,215,120,0.08);
+        }
+    </style>
+</head>
+<body>
+<div id="sun-container">
+    <svg id="sun-svg" viewBox="0 0 600 600"></svg>
+</div>
+
+<script>
+    (function animateSunWithSpots() {
+        const width = 600, height = 600;
+        const svg = d3.select("#sun-svg")
+            .attr("width", width)
+            .attr("height", height)
+            .style("background", "transparent");
+
+        // ----- DEFS: gradients, filters, masks -----
+        const defs = svg.append("defs");
+
+        // corona gradient
+        const coronaGrad = defs.append("radialGradient")
+            .attr("id", "coronaGrad")
+            .attr("cx", "50%").attr("cy", "50%").attr("r", "58%")
+            .attr("fx", "45%").attr("fy", "42%");
+        coronaGrad.append("stop").attr("offset", "0%").attr("stop-color", "#fff8e7").attr("stop-opacity", 0.95);
+        coronaGrad.append("stop").attr("offset", "15%").attr("stop-color", "#fde5a8").attr("stop-opacity", 0.98);
+        coronaGrad.append("stop").attr("offset", "35%").attr("stop-color", "#f9b84a").attr("stop-opacity", 0.95);
+        coronaGrad.append("stop").attr("offset", "62%").attr("stop-color", "#e07c1f").attr("stop-opacity", 0.9);
+        coronaGrad.append("stop").attr("offset", "85%").attr("stop-color", "#b6490c").attr("stop-opacity", 0.75);
+        coronaGrad.append("stop").attr("offset", "100%").attr("stop-color", "#7a2e0a").attr("stop-opacity", 0);
+
+        // core gradient
+        const coreGrad = defs.append("radialGradient")
+            .attr("id", "coreGrad")
+            .attr("cx", "48%").attr("cy", "46%").attr("r", "40%");
+        coreGrad.append("stop").attr("offset", "0%").attr("stop-color", "#ffecc2").attr("stop-opacity", 1);
+        coreGrad.append("stop").attr("offset", "40%").attr("stop-color", "#fbc45a").attr("stop-opacity", 0.95);
+        coreGrad.append("stop").attr("offset", "75%").attr("stop-color", "#e0842b").attr("stop-opacity", 0.85);
+        coreGrad.append("stop").attr("offset", "100%").attr("stop-color", "#b4510f").attr("stop-opacity", 0.7);
+
+        // texture filter
+        const texFilter = defs.append("filter")
+            .attr("id", "sunTexture")
+            .attr("x", "-20%").attr("y", "-20%").attr("width", "140%").attr("height", "140%");
+        texFilter.append("feTurbulence")
+            .attr("type", "fractalNoise")
+            .attr("baseFrequency", "0.9")
+            .attr("numOctaves", "4")
+            .attr("stitchTiles", "stitch")
+            .attr("result", "noise");
+        texFilter.append("feColorMatrix")
+            .attr("type", "matrix")
+            .attr("values", "0 0 0 0 0   0 0 0 0 0   0 0 0 0 0   0 0 0 0.7 0")
+            .attr("in", "noise")
+            .attr("result", "alphaNoise");
+        texFilter.append("feComposite")
+            .attr("in", "SourceGraphic")
+            .attr("in2", "alphaNoise")
+            .attr("operator", "in")
+            .attr("result", "textured");
+        texFilter.append("feBlend")
+            .attr("in", "SourceGraphic")
+            .attr("in2", "textured")
+            .attr("mode", "soft-light");
+
+        // corona displacement
+        const coronaDisplace = defs.append("filter")
+            .attr("id", "coronaDisplace")
+            .attr("x", "-10%").attr("y", "-10%").attr("width", "120%").attr("height", "120%");
+        coronaDisplace.append("feTurbulence")
+            .attr("type", "fractalNoise")
+            .attr("baseFrequency", "0.15")
+            .attr("numOctaves", "3")
+            .attr("result", "warpNoise");
+        coronaDisplace.append("feDisplacementMap")
+            .attr("in", "SourceGraphic")
+            .attr("in2", "warpNoise")
+            .attr("scale", "22")
+            .attr("xChannelSelector", "R")
+            .attr("yChannelSelector", "G");
+
+        // glow filter
+        const glowFilter = defs.append("filter")
+            .attr("id", "glowFilter")
+            .attr("x", "-30%").attr("y", "-30%").attr("width", "160%").attr("height", "160%");
+        glowFilter.append("feGaussianBlur")
+            .attr("stdDeviation", "18")
+            .attr("result", "blur");
+        glowFilter.append("feMerge")
+            .selectAll("feMergeNode")
+            .data([null, null])
+            .enter()
+            .append("feMergeNode")
+            .attr("in", (d, i) => i === 0 ? "blur" : "SourceGraphic");
+
+        // mask for sun disc
+        const sunMask = defs.append("mask")
+            .attr("id", "sunMask")
+            .attr("maskUnits", "userSpaceOnUse")
+            .attr("x", "0").attr("y", "0").attr("width", "600").attr("height", "600");
+        sunMask.append("circle")
+            .attr("cx", 300).attr("cy", 300).attr("r", 215)
+            .attr("fill", "white")
+            .attr("filter", "url(#coronaDisplace)");
+        sunMask.append("circle")
+            .attr("cx", 300).attr("cy", 300).attr("r", 250)
+            .attr("fill", "rgba(255,255,255,0.2)")
+            .attr("filter", "url(#coronaDisplace)");
+
+        // ----- STATIC GLOW -----
+        svg.append("circle")
+            .attr("cx", 300).attr("cy", 300).attr("r", 255)
+            .attr("fill", "url(#coronaGrad)")
+            .attr("filter", "url(#glowFilter)")
+            .attr("opacity", 0.6)
+            .attr("class", "sun-glow");
+
+        // ----- MAIN SUN GROUP (rotates) -----
+        const sunGroup = svg.append("g").attr("class", "sun-rotating-group");
+
+        // core disc
+        sunGroup.append("circle")
+            .attr("cx", 300).attr("cy", 300).attr("r", 218)
+            .attr("fill", "url(#coreGrad)")
+            .attr("mask", "url(#sunMask)")
+            .attr("filter", "url(#sunTexture)")
+            .style("mix-blend-mode", "screen");
+
+        // inner highlight
+        sunGroup.append("circle")
+            .attr("cx", 285).attr("cy", 280).attr("r", 100)
+            .attr("fill", "url(#coreGrad)")
+            .attr("opacity", 0.35)
+            .attr("filter", "blur(6px)");
+
+        // ----- CORONA RAYS -----
+        const rayGroup = sunGroup.append("g")
+            .attr("opacity", 0.25)
+            .attr("filter", "url(#glowFilter)");
+        for (let i = 0; i < 42; i++) {
+            const angle = (i / 42) * 2 * Math.PI;
+            const x1 = 300 + 195 * Math.cos(angle);
+            const y1 = 300 + 195 * Math.sin(angle);
+            const length = 30 + 25 * Math.sin(i * 2.3) + 12 * Math.cos(i * 1.7);
+            const x2 = 300 + (195 + length) * Math.cos(angle);
+            const y2 = 300 + (195 + length) * Math.sin(angle);
+            const sw = 2.2 + 1.8 * Math.sin(i * 1.2 + 0.5);
+            rayGroup.append("line")
+                .attr("x1", x1).attr("y1", y1)
+                .attr("x2", x2).attr("y2", y2)
+                .attr("stroke", i % 3 === 0 ? "#fdb64b" : "#f59e2e")
+                .attr("stroke-width", sw)
+                .attr("stroke-linecap", "round")
+                .attr("opacity", 0.3 + 0.2 * Math.sin(i + 0.7));
+        }
+        // secondary rays
+        const rayGroup2 = sunGroup.append("g").attr("opacity", 0.12);
+        for (let i = 0; i < 28; i++) {
+            const angle = (i / 28) * 2 * Math.PI + 0.2;
+            const x1 = 300 + 205 * Math.cos(angle);
+            const y1 = 300 + 205 * Math.sin(angle);
+            const length = 45 + 18 * Math.sin(i * 1.8 + 1.2);
+            const x2 = 300 + (205 + length) * Math.cos(angle);
+            const y2 = 300 + (205 + length) * Math.sin(angle);
+            rayGroup2.append("line")
+                .attr("x1", x1).attr("y1", y1)
+                .attr("x2", x2).attr("y2", y2)
+                .attr("stroke", "#f7b84d")
+                .attr("stroke-width", 1.2)
+                .attr("stroke-linecap", "round")
+                .attr("opacity", 0.2);
+        }
+
+        // ----- GRANULATION (static relative to sun) -----
+        const granulation = sunGroup.append("g")
+            .attr("filter", "url(#sunTexture)")
+            .style("mix-blend-mode", "overlay")
+            .attr("opacity", 0.3);
+        for (let i = 0; i < 70; i++) {
+            const angle = Math.random() * 2 * Math.PI;
+            const radius = 50 + Math.random() * 150;
+            const cx = 300 + radius * Math.cos(angle);
+            const cy = 300 + radius * Math.sin(angle);
+            const r = 3 + Math.random() * 12;
+            const bright = 0.3 + Math.random() * 0.5;
+            granulation.append("circle")
+                .attr("cx", cx).attr("cy", cy).attr("r", r)
+                .attr("fill", i % 3 === 0 ? "#fde5a8" : "#fbc45a")
+                .attr("opacity", bright * 0.35)
+                .attr("filter", "blur(2px)");
+        }
+
+        // faculae
+        const faculae = sunGroup.append("g").attr("opacity", 0.25);
+        for (let i = 0; i < 110; i++) {
+            const angle = Math.random() * 2 * Math.PI;
+            const radius = 130 + Math.random() * 80;
+            const cx = 300 + radius * Math.cos(angle);
+            const cy = 300 + radius * Math.sin(angle);
+            faculae.append("circle")
+                .attr("cx", cx).attr("cy", cy)
+                .attr("r", 1.5 + Math.random() * 4)
+                .attr("fill", "#fff2d6")
+                .attr("opacity", 0.2 + Math.random() * 0.35)
+                .attr("filter", "blur(1px)");
+        }
+
+        // outer corona wash
+        sunGroup.append("circle")
+            .attr("cx", 300).attr("cy", 300).attr("r", 245)
+            .attr("fill", "url(#coronaGrad)")
+            .attr("opacity", 0.15)
+            .attr("filter", "url(#glowFilter)")
+            .style("mix-blend-mode", "screen");
+
+        // faint rim
+        sunGroup.append("circle")
+            .attr("cx", 300).attr("cy", 300).attr("r", 225)
+            .attr("fill", "none")
+            .attr("stroke", "#f7b84d")
+            .attr("stroke-width", 1.5)
+            .attr("opacity", 0.2)
+            .attr("filter", "url(#coronaDisplace)");
+
+        // ----- SUNSPOTS (dynamic, evolve over time) -----
+        // We create a dedicated group inside sunGroup so spots rotate with the sun.
+        const spotGroup = sunGroup.append("g").attr("class", "sunspot-group");
+
+        // Generate initial spots with properties: angle, radius, size, phase, life
+        const numSpots = 12;
+        const spots = [];
+        for (let i = 0; i < numSpots; i++) {
+            spots.push({
+                angle: Math.random() * 2 * Math.PI,
+                radius: 40 + Math.random() * 140,      // distance from center
+                baseSize: 4 + Math.random() * 18,       // base radius
+                phase: Math.random() * 2 * Math.PI,
+                speed: 0.002 + Math.random() * 0.004,
+                drift: (Math.random() - 0.5) * 0.002,
+                life: 0.5 + Math.random() * 0.5,        // 0..1, changes over time
+                angleOffset: (Math.random() - 0.5) * 0.8,
+                // umbra/penumbra colors
+                dark: d3.color(d3.interpolateRgb("#3a1c0a", "#1a0a04")(Math.random())),
+                mid: d3.color(d3.interpolateRgb("#6a3018", "#3a1c0a")(Math.random())),
+            });
+        }
+
+        // Helper: draw a spot with umbra + penumbra
+        function drawSpot(spot, t) {
+            // life cycle: grow then shrink
+            const lifeCycle = Math.sin(spot.phase + t * 0.01) * 0.5 + 0.5; // 0..1
+            const sizeScale = 0.6 + 0.4 * lifeCycle;
+            const currentRadius = spot.baseSize * sizeScale * 0.8;
+            const opacity = 0.3 + 0.6 * lifeCycle;
+
+            // position drifts slightly
+            const angleDrift = spot.angle + t * spot.speed + Math.sin(t * spot.drift + spot.phase) * 0.1;
+            const radDrift = spot.radius + 8 * Math.sin(t * 0.005 + spot.phase * 2);
+            const cx = 300 + radDrift * Math.cos(angleDrift);
+            const cy = 300 + radDrift * Math.sin(angleDrift);
+
+            // umbra (dark core)
+            const umbraR = currentRadius * 0.5;
+            // penumbra (lighter fringe)
+            const penumbraR = currentRadius;
+
+            // group for this spot
+            const g = spotGroup.append("g")
+                .attr("class", "spot-" + spot.angle.toFixed(3))
+                .attr("opacity", opacity * 0.85);
+
+            // penumbra (lighter, larger)
+            g.append("circle")
+                .attr("cx", cx).attr("cy", cy)
+                .attr("r", penumbraR)
+                .attr("fill", spot.mid.toString())
+                .attr("filter", "blur(3px)")
+                .attr("opacity", 0.7);
+
+            // umbra (dark, smaller)
+            g.append("circle")
+                .attr("cx", cx).attr("cy", cy)
+                .attr("r", umbraR)
+                .attr("fill", spot.dark.toString())
+                .attr("filter", "blur(1.5px)")
+                .attr("opacity", 0.9);
+
+            // tiny bright rim (facula effect) - sometimes
+            if (lifeCycle > 0.6) {
+                g.append("circle")
+                    .attr("cx", cx - umbraR * 0.3).attr("cy", cy - umbraR * 0.3)
+                    .attr("r", umbraR * 0.25)
+                    .attr("fill", "#fde5a8")
+                    .attr("filter", "blur(2px)")
+                    .attr("opacity", 0.2 + 0.3 * lifeCycle);
+            }
+        }
+
+        // Initial draw
+        spots.forEach((spot, i) => {
+            drawSpot(spot, i * 0.5);
+        });
+
+        // ----- ANIMATION LOOP -----
+        let angle = 0;
+        let pulse = 0;
+        let time = 0;
+
+        function animate() {
+            angle += 0.0015;
+            pulse += 0.02;
+            time += 1;
+
+            // rotate sun group
+            sunGroup.attr("transform", `rotate(${angle * 180 / Math.PI}, 300, 300)`);
+
+            // pulse outer glow
+            const glowPulse = 0.55 + 0.08 * Math.sin(pulse);
+            svg.select(".sun-glow")
+                .attr("opacity", glowPulse);
+
+            // pulse corona wash
+            sunGroup.selectAll("circle")
+                .filter(function() { return d3.select(this).attr("r") == 245; })
+                .attr("opacity", 0.12 + 0.05 * Math.sin(pulse * 0.7 + 1.2));
+
+            // ---- UPDATE SUNSPOTS ----
+            // Remove old spot groups and redraw with updated positions
+            spotGroup.selectAll("*").remove();
+
+            // Update spot properties: drift, life, etc.
+            spots.forEach((spot, idx) => {
+                // slowly evolve life cycle
+                spot.phase += 0.008 + 0.005 * Math.sin(idx + time * 0.001);
+                // drift angle over time
+                spot.angle += spot.speed + 0.001 * Math.sin(time * 0.002 + idx);
+                // radius wobble
+                spot.radius += 0.02 * Math.sin(time * 0.003 + idx * 1.5);
+                // keep radius within bounds
+                if (spot.radius < 30) spot.radius = 30;
+                if (spot.radius > 180) spot.radius = 180;
+                // life cycle from phase
+                const lifeVal = Math.sin(spot.phase) * 0.5 + 0.5;
+                // if life too low, respawn (new spot)
+                if (lifeVal < 0.15) {
+                    // respawn with new random properties
+                    spot.angle = Math.random() * 2 * Math.PI;
+                    spot.radius = 40 + Math.random() * 140;
+                    spot.baseSize = 4 + Math.random() * 18;
+                    spot.phase = Math.random() * 2 * Math.PI;
+                    spot.speed = 0.002 + Math.random() * 0.004;
+                    spot.drift = (Math.random() - 0.5) * 0.002;
+                    spot.dark = d3.color(d3.interpolateRgb("#3a1c0a", "#1a0a04")(Math.random()));
+                    spot.mid = d3.color(d3.interpolateRgb("#6a3018", "#3a1c0a")(Math.random()));
+                }
+                // draw the updated spot
+                drawSpot(spot, time + idx * 0.3);
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+        console.log("Animated sun with dynamic sunspots running.");
+    })();
+</script>
+</body>
+</html>

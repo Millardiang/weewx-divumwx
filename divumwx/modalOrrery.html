@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<!--
+##############################################################################################
+# modalOrrery.html version 0.0.1
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  GPLv3
+##############################################################################################
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Solar System Orrery</title>
+
+<style>
+:root{
+  --bs-body-bg: #FFFFFF;
+  --moon-text-color: #1D2C4E;
+}
+[data-theme="dark"]{
+  --bs-body-bg: #111834;
+  --moon-text-color: #E9E4D4;
+}
+html, body { margin: 0; overflow: hidden; }
+body { background: var(--bs-body-bg); transition: background-color .2s; }
+.tooltip-box {
+  position: absolute; visibility: hidden; font-family: Helvetica; font-size: 7.5px;
+  background-color: #292e35; border-width: 1px; border-style: solid;
+  border-radius: 5px; padding: 10px; box-shadow: 2px 2px 20px; opacity: 0.9;
+  pointer-events: none;
+}
+</style>
+<style>
+
+[data-season="winter"] {
+  --card-bg: #e9f2ec; --card-bg-dark: #e9f2ec; --card-bg-light: #e9f2ec;
+  --bg-color: #e9f2ec; --bg-color-dark: #e9f2ec; --bg-color-light: #e9f2ec;
+  --bs-body-bg: #e9f2ec; --bs-card-bg: #e9f2ec; --bg: #e9f2ec;
+}
+[data-season="spring"] {
+  --card-bg: #eef7e3; --card-bg-dark: #eef7e3; --card-bg-light: #eef7e3;
+  --bg-color: #eef7e3; --bg-color-dark: #eef7e3; --bg-color-light: #eef7e3;
+  --bs-body-bg: #eef7e3; --bs-card-bg: #eef7e3; --bg: #eef7e3;
+}
+[data-season="summer"] {
+  --card-bg: #fff6d9; --card-bg-dark: #fff6d9; --card-bg-light: #fff6d9;
+  --bg-color: #fff6d9; --bg-color-dark: #fff6d9; --bg-color-light: #fff6d9;
+  --bs-body-bg: #fff6d9; --bs-card-bg: #fff6d9; --bg: #fff6d9;
+}
+[data-season="autumn"] {
+  --card-bg: #f2e6d8; --card-bg-dark: #f2e6d8; --card-bg-light: #f2e6d8;
+  --bg-color: #f2e6d8; --bg-color-dark: #f2e6d8; --bg-color-light: #f2e6d8;
+  --bs-body-bg: #f2e6d8; --bs-card-bg: #f2e6d8; --bg: #f2e6d8;
+}
+html[data-season="winter"] body, html[data-season="spring"] body,
+html[data-season="summer"] body, html[data-season="autumn"] body {
+  background-color: var(--bg-color, var(--card-bg));
+}
+</style>
+</head>
+<body>
+
+<div class="Orrery"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+(function(){
+
+  function fromParentTheme(){
+    try {
+      var b = window.parent && window.parent.document && window.parent.document.body;
+      if (b && (b.classList.contains('dark') || b.classList.contains('light'))) {
+        return b.classList.contains('dark') ? 'dark' : 'light';
+      }
+    } catch (e) {}
+    return null;
+  }
+  function applyTheme(){
+    var resolved = fromParentTheme();
+    if (!resolved) {
+      const mode = localStorage.getItem('dashboardThemeMode') || 'auto';
+      resolved = mode === 'light' ? 'light' : mode === 'dark' ? 'dark'
+        : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    }
+    document.documentElement.setAttribute('data-theme', resolved);
+    return resolved;
+  }
+  var themeNow = applyTheme();
+  window.addEventListener('storage', function(e){ if (e.key === 'dashboardThemeMode') { themeNow = applyTheme(); } });
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(){ themeNow = applyTheme(); });
+  try {
+    var __pb = window.parent && window.parent.document && window.parent.document.body;
+    if (__pb) new MutationObserver(function(){ themeNow = applyTheme(); }).observe(__pb, { attributes: true, attributeFilter: ['class'] });
+  } catch (e) {}
+
+  function reportHeight(){
+    if (window.parent === window) return;
+    window.parent.postMessage({ type: 'chartModalContentHeight', height: document.body.scrollHeight, width: document.body.scrollWidth }, '*');
+  }
+  if (window.parent !== window) new ResizeObserver(reportHeight).observe(document.body);
+
+  var svg = d3.select('.Orrery').append('svg').attr('width', 780).attr('height', 500);
+  var centerX = 260, centerY = 275;
+
+  var rocks = 1000;
+  var colors = ['#F618CC','#2E8B57','#007FFF','#FF0000','#BE688B','#FFA54F','#F67F40','#5FC6C6','#B6F131','white'];
+  var color = d3.scaleOrdinal().range(colors).domain(d3.range(0, 10));
+  var nodes = d3.range(rocks).map(function(){ return { type: 'asteroids' }; });
+  var node = svg.append('g').selectAll('circle').data(nodes).enter().append('circle')
+    .attr('r', 0.6)
+    .attr('fill', function(d){ return d3.rgb(color(d)).darker(0); })
+    .attr('transform', 'translate(260, 275)');
+  d3.forceSimulation(nodes)
+    .force('charge', d3.forceCollide().radius(2).strength(0.1))
+    .force('charge', d3.forceManyBody().distanceMin(1).distanceMax(2))
+    .force('radial', d3.forceRadial(function(d){ return d.type = 'asteroids', 120; }))
+    .velocityDecay(0.5)
+    .on('tick', function(){ node.attr('cx', function(d){ return d.x; }).attr('cy', function(d){ return d.y; }); });
+
+  var PLANETS = [
+    { key: 'jupiter', label: 'Jupiter', orbitR: 140, markerR: 10,  color: '#BE688B' },
+    { key: 'saturn',  label: 'Saturn',  orbitR: 160, markerR: 6.5, color: '#FFA54F', rings: true },
+    { key: 'uranus',  label: 'Uranus',  orbitR: 180, markerR: 6,   color: '#F67F40' },
+    { key: 'neptune', label: 'Neptune', orbitR: 200, markerR: 6,   color: '#5FC6C6' },
+    { key: 'pluto',   label: 'Pluto',   orbitR: 220, markerR: 3,   color: '#B6F131' },
+    { key: 'mercury', label: 'Mercury', orbitR: 40,  markerR: 4,   color: '#F618CC' },
+    { key: 'venus',   label: 'Venus',   orbitR: 60,  markerR: 4,   color: '#2E8B57' },
+    { key: 'mars',    label: 'Mars',    orbitR: 100, markerR: 4,   color: '#FF0000' },
+    { key: 'earth',   label: 'Earth',   orbitR: 80,  markerR: 5.5, color: '#007FFF' }
+  ];
+
+  var planetEls = {};
+  var tooltipsLayer = d3.select('.Orrery');
+
+  PLANETS.forEach(function(p){
+    svg.append('circle').attr('cx', centerX).attr('cy', centerY).attr('r', p.orbitR)
+      .attr('stroke-width', 1).attr('stroke', '#424140').attr('fill', 'none');
+
+    var needle = svg.append('line').style('stroke', '#424140').style('stroke-width', 1);
+    var marker = svg.append('circle').attr('r', p.markerR).attr('fill', p.color);
+
+    var tip = tooltipsLayer.append('div').attr('class', 'tooltip-box')
+      .style('color', p.color).style('border-color', p.color);
+    marker.on('mouseover', function(){ tip.style('visibility', 'visible'); })
+      .on('mousemove', function(event){
+        tip.style('top', event.pageY + 'px').style('left', event.pageX + 'px')
+          .html(p.label + ':<br>' + (planetEls[p.key].lastDeg != null ? planetEls[p.key].lastDeg.toFixed(2) : '\u2014') + '\u00B0');
+      })
+      .on('mouseout', function(){ tip.style('visibility', 'hidden'); });
+
+    var ringInner = null, ringOuter = null;
+    if (p.rings){
+      ringInner = svg.append('circle').attr('r', 12.5).attr('fill', 'none').attr('stroke', p.color).attr('stroke-width', 4.5);
+      ringOuter = svg.append('circle').attr('r', 17.5).attr('fill', 'none').attr('stroke', p.color).attr('stroke-width', 1.5);
+    }
+    planetEls[p.key] = { needle: needle, marker: marker, ringInner: ringInner, ringOuter: ringOuter, lastDeg: null };
+  });
+
+  var moonOrbit = svg.append('circle').attr('r', 12).attr('stroke-width', 1).attr('stroke', '#424140').attr('fill', 'none');
+  var moonNeedle = svg.append('line').style('stroke', '#424140').style('stroke-width', 1);
+  var moonMarkerWhite = svg.append('circle').attr('r', 2).attr('fill', 'white');
+  var moonMarkerRing = svg.append('circle').attr('r', 2).attr('fill', 'none').style('stroke-width', 0.5);
+  var moonTip = tooltipsLayer.append('div').attr('class', 'tooltip-box').style('color', 'white').style('border-color', 'white');
+  var moonLastDeg = null;
+  moonMarkerRing.on('mouseover', function(){ moonTip.style('visibility', 'visible'); })
+    .on('mousemove', function(event){
+      moonTip.style('top', event.pageY + 'px').style('left', event.pageX + 'px')
+        .html('Moon:<br>' + (moonLastDeg != null ? moonLastDeg.toFixed(2) : '\u2014') + '\u00B0');
+    })
+    .on('mouseout', function(){ moonTip.style('visibility', 'hidden'); });
+
+  var defSun = svg.append('defs');
+  var filterSun = defSun.append('filter').attr('id', 'sunFilter');
+  filterSun.append('feTurbulence').attr('id', 'turbolence').attr('type', 'fractalNoise')
+    .attr('baseFrequency', '5').attr('numOctaves', '10').attr('seed', '10')
+    .attr('stitchTiles', 'noStitch').attr('result', 'noise');
+  filterSun.append('feDisplacementMap').attr('in', 'SourceGraphic').attr('in2', 'noise')
+    .attr('scale', '20').attr('xChannelSelector', 'R').attr('yChannelSelector', 'B').attr('filterUnits', 'userSpaceOnUse');
+  filterSun.append('animate').attr('xlink:href', '#turbolence').attr('attributeName', 'baseFrequency')
+    .attr('dur', '100').attr('keyTimes', '0;0.5;1').attr('values', '5;5.1;5;').attr('repeatCount', 'indefinite');
+  svg.append('circle').attr('filter', 'url(#sunFilter)').style('stroke', 'none').style('fill', '#FF6347')
+    .attr('r', 21).attr('cx', centerX).attr('cy', centerY);
+
+  function panelText(x, y, text, fill, size, weight){
+    return svg.append('text').attr('x', x).attr('y', y).attr('text-anchor', 'left')
+      .style('font-size', (size || 14) + 'px').style('font-family', 'Helvetica')
+      .style('font-weight', weight || 'normal').style('fill', fill).text(text);
+  }
+  panelText(510, 136, 'Orrery', '#FF6347', 14, 'bold');
+  panelText(510, 152, "Kepler's Equation of Time", '#2E8B57');
+  svg.append('line').attr('x1', 510).attr('x2', 670).attr('y1', 159).attr('y2', 159)
+    .style('stroke', '#007FFF').style('stroke-width', '2px').style('stroke-linecap', 'round');
+  var jdText = panelText(510, 175, 'UT - Julian Date: \u2014', '#FFA54F');
+  var jdyText = panelText(510, 190, 'UT - Years - J2000: \u2014', '#FFA54F');
+  var jdayText = panelText(510, 205, 'UT - Days - J2000: \u2014', '#FFA54F');
+  var jsecText = panelText(510, 220, 'UT - /s - J2000: \u2014', '#FFA54F');
+  panelText(510, 235, 'Heliocentric Mean Longitude in Degrees', '#2E8B57');
+  svg.append('line').attr('x1', 510).attr('x2', 757).attr('y1', 242).attr('y2', 242)
+    .style('stroke', '#007FFF').style('stroke-width', '2px').style('stroke-linecap', 'round');
+
+  var LABEL_ROWS = [
+    { key: 'mercury', y: 261,   fill: '#F618CC' },
+    { key: 'venus',   y: 277,   fill: '#2E8B57' },
+    { key: 'earth',   y: 292,   fill: '#007FFF' },
+    { key: 'moon',    y: 307,   fill: null },
+    { key: 'mars',    y: 322,   fill: '#FF0000' },
+    { key: 'jupiter', y: 337,   fill: '#BE688B' },
+    { key: 'saturn',  y: 352.5, fill: '#FFA54F' },
+    { key: 'uranus',  y: 368,   fill: '#F67F40' },
+    { key: 'neptune', y: 384,   fill: '#5FC6C6' },
+    { key: 'pluto',   y: 399,   fill: '#B6F131' }
+  ];
+  var labelEls = {};
+  LABEL_ROWS.forEach(function(row){
+    labelEls[row.key] = panelText(510, row.y, row.key.charAt(0).toUpperCase() + row.key.slice(1) + ': \u2014\u00B0', row.fill || 'var(--moon-text-color)');
+  });
+  panelText(510, 425, 'Rendered by D3.js', '#2E8B57');
+
+  Date.prototype.getJulian = function(){
+    return (this / 86400000) - (this.getTimezoneOffset() / 1440) + 2440587.5;
+  };
+  function updateJulian(){
+    var now = new Date();
+    var jd = now.getJulian();
+    var jd2000 = new Date('Jan 01 2000 00:00:00').getJulian();
+    var jdy = (jd - jd2000) / 365, jday = (jd - jd2000), jsec = (jd - jd2000) * 86400;
+    jdText.text('UT - Julian Date: ' + jd);
+    jdyText.text('UT - Years - J2000: ' + jdy);
+    jdayText.text('UT - Days - J2000: ' + jday);
+    jsecText.text('UT - /s - J2000: ' + Math.round(jsec));
+  }
+  updateJulian();
+  setInterval(updateJulian, 1000);
+
+  function place(el, orbitCx, orbitCy, radius, longitudeDeg){
+    var rad = (90 - longitudeDeg) * Math.PI / 180;
+    var x = orbitCx + radius * Math.sin(rad);
+    var y = orbitCy - radius * Math.cos(rad);
+    return [x, y];
+  }
+
+  function redraw(v){
+    PLANETS.forEach(function(p){
+      var xy = place(null, centerX, centerY, p.orbitR, v[p.key]);
+      var els = planetEls[p.key];
+      els.lastDeg = v[p.key];
+      els.needle.attr('x1', centerX).attr('y1', centerY).attr('x2', xy[0]).attr('y2', xy[1]);
+      els.marker.attr('cx', xy[0]).attr('cy', xy[1]);
+      if (els.ringInner){ els.ringInner.attr('cx', xy[0]).attr('cy', xy[1]); els.ringOuter.attr('cx', xy[0]).attr('cy', xy[1]); }
+      labelEls[p.key].text(p.label + ': ' + v[p.key] + '\u00B0');
+    });
+
+    var earthXY = place(null, centerX, centerY, PLANETS.filter(function(p){ return p.key === 'earth'; })[0].orbitR, v.earth);
+    var moonx = v.moon + v.earth;
+    var moonXY = place(null, earthXY[0], earthXY[1], 12, moonx);
+    moonOrbit.attr('cx', earthXY[0]).attr('cy', earthXY[1]);
+    moonNeedle.attr('x1', earthXY[0]).attr('y1', earthXY[1]).attr('x2', moonXY[0]).attr('y2', moonXY[1]);
+    moonMarkerWhite.attr('cx', moonXY[0]).attr('cy', moonXY[1]);
+    moonMarkerRing.attr('cx', moonXY[0]).attr('cy', moonXY[1]).attr('stroke', themeNow === 'dark' ? 'white' : '#2d3a4b');
+    moonLastDeg = v.moon;
+    labelEls.moon.text('Moon: ' + v.moon + '\u00B0');
+
+    reportHeight();
+  }
+
+  function refresh(){
+    fetch('./jsondata/almanac.json?_=' + Date.now(), { cache: 'no-store' })
+      .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function(alm){
+        function num(x, fallback){ return (typeof x === 'number' && !isNaN(x)) ? x : (fallback || 0); }
+        redraw({
+          mercury: num(alm['almanac.mercury.hlongitude'], 0),
+          venus: num(alm['almanac.venus.hlongitude'], 0),
+          earth: num(alm['almanac.earth.hlongitude'], 0),
+          mars: num(alm['almanac.mars.hlongitude'], 0),
+          moon: num(alm['almanac.moon.az'], 0),
+          jupiter: num(alm['almanac.jupiter.hlongitude'], 0),
+          saturn: num(alm['almanac.saturn.hlongitude'], 0),
+          uranus: num(alm['almanac.uranus.hlongitude'], 0),
+          neptune: num(alm['almanac.neptune.hlongitude'], 0),
+          pluto: num(alm['almanac.pluto.hlongitude'], 0)
+        });
+      }).catch(function(e){ console.warn('modalOrrery: refresh failed —', e.message); });
+  }
+  refresh();
+  setInterval(refresh, 60000);
+
+})();
+</script>
+<script>
+(function applySeasonFromParent(){
+  function apply(){
+    try {
+      var b = window.parent && window.parent.document && window.parent.document.body;
+      var m = b && /season-(winter|spring|summer|autumn)/.exec(b.className);
+      if (m) document.documentElement.setAttribute('data-season', m[1]);
+      else document.documentElement.removeAttribute('data-season');
+    } catch (e) {}
+  }
+  apply();
+  try {
+    var pb = window.parent && window.parent.document && window.parent.document.body;
+    if (pb) new MutationObserver(apply).observe(pb, { attributes: true, attributeFilter: ['class'] });
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>

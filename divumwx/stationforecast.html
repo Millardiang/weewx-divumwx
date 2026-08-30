@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<!--
+##############################################################################################
+# stationforecast.html version 0.0.1
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  GPLv3
+##############################################################################################
+-->
+<html lang="en" data-bs-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>7-Day Forecast</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/css/bootstrap.min.css" rel="stylesheet">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root,
+[data-bs-theme="light"]{
+  --bw-accent:#B45309;
+  --bw-lime:#C9DA1E;
+  --bw-sky:#6FB6DD;
+  --bw-danger:#E36B57;
+  --bw-radius-sm:10px;
+  --bw-shadow:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.5);
+
+  --bs-body-bg: #EFECE2;
+  --bs-body-color: #1D2C4E;
+  --bs-secondary-color: #5C6672;
+  --bs-tertiary-bg: #FFFFFF;
+  --bs-secondary-bg: #FFFFFF;
+  --bs-border-color: #C9CFD8;
+  --bs-card-bg: #FFFFFF;
+  --bs-font-sans-serif:'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+[data-bs-theme="dark"]{
+  --bw-accent:#D3A94C;
+  --bw-lime:#C9DA1E;
+  --bw-sky:#6FB6DD;
+  --bw-danger:#E36B57;
+  --bw-shadow:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.5);
+
+  --bs-body-bg: #0A0F22;
+  --bs-body-color: #E9E4D4;
+  --bs-secondary-color: #8B93B8;
+  --bs-tertiary-bg: #111834;
+  --bs-secondary-bg: #111834;
+  --bs-border-color: #2A3358;
+  --bs-card-bg: #111834;
+}
+
+body{
+  font-family:var(--bs-font-sans-serif);
+  padding: 16px;
+  transition:background-color .25s ease, color .25s ease;
+}
+.card{background:var(--bs-card-bg); border-radius:var(--bw-radius-sm); box-shadow:var(--bw-shadow);}
+
+/* Seasonal accent theming removed entirely (retired site-wide -- see
+   header.js's applySeasonClass() for the full rationale). --bs-card-bg,
+   --bs-body-bg, and --bs-tertiary-bg now always resolve to their plain
+   :root/[data-bs-theme] values above, regardless of any body.season-*
+   class -- this page no longer has any CSS that reacts to one at all,
+   so it's correct even if a stray season-* class somehow still ends up
+   on <body> (a stale cached header.js, etc.) rather than depending on
+   the JS side never adding it. */
+
+.section-label{
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--bs-secondary-color);
+  margin:20px 0 12px;display:flex;align-items:center;gap:10px;
+}
+.section-label::after{content:"";flex:1;height:1px;background:var(--bs-border-color);}
+
+/* ---------- Day strip ---------- */
+.day-card{
+  flex:1 1 110px;min-width:90px;padding:14px 8px;text-align:center;
+  cursor:pointer;position:relative;
+}
+.day-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:transparent;}
+.day-card.active::before{background:var(--bw-lime);}
+.day-card .dname{font-size:12.5px;font-weight:700;color:var(--bs-secondary-color);text-transform:uppercase;letter-spacing:.03em;}
+.day-card .dicon{width:38px;height:38px;margin:8px auto 4px;display:block;object-fit:contain;}
+.day-card .dcond{font-size:11.5px;color:var(--bs-secondary-color);height:28px;display:flex;align-items:center;justify-content:center;}
+.day-card .dtemps{font-family:'JetBrains Mono',monospace;font-size:14px;margin-top:4px;}
+.day-card .dtemps .lo{color:var(--bs-secondary-color);}
+.day-card.active{background:var(--bs-tertiary-bg);}
+/* Hourly panel now matches the active day-card's background (both use
+   --bs-tertiary-bg) instead of the generic .card background
+   (--bs-card-bg), which under the seasonal theme overrides above reads
+   as a much warmer "parchment" tone -- was visually inconsistent with
+   the day strip's own highlighted state directly above it. */
+.card.hourly-panel{background:var(--bs-tertiary-bg);}
+.day-card.active .dname{color:var(--bw-accent);}
+
+/* ---------- Hourly table ---------- */
+.hourly-title h2{font-size:18px;font-weight:700;margin:0;}
+.hourly-title span{font-size:12px;color:var(--bs-secondary-color);}
+/* Bootstrap's own .table component defaults --bs-table-bg to
+   var(--bs-body-bg) and paints that directly onto every <td>/<th> cell,
+   independent of the parent .card -- this was the actual, entire cause
+   of the table area showing a different (parchment) colour than the
+   surrounding panel this whole time, nothing to do with seasonal
+   theming at all. Overriding it to transparent here lets the parent
+   .card.hourly-panel's own background (--bs-tertiary-bg) show through
+   uniformly instead. */
+table.hourly{ --bs-table-bg: transparent; }
+table.hourly{min-width:760px;}
+table.hourly th, table.hourly td{text-align:center;font-size:13px;vertical-align:middle;}
+table.hourly th{font-size:11px;color:var(--bs-secondary-color);text-transform:uppercase;letter-spacing:.03em;font-weight:600;border-bottom:1px solid var(--bs-border-color);}
+table.hourly td.rowlabel, table.hourly th.rowlabel{text-align:left;position:sticky;left:0;background:var(--bs-tertiary-bg);font-weight:700;color:var(--bs-secondary-color);}
+table.hourly img.hicon{width:28px;height:28px;display:block;margin:0 auto 4px;object-fit:contain;}
+
+table.hourly tr.track-row td.track-cell{
+  position:relative;
+  height:128px;
+  padding:0;
+  vertical-align:top;
+}
+table.hourly .track-marker{
+  position:absolute;
+  top:0;left:0;right:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:2px;
+  transition:top .4s ease;
+}
+table.hourly .track-marker img.hicon{margin-bottom:2px;}
+table.hourly .temp-cell{font-family:'JetBrains Mono',monospace;font-weight:600;}
+table.hourly .rain-cell{color:var(--bw-sky);font-family:'JetBrains Mono',monospace;font-size:12px;}
+
+/* ---------- Meteocons contrast filter, light theme only ---------- */
+[data-bs-theme="light"] .dicon,
+[data-bs-theme="light"] .hicon{
+  filter:
+    brightness(0.88) contrast(1.12) saturate(1.08)
+    drop-shadow(0 0.5px 1px rgba(20,24,27,.40))
+    drop-shadow(0 1.5px 4px rgba(20,24,27,.26))
+    drop-shadow(0 4px 7px rgba(20,24,27,.18));
+}
+
+/* ---------- Meteocons contrast filter, dark theme only ---------- */
+[data-bs-theme="dark"] .dicon,
+[data-bs-theme="dark"] .hicon{
+  filter:
+    brightness(1.45) contrast(1.2)
+    drop-shadow(0 0 2px rgba(255,255,255,.32))
+    drop-shadow(0 0 8px rgba(255,255,255,.18));
+}
+
+.wind-badge{ position:relative; width:44px; height:44px; margin:0 auto; display:flex; align-items:center; justify-content:center; }
+.wind-badge-ring{ position:absolute; inset:0; width:100%; height:100%; transition:transform .4s ease; }
+.wind-badge-value{ position:relative; font-family:'JetBrains Mono',monospace; font-size:9.5px; font-weight:700; color:var(--wind-col, var(--bs-secondary-color)); }
+
+.live-dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--bs-secondary-color); margin-right:6px; }
+</style>
+</head>
+<body>
+
+<div class="d-flex align-items-baseline justify-content-between flex-wrap gap-2 mb-1">
+  <h2 class="fw-bold fs-3 mb-0" id="pageTitle"></h2>
+  <span style="color:var(--bs-secondary-color);font-size:12px;"><span class="live-dot" id="liveDot"></span><span id="liveLabel">Connecting…</span></span>
+</div>
+
+<div class="section-label">Forecast</div>
+<div class="day-strip d-flex flex-wrap gap-3" id="dayStrip"></div>
+
+<div class="card hourly-panel mt-4 p-4">
+  <div class="hourly-title d-flex align-items-baseline justify-content-between mb-3">
+    <h2 id="hourlyTitle">Today — hourly</h2>
+    <span>Forecast source: Open‑Meteo</span>
+  </div>
+  <div class="table-responsive">
+    <table class="hourly table table-borderless mb-0" id="hourlyTable"></table>
+  </div>
+</div>
+
+<div class="mt-4">
+  <div class="hourly-title d-flex align-items-baseline justify-content-between mb-2">
+    <h2>7-Day Meteogram</h2>
+    <span>Forecast source: Open‑Meteo</span>
+  </div>
+
+  <iframe src="charts-d3.html?type=meteogram&embed=1" title="7-day meteogram"
+    style="width:100%;height:620px;border:0;display:block;"></iframe>
+</div>
+
+<div id="emptyState" class="text-center py-5" style="display:none;color:var(--bs-secondary-color);">
+  <p>No forecast data available.</p>
+</div>
+
+<script src="units.js"></script>
+<script>
+
+function applyAlertWarnFlags(){  }
+function render(){ renderPage(); setLive(forecastStatus); }
+</script>
+<script src="forecast.js"></script>
+<script>
+
+function round1(v){ return v==null ? null : Math.round(v*10)/10; }
+function round2(v){ return v==null ? null : Math.round(v*100)/100; }
+function fmtTemp(c, unit){ return c==null ? '--' : (unit==='F' ? round1(C2F(c))+'°F' : round1(c)+'°C'); }
+
+const TEMP_COLOR_STOPS = [
+  [-10, [91,127,227]], [0,[79,168,208]], [10,[79,184,155]], [18,[111,184,90]],
+  [24,[201,178,62]], [30,[224,138,61]], [36,[216,90,61]], [42,[184,48,42]],
+];
+function tempColor(c){
+  if(c==null) return null;
+  const stops = TEMP_COLOR_STOPS;
+  if(c <= stops[0][0]) return `rgb(${stops[0][1].join(',')})`;
+  if(c >= stops[stops.length-1][0]) return `rgb(${stops[stops.length-1][1].join(',')})`;
+  for(let i=0;i<stops.length-1;i++){
+    const [t0,c0] = stops[i], [t1,c1] = stops[i+1];
+    if(c>=t0 && c<=t1){
+      const f = (c-t0)/(t1-t0);
+      return `rgb(${c0.map((v,idx)=>Math.round(v+(c1[idx]-v)*f)).join(',')})`;
+    }
+  }
+}
+function tempSpan(c, unit){ return `<span style="color:${tempColor(c)};">${fmtTemp(c, unit)}</span>`; }
+
+const WIND_COLOR_STOPS = [
+  [0.0,[125,150,165]],[0.5,[110,168,189]],[1.5,[97,184,178]],[3.3,[99,184,114]],
+  [5.5,[156,182,80]],[7.9,[205,171,62]],[10.7,[224,138,61]],[13.8,[217,98,61]],
+  [17.1,[195,62,48]],[20.7,[170,45,60]],[24.4,[150,40,90]],[28.4,[120,40,120]],[32.6,[90,40,140]],
+];
+function windColor(ms){
+  if(ms==null) return null;
+  const stops = WIND_COLOR_STOPS;
+  if(ms <= stops[0][0]) return `rgb(${stops[0][1].join(',')})`;
+  if(ms >= stops[stops.length-1][0]) return `rgb(${stops[stops.length-1][1].join(',')})`;
+  for(let i=0;i<stops.length-1;i++){
+    const [s0,c0] = stops[i], [s1,c1] = stops[i+1];
+    if(ms>=s0 && ms<=s1){
+      const f = (ms-s0)/(s1-s0);
+      return `rgb(${c0.map((v,idx)=>Math.round(v+(c1[idx]-v)*f)).join(',')})`;
+    }
+  }
+}
+function fmtWindValueOnly(ms, unit){
+  if(ms==null) return '--';
+  switch(unit){
+    case 'mph': return round1(ms2mph(ms));
+    case 'kmh': return round1(ms2kmh(ms));
+    case 'kt':  return round1(ms2kt(ms));
+    case 'ms':  return round1(ms);
+    case 'bf':  return beaufort(ms).force;
+    default:    return round1(ms);
+  }
+}
+function windUnitAbbr(unit){
+  switch(unit){
+    case 'mph': return 'mph'; case 'kmh': return 'km/h'; case 'kt': return 'kt';
+    case 'ms': return 'm/s'; case 'bf': return 'Bf'; default: return 'm/s';
+  }
+}
+function degToCompass(deg){
+  if(deg==null) return '—';
+  const dirs=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+  return dirs[Math.round(deg/22.5)%16];
+}
+function windDirBadge(dirDeg, gustMs, unit){
+  const col = windColor(gustMs) || 'var(--bs-secondary-color)';
+  const val = fmtWindValueOnly(gustMs, unit);
+  const arrow = dirDeg!=null ? `
+      <svg viewBox="0 0 44 44" class="wind-badge-ring" aria-hidden="true">
+        <circle cx="22" cy="22" r="13" fill="none" stroke="${col}" stroke-width="1.5" opacity=".35"/>
+        <g transform="rotate(${dirDeg} 22 22)">
+          <path d="M22 1 L31.5 10.4 L22 5 L12.5 10.4 Z" fill="${col}"/>
+        </g>
+      </svg>` : '';
+  return `<div class="wind-badge" style="--wind-col:${col}" title="${dirDeg!=null ? 'From '+degToCompass(dirDeg) : ''}">
+      ${arrow}<span class="wind-badge-value">${val}</span>
+    </div>`;
+}
+function fmtRain(mm, unit){ if(mm==null) return '--'; return unit==='in' ? round2(mm2in(mm))+' in' : round2(mm)+' mm'; }
+
+const METEOCONS_BASE = 'https://cdn.meteocons.com/3.0.0-next.10/svg/fill/';
+const ICON_MAP = {
+  sun:'clear-day', moon:'clear-night', partly:'partly-cloudy-day', partlyNight:'partly-cloudy-night',
+  cloud:'cloudy', rain:'rain', drizzle:'drizzle', snow:'snow', sleet:'sleet',
+  thunder:'thunderstorms-day', thunderNight:'thunderstorms-night', fog:'fog-day', fogNight:'fog-night',
+};
+function iconUrl(name){ return METEOCONS_BASE + (ICON_MAP[name] || ICON_MAP.partly) + '.svg'; }
+function iconImg(name, cls, label){ return `<img class="${cls}" src="${iconUrl(name)}" alt="${label||name}" loading="lazy">`; }
+
+let currentSystem = (function(){
+  try {
+    const key = localStorage.getItem('dashboardUnitSystem') || 'uk';
+    if (typeof SYSTEMS !== 'undefined' && SYSTEMS[key]) return key;
+  } catch (e) {}
+  return 'uk';
+})();
+window.addEventListener('storage', e => {
+  if (e.key === 'dashboardUnitSystem') { currentSystem = e.newValue || 'uk'; renderPage(); }
+});
+
+let activeDay = 0;
+
+function reportHeight(){
+  if(window.parent === window) return;
+
+  requestAnimationFrame(() => {
+    window.parent.postMessage({ type: 'chartModalContentHeight', height: document.body.scrollHeight }, '*');
+  });
+}
+window.addEventListener('resize', reportHeight);
+
+function renderPage(){
+  const days = getDays();
+  if(!days || !days.length){
+    document.getElementById('dayStrip').innerHTML = '';
+    document.getElementById('hourlyTable').innerHTML = '';
+    document.getElementById('emptyState').style.display = '';
+    reportHeight();
+    return;
+  }
+  document.getElementById('emptyState').style.display = 'none';
+  if(activeDay >= days.length) activeDay = 0;
+  const sys = SYSTEMS[currentSystem];
+  const hrs = getHourly(activeDay) || [];
+
+  const strip = document.getElementById('dayStrip');
+  strip.innerHTML = days.map((d,i)=>`
+    <div class="day-card card ${i===activeDay?'active':''}" data-i="${i}">
+      <div class="dname">${d.name}</div>
+      ${iconImg(d.icon,'dicon',d.cond)}
+      <div class="dcond">${d.cond||''}</div>
+      <div class="dtemps">${tempSpan(d.hi,sys.temp)} <span class="lo">${tempSpan(d.lo,sys.temp)}</span></div>
+    </div>`).join('');
+  strip.querySelectorAll('.day-card').forEach(el=>{
+    el.addEventListener('click', ()=>{ activeDay = parseInt(el.dataset.i,10); renderPage(); });
+  });
+
+  document.getElementById('hourlyTitle').textContent = days[activeDay].name + ' — hourly';
+  const table = document.getElementById('hourlyTable');
+  const fmtHour = h => h===0?'12am':h===12?'12pm':h>12?(h-12)+'pm':h+'am';
+  const TRACK_RANGE = 56;
+  const trackTemps = hrs.map(h=>h.tempC).filter(t=>t!=null);
+  const tMin = trackTemps.length ? Math.min(...trackTemps) : 0;
+  const tMax = trackTemps.length ? Math.max(...trackTemps) : 1;
+  const tempOffset = t => (t==null || tMax===tMin) ? TRACK_RANGE/2 : Math.round((1-(t-tMin)/(tMax-tMin))*TRACK_RANGE);
+
+  table.innerHTML = `
+    <tr><th class="rowlabel">Time</th>${hrs.map(h=>`<th>${fmtHour(h.h)}</th>`).join('')}</tr>
+    <tr class="track-row">
+      <td class="rowlabel">Weather</td>
+      ${hrs.map(h=>`<td class="track-cell"><div class="track-marker" style="top:${tempOffset(h.tempC)}px">${iconImg(h.icon,'hicon')}<span class="temp-cell">${tempSpan(h.tempC, sys.temp)}</span></div></td>`).join('')}
+    </tr>
+    <tr><td class="rowlabel">Rain</td>${hrs.map(h=>`<td class="rain-cell">${h.rainMm>0 ? fmtRain(h.rainMm, sys.rain) : '—'}</td>`).join('')}</tr>
+    <tr>
+      <td class="rowlabel">Gust (${windUnitAbbr(sys.wind)})</td>
+      ${hrs.map(h=>`<td>${windDirBadge(h.windDirDeg, h.gustMs ?? h.windMs, sys.wind)}</td>`).join('')}
+    </tr>`;
+  reportHeight();
+}
+
+const THEME_ISDAY_POLL_MS = 5 * 60 * 1000;
+let lastIsDay = null;
+const NORTHERN_SEASON_BY_MONTH = [
+  'winter', 'winter', 'spring', 'spring', 'spring', 'summer',
+  'summer', 'summer', 'autumn', 'autumn', 'autumn', 'winter'
+];
+const SEASON_SWAP_SOUTH = { winter: 'summer', summer: 'winter', spring: 'autumn', autumn: 'spring' };
+function getMeteorologicalSeason(date, lat){
+  const season = NORTHERN_SEASON_BY_MONTH[date.getMonth()];
+  return ((typeof lat === 'number') ? lat : 51.94) >= 0 ? season : SEASON_SWAP_SOUTH[season];
+}
+function applySeasonClass(){
+  // Seasonal accent mode retired site-wide -- see header.js's
+  // applySeasonClass() for the full rationale. This page defines its
+  // own local copy (shadowing header.js's) so it needed the identical
+  // no-op treatment applied directly here.
+  document.body.classList.remove('season-winter', 'season-spring', 'season-summer', 'season-autumn');
+}
+function resolveAutoIsDay(){
+  if(lastIsDay != null) return !!lastIsDay;
+  return !window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+function resolveTheme(){
+  const mode = localStorage.getItem('dashboardThemeMode') || 'auto';
+  if (mode === 'seasonal') return 'light';
+  return mode==='light' ? 'light' : mode==='dark' ? 'dark' : (resolveAutoIsDay() ? 'light' : 'dark');
+}
+function applyTheme(){
+  document.documentElement.setAttribute('data-bs-theme', resolveTheme());
+  applySeasonClass();
+}
+function pollIsDayForTheme(){
+  // Primary source: almanac.json's actual sun altitude -- "day" is
+  // precisely "between sunrise and sunset" by definition (sun above
+  // the horizon), astronomically exact regardless of what loop.json's
+  // hardware-derived isDay flag happens to mean. Falls back to
+  // loop.json's own observations.isDay only if almanac.json's fetch
+  // fails or its own value is missing.
+  fetch('./jsondata/almanac.json?_=' + Date.now(), {cache:'no-store'})
+    .then(r => { if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    .then(alm => {
+      const sunAlt = alm['almanac.sun.alt'];
+      if(typeof sunAlt === 'number' && !isNaN(sunAlt)){
+        lastIsDay = sunAlt > 0;
+        applyTheme();
+      } else {
+        pollIsDayForThemeFallback();
+      }
+    })
+    .catch(()=>{ pollIsDayForThemeFallback(); });
+}
+function pollIsDayForThemeFallback(){
+  fetch('./jsondata/loop.json?_=' + Date.now(), {cache:'no-store'})
+    .then(r => { if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    .then(j => {
+      const o = (j && j.observations) || {};
+      if(o.isDay != null){ lastIsDay = o.isDay; applyTheme(); }
+    })
+    .catch(()=>{});
+}
+window.addEventListener('storage', e => {
+  if(e.key==='dashboardThemeMode') applyTheme();
+});
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+applyTheme();
+pollIsDayForTheme();
+setInterval(pollIsDayForTheme, THEME_ISDAY_POLL_MS);
+
+// ===================== Station title =====================
+fetch('./jsondata/archive.json?_=' + Date.now(), {cache:'no-store'})
+  .then(r => { if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+  .then(data => {
+    const loc = data && data.meta && data.meta.station_location;
+    if(loc) document.getElementById('pageTitle').textContent = loc;
+  })
+  .catch(()=>{});
+
+// ===================== Kick off =====================
+function setLive(status){
+  const dot = document.getElementById('liveDot');
+  const label = document.getElementById('liveLabel');
+  if(status==='live'){ dot.style.background = '#5BBB8A'; label.textContent = 'Live'; }
+  else if(status==='stale'){ dot.style.background = '#D6BE4E'; label.textContent = 'Live (stale)'; }
+  else if(status==='demo'){ dot.style.background = 'var(--bs-secondary-color)'; label.textContent = 'Demo data'; }
+  else { dot.style.background = 'var(--bs-secondary-color)'; label.textContent = 'Connecting…'; }
+}
+renderPage();
+setLive('connecting');
+pollForecast();
+setInterval(pollForecast, FORECAST_POLL_MS);
+</script>
+</body>
+</html>

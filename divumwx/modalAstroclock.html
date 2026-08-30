@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<!--
+##############################################################################################
+# modalAstroclock.html version 0.0.1
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  GPLv3
+##############################################################################################
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Astronomical Clock</title>
+
+<style>
+@font-face {
+  font-family: 'AstroDotBasic';
+  src: url('css/fonts/AstroDotBasic.ttf') format('truetype');
+}
+:root{
+  --bs-body-bg: #FFFFFF;
+  --moon-text-color: #1D2C4E;
+}
+[data-theme="dark"]{
+  --bs-body-bg: #111834;
+  --moon-text-color: #E9E4D4;
+}
+html, body { margin: 0; overflow: auto; }
+body { background: var(--bs-body-bg); transition: background-color .2s; }
+.analog-hours   { stroke-width: 5;   stroke: #32CD32; stroke-linecap: round; }
+.analog-minutes { stroke-width: 4;   stroke: #00FFFF; stroke-linecap: round; }
+.analog-seconds { stroke-width: 2.5; stroke: #FF00FF; stroke-linecap: round; }
+</style>
+<style>
+
+[data-season="winter"] {
+  --card-bg: #e9f2ec; --card-bg-dark: #e9f2ec; --card-bg-light: #e9f2ec;
+  --bg-color: #e9f2ec; --bg-color-dark: #e9f2ec; --bg-color-light: #e9f2ec;
+  --bs-body-bg: #e9f2ec; --bs-card-bg: #e9f2ec; --bg: #e9f2ec;
+}
+[data-season="spring"] {
+  --card-bg: #eef7e3; --card-bg-dark: #eef7e3; --card-bg-light: #eef7e3;
+  --bg-color: #eef7e3; --bg-color-dark: #eef7e3; --bg-color-light: #eef7e3;
+  --bs-body-bg: #eef7e3; --bs-card-bg: #eef7e3; --bg: #eef7e3;
+}
+[data-season="summer"] {
+  --card-bg: #fff6d9; --card-bg-dark: #fff6d9; --card-bg-light: #fff6d9;
+  --bg-color: #fff6d9; --bg-color-dark: #fff6d9; --bg-color-light: #fff6d9;
+  --bs-body-bg: #fff6d9; --bs-card-bg: #fff6d9; --bg: #fff6d9;
+}
+[data-season="autumn"] {
+  --card-bg: #f2e6d8; --card-bg-dark: #f2e6d8; --card-bg-light: #f2e6d8;
+  --bg-color: #f2e6d8; --bg-color-dark: #f2e6d8; --bg-color-light: #f2e6d8;
+  --bs-body-bg: #f2e6d8; --bs-card-bg: #f2e6d8; --bg: #f2e6d8;
+}
+html[data-season="winter"] body, html[data-season="spring"] body,
+html[data-season="summer"] body, html[data-season="autumn"] body {
+  background-color: var(--bg-color, var(--card-bg));
+}
+</style>
+</head>
+<body>
+
+<div class="clockpos">
+  <div class="astroclock"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+(function(){
+
+  function fromParentTheme(){
+    try {
+      var b = window.parent && window.parent.document && window.parent.document.body;
+      if (b && (b.classList.contains('dark') || b.classList.contains('light'))) {
+        return b.classList.contains('dark') ? 'dark' : 'light';
+      }
+    } catch (e) {}
+    return null;
+  }
+  function applyTheme(){
+    var resolved = fromParentTheme();
+    if (!resolved) {
+      const mode = localStorage.getItem('dashboardThemeMode') || 'auto';
+      resolved = mode === 'light' ? 'light' : mode === 'dark' ? 'dark'
+        : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    }
+    document.documentElement.setAttribute('data-theme', resolved);
+    return resolved;
+  }
+  var themeNow = applyTheme();
+  window.addEventListener('storage', function(e){ if (e.key === 'dashboardThemeMode') themeNow = applyTheme(); });
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(){ themeNow = applyTheme(); });
+  try {
+    var __pb = window.parent && window.parent.document && window.parent.document.body;
+    if (__pb) new MutationObserver(function(){ themeNow = applyTheme(); }).observe(__pb, { attributes: true, attributeFilter: ['class'] });
+  } catch (e) {}
+
+  function reportHeight(){
+    if (window.parent === window) return;
+    window.parent.postMessage({ type: 'chartModalContentHeight', height: document.body.scrollHeight, width: document.body.scrollWidth }, '*');
+  }
+  if (window.parent !== window) new ResizeObserver(reportHeight).observe(document.body);
+
+  function stationParts(date, tz){
+    var parts = {};
+    new Intl.DateTimeFormat('en-GB', {
+      timeZone: tz, hourCycle: 'h23',
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    }).formatToParts(date).forEach(function(p){ parts[p.type] = p.value; });
+    return parts;
+  }
+  function stationNow(tz){
+    var p = stationParts(new Date(), tz);
+    return new Date(Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second));
+  }
+
+  var toRad = function(x){ return x * (Math.PI / 180); };
+  var toDeg = function(x){ return x * (180 / Math.PI); };
+  var toDegRad = function(x, f){ return toRad(x * f); };
+
+  // (timeToDeg(), which parsed pre-formatted "HH:MM" strings, is gone --
+  // almanac.json now gives raw unix_epoch timestamps; epochToDeg() below
+  // goes straight from epoch to the same clock-face degrees.)
+
+  // almanac.json now gives raw unix_epoch timestamps rather than
+  // pre-formatted local-time strings for rise/set/transit/twilight --
+  // this goes straight from epoch to the same clock-face degrees
+  // timeToDeg() used to produce, reading hour/minute in the station's
+  // own timezone (matching the old server-side formatting, which used
+  // the server OS timezone under the same station-timezone assumption).
+  function epochToDeg(ts){
+    if (ts == null) return null;
+    var opts = { hour: '2-digit', minute: '2-digit', hour12: false };
+    try { if (window.StationTime) opts.timeZone = window.StationTime.getTZ(); } catch (e) {}
+    var parts = {};
+    try {
+      new Intl.DateTimeFormat('en-GB', opts).formatToParts(new Date(ts * 1000))
+        .forEach(function(p){ parts[p.type] = p.value; });
+    } catch (e) { return null; }
+    var h = Number(parts.hour), m = Number(parts.minute);
+    if (isNaN(h) || isNaN(m)) return null;
+    return (360 / 24) * h + (360 / 60 * m) / 24;
+  }
+  function fmtEpochDate(ts){
+    if (ts == null) return null;
+    var opts = { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false };
+    try { if (window.StationTime) opts.timeZone = window.StationTime.getTZ(); } catch (e) {}
+    return new Date(ts * 1000).toLocaleString(undefined, opts);
+  }
+
+  var svg = d3.select('.astroclock').append('svg').attr('width', 780).attr('height', 500);
+  var defs = svg.append('defs');
+
+  function appendText(x, y, text, fill, size, weight){
+    return svg.append('text').attr('x', x).attr('y', y)
+      .style('fill', fill).style('font-family', 'Helvetica')
+      .style('font-size', (size || 14) + 'px').style('text-anchor', 'left')
+      .style('font-weight', weight || 'normal').text(text);
+  }
+  function appendArc(r, startDeg, endDeg, tx, ty, rotate, stroke, strokeWidth){
+    var arc = d3.arc().innerRadius(r).outerRadius(r);
+    svg.append('path')
+      .attr('fill', 'none').attr('stroke-width', strokeWidth || 0.5).attr('stroke', stroke || 'rgba(137,142,143,1)')
+      .attr('d', arc({ startAngle: toRad(-startDeg), endAngle: toRad(endDeg) }))
+      .attr('transform', 'translate(' + tx + ',' + ty + ')' + (rotate ? ' rotate(' + rotate + ')' : ''));
+  }
+  function appendSector(fill, outerR, halfDeg, tx, ty, rotate){
+    var arc = d3.arc().innerRadius(0).outerRadius(outerR);
+    svg.append('path')
+      .attr('fill', fill).attr('stroke', fill).attr('stroke-width', 1)
+      .attr('d', arc({ startAngle: toRad(-halfDeg), endAngle: toRad(halfDeg) }))
+      .attr('transform', 'translate(' + tx + ',' + ty + ')' + (rotate ? ' rotate(' + rotate + ')' : ''));
+  }
+
+  'abcdefghijkl'.split('').forEach(function(ch, i){
+    svg.append('text').attr('x', 500).attr('y', 171 + i * 20)
+      .style('fill', 'rgba(46,139,87,1)').style('font-family', 'AstroDotBasic')
+      .style('font-size', '20px').style('text-anchor', 'middle').text(ch);
+  });
+
+  appendText(520, 168, 'Astronomical Clock', 'rgba(255,99,71,1)', 14, 'bold');
+  (function(){
+    var t = svg.append('text').attr('x', 520).attr('y', 186)
+      .style('font-family', 'Helvetica').style('font-size', '14px').style('text-anchor', 'left');
+    t.append('tspan').style('fill', 'rgba(46,139,87,1)').text('Based on the ');
+    t.append('tspan').style('fill', 'rgba(0,127,255,1)').text('Orloj');
+    t.append('tspan').style('fill', 'rgba(46,139,87,1)').text(' in the City of Prague');
+  })();
+  svg.append('line').attr('x1', 520).attr('x2', 766).attr('y1', 196).attr('y2', 196)
+    .style('stroke', 'rgba(0,127,255,1)').style('stroke-width', 1.75).style('stroke-linecap', 'round');
+
+  var INFO_ROWS = [
+    { y: 216, fill: '#FFA54F',           key: 'location',  fmt: function(v){ return 'Location: ' + v.location; } },
+    { y: 232, fill: 'rgba(0,127,255,1)', key: 'lat',       fmt: function(v){ return 'Latitude: ' + v.lat + '\u00B0'; } },
+    { y: 248, fill: 'rgba(0,127,255,1)', key: 'lon',       fmt: function(v){ return 'Longitude: ' + v.lon + '\u00B0'; } },
+    { y: 264, fill: 'rgba(0,127,255,1)', key: 'elevation', fmt: function(v){ return 'Elevation: ' + v.elevation + 'm'; } },
+    { y: 280, fill: '#FFA54F',           key: 'equinox',   fmt: function(v){ return 'Equinox: ' + v.nextEquinox; } },
+    { y: 296, fill: 'rgba(255,99,71,1)', key: 'solstice',  fmt: function(v){ return 'Solstice: ' + v.nextSolstice; } },
+    { y: 312, fill: null,                key: 'luminance', fmt: function(v){ return 'Luminance: ' + v.luminance.toFixed(2) + ' %'; } },
+    { y: 327, fill: null,                key: 'phase',     fmt: function(v){ return 'Moon phase: ' + v.moonphase; } },
+    { y: 343, fill: null,                key: 'age',       fmt: function(v){ return 'Moon cycle: ' + v.moonAge.toFixed(2) + ' Days old'; } },
+    { y: 359, fill: null,                key: 'moonaz',    fmt: function(v){ return 'Moon azimuth: ' + v.moonAz + '\u00B0'; } },
+    { y: 375, fill: 'rgba(255,99,71,1)', key: 'sunaz',     fmt: function(v){ return 'Sun azimuth: ' + v.sunAz + '\u00B0'; } },
+    { y: 391, fill: 'rgba(0,127,255,1)', key: 'aries',     fmt: function(v){ return 'Hand of Aries: ' + v.siderealTime + '\u00B0'; } }
+  ];
+  var infoEls = {};
+  INFO_ROWS.forEach(function(row){
+    infoEls[row.key] = appendText(520, row.y, '', row.fill || 'var(--moon-text-color)');
+  });
+  appendText(520, 414, 'Rendered by D3.js', 'rgba(46,139,87,1)');
+
+  svg.append('circle').attr('fill', 'rgba(42,86,147,1)').attr('r', 140).attr('cx', 260).attr('cy', 275);
+
+  appendArc(100,   17,   17,   260,  42,    180);
+  appendArc(165,   20,   20,   260,  -8.5,  180);
+  appendArc(242.5, 18,   18,   260,  -72.5, 180);
+  appendArc(388,   14,   14,   260,  -205,  180);
+  appendArc(770,   8.1,  8.1,  260,  -575,  180);
+
+  svg.append('line').attr('x1', 138).attr('x2', 382).attr('y1', 207.5).attr('y2', 207.5)
+    .style('stroke', 'rgba(137,142,143,1)').style('stroke-width', 0.5).style('stroke-linecap', 'round');
+  svg.append('line').attr('x1', 260).attr('x2', 260).attr('y1', 136).attr('y2', 215)
+    .style('stroke', 'rgba(137,142,143,1)').style('stroke-width', 0.5).style('stroke-linecap', 'round');
+
+  appendArc(770,   9.85, 9.85, 260,  989.5);
+  appendArc(388,   20.9, 20.9, 260,  620);
+  appendArc(242.5, 35,   35,   260,  487.5);
+  appendArc(142,   74,   74,   260,  205,   180);
+
+  [
+    [145.5, 94,   51,    233.5,  208, 180],
+    [145.5, 51,   94,    286.5,  208, 180],
+    [142,   35.5, 104.6, 303,    208, 180],
+    [142,   23,   22,    320,    208, 270],
+    [162,   18,   23,    356,    208, 270],
+    [220,   8,    17.7,  430,    208, 270],
+    [280,   4,    14.6,  503,    208, 270],
+    [350,   2.1,  12,    585,    208, 270],
+    [650,   0.75, 6.5,   897.5,  208, 270],
+    [142,   14.5, 27,    216.5,  208, 90],
+    [142,   22,   23,    199.5,  208, 90],
+    [162,   22,   18,    164,    208, 90],
+    [220,   17.5, 8,     90.5,   208, 90],
+    [280,   14.5, 4,     17.5,   208, 90],
+    [350,   11.7, 2.1,   -65,    208, 90],
+    [650,   6.5,  0.75,  -377.5, 208, 90]
+  ].forEach(function(r){ appendArc(r[0], r[1], r[2], r[3], r[4], r[5]); });
+
+  appendSector('rgba(41,46,53,1)', 140, 66, 260, 386);
+  appendSector('rgba(41,46,53,1)', 142, 66, 260, 273, 180);
+
+  appendArc(120, 78,  78,  260, 375);
+  appendArc(100, 95,  95,  260, 365);
+  appendArc(80,  121, 121, 260, 355);
+
+  var colorBleed = defs.append('linearGradient').attr('id', 'colorBleed').attr('x1', '0').attr('y1', '0').attr('x2', '0').attr('y2', '1');
+  colorBleed.append('stop').attr('stop-color', 'rgba(255,255,0,1)').attr('offset', '0%');
+  colorBleed.append('stop').attr('stop-color', 'rgba(255,0,0,1)').attr('offset', '50%');
+  colorBleed.append('stop').attr('stop-color', 'rgba(0,0,255,1)').attr('offset', '100%');
+
+  var sunsetRed = defs.append('radialGradient').attr('id', 'sunsetRed');
+  sunsetRed.append('stop').attr('stop-color', 'rgba(255,85,85,1.0)').attr('offset', '0');
+  sunsetRed.append('stop').attr('stop-color', 'rgba(255,85,85,0.5)').attr('offset', '0.5');
+  sunsetRed.append('stop').attr('stop-color', 'rgba(255,85,85,0)').attr('offset', '1');
+
+  [
+    { r: 185, stroke: 'url(#colorBleed)',  sw: 15 },
+    { r: 174, stroke: 'rgba(42,86,147,1)', sw: 8 },
+    { r: 155, stroke: 'rgba(9,70,62,1)',   sw: 31 },
+    { r: 171, stroke: 'rgba(255,99,71,1)', sw: 1.5 },
+    { r: 140, stroke: 'rgba(255,99,71,1)', sw: 1.5 },
+    { r: 92,  stroke: 'rgba(255,99,71,1)', sw: 1.5 }
+  ].forEach(function(c){
+    svg.append('circle').attr('r', c.r).attr('cx', 260).attr('cy', 275)
+      .attr('stroke', c.stroke).style('stroke-width', c.sw).style('fill', 'none');
+  });
+
+  appendArc(140, 67, 67, 260, 385, 0, 'rgba(255,99,71,1)', 1);
+
+  svg.append('circle').style('fill', 'rgba(41,46,53,1)').attr('r', 60).attr('cx', 260).attr('cy', 275);
+  svg.append('circle').attr('stroke', 'rgba(255,99,71,1)').style('stroke-width', 1.5).style('fill', 'none').attr('r', 60).attr('cx', 260).attr('cy', 275);
+
+  var xc = 260, yc = 275;
+  var clockCenter = svg.append('g').attr('transform', 'translate(260,275)');
+  var Axis = clockCenter.append('g');
+
+  Axis.selectAll('text.numbers').data(d3.range(24)).enter().append('text')
+    .attr('x', function(d, i){ return 155.5 * Math.cos(i * 0.2616 + 45.552); })
+    .attr('y', function(d, i){ return 155.5 * Math.sin(i * 0.2616 + 45.552); })
+    .attr('text-anchor', 'middle')
+    .style('fill', 'yellow').style('font-family', 'Helvetica')
+    .style('font-size', '12px').style('font-weight', 'bold').style('dominant-baseline', 'central')
+    .text(function(d){ return d; });
+
+  function addTicks(count, r1, r2, strokeWidth, stroke){
+    Axis.selectAll(null).data(d3.range(count)).enter().append('line')
+      .attr('x1', function(d, i){ return r1 * Math.cos(i / count * Math.PI * 2); })
+      .attr('y1', function(d, i){ return r1 * Math.sin(i / count * Math.PI * 2); })
+      .attr('x2', function(d, i){ return r2 * Math.cos(i / count * Math.PI * 2); })
+      .attr('y2', function(d, i){ return r2 * Math.sin(i / count * Math.PI * 2); })
+      .style('stroke-width', strokeWidth + 'px').style('stroke', stroke).style('stroke-linecap', 'round');
+  }
+  addTicks(120, 142.5, 145.5, 1.5, '#888');
+  addTicks(120, 168.5, 165.5, 1.5, '#888');
+  addTicks(24,  165.5, 168.5, 2.5, 'red');
+  addTicks(24,  142.5, 145.5, 2.5, 'red');
+
+  function addEventLine(angleDeg, stroke){
+    if (angleDeg == null) return;
+    var a = toRad(angleDeg);
+    Axis.append('line')
+      .attr('x1', -177 * Math.sin(a)).attr('y1', 177 * Math.cos(a))
+      .attr('x2', -194 * Math.sin(a)).attr('y2', 194 * Math.cos(a))
+      .style('stroke-width', 2.5).style('stroke', stroke).style('stroke-linecap', 'round');
+  }
+
+  var analogContent = svg.append('g').attr('transform', 'translate(260,275)');
+  var hourScale = d3.scaleLinear().range([0, 360]).domain([0, 24]);
+  var minuteScale = d3.scaleLinear().range([0, 360]).domain([0, 60]);
+  var secondScale = d3.scaleLinear().range([0, 360]).domain([0, 60]);
+  var handData = [
+    { label: 'hours', scale: hourScale, value: 0 },
+    { label: 'minutes', scale: minuteScale, value: 0 },
+    { label: 'seconds', scale: secondScale, value: 0 }
+  ];
+  var handsSel = analogContent.selectAll('.hands').data(handData).enter()
+    .append('g').attr('class', function(d){ return 'hands analog-' + d.label; })
+    .append('line')
+    .attr('x1', -144 * Math.sin(Math.PI)).attr('y1', 144 * Math.cos(Math.PI))
+    .attr('x2', -184 * Math.sin(Math.PI)).attr('y2', 184 * Math.cos(Math.PI));
+
+  var stationTz = null;
+  function updateHands(){
+    var local = stationTz ? stationNow(stationTz) : new Date();
+    handData[0].value = (local.getUTCHours() % 24) + 12 + (local.getUTCMinutes() + local.getUTCSeconds() / 60) / 60;
+    handData[1].value = (local.getUTCMinutes() % 60) + local.getUTCSeconds() / 60;
+    handData[2].value = local.getUTCSeconds() + local.getUTCMilliseconds() / 1000;
+    d3.selectAll('.hands').data(handData).attr('transform', function(d){ return 'rotate(' + d.scale(d.value) + ')'; });
+  }
+  setInterval(updateHands, 50);
+  updateHands();
+
+  function Visibility(V){
+    var a0 = 35 / 51, a1 = -0.3495, a2 = -0.1254, a3 = -0.0955, a4 = -0.03134, a5 = -0.01398;
+    return a0 + a1 * Math.cos(V) + a2 * Math.cos(2 * V) + a3 * Math.cos(3 * V) + a4 * Math.cos(4 * V) + a5 * Math.cos(5 * V);
+  }
+  function phase(t, phaze){
+    var T = t - 2 * Math.PI * Math.floor(t / (2 * Math.PI));
+    return T < Math.PI ? Math.cos(t) : phaze;
+  }
+
+  var MoonRings = true, MoonMutatis = true, Kaleidoscope = true, SunMutatis = true;
+  var MoonMov = 8, Velocity = 100, eclipticWidth = 0.75, clockRadius = 140;
+  var Rd = 0.28467 * clockRadius, Re = 0.71533 * clockRadius, b = 2.51284;
+
+  function eclipticR(d, aScale){
+    aScale = aScale || 0.28467;
+    var sd = Math.sin(d);
+    return aScale * clockRadius * (Math.sqrt(b * b - sd * sd) + Math.cos(d));
+  }
+
+  var ZODIAC = [
+    { char: 'c', mod: 13, pos: 1 }, { char: 'd', mod: 13, pos: 2 },
+    { char: 'e', mod: 12, pos: 2 }, { char: 'b', mod: 12, pos: 3 },
+    { char: 'a', mod: 13, pos: 6 }, { char: 'l', mod: 12, pos: 8 },
+    { char: 'k', mod: 13, pos: 11 }, { char: 'f', mod: 13, pos: 10 },
+    { char: 'g', mod: 11, pos: 10 }, { char: 'h', mod: 14, pos: 4 },
+    { char: 'i', mod: 14, pos: 2 }, { char: 'j', mod: 14, pos: 13 }
+  ];
+
+  var built = false;
+  function buildOnce(v){
+    if (built) return;
+    built = true;
+
+    var hourAries = v.hourAries;
+    var xe = xc + Rd * Math.sin(hourAries), ye = yc - Rd * Math.cos(hourAries);
+
+    svg.append('circle').attr('stroke', 'rgba(20,22,276,0.60)').style('stroke-width', 34).style('fill', 'none')
+      .attr('r', 0.48 * (Re + eclipticWidth * Re)).attr('cx', xe).attr('cy', ye);
+    svg.append('circle').attr('stroke', 'rgba(255,255,0,0.75)').style('stroke-width', 2.5).style('fill', 'none')
+      .attr('r', Re).attr('cx', xe).attr('cy', ye);
+    svg.append('circle').attr('stroke', 'rgba(255,255,0,1)').style('stroke-width', 1.5).style('fill', 'none')
+      .attr('r', eclipticWidth * 1.25 * Re).attr('cx', xe).attr('cy', ye);
+    svg.append('circle').attr('stroke', 'rgba(255,255,0,0.75)').style('stroke-width', 3).style('fill', 'none')
+      .attr('r', eclipticWidth * Re * 0.9).attr('cx', xe).attr('cy', ye);
+
+    var Lep = Re - Re * eclipticWidth;
+    for (var i = 0; i < 60; i += 2.5){
+      var d = toDegRad(i, 12);
+      var Ret = 0.285 * clockRadius * (Math.sqrt(b * b - Math.pow(Math.sin(d), 2)) + Math.cos(d));
+      var fa = hourAries + d;
+      svg.append('line')
+        .attr('x1', xc + Ret * Math.sin(fa)).attr('y1', yc - Ret * Math.cos(fa))
+        .attr('x2', xc + (Ret - Lep - 9) * Math.sin(fa)).attr('y2', yc - (Ret - Lep - 9) * Math.cos(fa))
+        .style('stroke', 'rgb(255,255,0,0.75)').style('stroke-width', 1.5).style('stroke-linecap', 'round');
+    }
+
+    var a2 = 0.283 * clockRadius;
+    for (var i2 = 0; i2 < 60; i2 += 0.5){
+      var d2 = toDegRad(i2, 6);
+      var Ret2 = a2 * (Math.sqrt(b * b - Math.pow(Math.sin(d2), 2)) + Math.cos(d2));
+      var fa2 = hourAries + d2;
+      svg.append('line')
+        .attr('x1', xc + Ret2 * Math.sin(fa2)).attr('y1', yc - Ret2 * Math.cos(fa2))
+        .attr('x2', xc + (Ret2 - 5) * Math.sin(fa2)).attr('y2', yc - (Ret2 - 5) * Math.cos(fa2))
+        .style('stroke', 'rgb(255,255,0,0.75)').style('stroke-width', 1).style('stroke-linecap', 'round');
+    }
+
+    var Lep_z = Re - Re * eclipticWidth, a_z = 0.275 * clockRadius;
+    ZODIAC.forEach(function(z){
+      for (var i3 = 1; i3 < 30; i3 += 2.54){
+        if (Math.floor(i3 % z.mod) !== z.pos) continue;
+        var d3v = toDegRad(i3, 12);
+        var Ret3 = a_z * (Math.sqrt(b * b - Math.pow(Math.sin(d3v), 2)) + Math.cos(d3v)) - 3.9;
+        var fa3 = hourAries + d3v;
+        var xd = xc + Ret3 * Math.sin(fa3), yd = yc - Ret3 * Math.cos(fa3);
+        var xf = xc + (Ret3 - Lep_z) * Math.sin(fa3), yf = yc - (Ret3 - Lep_z) * Math.cos(fa3);
+        svg.append('text').attr('x', (xd + xf) / 2).attr('y', (yd + yf) / 2)
+          .style('fill', 'rgb(255,255,0,1)').style('font-family', 'AstroDotBasic')
+          .style('font-size', '20px').style('text-anchor', 'middle')
+          .style('font-weight', 'bold').style('dominant-baseline', 'central').text(z.char);
+      }
+    });
+
+    var af1 = hourAries + Math.PI / 2;
+    var s1 = Math.sin(af1) * clockRadius, c1 = Math.cos(af1) * clockRadius;
+    svg.append('line').attr('x1', xc + 0.87 * s1).attr('y1', yc - 0.87 * c1)
+      .attr('x2', xc - 0.654 * s1).attr('y2', yc + 0.654 * c1)
+      .style('stroke', 'rgba(0,127,255,1)').style('stroke-width', 3).style('stroke-linecap', 'round');
+    svg.append('circle').style('fill', 'rgba(255,99,71,1)').attr('r', 4.5).attr('cx', xc + 0.87 * s1).attr('cy', yc - 0.87 * c1);
+    svg.append('circle').style('fill', 'rgba(255,99,71,1)').attr('r', 4).attr('cx', xc - 0.654 * s1).attr('cy', yc + 0.654 * c1);
+
+    var af2 = hourAries - 0.011 + Math.PI / 270;
+    var s2 = Math.sin(af2) * clockRadius, c2 = Math.cos(af2) * clockRadius;
+    svg.append('line').attr('x1', xc + s2).attr('y1', yc - c2)
+      .attr('x2', xc - 0.43 * s2).attr('y2', yc + 0.43 * c2)
+      .style('stroke', 'rgba(0,127,255,1)').style('stroke-width', 3).style('stroke-linecap', 'round');
+    svg.append('circle').style('fill', 'rgba(255,99,71,1)').attr('r', 4).attr('cx', xc + s2).attr('cy', yc - c2);
+    svg.append('circle').style('fill', 'rgba(255,99,71,1)').attr('r', 4).attr('cx', xc - 0.43 * s2).attr('cy', yc + 0.43 * c2);
+
+    var hours_arc = v.hoursArc;
+    var tailLen = 0.17 * clockRadius;
+    var Xt = xc - tailLen * Math.sin(hours_arc), Yt = yc + tailLen * Math.cos(hours_arc);
+    svg.append('line').attr('x1', xc).attr('y1', yc).attr('x2', Xt).attr('y2', Yt)
+      .style('stroke', 'rgba(255,255,0,1)').style('stroke-width', 3).style('stroke-linecap', 'round');
+    svg.append('circle').style('fill', 'rgba(255,255,0,1)').attr('r', 3).attr('cx', Xt).attr('cy', Yt);
+    svg.append('line').attr('x1', xc).attr('y1', yc)
+      .attr('x2', xc + 1.31 * clockRadius * Math.sin(hours_arc)).attr('y2', yc - 1.31 * clockRadius * Math.cos(hours_arc))
+      .style('stroke', 'rgba(255,255,0,1)').style('stroke-width', 3).style('stroke-linecap', 'round');
+
+    var Rs = eclipticR(-hourAries + hours_arc);
+    var Xs = xc + Rs * Math.sin(hours_arc), Ys = yc - Rs * Math.cos(hours_arc);
+    svg.append('circle').style('fill', 'url(#sunsetRed)').attr('r', 38).attr('cx', Xs).attr('cy', Ys);
+
+    var Alpha_S = SunMutatis ? Visibility(hours_arc + Math.PI) : 1;
+    if (Kaleidoscope){
+      var RmS = 7 * (1 - Alpha_S);
+      [{ r: 30, sw: 2 }, { r: 22 + RmS, sw: 2 }].forEach(function(o){
+        svg.append('circle').attr('stroke', 'rgba(255,255,0,0.80)').attr('stroke-width', o.sw)
+          .style('fill', 'none').attr('r', o.r).attr('cx', Xs).attr('cy', Ys);
+      });
+      svg.append('circle').attr('stroke', 'rgba(255,255,0,0.20)').attr('stroke-width', 30 - 22 - RmS)
+        .style('fill', 'none').attr('r', 0.5 * (30 + 22 + RmS)).attr('cx', Xs).attr('cy', Ys);
+
+      var Axis_k = svg.append('g').append('g');
+      (function(){
+        function updateSun(){
+          var now = new Date();
+          var K = 2 * Math.PI * (now.getMinutes() + now.getSeconds() / 60) / 60;
+          d3.selectAll('line.sunscope').remove();
+          Axis_k.selectAll('line.sunscope').data(d3.range(12)).enter().append('line').attr('class', 'sunscope')
+            .attr('x1', function(d, i){ return Xs + 30 * Math.sin(hourAries + i * Math.PI / 6 - K); })
+            .attr('y1', function(d, i){ return Ys - 30 * Math.cos(hourAries + i * Math.PI / 6 - K); })
+            .attr('x2', function(d, i){ return Xs + (22 + RmS) * Math.sin(hourAries + i * Math.PI / 6 + Velocity * K); })
+            .attr('y2', function(d, i){ return Ys - (22 + RmS) * Math.cos(hourAries + i * Math.PI / 6 + Velocity * K); })
+            .style('stroke-width', 1.5).style('stroke', 'rgba(255,255,0,' + Alpha_S + ')').style('stroke-linecap', 'round');
+        }
+        setInterval(updateSun, 1000);
+        updateSun();
+      })();
+    }
+    svg.append('circle').style('fill', 'rgba(255,255,0,' + Alpha_S + ')').attr('r', 10.55).attr('cx', Xs).attr('cy', Ys);
+    svg.append('circle').style('fill', 'rgba(255,255,0,1)').attr('r', 3.25).attr('cx', Xs).attr('cy', Ys);
+
+    var hour_MD = toRad(v.hourMoon);
+    var Rm = eclipticR(hourAries - hour_MD);
+    var tailLenM = 0.17 * clockRadius;
+    var XtM = xc - tailLenM * Math.sin(hour_MD), YtM = yc + tailLenM * Math.cos(hour_MD);
+    svg.append('line').attr('x1', xc).attr('y1', yc).attr('x2', XtM).attr('y2', YtM)
+      .style('stroke', 'rgba(255,0,0,1)').style('stroke-width', 3).style('stroke-linecap', 'round');
+    svg.append('circle').style('fill', 'rgba(255,0,0,1)').attr('r', 3).attr('cx', XtM).attr('cy', YtM);
+    svg.append('line').attr('x1', xc).attr('y1', yc)
+      .attr('x2', xc + 1.31 * clockRadius * Math.sin(hour_MD)).attr('y2', yc - 1.31 * clockRadius * Math.cos(hour_MD))
+      .style('stroke', 'rgba(255,0,0,1)').style('stroke-width', 3).style('stroke-linecap', 'round');
+
+    var Xm = xc + Rm * Math.sin(hour_MD), Ym = yc - Rm * Math.cos(hour_MD);
+    var Alpha_M = MoonMutatis ? 1 : Visibility(hours_arc - hour_MD);
+    var moonBase = MoonMutatis ? 'rgba(41,46,53,1)' : 'rgba(255,255,255,' + Alpha_M + ')';
+    svg.append('circle').style('fill', moonBase).attr('r', 10.55).attr('cx', Xm).attr('cy', Ym);
+
+    if (MoonMutatis){
+      var Rmo = 10.55, temp = -hour_MD + hours_arc;
+      var amp_R = Rmo * phase(temp + Math.PI, 1), amp_L = Rmo * phase(temp, -1);
+      var Rot = hour_MD + Math.PI;
+      var path = d3.path();
+      path.moveTo(Xm + Math.sin(Rot) * Rmo, Ym - Math.cos(Rot) * Rmo);
+      for (var pi = 0; pi < 2 * Math.PI; pi += Math.PI / 64){
+        var Rx = pi <= Math.PI ? Math.sin(pi) * amp_R : -Math.sin(pi) * amp_L;
+        var Ry = Math.cos(pi) * Rmo;
+        path.lineTo(Xm - Rx * Math.cos(Rot) + Ry * Math.sin(Rot), Ym - Rx * Math.sin(Rot) - Ry * Math.cos(Rot));
+      }
+      path.closePath();
+      svg.append('path').attr('d', path.toString()).style('fill', 'rgba(255,255,255,1.0)');
+    }
+
+    if (MoonRings){
+      var D = MoonMutatis ? 0.5 + 0.5 * Visibility(hours_arc) : 1;
+      var RmL = MoonMov * Alpha_M, RmB = 12, Rms = 12 - 7 * D;
+      svg.append('circle').attr('stroke', 'rgba(255,255,255,0.1)').style('stroke-width', RmB - Rms).style('fill', 'none')
+        .attr('r', 0.5 * (RmB + Rms) + RmL).attr('cx', Xm).attr('cy', Ym);
+      [RmB + RmL, Rms + RmL].forEach(function(r){
+        svg.append('circle').attr('stroke', 'rgba(255,255,255,1.0)').style('stroke-width', 1.5).style('fill', 'none')
+          .attr('r', r).attr('cx', Xm).attr('cy', Ym);
+      });
+
+      var Axis_M = svg.append('g').append('g');
+      (function(){
+        function updateMoon(){
+          var now = new Date();
+          var R = 2 * Math.PI * (now.getMinutes() + now.getSeconds() / 60) / 60;
+          d3.selectAll('line.moonscope').remove();
+          Axis_M.selectAll('line.moonscope').data(d3.range(12)).enter().append('line').attr('class', 'moonscope')
+            .attr('x1', function(d, i){ return Xm + (Rms + RmL) * Math.sin(hourAries + i * Math.PI / 6 - 2 * Velocity * R); })
+            .attr('y1', function(d, i){ return Ym - (Rms + RmL) * Math.cos(hourAries + i * Math.PI / 6 - 2 * Velocity * R); })
+            .attr('x2', function(d, i){ return Xm + (RmB + RmL) * Math.sin(hourAries + i * Math.PI / 6 - 2 * Velocity * R); })
+            .attr('y2', function(d, i){ return Ym - (RmB + RmL) * Math.cos(hourAries + i * Math.PI / 6 - 2 * Velocity * R); })
+            .style('stroke-width', 1.5).style('stroke', 'rgba(255,255,255,1.0)').style('stroke-linecap', 'round');
+        }
+        setInterval(updateMoon, 1000);
+        updateMoon();
+      })();
+    }
+
+    svg.append('circle').style('fill', 'rgba(41,46,53,1)').attr('r', 12).attr('cx', xc).attr('cy', yc);
+    svg.append('circle').attr('stroke', 'rgba(0,127,255,1)').style('stroke-width', 3).style('fill', 'none').attr('r', 12).attr('cx', xc).attr('cy', yc);
+    svg.append('circle').style('fill', 'rgba(255,99,71,1)').attr('r', 4).attr('cx', xc).attr('cy', yc);
+
+    [v.sunrise, v.sunTransit, v.sunset].forEach(function(a){ addEventLine(a, 'rgba(255,99,71,1)'); });
+    [v.moonrise, v.moonTransit, v.moonset].forEach(function(a){ addEventLine(a, 'rgba(255,255,255,1)'); });
+    [v.civilBegin, v.civilEnd, v.nauticalBegin, v.nauticalEnd, v.astroBegin, v.astroEnd].forEach(function(a){ addEventLine(a, 'rgba(74,227,82,1)'); });
+  }
+
+  function refresh(){
+    Promise.allSettled([
+      fetch('./jsondata/almanac.json?_=' + Date.now(), { cache: 'no-store' }).then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }),
+      fetch('./jsondata/archive.json?_=' + Date.now(), { cache: 'no-store' }).then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    ]).then(function(results){
+      var alm = results[0].status === 'fulfilled' ? results[0].value : {};
+      var arch = results[1].status === 'fulfilled' ? results[1].value : {};
+      var meta = arch.meta || {};
+      function num(x, fallback){ return (typeof x === 'number' && !isNaN(x)) ? x : (fallback || 0); }
+
+      var hourSunDeg = num(alm['almanac.sun.hour_angle'], 0);
+      var sunRa = num(alm['almanac.sun.ra'], 0);
+      var lmst = (hourSunDeg / 15) + (sunRa / 15);
+      var Lha = (lmst * 15) - 90;
+
+      var v = {
+        hoursArc: toRad(hourSunDeg),
+        hourMoon: num(alm['almanac.moon.hour_angle'], 0),
+        hourAries: toRad(Lha),
+        sunrise: epochToDeg(alm['almanac.sun.next_rising.unix_epoch.raw']),
+        sunTransit: epochToDeg(alm['almanac.sun.next_transit.unix_epoch.raw']),
+        sunset: epochToDeg(alm['almanac.sun.next_setting.unix_epoch.raw']),
+        moonrise: epochToDeg(alm['almanac.moon.next_rising.unix_epoch.raw']),
+        moonTransit: epochToDeg(alm['almanac.moon.next_transit.unix_epoch.raw']),
+        moonset: epochToDeg(alm['almanac.moon.next_setting.unix_epoch.raw']),
+        civilBegin: epochToDeg(alm['almanac(horizon=-6).sun.next_rising.unix_epoch.raw']),
+        civilEnd: epochToDeg(alm['almanac(horizon=-6).sun.next_setting.unix_epoch.raw']),
+        nauticalBegin: epochToDeg(alm['almanac(horizon=-12).sun.next_rising.unix_epoch.raw']),
+        nauticalEnd: epochToDeg(alm['almanac(horizon=-12).sun.next_setting.unix_epoch.raw']),
+        astroBegin: epochToDeg(alm['almanac(horizon=-18).sun.next_rising.unix_epoch.raw']),
+        astroEnd: epochToDeg(alm['almanac(horizon=-18).sun.next_setting.unix_epoch.raw'])
+      };
+
+      infoEls.location.text('Location: ' + (meta.station_location || '\u2014'));
+      infoEls.lat.text('Latitude: ' + num(meta.latitude, 0) + '\u00B0');
+      infoEls.lon.text('Longitude: ' + num(meta.longitude, 0) + '\u00B0');
+      infoEls.elevation.text('Elevation: ' + num(meta.elevation_m, 0) + 'm');
+      infoEls.equinox.text('Equinox: ' + (fmtEpochDate(alm['almanac.next_equinox.unix_epoch.raw']) || '\u2014'));
+      infoEls.solstice.text('Solstice: ' + (fmtEpochDate(alm['almanac.next_solstice.unix_epoch.raw']) || '\u2014'));
+      infoEls.luminance.text('Luminance: ' + num(alm['almanac.moon.phase'], 0).toFixed(2) + ' %');
+
+      infoEls.phase.text('Moon phase: ' + (alm['almanac.moon.phase_name'] || '\u2014'));
+      infoEls.age.text('Moon cycle: ' + num(alm['almanac.moon.age_days'], 0).toFixed(2) + ' Days old');
+      infoEls.moonaz.text('Moon azimuth: ' + num(alm['almanac.moon.az'], 0) + '\u00B0');
+      infoEls.sunaz.text('Sun azimuth: ' + num(alm['almanac.sun.az'], 0) + '\u00B0');
+      infoEls.aries.text('Hand of Aries: ' + num(alm['almanac.sidereal_time'], 0) + '\u00B0');
+
+      stationTz = window.StationTime && window.StationTime.getTZ ? window.StationTime.getTZ() : null;
+
+      buildOnce(v);
+      reportHeight();
+    }).catch(function(e){ console.warn('modalAstroclock: refresh failed —', e.message); });
+  }
+
+  refresh();
+  setInterval(refresh, 60000);
+
+})();
+</script>
+<script>
+(function applySeasonFromParent(){
+  function apply(){
+    try {
+      var b = window.parent && window.parent.document && window.parent.document.body;
+      var m = b && /season-(winter|spring|summer|autumn)/.exec(b.className);
+      if (m) document.documentElement.setAttribute('data-season', m[1]);
+      else document.documentElement.removeAttribute('data-season');
+    } catch (e) {}
+  }
+  apply();
+  try {
+    var pb = window.parent && window.parent.document && window.parent.document.body;
+    if (pb) new MutationObserver(apply).observe(pb, { attributes: true, attributeFilter: ['class'] });
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>

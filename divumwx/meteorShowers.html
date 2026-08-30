@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<!--
+##############################################################################################
+# meteorShowers.html version 0.1.0
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  GPLv3
+##############################################################################################
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meteor Showers — DivumWX</title>
+<link rel="stylesheet" href="header.css?v=s3n2026i">
+<style>
+
+:root {
+  --light-body: #EFECE2;
+  --dark-body: #0A0F22;
+  --light-card: #FFFFFF;
+  --light-text: #1D2C4E;
+  --dark-bg: #FFFFFF;
+  --dark-card: #111834;
+  --dark-text: #E9E4D4;
+
+  --bs-body-color: var(--light-text);
+  --bs-secondary-color: #5C6672;
+  --bs-tertiary-bg: var(--dark-bg);
+  --bs-border-color: #C9CFD8;
+  --bw-accent: #B45309;
+  --bw-good: #39a239;
+  --bw-sky: #4a90d9;
+}
+body.light {
+  background: var(--light-body);
+  color: var(--light-text);
+}
+body.dark {
+  background: var(--dark-body);
+  color: var(--dark-text);
+  --bs-body-color: var(--dark-text);
+  --bs-secondary-color: #8B93B8;
+  --bw-accent: #D3A94C;
+  --bs-border-color: #2A3358;
+  --dark-bg: var(--dark-card);
+}
+body.dark.season-winter { --dark-card: #24312a; }
+body.dark.season-spring { --dark-card: #26301f; }
+body.dark.season-summer { --dark-card: #332c16; }
+body.dark.season-autumn { --dark-card: #2c2118; }
+body {
+  margin: 0;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  transition: background 0.3s, color 0.3s;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 10px auto;
+  padding: 0 10px 40px;
+  box-sizing: border-box;
+}
+
+.page-title {
+  margin: 20px 0 4px;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+.page-subtitle {
+  margin: 0 0 20px;
+  font-size: 0.9rem;
+  color: var(--bs-secondary-color);
+}
+
+/* ---- Meteor content — same design language as modalMeteorShowers.html,
+   adapted from [data-theme] to body.light/body.dark since this is a real
+   standalone page (theme applied to <body> directly), not an iframe. ---- */
+.meteor-section{ margin-bottom:30px; }
+.meteor-section:last-child{ margin-bottom:0; }
+.meteor-section-title{
+  font-family:Georgia, 'Times New Roman', serif;
+  font-variant-caps:small-caps;
+  letter-spacing:.04em;
+  font-size:20px;
+  font-weight:700;
+  margin:0 0 4px;
+}
+.meteor-section-sub{
+  color:var(--bs-secondary-color);
+  font-size:12px;
+  margin:0 0 14px;
+}
+.meteor-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(230px, 1fr));
+  gap:12px;
+}
+.meteor-card{
+  background:var(--dark-bg);
+  border-radius:10px;
+  box-shadow:0 1px 2px rgba(0,0,0,0.12), 0 8px 20px -8px rgba(0,0,0,0.25);
+  padding:16px;
+}
+body.dark .meteor-card{ box-shadow:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.5); }
+.meteor-card-title{
+  font-size:12px; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
+  color:var(--bs-secondary-color); margin:0 0 10px;
+}
+.meteor-card p{ margin:0 0 8px; }
+.meteor-card p:last-child{ margin-bottom:0; }
+.meteor-card a{ color:var(--bw-accent); text-decoration:none; }
+.meteor-card a:hover{ text-decoration:underline; }
+.meteor-card.meteor-wide{ grid-column:span 2; }
+@media (max-width:560px){ .meteor-card.meteor-wide{ grid-column:span 1; } }
+.meteor-accent{ color:var(--bw-accent); font-weight:700; }
+.meteor-credit{ font-size:11px; color:var(--bs-secondary-color); }
+.meteor-updated{ font-size:11px; color:var(--bs-secondary-color); font-style:italic; margin-top:10px; }
+
+.meteor-shower-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:7px; }
+.meteor-shower-list li{ display:flex; justify-content:space-between; gap:10px; font-size:13px; border-bottom:1px solid var(--bs-border-color); padding-bottom:6px; }
+.meteor-shower-list li:last-child{ border-bottom:0; padding-bottom:0; }
+.meteor-shower-list .meteor-shower-name{ font-weight:700; color:var(--bw-accent); }
+.meteor-shower-list .meteor-shower-meta{ color:var(--bs-secondary-color); white-space:nowrap; }
+.meteor-empty{ color:var(--bs-secondary-color); font-style:italic; }
+
+.meteor-hero{ display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:6px; }
+.meteor-hero-name{ font-size:18px; font-weight:700; }
+.meteor-hero-days{ font-size:12px; color:var(--bs-secondary-color); }
+
+.meteor-table-wrap{
+  overflow-x:auto;
+  overflow-y:auto;
+  max-height:400px;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+.meteor-table-wrap::-webkit-scrollbar{ display:none; }
+.meteor-table th{ position:sticky; top:0; background:var(--dark-bg); z-index:1; }
+.meteor-table{ width:100%; border-collapse:collapse; font-size:12.5px; white-space:nowrap; }
+.meteor-table th{
+  text-align:left; font-size:10.5px; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
+  color:var(--bs-secondary-color); padding:0 10px 8px 0; border-bottom:1px solid var(--bs-border-color);
+}
+.meteor-table td{ padding:7px 10px 7px 0; border-bottom:1px solid var(--bs-border-color); }
+.meteor-table tr:last-child td{ border-bottom:0; }
+.meteor-table tr.meteor-active-row td{ color:var(--bw-accent); font-weight:600; }
+.meteor-table .meteor-name-cell{ font-weight:600; }
+.meteor-table .meteor-code-cell{ color:var(--bs-secondary-color); font-size:11px; }
+</style>
+</head>
+<body class="light">
+<script>
+// ==== THEME HANDLING ====
+// Copied verbatim from records.html's own boilerplate — same station
+// coordinates, same auto/seasonal logic, same "run before .container
+// paints" ordering to avoid a flash of the wrong theme.
+const STATION_LAT = 51.94;
+const STATION_LON = -0.987;
+const THEME_KEY = 'dashboardThemeMode';
+const THEME_ICONS = { auto: '\u{1F313}', light: '\u2600\uFE0F', dark: '\u{1F319}' };
+const THEME_ORDER = ['dark', 'light', 'auto'];
+const SEASON_ICONS = { winter: '\u2744\uFE0F', spring: '\u{1F338}', summer: '\u{1F33B}', autumn: '\u{1F342}' };
+const SEASON_CLASSES = ['season-winter', 'season-spring', 'season-summer', 'season-autumn'];
+const NORTHERN_SEASON_BY_MONTH = [
+  'winter', 'winter', 'spring', 'spring', 'spring', 'summer',
+  'summer', 'summer', 'autumn', 'autumn', 'autumn', 'winter'
+];
+const SEASON_SWAP_SOUTH = { winter: 'summer', summer: 'winter', spring: 'autumn', autumn: 'spring' };
+function getMeteorologicalSeason(date, lat) {
+  const season = NORTHERN_SEASON_BY_MONTH[date.getMonth()];
+  return (lat >= 0) ? season : SEASON_SWAP_SOUTH[season];
+}
+function seasonLabel(season) {
+  if (season === 'autumn' && (localStorage.getItem('dashboardUnitSystem') || 'uk') === 'us') return 'Fall';
+  return season.charAt(0).toUpperCase() + season.slice(1);
+}
+let lastIsDay = null;
+const LOOP_JSON_URL_FOR_THEME = './jsondata/loop.json';
+const THEME_ISDAY_POLL_MS = 60 * 1000;
+
+function getSunTimes(date, lat, lon) {
+  const rad = Math.PI / 180;
+  const msPerDay = 86400000;
+  const J1970 = 2440588, J2000 = 2451545;
+  const toJulian = d => d.valueOf() / msPerDay - 0.5 + J1970;
+  const fromJulian = j => new Date((j + 0.5 - J1970) * msPerDay);
+  const toDays = d => toJulian(d) - J2000;
+  const obliquity = rad * 23.4397;
+  const meanAnomaly = d => rad * (357.5291 + 0.98560028 * d);
+  const eclipticLon = M => {
+    const C = rad * (1.9148 * Math.sin(M) + 0.02 * Math.sin(2 * M) + 0.0003 * Math.sin(3 * M));
+    const perihelion = rad * 102.9372;
+    return M + C + perihelion + Math.PI;
+  };
+  const declination = L => Math.asin(Math.sin(L) * Math.sin(obliquity));
+  const julianCycle = (d, lw) => Math.round(d - 0.0009 - lw / (2 * Math.PI));
+  const approxTransit = (Ht, lw, n) => 0.0009 + (Ht + lw) / (2 * Math.PI) + n;
+  const solarTransitJ = (ds, M, L) => J2000 + ds + 0.0053 * Math.sin(M) - 0.0069 * Math.sin(2 * L);
+  const hourAngle = (h, phi, dec) => Math.acos((Math.sin(h) - Math.sin(phi) * Math.sin(dec)) / (Math.cos(phi) * Math.cos(dec)));
+  const lw = rad * -lon, phi = rad * lat;
+  const d = toDays(date);
+  const n = julianCycle(d, lw);
+  const ds = approxTransit(0, lw, n);
+  const M = meanAnomaly(ds);
+  const L = eclipticLon(M);
+  const dec = declination(L);
+  const Jnoon = solarTransitJ(ds, M, L);
+  const h0 = -0.833 * rad;
+  const H = hourAngle(h0, phi, dec);
+  if (isNaN(H)) return null;
+  const Jset = solarTransitJ(approxTransit(H, lw, n), M, L);
+  const Jrise = Jnoon - (Jset - Jnoon);
+  return { sunrise: fromJulian(Jrise), sunset: fromJulian(Jset) };
+}
+function getThemeMode() {
+  const stored = localStorage.getItem(THEME_KEY);
+  return THEME_ORDER.includes(stored) ? stored : 'auto';
+}
+function effectiveTheme(mode) {
+  if (mode === 'light' || mode === 'dark') return mode;
+  if (mode === 'seasonal') return 'light';
+  if (lastIsDay != null) return lastIsDay ? 'light' : 'dark';
+  const now = new Date();
+  const sun = getSunTimes(now, STATION_LAT, STATION_LON);
+  if (!sun) return 'light';
+  return (now >= sun.sunrise && now < sun.sunset) ? 'light' : 'dark';
+}
+function applyDashboardTheme() {
+  const mode = getThemeMode();
+  const resolved = effectiveTheme(mode);
+  document.body.classList.remove('light', 'dark');
+  document.body.classList.add(resolved);
+
+  // Seasonal accent mode retired site-wide -- see header.js's
+  // applySeasonClass() for the full rationale. This page has its own
+  // independent inline implementation (doesn't call the shared
+  // header.js function at all), so it needed the identical no-op
+  // treatment applied directly here. currentSeason kept as a variable
+  // (always null now) since it's still referenced below (themechange
+  // event detail, theme-toggle button label) and those call sites
+  // already handle null correctly -- every other themeMode already
+  // exercises that same null path today.
+  const currentSeason = null;
+
+  const btn = document.getElementById('themeToggle');
+  if (!btn) return;
+  if (mode === 'seasonal') {
+    btn.textContent = SEASON_ICONS[currentSeason];
+    btn.title = 'Seasonal (' + seasonLabel(currentSeason) + ')';
+  } else {
+    btn.textContent = THEME_ICONS[mode];
+    btn.title = mode === 'auto' ? ('Auto (currently ' + resolved + ')') : mode.charAt(0).toUpperCase() + mode.slice(1);
+  }
+}
+function pollIsDayForTheme() {
+  fetch(LOOP_JSON_URL_FOR_THEME + '?_=' + Date.now(), { cache: 'no-store' })
+    .then(res => { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
+    .then(j => {
+      const o = (j && j.observations) || {};
+      if (o.isDay != null) {
+        lastIsDay = o.isDay;
+        if (getThemeMode() === 'auto') applyDashboardTheme();
+      }
+    })
+    .catch(e => console.warn('meteorShowers: loop.json poll (theme) failed —', e.message));
+}
+
+applyDashboardTheme();
+pollIsDayForTheme();
+setInterval(pollIsDayForTheme, THEME_ISDAY_POLL_MS);
+setInterval(() => {
+  const m = getThemeMode();
+  if (m === 'auto' || m === 'seasonal') applyDashboardTheme();
+}, 60 * 1000);
+</script>
+
+<div class="container">
+  <div class="site-header-include" w3-include-html="astronomyNavbar.html"></div>
+
+  <h1 class="page-title">Meteor Showers</h1>
+  <p class="page-subtitle">The IAU working list of visual meteor showers — what's active right now, and the full year ahead.</p>
+
+  <section class="meteor-section">
+    <h2 class="meteor-section-title">Right Now</h2>
+    <p class="meteor-section-sub"><span id="todayDateStr"></span></p>
+    <div class="meteor-grid">
+
+      <div class="meteor-card">
+        <div class="meteor-card-title">Active Today</div>
+        <ul class="meteor-shower-list" id="activeTodayList"></ul>
+      </div>
+
+      <div class="meteor-card">
+        <div class="meteor-card-title">Next Peak</div>
+        <div id="nextPeakMount"></div>
+      </div>
+
+      <div class="meteor-card">
+        <div class="meteor-card-title">Viewing Guide</div>
+        <p>Meteors are best viewed during the night, though they can enter the atmosphere at any time of day — just harder to see except around dawn and dusk. Nearby ambient light and moonlight can make viewing difficult; showers are best seen away from city lights, looking roughly halfway up the sky rather than directly at the radiant.</p>
+      </div>
+
+      <div class="meteor-card">
+        <div class="meteor-card-title">&copy; Information</div>
+        <p class="meteor-credit">Data from the <a href="https://www.imo.net/" target="_blank" rel="noopener">International Meteor Organization</a> working list of visual meteor showers.</p>
+        <div class="meteor-updated">Dates and rates are long-term averages, not live forecasts.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="meteor-section">
+    <h2 class="meteor-section-title">Shower Catalog</h2>
+    <p class="meteor-section-sub">All <span id="showerCountStr"></span> showers, sorted by peak date. Highlighted rows are active today.</p>
+    <div class="meteor-grid">
+
+      <div class="meteor-card meteor-wide">
+        <div class="meteor-card-title">Full Year</div>
+        <div class="meteor-table-wrap">
+          <table class="meteor-table">
+            <thead>
+              <tr>
+                <th>Shower</th>
+                <th>Active</th>
+                <th>Peak</th>
+                <th>ZHR</th>
+                <th>Velocity</th>
+              </tr>
+            </thead>
+            <tbody id="catalogBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="meteor-card">
+        <div class="meteor-card-title">Reading the Table</div>
+        <p><span class="meteor-accent">ZHR</span> (Zenith Hourly Rate) is the theoretical number of meteors an observer would see per hour under a perfectly dark sky with the radiant directly overhead — real counts are usually lower. <span class="meteor-accent">Velocity</span> is the speed meteors enter the atmosphere at, in km/s; faster showers tend to produce brighter, more persistent trails.</p>
+      </div>
+
+      <div class="meteor-card">
+        <div class="meteor-card-title">Radio Ham Guide</div>
+        <p>Meteor scatter communications can be used by VHF enthusiasts and commercial operators alike, using specialised techniques to reach distances of 2000km or more on VHF frequencies — activity is best during a shower's peak, when ionised meteor trails are most numerous.</p>
+      </div>
+
+    </div>
+  </section>
+</div>
+
+<script>
+function cardsPerRowStub() {
+  return Math.max(1, Math.floor((window.innerWidth - 20) / 319));
+}
+function updateNavCollapse() {
+  const navbar = document.getElementById('navbar');
+  const navWrap = document.querySelector('.nav-wrap');
+  const menuInner = document.querySelector('.menu-inner');
+  const menuBtn = document.getElementById('menuBtn');
+  if (!navbar || !navWrap || !menuInner || !menuBtn) return;
+  const collapsed = cardsPerRowStub() <= 3;
+  if (collapsed && navbar.parentElement !== menuInner) {
+    navbar.classList.add('site-nav--menu');
+    menuInner.appendChild(navbar);
+  } else if (!collapsed && navbar.parentElement !== navWrap) {
+    navbar.classList.remove('site-nav--menu');
+    navWrap.insertBefore(navbar, menuBtn);
+  }
+  menuBtn.style.display = collapsed ? 'flex' : 'none';
+}
+
+const ARCHIVE_JSON_URL = './jsondata/archive.json';
+function setStationTitle() {
+  fetch(ARCHIVE_JSON_URL + '?_=' + Date.now(), { cache: 'no-store' })
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(data => {
+      const loc = data && data.meta && data.meta.station_location;
+      const el = document.querySelector('.brand-text');
+      if (loc && el) el.textContent = loc;
+    })
+    .catch(e => console.warn('meteorShowers: station_location fetch failed —', e.message));
+}
+
+function includeHTML(callback) {
+  const elements = document.querySelectorAll('[w3-include-html]');
+  let pending = elements.length;
+  if (pending === 0) { if (callback) callback(); return; }
+  elements.forEach(el => {
+    const file = el.getAttribute('w3-include-html');
+    fetch(file, { cache: 'no-store' })
+      .then(res => { if (!res.ok) throw new Error('HTTP ' + res.status); return res.text(); })
+      .then(html => { el.innerHTML = html; el.removeAttribute('w3-include-html'); })
+      .catch(e => { console.warn('meteorShowers: include failed for', file, '—', e.message); el.innerHTML = ''; })
+      .finally(() => { pending--; if (pending === 0 && callback) callback(); });
+  });
+}
+
+// astronomyNavbar.html ships with its links hardcoded to "/divumwx/..."
+// (the common case: DivumWX nested under a "divumwx" subdirectory of a
+// shared HTML_ROOT). That's wrong for the other supported deployment
+// mode -- a dedicated docroot where HTML_ROOT IS the DivumWX root, so
+// there's no "/divumwx" segment in the URL at all -- and would also be
+// wrong for any deployment where the subdirectory happens to be named
+// something other than "divumwx". Rather than hardcoding one mode and
+// needing a manual re-fix if the deployment differs, this derives the
+// actual DivumWX root from the CURRENT page's own URL and rewrites the
+// navbar's links to match, whatever that root actually is.
+//
+// This works because every page that includes astronomyNavbar.html is
+// either AT the DivumWX root (astronomy.html, constellations.html,
+// meteorShowers.html, visualisations.html) or exactly one level below
+// it, in a known-named subdirectory (skyfield/, celestial/) -- so
+// stripping a trailing filename segment, then a trailing "deep
+// directory" segment if present, always leaves exactly the DivumWX
+// root's own path, regardless of what (if anything) precedes it.
+function fixDivumwxNavLinks(navHost) {
+  if (!navHost) return;
+  const DEEP_DIRS = ['skyfield', 'celestial'];
+  const segments = window.location.pathname.split('/').filter(Boolean);
+  if (segments.length && segments[segments.length - 1].indexOf('.') !== -1) {
+    segments.pop(); // trailing filename, e.g. "index.html"
+  }
+  if (segments.length && DEEP_DIRS.indexOf(segments[segments.length - 1]) !== -1) {
+    segments.pop(); // trailing "skyfield" or "celestial"
+  }
+  const root = segments.length ? '/' + segments.join('/') : '';
+  navHost.querySelectorAll('a[href^="/divumwx/"], a[href="/divumwx"]').forEach(a => {
+    const href = a.getAttribute('href');
+    a.setAttribute('href', root + href.slice('/divumwx'.length));
+  });
+}
+
+function hideCurrentPageNavLink() {
+  // Same logic as header.js's initSharedHeader() -- this page has its
+  // own separate navbar wiring (predates the shared header.js/
+  // astronomyNavbar.html system) rather than calling initSharedHeader()
+  // itself, so it needs its own copy of this one piece rather than
+  // silently missing it.
+  function normalizePath(path) {
+    path = path.replace(/\/+$/, '') || '/';
+    if (!/\.[a-z0-9]+$/i.test(path)) path += '/index.html';
+    return path.toLowerCase();
+  }
+  const herePath = normalizePath(window.location.pathname);
+  document.querySelectorAll('.site-nav-link[href]').forEach(a => {
+    if (normalizePath(a.pathname) === herePath) a.style.display = 'none';
+  });
+}
+
+window.addEventListener('resize', updateNavCollapse);
+window.addEventListener('storage', e => {
+  if (e.key === THEME_KEY) applyDashboardTheme();
+});
+includeHTML(() => {
+  fixDivumwxNavLinks(document.querySelector('.site-header-include'));
+  document.getElementById('menuBtn').onclick = () => { document.body.classList.toggle('menu-open'); };
+  document.getElementById('themeToggle').onclick = () => {
+    const next = THEME_ORDER[(THEME_ORDER.indexOf(getThemeMode()) + 1) % THEME_ORDER.length];
+    localStorage.setItem(THEME_KEY, next);
+    applyDashboardTheme();
+  };
+  applyDashboardTheme();
+  updateNavCollapse();
+  hideCurrentPageNavLink();
+  setStationTitle();
+});
+</script>
+
+<script>
+(function(){
+
+  // Same IAU-catalog snapshot as modalMeteorShowers.html's fallback —
+  // used only if ./jsondata/meteor.txt can't be fetched or fails to parse.
+  var FALLBACK_SHOWERS = [
+    { code:'ANT', name:'Antihelion Source', start:'Dec 10', end:'Sep 10', peak:'Jan 01', ra:187.0, de:-4.0, v:30.0, r:3.0, zhr:4 },
+    { code:'QUA', name:'Quadrantids', start:'Dec 26', end:'Jan 12', peak:'Jan 04', ra:230.0, de:49.0, v:41.0, r:2.1, zhr:120 },
+    { code:'GUM', name:'γ-Ursae Minorids', start:'Jan 15', end:'Jan 22', peak:'Jan 18', ra:229.0, de:67.0, v:31.0, r:3.0, zhr:3 },
+    { code:'ACE', name:'α-Centaurids', start:'Jan 28', end:'Feb 21', peak:'Feb 08', ra:210.0, de:-59.0, v:56.0, r:2.0, zhr:6 },
+    { code:'GNO', name:'γ-Normids', start:'Feb 25', end:'Mar 28', peak:'Mar 14', ra:239.0, de:-50.0, v:56.0, r:2.4, zhr:6 },
+    { code:'LYR', name:'Lyrids', start:'Apr 16', end:'Apr 25', peak:'Apr 22', ra:271.0, de:34.0, v:49.0, r:2.1, zhr:18 },
+    { code:'PPU', name:'π-Puppids', start:'Apr 15', end:'Apr 28', peak:'Apr 23', ra:110.0, de:-45.0, v:18.0, r:2.0, zhr:0 },
+    { code:'ETA', name:'η-Aquariids', start:'Apr 19', end:'May 28', peak:'May 05', ra:338.0, de:-1.0, v:66.0, r:2.4, zhr:40 },
+    { code:'ELY', name:'η-Lyrids', start:'May 03', end:'May 14', peak:'May 08', ra:287.0, de:44.0, v:43.0, r:3.0, zhr:3 },
+    { code:'TAH', name:'τ Herculids', start:'May 25', end:'Jun 04', peak:'May 31', ra:209.0, de:28.0, v:16.0, r:2.5, zhr:10 },
+    { code:'ARI', name:'Daytime Arietids', start:'May 14', end:'Jun 24', peak:'Jun 07', ra:44.0, de:24.0, v:38.0, r:2.8, zhr:50 },
+    { code:'JBO', name:'June Bootids', start:'Jun 22', end:'Jul 02', peak:'Jun 27', ra:224.0, de:48.0, v:18.0, r:2.2, zhr:null },
+    { code:'JPE', name:'July Pegasids', start:'Jul 04', end:'Jul 17', peak:'Jul 10', ra:347.0, de:10.0, v:65.0, r:3.0, zhr:3 },
+    { code:'GDR', name:'July gamma-Draconids', start:'Jul 25', end:'Jul 31', peak:'Jul 28', ra:280.0, de:51.0, v:27.0, r:3.0, zhr:0 },
+    { code:'PAU', name:'Piscis Austrinids', start:'Jul 15', end:'Aug 10', peak:'Jul 28', ra:341.0, de:-30.0, v:35.0, r:3.2, zhr:0 },
+    { code:'SDA', name:'Southern δ-Aquariids', start:'Jul 12', end:'Aug 23', peak:'Jul 30', ra:340.0, de:-16.0, v:41.0, r:2.5, zhr:25 },
+    { code:'CAP', name:'α-Capricornids', start:'Jul 03', end:'Aug 15', peak:'Jul 30', ra:307.0, de:-10.0, v:23.0, r:2.5, zhr:5 },
+    { code:'ERI', name:'η-Eridanids', start:'Jul 31', end:'Aug 19', peak:'Aug 08', ra:41.0, de:-11.0, v:64.0, r:3.0, zhr:null },
+    { code:'PER', name:'Perseids', start:'Jul 17', end:'Aug 24', peak:'Aug 12', ra:48.0, de:58.0, v:59.0, r:2.2, zhr:150 },
+    { code:'KCG', name:'κ-Cygnids', start:'Aug 03', end:'Aug 25', peak:'Aug 17', ra:286.0, de:59.0, v:25.0, r:3.0, zhr:3 },
+    { code:'AUR', name:'Aurigids', start:'Aug 28', end:'Sep 05', peak:'Aug 31', ra:91.0, de:39.0, v:66.0, r:2.5, zhr:6 },
+    { code:'NUE', name:'ν-Eridanids', start:'Sep 01', end:'Oct 04', peak:'Sep 06', ra:62.0, de:4.0, v:67.0, r:0.95, zhr:0 },
+    { code:'SPE', name:'September ε-Perseids', start:'Sep 05', end:'Sep 21', peak:'Sep 09', ra:48.0, de:40.0, v:64.0, r:3.0, zhr:5 },
+    { code:'EER', name:'epsilon-Eridanids 2025', start:'Sep 10', end:'Sep 14', peak:'Sep 12', ra:52.0, de:-15.0, v:59.0, r:3.0, zhr:0 },
+    { code:'SLY', name:'September Lyncids', start:'Sep 10', end:'Oct 08', peak:'Sep 13', ra:113.0, de:56.0, v:60.0, r:3.0, zhr:4 },
+    { code:'CCY', name:'χ-Cygnids', start:'Sep 03', end:'Sep 25', peak:'Sep 14', ra:301.0, de:33.0, v:15.0, r:3.0, zhr:0 },
+    { code:'DSX', name:'Daytime Sextantids', start:'Sep 09', end:'Oct 09', peak:'Sep 27', ra:152.0, de:0.0, v:32.0, r:2.5, zhr:5 },
+    { code:'OCT', name:'October Camelopardalids', start:'Oct 05', end:'Oct 06', peak:'Oct 06', ra:164.0, de:79.0, v:46.0, r:2.5, zhr:0 },
+    { code:'DRA', name:'Draconids', start:'Oct 06', end:'Oct 10', peak:'Oct 08', ra:262.0, de:54.0, v:20.0, r:2.6, zhr:null },
+    { code:'STA', name:'Southern Taurids', start:'Sep 10', end:'Nov 20', peak:'Oct 10', ra:32.0, de:9.0, v:27.0, r:2.3, zhr:5 },
+    { code:'DAU', name:'δ-Aurigids', start:'Oct 10', end:'Oct 18', peak:'Oct 11', ra:84.0, de:44.0, v:64.0, r:3.0, zhr:2 },
+    { code:'EGE', name:'ε-Geminids', start:'Oct 14', end:'Oct 27', peak:'Oct 18', ra:102.0, de:27.0, v:70.0, r:3.0, zhr:3 },
+    { code:'ORI', name:'Orionids', start:'Oct 02', end:'Nov 07', peak:'Oct 22', ra:95.0, de:16.0, v:66.0, r:2.5, zhr:15 },
+    { code:'LMI', name:'Leonis Minorids', start:'Oct 19', end:'Oct 27', peak:'Oct 24', ra:162.0, de:37.0, v:62.0, r:3.0, zhr:2 },
+    { code:'NTA', name:'Northern Taurids', start:'Oct 20', end:'Dec 10', peak:'Nov 12', ra:58.0, de:22.0, v:29.0, r:2.3, zhr:5 },
+    { code:'LEO', name:'Leonids', start:'Nov 06', end:'Nov 30', peak:'Nov 17', ra:152.0, de:22.0, v:71.0, r:2.5, zhr:15 },
+    { code:'AMO', name:'α-Monocerotids', start:'Nov 15', end:'Nov 25', peak:'Nov 21', ra:117.0, de:1.0, v:65.0, r:2.5, zhr:null },
+    { code:'NOO', name:'November Orionids', start:'Nov 13', end:'Dec 06', peak:'Nov 28', ra:91.0, de:16.0, v:44.0, r:3.0, zhr:3 },
+    { code:'AND', name:'Andromedids 2025', start:'Nov 25', end:'Dec 05', peak:'Nov 30', ra:23.0, de:50.0, v:18.0, r:3.0, zhr:0 },
+    { code:'PHO', name:'Phoenicids', start:'Nov 28', end:'Dec 09', peak:'Dec 02', ra:18.0, de:-53.0, v:18.0, r:2.8, zhr:null },
+    { code:'DPC', name:'December φ-Cassiopeids', start:'Dec 01', end:'Dec 08', peak:'Dec 06', ra:24.0, de:50.0, v:16.0, r:3.0, zhr:2 },
+    { code:'PUP', name:'Puppid-Velids', start:'Dec 01', end:'Dec 15', peak:'Dec 07', ra:123.0, de:-45.0, v:40.0, r:2.9, zhr:10 },
+    { code:'MON', name:'Monocerotids', start:'Dec 05', end:'Dec 20', peak:'Dec 08', ra:100.0, de:8.0, v:41.0, r:3.0, zhr:2 },
+    { code:'HYD', name:'σ-Hydrids', start:'Dec 03', end:'Dec 15', peak:'Dec 11', ra:127.0, de:2.0, v:58.0, r:3.0, zhr:3 },
+    { code:'LSC', name:'lambda-Scupltorids 2025', start:'Dec 12', end:'Dec 13', peak:'Dec 12', ra:8.0, de:-38.0, v:11.0, r:3.0, zhr:0 },
+    { code:'GEM', name:'Geminids', start:'Dec 04', end:'Dec 20', peak:'Dec 14', ra:112.0, de:33.0, v:35.0, r:2.6, zhr:120 },
+    { code:'COM', name:'Comae Berenicids', start:'Dec 12', end:'Feb 04', peak:'Dec 16', ra:175.0, de:18.0, v:65.0, r:3.0, zhr:3 },
+    { code:'DLM', name:'December Leonis Minorids', start:'Dec 05', end:'Dec 24', peak:'Dec 20', ra:161.0, de:30.0, v:64.0, r:3.0, zhr:5 },
+    { code:'URS', name:'Ursids', start:'Dec 17', end:'Dec 26', peak:'Dec 22', ra:217.0, de:76.0, v:33.0, r:3.0, zhr:0 }
+  ];
+
+  var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  function parseMD(str){
+    var parts = str.split(' ');
+    var month = MONTHS.indexOf(parts[0]);
+    var day = parseInt(parts[1], 10);
+    return { month: month, day: day, key: month * 100 + day };
+  }
+
+  function isActiveToday(shower, todayKey){
+    var start = parseMD(shower.start).key;
+    var end = parseMD(shower.end).key;
+    if (start <= end) return todayKey >= start && todayKey <= end;
+    return todayKey >= start || todayKey <= end;
+  }
+
+  function daysUntilPeak(shower, today){
+    var peak = parseMD(shower.peak);
+    var target = new Date(today.getFullYear(), peak.month, peak.day);
+    if (target < today) target = new Date(today.getFullYear() + 1, peak.month, peak.day);
+    return Math.round((target - today) / 86400000);
+  }
+
+  function fmtRange(shower){ return shower.start + ' \u2013 ' + shower.end; }
+  function fmtZhr(shower){ return shower.zhr === null ? '\u2014' : String(shower.zhr); }
+
+  function parseShowerXml(xmlText){
+    var xml = new DOMParser().parseFromString(xmlText, 'application/xml');
+    if (xml.querySelector('parsererror')) throw new Error('meteor.txt did not parse as XML');
+    var nodes = xml.querySelectorAll('shower');
+    if (nodes.length === 0) throw new Error('meteor.txt had no <shower> entries');
+    var showers = [];
+    nodes.forEach(function(node){
+      function text(tag){
+        var el = node.querySelector(tag);
+        return el && el.textContent ? el.textContent.trim() : null;
+      }
+      var zhrText = text('ZHR');
+      showers.push({
+        code: text('IAU_code'),
+        name: text('name'),
+        start: text('start'),
+        end: text('end'),
+        peak: text('peak'),
+        ra: parseFloat(text('RA')),
+        de: parseFloat(text('DE')),
+        v: parseFloat(text('V')),
+        r: parseFloat(text('r')),
+        zhr: zhrText ? Math.round(parseFloat(zhrText)) : null
+      });
+    });
+    return showers;
+  }
+
+  function render(SHOWERS){
+    var now = new Date();
+    var todayKey = now.getMonth() * 100 + now.getDate();
+
+    document.getElementById('todayDateStr').textContent =
+      now.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    document.getElementById('showerCountStr').textContent = String(SHOWERS.length);
+
+    var activeShowers = SHOWERS.filter(function(s){ return isActiveToday(s, todayKey); })
+      .sort(function(a, b){ return (b.zhr || 0) - (a.zhr || 0); });
+
+    var activeList = document.getElementById('activeTodayList');
+    activeList.innerHTML = '';
+    if (activeShowers.length === 0) {
+      var li = document.createElement('li');
+      li.innerHTML = '<span class="meteor-empty">No showers active today</span>';
+      activeList.appendChild(li);
+    } else {
+      activeShowers.forEach(function(s){
+        var li = document.createElement('li');
+        var nameSpan = document.createElement('span');
+        nameSpan.className = 'meteor-shower-name';
+        nameSpan.textContent = s.name;
+        var metaSpan = document.createElement('span');
+        metaSpan.className = 'meteor-shower-meta';
+        metaSpan.textContent = 'ZHR ' + fmtZhr(s);
+        li.appendChild(nameSpan);
+        li.appendChild(metaSpan);
+        activeList.appendChild(li);
+      });
+    }
+
+    var withDays = SHOWERS.map(function(s){ return { shower: s, days: daysUntilPeak(s, now) }; })
+      .sort(function(a, b){ return a.days - b.days; });
+    var nextPeak = withDays[0];
+    var nextPeakMount = document.getElementById('nextPeakMount');
+    if (nextPeak) {
+      var daysLabel = nextPeak.days === 0 ? 'Today' : nextPeak.days === 1 ? 'Tomorrow' : 'In ' + nextPeak.days + ' days';
+      nextPeakMount.innerHTML =
+        '<div class="meteor-hero">' +
+          '<span class="meteor-hero-name">' + nextPeak.shower.name + '</span>' +
+          '<span class="meteor-hero-days">' + daysLabel + '</span>' +
+        '</div>' +
+        '<p>Peaks ' + nextPeak.shower.peak + ', active ' + fmtRange(nextPeak.shower) + '. ZHR up to ' + fmtZhr(nextPeak.shower) + '.</p>';
+    }
+
+    var sortedByPeak = SHOWERS.slice().sort(function(a, b){
+      return parseMD(a.peak).key - parseMD(b.peak).key;
+    });
+    var tbody = document.getElementById('catalogBody');
+    tbody.innerHTML = '';
+    sortedByPeak.forEach(function(s){
+      var tr = document.createElement('tr');
+      if (isActiveToday(s, todayKey)) tr.className = 'meteor-active-row';
+      tr.innerHTML =
+        '<td class="meteor-name-cell">' + s.name + ' <span class="meteor-code-cell">' + s.code + '</span></td>' +
+        '<td>' + fmtRange(s) + '</td>' +
+        '<td>' + s.peak + '</td>' +
+        '<td>' + fmtZhr(s) + '</td>' +
+        '<td>' + s.v.toFixed(0) + ' km/s</td>';
+      tbody.appendChild(tr);
+    });
+  }
+
+  fetch('./jsondata/meteor.txt?_=' + Date.now(), { cache: 'no-store' })
+    .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+    .then(function(xmlText){ render(parseShowerXml(xmlText)); })
+    .catch(function(e){
+      console.warn('meteorShowers: jsondata/meteor.txt fetch/parse failed, using built-in snapshot —', e.message);
+      render(FALLBACK_SHOWERS);
+    });
+})();
+</script>
+</body>
+</html>

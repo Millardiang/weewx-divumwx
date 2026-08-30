@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<!--
+##############################################################################################
+# modalWindRose.html version 0.0.1
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  GPLv3
+##############################################################################################
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Wind Roses</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<style>
+:root{
+  --bw-accent:#B45309;
+  --bw-radius-sm:10px;
+  --bw-shadow:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.5);
+  --bs-body-bg: #EFECE2;
+  --bs-body-color: #1D2C4E;
+  --bs-secondary-color: #5C6672;
+  --bs-card-bg: #FFFFFF;
+  --bs-border-color: #C9CFD8;
+}
+[data-theme="dark"]{
+  --bw-accent:#D3A94C;
+  --bs-body-bg: #0A0F22;
+  --bs-body-color: #E9E4D4;
+  --bs-secondary-color: #8B93B8;
+  --bs-card-bg: #111834;
+  --bs-border-color: #2A3358;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+body {
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  padding: 16px;
+  transition: background-color .2s, color .2s;
+}
+
+.title-row { display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+.title-row h1 { font-size:20px; font-weight:700; margin:0; }
+.d3-badge{
+  display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  padding:3px 9px;border-radius:999px;background:rgba(232,163,61,0.18);color:var(--bw-accent);margin-left:8px;
+  vertical-align:middle;
+}
+.secondary { color: var(--bs-secondary-color); }
+
+.toolbar {
+  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;
+  gap:8px; margin-bottom:14px;
+}
+.left-buttons { display:flex; gap:6px; }
+.right-buttons { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.toolbar button {
+  border:none; border-radius:6px; padding:5px 10px; font-size:12.5px;
+  background: var(--bs-card-bg); color: var(--bs-body-color); cursor:pointer;
+  transition: background-color .15s, color .15s;
+}
+.toolbar button.active { background: var(--bw-accent); color:#1a1a1a; font-weight:600; }
+.unit-display, .data-info {
+  font-size:11.5px; padding:4px 9px; border-radius:6px; background: var(--bs-card-bg);
+  color: var(--bs-secondary-color);
+}
+.data-info.live { color:#39a239; }
+.data-info.unavailable { color:#c2410c; }
+
+.roses-row { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-bottom:14px; }
+.rose-panel {
+  flex:1 1 320px; max-width:440px; background: var(--bs-card-bg);
+  border-radius: var(--bw-radius-sm); box-shadow: var(--bw-shadow); overflow:visible;
+  position:relative;
+}
+.rose-panel-header {
+  padding:8px 14px; border-bottom:1px solid var(--bs-border-color);
+  display:flex; justify-content:space-between; align-items:center;
+}
+.rose-panel-title { font-weight:700; font-size:13.5px; }
+.rose-panel-sub { font-size:10.5px; color: var(--bs-secondary-color); }
+.rose-svg-wrap { display:block; width:100%; aspect-ratio:1; cursor:crosshair; }
+.rose-svg-wrap svg { width:100%; height:100%; display:block; overflow:visible; }
+.rose-empty {
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  text-align:center; padding:20px; font-size:12px; color: var(--bs-secondary-color);
+}
+.rose-legend {
+  padding:8px 12px; border-top:1px solid var(--bs-border-color);
+  display:flex; flex-wrap:wrap; gap:4px 12px; justify-content:center;
+}
+.leg-item { display:flex; align-items:center; gap:4px; font-size:10px; color: var(--bs-secondary-color); }
+.leg-swatch { width:10px; height:10px; border-radius:2px; flex-shrink:0; }
+
+#roseTooltip {
+  position:fixed; pointer-events:none; z-index:9999; display:none;
+  background: var(--bs-card-bg); color: var(--bs-body-color);
+  border:1px solid var(--bs-border-color); border-radius:6px; padding:8px 11px;
+  font-size:12px; line-height:1.6; white-space:nowrap;
+  box-shadow: var(--bw-shadow); min-width:160px;
+}
+#roseTooltip .tt-title { font-weight:700; font-size:13px; margin-bottom:3px; border-bottom:1px solid var(--bs-border-color); padding-bottom:4px; }
+#roseTooltip .tt-row { display:flex; justify-content:space-between; gap:14px; }
+#roseTooltip .tt-label { color: var(--bs-secondary-color); }
+#roseTooltip .tt-val { font-weight:600; }
+
+.extreme-values-container {
+  background: var(--bs-card-bg); border-radius: var(--bw-radius-sm); box-shadow: var(--bw-shadow);
+  padding:14px 18px;
+}
+.extreme-values-title {
+  text-align:center; margin:0 0 12px; font-size:13px; font-weight:700;
+  letter-spacing:.05em; text-transform:uppercase; opacity:.85;
+  padding-bottom:8px; border-bottom:1px solid var(--bs-border-color);
+}
+.extreme-values-grid { display:grid; grid-template-columns: repeat(5,1fr); gap:10px; text-align:center; }
+.extreme-period { background: var(--bs-body-bg); border-radius:8px; padding:8px 6px; }
+.period-label { font-size:10.5px; font-weight:700; color: var(--bs-secondary-color); margin-bottom:6px; text-transform:uppercase; letter-spacing:.03em; }
+.metric-box { margin-bottom:6px; }
+.metric-box:last-child { margin-bottom:0; }
+.metric-value { font-size:11px; font-weight:700; line-height:1.2; }
+.metric-date { font-size:9px; color: var(--bs-secondary-color); margin-top:1px; }
+.metric-unit { font-size:9px; color: var(--bs-secondary-color); margin-left:1px; }
+.wind-speed-max .metric-value { color:#FF6B6B; }
+.wind-gust-max .metric-value { color:var(--bw-accent); }
+.wind-dir-prev .metric-value { color:#9D4EDD; }
+.extreme-values-note { text-align:center; font-size:9.5px; color: var(--bs-secondary-color); margin-top:10px; font-style:italic; padding-top:8px; border-top:1px solid var(--bs-border-color); }
+
+@media (max-width:900px){ .extreme-values-grid{ grid-template-columns: repeat(3,1fr); } }
+@media (max-width:600px){ .extreme-values-grid{ grid-template-columns: repeat(2,1fr); } }
+@media (max-width:400px){ .extreme-values-grid{ grid-template-columns: 1fr; } }
+</style>
+<style>
+
+[data-season="winter"] {
+  --card-bg: #e9f2ec; --card-bg-dark: #e9f2ec; --card-bg-light: #e9f2ec;
+  --bg-color: #e9f2ec; --bg-color-dark: #e9f2ec; --bg-color-light: #e9f2ec;
+  --bs-body-bg: #e9f2ec; --bs-card-bg: #e9f2ec; --bg: #e9f2ec;
+}
+[data-season="spring"] {
+  --card-bg: #eef7e3; --card-bg-dark: #eef7e3; --card-bg-light: #eef7e3;
+  --bg-color: #eef7e3; --bg-color-dark: #eef7e3; --bg-color-light: #eef7e3;
+  --bs-body-bg: #eef7e3; --bs-card-bg: #eef7e3; --bg: #eef7e3;
+}
+[data-season="summer"] {
+  --card-bg: #fff6d9; --card-bg-dark: #fff6d9; --card-bg-light: #fff6d9;
+  --bg-color: #fff6d9; --bg-color-dark: #fff6d9; --bg-color-light: #fff6d9;
+  --bs-body-bg: #fff6d9; --bs-card-bg: #fff6d9; --bg: #fff6d9;
+}
+[data-season="autumn"] {
+  --card-bg: #f2e6d8; --card-bg-dark: #f2e6d8; --card-bg-light: #f2e6d8;
+  --bg-color: #f2e6d8; --bg-color-dark: #f2e6d8; --bg-color-light: #f2e6d8;
+  --bs-body-bg: #f2e6d8; --bs-card-bg: #f2e6d8; --bg: #f2e6d8;
+}
+html[data-season="winter"] body, html[data-season="spring"] body,
+html[data-season="summer"] body, html[data-season="autumn"] body {
+  background-color: var(--bg-color, var(--card-bg));
+}
+</style>
+</head>
+<body>
+
+<div id="roseTooltip"></div>
+
+<div class="title-row">
+  <h1>Wind Roses</h1>
+  <span class="secondary" style="font-size:12px;" id="calmSummary"></span>
+</div>
+
+<div class="toolbar">
+  <div class="left-buttons">
+    <button data-period="week" class="active">Week</button>
+    <button data-period="month">Month</button>
+    <button data-period="year">Year</button>
+  </div>
+  <div class="right-buttons">
+    <span class="unit-display" id="unitDisplay"></span>
+    <span class="data-info" id="dataSource">Connecting…</span>
+  </div>
+</div>
+
+<div class="roses-row">
+  <div class="rose-panel">
+    <div class="rose-panel-header">
+      <span class="rose-panel-title" style="color:#FF6B6B;">Wind Speed</span>
+      <span class="rose-panel-sub" id="calmSpeed"></span>
+    </div>
+    <div class="rose-svg-wrap" id="roseSpeed"></div>
+    <div class="rose-empty" id="roseSpeedEmpty" style="display:none;"></div>
+    <div class="rose-legend" id="legendSpeed"></div>
+  </div>
+
+  <div class="rose-panel">
+    <div class="rose-panel-header">
+      <span class="rose-panel-title" style="color:var(--bw-accent);">Wind Gust</span>
+      <span class="rose-panel-sub" id="calmGust"></span>
+    </div>
+    <div class="rose-svg-wrap" id="roseGust"></div>
+    <div class="rose-empty" id="roseGustEmpty" style="display:none;"></div>
+    <div class="rose-legend" id="legendGust"></div>
+  </div>
+</div>
+
+<div class="extreme-values-container">
+  <div class="extreme-values-title">Wind Speed, Gust &amp; Prevailing Direction</div>
+  <div class="extreme-values-grid" id="extremeGrid"></div>
+  <div class="extreme-values-note">Maximum values shown for each period. Prevailing direction uses vector averaging.</div>
+</div>
+
+<script src="units.js"></script>
+<script>
+const CHARTS_JSON_URL = './jsondata/charts.json';
+const DIR_FIELD_CANDIDATES = ['windDirAvg', 'windDirVecAvg', 'windDir'];
+
+const BINS = [
+  { label:'< 1.5',  cs:'rgba(255,107,107,0.22)', cg:'rgba(232,163,61,0.28)' },
+  { label:'1.5–3',  cs:'rgba(255,107,107,0.40)', cg:'rgba(232,163,61,0.42)' },
+  { label:'3–5.5',  cs:'rgba(255,107,107,0.58)', cg:'rgba(232,163,61,0.58)' },
+  { label:'5.5–8',  cs:'rgba(255,107,107,0.75)', cg:'rgba(232,163,61,0.74)' },
+  { label:'8–11',   cs:'rgba(220,55,55,0.90)',   cg:'rgba(196,120,20,0.90)' },
+  { label:'> 11',   cs:'rgba(155,15,15,1.00)',   cg:'rgba(150,85,0,1.00)' },
+];
+const BIN_MAX = [1.5, 3.3, 5.5, 8.0, 11.0, Infinity];
+const DIRS_16 = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+const COMPASS_8 = ['N','NE','E','SE','S','SW','W','NW'];
+const CONV_FACTOR = { mph: 2.23694, kmh: 3.6, kt: 1.94384, ms: 1, bf: 1 };
+const CONV_LABEL  = { mph: 'mph', kmh: 'km/h', kt: 'kt', ms: 'm/s', bf: 'm/s' };
+
+let allData = [];
+let currentPeriod = 'week';
+let dataReady = false;
+let dirFieldMissing = false;
+
+let currentUnits = 'uk';
+function loadUnitKey(){
+  try {
+    const key = localStorage.getItem('dashboardUnitSystem') || 'uk';
+    if (typeof SYSTEMS !== 'undefined' && SYSTEMS[key]) return key;
+  } catch (e) {}
+  return 'uk';
+}
+currentUnits = loadUnitKey();
+function windUnit(){ return (SYSTEMS[currentUnits] || SYSTEMS.uk).wind; }
+function conv(){ return CONV_FACTOR[windUnit()] || 1; }
+function ulbl(){ return CONV_LABEL[windUnit()] || 'm/s'; }
+function fmtV(ms){ return (ms * conv()).toFixed(1); }
+function updateUnitDisplay(){
+  document.getElementById('unitDisplay').textContent = 'Units: ' + ulbl() +
+    (windUnit() === 'bf' ? ' (Beaufort shown as m/s here)' : '');
+}
+
+function reportHeight(){
+  if (window.parent === window) return;
+  window.parent.postMessage({ type: 'chartModalContentHeight', height: document.body.scrollHeight }, '*');
+}
+if (window.parent !== window) {
+  new ResizeObserver(reportHeight).observe(document.body);
+}
+
+let lastIsDay = null;
+function resolveAutoIsDay(){
+  if (lastIsDay != null) return !!lastIsDay;
+  return !window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+function applyTheme(){
+  const mode = localStorage.getItem('dashboardThemeMode') || 'auto';
+  const resolved = mode === 'light' ? 'light' : mode === 'dark' ? 'dark' : (resolveAutoIsDay() ? 'light' : 'dark');
+  document.documentElement.setAttribute('data-theme', resolved);
+  if (dataReady) drawAll();
+}
+function pollIsDayForTheme(){
+  fetch('./jsondata/loop.json?_=' + Date.now(), { cache: 'no-store' })
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(j => {
+      const o = (j && j.observations) || {};
+      if (o.isDay != null) { lastIsDay = o.isDay; applyTheme(); }
+    })
+    .catch(() => {});
+}
+window.addEventListener('storage', e => {
+  if (e.key === 'dashboardThemeMode') applyTheme();
+  if (e.key === 'dashboardUnitSystem') { currentUnits = loadUnitKey(); updateUnitDisplay(); if (dataReady) drawAll(); buildExtremes(); }
+});
+window.addEventListener('unitsystemchange', () => { currentUnits = loadUnitKey(); updateUnitDisplay(); if (dataReady) { drawAll(); } });
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+
+function themeColors(){
+  const light = document.documentElement.getAttribute('data-theme') === 'light';
+  return light ? {
+    ring: 'rgba(0,0,0,0.18)', ringTxt: 'rgba(0,0,0,0.55)',
+    spokeMaj: 'rgba(0,0,0,0.18)', spokeMin: 'rgba(0,0,0,0.08)',
+    cardTxt: 'rgba(0,0,0,0.70)', petalStroke: 'rgba(0,0,0,0.20)',
+    calm: isGust => isGust ? 'rgba(196,120,20,0.15)' : 'rgba(200,50,50,0.12)',
+    calmStr: isGust => isGust ? 'rgba(196,120,20,0.50)' : 'rgba(180,40,40,0.45)',
+  } : {
+    ring: 'rgba(230,234,249,0.10)', ringTxt: 'rgba(230,234,249,0.35)',
+    spokeMaj: 'rgba(230,234,249,0.12)', spokeMin: 'rgba(230,234,249,0.05)',
+    cardTxt: 'rgba(230,234,249,0.75)', petalStroke: 'rgba(0,0,0,0.25)',
+    calm: isGust => isGust ? 'rgba(232,163,61,0.14)' : 'rgba(255,107,107,0.12)',
+    calmStr: isGust => isGust ? 'rgba(232,163,61,0.5)' : 'rgba(255,107,107,0.45)',
+  };
+}
+
+async function loadData(){
+  const src = document.getElementById('dataSource');
+  try {
+    const res = await fetch(CHARTS_JSON_URL + '?_=' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    const series = json && json[0] && json[0].chartPlot && json[0].chartPlot.series;
+    if (!series) throw new Error('Unexpected charts.json shape — no chartPlot.series found');
+
+    const dirField = DIR_FIELD_CANDIDATES.find(f => Array.isArray(series[f]) && series[f].some(p => p && p[1] != null));
+    dirFieldMissing = !dirField;
+
+    const byTs = new Map();
+    (series.windSpeedAvg || []).forEach(p => {
+      if (p && p[1] != null) byTs.set(p[0], { ts: p[0], speedMs: parseFloat(p[1]), gustMs: null, dirDeg: null });
+    });
+    (series.windGustMax || []).forEach(p => {
+      if (p && p[1] != null && byTs.has(p[0])) byTs.get(p[0]).gustMs = parseFloat(p[1]);
+    });
+    if (dirField) {
+      (series[dirField] || []).forEach(p => {
+        if (p && p[1] != null && byTs.has(p[0])) byTs.get(p[0]).dirDeg = parseFloat(p[1]);
+      });
+    }
+    allData = Array.from(byTs.values()).sort((a, b) => a.ts - b.ts);
+    dataReady = true;
+    src.textContent = 'Live data (' + allData.length + ' days)';
+    src.className = 'data-info live';
+  } catch (e) {
+    console.warn('Wind Roses: charts.json load failed —', e.message);
+    allData = [];
+    dataReady = false;
+    src.textContent = 'Data unavailable';
+    src.className = 'data-info unavailable';
+  }
+  updateUnitDisplay();
+  drawAll();
+  buildExtremes();
+  reportHeight();
+}
+
+function getSubset(){
+  if (currentPeriod === 'year') return allData;
+  return allData.slice(-(currentPeriod === 'month' ? 30 : 7));
+}
+
+function buildRoseData(subset, useGust){
+  const sectors = Array.from({ length: 16 }, () => new Array(BINS.length).fill(0));
+  let calm = 0, counted = 0;
+  subset.forEach(d => {
+    if (d.dirDeg == null) return;
+    const val = useGust ? (d.gustMs != null ? d.gustMs : d.speedMs) : d.speedMs;
+    if (val == null) return;
+    counted++;
+    if (val <= 0.5) { calm++; return; }
+    const di = Math.round(d.dirDeg / 22.5) % 16;
+    const bi = BIN_MAX.findIndex(mx => val < mx);
+    sectors[di][bi === -1 ? BINS.length - 1 : bi]++;
+  });
+  return { sectors, calm, total: counted };
+}
+
+function showEmpty(containerId, msg){
+  document.getElementById(containerId).style.display = 'none';
+  const el = document.getElementById(containerId + 'Empty');
+  el.textContent = msg;
+  el.style.display = 'flex';
+  const legendId = containerId === 'roseSpeed' ? 'legendSpeed' : 'legendGust';
+  document.getElementById(legendId).style.display = 'none';
+}
+function hideEmpty(containerId){
+  document.getElementById(containerId).style.display = 'block';
+  document.getElementById(containerId + 'Empty').style.display = 'none';
+  const legendId = containerId === 'roseSpeed' ? 'legendSpeed' : 'legendGust';
+  document.getElementById(legendId).style.display = '';
+}
+
+const tooltip = document.getElementById('roseTooltip');
+function hideTooltip(){ tooltip.style.display = 'none'; }
+
+function drawRoseD3(containerId, roseData, isGust){
+  const container = document.getElementById(containerId);
+
+  if (!dataReady || allData.length === 0) {
+    showEmpty(containerId, 'No wind data available yet.');
+    return;
+  }
+  if (dirFieldMissing) {
+    showEmpty(containerId, 'Direction data unavailable in charts.json — rose cannot be drawn.');
+    return;
+  }
+  if (roseData.total === 0) {
+    showEmpty(containerId, 'No observations for this period.');
+    return;
+  }
+  hideEmpty(containerId);
+
+  const TC = themeColors();
+  const W = 420, H = 420, cx = W / 2, cy = H / 2;
+  const maxR = Math.min(cx, cy) - 38;
+
+  container.innerHTML = '';
+  const svg = d3.select(container).append('svg').attr('viewBox', `0 0 ${W} ${H}`);
+  const g = svg.append('g').attr('transform', `translate(${cx},${cy})`);
+
+  const { sectors, calm, total } = roseData;
+  const dirTotals = sectors.map(s => s.reduce((a, b) => a + b, 0));
+  const maxCount = Math.max(...dirTotals, 1);
+
+  for (let i = 1; i <= 4; i++) {
+    const r = (i / 4) * maxR;
+    g.append('circle').attr('r', r).attr('fill', 'none').attr('stroke', TC.ring).attr('stroke-width', 0.8);
+    const pct = Math.round((i / 4) * (maxCount / total) * 100);
+    g.append('text')
+      .attr('x', 0).attr('y', -r - 4).attr('text-anchor', 'middle')
+      .attr('font-size', 9).attr('font-family', 'system-ui, sans-serif').attr('fill', TC.ringTxt)
+      .text(pct + '%');
+  }
+
+  for (let i = 0; i < 16; i++) {
+    const a = (i / 16) * 2 * Math.PI;
+    g.append('line')
+      .attr('x1', 0).attr('y1', 0)
+      .attr('x2', Math.sin(a) * maxR).attr('y2', -Math.cos(a) * maxR)
+      .attr('stroke', i % 2 === 0 ? TC.spokeMaj : TC.spokeMin)
+      .attr('stroke-width', i % 2 === 0 ? 0.8 : 0.4);
+  }
+
+  const sW = (2 * Math.PI / 16) * 0.88;
+  const arcGen = d3.arc();
+  for (let di = 0; di < 16; di++) {
+    const base = (di / 16) * 2 * Math.PI;
+    let cumR = 0;
+    for (let bi = 0; bi < BINS.length; bi++) {
+      const cnt = sectors[di][bi]; if (!cnt) continue;
+      const seg = (cnt / maxCount) * maxR;
+      const d = arcGen({
+        innerRadius: Math.max(cumR, 0.5), outerRadius: cumR + seg,
+        startAngle: base - sW / 2, endAngle: base + sW / 2,
+      });
+      g.append('path')
+        .attr('d', d)
+        .attr('fill', isGust ? BINS[bi].cg : BINS[bi].cs)
+        .attr('stroke', TC.petalStroke).attr('stroke-width', 0.4)
+        .on('mousemove', (event) => showRoseTooltip({di, bi, cnt, total, isGust, roseData}, event))
+        .on('mouseleave', hideTooltip);
+      cumR += seg;
+    }
+  }
+
+  const cr = Math.max(3, (calm / total) * maxR * 0.5);
+  g.append('circle')
+    .attr('r', cr).attr('fill', TC.calm(isGust)).attr('stroke', TC.calmStr(isGust)).attr('stroke-width', 1)
+    .on('mousemove', (event) => showCalmTooltip(calm, total, isGust, event))
+    .on('mouseleave', hideTooltip);
+
+  const labR = maxR + 20;
+  COMPASS_8.forEach((lbl, i) => {
+    const a = (i / 8) * 2 * Math.PI;
+    g.append('text')
+      .attr('x', Math.sin(a) * labR).attr('y', -Math.cos(a) * labR)
+      .attr('text-anchor', 'middle').attr('dominant-baseline', 'middle')
+      .attr('font-family', 'system-ui, sans-serif')
+      .attr('font-size', lbl === 'N' ? 13 : 11).attr('font-weight', lbl === 'N' ? 'bold' : 'normal')
+      .attr('fill', lbl === 'N' ? (isGust ? '#D3A94C' : '#FF6B6B') : TC.cardTxt)
+      .text(lbl);
+  });
+  g.append('circle').attr('r', 3).attr('fill', isGust ? '#D3A94C' : '#FF6B6B');
+
+  document.getElementById(isGust ? 'calmGust' : 'calmSpeed').textContent =
+    'Calm: ' + ((calm / total) * 100).toFixed(1) + '%';
+}
+
+function positionTooltip(event){
+  const TW = 200, TH = 100;
+  let tx = event.clientX + 14, ty = event.clientY - 10;
+  if (tx + TW > window.innerWidth) tx = event.clientX - TW - 14;
+  if (ty + TH > window.innerHeight) ty = event.clientY - TH - 10;
+  tooltip.style.left = tx + 'px';
+  tooltip.style.top = ty + 'px';
+}
+function showRoseTooltip({di, bi, cnt, total, isGust, roseData}, event){
+  const dir = DIRS_16[di];
+  const dirCount = roseData.sectors[di].reduce((a, b) => a + b, 0);
+  const freq = total > 0 ? ((dirCount / total) * 100).toFixed(1) : '0.0';
+  const titleColor = isGust ? '#D3A94C' : '#FF6B6B';
+  const binLabel = BINS[bi].label.replace(/[\d.]+/g, n => (parseFloat(n) * conv()).toFixed(conv() === 1 ? 1 : 0)) + ' ' + ulbl();
+  const binCount = total > 0 ? ((cnt / total) * 100).toFixed(1) + '%' : '—';
+
+  tooltip.innerHTML =
+    '<div class="tt-title" style="color:' + titleColor + '">' + dir + ' — ' + (isGust ? 'Gust' : 'Speed') + '</div>' +
+    '<div class="tt-row"><span class="tt-label">Direction freq.</span><span class="tt-val">' + freq + '%</span></div>' +
+    '<div class="tt-row"><span class="tt-label">Speed band</span><span class="tt-val">' + binLabel + '</span></div>' +
+    '<div class="tt-row"><span class="tt-label">Band share</span><span class="tt-val">' + binCount + '</span></div>' +
+    '<div class="tt-row"><span class="tt-label">Obs. in sector</span><span class="tt-val">' + dirCount + '</span></div>';
+  tooltip.style.display = 'block';
+  positionTooltip(event);
+}
+function showCalmTooltip(calm, total, isGust, event){
+  const titleColor = isGust ? '#D3A94C' : '#FF6B6B';
+  const pct = total > 0 ? ((calm / total) * 100).toFixed(1) : '0.0';
+  tooltip.innerHTML =
+    '<div class="tt-title" style="color:' + titleColor + '">Calm</div>' +
+    '<div class="tt-row"><span class="tt-label">Below</span><span class="tt-val">' + (0.5 * conv()).toFixed(1) + ' ' + ulbl() + '</span></div>' +
+    '<div class="tt-row"><span class="tt-label">Share of obs.</span><span class="tt-val">' + pct + '%</span></div>';
+  tooltip.style.display = 'block';
+  positionTooltip(event);
+}
+
+function buildLegend(containerId, isGust){
+  const el = document.getElementById(containerId); el.innerHTML = '';
+  BINS.forEach(b => {
+    const color = isGust ? b.cg : b.cs;
+    const lbl = b.label.replace(/[\d.]+/g, n => (parseFloat(n) * conv()).toFixed(conv() === 1 ? 1 : 0));
+    const d = document.createElement('div'); d.className = 'leg-item';
+    d.innerHTML = '<div class="leg-swatch" style="background:' + color + '"></div><span>' + lbl + ' ' + ulbl() + '</span>';
+    el.appendChild(d);
+  });
+}
+
+function prevailingDir(slice){
+  let sx = 0, sy = 0, n = 0;
+  slice.forEach(d => {
+    if (d.dirDeg == null) return;
+    const r = d.dirDeg * Math.PI / 180;
+    sx += Math.cos(r); sy += Math.sin(r); n++;
+  });
+  if (!n) return { deg: null, abbr: 'N/A' };
+  let deg = Math.atan2(sy / n, sx / n) * 180 / Math.PI;
+  if (deg < 0) deg += 360;
+  deg = Math.round(deg);
+  return { deg, abbr: DIRS_16[Math.round(deg / 22.5) % 16] };
+}
+function fmtDate(ts){ return new Date(ts).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }); }
+function buildExtremes(){
+  const grid = document.getElementById('extremeGrid'); grid.innerHTML = '';
+  if (!dataReady || allData.length === 0) {
+    grid.innerHTML = '<div class="extreme-period" style="grid-column:1/-1;color:var(--bs-secondary-color);">No data available.</div>';
+    return;
+  }
+  const periods = [
+    { label: 'Daily', days: 1 }, { label: 'Weekly', days: 7 }, { label: 'Monthly', days: 30 },
+    { label: 'Yearly', days: 365 }, { label: 'All-time', days: allData.length },
+  ];
+  periods.forEach(p => {
+    const slice = allData.slice(-Math.min(p.days, allData.length));
+    const maxSpd = slice.filter(d => d.speedMs != null).reduce((a, b) => b.speedMs > a.speedMs ? b : a, { speedMs: -Infinity, ts: null });
+    const maxGst = slice.filter(d => d.gustMs != null).reduce((a, b) => (b.gustMs || 0) > (a.gustMs || 0) ? b : a, { gustMs: -Infinity, ts: null });
+    const dir = dirFieldMissing ? { deg: null, abbr: 'N/A' } : prevailingDir(slice);
+    const col = document.createElement('div'); col.className = 'extreme-period';
+    col.innerHTML =
+      '<div class="period-label">' + p.label + '</div>' +
+      '<div class="metric-box wind-speed-max">' +
+        (maxSpd.ts ? '<div class="metric-value">' + fmtV(maxSpd.speedMs) + '<span class="metric-unit">' + ulbl() + '</span></div><div class="metric-date">' + fmtDate(maxSpd.ts) + ' (speed)</div>'
+          : '<div class="metric-value" style="opacity:.5;">N/A</div>') +
+      '</div>' +
+      '<div class="metric-box wind-gust-max">' +
+        (maxGst.ts && maxGst.gustMs > 0 ? '<div class="metric-value">' + fmtV(maxGst.gustMs) + '<span class="metric-unit">' + ulbl() + '</span></div><div class="metric-date">' + fmtDate(maxGst.ts) + ' (gust)</div>'
+          : '<div class="metric-value" style="opacity:.5;">N/A</div>') +
+      '</div>' +
+      '<div class="metric-box wind-dir-prev">' +
+        (dir.deg != null ? '<div class="metric-value">' + dir.abbr + '<span class="metric-unit"> (' + dir.deg + '°)</span></div><div class="metric-date">prevailing</div>'
+          : '<div class="metric-value" style="opacity:.5;">N/A</div>') +
+      '</div>';
+    grid.appendChild(col);
+  });
+  reportHeight();
+}
+
+function drawAll(){
+  const sub = getSubset();
+  const spd = buildRoseData(sub, false);
+  const gst = buildRoseData(sub, true);
+  drawRoseD3('roseSpeed', spd, false);
+  drawRoseD3('roseGust', gst, true);
+  buildLegend('legendSpeed', false);
+  buildLegend('legendGust', true);
+  document.getElementById('calmSummary').textContent = dirFieldMissing ? 'Direction data unavailable' : '';
+  reportHeight();
+}
+
+document.querySelectorAll('button[data-period]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('button[data-period]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentPeriod = btn.dataset.period;
+    drawAll();
+    buildExtremes();
+  });
+});
+
+applyTheme();
+pollIsDayForTheme();
+setInterval(pollIsDayForTheme, 5 * 60 * 1000);
+updateUnitDisplay();
+loadData();
+</script>
+<script>
+(function applySeasonFromParent(){
+  function apply(){
+    try {
+      var b = window.parent && window.parent.document && window.parent.document.body;
+      var m = b && /season-(winter|spring|summer|autumn)/.exec(b.className);
+      if (m) document.documentElement.setAttribute('data-season', m[1]);
+      else document.documentElement.removeAttribute('data-season');
+    } catch (e) {}
+  }
+  apply();
+  try {
+    var pb = window.parent && window.parent.document && window.parent.document.body;
+    if (pb) new MutationObserver(apply).observe(pb, { attributes: true, attributeFilter: ['class'] });
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>
