@@ -23,7 +23,7 @@ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LIC
 * Kiosk mode, 3 x 3 grid for displaying on tablet sized screens.
 
 # Repository
-* https://github.com/Millardiang/weewx-divumwx/tree/dev
+* https://github.com/Millardiang/weewx-divumwx
 
 # Live Website
 * https://steepleclaydonweather.uk
