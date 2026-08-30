@@ -1,0 +1,11 @@
+{
+  "timestamp": "2026-07-22T22:57:33.630033+00:00",
+  "phase": "Waxing Gibbous",
+  "illuminated_percent": 59.9,
+  "altitude": -60.8,
+  "azimuth": 360.0,
+  "is_visible": false,
+  "age_days": 8.3,
+  "distance_km": 384400,
+  "calculation_method": "simplified"
+}
