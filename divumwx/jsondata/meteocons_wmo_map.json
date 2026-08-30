@@ -1,0 +1,46 @@
+{
+  "meta": {
+    "source": "basmilius/weather-icons ? production/fill/svg",
+    "version": "2025.10-fix",
+    "description": "WMO code ? Meteocons (filled) icon names with emoji + label fallbacks"
+  },
+  "mapping": {
+    "0":  { "day": "clear-day",                  "night": "clear-night",                 "emoji": "??",  "label": "Clear sky" },
+    "1":  { "day": "mostly-clear-day",           "night": "mostly-clear-night",          "emoji": "??",  "label": "Mainly clear" },
+    "2":  { "day": "partly-cloudy-day",          "night": "partly-cloudy-night",         "emoji": "?",  "label": "Partly cloudy" },
+    "3":  { "day": "overcast",                   "night": "overcast",                    "emoji": "??",  "label": "Overcast" },
+
+    "45": { "day": "fog-day",                    "night": "fog-night",                   "emoji": "??",  "label": "Fog" },
+    "48": { "day": "fog-day",                    "night": "fog-night",                   "emoji": "??",  "label": "Depositing rime fog" },
+
+    "51": { "day": "partly-cloudy-day-drizzle",  "night": "partly-cloudy-night-drizzle", "emoji": "??",  "label": "Light drizzle" },
+    "53": { "day": "overcast-day-drizzle",       "night": "overcast-night-drizzle",      "emoji": "??",  "label": "Moderate drizzle" },
+    "55": { "day": "extreme-day-drizzle",        "night": "extreme-night-drizzle",       "emoji": "??",  "label": "Dense drizzle" },
+
+    "56": { "day": "partly-cloudy-day-sleet",    "night": "partly-cloudy-night-sleet",   "emoji": "????", "label": "Freezing drizzle" },
+    "57": { "day": "overcast-day-sleet",         "night": "overcast-night-sleet",        "emoji": "????", "label": "Freezing drizzle" },
+
+    "61": { "day": "partly-cloudy-day-rain",     "night": "partly-cloudy-night-rain",    "emoji": "??",  "label": "Slight rain" },
+    "63": { "day": "overcast-day-rain",          "night": "overcast-night-rain",         "emoji": "??",  "label": "Moderate rain" },
+    "65": { "day": "extreme-day-rain",           "night": "extreme-night-rain",          "emoji": "??",  "label": "Heavy rain" },
+
+    "66": { "day": "partly-cloudy-day-sleet",    "night": "partly-cloudy-night-sleet",   "emoji": "????", "label": "Freezing rain" },
+    "67": { "day": "overcast-day-sleet",         "night": "overcast-night-sleet",        "emoji": "????", "label": "Freezing rain" },
+
+    "71": { "day": "partly-cloudy-day-snow",     "night": "partly-cloudy-night-snow",    "emoji": "??",  "label": "Slight snow" },
+    "73": { "day": "overcast-day-snow",          "night": "overcast-night-snow",         "emoji": "??",  "label": "Moderate snow" },
+    "75": { "day": "extreme-day-snow",           "night": "extreme-night-snow",          "emoji": "??",  "label": "Heavy snow" },
+    "77": { "day": "snow",                       "night": "snow",                        "emoji": "??",  "label": "Snow grains" },
+
+    "80": { "day": "partly-cloudy-day-rain",     "night": "partly-cloudy-night-rain",    "emoji": "??",  "label": "Light rain showers" },
+    "81": { "day": "overcast-day-rain",          "night": "overcast-night-rain",         "emoji": "??",  "label": "Moderate rain showers" },
+    "82": { "day": "extreme-day-rain",           "night": "extreme-night-rain",          "emoji": "??",  "label": "Violent rain showers" },
+
+    "85": { "day": "partly-cloudy-day-snow",     "night": "partly-cloudy-night-snow",    "emoji": "??",  "label": "Light snow showers" },
+    "86": { "day": "extreme-day-snow",           "night": "extreme-night-snow",          "emoji": "??",  "label": "Heavy snow showers" },
+
+    "95": { "day": "thunderstorms-day",          "night": "thunderstorms-night",         "emoji": "??",  "label": "Thunderstorm" },
+    "96": { "day": "thunderstorms-day-rain",     "night": "thunderstorms-night-rain",    "emoji": "????", "label": "Thunderstorm with rain" },
+    "99": { "day": "thunderstorms-day-snow",     "night": "thunderstorms-day-snow",      "emoji": "????", "label": "Thunderstorm with hail" }
+  }
+}
