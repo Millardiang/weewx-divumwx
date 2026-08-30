@@ -1,0 +1,26 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Lunar eclipse">
+  <!-- Faint starfield, kept subtle so it still reads clearly at 24px -->
+  <circle cx="14" cy="18" r="2" fill="#4A5578"/>
+  <circle cx="86" cy="24" r="1.6" fill="#4A5578"/>
+  <circle cx="80" cy="78" r="1.6" fill="#4A5578"/>
+  <circle cx="10" cy="70" r="1.4" fill="#4A5578"/>
+
+  <!-- Moon disc: coppery "blood moon" red, the colour a totally or
+       partially eclipsed moon actually takes on, from sunlight
+       refracted through Earth's atmosphere. Reads immediately as an
+       eclipse rather than an ordinary moon-phase icon. -->
+  <circle cx="50" cy="50" r="34" fill="#B33A2E" stroke="#7A2019" stroke-width="3"/>
+
+  <!-- A few darker maria-like patches for texture -->
+  <circle cx="40" cy="40" r="6" fill="#8F2A20" opacity="0.55"/>
+  <circle cx="60" cy="58" r="8" fill="#8F2A20" opacity="0.45"/>
+  <circle cx="55" cy="34" r="4" fill="#8F2A20" opacity="0.5"/>
+
+  <!-- Earth's shadow (umbra) advancing across the disc: partial
+       coverage, matching "Partial Lunar Eclipse" without needing a
+       separate icon for total vs. partial. -->
+  <path d="M 50 16 A 34 34 0 0 1 50 84 A 44 44 0 0 0 50 16 Z" fill="#151A2E"/>
+
+  <!-- Thin highlight rim on the shadow's leading edge -->
+  <path d="M 50 16 A 34 34 0 0 1 78.05 32 A 44 44 0 0 0 50 16 Z" fill="#2A3356" opacity="0.6"/>
+</svg>
