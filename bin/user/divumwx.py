@@ -2258,7 +2258,7 @@ class WeatherAPIPoller:
         self.longitude = longitude
         
         # Check if this source is enabled
-        self.enabled = config.get('enabled', True)  # Default to True for backward compatibility
+        self.enabled = to_bool(config.get('enabled', True))  # Default to True for backward compatibility
         if not self.enabled:
             loginf(f"{self.name}: Disabled in configuration (enabled = False)")
             # Set minimal config for disabled sources
