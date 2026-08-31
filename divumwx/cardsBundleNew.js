@@ -1029,6 +1029,7 @@ try {
   var ARCHIVE_JSON_URL = './jsondata/archive.json';
   var ASTRO_JSON_URL   = './jsondata/almanac.json';
   var CLOUD_JSON_URL   = './jsondata/cloud_coverage.json';
+  var ME_JSON_URL      = './jsondata/me.txt';
   var POLL_MS = 30 * 1000;
   var ICON_BASE = './meteocons/fill/svg/';
 
@@ -1084,6 +1085,57 @@ try {
       if (pct <= thresholds[i][0]) return thresholds[i][1];
     }
     return '8 oktas';
+  }
+
+  // Parses METAR's visib notation ("6+", "10+", "1/2", "1 1/2", "3") into
+  // a numeric statute-miles value plus whether a "+" (>=) was present.
+  // Returns null if the string doesn't parse as any recognized METAR
+  // visibility format, rather than guessing.
+  function parseMetarVisibilityMiles(visib){
+    if (visib === null || visib === undefined || visib === '') return null;
+    var str = String(visib).trim();
+    var plus = false;
+    if (str.charAt(str.length - 1) === '+') {
+      plus = true;
+      str = str.slice(0, -1).trim();
+    }
+    var parts = str.split(' ');
+    var total = 0, valid = false;
+    for (var i = 0; i < parts.length; i++){
+      var part = parts[i];
+      if (part.indexOf('/') > -1){
+        var frac = part.split('/');
+        if (frac.length === 2){
+          var num = parseFloat(frac[0]), den = parseFloat(frac[1]);
+          if (!isNaN(num) && !isNaN(den) && den !== 0){ total += num / den; valid = true; }
+        }
+      } else {
+        var n = parseFloat(part);
+        if (!isNaN(n)){ total += n; valid = true; }
+      }
+    }
+    return valid ? { miles: total, plus: plus } : null;
+  }
+
+  // Imperial (currentUnits.wind === 'mph', the same proxy cloudBaseLabel
+  // above already uses for lack of a dedicated distance-unit toggle):
+  // shows METAR's own string completely unchanged -- "6+" means "6
+  // statute miles or greater" (AWC's API caps visibility reporting at
+  // this value even when the raw observation is effectively unlimited,
+  // per the raw METAR line's own "9999"/CAVOK-equivalent), and this is
+  // the native, correctly-understood notation for that unit system.
+  // Metric: parses and converts to km, preserving the "+"/fraction
+  // semantics rather than dropping them -- "6+" mi becomes "9.7+" km,
+  // not a bare "9.7" that quietly loses the >= meaning. Falls back to
+  // the raw string (still with a unit, just not converted) if the
+  // format doesn't parse, rather than showing nothing.
+  function metarVisibilityLabel(visib){
+    if (visib === null || visib === undefined || visib === '') return '\u2014';
+    if (currentUnits.wind === 'mph') return visib + ' mi';
+    var parsed = parseMetarVisibilityMiles(visib);
+    if (parsed === null) return visib + ' mi';
+    var km = parsed.miles * 1.60934;
+    return d3.format('.1f')(km) + (parsed.plus ? '+' : '') + ' km';
   }
 
   function toOrdinal(deg){
@@ -1367,9 +1419,10 @@ try {
       fetch(LOOP_JSON_URL + ((LOOP_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
       fetch(ARCHIVE_JSON_URL + ((ARCHIVE_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
       fetch(ASTRO_JSON_URL + ((ASTRO_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
-      fetch(CLOUD_JSON_URL + ((CLOUD_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+      fetch(CLOUD_JSON_URL + ((CLOUD_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
+      fetch(ME_JSON_URL + ((ME_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
     ]).then(function(results){
-      var loopResult = results[0], archResult = results[1], astroResult = results[2], cloudResult = results[3];
+      var loopResult = results[0], archResult = results[1], astroResult = results[2], cloudResult = results[3], metarResult = results[4];
       if(loopResult.status === 'rejected') console.warn('cardCurrent: loop.json fetch failed —', loopResult.reason.message);
       if(archResult.status === 'rejected') console.warn('cardCurrent: archive.json fetch failed —', archResult.reason.message);
       if(astroResult.status === 'rejected') console.warn('cardCurrent: almanac.json fetch failed —', astroResult.reason.message);
@@ -1386,12 +1439,25 @@ try {
       } else if(typeof cloudResult.value.cloudPercent !== 'number' || isNaN(cloudResult.value.cloudPercent)){
         console.info('cardCurrent: cloud_coverage.json fetched but cloudPercent is missing/invalid (falling back) —', JSON.stringify(cloudResult.value));
       }
+      // me.txt (METAR) is likewise optional -- only configured if the
+      // person supplied an ICAO code during install (install.py's own
+      // apply_weatherapi_metar_merge() leaves url/data_path unset
+      // otherwise). Same info-not-warn logging rationale as above.
+      if(metarResult.status === 'rejected'){
+        console.info('cardCurrent: me.txt fetch failed (Visibility will show —) —', metarResult.reason.message);
+      }
 
       var loop = loopResult.status === 'fulfilled' ? loopResult.value : {};
       var arch = archResult.status === 'fulfilled' ? archResult.value : {};
       var o = loop.observations || {};
       var alm = astroResult.status === 'fulfilled' ? astroResult.value : {};
       var cloudCoverage = cloudResult.status === 'fulfilled' ? cloudResult.value : null;
+      // me.txt is a JSON ARRAY (one METAR report per configured ICAO
+      // station, and this install only configures one) -- confirmed via
+      // a real capture: [{"icaoId":"EGTK",...,"visib":"6+",...}]. Take
+      // the first (only) element.
+      var metarReport = (metarResult.status === 'fulfilled' && Array.isArray(metarResult.value) && metarResult.value.length > 0)
+        ? metarResult.value[0] : null;
       var sky = arch.sky || {};
       var wind = arch.wind || {};
       var rain = arch.rain || {};
@@ -1446,6 +1512,7 @@ try {
       iconImg.src = ICON_BASE + pickIcon(inputs);
       cloudBaseText.textContent = cloudBaseLabel(o.cloudBase || 0);
       cloudCoverText.textContent = Math.round(cloudCover) + '% \u2013 ' + cloudOktas(cloudCover);
+      visibilityText.textContent = metarVisibilityLabel(metarReport && metarReport.visib);
       tempAvgText.textContent = tempLabel(temp.day_avg_last_hour || 0);
       gustText.textContent = windLabel(wind.gust_10m_max || 0);
       speedText.textContent = windLabel(wind.speed_10m_avg || 0);
