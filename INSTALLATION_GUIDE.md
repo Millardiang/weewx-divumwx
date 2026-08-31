@@ -1,5 +1,8 @@
 # Caution
 This extension is still in beta at this time. Exercise caution and ensure you backup all essential files before you commence.
+
+ALWAYS BACKUP YOUR DATABASE FIRST - It is not a nice to have but a necessity whenever your make changes to your WeeWX installation.
+
 # DivumWX Installation Guide - For WeeWX installed by pip method
 This installation guide assumes that you already have a stable WeeWX installation running with your specific hardware driver. The installation has been tested with pip installed WeeWX 5.4.0 and Debian 13 (Trixie).
 The installation instructions are based on pip. For alternative installations refer to [WeeWX Quickstarts](https://weewx.com/docs/5.4/quickstarts).
