@@ -179,10 +179,10 @@ footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neu
     </div>
 
     <div class="noaa-stn">
-      <span><b>NAME:</b> Steeple Claydon, Buckinghamshire</span>
-      <span><b>LAT:</b> 51&deg; 57.0' N</span>
-      <span><b>LONG:</b> 1&deg; 04.8' W</span>
-      <span style="opacity:.6"><b>ELEV / HW:</b> not yet configured — add real values when known</span>
+      <span id="noaaStnName"><b>NAME:</b> Steeple Claydon, Buckinghamshire</span>
+      <span id="noaaStnLat"><b>LAT:</b> 51&deg; 57.0' N</span>
+      <span id="noaaStnLong"><b>LONG:</b> 1&deg; 04.8' W</span>
+      <span id="noaaStnElev" style="opacity:.6"><b>ELEV / HW:</b> not yet configured — add real values when known</span>
     </div>
 
     <div id="noaaErr" class="noaa-err mx-3 mt-3" style="display:none;"></div>
@@ -556,13 +556,58 @@ document.getElementById('yrSel').addEventListener('change', e=>{
 });
 
 const STATION_TITLE_JSON_URL = './jsondata/archive.json';
+
+// Converts decimal degrees (archive.json's meta.latitude/longitude, e.g.
+// 51.95) into the degrees/decimal-minutes format this page already
+// displays ("51° 57.0' N") -- matches the previously-hardcoded text's
+// own format exactly, just computed from real data instead of frozen
+// at whatever one station's coordinates happened to be when the
+// template was written.
+function formatDM(decimalDegrees, positiveHemisphere, negativeHemisphere){
+  if (typeof decimalDegrees !== 'number' || isNaN(decimalDegrees)) return null;
+  const hemisphere = decimalDegrees >= 0 ? positiveHemisphere : negativeHemisphere;
+  const absVal = Math.abs(decimalDegrees);
+  const degrees = Math.floor(absVal);
+  const minutes = (absVal - degrees) * 60;
+  const minutesStr = (minutes < 10 ? '0' : '') + minutes.toFixed(1);
+  return degrees + '\u00B0 ' + minutesStr + '\u0027 ' + hemisphere;
+}
+
 function setStationTitle(){
   fetch(STATION_TITLE_JSON_URL + ((STATION_TITLE_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'})
     .then(r => { if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
     .then(data => {
-      const loc = data && data.meta && data.meta.station_location;
+      const meta = (data && data.meta) || {};
+
+      const loc = meta.station_location;
       const el = document.querySelector('.brand-text');
       if(loc && el) el.textContent = loc;
+
+      // NAME/LAT/LONG/ELEV-HW: this block was previously hardcoded
+      // directly into the HTML (one real station's actual details baked
+      // into the shared template, wrong for every other install) with
+      // zero JS wiring to update it at all. Each field only overwrites
+      // its hardcoded fallback text if the corresponding archive.json
+      // value actually parses -- an absent/malformed field leaves the
+      // page showing its old static text rather than a blank or "—".
+      const nameEl = document.getElementById('noaaStnName');
+      if(nameEl && loc) nameEl.innerHTML = '<b>NAME:</b> ' + loc;
+
+      const latEl = document.getElementById('noaaStnLat');
+      const latDM = formatDM(meta.latitude, 'N', 'S');
+      if(latEl && latDM) latEl.innerHTML = '<b>LAT:</b> ' + latDM;
+
+      const longEl = document.getElementById('noaaStnLong');
+      const longDM = formatDM(meta.longitude, 'E', 'W');
+      if(longEl && longDM) longEl.innerHTML = '<b>LONG:</b> ' + longDM;
+
+      const elevEl = document.getElementById('noaaStnElev');
+      if(elevEl && typeof meta.elevation_m === 'number' && !isNaN(meta.elevation_m)){
+        const elevText = Math.round(meta.elevation_m) + 'm';
+        const hwText = meta.station_hardware ? (' / ' + meta.station_hardware) : '';
+        elevEl.innerHTML = '<b>ELEV / HW:</b> ' + elevText + hwText;
+        elevEl.style.opacity = '';
+      }
     })
     .catch(e => console.warn('Re-ImaginedWX climate: station_location fetch failed —', e.message));
 }
