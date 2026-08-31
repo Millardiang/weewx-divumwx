@@ -984,6 +984,55 @@ def apply_skyfieldloopdata_merge(cfg, html_root=None):
     return report
 
 
+DIVUMWX_CLOUDCOVERAGEOVERRIDE_JSON_FILE_SUFFIX = 'jsondata/cloud_coverage.json'
+DIVUMWX_CLOUDCOVERAGEOVERRIDE_DEFAULT_MAX_AGE = '300'
+
+
+def apply_cloudcoverageoverride_merge(cfg, html_root=None):
+    """
+    Mutates cfg['CloudCoverageOverride'] in place. Returns a report dict.
+
+    Same shape and same reasoning as apply_skyfieldloopdata_merge() just
+    above: CloudCoverageOverrideService is registered in data_services
+    (see DIVUMWX_DATA_SERVICES) and needs an explicit json_file pointing
+    at the SEPARATE weewx-Cloud_coverage extension's own
+    json_output_path (that extension's own config, not DivumWX's --
+    this only reads the file, it doesn't produce it). No hardcoded
+    fallback is written into divumwx.py itself for the same reason
+    SkyfieldLoopData's target_path has none -- a guessed path being
+    silently wrong is worse than a clear one-time setup step. Default
+    assumes the two extensions share the same jsondata directory, which
+    matches every other DivumWX JSON source (loop.json, archive.json,
+    almanac.json, etc.) and is the natural place for a webserver-
+    readable file like this to live anyway, given the whole point is
+    for it to be readable by the dashboard's own client-side cards too.
+    """
+    report = {
+        'created_section': False,
+        'json_file_set': False,
+        'json_file_needs_prompt': False,
+        'max_age_seconds_set': False,
+    }
+
+    if 'CloudCoverageOverride' not in cfg:
+        cfg['CloudCoverageOverride'] = {}
+        report['created_section'] = True
+    cco = cfg['CloudCoverageOverride']
+
+    if 'json_file' not in cco or not cco['json_file']:
+        if html_root:
+            cco['json_file'] = html_root.rstrip('/') + '/' + DIVUMWX_CLOUDCOVERAGEOVERRIDE_JSON_FILE_SUFFIX
+            report['json_file_set'] = True
+        else:
+            report['json_file_needs_prompt'] = True
+
+    if 'max_age_seconds' not in cco:
+        cco['max_age_seconds'] = DIVUMWX_CLOUDCOVERAGEOVERRIDE_DEFAULT_MAX_AGE
+        report['max_age_seconds_set'] = True
+
+    return report
+
+
 DIVUMWX_WEATHERAPI_ALERTS_API_TYPE = 'openweather'
 DIVUMWX_WEATHERAPI_ALERTS_DEFAULT_POLL_INTERVAL = '1800'
 DIVUMWX_WEATHERAPI_ALERTS_PATH_SUFFIX = 'jsondata/openweathermap.txt'
@@ -1826,7 +1875,15 @@ def remove_obsolete_weatherapi_sections(cfg, printer, obsolete_sections=('Xweath
 
 
 DIVUMWX_PREP_SERVICES = []
+# CloudCoverageOverrideService MUST come before LiveDataService in this
+# list -- WeeWX dispatches NEW_LOOP_PACKET to services in data_services
+# list order, and LiveDataService reads event.packet to build loop.json.
+# If CloudCoverageOverrideService ran after it, loop.json would still
+# show the pre-override value even though the eventual archive record
+# (built independently, in a later service group) would be correct --
+# see that service's own docstring in divumwx.py for the full reasoning.
 DIVUMWX_DATA_SERVICES = ['user.divumwx.SkyfieldLoopData', 'user.divumwx.DataInjectService',
+                         'user.divumwx.CloudCoverageOverrideService',
                          'user.divumwx.LiveDataService', 'user.divumwx.WeatherAPIService',
                          'user.divumwx.TimelapseService']
 DIVUMWX_XTYPE_SERVICES = ['user.divumwx.AirDensityService', 'user.divumwx.vpdService',
@@ -2065,6 +2122,8 @@ class DivumwxInstaller(ExtensionInstaller):
         apply_livedata_merge(cfg, html_root=html_root, update_interval=update_interval)
 
         apply_skyfieldloopdata_merge(cfg, html_root=html_root)
+
+        apply_cloudcoverageoverride_merge(cfg, html_root=html_root)
 
         # --- [WeatherAPI] ---
 
