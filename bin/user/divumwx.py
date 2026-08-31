@@ -120,6 +120,185 @@ except ImportError:
     log.warning("skyfield library not available. SkyfieldLoopData service will do nothing.")
 
 
+class CloudCoverageOverrideService(StdService):
+    """
+    Overrides the loop packet's native 'cloudcover' field with a
+    sky-camera-derived reading from cloud_coverage.json (written by the
+    separate weewx-Cloud_coverage extension: https://github.com/
+    Millardiang/weewx-Cloud_coverage), but ONLY between sunrise and
+    sunset -- the camera reading isn't meaningful after dark, per that
+    extension's own documented limitation (twilight/color-temperature
+    misclassification), and its background thread doesn't run/write at
+    night anyway.
+
+    Deliberately its own small service rather than an addition to
+    DataInjectService above: DataInjectService's field-mapping injection
+    is unconditional (always overwrites if fresh cached data exists) --
+    it has no concept of "only during the day" or "leave the existing
+    value alone if this source isn't authoritative right now", and
+    bolting that onto a generic, already-working service risked breaking
+    its existing sources (airquality, forecast) for the sake of one
+    source's very different requirements.
+
+    Binds to NEW_LOOP_PACKET only, not NEW_ARCHIVE_RECORD -- WeeWX's own
+    native archiving accumulates loop packets over the archive interval
+    and extracts the average for continuous numeric types like
+    cloudcover, so once this service has (conditionally) overwritten
+    event.packet['cloudcover'] on each loop packet, that native
+    accumulation does the rest automatically. No separate archive-time
+    logic is needed: the database's cloudcover column just naturally
+    reflects whichever source (camera vs. station hardware) was
+    authoritative for each loop packet that fed into that archive
+    interval, including a sensible blended average on the rare interval
+    that straddles sunrise/sunset itself.
+
+    Must be registered BEFORE user.divumwx.LiveDataService in
+    weewx.conf's [Engine][[Services]] data_services list, since
+    LiveDataService reads event.packet to build loop.json -- if this
+    service ran after it, loop.json would still show the old value even
+    though the eventual archive record (assembled independently by
+    WeeWX's own StdArchive, in a later service group) would be correct.
+    install.py's own merge function is responsible for this ordering;
+    see its own comment for the registration itself.
+
+    "Available" means cloud_coverage.json was read successfully, is
+    fresh (mtime within max_age_seconds), AND its cloudPercent value is
+    a genuine number -- anything else (file missing, stale, malformed)
+    leaves the packet's original cloudcover value completely untouched,
+    so a station's native hardware-reported reading is always the safe
+    fallback, exactly matching the client-side dashboard cards' own
+    identical fallback behavior for the same file.
+    """
+
+    def __init__(self, engine, config_dict):
+        super(CloudCoverageOverrideService, self).__init__(engine, config_dict)
+
+        cfg = config_dict.get('CloudCoverageOverride', {})
+        self.enable = to_bool(cfg.get('enable', True))
+        if not self.enable:
+            log.info("CloudCoverageOverrideService: disabled via config")
+            return
+
+        # No hardcoded fallback -- same reasoning as LiveDataService's
+        # own json_file check just below: a guessed path is wrong for
+        # virtually every install except whichever machine a literal
+        # was written on. install.py's own merge function should always
+        # write this from the site's actual jsondata directory; an
+        # absent value here means that merge didn't run or the section
+        # was hand-stripped.
+        self.json_file = cfg.get('json_file', '').strip()
+        if not self.json_file:
+            log.error("CloudCoverageOverrideService: no 'json_file' set in "
+                      "[CloudCoverageOverride] -- disabling (no event "
+                      "handlers registered). Re-run the DivumWX installer, "
+                      "or set json_file manually to the weewx-Cloud_coverage "
+                      "extension's own json_output_path (typically "
+                      "<your DivumWX HTML_ROOT>/jsondata/cloud_coverage.json).")
+            return
+
+        self.max_age_seconds = to_int(cfg.get('max_age_seconds', 300))
+
+        # Station location -- read once here; a moving (GPS) station
+        # would need this refreshed per-packet, which this service does
+        # not do. Same pattern as SkyfieldLoopData's own __init__ above.
+        self.lat = engine.stn_info.latitude_f
+        self.lon = engine.stn_info.longitude_f
+        altitude_vt = weewx.units.convert(engine.stn_info.altitude_vt, 'meter')
+        self.altitude_m = altitude_vt[0]
+
+        self._warned_missing = False
+
+        self.bind(weewx.NEW_LOOP_PACKET, self.new_loop_packet)
+        log.info("CloudCoverageOverrideService: watching %s (max_age=%ds)",
+                 self.json_file, self.max_age_seconds)
+
+    def _is_day(self, time_ts):
+        """Sun altitude > 0 -- "day" is precisely "between sunrise and
+        sunset" by definition, matching the same standard the client-
+        side dashboard fix uses throughout (almanac.json's
+        almanac.sun.alt). Uses weewx's own built-in almanac (already
+        imported at the top of this file as weewx.almanac, no extra
+        dependency) rather than duplicating LiveDataService's own
+        private ephem/astral sunrise-caching machinery above, which is
+        bound to that service's own instance state and not straightforward
+        to reuse from here.
+
+        WeeWX 5.x renamed almanac sun/moon/planet properties from the
+        older bare name (e.g. .alt) to a longer one (.altitude), and
+        made them all return a ValueHelper rather than a bare float --
+        confirmed via WeeWX's own 5.0/5.1 changelog ("Most almanac
+        properties are now returned as ValueHelpers... use
+        $almanac.venus.altitude instead of $almanac.venus.alt") and its
+        own mailing list ("To get the embedded number, use the '.raw'
+        suffix"). Using the old bare .alt name or skipping .raw would
+        silently misbehave rather than raise -- this file already
+        requires WeeWX 5.0+ (see install.py's MIN_WEEWX_VERSION check),
+        so .altitude.raw is the correct call here, not .alt.
+        """
+        try:
+            alm = weewx.almanac.Almanac(time_ts, self.lat, self.lon, self.altitude_m)
+            sun_alt_raw = alm.sun.altitude.raw
+            if sun_alt_raw is None:
+                return None
+            return sun_alt_raw > 0
+        except Exception as e:
+            log.warning("CloudCoverageOverrideService: almanac calculation "
+                       "failed (%s) -- leaving cloudcover untouched this packet.", e)
+            return None
+
+    def new_loop_packet(self, event):
+        if not self.enable:
+            return
+
+        time_ts = event.packet.get('dateTime')
+        if time_ts is None:
+            return
+
+        is_day = self._is_day(time_ts)
+        if not is_day:
+            # Night, or the almanac calculation itself failed -- leave
+            # the packet's native cloudcover value (whatever the
+            # station's own hardware driver reported) completely
+            # untouched. This is the expected fallback path, not an
+            # error condition.
+            return
+
+        try:
+            if not os.path.isfile(self.json_file):
+                if not self._warned_missing:
+                    log.info("CloudCoverageOverrideService: %s not found -- "
+                            "falling back to native cloudcover (will keep "
+                            "checking silently until it appears).",
+                            self.json_file)
+                    self._warned_missing = True
+                return
+
+            age = time.time() - os.path.getmtime(self.json_file)
+            if age > self.max_age_seconds:
+                log.debug("CloudCoverageOverrideService: %s is %.0fs old "
+                         "(max %ds) -- falling back to native cloudcover.",
+                         self.json_file, age, self.max_age_seconds)
+                return
+
+            with open(self.json_file, 'r') as f:
+                data = json.load(f)
+
+            cloud_pct = data.get('cloudPercent')
+            if not isinstance(cloud_pct, (int, float)) or isinstance(cloud_pct, bool):
+                log.warning("CloudCoverageOverrideService: %s has no valid "
+                           "cloudPercent (%r) -- falling back to native "
+                           "cloudcover.", self.json_file, cloud_pct)
+                return
+
+            event.packet['cloudcover'] = float(cloud_pct)
+            self._warned_missing = False
+
+        except (OSError, ValueError) as e:
+            log.warning("CloudCoverageOverrideService: could not read %s "
+                       "(%s) -- falling back to native cloudcover.",
+                       self.json_file, e)
+
+
 class LiveDataService(StdService):
     SYSTEM_FIELDS = {'dateTime', 'usUnits', 'interval', 'rxCheckPercent'}
     NON_PHYSICAL_FIELDS = (
