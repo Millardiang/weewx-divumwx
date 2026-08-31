@@ -1394,7 +1394,18 @@ try {
       var tdDiff       = outTemp - ((typeof o.dewpoint === 'number') ? o.dewpoint : 0);
       var windSpeedAvg = (typeof wind.speed_avg === 'number') ? wind.speed_avg : 0;
       var rainRate     = (typeof rain.rate === 'number') ? rain.rate : 0;
-      var cloudCover   = (typeof sky.cloud_cover === 'number') ? sky.cloud_cover : (o.cloudcover || 0);
+      // Was: prefer archive.json's sky.cloud_cover, fall back to
+      // loop.json's o.cloudcover only if the former isn't a number.
+      // Bug: archive.json's sky.cloud_cover has been observed stuck at
+      // 0 in every sample captured this whole conversation -- 0 is
+      // still a valid number, so that fallback never actually
+      // triggered, and the live, correct loop.json reading (confirmed
+      // 94.0 in a real capture while the card showed 0%) was never
+      // used. loop.json is the live per-loop-packet value and is the
+      // right primary source for something this fast-changing anyway;
+      // archive.json is now only a fallback for the rare case
+      // loop.json's own field is genuinely absent.
+      var cloudCover   = (typeof o.cloudcover === 'number') ? o.cloudcover : (sky.cloud_cover || 0);
 
       var inputs = { rainRate: rainRate, windSpeedAvg: windSpeedAvg, tdDiff: tdDiff, outTemp: outTemp, isDay: isDay, snow: 0, cloudCover: cloudCover };
 
@@ -11319,7 +11330,13 @@ try {
       // observations.isDay only if almanac.json's own fetch failed.
       var sunAlt = num(alm['almanac.sun.alt']);
       var isDay = (sunAlt !== null) ? (sunAlt > 0) : (o.isDay === 1);
-      var cloudCoverPct = (typeof sky.cloud_cover === 'number') ? sky.cloud_cover : (o.cloudcover || 0);
+      // Same fix as cardCurrent.js's identical bug -- see its comment
+      // for the full explanation. loop.json's o.cloudcover is the
+      // live/correct value; archive.json's sky.cloud_cover has been
+      // observed stuck at 0 in every sample seen this whole
+      // conversation, and the old priority order never actually fell
+      // back away from it since 0 is still a valid number.
+      var cloudCoverPct = (typeof o.cloudcover === 'number') ? o.cloudcover : (sky.cloud_cover || 0);
 
       // Ported directly from the PHP module: <0 means charging/exporting,
       // >=0 means discharging/importing. Display value is the magnitude
