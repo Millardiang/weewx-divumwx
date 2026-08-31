@@ -1028,6 +1028,7 @@ try {
   var LOOP_JSON_URL    = './jsondata/loop.json';
   var ARCHIVE_JSON_URL = './jsondata/archive.json';
   var ASTRO_JSON_URL   = './jsondata/almanac.json';
+  var CLOUD_JSON_URL   = './jsondata/cloud_coverage.json';
   var POLL_MS = 30 * 1000;
   var ICON_BASE = './meteocons/fill/svg/';
 
@@ -1365,17 +1366,32 @@ try {
     Promise.allSettled([
       fetch(LOOP_JSON_URL + ((LOOP_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
       fetch(ARCHIVE_JSON_URL + ((ARCHIVE_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
-      fetch(ASTRO_JSON_URL + ((ASTRO_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+      fetch(ASTRO_JSON_URL + ((ASTRO_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
+      fetch(CLOUD_JSON_URL + ((CLOUD_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
     ]).then(function(results){
-      var loopResult = results[0], archResult = results[1], astroResult = results[2];
+      var loopResult = results[0], archResult = results[1], astroResult = results[2], cloudResult = results[3];
       if(loopResult.status === 'rejected') console.warn('cardCurrent: loop.json fetch failed —', loopResult.reason.message);
       if(archResult.status === 'rejected') console.warn('cardCurrent: archive.json fetch failed —', archResult.reason.message);
       if(astroResult.status === 'rejected') console.warn('cardCurrent: almanac.json fetch failed —', astroResult.reason.message);
+      // cloud_coverage.json is optional -- absent-and-rejected is a
+      // normal state on installs without it, so this logs at info (not
+      // warn) rather than looking like an error. Still logged, not
+      // silent, so "is it actually being used?" is answerable from the
+      // console instead of guessing: covers both fetch failure (wrong
+      // path, 404, network) and fetch-succeeded-but-malformed
+      // (cloudPercent missing/not a number) -- two different failure
+      // modes that would otherwise look identical from the outside.
+      if(cloudResult.status === 'rejected'){
+        console.info('cardCurrent: cloud_coverage.json fetch failed (falling back to loop.json/archive.json) —', cloudResult.reason.message);
+      } else if(typeof cloudResult.value.cloudPercent !== 'number' || isNaN(cloudResult.value.cloudPercent)){
+        console.info('cardCurrent: cloud_coverage.json fetched but cloudPercent is missing/invalid (falling back) —', JSON.stringify(cloudResult.value));
+      }
 
       var loop = loopResult.status === 'fulfilled' ? loopResult.value : {};
       var arch = archResult.status === 'fulfilled' ? archResult.value : {};
       var o = loop.observations || {};
       var alm = astroResult.status === 'fulfilled' ? astroResult.value : {};
+      var cloudCoverage = cloudResult.status === 'fulfilled' ? cloudResult.value : null;
       var sky = arch.sky || {};
       var wind = arch.wind || {};
       var rain = arch.rain || {};
@@ -1405,7 +1421,24 @@ try {
       // right primary source for something this fast-changing anyway;
       // archive.json is now only a fallback for the rare case
       // loop.json's own field is genuinely absent.
-      var cloudCover   = (typeof o.cloudcover === 'number') ? o.cloudcover : (sky.cloud_cover || 0);
+      // Between sunrise and sunset, cloud_coverage.json (a sky-camera-
+      // derived reading, when available) takes priority over
+      // loop.json/archive.json -- but only during the day, since it's
+      // presumably not meaningful after dark. "Available" means the
+      // fetch succeeded AND cloudPercent is actually a valid number,
+      // not just that the file exists. Falls back to the existing
+      // loop.json-primary/archive.json-fallback logic at night, or any
+      // time cloud_coverage.json's fetch failed or its data was invalid.
+      var cloudPercentFromCamera = (cloudCoverage && typeof cloudCoverage.cloudPercent === 'number' && !isNaN(cloudCoverage.cloudPercent))
+        ? cloudCoverage.cloudPercent : null;
+      var cloudCover = (isDay && cloudPercentFromCamera !== null)
+        ? cloudPercentFromCamera
+        : ((typeof o.cloudcover === 'number') ? o.cloudcover : (sky.cloud_cover || 0));
+      console.info('cardCurrent: cloud cover source —', {
+        isDay: isDay, sunAlt: sunAlt, cameraAvailable: cloudPercentFromCamera !== null,
+        cameraValue: cloudPercentFromCamera, usedValue: cloudCover,
+        source: (isDay && cloudPercentFromCamera !== null) ? 'cloud_coverage.json' : 'loop.json/archive.json'
+      });
 
       var inputs = { rainRate: rainRate, windSpeedAvg: windSpeedAvg, tdDiff: tdDiff, outTemp: outTemp, isDay: isDay, snow: 0, cloudCover: cloudCover };
 
@@ -10991,6 +11024,7 @@ try {
   var ARCHIVE_JSON_URL = './jsondata/archive.json';
   var SOLAR_JSON_URL   = './jsondata/solar_data.json';
   var ASTRO_JSON_URL   = './jsondata/almanac.json';
+  var CLOUD_JSON_URL   = './jsondata/cloud_coverage.json';
   var POLL_MS = 10 * 1000; // power/SOC/grid readings are live values, not slow-changing -- same interval class as the other live-gauge cards (wind, barometer, etc.), not the 30s used by webcam/earthquake's much slower-changing sources.
 
   // Legacy PHP hardcoded 4050 (W) as the array's rated capacity to turn
@@ -11288,13 +11322,26 @@ try {
       fetch(LOOP_JSON_URL + ((LOOP_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
       fetch(ARCHIVE_JSON_URL + ((ARCHIVE_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
       fetch(SOLAR_JSON_URL + ((SOLAR_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
-      fetch(ASTRO_JSON_URL + ((ASTRO_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+      fetch(ASTRO_JSON_URL + ((ASTRO_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
+      fetch(CLOUD_JSON_URL + ((CLOUD_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
     ]).then(function(results){
-      var loopResult = results[0], archResult = results[1], solarResult = results[2], astroResult = results[3];
+      var loopResult = results[0], archResult = results[1], solarResult = results[2], astroResult = results[3], cloudResult = results[4];
       if (loopResult.status === 'rejected') console.warn('cardSolarEnergy: loop.json fetch failed --', loopResult.reason.message);
       if (archResult.status === 'rejected') console.warn('cardSolarEnergy: archive.json fetch failed --', archResult.reason.message);
       if (solarResult.status === 'rejected') console.warn('cardSolarEnergy: solar_data.json fetch failed --', solarResult.reason.message);
       if (astroResult.status === 'rejected') console.warn('cardSolarEnergy: almanac.json fetch failed --', astroResult.reason.message);
+      // cloud_coverage.json is optional -- logs at info (not warn) since
+      // absent-and-rejected is a normal state on installs without it,
+      // but still logged (not silent) so "is it actually being used?"
+      // is answerable from the console: covers both fetch failure and
+      // fetch-succeeded-but-malformed (cloudPercent missing/not a
+      // number), two different failure modes that otherwise look
+      // identical from the outside.
+      if(cloudResult.status === 'rejected'){
+        console.info('cardSolarEnergy: cloud_coverage.json fetch failed (falling back to loop.json/archive.json) --', cloudResult.reason.message);
+      } else if(typeof cloudResult.value.cloudPercent !== 'number' || isNaN(cloudResult.value.cloudPercent)){
+        console.info('cardSolarEnergy: cloud_coverage.json fetched but cloudPercent is missing/invalid (falling back) --', JSON.stringify(cloudResult.value));
+      }
 
       // BUGFIX: this used to read loopResult.value directly (the whole
       // loop.json object) rather than its .observations sub-object, the
@@ -11307,6 +11354,7 @@ try {
       // below was even added.
       var o = loopResult.status === 'fulfilled' ? (loopResult.value.observations || {}) : {};
       var arch = archResult.status === 'fulfilled' ? archResult.value : {};
+      var cloudCoverage = cloudResult.status === 'fulfilled' ? cloudResult.value : null;
       var sky = arch.sky || {};
       var solarData = solarResult.status === 'fulfilled' ? solarResult.value : {};
       var alm = astroResult.status === 'fulfilled' ? astroResult.value : {};
@@ -11336,7 +11384,23 @@ try {
       // observed stuck at 0 in every sample seen this whole
       // conversation, and the old priority order never actually fell
       // back away from it since 0 is still a valid number.
-      var cloudCoverPct = (typeof o.cloudcover === 'number') ? o.cloudcover : (sky.cloud_cover || 0);
+      //
+      // Between sunrise and sunset, cloud_coverage.json (a sky-camera-
+      // derived reading, when available) takes priority over
+      // loop.json/archive.json -- but only during the day. "Available"
+      // means the fetch succeeded AND cloudPercent is actually a valid
+      // number. Falls back to loop.json/archive.json at night, or any
+      // time cloud_coverage.json's fetch failed or its data was invalid.
+      var cloudPercentFromCamera = (cloudCoverage && typeof cloudCoverage.cloudPercent === 'number' && !isNaN(cloudCoverage.cloudPercent))
+        ? cloudCoverage.cloudPercent : null;
+      var cloudCoverPct = (isDay && cloudPercentFromCamera !== null)
+        ? cloudPercentFromCamera
+        : ((typeof o.cloudcover === 'number') ? o.cloudcover : (sky.cloud_cover || 0));
+      console.info('cardSolarEnergy: cloud cover source —', {
+        isDay: isDay, sunAlt: sunAlt, cameraAvailable: cloudPercentFromCamera !== null,
+        cameraValue: cloudPercentFromCamera, usedValue: cloudCoverPct,
+        source: (isDay && cloudPercentFromCamera !== null) ? 'cloud_coverage.json' : 'loop.json/archive.json'
+      });
 
       // Ported directly from the PHP module: <0 means charging/exporting,
       // >=0 means discharging/importing. Display value is the magnitude
