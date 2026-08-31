@@ -273,7 +273,7 @@ let currentSystem = (function(){
 
 function fmtN(v, dec=1){ return v!=null ? v.toFixed(dec) : '—'; }
 function fmtT(v, sys){ return v!=null ? fmtN(convTemp(v, sys.temp)) : '—'; }
-function fmtR(v, sys){ return v!=null ? fmtN(convRain(v, sys.rain), 2) : '—'; }
+function fmtR(v, sys){ return v!=null ? fmtN(convRain(v, sys.rain)) : '—'; }
 function fmtW(v, sys){ return v!=null ? fmtN(convWind(v, sys.wind)) : '—'; }
 function compass(deg){
   if(deg==null) return '—';
