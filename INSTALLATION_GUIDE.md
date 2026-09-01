@@ -1,5 +1,6 @@
 # Caution
 This extension is still in beta at this time. Exercise caution and ensure you backup all essential files before you commence.
+You will experience a lot of logging at this stage which will be removed in due course.
 
 ALWAYS BACKUP YOUR DATABASE FIRST - It is not a nice to have but a necessity whenever your make changes to your WeeWX installation.
 
