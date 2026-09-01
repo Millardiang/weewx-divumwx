@@ -8,78 +8,125 @@
 ##     "rainRate" key below it, which was already correct. hailRate-based
 ##     .mm_per_hour occurrences (prainRateHourly, prainRate) are genuinely
 ##     group_rainrate and are correct as-is -- left untouched.
-##  2. This copy of the file had NO #try/#except crash guards anywhere
-##     (an older/reverted copy predating that convention -- see the
-##     handover doc's "File source-of-truth discipline" note). A single
-##     unregistered observation type (e.g. a particulate sensor field not
-##     on a given station's schema) would silently revert the whole
-##     charts.json to stale content with only a journal entry to show for
-##     it. Restored per-field #try/#except wrapping (falling back to []
-##     -- matching the array shape .series().json normally returns) for
-##     every hardware-dependent/optional field: particulates, air
-##     density, cloud cover, ET, greenhouse gases, lightning, pollen,
-##     vpd, and solar/UV. barometer, base rain, outTemp/dewpoint/
-##     humidity, and wind are genuinely universal wview_extended schema
-##     types and are left unguarded, per that same convention.
-##  3. Also found and fixed while verifying JSON well-formedness: the
-##     tail of this file had one extra, unmatched closing '}' (3 '{' vs
-##     4 '}' in the original) -- silently produced invalid JSON on every
-##     successful generation, independent of bugs #1/#2 above. Removed.
+##  2. This copy of the file had NO crash guards anywhere (an older/
+##     reverted copy predating that convention -- see the handover doc's
+##     "File source-of-truth discipline" note). A single unregistered
+##     observation type (e.g. a particulate sensor field not on a given
+##     station's schema) would silently revert the whole charts.json to
+##     stale content with only a journal entry to show for it. Restored
+##     per-field guards for every hardware-dependent/optional field:
+##     particulates, air density, cloud cover, ET, greenhouse gases,
+##     lightning, pollen, hail/prain, vpd, and solar/UV. barometer, base
+##     rain, outTemp/dewpoint/humidity, and wind are genuinely universal
+##     wview_extended schema types and are left unguarded.
+##  3. IMPORTANT -- the guard pattern is NOT plain '#try / "key": $expr /
+##     #except / "key": [] / #end try'. Cheetah writes literal template
+##     text to the output stream as soon as it's reached, even inside a
+##     #try block -- it does NOT buffer/roll back partial output if the
+##     expression that follows then throws. '"key": ' is plain literal
+##     text that gets written BEFORE $expr is evaluated, so on failure
+##     the output was '"key": "key": [],' -- the literal prefix from the
+##     failed attempt, immediately followed by the #except block's own
+##     full line. That's a corrupted, duplicated key -- invalid JSON --
+##     on every field that ever fails, which is exactly what silently
+##     broke charts.json after the previous "#try / #except" fix in this
+##     same file, even though it looked correct on manual inspection and
+##     passed a hand-rolled (non-Cheetah) simulation. Caught only by
+##     rendering through the real Cheetah engine with actual failing
+##     fields, not by static analysis.
+##     Fixed by computing into a #set variable first (#set never emits
+##     literal output for a failing RHS -- it's a pure assignment
+##     directive) and only emitting the literal '"key": $fv,' line
+##     afterwards, once $fv is already a fully-evaluated, safe value:
+##         #set $fv = []
+##         #try
+##         #set $fv = <expr>
+##         #except
+##         #pass
+##         #end try
+##         "key": $fv,
+##     Verified against a real Cheetah3 render (not just JSON.loads on
+##     hand-written text) with multiple fields deliberately failing at
+##     once, both with and without hail data present.
+##  4. Also found while verifying JSON well-formedness: the tail of this
+##     file had one extra, unmatched closing '}' (3 '{' vs 4 '}' in the
+##     original) -- silently produced invalid JSON on every successful
+##     generation, independent of bugs #1-#3 above. Removed.
 ##
 [
 {
 "chartPlot": {"series":
 {##airquality
+#set $fv = []
 #try
-"pm1_0Hourly": $span(hour_delta=24).pm1_0.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+#set $fv = $span(hour_delta=24).pm1_0.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json
 #except
-"pm1_0Hourly": [],
+#pass
 #end try
+"pm1_0Hourly": $fv,
+#set $fv = []
 #try
-"pm2_5Hourly": $span(hour_delta=24).pm2_5.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+#set $fv = $span(hour_delta=24).pm2_5.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json
 #except
-"pm2_5Hourly": [],
+#pass
 #end try
+"pm2_5Hourly": $fv,
+#set $fv = []
 #try
-"pm4_0Hourly": $span(hour_delta=24).pm4_0.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+#set $fv = $span(hour_delta=24).pm4_0.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json
 #except
-"pm4_0Hourly": [],
+#pass
 #end try
+"pm4_0Hourly": $fv,
+#set $fv = []
 #try
-"pm10_0Hourly": $span(hour_delta=24).pm10_0.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+#set $fv = $span(hour_delta=24).pm10_0.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json
 #except
-"pm10_0Hourly": [],
+#pass
 #end try
+"pm10_0Hourly": $fv,
+#set $fv = []
 #try
-"aodHourly": $span(hour_delta=24).aerosol_optical_depth.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(3).json,
+#set $fv = $span(hour_delta=24).aerosol_optical_depth.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(3).json
 #except
-"aodHourly": [],
+#pass
 #end try
+"aodHourly": $fv,
+#set $fv = []
 #try
-"pm1_0": $alltime.pm1_0.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $alltime.pm1_0.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"pm1_0": [],
+#pass
 #end try
+"pm1_0": $fv,
+#set $fv = []
 #try
-"pm2_5": $alltime.pm2_5.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $alltime.pm2_5.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"pm2_5": [],
+#pass
 #end try
+"pm2_5": $fv,
+#set $fv = []
 #try
-"pm4_0": $alltime.pm4_0.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $alltime.pm4_0.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"pm4_0": [],
+#pass
 #end try
+"pm4_0": $fv,
+#set $fv = []
 #try
-"pm10_0": $alltime.pm10_0.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $alltime.pm10_0.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"pm10_0": [],
+#pass
 #end try
+"pm10_0": $fv,
+#set $fv = []
 #try
-"aodMax": $alltime.aerosol_optical_depth.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $alltime.aerosol_optical_depth.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"aodMax": [],
+#pass
 #end try
+"aodMax": $fv,
 ##barometer and airdensity
 "baromAvgHourly": $span(hour_delta=24).barometer.series(aggregate_type='avg', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').hPa.round(1).json,
 "baromMaxHourly": $span(hour_delta=24).barometer.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').hPa.round(1).json,
@@ -87,217 +134,297 @@
 "baromMax": $alltime.barometer.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').hPa.round(0).json,
 "baromMin": $alltime.barometer.series(aggregate_type='min', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').hPa.round(0).json,
 "baromAvg": $alltime.barometer.series(aggregate_type='avg', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').hPa.round(0).json,
+#set $fv = []
 #try
-"airDenMax": $alltime.AirDensity.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $alltime.AirDensity.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"airDenMax": [],
+#pass
 #end try
+"airDenMax": $fv,
+#set $fv = []
 #try
-"airDenMin": $alltime.AirDensity.series(aggregate_type='min', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $alltime.AirDensity.series(aggregate_type='min', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"airDenMin": [],
+#pass
 #end try
+"airDenMin": $fv,
+#set $fv = []
 #try
-"airDenAvg": $alltime.AirDensity.series(aggregate_type='avg', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $alltime.AirDensity.series(aggregate_type='avg', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"airDenAvg": [],
+#pass
 #end try
+"airDenAvg": $fv,
 ##cloudcover
+#set $fv = []
 #try
-"cloudCover": $day.cloudcover.series(aggregate_type='max', aggregate_interval=900, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $day.cloudcover.series(aggregate_type='max', aggregate_interval=900, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"cloudCover": [],
+#pass
 #end try
+"cloudCover": $fv,
 ##evapotranspiration
+#set $fv = []
 #try
-"evtHourly": $span(hour_delta=24).ET.series(aggregate_type='avg', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').mm.round(2).json,
+#set $fv = $span(hour_delta=24).ET.series(aggregate_type='avg', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').mm.round(2).json
 #except
-"evtHourly": [],
+#pass
 #end try
+"evtHourly": $fv,
+#set $fv = []
 #try
-"evtMax": $alltime.ET.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').mm.round(0).json,
+#set $fv = $alltime.ET.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').mm.round(0).json
 #except
-"evtMax": [],
+#pass
 #end try
+"evtMax": $fv,
+#set $fv = []
 #try
-"evtMin": $alltime.ET.series(aggregate_type='min', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').mm.round(0).json,
+#set $fv = $alltime.ET.series(aggregate_type='min', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').mm.round(0).json
 #except
-"evtMin": [],
+#pass
 #end try
+"evtMin": $fv,
+#set $fv = []
 #try
-"evtAvg": $alltime.ET.series(aggregate_type='avg', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').mm.round(0).json,
+#set $fv = $alltime.ET.series(aggregate_type='avg', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').mm.round(0).json
 #except
-"evtAvg": [],
+#pass
 #end try
+"evtAvg": $fv,
 ##greenhouse gases
+#set $fv = []
 #try
-"coHourly": $span(hour_delta=24).co.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(3).json,
+#set $fv = $span(hour_delta=24).co.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(3).json
 #except
-"coHourly": [],
+#pass
 #end try
+"coHourly": $fv,
+#set $fv = []
 #try
-"co2Hourly": $span(hour_delta=24).co2.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+#set $fv = $span(hour_delta=24).co2.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json
 #except
-"co2Hourly": [],
+#pass
 #end try
+"co2Hourly": $fv,
+#set $fv = []
 #try
-"nh3Hourly": $span(hour_delta=24).nh3.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(4).json,
+#set $fv = $span(hour_delta=24).nh3.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(4).json
 #except
-"nh3Hourly": [],
+#pass
 #end try
+"nh3Hourly": $fv,
+#set $fv = []
 #try
-"no2Hourly": $span(hour_delta=24).no2.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(4).json,
+#set $fv = $span(hour_delta=24).no2.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(4).json
 #except
-"no2Hourly": [],
+#pass
 #end try
+"no2Hourly": $fv,
+#set $fv = []
 #try
-"o3Hourly": $span(hour_delta=24).o3.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(4).json,
+#set $fv = $span(hour_delta=24).o3.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(4).json
 #except
-"o3Hourly": [],
+#pass
 #end try
+"o3Hourly": $fv,
+#set $fv = []
 #try
-"so2Hourly": $span(hour_delta=24).so2.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(4).json,
+#set $fv = $span(hour_delta=24).so2.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(4).json
 #except
-"so2Hourly": [],
+#pass
 #end try
+"so2Hourly": $fv,
+#set $fv = []
 #try
-"coMax": $alltime.co.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $alltime.co.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"coMax": [],
+#pass
 #end try
+"coMax": $fv,
+#set $fv = []
 #try
-"co2Max": $alltime.co2.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $alltime.co2.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"co2Max": [],
+#pass
 #end try
+"co2Max": $fv,
+#set $fv = []
 #try
-"nh3Max": $alltime.nh3.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $alltime.nh3.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"nh3Max": [],
+#pass
 #end try
+"nh3Max": $fv,
+#set $fv = []
 #try
-"no2Max": $alltime.no2.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $alltime.no2.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"no2Max": [],
+#pass
 #end try
+"no2Max": $fv,
+#set $fv = []
 #try
-"o3Max": $alltime.o3.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $alltime.o3.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"o3Max": [],
+#pass
 #end try
+"o3Max": $fv,
+#set $fv = []
 #try
-"so2Max": $alltime.so2.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $alltime.so2.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"so2Max": [],
+#pass
 #end try
+"so2Max": $fv,
 ##lightning
+#set $fv = []
 #try
-"lightCountHourly": $span(hour_delta=24).lightning_strike_count.series(aggregate_type='sum', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $span(hour_delta=24).lightning_strike_count.series(aggregate_type='sum', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"lightCountHourly": [],
+#pass
 #end try
+"lightCountHourly": $fv,
+#set $fv = []
 #try
-"lightDistHourly": $span(hour_delta=24).lightning_distance.series(aggregate_type='avg', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+#set $fv = $span(hour_delta=24).lightning_distance.series(aggregate_type='avg', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json
 #except
-"lightDistHourly": [],
+#pass
 #end try
+"lightDistHourly": $fv,
+#set $fv = []
 #try
-"lightDist": $alltime.lightning_distance.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $alltime.lightning_distance.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"lightDist": [],
+#pass
 #end try
+"lightDist": $fv,
+#set $fv = []
 #try
-"lightCount": $alltime.lightning_strike_count.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $alltime.lightning_strike_count.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"lightCount": [],
+#pass
 #end try
+"lightCount": $fv,
 ##pollen
+#set $fv = []
 #try
-"alderHourly": $span(hour_delta=24).alder_pollen.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $span(hour_delta=24).alder_pollen.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"alderHourly": [],
+#pass
 #end try
+"alderHourly": $fv,
+#set $fv = []
 #try
-"birchHourly": $span(hour_delta=24).birch_pollen.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $span(hour_delta=24).birch_pollen.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"birchHourly": [],
+#pass
 #end try
+"birchHourly": $fv,
+#set $fv = []
 #try
-"oliveHourly": $span(hour_delta=24).olive_pollen.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $span(hour_delta=24).olive_pollen.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"oliveHourly": [],
+#pass
 #end try
+"oliveHourly": $fv,
+#set $fv = []
 #try
-"grassHourly": $span(hour_delta=24).grass_pollen.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $span(hour_delta=24).grass_pollen.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"grassHourly": [],
+#pass
 #end try
+"grassHourly": $fv,
+#set $fv = []
 #try
-"mugwortHourly": $span(hour_delta=24).mugwort_pollen.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $span(hour_delta=24).mugwort_pollen.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"mugwortHourly": [],
+#pass
 #end try
+"mugwortHourly": $fv,
+#set $fv = []
 #try
-"ragweedHourly": $span(hour_delta=24).ragweed_pollen.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $span(hour_delta=24).ragweed_pollen.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"ragweedHourly": [],
+#pass
 #end try
+"ragweedHourly": $fv,
+#set $fv = []
 #try
-"alder": $alltime.alder_pollen.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $alltime.alder_pollen.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"alder": [],
+#pass
 #end try
+"alder": $fv,
+#set $fv = []
 #try
-"birch": $alltime.birch_pollen.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $alltime.birch_pollen.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"birch": [],
+#pass
 #end try
+"birch": $fv,
+#set $fv = []
 #try
-"olive": $alltime.olive_pollen.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $alltime.olive_pollen.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"olive": [],
+#pass
 #end try
+"olive": $fv,
+#set $fv = []
 #try
-"grass": $alltime.grass_pollen.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $alltime.grass_pollen.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"grass": [],
+#pass
 #end try
+"grass": $fv,
+#set $fv = []
 #try
-"mugwort": $alltime.mugwort_pollen.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $alltime.mugwort_pollen.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"mugwort": [],
+#pass
 #end try
+"mugwort": $fv,
+#set $fv = []
 #try
-"ragweed": $alltime.ragweed_pollen.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $alltime.ragweed_pollen.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"ragweed": [],
+#pass
 #end try
+"ragweed": $fv,
 ##rain
 "rainHourly": $span(hour_delta=24).rain.series(aggregate_type='sum', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').mm.round(1).json,
 "rainRateHourly": $span(hour_delta=24).rain.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').mm.round(1).json,
 "rain": $alltime.rain.series(aggregate_type='sum', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').mm.round(1).json,
 "rainRate": $alltime.rain.series(aggregate_type='sum', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').mm.round(0).json,
 #if $current.hail.has_data
+#set $fv = []
 #try
-"prainHourly": $span(hour_delta=24).hail.series(aggregate_type='sum', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').mm.round(1).json,
+#set $fv = $span(hour_delta=24).hail.series(aggregate_type='sum', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').mm.round(1).json
 #except
-"prainHourly": [],
+#pass
 #end try
+"prainHourly": $fv,
+#set $fv = []
 #try
-"prainRateHourly": $span(hour_delta=24).hailRate.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').mm_per_hour.round(1).json,
+#set $fv = $span(hour_delta=24).hailRate.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').mm_per_hour.round(1).json
 #except
-"prainRateHourly": [],
+#pass
 #end try
+"prainRateHourly": $fv,
+#set $fv = []
 #try
-"prain": $alltime.hail.series(aggregate_type='sum', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').mm.round(0).json,
+#set $fv = $alltime.hail.series(aggregate_type='sum', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').mm.round(0).json
 #except
-"prain": [],
+#pass
 #end try
+"prain": $fv,
+#set $fv = []
 #try
-"prainRate": $alltime.hailRate.series(aggregate_type='sum', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').mm_per_hour.round(0).json,
+#set $fv = $alltime.hailRate.series(aggregate_type='sum', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').mm_per_hour.round(0).json
 #except
-"prainRate": [],
+#pass
 #end try
+"prainRate": $fv,
 #end if
 ##temp
 "outTempMax": $alltime.outTemp.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').degree_C.round(1).json,
@@ -311,26 +438,34 @@
 "outDewHourly": $span(hour_delta=24).dewpoint.series(aggregate_type='avg', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').degree_C.round(1).json,
 "outHumidHourly": $span(hour_delta=24).outHumidity.series(aggregate_type='avg', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json,
 ##vpd
+#set $fv = []
 #try
-"vpdHourly": $span(hour_delta=24).vpd.series(aggregate_type='avg', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $span(hour_delta=24).vpd.series(aggregate_type='avg', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"vpdHourly": [],
+#pass
 #end try
+"vpdHourly": $fv,
+#set $fv = []
 #try
-"vpdMax": $alltime.vpd.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $alltime.vpd.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"vpdMax": [],
+#pass
 #end try
+"vpdMax": $fv,
+#set $fv = []
 #try
-"vpdMin": $alltime.vpd.series(aggregate_type='min', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $alltime.vpd.series(aggregate_type='min', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"vpdMin": [],
+#pass
 #end try
+"vpdMin": $fv,
+#set $fv = []
 #try
-"vpdAvg": $alltime.vpd.series(aggregate_type='avg', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $alltime.vpd.series(aggregate_type='avg', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"vpdAvg": [],
+#pass
 #end try
+"vpdAvg": $fv,
 ##wind
 "windSpeedHourly": $span(hour_delta=24).windSpeed.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').meter_per_second.round(1).json,
 "windGustHourly": $span(hour_delta=24).windGust.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').meter_per_second.round(1).json,
@@ -341,37 +476,50 @@
 "windGustAvg": $alltime.windGust.series(aggregate_type='avg', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').meter_per_second.round(0).json,
 "windDirAvg": $alltime.windDir.series(aggregate_type='avg', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json,
 ##solar and energy
+#set $fv = []
 #try
-"solarRadiationHourly": $span(hour_delta=24).radiation.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $span(hour_delta=24).radiation.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"solarRadiationHourly": [],
+#pass
 #end try
+"solarRadiationHourly": $fv,
+#set $fv = []
 #try
-"solarHourly": $span(hour_delta=24).radiation.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+#set $fv = $span(hour_delta=24).radiation.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
-"solarHourly": [],
+#pass
 #end try
+"solarHourly": $fv,
+#set $fv = []
 #try
-"uvHourly": $span(hour_delta=24).UV.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+#set $fv = $span(hour_delta=24).UV.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json
 #except
-"uvHourly": [],
+#pass
 #end try
+"uvHourly": $fv,
+#set $fv = []
 #try
-"solarMax": $alltime.radiation.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+#set $fv = $alltime.radiation.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json
 #except
-"solarMax": [],
+#pass
 #end try
+"solarMax": $fv,
+#set $fv = []
 #try
-"solarAvg": $alltime.radiation.series(aggregate_type='avg', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json,
+#set $fv = $alltime.radiation.series(aggregate_type='avg', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json
 #except
-"solarAvg": [],
+#pass
 #end try
+"solarAvg": $fv,
+#set $fv = []
 #try
-"UVMax": $alltime.UV.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json
+#set $fv = $alltime.UV.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(1).json
 #except
-"UVMax": []
+#pass
 #end try
+"UVMax": $fv
 },
 "units": "$unit.label.radiation"#slurp}
+}
 }
 ]
