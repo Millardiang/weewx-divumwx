@@ -416,6 +416,7 @@ class LiveDataService(StdService):
         self.received_packet = False
         self.last_conv_stats = (0, 0)
         self.total_conv_stats = self._load_persistent_stats()  # persistent totals
+        self.json_write_count = 0  # for the periodic INFO summary in _update_json_file()
         self.last_sun_calc_date = None  # Cache sunrise/sunset for current day
         self.cached_sunrise = None
         self.cached_sunset = None
@@ -1613,9 +1614,25 @@ class LiveDataService(StdService):
                 json.dump(data, f, indent=2 if self.pretty_print else None, sort_keys=self.pretty_print)
             os.replace(tmp, self.json_file)
 
-            # Only log every 10 updates or when debug is enabled
-            if conv_last + skip_last > 0:
-                log.info(f"Updated {os.path.basename(self.json_file)} — {len(obs)} fields")
+            # Log every 10th write at INFO as a periodic heartbeat; every
+            # other write goes to DEBUG. Previously this branched on
+            # "conv_last + skip_last > 0", which is true on virtually every
+            # single update (almost every write converts or skips at least
+            # one field), so despite the comment above claiming a "every 10
+            # updates" throttle, it logged at INFO on nearly every call --
+            # once per update_interval (2s by default), regardless of
+            # WeeWX's own [debug] verbosity setting. That's what generated
+            # the log flood reported in beta feedback (Gary): "Updated
+            # loop.json" appearing in syslog every 2-4 seconds at INFO. This
+            # is routine per-loop-packet processing, not something that
+            # belongs at INFO by WeeWX's own logging conventions -- it
+            # should be DEBUG-only, with just an occasional INFO heartbeat
+            # so "is this still running" is answerable without turning on
+            # full debug logging.
+            self.json_write_count += 1
+            if self.json_write_count % 10 == 0:
+                log.info(f"Updated {os.path.basename(self.json_file)} — {len(obs)} fields "
+                         f"(write #{self.json_write_count})")
             else:
                 log.debug(f"Updated {os.path.basename(self.json_file)} — {len(obs)} fields ({conv_last} converted, {skip_last} skipped)")
 
