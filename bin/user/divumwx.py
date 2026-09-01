@@ -2409,7 +2409,16 @@ class WeatherAPIPoller:
             with open(self.data_path, 'w') as f:
                 f.write(response.text)
             
-            loginf(f"{self.name}: Saved data to {self.data_path} "
+            # Routine per-poll confirmation -- DEBUG, not INFO. This can
+            # fire as often as every poll_interval (as low as 300s, and
+            # there can be over a dozen [WeatherAPI] sources configured
+            # at once), which adds up to a lot of "it worked" noise at
+            # WeeWX's default INFO verbosity for something that isn't
+            # actionable unless it stops happening (which already logs
+            # its own errors elsewhere). Same treatment as the loop.json
+            # write in LiveDataService._update_json_file() (beta
+            # feedback, Gary).
+            logdbg(f"{self.name}: Saved data to {self.data_path} "
                    f"({len(response.text)} bytes)")
             
             return True
@@ -2888,7 +2897,11 @@ class DataInjectService(StdService):
                         self.inject_data_into_record(event.record, data, source_config, 
                                                     source_name, "archive")
             
-            log.info("Archive data injection completed")
+            # Routine per-archive-record confirmation (fires every archive
+            # interval, 5 min by default) -- DEBUG, not INFO. Same
+            # reasoning as the WeatherAPIPoller "Saved data to" change
+            # above (beta feedback, Gary).
+            log.debug("Archive data injection completed")
             
         except Exception as e:
             log.error("Failed to inject external data into archive record: %s", e)
@@ -3252,7 +3265,15 @@ class SunshineDuration(StdService):
             else: 
                  event.record['sunshine_time'] = 0
                  event.record['sunshine_time_hours'] = 0
-            loginf("Sunshine duration from loop packets = %f min" % (event.record['sunshine_time']))
+            # Routine per-archive-record confirmation (every archive
+            # interval, 5 min by default) on the normal, steady-state path
+            # -- DEBUG, not INFO. Unlike the "Estimated sunshine duration"
+            # branch above (which only fires once, on the first archive
+            # record after a restart, and stays at INFO as a startup
+            # confirmation), this branch runs on every single archive
+            # record for the rest of the service's life (beta feedback,
+            # Gary).
+            logdbg("Sunshine duration from loop packets = %f min" % (event.record['sunshine_time']))
 
         self.sunshineSeconds = 0
         self.cum_time = 0
