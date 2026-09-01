@@ -37,7 +37,6 @@ from __future__ import annotations
 #  • Startup warning if no loop packets received within 20 s
 #  • Journald integration for WeeWX 5.x
 #  • Uptime seconds since service start included in metadata
-#  • Optional MQTT publishing of live data
 #  • Calculated variables: wind cardinal, beaufort, apparent temp, heat index, humidex, windchill, cloud base
 # --------------------------------------------------------
 
@@ -86,16 +85,6 @@ except ImportError:
         EPHEM_AVAILABLE = False
         ASTRAL_MODE = False
         log.warning("Neither ephem nor astral library available. isDay feature disabled.")
-
-# Try to import paho-mqtt for MQTT publishing
-MQTT_AVAILABLE = False
-try:
-    import paho.mqtt.client as mqtt
-    MQTT_AVAILABLE = True
-    log.info("paho-mqtt library available for MQTT publishing")
-except ImportError:
-    MQTT_AVAILABLE = False
-    log.warning("paho-mqtt library not available. MQTT publishing disabled.")
 
 # Try to import Skyfield, for the SkyfieldLoopData service (a separate,
 # optional live sky/almanac data feed -- its own JSON file, not merged into
@@ -361,31 +350,6 @@ class LiveDataService(StdService):
         self.unit_map = {'US': weewx.US, 'METRIC': weewx.METRIC, 'METRICWX': weewx.METRICWX}
         self.unit_system = self.unit_map.get(self.unit_system_str, weewx.US)
 
-        # MQTT Configuration
-        self.mqtt_enabled = to_bool(cfg.get('mqtt_enabled', False))
-        self.mqtt_client = None
-        self.mqtt_config = {}
-        
-        if self.mqtt_enabled and MQTT_AVAILABLE:
-            mqtt_cfg = cfg.get('MQTT', {})
-            self.mqtt_config = {
-                'host': mqtt_cfg.get('host', 'localhost'),
-                'port': to_int(mqtt_cfg.get('port', 1883)),
-                'username': mqtt_cfg.get('username'),
-                'password': mqtt_cfg.get('password'),
-                'topic': mqtt_cfg.get('topic', 'weather/live'),
-                'qos': to_int(mqtt_cfg.get('qos', 0)),
-                'retain': to_bool(mqtt_cfg.get('retain', False)),
-                'client_id': mqtt_cfg.get('client_id', 'weewx_livedata'),
-                'publish_format': mqtt_cfg.get('publish_format', 'json'),  # 'json' or 'individual'
-                'individual_topic_prefix': mqtt_cfg.get('individual_topic_prefix', 'weather/')
-            }
-            log.info(f"MQTT publishing enabled: {self.mqtt_config['host']}:{self.mqtt_config['port']}, topic: {self.mqtt_config['topic']}")
-            self._init_mqtt()
-        elif self.mqtt_enabled and not MQTT_AVAILABLE:
-            log.error("MQTT enabled but paho-mqtt library not installed. Install with: pip install paho-mqtt")
-            self.mqtt_enabled = False
-
         # Station location for sunrise/sunset calculations
         self.station_config = config_dict.get('Station', {})
         
@@ -410,14 +374,23 @@ class LiveDataService(StdService):
         else:
             self.altitude = float(alt_val)
         
-        # Parse timezone offset
-        tz_val = self.station_config.get('tz_offset', 0)
-        if isinstance(tz_val, (list, tuple)):
-            self.timezone = int(tz_val[0])
-        else:
-            self.timezone = int(tz_val)
-        
-        log.info(f"Station location: lat={self.latitude}, lon={self.longitude}, alt={self.altitude}m, tz={self.timezone}")
+        # NOTE: there used to be a manual "tz_offset" config-driven correction
+        # applied to sunrise/sunset timestamps here (self.timezone below).
+        # Removed entirely -- it was compensating for a real bug in
+        # _calculate_sunrise_sunset_ephem/_calculate_sunrise_sunset_astral
+        # (time.mktime() misinterpreting naive-UTC datetime fields as local
+        # time, silently shifting sunrise/sunset by exactly the system's
+        # local UTC offset -- see those functions' docstrings). 'tz_offset'
+        # was never a real weewx.conf [Station] key, so this compensation was
+        # inert for virtually every install (self.timezone defaulted to 0),
+        # which is exactly why the underlying bug went unnoticed until a
+        # non-UTC station (Alex, Belgium, UTC+2) reported isDay running 2h
+        # early. Fixing the root cause makes any such config-driven
+        # compensation not just unnecessary but actively wrong again the
+        # moment someone sets tz_offset to "fix" it locally, so it's gone
+        # rather than left in place unused.
+
+        log.info(f"Station location: lat={self.latitude}, lon={self.longitude}, alt={self.altitude}m")
         
         # Check if we have a valid location
         if self.latitude == 0.0 and self.longitude == 0.0:
@@ -466,114 +439,6 @@ class LiveDataService(StdService):
         threading.Timer(20.0, self._check_first_packet).start()
 
     # ---------------------------------------------------------------------
-    # MQTT Initialization
-    # ---------------------------------------------------------------------
-
-    def _init_mqtt(self):
-        """Initialize MQTT client connection."""
-        if not self.mqtt_enabled or not MQTT_AVAILABLE:
-            return
-            
-        try:
-            self.mqtt_client = mqtt.Client(client_id=self.mqtt_config['client_id'])
-            
-            # Set username/password if provided
-            if self.mqtt_config.get('username'):
-                self.mqtt_client.username_pw_set(
-                    self.mqtt_config['username'],
-                    self.mqtt_config.get('password')
-                )
-            
-            # Set up callbacks
-            self.mqtt_client.on_connect = self._on_mqtt_connect
-            self.mqtt_client.on_disconnect = self._on_mqtt_disconnect
-            
-            # Connect to broker
-            self.mqtt_client.connect(
-                self.mqtt_config['host'],
-                self.mqtt_config['port'],
-                keepalive=60
-            )
-            
-            # Start the network loop in a separate thread
-            self.mqtt_client.loop_start()
-            log.info("MQTT client initialized and connecting...")
-            
-        except Exception as e:
-            log.error(f"Failed to initialize MQTT client: {e}")
-            self.mqtt_enabled = False
-
-    def _on_mqtt_connect(self, client, userdata, flags, rc):
-        """Callback for MQTT connection."""
-        if rc == 0:
-            log.info(f"MQTT connected successfully to {self.mqtt_config['host']}:{self.mqtt_config['port']}")
-        else:
-            log.error(f"MQTT connection failed with code {rc}")
-            self.mqtt_enabled = False
-
-    def _on_mqtt_disconnect(self, client, userdata, rc):
-        """Callback for MQTT disconnection."""
-        log.warning(f"MQTT disconnected (rc={rc})")
-        # Try to reconnect
-        try:
-            client.reconnect()
-        except:
-            pass
-
-    def _publish_to_mqtt(self, data):
-        """Publish data to MQTT broker."""
-        if not self.mqtt_enabled or not self.mqtt_client:
-            return
-            
-        try:
-            if self.mqtt_config['publish_format'] == 'json':
-                # Publish entire JSON object as single message
-                payload = json.dumps(data, indent=None)
-                result = self.mqtt_client.publish(
-                    self.mqtt_config['topic'],
-                    payload,
-                    qos=self.mqtt_config['qos'],
-                    retain=self.mqtt_config['retain']
-                )
-                if result.rc == mqtt.MQTT_ERR_SUCCESS:
-                    log.debug(f"Published to MQTT topic: {self.mqtt_config['topic']}")
-                else:
-                    log.error(f"MQTT publish failed: {result.rc}")
-                    
-            elif self.mqtt_config['publish_format'] == 'individual':
-                # Publish each observation as individual topic
-                observations = data.get('observations', {})
-                for field, value in observations.items():
-                    # Skip complex values
-                    if isinstance(value, (dict, list)):
-                        continue
-                    
-                    topic = f"{self.mqtt_config['individual_topic_prefix']}{field}"
-                    payload = str(value)
-                    
-                    result = self.mqtt_client.publish(
-                        topic,
-                        payload,
-                        qos=self.mqtt_config['qos'],
-                        retain=self.mqtt_config['retain']
-                    )
-                    
-                # Also publish metadata as JSON
-                metadata_topic = f"{self.mqtt_config['individual_topic_prefix']}metadata"
-                metadata_payload = json.dumps(data.get('metadata', {}), indent=None)
-                self.mqtt_client.publish(
-                    metadata_topic,
-                    metadata_payload,
-                    qos=self.mqtt_config['qos'],
-                    retain=self.mqtt_config['retain']
-                )
-                
-                log.debug(f"Published {len(observations)} individual values to MQTT")
-                
-        except Exception as e:
-            log.error(f"Error publishing to MQTT: {e}")
-
-    # ---------------------------------------------------------------------
     # Sunrise/Sunset calculation initialization
     # ---------------------------------------------------------------------
 
@@ -609,27 +474,50 @@ class LiveDataService(StdService):
             return None
 
     def _calculate_sunrise_sunset_ephem(self, date):
-        """Calculate sunrise and sunset times using ephem."""
+        """
+        Calculate sunrise and sunset times using ephem, as true Unix epoch
+        timestamps (timezone-invariant -- correct regardless of the system's
+        local timezone).
+
+        ephem.Date.datetime() returns a NAIVE datetime whose numeric fields
+        are UTC clock values (ephem's internal representation is always UT).
+        The previous implementation ran those naive-UTC fields through
+        time.mktime(), which assumes its input is LOCAL wall-clock time and
+        converts using the system's local timezone -- silently shifting the
+        result by exactly the system's local UTC offset, then attempting
+        (ineffectively, since it was never actually configured) to correct
+        for that via a separate tz_offset compensation. Explicitly attaching
+        UTC tzinfo before calling .timestamp() sidesteps local-timezone
+        interpretation entirely. See beta report from Alex (Belgium, UTC+2):
+        isDay was flipping 2 hours before actual sunrise/sunset.
+        """
         try:
             self.sun_calculator.date = date
             sunrise = self.sun_calculator.previous_rising(ephem.Sun())
             sunset = self.sun_calculator.next_setting(ephem.Sun())
-            
-            # Convert to Unix timestamps
-            sunrise_ts = time.mktime(sunrise.datetime().timetuple())
-            sunset_ts = time.mktime(sunset.datetime().timetuple())
-            
-            # Adjust for timezone (ephem works in UTC)
-            sunrise_ts += self.timezone * 3600
-            sunset_ts += self.timezone * 3600
-            
+
+            sunrise_ts = sunrise.datetime().replace(tzinfo=datetime.timezone.utc).timestamp()
+            sunset_ts = sunset.datetime().replace(tzinfo=datetime.timezone.utc).timestamp()
+
             return sunrise_ts, sunset_ts
         except Exception as e:
             log.error(f"Error calculating sunrise/sunset with ephem: {e}")
             return None, None
 
     def _calculate_sunrise_sunset_astral(self, date):
-        """Calculate sunrise and sunset times using astral."""
+        """
+        Calculate sunrise and sunset times using astral, as true Unix epoch
+        timestamps. astral's sun() is called with tzinfo=utc below, so
+        s['sunrise']/s['sunset'] are already timezone-AWARE UTC datetimes --
+        calling .timestamp() directly on them gives the correct epoch
+        regardless of the system's local timezone. The previous
+        implementation discarded that tzinfo by going through
+        .timetuple() + time.mktime(), which reintroduces the same
+        local-timezone misinterpretation bug as the ephem path above (see
+        that function's docstring) -- .timestamp() on an aware datetime
+        never has that problem, so there's nothing to compensate for
+        afterwards.
+        """
         try:
             # Convert date to datetime at noon (astral expects datetime)
             dt = datetime.datetime(date.year, date.month, date.day, 12, 0, 0)
@@ -637,13 +525,8 @@ class LiveDataService(StdService):
             # Calculate sun times
             s = sun(self.sun_calculator.observer, date=dt, tzinfo=datetime.timezone.utc)
             
-            # Convert to Unix timestamps
-            sunrise_ts = time.mktime(s['sunrise'].timetuple())
-            sunset_ts = time.mktime(s['sunset'].timetuple())
-            
-            # Adjust for timezone
-            sunrise_ts += self.timezone * 3600
-            sunset_ts += self.timezone * 3600
+            sunrise_ts = s['sunrise'].timestamp()
+            sunset_ts = s['sunset'].timestamp()
             
             return sunrise_ts, sunset_ts
         except Exception as e:
@@ -1699,7 +1582,7 @@ class LiveDataService(StdService):
         self._save_persistent_stats()
 
     # ---------------------------------------------------------------------
-    # JSON writing and MQTT publishing
+    # JSON writing
     # ---------------------------------------------------------------------
 
     def _update_json_file(self):
@@ -1735,11 +1618,6 @@ class LiveDataService(StdService):
                 log.info(f"Updated {os.path.basename(self.json_file)} — {len(obs)} fields")
             else:
                 log.debug(f"Updated {os.path.basename(self.json_file)} — {len(obs)} fields ({conv_last} converted, {skip_last} skipped)")
-            
-            # Publish to MQTT if enabled
-            if self.mqtt_enabled and self.mqtt_client:
-                self._publish_to_mqtt(data)
-                log.debug("Published to MQTT")
 
         except Exception as e:
             log.error(f"Error updating JSON file: {e}", exc_info=True)
@@ -1775,16 +1653,7 @@ class LiveDataService(StdService):
                 'last_update': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
             }
         }
-        
-        # Add MQTT info if enabled
-        if self.mqtt_enabled:
-            metadata['mqtt'] = {
-                'enabled': True,
-                'host': self.mqtt_config.get('host'),
-                'topic': self.mqtt_config.get('topic'),
-                'format': self.mqtt_config.get('publish_format')
-            }
-        
+
         return metadata
 
     def _get_unit_labels(self):
@@ -1865,16 +1734,7 @@ class LiveDataService(StdService):
             self._update_json_file()
             self._save_known_fields()
             self._save_persistent_stats()
-        
-        # Disconnect MQTT if connected
-        if self.mqtt_enabled and self.mqtt_client:
-            try:
-                self.mqtt_client.loop_stop()
-                self.mqtt_client.disconnect()
-                log.info("MQTT client disconnected")
-            except:
-                pass
-        
+
         log.info("LiveDataService stopped cleanly")
 
 #!/usr/bin/env python3
@@ -2052,7 +1912,7 @@ OPENMETEO_MODEL_CHOICES = {
     'cma_grapes_global': 'CMA GRAPES (China)',
     'knmi_seamless': 'KNMI (Netherlands)',
     'dmi_seamless': 'DMI (Denmark)',
-    'metno_nordic_seamless': 'MET Norway Nordic',
+    'metno_seamless': 'MET Norway Nordic Seamless (with ECMWF)',
     'meteoswiss_icon_seamless': 'MeteoSwiss ICON',
 }
 
@@ -5028,6 +4888,12 @@ INSTALL
         keep_days = 3
         # Only needs changing if ffmpeg isn't on PATH for weewx's user.
         ffmpeg_path = ffmpeg
+        # Capture overnight too, instead of pausing between sunset and
+        # sunrise (per loop.json's isDay). Off by default. Worth turning on
+        # at high latitudes, where the day/night gate can remove a large
+        # fraction of the year's footage, or if you want night frames kept
+        # simply because the weather-data overlay is still useful after dark.
+        capture_at_night = False
 
 3. In weewx.conf's [Engine][[Services]], add user.timelapse.TimelapseService
    to report_services (a comma-separated list already there):
@@ -5127,6 +4993,14 @@ class TimelapseService(StdService):
         self.keep_days = int(tl_dict.get('keep_days', 3))
         self.ffmpeg_path = tl_dict.get('ffmpeg_path', 'ffmpeg')
 
+        # Feature request (Alex, beta feedback): at high latitudes the
+        # day/night gate removes a large fraction of the year's footage, and
+        # with weather data burned into the overlay the night frames are
+        # still worth keeping. Defaults to False (preserves existing
+        # day-only behaviour) so nothing changes for installs that don't set
+        # this explicitly.
+        self.capture_at_night = to_bool(tl_dict.get('capture_at_night', False))
+
         if not os.path.isdir(self.output_dir):
             os.makedirs(self.output_dir)
 
@@ -5153,10 +5027,11 @@ class TimelapseService(StdService):
 
         self.bind(weewx.NEW_LOOP_PACKET, self.new_loop_packet)
         loginf(
-            "Timelapse service started: source=%s output=%s loop_json=%s buckets=%s output_fps=%s ffmpeg=%s"
+            "Timelapse service started: source=%s output=%s loop_json=%s buckets=%s output_fps=%s ffmpeg=%s capture_at_night=%s"
             % (self.source_image, self.output_dir, self.loop_json,
                ','.join('%s@%ss' % (b['name'], b['interval']) for b in self.buckets),
-               self.output_fps, 'found' if self.ffmpeg_available else 'MISSING')
+               self.output_fps, 'found' if self.ffmpeg_available else 'MISSING',
+               self.capture_at_night)
         )
         if not os.path.isfile(self.source_image):
             logerr("Timelapse: source image not found at %s (will keep checking)" % self.source_image)
@@ -5178,7 +5053,7 @@ class TimelapseService(StdService):
             return
         if not os.path.isfile(self.source_image):
             return
-        if not self._is_daytime():
+        if not self.capture_at_night and not self._is_daytime():
             return
 
         # One copy of the source frame is shared across every bucket that's
@@ -5226,7 +5101,15 @@ class TimelapseService(StdService):
         try:
             with open(self.loop_json) as f:
                 data = json.load(f)
-            return data.get('observations', {}).get('isDay') == 1
+            # Missing isDay key gets the same fail-open treatment as a missing
+            # file, not fail-closed: data.get('observations', {}).get('isDay')
+            # returns None when the key is absent, and None == 1 is False --
+            # that silently disabled capture *permanently* on any loop.json
+            # that has no isDay key at all (as opposed to isDay explicitly
+            # being 0), which is a much worse failure mode than the
+            # documented "fail open" behaviour above for a missing file
+            # entirely. See beta report from Alex (Belgium).
+            return data.get('observations', {}).get('isDay', 1) == 1
         except Exception:
             return True
 
