@@ -71,7 +71,46 @@ import shutil
 import sys
 from datetime import datetime
 
-import weecfg
+try:
+    import weecfg
+except ImportError:
+    # This script is meant to be run directly ('python3
+    # divumwx_uninstall_helper.py'), per install.py's own closing message --
+    # but weecfg only exists inside whatever Python environment WeeWX itself
+    # was installed into. WeeWX 5.x's standard (pip-based) install puts that
+    # environment in a dedicated virtualenv, separate from the system
+    # python3, so running this with a bare 'python3' invokes an interpreter
+    # that's never heard of weecfg (beta report, Gert -- a bare
+    # ModuleNotFoundError traceback with no indication of why). Rather than
+    # let that traceback stand, try to point at the interpreter that DOES
+    # have it: weectl (WeeWX's own CLI, which imports weecfg successfully
+    # every time it runs) is launched via a shebang line naming that exact
+    # interpreter, so reading it is a reliable way to find the right one
+    # without guessing at venv locations ourselves.
+    weectl_path = shutil.which('weectl')
+    hint = None
+    if weectl_path:
+        try:
+            with open(weectl_path) as f:
+                first_line = f.readline().strip()
+            if first_line.startswith('#!'):
+                hint = first_line[2:].strip()
+        except OSError:
+            pass
+
+    print("ERROR: couldn't import 'weecfg' -- this Python interpreter doesn't "
+          "have WeeWX's own packages installed.", file=sys.stderr)
+    print(f"You ran this with: {sys.executable}", file=sys.stderr)
+    if hint:
+        print(f"\nTry running it with the same interpreter weectl uses instead:\n"
+              f"    {hint} {os.path.abspath(__file__)}", file=sys.stderr)
+    else:
+        print("\nRun 'which weectl' and then 'head -1 $(which weectl)' to find "
+              "the interpreter WeeWX itself uses (often a virtualenv's "
+              "python3, e.g. ~/weewx-venv/bin/python3), then re-run this "
+              "script with that interpreter instead of a bare 'python3'.",
+              file=sys.stderr)
+    sys.exit(1)
 
 
 # --- Sections this installer is known to have written, and therefore
