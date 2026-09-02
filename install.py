@@ -341,6 +341,42 @@ DIVUMWX_REPORT_GENERIC_LABELS = {
 DIVUMWX_REPORT_ORDINATES = ('North, NNE, NE, ENE, East, ESE, SE, SSE, South, '
                              'SSW, SW, WSW, West, WNW, NW, NNW, N/A')
 
+# Must match DIVUMWX_LIVEDATA_UNIT_SYSTEM below -- loop.json and every
+# report-generated JSON file (charts.json, archive.json) need to agree on
+# one canonical unit system, since the front-end (cardsBundleNew.js etc.)
+# does its own display-unit conversion/formatting from a known, fixed
+# baseline rather than reading whatever unit system happened to be active
+# per station. See apply_divumwx_report_merge()'s docstring for why this
+# is enforced unconditionally, and why it's written with an explicit
+# in-file weewx.conf comment rather than silently.
+DIVUMWX_REPORT_UNIT_SYSTEM = 'METRICWX'
+
+DIVUMWX_REPORT_UNIT_SYSTEM_COMMENT = [
+    '',
+    '# DO NOT CHANGE THIS VALUE. DivumWX requires unit_system = METRICWX',
+    '# here, regardless of this station\'s own configured unit system.',
+    '#',
+    '# loop.json (via [LiveData], see its own unit_system a little further',
+    '# down this file) is hardcoded to METRICWX and always has been. If',
+    '# DivumWXReport uses anything else, charts.json and archive.json will',
+    '# disagree with loop.json on units for the exact same observations --',
+    '# the front-end has no way to reconcile that; it expects one',
+    '# consistent baseline throughout and does its own conversion to the',
+    '# visitor\'s preferred display units from there.',
+    '#',
+    '# Concretely: on a station whose own unit_system is US, changing this',
+    '# back to US (or removing it) makes every number in charts.json and',
+    '# archive.json come through in US units while loop.json stays metric',
+    '# -- this is the exact "bizarre things happen" bug reported by a US',
+    '# user in beta and fixed by pinning this value.',
+    '#',
+    '# If DivumWX is ever updated to do its own explicit per-field unit',
+    '# conversion in every .tmpl file (rather than relying on one ambient',
+    "# report-level baseline), this constraint could be lifted -- but that's",
+    '# a substantial rewrite of charts_json.tmpl/archive_json.tmpl, not a',
+    '# config change, and hasn\'t happened as of this fix.',
+]
+
 DIVUMWX_REPORT_SEARCH_LIST_EXTENSIONS = [
     'user.stats.MyStats', 'user.divumwx.TimeSince', 'user.divumwx_cards.DivumwxCards',
 ]
@@ -362,11 +398,26 @@ def apply_divumwx_report_merge(cfg, html_root):
     skin/enable/HTML_ROOT/skin_semantics: set-once (never overwrite a
     user's deliberate override on reinstall).
 
-    Everything under [[[Defaults]]], plus CheetahGenerator and
-    Generators: always enforced -- these are the skin's own required
+    Everything under [[[Defaults]]], plus CheetahGenerator, Generators,
+    and unit_system: always enforced -- these are the skin's own required
     wiring, not user-tunable preference (same policy the Units/Groups
     handling already used, and per the skin's own stated reasoning that
     these "must not be changed, to avoid affecting other skins").
+
+    unit_system specifically: WeeWX reports default their unit_system from
+    [StdReport]'s top-level setting (which in turn usually follows the
+    station's own configured unit system) unless a report overrides it.
+    DivumWXReport was never overriding it, so a US-configured station got
+    a US-unit-system report -- while [LiveData] (loop.json) has always
+    been hardcoded to METRICWX (see DIVUMWX_LIVEDATA_UNIT_SYSTEM below).
+    That mismatch is exactly what caused "bizarre things" for US users.
+    Enforced unconditionally (not set-once), same as LiveData's, so an
+    existing install with a stale/wrong value gets corrected on upgrade
+    too, not just on fresh install -- and written with an explicit
+    DIVUMWX_REPORT_UNIT_SYSTEM_COMMENT directly above it in weewx.conf
+    itself (not just here in the Python source), since this line sits in
+    a file people hand-edit and the reasoning needs to be visible right
+    where someone would go to change it.
     """
     report = {
         'created_subsection': False,
@@ -374,6 +425,7 @@ def apply_divumwx_report_merge(cfg, html_root):
         'enable_defaulted': False,
         'html_root_set': False,
         'skin_semantics_defaulted': False,
+        'unit_system_enforced': False,
         'defaults_enforced': [],
         'cheetah_enforced': [],
         'generators_enforced': False,
@@ -396,6 +448,20 @@ def apply_divumwx_report_merge(cfg, html_root):
     if 'skin_semantics' not in dr:
         dr['skin_semantics'] = '2'
         report['skin_semantics_defaulted'] = True
+
+    if dr.get('unit_system') != DIVUMWX_REPORT_UNIT_SYSTEM:
+        dr['unit_system'] = DIVUMWX_REPORT_UNIT_SYSTEM
+        report['unit_system_enforced'] = True
+    # Comment is (re-)applied every run, independent of unit_system_enforced
+    # above, so it survives even if some other tool or a manual edit strips
+    # comments but leaves the value -- cheap, and there's no reason for it
+    # to ever be missing.
+    try:
+        dr.comments['unit_system'] = list(DIVUMWX_REPORT_UNIT_SYSTEM_COMMENT)
+    except AttributeError:
+        # cfg isn't a real ConfigObj (e.g. a plain dict in a unit test) --
+        # comments aren't representable, harmless to skip.
+        pass
 
     # [[[Defaults]]] -- structural, always enforced
     dr.setdefault('Defaults', {})
@@ -2211,7 +2277,14 @@ class DivumwxInstaller(ExtensionInstaller):
 
         # --- In additions-file order ---
 
-        apply_divumwx_report_merge(cfg, html_root=html_root)
+        report_merge_result = apply_divumwx_report_merge(cfg, html_root=html_root)
+        if report_merge_result['unit_system_enforced']:
+            printer.out(
+                "DivumWXReport unit_system set to METRICWX (required -- "
+                "loop.json and the report's own generated JSON files must "
+                "agree on one unit system; the front-end handles display "
+                "conversion from there). See the comment above this "
+                "setting in weewx.conf before changing it.", level=2)
 
         apply_calculation_merges(cfg, fresh_install=fresh_install)
 
