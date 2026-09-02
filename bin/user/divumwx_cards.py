@@ -68,9 +68,32 @@ Provides three tags:
                                real, matching how cardWebcam.js already
                                works; the frontend fetch is the other
                                half (see cardStationImage.js).
+
+    $divumwx_in_uk           — the installer's own "are you in the UK?"
+                               answer ([DivumWXCards] in_uk, set by
+                               install.py's in_england/in_uk prompts),
+                               exposed as the bare JSON literal true,
+                               false, or null (not a string) -- null when
+                               the install predates this field or the
+                               value is otherwise unset/blank. Embed
+                               directly:
+
+                                 "in_uk": $divumwx_in_uk
+
+                               Consumed by alertBar.js to decide whether
+                               to show its UK-specific alert card (Met
+                               Office link on OpenWeatherMap alerts, UKHSA
+                               health alerts, UK flood data, AuroraWatch)
+                               -- this explicit answer is preferred over
+                               alertBar.js's own lat/lon bounding-box
+                               guess when present, since it's what the
+                               person who set up the station actually
+                               said rather than an approximation from
+                               station coordinates.
 """
 import json
 
+from weeutil.weeutil import to_bool
 from weewx.cheetahgenerator import SearchList
 
 
@@ -101,11 +124,27 @@ class DivumwxCards(SearchList):
         station_image_title = cards_section.get('station_image_title', '') or None
         station_image_path = cards_section.get('station_image_path', '') or None
 
+        # in_uk: the installer's own "are you in the UK?" answer
+        # (install.py, [DivumWXCards] in_uk), NOT re-derived here. Left
+        # as JSON null (rather than defaulting to false) when unset --
+        # e.g. an existing install that hasn't been re-run since this
+        # field was added -- so the front-end can tell "explicitly
+        # answered no" apart from "we don't actually know" and fall back
+        # to its own lat/lon-based guess only in the latter case.
+        # ConfigObj stores this as the string 'True'/'False' (matching
+        # every other installer-collected yes/no answer in this codebase,
+        # e.g. [WeatherAPI][[Alerts]] enabled), so it needs to go through
+        # to_bool() rather than a raw string comparison -- to_bool()
+        # accepts 'true'/'yes'/'1' etc. too, same as the rest of WeeWX.
+        in_uk_raw = cards_section.get('in_uk', None)
+        in_uk = to_bool(in_uk_raw) if in_uk_raw not in (None, '') else None
+
         search_list_extension = {
             'divumwx_enabled_cards': json.dumps(list(enabled_cards)),
             'divumwx_webcam_title': json.dumps(webcam_title),
             'divumwx_webcam_image': json.dumps(webcam_image),
             'divumwx_station_image_title': json.dumps(station_image_title),
             'divumwx_station_image_path': json.dumps(station_image_path),
+            'divumwx_in_uk': json.dumps(in_uk),
         }
         return [search_list_extension]

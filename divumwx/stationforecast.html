@@ -337,7 +337,7 @@ function renderPage(){
 
   document.getElementById('hourlyTitle').textContent = days[activeDay].name + ' — hourly';
   const table = document.getElementById('hourlyTable');
-  const fmtHour = h => h===0?'12am':h===12?'12pm':h>12?(h-12)+'pm':h+'am';
+  const fmtHour = h => String(h).padStart(2, '0') + ':00';
   const TRACK_RANGE = 56;
   const trackTemps = hrs.map(h=>h.tempC).filter(t=>t!=null);
   const tMin = trackTemps.length ? Math.min(...trackTemps) : 0;

@@ -341,6 +341,42 @@ DIVUMWX_REPORT_GENERIC_LABELS = {
 DIVUMWX_REPORT_ORDINATES = ('North, NNE, NE, ENE, East, ESE, SE, SSE, South, '
                              'SSW, SW, WSW, West, WNW, NW, NNW, N/A')
 
+# Must match DIVUMWX_LIVEDATA_UNIT_SYSTEM below -- loop.json and every
+# report-generated JSON file (charts.json, archive.json) need to agree on
+# one canonical unit system, since the front-end (cardsBundleNew.js etc.)
+# does its own display-unit conversion/formatting from a known, fixed
+# baseline rather than reading whatever unit system happened to be active
+# per station. See apply_divumwx_report_merge()'s docstring for why this
+# is enforced unconditionally, and why it's written with an explicit
+# in-file weewx.conf comment rather than silently.
+DIVUMWX_REPORT_UNIT_SYSTEM = 'METRICWX'
+
+DIVUMWX_REPORT_UNIT_SYSTEM_COMMENT = [
+    '',
+    '# DO NOT CHANGE THIS VALUE. DivumWX requires unit_system = METRICWX',
+    '# here, regardless of this station\'s own configured unit system.',
+    '#',
+    '# loop.json (via [LiveData], see its own unit_system a little further',
+    '# down this file) is hardcoded to METRICWX and always has been. If',
+    '# DivumWXReport uses anything else, charts.json and archive.json will',
+    '# disagree with loop.json on units for the exact same observations --',
+    '# the front-end has no way to reconcile that; it expects one',
+    '# consistent baseline throughout and does its own conversion to the',
+    '# visitor\'s preferred display units from there.',
+    '#',
+    '# Concretely: on a station whose own unit_system is US, changing this',
+    '# back to US (or removing it) makes every number in charts.json and',
+    '# archive.json come through in US units while loop.json stays metric',
+    '# -- this is the exact "bizarre things happen" bug reported by a US',
+    '# user in beta and fixed by pinning this value.',
+    '#',
+    '# If DivumWX is ever updated to do its own explicit per-field unit',
+    '# conversion in every .tmpl file (rather than relying on one ambient',
+    "# report-level baseline), this constraint could be lifted -- but that's",
+    '# a substantial rewrite of charts_json.tmpl/archive_json.tmpl, not a',
+    '# config change, and hasn\'t happened as of this fix.',
+]
+
 DIVUMWX_REPORT_SEARCH_LIST_EXTENSIONS = [
     'user.stats.MyStats', 'user.divumwx.TimeSince', 'user.divumwx_cards.DivumwxCards',
 ]
@@ -362,11 +398,26 @@ def apply_divumwx_report_merge(cfg, html_root):
     skin/enable/HTML_ROOT/skin_semantics: set-once (never overwrite a
     user's deliberate override on reinstall).
 
-    Everything under [[[Defaults]]], plus CheetahGenerator and
-    Generators: always enforced -- these are the skin's own required
+    Everything under [[[Defaults]]], plus CheetahGenerator, Generators,
+    and unit_system: always enforced -- these are the skin's own required
     wiring, not user-tunable preference (same policy the Units/Groups
     handling already used, and per the skin's own stated reasoning that
     these "must not be changed, to avoid affecting other skins").
+
+    unit_system specifically: WeeWX reports default their unit_system from
+    [StdReport]'s top-level setting (which in turn usually follows the
+    station's own configured unit system) unless a report overrides it.
+    DivumWXReport was never overriding it, so a US-configured station got
+    a US-unit-system report -- while [LiveData] (loop.json) has always
+    been hardcoded to METRICWX (see DIVUMWX_LIVEDATA_UNIT_SYSTEM below).
+    That mismatch is exactly what caused "bizarre things" for US users.
+    Enforced unconditionally (not set-once), same as LiveData's, so an
+    existing install with a stale/wrong value gets corrected on upgrade
+    too, not just on fresh install -- and written with an explicit
+    DIVUMWX_REPORT_UNIT_SYSTEM_COMMENT directly above it in weewx.conf
+    itself (not just here in the Python source), since this line sits in
+    a file people hand-edit and the reasoning needs to be visible right
+    where someone would go to change it.
     """
     report = {
         'created_subsection': False,
@@ -374,6 +425,7 @@ def apply_divumwx_report_merge(cfg, html_root):
         'enable_defaulted': False,
         'html_root_set': False,
         'skin_semantics_defaulted': False,
+        'unit_system_enforced': False,
         'defaults_enforced': [],
         'cheetah_enforced': [],
         'generators_enforced': False,
@@ -396,6 +448,20 @@ def apply_divumwx_report_merge(cfg, html_root):
     if 'skin_semantics' not in dr:
         dr['skin_semantics'] = '2'
         report['skin_semantics_defaulted'] = True
+
+    if dr.get('unit_system') != DIVUMWX_REPORT_UNIT_SYSTEM:
+        dr['unit_system'] = DIVUMWX_REPORT_UNIT_SYSTEM
+        report['unit_system_enforced'] = True
+    # Comment is (re-)applied every run, independent of unit_system_enforced
+    # above, so it survives even if some other tool or a manual edit strips
+    # comments but leaves the value -- cheap, and there's no reason for it
+    # to ever be missing.
+    try:
+        dr.comments['unit_system'] = list(DIVUMWX_REPORT_UNIT_SYSTEM_COMMENT)
+    except AttributeError:
+        # cfg isn't a real ConfigObj (e.g. a plain dict in a unit test) --
+        # comments aren't representable, harmless to skip.
+        pass
 
     # [[[Defaults]]] -- structural, always enforced
     dr.setdefault('Defaults', {})
@@ -1052,6 +1118,7 @@ def apply_weatherapi_alerts_merge(cfg, html_root=None, app_id=None, poll_interva
     report = {
         'created_subsection': created,
         'enabled_enforced': False,
+        'enabled_disabled_no_app_id': False,
         'api_type_enforced': False,
         'app_id_set': False,
         'app_id_needs_prompt': False,
@@ -1060,19 +1127,30 @@ def apply_weatherapi_alerts_merge(cfg, html_root=None, app_id=None, poll_interva
         'data_path_needs_prompt': False,
     }
 
-    if alerts.get('enabled') != 'True':
-        alerts['enabled'] = 'True'
-        report['enabled_enforced'] = True
-    if alerts.get('api_type') != DIVUMWX_WEATHERAPI_ALERTS_API_TYPE:
-        alerts['api_type'] = DIVUMWX_WEATHERAPI_ALERTS_API_TYPE
-        report['api_type_enforced'] = True
-
     if 'app_id' not in alerts or not alerts['app_id']:
         if app_id:
             alerts['app_id'] = app_id
             report['app_id_set'] = True
         else:
             report['app_id_needs_prompt'] = True
+
+    # Alerts requires OpenWeatherMap credentials to function at all -- if no
+    # app_id is (or will be) present, force enabled=False rather than
+    # unconditionally forcing True. Without this, an install where the app_id
+    # prompt is explicitly left blank (a supported path -- see prompt text)
+    # still enabled Alerts, producing continuous HTTP 401s until fixed
+    # manually (see beta report, Kjell, Norway).
+    have_app_id = bool(alerts.get('app_id'))
+    if not have_app_id:
+        if alerts.get('enabled') != 'False':
+            alerts['enabled'] = 'False'
+            report['enabled_disabled_no_app_id'] = True
+    elif alerts.get('enabled') != 'True':
+        alerts['enabled'] = 'True'
+        report['enabled_enforced'] = True
+    if alerts.get('api_type') != DIVUMWX_WEATHERAPI_ALERTS_API_TYPE:
+        alerts['api_type'] = DIVUMWX_WEATHERAPI_ALERTS_API_TYPE
+        report['api_type_enforced'] = True
 
     if 'poll_interval' not in alerts:
         alerts['poll_interval'] = str(poll_interval) if poll_interval is not None \
@@ -1151,7 +1229,7 @@ DIVUMWX_OPENMETEO_MODEL_CHOICES = {
     'cma_grapes_global': 'CMA GRAPES (China)',
     'knmi_seamless': 'KNMI (Netherlands)',
     'dmi_seamless': 'DMI (Denmark)',
-    'metno_nordic_seamless': 'MET Norway Nordic',
+    'metno_seamless': 'MET Norway Nordic Seamless (with ECMWF)',
     'meteoswiss_icon_seamless': 'MeteoSwiss ICON',
 }
 
@@ -1669,6 +1747,98 @@ def apply_divumwx_cards_merge(cfg, rain_choice=None, optional_selected=None,
     return report
 
 
+DIVUMWX_TIMELAPSE_DEFAULT_OUTPUT_DIR = 'webcam-timelapse'
+
+
+def apply_timelapse_merge(cfg, site_root=None, source_image=None, output_dir=None,
+                           ffmpeg_available=None):
+    """
+    Mutates cfg['Timelapse'] in place. Set-once.
+
+    TimelapseService is unconditionally registered in DIVUMWX_DATA_SERVICES
+    (see DIVUMWX_DATA_SERVICES above), so it always runs -- but without a
+    [Timelapse] section it falls back to defaults relative to the global
+    StdReport HTML_ROOT rather than DivumWX's own site subdirectory
+    (DIVUMWX_ROOT_SUBDIR), and to a hardcoded 'img/picam.jpg' regardless of
+    what webcam image path was actually configured. This produced a real
+    beta failure (Kjell, Norway): source_image pointed at a file that
+    doesn't exist and output_dir hit a PermissionError on first run.
+
+    site_root defaults to DIVUMWX_ROOT_SUBDIR, matching where DivumWX's site
+    files (and TimelapseService's divumwx_root join point) normally live --
+    but the caller must pass '' explicitly when the site's StdReport
+    HTML_ROOT already resolves to a path ending in DIVUMWX_ROOT_SUBDIR (see
+    the html_root computation earlier in this file), otherwise
+    TimelapseService would join 'divumwx' onto a HTML_ROOT that already ends
+    in 'divumwx' at runtime and double-nest the path.
+    """
+    if 'Timelapse' not in cfg:
+        cfg['Timelapse'] = {}
+        created = True
+    else:
+        created = False
+    tl = cfg['Timelapse']
+
+    report = {
+        'created_subsection': created,
+        'site_root_set': False,
+        'source_image_set': False,
+        'output_dir_set': False,
+        'ffmpeg_missing': ffmpeg_available is False,
+    }
+
+    if 'site_root' not in tl or not tl['site_root']:
+        tl['site_root'] = DIVUMWX_ROOT_SUBDIR if site_root is None else site_root
+        report['site_root_set'] = True
+
+    if 'source_image' not in tl or not tl['source_image']:
+        tl['source_image'] = source_image or DIVUMWX_WEBCAM_DEFAULT_IMAGE
+        report['source_image_set'] = True
+
+    if 'output_dir' not in tl or not tl['output_dir']:
+        tl['output_dir'] = output_dir or DIVUMWX_TIMELAPSE_DEFAULT_OUTPUT_DIR
+        report['output_dir_set'] = True
+
+    return report
+
+
+def create_timelapse_output_dir(divumwx_root, output_dir, printer):
+    """
+    Creates the Timelapse output directory at install time, the same way
+    copy_divumwx_frontend() pre-creates the frontend directory -- so
+    TimelapseService (which runs as the weewx service user, not necessarily
+    whoever ran the installer) finds it already there with usable
+    permissions instead of hitting a PermissionError trying to create it
+    itself on first NEW_LOOP_PACKET. Mirrors that function's PermissionError
+    handling rather than inventing a new pattern.
+
+    divumwx_root must already be the fully-resolved DivumWX site directory
+    (site HTML_ROOT + DIVUMWX_ROOT_SUBDIR) -- the same value install.py's
+    own `html_root` local variable holds at the call site below, NOT the
+    raw global StdReport HTML_ROOT. TimelapseService itself does its own
+    separate site_root join against the raw global HTML_ROOT at runtime
+    (see divumwx.py); this is install-time only and must land on the same
+    final path or the directory gets created in the wrong place.
+    """
+    full_path = os.path.join(divumwx_root.rstrip('/'), output_dir)
+    try:
+        os.makedirs(full_path, exist_ok=True)
+    except PermissionError as e:
+        printer.out(
+            f"WARNING: permission denied creating Timelapse output directory "
+            f"{full_path} ({e}). TimelapseService will retry creating it "
+            f"itself at runtime as the weewx service user, which may also "
+            f"fail. Either:\n"
+            f"    (a) re-run this install with sudo, or\n"
+            f"    (b) fix it by hand first:\n"
+            f"        sudo mkdir -p {full_path}\n"
+            f"        sudo chown -R <weewx-service-user> {full_path}\n",
+            level=1)
+        return False
+    printer.out(f"Timelapse output directory ready: {full_path}", level=2)
+    return True
+
+
 DIVUMWX_ROOT_SUBDIR = 'divumwx'
 
 DIVUMWX_FRONTEND_EXCLUDED_FILES = {'bootstrap.min.js'}
@@ -2107,7 +2277,14 @@ class DivumwxInstaller(ExtensionInstaller):
 
         # --- In additions-file order ---
 
-        apply_divumwx_report_merge(cfg, html_root=html_root)
+        report_merge_result = apply_divumwx_report_merge(cfg, html_root=html_root)
+        if report_merge_result['unit_system_enforced']:
+            printer.out(
+                "DivumWXReport unit_system set to METRICWX (required -- "
+                "loop.json and the report's own generated JSON files must "
+                "agree on one unit system; the front-end handles display "
+                "conversion from there). See the comment above this "
+                "setting in weewx.conf before changing it.", level=2)
 
         apply_calculation_merges(cfg, fresh_install=fresh_install)
 
@@ -2131,8 +2308,14 @@ class DivumwxInstaller(ExtensionInstaller):
             "OpenWeatherMap app_id (for weather alerts, leave blank to configure later)", default='')
         alerts_poll_interval = weecfg.prompt_with_limits(
             "Alerts poll interval, in seconds", default='1800', low_limit=60, high_limit=86400)
-        apply_weatherapi_alerts_merge(
+        alerts_report = apply_weatherapi_alerts_merge(
             cfg, html_root=html_root, app_id=app_id, poll_interval=alerts_poll_interval)
+        if alerts_report['enabled_disabled_no_app_id']:
+            printer.out(
+                "No OpenWeatherMap app_id given -- Alerts left disabled "
+                "(enabled = False) to avoid unauthenticated polling. Add an "
+                "app_id and set enabled = True under [WeatherAPI][[Alerts]] "
+                "in weewx.conf later to turn it on.", level=1)
 
         model_options = list(DIVUMWX_OPENMETEO_MODEL_CHOICES.keys())
         printer.out("Open-Meteo forecast models (see https://open-meteo.com/en/docs "
@@ -2159,6 +2342,26 @@ class DivumwxInstaller(ExtensionInstaller):
         in_england = y_or_n("Are you in England? (y/n) ") == 'y'
         in_uk = in_england or (
             y_or_n("Are you in the United Kingdom (but not England)? (y/n) ") == 'y')
+
+        # Persisted unconditionally, every run -- NOT inside the
+        # "if 'enabled_cards' not in ..." gate a few lines below that
+        # apply_divumwx_cards_merge() lives behind, since in_uk is asked
+        # fresh on every single install/reconfigure run (not gated behind
+        # a "have we asked before" check the way card selection is), and
+        # would otherwise never get persisted at all for an existing
+        # install re-running this script. Previously in_uk only existed
+        # transiently in this function, used solely to gate individual
+        # [WeatherAPI][[...]] sub-services' own enabled flags (flood,
+        # heat/cold alert, MetOfficeRSS) -- nothing kept the actual
+        # answer anywhere a template could read it back. See
+        # cardsBundleNew.js's alertBar.js: it needs to know whether a
+        # station is actually in the UK to decide whether to show its
+        # UK-specific alert card (Met Office link, UKHSA health alerts,
+        # UK flood data, AuroraWatch) at all -- a lat/lon bounding-box
+        # guess is a reasonable fallback, but this explicit answer is
+        # more accurate and should be preferred when available.
+        cfg.setdefault('DivumWXCards', {})
+        cfg['DivumWXCards']['in_uk'] = 'True' if in_uk else 'False'
 
         apply_weatherapi_flood_merge(cfg, html_root=html_root, in_england=in_england)
 
@@ -2275,6 +2478,33 @@ class DivumwxInstaller(ExtensionInstaller):
                 cfg, rain_choice=rain_choice, optional_selected=optional_selected,
                 webcam_title=webcam_title, webcam_image=webcam_image,
                 station_image_title=station_image_title, station_image_path=station_image_path)
+
+        # --- [Timelapse] ---
+        # Deliberately OUTSIDE the "if 'enabled_cards' not in ..." gate above:
+        # TimelapseService is always registered (see DIVUMWX_DATA_SERVICES)
+        # regardless of card selection, so it can be running unconfigured on
+        # an existing beta install that already went through card selection
+        # in an earlier version of this installer, before this section
+        # existed -- an upgrade run needs to fill this in too, not just
+        # fresh installs. apply_timelapse_merge() is itself set-once (checks
+        # 'not in tl' per key), so this is safe to call every run. Reuses
+        # whatever webcam_image is already on record in [DivumWXCards]
+        # (freshly set above, or from a prior run) rather than asking again.
+        ffmpeg_available = shutil.which('ffmpeg') is not None
+        if not ffmpeg_available:
+            printer.out(
+                "WARNING: 'ffmpeg' not found on PATH. TimelapseService "
+                "will start but timelapse capture will stay disabled until "
+                "ffmpeg is installed (e.g. sudo apt install ffmpeg) and "
+                "weewx is restarted.", level=1)
+        timelapse_site_root = '' if os.path.basename(os.path.normpath(site_html_root)) \
+            == DIVUMWX_ROOT_SUBDIR else DIVUMWX_ROOT_SUBDIR
+        existing_webcam_image = cfg.get('DivumWXCards', {}).get('webcam_image')
+        apply_timelapse_merge(
+            cfg, site_root=timelapse_site_root, source_image=existing_webcam_image,
+            ffmpeg_available=ffmpeg_available)
+        create_timelapse_output_dir(
+            html_root, cfg['Timelapse']['output_dir'], printer)
 
         printer.out("DivumWX configuration complete.", level=1)
         printer.out(
