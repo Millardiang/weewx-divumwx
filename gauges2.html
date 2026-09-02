@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<!--
+##############################################################################################
+# gauges2.html version 0.0.2
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  GPLv3
+#
+#  "Range Gauges" — grey track + blue/red diverging band centred on the live value,
+#  tangential tick labels. See gaugeDiverging.js. Same gauge order as gauges.html: Temp,
+#  Wind (dual — speed ring with a smaller inset Gust ring), Wind Direction (compass),
+#  Barometer, Rainfall, Rain Rate, UV Index, Solar Radiation, Humidity, Dew Point,
+#  Air Quality, Lightning.
+##############################################################################################
+-->
+<html lang="en" data-bs-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>DivumWX Weather</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="header.css?v=s3n2026i">
+<style>
+
+:root,
+[data-bs-theme="light"]{
+  --bw-accent:#B45309;
+  --bw-accent-soft:#3A2E1A;
+  --bw-lime:#C9DA1E;
+  --bw-sky:#6FB6DD;
+  --bw-good:#5BBB8A;
+  --live-good:#39E888;
+  --bw-danger:#E36B57;
+  --bw-yellow:#D6BE4E;
+  --bw-radius:18px;
+  --bw-radius-sm:10px;
+  --bw-shadow:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.5);
+
+  --bs-body-bg: #EFECE2;
+  --bs-body-color: #1D2C4E;
+  --bs-secondary-color: #5C6672;
+  --bs-tertiary-bg: #FFFFFF;
+  --bs-secondary-bg: #FFFFFF;
+  --bs-border-color: #C9CFD8;
+  --bs-card-bg: #FFFFFF;
+  --bs-font-sans-serif:'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+[data-bs-theme="dark"]{
+  --bw-accent:#D3A94C;
+  --bw-accent-soft:#3A2E1A;
+  --bw-sky:#6FB6DD;
+  --bw-good:#5BBB8A;
+  --live-good:#39E888;
+  --bw-danger:#E36B57;
+  --bw-yellow:#D6BE4E;
+  --bw-shadow:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.5);
+
+  --bs-body-bg: #0A0F22;
+  --bs-body-color: #E9E4D4;
+  --bs-secondary-color: #8B93B8;
+  --bs-tertiary-bg: #111834;
+  --bs-secondary-bg: #111834;
+  --bs-border-color: #2A3358;
+  --bs-card-bg: #111834;
+}
+
+body{
+  font-family:var(--bs-font-sans-serif);
+  padding-bottom:48px;
+  transition:background-color .25s ease, color .25s ease;
+}
+.font-mono{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;}
+.card{background:var(--bs-card-bg); border-radius:var(--bw-radius-sm); box-shadow:var(--bw-shadow);}
+/* Seasonal accent mode — tints the card background the same way index.html's
+   dashboard does, using the same palette (kept in sync with header.css). */
+body.season-winter { --bs-card-bg: #e9f2ec; }
+[data-bs-theme="dark"] body.season-winter { --bs-card-bg: #24312a; }
+body.season-spring { --bs-card-bg: #eef7e3; }
+[data-bs-theme="dark"] body.season-spring { --bs-card-bg: #26301f; }
+body.season-summer { --bs-card-bg: #fff6d9; }
+[data-bs-theme="dark"] body.season-summer { --bs-card-bg: #332c16; }
+body.season-autumn { --bs-card-bg: #f2e6d8; }
+[data-bs-theme="dark"] body.season-autumn { --bs-card-bg: #2c2118; }
+
+.page-title{font-size:32px;font-weight:700;margin:0 0 4px;}
+.page-sub{color:var(--bs-secondary-color);font-size:15px;margin-bottom:4px;}
+.live-status-wrap{position:relative;display:inline-flex;width:8px;height:8px;flex-shrink:0;}
+#gauges2StatusDot{width:8px;height:8px;border-radius:50%;display:block;position:relative;z-index:1;}
+.live-status-ripple{
+  position:absolute;top:50%;left:50%;
+  width:8px;height:8px;margin:-4px 0 0 -4px;
+  border-radius:50%;
+  background:radial-gradient(circle, var(--live-good) 0%, var(--live-good) 35%, transparent 75%);
+  opacity:0;pointer-events:none;
+  filter:blur(.3px);
+}
+.live-status-ripple.ping{ animation: dot-ripple 1.8s cubic-bezier(.25,.6,.4,1) 1; }
+@keyframes dot-ripple{
+  0%   { width:8px;   height:8px;   margin:-4px 0 0 -4px;   opacity:.8; }
+  45%  { opacity:.45; }
+  100% { width:110px; height:110px; margin:-55px 0 0 -55px; opacity:0; }
+}
+
+.gauge-card{display:flex;flex-direction:column;align-items:center;padding:14px 10px 18px;height:100%;}
+.gauge-wrap{width:100%;max-width:360px;aspect-ratio:340/330;}
+.gauge-wrap > div{width:100%;height:100%;}
+
+footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;}
+</style>
+</head>
+<body>
+
+<div class="container-xl">
+  <div w3-include-html="navbar.html"></div>
+
+  <div class="d-flex align-items-baseline justify-content-between flex-wrap gap-2 mt-1">
+    <div>
+      <h1 class="page-title">Range Gauges</h1>
+    </div>
+    <div class="font-mono small d-flex align-items-center gap-2" style="color:var(--bs-secondary-color);">
+      <span class="live-status-wrap"><span id="gauges2StatusDot" title="Connecting…" style="background:var(--bs-secondary-color);"></span><span id="gauges2StatusRing" class="live-status-ripple"></span></span>
+      <span id="gauges2StatusLabel">CONNECTING</span> · UPDATED <span id="gauges2Clock">--:--:--</span>
+    </div>
+  </div>
+
+  <div id="gauges2Err" class="alert alert-danger mt-3" style="display:none;"></div>
+
+  <div class="row g-3 mt-1">
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="card gauge-card h-100"><div class="gauge-wrap"><div id="g2Temp"></div></div></div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="card gauge-card h-100"><div class="gauge-wrap"><div id="g2Wind"></div></div></div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="card gauge-card h-100"><div class="gauge-wrap"><div id="g2WindDir"></div></div></div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="card gauge-card h-100"><div class="gauge-wrap"><div id="g2Baro"></div></div></div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="card gauge-card h-100"><div class="gauge-wrap"><div id="g2Rain"></div></div></div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="card gauge-card h-100"><div class="gauge-wrap"><div id="g2RainRate"></div></div></div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="card gauge-card h-100"><div class="gauge-wrap"><div id="g2Uvi"></div></div></div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="card gauge-card h-100"><div class="gauge-wrap"><div id="g2Solar"></div></div></div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="card gauge-card h-100"><div class="gauge-wrap"><div id="g2Humid"></div></div></div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="card gauge-card h-100"><div class="gauge-wrap"><div id="g2Dew"></div></div></div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="card gauge-card h-100"><div class="gauge-wrap"><div id="g2Aq"></div></div></div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="card gauge-card h-100"><div class="gauge-wrap"><div id="g2Lightning"></div></div></div>
+    </div>
+  </div>
+
+  <footer class="text-center py-3">DivumWX — Range Gauges</footer>
+</div>
+
+<script src="header.js?v=s3n2026q"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="units.js"></script>
+<script src="cardSensorMap.js"></script>
+<script src="gaugeDiverging.js?v=11db3261"></script>
+<script>
+var currentSystem = (function(){
+  var stored = localStorage.getItem('dashboardUnitSystem');
+  return (stored && SYSTEMS[stored]) ? stored : 'uk';
+})();
+
+function round1(v){ return v==null ? null : Math.round(v*10)/10; }
+function round2(v){ return v==null ? null : Math.round(v*100)/100; }
+function niceMajors(min, max, steps){
+  var arr = [];
+  for(var i=0;i<=steps;i++) arr.push(min + (max-min)*i/steps);
+  return arr;
+}
+
+function tempLabel(c, unit){ return unit==='F' ? round1(C2F(c)) + '°F' : round1(c) + '°C'; }
+function tempTick(c, unit){ return (unit==='F' ? Math.round(C2F(c)) : Math.round(c)) + '°'; }
+function windLabel(ms, unit){
+  switch(unit){
+    case 'mph': return round1(ms2mph(ms)) + ' mph';
+    case 'kmh': return round1(ms2kmh(ms)) + ' km/h';
+    case 'kt':  return round1(ms2kt(ms)) + ' kt';
+    case 'bf':  return 'F' + beaufort(ms).force;
+    default:    return round1(ms) + ' m/s';
+  }
+}
+function windTick(ms, unit){
+  switch(unit){
+    case 'mph': return Math.round(ms2mph(ms));
+    case 'kmh': return Math.round(ms2kmh(ms));
+    case 'kt':  return Math.round(ms2kt(ms));
+    case 'bf':  return beaufort(ms).force;
+    default:    return Math.round(ms);
+  }
+}
+function pressureLabel(hpa, unit){
+  switch(unit){
+    case 'inhg': return round1(hpa2inhg(hpa)) + ' inHg';
+    case 'mmhg': return round1(hpa2mmhg(hpa)) + ' mmHg';
+    case 'kpa':  return round1(hpa2kpa(hpa)) + ' kPa';
+    case 'mbar': return round1(hpa) + ' mbar';
+    default:     return round1(hpa) + ' hPa';
+  }
+}
+function pressureTick(hpa, unit){
+  switch(unit){
+    case 'inhg': return Math.round(hpa2inhg(hpa)*10)/10;
+    case 'mmhg': return Math.round(hpa2mmhg(hpa));
+    case 'kpa':  return Math.round(hpa2kpa(hpa)*10)/10;
+    case 'mbar': return Math.round(hpa);
+    default:     return Math.round(hpa);
+  }
+}
+function rainLabel(mm, unit){ return unit==='in' ? round2(mm2in(mm)) + ' in' : round2(mm) + ' mm'; }
+function rainTick(mm, unit){ return unit==='in' ? Math.round(mm2in(mm)*10)/10 : Math.round(mm); }
+function rainRateLabel(mmPerHr, unit){ return unit==='in' ? round2(mm2in(mmPerHr)) + ' in/hr' : round2(mmPerHr) + ' mm/hr'; }
+function rainRateTick(mmPerHr, unit){ return unit==='in' ? Math.round(mm2in(mmPerHr)*10)/10 : Math.round(mmPerHr); }
+
+var COMPASS_16 = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+function degToCompass16(deg){
+  if(deg==null) return '--';
+  return COMPASS_16[Math.round(((deg%360)+360)%360/22.5) % 16];
+}
+
+function rainNiceMax(mm){
+  var base = 50;
+  if(mm==null || isNaN(mm) || mm <= base*0.8) return base;
+  return Math.ceil((mm+10)/10)*10;
+}
+function rainRateNiceMax(mmPerHr){
+  var base = 10;
+  if(mmPerHr==null || isNaN(mmPerHr) || mmPerHr <= base*0.8) return base;
+  return Math.ceil((mmPerHr+4)/4)*4;
+}
+function lightningNiceMax(count){
+  var base = 10;
+  if(count==null || isNaN(count) || count <= base*0.8) return base;
+  return Math.ceil((count+5)/5)*5;
+}
+
+// ===================== 1. Temperature =====================
+// Domain and tick set match the reference screenshot's temperature gauge.
+var TEMP_DOMAIN_C = [-20, 40];
+var TEMP_MAJORS_C = [-20, -10, 0, 10, 20, 30, 40];
+var TEMP_BAND_HALF_C = 8; // how far above/below the live reading the diverging band extends
+
+function domainForTemp(unit){ return unit==='F' ? TEMP_DOMAIN_C.map(C2F) : TEMP_DOMAIN_C; }
+function majorsForTemp(unit){ return unit==='F' ? TEMP_MAJORS_C.map(function(v){ return Math.round(C2F(v)); }) : TEMP_MAJORS_C; }
+function bandHalfForTemp(unit){ return unit==='F' ? TEMP_BAND_HALF_C * 9/5 : TEMP_BAND_HALF_C; }
+
+function renderOutTemp(c, dayMin, dayMax){
+  var unit = SYSTEMS[currentSystem].temp;
+  var value = c==null ? null : (unit==='F' ? C2F(c) : c);
+  GaugeDiverging.render('g2Temp', {
+    domain: domainForTemp(unit),
+    value: value,
+    bandHalfWidth: bandHalfForTemp(unit),
+    majorTicks: majorsForTemp(unit),
+    minorPerInterval: 4,
+    tickFormat: function(v){ return Math.round(v) + '°'; },
+    title: 'Outside Temperature',
+    valueText: c==null ? '--' : tempLabel(c, unit),
+    minText: dayMin==null ? null : tempLabel(dayMin, unit),
+    maxText: dayMax==null ? null : tempLabel(dayMax, unit)
+  });
+}
+
+// ===================== 2. Wind speed + gust (dual ring) =====================
+function renderWind(speedMs, gustMs){
+  var unit = SYSTEMS[currentSystem].wind;
+  var majors = [0,6,12,18,24,30,36];
+  var outerCfg = {
+    domain: [0,36], value: speedMs==null ? null : speedMs, bandHalfWidth: 6,
+    majorTicks: majors, minorPerInterval: 4,
+    tickFormat: function(v){ return String(windTick(v, unit)); },
+    title: 'Wind Speed', valueText: speedMs==null ? '--' : windLabel(speedMs, unit)
+  };
+  var innerCfg = {
+    domain: [0,36], value: gustMs==null ? null : gustMs, bandHalfWidth: 6,
+    title: 'Gust', valueText: gustMs==null ? '--' : windLabel(gustMs, unit)
+  };
+  GaugeDiverging.renderDual('g2Wind', outerCfg, innerCfg);
+}
+
+// ===================== 3. Wind direction (compass) =====================
+// Note: the station doesn't report a separate "gust direction" — only current heading
+// (windDir) and a 10-minute average (windDir10). The inset ring uses the 10-min average
+// rather than inventing a gust-direction figure that doesn't exist in the data.
+function renderWindDir(dirNow, dir10){
+  var outerCfg = {
+    value: dirNow, bandHalfDeg: 130,
+    title: 'Wind Direction',
+    valueText: dirNow==null ? '--' : (degToCompass16(dirNow) + ' / ' + Math.round(dirNow) + '°')
+  };
+  var innerCfg = {
+    value: dir10, bandHalfDeg: 130,
+    title: '10-min Avg',
+    valueText: dir10==null ? '--' : (degToCompass16(dir10) + ' / ' + Math.round(dir10) + '°')
+  };
+  GaugeDiverging.renderCompassDual('g2WindDir', outerCfg, innerCfg);
+}
+
+// ===================== 4. Barometer =====================
+function renderBaro(current, dayMin, dayMax){
+  var unit = SYSTEMS[currentSystem].pressure;
+  GaugeDiverging.render('g2Baro', {
+    domain: [940,1060], value: current, bandHalfWidth: 15,
+    majorTicks: [940,960,980,1000,1020,1040,1060], minorPerInterval: 4,
+    tickFormat: function(v){ return String(pressureTick(v, unit)); },
+    title: 'Barometer', valueText: current==null ? '--' : pressureLabel(current, unit),
+    minText: dayMin==null ? null : pressureLabel(dayMin, unit),
+    maxText: dayMax==null ? null : pressureLabel(dayMax, unit)
+  });
+}
+
+// ===================== 5. Rainfall (day total) =====================
+function renderRain(dayMm){
+  var unit = SYSTEMS[currentSystem].rain;
+  var max = rainNiceMax(dayMm);
+  GaugeDiverging.render('g2Rain', {
+    domain: [0,max], value: dayMm==null ? 0 : dayMm, bandHalfWidth: max*0.15,
+    majorTicks: niceMajors(0,max,5), minorPerInterval: 4,
+    tickFormat: function(v){ return String(rainTick(v, unit)); },
+    title: 'Rainfall', valueText: rainLabel(dayMm==null ? 0 : dayMm, unit)
+  });
+}
+
+// ===================== 6. Rain rate =====================
+function renderRainRate(rate){
+  var unit = SYSTEMS[currentSystem].rain;
+  var max = rainRateNiceMax(rate);
+  GaugeDiverging.render('g2RainRate', {
+    domain: [0,max], value: rate==null ? 0 : rate, bandHalfWidth: max*0.2,
+    majorTicks: niceMajors(0,max,4), minorPerInterval: 4,
+    tickFormat: function(v){ return String(rainRateTick(v, unit)); },
+    title: 'Rain Rate', valueText: rainRateLabel(rate==null ? 0 : rate, unit)
+  });
+}
+
+// ===================== 7. UV Index =====================
+function renderUvi(uv){
+  GaugeDiverging.render('g2Uvi', {
+    domain: [0,14], value: uv==null ? 0 : uv, bandHalfWidth: 3,
+    majorTicks: niceMajors(0,14,7), minorPerInterval: 1,
+    tickFormat: function(v){ return String(Math.round(v)); },
+    title: 'UV Index', valueText: (uv==null ? 0 : uv).toFixed(1)
+  });
+}
+
+// ===================== 8. Solar radiation =====================
+function renderSolar(radiation){
+  GaugeDiverging.render('g2Solar', {
+    domain: [0,1200], value: radiation==null ? 0 : radiation, bandHalfWidth: 150,
+    majorTicks: niceMajors(0,1200,6), minorPerInterval: 3,
+    tickFormat: function(v){ return String(Math.round(v)); },
+    title: 'Solar Radiation', valueText: (radiation==null ? 0 : Math.round(radiation)) + ' W/m²'
+  });
+}
+
+// ===================== 9. Humidity =====================
+function renderHumid(pct, dayMin, dayMax){
+  GaugeDiverging.render('g2Humid', {
+    domain: [0,100], value: pct==null ? 0 : pct, bandHalfWidth: 15,
+    majorTicks: niceMajors(0,100,5), minorPerInterval: 3,
+    tickFormat: function(v){ return Math.round(v) + '%'; },
+    title: 'Humidity', valueText: (pct==null ? 0 : pct).toFixed(1) + '%',
+    minText: dayMin==null ? null : round1(dayMin) + '%',
+    maxText: dayMax==null ? null : round1(dayMax) + '%'
+  });
+}
+
+// ===================== 10. Dew point =====================
+var DEW_DOMAIN_C = [-10, 30];
+var DEW_MAJORS_C = [-10, 0, 10, 20, 30];
+function renderDew(c, dayMin, dayMax){
+  var unit = SYSTEMS[currentSystem].temp;
+  var domain = unit==='F' ? DEW_DOMAIN_C.map(C2F) : DEW_DOMAIN_C;
+  var majors = unit==='F' ? DEW_MAJORS_C.map(function(v){ return Math.round(C2F(v)); }) : DEW_MAJORS_C;
+  var value = c==null ? null : (unit==='F' ? C2F(c) : c);
+  GaugeDiverging.render('g2Dew', {
+    domain: domain, value: value, bandHalfWidth: unit==='F' ? 14 : 8,
+    majorTicks: majors, minorPerInterval: 4,
+    tickFormat: function(v){ return Math.round(v) + '°'; },
+    title: 'Dew Point', valueText: c==null ? '--' : tempLabel(c, unit),
+    minText: dayMin==null ? null : tempLabel(dayMin, unit),
+    maxText: dayMax==null ? null : tempLabel(dayMax, unit)
+  });
+}
+
+// ===================== 11. Air quality =====================
+function renderAq(aqi){
+  GaugeDiverging.render('g2Aq', {
+    domain: [0,200], value: aqi==null ? 0 : aqi, bandHalfWidth: 30,
+    majorTicks: niceMajors(0,200,4), minorPerInterval: 4,
+    tickFormat: function(v){ return String(Math.round(v)); },
+    title: 'Air Quality', valueText: String(aqi==null ? 0 : Math.round(aqi))
+  });
+}
+
+// ===================== 12. Lightning =====================
+function renderLightning(count){
+  var max = lightningNiceMax(count);
+  GaugeDiverging.render('g2Lightning', {
+    domain: [0,max], value: count==null ? 0 : count, bandHalfWidth: max*0.2,
+    majorTicks: niceMajors(0,max,5), minorPerInterval: 1,
+    tickFormat: function(v){ return String(Math.round(v)); },
+    title: 'Lightning Strike Count', valueText: count==null ? 'None' : String(Math.round(count))
+  });
+}
+
+function renderAll(){
+  [
+    function(){ renderOutTemp(liveValues.outTemp, liveValues.tempDayMin, liveValues.tempDayMax); },
+    function(){ renderWind(liveValues.windSpeed, liveValues.windGust); },
+    function(){ renderWindDir(liveValues.windDir, liveValues.windDir10); },
+    function(){ renderBaro(liveValues.barometer, liveValues.baroDayMin, liveValues.baroDayMax); },
+    function(){ renderRain(liveValues.dayRain); },
+    function(){ renderRainRate(liveValues.rainRate); },
+    function(){ renderUvi(liveValues.uv); },
+    function(){ renderSolar(liveValues.radiation); },
+    function(){ renderHumid(liveValues.outHumidity, liveValues.humidDayMin, liveValues.humidDayMax); },
+    function(){ renderDew(liveValues.dewpoint, liveValues.dewDayMin, liveValues.dewDayMax); },
+    function(){ renderAq(liveValues.aqi); },
+    function(){ renderLightning(liveValues.lightningCount); }
+  ].forEach(function(fn){
+    try { fn(); } catch(e){ console.warn('gauges2: a gauge failed to render —', e.message); }
+  });
+}
+
+var LOOP_JSON_URL = './jsondata/loop.json';
+var ARCHIVE_JSON_URL = './jsondata/archive.json';
+var LOOP_POLL_MS = 15 * 1000;
+var ARCHIVE_POLL_MS = 60 * 1000;
+
+// Card-visibility filtering (see cardSensorMap.js). Same reasoning and
+// same rain/prain OR-case as gauges.html's GAUGE_BASES -- kept in sync
+// with that file's mapping since this page mirrors its gauge set exactly
+// (same order, g2 prefix instead of g).
+var GAUGE_BASES = {
+  g2Temp: ['outTemp'],
+  g2Wind: ['windSpeed', 'windGust'],
+  g2WindDir: ['windDir'],
+  g2Baro: ['barom'],
+  g2Rain: ['rain', 'prain'],
+  g2RainRate: ['rain', 'prain'],
+  g2Uvi: ['uv'],
+  g2Solar: ['solar', 'solarRadiation'],
+  g2Humid: ['outHumid'],
+  g2Dew: ['outDew'],
+  g2Aq: ['pm1_0', 'pm2_5', 'pm4_0', 'pm10_0'],
+  g2Lightning: ['lightCount', 'lightDist'],
+};
+var ENABLED_CARDS = null; // null = unknown yet / fetch failed -- fail open
+
+function applyGaugeVisibility(){
+  Object.keys(GAUGE_BASES).forEach(function(gaugeId){
+    var mount = document.getElementById(gaugeId);
+    if (!mount) return;
+    var wrap = mount.closest('.col-12');
+    if (!wrap) return;
+    var bases = GAUGE_BASES[gaugeId];
+    var show = bases.some(function(base){ return isBaseCardEnabled(base, ENABLED_CARDS); });
+    wrap.classList.toggle('d-none', !show);
+  });
+}
+
+var liveValues = {
+  outTemp:null, tempDayMin:null, tempDayMax:null,
+  windSpeed:null, windGust:null, windDir:null, windDir10:null,
+  barometer:null, baroDayMin:null, baroDayMax:null,
+  dayRain:null, rainRate:null, uv:null, radiation:null,
+  outHumidity:null, humidDayMin:null, humidDayMax:null,
+  dewpoint:null, dewDayMin:null, dewDayMax:null,
+  aqi:null, lightningCount:null
+};
+
+function setGauges2Status(status){
+  var dot = document.getElementById('gauges2StatusDot');
+  var label = document.getElementById('gauges2StatusLabel');
+  if(status==='live'){ dot.style.background = 'var(--bw-good)'; label.textContent = 'LIVE'; pulseStatusDot(); }
+  else if(status==='stale'){ dot.style.background = 'var(--bw-accent)'; label.textContent = 'LIVE (stale)'; }
+  else if(status==='error'){ dot.style.background = 'var(--bw-danger)'; label.textContent = 'OFFLINE'; }
+  else { dot.style.background = 'var(--bs-secondary-color)'; label.textContent = 'CONNECTING'; }
+}
+
+function pulseStatusDot(){
+  var ring = document.getElementById('gauges2StatusRing');
+  if(!ring) return;
+  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  ring.classList.remove('ping');
+  void ring.offsetWidth;
+  ring.classList.add('ping');
+}
+
+function pollLoop(){
+  fetch(LOOP_JSON_URL + ((LOOP_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'})
+    .then(function(res){ if(!res.ok) throw new Error('HTTP '+res.status); return res.json(); })
+    .then(function(j){
+      var o = j.observations || {};
+      liveValues.outTemp = o.outTemp ?? null;
+      liveValues.windSpeed = o.windSpeed ?? null;
+      liveValues.windGust = o.windGust ?? null;
+      liveValues.windDir = o.windDir ?? null;
+      liveValues.windDir10 = o.windDir10 ?? null;
+      liveValues.barometer = o.barometer ?? null;
+      if(o.dayRain != null) liveValues.dayRain = o.dayRain;
+      liveValues.rainRate = o.rainRate ?? null;
+      liveValues.uv = o.UV ?? null;
+      liveValues.radiation = o.radiation ?? null;
+      liveValues.outHumidity = o.outHumidity ?? null;
+      liveValues.dewpoint = o.dewpoint ?? null;
+      liveValues.aqi = o.pm25_RealAQI_co2 ?? null;
+      liveValues.lightningCount = o.lightning_strike_count ?? null;
+      if(o.isDay != null) lastIsDay = o.isDay;
+
+      document.getElementById('gauges2Clock').textContent = new Date().toLocaleTimeString('en-GB', {hour12:false});
+      setGauges2Status('live');
+      document.getElementById('gauges2Err').style.display = 'none';
+      if(themeMode==='auto') applyTheme(); else renderAll();
+    })
+    .catch(function(e){
+      console.warn('SǢL gauges2: loop.json poll failed —', e.message);
+      setGauges2Status(liveValues.outTemp!=null ? 'stale' : 'error');
+      var errEl = document.getElementById('gauges2Err');
+      errEl.textContent = 'Live data unavailable: ' + e.message;
+      errEl.style.display = '';
+      renderAll();
+    });
+}
+
+function pollArchive(){
+  fetch(ARCHIVE_JSON_URL + ((ARCHIVE_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'})
+    .then(function(res){ if(!res.ok) throw new Error('HTTP '+res.status); return res.json(); })
+    .then(function(j){
+      liveValues.tempDayMin = (j.temp && j.temp.day_min != null) ? j.temp.day_min : null;
+      liveValues.tempDayMax = (j.temp && j.temp.day_max != null) ? j.temp.day_max : null;
+      liveValues.baroDayMin = (j.barom && j.barom.day_min != null) ? j.barom.day_min : null;
+      liveValues.baroDayMax = (j.barom && j.barom.day_max != null) ? j.barom.day_max : null;
+      liveValues.humidDayMin = (j.humid && j.humid.day_min != null) ? j.humid.day_min : null;
+      liveValues.humidDayMax = (j.humid && j.humid.day_max != null) ? j.humid.day_max : null;
+      liveValues.dewDayMin = (j.dew && j.dew.day_min != null) ? j.dew.day_min : null;
+      liveValues.dewDayMax = (j.dew && j.dew.day_max != null) ? j.dew.day_max : null;
+      if(j.rain && j.rain.day != null) liveValues.dayRain = j.rain.day;
+      var cards = j.meta && j.meta.enabled_cards;
+      if (Array.isArray(cards) && cards.length) {
+        ENABLED_CARDS = cards;
+        applyGaugeVisibility();
+      }
+      renderAll();
+    })
+    .catch(function(e){
+      console.warn('SǢL gauges2: archive.json poll failed —', e.message);
+    });
+}
+
+function includeHTML(callback){
+  var elements = document.querySelectorAll('[w3-include-html]');
+  var pending = elements.length;
+  if(pending === 0){ if(callback) callback(); return; }
+  elements.forEach(function(el){
+    var file = el.getAttribute('w3-include-html');
+    fetch(file, {cache:'no-store'})
+      .then(function(res){ if(!res.ok) throw new Error('HTTP '+res.status); return res.text(); })
+      .then(function(html){ el.innerHTML = html; el.removeAttribute('w3-include-html'); })
+      .catch(function(e){ console.warn('SǢL gauges2: include failed for', file, '—', e.message); el.innerHTML = ''; })
+      .finally(function(){ pending--; if(pending === 0 && callback) callback(); });
+  });
+}
+
+function setStationTitle(){
+  fetch(ARCHIVE_JSON_URL + ((ARCHIVE_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'})
+    .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    .then(function(data){
+      var loc = data && data.meta && data.meta.station_location;
+      var el = document.querySelector('.brand-text');
+      if(loc && el) el.textContent = loc;
+    })
+    .catch(function(e){ console.warn('SǢL gauges2: station_location fetch failed —', e.message); });
+}
+
+var root = document.documentElement;
+var themeMode = localStorage.getItem('dashboardThemeMode') || 'auto';
+var lastIsDay = null;
+
+var THEME_ICONS = { auto: '\u{1F313}', light: '\u2600\uFE0F', dark: '\u{1F319}' };
+var THEME_ORDER = ['dark', 'light', 'auto'];
+if (!THEME_ORDER.includes(themeMode)) themeMode = 'dark';
+var currentSeason = null;
+function resolveAutoIsDay(){
+  if(lastIsDay != null) return !!lastIsDay;
+  return !window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+function resolveTheme(){
+  // Seasonal is a fixed standalone theme, never affected by day/night auto-switching.
+  if (themeMode === 'seasonal') return 'light';
+  return themeMode==='light' ? 'light' : themeMode==='dark' ? 'dark' : (resolveAutoIsDay() ? 'light' : 'dark');
+}
+function applyTheme(){
+  root.setAttribute('data-bs-theme', resolveTheme());
+  currentSeason = applySeasonClass(themeMode);
+  syncThemeNavUI();
+  renderAll();
+}
+function syncThemeNavUI(){
+  var btn = document.getElementById('themeToggle');
+  if(!btn) return;
+  var resolved = resolveTheme();
+  if (themeMode === 'seasonal') {
+    btn.textContent = SEASON_ICONS[currentSeason];
+    btn.title = 'Seasonal (' + seasonLabel(currentSeason) + ')';
+  } else {
+    btn.textContent = THEME_ICONS[themeMode];
+    btn.title = themeMode === 'auto' ? ('Auto (currently ' + resolved + ')') : (themeMode.charAt(0).toUpperCase() + themeMode.slice(1));
+  }
+}
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(){
+  if(themeMode==='auto') applyTheme();
+});
+
+window.addEventListener('storage', function(e){
+  if(e.key === 'dashboardThemeMode'){
+    themeMode = e.newValue || 'auto';
+    applyTheme();
+  }
+  if(e.key === 'dashboardUnitSystem'){
+    currentSystem = (e.newValue && SYSTEMS[e.newValue]) ? e.newValue : 'uk';
+    var unitSelect = document.getElementById('unitSystem');
+    if(unitSelect) unitSelect.value = currentSystem;
+    renderAll();
+  }
+});
+
+applyTheme();
+
+setGauges2Status('connecting');
+try { renderAll(); } catch(e){ console.warn('gauges2: renderAll failed —', e.message); }
+try { pollArchive(); } catch(e){ console.warn('gauges2: pollArchive failed —', e.message); }
+setInterval(pollArchive, ARCHIVE_POLL_MS);
+try { pollLoop(); } catch(e){ console.warn('gauges2: pollLoop failed —', e.message); }
+setInterval(pollLoop, LOOP_POLL_MS);
+
+includeHTML(function(){
+  initSharedHeader();
+  setStationTitle();
+  var unitSelect = document.getElementById('unitSystem');
+  if(unitSelect){
+    unitSelect.value = currentSystem;
+    unitSelect.addEventListener('change', function(e){
+      currentSystem = e.target.value;
+      localStorage.setItem('dashboardUnitSystem', currentSystem);
+      renderAll();
+    });
+  }
+  var themeBtn = document.getElementById('themeToggle');
+  if(themeBtn){
+    themeBtn.addEventListener('click', function(){
+      themeMode = THEME_ORDER[(THEME_ORDER.indexOf(themeMode) + 1) % THEME_ORDER.length];
+      localStorage.setItem('dashboardThemeMode', themeMode);
+      applyTheme();
+    });
+  }
+  syncThemeNavUI();
+});
+</script>
+</body>
+</html>

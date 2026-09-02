@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<!--
+##############################################################################################
+# gauges.html version 0.0.1
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  GPLv3
+##############################################################################################
+-->
+<html lang="en" data-bs-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>DivumWX Weather</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="header.css?v=s3n2026i">
+<style>
+
+:root,
+[data-bs-theme="light"]{
+  --bw-accent:#B45309;
+  --bw-accent-soft:#3A2E1A;
+  --bw-lime:#C9DA1E;
+  --bw-sky:#6FB6DD;
+  --bw-good:#5BBB8A;
+  --live-good:#39E888;
+  --bw-danger:#E36B57;
+  --bw-yellow:#D6BE4E;
+  --bw-radius:18px;
+  --bw-radius-sm:10px;
+  --bw-shadow:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.5);
+
+  --bs-body-bg: #EFECE2;
+  --bs-body-color: #1D2C4E;
+  --bs-secondary-color: #5C6672;
+  --bs-tertiary-bg: #FFFFFF;
+  --bs-secondary-bg: #FFFFFF;
+  --bs-border-color: #C9CFD8;
+  --bs-card-bg: #FFFFFF;
+  --bs-font-sans-serif:'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+[data-bs-theme="dark"]{
+  --bw-accent:#D3A94C;
+  --bw-accent-soft:#3A2E1A;
+  --bw-sky:#6FB6DD;
+  --bw-good:#5BBB8A;
+  --live-good:#39E888;
+  --bw-danger:#E36B57;
+  --bw-yellow:#D6BE4E;
+  --bw-shadow:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.5);
+
+  --bs-body-bg: #0A0F22;
+  --bs-body-color: #E9E4D4;
+  --bs-secondary-color: #8B93B8;
+  --bs-tertiary-bg: #111834;
+  --bs-secondary-bg: #111834;
+  --bs-border-color: #2A3358;
+  --bs-card-bg: #111834;
+}
+
+body{
+  font-family:var(--bs-font-sans-serif);
+  padding-bottom:48px;
+  transition:background-color .25s ease, color .25s ease;
+}
+.font-mono{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;}
+.card{background:var(--bs-card-bg); border-radius:var(--bw-radius-sm); box-shadow:var(--bw-shadow);}
+/* Seasonal accent mode — tints the card background the same way index.html's
+   dashboard does, using the same palette (kept in sync with header.css). */
+body.season-winter { --bs-card-bg: #e9f2ec; }
+[data-bs-theme="dark"] body.season-winter { --bs-card-bg: #24312a; }
+body.season-spring { --bs-card-bg: #eef7e3; }
+[data-bs-theme="dark"] body.season-spring { --bs-card-bg: #26301f; }
+body.season-summer { --bs-card-bg: #fff6d9; }
+[data-bs-theme="dark"] body.season-summer { --bs-card-bg: #332c16; }
+body.season-autumn { --bs-card-bg: #f2e6d8; }
+[data-bs-theme="dark"] body.season-autumn { --bs-card-bg: #2c2118; }
+
+/* ---------- Top bar ---------- */
+
+.page-title{font-size:32px;font-weight:700;margin:0 0 4px;}
+.page-sub{color:var(--bs-secondary-color);font-size:15px;margin-bottom:4px;}
+.live-status-wrap{position:relative;display:inline-flex;width:8px;height:8px;flex-shrink:0;}
+#gaugesStatusDot{width:8px;height:8px;border-radius:50%;display:block;position:relative;z-index:1;}
+.live-status-ripple{
+  position:absolute;top:50%;left:50%;
+  width:8px;height:8px;margin:-4px 0 0 -4px;
+  border-radius:50%;
+  background:radial-gradient(circle, var(--live-good) 0%, var(--live-good) 35%, transparent 75%);
+  opacity:0;pointer-events:none;
+  filter:blur(.3px);
+}
+.live-status-ripple.ping{ animation: dot-ripple 1.8s cubic-bezier(.25,.6,.4,1) 1; }
+@keyframes dot-ripple{
+  0%   { width:8px;   height:8px;   margin:-4px 0 0 -4px;   opacity:.8; }
+  45%  { opacity:.45; }
+  100% { width:110px; height:110px; margin:-55px 0 0 -55px; opacity:0; }
+}
+
+/* ---------- Gauge cards ---------- */
+.gauge-card{display:flex;flex-direction:column;align-items:center;padding:14px 10px 18px;height:100%;}
+.gauge-wrap{width:100%;max-width:330px;aspect-ratio:330/322;}
+.gauge-wrap > div{width:100%;height:100%;}
+
+footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;}
+</style>
+</head>
+<body>
+
+<div class="container-xl">
+  <div w3-include-html="navbar.html"></div>
+
+  <div class="d-flex align-items-baseline justify-content-between flex-wrap gap-2 mt-1">
+    <div>
+      <h1 class="page-title">Live Gauges</h1>
+    </div>
+    <div class="font-mono small d-flex align-items-center gap-2" style="color:var(--bs-secondary-color);">
+      <span class="live-status-wrap"><span id="gaugesStatusDot" title="Connecting…" style="background:var(--bs-secondary-color);"></span><span id="gaugesStatusRing" class="live-status-ripple"></span></span>
+      <span id="gaugesStatusLabel">CONNECTING</span> · UPDATED <span id="gaugesClock">--:--:--</span>
+    </div>
+  </div>
+
+  <div id="gaugesErr" class="alert alert-danger mt-3" style="display:none;"></div>
+
+  <div class="row g-3 mt-1">
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="card gauge-card h-100"><div class="gauge-wrap"><div id="gTemp"></div></div></div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="card gauge-card h-100"><div class="gauge-wrap"><div id="gWind"></div></div></div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="card gauge-card h-100"><div class="gauge-wrap"><div id="gWindDir"></div></div></div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="card gauge-card h-100"><div class="gauge-wrap"><div id="gBaro"></div></div></div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="card gauge-card h-100"><div class="gauge-wrap"><div id="gRain"></div></div></div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="card gauge-card h-100"><div class="gauge-wrap"><div id="gRainRate"></div></div></div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="card gauge-card h-100"><div class="gauge-wrap"><div id="gUvi"></div></div></div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="card gauge-card h-100"><div class="gauge-wrap"><div id="gSolar"></div></div></div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="card gauge-card h-100"><div class="gauge-wrap"><div id="gHumid"></div></div></div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="card gauge-card h-100"><div class="gauge-wrap"><div id="gDew"></div></div></div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="card gauge-card h-100"><div class="gauge-wrap"><div id="gAq"></div></div></div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="card gauge-card h-100"><div class="gauge-wrap"><div id="gLightning"></div></div></div>
+    </div>
+  </div>
+
+  <footer class="text-center py-3">DivumWX — Gauges</footer>
+</div>
+
+<script src="header.js?v=s3n2026q"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="units.js"></script>
+<script src="cardSensorMap.js"></script>
+<script src="iopctrl.js"></script>
+<script>
+var currentSystem = (function(){
+  var stored = localStorage.getItem('dashboardUnitSystem');
+  return (stored && SYSTEMS[stored]) ? stored : 'uk';
+})();
+
+function round1(v){ return v==null ? null : Math.round(v*10)/10; }
+function round2(v){ return v==null ? null : Math.round(v*100)/100; }
+
+function tempLabel(c, unit){ return unit==='F' ? round1(C2F(c)) + '°F' : round1(c) + '°C'; }
+function tempTick(c, unit){ return unit==='F' ? Math.round(C2F(c)) : Math.round(c); }
+function windLabel(ms, unit){
+  switch(unit){
+    case 'mph': return round1(ms2mph(ms)) + ' mph';
+    case 'kmh': return round1(ms2kmh(ms)) + ' km/h';
+    case 'kt':  return round1(ms2kt(ms)) + ' kt';
+    case 'bf':  return 'F' + beaufort(ms).force;
+    default:    return round1(ms) + ' m/s';
+  }
+}
+function windTick(ms, unit){
+  switch(unit){
+    case 'mph': return Math.round(ms2mph(ms));
+    case 'kmh': return Math.round(ms2kmh(ms));
+    case 'kt':  return Math.round(ms2kt(ms));
+    case 'bf':  return beaufort(ms).force;
+    default:    return ms;
+  }
+}
+function pressureLabel(hpa, unit){
+  switch(unit){
+    case 'inhg': return round1(hpa2inhg(hpa)) + ' inHg';
+    case 'mmhg': return round1(hpa2mmhg(hpa)) + ' mmHg';
+    case 'kpa':  return round1(hpa2kpa(hpa)) + ' kPa';
+    case 'mbar': return round1(hpa) + ' mbar';
+    default:     return round1(hpa) + ' hPa';
+  }
+}
+function pressureTick(hpa, unit){
+  switch(unit){
+    case 'inhg': return Math.round(hpa2inhg(hpa)*10)/10;
+    case 'mmhg': return Math.round(hpa2mmhg(hpa));
+    case 'kpa':  return Math.round(hpa2kpa(hpa)*10)/10;
+    case 'mbar': return Math.round(hpa);
+    default:     return Math.round(hpa);
+  }
+}
+function rainLabel(mm, unit){ return unit==='in' ? round2(mm2in(mm)) + ' in' : round2(mm) + ' mm'; }
+function rainTick(mm, unit){ return unit==='in' ? Math.round(mm2in(mm)*10)/10 : Math.round(mm); }
+function rainRateLabel(mmPerHr, unit){ return unit==='in' ? round2(mm2in(mmPerHr)) + ' in/hr' : round2(mmPerHr) + ' mm/hr'; }
+function rainRateTick(mmPerHr, unit){ return unit==='in' ? Math.round(mm2in(mmPerHr)*10)/10 : Math.round(mmPerHr); }
+function distLabel(km, unit){
+  switch(unit){
+    case 'mi': return round1(km2mi(km)) + ' mi';
+    case 'nm': return round1(km2nm(km)) + ' nm';
+    default:   return round1(km) + ' km';
+  }
+}
+function distTick(km, unit){
+  switch(unit){
+    case 'mi': return Math.round(km2mi(km)*10)/10;
+    case 'nm': return Math.round(km2nm(km)*10)/10;
+    default:   return Math.round(km*10)/10;
+  }
+}
+
+function chromeColors(){
+  var cs = getComputedStyle(document.documentElement);
+  return {
+    tick: (cs.getPropertyValue('--bs-secondary-color') || '#5b6472').trim(),
+    label: (cs.getPropertyValue('--bs-body-color') || '#222').trim()
+  };
+}
+
+var TEMP_COLOR_STOPS = [
+  [-10, [91,127,227]], [0, [79,168,208]], [10, [79,184,155]], [18, [111,184,90]],
+  [24, [201,178,62]], [30, [224,138,61]], [36, [216,90,61]], [42, [184,48,42]]
+];
+function tempColor(c){
+  if(c==null) return '#8c9a95';
+  var stops = TEMP_COLOR_STOPS;
+  if(c <= stops[0][0]){ var s=stops[0][1]; return 'rgb('+s[0]+','+s[1]+','+s[2]+')'; }
+  if(c >= stops[stops.length-1][0]){ var e=stops[stops.length-1][1]; return 'rgb('+e[0]+','+e[1]+','+e[2]+')'; }
+  for(var i=0;i<stops.length-1;i++){
+    var t0=stops[i][0], c0=stops[i][1], t1=stops[i+1][0], c1=stops[i+1][1];
+    if(c>=t0 && c<=t1){
+      var f=(c-t0)/(t1-t0);
+      var r=Math.round(c0[0]+(c1[0]-c0[0])*f), g=Math.round(c0[1]+(c1[1]-c0[1])*f), b=Math.round(c0[2]+(c1[2]-c0[2])*f);
+      return 'rgb('+r+','+g+','+b+')';
+    }
+  }
+}
+
+var RG_SIZE = 280;
+var RG_HEIGHT = RG_SIZE * 1.15;
+var RG_LABEL_MARGIN = 25;
+var RG_VIEW_WIDTH = RG_SIZE + RG_LABEL_MARGIN * 2;
+var RG_CX = RG_VIEW_WIDTH / 2, RG_CY = RG_HEIGHT * 0.58;
+var RG_R = RG_SIZE * 0.45;
+var RG_RING_W = 18;
+var RG_START_DEG = 225, RG_END_DEG = 225 + 270;
+
+function rgDeg2rad(deg){ return deg * Math.PI / 180; }
+function rgScale(min, max){
+  return d3.scaleLinear().domain([min, max]).range([rgDeg2rad(RG_START_DEG), rgDeg2rad(RG_END_DEG)]);
+}
+
+var rgInstances = {};
+
+function rgEnsure(id, dual){
+  var existing = rgInstances[id];
+  if(existing) return existing;
+  var wrap = document.getElementById(id);
+  if(!wrap || typeof d3 === 'undefined') return null;
+  var svg = d3.select(wrap).append('svg')
+    .attr('viewBox', '0 0 ' + RG_VIEW_WIDTH + ' ' + RG_HEIGHT)
+    .style('width', '100%').style('height', '100%').style('display', 'block');
+  var root = svg.append('g').attr('transform', 'translate(' + RG_CX + ',' + RG_CY + ')');
+
+  var inst = {
+    svg: svg, root: root,
+    ringG: root.append('g').attr('class', 'rg-ring'),
+    progressG: root.append('g').attr('class', 'rg-progress'),
+    axisG: root.append('g').attr('class', 'rg-axis'),
+    needleG: root.append('g').attr('class', 'rg-needle'),
+    anchor: root.append('circle').attr('class', 'rg-anchor'),
+    topLabelText: svg.append('text').attr('class', 'rg-toplabel').attr('text-anchor', 'middle').attr('dy', '.35em')
+      .attr('x', RG_CX).attr('y', RG_CY - (RG_R + 42)),
+    titleText: root.append('text').attr('class', 'rg-title').attr('text-anchor', 'middle').attr('dy', '.35em'),
+    detailText: root.append('text').attr('class', 'rg-detail').attr('text-anchor', 'middle').attr('dy', '.35em'),
+    angle: rgDeg2rad(RG_START_DEG)
+  };
+  inst.needleG.append('path').attr('class', 'rg-needle-shape');
+
+  if(dual){
+    inst.needleG2 = root.append('g').attr('class', 'rg-needle2');
+    inst.needleG2.append('path').attr('class', 'rg-needle-shape');
+    inst.anchor2 = root.append('circle').attr('class', 'rg-anchor2');
+    inst.title2Text = root.append('text').attr('class', 'rg-title2').attr('text-anchor', 'middle').attr('dy', '.35em');
+    inst.detail2Text = root.append('text').attr('class', 'rg-detail2').attr('text-anchor', 'middle').attr('dy', '.35em');
+    inst.angle2 = rgDeg2rad(RG_START_DEG);
+  }
+  rgInstances[id] = inst;
+  return inst;
+}
+
+function rgArcTween(arcGen){
+  return function(d){
+    var node = this;
+    var prev = node.__rgPrev || { innerRadius: d.innerRadius, outerRadius: d.outerRadius, startAngle: d.startAngle, endAngle: d.startAngle };
+    var interp = d3.interpolate(prev, d);
+    node.__rgPrev = d;
+    return function(t){ return arcGen(interp(t)); };
+  };
+}
+
+function rgNeedlePath(length, width){
+  var hw = width / 2;
+  return 'M' + (-hw) + ',0 L0,' + (-length) + ' L' + hw + ',0 Z';
+}
+
+function rgRotateTo(group, angleField, inst, targetRad, dur){
+  var fromRad = inst[angleField];
+  group.transition().duration(dur).ease(d3.easeCubicOut)
+    .attrTween('transform', function(){
+      var interp = d3.interpolateNumber(fromRad, targetRad);
+      return function(t){ return 'rotate(' + (interp(t) * 180 / Math.PI) + ')'; };
+    })
+    .on('end', function(){ inst[angleField] = targetRad; });
+}
+
+function renderRadialGauge(id, cfg){
+  var inst = rgEnsure(id, !!cfg.dual);
+  if(!inst) return;
+  var cc = chromeColors();
+  var scale = rgScale(cfg.min, cfg.max);
+  var span = rgDeg2rad(RG_END_DEG) - rgDeg2rad(RG_START_DEG);
+
+  // ---- Ring ----
+  if(cfg.ring){
+    var gen = d3.arc().innerRadius(RG_R - RG_RING_W).outerRadius(RG_R);
+    var prevFrac = 0, segs = [];
+    cfg.ring.forEach(function(st){
+      segs.push({ a0: rgDeg2rad(RG_START_DEG) + prevFrac * span, a1: rgDeg2rad(RG_START_DEG) + st[0] * span, color: st[1] });
+      prevFrac = st[0];
+    });
+    inst.ringG.selectAll('path').data(segs).join('path')
+      .attr('d', function(d){ return gen({ startAngle: d.a0, endAngle: d.a1 }); })
+      .attr('fill', function(d){ return d.color; });
+  } else if(cfg.ringColor){
+    var gen2 = d3.arc().innerRadius(RG_R - RG_RING_W).outerRadius(RG_R)
+      .startAngle(rgDeg2rad(RG_START_DEG)).endAngle(rgDeg2rad(RG_END_DEG));
+    inst.ringG.selectAll('path').data([0]).join('path').attr('d', gen2()).attr('fill', cfg.ringColor);
+  } else if(cfg.ringGradient){
+    var genG = d3.arc().innerRadius(RG_R - RG_RING_W).outerRadius(RG_R);
+    var N = 48;
+    var interpColor = d3.interpolateRgb(cfg.ringGradient[0], cfg.ringGradient[1]);
+    var segsG = d3.range(N).map(function(gi){
+      return {
+        a0: rgDeg2rad(RG_START_DEG) + (gi / N) * span,
+        a1: rgDeg2rad(RG_START_DEG) + ((gi + 1) / N) * span,
+        color: interpColor(gi / (N - 1))
+      };
+    });
+    inst.ringG.selectAll('path').data(segsG).join('path')
+      .attr('d', function(d){ return genG({ startAngle: d.a0, endAngle: d.a1 }); })
+      .attr('fill', function(d){ return d.color; });
+  }
+
+  // ---- Ticks + labels (iopctrl.arcaxis) ----
+  var axis = iopctrl.arcaxis().scale(scale).outerRadius(RG_R).tickPadding(25)
+    .ticks(cfg.splitNumber || 5).tickSubdivide(cfg.subTicks != null ? cfg.subTicks : 4)
+    .tickFormat(cfg.tickFormat || null).orient('out');
+  inst.axisG.call(axis);
+  inst.axisG.selectAll('.tick.major line, line.tick.minor').attr('stroke', cc.tick);
+  inst.axisG.selectAll('.tick.major text').attr('fill', cc.label).style('font-size', (cfg.tickFontSize || 11) + 'px');
+  inst.axisG.select('path.domain').attr('fill', 'none').attr('stroke', 'none');
+
+  var value = cfg.value == null ? cfg.min : cfg.value;
+  var targetAngle = scale(value);
+
+  // ---- Progress fill (Temperature / Rainfall) ----
+  if(cfg.progress){
+    var pgen = d3.arc().innerRadius(RG_R - RG_RING_W).outerRadius(RG_R);
+    inst.progressG.selectAll('path').data([0]).join('path').attr('fill', cfg.color)
+      .datum({ startAngle: rgDeg2rad(RG_START_DEG), endAngle: targetAngle, innerRadius: RG_R - RG_RING_W, outerRadius: RG_R })
+      .transition().duration(700).ease(d3.easeCubicOut).attrTween('d', rgArcTween(pgen));
+  } else {
+    inst.progressG.selectAll('path').remove();
+  }
+
+  // ---- Needle + anchor ----
+  var needleOpacity = cfg.needleOpacity == null ? 1 : cfg.needleOpacity;
+  inst.needleG.select('path.rg-needle-shape')
+    .attr('d', rgNeedlePath(RG_R * (cfg.needleLength || 0.65), cfg.needleWidth || 6))
+    .attr('fill', cfg.color)
+    .attr('opacity', needleOpacity);
+  rgRotateTo(inst.needleG, 'angle', inst, targetAngle, 700);
+  inst.anchor.attr('r', (cfg.anchorSize || 16) / 2).attr('fill', cfg.color).attr('opacity', needleOpacity);
+
+  // ---- Title / top label / detail ----
+  inst.titleText.text('');
+  inst.topLabelText.style('font-size', '14px').style('font-weight', 700).style('fill', cc.label).text(cfg.title || cfg.topLabel || '');
+  inst.detailText.attr('x', 0).attr('y', 0.70 * RG_R).style('font-size', '26px').style('fill', cfg.color)
+    .text(cfg.detail == null ? '' : cfg.detail);
+
+  // ---- Dual gauge: second needle/anchor/title/detail (Wind gust) ----
+  if(cfg.dual){
+    var value2 = cfg.value2 == null ? cfg.min : cfg.value2;
+    var targetAngle2 = scale(value2);
+    var x2 = (cfg.title2X == null ? 0.38 : cfg.title2X) * RG_R;
+    inst.needleG2.select('path.rg-needle-shape')
+      .attr('d', rgNeedlePath(RG_R * (cfg.needle2Length || 0.5), cfg.needle2Width || 5))
+      .attr('fill', cfg.color2);
+    rgRotateTo(inst.needleG2, 'angle2', inst, targetAngle2, 700);
+    inst.anchor2.attr('r', (cfg.anchor2Size || 11) / 2).attr('fill', cfg.color2).attr('cx', 0).attr('cy', 0);
+    inst.title2Text.attr('x', x2).attr('y', 0.78 * RG_R).style('font-size', '13px').style('fill', cfg.color2).text(cfg.title2 || '');
+    inst.detail2Text.attr('x', x2).attr('y', 0.95 * RG_R).style('font-size', '18px').style('fill', cfg.color2).text(cfg.detail2 || '');
+  }
+}
+
+// ===================== 1. Temperature =====================
+var tempRing = [
+  [0.1,'rgb(91,127,227)'],[0.2,'rgb(86,143,219)'],[0.3,'rgb(79,170,203)'],
+  [0.4,'rgb(79,181,166)'],[0.5,'rgb(99,184,114)'],[0.6,'rgb(171,180,71)'],
+  [0.7,'rgb(220,145,61)'],[0.8,'rgb(216,90,61)'],[0.9,'rgb(184,48,42)'],[1,'rgb(184,48,42)']
+];
+function renderTemp(c){
+  var col = tempColor(c);
+  var unit = SYSTEMS[currentSystem].temp;
+  renderRadialGauge('gTemp', {
+    min: -20, max: 50, splitNumber: 7, ring: tempRing,
+    value: c==null ? -20 : Math.round(c*10)/10, color: col,
+    anchorSize: 18, title: 'Temperature',
+    tickFormat: function(v){ return tempTick(v, unit) + '°'; },
+    detail: tempLabel(c==null ? -20 : c, unit)
+  });
+}
+
+// ===================== 2. Wind speed + gust =====================
+var windRanges = [0,0.3,1.5,3.3,5.4,7.9,10.7,13.8,17.1,20.7,24.4,28.4,32.6,36.0];
+var windColors = ['#85a3aa','#7e98bb','#6e90d0','#0f94a7','#39a239','#c2863e','#c8420d','#d20032','#af5088','#754a92','#45698d','#c1fc77','#f1ff6c'];
+var windRing = windRanges.slice(1).map(function(t,i){ return [t/36, windColors[i]]; });
+function renderWind(speedMs, gustMs){
+  var unit = SYSTEMS[currentSystem].wind;
+  var speedVal = speedMs==null ? 0 : Math.round(speedMs*10)/10;
+  var gustVal = gustMs==null ? 0 : Math.round(gustMs*10)/10;
+  renderRadialGauge('gWind', {
+    min: 0, max: 36, splitNumber: 6, ring: windRing, topLabel: 'Wind',
+    tickFormat: function(v){ return windTick(v, unit); },
+    dual: true,
+    value: speedVal, color: '#5EE6F5', needleLength: 0.70, anchorSize: 14,
+    value2: gustVal, color2: '#FFB347', needle2Length: 0.50, anchor2Size: 11,
+    title2X: 0.38, title2: 'Gust', detail2: windLabel(gustVal, unit)
+  });
+  var inst = rgInstances['gWind'];
+  if(inst){
+    var x = -0.38 * RG_R;
+    inst.titleText.attr('x', x).attr('y', 0.78 * RG_R).style('font-size', '13px').style('font-weight', 400).style('fill', '#5EE6F5').text('Speed');
+    inst.detailText.attr('x', x).attr('y', 0.95 * RG_R).style('font-size', '18px').style('fill', '#5EE6F5').text(windLabel(speedVal, unit));
+  }
+}
+
+var windDirRing = [
+  [1/8,'#EE5586'], [2/8,'#F2708B'], [3/8,'#F7941D'], [4/8,'#FDBB4E'],
+  [5/8,'#A4CE4E'], [6/8,'#5FD1B9'], [7/8,'#4A9CC7'], [1,'#6B8FD6']
+];
+var WIND_DIR_RING_COLORS = windDirRing.map(function(stop){ return stop[1]; });
+var WIND_ROSE_DIRS = ['N','NE','E','SE','S','SW','W','NW'];
+var WIND_ROSE_SPEED_EDGES = [2, 4, 6, 8];
+var WIND_ROSE_COLORS = ['#6FB6DD','#5BBB8A','#D6BE4E','#E8A33D','#E36B57'];
+var windRoseCounts = null;
+var windRoseTotal = 0;
+var COMPASS_16 = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+function degToCompass(deg){
+  if(deg==null) return '--';
+  return COMPASS_16[Math.round(((deg%360)+360)%360/22.5) % 16];
+}
+
+function windRoseSpeedBinIndex(ms){
+  for(var i=0;i<WIND_ROSE_SPEED_EDGES.length;i++){ if(ms < WIND_ROSE_SPEED_EDGES[i]) return i; }
+  return WIND_ROSE_SPEED_EDGES.length;
+}
+function windRoseSpeedBinLabel(i, unit){
+  var lo = i===0 ? 0 : WIND_ROSE_SPEED_EDGES[i-1];
+  if(i===WIND_ROSE_SPEED_EDGES.length) return windTick(lo, unit) + '+';
+  return windTick(lo, unit) + '\u2013' + windTick(WIND_ROSE_SPEED_EDGES[i], unit);
+}
+function windRoseSectorIndex(deg){
+  return Math.round((((deg % 360) + 360) % 360) / 45) % 8;
+}
+function buildWindRoseData(dirSeries, speedSeries){
+  var speedByTs = {};
+  (speedSeries || []).forEach(function(pt){ if(pt && pt[1] != null) speedByTs[pt[0]] = pt[1]; });
+  var counts = [];
+  for(var s=0; s<8; s++){ counts.push([0,0,0,0,0]); }
+  var total = 0;
+  (dirSeries || []).forEach(function(pt){
+    if(!pt || pt[1] == null) return;
+    var spd = speedByTs[pt[0]];
+    if(spd == null) return;
+    counts[windRoseSectorIndex(pt[1])][windRoseSpeedBinIndex(spd)]++;
+    total++;
+  });
+  return { counts: counts, total: total };
+}
+
+var WIND_DIR_SIZE = 280;
+var WIND_DIR_HEIGHT = WIND_DIR_SIZE * 1.15;
+var WIND_DIR_LABEL_MARGIN = 25;
+var WIND_DIR_VIEW_WIDTH = WIND_DIR_SIZE + WIND_DIR_LABEL_MARGIN * 2;
+var WIND_DIR_CX = WIND_DIR_VIEW_WIDTH / 2;
+var WIND_DIR_CY = WIND_DIR_HEIGHT * 0.58;
+var WIND_DIR_RING_OUTER_R = WIND_DIR_SIZE * 0.45;
+var WIND_DIR_RING_WIDTH = 18;
+var WIND_DIR_RING_INNER_R = WIND_DIR_RING_OUTER_R - WIND_DIR_RING_WIDTH;
+var WIND_DIR_POLAR_MAX_R = WIND_DIR_SIZE * 0.29;
+var WIND_DIR_POINTER_ANCHOR_R = WIND_DIR_RING_OUTER_R * 0.85;
+var WIND_DIR_POINTER_HALF_LEN = 9;
+var WIND_DIR_POINTER_HALF_WIDTH = 8;
+
+var windDirSvg = null, windDirTitleText = null, windDirGridG = null, windDirPetalsG = null,
+    windDirRingG = null, windDirTicksG = null, windDirLabelsG = null, windDirPointerG = null;
+var windDirPointerAngle = 0;
+
+function windDirDeg2rad(deg){ return deg * Math.PI / 180; }
+
+function windDirEnsureSvg(){
+  var wrap = document.getElementById('gWindDir');
+  if(!wrap || windDirSvg || typeof d3 === 'undefined') return;
+  windDirSvg = d3.select(wrap).append('svg')
+    .attr('viewBox', '0 0 ' + WIND_DIR_VIEW_WIDTH + ' ' + WIND_DIR_HEIGHT)
+    .style('width', '100%').style('height', '100%').style('display', 'block');
+  windDirTitleText = windDirSvg.append('text')
+    .attr('x', WIND_DIR_CX).attr('y', WIND_DIR_CY - (WIND_DIR_RING_OUTER_R + 42))
+    .attr('text-anchor', 'middle').attr('dy', '.35em').style('font-size', '14px').style('font-weight', 700)
+    .text('Wind Vector');
+  var root = windDirSvg.append('g').attr('transform', 'translate(' + WIND_DIR_CX + ',' + WIND_DIR_CY + ')');
+  windDirGridG = root.append('g').attr('class', 'wind-dir-grid');
+  windDirPetalsG = root.append('g').attr('class', 'wind-dir-petals');
+  windDirRingG = root.append('g').attr('class', 'wind-dir-ring');
+  windDirTicksG = root.append('g').attr('class', 'wind-dir-ticks');
+  windDirLabelsG = root.append('g').attr('class', 'wind-dir-labels');
+  windDirPointerG = root.append('g').attr('class', 'wind-dir-pointer');
+  windDirPointerG.append('path').attr('class', 'wind-dir-pointer-shape')
+    .attr('d', 'M0,' + (-(WIND_DIR_POINTER_ANCHOR_R - WIND_DIR_POINTER_HALF_LEN)) +
+      ' L' + WIND_DIR_POINTER_HALF_WIDTH + ',' + (-(WIND_DIR_POINTER_ANCHOR_R + WIND_DIR_POINTER_HALF_LEN)) +
+      ' L' + (-WIND_DIR_POINTER_HALF_WIDTH) + ',' + (-(WIND_DIR_POINTER_ANCHOR_R + WIND_DIR_POINTER_HALF_LEN)) + ' Z')
+    .attr('fill', '#fff').style('display', 'none')
+    .append('title');
+}
+
+function windDirArcTween(arcGen){
+  return function(d){
+    var node = this;
+    var prev = node.__wdPrev || { innerRadius: 0, outerRadius: 0, startAngle: d.startAngle, endAngle: d.endAngle };
+    var interp = d3.interpolate(prev, d);
+    node.__wdPrev = d;
+    return function(t){ return arcGen(interp(t)); };
+  };
+}
+
+function renderWindDir(dirNow, dir10){
+  windDirEnsureSvg();
+  if(!windDirSvg) return;
+  var cc = chromeColors();
+  var unit = SYSTEMS[currentSystem].wind;
+  var hasData = windRoseCounts != null && windRoseTotal > 0;
+
+  windDirTitleText.style('fill', cc.label);
+
+  var ringArc = d3.arc().innerRadius(WIND_DIR_RING_INNER_R).outerRadius(WIND_DIR_RING_OUTER_R);
+  windDirRingG.selectAll('path').data(d3.range(8)).join('path')
+    .attr('d', function(i){
+      return ringArc({ startAngle: windDirDeg2rad(i * 45), endAngle: windDirDeg2rad((i + 1) * 45) });
+    })
+    .attr('fill', function(i){ return WIND_DIR_RING_COLORS[i]; });
+
+  var majorTicks = windDirTicksG.selectAll('line.major').data(d3.range(8)).join('line').attr('class', 'major');
+  majorTicks
+    .attr('x1', function(i){ return WIND_DIR_RING_OUTER_R * Math.sin(windDirDeg2rad(i * 45)); })
+    .attr('y1', function(i){ return -WIND_DIR_RING_OUTER_R * Math.cos(windDirDeg2rad(i * 45)); })
+    .attr('x2', function(i){ return (WIND_DIR_RING_OUTER_R + 15) * Math.sin(windDirDeg2rad(i * 45)); })
+    .attr('y2', function(i){ return -(WIND_DIR_RING_OUTER_R + 15) * Math.cos(windDirDeg2rad(i * 45)); })
+    .attr('stroke', cc.tick).attr('stroke-width', 2);
+
+  var minorAngles = [];
+  for(var m = 0; m < 8; m++){ for(var k = 1; k <= 4; k++){ minorAngles.push(m * 45 + k * 9); } }
+  windDirTicksG.selectAll('line.minor').data(minorAngles).join('line').attr('class', 'minor')
+    .attr('x1', function(deg){ return WIND_DIR_RING_OUTER_R * Math.sin(windDirDeg2rad(deg)); })
+    .attr('y1', function(deg){ return -WIND_DIR_RING_OUTER_R * Math.cos(windDirDeg2rad(deg)); })
+    .attr('x2', function(deg){ return (WIND_DIR_RING_OUTER_R + 7) * Math.sin(windDirDeg2rad(deg)); })
+    .attr('y2', function(deg){ return -(WIND_DIR_RING_OUTER_R + 7) * Math.cos(windDirDeg2rad(deg)); })
+    .attr('stroke', cc.tick).attr('stroke-width', 1);
+
+  var labelR = WIND_DIR_RING_OUTER_R + 25;
+  var ringLabelIndices = d3.range(8);
+  windDirLabelsG.selectAll('text').data(ringLabelIndices).join('text')
+    .attr('x', function(i){ return labelR * Math.sin(windDirDeg2rad(i * 45)); })
+    .attr('y', function(i){ return -labelR * Math.cos(windDirDeg2rad(i * 45)); })
+    .attr('text-anchor', 'middle').attr('dy', '.35em')
+    .style('font-size', '12px').style('fill', cc.label)
+    .text(function(i){ return WIND_ROSE_DIRS[i]; });
+
+  windDirGridG.selectAll('line').data(d3.range(8)).join('line')
+    .attr('x1', 0).attr('y1', 0)
+    .attr('x2', function(i){ return WIND_DIR_RING_INNER_R * Math.sin(windDirDeg2rad(i * 45)); })
+    .attr('y2', function(i){ return -WIND_DIR_RING_INNER_R * Math.cos(windDirDeg2rad(i * 45)); })
+    .attr('stroke', cc.tick).attr('stroke-width', 1).attr('opacity', 0.5);
+
+  windDirGridG.selectAll('circle').data([1, 2, 3]).join('circle')
+    .attr('r', function(i){ return WIND_DIR_POLAR_MAX_R * i / 3; })
+    .attr('fill', 'none').attr('stroke', cc.tick).attr('stroke-width', 1).attr('opacity', 0.5);
+
+  var sectorTotals = WIND_ROSE_DIRS.map(function(_, sector){
+    if(!hasData) return 0;
+    var sum = 0;
+    for(var bb = 0; bb < 5; bb++) sum += windRoseCounts[sector][bb];
+    return (sum / windRoseTotal) * 100;
+  });
+  var maxSectorTotal = Math.max.apply(null, sectorTotals.concat([0]));
+  var spikeHeight = Math.max(maxSectorTotal * 0.35, 4);
+  var radiusScale = d3.scaleLinear().domain([0, Math.max(maxSectorTotal + spikeHeight, 1)]).range([0, WIND_DIR_POLAR_MAX_R]);
+
+  var sectorNow = dirNow == null ? null : windRoseSectorIndex(dirNow);
+  var sector10  = dir10  == null ? null : windRoseSectorIndex(dir10);
+  var petalArc = d3.arc();
+  var arcs = [];
+  WIND_ROSE_DIRS.forEach(function(_, sector){
+    var a0 = windDirDeg2rad(sector * 45 - 22.5), a1 = windDirDeg2rad(sector * 45 + 22.5);
+    var cum = 0;
+    for(var b = 0; b < 5; b++){
+      var v = hasData ? Math.round((windRoseCounts[sector][b] / windRoseTotal) * 1000) / 10 : 0;
+      arcs.push({
+        key: sector + '-' + b, startAngle: a0, endAngle: a1,
+        innerRadius: radiusScale(cum), outerRadius: radiusScale(cum + v),
+        fill: WIND_ROSE_COLORS[b],
+        title: hasData ? (windRoseSpeedBinLabel(b, unit) + ' ' + unit + ' from ' + WIND_ROSE_DIRS[sector] + ': ' + v + '%') : ''
+      });
+      cum += v;
+    }
+    var nowV = sectorNow === sector ? spikeHeight : 0;
+    arcs.push({
+      key: sector + '-now', startAngle: a0, endAngle: a1,
+      innerRadius: radiusScale(cum), outerRadius: radiusScale(cum + nowV),
+      fill: '#5EE6F5',
+      title: (sectorNow === sector && dirNow != null) ? ('Now: ' + round1(dirNow) + '\u00b0 ' + degToCompass(dirNow)) : ''
+    });
+    cum += nowV;
+    var avg10V = sector10 === sector ? spikeHeight : 0;
+    arcs.push({
+      key: sector + '-avg10', startAngle: a0, endAngle: a1,
+      innerRadius: radiusScale(cum), outerRadius: radiusScale(cum + avg10V),
+      fill: '#7DEB87',
+      title: (sector10 === sector && dir10 != null) ? ('10-min avg: ' + round1(dir10) + '\u00b0 ' + degToCompass(dir10)) : ''
+    });
+  });
+
+  windDirPetalsG.selectAll('path').data(arcs, function(d){ return d.key; }).join(
+    function(enter){
+      var p = enter.append('path').attr('fill', function(d){ return d.fill; });
+      p.append('title');
+      return p;
+    },
+    function(update){ return update.attr('fill', function(d){ return d.fill; }); }
+  );
+  windDirPetalsG.selectAll('path')
+    .each(function(d){ d3.select(this).select('title').text(d.title); })
+    .transition().duration(700).ease(d3.easeCubicOut)
+    .attrTween('d', windDirArcTween(petalArc));
+
+  var pointerShape = windDirPointerG.select('path.wind-dir-pointer-shape');
+  pointerShape.style('display', dirNow == null ? 'none' : null);
+  pointerShape.select('title').text(dirNow == null ? '' : ('Now: ' + round1(dirNow) + '\u00b0 ' + degToCompass(dirNow)));
+  if(dirNow != null){
+    var fromAngle = windDirPointerAngle;
+    var toAngle = dirNow;
+    windDirPointerG.transition().duration(700).ease(d3.easeCubicOut)
+      .attrTween('transform', function(){
+        var interp = d3.interpolateNumber(fromAngle, toAngle);
+        return function(t){ return 'rotate(' + interp(t) + ')'; };
+      })
+      .on('end', function(){ windDirPointerAngle = toAngle; });
+  }
+}
+
+// ===================== 4. Barometer =====================
+var baroBands = [[940,970,'#ff00ff'],[970,990,'#f8d747'],[990,1010,'#007fff'],[1010,1030,'#2e8b57'],[1030,1060,'#ff6347']];
+var baroRing = baroBands.map(function(b){ return [(b[1]-940)/120, b[2]]; });
+function renderBaro(current, low, high){
+  var unit = SYSTEMS[currentSystem].pressure;
+  var val = current==null ? 1013 : Math.round(current*10)/10;
+  renderRadialGauge('gBaro', {
+    min: 940, max: 1060, splitNumber: 6, ring: baroRing, topLabel: 'Barometer',
+    tickFormat: function(v){ return pressureTick(v, unit); },
+    value: val, color: '#5EE6F5', needleLength: 0.65, anchorSize: 16,
+    detail: pressureLabel(current==null ? 1013 : current, unit)
+  });
+}
+
+// ===================== 5. Rainfall =====================
+function rainNiceMax(mm){
+  var base = 50;
+  if(mm==null || isNaN(mm) || mm <= base*0.8) return base;
+  return Math.ceil((mm+10)/10)*10;
+}
+function renderRain(dayMm){
+  var unit = SYSTEMS[currentSystem].rain;
+  var max = rainNiceMax(dayMm);
+  renderRadialGauge('gRain', {
+    min: 0, max: max, splitNumber: 5, ringGradient: ['#DCEFFB', '#0B4F9E'], progress: true,
+    tickFormat: function(v){ return rainTick(v, unit); },
+    value: dayMm==null ? 0 : Math.round(dayMm*10)/10, color: '#6FB6DD',
+    anchorSize: 16, title: 'Rainfall',
+    detail: rainLabel(dayMm==null ? 0 : dayMm, unit)
+  });
+}
+
+function rainRateNiceMax(mmPerHr){
+  var base = 10;
+  if(mmPerHr==null || isNaN(mmPerHr) || mmPerHr <= base*0.8) return base;
+  return Math.ceil((mmPerHr+4)/4)*4;
+}
+function renderRainRate(rate){
+  var unit = SYSTEMS[currentSystem].rain;
+  var max = rainRateNiceMax(rate);
+  renderRadialGauge('gRainRate', {
+    min: 0, max: max, splitNumber: 4, ringGradient: ['#DCEFFB', '#0B4F9E'], progress: true,
+    tickFormat: function(v){ return rainRateTick(v, unit); },
+    value: rate==null ? 0 : Math.round(rate*10)/10, color: '#6FB6DD',
+    anchorSize: 16, title: 'Rain Rate',
+    detail: rainRateLabel(rate==null ? 0 : rate, unit)
+  });
+}
+
+// ===================== 7. UVI =====================
+function uvColor(v){
+  if(v==null) return '#8c9a95';
+  if(v <= 2)  return '#299501';
+  if(v <= 5)  return '#F7E400';
+  if(v <= 7)  return '#F85900';
+  if(v <= 10) return '#D8001D';
+  return '#6B49C8';
+}
+var uviRing = [[2/14,'#299501'],[5/14,'#F7E400'],[7/14,'#F85900'],[10/14,'#D8001D'],[1,'#6B49C8']];
+function renderUvi(uv){
+  var col = uvColor(uv);
+  renderRadialGauge('gUvi', {
+    min: 0, max: 14, splitNumber: 7, ring: uviRing,
+    value: uv==null ? 0 : Math.round(uv*10)/10, color: col,
+    anchorSize: 16, title: 'UVI',
+    detail: (uv==null ? 0 : uv).toFixed(1)
+  });
+}
+
+function solarColor(v){
+  if(v==null) return '#8c9a95';
+  if(v <= 200) return '#299501';
+  if(v <= 500) return '#F7E400';
+  if(v <= 800) return '#F85900';
+  return '#D8001D';
+}
+var solarRing = [[200/1200,'#299501'],[500/1200,'#F7E400'],[800/1200,'#F85900'],[1,'#D8001D']];
+function renderSolar(radiation){
+  var col = solarColor(radiation);
+  renderRadialGauge('gSolar', {
+    min: 0, max: 1200, splitNumber: 6, ring: solarRing,
+    value: radiation==null ? 0 : Math.round(radiation), color: col,
+    anchorSize: 16, title: 'Solar Radiation',
+    detail: (radiation==null ? 0 : Math.round(radiation)) + ' W/m²'
+  });
+}
+
+function humidColor(v){
+  if(v==null) return '#8c9a95';
+  if(v <= 30) return '#E8A33D';
+  if(v <= 60) return '#5BBB8A';
+  if(v <= 80) return '#6FB6DD';
+  return '#E36B57';
+}
+var humidRing = [[0.3,'#E8A33D'],[0.6,'#5BBB8A'],[0.8,'#6FB6DD'],[1,'#E36B57']];
+function renderHumid(pct){
+  var col = humidColor(pct);
+  renderRadialGauge('gHumid', {
+    min: 0, max: 100, splitNumber: 5, ring: humidRing,
+    tickFormat: function(v){ return v + '%'; },
+    value: pct==null ? 0 : round1(pct), color: col,
+    anchorSize: 16, title: 'Humidity',
+    detail: (pct==null ? 0 : pct).toFixed(1) + '%'
+  });
+}
+
+var DEW_MIN = -10, DEW_MAX = 30;
+function dewColor(v){
+  if(v==null) return '#8c9a95';
+  if(v <= 10) return '#5BBB8A';
+  if(v <= 16) return '#6FB6DD';
+  if(v <= 20) return '#E8A33D';
+  return '#E36B57';
+}
+function dewFrac(v){ return (v - DEW_MIN) / (DEW_MAX - DEW_MIN); }
+var dewRing = [[dewFrac(10),'#5BBB8A'],[dewFrac(16),'#6FB6DD'],[dewFrac(20),'#E8A33D'],[1,'#E36B57']];
+function renderDew(c){
+  var col = dewColor(c);
+  var unit = SYSTEMS[currentSystem].temp;
+  renderRadialGauge('gDew', {
+    min: DEW_MIN, max: DEW_MAX, splitNumber: 8, ring: dewRing,
+    tickFormat: function(v){ return tempTick(v, unit) + '°'; },
+    value: c==null ? DEW_MIN : Math.round(c*10)/10, color: col,
+    anchorSize: 16, title: 'Dew Point',
+    detail: tempLabel(c==null ? DEW_MIN : c, unit)
+  });
+}
+
+var AQ_MAX = 200;
+function aqColor(v){
+  if(v==null) return '#8c9a95';
+  if(v <= 50) return '#5BBB8A';
+  if(v <= 100) return '#D6BE4E';
+  if(v <= 150) return '#E36B57';
+  return '#6B49C8';
+}
+var aqRing = [[50/AQ_MAX,'#5BBB8A'],[100/AQ_MAX,'#D6BE4E'],[150/AQ_MAX,'#E36B57'],[1,'#6B49C8']];
+function renderAq(aqi){
+  var col = aqColor(aqi);
+  renderRadialGauge('gAq', {
+    min: 0, max: AQ_MAX, splitNumber: 4, ring: aqRing,
+    value: aqi==null ? 0 : Math.round(aqi), color: col,
+    anchorSize: 16, title: 'Air Quality',
+    detail: String(aqi==null ? 0 : Math.round(aqi))
+  });
+}
+
+function lightningNiceMax(count){
+  var base = 10;
+  if(count==null || isNaN(count) || count <= base*0.8) return base;
+  return Math.ceil((count+5)/5)*5;
+}
+function lightningColor(count){
+  if(count==null) return '#8c9a95';
+  if(count < 1)  return '#299501';
+  if(count <= 5) return '#F7E400';
+  if(count <= 15) return '#F85900';
+  return '#D8001D';
+}
+function renderLightning(count){
+  var max = lightningNiceMax(count);
+  var col = lightningColor(count);
+  var ring = [
+    [Math.min(1, 1/max),  '#299501'],
+    [Math.min(1, 5/max),  '#F7E400'],
+    [Math.min(1, 15/max), '#F85900'],
+    [1,                   '#D8001D']
+  ];
+  renderRadialGauge('gLightning', {
+    min: 0, max: max, splitNumber: 5, ring: ring,
+    value: count==null ? 0 : Math.round(count), color: col, needleOpacity: count==null ? 0.2 : 1,
+    anchorSize: 16, title: 'Lightning Strike Count',
+    detail: count==null ? 'None' : String(Math.round(count))
+  });
+}
+
+function renderAll(d){
+  [
+    function(){ renderTemp(d.outTemp); },
+    function(){ renderWind(d.windSpeed, d.windGust); },
+    function(){ renderWindDir(d.windDir, d.windDir10); },
+    function(){ renderBaro(d.barometer, d.baroDayMin, d.baroDayMax); },
+    function(){ renderRain(d.dayRain); },
+    function(){ renderRainRate(d.rainRate); },
+    function(){ renderUvi(d.uv); },
+    function(){ renderSolar(d.radiation); },
+    function(){ renderHumid(d.outHumidity); },
+    function(){ renderDew(d.dewpoint); },
+    function(){ renderAq(d.aqi); },
+    function(){ renderLightning(d.lightningCount); },
+  ].forEach(function(fn){
+    try { fn(); } catch(e){ console.warn('gauges: a gauge failed to render —', e.message); }
+  });
+}
+
+var LOOP_JSON_URL = './jsondata/loop.json';
+var ARCHIVE_JSON_URL = './jsondata/archive.json';
+
+var CHARTS_JSON_URL = './jsondata/charts.json';
+var LOOP_POLL_MS = 15 * 1000;
+var ARCHIVE_POLL_MS = 60 * 1000;
+var CHARTS_POLL_MS = 60 * 60 * 1000;
+
+// Card-visibility filtering (see cardSensorMap.js). Maps each gauge's
+// mount element id to the base series it represents; gRain/gRainRate
+// check whether EITHER a tipping-bucket or piezo rain card is enabled,
+// since this page shows a single rain gauge fed from loop.json's plain
+// 'rain' object regardless of which physical sensor type is configured
+// (see pollArchive() below reading j.rain.day) -- unlike records.html,
+// which has separate rain/prain metrics tied to distinct base series.
+var GAUGE_BASES = {
+  gTemp: ['outTemp'],
+  gWind: ['windSpeed', 'windGust'],
+  gWindDir: ['windDir'],
+  gBaro: ['barom'],
+  gRain: ['rain', 'prain'],
+  gRainRate: ['rain', 'prain'],
+  gUvi: ['uv'],
+  gSolar: ['solar', 'solarRadiation'],
+  gHumid: ['outHumid'],
+  gDew: ['outDew'],
+  gAq: ['pm1_0', 'pm2_5', 'pm4_0', 'pm10_0'],
+  gLightning: ['lightCount', 'lightDist'],
+};
+var ENABLED_CARDS = null; // null = unknown yet / fetch failed -- fail open
+
+function applyGaugeVisibility(){
+  Object.keys(GAUGE_BASES).forEach(function(gaugeId){
+    var mount = document.getElementById(gaugeId);
+    if (!mount) return;
+    var wrap = mount.closest('.col-12');
+    if (!wrap) return;
+    var bases = GAUGE_BASES[gaugeId];
+    var show = bases.some(function(base){ return isBaseCardEnabled(base, ENABLED_CARDS); });
+    wrap.classList.toggle('d-none', !show);
+  });
+}
+
+var liveValues = { outTemp:null, windSpeed:null, windGust:null, windDir:null, windDir10:null, barometer:null, dayRain:null, rainRate:null, uv:null, radiation:null, outHumidity:null, dewpoint:null, aqi:null, lightningCount:null, baroDayMin:null, baroDayMax:null };
+
+function setGaugesStatus(status){
+  var dot = document.getElementById('gaugesStatusDot');
+  var label = document.getElementById('gaugesStatusLabel');
+  if(status==='live'){ dot.style.background = 'var(--bw-good)'; label.textContent = 'LIVE'; pulseStatusDot(); }
+  else if(status==='stale'){ dot.style.background = 'var(--bw-accent)'; label.textContent = 'LIVE (stale)'; }
+  else if(status==='error'){ dot.style.background = 'var(--bw-danger)'; label.textContent = 'OFFLINE'; }
+  else { dot.style.background = 'var(--bs-secondary-color)'; label.textContent = 'CONNECTING'; }
+}
+
+function pulseStatusDot(){
+  var ring = document.getElementById('gaugesStatusRing');
+  if(!ring) return;
+  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  ring.classList.remove('ping');
+  void ring.offsetWidth;
+  ring.classList.add('ping');
+}
+
+function pollLoop(){
+  fetch(LOOP_JSON_URL + ((LOOP_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'})
+    .then(function(res){ if(!res.ok) throw new Error('HTTP '+res.status); return res.json(); })
+    .then(function(j){
+      var o = j.observations || {};
+      liveValues.outTemp = o.outTemp ?? null;
+      liveValues.windSpeed = o.windSpeed ?? null;
+      liveValues.windGust = o.windGust ?? null;
+      liveValues.windDir = o.windDir ?? null;
+      liveValues.windDir10 = o.windDir10 ?? null;
+      liveValues.barometer = o.barometer ?? null;
+      if(o.dayRain != null) liveValues.dayRain = o.dayRain;
+      liveValues.uv = o.UV ?? null;
+      liveValues.outHumidity = o.outHumidity ?? null;
+      liveValues.dewpoint = o.dewpoint ?? null;
+      liveValues.aqi = o.pm25_RealAQI_co2 ?? null;
+      liveValues.rainRate = o.rainRate ?? null;
+      liveValues.radiation = o.radiation ?? null;
+      liveValues.lightningCount = o.lightning_strike_count ?? null;
+      if(o.isDay != null) lastIsDay = o.isDay;
+
+      document.getElementById('gaugesClock').textContent = new Date().toLocaleTimeString('en-GB', {hour12:false});
+      setGaugesStatus('live');
+      document.getElementById('gaugesErr').style.display = 'none';
+      if(themeMode==='auto') applyTheme(); else renderAll(liveValues);
+    })
+    .catch(function(e){
+      console.warn('SǢL gauges: loop.json poll failed —', e.message);
+      setGaugesStatus(liveValues.outTemp!=null ? 'stale' : 'error');
+      var errEl = document.getElementById('gaugesErr');
+      errEl.textContent = 'Live data unavailable: ' + e.message;
+      errEl.style.display = '';
+      renderAll(liveValues);
+    });
+}
+
+function pollArchive(){
+  fetch(ARCHIVE_JSON_URL + ((ARCHIVE_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'})
+    .then(function(res){ if(!res.ok) throw new Error('HTTP '+res.status); return res.json(); })
+    .then(function(j){
+      liveValues.baroDayMin = (j.barom && j.barom.day_min != null) ? j.barom.day_min : null;
+      liveValues.baroDayMax = (j.barom && j.barom.day_max != null) ? j.barom.day_max : null;
+      if(j.rain && j.rain.day != null) liveValues.dayRain = j.rain.day;
+      var cards = j.meta && j.meta.enabled_cards;
+      if (Array.isArray(cards) && cards.length) {
+        ENABLED_CARDS = cards;
+        applyGaugeVisibility();
+      }
+      renderAll(liveValues);
+    })
+    .catch(function(e){
+      console.warn('SǢL gauges: archive.json poll failed —', e.message);
+    });
+}
+
+function pollWindRose(){
+  fetch(CHARTS_JSON_URL + ((CHARTS_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'})
+    .then(function(res){ if(!res.ok) throw new Error('HTTP '+res.status); return res.json(); })
+    .then(function(json){
+      var series = json && json[0] && json[0].chartPlot && json[0].chartPlot.series;
+      if(!series) throw new Error('Unexpected charts.json shape — no chartPlot.series found');
+      var built = buildWindRoseData(series.windDirHourly, series.windSpeedHourly);
+      windRoseCounts = built.counts;
+      windRoseTotal = built.total;
+    })
+    .catch(function(e){
+      console.warn('SǢL gauges: charts.json poll failed —', e.message);
+      windRoseCounts = null;
+      windRoseTotal = 0;
+    })
+    .finally(function(){ renderWindDir(liveValues.windDir, liveValues.windDir10); });
+}
+
+function includeHTML(callback){
+  var elements = document.querySelectorAll('[w3-include-html]');
+  var pending = elements.length;
+  if(pending === 0){ if(callback) callback(); return; }
+  elements.forEach(function(el){
+    var file = el.getAttribute('w3-include-html');
+    fetch(file, {cache:'no-store'})
+      .then(function(res){ if(!res.ok) throw new Error('HTTP '+res.status); return res.text(); })
+      .then(function(html){ el.innerHTML = html; el.removeAttribute('w3-include-html'); })
+      .catch(function(e){ console.warn('SǢL gauges: include failed for', file, '—', e.message); el.innerHTML = ''; })
+      .finally(function(){ pending--; if(pending === 0 && callback) callback(); });
+  });
+}
+
+function setStationTitle(){
+  fetch(ARCHIVE_JSON_URL + ((ARCHIVE_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'})
+    .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    .then(function(data){
+      var loc = data && data.meta && data.meta.station_location;
+      var el = document.querySelector('.brand-text');
+      if(loc && el) el.textContent = loc;
+    })
+    .catch(function(e){ console.warn('SǢL gauges: station_location fetch failed —', e.message); });
+}
+
+var root = document.documentElement;
+var themeMode = localStorage.getItem('dashboardThemeMode') || 'auto';
+var lastIsDay = null;
+
+var THEME_ICONS = { auto: '\u{1F313}', light: '\u2600\uFE0F', dark: '\u{1F319}' };
+var THEME_ORDER = ['dark', 'light', 'auto'];
+if (!THEME_ORDER.includes(themeMode)) themeMode = 'dark';
+var currentSeason = null;
+function resolveAutoIsDay(){
+  if(lastIsDay != null) return !!lastIsDay;
+  return !window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+function resolveTheme(){
+  // Seasonal is a fixed standalone theme, never affected by day/night auto-switching.
+  if (themeMode === 'seasonal') return 'light';
+  return themeMode==='light' ? 'light' : themeMode==='dark' ? 'dark' : (resolveAutoIsDay() ? 'light' : 'dark');
+}
+function applyTheme(){
+  root.setAttribute('data-bs-theme', resolveTheme());
+  currentSeason = applySeasonClass(themeMode);
+  syncThemeNavUI();
+  renderAll(liveValues);
+}
+function syncThemeNavUI(){
+  var btn = document.getElementById('themeToggle');
+  if(!btn) return;
+  var resolved = resolveTheme();
+  if (themeMode === 'seasonal') {
+    btn.textContent = SEASON_ICONS[currentSeason];
+    btn.title = 'Seasonal (' + seasonLabel(currentSeason) + ')';
+  } else {
+    btn.textContent = THEME_ICONS[themeMode];
+    btn.title = themeMode === 'auto' ? ('Auto (currently ' + resolved + ')') : (themeMode.charAt(0).toUpperCase() + themeMode.slice(1));
+  }
+}
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(){
+  if(themeMode==='auto') applyTheme();
+});
+
+window.addEventListener('storage', function(e){
+  if(e.key === 'dashboardThemeMode'){
+    themeMode = e.newValue || 'auto';
+    applyTheme();
+  }
+  if(e.key === 'dashboardUnitSystem'){
+    currentSystem = (e.newValue && SYSTEMS[e.newValue]) ? e.newValue : 'uk';
+    var unitSelect = document.getElementById('unitSystem');
+    if(unitSelect) unitSelect.value = currentSystem;
+    renderAll(liveValues);
+  }
+});
+
+applyTheme();
+
+// ===================== Bootstrap =====================
+setGaugesStatus('connecting');
+try { renderAll(liveValues); } catch(e){ console.warn('gauges: renderAll failed —', e.message); }
+try { pollArchive(); } catch(e){ console.warn('gauges: pollArchive failed —', e.message); }
+setInterval(pollArchive, ARCHIVE_POLL_MS);
+try { pollWindRose(); } catch(e){ console.warn('gauges: pollWindRose failed —', e.message); }
+setInterval(pollWindRose, CHARTS_POLL_MS);
+try { pollLoop(); } catch(e){ console.warn('gauges: pollLoop failed —', e.message); }
+setInterval(pollLoop, LOOP_POLL_MS);
+
+includeHTML(function(){
+  initSharedHeader();
+  setStationTitle();
+  var unitSelect = document.getElementById('unitSystem');
+  if(unitSelect){
+    unitSelect.value = currentSystem;
+    unitSelect.addEventListener('change', function(e){
+      currentSystem = e.target.value;
+      localStorage.setItem('dashboardUnitSystem', currentSystem);
+      renderAll(liveValues);
+    });
+  }
+  var themeBtn = document.getElementById('themeToggle');
+  if(themeBtn){
+    themeBtn.addEventListener('click', function(){
+      themeMode = THEME_ORDER[(THEME_ORDER.indexOf(themeMode) + 1) % THEME_ORDER.length];
+      localStorage.setItem('dashboardThemeMode', themeMode);
+      applyTheme();
+    });
+  }
+  syncThemeNavUI();
+});
+</script>
+</body>
+</html>
