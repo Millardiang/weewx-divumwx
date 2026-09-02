@@ -2343,6 +2343,26 @@ class DivumwxInstaller(ExtensionInstaller):
         in_uk = in_england or (
             y_or_n("Are you in the United Kingdom (but not England)? (y/n) ") == 'y')
 
+        # Persisted unconditionally, every run -- NOT inside the
+        # "if 'enabled_cards' not in ..." gate a few lines below that
+        # apply_divumwx_cards_merge() lives behind, since in_uk is asked
+        # fresh on every single install/reconfigure run (not gated behind
+        # a "have we asked before" check the way card selection is), and
+        # would otherwise never get persisted at all for an existing
+        # install re-running this script. Previously in_uk only existed
+        # transiently in this function, used solely to gate individual
+        # [WeatherAPI][[...]] sub-services' own enabled flags (flood,
+        # heat/cold alert, MetOfficeRSS) -- nothing kept the actual
+        # answer anywhere a template could read it back. See
+        # cardsBundleNew.js's alertBar.js: it needs to know whether a
+        # station is actually in the UK to decide whether to show its
+        # UK-specific alert card (Met Office link, UKHSA health alerts,
+        # UK flood data, AuroraWatch) at all -- a lat/lon bounding-box
+        # guess is a reasonable fallback, but this explicit answer is
+        # more accurate and should be preferred when available.
+        cfg.setdefault('DivumWXCards', {})
+        cfg['DivumWXCards']['in_uk'] = 'True' if in_uk else 'False'
+
         apply_weatherapi_flood_merge(cfg, html_root=html_root, in_england=in_england)
 
         apply_weatherapi_aurorawatch_merge(
