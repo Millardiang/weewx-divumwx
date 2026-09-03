@@ -1,0 +1,458 @@
+#errorCatcher Echo
+##############################################################################
+## strings.json.tmpl -- the client-side translation dictionary.
+##
+## Generates jsondata/strings.json: a flat {"English phrase": "translated
+## phrase"} map, resolved through the exact same $gettext(...) +
+## skins/DivumWX/lang/<code>.conf mechanism as archive.json.tmpl's
+## trend_desc field (see that file's own comment for the full explanation
+## of how lang/<code>.conf selection works). The front-end
+## (cardsBundleNew.js) fetches this once per page load and looks phrases
+## up by their English text; a phrase with no entry for the active
+## language falls back to itself, i.e. to English -- same one-string-at-a-
+## time fallback behaviour the [Texts] mechanism already has, so a
+## partial translation never breaks the page, it just leaves the
+## untranslated phrases in English.
+##
+## Every value below is wrapped in json.dumps(...) rather than bare
+## interpolation -- translators may paste text from Google Translate or
+## similar that happens to contain a double quote, backslash, or other
+## character JSON needs escaped; json.dumps handles that safely so a
+## translation can't accidentally corrupt the JSON output.
+##
+## NOTE: $gettext(...) must always be called directly (as below), never
+## assigned to a bare variable first (e.g. "#set $t = $gettext") --
+## Cheetah auto-calls bare $name references, so that assignment would
+## silently invoke gettext() with no arguments instead of storing the
+## function. Confirmed against the real Cheetah engine while building
+## this file.
+##
+## KEEPING THIS FILE IN SYNC:
+## Every key below must exist as a matching quoted key under [Texts] in
+## skins/DivumWX/lang/en.conf (the reference dictionary -- see its own
+## header comment), and *should* exist in each of the other lang/<code>.conf
+## files too, though a missing one just falls back to English rather than
+## erroring. When a card gets converted to use $gettext(...) lookups
+## instead of a hardcoded string, add its phrase here AND to en.conf in
+## the same change -- the two are a paired dependency (see the DivumWX
+## beta-fix handover's "paired-file dependencies failing silently" lesson)
+## and drifting them apart is a silent bug, not a loud one.
+##
+## Phrases are grouped by the card/page they belong to purely as a reading
+## aid for whoever's translating -- the JSON output itself is a flat
+## dictionary; the grouping comments don't survive into strings.json.
+##############################################################################
+#import json
+{
+##############################################################################
+## cardTemperature.js
+##############################################################################
+"Temperature": $json.dumps($gettext("Temperature")),
+"Temperature Chart & Records": $json.dumps($gettext("Temperature Chart & Records")),
+"Min": $json.dumps($gettext("Min")),
+"Max": $json.dumps($gettext("Max")),
+"Max | Min": $json.dumps($gettext("Max | Min")),
+"Trend": $json.dumps($gettext("Trend")),
+"Indoor Temp": $json.dumps($gettext("Indoor Temp")),
+"Apparent": $json.dumps($gettext("Apparent")),
+"Humidity": $json.dumps($gettext("Humidity")),
+"Heat Index": $json.dumps($gettext("Heat Index")),
+"Avg Today": $json.dumps($gettext("Avg Today")),
+"Dewpoint": $json.dumps($gettext("Dewpoint")),
+"Windchill": $json.dumps($gettext("Windchill")),
+##############################################################################
+## cardGeocentric.js
+##############################################################################
+"Geocentric": $json.dumps($gettext("Geocentric")),
+"Live Meeus Calculation": $json.dumps($gettext("Live Meeus Calculation")),
+"Zenith": $json.dumps($gettext("Zenith")),
+"Horizon": $json.dumps($gettext("Horizon")),
+"Analemma": $json.dumps($gettext("Analemma")),
+##############################################################################
+## cardStationImage.js
+##############################################################################
+"Station Image": $json.dumps($gettext("Station Image")),
+##############################################################################
+## cardWebcam.js
+##############################################################################
+"Webcam": $json.dumps($gettext("Webcam")),
+"Timelapse": $json.dumps($gettext("Timelapse")),
+##############################################################################
+## cardBarometer.js
+##############################################################################
+"Barometer": $json.dumps($gettext("Barometer")),
+"Barometer Chart & Records": $json.dumps($gettext("Barometer Chart & Records")),
+"Station Alt": $json.dumps($gettext("Station Alt")),
+"Air Density": $json.dumps($gettext("Air Density")),
+"STORMY": $json.dumps($gettext("STORMY")),
+"RAIN": $json.dumps($gettext("RAIN")),
+"CHANGE": $json.dumps($gettext("CHANGE")),
+"FAIR": $json.dumps($gettext("FAIR")),
+"VERY DRY": $json.dumps($gettext("VERY DRY")),
+## "Steady" itself is already defined in [Texts] (see archive.json.tmpl's
+## barom.trend_desc, Session 1) -- this just exposes that same existing
+## translation to the client too, for cardBarometer.js's own "|| 'Steady'"
+## fallback (used only if archive.json's trend_desc is somehow missing).
+"Steady": $json.dumps($gettext("Steady")),
+##############################################################################
+## cardSolarRadiation.js
+##############################################################################
+"Solar Radiation": $json.dumps($gettext("Solar Radiation")),
+"All-Time Max": $json.dumps($gettext("All-Time Max")),
+"Yesterday Max": $json.dumps($gettext("Yesterday Max")),
+"Month Max": $json.dumps($gettext("Month Max")),
+"Sunshine Today": $json.dumps($gettext("Sunshine Today")),
+"Illuminance": $json.dumps($gettext("Illuminance")),
+"Solar & UV Chart & Records": $json.dumps($gettext("Solar & UV Chart & Records")),
+##############################################################################
+## cardEarthDaylight.js
+##############################################################################
+"Earth Daylight": $json.dumps($gettext("Earth Daylight")),
+"Sun Distance": $json.dumps($gettext("Sun Distance")),
+"Aurora Activity": $json.dumps($gettext("Aurora Activity")),
+"Next Equinox": $json.dumps($gettext("Next Equinox")),
+"Next Solstice": $json.dumps($gettext("Next Solstice")),
+"Sun Dec \u03B4": $json.dumps($gettext("Sun Dec \u03B4")),
+"Earth's Ecliptic Angle": $json.dumps($gettext("Earth's Ecliptic Angle")),
+"Sun Ra \u03BB": $json.dumps($gettext("Sun Ra \u03BB")),
+"World Daylight Map": $json.dumps($gettext("World Daylight Map")),
+##############################################################################
+## cardUvIndex.js -- Max/Yesterday Max/Month Max/All-Time Max/
+## Solar & UV Chart & Records reuse cardSolarRadiation.js's keys above.
+##############################################################################
+"UV-Index": $json.dumps($gettext("UV-Index")),
+"Risk": $json.dumps($gettext("Risk")),
+"Year Max": $json.dumps($gettext("Year Max")),
+"Extreme": $json.dumps($gettext("Extreme")),
+"Very High": $json.dumps($gettext("Very High")),
+"High": $json.dumps($gettext("High")),
+"Moderate": $json.dumps($gettext("Moderate")),
+"Below Horizon": $json.dumps($gettext("Below Horizon")),
+"Low": $json.dumps($gettext("Low")),
+##############################################################################
+## cardHumidity.js -- Humidity/Max/Min/Trend reuse cardTemperature.js's
+## keys; Rising/Falling/Steady reuse the barometer trend-description keys
+## from the top of this file. VERY DRY reuses cardBarometer.js's gauge-
+## scale key -- coincidentally the correct Danish translation is the same
+## in both contexts ("MEGET TØRT"), but this is a shared key across two
+## different meanings (barometric trend vs. air humidity) worth
+## revisiting if a future language needs them to differ -- see
+## en.conf's comment at this same key.
+##############################################################################
+"Zone": $json.dumps($gettext("Zone")),
+"Vapour P D": $json.dumps($gettext("Vapour P D")),
+"Evapo T": $json.dumps($gettext("Evapo T")),
+"Humidity & Temperature Chart & Records": $json.dumps($gettext("Humidity & Temperature Chart & Records")),
+"Very Dry": $json.dumps($gettext("Very Dry")),
+"Comfortable": $json.dumps($gettext("Comfortable")),
+"Very Humid": $json.dumps($gettext("Very Humid")),
+"COMFORTABLE": $json.dumps($gettext("COMFORTABLE")),
+"VERY HUMID": $json.dumps($gettext("VERY HUMID")),
+##############################################################################
+## cardWindCompass.js -- COMPASS_16 is the full 16-point compass rose.
+## IMPORTANT for translators: the single-letter/abbreviated points (N, E,
+## S, W, NNE, ENE, etc.) are built from each language's OWN word for
+## North/East/South/West, not just copied from English -- e.g. Danish and
+## Norwegian use Ø for East and V for West (not E/W), so "NNE" becomes
+## "NNØ", "ENE" becomes "ØNØ", and so on all the way round. Don't
+## translate these as if they were English abbreviations with a language
+## skin on top -- rebuild the 16-point rose from that language's own
+## cardinal-direction letters. See translation_review_da.md for the
+## worked Danish example.
+##############################################################################
+"North": $json.dumps($gettext("North")),
+"NNE": $json.dumps($gettext("NNE")),
+"NE": $json.dumps($gettext("NE")),
+"ENE": $json.dumps($gettext("ENE")),
+"East": $json.dumps($gettext("East")),
+"ESE": $json.dumps($gettext("ESE")),
+"SE": $json.dumps($gettext("SE")),
+"SSE": $json.dumps($gettext("SSE")),
+"South": $json.dumps($gettext("South")),
+"SSW": $json.dumps($gettext("SSW")),
+"SW": $json.dumps($gettext("SW")),
+"WSW": $json.dumps($gettext("WSW")),
+"West": $json.dumps($gettext("West")),
+"WNW": $json.dumps($gettext("WNW")),
+"NW": $json.dumps($gettext("NW")),
+"NNW": $json.dumps($gettext("NNW")),
+"N": $json.dumps($gettext("N")),
+"E": $json.dumps($gettext("E")),
+"S": $json.dumps($gettext("S")),
+"W": $json.dumps($gettext("W")),
+"Direction | Windspeed": $json.dumps($gettext("Direction | Windspeed")),
+"Max Gust": $json.dumps($gettext("Max Gust")),
+"Beaufort": $json.dumps($gettext("Beaufort")),
+"Wind Run": $json.dumps($gettext("Wind Run")),
+"Wind & Gust Chart & Records": $json.dumps($gettext("Wind & Gust Chart & Records")),
+"Currently": $json.dumps($gettext("Currently")),
+"Gust": $json.dumps($gettext("Gust")),
+##############################################################################
+## cardVapourPressureDeficit.js -- Month Max/Year Max reuse
+## cardSolarRadiation.js/cardUvIndex.js's keys above. Note for whoever
+## does the next card: this file's source is 95% one giant inline SVG
+## illustration (a hand-drawn tree, embedded as a <symbol> string) --
+## don't let a raw scanner candidate count from a file like this suggest
+## more real text exists than actually does. cardMoonPhase.js and
+## cardClockOutlook.js's high candidate counts in the original 26-card
+## survey are suspected to be the same pattern, not proportionally more
+## translatable text -- worth checking before assuming they're large jobs.
+##############################################################################
+"Vapour Pressure Deficit (kPa)": $json.dumps($gettext("Vapour Pressure Deficit (kPa)")),
+"Day Min": $json.dumps($gettext("Day Min")),
+"Day Max": $json.dumps($gettext("Day Max")),
+"Month Min": $json.dumps($gettext("Month Min")),
+"Year Min": $json.dumps($gettext("Year Min")),
+"Records": $json.dumps($gettext("Records")),
+##############################################################################
+## cardClockOutlook.js -- PARTIAL. This card is qualitatively different
+## from every other card done so far: it builds full narrative sentences
+## dynamically (forecast text, UK Met Office/aurora/flood/health alert
+## descriptions) via string concatenation, which does NOT safely
+## translate the way short fixed labels do -- word order and grammar
+## differ across languages in ways naive concatenation can't handle.
+## Only the safe, unambiguous pieces are done here; see
+## translation_review_da.md / the session notes for what's deferred and
+## why, including two real traps found: an "ordinal suffix" function
+## (1st/2nd/3rd/4th) that's an English-specific grammar feature, and a
+## MONTHS3 array that looks like a translatable month list but is
+## actually parsing English text from an external UK Met Office feed --
+## translating it would break the parser, not the display.
+##############################################################################
+"StationTime | Outlook": $json.dumps($gettext("StationTime | Outlook")),
+"Climatological Summary": $json.dumps($gettext("Climatological Summary")),
+"More": $json.dumps($gettext("More")),
+"Less": $json.dumps($gettext("Less")),
+##############################################################################
+## cardAnemometer.js -- reuses cardWindCompass.js's compass rose, Max Gust,
+## Beaufort, Wind Run, Wind & Gust Chart & Records, and Gust keys above.
+##############################################################################
+"Anemometer": $json.dumps($gettext("Anemometer")),
+"Bearing": $json.dumps($gettext("Bearing")),
+"Ordinal": $json.dumps($gettext("Ordinal")),
+##############################################################################
+## cardPiezoRain.js
+##############################################################################
+"Piezo Rain": $json.dumps($gettext("Piezo Rain")),
+"This Month": $json.dumps($gettext("This Month")),
+"Last Hour": $json.dumps($gettext("Last Hour")),
+"Last 24hr": $json.dumps($gettext("Last 24hr")),
+"Rain Rate": $json.dumps($gettext("Rain Rate")),
+"Rain Event": $json.dumps($gettext("Rain Event")),
+"Rain & Rain Rate Chart & Records": $json.dumps($gettext("Rain & Rain Rate Chart & Records")),
+##############################################################################
+## cardRainfall.js -- reuses cardPiezoRain.js's This Month/Last Hour/
+## Last 24hr/Rain Rate/Rain Event/Rain & Rain Rate Chart & Records keys.
+##############################################################################
+"Rainfall": $json.dumps($gettext("Rainfall")),
+##############################################################################
+## cardTippingRain.js -- reuses the same rain-vocabulary keys above.
+##############################################################################
+"Tipping Rain": $json.dumps($gettext("Tipping Rain")),
+##############################################################################
+## cardMoonPhase.js -- like cardVapourPressureDeficit.js, this file's
+## source is dominated by an inline SVG illustration (a detailed lunar
+## texture/gradient set), not text. Its real content is a small METEOR_EVENTS
+## calendar: 19 entries with only ~18 unique phrases. Each phrase is
+## translated as one complete, indivisible unit (e.g. "Perseids peak" is
+## one dictionary entry) rather than decomposed into a shower name + a
+## status word and reassembled -- unlike cardClockOutlook.js's forecast
+## sentences, this is a small FIXED, finite set of known phrases, so
+## phrase-level translation is safe here; there's no dynamic
+## concatenation to get wrong.
+##############################################################################
+"Current Moonphase": $json.dumps($gettext("Current Moonphase")),
+"Moon Rise": $json.dumps($gettext("Moon Rise")),
+"Moon Set": $json.dumps($gettext("Moon Set")),
+"Distance": $json.dumps($gettext("Distance")),
+"Illumination": $json.dumps($gettext("Illumination")),
+"Next Full Moon": $json.dumps($gettext("Next Full Moon")),
+"Next New Moon": $json.dumps($gettext("Next New Moon")),
+"Meteor Shower": $json.dumps($gettext("Meteor Shower")),
+"Celestial Data \u2013 Radio Aurora | Northern Lights - Meteor Showers - Moon Data": $json.dumps($gettext("Celestial Data \u2013 Radio Aurora | Northern Lights - Meteor Showers - Moon Data")),
+"Quadrantids": $json.dumps($gettext("Quadrantids")),
+"Quadrantids peak": $json.dumps($gettext("Quadrantids peak")),
+"Approaching Lyrids": $json.dumps($gettext("Approaching Lyrids")),
+"Lyrids peak": $json.dumps($gettext("Lyrids peak")),
+"ETA Aquarids": $json.dumps($gettext("ETA Aquarids")),
+"Delta Aquarids soon": $json.dumps($gettext("Delta Aquarids soon")),
+"Delta Aquarids peak": $json.dumps($gettext("Delta Aquarids peak")),
+"Perseids active": $json.dumps($gettext("Perseids active")),
+"Perseids peak": $json.dumps($gettext("Perseids peak")),
+"Perseids passed": $json.dumps($gettext("Perseids passed")),
+"Draconids peak": $json.dumps($gettext("Draconids peak")),
+"Orionids peak": $json.dumps($gettext("Orionids peak")),
+"South Taurids peak": $json.dumps($gettext("South Taurids peak")),
+"North Taurids peak": $json.dumps($gettext("North Taurids peak")),
+"Leonids peak": $json.dumps($gettext("Leonids peak")),
+"Geminids peak": $json.dumps($gettext("Geminids peak")),
+"Ursids active": $json.dumps($gettext("Ursids active")),
+"Ursids peak": $json.dumps($gettext("Ursids peak")),
+"No Meteor Showers": $json.dumps($gettext("No Meteor Showers")),
+##############################################################################
+## cardSolarDial.js -- Illumination and the Celestial Data tooltip reuse
+## cardMoonPhase.js's keys above.
+##############################################################################
+"Solar Dial": $json.dumps($gettext("Solar Dial")),
+"Daylight | Darkness": $json.dumps($gettext("Daylight | Darkness")),
+"Sun Azimuth": $json.dumps($gettext("Sun Azimuth")),
+"Sun Elevation": $json.dumps($gettext("Sun Elevation")),
+"Sunrise (First Light)": $json.dumps($gettext("Sunrise (First Light)")),
+"Sunset (Last Light)": $json.dumps($gettext("Sunset (Last Light)")),
+"Moon Phase": $json.dumps($gettext("Moon Phase")),
+"Moonrise | Moonset": $json.dumps($gettext("Moonrise | Moonset")),
+"Sun Set": $json.dumps($gettext("Sun Set")),
+"Sun Rise": $json.dumps($gettext("Sun Rise")),
+##############################################################################
+## cardSolarEnergy.js
+##############################################################################
+"Solar Energy": $json.dumps($gettext("Solar Energy")),
+"PV Array Generating": $json.dumps($gettext("PV Array Generating")),
+"Grid": $json.dumps($gettext("Grid")),
+"Battery": $json.dumps($gettext("Battery")),
+"House Load": $json.dumps($gettext("House Load")),
+"Solar Daily Energy": $json.dumps($gettext("Solar Daily Energy")),
+"Grid Daily Export": $json.dumps($gettext("Grid Daily Export")),
+"PV Efficiency": $json.dumps($gettext("PV Efficiency")),
+"Solar Energy Chart & Records": $json.dumps($gettext("Solar Energy Chart & Records")),
+"Charging": $json.dumps($gettext("Charging")),
+"Discharging": $json.dumps($gettext("Discharging")),
+"Exporting": $json.dumps($gettext("Exporting")),
+"Importing": $json.dumps($gettext("Importing")),
+##############################################################################
+## cardLightning.js
+##############################################################################
+"Lightning": $json.dumps($gettext("Lightning")),
+"Current": $json.dumps($gettext("Current")),
+"Today": $json.dumps($gettext("Today")),
+"All-Time Total": $json.dumps($gettext("All-Time Total")),
+"Last Detected": $json.dumps($gettext("Last Detected")),
+"Last Distance": $json.dumps($gettext("Last Distance")),
+"Lightning Chart & Records": $json.dumps($gettext("Lightning Chart & Records")),
+##############################################################################
+## cardPollen.js -- Low/Moderate/High/Very High/Risk reuse cardUvIndex.js's
+## keys above.
+##############################################################################
+"None": $json.dumps($gettext("None")),
+"No Data": $json.dumps($gettext("No Data")),
+"Current Pollen Risk": $json.dumps($gettext("Current Pollen Risk")),
+"Grass Pollen": $json.dumps($gettext("Grass Pollen")),
+"Tree Pollen": $json.dumps($gettext("Tree Pollen")),
+"Weed Pollen": $json.dumps($gettext("Weed Pollen")),
+"Pollen Chart & Records": $json.dumps($gettext("Pollen Chart & Records")),
+##############################################################################
+## cardGreenhouseGas.js -- chemical formula labels (NO2, CO, O3, SO2, AOD,
+## NH3) deliberately left untranslated, same category as unit
+## abbreviations -- universal scientific notation, not English words.
+##############################################################################
+"Greenhouse Gas": $json.dumps($gettext("Greenhouse Gas")),
+"Nitrogen Dioxide": $json.dumps($gettext("Nitrogen Dioxide")),
+"Carbon Monoxide": $json.dumps($gettext("Carbon Monoxide")),
+"Ozone": $json.dumps($gettext("Ozone")),
+"Sulphur Dioxide": $json.dumps($gettext("Sulphur Dioxide")),
+"Aerosol Optical Depth": $json.dumps($gettext("Aerosol Optical Depth")),
+"Ammonia": $json.dumps($gettext("Ammonia")),
+"Greenhouse Gases Chart & Records": $json.dumps($gettext("Greenhouse Gases Chart & Records")),
+##############################################################################
+## cardAirquality.js -- Low/Moderate/High/Very High/No Data reuse
+## cardUvIndex.js/cardPollen.js's keys above. PM2.5/PM10.0/PM1.0/PM4.0
+## deliberately left untranslated -- same reasoning as the chemical
+## formulas above.
+##############################################################################
+"Airquality (UK DAQI)": $json.dumps($gettext("Airquality (UK DAQI)")),
+"Overall": $json.dumps($gettext("Overall")),
+"Air Quality Chart & Records": $json.dumps($gettext("Air Quality Chart & Records")),
+"No particle sensor data available": $json.dumps($gettext("No particle sensor data available")),
+##############################################################################
+## cardEvapoTranspiration.js -- Last Hour/This Month/Records/Current reuse
+## keys above. Two internal 'months' arrays deliberately left
+## untranslated: one is a parser (same Intl('en-GB')+.indexOf() trap as
+## cardClockOutlook.js/cardLightning.js), the other feeds a monthLabel
+## field that's computed but never actually displayed anywhere in this
+## file -- genuinely dead code, not worth adding an unused key for.
+##############################################################################
+"Evapotranspiration (mm)": $json.dumps($gettext("Evapotranspiration (mm)")),
+"Last 24 Hours": $json.dumps($gettext("Last 24 Hours")),
+"This Year": $json.dumps($gettext("This Year")),
+##############################################################################
+## cardEarthquake.js -- Moderate reuses cardUvIndex.js's key above.
+##############################################################################
+"Minor": $json.dumps($gettext("Minor")),
+"Light": $json.dumps($gettext("Light")),
+"Strong": $json.dumps($gettext("Strong")),
+"Great": $json.dumps($gettext("Great")),
+"Major": $json.dumps($gettext("Major")),
+"Earthquake": $json.dumps($gettext("Earthquake")),
+"Location": $json.dumps($gettext("Location")),
+"Time": $json.dumps($gettext("Time")),
+"Depth": $json.dumps($gettext("Depth")),
+"Epicenter": $json.dumps($gettext("Epicenter")),
+"Category": $json.dumps($gettext("Category")),
+"Earthquake Map": $json.dumps($gettext("Earthquake Map")),
+"Magnitude": $json.dumps($gettext("Magnitude")),
+"Unknown location": $json.dumps($gettext("Unknown location")),
+##############################################################################
+## cardCurrent.js -- North/NNE/.../NNW reuse the full-name compass keys
+## from cardWindCompass.js. The weather-condition classifier below is a
+## small fixed set of complete phrases (like cardMoonPhase.js's meteor
+## showers) -- each translated as one indivisible unit, no concatenation
+## involved. 'oktas'/'okta' (the cloud-cover scale) deliberately left
+## untranslated -- the international meteorological unit name (from
+## Latin octo), used unchanged in Danish and most European languages.
+##############################################################################
+"Rain Showers Windy Conditions": $json.dumps($gettext("Rain Showers Windy Conditions")),
+"Flooding Possible": $json.dumps($gettext("Flooding Possible")),
+"Heavy Rain": $json.dumps($gettext("Heavy Rain")),
+"Moderate Rain": $json.dumps($gettext("Moderate Rain")),
+"Light Rain": $json.dumps($gettext("Light Rain")),
+"Steady Rain": $json.dumps($gettext("Steady Rain")),
+"Heavy Snow": $json.dumps($gettext("Heavy Snow")),
+"Moderate Snow": $json.dumps($gettext("Moderate Snow")),
+"Light Snow": $json.dumps($gettext("Light Snow")),
+"Misty Conditions": $json.dumps($gettext("Misty Conditions")),
+"Misty Hazy Conditions": $json.dumps($gettext("Misty Hazy Conditions")),
+"Strong Wind Conditions": $json.dumps($gettext("Strong Wind Conditions")),
+"Very Windy Conditions": $json.dumps($gettext("Very Windy Conditions")),
+"Moderate Wind Conditions": $json.dumps($gettext("Moderate Wind Conditions")),
+"Breezy Conditions": $json.dumps($gettext("Breezy Conditions")),
+"Clear Sky": $json.dumps($gettext("Clear Sky")),
+"Sunny": $json.dumps($gettext("Sunny")),
+"Mostly Clear Conditions": $json.dumps($gettext("Mostly Clear Conditions")),
+"Mostly Sunny Conditions": $json.dumps($gettext("Mostly Sunny Conditions")),
+"Partly Cloudy Conditions": $json.dumps($gettext("Partly Cloudy Conditions")),
+"Mostly Cloudy Conditions": $json.dumps($gettext("Mostly Cloudy Conditions")),
+"Overcast Conditions": $json.dumps($gettext("Overcast Conditions")),
+"Current Conditions": $json.dumps($gettext("Current Conditions")),
+"Cloud Base": $json.dumps($gettext("Cloud Base")),
+"Visibility": $json.dumps($gettext("Visibility")),
+"Cloud Cover": $json.dumps($gettext("Cloud Cover")),
+"60min Temp Avg": $json.dumps($gettext("60min Temp Avg")),
+"10min Gust Max": $json.dumps($gettext("10min Gust Max")),
+"10min Speed Avg": $json.dumps($gettext("10min Speed Avg")),
+"Rainfall (last hr)": $json.dumps($gettext("Rainfall (last hr)")),
+"10min Wind Dir": $json.dumps($gettext("10min Wind Dir")),
+"Nearby METAR": $json.dumps($gettext("Nearby METAR")),
+##############################################################################
+## cardForecast.js -- WEEKDAYS reuse (via the same keys) is new here since
+## they're abbreviated (Sun/Mon/...); N/NNE/etc reuse the abbreviated
+## compass keys from cardClockOutlook.js/cardWindCompass.js. Today reuses
+## cardLightning.js's key. 'Day'/'Night' as internal period-state values
+## (s.period === 'Day') are NOT in this dictionary -- only the one
+## genuinely displayed "Night" suffix (weekday + " Night") is.
+##############################################################################
+"Sun": $json.dumps($gettext("Sun")),
+"Mon": $json.dumps($gettext("Mon")),
+"Tue": $json.dumps($gettext("Tue")),
+"Wed": $json.dumps($gettext("Wed")),
+"Thu": $json.dumps($gettext("Thu")),
+"Fri": $json.dumps($gettext("Fri")),
+"Sat": $json.dumps($gettext("Sat")),
+"Forecast": $json.dumps($gettext("Forecast")),
+"Station 7-Day Forecast and Meteogram": $json.dumps($gettext("Station 7-Day Forecast and Meteogram")),
+"Unknown": $json.dumps($gettext("Unknown")),
+"Tomorrow": $json.dumps($gettext("Tomorrow")),
+"Tonight": $json.dumps($gettext("Tonight")),
+"Tomorrow Night": $json.dumps($gettext("Tomorrow Night")),
+"Night": $json.dumps($gettext("Night")),
+"hum": $json.dumps($gettext("hum"))
+}
