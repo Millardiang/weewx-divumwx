@@ -381,8 +381,24 @@ DIVUMWX_REPORT_SEARCH_LIST_EXTENSIONS = [
     'user.stats.MyStats', 'user.divumwx.TimeSince', 'user.divumwx_cards.DivumwxCards',
 ]
 
+# Language codes DivumWX ships a skins/DivumWX/lang/<code>.conf for, in the
+# order offered at install time. 'en' is the reference dictionary (see that
+# file's own header comment) and is always available even though it's not a
+# translation. Adding a new language later means: (1) drop a new
+# lang/<code>.conf next to these (en.conf is the template to copy), (2) add
+# its files= entry in DivumwxInstaller.__init__ below, (3) add it here.
+DIVUMWX_LANG_CHOICES = {
+    'en': 'English',
+    'fr': 'Français (French)',
+    'de': 'Deutsch (German)',
+    'es': 'Español (Spanish)',
+    'it': 'Italiano (Italian)',
+    'da': 'Dansk (Danish)',
+    'no': 'Norsk (Norwegian)',
+}
 
-def apply_divumwx_report_merge(cfg, html_root):
+
+def apply_divumwx_report_merge(cfg, html_root, lang=None):
     """
     Mutates cfg['StdReport']['DivumWXReport'] in place, creating it if
     needed.
@@ -426,6 +442,7 @@ def apply_divumwx_report_merge(cfg, html_root):
         'html_root_set': False,
         'skin_semantics_defaulted': False,
         'unit_system_enforced': False,
+        'lang_enforced': False,
         'defaults_enforced': [],
         'cheetah_enforced': [],
         'generators_enforced': False,
@@ -448,6 +465,21 @@ def apply_divumwx_report_merge(cfg, html_root):
     if 'skin_semantics' not in dr:
         dr['skin_semantics'] = '2'
         report['skin_semantics_defaulted'] = True
+
+    # lang: this is WeeWX's own real [StdReport][[<report>]] lang setting
+    # (see https://weewx.com/docs/latest/custom/localization/), not a
+    # DivumWX invention -- CheetahGenerator uses it to pick which
+    # skins/DivumWX/lang/<code>.conf to merge in as the active [Texts]
+    # dictionary for $gettext(...) lookups in the two .tmpl files. Passed
+    # in from configure()'s prompt; enforced (not set-once) so re-running
+    # the installer is the supported way to change language later, same
+    # policy as unit_system just below. A caller that doesn't pass lang at
+    # all (e.g. an isolated unit test) leaves whatever's already there
+    # untouched rather than forcing a default -- only a real, deliberately
+    # chosen code overwrites it.
+    if lang is not None and dr.get('lang') != lang:
+        dr['lang'] = lang
+        report['lang_enforced'] = True
 
     if dr.get('unit_system') != DIVUMWX_REPORT_UNIT_SYSTEM:
         dr['unit_system'] = DIVUMWX_REPORT_UNIT_SYSTEM
@@ -2184,17 +2216,37 @@ class DivumwxInstaller(ExtensionInstaller):
                 ('skins/DivumWX', [
                     'skins/DivumWX/jsondata/archive.json.tmpl',
                     'skins/DivumWX/jsondata/charts.json.tmpl',
+                    # en.conf is the reference dictionary (see its own header
+                    # comment), not just "the English translation" -- keep it
+                    # first. fr/de/es/it/da/no are the six languages this
+                    # translation pass actually targeted -- real DivumWX
+                    # [Texts] content, verified against the real Cheetah/
+                    # ConfigObj engines. DIVUMWX_LANG_CHOICES above is the
+                    # single place a new one gets added alongside its own
+                    # lang/<code>.conf file.
+                    'skins/DivumWX/lang/en.conf',
+                    'skins/DivumWX/lang/fr.conf',
+                    'skins/DivumWX/lang/de.conf',
+                    'skins/DivumWX/lang/es.conf',
+                    'skins/DivumWX/lang/it.conf',
+                    'skins/DivumWX/lang/da.conf',
+                    'skins/DivumWX/lang/no.conf',
+                    # cn/cz/en_US/gr/nl/th.conf: kept at the person's
+                    # request rather than deleted, but flagged here as
+                    # unmodified Seasons-skin boilerplate (still headed
+                    # "Localization File -- Seasons skin" internally) --
+                    # NOT DivumWX-specific content, and not offered in
+                    # DIVUMWX_LANG_CHOICES, so the install-time language
+                    # prompt never selects them. If one of these languages
+                    # is wanted for real, it needs the same treatment
+                    # fr/de/es/it/da/no.conf got: a real [Texts] section
+                    # with DivumWX's own nine trend phrases, then added to
+                    # DIVUMWX_LANG_CHOICES.
                     'skins/DivumWX/lang/cn.conf',
                     'skins/DivumWX/lang/cz.conf',
-                    'skins/DivumWX/lang/de.conf',
-                    'skins/DivumWX/lang/en.conf',
                     'skins/DivumWX/lang/en_US.conf',
-                    'skins/DivumWX/lang/es.conf',
-                    'skins/DivumWX/lang/fr.conf',
                     'skins/DivumWX/lang/gr.conf',
-                    'skins/DivumWX/lang/it.conf',
                     'skins/DivumWX/lang/nl.conf',
-                    'skins/DivumWX/lang/no.conf',
                     'skins/DivumWX/lang/th.conf',
                 ]),
                 # skins/DivumWXSkyfield and skins/DivumWXCelestial are
@@ -2277,7 +2329,24 @@ class DivumwxInstaller(ExtensionInstaller):
 
         # --- In additions-file order ---
 
-        report_merge_result = apply_divumwx_report_merge(cfg, html_root=html_root)
+        printer.out("Available languages:", level=1)
+        for code, label in DIVUMWX_LANG_CHOICES.items():
+            printer.out(f"  {code}: {label}", level=1)
+        # Default to whatever's already configured (re-running the installer
+        # without changing anything should be a no-op here), or 'en' on a
+        # genuinely fresh install. prompt_with_options enforces the answer
+        # is one of the known codes, so a typo can't silently set an
+        # unsupported lang value with no matching lang/<code>.conf on disk.
+        existing_lang = cfg.get('StdReport', {}).get('DivumWXReport', {}).get('lang', 'en')
+        if existing_lang not in DIVUMWX_LANG_CHOICES:
+            existing_lang = 'en'
+        lang = weecfg.prompt_with_options(
+            "Language for the DivumWX report (translates the barometer "
+            "trend text in archive.json; see readme for what this does "
+            "and doesn't cover)",
+            default=existing_lang, options=list(DIVUMWX_LANG_CHOICES.keys()))
+
+        report_merge_result = apply_divumwx_report_merge(cfg, html_root=html_root, lang=lang)
         if report_merge_result['unit_system_enforced']:
             printer.out(
                 "DivumWXReport unit_system set to METRICWX (required -- "
@@ -2285,6 +2354,8 @@ class DivumwxInstaller(ExtensionInstaller):
                 "agree on one unit system; the front-end handles display "
                 "conversion from there). See the comment above this "
                 "setting in weewx.conf before changing it.", level=2)
+        if report_merge_result['lang_enforced']:
+            printer.out(f"DivumWXReport lang set to '{lang}'.", level=2)
 
         apply_calculation_merges(cfg, fresh_install=fresh_install)
 
