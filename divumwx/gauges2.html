@@ -443,6 +443,71 @@ var ARCHIVE_JSON_URL = './jsondata/archive.json';
 var LOOP_POLL_MS = 15 * 1000;
 var ARCHIVE_POLL_MS = 60 * 1000;
 
+// Card <-> sensor mapping, inlined directly in this page -- see
+// records.html's copy of this same table for why it's duplicated rather
+// than shared from one file (a shared file silently failed in the field
+// when it wasn't deployed alongside the pages referencing it).
+var DIVUMWX_CARD_TO_BASES = {
+  cardTemperature:            ['outTemp', 'outDew'],
+  cardHumidity:                ['outHumid'],
+  cardAnemometer:              ['windSpeed', 'windGust'],
+  cardWindCompass:             ['windDir'],
+  cardBarometer:                ['barom'],
+  cardTippingRain:             ['rain', 'rainRate'],
+  cardPiezoRain:                ['prain', 'prainRate'],
+  cardSolarRadiation:          ['solar', 'solarRadiation'],
+  cardUvIndex:                  ['uv'],
+  cardVapourPressureDeficit:   ['vpd'],
+  cardEvapoTranspiration:      ['evt'],
+  cardLightning:                ['lightCount', 'lightDist'],
+  cardAirquality:               ['pm1_0', 'pm2_5', 'pm4_0', 'pm10_0', 'aod'],
+  cardGreenhouseGas:            ['co', 'co2', 'no2', 'nh3', 'o3', 'so2'],
+  cardPollen:                    ['alder', 'birch', 'olive', 'grass', 'mugwort', 'ragweed'],
+};
+var DIVUMWX_BASE_TO_CARD = {};
+Object.keys(DIVUMWX_CARD_TO_BASES).forEach(function(card){
+  DIVUMWX_CARD_TO_BASES[card].forEach(function(base){
+    DIVUMWX_BASE_TO_CARD[base.toLowerCase()] = card;
+  });
+});
+function isBaseCardEnabled(base, enabledCards) {
+  if (!Array.isArray(enabledCards) || enabledCards.length === 0) return true;
+  var card = DIVUMWX_BASE_TO_CARD[String(base).toLowerCase()];
+  if (!card) return true;
+  return enabledCards.indexOf(card) !== -1;
+}
+
+// Same reasoning and same rain/prain OR-case as gauges.html's
+// GAUGE_BASES -- kept in sync with that file's mapping since this page
+// mirrors its gauge set exactly (same order, g2 prefix instead of g).
+var GAUGE_BASES = {
+  g2Temp: ['outTemp'],
+  g2Wind: ['windSpeed', 'windGust'],
+  g2WindDir: ['windDir'],
+  g2Baro: ['barom'],
+  g2Rain: ['rain', 'prain'],
+  g2RainRate: ['rain', 'prain'],
+  g2Uvi: ['uv'],
+  g2Solar: ['solar', 'solarRadiation'],
+  g2Humid: ['outHumid'],
+  g2Dew: ['outDew'],
+  g2Aq: ['pm1_0', 'pm2_5', 'pm4_0', 'pm10_0'],
+  g2Lightning: ['lightCount', 'lightDist'],
+};
+var ENABLED_CARDS = null; // null = unknown yet / fetch failed -- fail open
+
+function applyGaugeVisibility(){
+  Object.keys(GAUGE_BASES).forEach(function(gaugeId){
+    var mount = document.getElementById(gaugeId);
+    if (!mount) return;
+    var wrap = mount.closest('.col-12');
+    if (!wrap) return;
+    var bases = GAUGE_BASES[gaugeId];
+    var show = bases.some(function(base){ return isBaseCardEnabled(base, ENABLED_CARDS); });
+    wrap.classList.toggle('d-none', !show);
+  });
+}
+
 var liveValues = {
   outTemp:null, tempDayMin:null, tempDayMax:null,
   windSpeed:null, windGust:null, windDir:null, windDir10:null,
@@ -520,6 +585,11 @@ function pollArchive(){
       liveValues.dewDayMin = (j.dew && j.dew.day_min != null) ? j.dew.day_min : null;
       liveValues.dewDayMax = (j.dew && j.dew.day_max != null) ? j.dew.day_max : null;
       if(j.rain && j.rain.day != null) liveValues.dayRain = j.rain.day;
+      var cards = j.meta && j.meta.enabled_cards;
+      if (Array.isArray(cards) && cards.length) {
+        ENABLED_CARDS = cards;
+        applyGaugeVisibility();
+      }
       renderAll();
     })
     .catch(function(e){

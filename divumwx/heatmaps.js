@@ -411,6 +411,59 @@
   let cellMetric = category.cellMetric;
   let stationLocation = '';
 
+  // Maps each heatmap category to the base series it represents -- clean
+  // 1:1 mapping for every category here, since this file already
+  // separates tipping-bucket rain ('rain') from piezo rain ('prain')
+  // into distinct categories.
+  const HEATMAP_CATEGORY_TO_BASE = {
+    temperature: 'outTemp',
+    wind: 'windGust',
+    barometer: 'barom',
+    solarRadiation: 'solar',
+    uv: 'uv',
+    humidity: 'outHumid',
+    rain: 'rain',
+    prain: 'prain',
+  };
+
+  // Card <-> sensor mapping, inlined directly in this file -- see
+  // records.html's copy of this same table for why it's duplicated
+  // rather than shared from one file (a shared file silently failed in
+  // the field when it wasn't deployed alongside the pages referencing
+  // it -- every isBaseCardEnabled() call threw a plain ReferenceError,
+  // with no visible symptom at all: tabs just stayed visible, as if the
+  // feature didn't exist).
+  const DIVUMWX_CARD_TO_BASES = {
+    cardTemperature:            ['outTemp', 'outDew'],
+    cardHumidity:                ['outHumid'],
+    cardAnemometer:              ['windSpeed', 'windGust'],
+    cardWindCompass:             ['windDir'],
+    cardBarometer:                ['barom'],
+    cardTippingRain:             ['rain', 'rainRate'],
+    cardPiezoRain:                ['prain', 'prainRate'],
+    cardSolarRadiation:          ['solar', 'solarRadiation'],
+    cardUvIndex:                  ['uv'],
+    cardVapourPressureDeficit:   ['vpd'],
+    cardEvapoTranspiration:      ['evt'],
+    cardLightning:                ['lightCount', 'lightDist'],
+    cardAirquality:               ['pm1_0', 'pm2_5', 'pm4_0', 'pm10_0', 'aod'],
+    cardGreenhouseGas:            ['co', 'co2', 'no2', 'nh3', 'o3', 'so2'],
+    cardPollen:                    ['alder', 'birch', 'olive', 'grass', 'mugwort', 'ragweed'],
+  };
+  const DIVUMWX_BASE_TO_CARD = {};
+  Object.keys(DIVUMWX_CARD_TO_BASES).forEach(card => {
+    DIVUMWX_CARD_TO_BASES[card].forEach(base => {
+      DIVUMWX_BASE_TO_CARD[base.toLowerCase()] = card;
+    });
+  });
+  function isBaseCardEnabled(base, enabledCards) {
+    if (!Array.isArray(enabledCards) || enabledCards.length === 0) return true;
+    const card = DIVUMWX_BASE_TO_CARD[String(base).toLowerCase()];
+    if (!card) return true; // unmapped base -- deliberately always shown
+    return enabledCards.indexOf(card) !== -1;
+  }
+  let enabledCards = null; // null = unknown yet / fetch failed -- fail open
+
   const style = document.createElement('style');
   style.textContent = `
     [data-embed="1"] .hm-tabs{ display:none; }
@@ -642,8 +695,28 @@
     .then(data => {
       const loc = data && data.meta && data.meta.station_location;
       if (loc) { stationLocation = loc; updatePageTitle(); updateBrandText(); }
+      const cards = data && data.meta && data.meta.enabled_cards;
+      if (Array.isArray(cards) && cards.length) {
+        enabledCards = cards;
+        applyTabVisibility();
+      }
     })
     .catch(() => {});
+
+  function applyTabVisibility(){
+    let currentTabHidden = false;
+    document.querySelectorAll('.hm-tab').forEach(btn => {
+      const cat = btn.dataset.cat;
+      const base = HEATMAP_CATEGORY_TO_BASE[cat];
+      const show = !base || isBaseCardEnabled(base, enabledCards);
+      btn.classList.toggle('d-none', !show);
+      if (!show && cat === categoryKey) currentTabHidden = true;
+    });
+    if (currentTabHidden) {
+      const firstVisible = document.querySelector('.hm-tab:not(.d-none)');
+      if (firstVisible) switchCategory(firstVisible.dataset.cat);
+    }
+  }
 
   function updateBrandText(){
     const el = document.querySelector('.brand-text');

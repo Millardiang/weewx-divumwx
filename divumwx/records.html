@@ -404,6 +404,53 @@ function updateNavCollapse() {
 }
 
 const ARCHIVE_JSON_URL = './jsondata/archive.json';
+var ENABLED_CARDS = null; // null = unknown yet / fetch failed -- fail open (show everything)
+
+// Card <-> sensor mapping, inlined directly in this page rather than a
+// shared external file. A shared cardSensorMap.js was tried first and
+// silently failed in the field -- when it wasn't deployed alongside the
+// pages that referenced it, every isBaseCardEnabled() call threw a plain
+// ReferenceError, which fails with no visible symptom at all (no crash,
+// nothing on screen -- gauges/tabs/records just stay visible, exactly as
+// if the feature didn't exist). Duplicating this small table in every
+// page that needs it costs a little repetition but removes that whole
+// failure mode -- there's no second file to forget to deploy.
+//
+// DELIBERATELY UNMAPPED (left always shown, never hidden): airDen (air
+// density -- a software calculation, not a discrete sensor with its own
+// card), cloudCover, solarGeneration/solarExport (no confirmed dedicated
+// card name for these in any enabled_cards sample seen). Guessing a card
+// name for these risks hiding legitimate data, so they're left alone.
+var DIVUMWX_CARD_TO_BASES = {
+  cardTemperature:            ['outTemp', 'outDew'],
+  cardHumidity:                ['outHumid'],
+  cardAnemometer:              ['windSpeed', 'windGust'],
+  cardWindCompass:             ['windDir'],
+  cardBarometer:                ['barom'],
+  cardTippingRain:             ['rain', 'rainRate'],
+  cardPiezoRain:                ['prain', 'prainRate'],
+  cardSolarRadiation:          ['solar', 'solarRadiation'],
+  cardUvIndex:                  ['uv'],
+  cardVapourPressureDeficit:   ['vpd'],
+  cardEvapoTranspiration:      ['evt'],
+  cardLightning:                ['lightCount', 'lightDist'],
+  cardAirquality:               ['pm1_0', 'pm2_5', 'pm4_0', 'pm10_0', 'aod'],
+  cardGreenhouseGas:            ['co', 'co2', 'no2', 'nh3', 'o3', 'so2'],
+  cardPollen:                    ['alder', 'birch', 'olive', 'grass', 'mugwort', 'ragweed'],
+};
+var DIVUMWX_BASE_TO_CARD = {};
+Object.keys(DIVUMWX_CARD_TO_BASES).forEach(function(card){
+  DIVUMWX_CARD_TO_BASES[card].forEach(function(base){
+    DIVUMWX_BASE_TO_CARD[base.toLowerCase()] = card;
+  });
+});
+function isBaseCardEnabled(base, enabledCards) {
+  if (!Array.isArray(enabledCards) || enabledCards.length === 0) return true;
+  var card = DIVUMWX_BASE_TO_CARD[String(base).toLowerCase()];
+  if (!card) return true; // unmapped base -- see DELIBERATELY UNMAPPED above
+  return enabledCards.indexOf(card) !== -1;
+}
+
 function setStationTitle() {
   fetch(ARCHIVE_JSON_URL + '?_=' + Date.now(), { cache: 'no-store' })
     .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
@@ -411,8 +458,13 @@ function setStationTitle() {
       const loc = data && data.meta && data.meta.station_location;
       const el = document.querySelector('.brand-text');
       if (loc && el) el.textContent = loc;
+      const cards = data && data.meta && data.meta.enabled_cards;
+      if (Array.isArray(cards) && cards.length) {
+        ENABLED_CARDS = cards;
+        renderAll();
+      }
     })
-    .catch(e => console.warn('records: station_location fetch failed —', e.message));
+    .catch(e => console.warn('records: station_location/enabled_cards fetch failed —', e.message));
 }
 
 function includeHTML(callback) {
@@ -722,7 +774,11 @@ function renderAll() {
   METRICS.forEach(metric => {
     const entry = SERIES_INDEX[metric.base.toLowerCase()];
     if (!entry) return;
+    // Mark as "used" regardless of enabled state -- otherwise a
+    // recognised-but-disabled base would fall through into the
+    // leftovers/"unrecognised" section below instead of being hidden.
     usedBases.add(metric.base.toLowerCase());
+    if (!isBaseCardEnabled(metric.base, ENABLED_CARDS)) return;
     const records = computeRecords(entry, periods);
     byCategory[metric.category].push(renderMetricCard(metric, records, periods));
   });

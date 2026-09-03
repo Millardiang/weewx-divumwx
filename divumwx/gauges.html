@@ -896,6 +896,73 @@ var LOOP_POLL_MS = 15 * 1000;
 var ARCHIVE_POLL_MS = 60 * 1000;
 var CHARTS_POLL_MS = 60 * 60 * 1000;
 
+// Card <-> sensor mapping, inlined directly in this page -- see
+// records.html's copy of this same table for why it's duplicated rather
+// than shared from one file (a shared file silently failed in the field
+// when it wasn't deployed alongside the pages referencing it).
+var DIVUMWX_CARD_TO_BASES = {
+  cardTemperature:            ['outTemp', 'outDew'],
+  cardHumidity:                ['outHumid'],
+  cardAnemometer:              ['windSpeed', 'windGust'],
+  cardWindCompass:             ['windDir'],
+  cardBarometer:                ['barom'],
+  cardTippingRain:             ['rain', 'rainRate'],
+  cardPiezoRain:                ['prain', 'prainRate'],
+  cardSolarRadiation:          ['solar', 'solarRadiation'],
+  cardUvIndex:                  ['uv'],
+  cardVapourPressureDeficit:   ['vpd'],
+  cardEvapoTranspiration:      ['evt'],
+  cardLightning:                ['lightCount', 'lightDist'],
+  cardAirquality:               ['pm1_0', 'pm2_5', 'pm4_0', 'pm10_0', 'aod'],
+  cardGreenhouseGas:            ['co', 'co2', 'no2', 'nh3', 'o3', 'so2'],
+  cardPollen:                    ['alder', 'birch', 'olive', 'grass', 'mugwort', 'ragweed'],
+};
+var DIVUMWX_BASE_TO_CARD = {};
+Object.keys(DIVUMWX_CARD_TO_BASES).forEach(function(card){
+  DIVUMWX_CARD_TO_BASES[card].forEach(function(base){
+    DIVUMWX_BASE_TO_CARD[base.toLowerCase()] = card;
+  });
+});
+function isBaseCardEnabled(base, enabledCards) {
+  if (!Array.isArray(enabledCards) || enabledCards.length === 0) return true;
+  var card = DIVUMWX_BASE_TO_CARD[String(base).toLowerCase()];
+  if (!card) return true;
+  return enabledCards.indexOf(card) !== -1;
+}
+
+// Maps each gauge's mount element id to the base series it represents;
+// gRain/gRainRate check whether EITHER a tipping-bucket or piezo rain
+// card is enabled, since this page shows a single rain gauge fed from
+// loop.json's plain 'rain' object regardless of which physical sensor
+// type is configured (see pollArchive() below reading j.rain.day).
+var GAUGE_BASES = {
+  gTemp: ['outTemp'],
+  gWind: ['windSpeed', 'windGust'],
+  gWindDir: ['windDir'],
+  gBaro: ['barom'],
+  gRain: ['rain', 'prain'],
+  gRainRate: ['rain', 'prain'],
+  gUvi: ['uv'],
+  gSolar: ['solar', 'solarRadiation'],
+  gHumid: ['outHumid'],
+  gDew: ['outDew'],
+  gAq: ['pm1_0', 'pm2_5', 'pm4_0', 'pm10_0'],
+  gLightning: ['lightCount', 'lightDist'],
+};
+var ENABLED_CARDS = null; // null = unknown yet / fetch failed -- fail open
+
+function applyGaugeVisibility(){
+  Object.keys(GAUGE_BASES).forEach(function(gaugeId){
+    var mount = document.getElementById(gaugeId);
+    if (!mount) return;
+    var wrap = mount.closest('.col-12');
+    if (!wrap) return;
+    var bases = GAUGE_BASES[gaugeId];
+    var show = bases.some(function(base){ return isBaseCardEnabled(base, ENABLED_CARDS); });
+    wrap.classList.toggle('d-none', !show);
+  });
+}
+
 var liveValues = { outTemp:null, windSpeed:null, windGust:null, windDir:null, windDir10:null, barometer:null, dayRain:null, rainRate:null, uv:null, radiation:null, outHumidity:null, dewpoint:null, aqi:null, lightningCount:null, baroDayMin:null, baroDayMax:null };
 
 function setGaugesStatus(status){
@@ -959,6 +1026,11 @@ function pollArchive(){
       liveValues.baroDayMin = (j.barom && j.barom.day_min != null) ? j.barom.day_min : null;
       liveValues.baroDayMax = (j.barom && j.barom.day_max != null) ? j.barom.day_max : null;
       if(j.rain && j.rain.day != null) liveValues.dayRain = j.rain.day;
+      var cards = j.meta && j.meta.enabled_cards;
+      if (Array.isArray(cards) && cards.length) {
+        ENABLED_CARDS = cards;
+        applyGaugeVisibility();
+      }
       renderAll(liveValues);
     })
     .catch(function(e){

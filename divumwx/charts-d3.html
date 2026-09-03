@@ -2271,6 +2271,96 @@ pollIsDayForTheme();
 setInterval(pollIsDayForTheme, THEME_ISDAY_POLL_MS);
 
 const STATION_TITLE_JSON_URL = './jsondata/archive.json';
+
+// Card <-> sensor mapping, inlined directly in this page -- see
+// records.html's copy of this same table for why it's duplicated rather
+// than shared from one file (a shared file silently failed in the field
+// when it wasn't deployed alongside the pages referencing it).
+const DIVUMWX_CARD_TO_BASES = {
+  cardTemperature:            ['outTemp', 'outDew'],
+  cardHumidity:                ['outHumid'],
+  cardAnemometer:              ['windSpeed', 'windGust'],
+  cardWindCompass:             ['windDir'],
+  cardBarometer:                ['barom'],
+  cardTippingRain:             ['rain', 'rainRate'],
+  cardPiezoRain:                ['prain', 'prainRate'],
+  cardSolarRadiation:          ['solar', 'solarRadiation'],
+  cardUvIndex:                  ['uv'],
+  cardVapourPressureDeficit:   ['vpd'],
+  cardEvapoTranspiration:      ['evt'],
+  cardLightning:                ['lightCount', 'lightDist'],
+  cardAirquality:               ['pm1_0', 'pm2_5', 'pm4_0', 'pm10_0', 'aod'],
+  cardGreenhouseGas:            ['co', 'co2', 'no2', 'nh3', 'o3', 'so2'],
+  cardPollen:                    ['alder', 'birch', 'olive', 'grass', 'mugwort', 'ragweed'],
+};
+const DIVUMWX_BASE_TO_CARD = {};
+Object.keys(DIVUMWX_CARD_TO_BASES).forEach(card => {
+  DIVUMWX_CARD_TO_BASES[card].forEach(base => {
+    DIVUMWX_BASE_TO_CARD[base.toLowerCase()] = card;
+  });
+});
+function isBaseCardEnabled(base, enabledCards) {
+  if (!Array.isArray(enabledCards) || enabledCards.length === 0) return true;
+  const card = DIVUMWX_BASE_TO_CARD[String(base).toLowerCase()];
+  if (!card) return true;
+  return enabledCards.indexOf(card) !== -1;
+}
+
+// Maps each .records-tab category to the card(s) whose data it draws
+// from. Categories are deliberately NOT all mapped:
+//   - 'cloud' mixes cloudCover (no dedicated card) with lightDist
+//     (cardLightning) purely to approximate visibility -- gating this
+//     tab on cardLightning would hide "Cloud & Visibility" because
+//     Lightning was disabled, which would make no sense to a user. Left
+//     always visible.
+//   - 'aurora' / 'meteogram' / 'windrose' aren't backed by a selectable
+//     card at all. Left always visible.
+//   - 'rain' uses only 'rain'/'rainHourly'/'rainRateHourly' -- there is
+//     no piezo-rain (prain) variant anywhere in CHART_CATEGORIES, so
+//     this gates on cardTippingRain specifically. A piezo-only station
+//     getting an empty rain chart here is a pre-existing gap in this
+//     page (it never drew piezo data), not something papered over.
+//   - 'solaruv' combines UV and Solar Radiation, which have separate
+//     cards -- shown if EITHER is enabled.
+const TAB_CATEGORY_BASES = {
+  temperature: { any: ['outTemp'] },
+  wind:        { any: ['windSpeed'] },
+  rain:        { any: ['rain'] },
+  barometer:   { any: ['barom'] },
+  solaruv:     { any: ['uv', 'solar'] },
+  lightning:   { any: ['lightCount'] },
+  pollen:      { any: ['alder'] },
+  airquality:  { any: ['pm2_5'] },
+  gases:       { any: ['co2'] },
+};
+let ENABLED_CARDS = null; // null = unknown yet / fetch failed -- fail open
+
+function applyTabVisibility(){
+  let currentTabHidden = false;
+  document.querySelectorAll('.records-tab').forEach(btn => {
+    const cat = btn.dataset.cat;
+    const spec = TAB_CATEGORY_BASES[cat];
+    const show = !spec || spec.any.some(base => isBaseCardEnabled(base, ENABLED_CARDS));
+    btn.classList.toggle('d-none', !show);
+    if (!show && cat === currentCategory) currentTabHidden = true;
+  });
+  if (currentTabHidden) {
+    const firstVisible = document.querySelector('.records-tab:not(.d-none)');
+    if (firstVisible) {
+      currentCategory = firstVisible.dataset.cat;
+      hiddenSeries.clear();
+      const url = new URL(window.location.href);
+      url.searchParams.set('type', currentCategory);
+      history.replaceState(null, '', url);
+      document.querySelectorAll('.records-tab').forEach(b => b.classList.toggle('active', b === firstVisible));
+      updatePageTitle();
+      populateHistoricalYears();
+      renderChart();
+      renderRecordsPanel();
+    }
+  }
+}
+
 function setStationTitle(){
   fetch(STATION_TITLE_JSON_URL + ((STATION_TITLE_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'})
     .then(r => { if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
@@ -2278,8 +2368,13 @@ function setStationTitle(){
       const loc = data && data.meta && data.meta.station_location;
       const el = document.querySelector('.brand-text');
       if(loc && el) el.textContent = loc;
+      const cards = data && data.meta && data.meta.enabled_cards;
+      if (Array.isArray(cards) && cards.length) {
+        ENABLED_CARDS = cards;
+        applyTabVisibility();
+      }
     })
-    .catch(e => console.warn('Re-ImaginedWX charts: station_location fetch failed —', e.message));
+    .catch(e => console.warn('Re-ImaginedWX charts: station_location/enabled_cards fetch failed —', e.message));
 }
 
 function includeHTML(callback){
