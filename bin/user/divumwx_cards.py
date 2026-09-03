@@ -90,6 +90,24 @@ Provides three tags:
                                person who set up the station actually
                                said rather than an approximation from
                                station coordinates.
+
+    $divumwx_lang             — the report's active WeeWX `lang` setting
+                               ([StdReport][[DivumWXReport]] lang, set by
+                               install.py's language prompt -- see
+                               DIVUMWX_LANG_CHOICES there), as a plain JSON
+                               string, e.g. "fr". Defaults to "en" if the
+                               setting is missing entirely (an install that
+                               predates this field). This is the SAME value
+                               CheetahGenerator itself already used to pick
+                               skins/DivumWX/lang/<code>.conf for this
+                               template render's own $gettext(...) lookups
+                               (see archive.json.tmpl's "barom".trend_desc)
+                               -- exposing it here just lets the front-end
+                               read back which language that was, without
+                               it needing to independently know or guess.
+                               Embed directly:
+
+                                 "lang": $divumwx_lang
 """
 import json
 
@@ -139,6 +157,15 @@ class DivumwxCards(SearchList):
         in_uk_raw = cards_section.get('in_uk', None)
         in_uk = to_bool(in_uk_raw) if in_uk_raw not in (None, '') else None
 
+        # Read from [StdReport][[DivumWXReport]], not [DivumWXCards] -- this
+        # is WeeWX's own real report-level lang setting (the same one
+        # CheetahGenerator itself consulted to select this render's
+        # lang/<code>.conf), not a DivumWX-specific config key. Defaults to
+        # 'en' rather than None/null so front-end code can always treat this
+        # as a real language code without a separate null check.
+        divumwx_report = self.generator.config_dict.get('StdReport', {}).get('DivumWXReport', {})
+        lang = divumwx_report.get('lang', 'en') or 'en'
+
         search_list_extension = {
             'divumwx_enabled_cards': json.dumps(list(enabled_cards)),
             'divumwx_webcam_title': json.dumps(webcam_title),
@@ -146,5 +173,6 @@ class DivumwxCards(SearchList):
             'divumwx_station_image_title': json.dumps(station_image_title),
             'divumwx_station_image_path': json.dumps(station_image_path),
             'divumwx_in_uk': json.dumps(in_uk),
+            'divumwx_lang': json.dumps(lang),
         }
         return [search_list_extension]
