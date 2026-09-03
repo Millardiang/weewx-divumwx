@@ -4979,37 +4979,36 @@ try {
   beamHalfLen *= WIDEN;
   bucketW *= WIDEN;
 
-  // Hero value — sits above the top of the image (above the funnel rim
-  // and its entry drops, mechTopY=13) rather than inside the funnel
-  // interior. Pulled in just far enough to clear the entry drops (which
-  // were themselves brought in closer to the rim for the same reason —
-  // see their positions in renderCard) with a small margin, rather than
-  // leaving a big empty gap above the device. heroTopY is only an
-  // estimate of the text's own visual extent (11px font, so roughly one
-  // font-size of ascent above the baseline plus a little padding) — used
-  // purely for the recentring maths below, not for drawing.
-  var heroY = mechTopY - 19; // text baseline
-  var heroTopY = heroY - 9;
+  // Hero value — moved down into the funnel's own vertical section (the
+  // straight-walled collar above the tapered funnel rim, mechTopY)
+  // rather than floating above the whole image, per feedback on the
+  // rendered card. The collar height is now an independent, fixed value
+  // (funnelCollarH) — previously funnelExtTopY was derived FROM the
+  // hero text's position; that's inverted now, since the hero sits
+  // inside the collar rather than above it. heroY (baseline) is placed
+  // so the glyphs sit vertically centred within the collar: roughly one
+  // font-size of ascent above the baseline (11px font, so ~9px) and
+  // negligible descent (digits and "mm" have no descenders), so the
+  // glyphs' own visual centre sits ~heroAscent/2 above the baseline —
+  // matches the same 11px/9px assumption the original heroY/heroTopY
+  // comment already used.
+  var funnelCollarH = 26;
+  var funnelExtTopY = mechTopY - funnelCollarH;
+  var heroAscent = 9;
+  var heroY = (funnelExtTopY + mechTopY) / 2 + heroAscent / 2; // baseline
+  var heroTopY = heroY - heroAscent; // visual top edge estimate, kept for any other reader relying on it
 
-  // Vertical extension on top of the funnel — two straight walls rising
-  // from the funnel's existing open rim (mechTopY) up into what would
-  // otherwise be dead space between it and the hero value text above,
-  // rather than leaving that gap empty. Stops a few px short of the
-  // hero text's own estimated top edge (heroTopY) for breathing room.
-  var funnelExtTopY = heroTopY + 7;
-
-  // Recentre the whole drawing (hero text down to the tube floor)
-  // vertically within the fixed H-tall canvas, same idea as before —
-  // equal margins top and bottom — but now measured from the hero
-  // text's own top edge rather than the funnel rim, since that's the
-  // topmost thing on the card now. H itself is left untouched (still
-  // matching Piezo Rain's own canvas height, so the mechanism/tube keep
-  // the same rendered size as Piezo Rain's), so adding the hero above
-  // the image necessarily leaves less spare margin than before — this
-  // just keeps what margin remains split evenly.
-  var CONTENT_H = tubeBottomY - heroTopY;
+  // Recentre the whole drawing (funnel collar top down to the tube
+  // floor) vertically within the fixed H-tall canvas — equal margins
+  // top and bottom. Anchored to funnelExtTopY (the collar's top edge)
+  // rather than heroTopY now, since the collar is the topmost thing on
+  // the card once the hero text moved down inside it — heroTopY no
+  // longer marks the top of the drawing. H itself is left untouched
+  // (still matching Piezo Rain's own canvas height, so the mechanism/
+  // tube keep the same rendered size as Piezo Rain's).
+  var CONTENT_H = tubeBottomY - funnelExtTopY;
   var V_MARGIN = (H - CONTENT_H) / 2;
-  var VIEW_MIN_Y = heroTopY - V_MARGIN;
+  var VIEW_MIN_Y = funnelExtTopY - V_MARGIN;
 
   var THRESHOLDS = [
     { limit: 2, val: 1 }, { limit: 5, val: 2 }, { limit: 10, val: 3 },
@@ -5155,9 +5154,9 @@ try {
     dripG = svg.append('g');
     tubeDynG = svg.append('g');
 
-    // Hero value sits above the top of the image (see heroY, computed
-    // above alongside the vertical recentring maths) rather than inside
-    // the funnel interior.
+    // Hero value sits inside the funnel's vertical collar section (see
+    // heroY, computed above alongside the collar/vertical recentring
+    // maths) rather than floating above the whole image.
     svg.append('text').attr('class', 'tr-hero').attr('x', cx).attr('y', heroY)
       .style('text-anchor', 'middle').style('font-family', '"IBM Plex Mono", ui-monospace, monospace').style('font-weight', '600')
       .style('font-size', '11px').style('fill', 'var(--bw-accent)');
