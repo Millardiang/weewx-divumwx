@@ -146,7 +146,8 @@ null
 "webcam_image": $divumwx_webcam_image,#slurp
 "station_image_title": $divumwx_station_image_title,#slurp
 "station_image_path": $divumwx_station_image_path,#slurp
-"in_uk": $divumwx_in_uk#slurp
+"in_uk": $divumwx_in_uk,#slurp
+"lang": $divumwx_lang#slurp
 },
 
 "air_density": {
@@ -177,32 +178,44 @@ null
 #end try
 ## Most-extreme-first on BOTH sides — this is the ordering bug fix
 ## described at the top of the file.
+## Translation note: these nine phrases are the one place in this file
+## (see the file-level comment block above) that emit natural-language
+## text rather than a formatted number/unit. $gettext(...) resolves each
+## phrase against the report's active [StdReport][[DivumWXReport]] lang
+## setting (skins/DivumWX/lang/<code>.conf's [Texts] section) at
+## generation time, exactly the same mechanism weewx-loopdata/
+## weewx-celestial use for their own live-composed JS strings -- the
+## front-end (cardBarometer.js) never needs to know or care what
+## language is active, it just displays whatever trend_desc it's given.
+## Safe against the Cheetah #try/partial-output bug documented elsewhere
+## in this file: $gettext() is called only inside #set assignments here,
+## never emitted directly inside a #try body.
 #if $baromTrendCode > 3
-#set $baromTrendDesc = "Rising Very Rapidly"
+#set $baromTrendDesc = $gettext("Rising Very Rapidly")
 #set $baromTrendCode = 4
 #elif $baromTrendCode > 2
-#set $baromTrendDesc = "Rising Quickly"
+#set $baromTrendDesc = $gettext("Rising Quickly")
 #set $baromTrendCode = 3
 #elif $baromTrendCode > 1
-#set $baromTrendDesc = "Rising"
+#set $baromTrendDesc = $gettext("Rising")
 #set $baromTrendCode = 2
 #elif $baromTrendCode > 0
-#set $baromTrendDesc = "Rising Slowly"
+#set $baromTrendDesc = $gettext("Rising Slowly")
 #set $baromTrendCode = 1
 #elif $baromTrendCode < -3
-#set $baromTrendDesc = "Falling Very Rapidly"
+#set $baromTrendDesc = $gettext("Falling Very Rapidly")
 #set $baromTrendCode = -4
 #elif $baromTrendCode < -2
-#set $baromTrendDesc = "Falling Quickly"
+#set $baromTrendDesc = $gettext("Falling Quickly")
 #set $baromTrendCode = -3
 #elif $baromTrendCode < -1
-#set $baromTrendDesc = "Falling"
+#set $baromTrendDesc = $gettext("Falling")
 #set $baromTrendCode = -2
 #elif $baromTrendCode < 0
-#set $baromTrendDesc = "Falling Slowly"
+#set $baromTrendDesc = $gettext("Falling Slowly")
 #set $baromTrendCode = -1
 #else
-#set $baromTrendDesc = "Steady"
+#set $baromTrendDesc = $gettext("Steady")
 #set $baromTrendCode = 0
 #end if
 "current": $current.barometer.format(format_string="%.2f", None_string="null", add_label=False, localize=False),
