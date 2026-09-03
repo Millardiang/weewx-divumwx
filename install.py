@@ -540,6 +540,10 @@ def apply_divumwx_report_merge(cfg, html_root, lang=None):
     if dvmdata['WeatherData'].get('template') != 'jsondata/archive.json.tmpl':
         dvmdata['WeatherData']['template'] = 'jsondata/archive.json.tmpl'
         report['cheetah_enforced'].append('DVMDATA.WeatherData.template')
+    dvmdata.setdefault('Strings', {})
+    if dvmdata['Strings'].get('template') != 'jsondata/strings.json.tmpl':
+        dvmdata['Strings']['template'] = 'jsondata/strings.json.tmpl'
+        report['cheetah_enforced'].append('DVMDATA.Strings.template')
 
     # [[[Generators]]] -- structural, always enforced
     dr.setdefault('Generators', {})
@@ -2216,6 +2220,7 @@ class DivumwxInstaller(ExtensionInstaller):
                 ('skins/DivumWX', [
                     'skins/DivumWX/jsondata/archive.json.tmpl',
                     'skins/DivumWX/jsondata/charts.json.tmpl',
+                    'skins/DivumWX/jsondata/strings.json.tmpl',
                     # en.conf is the reference dictionary (see its own header
                     # comment), not just "the English translation" -- keep it
                     # first. fr/de/es/it/da/no are the six languages this
