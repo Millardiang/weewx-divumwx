@@ -40,6 +40,7 @@ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LIC
 * The late David Marshall, my very first collaborator, for his ingenious method of estimating cloud cover by counting pixels on radar images.
 * Mike Isacson for providing test server resources and being brave enough to test early developments.
 * Vince Skahan constantly giving me food for thought.
+* Early adopters, in particular Kjell, Gert, Jon, Gary for helping me squash some bugs and many helpful suggestions.
 * Open-Meteo for weather forecasts, pollen data, greenhouse gas data.
 * OpenWeather for global weather alerts.
 * Aviation Weather for METAR data.
