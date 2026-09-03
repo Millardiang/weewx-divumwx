@@ -1,3 +1,81 @@
+/* ===== cardI18n.js ===== */
+try {
+/*
+##############################################################################################
+# cardI18n.js version 0.0.1
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  GPLv3
+##############################################################################################
+*/
+
+// ===================== cardI18n.js =====================
+//
+// Loads jsondata/strings.json (generated server-side by
+// strings.json.tmpl via WeeWX's own $gettext()/lang mechanism -- see that
+// file's header comment) ONCE for the whole page, and exposes a single
+// shared window.DivumWXI18N used by every card, rather than each card
+// fetching and parsing the same file itself. Deliberately placed first in
+// the bundle (before any card's own IIFE runs) so DivumWXI18N always
+// exists by the time a card needs it.
+//
+// window.DivumWXI18N.t(key)
+//   Synchronous lookup. Returns the translated string if strings.json has
+//   already loaded and has an entry for `key`, otherwise returns `key`
+//   itself unchanged -- which is correct, not just a fallback of
+//   convenience, because every key IS the English phrase (same convention
+//   as the server-side [Texts] files). A card can call t() before the
+//   fetch resolves and will simply get English back for that first paint.
+//
+// window.DivumWXI18N.ready
+//   A Promise that resolves once strings.json has loaded (or failed to,
+//   in which case it still resolves -- a network hiccup here should
+//   degrade to "page stays in English", never break the page).
+//
+// 'i18nready' event on window
+//   Fired once, after strings.json loads, so a card that already rendered
+//   once in English can re-render with translations. Cards do this via
+//   the same "cache lastData, re-render on an event" pattern already
+//   used for 'unitsystemchange' and 'resize' (see cardTemperature.js) --
+//   this is one more event in that same family, not a new pattern.
+(function(){
+  var STRINGS_JSON_URL = './jsondata/strings.json';
+  var strings = {};
+  var loaded = false;
+
+  function t(key){
+    if (loaded && Object.prototype.hasOwnProperty.call(strings, key)) {
+      return strings[key];
+    }
+    return key;
+  }
+
+  var resolveReady;
+  var ready = new Promise(function(resolve){ resolveReady = resolve; });
+
+  fetch(STRINGS_JSON_URL, {cache: 'no-store'})
+    .then(function(r){
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(function(json){
+      strings = json || {};
+      loaded = true;
+      resolveReady();
+      window.dispatchEvent(new CustomEvent('i18nready'));
+    })
+    .catch(function(e){
+      console.warn('cardI18n: strings.json fetch failed \u2014 staying in English:', e.message);
+      loaded = true; // so t() falls through to the (already-correct) English key cleanly
+      resolveReady();
+    });
+
+  window.DivumWXI18N = { t: t, ready: ready };
+})();
+
+} catch (e) {
+  console.error("cardsBundle: cardI18n.js failed:", e);
+}
+
 /*
 ##############################################################################################
 # cardsBundleNew.js
@@ -109,7 +187,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'StationTime | Outlook';
+  titleLabel.textContent = DivumWXI18N.t('StationTime | Outlook');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -340,7 +418,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'climate.html?embed=1';
   cardLink.setAttribute('data-modal', 'Climate Summary');
-  cardLink.setAttribute('data-title', 'Climatological Summary');
+  cardLink.setAttribute('data-title', DivumWXI18N.t('Climatological Summary'));
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-url', 'climate.html?embed=1');
@@ -371,7 +449,7 @@ try {
     for (var i = 0; i < candidates.length; i++){ if (Hh[candidates[i]] !== undefined) return candidates[i]; }
     return null;
   }
-  var COMPASS_16 = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+  var COMPASS_16 = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'].map(function(k){ return DivumWXI18N.t(k); });
   function compassOf(deg){
     var idx = Math.round((((deg % 360) + 360) % 360) / 22.5) % 16;
     return COMPASS_16[idx];
@@ -814,12 +892,12 @@ try {
       var moreBtn = document.createElement('button');
       moreBtn.type = 'button';
       moreBtn.className = 'alert-read alert-more-btn';
-      moreBtn.textContent = 'More';
+      moreBtn.textContent = DivumWXI18N.t('More');
 
       var lessBtn = document.createElement('button');
       lessBtn.type = 'button';
       lessBtn.className = 'alert-read alert-less-btn';
-      lessBtn.textContent = 'Less';
+      lessBtn.textContent = DivumWXI18N.t('Less');
       more.appendChild(lessBtn);
 
       function setExpanded(expanded){
@@ -1056,26 +1134,26 @@ try {
 
   function pickSummary(d){
     var night = !d.isDay;
-    if (d.rainRate > 0 && d.windSpeedAvg > 7.5) return 'Rain Showers Windy Conditions';
-    if (d.rainRate >= 20) return 'Flooding Possible';
-    if (d.rainRate >= 10) return 'Heavy Rain';
-    if (d.rainRate >= 5) return 'Moderate Rain';
-    if (d.rainRate >= 1) return 'Steady Rain';
-    if (d.rainRate > 0) return 'Light Rain';
-    if (d.snow >= 1.5) return 'Heavy Snow';
-    if (d.snow >= 0.75) return 'Moderate Snow';
-    if (d.snow > 0.1) return 'Light Snow';
-    if (d.tdDiff < 0.5 && d.outTemp > 5) return 'Misty Conditions';
-    if (d.tdDiff < 0.8 && d.outTemp > 5) return 'Misty Hazy Conditions';
-    if (d.windSpeedAvg >= 40) return 'Strong Wind Conditions';
-    if (d.windSpeedAvg >= 30) return 'Very Windy Conditions';
-    if (d.windSpeedAvg >= 22) return 'Moderate Wind Conditions';
-    if (d.windSpeedAvg >= 7.5) return 'Breezy Conditions';
-    if (d.cloudCover < 7 && d.cloudCover > 0) return night ? 'Clear Sky' : 'Sunny';
-    if (d.cloudCover < 32) return night ? 'Mostly Clear Conditions' : 'Mostly Sunny Conditions';
-    if (d.cloudCover < 70) return 'Partly Cloudy Conditions';
-    if (d.cloudCover < 95) return 'Mostly Cloudy Conditions';
-    return 'Overcast Conditions';
+    if (d.rainRate > 0 && d.windSpeedAvg > 7.5) return DivumWXI18N.t('Rain Showers Windy Conditions');
+    if (d.rainRate >= 20) return DivumWXI18N.t('Flooding Possible');
+    if (d.rainRate >= 10) return DivumWXI18N.t('Heavy Rain');
+    if (d.rainRate >= 5) return DivumWXI18N.t('Moderate Rain');
+    if (d.rainRate >= 1) return DivumWXI18N.t('Steady Rain');
+    if (d.rainRate > 0) return DivumWXI18N.t('Light Rain');
+    if (d.snow >= 1.5) return DivumWXI18N.t('Heavy Snow');
+    if (d.snow >= 0.75) return DivumWXI18N.t('Moderate Snow');
+    if (d.snow > 0.1) return DivumWXI18N.t('Light Snow');
+    if (d.tdDiff < 0.5 && d.outTemp > 5) return DivumWXI18N.t('Misty Conditions');
+    if (d.tdDiff < 0.8 && d.outTemp > 5) return DivumWXI18N.t('Misty Hazy Conditions');
+    if (d.windSpeedAvg >= 40) return DivumWXI18N.t('Strong Wind Conditions');
+    if (d.windSpeedAvg >= 30) return DivumWXI18N.t('Very Windy Conditions');
+    if (d.windSpeedAvg >= 22) return DivumWXI18N.t('Moderate Wind Conditions');
+    if (d.windSpeedAvg >= 7.5) return DivumWXI18N.t('Breezy Conditions');
+    if (d.cloudCover < 7 && d.cloudCover > 0) return night ? DivumWXI18N.t('Clear Sky') : DivumWXI18N.t('Sunny');
+    if (d.cloudCover < 32) return night ? DivumWXI18N.t('Mostly Clear Conditions') : DivumWXI18N.t('Mostly Sunny Conditions');
+    if (d.cloudCover < 70) return DivumWXI18N.t('Partly Cloudy Conditions');
+    if (d.cloudCover < 95) return DivumWXI18N.t('Mostly Cloudy Conditions');
+    return DivumWXI18N.t('Overcast Conditions');
   }
 
   function cloudOktas(pct){
@@ -1140,10 +1218,10 @@ try {
 
   function toOrdinal(deg){
     var points = [
-      [11.25,'North'], [33.75,'NNE'],  [56.25,'NE'],   [78.75,'ENE'],
-      [101.25,'East'], [123.75,'ESE'], [146.25,'SE'],  [168.75,'SSE'],
-      [191.25,'South'],[213.75,'SSW'], [236.25,'SW'],  [261.25,'WSW'],
-      [281.25,'West'], [303.75,'WNW'], [326.25,'NW'],  [348.75,'NNW'],
+      [11.25,DivumWXI18N.t('North')], [33.75,DivumWXI18N.t('NNE')],  [56.25,DivumWXI18N.t('NE')],   [78.75,DivumWXI18N.t('ENE')],
+      [101.25,DivumWXI18N.t('East')], [123.75,DivumWXI18N.t('ESE')], [146.25,DivumWXI18N.t('SE')],  [168.75,DivumWXI18N.t('SSE')],
+      [191.25,DivumWXI18N.t('South')],[213.75,DivumWXI18N.t('SSW')], [236.25,DivumWXI18N.t('SW')],  [261.25,DivumWXI18N.t('WSW')],
+      [281.25,DivumWXI18N.t('West')], [303.75,DivumWXI18N.t('WNW')], [326.25,DivumWXI18N.t('NW')],  [348.75,DivumWXI18N.t('NNW')],
     ];
     for (var i = 0; i < points.length; i++){
       if (deg <= points[i][0]) return points[i][1];
@@ -1165,6 +1243,7 @@ try {
       refresh();
     }
   });
+  window.addEventListener('i18nready', refresh);
 
   function mphToMs(v){ return v * 0.44704; }
   function windLabel(mphValue){
@@ -1229,7 +1308,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Current Conditions';
+  titleLabel.textContent = DivumWXI18N.t('Current Conditions');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -1370,16 +1449,16 @@ try {
     return valueEl;
   }
 
-  var cloudBaseText  = addChipRow('Cloud Base');
-  var visibilityText = addChipRow('Visibility');
+  var cloudBaseText  = addChipRow(DivumWXI18N.t('Cloud Base'));
+  var visibilityText = addChipRow(DivumWXI18N.t('Visibility'));
   visibilityText.textContent = '\u2014';
-  var cloudCoverText = addChipRow('Cloud Cover');
-  var tempAvgText    = addChipRow('60min Temp Avg');
-  var gustText       = addChipRow('10min Gust Max');
-  var speedText      = addChipRow('10min Speed Avg');
-  var rainText       = addChipRow('Rainfall (last hr)');
+  var cloudCoverText = addChipRow(DivumWXI18N.t('Cloud Cover'));
+  var tempAvgText    = addChipRow(DivumWXI18N.t('60min Temp Avg'));
+  var gustText       = addChipRow(DivumWXI18N.t('10min Gust Max'));
+  var speedText      = addChipRow(DivumWXI18N.t('10min Speed Avg'));
+  var rainText       = addChipRow(DivumWXI18N.t('Rainfall (last hr)'));
 
-  var dirValueEl = addChipRow('10min Wind Dir');
+  var dirValueEl = addChipRow(DivumWXI18N.t('10min Wind Dir'));
   var dirText = {
     base:   document.createElement('span'),
     suffix: document.createElement('span')
@@ -1401,7 +1480,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'modalMetar.html';
   cardLink.setAttribute('data-modal', 'METAR');
-  cardLink.setAttribute('data-title', 'Nearby METAR');
+  cardLink.setAttribute('data-title', DivumWXI18N.t('Nearby METAR'));
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '900px');
   cardLink.setAttribute('data-modal-height', '600px');
@@ -1594,6 +1673,13 @@ try {
   window.addEventListener('resize', function(){
     if (lastData) render(lastData);
   });
+  // Card typically renders once (in English, since strings.json is still
+  // fetching) before DivumWXI18N's own fetch resolves. Re-render once it
+  // has, same pattern as unitsystemchange/resize above -- swaps the
+  // already-rendered English labels for translated ones in place.
+  window.addEventListener('i18nready', function(){
+    if (lastData) render(lastData);
+  });
 
   var mount = document.getElementById('thermometerCard3');
   if (!mount || !window.d3) return;
@@ -1626,7 +1712,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Temperature';
+  titleLabel.textContent = DivumWXI18N.t('Temperature');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -1776,7 +1862,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=temperature&embed=1';
   cardLink.setAttribute('data-modal', 'Temperature');
-  cardLink.setAttribute('data-title', 'Temperature Chart & Records');
+  cardLink.setAttribute('data-title', DivumWXI18N.t('Temperature Chart & Records'));
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '700px');
@@ -1836,7 +1922,7 @@ try {
     var windChill        = tc(v.windChill);
     var trend_outTemp   = td(v.trend_outTemp);
 
-    titleLabel.textContent = 'Temperature (\u00B0' + unitsTemp + ')';
+    titleLabel.textContent = DivumWXI18N.t('Temperature') + ' (\u00B0' + unitsTemp + ')';
 
     var defs = svg.append('defs');
     var bulbGradient = defs.append('radialGradient')
@@ -1890,11 +1976,11 @@ try {
     svg.append('text').attr('class', 'min-temp-label')
       .attr('x', 45 + tubeWidth / 2 + 13).attr('y', yScale(globalMinTemp) + 8.5)
       .attr('text-anchor', 'middle').style('font-family', 'inherit').style('fill', 'var(--bs-body-color)').style('font-size', '8px')
-      .text('Min');
+      .text(DivumWXI18N.t('Min'));
     svg.append('text').attr('class', 'max-temp-label')
       .attr('x', 45 + tubeWidth / 2 + 13).attr('y', yScale(globalMaxTemp) - 3)
       .attr('text-anchor', 'middle').style('font-family', 'inherit').style('fill', 'var(--bs-body-color)').style('font-size', '8px')
-      .text('Max');
+      .text(DivumWXI18N.t('Max'));
 
     svg.append('line').attr('class', 'min-temp-line')
       .attr('x1', 45 - tubeWidth / 2 + 20).attr('x2', 45 + tubeWidth / 2 + 22)
@@ -1912,19 +1998,27 @@ try {
     // left as blank space, so the text zone gets more breathing room
     // where the card is narrowest and legibility matters most.
     var mediaMode = isMediaMode();
+    // Each row carries a stable `id` (never translated, never shown --
+    // used only for the media-mode filter below) separate from `label`
+    // (translated display text). Before this change the filter compared
+    // against the English label text directly ("Indoor Temp") -- once
+    // that label is translated, that comparison would silently stop
+    // matching and Indoor Temp would stop being hidden in media mode.
+    // Filtering on `id` instead means the label can be translated to
+    // anything without touching the filter logic at all.
     var weatherData = [
-      { label: 'Max | Min',   value: globalMaxTemp.toFixed(1) + '\u00B0' + unitsTemp + ' | ' + globalMinTemp.toFixed(1) + '\u00B0' + unitsTemp, color: 'transparent', trend: 0 },
-      { label: 'Trend',       value: trend_outTemp.toFixed(1) + '\u00B0' + unitsTemp, color: v.tempColor, trend: trend_outTemp },
-      { label: 'Indoor Temp', value: inTemp.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorInTemp, trend: v.trend_inTemp },
-      { label: 'Apparent',    value: appTemp.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorAppTemp, trend: getTrend(v.appTemp, v.appTemp_3hours) },
-      { label: 'Humidity',    value: v.humidity.toFixed(0) + '%', color: v.colorHumidityOut, trend: v.trend_outHumidity },
-      { label: 'Heat Index',  value: heatIndex.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorHeatindex, trend: getTrend(v.heatIndex, v.heatIndex_3hours) },
-      { label: 'Avg Today',   value: avgToday.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorOutTempDayAvg, trend: getTrend(v.avgToday, v.avgToday_3hours) },
-      { label: 'Dewpoint',    value: dewpoint.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorDewpoint, trend: v.trend_dewpoint },
-      { label: 'Windchill',   value: windChill.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorWindchill, trend: getTrend(v.windChill, v.windChill_3hours) }
+      { id: 'maxMin',      label: DivumWXI18N.t('Max | Min'),   value: globalMaxTemp.toFixed(1) + '\u00B0' + unitsTemp + ' | ' + globalMinTemp.toFixed(1) + '\u00B0' + unitsTemp, color: 'transparent', trend: 0 },
+      { id: 'trend',       label: DivumWXI18N.t('Trend'),       value: trend_outTemp.toFixed(1) + '\u00B0' + unitsTemp, color: v.tempColor, trend: trend_outTemp },
+      { id: 'indoorTemp',  label: DivumWXI18N.t('Indoor Temp'), value: inTemp.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorInTemp, trend: v.trend_inTemp },
+      { id: 'apparent',    label: DivumWXI18N.t('Apparent'),    value: appTemp.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorAppTemp, trend: getTrend(v.appTemp, v.appTemp_3hours) },
+      { id: 'humidity',    label: DivumWXI18N.t('Humidity'),    value: v.humidity.toFixed(0) + '%', color: v.colorHumidityOut, trend: v.trend_outHumidity },
+      { id: 'heatIndex',   label: DivumWXI18N.t('Heat Index'),  value: heatIndex.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorHeatindex, trend: getTrend(v.heatIndex, v.heatIndex_3hours) },
+      { id: 'avgToday',    label: DivumWXI18N.t('Avg Today'),   value: avgToday.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorOutTempDayAvg, trend: getTrend(v.avgToday, v.avgToday_3hours) },
+      { id: 'dewpoint',    label: DivumWXI18N.t('Dewpoint'),    value: dewpoint.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorDewpoint, trend: v.trend_dewpoint },
+      { id: 'windchill',   label: DivumWXI18N.t('Windchill'),   value: windChill.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorWindchill, trend: getTrend(v.windChill, v.windChill_3hours) }
     ];
     if (mediaMode) {
-      weatherData = weatherData.filter(function(d){ return d.label !== 'Indoor Temp'; });
+      weatherData = weatherData.filter(function(d){ return d.id !== 'indoorTemp'; });
     }
 
     // Rows beyond weatherData.length (only happens in media mode) are
@@ -2053,7 +2147,7 @@ try {
   function addDays(fakeUtcDate, n){
     return new Date(fakeUtcDate.getTime() + n * 86400000);
   }
-  var WEEKDAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var WEEKDAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(function(k){ return DivumWXI18N.t(k); });
   function weekdayAbbrev(dateStr){
     var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateStr);
     var d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
@@ -2073,6 +2167,9 @@ try {
       currentUnits = e.detail.config;
       if (lastForecastJson) renderCard(lastForecastJson, iconMap);
     }
+  });
+  window.addEventListener('i18nready', function(){
+    if (lastForecastJson) renderCard(lastForecastJson, iconMap);
   });
 
   function toCelsius(v, sourceUnit){
@@ -2106,7 +2203,7 @@ try {
       default:    return (ms * 3.6).toFixed(1) + ' km/h';
     }
   }
-  var COMPASS_16 = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+  var COMPASS_16 = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'].map(function(k){ return DivumWXI18N.t(k); });
   function deg2compass(deg){
     return COMPASS_16[Math.floor((deg / 22.5) + 0.5) % 16];
   }
@@ -2142,7 +2239,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Forecast';
+  titleLabel.textContent = DivumWXI18N.t('Forecast');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -2208,7 +2305,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'stationforecast.html';
   cardLink.setAttribute('data-modal', '7-Day Forecast');
-  cardLink.setAttribute('data-title', 'Station 7-Day Forecast and Meteogram');
+  cardLink.setAttribute('data-title', DivumWXI18N.t('Station 7-Day Forecast and Meteogram'));
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '800px');
@@ -2227,7 +2324,7 @@ try {
     if (!entry) return '<span style="font-size:20px">\u2753</span>';
     var iconName = isNight ? entry.night : entry.day;
     var emoji = entry.emoji || '\u2753';
-    var label = entry.label || 'Unknown';
+    var label = entry.label || DivumWXI18N.t('Unknown');
     if (iconName) {
       return '<img src="' + ICON_BASE + iconName + '.svg" alt="' + label + '" title="' + label +
         '" width="34" height="34" style="width:34px;height:34px;display:block;margin:2px 0;">';
@@ -2235,7 +2332,7 @@ try {
     return '<span title="' + label + '" style="font-size:20px">' + emoji + '</span>';
   }
   function weatherText(code, map){
-    return (map && map[code] && map[code].label) || 'Unknown';
+    return (map && map[code] && map[code].label) || DivumWXI18N.t('Unknown');
   }
 
   function safeSlice(arr, offset, length, fallback){
@@ -2310,13 +2407,13 @@ try {
 
   function labelFor(s, todayStr, tomorrowStr){
     if (s.period === 'Day') {
-      if (s.date === todayStr) return 'Today';
-      if (s.date === tomorrowStr) return 'Tomorrow';
+      if (s.date === todayStr) return DivumWXI18N.t('Today');
+      if (s.date === tomorrowStr) return DivumWXI18N.t('Tomorrow');
       return weekdayAbbrev(s.date);
     }
-    if (s.date === todayStr) return 'Tonight';
-    if (s.date === tomorrowStr) return 'Tomorrow Night';
-    return weekdayAbbrev(s.date) + ' Night';
+    if (s.date === todayStr) return DivumWXI18N.t('Tonight');
+    if (s.date === tomorrowStr) return DivumWXI18N.t('Tomorrow Night');
+    return weekdayAbbrev(s.date) + ' ' + DivumWXI18N.t('Night');
   }
 
   function renderCard(data, map){
@@ -2328,7 +2425,7 @@ try {
     var todayStr = fmtDate(now);
     var tomorrowStr = fmtDate(addDays(now, 1));
 
-    titleLabel.textContent = 'Forecast (\u00B0' + currentUnits.temp + ')';
+    titleLabel.textContent = DivumWXI18N.t('Forecast') + ' (\u00B0' + currentUnits.temp + ')';
 
     // wind.svg's own gradient is a pale grey (#d4d7dd→#bec1c6) — barely
     // visible against a white/light card face, so light theme darkens it
@@ -2361,7 +2458,7 @@ try {
       var lbl = labelFor(s, todayStr, tomorrowStr);
       var isDay = s.period === 'Day';
       var tempText = tempLabel(isDay ? s.tmaxC : s.tminC);
-      var extra = isDay ? ('UV-I ' + s.uv) : (s.humidity + '% hum');
+      var extra = isDay ? ('UV-I ' + s.uv) : (s.humidity + '% ' + DivumWXI18N.t('hum'));
       var icon = getIconHtml(s.code, s.period, map);
       var text = weatherText(s.code, map);
 
@@ -2456,7 +2553,7 @@ try {
     if (v < 100) return '0' + v;
     return '' + v;
   }
-  var COMPASS_16 = ['North','NNE','NE','ENE','East','ESE','SE','SSE','South','SSW','SW','WSW','West','WNW','NW','NNW'];
+  var COMPASS_16 = [DivumWXI18N.t('North'),DivumWXI18N.t('NNE'),DivumWXI18N.t('NE'),DivumWXI18N.t('ENE'),DivumWXI18N.t('East'),DivumWXI18N.t('ESE'),DivumWXI18N.t('SE'),DivumWXI18N.t('SSE'),DivumWXI18N.t('South'),DivumWXI18N.t('SSW'),DivumWXI18N.t('SW'),DivumWXI18N.t('WSW'),DivumWXI18N.t('West'),DivumWXI18N.t('WNW'),DivumWXI18N.t('NW'),DivumWXI18N.t('NNW')];
   var COMPASS_BOUNDS = [11.25,33.75,56.25,78.75,101.25,123.75,146.25,168.75,191.25,213.75,236.25,258.75,281.25,303.75,326.25,348.75];
   function toOrdinal(deg){
     for (var i = 0; i < COMPASS_BOUNDS.length; i++){ if (deg <= COMPASS_BOUNDS[i]) return COMPASS_16[i]; }
@@ -2476,6 +2573,9 @@ try {
       currentUnits = e.detail.config;
       if (lastData) renderCard(lastData);
     }
+  });
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
   });
 
   var WIND_UNIT_LABEL = { mph: 'mph', kmh: 'km/h', kt: 'kt', ms: 'm/s', bf: 'Bft' };
@@ -2526,7 +2626,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Anemometer';
+  titleLabel.textContent = DivumWXI18N.t('Anemometer');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -2634,11 +2734,11 @@ try {
     return valueEl;
   }
 
-  var maxGustText = addChipRow('Max Gust');
-  var bearingText = addChipRow('Bearing');
-  var ordinalText = addChipRow('Ordinal');
-  var beaufortText = addChipRow('Beaufort');
-  var windRunText = addChipRow('Wind Run');
+  var maxGustText = addChipRow(DivumWXI18N.t('Max Gust'));
+  var bearingText = addChipRow(DivumWXI18N.t('Bearing'));
+  var ordinalText = addChipRow(DivumWXI18N.t('Ordinal'));
+  var beaufortText = addChipRow(DivumWXI18N.t('Beaufort'));
+  var windRunText = addChipRow(DivumWXI18N.t('Wind Run'));
   windRunText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
 
   // Whole card is a click-through to the wind chart/records page — an
@@ -2653,7 +2753,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=wind&embed=1';
   cardLink.setAttribute('data-modal', 'Wind');
-  cardLink.setAttribute('data-title', 'Wind & Gust Chart & Records');
+  cardLink.setAttribute('data-title', DivumWXI18N.t('Wind & Gust Chart & Records'));
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '700px');
@@ -2740,7 +2840,7 @@ try {
   var needleSpring = null, lastGaugeDomain = null;
 
   function renderCard(v){
-    titleLabel.textContent = 'Anemometer (' + (WIND_UNIT_LABEL[currentUnits.wind] || 'km/h') + ')';
+    titleLabel.textContent = DivumWXI18N.t('Anemometer') + ' (' + (WIND_UNIT_LABEL[currentUnits.wind] || 'km/h') + ')';
 
     var gaugeCfg = GAUGE_CONFIG[currentUnits.wind] || GAUGE_CONFIG.kmh;
     var gaugeDomain = gaugeCfg[0], tickCount = gaugeCfg[1];
@@ -2866,7 +2966,7 @@ try {
       .text(windLabel(v.windSpeed));
     dynG.append('text').attr('x', cx).attr('y', H - 8).style('text-anchor', 'middle')
       .style('font-family', '"IBM Plex Mono", ui-monospace, monospace').style('font-size', '9.5px').style('fill', 'var(--bw-accent)')
-      .text('Gust ' + windLabel(v.windGust));
+      .text(DivumWXI18N.t('Gust') + ' ' + windLabel(v.windGust));
 
     // ---- Right pane: 5 readouts as label/value chip rows ----
     maxGustText.textContent = windLabel(v.gustMax) + ' (' + timeLabelFor(v.gustMaxTime) + ')';
@@ -2962,11 +3062,11 @@ try {
     if (v < 100) return '0' + v;
     return '' + v;
   }
-  var COMPASS_16 = ['North','NNE','NE','ENE','East','ESE','SE','SSE','South','SSW','SW','WSW','West','WNW','NW','NNW'];
+  var COMPASS_16 = [DivumWXI18N.t('North'),DivumWXI18N.t('NNE'),DivumWXI18N.t('NE'),DivumWXI18N.t('ENE'),DivumWXI18N.t('East'),DivumWXI18N.t('ESE'),DivumWXI18N.t('SE'),DivumWXI18N.t('SSE'),DivumWXI18N.t('South'),DivumWXI18N.t('SSW'),DivumWXI18N.t('SW'),DivumWXI18N.t('WSW'),DivumWXI18N.t('West'),DivumWXI18N.t('WNW'),DivumWXI18N.t('NW'),DivumWXI18N.t('NNW')];
   var COMPASS_BOUNDS = [11.25,33.75,56.25,78.75,101.25,123.75,146.25,168.75,191.25,213.75,236.25,258.75,281.25,303.75,326.25,348.75];
   function toOrdinal(deg){
     for (var i = 0; i < COMPASS_BOUNDS.length; i++){ if (deg <= COMPASS_BOUNDS[i]) return COMPASS_16[i]; }
-    return 'North';
+    return DivumWXI18N.t('North');
   }
   var currentUnits = loadStoredUnits();
   function loadStoredUnits(){
@@ -2981,6 +3081,9 @@ try {
       currentUnits = e.detail.config;
       if (lastData) renderCard(lastData);
     }
+  });
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
   });
 
   var WIND_UNIT_LABEL = { mph: 'mph', kmh: 'km/h', kt: 'kt', ms: 'm/s', bf: 'Bft' };
@@ -3030,7 +3133,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Direction | Windspeed';
+  titleLabel.textContent = DivumWXI18N.t('Direction | Windspeed');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -3137,9 +3240,9 @@ try {
   // Bearing/Ordinal are already shown directly on the compass dial itself
   // (unlike Anemometer's simpler needle gauge), so the right pane only
   // needs the three readouts that don't have a natural home on the dial.
-  var maxGustText = addChipRow('Max Gust');
-  var beaufortText = addChipRow('Beaufort');
-  var windRunText = addChipRow('Wind Run');
+  var maxGustText = addChipRow(DivumWXI18N.t('Max Gust'));
+  var beaufortText = addChipRow(DivumWXI18N.t('Beaufort'));
+  var windRunText = addChipRow(DivumWXI18N.t('Wind Run'));
   windRunText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
 
   // Whole card is a click-through to the wind chart/records page — an
@@ -3152,7 +3255,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=wind&embed=1';
   cardLink.setAttribute('data-modal', 'Wind');
-  cardLink.setAttribute('data-title', 'Wind & Gust Chart & Records');
+  cardLink.setAttribute('data-title', DivumWXI18N.t('Wind & Gust Chart & Records'));
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '700px');
@@ -3243,7 +3346,7 @@ try {
   }
 
   function renderCard(v){
-    titleLabel.textContent = 'Direction | Windspeed (' + (WIND_UNIT_LABEL[currentUnits.wind] || 'km/h') + ')';
+    titleLabel.textContent = DivumWXI18N.t('Direction | Windspeed') + ' (' + (WIND_UNIT_LABEL[currentUnits.wind] || 'km/h') + ')';
 
     var svgSel = d3.select(leftPane);
     var svg = svgSel.select('svg');
@@ -3284,13 +3387,13 @@ try {
       }
 
       compassG.append('text').attr('x', 0).attr('y', -nsewR).attr('dy', '0.32em').style('text-anchor', 'middle')
-        .style('font-size', '9px').style('font-weight', '700').style('fill', '#ff6347').text('N');
+        .style('font-size', '9px').style('font-weight', '700').style('fill', '#ff6347').text(DivumWXI18N.t('N'));
       compassG.append('text').attr('x', nsewR).attr('y', 0).attr('dy', '0.32em').style('text-anchor', 'middle')
-        .style('font-size', '8px').style('fill', overlayTextColor).text('E');
+        .style('font-size', '8px').style('fill', overlayTextColor).text(DivumWXI18N.t('E'));
       compassG.append('text').attr('x', 0).attr('y', nsewR).attr('dy', '0.32em').style('text-anchor', 'middle')
-        .style('font-size', '8px').style('fill', overlayTextColor).text('S');
+        .style('font-size', '8px').style('fill', overlayTextColor).text(DivumWXI18N.t('S'));
       compassG.append('text').attr('x', -nsewR).attr('y', 0).attr('dy', '0.32em').style('text-anchor', 'middle')
-        .style('font-size', '8px').style('fill', overlayTextColor).text('W');
+        .style('font-size', '8px').style('fill', overlayTextColor).text(DivumWXI18N.t('W'));
 
       var arrowG = compassG.append('g').attr('class', 'arrow').attr('transform', 'rotate(0)');
       arrowG.append('path').attr('d', ringArrowPath(tickInnerR, 15)).attr('fill', '#007fff');
@@ -3328,10 +3431,10 @@ try {
     var heroY = cy + tickLabelR + 14;
     chromeG.append('text').attr('x', cx).attr('y', heroY).style('text-anchor', 'middle')
       .style('font-family', '"IBM Plex Mono", ui-monospace, monospace').style('font-size', '13px').style('fill', 'var(--bw-accent)')
-      .text('Currently ' + windFromMS(v.windSpeed).toFixed(1) + ' ' + (WIND_UNIT_LABEL[currentUnits.wind] || 'km/h'));
+      .text(DivumWXI18N.t('Currently') + ' ' + windFromMS(v.windSpeed).toFixed(1) + ' ' + (WIND_UNIT_LABEL[currentUnits.wind] || 'km/h'));
     chromeG.append('text').attr('x', cx).attr('y', heroY + 15).style('text-anchor', 'middle')
       .style('font-family', '"IBM Plex Mono", ui-monospace, monospace').style('font-size', '9.5px').style('fill', 'var(--bw-accent)')
-      .text('Gust ' + windFromMS(v.windGust).toFixed(1) + ' ' + (WIND_UNIT_LABEL[currentUnits.wind] || 'km/h'));
+      .text(DivumWXI18N.t('Gust') + ' ' + windFromMS(v.windGust).toFixed(1) + ' ' + (WIND_UNIT_LABEL[currentUnits.wind] || 'km/h'));
 
     // ---- Right pane: 3 readouts as label/value chip rows ----
     maxGustText.textContent = windLabel(v.gustMax) + ' (' + timeLabelFor(v.gustMaxTime) + ')';
@@ -3434,6 +3537,9 @@ try {
       if (lastData) renderCard(lastData);
     }
   });
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
+  });
 
   var PRESSURE_CONFIG = {
     hpa:  { factor: 1,                  dp: 1, domain: [940, 1060], ticks: 12, tickDp: 0, label: 'hPa',  badgeUnit: 'inHg', badgeFactor: 0.029529983071445, badgeDp: 2 },
@@ -3475,7 +3581,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Barometer';
+  titleLabel.textContent = DivumWXI18N.t('Barometer');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -3579,11 +3685,11 @@ try {
     return valueEl;
   }
 
-  var maxText = addChipRow('Max');
-  var minText = addChipRow('Min');
-  var trendText = addChipRow('Trend');
-  var altitudeText = addChipRow('Station Alt');
-  var airDensityText = addChipRow('Air Density');
+  var maxText = addChipRow(DivumWXI18N.t('Max'));
+  var minText = addChipRow(DivumWXI18N.t('Min'));
+  var trendText = addChipRow(DivumWXI18N.t('Trend'));
+  var altitudeText = addChipRow(DivumWXI18N.t('Station Alt'));
+  var airDensityText = addChipRow(DivumWXI18N.t('Air Density'));
   airDensityText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
 
   // Whole card is a click-through to the barometer chart/records page —
@@ -3596,7 +3702,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=barometer&embed=1';
   cardLink.setAttribute('data-modal', 'Barometer');
-  cardLink.setAttribute('data-title', 'Barometer Chart & Records');
+  cardLink.setAttribute('data-title', DivumWXI18N.t('Barometer Chart & Records'));
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '700px');
@@ -3620,16 +3726,16 @@ try {
 
 
   var TREND_LABELS = [
-    { name: 'STORMY', offset: '6.25%', anchor: 'middle' },
-    { name: 'RAIN', offset: '16.7%', anchor: 'middle' },
-    { name: 'CHANGE', offset: '25%', anchor: 'middle' },
-    { name: 'FAIR', offset: '33.3%', anchor: 'middle' },
-    { name: 'VERY DRY', offset: '43.75%', anchor: 'middle' }
+    { name: DivumWXI18N.t('STORMY'), offset: '6.25%', anchor: 'middle' },
+    { name: DivumWXI18N.t('RAIN'), offset: '16.7%', anchor: 'middle' },
+    { name: DivumWXI18N.t('CHANGE'), offset: '25%', anchor: 'middle' },
+    { name: DivumWXI18N.t('FAIR'), offset: '33.3%', anchor: 'middle' },
+    { name: DivumWXI18N.t('VERY DRY'), offset: '43.75%', anchor: 'middle' }
   ];
 
   function renderCard(v){
     var cfg = pressureConfig();
-    titleLabel.textContent = 'Barometer (' + cfg.label + ')';
+    titleLabel.textContent = DivumWXI18N.t('Barometer') + ' (' + cfg.label + ')';
 
     var svgSel = d3.select(leftPane);
     var svg = svgSel.select('svg');
@@ -3760,7 +3866,7 @@ try {
         maxTime: num(barom.day_maxtime, 0),
         minTime: num(barom.day_mintime, 0),
         trendCode: trendCode,
-        trendDesc: barom.trend_desc || 'Steady',
+        trendDesc: barom.trend_desc || DivumWXI18N.t('Steady'),
         trendColor: trendCode > 0 ? '#3b9cac' : trendCode < 0 ? '#ff7c39' : '#90b12a',
         currentColor: o.barometerColor || 'var(--bw-accent)',
         dayMaxColor: overlayTextColor,
@@ -3830,6 +3936,9 @@ try {
       if (lastData) renderCard(lastData);
     }
   });
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
+  });
   function mm2in(mm){ return mm / 25.400013716; }
   function rainLabel(mm){
     return currentUnits.rain === 'in'
@@ -3868,7 +3977,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Piezo Rain';
+  titleLabel.textContent = DivumWXI18N.t('Piezo Rain');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -3973,11 +4082,11 @@ try {
   }
 
   var yearText = addChipRow(String(stationNow().getUTCFullYear()));
-  var monthText = addChipRow('This Month');
-  var hourText = addChipRow('Last Hour');
-  var last24hText = addChipRow('Last 24hr');
-  var rateText = addChipRow('Rain Rate');
-  var eventText = addChipRow('Rain Event');
+  var monthText = addChipRow(DivumWXI18N.t('This Month'));
+  var hourText = addChipRow(DivumWXI18N.t('Last Hour'));
+  var last24hText = addChipRow(DivumWXI18N.t('Last 24hr'));
+  var rateText = addChipRow(DivumWXI18N.t('Rain Rate'));
+  var eventText = addChipRow(DivumWXI18N.t('Rain Event'));
   eventText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
 
   // Whole card is a click-through to the rain chart/records page — an
@@ -3990,7 +4099,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=rain&embed=1';
   cardLink.setAttribute('data-modal', 'Rain');
-  cardLink.setAttribute('data-title', 'Rain & Rain Rate Chart & Records');
+  cardLink.setAttribute('data-title', DivumWXI18N.t('Rain & Rain Rate Chart & Records'));
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '700px');
@@ -4026,7 +4135,7 @@ try {
   ];
 
   function renderCard(v){
-    titleLabel.textContent = 'Piezo Rain (' + (currentUnits.rain === 'in' ? 'in' : 'mm') + ')';
+    titleLabel.textContent = DivumWXI18N.t('Piezo Rain') + ' (' + (currentUnits.rain === 'in' ? 'in' : 'mm') + ')';
 
     var svgSel = d3.select(leftPane);
     var svg = svgSel.select('svg');
@@ -4288,6 +4397,9 @@ try {
       if (lastData) renderCard(lastData);
     }
   });
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
+  });
   function mm2in(mm){ return mm / 25.400013716; }
   function rainLabel(mm){
     return currentUnits.rain === 'in'
@@ -4326,7 +4438,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Rainfall';
+  titleLabel.textContent = DivumWXI18N.t('Rainfall');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -4431,11 +4543,11 @@ try {
   }
 
   var yearText = addChipRow(String(stationNow().getUTCFullYear()));
-  var monthText = addChipRow('This Month');
-  var hourText = addChipRow('Last Hour');
-  var last24hText = addChipRow('Last 24hr');
-  var rateText = addChipRow('Rain Rate');
-  var eventText = addChipRow('Rain Event');
+  var monthText = addChipRow(DivumWXI18N.t('This Month'));
+  var hourText = addChipRow(DivumWXI18N.t('Last Hour'));
+  var last24hText = addChipRow(DivumWXI18N.t('Last 24hr'));
+  var rateText = addChipRow(DivumWXI18N.t('Rain Rate'));
+  var eventText = addChipRow(DivumWXI18N.t('Rain Event'));
   eventText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
 
   // Whole card is a click-through to the rain chart/records page — an
@@ -4448,7 +4560,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=rain&embed=1';
   cardLink.setAttribute('data-modal', 'Rain');
-  cardLink.setAttribute('data-title', 'Rain & Rain Rate Chart & Records');
+  cardLink.setAttribute('data-title', DivumWXI18N.t('Rain & Rain Rate Chart & Records'));
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '700px');
@@ -4485,7 +4597,7 @@ try {
   ];
 
   function renderCard(v){
-    titleLabel.textContent = 'Rainfall (' + (currentUnits.rain === 'in' ? 'in' : 'mm') + ')';
+    titleLabel.textContent = DivumWXI18N.t('Rainfall') + ' (' + (currentUnits.rain === 'in' ? 'in' : 'mm') + ')';
 
     var svgSel = d3.select(leftPane);
     var svg = svgSel.select('svg');
@@ -4715,6 +4827,9 @@ try {
       if (lastData) renderCard(lastData);
     }
   });
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
+  });
   function mm2in(mm){ return mm / 25.400013716; }
   function rainLabel(mm){
     return currentUnits.rain === 'in'
@@ -4749,7 +4864,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Tipping Rain';
+  titleLabel.textContent = DivumWXI18N.t('Tipping Rain');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -4854,11 +4969,11 @@ try {
   }
 
   var yearText = addChipRow(String(stationNow().getUTCFullYear()));
-  var monthText = addChipRow('This Month');
-  var hourText = addChipRow('Last Hour');
-  var last24hText = addChipRow('Last 24hr');
-  var rateText = addChipRow('Rain Rate');
-  var eventText = addChipRow('Rain Event');
+  var monthText = addChipRow(DivumWXI18N.t('This Month'));
+  var hourText = addChipRow(DivumWXI18N.t('Last Hour'));
+  var last24hText = addChipRow(DivumWXI18N.t('Last 24hr'));
+  var rateText = addChipRow(DivumWXI18N.t('Rain Rate'));
+  var eventText = addChipRow(DivumWXI18N.t('Rain Event'));
   eventText.parentElement.style.borderBottom = 'none';
 
   // Whole card is a click-through to the same rain chart/records page the
@@ -4868,7 +4983,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=rain&embed=1';
   cardLink.setAttribute('data-modal', 'Tipping Rain');
-  cardLink.setAttribute('data-title', 'Rain & Rain Rate Chart & Records');
+  cardLink.setAttribute('data-title', DivumWXI18N.t('Rain & Rain Rate Chart & Records'));
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '700px');
@@ -5246,7 +5361,7 @@ try {
   }
 
   function renderCard(v){
-    titleLabel.textContent = 'Tipping Rain (' + (currentUnits.rain === 'in' ? 'in' : 'mm') + ')';
+    titleLabel.textContent = DivumWXI18N.t('Tipping Rain') + ' (' + (currentUnits.rain === 'in' ? 'in' : 'mm') + ')';
 
     if (!svg) buildStatic();
 
@@ -5464,7 +5579,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Solar Radiation';
+  titleLabel.textContent = DivumWXI18N.t('Solar Radiation');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -5568,12 +5683,12 @@ try {
     return valueEl;
   }
 
-  var dayMaxText = addChipRow('Max');
-  var alltimeMaxText = addChipRow('All-Time Max');
-  var yesterdayMaxText = addChipRow('Yesterday Max');
-  var monthMaxText = addChipRow('Month Max');
-  var sunshineText = addChipRow('Sunshine Today');
-  var luxText = addChipRow('Illuminance');
+  var dayMaxText = addChipRow(DivumWXI18N.t('Max'));
+  var alltimeMaxText = addChipRow(DivumWXI18N.t('All-Time Max'));
+  var yesterdayMaxText = addChipRow(DivumWXI18N.t('Yesterday Max'));
+  var monthMaxText = addChipRow(DivumWXI18N.t('Month Max'));
+  var sunshineText = addChipRow(DivumWXI18N.t('Sunshine Today'));
+  var luxText = addChipRow(DivumWXI18N.t('Illuminance'));
   luxText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
 
   // Whole card is a click-through to the chart/records page — an
@@ -5589,7 +5704,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=solaruv&embed=1';
   cardLink.setAttribute('data-modal', 'Solar Radiation');
-  cardLink.setAttribute('data-title', 'Solar & UV Chart & Records');
+  cardLink.setAttribute('data-title', DivumWXI18N.t('Solar & UV Chart & Records'));
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '700px');
@@ -5684,6 +5799,9 @@ try {
   }
 
   var lastData = null;
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
+  });
   function refresh(){
     Promise.allSettled([
       fetch(LOOP_JSON_URL + ((LOOP_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
@@ -5808,7 +5926,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'UV-Index';
+  titleLabel.textContent = DivumWXI18N.t('UV-Index');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -5912,12 +6030,12 @@ try {
     return valueEl;
   }
 
-  var dayMaxText = addChipRow('Max');
-  var riskText = addChipRow('Risk');
-  var yesterdayMaxText = addChipRow('Yesterday Max');
-  var monthMaxText = addChipRow('Month Max');
-  var yearMaxText = addChipRow('Year Max');
-  var alltimeMaxText = addChipRow('All-Time Max');
+  var dayMaxText = addChipRow(DivumWXI18N.t('Max'));
+  var riskText = addChipRow(DivumWXI18N.t('Risk'));
+  var yesterdayMaxText = addChipRow(DivumWXI18N.t('Yesterday Max'));
+  var monthMaxText = addChipRow(DivumWXI18N.t('Month Max'));
+  var yearMaxText = addChipRow(DivumWXI18N.t('Year Max'));
+  var alltimeMaxText = addChipRow(DivumWXI18N.t('All-Time Max'));
   alltimeMaxText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
 
   // Whole card is a click-through to the chart/records page — an
@@ -5932,7 +6050,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=solaruv&embed=1';
   cardLink.setAttribute('data-modal', 'UV Index');
-  cardLink.setAttribute('data-title', 'Solar & UV Chart & Records');
+  cardLink.setAttribute('data-title', DivumWXI18N.t('Solar & UV Chart & Records'));
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '700px');
@@ -5961,12 +6079,12 @@ try {
   var GAUGE_DOMAIN = 18, TICK_COUNT = 10;
 
   function riskLabel(uvNow, isDay){
-    if (uvNow >= 10) return 'Extreme';
-    if (uvNow >= 8)  return 'Very High';
-    if (uvNow >= 6)  return 'High';
-    if (uvNow >= 3)  return 'Moderate';
-    if (!isDay)      return 'Below Horizon';
-    return 'Low';
+    if (uvNow >= 10) return DivumWXI18N.t('Extreme');
+    if (uvNow >= 8)  return DivumWXI18N.t('Very High');
+    if (uvNow >= 6)  return DivumWXI18N.t('High');
+    if (uvNow >= 3)  return DivumWXI18N.t('Moderate');
+    if (!isDay)      return DivumWXI18N.t('Below Horizon');
+    return DivumWXI18N.t('Low');
   }
 
   function renderCard(v){
@@ -6042,6 +6160,9 @@ try {
   }
 
   var lastData = null;
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
+  });
   function refresh(){
     Promise.allSettled([
       fetch(LOOP_JSON_URL + ((LOOP_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
@@ -6161,7 +6282,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Humidity';
+  titleLabel.textContent = DivumWXI18N.t('Humidity');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -6265,12 +6386,12 @@ try {
     return valueEl;
   }
 
-  var dayMaxText = addChipRow('Max');
-  var zoneText = addChipRow('Zone');
-  var vpdText = addChipRow('Vapour P D');
-  var evapoTText = addChipRow('Evapo T');
-  var trendText = addChipRow('Trend');
-  var dayMinText = addChipRow('Min');
+  var dayMaxText = addChipRow(DivumWXI18N.t('Max'));
+  var zoneText = addChipRow(DivumWXI18N.t('Zone'));
+  var vpdText = addChipRow(DivumWXI18N.t('Vapour P D'));
+  var evapoTText = addChipRow(DivumWXI18N.t('Evapo T'));
+  var trendText = addChipRow(DivumWXI18N.t('Trend'));
+  var dayMinText = addChipRow(DivumWXI18N.t('Min'));
   dayMinText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
 
   // Whole card is a click-through to the chart/records page — an
@@ -6286,7 +6407,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=temperature&embed=1';
   cardLink.setAttribute('data-modal', 'Humidity');
-  cardLink.setAttribute('data-title', 'Humidity & Temperature Chart & Records');
+  cardLink.setAttribute('data-title', DivumWXI18N.t('Humidity & Temperature Chart & Records'));
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '700px');
@@ -6307,14 +6428,14 @@ try {
   var GAUGE_DOMAIN = 100, TICK_COUNT = 11;
 
   function comfortZone(h){
-    if (h < 30) return 'Very Dry';
-    if (h < 70) return 'Comfortable';
-    return 'Very Humid';
+    if (h < 30) return DivumWXI18N.t('Very Dry');
+    if (h < 70) return DivumWXI18N.t('Comfortable');
+    return DivumWXI18N.t('Very Humid');
   }
   function trendInfo(t){
-    if (t > 0.5) return { label: 'Rising', arrow: '\u279a' };
-    if (t < -0.5) return { label: 'Falling', arrow: '\u2798' };
-    return { label: 'Steady', arrow: '\u2799' };
+    if (t > 0.5) return { label: DivumWXI18N.t('Rising'), arrow: '\u279a' };
+    if (t < -0.5) return { label: DivumWXI18N.t('Falling'), arrow: '\u2798' };
+    return { label: DivumWXI18N.t('Steady'), arrow: '\u2799' };
   }
 
   function renderCard(v){
@@ -6342,9 +6463,9 @@ try {
       .attr('transform', 'translate(' + cx + ',' + cy + ')')
       .attr('d', textArc()).style('fill', 'none').style('stroke', 'none');
     var zoneLabels = [
-      { name: 'VERY DRY', offset: '4.5%', anchor: 'start' },
-      { name: 'COMFORTABLE', offset: '25%', anchor: 'middle' },
-      { name: 'VERY HUMID', offset: '46%', anchor: 'end' }
+      { name: DivumWXI18N.t('VERY DRY'), offset: '4.5%', anchor: 'start' },
+      { name: DivumWXI18N.t('COMFORTABLE'), offset: '25%', anchor: 'middle' },
+      { name: DivumWXI18N.t('VERY HUMID'), offset: '46%', anchor: 'end' }
     ];
     var labelContainer = svg.append('g')
       .style('font-family', 'inherit').style('font-weight', '700').style('font-size', '5px').style('fill', '#1c4263');
@@ -6409,6 +6530,9 @@ try {
   }
 
   var lastData = null;
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
+  });
   function refresh(){
     Promise.allSettled([
       fetch(LOOP_JSON_URL + ((LOOP_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
@@ -6579,7 +6703,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Earth Daylight';
+  titleLabel.textContent = DivumWXI18N.t('Earth Daylight');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -6686,13 +6810,13 @@ try {
     return valueEl;
   }
 
-  var distanceText = addChipRow('Sun Distance');
-  var auroraText = addChipRow('Aurora Activity');
-  var equinoxText = addChipRow('Next Equinox');
-  var solsticeText = addChipRow('Next Solstice');
-  var sunDecText = addChipRow('Sun Dec \u03B4');
-  var eclipticText = addChipRow("Earth's Ecliptic Angle");
-  var sunRaText = addChipRow('Sun Ra \u03BB');
+  var distanceText = addChipRow(DivumWXI18N.t('Sun Distance'));
+  var auroraText = addChipRow(DivumWXI18N.t('Aurora Activity'));
+  var equinoxText = addChipRow(DivumWXI18N.t('Next Equinox'));
+  var solsticeText = addChipRow(DivumWXI18N.t('Next Solstice'));
+  var sunDecText = addChipRow(DivumWXI18N.t('Sun Dec \u03B4'));
+  var eclipticText = addChipRow(DivumWXI18N.t("Earth's Ecliptic Angle"));
+  var sunRaText = addChipRow(DivumWXI18N.t('Sun Ra \u03BB'));
   sunRaText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
 
   // Whole card is a click-through to the world daylight map — an
@@ -6705,7 +6829,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'modalDaylightMap.html';
   cardLink.setAttribute('data-modal', 'World Daylight Map');
-  cardLink.setAttribute('data-title', 'World Daylight Map');
+  cardLink.setAttribute('data-title', DivumWXI18N.t('World Daylight Map'));
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1300px');
   cardLink.setAttribute('data-modal-height', '780px');
@@ -6893,6 +7017,9 @@ try {
   }
 
   var lastData = null, stationLat = 51.94, stationLon = -0.987;
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData, stationLat, stationLon);
+  });
   function refresh(){
     Promise.allSettled([
       fetch(ASTRO_JSON_URL + ((ASTRO_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
@@ -7050,7 +7177,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Solar Dial';
+  titleLabel.textContent = DivumWXI18N.t('Solar Dial');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -7160,14 +7287,14 @@ try {
     return valueEl;
   }
 
-  var daylightText   = addChipRow('Daylight | Darkness');
-  var azimuthText    = addChipRow('Sun Azimuth');
-  var elevationText  = addChipRow('Sun Elevation');
-  var sunriseText    = addChipRow('Sunrise (First Light)');
-  var sunsetText     = addChipRow('Sunset (Last Light)');
-  var moonPhaseText  = addChipRow('Moon Phase');
-  var moonRiseSetText = addChipRow('Moonrise | Moonset');
-  var illumText      = addChipRow('Illumination');
+  var daylightText   = addChipRow(DivumWXI18N.t('Daylight | Darkness'));
+  var azimuthText    = addChipRow(DivumWXI18N.t('Sun Azimuth'));
+  var elevationText  = addChipRow(DivumWXI18N.t('Sun Elevation'));
+  var sunriseText    = addChipRow(DivumWXI18N.t('Sunrise (First Light)'));
+  var sunsetText     = addChipRow(DivumWXI18N.t('Sunset (Last Light)'));
+  var moonPhaseText  = addChipRow(DivumWXI18N.t('Moon Phase'));
+  var moonRiseSetText = addChipRow(DivumWXI18N.t('Moonrise | Moonset'));
+  var illumText      = addChipRow(DivumWXI18N.t('Illumination'));
   illumText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
 
   // Whole card is a click-through to the celestial modal — an
@@ -7180,7 +7307,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'modalCelestial.html';
   cardLink.setAttribute('data-modal', 'Celestial');
-  cardLink.setAttribute('data-title', 'Celestial Data \u2013 Radio Aurora | Northern Lights - Meteor Showers - Moon Data');
+  cardLink.setAttribute('data-title', DivumWXI18N.t('Celestial Data \u2013 Radio Aurora | Northern Lights - Meteor Showers - Moon Data'));
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '720px');
@@ -7268,7 +7395,7 @@ try {
     var mins = Math.floor(diff / (1000 * 60)) - totalHours * 60;
     dialG.append('text').attr('y', -4).style('text-anchor', 'middle')
       .style('font-family', 'inherit').style('font-size', '11px').style('fill', overlayTextColor)
-      .text(isDay ? 'Sun Set' : 'Sun Rise');
+      .text(isDay ? DivumWXI18N.t('Sun Set') : DivumWXI18N.t('Sun Rise'));
     dialG.append('text').attr('y', 10).style('text-anchor', 'middle')
       .style('font-family', 'inherit').style('font-size', '8.5px').style('fill', overlayTextColor)
       .text(hrs + ' hrs ' + mins + ' mins');
@@ -7286,6 +7413,9 @@ try {
   }
 
   var lastData = null;
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
+  });
   function refresh(){
     fetch(ASTRO_JSON_URL + ((ASTRO_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
       .then(function(alm){
@@ -7418,7 +7548,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Geocentric';
+  titleLabel.textContent = DivumWXI18N.t('Geocentric');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -7505,7 +7635,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'modalMeeusLive.html';
   cardLink.setAttribute('data-modal', 'Geocentric Live Meeus Calculation');
-  cardLink.setAttribute('data-title', 'Live Meeus Calculation');
+  cardLink.setAttribute('data-title', DivumWXI18N.t('Live Meeus Calculation'));
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1600px');
   cardLink.setAttribute('data-modal-height', '1400px');
@@ -7564,9 +7694,9 @@ try {
     svg.append('line').attr('x1', xScale(180)).attr('y1', yScale(yDomain[0])).attr('x2', xScale(180)).attr('y2', yScale(yDomain[1]))
       .style('stroke', '#2e8b57').style('stroke-width', 1);
     svg.append('text').attr('x', xScale(180)).attr('y', padTop - 2).style('text-anchor', 'middle')
-      .style('font-family', 'inherit').style('font-size', '6px').style('fill', overlayTextColor).text('Zenith');
+      .style('font-family', 'inherit').style('font-size', '6px').style('fill', overlayTextColor).text(DivumWXI18N.t('Zenith'));
     svg.append('text').attr('x', padLeft + 3).attr('y', yScale(0) - 4)
-      .style('font-family', 'inherit').style('font-size', '6px').style('fill', overlayTextColor).text('Horizon');
+      .style('font-family', 'inherit').style('font-size', '6px').style('fill', overlayTextColor).text(DivumWXI18N.t('Horizon'));
 
     var lineGen = d3.line().x(function(d){ return xScale(d.x); }).y(function(d){ return yScale(d.y); }).curve(d3.curveBasisOpen);
     var sunPath = computeSkyPath(v.sunDec, lat, hemisphere, 360);
@@ -7679,7 +7809,7 @@ try {
 
     svg.append('text').attr('x', W2 / 2).attr('y', padTop2 - 4).style('text-anchor', 'middle')
       .style('font-family', 'inherit').style('font-size', '6px').style('fill', overlayTextColor)
-      .style('font-variant-caps', 'small-caps').style('letter-spacing', '.04em').text('Analemma');
+      .style('font-variant-caps', 'small-caps').style('letter-spacing', '.04em').text(DivumWXI18N.t('Analemma'));
 
     // Light celestial-equator reference line (dec = 0), matching the
     // horizon/zenith crosshair convention used in the sky-path chart.
@@ -7743,6 +7873,12 @@ try {
   }
   refresh();
   setInterval(refresh, POLL_MS);
+  // No prior unitsystemchange/resize re-render pattern existed in this
+  // card to follow -- this is the first such listener here, same idea as
+  // cardTemperature.js's.
+  window.addEventListener('i18nready', function(){
+    if (lastData) { renderCard(lastData, stationLat); renderAnalemma(lastData); }
+  });
 })();
 } catch (e) {
   console.error("cardsBundle: cardGeocentric.js failed:", e);
@@ -7797,26 +7933,26 @@ try {
   }
 
   var METEOR_EVENTS = [
-    { s: [1,1], e: [1,2], t: 'Quadrantids' },
-    { s: [1,3], e: [1,4], t: 'Quadrantids peak' },
-    { s: [1,5], e: [1,12], t: 'Quadrantids' },
-    { s: [4,9], e: [4,20], t: 'Approaching Lyrids' },
-    { s: [4,21], e: [4,22], t: 'Lyrids peak' },
-    { s: [5,5], e: [5,6], t: 'ETA Aquarids' },
-    { s: [7,20], e: [7,27], t: 'Delta Aquarids soon' },
-    { s: [7,28], e: [7,29], t: 'Delta Aquarids peak' },
-    { s: [8,1], e: [8,10], t: 'Perseids active' },
-    { s: [8,11], e: [8,13], t: 'Perseids peak' },
-    { s: [8,14], e: [8,18], t: 'Perseids passed' },
-    { s: [10,7], e: [10,7], t: 'Draconids peak' },
-    { s: [10,20], e: [10,21], t: 'Orionids peak' },
-    { s: [11,4], e: [11,5], t: 'South Taurids peak' },
-    { s: [11,11], e: [11,11], t: 'North Taurids peak' },
-    { s: [11,17], e: [11,18], t: 'Leonids peak' },
-    { s: [12,13], e: [12,14], t: 'Geminids peak' },
-    { s: [12,17], e: [12,20], t: 'Ursids active' },
-    { s: [12,21], e: [12,22], t: 'Ursids peak' },
-    { s: [12,23], e: [12,25], t: 'Ursids active' }
+    { s: [1,1], e: [1,2], t: DivumWXI18N.t('Quadrantids') },
+    { s: [1,3], e: [1,4], t: DivumWXI18N.t('Quadrantids peak') },
+    { s: [1,5], e: [1,12], t: DivumWXI18N.t('Quadrantids') },
+    { s: [4,9], e: [4,20], t: DivumWXI18N.t('Approaching Lyrids') },
+    { s: [4,21], e: [4,22], t: DivumWXI18N.t('Lyrids peak') },
+    { s: [5,5], e: [5,6], t: DivumWXI18N.t('ETA Aquarids') },
+    { s: [7,20], e: [7,27], t: DivumWXI18N.t('Delta Aquarids soon') },
+    { s: [7,28], e: [7,29], t: DivumWXI18N.t('Delta Aquarids peak') },
+    { s: [8,1], e: [8,10], t: DivumWXI18N.t('Perseids active') },
+    { s: [8,11], e: [8,13], t: DivumWXI18N.t('Perseids peak') },
+    { s: [8,14], e: [8,18], t: DivumWXI18N.t('Perseids passed') },
+    { s: [10,7], e: [10,7], t: DivumWXI18N.t('Draconids peak') },
+    { s: [10,20], e: [10,21], t: DivumWXI18N.t('Orionids peak') },
+    { s: [11,4], e: [11,5], t: DivumWXI18N.t('South Taurids peak') },
+    { s: [11,11], e: [11,11], t: DivumWXI18N.t('North Taurids peak') },
+    { s: [11,17], e: [11,18], t: DivumWXI18N.t('Leonids peak') },
+    { s: [12,13], e: [12,14], t: DivumWXI18N.t('Geminids peak') },
+    { s: [12,17], e: [12,20], t: DivumWXI18N.t('Ursids active') },
+    { s: [12,21], e: [12,22], t: DivumWXI18N.t('Ursids peak') },
+    { s: [12,23], e: [12,25], t: DivumWXI18N.t('Ursids active') }
   ];
   function currentMeteorShower(now){
     var m = now.getUTCMonth() + 1, d = now.getUTCDate();
@@ -7826,7 +7962,7 @@ try {
       var startNum = ev.s[0] * 100 + ev.s[1], endNum = ev.e[0] * 100 + ev.e[1];
       if (todayNum >= startNum && todayNum <= endNum) return ev.t;
     }
-    return 'No Meteor Showers';
+    return DivumWXI18N.t('No Meteor Showers');
   }
 
   var MOON_TEXTURE_MARKUP =
@@ -7972,7 +8108,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Current Moonphase';
+  titleLabel.textContent = DivumWXI18N.t('Current Moonphase');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -8095,13 +8231,13 @@ try {
     return valueEl;
   }
 
-  var riseText        = addChipRow('Moon Rise');
-  var setText          = addChipRow('Moon Set');
-  var distanceText     = addChipRow('Distance');
-  var illumText        = addChipRow('Illumination');
-  var fullMoonText     = addChipRow('Next Full Moon');
-  var newMoonText      = addChipRow('Next New Moon');
-  var meteorText       = addChipRow('Meteor Shower');
+  var riseText        = addChipRow(DivumWXI18N.t('Moon Rise'));
+  var setText          = addChipRow(DivumWXI18N.t('Moon Set'));
+  var distanceText     = addChipRow(DivumWXI18N.t('Distance'));
+  var illumText        = addChipRow(DivumWXI18N.t('Illumination'));
+  var fullMoonText     = addChipRow(DivumWXI18N.t('Next Full Moon'));
+  var newMoonText      = addChipRow(DivumWXI18N.t('Next New Moon'));
+  var meteorText       = addChipRow(DivumWXI18N.t('Meteor Shower'));
   meteorText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
 
   // Whole card is a click-through to the celestial data modal — an
@@ -8114,7 +8250,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'modalCelestial.html';
   cardLink.setAttribute('data-modal', 'Celestial');
-  cardLink.setAttribute('data-title', 'Celestial Data \u2013 Radio Aurora | Northern Lights - Meteor Showers - Moon Data');
+  cardLink.setAttribute('data-title', DivumWXI18N.t('Celestial Data \u2013 Radio Aurora | Northern Lights - Meteor Showers - Moon Data'));
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '720px');
@@ -8184,6 +8320,9 @@ try {
   }
 
   var lastData = null;
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
+  });
   function refresh(){
     fetch(ASTRO_JSON_URL + ((ASTRO_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
       .then(function(alm){
@@ -8293,7 +8432,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Lightning';
+  titleLabel.textContent = DivumWXI18N.t('Lightning');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -8418,13 +8557,13 @@ try {
     return valueEl;
   }
 
-  var currentText   = addChipRow('Current');
-  var todayText      = addChipRow('Today');
-  var hourText        = addChipRow('Last Hour');
+  var currentText   = addChipRow(DivumWXI18N.t('Current'));
+  var todayText      = addChipRow(DivumWXI18N.t('Today'));
+  var hourText        = addChipRow(DivumWXI18N.t('Last Hour'));
   var yearText          = addChipRow(String(stationNow().getUTCFullYear()) + ' Total');
-  var alltimeText        = addChipRow('All-Time Total');
-  var lastDetectedText     = addChipRow('Last Detected', { wrap: true });
-  var lastDistanceText      = addChipRow('Last Distance');
+  var alltimeText        = addChipRow(DivumWXI18N.t('All-Time Total'));
+  var lastDetectedText     = addChipRow(DivumWXI18N.t('Last Detected'), { wrap: true });
+  var lastDistanceText      = addChipRow(DivumWXI18N.t('Last Distance'));
   lastDistanceText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
 
   // Whole card is a click-through to the lightning chart/records page —
@@ -8437,7 +8576,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=lightning&embed=1';
   cardLink.setAttribute('data-modal', 'Lightning');
-  cardLink.setAttribute('data-title', 'Lightning Chart & Records');
+  cardLink.setAttribute('data-title', DivumWXI18N.t('Lightning Chart & Records'));
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '700px');
@@ -8526,6 +8665,9 @@ try {
   }
 
   var lastData = null;
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
+  });
   function refresh(){
     fetch(ARCHIVE_JSON_URL + ((ARCHIVE_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
       .then(function(arch){
@@ -8588,21 +8730,21 @@ try {
 
   // -- Risk classifier, ported from the PHP's pollenRisk() ---------------
   var GRASS_BANDS = [
-    [0,        'None',      '#59C239'],
-    [4,        'Low',       '#FFE000'],
-    [19,       'Moderate',  '#F19E38'],
-    [200,      'High',      '#EA3323'],
-    [Infinity, 'Very High', '#621e2f']
+    [0,        DivumWXI18N.t('None'),      '#59C239'],
+    [4,        DivumWXI18N.t('Low'),       '#FFE000'],
+    [19,       DivumWXI18N.t('Moderate'),  '#F19E38'],
+    [200,      DivumWXI18N.t('High'),      '#EA3323'],
+    [Infinity, DivumWXI18N.t('Very High'), '#621e2f']
   ];
   var TREE_WEED_BANDS = [
-    [0,        'None',      '#59C239'],
-    [9,        'Low',       '#FFE000'],
-    [49,       'Moderate',  '#F19E38'],
-    [500,      'High',      '#EA3323'],
-    [Infinity, 'Very High', '#621e2f']
+    [0,        DivumWXI18N.t('None'),      '#59C239'],
+    [9,        DivumWXI18N.t('Low'),       '#FFE000'],
+    [49,       DivumWXI18N.t('Moderate'),  '#F19E38'],
+    [500,      DivumWXI18N.t('High'),      '#EA3323'],
+    [Infinity, DivumWXI18N.t('Very High'), '#621e2f']
   ];
   function pollenRisk(value, bands){
-    if (value === null || typeof value === 'undefined') return { risk: 'No Data', color: 'var(--bs-secondary-color)' };
+    if (value === null || typeof value === 'undefined') return { risk: DivumWXI18N.t('No Data'), color: 'var(--bs-secondary-color)' };
     for (var i = 0; i < bands.length; i++){
       if (value <= bands[i][0]) return { risk: bands[i][1], color: bands[i][2] };
     }
@@ -8647,7 +8789,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Current Pollen Risk';
+  titleLabel.textContent = DivumWXI18N.t('Current Pollen Risk');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -8752,9 +8894,9 @@ try {
   }
 
   var ICONS = [
-    { key: 'grass', label: 'Grass Pollen', svg: GRASS_ICON_SVG, colorVar: '--grass-color' },
-    { key: 'tree',  label: 'Tree Pollen',  svg: TREE_ICON_SVG,  colorVar: '--tree-color'  },
-    { key: 'weed',  label: 'Weed Pollen',  svg: WEED_ICON_SVG,  colorVar: '--weed-color'  }
+    { key: 'grass', label: DivumWXI18N.t('Grass Pollen'), svg: GRASS_ICON_SVG, colorVar: '--grass-color' },
+    { key: 'tree',  label: DivumWXI18N.t('Tree Pollen'),  svg: TREE_ICON_SVG,  colorVar: '--tree-color'  },
+    { key: 'weed',  label: DivumWXI18N.t('Weed Pollen'),  svg: WEED_ICON_SVG,  colorVar: '--weed-color'  }
   ];
 
   var columnEls = ICONS.map(function(icon){
@@ -8822,7 +8964,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=pollen&embed=1';
   cardLink.setAttribute('data-modal', 'Pollen');
-  cardLink.setAttribute('data-title', 'Pollen Chart & Records');
+  cardLink.setAttribute('data-title', DivumWXI18N.t('Pollen Chart & Records'));
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '700px');
@@ -8840,12 +8982,15 @@ try {
       var risk = v[c.icon.key];
       c.iconWrap.querySelector('svg').style.setProperty(c.icon.colorVar, risk.color);
       c.imageLabel.style.background = risk.color;
-      c.riskLabel.textContent = 'Risk ' + risk.risk;
+      c.riskLabel.textContent = DivumWXI18N.t('Risk') + ' ' + risk.risk;
       c.riskLabel.style.color = 'var(--bw-accent)';
     });
   }
 
   var lastData = null;
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
+  });
   function refresh(){
     fetch(LOOP_JSON_URL + ((LOOP_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
       .then(function(loop){
@@ -8937,7 +9082,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Greenhouse Gas';
+  titleLabel.textContent = DivumWXI18N.t('Greenhouse Gas');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -9050,12 +9195,12 @@ try {
     return valueEl;
   }
 
-  var no2Text = addChipRow('Nitrogen Dioxide');
-  var coText   = addChipRow('Carbon Monoxide');
-  var o3Text    = addChipRow('Ozone');
-  var so2Text    = addChipRow('Sulphur Dioxide');
-  var aodText     = addChipRow('Aerosol Optical Depth');
-  var nh3Text      = addChipRow('Ammonia');
+  var no2Text = addChipRow(DivumWXI18N.t('Nitrogen Dioxide'));
+  var coText   = addChipRow(DivumWXI18N.t('Carbon Monoxide'));
+  var o3Text    = addChipRow(DivumWXI18N.t('Ozone'));
+  var so2Text    = addChipRow(DivumWXI18N.t('Sulphur Dioxide'));
+  var aodText     = addChipRow(DivumWXI18N.t('Aerosol Optical Depth'));
+  var nh3Text      = addChipRow(DivumWXI18N.t('Ammonia'));
   nh3Text.parentElement.style.borderBottom = 'none'; // last row — no divider under it
 
   // Whole card is a click-through to the greenhouse gas chart/records
@@ -9069,7 +9214,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=gases&embed=1';
   cardLink.setAttribute('data-modal', 'Greenhouse Gases');
-  cardLink.setAttribute('data-title', 'Greenhouse Gases Chart & Records');
+  cardLink.setAttribute('data-title', DivumWXI18N.t('Greenhouse Gases Chart & Records'));
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '700px');
@@ -9241,6 +9386,9 @@ try {
   }
 
   var lastData = null;
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
+  });
   function refresh(){
     fetch(LOOP_JSON_URL + ((LOOP_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
       .then(function(loop){
@@ -9302,28 +9450,28 @@ try {
 
   // -- DAQI band tables, ported from the PHP's $daqiBands -----------------
   var STANDARD_BANDS = [
-    { max: 11,  band: 1,  desc: 'Low' },
-    { max: 22,  band: 2,  desc: 'Low' },
-    { max: 33,  band: 3,  desc: 'Low' },
-    { max: 44,  band: 4,  desc: 'Moderate' },
-    { max: 55,  band: 5,  desc: 'Moderate' },
-    { max: 66,  band: 6,  desc: 'Moderate' },
-    { max: 77,  band: 7,  desc: 'High' },
-    { max: 88,  band: 8,  desc: 'High' },
-    { max: 100, band: 9,  desc: 'High' },
-    { max: Infinity, band: 10, desc: 'Very High' }
+    { max: 11,  band: 1,  desc: DivumWXI18N.t('Low') },
+    { max: 22,  band: 2,  desc: DivumWXI18N.t('Low') },
+    { max: 33,  band: 3,  desc: DivumWXI18N.t('Low') },
+    { max: 44,  band: 4,  desc: DivumWXI18N.t('Moderate') },
+    { max: 55,  band: 5,  desc: DivumWXI18N.t('Moderate') },
+    { max: 66,  band: 6,  desc: DivumWXI18N.t('Moderate') },
+    { max: 77,  band: 7,  desc: DivumWXI18N.t('High') },
+    { max: 88,  band: 8,  desc: DivumWXI18N.t('High') },
+    { max: 100, band: 9,  desc: DivumWXI18N.t('High') },
+    { max: Infinity, band: 10, desc: DivumWXI18N.t('Very High') }
   ];
   var PM10_BANDS = [
-    { max: 16, band: 1,  desc: 'Low' },
-    { max: 33, band: 2,  desc: 'Low' },
-    { max: 50, band: 3,  desc: 'Low' },
-    { max: 58, band: 4,  desc: 'Moderate' },
-    { max: 66, band: 5,  desc: 'Moderate' },
-    { max: 75, band: 6,  desc: 'Moderate' },
-    { max: 83, band: 7,  desc: 'High' },
-    { max: 91, band: 8,  desc: 'High' },
-    { max: 100, band: 9,  desc: 'High' },
-    { max: Infinity, band: 10, desc: 'Very High' }
+    { max: 16, band: 1,  desc: DivumWXI18N.t('Low') },
+    { max: 33, band: 2,  desc: DivumWXI18N.t('Low') },
+    { max: 50, band: 3,  desc: DivumWXI18N.t('Low') },
+    { max: 58, band: 4,  desc: DivumWXI18N.t('Moderate') },
+    { max: 66, band: 5,  desc: DivumWXI18N.t('Moderate') },
+    { max: 75, band: 6,  desc: DivumWXI18N.t('Moderate') },
+    { max: 83, band: 7,  desc: DivumWXI18N.t('High') },
+    { max: 91, band: 8,  desc: DivumWXI18N.t('High') },
+    { max: 100, band: 9,  desc: DivumWXI18N.t('High') },
+    { max: Infinity, band: 10, desc: DivumWXI18N.t('Very High') }
   ];
   var DAQI_BANDS = { pm1_0: STANDARD_BANDS, pm2_5: STANDARD_BANDS, pm4_0: STANDARD_BANDS, pm10_0: PM10_BANDS };
   var DAQI_COLORS = {
@@ -9393,7 +9541,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Airquality (UK DAQI)';
+  titleLabel.textContent = DivumWXI18N.t('Airquality (UK DAQI)');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -9476,7 +9624,7 @@ try {
   leftPane.appendChild(overallCaption);
 
   var overallLabel = document.createElement('div');
-  overallLabel.textContent = 'Overall';
+  overallLabel.textContent = DivumWXI18N.t('Overall');
   overallLabel.style.fontSize = '7px';
   overallLabel.style.fontVariantCaps = 'small-caps';
   overallLabel.style.letterSpacing = '.06em';
@@ -9517,7 +9665,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=airquality&embed=1';
   cardLink.setAttribute('data-modal', 'Air Quality');
-  cardLink.setAttribute('data-title', 'Air Quality Chart & Records');
+  cardLink.setAttribute('data-title', DivumWXI18N.t('Air Quality Chart & Records'));
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '700px');
@@ -9652,7 +9800,7 @@ try {
       placeholder.style.fontSize = '10px';
       placeholder.style.color = overlayTextColor;
       placeholder.style.opacity = '0.7';
-      placeholder.textContent = 'No particle sensor data available';
+      placeholder.textContent = DivumWXI18N.t('No particle sensor data available');
       grid.appendChild(placeholder);
       return;
     }
@@ -9680,7 +9828,7 @@ try {
 
     if (available.length === 0){
       overallLabel.style.color = overlayTextColor;
-      overallValue.textContent = 'No Data';
+      overallValue.textContent = DivumWXI18N.t('No Data');
       overallValue.style.background = 'transparent';
       overallValue.style.color = overlayTextColor;
       return;
@@ -9731,6 +9879,9 @@ try {
 
 
   window.addEventListener('themechange', function(){
+    if (lastData) renderCard(lastData);
+  });
+  window.addEventListener('i18nready', function(){
     if (lastData) renderCard(lastData);
   });
 })();
@@ -9820,7 +9971,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Vapour Pressure Deficit (kPa)';
+  titleLabel.textContent = DivumWXI18N.t('Vapour Pressure Deficit (kPa)');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -9927,12 +10078,12 @@ try {
     return valueEl;
   }
 
-  var dayMinText   = addChipRow('Day Min');
-  var dayMaxText    = addChipRow('Day Max');
-  var monthMinText   = addChipRow('Month Min');
-  var monthMaxText    = addChipRow('Month Max');
-  var yearMinText       = addChipRow('Year Min');
-  var yearMaxText        = addChipRow('Year Max');
+  var dayMinText   = addChipRow(DivumWXI18N.t('Day Min'));
+  var dayMaxText    = addChipRow(DivumWXI18N.t('Day Max'));
+  var monthMinText   = addChipRow(DivumWXI18N.t('Month Min'));
+  var monthMaxText    = addChipRow(DivumWXI18N.t('Month Max'));
+  var yearMinText       = addChipRow(DivumWXI18N.t('Year Min'));
+  var yearMaxText        = addChipRow(DivumWXI18N.t('Year Max'));
   yearMaxText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
 
   // Whole card is a click-through to the records page — an absolutely-
@@ -9947,7 +10098,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'records.html';
   cardLink.setAttribute('data-modal', 'Vapour Pressure Deficit');
-  cardLink.setAttribute('data-title', 'Records');
+  cardLink.setAttribute('data-title', DivumWXI18N.t('Records'));
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '700px');
@@ -9999,6 +10150,9 @@ try {
   }
 
   var lastData = null;
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
+  });
   function refresh(){
     fetch(ARCHIVE_JSON_URL + ((ARCHIVE_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
       .then(function(arch){
@@ -10091,7 +10245,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Evapotranspiration (mm)';
+  titleLabel.textContent = DivumWXI18N.t('Evapotranspiration (mm)');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -10195,10 +10349,10 @@ try {
     return valueEl;
   }
 
-  var hourText  = addChipRow('Last Hour');
-  var last24hText = addChipRow('Last 24 Hours');
-  var monthText     = addChipRow('This Month');
-  var yearText          = addChipRow('This Year');
+  var hourText  = addChipRow(DivumWXI18N.t('Last Hour'));
+  var last24hText = addChipRow(DivumWXI18N.t('Last 24 Hours'));
+  var monthText     = addChipRow(DivumWXI18N.t('This Month'));
+  var yearText          = addChipRow(DivumWXI18N.t('This Year'));
   yearText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
 
   // Whole card is a click-through to the records page — an absolutely-
@@ -10213,7 +10367,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'records.html';
   cardLink.setAttribute('data-modal', 'Evapotranspiration');
-  cardLink.setAttribute('data-title', 'Records');
+  cardLink.setAttribute('data-title', DivumWXI18N.t('Records'));
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '700px');
@@ -10263,7 +10417,7 @@ try {
       .text(v.current.toFixed(2) + ' ' + v.units);
     svg.append('text').attr('x', leafX).attr('y', heroY + 14).style('text-anchor', 'middle')
       .style('font-family', 'inherit').style('font-size', '8px').style('fill', overlayTextColor)
-      .text('Current');
+      .text(DivumWXI18N.t('Current'));
 
     // ---- Right pane: 4 readouts as label/value chip rows ----
     hourText.textContent = v.hour.toFixed(2) + ' ' + v.units;
@@ -10273,6 +10427,9 @@ try {
   }
 
   var lastData = null;
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
+  });
   function refresh(){
     fetch(ARCHIVE_JSON_URL + ((ARCHIVE_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
       .then(function(arch){
@@ -10360,12 +10517,12 @@ try {
   }
 
   var MAG_CATEGORIES = [
-    { max: 4.0, label: 'Minor', color: '#2e8b57' },
-    { max: 5.0, label: 'Light', color: '#fde396' },
-    { max: 6.0, label: 'Moderate', color: '#ff964f' },
-    { max: 7.0, label: 'Strong', color: '#ff6181' },
-    { max: 8.0, label: 'Great', color: '#be688b' },
-    { max: Infinity, label: 'Major', color: '#007FFF' }
+    { max: 4.0, label: DivumWXI18N.t('Minor'), color: '#2e8b57' },
+    { max: 5.0, label: DivumWXI18N.t('Light'), color: '#fde396' },
+    { max: 6.0, label: DivumWXI18N.t('Moderate'), color: '#ff964f' },
+    { max: 7.0, label: DivumWXI18N.t('Strong'), color: '#ff6181' },
+    { max: 8.0, label: DivumWXI18N.t('Great'), color: '#be688b' },
+    { max: Infinity, label: DivumWXI18N.t('Major'), color: '#007FFF' }
   ];
   function categoryFor(mag){
     for (var i = 0; i < MAG_CATEGORIES.length; i++){
@@ -10406,7 +10563,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Earthquake';
+  titleLabel.textContent = DivumWXI18N.t('Earthquake');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -10533,11 +10690,11 @@ try {
     return valueEl;
   }
 
-  var locationText = addChipRow('Location', { wrap: true });
-  var timeText       = addChipRow('Time');
-  var depthText         = addChipRow('Depth');
-  var epicenterText        = addChipRow('Epicenter', { wrap: true });
-  var categoryText            = addChipRow('Category');
+  var locationText = addChipRow(DivumWXI18N.t('Location'), { wrap: true });
+  var timeText       = addChipRow(DivumWXI18N.t('Time'));
+  var depthText         = addChipRow(DivumWXI18N.t('Depth'));
+  var epicenterText        = addChipRow(DivumWXI18N.t('Epicenter'), { wrap: true });
+  var categoryText            = addChipRow(DivumWXI18N.t('Category'));
   categoryText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
 
   // Whole card is a click-through to the earthquake map — an absolutely-
@@ -10552,7 +10709,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'modalEarthquakeMap.html';
   cardLink.setAttribute('data-modal', 'Earthquakes');
-  cardLink.setAttribute('data-title', 'Earthquake Map');
+  cardLink.setAttribute('data-title', DivumWXI18N.t('Earthquake Map'));
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '900px');
   cardLink.setAttribute('data-modal-height', '620px');
@@ -10586,7 +10743,7 @@ try {
     // Given a fixed position clear of the rings instead of one anchored
     // to cy, and cy itself nudged down so the ring + hero number sit
     // centered as their own group beneath it.
-    addCenter(svg, cx, 24, 'Magnitude');
+    addCenter(svg, cx, 24, DivumWXI18N.t('Magnitude'));
     addCenter(svg, cx, cy + 6, v.magnitude.toFixed(1), 'var(--bw-accent)', 22);
 
     var rings = [ { r: 20, sw: 2.5 }, { r: 31, sw: 2.0 }, { r: 42, sw: 1.0 }, { r: 53, sw: 0.5 } ];
@@ -10612,6 +10769,9 @@ try {
   }
 
   var lastData = null;
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
+  });
   function refresh(){
     Promise.allSettled([
       fetch(EQ_JSON_URL + ((EQ_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
@@ -10632,7 +10792,7 @@ try {
       var magnitude = num(props.mag, 0);
 
       lastData = {
-        location: props.flynn_region || 'Unknown location',
+        location: props.flynn_region || DivumWXI18N.t('Unknown location'),
         time: eventTimeLabel(props.time),
         depth: num(props.depth, 0),
         distanceKm: haversineKm(stationLat, stationLon, quakeLat, quakeLon),
@@ -10734,7 +10894,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Webcam';
+  titleLabel.textContent = DivumWXI18N.t('Webcam');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -10792,7 +10952,7 @@ try {
   imgLink.className = 'card-whole-link';
   imgLink.href = 'modalTimelapse.html';
   imgLink.setAttribute('data-modal', 'Timelapse');
-  imgLink.setAttribute('data-title', 'Timelapse - ' + MODAL_TITLE);
+  imgLink.setAttribute('data-title', DivumWXI18N.t('Timelapse') + ' - ' + MODAL_TITLE);
   imgLink.setAttribute('data-type', 'iframe');
   imgLink.setAttribute('data-modal-width', '760px');
   imgLink.setAttribute('data-modal-height', '460px');
@@ -10860,13 +11020,13 @@ try {
         lastIsDay = isDay;
 
         if (!isDay){
-          titleLabel.textContent = 'Timelapse';
+          titleLabel.textContent = DivumWXI18N.t('Timelapse');
           img.src = 'img/nightTime.svg';
           setStatus(false);
           return;
         }
 
-        titleLabel.textContent = 'Webcam';
+        titleLabel.textContent = DivumWXI18N.t('Webcam');
         var url = WEBCAM_IMAGE_PATH + '?v=' + cacheBustToken();
 
         // Both checks run concurrently and independently; the final status
@@ -10900,7 +11060,7 @@ try {
         if (m && m.webcam_image) WEBCAM_IMAGE_PATH = m.webcam_image;
         // The image-link modal was already built with the fallback title
         // above (before this fetch could resolve) — update it in place.
-        imgLink.setAttribute('data-title', 'Timelapse - ' + MODAL_TITLE);
+        imgLink.setAttribute('data-title', DivumWXI18N.t('Timelapse') + ' - ' + MODAL_TITLE);
       })
       .catch(function(e){
         console.warn('cardWebcam: config fetch failed --', e.message);
@@ -10910,6 +11070,12 @@ try {
   fetchWebcamConfig().then(function(){
     refresh();
     setInterval(refresh, POLL_MS);
+  });
+  window.addEventListener('i18nready', function(){
+    // refresh() already re-derives titleLabel.textContent from lastIsDay
+    // every poll cycle -- this just avoids waiting up to POLL_MS for the
+    // very first translated paint.
+    if (lastIsDay !== null) refresh();
   });
 })();
 } catch (e) {
@@ -10939,7 +11105,7 @@ try {
 // cardWebcam.js's MODAL_TITLE/WEBCAM_IMAGE_PATH fallback+fetch.
 (function(){
   var ARCHIVE_JSON_URL = './jsondata/archive.json';
-  var STATION_IMAGE_TITLE = 'Station Image';
+  var STATION_IMAGE_TITLE = DivumWXI18N.t('Station Image');
   var STATION_IMAGE_PATH = 'img/stationImage.jpg';
   var POLL_MS = 30 * 1000;
 
@@ -11049,6 +11215,17 @@ try {
   img.style.borderRadius = '5px';
   body.appendChild(img);
 
+  var titleOverriddenByConfig = false;
+  window.addEventListener('i18nready', function(){
+    // Only re-apply the translated fallback if the station owner hasn't
+    // set their own custom title -- that's arbitrary user-typed text
+    // (e.g. "Backyard Cam"), never something DivumWX should translate.
+    if (!titleOverriddenByConfig) {
+      STATION_IMAGE_TITLE = DivumWXI18N.t('Station Image');
+      img.alt = STATION_IMAGE_TITLE;
+    }
+  });
+
   function refresh(){
     img.onload = function(){ setStatus(true); };
     img.onerror = function(){ setStatus(false); };
@@ -11059,7 +11236,7 @@ try {
       .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
       .then(function(data){
         var m = data && data.meta;
-        if (m && m.station_image_title) { STATION_IMAGE_TITLE = m.station_image_title; img.alt = STATION_IMAGE_TITLE; }
+        if (m && m.station_image_title) { STATION_IMAGE_TITLE = m.station_image_title; img.alt = STATION_IMAGE_TITLE; titleOverriddenByConfig = true; }
         if (m && m.station_image_path) STATION_IMAGE_PATH = m.station_image_path;
       })
       .catch(function(e){
@@ -11180,7 +11357,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Solar Energy';
+  titleLabel.textContent = DivumWXI18N.t('Solar Energy');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -11253,7 +11430,7 @@ try {
   leftPane.appendChild(pvIcon);
 
   var pvHeroLabel = document.createElement('div');
-  pvHeroLabel.textContent = 'PV Array Generating';
+  pvHeroLabel.textContent = DivumWXI18N.t('PV Array Generating');
   pvHeroLabel.style.fontSize = '9px';
   pvHeroLabel.style.fontVariantCaps = 'small-caps';
   pvHeroLabel.style.letterSpacing = '.06em';
@@ -11332,12 +11509,12 @@ try {
     return valueEl;
   }
 
-  var gridText      = addChipRow('Grid', { wrap: true });
-  var batteryText    = addChipRow('Battery', { wrap: true });
-  var loadText          = addChipRow('House Load');
-  var dailyEnergyText       = addChipRow('Solar Daily Energy');
-  var dailyExportText          = addChipRow('Grid Daily Export');
-  var efficiencyText              = addChipRow('PV Efficiency');
+  var gridText      = addChipRow(DivumWXI18N.t('Grid'), { wrap: true });
+  var batteryText    = addChipRow(DivumWXI18N.t('Battery'), { wrap: true });
+  var loadText          = addChipRow(DivumWXI18N.t('House Load'));
+  var dailyEnergyText       = addChipRow(DivumWXI18N.t('Solar Daily Energy'));
+  var dailyExportText          = addChipRow(DivumWXI18N.t('Grid Daily Export'));
+  var efficiencyText              = addChipRow(DivumWXI18N.t('PV Efficiency'));
   efficiencyText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
 
   // Whole card is a click-through to the solar/energy chart -- same
@@ -11350,7 +11527,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=solar&embed=1';
   cardLink.setAttribute('data-modal', 'Solar Energy');
-  cardLink.setAttribute('data-title', 'Solar Energy Chart & Records');
+  cardLink.setAttribute('data-title', DivumWXI18N.t('Solar Energy Chart & Records'));
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-url', 'charts-d3.html?type=solar&embed=1');
   cardLink.style.position = 'absolute';
@@ -11488,13 +11665,13 @@ try {
       // is assumed to match the old module's (not separately confirmed
       // against this integration's own docs) -- worth double-checking
       // against a real export event if the label ever looks backwards.
-      var batteryState = (batteryPowerRaw !== null && batteryPowerRaw < 0) ? 'Charging' : 'Discharging';
+      var batteryState = (batteryPowerRaw !== null && batteryPowerRaw < 0) ? DivumWXI18N.t('Charging') : DivumWXI18N.t('Discharging');
       // "to Grid"/"from Grid" dropped -- this row's own label already says
       // GRID, so the full phrase was redundant and was the direct cause of
       // this row wrapping to 2 lines, which left too little vertical room
       // for the 6 rows to fit within the card's fixed height without the
       // last row (PV Efficiency) crowding the bottom border.
-      var gridState = (gridPowerRaw !== null && gridPowerRaw < 0) ? 'Exporting' : 'Importing';
+      var gridState = (gridPowerRaw !== null && gridPowerRaw < 0) ? DivumWXI18N.t('Exporting') : DivumWXI18N.t('Importing');
 
       var pvEfficiency = (pvPower !== null) ? (pvPower / ARRAY_RATED_WATTS * 100) : null;
 
@@ -11525,6 +11702,10 @@ try {
   }
   refresh();
   setInterval(refresh, POLL_MS);
+  // No lastData cache in this card (unlike most others) -- refresh() both
+  // fetches and renders in one step, so re-running it is the correct way
+  // to pick up translations once strings.json has loaded.
+  window.addEventListener('i18nready', refresh);
 })();
 } catch (e) {
   console.error("cardsBundle: cardSolarEnergy.js failed:", e);
