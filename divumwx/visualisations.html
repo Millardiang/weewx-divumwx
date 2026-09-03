@@ -300,7 +300,21 @@ window.addEventListener('message', (e) => {
 
   visNatural = {
     width: e.data.width || visNatural.width,
-    height: Math.min(e.data.height || visNatural.height, Math.round(window.innerHeight * 0.85))
+    // Previously capped to 85% of the browser window's height
+    // (Math.round(window.innerHeight * 0.85)) -- but #visCard and
+    // .vis-frame-wrap both have overflow:hidden (see their CSS above),
+    // so on a normal laptop screen that cap silently hard-clipped
+    // content with no scrollbar, rather than making the card scroll or
+    // grow. modalMeeusLive.html's own content genuinely needs around
+    // 1400px (see its data-height hint above) -- the viewport-percentage
+    // cap was cutting that off well before the actual content ended,
+    // which is exactly the "text at the bottom of the chart being
+    // chopped off" bug reported for the Meeus Live visualisation.
+    // Replaced with a generous fixed ceiling instead: high enough that
+    // every current visualisation's real content fits under it
+    // comfortably, low enough to still guard against some future
+    // visualisation reporting a runaway height due to its own bug.
+    height: Math.min(e.data.height || visNatural.height, 2200)
   };
   applyVisFit();
   reveal();
