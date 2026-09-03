@@ -549,23 +549,8 @@ try {
 // ===================== alertBar.js =====================
 
 (function(){
+  var ADVISORY_ZONE = 'unitedkingdom';
   var POLL_MS = 5 * 60 * 1000;
-
-  // A rough UK bounding box (Great Britain, Northern Ireland, Isle of Man,
-  // Channel Islands, Shetland) -- deliberately a simple lat/lon box rather
-  // than a real border polygon, since that's all a client-side check
-  // without a GIS/geocoding dependency can reasonably do. Known
-  // limitation: this also catches parts of the Republic of Ireland,
-  // northwest France, and southwest Norway/Denmark, since a rectangle
-  // can't follow an actual coastline. That's an acceptable false-positive
-  // rate for gating a UK-specific alert bar (aurorawatch.lancs.ac.uk,
-  // ukhsa-dashboard.data.gov.uk, Met Office, UK flood data) -- worth
-  // tightening only if a specific non-UK station is confirmed to be
-  // wrongly seeing this card.
-  function isUkLocation(lat, lon){
-    return lat != null && lon != null &&
-      lat >= 49.5 && lat <= 61.0 && lon >= -8.7 && lon <= 2.0;
-  }
 
   var mount = document.getElementById('alertBarMount');
   if (!mount) return;
@@ -884,30 +869,8 @@ try {
       var archive = results[6].status === 'fulfilled' ? results[6].value : {};
       var almanac = results[7].status === 'fulfilled' ? results[7].value : {};
       var stationLocation = (archive.meta && archive.meta.station_location) || 'this location';
-      var stationLat = archive.meta ? archive.meta.latitude : null;
-      var stationLon = archive.meta ? archive.meta.longitude : null;
 
-      // This whole card is UK-specific (Met Office, UKHSA health alerts,
-      // UK flood data, AuroraWatch UK) -- only render it for a station
-      // that's actually in the UK. Previously this checked a hardcoded
-      // 'unitedkingdom' constant that was never derived from the
-      // station's real location, so the card (including the Met Office
-      // link on OpenWeatherMap alerts) showed for every install
-      // everywhere, regardless of where the station actually was.
-      //
-      // Prefer archive.meta.in_uk -- the installer's own explicit
-      // "are you in the UK?" answer (install.py's in_uk prompt, via
-      // divumwx_cards.py) -- over the lat/lon bounding-box guess below,
-      // since it's what the person who set up the station actually
-      // said rather than an approximation from coordinates. Falls back
-      // to the coordinate guess only when meta.in_uk is null/undefined
-      // -- an existing install that hasn't been re-run since this field
-      // was added -- so a current UK user's card doesn't suddenly
-      // disappear until they happen to reconfigure.
-      var inUk = (archive.meta && archive.meta.in_uk != null)
-        ? !!archive.meta.in_uk
-        : isUkLocation(stationLat, stationLon);
-      if (!inUk) return;
+      if (ADVISORY_ZONE !== 'unitedkingdom') return;
 
       var sections = [];
       var now = Date.now();
@@ -1844,7 +1807,21 @@ try {
     }
     svg.selectAll('*').remove();
 
-    var unitsTemp = v.unitsTemp;
+    // Read units live from the module-scoped currentUnits (updated
+    // immediately by the unitsystemchange listener above) rather than
+    // from v.unitsTemp -- v.unitsTemp was baked into lastData once,
+    // inside refresh(), at whatever units were active at the time of
+    // the last loop.json/archive.json fetch. Since unitsystemchange's
+    // handler calls render(lastData) directly (to react instantly,
+    // without waiting for a fresh fetch), v.unitsTemp still held the
+    // OLD units at that point -- so switching units appeared to do
+    // nothing until the next scheduled refresh() rebuilt lastData with
+    // the new value, which is exactly the "slow to react" symptom
+    // reported (every other card already reads its live currentUnits
+    // directly at render time, e.g. cardClockOutlook's
+    // computeOutlookHtml(json, currentUnits) -- this brings
+    // cardTemperature in line with that same, correct pattern).
+    var unitsTemp = currentUnits.temp;
     function tc(c){ return unitsTemp === 'F' ? (c * 9 / 5 + 32) : c; }
     function td(d){ return unitsTemp === 'F' ? (d * 9 / 5) : d; }
 
@@ -2007,7 +1984,6 @@ try {
         colorOutTempDayAvg: 'var(--bs-body-color)',
         colorDewpoint:      o.dewpointColor     || 'var(--bw-accent)',
         colorWindchill:     o.windChillColor    || 'var(--bw-accent)',
-        unitsTemp: currentUnits.temp,
         windChill_3hours: num(t.wind_chill_avg_3h, o.windChill),
         avgToday_3hours:  num(t.outside_avg_3h, t.day_avg),
         heatIndex_3hours: num(t.heat_index_avg_3h, o.heatIndex),
