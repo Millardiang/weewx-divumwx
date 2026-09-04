@@ -233,34 +233,8 @@ body.menu-open .menu-btn span:nth-child(3) {
   position: relative;
   display: inline-block;
 }
-/* appearance:none below (needed to actually get the narrow custom width
-   applied, particularly on mobile Safari) also removes the browser's own
-   dropdown arrow -- replace it with a small CSS-only chevron so the box
-   still visually reads as "click to open a list", not a plain label. */
-.select-wrap::after {
-  content: '';
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  width: 0;
-  height: 0;
-  border-left: 4px solid transparent;
-  border-right: 4px solid transparent;
-  border-top: 5px solid currentColor;
-  opacity: 0.6;
-  transform: translateY(-50%);
-  pointer-events: none;
-}
 .select-wrap select {
   color: transparent !important;
-  /* Without this, mobile Safari in particular renders its OWN native
-     select chrome (rounded corners, generous touch-friendly padding)
-     largely ignoring the width/padding/border-radius set below on
-     #unitSystem/#languageSystem -- this is what was actually showing in
-     the "still too wide" screenshot, not those rules failing to apply. */
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
 }
 .select-wrap select option {
   color: initial !important;
