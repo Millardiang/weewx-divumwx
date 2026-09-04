@@ -115,13 +115,18 @@ html[data-bs-theme="dark"] body.season-summer header, html[data-bs-theme="dark"]
 }
 
 .site-title {
-  flex: 0 0 auto;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
   font-family: Georgia, 'Times New Roman', serif;
   font-variant-caps: small-caps;
   letter-spacing: .08em;
   font-size: 1.15rem;
   font-weight: 600;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: normal;
+  line-height: 1.15;
   color: inherit;
   text-decoration: none;
 }
@@ -159,6 +164,7 @@ html[data-bs-theme="dark"] body.season-summer header, html[data-bs-theme="dark"]
   text-align: center;
 }
 .site-nav.site-nav--menu #unitSystem,
+.site-nav.site-nav--menu #languageSystem,
 .site-nav.site-nav--menu #themeToggle,
 .site-nav.site-nav--menu #seasonToggle {
   margin-top: 8px;
@@ -227,8 +233,34 @@ body.menu-open .menu-btn span:nth-child(3) {
   position: relative;
   display: inline-block;
 }
+/* appearance:none below (needed to actually get the narrow custom width
+   applied, particularly on mobile Safari) also removes the browser's own
+   dropdown arrow -- replace it with a small CSS-only chevron so the box
+   still visually reads as "click to open a list", not a plain label. */
+.select-wrap::after {
+  content: '';
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid currentColor;
+  opacity: 0.6;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
 .select-wrap select {
   color: transparent !important;
+  /* Without this, mobile Safari in particular renders its OWN native
+     select chrome (rounded corners, generous touch-friendly padding)
+     largely ignoring the width/padding/border-radius set below on
+     #unitSystem/#languageSystem -- this is what was actually showing in
+     the "still too wide" screenshot, not those rules failing to apply. */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
 }
 .select-wrap select option {
   color: initial !important;
@@ -260,7 +292,7 @@ body.menu-open .menu-btn span:nth-child(3) {
 }
 
 #unitSystem {
-  width: 232px;
+  width: 118px;
 }
 #unitSystem option {
   background: var(--light-card, rgb(204,218,246));
@@ -269,6 +301,74 @@ body.menu-open .menu-btn span:nth-child(3) {
 body.dark #unitSystem option, [data-bs-theme="dark"] #unitSystem option {
   background: var(--card-bg, #2b2b2b);
   color: var(--dark-text, #f5f5f5);
+}
+
+/* #languageSystem deliberately mirrors #unitSystem's rules above exactly
+   (same properties, same values bar width) -- it's the same select-wrap
+   pattern (see .select-wrap/.select-label above, which already applied
+   correctly since those rules are class-based, not ID-based -- this is
+   only the ID-specific half #unitSystem had and #languageSystem was
+   missing). Narrower than #unitSystem (180px vs 232px) since language
+   names are generally shorter than the unit-system labels
+   (HEADER_UNIT_SYSTEM_LABELS's "Aviation (°C, kt, mbar)" style strings),
+   and DivumWXI18N.getLanguageName() returns each language's own short
+   self-name (e.g. "Dansk", not "Dansk (Danish)"). Adjust if a language's
+   own name turns out to run long enough to still get clipped by the
+   .select-label max-width/ellipsis rule above. */
+#languageSystem {
+  font-family: inherit;
+  font-size: 13px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(128,128,128,0.4);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+#languageSystem {
+  width: 96px;
+}
+#languageSystem option {
+  background: var(--light-card, rgb(204,218,246));
+  color: var(--light-text, #222);
+}
+body.dark #languageSystem option, [data-bs-theme="dark"] #languageSystem option {
+  background: var(--card-bg, #2b2b2b);
+  color: var(--dark-text, #f5f5f5);
+}
+
+/* Real flag <img> for the CLOSED selector state only -- native <option>
+   elements can't embed images in any browser, so the open dropdown list
+   uses an emoji flag prefix in each option's own text instead (built
+   client-side in index.html's populateLanguageSelector(), from the same
+   country-code table as this image's src -- see
+   DivumWXI18N.getLanguageFlagUrl/getLanguageFlagEmoji in cardI18n.js).
+   Pinned to the select-wrap's left edge; the label text (now the current
+   language's own name, not a static "Select language" caption, once a
+   flag makes "which language is this" worth actually answering) is
+   pushed right to make room for it, and left-aligned rather than
+   centered like #unitSystem's label -- centering would put it visually
+   underneath the flag at this width. */
+#languageFlag {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 12px;
+  object-fit: cover;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(128,128,128,0.35);
+  pointer-events: none;
+}
+.select-wrap--lang .select-label {
+  left: 32px;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  text-align: left;
+  max-width: calc(100% - 48px);
 }
 
 #themeToggle {

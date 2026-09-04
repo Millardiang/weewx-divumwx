@@ -1,8 +1,307 @@
+/* ===== cardI18n.js ===== */
+try {
 /*
 ##############################################################################################
-# cardsBundleNew.js
-#############################################################################################
+# cardI18n.js version 0.0.3
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  GPLv3
+##############################################################################################
 */
+
+// ===================== cardI18n.js =====================
+//
+// Loads jsondata/strings.json ONCE for the whole page -- generated
+// server-side by strings.json.tmpl, which now contains EVERY language's
+// full phrase set in one payload, nested by code:
+//
+//   {"_default": "da", "da": {"Temperature": "Temperatur", ...},
+//    "fr": {...}, ...}
+//
+// "_default" is this report's own configured WeeWX `lang` setting -- the
+// language a fresh visitor sees before ever touching the language
+// dropdown. Everything else is a real language code mapped to that
+// language's dictionary.
+//
+// window.DivumWXI18N.t(key)
+//   Synchronous lookup against the CURRENTLY ACTIVE language (see
+//   setLanguage() below). Returns the translated string if the payload
+//   has loaded and the active language's dictionary has an entry for
+//   `key`, otherwise returns `key` itself unchanged -- correct, not just
+//   a fallback of convenience, because every key IS the English phrase
+//   (same convention as the server-side [Texts] files). A card can call
+//   t() before the fetch resolves and will simply get English back for
+//   that first paint.
+//
+// window.DivumWXI18N.applyLabel(el, key)
+//   For text that gets set ONCE at card-boot time and never touched
+//   again afterwards (a card's own addChipRow(label) helper is the main
+//   case). Plain t(key) is wrong for that case for two separate reasons,
+//   both handled here: (1) card boot always runs before the initial
+//   fetch can possibly resolve (JS is single-threaded), so a bare t()
+//   call at boot always returns the English fallback, permanently, even
+//   after the payload loads; (2) even after it loads, switching language
+//   later needs this same text updated again, and nothing else would
+//   ever revisit it. applyLabel sets el.textContent = t(key) right away
+//   (same correct English-first-paint behaviour as t()), and PERMANENTLY
+//   registers the {el, key} pair -- re-applied not just once when the
+//   payload first loads, but every time setLanguage() is called
+//   afterwards too. Cards using addChipRow(DivumWXI18N.t('X')) need to
+//   change to addChipRow('X') and have addChipRow itself call
+//   DivumWXI18N.applyLabel(labelEl, label) instead of a bare
+//   labelEl.textContent = label -- see cardTemperature.js's addChipRow
+//   for a card that never needed this fix, because it rebuilds every
+//   label fresh inside renderCard() instead of once at boot (and so
+//   picks up a live language switch correctly too, via the 'i18nready'
+//   re-render below).
+//
+// window.DivumWXI18N.applyAttr(el, attr, key)
+//   The same idea as applyLabel, for setAttribute-based text (tooltips'
+//   data-title, mainly). Same permanent registration, same re-apply on
+//   every setLanguage() call.
+//
+// window.DivumWXI18N.getLanguage()
+//   The currently active language code.
+//
+// window.DivumWXI18N.getLanguageName(code)
+//   That language's own self-name, read directly from its [Texts]
+//   section's "Language" key (e.g. "Dansk", "Français", "العربية") --
+//   NOT translated into the currently active language, always that
+//   language's own name for itself, the way a language picker should
+//   read. Falls back to the raw code if that language isn't in the
+//   loaded payload. Lets a language-picker dropdown build its own
+//   option labels straight from the same payload everything else reads
+//   from, rather than needing a second hardcoded code-to-name list kept
+//   in sync separately (which is exactly the trap DIVUMWX_LANG_CHOICES
+//   in install.py already had to be careful about on the server side).
+//
+// window.DivumWXI18N.getLanguageFlagEmoji(code) /
+// window.DivumWXI18N.getLanguageFlagUrl(code)
+//   A representative country flag for that language -- a judgment call
+//   for languages with no country of their own (Breton, Catalan, Welsh,
+//   Basque) or spoken across several (Arabic, Hindi, Tamil, Urdu), see
+//   LANGUAGE_FLAG_COUNTRY's own comment for the specific choices made.
+//   getLanguageFlagEmoji returns a Unicode flag emoji (works directly as
+//   plain text, including inside a native <option> -- real image files
+//   can't be embedded in <option> elements in any browser); returns ''
+//   if the code isn't recognized. getLanguageFlagUrl returns a path to
+//   the matching SVG under img/flags/ (for use in an actual <img>
+//   element next to the closed selector, where images work fine -- it's
+//   only inside the open <option> list itself that's restricted to
+//   plain text). Both driven by the same country-code table, so the
+//   emoji and the SVG can never show two different countries for the
+//   same language.
+//
+// window.DivumWXI18N.getAvailableLanguages()
+//   Array of every language code present in the loaded payload (empty
+//   array before the payload has loaded) -- e.g. for a language-picker
+//   dropdown to populate its own options from, rather than hardcoding
+//   the list separately somewhere else. Order matches the order
+//   strings.json.tmpl's Python side produced them in (alphabetical by
+//   code), not necessarily the order a UI wants to display them in.
+//
+// window.DivumWXI18N.setLanguage(code)
+//   Switches the active language, in the browser, with no server round
+//   trip -- every language's text already arrived in the one payload
+//   fetch. Persists the choice to localStorage (key 'dashboardLanguage',
+//   read back on the next page load ahead of "_default") so it survives
+//   a refresh, same convention as the existing unit-system dropdown's
+//   'dashboardUnitSystem' key. No-ops (returns false) if `code` isn't a
+//   language actually present in the loaded payload, rather than
+//   silently switching to an all-English-fallback state.  Re-applies
+//   every applyLabel/applyAttr-registered element immediately, then
+//   fires 'i18nready' again so every card's own re-render listener (the
+//   same one used for the very first load) picks up the switch too --
+//   this is deliberately the SAME event as the initial-load signal, not
+//   a separate 'languagechange' event, so no card needs new listener
+//   code to support live switching; whatever already made a card
+//   correctly show translations on page load makes it correctly react
+//   to a live switch too. Returns true on a successful switch.
+//
+// window.DivumWXI18N.ready
+//   A Promise that resolves once the initial payload load has settled
+//   (loaded or failed -- a network hiccup here should degrade to "page
+//   stays in English", never break the page).
+//
+// 'i18nready' event on window
+//   Fired once after the initial payload loads, AND again every time
+//   setLanguage() successfully switches languages. Cards do this via the
+//   same "cache lastData, re-render on an event" pattern already used
+//   for 'unitsystemchange' and 'resize' (see cardTemperature.js) -- one
+//   more event in that same family, not a new pattern. This event alone
+//   does NOT fix applyLabel/applyAttr-created labels -- those are
+//   handled internally, automatically, without the card needing to do
+//   anything on this event.
+(function(){
+  var STRINGS_JSON_URL = './jsondata/strings.json';
+  var LANG_STORAGE_KEY = 'dashboardLanguage';
+  var payload = null;      // the full {"_default": "...", "da": {...}, ...} object once loaded
+  var activeLang = null;   // resolved once the payload loads: localStorage override, or "_default"
+  var loaded = false;
+  var registeredLabels = []; // {el, key} pairs -- permanent, re-applied on every language switch
+  var registeredAttrs = [];  // {el, attr, key} pairs -- same
+
+  function t(key){
+    if (loaded && payload[activeLang] && Object.prototype.hasOwnProperty.call(payload[activeLang], key)) {
+      return payload[activeLang][key];
+    }
+    return key;
+  }
+
+  function applyLabel(el, key){
+    el.textContent = t(key);
+    registeredLabels.push({ el: el, key: key });
+  }
+
+  function applyAttr(el, attr, key){
+    el.setAttribute(attr, t(key));
+    registeredAttrs.push({ el: el, attr: attr, key: key });
+  }
+
+  function getLanguage(){
+    return activeLang;
+  }
+
+  function getLanguageName(code){
+    return (payload && payload[code] && payload[code]['Language']) || code;
+  }
+
+  // Flags are COUNTRY symbols, not language symbols, so this is a
+  // deliberate representative choice for every code, not a lookup that
+  // could be derived automatically -- most are a direct match (fr->fr,
+  // de->de) but several of DivumWX's 25 languages are regional/minority
+  // languages with no country of their own (Breton, Catalan, Welsh,
+  // Basque) or are spoken across multiple countries (Arabic, Hindi,
+  // Tamil, Urdu), where the "obvious" flag is a judgment call, not a
+  // fact. Two of these are NOT the same 2 letters as the language code,
+  // on purpose -- 'da' (Danish) needs Denmark's flag ('dk'), not a
+  // (nonexistent) country called "da"; 'uk' (Ukrainian) needs Ukraine's
+  // flag ('ua'), NOT the United Kingdom's ('gb') -- a genuinely easy
+  // mix-up since "UK" reads as "United Kingdom" to a human but is this
+  // project's language code for Ukrainian, inherited from ISO 639-1.
+  var LANGUAGE_FLAG_COUNTRY = {
+    ar: 'sa',    // Arabic -> Saudi Arabia (representative choice; Arabic has no single country)
+    br: 'fr',    // Breton -> France (regional language of Brittany)
+    ca: 'es',    // Catalan -> Spain (regional language of Catalonia)
+    cn: 'cn',    // Chinese -> China
+    cy: 'gb',    // Welsh -> United Kingdom (regional language of Wales)
+    cz: 'cz',    // Czech -> Czech Republic
+    da: 'dk',    // Danish -> Denmark (NOT "da" -- no such country code)
+    de: 'de',    // German -> Germany
+    en: 'gb',    // English -> United Kingdom (this project's own default/reference)
+    en_US: 'us', // English (US) -> United States
+    es: 'es',    // Spanish -> Spain
+    eu: 'es',    // Basque -> Spain (representative choice; also spoken in France)
+    fr: 'fr',    // French -> France
+    gr: 'gr',    // Greek -> Greece
+    hi: 'in',    // Hindi -> India
+    it: 'it',    // Italian -> Italy
+    nl: 'nl',    // Dutch -> Netherlands
+    no: 'no',    // Norwegian -> Norway
+    pl: 'pl',    // Polish -> Poland
+    pt: 'pt',    // Portuguese -> Portugal
+    ta: 'in',    // Tamil -> India (representative choice; also widely spoken in Sri Lanka)
+    th: 'th',    // Thai -> Thailand
+    tr: 'tr',    // Turkish -> Turkey
+    uk: 'ua',    // Ukrainian -> Ukraine (NOT "uk"/United Kingdom -- see note above)
+    ur: 'pk'     // Urdu -> Pakistan
+  };
+  // Same country-code table drives both the emoji (built from Unicode
+  // "regional indicator symbol" letters -- every flag emoji is just two
+  // of these back to back) and the real SVG file path, so the two can
+  // never drift out of sync with each other.
+  function countryCodeToEmoji(cc){
+    if (!cc || cc.length !== 2) return '';
+    var A = 0x1F1E6, base = 'a'.charCodeAt(0);
+    return String.fromCodePoint(A + (cc.charCodeAt(0) - base)) +
+           String.fromCodePoint(A + (cc.charCodeAt(1) - base));
+  }
+  function getLanguageFlagEmoji(code){
+    var cc = LANGUAGE_FLAG_COUNTRY[code];
+    return cc ? countryCodeToEmoji(cc) : '';
+  }
+  function getLanguageFlagUrl(code){
+    var cc = LANGUAGE_FLAG_COUNTRY[code];
+    return cc ? ('./img/flags/' + cc + '.svg') : '';
+  }
+
+  function getAvailableLanguages(){
+    if (!loaded) return [];
+    return Object.keys(payload).filter(function(k){ return k.indexOf('_') !== 0; });
+  }
+
+  function reapplyAll(){
+    registeredLabels.forEach(function(p){ p.el.textContent = t(p.key); });
+    registeredAttrs.forEach(function(p){ p.el.setAttribute(p.attr, t(p.key)); });
+  }
+
+  function setLanguage(code){
+    if (!loaded || !payload[code]) return false;
+    activeLang = code;
+    try { localStorage.setItem(LANG_STORAGE_KEY, code); } catch (e) {}
+    reapplyAll();
+    window.dispatchEvent(new CustomEvent('i18nready'));
+    return true;
+  }
+
+  var resolveReady;
+  var ready = new Promise(function(resolve){ resolveReady = resolve; });
+
+  fetch(STRINGS_JSON_URL, {cache: 'no-store'})
+    .then(function(r){
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(function(json){
+      payload = json || {};
+      var saved = null;
+      try { saved = localStorage.getItem(LANG_STORAGE_KEY); } catch (e) {}
+      // A saved choice only wins if that language actually exists in
+      // THIS payload -- a station that's since dropped a language (or a
+      // stale value from a much older install) falls back to the
+      // server's own configured default instead of silently landing on
+      // an all-English page.
+      activeLang = (saved && payload[saved]) ? saved : (payload['_default'] || 'en');
+      loaded = true;
+      // Fix up every label/attr that was registered before this point --
+      // this is the only thing that makes applyLabel/applyAttr different
+      // from a bare t()/setAttribute call at boot time.
+      reapplyAll();
+      resolveReady();
+    })
+    .catch(function(e){
+      console.warn('cardI18n: strings.json fetch failed \u2014 staying in English:', e.message);
+      payload = {};
+      activeLang = 'en';
+      loaded = true; // so t() falls through to the (already-correct) English key cleanly
+      resolveReady();
+    })
+    .then(function(){
+      // Deliberately OUTSIDE the fetch/parse .then()-.catch() pair above,
+      // in its own link of the chain: dispatchEvent is a native browser
+      // method that should never throw in practice, but if it somehow
+      // did, we don't want that exception being mistaken for a fetch
+      // failure and reverting payload/activeLang back to the all-English
+      // fallback state right after a genuinely successful load.
+      window.dispatchEvent(new CustomEvent('i18nready'));
+    });
+
+  window.DivumWXI18N = {
+    t: t,
+    applyLabel: applyLabel,
+    applyAttr: applyAttr,
+    getLanguage: getLanguage,
+    getLanguageName: getLanguageName,
+    getLanguageFlagEmoji: getLanguageFlagEmoji,
+    getLanguageFlagUrl: getLanguageFlagUrl,
+    getAvailableLanguages: getAvailableLanguages,
+    setLanguage: setLanguage,
+    ready: ready
+  };
+})();
+
+} catch (e) {
+  console.error("cardsBundle: cardI18n.js failed:", e);
+}
 /* ===== cardClockOutlook.js ===== */
 try {
 /*
@@ -109,7 +408,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'StationTime | Outlook';
+  DivumWXI18N.applyLabel(titleLabel, 'StationTime | Outlook');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -340,7 +639,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'climate.html?embed=1';
   cardLink.setAttribute('data-modal', 'Climate Summary');
-  cardLink.setAttribute('data-title', 'Climatological Summary');
+  DivumWXI18N.applyAttr(cardLink, 'data-title', 'Climatological Summary');
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-url', 'climate.html?embed=1');
@@ -374,7 +673,7 @@ try {
   var COMPASS_16 = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
   function compassOf(deg){
     var idx = Math.round((((deg % 360) + 360) % 360) / 22.5) % 16;
-    return COMPASS_16[idx];
+    return DivumWXI18N.t(COMPASS_16[idx]);
   }
 
   function computeOutlookHtml(data, unitsCfg){
@@ -814,12 +1113,12 @@ try {
       var moreBtn = document.createElement('button');
       moreBtn.type = 'button';
       moreBtn.className = 'alert-read alert-more-btn';
-      moreBtn.textContent = 'More';
+      moreBtn.textContent = DivumWXI18N.t('More');
 
       var lessBtn = document.createElement('button');
       lessBtn.type = 'button';
       lessBtn.className = 'alert-read alert-less-btn';
-      lessBtn.textContent = 'Less';
+      lessBtn.textContent = DivumWXI18N.t('Less');
       more.appendChild(lessBtn);
 
       function setExpanded(expanded){
@@ -1007,6 +1306,11 @@ try {
 
   refresh();
   setInterval(refresh, POLL_MS);
+  // No i18nready listener existed here at all previously -- without one,
+  // the compass/More-Less/section text was only ever guaranteed correct
+  // on the NEXT scheduled poll (up to POLL_MS away), not immediately
+  // once translations load, unlike every other card.
+  window.addEventListener('i18nready', refresh);
 })();
 } catch (e) {
   console.error("cardsBundle: alertBar.js failed:", e);
@@ -1056,26 +1360,26 @@ try {
 
   function pickSummary(d){
     var night = !d.isDay;
-    if (d.rainRate > 0 && d.windSpeedAvg > 7.5) return 'Rain Showers Windy Conditions';
-    if (d.rainRate >= 20) return 'Flooding Possible';
-    if (d.rainRate >= 10) return 'Heavy Rain';
-    if (d.rainRate >= 5) return 'Moderate Rain';
-    if (d.rainRate >= 1) return 'Steady Rain';
-    if (d.rainRate > 0) return 'Light Rain';
-    if (d.snow >= 1.5) return 'Heavy Snow';
-    if (d.snow >= 0.75) return 'Moderate Snow';
-    if (d.snow > 0.1) return 'Light Snow';
-    if (d.tdDiff < 0.5 && d.outTemp > 5) return 'Misty Conditions';
-    if (d.tdDiff < 0.8 && d.outTemp > 5) return 'Misty Hazy Conditions';
-    if (d.windSpeedAvg >= 40) return 'Strong Wind Conditions';
-    if (d.windSpeedAvg >= 30) return 'Very Windy Conditions';
-    if (d.windSpeedAvg >= 22) return 'Moderate Wind Conditions';
-    if (d.windSpeedAvg >= 7.5) return 'Breezy Conditions';
-    if (d.cloudCover < 7 && d.cloudCover > 0) return night ? 'Clear Sky' : 'Sunny';
-    if (d.cloudCover < 32) return night ? 'Mostly Clear Conditions' : 'Mostly Sunny Conditions';
-    if (d.cloudCover < 70) return 'Partly Cloudy Conditions';
-    if (d.cloudCover < 95) return 'Mostly Cloudy Conditions';
-    return 'Overcast Conditions';
+    if (d.rainRate > 0 && d.windSpeedAvg > 7.5) return DivumWXI18N.t('Rain Showers Windy Conditions');
+    if (d.rainRate >= 20) return DivumWXI18N.t('Flooding Possible');
+    if (d.rainRate >= 10) return DivumWXI18N.t('Heavy Rain');
+    if (d.rainRate >= 5) return DivumWXI18N.t('Moderate Rain');
+    if (d.rainRate >= 1) return DivumWXI18N.t('Steady Rain');
+    if (d.rainRate > 0) return DivumWXI18N.t('Light Rain');
+    if (d.snow >= 1.5) return DivumWXI18N.t('Heavy Snow');
+    if (d.snow >= 0.75) return DivumWXI18N.t('Moderate Snow');
+    if (d.snow > 0.1) return DivumWXI18N.t('Light Snow');
+    if (d.tdDiff < 0.5 && d.outTemp > 5) return DivumWXI18N.t('Misty Conditions');
+    if (d.tdDiff < 0.8 && d.outTemp > 5) return DivumWXI18N.t('Misty Hazy Conditions');
+    if (d.windSpeedAvg >= 40) return DivumWXI18N.t('Strong Wind Conditions');
+    if (d.windSpeedAvg >= 30) return DivumWXI18N.t('Very Windy Conditions');
+    if (d.windSpeedAvg >= 22) return DivumWXI18N.t('Moderate Wind Conditions');
+    if (d.windSpeedAvg >= 7.5) return DivumWXI18N.t('Breezy Conditions');
+    if (d.cloudCover < 7 && d.cloudCover > 0) return night ? DivumWXI18N.t('Clear Sky') : DivumWXI18N.t('Sunny');
+    if (d.cloudCover < 32) return night ? DivumWXI18N.t('Mostly Clear Conditions') : DivumWXI18N.t('Mostly Sunny Conditions');
+    if (d.cloudCover < 70) return DivumWXI18N.t('Partly Cloudy Conditions');
+    if (d.cloudCover < 95) return DivumWXI18N.t('Mostly Cloudy Conditions');
+    return DivumWXI18N.t('Overcast Conditions');
   }
 
   function cloudOktas(pct){
@@ -1140,15 +1444,15 @@ try {
 
   function toOrdinal(deg){
     var points = [
-      [11.25,'North'], [33.75,'NNE'],  [56.25,'NE'],   [78.75,'ENE'],
-      [101.25,'East'], [123.75,'ESE'], [146.25,'SE'],  [168.75,'SSE'],
-      [191.25,'South'],[213.75,'SSW'], [236.25,'SW'],  [261.25,'WSW'],
-      [281.25,'West'], [303.75,'WNW'], [326.25,'NW'],  [348.75,'NNW'],
+      [11.25,DivumWXI18N.t('North')], [33.75,DivumWXI18N.t('NNE')],  [56.25,DivumWXI18N.t('NE')],   [78.75,DivumWXI18N.t('ENE')],
+      [101.25,DivumWXI18N.t('East')], [123.75,DivumWXI18N.t('ESE')], [146.25,DivumWXI18N.t('SE')],  [168.75,DivumWXI18N.t('SSE')],
+      [191.25,DivumWXI18N.t('South')],[213.75,DivumWXI18N.t('SSW')], [236.25,DivumWXI18N.t('SW')],  [261.25,DivumWXI18N.t('WSW')],
+      [281.25,DivumWXI18N.t('West')], [303.75,DivumWXI18N.t('WNW')], [326.25,DivumWXI18N.t('NW')],  [348.75,DivumWXI18N.t('NNW')],
     ];
     for (var i = 0; i < points.length; i++){
       if (deg <= points[i][0]) return points[i][1];
     }
-    return 'North';
+    return DivumWXI18N.t('North');
   }
 
   var currentUnits = loadStoredUnits();
@@ -1165,6 +1469,7 @@ try {
       refresh();
     }
   });
+  window.addEventListener('i18nready', refresh);
 
   function mphToMs(v){ return v * 0.44704; }
   function windLabel(mphValue){
@@ -1229,7 +1534,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Current Conditions';
+  DivumWXI18N.applyLabel(titleLabel, 'Current Conditions');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -1350,7 +1655,7 @@ try {
     row.style.borderBottom = '1px solid var(--bs-border-color)';
 
     var labelEl = document.createElement('span');
-    labelEl.textContent = label;
+    DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.lineHeight = '1';
     labelEl.style.fontVariantCaps = 'small-caps';
@@ -1401,7 +1706,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'modalMetar.html';
   cardLink.setAttribute('data-modal', 'METAR');
-  cardLink.setAttribute('data-title', 'Nearby METAR');
+  DivumWXI18N.applyAttr(cardLink, 'data-title', 'Nearby METAR');
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '900px');
   cardLink.setAttribute('data-modal-height', '600px');
@@ -1594,6 +1899,13 @@ try {
   window.addEventListener('resize', function(){
     if (lastData) render(lastData);
   });
+  // Card typically renders once (in English, since strings.json is still
+  // fetching) before DivumWXI18N's own fetch resolves. Re-render once it
+  // has, same pattern as unitsystemchange/resize above -- swaps the
+  // already-rendered English labels for translated ones in place.
+  window.addEventListener('i18nready', function(){
+    if (lastData) render(lastData);
+  });
 
   var mount = document.getElementById('thermometerCard3');
   if (!mount || !window.d3) return;
@@ -1626,7 +1938,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Temperature';
+  titleLabel.textContent = DivumWXI18N.t('Temperature');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -1776,7 +2088,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=temperature&embed=1';
   cardLink.setAttribute('data-modal', 'Temperature');
-  cardLink.setAttribute('data-title', 'Temperature Chart & Records');
+  DivumWXI18N.applyAttr(cardLink, 'data-title', 'Temperature Chart & Records');
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '700px');
@@ -1836,7 +2148,7 @@ try {
     var windChill        = tc(v.windChill);
     var trend_outTemp   = td(v.trend_outTemp);
 
-    titleLabel.textContent = 'Temperature (\u00B0' + unitsTemp + ')';
+    titleLabel.textContent = DivumWXI18N.t('Temperature') + ' (\u00B0' + unitsTemp + ')';
 
     var defs = svg.append('defs');
     var bulbGradient = defs.append('radialGradient')
@@ -1890,11 +2202,11 @@ try {
     svg.append('text').attr('class', 'min-temp-label')
       .attr('x', 45 + tubeWidth / 2 + 13).attr('y', yScale(globalMinTemp) + 8.5)
       .attr('text-anchor', 'middle').style('font-family', 'inherit').style('fill', 'var(--bs-body-color)').style('font-size', '8px')
-      .text('Min');
+      .text(DivumWXI18N.t('Min'));
     svg.append('text').attr('class', 'max-temp-label')
       .attr('x', 45 + tubeWidth / 2 + 13).attr('y', yScale(globalMaxTemp) - 3)
       .attr('text-anchor', 'middle').style('font-family', 'inherit').style('fill', 'var(--bs-body-color)').style('font-size', '8px')
-      .text('Max');
+      .text(DivumWXI18N.t('Max'));
 
     svg.append('line').attr('class', 'min-temp-line')
       .attr('x1', 45 - tubeWidth / 2 + 20).attr('x2', 45 + tubeWidth / 2 + 22)
@@ -1912,19 +2224,27 @@ try {
     // left as blank space, so the text zone gets more breathing room
     // where the card is narrowest and legibility matters most.
     var mediaMode = isMediaMode();
+    // Each row carries a stable `id` (never translated, never shown --
+    // used only for the media-mode filter below) separate from `label`
+    // (translated display text). Before this change the filter compared
+    // against the English label text directly ("Indoor Temp") -- once
+    // that label is translated, that comparison would silently stop
+    // matching and Indoor Temp would stop being hidden in media mode.
+    // Filtering on `id` instead means the label can be translated to
+    // anything without touching the filter logic at all.
     var weatherData = [
-      { label: 'Max | Min',   value: globalMaxTemp.toFixed(1) + '\u00B0' + unitsTemp + ' | ' + globalMinTemp.toFixed(1) + '\u00B0' + unitsTemp, color: 'transparent', trend: 0 },
-      { label: 'Trend',       value: trend_outTemp.toFixed(1) + '\u00B0' + unitsTemp, color: v.tempColor, trend: trend_outTemp },
-      { label: 'Indoor Temp', value: inTemp.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorInTemp, trend: v.trend_inTemp },
-      { label: 'Apparent',    value: appTemp.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorAppTemp, trend: getTrend(v.appTemp, v.appTemp_3hours) },
-      { label: 'Humidity',    value: v.humidity.toFixed(0) + '%', color: v.colorHumidityOut, trend: v.trend_outHumidity },
-      { label: 'Heat Index',  value: heatIndex.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorHeatindex, trend: getTrend(v.heatIndex, v.heatIndex_3hours) },
-      { label: 'Avg Today',   value: avgToday.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorOutTempDayAvg, trend: getTrend(v.avgToday, v.avgToday_3hours) },
-      { label: 'Dewpoint',    value: dewpoint.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorDewpoint, trend: v.trend_dewpoint },
-      { label: 'Windchill',   value: windChill.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorWindchill, trend: getTrend(v.windChill, v.windChill_3hours) }
+      { id: 'maxMin',      label: DivumWXI18N.t('Max | Min'),   value: globalMaxTemp.toFixed(1) + '\u00B0' + unitsTemp + ' | ' + globalMinTemp.toFixed(1) + '\u00B0' + unitsTemp, color: 'transparent', trend: 0 },
+      { id: 'trend',       label: DivumWXI18N.t('Trend'),       value: trend_outTemp.toFixed(1) + '\u00B0' + unitsTemp, color: v.tempColor, trend: trend_outTemp },
+      { id: 'indoorTemp',  label: DivumWXI18N.t('Indoor Temp'), value: inTemp.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorInTemp, trend: v.trend_inTemp },
+      { id: 'apparent',    label: DivumWXI18N.t('Apparent'),    value: appTemp.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorAppTemp, trend: getTrend(v.appTemp, v.appTemp_3hours) },
+      { id: 'humidity',    label: DivumWXI18N.t('Humidity'),    value: v.humidity.toFixed(0) + '%', color: v.colorHumidityOut, trend: v.trend_outHumidity },
+      { id: 'heatIndex',   label: DivumWXI18N.t('Heat Index'),  value: heatIndex.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorHeatindex, trend: getTrend(v.heatIndex, v.heatIndex_3hours) },
+      { id: 'avgToday',    label: DivumWXI18N.t('Avg Today'),   value: avgToday.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorOutTempDayAvg, trend: getTrend(v.avgToday, v.avgToday_3hours) },
+      { id: 'dewpoint',    label: DivumWXI18N.t('Dewpoint'),    value: dewpoint.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorDewpoint, trend: v.trend_dewpoint },
+      { id: 'windchill',   label: DivumWXI18N.t('Windchill'),   value: windChill.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorWindchill, trend: getTrend(v.windChill, v.windChill_3hours) }
     ];
     if (mediaMode) {
-      weatherData = weatherData.filter(function(d){ return d.label !== 'Indoor Temp'; });
+      weatherData = weatherData.filter(function(d){ return d.id !== 'indoorTemp'; });
     }
 
     // Rows beyond weatherData.length (only happens in media mode) are
@@ -2057,7 +2377,7 @@ try {
   function weekdayAbbrev(dateStr){
     var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateStr);
     var d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
-    return WEEKDAYS[d.getUTCDay()];
+    return DivumWXI18N.t(WEEKDAYS[d.getUTCDay()]);
   }
 
   var currentUnits = loadStoredUnits();
@@ -2073,6 +2393,9 @@ try {
       currentUnits = e.detail.config;
       if (lastForecastJson) renderCard(lastForecastJson, iconMap);
     }
+  });
+  window.addEventListener('i18nready', function(){
+    if (lastForecastJson) renderCard(lastForecastJson, iconMap);
   });
 
   function toCelsius(v, sourceUnit){
@@ -2108,7 +2431,7 @@ try {
   }
   var COMPASS_16 = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
   function deg2compass(deg){
-    return COMPASS_16[Math.floor((deg / 22.5) + 0.5) % 16];
+    return DivumWXI18N.t(COMPASS_16[Math.floor((deg / 22.5) + 0.5) % 16]);
   }
 
   var mount = document.getElementById('forecastCard4');
@@ -2142,7 +2465,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Forecast';
+  titleLabel.textContent = DivumWXI18N.t('Forecast');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -2208,7 +2531,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'stationforecast.html';
   cardLink.setAttribute('data-modal', '7-Day Forecast');
-  cardLink.setAttribute('data-title', 'Station 7-Day Forecast and Meteogram');
+  DivumWXI18N.applyAttr(cardLink, 'data-title', 'Station 7-Day Forecast and Meteogram');
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '800px');
@@ -2227,7 +2550,7 @@ try {
     if (!entry) return '<span style="font-size:20px">\u2753</span>';
     var iconName = isNight ? entry.night : entry.day;
     var emoji = entry.emoji || '\u2753';
-    var label = entry.label || 'Unknown';
+    var label = entry.label || DivumWXI18N.t('Unknown');
     if (iconName) {
       return '<img src="' + ICON_BASE + iconName + '.svg" alt="' + label + '" title="' + label +
         '" width="34" height="34" style="width:34px;height:34px;display:block;margin:2px 0;">';
@@ -2235,7 +2558,7 @@ try {
     return '<span title="' + label + '" style="font-size:20px">' + emoji + '</span>';
   }
   function weatherText(code, map){
-    return (map && map[code] && map[code].label) || 'Unknown';
+    return (map && map[code] && map[code].label) || DivumWXI18N.t('Unknown');
   }
 
   function safeSlice(arr, offset, length, fallback){
@@ -2310,13 +2633,13 @@ try {
 
   function labelFor(s, todayStr, tomorrowStr){
     if (s.period === 'Day') {
-      if (s.date === todayStr) return 'Today';
-      if (s.date === tomorrowStr) return 'Tomorrow';
+      if (s.date === todayStr) return DivumWXI18N.t('Today');
+      if (s.date === tomorrowStr) return DivumWXI18N.t('Tomorrow');
       return weekdayAbbrev(s.date);
     }
-    if (s.date === todayStr) return 'Tonight';
-    if (s.date === tomorrowStr) return 'Tomorrow Night';
-    return weekdayAbbrev(s.date) + ' Night';
+    if (s.date === todayStr) return DivumWXI18N.t('Tonight');
+    if (s.date === tomorrowStr) return DivumWXI18N.t('Tomorrow Night');
+    return weekdayAbbrev(s.date) + ' ' + DivumWXI18N.t('Night');
   }
 
   function renderCard(data, map){
@@ -2328,7 +2651,7 @@ try {
     var todayStr = fmtDate(now);
     var tomorrowStr = fmtDate(addDays(now, 1));
 
-    titleLabel.textContent = 'Forecast (\u00B0' + currentUnits.temp + ')';
+    titleLabel.textContent = DivumWXI18N.t('Forecast') + ' (\u00B0' + currentUnits.temp + ')';
 
     // wind.svg's own gradient is a pale grey (#d4d7dd→#bec1c6) — barely
     // visible against a white/light card face, so light theme darkens it
@@ -2361,7 +2684,7 @@ try {
       var lbl = labelFor(s, todayStr, tomorrowStr);
       var isDay = s.period === 'Day';
       var tempText = tempLabel(isDay ? s.tmaxC : s.tminC);
-      var extra = isDay ? ('UV-I ' + s.uv) : (s.humidity + '% hum');
+      var extra = isDay ? ('UV-I ' + s.uv) : (s.humidity + '% ' + DivumWXI18N.t('hum'));
       var icon = getIconHtml(s.code, s.period, map);
       var text = weatherText(s.code, map);
 
@@ -2459,8 +2782,8 @@ try {
   var COMPASS_16 = ['North','NNE','NE','ENE','East','ESE','SE','SSE','South','SSW','SW','WSW','West','WNW','NW','NNW'];
   var COMPASS_BOUNDS = [11.25,33.75,56.25,78.75,101.25,123.75,146.25,168.75,191.25,213.75,236.25,258.75,281.25,303.75,326.25,348.75];
   function toOrdinal(deg){
-    for (var i = 0; i < COMPASS_BOUNDS.length; i++){ if (deg <= COMPASS_BOUNDS[i]) return COMPASS_16[i]; }
-    return 'North';
+    for (var i = 0; i < COMPASS_BOUNDS.length; i++){ if (deg <= COMPASS_BOUNDS[i]) return DivumWXI18N.t(COMPASS_16[i]); }
+    return DivumWXI18N.t('North');
   }
 
   var currentUnits = loadStoredUnits();
@@ -2476,6 +2799,9 @@ try {
       currentUnits = e.detail.config;
       if (lastData) renderCard(lastData);
     }
+  });
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
   });
 
   var WIND_UNIT_LABEL = { mph: 'mph', kmh: 'km/h', kt: 'kt', ms: 'm/s', bf: 'Bft' };
@@ -2526,7 +2852,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Anemometer';
+  titleLabel.textContent = DivumWXI18N.t('Anemometer');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -2615,7 +2941,7 @@ try {
     row.style.borderBottom = '1px solid var(--bs-border-color)';
 
     var labelEl = document.createElement('span');
-    labelEl.textContent = label;
+    DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
     labelEl.style.letterSpacing = '.06em';
@@ -2653,7 +2979,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=wind&embed=1';
   cardLink.setAttribute('data-modal', 'Wind');
-  cardLink.setAttribute('data-title', 'Wind & Gust Chart & Records');
+  DivumWXI18N.applyAttr(cardLink, 'data-title', 'Wind & Gust Chart & Records');
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '700px');
@@ -2740,7 +3066,7 @@ try {
   var needleSpring = null, lastGaugeDomain = null;
 
   function renderCard(v){
-    titleLabel.textContent = 'Anemometer (' + (WIND_UNIT_LABEL[currentUnits.wind] || 'km/h') + ')';
+    titleLabel.textContent = DivumWXI18N.t('Anemometer') + ' (' + (WIND_UNIT_LABEL[currentUnits.wind] || 'km/h') + ')';
 
     var gaugeCfg = GAUGE_CONFIG[currentUnits.wind] || GAUGE_CONFIG.kmh;
     var gaugeDomain = gaugeCfg[0], tickCount = gaugeCfg[1];
@@ -2866,7 +3192,7 @@ try {
       .text(windLabel(v.windSpeed));
     dynG.append('text').attr('x', cx).attr('y', H - 8).style('text-anchor', 'middle')
       .style('font-family', '"IBM Plex Mono", ui-monospace, monospace').style('font-size', '9.5px').style('fill', 'var(--bw-accent)')
-      .text('Gust ' + windLabel(v.windGust));
+      .text(DivumWXI18N.t('Gust') + ' ' + windLabel(v.windGust));
 
     // ---- Right pane: 5 readouts as label/value chip rows ----
     maxGustText.textContent = windLabel(v.gustMax) + ' (' + timeLabelFor(v.gustMaxTime) + ')';
@@ -2899,7 +3225,7 @@ try {
         windDir:   num(o.windDir, 0),
         windSpeed: num(o.windSpeed, 0),
         windGust:  num(o.windGust, 0),
-        gustMax:   num(o.maxdailygust, 0),
+        gustMax:   num(wind.gust_max, 0),
         gustMaxTime: num(wind.gust_maxtime, 0),
         windRunMi: num(wind.wind_run, 0),
         beaufortScale: num(o.beaufortScale, 0),
@@ -2965,8 +3291,8 @@ try {
   var COMPASS_16 = ['North','NNE','NE','ENE','East','ESE','SE','SSE','South','SSW','SW','WSW','West','WNW','NW','NNW'];
   var COMPASS_BOUNDS = [11.25,33.75,56.25,78.75,101.25,123.75,146.25,168.75,191.25,213.75,236.25,258.75,281.25,303.75,326.25,348.75];
   function toOrdinal(deg){
-    for (var i = 0; i < COMPASS_BOUNDS.length; i++){ if (deg <= COMPASS_BOUNDS[i]) return COMPASS_16[i]; }
-    return 'North';
+    for (var i = 0; i < COMPASS_BOUNDS.length; i++){ if (deg <= COMPASS_BOUNDS[i]) return DivumWXI18N.t(COMPASS_16[i]); }
+    return DivumWXI18N.t('North');
   }
   var currentUnits = loadStoredUnits();
   function loadStoredUnits(){
@@ -2981,6 +3307,9 @@ try {
       currentUnits = e.detail.config;
       if (lastData) renderCard(lastData);
     }
+  });
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
   });
 
   var WIND_UNIT_LABEL = { mph: 'mph', kmh: 'km/h', kt: 'kt', ms: 'm/s', bf: 'Bft' };
@@ -3030,7 +3359,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Direction | Windspeed';
+  titleLabel.textContent = DivumWXI18N.t('Direction | Windspeed');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -3115,7 +3444,7 @@ try {
     row.style.borderBottom = '1px solid var(--bs-border-color)';
 
     var labelEl = document.createElement('span');
-    labelEl.textContent = label;
+    DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
     labelEl.style.letterSpacing = '.06em';
@@ -3152,7 +3481,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=wind&embed=1';
   cardLink.setAttribute('data-modal', 'Wind');
-  cardLink.setAttribute('data-title', 'Wind & Gust Chart & Records');
+  DivumWXI18N.applyAttr(cardLink, 'data-title', 'Wind & Gust Chart & Records');
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '700px');
@@ -3243,7 +3572,7 @@ try {
   }
 
   function renderCard(v){
-    titleLabel.textContent = 'Direction | Windspeed (' + (WIND_UNIT_LABEL[currentUnits.wind] || 'km/h') + ')';
+    titleLabel.textContent = DivumWXI18N.t('Direction | Windspeed') + ' (' + (WIND_UNIT_LABEL[currentUnits.wind] || 'km/h') + ')';
 
     var svgSel = d3.select(leftPane);
     var svg = svgSel.select('svg');
@@ -3283,14 +3612,14 @@ try {
           .attr('r', 0.6).style('fill', 'var(--bs-border-color)');
       }
 
-      compassG.append('text').attr('x', 0).attr('y', -nsewR).attr('dy', '0.32em').style('text-anchor', 'middle')
-        .style('font-size', '9px').style('font-weight', '700').style('fill', '#ff6347').text('N');
-      compassG.append('text').attr('x', nsewR).attr('y', 0).attr('dy', '0.32em').style('text-anchor', 'middle')
-        .style('font-size', '8px').style('fill', overlayTextColor).text('E');
-      compassG.append('text').attr('x', 0).attr('y', nsewR).attr('dy', '0.32em').style('text-anchor', 'middle')
-        .style('font-size', '8px').style('fill', overlayTextColor).text('S');
-      compassG.append('text').attr('x', -nsewR).attr('y', 0).attr('dy', '0.32em').style('text-anchor', 'middle')
-        .style('font-size', '8px').style('fill', overlayTextColor).text('W');
+      DivumWXI18N.applyLabel(compassG.append('text').attr('x', 0).attr('y', -nsewR).attr('dy', '0.32em').style('text-anchor', 'middle')
+        .style('font-size', '9px').style('font-weight', '700').style('fill', '#ff6347').node(), 'N');
+      DivumWXI18N.applyLabel(compassG.append('text').attr('x', nsewR).attr('y', 0).attr('dy', '0.32em').style('text-anchor', 'middle')
+        .style('font-size', '8px').style('fill', overlayTextColor).node(), 'E');
+      DivumWXI18N.applyLabel(compassG.append('text').attr('x', 0).attr('y', nsewR).attr('dy', '0.32em').style('text-anchor', 'middle')
+        .style('font-size', '8px').style('fill', overlayTextColor).node(), 'S');
+      DivumWXI18N.applyLabel(compassG.append('text').attr('x', -nsewR).attr('y', 0).attr('dy', '0.32em').style('text-anchor', 'middle')
+        .style('font-size', '8px').style('fill', overlayTextColor).node(), 'W');
 
       var arrowG = compassG.append('g').attr('class', 'arrow').attr('transform', 'rotate(0)');
       arrowG.append('path').attr('d', ringArrowPath(tickInnerR, 15)).attr('fill', '#007fff');
@@ -3328,10 +3657,10 @@ try {
     var heroY = cy + tickLabelR + 14;
     chromeG.append('text').attr('x', cx).attr('y', heroY).style('text-anchor', 'middle')
       .style('font-family', '"IBM Plex Mono", ui-monospace, monospace').style('font-size', '13px').style('fill', 'var(--bw-accent)')
-      .text('Currently ' + windFromMS(v.windSpeed).toFixed(1) + ' ' + (WIND_UNIT_LABEL[currentUnits.wind] || 'km/h'));
+      .text(DivumWXI18N.t('Currently') + ' ' + windFromMS(v.windSpeed).toFixed(1) + ' ' + (WIND_UNIT_LABEL[currentUnits.wind] || 'km/h'));
     chromeG.append('text').attr('x', cx).attr('y', heroY + 15).style('text-anchor', 'middle')
       .style('font-family', '"IBM Plex Mono", ui-monospace, monospace').style('font-size', '9.5px').style('fill', 'var(--bw-accent)')
-      .text('Gust ' + windFromMS(v.windGust).toFixed(1) + ' ' + (WIND_UNIT_LABEL[currentUnits.wind] || 'km/h'));
+      .text(DivumWXI18N.t('Gust') + ' ' + windFromMS(v.windGust).toFixed(1) + ' ' + (WIND_UNIT_LABEL[currentUnits.wind] || 'km/h'));
 
     // ---- Right pane: 3 readouts as label/value chip rows ----
     maxGustText.textContent = windLabel(v.gustMax) + ' (' + timeLabelFor(v.gustMaxTime) + ')';
@@ -3363,7 +3692,7 @@ try {
         windDir10: num(wind.direction_10m_avg, 0),
         windSpeed: num(o.windSpeed, 0),
         windGust:  num(o.windGust, 0),
-        gustMax:   num(o.maxdailygust, 0),
+        gustMax:   num(wind.gust_max, 0),
         gustMaxTime: num(wind.gust_maxtime, 0),
         windRunMi: num(wind.wind_run, 0),
         beaufortScale: num(o.beaufortScale, 0),
@@ -3434,6 +3763,9 @@ try {
       if (lastData) renderCard(lastData);
     }
   });
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
+  });
 
   var PRESSURE_CONFIG = {
     hpa:  { factor: 1,                  dp: 1, domain: [940, 1060], ticks: 12, tickDp: 0, label: 'hPa',  badgeUnit: 'inHg', badgeFactor: 0.029529983071445, badgeDp: 2 },
@@ -3475,7 +3807,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Barometer';
+  titleLabel.textContent = DivumWXI18N.t('Barometer');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -3560,7 +3892,7 @@ try {
     row.style.borderBottom = '1px solid var(--bs-border-color)';
 
     var labelEl = document.createElement('span');
-    labelEl.textContent = label;
+    DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
     labelEl.style.letterSpacing = '.06em';
@@ -3596,7 +3928,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=barometer&embed=1';
   cardLink.setAttribute('data-modal', 'Barometer');
-  cardLink.setAttribute('data-title', 'Barometer Chart & Records');
+  DivumWXI18N.applyAttr(cardLink, 'data-title', 'Barometer Chart & Records');
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '700px');
@@ -3629,7 +3961,7 @@ try {
 
   function renderCard(v){
     var cfg = pressureConfig();
-    titleLabel.textContent = 'Barometer (' + cfg.label + ')';
+    titleLabel.textContent = DivumWXI18N.t('Barometer') + ' (' + cfg.label + ')';
 
     var svgSel = d3.select(leftPane);
     var svg = svgSel.select('svg');
@@ -3692,7 +4024,7 @@ try {
     TREND_LABELS.forEach(function(l){
       labelContainer.append('text').append('textPath')
         .attr('xlink:href', '#barometerLabelPath').attr('startOffset', l.offset)
-        .style('text-anchor', l.anchor).text(l.name);
+        .style('text-anchor', l.anchor).text(DivumWXI18N.t(l.name));
     });
 
     var needleAngle = arcScale(currentDisp);
@@ -3760,7 +4092,7 @@ try {
         maxTime: num(barom.day_maxtime, 0),
         minTime: num(barom.day_mintime, 0),
         trendCode: trendCode,
-        trendDesc: barom.trend_desc || 'Steady',
+        trendDesc: barom.trend_desc || DivumWXI18N.t('Steady'),
         trendColor: trendCode > 0 ? '#3b9cac' : trendCode < 0 ? '#ff7c39' : '#90b12a',
         currentColor: o.barometerColor || 'var(--bw-accent)',
         dayMaxColor: overlayTextColor,
@@ -3830,6 +4162,9 @@ try {
       if (lastData) renderCard(lastData);
     }
   });
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
+  });
   function mm2in(mm){ return mm / 25.400013716; }
   function rainLabel(mm){
     return currentUnits.rain === 'in'
@@ -3868,7 +4203,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Piezo Rain';
+  titleLabel.textContent = DivumWXI18N.t('Piezo Rain');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -3953,7 +4288,7 @@ try {
     row.style.borderBottom = '1px solid var(--bs-border-color)';
 
     var labelEl = document.createElement('span');
-    labelEl.textContent = label;
+    DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
     labelEl.style.letterSpacing = '.06em';
@@ -3990,7 +4325,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=rain&embed=1';
   cardLink.setAttribute('data-modal', 'Rain');
-  cardLink.setAttribute('data-title', 'Rain & Rain Rate Chart & Records');
+  DivumWXI18N.applyAttr(cardLink, 'data-title', 'Rain & Rain Rate Chart & Records');
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '700px');
@@ -4026,7 +4361,7 @@ try {
   ];
 
   function renderCard(v){
-    titleLabel.textContent = 'Piezo Rain (' + (currentUnits.rain === 'in' ? 'in' : 'mm') + ')';
+    titleLabel.textContent = DivumWXI18N.t('Piezo Rain') + ' (' + (currentUnits.rain === 'in' ? 'in' : 'mm') + ')';
 
     var svgSel = d3.select(leftPane);
     var svg = svgSel.select('svg');
@@ -4288,6 +4623,9 @@ try {
       if (lastData) renderCard(lastData);
     }
   });
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
+  });
   function mm2in(mm){ return mm / 25.400013716; }
   function rainLabel(mm){
     return currentUnits.rain === 'in'
@@ -4326,7 +4664,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Rainfall';
+  titleLabel.textContent = DivumWXI18N.t('Rainfall');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -4411,7 +4749,7 @@ try {
     row.style.borderBottom = '1px solid var(--bs-border-color)';
 
     var labelEl = document.createElement('span');
-    labelEl.textContent = label;
+    DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
     labelEl.style.letterSpacing = '.06em';
@@ -4448,7 +4786,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=rain&embed=1';
   cardLink.setAttribute('data-modal', 'Rain');
-  cardLink.setAttribute('data-title', 'Rain & Rain Rate Chart & Records');
+  DivumWXI18N.applyAttr(cardLink, 'data-title', 'Rain & Rain Rate Chart & Records');
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '700px');
@@ -4485,7 +4823,7 @@ try {
   ];
 
   function renderCard(v){
-    titleLabel.textContent = 'Rainfall (' + (currentUnits.rain === 'in' ? 'in' : 'mm') + ')';
+    titleLabel.textContent = DivumWXI18N.t('Rainfall') + ' (' + (currentUnits.rain === 'in' ? 'in' : 'mm') + ')';
 
     var svgSel = d3.select(leftPane);
     var svg = svgSel.select('svg');
@@ -4715,6 +5053,9 @@ try {
       if (lastData) renderCard(lastData);
     }
   });
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
+  });
   function mm2in(mm){ return mm / 25.400013716; }
   function rainLabel(mm){
     return currentUnits.rain === 'in'
@@ -4749,7 +5090,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Tipping Rain';
+  titleLabel.textContent = DivumWXI18N.t('Tipping Rain');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -4834,7 +5175,7 @@ try {
     row.style.borderBottom = '1px solid var(--bs-border-color)';
 
     var labelEl = document.createElement('span');
-    labelEl.textContent = label;
+    DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
     labelEl.style.letterSpacing = '.06em';
@@ -4868,7 +5209,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=rain&embed=1';
   cardLink.setAttribute('data-modal', 'Tipping Rain');
-  cardLink.setAttribute('data-title', 'Rain & Rain Rate Chart & Records');
+  DivumWXI18N.applyAttr(cardLink, 'data-title', 'Rain & Rain Rate Chart & Records');
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '700px');
@@ -5246,7 +5587,7 @@ try {
   }
 
   function renderCard(v){
-    titleLabel.textContent = 'Tipping Rain (' + (currentUnits.rain === 'in' ? 'in' : 'mm') + ')';
+    titleLabel.textContent = DivumWXI18N.t('Tipping Rain') + ' (' + (currentUnits.rain === 'in' ? 'in' : 'mm') + ')';
 
     if (!svg) buildStatic();
 
@@ -5464,7 +5805,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Solar Radiation';
+  DivumWXI18N.applyLabel(titleLabel, 'Solar Radiation');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -5549,7 +5890,7 @@ try {
     row.style.borderBottom = '1px solid var(--bs-border-color)';
 
     var labelEl = document.createElement('span');
-    labelEl.textContent = label;
+    DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
     labelEl.style.letterSpacing = '.06em';
@@ -5589,7 +5930,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=solaruv&embed=1';
   cardLink.setAttribute('data-modal', 'Solar Radiation');
-  cardLink.setAttribute('data-title', 'Solar & UV Chart & Records');
+  DivumWXI18N.applyAttr(cardLink, 'data-title', 'Solar & UV Chart & Records');
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '700px');
@@ -5684,6 +6025,9 @@ try {
   }
 
   var lastData = null;
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
+  });
   function refresh(){
     Promise.allSettled([
       fetch(LOOP_JSON_URL + ((LOOP_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
@@ -5808,7 +6152,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'UV-Index';
+  DivumWXI18N.applyLabel(titleLabel, 'UV-Index');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -5893,7 +6237,7 @@ try {
     row.style.borderBottom = '1px solid var(--bs-border-color)';
 
     var labelEl = document.createElement('span');
-    labelEl.textContent = label;
+    DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
     labelEl.style.letterSpacing = '.06em';
@@ -5932,7 +6276,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=solaruv&embed=1';
   cardLink.setAttribute('data-modal', 'UV Index');
-  cardLink.setAttribute('data-title', 'Solar & UV Chart & Records');
+  DivumWXI18N.applyAttr(cardLink, 'data-title', 'Solar & UV Chart & Records');
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '700px');
@@ -5961,12 +6305,12 @@ try {
   var GAUGE_DOMAIN = 18, TICK_COUNT = 10;
 
   function riskLabel(uvNow, isDay){
-    if (uvNow >= 10) return 'Extreme';
-    if (uvNow >= 8)  return 'Very High';
-    if (uvNow >= 6)  return 'High';
-    if (uvNow >= 3)  return 'Moderate';
-    if (!isDay)      return 'Below Horizon';
-    return 'Low';
+    if (uvNow >= 10) return DivumWXI18N.t('Extreme');
+    if (uvNow >= 8)  return DivumWXI18N.t('Very High');
+    if (uvNow >= 6)  return DivumWXI18N.t('High');
+    if (uvNow >= 3)  return DivumWXI18N.t('Moderate');
+    if (!isDay)      return DivumWXI18N.t('Below Horizon');
+    return DivumWXI18N.t('Low');
   }
 
   function renderCard(v){
@@ -6042,6 +6386,9 @@ try {
   }
 
   var lastData = null;
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
+  });
   function refresh(){
     Promise.allSettled([
       fetch(LOOP_JSON_URL + ((LOOP_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
@@ -6161,7 +6508,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Humidity';
+  DivumWXI18N.applyLabel(titleLabel, 'Humidity');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -6246,7 +6593,7 @@ try {
     row.style.borderBottom = '1px solid var(--bs-border-color)';
 
     var labelEl = document.createElement('span');
-    labelEl.textContent = label;
+    DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
     labelEl.style.letterSpacing = '.06em';
@@ -6286,7 +6633,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=temperature&embed=1';
   cardLink.setAttribute('data-modal', 'Humidity');
-  cardLink.setAttribute('data-title', 'Humidity & Temperature Chart & Records');
+  DivumWXI18N.applyAttr(cardLink, 'data-title', 'Humidity & Temperature Chart & Records');
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '700px');
@@ -6307,14 +6654,14 @@ try {
   var GAUGE_DOMAIN = 100, TICK_COUNT = 11;
 
   function comfortZone(h){
-    if (h < 30) return 'Very Dry';
-    if (h < 70) return 'Comfortable';
-    return 'Very Humid';
+    if (h < 30) return DivumWXI18N.t('Very Dry');
+    if (h < 70) return DivumWXI18N.t('Comfortable');
+    return DivumWXI18N.t('Very Humid');
   }
   function trendInfo(t){
-    if (t > 0.5) return { label: 'Rising', arrow: '\u279a' };
-    if (t < -0.5) return { label: 'Falling', arrow: '\u2798' };
-    return { label: 'Steady', arrow: '\u2799' };
+    if (t > 0.5) return { label: DivumWXI18N.t('Rising'), arrow: '\u279a' };
+    if (t < -0.5) return { label: DivumWXI18N.t('Falling'), arrow: '\u2798' };
+    return { label: DivumWXI18N.t('Steady'), arrow: '\u2799' };
   }
 
   function renderCard(v){
@@ -6342,9 +6689,9 @@ try {
       .attr('transform', 'translate(' + cx + ',' + cy + ')')
       .attr('d', textArc()).style('fill', 'none').style('stroke', 'none');
     var zoneLabels = [
-      { name: 'VERY DRY', offset: '4.5%', anchor: 'start' },
-      { name: 'COMFORTABLE', offset: '25%', anchor: 'middle' },
-      { name: 'VERY HUMID', offset: '46%', anchor: 'end' }
+      { name: DivumWXI18N.t('VERY DRY'), offset: '4.5%', anchor: 'start' },
+      { name: DivumWXI18N.t('COMFORTABLE'), offset: '25%', anchor: 'middle' },
+      { name: DivumWXI18N.t('VERY HUMID'), offset: '46%', anchor: 'end' }
     ];
     var labelContainer = svg.append('g')
       .style('font-family', 'inherit').style('font-weight', '700').style('font-size', '5px').style('fill', '#1c4263');
@@ -6409,6 +6756,9 @@ try {
   }
 
   var lastData = null;
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
+  });
   function refresh(){
     Promise.allSettled([
       fetch(LOOP_JSON_URL + ((LOOP_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
@@ -6579,7 +6929,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Earth Daylight';
+  DivumWXI18N.applyLabel(titleLabel, 'Earth Daylight');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -6667,7 +7017,7 @@ try {
     row.style.borderBottom = '1px solid var(--bs-border-color)';
 
     var labelEl = document.createElement('span');
-    labelEl.textContent = label;
+    DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
     labelEl.style.letterSpacing = '.06em';
@@ -6705,7 +7055,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'modalDaylightMap.html';
   cardLink.setAttribute('data-modal', 'World Daylight Map');
-  cardLink.setAttribute('data-title', 'World Daylight Map');
+  DivumWXI18N.applyAttr(cardLink, 'data-title', 'World Daylight Map');
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1300px');
   cardLink.setAttribute('data-modal-height', '780px');
@@ -6893,6 +7243,9 @@ try {
   }
 
   var lastData = null, stationLat = 51.94, stationLon = -0.987;
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData, stationLat, stationLon);
+  });
   function refresh(){
     Promise.allSettled([
       fetch(ASTRO_JSON_URL + ((ASTRO_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
@@ -7050,7 +7403,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Solar Dial';
+  DivumWXI18N.applyLabel(titleLabel, 'Solar Dial');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -7141,7 +7494,7 @@ try {
     row.style.borderBottom = '1px solid var(--bs-border-color)';
 
     var labelEl = document.createElement('span');
-    labelEl.textContent = label;
+    DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
     labelEl.style.letterSpacing = '.06em';
@@ -7180,7 +7533,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'modalCelestial.html';
   cardLink.setAttribute('data-modal', 'Celestial');
-  cardLink.setAttribute('data-title', 'Celestial Data \u2013 Radio Aurora | Northern Lights - Meteor Showers - Moon Data');
+  DivumWXI18N.applyAttr(cardLink, 'data-title', 'Celestial Data \u2013 Radio Aurora | Northern Lights - Meteor Showers - Moon Data');
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '720px');
@@ -7268,7 +7621,7 @@ try {
     var mins = Math.floor(diff / (1000 * 60)) - totalHours * 60;
     dialG.append('text').attr('y', -4).style('text-anchor', 'middle')
       .style('font-family', 'inherit').style('font-size', '11px').style('fill', overlayTextColor)
-      .text(isDay ? 'Sun Set' : 'Sun Rise');
+      .text(isDay ? DivumWXI18N.t('Sun Set') : DivumWXI18N.t('Sun Rise'));
     dialG.append('text').attr('y', 10).style('text-anchor', 'middle')
       .style('font-family', 'inherit').style('font-size', '8.5px').style('fill', overlayTextColor)
       .text(hrs + ' hrs ' + mins + ' mins');
@@ -7286,6 +7639,9 @@ try {
   }
 
   var lastData = null;
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
+  });
   function refresh(){
     fetch(ASTRO_JSON_URL + ((ASTRO_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
       .then(function(alm){
@@ -7418,7 +7774,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Geocentric';
+  DivumWXI18N.applyLabel(titleLabel, 'Geocentric');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -7505,7 +7861,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'modalMeeusLive.html';
   cardLink.setAttribute('data-modal', 'Geocentric Live Meeus Calculation');
-  cardLink.setAttribute('data-title', 'Live Meeus Calculation');
+  DivumWXI18N.applyAttr(cardLink, 'data-title', 'Live Meeus Calculation');
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1600px');
   cardLink.setAttribute('data-modal-height', '1400px');
@@ -7564,9 +7920,9 @@ try {
     svg.append('line').attr('x1', xScale(180)).attr('y1', yScale(yDomain[0])).attr('x2', xScale(180)).attr('y2', yScale(yDomain[1]))
       .style('stroke', '#2e8b57').style('stroke-width', 1);
     svg.append('text').attr('x', xScale(180)).attr('y', padTop - 2).style('text-anchor', 'middle')
-      .style('font-family', 'inherit').style('font-size', '6px').style('fill', overlayTextColor).text('Zenith');
+      .style('font-family', 'inherit').style('font-size', '6px').style('fill', overlayTextColor).text(DivumWXI18N.t('Zenith'));
     svg.append('text').attr('x', padLeft + 3).attr('y', yScale(0) - 4)
-      .style('font-family', 'inherit').style('font-size', '6px').style('fill', overlayTextColor).text('Horizon');
+      .style('font-family', 'inherit').style('font-size', '6px').style('fill', overlayTextColor).text(DivumWXI18N.t('Horizon'));
 
     var lineGen = d3.line().x(function(d){ return xScale(d.x); }).y(function(d){ return yScale(d.y); }).curve(d3.curveBasisOpen);
     var sunPath = computeSkyPath(v.sunDec, lat, hemisphere, 360);
@@ -7679,7 +8035,7 @@ try {
 
     svg.append('text').attr('x', W2 / 2).attr('y', padTop2 - 4).style('text-anchor', 'middle')
       .style('font-family', 'inherit').style('font-size', '6px').style('fill', overlayTextColor)
-      .style('font-variant-caps', 'small-caps').style('letter-spacing', '.04em').text('Analemma');
+      .style('font-variant-caps', 'small-caps').style('letter-spacing', '.04em').text(DivumWXI18N.t('Analemma'));
 
     // Light celestial-equator reference line (dec = 0), matching the
     // horizon/zenith crosshair convention used in the sky-path chart.
@@ -7743,6 +8099,12 @@ try {
   }
   refresh();
   setInterval(refresh, POLL_MS);
+  // No prior unitsystemchange/resize re-render pattern existed in this
+  // card to follow -- this is the first such listener here, same idea as
+  // cardTemperature.js's.
+  window.addEventListener('i18nready', function(){
+    if (lastData) { renderCard(lastData, stationLat); renderAnalemma(lastData); }
+  });
 })();
 } catch (e) {
   console.error("cardsBundle: cardGeocentric.js failed:", e);
@@ -7824,9 +8186,9 @@ try {
     for (var i = 0; i < METEOR_EVENTS.length; i++){
       var ev = METEOR_EVENTS[i];
       var startNum = ev.s[0] * 100 + ev.s[1], endNum = ev.e[0] * 100 + ev.e[1];
-      if (todayNum >= startNum && todayNum <= endNum) return ev.t;
+      if (todayNum >= startNum && todayNum <= endNum) return DivumWXI18N.t(ev.t);
     }
-    return 'No Meteor Showers';
+    return DivumWXI18N.t('No Meteor Showers');
   }
 
   var MOON_TEXTURE_MARKUP =
@@ -7972,7 +8334,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Current Moonphase';
+  DivumWXI18N.applyLabel(titleLabel, 'Current Moonphase');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -8065,7 +8427,7 @@ try {
     row.style.borderBottom = '1px solid var(--bs-border-color)';
 
     var labelEl = document.createElement('span');
-    labelEl.textContent = label;
+    DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
     labelEl.style.letterSpacing = '.06em';
@@ -8114,7 +8476,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'modalCelestial.html';
   cardLink.setAttribute('data-modal', 'Celestial');
-  cardLink.setAttribute('data-title', 'Celestial Data \u2013 Radio Aurora | Northern Lights - Meteor Showers - Moon Data');
+  DivumWXI18N.applyAttr(cardLink, 'data-title', 'Celestial Data \u2013 Radio Aurora | Northern Lights - Meteor Showers - Moon Data');
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '720px');
@@ -8184,6 +8546,9 @@ try {
   }
 
   var lastData = null;
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
+  });
   function refresh(){
     fetch(ASTRO_JSON_URL + ((ASTRO_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
       .then(function(alm){
@@ -8293,7 +8658,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Lightning';
+  DivumWXI18N.applyLabel(titleLabel, 'Lightning');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -8391,7 +8756,7 @@ try {
     }
 
     var labelEl = document.createElement('span');
-    labelEl.textContent = label;
+    DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
     labelEl.style.letterSpacing = '.06em';
@@ -8437,7 +8802,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=lightning&embed=1';
   cardLink.setAttribute('data-modal', 'Lightning');
-  cardLink.setAttribute('data-title', 'Lightning Chart & Records');
+  DivumWXI18N.applyAttr(cardLink, 'data-title', 'Lightning Chart & Records');
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '700px');
@@ -8526,6 +8891,9 @@ try {
   }
 
   var lastData = null;
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
+  });
   function refresh(){
     fetch(ARCHIVE_JSON_URL + ((ARCHIVE_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
       .then(function(arch){
@@ -8647,7 +9015,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Current Pollen Risk';
+  DivumWXI18N.applyLabel(titleLabel, 'Current Pollen Risk');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -8733,7 +9101,7 @@ try {
     row.style.borderBottom = '1px solid var(--bs-border-color)';
 
     var labelEl = document.createElement('span');
-    labelEl.textContent = label;
+    DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
     labelEl.style.letterSpacing = '.06em';
@@ -8742,9 +9110,9 @@ try {
     row.appendChild(labelEl);
 
     var valueEl = document.createElement('span');
-    valueEl.style.fontSize = '9.5px';
-    valueEl.style.fontWeight = '700';
+    valueEl.style.fontSize = '8.5px';
     valueEl.style.fontFamily = '"IBM Plex Mono", ui-monospace, monospace';
+    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis';
     row.appendChild(valueEl);
 
     rightPane.appendChild(row);
@@ -8752,9 +9120,9 @@ try {
   }
 
   var ICONS = [
-    { key: 'grass', label: 'Grass Pollen', svg: GRASS_ICON_SVG, colorVar: '--grass-color' },
-    { key: 'tree',  label: 'Tree Pollen',  svg: TREE_ICON_SVG,  colorVar: '--tree-color'  },
-    { key: 'weed',  label: 'Weed Pollen',  svg: WEED_ICON_SVG,  colorVar: '--weed-color'  }
+    { key: 'grass', label: 'Grass Pollen', shortKey: 'Grass', svg: GRASS_ICON_SVG, colorVar: '--grass-color' },
+    { key: 'tree',  label: 'Tree Pollen',  shortKey: 'Tree',  svg: TREE_ICON_SVG,  colorVar: '--tree-color'  },
+    { key: 'weed',  label: 'Weed Pollen',  shortKey: 'Weed',  svg: WEED_ICON_SVG,  colorVar: '--weed-color'  }
   ];
 
   var columnEls = ICONS.map(function(icon){
@@ -8797,7 +9165,7 @@ try {
     // colour swatch behind fixed black text reads clearly in both
     // themes regardless of how light the risk colour itself is.
     var imageLabel = document.createElement('div');
-    imageLabel.textContent = icon.label.replace(' Pollen', '');
+    DivumWXI18N.applyLabel(imageLabel, icon.shortKey);
     imageLabel.style.fontSize = '9px';
     imageLabel.style.fontWeight = '700';
     imageLabel.style.color = '#111111';
@@ -8822,7 +9190,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=pollen&embed=1';
   cardLink.setAttribute('data-modal', 'Pollen');
-  cardLink.setAttribute('data-title', 'Pollen Chart & Records');
+  DivumWXI18N.applyAttr(cardLink, 'data-title', 'Pollen Chart & Records');
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '700px');
@@ -8840,12 +9208,15 @@ try {
       var risk = v[c.icon.key];
       c.iconWrap.querySelector('svg').style.setProperty(c.icon.colorVar, risk.color);
       c.imageLabel.style.background = risk.color;
-      c.riskLabel.textContent = 'Risk ' + risk.risk;
+      c.riskLabel.textContent = DivumWXI18N.t('Risk') + ' ' + DivumWXI18N.t(risk.risk);
       c.riskLabel.style.color = 'var(--bw-accent)';
     });
   }
 
   var lastData = null;
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
+  });
   function refresh(){
     fetch(LOOP_JSON_URL + ((LOOP_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
       .then(function(loop){
@@ -8937,7 +9308,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Greenhouse Gas';
+  DivumWXI18N.applyLabel(titleLabel, 'Greenhouse Gas');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -9028,7 +9399,7 @@ try {
     row.style.borderBottom = '1px solid var(--bs-border-color)';
 
     var labelEl = document.createElement('span');
-    labelEl.textContent = label;
+    DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '6.5px';
     labelEl.style.fontVariantCaps = 'small-caps';
     labelEl.style.letterSpacing = '.06em';
@@ -9069,7 +9440,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=gases&embed=1';
   cardLink.setAttribute('data-modal', 'Greenhouse Gases');
-  cardLink.setAttribute('data-title', 'Greenhouse Gases Chart & Records');
+  DivumWXI18N.applyAttr(cardLink, 'data-title', 'Greenhouse Gases Chart & Records');
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '700px');
@@ -9241,6 +9612,9 @@ try {
   }
 
   var lastData = null;
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
+  });
   function refresh(){
     fetch(LOOP_JSON_URL + ((LOOP_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
       .then(function(loop){
@@ -9393,7 +9767,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Airquality (UK DAQI)';
+  DivumWXI18N.applyLabel(titleLabel, 'Airquality (UK DAQI)');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -9476,7 +9850,7 @@ try {
   leftPane.appendChild(overallCaption);
 
   var overallLabel = document.createElement('div');
-  overallLabel.textContent = 'Overall';
+  DivumWXI18N.applyLabel(overallLabel, 'Overall');
   overallLabel.style.fontSize = '7px';
   overallLabel.style.fontVariantCaps = 'small-caps';
   overallLabel.style.letterSpacing = '.06em';
@@ -9517,7 +9891,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=airquality&embed=1';
   cardLink.setAttribute('data-modal', 'Air Quality');
-  cardLink.setAttribute('data-title', 'Air Quality Chart & Records');
+  DivumWXI18N.applyAttr(cardLink, 'data-title', 'Air Quality Chart & Records');
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '700px');
@@ -9652,7 +10026,12 @@ try {
       placeholder.style.fontSize = '10px';
       placeholder.style.color = overlayTextColor;
       placeholder.style.opacity = '0.7';
-      placeholder.textContent = 'No particle sensor data available';
+      // ensureGrid only actually rebuilds the DOM when the set of
+      // available pollutants changes (see the layoutKey guard above) --
+      // if there's genuinely no particle sensor, that never changes, so
+      // this text is effectively set once and never revisited, same
+      // class of bug as everything else fixed this session.
+      DivumWXI18N.applyLabel(placeholder, 'No particle sensor data available');
       grid.appendChild(placeholder);
       return;
     }
@@ -9680,7 +10059,7 @@ try {
 
     if (available.length === 0){
       overallLabel.style.color = overlayTextColor;
-      overallValue.textContent = 'No Data';
+      overallValue.textContent = DivumWXI18N.t('No Data');
       overallValue.style.background = 'transparent';
       overallValue.style.color = overlayTextColor;
       return;
@@ -9696,7 +10075,7 @@ try {
       p.els.icon.src = iconUrl(daqi.band);
       p.els.label.style.background = color;
       p.chipValue.textContent = value.toFixed(1) + ' \u00B5g/m\u00B3';
-      if (daqi.band > highestBand){ highestBand = daqi.band; overallDesc = daqi.desc; }
+      if (daqi.band > highestBand){ highestBand = daqi.band; overallDesc = DivumWXI18N.t(daqi.desc); }
     });
 
     var overallColor = DAQI_COLORS[highestBand];
@@ -9731,6 +10110,9 @@ try {
 
 
   window.addEventListener('themechange', function(){
+    if (lastData) renderCard(lastData);
+  });
+  window.addEventListener('i18nready', function(){
     if (lastData) renderCard(lastData);
   });
 })();
@@ -9820,7 +10202,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Vapour Pressure Deficit (kPa)';
+  DivumWXI18N.applyLabel(titleLabel, 'Vapour Pressure Deficit (kPa)');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -9908,7 +10290,7 @@ try {
     row.style.borderBottom = '1px solid var(--bs-border-color)';
 
     var labelEl = document.createElement('span');
-    labelEl.textContent = label;
+    DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
     labelEl.style.letterSpacing = '.06em';
@@ -9947,7 +10329,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'records.html';
   cardLink.setAttribute('data-modal', 'Vapour Pressure Deficit');
-  cardLink.setAttribute('data-title', 'Records');
+  DivumWXI18N.applyAttr(cardLink, 'data-title', 'Records');
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '700px');
@@ -9999,6 +10381,9 @@ try {
   }
 
   var lastData = null;
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
+  });
   function refresh(){
     fetch(ARCHIVE_JSON_URL + ((ARCHIVE_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
       .then(function(arch){
@@ -10091,7 +10476,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Evapotranspiration (mm)';
+  DivumWXI18N.applyLabel(titleLabel, 'Evapotranspiration (mm)');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -10176,7 +10561,7 @@ try {
     row.style.borderBottom = '1px solid var(--bs-border-color)';
 
     var labelEl = document.createElement('span');
-    labelEl.textContent = label;
+    DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
     labelEl.style.letterSpacing = '.06em';
@@ -10213,7 +10598,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'records.html';
   cardLink.setAttribute('data-modal', 'Evapotranspiration');
-  cardLink.setAttribute('data-title', 'Records');
+  DivumWXI18N.applyAttr(cardLink, 'data-title', 'Records');
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '1400px');
   cardLink.setAttribute('data-modal-height', '700px');
@@ -10263,7 +10648,7 @@ try {
       .text(v.current.toFixed(2) + ' ' + v.units);
     svg.append('text').attr('x', leafX).attr('y', heroY + 14).style('text-anchor', 'middle')
       .style('font-family', 'inherit').style('font-size', '8px').style('fill', overlayTextColor)
-      .text('Current');
+      .text(DivumWXI18N.t('Current'));
 
     // ---- Right pane: 4 readouts as label/value chip rows ----
     hourText.textContent = v.hour.toFixed(2) + ' ' + v.units;
@@ -10273,6 +10658,9 @@ try {
   }
 
   var lastData = null;
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
+  });
   function refresh(){
     fetch(ARCHIVE_JSON_URL + ((ARCHIVE_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
       .then(function(arch){
@@ -10406,7 +10794,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Earthquake';
+  DivumWXI18N.applyLabel(titleLabel, 'Earthquake');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -10505,7 +10893,7 @@ try {
     }
 
     var labelEl = document.createElement('span');
-    labelEl.textContent = label;
+    DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
     labelEl.style.letterSpacing = '.06em';
@@ -10552,7 +10940,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'modalEarthquakeMap.html';
   cardLink.setAttribute('data-modal', 'Earthquakes');
-  cardLink.setAttribute('data-title', 'Earthquake Map');
+  DivumWXI18N.applyAttr(cardLink, 'data-title', 'Earthquake Map');
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-modal-width', '900px');
   cardLink.setAttribute('data-modal-height', '620px');
@@ -10586,7 +10974,7 @@ try {
     // Given a fixed position clear of the rings instead of one anchored
     // to cy, and cy itself nudged down so the ring + hero number sit
     // centered as their own group beneath it.
-    addCenter(svg, cx, 24, 'Magnitude');
+    addCenter(svg, cx, 24, DivumWXI18N.t('Magnitude'));
     addCenter(svg, cx, cy + 6, v.magnitude.toFixed(1), 'var(--bw-accent)', 22);
 
     var rings = [ { r: 20, sw: 2.5 }, { r: 31, sw: 2.0 }, { r: 42, sw: 1.0 }, { r: 53, sw: 0.5 } ];
@@ -10608,10 +10996,13 @@ try {
     timeText.textContent = v.time;
     depthText.textContent = v.depth.toFixed(1) + ' km';
     epicenterText.textContent = v.distanceKm.toFixed(1) + ' km' + (v.station ? ' (from ' + v.station + ')' : '');
-    categoryText.textContent = v.cat.label;
+    categoryText.textContent = DivumWXI18N.t(v.cat.label);
   }
 
   var lastData = null;
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
+  });
   function refresh(){
     Promise.allSettled([
       fetch(EQ_JSON_URL + ((EQ_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
@@ -10632,7 +11023,7 @@ try {
       var magnitude = num(props.mag, 0);
 
       lastData = {
-        location: props.flynn_region || 'Unknown location',
+        location: props.flynn_region || DivumWXI18N.t('Unknown location'),
         time: eventTimeLabel(props.time),
         depth: num(props.depth, 0),
         distanceKm: haversineKm(stationLat, stationLon, quakeLat, quakeLon),
@@ -10734,7 +11125,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Webcam';
+  titleLabel.textContent = DivumWXI18N.t('Webcam');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -10792,7 +11183,7 @@ try {
   imgLink.className = 'card-whole-link';
   imgLink.href = 'modalTimelapse.html';
   imgLink.setAttribute('data-modal', 'Timelapse');
-  imgLink.setAttribute('data-title', 'Timelapse - ' + MODAL_TITLE);
+  imgLink.setAttribute('data-title', DivumWXI18N.t('Timelapse') + ' - ' + MODAL_TITLE);
   imgLink.setAttribute('data-type', 'iframe');
   imgLink.setAttribute('data-modal-width', '760px');
   imgLink.setAttribute('data-modal-height', '460px');
@@ -10860,13 +11251,13 @@ try {
         lastIsDay = isDay;
 
         if (!isDay){
-          titleLabel.textContent = 'Timelapse';
+          titleLabel.textContent = DivumWXI18N.t('Timelapse');
           img.src = 'img/nightTime.svg';
           setStatus(false);
           return;
         }
 
-        titleLabel.textContent = 'Webcam';
+        titleLabel.textContent = DivumWXI18N.t('Webcam');
         var url = WEBCAM_IMAGE_PATH + '?v=' + cacheBustToken();
 
         // Both checks run concurrently and independently; the final status
@@ -10900,7 +11291,7 @@ try {
         if (m && m.webcam_image) WEBCAM_IMAGE_PATH = m.webcam_image;
         // The image-link modal was already built with the fallback title
         // above (before this fetch could resolve) — update it in place.
-        imgLink.setAttribute('data-title', 'Timelapse - ' + MODAL_TITLE);
+        imgLink.setAttribute('data-title', DivumWXI18N.t('Timelapse') + ' - ' + MODAL_TITLE);
       })
       .catch(function(e){
         console.warn('cardWebcam: config fetch failed --', e.message);
@@ -10910,6 +11301,22 @@ try {
   fetchWebcamConfig().then(function(){
     refresh();
     setInterval(refresh, POLL_MS);
+  });
+  window.addEventListener('i18nready', function(){
+    // refresh() already re-derives titleLabel.textContent from lastIsDay
+    // every poll cycle -- this just avoids waiting up to POLL_MS for the
+    // very first translated paint.
+    if (lastIsDay !== null) refresh();
+    // The Timelapse tooltip is set at two points that can each run
+    // before OR after strings.json loads (card boot, and whenever
+    // fetchWebcamConfig's own separate fetch resolves) -- neither is
+    // guaranteed to run after i18n is ready, so re-apply here too,
+    // using whatever MODAL_TITLE currently holds (already correct by
+    // now if fetchWebcamConfig finished first, or still the fallback
+    // otherwise -- that fetch's own .then() re-applies this same line
+    // again once it does finish, so between the two this always ends
+    // up correct regardless of which finishes first).
+    imgLink.setAttribute('data-title', DivumWXI18N.t('Timelapse') + ' - ' + MODAL_TITLE);
   });
 })();
 } catch (e) {
@@ -10939,7 +11346,7 @@ try {
 // cardWebcam.js's MODAL_TITLE/WEBCAM_IMAGE_PATH fallback+fetch.
 (function(){
   var ARCHIVE_JSON_URL = './jsondata/archive.json';
-  var STATION_IMAGE_TITLE = 'Station Image';
+  var STATION_IMAGE_TITLE = DivumWXI18N.t('Station Image');
   var STATION_IMAGE_PATH = 'img/stationImage.jpg';
   var POLL_MS = 30 * 1000;
 
@@ -11049,6 +11456,17 @@ try {
   img.style.borderRadius = '5px';
   body.appendChild(img);
 
+  var titleOverriddenByConfig = false;
+  window.addEventListener('i18nready', function(){
+    // Only re-apply the translated fallback if the station owner hasn't
+    // set their own custom title -- that's arbitrary user-typed text
+    // (e.g. "Backyard Cam"), never something DivumWX should translate.
+    if (!titleOverriddenByConfig) {
+      STATION_IMAGE_TITLE = DivumWXI18N.t('Station Image');
+      img.alt = STATION_IMAGE_TITLE;
+    }
+  });
+
   function refresh(){
     img.onload = function(){ setStatus(true); };
     img.onerror = function(){ setStatus(false); };
@@ -11059,7 +11477,7 @@ try {
       .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
       .then(function(data){
         var m = data && data.meta;
-        if (m && m.station_image_title) { STATION_IMAGE_TITLE = m.station_image_title; img.alt = STATION_IMAGE_TITLE; }
+        if (m && m.station_image_title) { STATION_IMAGE_TITLE = m.station_image_title; img.alt = STATION_IMAGE_TITLE; titleOverriddenByConfig = true; }
         if (m && m.station_image_path) STATION_IMAGE_PATH = m.station_image_path;
       })
       .catch(function(e){
@@ -11180,7 +11598,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  titleLabel.textContent = 'Solar Energy';
+  DivumWXI18N.applyLabel(titleLabel, 'Solar Energy');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -11253,7 +11671,7 @@ try {
   leftPane.appendChild(pvIcon);
 
   var pvHeroLabel = document.createElement('div');
-  pvHeroLabel.textContent = 'PV Array Generating';
+  DivumWXI18N.applyLabel(pvHeroLabel, 'PV Array Generating');
   pvHeroLabel.style.fontSize = '9px';
   pvHeroLabel.style.fontVariantCaps = 'small-caps';
   pvHeroLabel.style.letterSpacing = '.06em';
@@ -11304,7 +11722,7 @@ try {
     }
 
     var labelEl = document.createElement('span');
-    labelEl.textContent = label;
+    DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
     labelEl.style.letterSpacing = '.06em';
@@ -11350,7 +11768,7 @@ try {
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=solar&embed=1';
   cardLink.setAttribute('data-modal', 'Solar Energy');
-  cardLink.setAttribute('data-title', 'Solar Energy Chart & Records');
+  DivumWXI18N.applyAttr(cardLink, 'data-title', 'Solar Energy Chart & Records');
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-url', 'charts-d3.html?type=solar&embed=1');
   cardLink.style.position = 'absolute';
@@ -11488,13 +11906,13 @@ try {
       // is assumed to match the old module's (not separately confirmed
       // against this integration's own docs) -- worth double-checking
       // against a real export event if the label ever looks backwards.
-      var batteryState = (batteryPowerRaw !== null && batteryPowerRaw < 0) ? 'Charging' : 'Discharging';
+      var batteryState = (batteryPowerRaw !== null && batteryPowerRaw < 0) ? DivumWXI18N.t('Charging') : DivumWXI18N.t('Discharging');
       // "to Grid"/"from Grid" dropped -- this row's own label already says
       // GRID, so the full phrase was redundant and was the direct cause of
       // this row wrapping to 2 lines, which left too little vertical room
       // for the 6 rows to fit within the card's fixed height without the
       // last row (PV Efficiency) crowding the bottom border.
-      var gridState = (gridPowerRaw !== null && gridPowerRaw < 0) ? 'Exporting' : 'Importing';
+      var gridState = (gridPowerRaw !== null && gridPowerRaw < 0) ? DivumWXI18N.t('Exporting') : DivumWXI18N.t('Importing');
 
       var pvEfficiency = (pvPower !== null) ? (pvPower / ARRAY_RATED_WATTS * 100) : null;
 
@@ -11525,6 +11943,10 @@ try {
   }
   refresh();
   setInterval(refresh, POLL_MS);
+  // No lastData cache in this card (unlike most others) -- refresh() both
+  // fetches and renders in one step, so re-running it is the correct way
+  // to pick up translations once strings.json has loaded.
+  window.addEventListener('i18nready', refresh);
 })();
 } catch (e) {
   console.error("cardsBundle: cardSolarEnergy.js failed:", e);

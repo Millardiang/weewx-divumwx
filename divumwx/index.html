@@ -636,6 +636,106 @@ function broadcastUnitSystem() {
   }));
 }
 
+// ==== LANGUAGE HANDLING ====
+// Unlike the unit selector above, there's no separate broadcast function
+// here: DivumWXI18N.setLanguage() (cardI18n.js, part of
+// cardsBundleNew.js) already does persistence + the equivalent broadcast
+// internally, so the onchange handler below just calls straight through
+// to it.
+//
+// Timing note: cardsBundleNew.js (which defines window.DivumWXI18N) is
+// deliberately the LAST script tag on this page, loaded well after this
+// block and after includeHTML()'s callback (which is where
+// populateLanguageSelector() below actually gets called from) -- so
+// DivumWXI18N will not exist yet at that point. Rather than delay/poll
+// for it, this listens for cardI18n.js's own 'i18nready' event instead:
+// window.addEventListener works even when registered before the event's
+// eventual source (cardsBundleNew.js) has loaded, since it's just
+// registering interest in a named event on `window`, not a reference to
+// DivumWXI18N itself. 'i18nready' fires once after the initial
+// translations load, AND again on every later language switch (from
+// this page or, via the saved localStorage value, a previous visit) --
+// populateLanguageSelector() below is written to be safe to call
+// repeatedly: it only builds the <option> list once, but always
+// resyncs select.value, so it stays correct either way.
+// populateLanguageSelector() is written to be safe to call repeatedly:
+// it only builds the <option> list once, but always resyncs select.value
+// AND the flag image/label (both below), so it stays correct on every
+// call regardless of whether this is the very first load or a later
+// switch.
+function populateLanguageSelector() {
+  const select = document.getElementById('languageSystem');
+  const flagImg = document.getElementById('languageFlag');
+  const label = document.getElementById('languageLabel');
+  if (!select || typeof DivumWXI18N === 'undefined') return;
+  if (!select.options.length) {
+    DivumWXI18N.getAvailableLanguages().forEach(code => {
+      const opt = document.createElement('option');
+      opt.value = code;
+      // Emoji flag prefix -- a real <img> can't go inside a native
+      // <option> in any browser, so this is what makes the OPEN dropdown
+      // list itself show a flag per language; the closed state gets a
+      // real SVG via #languageFlag below instead, since an <img> works
+      // fine there.
+      const emoji = DivumWXI18N.getLanguageFlagEmoji(code);
+      opt.textContent = (emoji ? emoji + ' ' : '') + DivumWXI18N.getLanguageName(code);
+      select.appendChild(opt);
+    });
+    select.onchange = () => {
+      DivumWXI18N.setLanguage(select.value);
+    };
+  }
+  const current = DivumWXI18N.getLanguage();
+  select.value = current;
+  if (flagImg) {
+    const url = DivumWXI18N.getLanguageFlagUrl(current);
+    if (url) { flagImg.src = url; flagImg.style.display = ''; }
+    else { flagImg.style.display = 'none'; }
+  }
+  // Shows the current language's own name once one is actually known,
+  // rather than #unitSystem's pattern of always showing a static
+  // "Select units" caption -- once there's a flag next to it, a caption
+  // that never changes reads as broken/wrong on repeat visits (it would
+  // sit there showing "Select language" right beside e.g. the Danish
+  // flag AND the language already switched to Danish, contradicting
+  // itself), whereas a plain unit-system dropdown has no comparable
+  // "current value" to show without duplicating what's already in the
+  // option list's own units.
+  if (label) label.textContent = DivumWXI18N.getLanguageName(current);
+}
+window.addEventListener('i18nready', populateLanguageSelector);
+
+// ==== NAVBAR TRANSLATION ====
+// Every navbar.html element that needs translating carries a
+// data-i18n="Key" (for its own text content) or
+// data-i18n-attr="attr1,attr2:Key" (for one or more attributes sharing
+// the same translated text, e.g. both aria-label and title) marker --
+// this loop just reads those markers and hands each off to
+// DivumWXI18N.applyLabel/applyAttr, which already handle the
+// boot-before-load timing and permanent re-apply-on-language-switch
+// behaviour internally (see cardI18n.js) -- nothing further to do here
+// per element. Guarded to run only once (`navbarTranslated`) since
+// applyLabel/applyAttr's own registries handle every later language
+// switch on their own; re-scanning the DOM and re-registering the same
+// elements on every switch would be pointless duplicate work.
+let navbarTranslated = false;
+function translateNavbar() {
+  if (navbarTranslated || typeof DivumWXI18N === 'undefined') return;
+  navbarTranslated = true;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    DivumWXI18N.applyLabel(el, el.getAttribute('data-i18n'));
+  });
+  document.querySelectorAll('[data-i18n-attr]').forEach(el => {
+    const spec = el.getAttribute('data-i18n-attr');
+    const sep = spec.indexOf(':');
+    if (sep === -1) return;
+    const attrs = spec.slice(0, sep).split(',');
+    const key = spec.slice(sep + 1);
+    attrs.forEach(attr => DivumWXI18N.applyAttr(el, attr.trim(), key));
+  });
+}
+window.addEventListener('i18nready', translateNavbar);
+
 window.addEventListener('storage', e => {
   if (e.key === THEME_KEY) applyDashboardTheme();
 });
@@ -933,6 +1033,8 @@ includeHTML(() => {
   applyDashboardTheme();
   populateUnitSelector();
   broadcastUnitSystem();
+  populateLanguageSelector();
+  translateNavbar();
   updateNavCollapse();
   setStationTitle();
 });
