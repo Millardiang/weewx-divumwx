@@ -387,14 +387,40 @@ DIVUMWX_REPORT_SEARCH_LIST_EXTENSIONS = [
 # translation. Adding a new language later means: (1) drop a new
 # lang/<code>.conf next to these (en.conf is the template to copy), (2) add
 # its files= entry in DivumwxInstaller.__init__ below, (3) add it here.
+#
+# All 25 below carry the full 267-key set (every card, not just the
+# barometer trend phrases) -- verified via ConfigObj parse + Cheetah
+# render before being added here.
 DIVUMWX_LANG_CHOICES = {
-    'en': 'English',
-    'fr': 'Français (French)',
-    'de': 'Deutsch (German)',
-    'es': 'Español (Spanish)',
-    'it': 'Italiano (Italian)',
-    'da': 'Dansk (Danish)',
-    'no': 'Norsk (Norwegian)',
+    'en':    'English',
+    'en_US': 'English (US)',
+    'ar':    'العربية (Arabic)',
+    'br':    'Brezhoneg (Breton)',
+    'ca':    'Català (Catalan)',
+    'cn':    '中文 (Chinese, Simplified)',
+    'cy':    'Cymraeg (Welsh)',
+    'cz':    'Čeština (Czech)',
+    'da':    'Dansk (Danish)',
+    'de':    'Deutsch (German)',
+    'es':    'Español (Spanish)',
+    'eu':    'Euskara (Basque)',
+    'fr':    'Français (French)',
+    'gr':    'Ελληνικά (Greek)',
+    'hi':    'हिन्दी (Hindi)',
+    'it':    'Italiano (Italian)',
+    'nl':    'Nederlands (Dutch)',
+    'no':    'Norsk (Norwegian)',
+    'pl':    'Polski (Polish)',
+    'pt':    'Português (Portuguese)',
+    'sv':    'Svenska (Swedish)',
+    'fi':    'Suomi (Finnish)',
+    'hu':    'Magyar (Hungarian)',
+    'is':    'Íslenska (Icelandic)',
+    'ta':    'தமிழ் (Tamil)',
+    'th':    'ไทย (Thai)',
+    'tr':    'Türkçe (Turkish)',
+    'uk':    'Українська (Ukrainian)',
+    'ur':    'اردو (Urdu)',
 }
 
 
@@ -540,6 +566,10 @@ def apply_divumwx_report_merge(cfg, html_root, lang=None):
     if dvmdata['WeatherData'].get('template') != 'jsondata/archive.json.tmpl':
         dvmdata['WeatherData']['template'] = 'jsondata/archive.json.tmpl'
         report['cheetah_enforced'].append('DVMDATA.WeatherData.template')
+    dvmdata.setdefault('Strings', {})
+    if dvmdata['Strings'].get('template') != 'jsondata/strings.json.tmpl':
+        dvmdata['Strings']['template'] = 'jsondata/strings.json.tmpl'
+        report['cheetah_enforced'].append('DVMDATA.Strings.template')
 
     # [[[Generators]]] -- structural, always enforced
     dr.setdefault('Generators', {})
@@ -2216,38 +2246,45 @@ class DivumwxInstaller(ExtensionInstaller):
                 ('skins/DivumWX', [
                     'skins/DivumWX/jsondata/archive.json.tmpl',
                     'skins/DivumWX/jsondata/charts.json.tmpl',
+                    'skins/DivumWX/jsondata/strings.json.tmpl',
                     # en.conf is the reference dictionary (see its own header
                     # comment), not just "the English translation" -- keep it
-                    # first. fr/de/es/it/da/no are the six languages this
-                    # translation pass actually targeted -- real DivumWX
-                    # [Texts] content, verified against the real Cheetah/
-                    # ConfigObj engines. DIVUMWX_LANG_CHOICES above is the
-                    # single place a new one gets added alongside its own
-                    # lang/<code>.conf file.
+                    # first. All 25 below carry the full 267-key set (every
+                    # card's phrases, not just the original barometer-only
+                    # subset fr/de/es/it/no started with) -- verified against
+                    # the real Cheetah/ConfigObj engines before being added
+                    # here. DIVUMWX_LANG_CHOICES above is the single place a
+                    # new one gets added alongside its own lang/<code>.conf
+                    # file.
                     'skins/DivumWX/lang/en.conf',
-                    'skins/DivumWX/lang/fr.conf',
+                    'skins/DivumWX/lang/en_US.conf',
+                    'skins/DivumWX/lang/ar.conf',
+                    'skins/DivumWX/lang/br.conf',
+                    'skins/DivumWX/lang/ca.conf',
+                    'skins/DivumWX/lang/cn.conf',
+                    'skins/DivumWX/lang/cy.conf',
+                    'skins/DivumWX/lang/cz.conf',
+                    'skins/DivumWX/lang/da.conf',
                     'skins/DivumWX/lang/de.conf',
                     'skins/DivumWX/lang/es.conf',
-                    'skins/DivumWX/lang/it.conf',
-                    'skins/DivumWX/lang/da.conf',
-                    'skins/DivumWX/lang/no.conf',
-                    # cn/cz/en_US/gr/nl/th.conf: kept at the person's
-                    # request rather than deleted, but flagged here as
-                    # unmodified Seasons-skin boilerplate (still headed
-                    # "Localization File -- Seasons skin" internally) --
-                    # NOT DivumWX-specific content, and not offered in
-                    # DIVUMWX_LANG_CHOICES, so the install-time language
-                    # prompt never selects them. If one of these languages
-                    # is wanted for real, it needs the same treatment
-                    # fr/de/es/it/da/no.conf got: a real [Texts] section
-                    # with DivumWX's own nine trend phrases, then added to
-                    # DIVUMWX_LANG_CHOICES.
-                    'skins/DivumWX/lang/cn.conf',
-                    'skins/DivumWX/lang/cz.conf',
-                    'skins/DivumWX/lang/en_US.conf',
+                    'skins/DivumWX/lang/eu.conf',
+                    'skins/DivumWX/lang/fr.conf',
                     'skins/DivumWX/lang/gr.conf',
+                    'skins/DivumWX/lang/hi.conf',
+                    'skins/DivumWX/lang/it.conf',
                     'skins/DivumWX/lang/nl.conf',
+                    'skins/DivumWX/lang/no.conf',
+                    'skins/DivumWX/lang/pl.conf',
+                    'skins/DivumWX/lang/pt.conf',
+                    'skins/DivumWX/lang/sv.conf',
+                    'skins/DivumWX/lang/fi.conf',
+                    'skins/DivumWX/lang/hu.conf',
+                    'skins/DivumWX/lang/is.conf',
+                    'skins/DivumWX/lang/ta.conf',
                     'skins/DivumWX/lang/th.conf',
+                    'skins/DivumWX/lang/tr.conf',
+                    'skins/DivumWX/lang/uk.conf',
+                    'skins/DivumWX/lang/ur.conf',
                 ]),
                 # skins/DivumWXSkyfield and skins/DivumWXCelestial are
                 # deliberately NOT listed here -- see check_all_dependencies()'s
