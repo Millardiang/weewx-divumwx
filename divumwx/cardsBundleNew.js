@@ -199,6 +199,10 @@ try {
     no: 'no',    // Norwegian -> Norway
     pl: 'pl',    // Polish -> Poland
     pt: 'pt',    // Portuguese -> Portugal
+    sv: 'se',    // Swedish -> Sweden (NOT "sv" -- no such country code)
+    fi: 'fi',    // Finnish -> Finland
+    hu: 'hu',    // Hungarian -> Hungary
+    is: 'is',    // Icelandic -> Iceland
     ta: 'in',    // Tamil -> India (representative choice; also widely spoken in Sri Lanka)
     th: 'th',    // Thai -> Thailand
     tr: 'tr',    // Turkish -> Turkey
