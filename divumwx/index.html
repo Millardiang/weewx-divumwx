@@ -658,21 +658,50 @@ function broadcastUnitSystem() {
 // populateLanguageSelector() below is written to be safe to call
 // repeatedly: it only builds the <option> list once, but always
 // resyncs select.value, so it stays correct either way.
+// populateLanguageSelector() is written to be safe to call repeatedly:
+// it only builds the <option> list once, but always resyncs select.value
+// AND the flag image/label (both below), so it stays correct on every
+// call regardless of whether this is the very first load or a later
+// switch.
 function populateLanguageSelector() {
   const select = document.getElementById('languageSystem');
+  const flagImg = document.getElementById('languageFlag');
+  const label = document.getElementById('languageLabel');
   if (!select || typeof DivumWXI18N === 'undefined') return;
   if (!select.options.length) {
     DivumWXI18N.getAvailableLanguages().forEach(code => {
       const opt = document.createElement('option');
       opt.value = code;
-      opt.textContent = DivumWXI18N.getLanguageName(code);
+      // Emoji flag prefix -- a real <img> can't go inside a native
+      // <option> in any browser, so this is what makes the OPEN dropdown
+      // list itself show a flag per language; the closed state gets a
+      // real SVG via #languageFlag below instead, since an <img> works
+      // fine there.
+      const emoji = DivumWXI18N.getLanguageFlagEmoji(code);
+      opt.textContent = (emoji ? emoji + ' ' : '') + DivumWXI18N.getLanguageName(code);
       select.appendChild(opt);
     });
     select.onchange = () => {
       DivumWXI18N.setLanguage(select.value);
     };
   }
-  select.value = DivumWXI18N.getLanguage();
+  const current = DivumWXI18N.getLanguage();
+  select.value = current;
+  if (flagImg) {
+    const url = DivumWXI18N.getLanguageFlagUrl(current);
+    if (url) { flagImg.src = url; flagImg.style.display = ''; }
+    else { flagImg.style.display = 'none'; }
+  }
+  // Shows the current language's own name once one is actually known,
+  // rather than #unitSystem's pattern of always showing a static
+  // "Select units" caption -- once there's a flag next to it, a caption
+  // that never changes reads as broken/wrong on repeat visits (it would
+  // sit there showing "Select language" right beside e.g. the Danish
+  // flag AND the language already switched to Danish, contradicting
+  // itself), whereas a plain unit-system dropdown has no comparable
+  // "current value" to show without duplicating what's already in the
+  // option list's own units.
+  if (label) label.textContent = DivumWXI18N.getLanguageName(current);
 }
 window.addEventListener('i18nready', populateLanguageSelector);
 
