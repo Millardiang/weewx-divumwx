@@ -307,6 +307,39 @@ body.dark #languageSystem option, [data-bs-theme="dark"] #languageSystem option 
   color: var(--dark-text, #f5f5f5);
 }
 
+/* Real flag <img> for the CLOSED selector state only -- native <option>
+   elements can't embed images in any browser, so the open dropdown list
+   uses an emoji flag prefix in each option's own text instead (built
+   client-side in index.html's populateLanguageSelector(), from the same
+   country-code table as this image's src -- see
+   DivumWXI18N.getLanguageFlagUrl/getLanguageFlagEmoji in cardI18n.js).
+   Pinned to the select-wrap's left edge; the label text (now the current
+   language's own name, not a static "Select language" caption, once a
+   flag makes "which language is this" worth actually answering) is
+   pushed right to make room for it, and left-aligned rather than
+   centered like #unitSystem's label -- centering would put it visually
+   underneath the flag at this width. */
+#languageFlag {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 12px;
+  object-fit: cover;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(128,128,128,0.35);
+  pointer-events: none;
+}
+.select-wrap--lang .select-label {
+  left: 32px;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  text-align: left;
+  max-width: calc(100% - 40px);
+}
+
 #themeToggle {
   font-size: 22px;
   background: none;
