@@ -108,11 +108,48 @@ Provides three tags:
                                Embed directly:
 
                                  "lang": $divumwx_lang
+
+    $divumwx_strings_payload  — the entire jsondata/strings.json content,
+                               pre-formatted as one JSON object string:
+                               '{"_default": "da", "da": {...}, "fr": {...},
+                               ...}'. "_default" is this report's own
+                               configured lang (same value as $divumwx_lang
+                               above); every other top-level key is a
+                               language code mapped to that language's full
+                               [Texts] dictionary, read directly from
+                               skins/DivumWX/lang/*.conf via configobj --
+                               NOT via $gettext(), which only ever resolves
+                               against this one report's single configured
+                               lang, so it can't be asked for a different
+                               language mid-render. This is what makes
+                               DivumWX's client-side language switcher
+                               possible: cardI18n.js can switch which
+                               language's dictionary it reads from
+                               instantly in the browser, the same way its
+                               existing unit-system dropdown switches units,
+                               with no server round trip, since every
+                               language's text already arrived in this one
+                               payload. Built entirely here (not spread
+                               across Cheetah template logic) so the whole
+                               structure is assembled with plain Python
+                               json.dumps -- reliable escaping, no risk of
+                               the kind of Cheetah-side JSON-construction
+                               bugs documented elsewhere in this codebase's
+                               history. Embed directly (already valid JSON):
+
+                                 $divumwx_strings_payload
 """
+import glob
 import json
+import logging
+import os.path
+
+import configobj
 
 from weeutil.weeutil import to_bool
 from weewx.cheetahgenerator import SearchList
+
+log = logging.getLogger(__name__)
 
 
 class DivumwxCards(SearchList):
@@ -166,6 +203,9 @@ class DivumwxCards(SearchList):
         divumwx_report = self.generator.config_dict.get('StdReport', {}).get('DivumWXReport', {})
         lang = divumwx_report.get('lang', 'en') or 'en'
 
+        strings_payload = self._read_all_lang_strings()
+        strings_payload['_default'] = lang
+
         search_list_extension = {
             'divumwx_enabled_cards': json.dumps(list(enabled_cards)),
             'divumwx_webcam_title': json.dumps(webcam_title),
@@ -174,5 +214,53 @@ class DivumwxCards(SearchList):
             'divumwx_station_image_path': json.dumps(station_image_path),
             'divumwx_in_uk': json.dumps(in_uk),
             'divumwx_lang': json.dumps(lang),
+            'divumwx_strings_payload': json.dumps(strings_payload),
         }
         return [search_list_extension]
+
+    def _read_all_lang_strings(self):
+        """Read every skins/DivumWX/lang/*.conf file's [Texts] section
+        directly via configobj, keyed by language code (the filename minus
+        '.conf'). This deliberately does NOT go through WeeWX's own
+        $gettext()/Gettext search-list class -- that mechanism only ever
+        has access to the ONE lang file matching this report's own
+        configured `lang` setting (it's loaded as part of building
+        self.generator.skin_dict, before any template ever runs), so there
+        is no way to ask it for a *different* language's text mid-render.
+        Reading the files ourselves, with the same configobj library WeeWX
+        itself uses internally, is the only way to get every language's
+        text into one JSON payload for the client-side switcher.
+
+        The skin's own directory is derived from skin_dict, the same
+        SKIN_ROOT/skin fields weewx.cheetahgenerator.SkinInfo exposes as
+        $SKIN_ROOT/$skin -- not hardcoded, so this keeps working regardless
+        of install layout (pip vs setup.py, a relocated WEEWX_ROOT, etc).
+        """
+        skin_dict = getattr(self.generator, 'skin_dict', {})
+        weewx_root = self.generator.config_dict.get('WEEWX_ROOT', '')
+        skin_root = skin_dict.get('SKIN_ROOT', 'skins')
+        skin_name = skin_dict.get('skin', 'DivumWX')
+        lang_dir = os.path.join(weewx_root, skin_root, skin_name, 'lang')
+
+        result = {}
+        for path in sorted(glob.glob(os.path.join(lang_dir, '*.conf'))):
+            code = os.path.splitext(os.path.basename(path))[0]
+            try:
+                conf = configobj.ConfigObj(path, encoding='utf-8')
+                texts = conf.get('Texts', {})
+                # configobj can hand back nested Section objects for [Texts]
+                # sub-blocks (pgettext-style contexts) as well as plain
+                # string values -- only the plain [Texts] key = "value"
+                # entries are relevant to $gettext()/DivumWXI18N.t(), so
+                # skip anything that isn't a plain string rather than
+                # letting json.dumps choke on a non-serializable Section.
+                result[code] = {
+                    k: v for k, v in texts.items() if isinstance(v, str)
+                }
+            except Exception as e:
+                # One malformed .conf file must not take down
+                # archive.json/charts.json generation too -- they share
+                # this same search list extension instance.
+                log.warning("divumwx_cards: skipping unreadable lang file %s: %s", path, e)
+                continue
+        return result
