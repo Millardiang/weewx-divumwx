@@ -2,7 +2,7 @@
 try {
 /*
 ##############################################################################################
-# cardI18n.js version 0.0.2
+# cardI18n.js version 0.0.3
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -10,79 +10,161 @@ try {
 
 // ===================== cardI18n.js =====================
 //
-// Loads jsondata/strings.json (generated server-side by
-// strings.json.tmpl via WeeWX's own $gettext()/lang mechanism -- see that
-// file's header comment) ONCE for the whole page, and exposes a single
-// shared window.DivumWXI18N used by every card, rather than each card
-// fetching and parsing the same file itself. Deliberately placed first in
-// the bundle (before any card's own IIFE runs) so DivumWXI18N always
-// exists by the time a card needs it.
+// Loads jsondata/strings.json ONCE for the whole page -- generated
+// server-side by strings.json.tmpl, which now contains EVERY language's
+// full phrase set in one payload, nested by code:
+//
+//   {"_default": "da", "da": {"Temperature": "Temperatur", ...},
+//    "fr": {...}, ...}
+//
+// "_default" is this report's own configured WeeWX `lang` setting -- the
+// language a fresh visitor sees before ever touching the language
+// dropdown. Everything else is a real language code mapped to that
+// language's dictionary.
 //
 // window.DivumWXI18N.t(key)
-//   Synchronous lookup. Returns the translated string if strings.json has
-//   already loaded and has an entry for `key`, otherwise returns `key`
-//   itself unchanged -- which is correct, not just a fallback of
-//   convenience, because every key IS the English phrase (same convention
-//   as the server-side [Texts] files). A card can call t() before the
-//   fetch resolves and will simply get English back for that first paint.
+//   Synchronous lookup against the CURRENTLY ACTIVE language (see
+//   setLanguage() below). Returns the translated string if the payload
+//   has loaded and the active language's dictionary has an entry for
+//   `key`, otherwise returns `key` itself unchanged -- correct, not just
+//   a fallback of convenience, because every key IS the English phrase
+//   (same convention as the server-side [Texts] files). A card can call
+//   t() before the fetch resolves and will simply get English back for
+//   that first paint.
 //
 // window.DivumWXI18N.applyLabel(el, key)
 //   For text that gets set ONCE at card-boot time and never touched
-//   again afterwards (chip-row labels built by a card's own
-//   addChipRow(label) helper are the main case -- unlike a card's
-//   *values*, which normally get re-written on every renderCard() call,
-//   the *label* span is usually created once and left alone). Plain
-//   t(key) is wrong for that case: card boot runs synchronously, always
-//   before strings.json's fetch can possibly resolve (JS is
-//   single-threaded -- the fetch .then() callback cannot run until the
-//   current synchronous script finishes), so a bare t() call at boot
-//   ALWAYS returns the English fallback, permanently, even after
-//   translations load. applyLabel sets el.textContent = t(key) right
-//   away (same correct English-first-paint behaviour as t()), but also
-//   remembers the pair so it can go back and fix it up once strings.json
-//   actually arrives. Cards using addChipRow(DivumWXI18N.t('X')) need to
+//   again afterwards (a card's own addChipRow(label) helper is the main
+//   case). Plain t(key) is wrong for that case for two separate reasons,
+//   both handled here: (1) card boot always runs before the initial
+//   fetch can possibly resolve (JS is single-threaded), so a bare t()
+//   call at boot always returns the English fallback, permanently, even
+//   after the payload loads; (2) even after it loads, switching language
+//   later needs this same text updated again, and nothing else would
+//   ever revisit it. applyLabel sets el.textContent = t(key) right away
+//   (same correct English-first-paint behaviour as t()), and PERMANENTLY
+//   registers the {el, key} pair -- re-applied not just once when the
+//   payload first loads, but every time setLanguage() is called
+//   afterwards too. Cards using addChipRow(DivumWXI18N.t('X')) need to
 //   change to addChipRow('X') and have addChipRow itself call
 //   DivumWXI18N.applyLabel(labelEl, label) instead of a bare
 //   labelEl.textContent = label -- see cardTemperature.js's addChipRow
 //   for a card that never needed this fix, because it rebuilds every
-//   label fresh inside renderCard() instead of once at boot.
+//   label fresh inside renderCard() instead of once at boot (and so
+//   picks up a live language switch correctly too, via the 'i18nready'
+//   re-render below).
+//
+// window.DivumWXI18N.applyAttr(el, attr, key)
+//   The same idea as applyLabel, for setAttribute-based text (tooltips'
+//   data-title, mainly). Same permanent registration, same re-apply on
+//   every setLanguage() call.
+//
+// window.DivumWXI18N.getLanguage()
+//   The currently active language code.
+//
+// window.DivumWXI18N.getLanguageName(code)
+//   That language's own self-name, read directly from its [Texts]
+//   section's "Language" key (e.g. "Dansk", "Français", "العربية") --
+//   NOT translated into the currently active language, always that
+//   language's own name for itself, the way a language picker should
+//   read. Falls back to the raw code if that language isn't in the
+//   loaded payload. Lets a language-picker dropdown build its own
+//   option labels straight from the same payload everything else reads
+//   from, rather than needing a second hardcoded code-to-name list kept
+//   in sync separately (which is exactly the trap DIVUMWX_LANG_CHOICES
+//   in install.py already had to be careful about on the server side).
+//
+// window.DivumWXI18N.getAvailableLanguages()
+//   Array of every language code present in the loaded payload (empty
+//   array before the payload has loaded) -- e.g. for a language-picker
+//   dropdown to populate its own options from, rather than hardcoding
+//   the list separately somewhere else. Order matches the order
+//   strings.json.tmpl's Python side produced them in (alphabetical by
+//   code), not necessarily the order a UI wants to display them in.
+//
+// window.DivumWXI18N.setLanguage(code)
+//   Switches the active language, in the browser, with no server round
+//   trip -- every language's text already arrived in the one payload
+//   fetch. Persists the choice to localStorage (key 'dashboardLanguage',
+//   read back on the next page load ahead of "_default") so it survives
+//   a refresh, same convention as the existing unit-system dropdown's
+//   'dashboardUnitSystem' key. No-ops (returns false) if `code` isn't a
+//   language actually present in the loaded payload, rather than
+//   silently switching to an all-English-fallback state.  Re-applies
+//   every applyLabel/applyAttr-registered element immediately, then
+//   fires 'i18nready' again so every card's own re-render listener (the
+//   same one used for the very first load) picks up the switch too --
+//   this is deliberately the SAME event as the initial-load signal, not
+//   a separate 'languagechange' event, so no card needs new listener
+//   code to support live switching; whatever already made a card
+//   correctly show translations on page load makes it correctly react
+//   to a live switch too. Returns true on a successful switch.
 //
 // window.DivumWXI18N.ready
-//   A Promise that resolves once strings.json has loaded (or failed to,
-//   in which case it still resolves -- a network hiccup here should
-//   degrade to "page stays in English", never break the page).
+//   A Promise that resolves once the initial payload load has settled
+//   (loaded or failed -- a network hiccup here should degrade to "page
+//   stays in English", never break the page).
 //
 // 'i18nready' event on window
-//   Fired once, after strings.json loads, so a card that already rendered
-//   once in English can re-render with translations. Cards do this via
-//   the same "cache lastData, re-render on an event" pattern already
-//   used for 'unitsystemchange' and 'resize' (see cardTemperature.js) --
-//   this is one more event in that same family, not a new pattern. Note
-//   this event alone does NOT fix applyLabel-created labels -- those are
+//   Fired once after the initial payload loads, AND again every time
+//   setLanguage() successfully switches languages. Cards do this via the
+//   same "cache lastData, re-render on an event" pattern already used
+//   for 'unitsystemchange' and 'resize' (see cardTemperature.js) -- one
+//   more event in that same family, not a new pattern. This event alone
+//   does NOT fix applyLabel/applyAttr-created labels -- those are
 //   handled internally, automatically, without the card needing to do
 //   anything on this event.
 (function(){
   var STRINGS_JSON_URL = './jsondata/strings.json';
-  var strings = {};
+  var LANG_STORAGE_KEY = 'dashboardLanguage';
+  var payload = null;      // the full {"_default": "...", "da": {...}, ...} object once loaded
+  var activeLang = null;   // resolved once the payload loads: localStorage override, or "_default"
   var loaded = false;
-  var pendingLabels = []; // {el, key} pairs set before strings.json loaded
+  var registeredLabels = []; // {el, key} pairs -- permanent, re-applied on every language switch
+  var registeredAttrs = [];  // {el, attr, key} pairs -- same
 
   function t(key){
-    if (loaded && Object.prototype.hasOwnProperty.call(strings, key)) {
-      return strings[key];
+    if (loaded && payload[activeLang] && Object.prototype.hasOwnProperty.call(payload[activeLang], key)) {
+      return payload[activeLang][key];
     }
     return key;
   }
 
   function applyLabel(el, key){
     el.textContent = t(key);
-    if (!loaded) pendingLabels.push({ el: el, key: key });
+    registeredLabels.push({ el: el, key: key });
   }
 
-  var pendingAttrs = []; // {el, attr, key} pairs for setAttribute-based text (e.g. data-title tooltips)
   function applyAttr(el, attr, key){
     el.setAttribute(attr, t(key));
-    if (!loaded) pendingAttrs.push({ el: el, attr: attr, key: key });
+    registeredAttrs.push({ el: el, attr: attr, key: key });
+  }
+
+  function getLanguage(){
+    return activeLang;
+  }
+
+  function getLanguageName(code){
+    return (payload && payload[code] && payload[code]['Language']) || code;
+  }
+
+  function getAvailableLanguages(){
+    if (!loaded) return [];
+    return Object.keys(payload).filter(function(k){ return k.indexOf('_') !== 0; });
+  }
+
+  function reapplyAll(){
+    registeredLabels.forEach(function(p){ p.el.textContent = t(p.key); });
+    registeredAttrs.forEach(function(p){ p.el.setAttribute(p.attr, t(p.key)); });
+  }
+
+  function setLanguage(code){
+    if (!loaded || !payload[code]) return false;
+    activeLang = code;
+    try { localStorage.setItem(LANG_STORAGE_KEY, code); } catch (e) {}
+    reapplyAll();
+    window.dispatchEvent(new CustomEvent('i18nready'));
+    return true;
   }
 
   var resolveReady;
@@ -94,27 +176,49 @@ try {
       return r.json();
     })
     .then(function(json){
-      strings = json || {};
+      payload = json || {};
+      var saved = null;
+      try { saved = localStorage.getItem(LANG_STORAGE_KEY); } catch (e) {}
+      // A saved choice only wins if that language actually exists in
+      // THIS payload -- a station that's since dropped a language (or a
+      // stale value from a much older install) falls back to the
+      // server's own configured default instead of silently landing on
+      // an all-English page.
+      activeLang = (saved && payload[saved]) ? saved : (payload['_default'] || 'en');
       loaded = true;
-      // Fix up every label that was set before this point -- this is
-      // the only thing that makes applyLabel different from a bare
-      // t() call at boot time.
-      pendingLabels.forEach(function(p){ p.el.textContent = t(p.key); });
-      pendingLabels = [];
-      pendingAttrs.forEach(function(p){ p.el.setAttribute(p.attr, t(p.key)); });
-      pendingAttrs = [];
+      // Fix up every label/attr that was registered before this point --
+      // this is the only thing that makes applyLabel/applyAttr different
+      // from a bare t()/setAttribute call at boot time.
+      reapplyAll();
       resolveReady();
-      window.dispatchEvent(new CustomEvent('i18nready'));
     })
     .catch(function(e){
       console.warn('cardI18n: strings.json fetch failed \u2014 staying in English:', e.message);
+      payload = {};
+      activeLang = 'en';
       loaded = true; // so t() falls through to the (already-correct) English key cleanly
-      pendingLabels = [];
-      pendingAttrs = [];
       resolveReady();
+    })
+    .then(function(){
+      // Deliberately OUTSIDE the fetch/parse .then()-.catch() pair above,
+      // in its own link of the chain: dispatchEvent is a native browser
+      // method that should never throw in practice, but if it somehow
+      // did, we don't want that exception being mistaken for a fetch
+      // failure and reverting payload/activeLang back to the all-English
+      // fallback state right after a genuinely successful load.
+      window.dispatchEvent(new CustomEvent('i18nready'));
     });
 
-  window.DivumWXI18N = { t: t, applyLabel: applyLabel, applyAttr: applyAttr, ready: ready };
+  window.DivumWXI18N = {
+    t: t,
+    applyLabel: applyLabel,
+    applyAttr: applyAttr,
+    getLanguage: getLanguage,
+    getLanguageName: getLanguageName,
+    getAvailableLanguages: getAvailableLanguages,
+    setLanguage: setLanguage,
+    ready: ready
+  };
 })();
 
 } catch (e) {
