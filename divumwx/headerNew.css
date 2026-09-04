@@ -134,6 +134,7 @@ html[data-bs-theme="dark"] body.season-summer header, html[data-bs-theme="dark"]
   text-align: center;
 }
 .site-nav.site-nav--menu #unitSystem,
+.site-nav.site-nav--menu #languageSystem,
 .site-nav.site-nav--menu #themeToggle,
 .site-nav.site-nav--menu #seasonToggle {
   margin-top: 8px;
@@ -242,6 +243,31 @@ body.menu-open .menu-btn span:nth-child(3) {
   color: var(--light-text, #222);
 }
 body.dark #unitSystem option, [data-bs-theme="dark"] #unitSystem option {
+  background: var(--card-bg, #2b2b2b);
+  color: var(--dark-text, #f5f5f5);
+}
+
+/* #languageSystem mirrors #unitSystem's rules above -- see header.css's
+   identical block for the full explanation. */
+#languageSystem {
+  font-family: inherit;
+  font-size: 13px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(128,128,128,0.4);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+#languageSystem {
+  width: 180px;
+}
+#languageSystem option {
+  background: var(--light-card, rgb(204,218,246));
+  color: var(--light-text, #222);
+}
+body.dark #languageSystem option, [data-bs-theme="dark"] #languageSystem option {
   background: var(--card-bg, #2b2b2b);
   color: var(--dark-text, #f5f5f5);
 }
