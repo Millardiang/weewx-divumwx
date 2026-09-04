@@ -74,6 +74,23 @@ try {
 //   in sync separately (which is exactly the trap DIVUMWX_LANG_CHOICES
 //   in install.py already had to be careful about on the server side).
 //
+// window.DivumWXI18N.getLanguageFlagEmoji(code) /
+// window.DivumWXI18N.getLanguageFlagUrl(code)
+//   A representative country flag for that language -- a judgment call
+//   for languages with no country of their own (Breton, Catalan, Welsh,
+//   Basque) or spoken across several (Arabic, Hindi, Tamil, Urdu), see
+//   LANGUAGE_FLAG_COUNTRY's own comment for the specific choices made.
+//   getLanguageFlagEmoji returns a Unicode flag emoji (works directly as
+//   plain text, including inside a native <option> -- real image files
+//   can't be embedded in <option> elements in any browser); returns ''
+//   if the code isn't recognized. getLanguageFlagUrl returns a path to
+//   the matching SVG under img/flags/ (for use in an actual <img>
+//   element next to the closed selector, where images work fine -- it's
+//   only inside the open <option> list itself that's restricted to
+//   plain text). Both driven by the same country-code table, so the
+//   emoji and the SVG can never show two different countries for the
+//   same language.
+//
 // window.DivumWXI18N.getAvailableLanguages()
 //   Array of every language code present in the loaded payload (empty
 //   array before the payload has loaded) -- e.g. for a language-picker
@@ -148,6 +165,65 @@ try {
     return (payload && payload[code] && payload[code]['Language']) || code;
   }
 
+  // Flags are COUNTRY symbols, not language symbols, so this is a
+  // deliberate representative choice for every code, not a lookup that
+  // could be derived automatically -- most are a direct match (fr->fr,
+  // de->de) but several of DivumWX's 25 languages are regional/minority
+  // languages with no country of their own (Breton, Catalan, Welsh,
+  // Basque) or are spoken across multiple countries (Arabic, Hindi,
+  // Tamil, Urdu), where the "obvious" flag is a judgment call, not a
+  // fact. Two of these are NOT the same 2 letters as the language code,
+  // on purpose -- 'da' (Danish) needs Denmark's flag ('dk'), not a
+  // (nonexistent) country called "da"; 'uk' (Ukrainian) needs Ukraine's
+  // flag ('ua'), NOT the United Kingdom's ('gb') -- a genuinely easy
+  // mix-up since "UK" reads as "United Kingdom" to a human but is this
+  // project's language code for Ukrainian, inherited from ISO 639-1.
+  var LANGUAGE_FLAG_COUNTRY = {
+    ar: 'sa',    // Arabic -> Saudi Arabia (representative choice; Arabic has no single country)
+    br: 'fr',    // Breton -> France (regional language of Brittany)
+    ca: 'es',    // Catalan -> Spain (regional language of Catalonia)
+    cn: 'cn',    // Chinese -> China
+    cy: 'gb',    // Welsh -> United Kingdom (regional language of Wales)
+    cz: 'cz',    // Czech -> Czech Republic
+    da: 'dk',    // Danish -> Denmark (NOT "da" -- no such country code)
+    de: 'de',    // German -> Germany
+    en: 'gb',    // English -> United Kingdom (this project's own default/reference)
+    en_US: 'us', // English (US) -> United States
+    es: 'es',    // Spanish -> Spain
+    eu: 'es',    // Basque -> Spain (representative choice; also spoken in France)
+    fr: 'fr',    // French -> France
+    gr: 'gr',    // Greek -> Greece
+    hi: 'in',    // Hindi -> India
+    it: 'it',    // Italian -> Italy
+    nl: 'nl',    // Dutch -> Netherlands
+    no: 'no',    // Norwegian -> Norway
+    pl: 'pl',    // Polish -> Poland
+    pt: 'pt',    // Portuguese -> Portugal
+    ta: 'in',    // Tamil -> India (representative choice; also widely spoken in Sri Lanka)
+    th: 'th',    // Thai -> Thailand
+    tr: 'tr',    // Turkish -> Turkey
+    uk: 'ua',    // Ukrainian -> Ukraine (NOT "uk"/United Kingdom -- see note above)
+    ur: 'pk'     // Urdu -> Pakistan
+  };
+  // Same country-code table drives both the emoji (built from Unicode
+  // "regional indicator symbol" letters -- every flag emoji is just two
+  // of these back to back) and the real SVG file path, so the two can
+  // never drift out of sync with each other.
+  function countryCodeToEmoji(cc){
+    if (!cc || cc.length !== 2) return '';
+    var A = 0x1F1E6, base = 'a'.charCodeAt(0);
+    return String.fromCodePoint(A + (cc.charCodeAt(0) - base)) +
+           String.fromCodePoint(A + (cc.charCodeAt(1) - base));
+  }
+  function getLanguageFlagEmoji(code){
+    var cc = LANGUAGE_FLAG_COUNTRY[code];
+    return cc ? countryCodeToEmoji(cc) : '';
+  }
+  function getLanguageFlagUrl(code){
+    var cc = LANGUAGE_FLAG_COUNTRY[code];
+    return cc ? ('./img/flags/' + cc + '.svg') : '';
+  }
+
   function getAvailableLanguages(){
     if (!loaded) return [];
     return Object.keys(payload).filter(function(k){ return k.indexOf('_') !== 0; });
@@ -215,6 +291,8 @@ try {
     applyAttr: applyAttr,
     getLanguage: getLanguage,
     getLanguageName: getLanguageName,
+    getLanguageFlagEmoji: getLanguageFlagEmoji,
+    getLanguageFlagUrl: getLanguageFlagUrl,
     getAvailableLanguages: getAvailableLanguages,
     setLanguage: setLanguage,
     ready: ready
