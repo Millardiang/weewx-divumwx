@@ -165,45 +165,62 @@ try {
     return (payload && payload[code] && payload[code]['Language']) || code;
   }
 
-  // Flags are COUNTRY symbols, not language symbols, so this is a
-  // deliberate representative choice for every code, not a lookup that
-  // could be derived automatically -- most are a direct match (fr->fr,
-  // de->de) but several of DivumWX's 25 languages are regional/minority
-  // languages with no country of their own (Breton, Catalan, Welsh,
-  // Basque) or are spoken across multiple countries (Arabic, Hindi,
-  // Tamil, Urdu), where the "obvious" flag is a judgment call, not a
-  // fact. Two of these are NOT the same 2 letters as the language code,
-  // on purpose -- 'da' (Danish) needs Denmark's flag ('dk'), not a
-  // (nonexistent) country called "da"; 'uk' (Ukrainian) needs Ukraine's
-  // flag ('ua'), NOT the United Kingdom's ('gb') -- a genuinely easy
-  // mix-up since "UK" reads as "United Kingdom" to a human but is this
-  // project's language code for Ukrainian, inherited from ISO 639-1.
+  // Flags are COUNTRY (or, for the four marked below, REGION) symbols,
+  // not language symbols, so this is a deliberate representative choice
+  // for every code, not a lookup that could be derived automatically --
+  // most are a direct match (fr->fr, de->de) but several of DivumWX's
+  // languages are regional/minority languages spoken across multiple
+  // countries (Arabic, Hindi, Tamil, Urdu), where the "obvious" flag is
+  // a judgment call, not a fact. Two of the country ones are NOT the
+  // same 2 letters as the language code, on purpose -- 'da' (Danish)
+  // needs Denmark's flag ('dk'), not a (nonexistent) country called
+  // "da"; 'uk' (Ukrainian) needs Ukraine's flag ('ua'), NOT the United
+  // Kingdom's ('gb') -- a genuinely easy mix-up since "UK" reads as
+  // "United Kingdom" to a human but is this project's language code for
+  // Ukrainian, inherited from ISO 639-1. Likewise 'sv' (Swedish) needs
+  // Sweden's flag ('se'), NOT El Salvador's ('sv' is El Salvador's ISO
+  // 3166-1 country code, an entirely unrelated coincidence).
+  //
+  // cy/ca/eu/br use actual REGIONAL flags (Wales, Catalonia, Basque
+  // Country, Brittany), not a nearby country's flag -- sourced from
+  // HatScripts/circle-flags (MIT licensed), the values below are that
+  // project's own subdivision codes (gb-wls, es-ct, es-pv, fr-bre), not
+  // ISO 3166-1 country codes, since none of these four regions has one
+  // of their own. These four are also circular artwork, not the
+  // rectangular style every other flag in img/flags/ uses -- a real,
+  // visible style inconsistency, traded deliberately for actual
+  // correctness (a Welsh person's own flag, not the Union Jack) rather
+  // than left as the earlier country-flag approximation.
   var LANGUAGE_FLAG_COUNTRY = {
-    ar: 'sa',    // Arabic -> Saudi Arabia (representative choice; Arabic has no single country)
-    br: 'fr',    // Breton -> France (regional language of Brittany)
-    ca: 'es',    // Catalan -> Spain (regional language of Catalonia)
-    cn: 'cn',    // Chinese -> China
-    cy: 'gb',    // Welsh -> United Kingdom (regional language of Wales)
-    cz: 'cz',    // Czech -> Czech Republic
-    da: 'dk',    // Danish -> Denmark (NOT "da" -- no such country code)
-    de: 'de',    // German -> Germany
-    en: 'gb',    // English -> United Kingdom (this project's own default/reference)
-    en_US: 'us', // English (US) -> United States
-    es: 'es',    // Spanish -> Spain
-    eu: 'es',    // Basque -> Spain (representative choice; also spoken in France)
-    fr: 'fr',    // French -> France
-    gr: 'gr',    // Greek -> Greece
-    hi: 'in',    // Hindi -> India
-    it: 'it',    // Italian -> Italy
-    nl: 'nl',    // Dutch -> Netherlands
-    no: 'no',    // Norwegian -> Norway
-    pl: 'pl',    // Polish -> Poland
-    pt: 'pt',    // Portuguese -> Portugal
-    ta: 'in',    // Tamil -> India (representative choice; also widely spoken in Sri Lanka)
-    th: 'th',    // Thai -> Thailand
-    tr: 'tr',    // Turkish -> Turkey
-    uk: 'ua',    // Ukrainian -> Ukraine (NOT "uk"/United Kingdom -- see note above)
-    ur: 'pk'     // Urdu -> Pakistan
+    ar: 'sa',      // Arabic -> Saudi Arabia (representative choice; Arabic has no single country)
+    br: 'fr-bre',  // Breton -> Brittany (regional flag, not France's)
+    ca: 'es-ct',   // Catalan -> Catalonia (regional flag, not Spain's)
+    cn: 'cn',      // Chinese -> China
+    cy: 'gb-wls',  // Welsh -> Wales (regional flag, not the UK's)
+    cz: 'cz',      // Czech -> Czech Republic
+    da: 'dk',      // Danish -> Denmark (NOT "da" -- no such country code)
+    de: 'de',      // German -> Germany
+    en: 'gb',      // English -> United Kingdom (this project's own default/reference)
+    en_US: 'us',   // English (US) -> United States
+    es: 'es',      // Spanish -> Spain
+    eu: 'es-pv',   // Basque -> Basque Country (regional flag; also spoken in France, but this is the larger Spanish side)
+    fr: 'fr',      // French -> France
+    gr: 'gr',      // Greek -> Greece
+    hi: 'in',      // Hindi -> India
+    it: 'it',      // Italian -> Italy
+    nl: 'nl',      // Dutch -> Netherlands
+    no: 'no',      // Norwegian -> Norway
+    pl: 'pl',      // Polish -> Poland
+    pt: 'pt',      // Portuguese -> Portugal
+    sv: 'se',      // Swedish -> Sweden (NOT "sv" -- that's El Salvador's country code)
+    fi: 'fi',      // Finnish -> Finland
+    hu: 'hu',      // Hungarian -> Hungary
+    is: 'is',      // Icelandic -> Iceland
+    ta: 'in',      // Tamil -> India (representative choice; also widely spoken in Sri Lanka)
+    th: 'th',      // Thai -> Thailand
+    tr: 'tr',      // Turkish -> Turkey
+    uk: 'ua',      // Ukrainian -> Ukraine (NOT "uk"/United Kingdom -- see note above)
+    ur: 'pk'       // Urdu -> Pakistan
   };
   // Same country-code table drives both the emoji (built from Unicode
   // "regional indicator symbol" letters -- every flag emoji is just two
@@ -9101,7 +9118,7 @@ try {
     row.style.borderBottom = '1px solid var(--bs-border-color)';
 
     var labelEl = document.createElement('span');
-    labelEl.textContent = label;
+    DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
     labelEl.style.letterSpacing = '.06em';
@@ -9110,9 +9127,9 @@ try {
     row.appendChild(labelEl);
 
     var valueEl = document.createElement('span');
-    valueEl.style.fontSize = '9.5px';
-    valueEl.style.fontWeight = '700';
+    valueEl.style.fontSize = '8.5px';
     valueEl.style.fontFamily = '"IBM Plex Mono", ui-monospace, monospace';
+    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis';
     row.appendChild(valueEl);
 
     rightPane.appendChild(row);

@@ -115,13 +115,18 @@ html[data-bs-theme="dark"] body.season-summer header, html[data-bs-theme="dark"]
 }
 
 .site-title {
-  flex: 0 0 auto;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
   font-family: Georgia, 'Times New Roman', serif;
   font-variant-caps: small-caps;
   letter-spacing: .08em;
   font-size: 1.15rem;
   font-weight: 600;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: normal;
+  line-height: 1.15;
   color: inherit;
   text-decoration: none;
 }
@@ -261,7 +266,7 @@ body.menu-open .menu-btn span:nth-child(3) {
 }
 
 #unitSystem {
-  width: 232px;
+  width: 118px;
 }
 #unitSystem option {
   background: var(--light-card, rgb(204,218,246));
@@ -296,7 +301,7 @@ body.dark #unitSystem option, [data-bs-theme="dark"] #unitSystem option {
 }
 
 #languageSystem {
-  width: 180px;
+  width: 96px;
 }
 #languageSystem option {
   background: var(--light-card, rgb(204,218,246));
@@ -333,11 +338,11 @@ body.dark #languageSystem option, [data-bs-theme="dark"] #languageSystem option 
 }
 .select-wrap--lang .select-label {
   left: 32px;
-  right: 8px;
+  right: 16px;
   top: 50%;
   transform: translateY(-50%);
   text-align: left;
-  max-width: calc(100% - 40px);
+  max-width: calc(100% - 48px);
 }
 
 #themeToggle {

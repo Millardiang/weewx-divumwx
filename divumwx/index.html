@@ -705,6 +705,37 @@ function populateLanguageSelector() {
 }
 window.addEventListener('i18nready', populateLanguageSelector);
 
+// ==== NAVBAR TRANSLATION ====
+// Every navbar.html element that needs translating carries a
+// data-i18n="Key" (for its own text content) or
+// data-i18n-attr="attr1,attr2:Key" (for one or more attributes sharing
+// the same translated text, e.g. both aria-label and title) marker --
+// this loop just reads those markers and hands each off to
+// DivumWXI18N.applyLabel/applyAttr, which already handle the
+// boot-before-load timing and permanent re-apply-on-language-switch
+// behaviour internally (see cardI18n.js) -- nothing further to do here
+// per element. Guarded to run only once (`navbarTranslated`) since
+// applyLabel/applyAttr's own registries handle every later language
+// switch on their own; re-scanning the DOM and re-registering the same
+// elements on every switch would be pointless duplicate work.
+let navbarTranslated = false;
+function translateNavbar() {
+  if (navbarTranslated || typeof DivumWXI18N === 'undefined') return;
+  navbarTranslated = true;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    DivumWXI18N.applyLabel(el, el.getAttribute('data-i18n'));
+  });
+  document.querySelectorAll('[data-i18n-attr]').forEach(el => {
+    const spec = el.getAttribute('data-i18n-attr');
+    const sep = spec.indexOf(':');
+    if (sep === -1) return;
+    const attrs = spec.slice(0, sep).split(',');
+    const key = spec.slice(sep + 1);
+    attrs.forEach(attr => DivumWXI18N.applyAttr(el, attr.trim(), key));
+  });
+}
+window.addEventListener('i18nready', translateNavbar);
+
 window.addEventListener('storage', e => {
   if (e.key === THEME_KEY) applyDashboardTheme();
 });
@@ -1003,6 +1034,7 @@ includeHTML(() => {
   populateUnitSelector();
   broadcastUnitSystem();
   populateLanguageSelector();
+  translateNavbar();
   updateNavCollapse();
   setStationTitle();
 });
