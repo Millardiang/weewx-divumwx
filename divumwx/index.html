@@ -636,6 +636,46 @@ function broadcastUnitSystem() {
   }));
 }
 
+// ==== LANGUAGE HANDLING ====
+// Unlike the unit selector above, there's no separate broadcast function
+// here: DivumWXI18N.setLanguage() (cardI18n.js, part of
+// cardsBundleNew.js) already does persistence + the equivalent broadcast
+// internally, so the onchange handler below just calls straight through
+// to it.
+//
+// Timing note: cardsBundleNew.js (which defines window.DivumWXI18N) is
+// deliberately the LAST script tag on this page, loaded well after this
+// block and after includeHTML()'s callback (which is where
+// populateLanguageSelector() below actually gets called from) -- so
+// DivumWXI18N will not exist yet at that point. Rather than delay/poll
+// for it, this listens for cardI18n.js's own 'i18nready' event instead:
+// window.addEventListener works even when registered before the event's
+// eventual source (cardsBundleNew.js) has loaded, since it's just
+// registering interest in a named event on `window`, not a reference to
+// DivumWXI18N itself. 'i18nready' fires once after the initial
+// translations load, AND again on every later language switch (from
+// this page or, via the saved localStorage value, a previous visit) --
+// populateLanguageSelector() below is written to be safe to call
+// repeatedly: it only builds the <option> list once, but always
+// resyncs select.value, so it stays correct either way.
+function populateLanguageSelector() {
+  const select = document.getElementById('languageSystem');
+  if (!select || typeof DivumWXI18N === 'undefined') return;
+  if (!select.options.length) {
+    DivumWXI18N.getAvailableLanguages().forEach(code => {
+      const opt = document.createElement('option');
+      opt.value = code;
+      opt.textContent = DivumWXI18N.getLanguageName(code);
+      select.appendChild(opt);
+    });
+    select.onchange = () => {
+      DivumWXI18N.setLanguage(select.value);
+    };
+  }
+  select.value = DivumWXI18N.getLanguage();
+}
+window.addEventListener('i18nready', populateLanguageSelector);
+
 window.addEventListener('storage', e => {
   if (e.key === THEME_KEY) applyDashboardTheme();
 });
@@ -933,6 +973,7 @@ includeHTML(() => {
   applyDashboardTheme();
   populateUnitSelector();
   broadcastUnitSystem();
+  populateLanguageSelector();
   updateNavCollapse();
   setStationTitle();
 });
