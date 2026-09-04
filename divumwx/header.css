@@ -159,6 +159,7 @@ html[data-bs-theme="dark"] body.season-summer header, html[data-bs-theme="dark"]
   text-align: center;
 }
 .site-nav.site-nav--menu #unitSystem,
+.site-nav.site-nav--menu #languageSystem,
 .site-nav.site-nav--menu #themeToggle,
 .site-nav.site-nav--menu #seasonToggle {
   margin-top: 8px;
@@ -267,6 +268,41 @@ body.menu-open .menu-btn span:nth-child(3) {
   color: var(--light-text, #222);
 }
 body.dark #unitSystem option, [data-bs-theme="dark"] #unitSystem option {
+  background: var(--card-bg, #2b2b2b);
+  color: var(--dark-text, #f5f5f5);
+}
+
+/* #languageSystem deliberately mirrors #unitSystem's rules above exactly
+   (same properties, same values bar width) -- it's the same select-wrap
+   pattern (see .select-wrap/.select-label above, which already applied
+   correctly since those rules are class-based, not ID-based -- this is
+   only the ID-specific half #unitSystem had and #languageSystem was
+   missing). Narrower than #unitSystem (180px vs 232px) since language
+   names are generally shorter than the unit-system labels
+   (HEADER_UNIT_SYSTEM_LABELS's "Aviation (°C, kt, mbar)" style strings),
+   and DivumWXI18N.getLanguageName() returns each language's own short
+   self-name (e.g. "Dansk", not "Dansk (Danish)"). Adjust if a language's
+   own name turns out to run long enough to still get clipped by the
+   .select-label max-width/ellipsis rule above. */
+#languageSystem {
+  font-family: inherit;
+  font-size: 13px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(128,128,128,0.4);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+#languageSystem {
+  width: 180px;
+}
+#languageSystem option {
+  background: var(--light-card, rgb(204,218,246));
+  color: var(--light-text, #222);
+}
+body.dark #languageSystem option, [data-bs-theme="dark"] #languageSystem option {
   background: var(--card-bg, #2b2b2b);
   color: var(--dark-text, #f5f5f5);
 }
