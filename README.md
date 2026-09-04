@@ -21,6 +21,38 @@ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LIC
 * Toggle between themes - Auto (day and night - default), Light or Dark. The dark and light themes are inspired by John Kline's styling of his Celestial Live and Skyfield extensions.
 * Automatic timelapse video generation from webcam images.
 * Kiosk mode, 3 x 3 grid for displaying on tablet sized screens.
+* Instant language selection for homepage dashboard from drop down menu
+
+# Languages supported
+* Arabic
+* Basque
+* Breton
+* Catalan
+* Chinese (Simplified)
+* Czech
+* Danish
+* Dutch
+* English
+* English (US)
+* Finnish
+* French
+* German
+* Greek
+* Hindi
+* Hungarian
+* Icelandic
+* Italian
+* Norwegian
+* Polish
+* Portuguese
+* Spanish
+* Swedish
+* Tamil
+* Thai
+* Turkish
+* Ukrainian
+* Urdu
+* Welsh
 
 # Repository
 * https://github.com/Millardiang/weewx-divumwx
