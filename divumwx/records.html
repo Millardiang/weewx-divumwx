@@ -190,6 +190,8 @@ table.records-table {
 </style>
 </head>
 <body class="light">
+<script src="cardI18n.js?v=s3n2026a"></script>
+<script src="siteHeader.js"></script>
 <script>
 // ==== THEME HANDLING ====
 // Deliberately the very first thing in <body>, before .container (navbar
@@ -343,14 +345,24 @@ setInterval(() => {
 
 <script src="units.js"></script>
 <script>
-const UNIT_KEY = 'dashboardUnitSystem';
-const UNIT_LABELS = {
-  uk: 'UK (\u00B0C, mph, hPa)', us: 'US (\u00B0F, mph, inHg)',
-  metric: 'Metric (\u00B0C, km/h, hPa)', scandi: 'Scandinavian (\u00B0C, m/s, hPa)',
-  canada: 'Canada (\u00B0C, km/h, kPa)', aviation: 'Aviation (\u00B0C, kt, mbar)',
-  beaufort: 'Beaufort (\u00B0C, Bft, hPa)'
-};
-let currentUnitSystem = localStorage.getItem(UNIT_KEY) || 'uk';
+// NAV_UNIT_KEY/NAV_UNIT_LABELS now come from siteHeader.js -- removed
+// the identical const declarations that used to be here (as UNIT_KEY/
+// UNIT_LABELS). They MUST come from there now, not be redeclared: a
+// later const/let redeclaring an existing var of the same name in the
+// same scope is a SyntaxError that would take out this page's entire
+// script block, including the records engine below. siteHeader.js uses
+// the NAV_-prefixed names specifically to avoid colliding with any
+// page's own same-named globals (charts-d3.html has its own unrelated
+// UNIT_LABELS, for instance) -- this page's references below were
+// updated to match.
+let currentUnitSystem = localStorage.getItem(NAV_UNIT_KEY) || 'uk';
+// This page's own populateUnitSelector() overrides siteHeader.js's
+// generic one (last function declaration with a given name wins, so
+// initSharedHeader()'s internal call to populateUnitSelector() picks up
+// THIS version) -- kept here rather than folded into the shared file
+// because it has page-specific side effects the generic version
+// shouldn't have: tracking currentUnitSystem and calling renderAll() to
+// actually refresh the records table when units change.
 function populateUnitSelector() {
   const select = document.getElementById('unitSystem');
   if (!select) return;
@@ -358,13 +370,13 @@ function populateUnitSelector() {
   Object.keys(SYSTEMS).forEach(key => {
     const opt = document.createElement('option');
     opt.value = key;
-    opt.textContent = UNIT_LABELS[key] || key;
+    opt.textContent = NAV_UNIT_LABELS[key] || key;
     select.appendChild(opt);
   });
   select.value = currentUnitSystem;
   select.onchange = () => {
     currentUnitSystem = select.value;
-    localStorage.setItem(UNIT_KEY, select.value);
+    localStorage.setItem(NAV_UNIT_KEY, select.value);
     window.dispatchEvent(new CustomEvent('unitsystemchange', {
       detail: { system: select.value, config: (typeof SYSTEMS !== 'undefined' ? SYSTEMS[select.value] : null) }
     }));
@@ -375,32 +387,6 @@ function populateUnitSelector() {
 function currentSystemConfig() {
   if (typeof SYSTEMS === 'undefined') return { temp: 'C', wind: 'mph', rain: 'mm' };
   return SYSTEMS[currentUnitSystem] || { temp: 'C', wind: 'mph', rain: 'mm' };
-}
-
-function cardsPerRowStub() {
-
-
-  return Math.max(1, Math.floor((window.innerWidth - 20) / 319));
-}
-// Uses cardsPerRowStub() rather than cardsPerRow() (see above) — this
-// page has no card grid to measure, just the page's own column-width
-// assumption — to decide when the nav should collapse into the hidden
-// hamburger menu.
-function updateNavCollapse() {
-  const navbar = document.getElementById('navbar');
-  const navWrap = document.querySelector('.nav-wrap');
-  const menuInner = document.querySelector('.menu-inner');
-  const menuBtn = document.getElementById('menuBtn');
-  if (!navbar || !navWrap || !menuInner || !menuBtn) return;
-  const collapsed = cardsPerRowStub() <= 3;
-  if (collapsed && navbar.parentElement !== menuInner) {
-    navbar.classList.add('site-nav--menu');
-    menuInner.appendChild(navbar);
-  } else if (!collapsed && navbar.parentElement !== navWrap) {
-    navbar.classList.remove('site-nav--menu');
-    navWrap.insertBefore(navbar, menuBtn);
-  }
-  menuBtn.style.display = collapsed ? 'flex' : 'none';
 }
 
 const ARCHIVE_JSON_URL = './jsondata/archive.json';
@@ -467,25 +453,16 @@ function setStationTitle() {
     .catch(e => console.warn('records: station_location/enabled_cards fetch failed —', e.message));
 }
 
-function includeHTML(callback) {
-  const elements = document.querySelectorAll('[w3-include-html]');
-  let pending = elements.length;
-  if (pending === 0) { if (callback) callback(); return; }
-  elements.forEach(el => {
-    const file = el.getAttribute('w3-include-html');
-    fetch(file, { cache: 'no-store' })
-      .then(res => { if (!res.ok) throw new Error('HTTP ' + res.status); return res.text(); })
-      .then(html => { el.innerHTML = html; el.removeAttribute('w3-include-html'); })
-      .catch(e => { console.warn('records: include failed for', file, '—', e.message); el.innerHTML = ''; })
-      .finally(() => { pending--; if (pending === 0 && callback) callback(); });
-  });
-}
+// includeHTML, populateLanguageSelector, and translateNavbar all now
+// live in siteHeader.js -- one shared copy for every page, instead of
+// this page's own separate copies.
 
-window.addEventListener('resize', updateNavCollapse);
 window.addEventListener('storage', e => {
   if (e.key === THEME_KEY) applyDashboardTheme();
 });
+
 includeHTML(() => {
+  initSharedHeader();
   document.getElementById('menuBtn').onclick = () => { document.body.classList.toggle('menu-open'); };
   document.getElementById('themeToggle').onclick = () => {
     const next = THEME_ORDER[(THEME_ORDER.indexOf(getThemeMode()) + 1) % THEME_ORDER.length];
@@ -493,8 +470,6 @@ includeHTML(() => {
     applyDashboardTheme();
   };
   applyDashboardTheme();
-  populateUnitSelector();
-  updateNavCollapse();
   setStationTitle();
 });
 

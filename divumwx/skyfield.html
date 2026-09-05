@@ -193,10 +193,16 @@ body{
 </div>
 
 <script src="units.js"></script>
-<script src="header.js?v=s3n2026q"></script>
+<script src="cardI18n.js?v=s3n2026a"></script>
+<script src="siteHeader.js"></script>
 <script>
 
-applySeasonClass(localStorage.getItem('dashboardThemeMode') || 'auto', 51.94);
+// Seasonal accent mode retired site-wide -- was:
+// applySeasonClass(localStorage.getItem('dashboardThemeMode') || 'auto', 51.94);
+// That function no longer exists anywhere on the site; this leftover
+// top-level call threw immediately on page load, before anything else
+// in this script block (including the tab-switching setup and the
+// includeHTML() call that loads the navbar) ever ran.
 
 // ==== Tab switching: click a .records-tab, load its data-src into the frame ====
 var skyfieldFrame = document.getElementById('skyfieldFrame');
@@ -211,19 +217,7 @@ skyfieldTabs.forEach(function(btn){
 if (skyfieldTabs.length) skyfieldTabs[0].click();
 
 // ==== Shared navbar/menu behaviour (same as every other page) ====
-function includeHTML(callback) {
-  var elements = document.querySelectorAll('[w3-include-html]');
-  var remaining = elements.length;
-  if (!remaining) { callback(); return; }
-  elements.forEach(function(el){
-    var file = el.getAttribute('w3-include-html');
-    fetch(file)
-      .then(function(res){ return res.ok ? res.text() : Promise.reject(res.status); })
-      .then(function(html){ el.innerHTML = html; el.removeAttribute('w3-include-html'); })
-      .catch(function(e){ console.warn('skyfield: include failed --', file, e); })
-      .finally(function(){ if (--remaining === 0) callback(); });
-  });
-}
+// includeHTML() now lives in siteHeader.js -- one shared copy.
 includeHTML(function(){
   initSharedHeader();
   document.getElementById('themeToggle').onclick = function(){
@@ -237,7 +231,7 @@ includeHTML(function(){
       resolved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     }
     document.documentElement.setAttribute('data-bs-theme', resolved);
-    applySeasonClass(next, 51.94);
+    // Seasonal accent mode retired site-wide -- was: applySeasonClass(next, 51.94);
   };
 });
 </script>

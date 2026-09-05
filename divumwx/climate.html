@@ -255,7 +255,8 @@ footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neu
 </div>
 
 <script src="units.js"></script>
-<script src="header.js?v=s3n2026q"></script>
+<script src="cardI18n.js?v=s3n2026a"></script>
+<script src="siteHeader.js"></script>
 <script>
 function convTemp(c, unit){ return unit==='F' ? C2F(c) : c; }
 function convWind(ms, unit){
@@ -612,31 +613,7 @@ function setStationTitle(){
     .catch(e => console.warn('Re-ImaginedWX climate: station_location fetch failed —', e.message));
 }
 
-function includeHTML(callback){
-  const elements = document.querySelectorAll('[w3-include-html]');
-  let pending = elements.length;
-  if(pending === 0){ if(callback) callback(); return; }
-  elements.forEach(el => {
-    const file = el.getAttribute('w3-include-html');
-    fetch(file, {cache:'no-store'})
-      .then(res => {
-        if(!res.ok) throw new Error('HTTP '+res.status);
-        return res.text();
-      })
-      .then(html => {
-        el.innerHTML = html;
-        el.removeAttribute('w3-include-html');
-      })
-      .catch(e => {
-        console.warn('Re-ImaginedWX climate: include failed for', file, '—', e.message);
-        el.innerHTML = '';
-      })
-      .finally(() => {
-        pending--;
-        if(pending === 0 && callback) callback();
-      });
-  });
-}
+// includeHTML() now lives in siteHeader.js -- one shared copy.
 
 const root = document.documentElement;
 let themeMode = localStorage.getItem('dashboardThemeMode') || 'auto';
@@ -660,7 +637,14 @@ function resolveTheme(){
 }
 function applyTheme(){
   root.setAttribute('data-bs-theme', resolveTheme());
-  currentSeason = applySeasonClass(themeMode);
+  // Seasonal accent mode retired site-wide -- was: currentSeason =
+  // applySeasonClass(themeMode). That function no longer exists
+  // anywhere on the site; the leftover call here threw
+  // 'applySeasonClass is not defined' on every applyTheme() call,
+  // which (since applyTheme() runs before includeHTML()'s callback on
+  // this page) silently prevented the navbar from ever loading at all
+  // -- not a siteHeader.js problem, a much older dead-code reference.
+  currentSeason = null;
   syncThemeNavUI();
 }
 function syncThemeNavUI(){

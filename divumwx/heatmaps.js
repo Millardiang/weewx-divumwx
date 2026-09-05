@@ -652,7 +652,14 @@
   }
   function applyTheme(){
     document.documentElement.setAttribute('data-bs-theme', resolveTheme());
-    currentSeason = applySeasonClass(themeMode);
+    // Seasonal accent mode retired site-wide -- see the other pages'
+    // identical comment for the full rationale. The leftover
+    // applySeasonClass(themeMode) call here threw 'applySeasonClass is
+    // not defined' on every applyTheme() call, and since buildHeatmap()
+    // below never ran until AFTER that line, this silently produced a
+    // blank page every time -- not a rendering bug in the heatmap code
+    // itself, a dead-code reference blocking it from ever running.
+    currentSeason = null;
     syncThemeNavUI();
     if (dataAvailable) buildHeatmap();
   }
@@ -1065,25 +1072,10 @@
   });
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
 
-  function includeHTML(callback){
-    const elements = document.querySelectorAll('[w3-include-html]');
-    let pending = elements.length;
-    if (pending === 0) { if (callback) callback(); return; }
-    elements.forEach(el => {
-      const file = el.getAttribute('w3-include-html');
-      fetch(file, { cache: 'no-store' })
-        .then(res => { if (!res.ok) throw new Error('HTTP ' + res.status); return res.text(); })
-        .then(html => { el.innerHTML = html; el.removeAttribute('w3-include-html'); })
-        .catch(e => {
-          console.warn('heatmaps: include failed for', file, '\u2014', e.message);
-          el.innerHTML = '';
-        })
-        .finally(() => { pending--; if (pending === 0 && callback) callback(); });
-    });
-  }
+  // includeHTML() now lives in siteHeader.js -- one shared copy.
 
   includeHTML(() => {
-    if (typeof initSharedHeader === 'function') initSharedHeader();
+    initSharedHeader();
     updateBrandText();
     const unitSelect = document.getElementById('unitSystem');
     if (unitSelect) {

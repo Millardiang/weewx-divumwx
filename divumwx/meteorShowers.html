@@ -149,6 +149,8 @@ body.dark .meteor-card{ box-shadow:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rg
 </style>
 </head>
 <body class="light">
+<script src="cardI18n.js?v=s3n2026a"></script>
+<script src="siteHeader.js"></script>
 <script>
 // ==== THEME HANDLING ====
 // Copied verbatim from records.html's own boilerplate — same station
@@ -347,26 +349,6 @@ setInterval(() => {
 </div>
 
 <script>
-function cardsPerRowStub() {
-  return Math.max(1, Math.floor((window.innerWidth - 20) / 319));
-}
-function updateNavCollapse() {
-  const navbar = document.getElementById('navbar');
-  const navWrap = document.querySelector('.nav-wrap');
-  const menuInner = document.querySelector('.menu-inner');
-  const menuBtn = document.getElementById('menuBtn');
-  if (!navbar || !navWrap || !menuInner || !menuBtn) return;
-  const collapsed = cardsPerRowStub() <= 3;
-  if (collapsed && navbar.parentElement !== menuInner) {
-    navbar.classList.add('site-nav--menu');
-    menuInner.appendChild(navbar);
-  } else if (!collapsed && navbar.parentElement !== navWrap) {
-    navbar.classList.remove('site-nav--menu');
-    navWrap.insertBefore(navbar, menuBtn);
-  }
-  menuBtn.style.display = collapsed ? 'flex' : 'none';
-}
-
 const ARCHIVE_JSON_URL = './jsondata/archive.json';
 function setStationTitle() {
   fetch(ARCHIVE_JSON_URL + '?_=' + Date.now(), { cache: 'no-store' })
@@ -379,78 +361,18 @@ function setStationTitle() {
     .catch(e => console.warn('meteorShowers: station_location fetch failed —', e.message));
 }
 
-function includeHTML(callback) {
-  const elements = document.querySelectorAll('[w3-include-html]');
-  let pending = elements.length;
-  if (pending === 0) { if (callback) callback(); return; }
-  elements.forEach(el => {
-    const file = el.getAttribute('w3-include-html');
-    fetch(file, { cache: 'no-store' })
-      .then(res => { if (!res.ok) throw new Error('HTTP ' + res.status); return res.text(); })
-      .then(html => { el.innerHTML = html; el.removeAttribute('w3-include-html'); })
-      .catch(e => { console.warn('meteorShowers: include failed for', file, '—', e.message); el.innerHTML = ''; })
-      .finally(() => { pending--; if (pending === 0 && callback) callback(); });
-  });
-}
+// updateNavCollapse, includeHTML, fixDivumwxNavLinks,
+// hideCurrentPageNavLink (now normalizePath, folded into
+// initSharedHeader itself), populateLanguageSelector, and
+// translateNavbar all now live in siteHeader.js -- one shared copy for
+// every page, instead of this page's own separate copies.
 
-// astronomyNavbar.html ships with its links hardcoded to "/divumwx/..."
-// (the common case: DivumWX nested under a "divumwx" subdirectory of a
-// shared HTML_ROOT). That's wrong for the other supported deployment
-// mode -- a dedicated docroot where HTML_ROOT IS the DivumWX root, so
-// there's no "/divumwx" segment in the URL at all -- and would also be
-// wrong for any deployment where the subdirectory happens to be named
-// something other than "divumwx". Rather than hardcoding one mode and
-// needing a manual re-fix if the deployment differs, this derives the
-// actual DivumWX root from the CURRENT page's own URL and rewrites the
-// navbar's links to match, whatever that root actually is.
-//
-// This works because every page that includes astronomyNavbar.html is
-// either AT the DivumWX root (astronomy.html, constellations.html,
-// meteorShowers.html, visualisations.html) or exactly one level below
-// it, in a known-named subdirectory (skyfield/, celestial/) -- so
-// stripping a trailing filename segment, then a trailing "deep
-// directory" segment if present, always leaves exactly the DivumWX
-// root's own path, regardless of what (if anything) precedes it.
-function fixDivumwxNavLinks(navHost) {
-  if (!navHost) return;
-  const DEEP_DIRS = ['skyfield', 'celestial'];
-  const segments = window.location.pathname.split('/').filter(Boolean);
-  if (segments.length && segments[segments.length - 1].indexOf('.') !== -1) {
-    segments.pop(); // trailing filename, e.g. "index.html"
-  }
-  if (segments.length && DEEP_DIRS.indexOf(segments[segments.length - 1]) !== -1) {
-    segments.pop(); // trailing "skyfield" or "celestial"
-  }
-  const root = segments.length ? '/' + segments.join('/') : '';
-  navHost.querySelectorAll('a[href^="/divumwx/"], a[href="/divumwx"]').forEach(a => {
-    const href = a.getAttribute('href');
-    a.setAttribute('href', root + href.slice('/divumwx'.length));
-  });
-}
-
-function hideCurrentPageNavLink() {
-  // Same logic as header.js's initSharedHeader() -- this page has its
-  // own separate navbar wiring (predates the shared header.js/
-  // astronomyNavbar.html system) rather than calling initSharedHeader()
-  // itself, so it needs its own copy of this one piece rather than
-  // silently missing it.
-  function normalizePath(path) {
-    path = path.replace(/\/+$/, '') || '/';
-    if (!/\.[a-z0-9]+$/i.test(path)) path += '/index.html';
-    return path.toLowerCase();
-  }
-  const herePath = normalizePath(window.location.pathname);
-  document.querySelectorAll('.site-nav-link[href]').forEach(a => {
-    if (normalizePath(a.pathname) === herePath) a.style.display = 'none';
-  });
-}
-
-window.addEventListener('resize', updateNavCollapse);
 window.addEventListener('storage', e => {
   if (e.key === THEME_KEY) applyDashboardTheme();
 });
+
 includeHTML(() => {
-  fixDivumwxNavLinks(document.querySelector('.site-header-include'));
+  initSharedHeader();
   document.getElementById('menuBtn').onclick = () => { document.body.classList.toggle('menu-open'); };
   document.getElementById('themeToggle').onclick = () => {
     const next = THEME_ORDER[(THEME_ORDER.indexOf(getThemeMode()) + 1) % THEME_ORDER.length];
@@ -458,8 +380,6 @@ includeHTML(() => {
     applyDashboardTheme();
   };
   applyDashboardTheme();
-  updateNavCollapse();
-  hideCurrentPageNavLink();
   setStationTitle();
 });
 </script>

@@ -195,7 +195,8 @@ footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neu
 </div>
 
 <script src="units.js"></script>
-<script src="header.js?v=s3n2026q"></script>
+<script src="cardI18n.js?v=s3n2026a"></script>
+<script src="siteHeader.js"></script>
 <script>
 
 // ==== VISUALISATION PICKER ====
@@ -346,7 +347,14 @@ function resolveTheme(){
 }
 function applyTheme(){
   root.setAttribute('data-bs-theme', resolveTheme());
-  currentSeason = applySeasonClass(themeMode);
+  // Seasonal accent mode retired site-wide -- was: currentSeason =
+  // applySeasonClass(themeMode). That function no longer exists
+  // anywhere on the site; the leftover call here threw
+  // 'applySeasonClass is not defined' on every applyTheme() call,
+  // which (since applyTheme() runs before includeHTML()'s callback on
+  // this page) silently prevented the navbar from ever loading at all
+  // -- not a siteHeader.js problem, a much older dead-code reference.
+  currentSeason = null;
   syncThemeNavUI();
 }
 function syncThemeNavUI(){
@@ -391,57 +399,8 @@ setInterval(() => {
 }, 60 * 1000);
 
 // ==== SHARED NAVBAR INCLUDE ====
-function includeHTML(callback){
-  const elements = document.querySelectorAll('[w3-include-html]');
-  let pending = elements.length;
-  if (pending === 0) { if (callback) callback(); return; }
-  elements.forEach(el => {
-    const file = el.getAttribute('w3-include-html');
-    fetch(file, {cache:'no-store'})
-      .then(res => { if (!res.ok) throw new Error('HTTP '+res.status); return res.text(); })
-      .then(html => { el.innerHTML = html; el.removeAttribute('w3-include-html'); })
-      .catch(e => {
-        console.warn('Re-ImaginedWX visualisations: include failed for', file, '—', e.message);
-        el.innerHTML = '';
-      })
-      .finally(() => { pending--; if (pending === 0 && callback) callback(); });
-  });
-}
-
-// astronomyNavbar.html ships with its links hardcoded to "/divumwx/..."
-// (the common case: DivumWX nested under a "divumwx" subdirectory of a
-// shared HTML_ROOT). That's wrong for the other supported deployment
-// mode -- a dedicated docroot where HTML_ROOT IS the DivumWX root, so
-// there's no "/divumwx" segment in the URL at all -- and would also be
-// wrong for any deployment where the subdirectory happens to be named
-// something other than "divumwx". Rather than hardcoding one mode and
-// needing a manual re-fix if the deployment differs, this derives the
-// actual DivumWX root from the CURRENT page's own URL and rewrites the
-// navbar's links to match, whatever that root actually is.
-//
-// This works because every page that includes astronomyNavbar.html is
-// either AT the DivumWX root (astronomy.html, constellations.html,
-// meteorShowers.html, visualisations.html) or exactly one level below
-// it, in a known-named subdirectory (skyfield/, celestial/) -- so
-// stripping a trailing filename segment, then a trailing "deep
-// directory" segment if present, always leaves exactly the DivumWX
-// root's own path, regardless of what (if anything) precedes it.
-function fixDivumwxNavLinks(navHost) {
-  if (!navHost) return;
-  const DEEP_DIRS = ['skyfield', 'celestial'];
-  const segments = window.location.pathname.split('/').filter(Boolean);
-  if (segments.length && segments[segments.length - 1].indexOf('.') !== -1) {
-    segments.pop(); // trailing filename, e.g. "index.html"
-  }
-  if (segments.length && DEEP_DIRS.indexOf(segments[segments.length - 1]) !== -1) {
-    segments.pop(); // trailing "skyfield" or "celestial"
-  }
-  const root = segments.length ? '/' + segments.join('/') : '';
-  navHost.querySelectorAll('a[href^="/divumwx/"], a[href="/divumwx"]').forEach(a => {
-    const href = a.getAttribute('href');
-    a.setAttribute('href', root + href.slice('/divumwx'.length));
-  });
-}
+// includeHTML(), fixDivumwxNavLinks(), and initSharedHeader() all now
+// live in siteHeader.js -- one shared copy.
 
 // ==== SITE TITLE ====
 const ARCHIVE_JSON_URL = './jsondata/archive.json';
@@ -457,7 +416,6 @@ function setStationTitle(){
 }
 
 includeHTML(() => {
-  fixDivumwxNavLinks(document.querySelector('.site-navbar-include'));
   initSharedHeader();
   setStationTitle();
   const unitSelect = document.getElementById('unitSystem');

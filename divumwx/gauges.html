@@ -163,7 +163,8 @@ footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neu
   <footer class="text-center py-3">DivumWX — Gauges</footer>
 </div>
 
-<script src="header.js?v=s3n2026q"></script>
+<script src="cardI18n.js?v=s3n2026a"></script>
+<script src="siteHeader.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script src="units.js"></script>
 <script src="iopctrl.js"></script>
@@ -1056,19 +1057,7 @@ function pollWindRose(){
     .finally(function(){ renderWindDir(liveValues.windDir, liveValues.windDir10); });
 }
 
-function includeHTML(callback){
-  var elements = document.querySelectorAll('[w3-include-html]');
-  var pending = elements.length;
-  if(pending === 0){ if(callback) callback(); return; }
-  elements.forEach(function(el){
-    var file = el.getAttribute('w3-include-html');
-    fetch(file, {cache:'no-store'})
-      .then(function(res){ if(!res.ok) throw new Error('HTTP '+res.status); return res.text(); })
-      .then(function(html){ el.innerHTML = html; el.removeAttribute('w3-include-html'); })
-      .catch(function(e){ console.warn('SǢL gauges: include failed for', file, '—', e.message); el.innerHTML = ''; })
-      .finally(function(){ pending--; if(pending === 0 && callback) callback(); });
-  });
-}
+// includeHTML() now lives in siteHeader.js -- one shared copy.
 
 function setStationTitle(){
   fetch(ARCHIVE_JSON_URL + ((ARCHIVE_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'})
@@ -1100,7 +1089,14 @@ function resolveTheme(){
 }
 function applyTheme(){
   root.setAttribute('data-bs-theme', resolveTheme());
-  currentSeason = applySeasonClass(themeMode);
+  // Seasonal accent mode retired site-wide -- was: currentSeason =
+  // applySeasonClass(themeMode). That function no longer exists
+  // anywhere on the site; the leftover call here threw
+  // 'applySeasonClass is not defined' on every applyTheme() call,
+  // which (since applyTheme() runs before includeHTML()'s callback on
+  // this page) silently prevented the navbar from ever loading at all
+  // -- not a siteHeader.js problem, a much older dead-code reference.
+  currentSeason = null;
   syncThemeNavUI();
   renderAll(liveValues);
 }
