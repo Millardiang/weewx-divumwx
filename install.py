@@ -543,11 +543,31 @@ def apply_divumwx_report_merge(cfg, html_root, lang=None):
         defaults['Ordinates']['directions'] = DIVUMWX_REPORT_ORDINATES
         report['defaults_enforced'].append('Ordinates.directions')
 
-    # [[[CheetahGenerator]]] -- structural, always enforced
+    # [[[CheetahGenerator]]] -- structural, always enforced.
+    #
+    # encoding = utf8, NOT WeeWX's own default of html_entities. Every
+    # template this report's CheetahGenerator ever runs -- the
+    # DVMDATA.WeatherData/AllCharts/Strings stanzas immediately below --
+    # produces a JSON file (archive.json, charts.json, strings.json),
+    # never an actual HTML page (DivumWX's HTML is entirely static;
+    # there is no index.html.tmpl-equivalent under this report the way
+    # there is under DivumWXSkyfield/DivumWXCelestial below, where
+    # html_entities is correct). html_entities is the right choice for
+    # safely embedding text into real HTML markup, but it does that by
+    # converting non-ASCII characters into decimal HTML entities (e.g.
+    # "\u00f8" -> "&#248;") -- which is exactly wrong for JSON: the
+    # entity string lands in the JSON value as literal text, and
+    # anything that reads that value with .textContent (which does not
+    # decode HTML entities, unlike .innerHTML) displays the literal
+    # "&#248;" on screen instead of "\u00f8". This is what caused
+    # station names containing e.g. Danish "\u00f8" to render as
+    # "S&#248;marken" instead of "S\u00f8marken" -- and, more broadly,
+    # put every translated phrase containing a non-ASCII character in
+    # strings.json at the same risk, not just station_location.
     dr.setdefault('CheetahGenerator', {})
     cg = dr['CheetahGenerator']
-    if cg.get('encoding') != 'html_entities':
-        cg['encoding'] = 'html_entities'
+    if cg.get('encoding') != 'utf8':
+        cg['encoding'] = 'utf8'
         report['cheetah_enforced'].append('encoding')
     if cg.get('search_list_extensions') != DIVUMWX_REPORT_SEARCH_LIST_EXTENSIONS:
         cg['search_list_extensions'] = list(DIVUMWX_REPORT_SEARCH_LIST_EXTENSIONS)
@@ -555,8 +575,14 @@ def apply_divumwx_report_merge(cfg, html_root, lang=None):
 
     cg.setdefault('DVMDATA', {})
     dvmdata = cg['DVMDATA']
-    if dvmdata.get('encoding') != 'html_entities':
-        dvmdata['encoding'] = 'html_entities'
+    # Same reasoning as the outer encoding above -- DVMDATA is
+    # specifically the JSON-only stanza, so this matters even more than
+    # the outer setting (which DVMDATA would otherwise inherit anyway,
+    # but is set explicitly here too so this stays correct even if a
+    # future stanza is added under this same CheetahGenerator that
+    # genuinely does need html_entities for real HTML output).
+    if dvmdata.get('encoding') != 'utf8':
+        dvmdata['encoding'] = 'utf8'
         report['cheetah_enforced'].append('DVMDATA.encoding')
     dvmdata.setdefault('AllCharts', {})
     if dvmdata['AllCharts'].get('template') != 'jsondata/charts.json.tmpl':
