@@ -779,13 +779,18 @@ try {
     }
 
     var isSnow = precipCode != null && [71,73,75,77,85,86].indexOf(precipCode) !== -1;
+    // precipUnit is now just the raw unit symbol (never translated, same as
+    // tempSuffix/speedSuffix above) -- the precip *type* word ("Rain"/
+    // "Snow"/etc.) is already stated by typeWord below, so repeating a
+    // translated "rain"/"snow" noun here would be redundant and would need
+    // its own separate lowercase dictionary key just for this one spot.
     var precipOut, precipUnit;
     if (isSnow){
-      if (wantRainIn){ precipOut = Math.round(precipTotalMM / 25.4 * 100) / 100; precipUnit = ' in snow'; }
-      else { precipOut = Math.round(precipTotalMM / 10 * 10) / 10; precipUnit = ' cm snow'; }
+      if (wantRainIn){ precipOut = Math.round(precipTotalMM / 25.4 * 100) / 100; precipUnit = ' in'; }
+      else { precipOut = Math.round(precipTotalMM / 10 * 10) / 10; precipUnit = ' cm'; }
     } else {
       precipOut = wantRainIn ? Math.round(precipTotalMM / 25.4 * 100) / 100 : Math.round(precipTotalMM * 10) / 10;
-      precipUnit = wantRainIn ? ' in rain' : ' mm rain';
+      precipUnit = wantRainIn ? ' in' : ' mm';
     }
 
     var spdMeanMS = spdVals.length ? spdVals.reduce(function(a, b){ return a + b; }, 0) / spdVals.length : null;
@@ -800,26 +805,30 @@ try {
     var out = [];
 
     if (selTempOut !== null){
-      var tempPhrase = 'Temperature ' + (isNight ? 'low' : 'high') + ' around ' + selTempOut + tempSuffix;
+      var tempPhrase = DivumWXI18N.t('Temperature') + ' ' + DivumWXI18N.t(isNight ? 'low' : 'high') + ' ' + DivumWXI18N.t('around') + ' ' + selTempOut + tempSuffix;
       var windPhrase = '';
       if (dirOut !== null || spdOut !== null || gustOut !== null){
-        windPhrase = ', winds ' + (dirOut || '');
+        windPhrase = ', ' + DivumWXI18N.t('winds') + ' ' + (dirOut || '');
         if (spdOut !== null) windPhrase += ' ' + spdOut + speedSuffix;
-        if (gustOut !== null && (spdOut === null || gustOut > spdOut)) windPhrase += ' gusting to ' + gustOut + speedSuffix;
+        if (gustOut !== null && (spdOut === null || gustOut > spdOut)) windPhrase += ' ' + DivumWXI18N.t('gusting to') + ' ' + gustOut + speedSuffix;
       }
       out.push(tempPhrase + windPhrase + '.');
     }
 
     if (precipTotalMM > 0.05){
-      var typeWord = isSnow ? 'Snow' : 'Light rain';
-      if (precipTotalMM > 2.0 && !isSnow) typeWord = 'Rain';
-      if (precipTotalMM > 5.0 && !isSnow) typeWord = 'Heavy rain';
-      out.push(typeWord + ', total ' + precipOut + precipUnit + ' through to ' + until + '.');
+      // Reuses the same rain-intensity keys cardLightning.js already
+      // defines ('Heavy Rain' / 'Light Rain') so translators don't have
+      // to maintain two near-duplicate phrases; 'Rain' and 'Snow' are the
+      // only genuinely new keys this needs.
+      var typeWord = isSnow ? DivumWXI18N.t('Snow') : DivumWXI18N.t('Light Rain');
+      if (precipTotalMM > 2.0 && !isSnow) typeWord = DivumWXI18N.t('Rain');
+      if (precipTotalMM > 5.0 && !isSnow) typeWord = DivumWXI18N.t('Heavy Rain');
+      out.push(typeWord + ', ' + DivumWXI18N.t('total') + ' ' + precipOut + precipUnit + ' ' + DivumWXI18N.t('through to') + ' ' + until + '.');
     } else {
-      out.push('Remaining dry through to ' + until + '.');
+      out.push(DivumWXI18N.t('Remaining dry through to') + ' ' + until + '.');
     }
 
-    return '<span style="color:' + overlayTextColor + ';font-weight:600;">Outlook For Next Three Hours</span><br><span style="color:var(--bw-accent);">' + out.join(' ') + '</span>';
+    return '<span style="color:' + overlayTextColor + ';font-weight:600;">' + DivumWXI18N.t('Outlook For Next Three Hours') + '</span><br><span style="color:var(--bw-accent);">' + out.join(' ') + '</span>';
   }
 
   var lastForecastJson = null;
