@@ -2417,6 +2417,16 @@ try {
     var d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
     return DivumWXI18N.t(WEEKDAYS[d.getUTCDay()]);
   }
+  // Used for the card's third heading (e.g. "Wednesday") -- separate key
+  // set from WEEKDAYS' abbreviations since a full weekday name is a
+  // different, independently-translated string in every language, not
+  // just the abbreviation spelled out.
+  var WEEKDAYS_FULL = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  function weekdayFull(dateStr){
+    var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateStr);
+    var d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+    return DivumWXI18N.t(WEEKDAYS_FULL[d.getUTCDay()]);
+  }
 
   var currentUnits = loadStoredUnits();
   function loadStoredUnits(){
@@ -2601,7 +2611,7 @@ try {
       return '<img src="' + ICON_BASE + iconName + '.svg" alt="' + label + '" title="' + label +
         '" width="34" height="34" style="width:34px;height:34px;display:block;margin:2px 0;">';
     }
-    return '<span title="' + label + '" style="font-size:20px">' + emoji + '</span>';
+    return '<span title="' + label + '" style="font-size:34px;line-height:1;">' + emoji + '</span>';
   }
   function weatherText(code, map){
     var entry = map && map[code];
@@ -2625,107 +2635,93 @@ try {
     return fallback;
   }
 
-  function buildSegments(data){
+  function buildDays(data){
     var h = data.hourly;
     var hu = data.hourly_units || {};
     var hours = h.time;
     var count = hours.length;
-    var segments = [];
+    var days = [];
 
     var tempUnit = hu.temperature_2m;
     var rainUnit = hu.precipitation;
     var windUnit = hu.windspeed_10m || hu.wind_speed_10m;
 
-    // Open-Meteo's own daily aggregate -- forecast.js (stationforecast.html's
-    // day-strip) reads tmax/code straight from here. This function used to
-    // derive "today"'s high and condition purely from a 12-hour slice of the
-    // hourly array (6am-6pm) instead, which can pick a different max and a
-    // single noon-only weather code rather than Open-Meteo's own whole-day
-    // aggregate -- the two cards showing visibly different numbers for the
-    // same "today" was that mismatch, not a data-freshness problem. There's
-    // no equivalent "tonight" aggregate in the plain daily block, so Night
-    // segments still derive tminC/code from their own hourly window below.
+    // Open-Meteo's own daily aggregate -- confirmed present in this same
+    // forecastcard.txt (forecast.js/stationforecast.html's day-strip reads
+    // tmax/tmin/code from exactly this block). Used here for temperature
+    // and condition since it's the authoritative whole-day figure; rain,
+    // wind and UV aren't confirmed to exist as daily fields in this
+    // station's feed, so those are still aggregated from the full 24-hour
+    // hourly window (00:00-23:59 station-local) rather than guessed at.
     var d = data.daily || {};
     var du = data.daily_units || {};
     var dailyDates = d.time || [];
-    var dailyTempUnit = du.temperature_2m_max || tempUnit;
+    var dailyMaxUnit = du.temperature_2m_max || tempUnit;
+    var dailyMinUnit = du.temperature_2m_min || tempUnit;
 
-    function makeSegment(offset, period, codeIdx){
-      var temps = safeSlice(h.temperature_2m, offset, 12, 0).map(function(v){ return toCelsius(v, tempUnit); });
-      var rains = safeSlice(h.precipitation, offset, 12, 0).map(function(v){ return toMM(v, rainUnit); });
-      var probs = safeSlice(h.precipitation_probability, offset, 12, 0);
-      var winds = safeSlice(h.windspeed_10m || h.wind_speed_10m, offset, 12, 0).map(function(v){ return toMS(v, windUnit); });
-      var dirs  = safeSlice(h.winddirection_10m || h.wind_direction_10m, offset, 12, 0);
-      var hum   = safeSlice(h.relative_humidity_2m, offset, 12, 50);
-      var uv    = safeSlice(h.uv_index, offset, 12, 0);
-      var date  = String(hours[offset >= count ? count - 1 : offset]).slice(0, 10);
+    for (var i = 0; i < count; i += 24){
+      var temps = safeSlice(h.temperature_2m, i, 24, 0).map(function(v){ return toCelsius(v, tempUnit); });
+      var rains = safeSlice(h.precipitation, i, 24, 0).map(function(v){ return toMM(v, rainUnit); });
+      var probs = safeSlice(h.precipitation_probability, i, 24, 0);
+      var winds = safeSlice(h.windspeed_10m || h.wind_speed_10m, i, 24, 0).map(function(v){ return toMS(v, windUnit); });
+      var dirs  = safeSlice(h.winddirection_10m || h.wind_direction_10m, i, 24, 0);
+      var uv    = safeSlice(h.uv_index, i, 24, 0);
+      var date  = String(hours[i >= count ? count - 1 : i]).slice(0, 10);
 
       var tmaxC = maxOf(temps);
-      var code = pickAt(h, ['weathercode', 'weather_code'], codeIdx, 0);
-      if (period === 'Day') {
-        var dayIdx = dailyDates.indexOf(date);
-        if (dayIdx !== -1) {
-          if (d.temperature_2m_max && d.temperature_2m_max[dayIdx] != null) {
-            tmaxC = toCelsius(d.temperature_2m_max[dayIdx], dailyTempUnit);
-          }
-          if (d.weather_code && d.weather_code[dayIdx] != null) {
-            code = d.weather_code[dayIdx];
-          }
+      var tminC = minOf(temps);
+      var code = pickAt(h, ['weathercode', 'weather_code'], i + 12, 0); // noon sample, used only if the daily lookup below misses
+      var dayIdx = dailyDates.indexOf(date);
+      if (dayIdx !== -1) {
+        if (d.temperature_2m_max && d.temperature_2m_max[dayIdx] != null) {
+          tmaxC = toCelsius(d.temperature_2m_max[dayIdx], dailyMaxUnit);
+        }
+        if (d.temperature_2m_min && d.temperature_2m_min[dayIdx] != null) {
+          tminC = toCelsius(d.temperature_2m_min[dayIdx], dailyMinUnit);
+        }
+        if (d.weather_code && d.weather_code[dayIdx] != null) {
+          code = d.weather_code[dayIdx];
         }
       }
 
-      return {
+      days.push({
         date: date,
-        period: period,
-        tmaxC: tmaxC, tminC: minOf(temps),
+        tmaxC: tmaxC, tminC: tminC,
         rainMM: sumOf(rains),
         rainProb: maxOf(probs),
         windMS: maxOf(winds),
-        windDir: deg2compass(dirs[5] || 0),
-        humidity: Math.round(sumOf(hum) / Math.max(hum.length, 1)),
+        // A single midday sample, same "pick one representative hour"
+        // approach the old 12-hour segments used (dirs[5]) -- not a true
+        // vector-averaged dominant direction, since nothing else on this
+        // card computes one either.
+        windDir: deg2compass(dirs[12] || 0),
         uv: Math.round((maxOf(uv) || 0) * 10) / 10,
         code: code
-      };
+      });
     }
-
-    for (var i = 0; i < count; i += 24){
-      segments.push(makeSegment(i + 6, 'Day', i + 12));
-      segments.push(makeSegment(i + 18, 'Night', i + 18));
-    }
-    return segments;
+    return days;
   }
 
-  function pickStartIndex(segments){
-    var now = stationNow();
-    var todayStr = fmtDate(now);
-    var hr = now.getUTCHours();
-    for (var i = 0; i < segments.length; i++){
-      var s = segments[i];
-      if (s.date === todayStr && s.period === 'Day' && hr >= 6 && hr < 18) return i;
-      if (s.date === todayStr && s.period === 'Night' && (hr < 6 || hr >= 18)) return i;
+  function pickStartIndex(days, todayStr){
+    for (var i = 0; i < days.length; i++){
+      if (days[i].date === todayStr) return i;
     }
     return 0;
   }
 
-  function labelFor(s, todayStr, tomorrowStr){
-    if (s.period === 'Day') {
-      if (s.date === todayStr) return DivumWXI18N.t('Today');
-      if (s.date === tomorrowStr) return DivumWXI18N.t('Tomorrow');
-      return weekdayAbbrev(s.date);
-    }
-    if (s.date === todayStr) return DivumWXI18N.t('Tonight');
-    if (s.date === tomorrowStr) return DivumWXI18N.t('Tomorrow Night');
-    return weekdayAbbrev(s.date) + ' ' + DivumWXI18N.t('Night');
+  function labelForDay(dateStr, todayStr, tomorrowStr){
+    if (dateStr === todayStr) return DivumWXI18N.t('Today');
+    if (dateStr === tomorrowStr) return DivumWXI18N.t('Tomorrow');
+    return weekdayFull(dateStr);
   }
 
   function renderCard(data, map){
-    var segments = buildSegments(data);
-    var startIdx = pickStartIndex(segments);
-    var view = segments.slice(startIdx, startIdx + 3);
-
+    var days = buildDays(data);
     var now = stationNow();
     var todayStr = fmtDate(now);
     var tomorrowStr = fmtDate(addDays(now, 1));
+    var startIdx = pickStartIndex(days, todayStr);
+    var view = days.slice(startIdx, startIdx + 3);
 
     titleLabel.textContent = DivumWXI18N.t('Forecast') + ' (\u00B0' + currentUnits.temp + ')';
 
@@ -2757,24 +2753,37 @@ try {
     var html = '';
     for (var i = 0; i < view.length; i++){
       var s = view[i];
-      var lbl = labelFor(s, todayStr, tomorrowStr);
-      var isDay = s.period === 'Day';
-      var tempText = tempLabel(isDay ? s.tmaxC : s.tminC);
-      var extra = isDay ? ('UV-I ' + s.uv) : (s.humidity + '% ' + DivumWXI18N.t('hum'));
-      var icon = getIconHtml(s.code, s.period, map);
+      var lbl = labelForDay(s.date, todayStr, tomorrowStr);
+      // Single trailing unit letter (on the low value only) rather than
+      // repeating "°C"/"°F" on both numbers -- shortens the string enough
+      // to fit one line at this card's font size, and white-space:nowrap
+      // below stops it wrapping onto two lines even if a translated
+      // temperature format runs a little longer.
+      var hiVal = currentUnits.temp === 'F' ? (s.tmaxC * 9 / 5 + 32).toFixed(1) : s.tmaxC.toFixed(1);
+      var tempText = hiVal + '\u00B0 <span style="color:var(--bs-secondary-color);">/ ' + tempLabel(s.tminC) + '</span>';
+      var extra = 'UV-I ' + s.uv;
+      var icon = getIconHtml(s.code, 'Day', map); // always the day icon variant -- every column is now a whole calendar day, not a day/night split
       var text = weatherText(s.code, map);
 
       if (i > 0) html += DIVIDER;
+      // Every row below has an explicit height (rather than the previous
+      // justify-content:space-evenly, which distributes *remaining* space
+      // and therefore drifts differently per column whenever one column's
+      // content is a different total height than another -- e.g. a longer
+      // translated weekday name, or an icon-map miss falling back to the
+      // smaller emoji glyph instead of the 34px icon). Fixed heights make
+      // every row land at the same vertical position in all three columns
+      // regardless of content differences.
       html +=
-        '<div style="display:flex;flex-direction:column;align-items:flex-start;justify-content:space-evenly;height:100%;overflow:hidden;padding:0 6px;box-sizing:border-box;">' +
-          '<div style="font-size:11px;">' + lbl + '</div>' +
-          icon +
-          '<div style="font-size:9.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;">' + text + '</div>' +
-          '<div style="font-size:9px;line-height:2.3;color:var(--bw-accent);">' +
-            miniIcon('thermometer', 26, -8) + tempText + '<br>' +
-            miniIcon('raindrop') + rainLabel(s.rainMM) + ' (' + s.rainProb + '%)<br>' +
-            miniIcon('wind', 19, -5, true) + s.windDir + ' ' + windLabel(s.windMS) + '<br>' +
-            extra +
+        '<div style="display:flex;flex-direction:column;align-items:flex-start;height:100%;overflow:hidden;padding:0 6px;box-sizing:border-box;">' +
+          '<div style="height:16px;font-size:11px;line-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;margin-bottom:4px;">' + lbl + '</div>' +
+          '<div style="height:38px;display:flex;align-items:center;margin-bottom:4px;">' + icon + '</div>' +
+          '<div style="height:13px;font-size:9.5px;line-height:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;margin-bottom:6px;">' + text + '</div>' +
+          '<div style="font-size:8px;line-height:2.3;color:var(--bw-accent);">' +
+            '<span style="white-space:nowrap;">' + miniIcon('thermometer', 26, -8) + tempText + '</span><br>' +
+            '<span style="white-space:nowrap;">' + miniIcon('raindrop') + rainLabel(s.rainMM) + ' (' + s.rainProb + '%)</span><br>' +
+            '<span style="white-space:nowrap;">' + miniIcon('wind', 19, -5, true) + s.windDir + ' ' + windLabel(s.windMS) + '</span><br>' +
+            '<span style="white-space:nowrap;">' + extra + '</span>' +
           '</div>' +
         '</div>';
     }
