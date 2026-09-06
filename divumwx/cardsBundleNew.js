@@ -8688,15 +8688,31 @@ try {
     var parts = {};
     new Intl.DateTimeFormat('en-GB', {
       timeZone: StationTime.getTZ(), hourCycle: 'h23',
-      year: 'numeric', month: 'short', day: '2-digit',
+      year: 'numeric', month: '2-digit', day: '2-digit',
       hour: '2-digit', minute: '2-digit', second: '2-digit'
     }).formatToParts(date).forEach(function(p){ parts[p.type] = p.value; });
     return parts;
   }
   function stationNow(){
     var p = stationParts(new Date());
-    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    return new Date(Date.UTC(+p.year, months.indexOf(p.month), +p.day, +p.hour, +p.minute, +p.second));
+    return new Date(Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second));
+  }
+  // Separate formatter for the "Last Detected" display text (wants a
+  // readable month name, e.g. "6th Sept"), kept apart from stationParts()
+  // above -- en-GB's short-month name for September is "Sept", not the
+  // 3-letter "Sep" a months.indexOf(['Jan',...,'Sep',...]) lookup expects,
+  // so reusing one formatter for both display text and date reconstruction
+  // silently rolled every September back to December 2025 (months.indexOf
+  // returning -1). stationNow() now takes a numeric month instead, which
+  // has no locale-spelling ambiguity to get wrong.
+  function displayDateParts(date){
+    var parts = {};
+    new Intl.DateTimeFormat('en-GB', {
+      timeZone: StationTime.getTZ(), hourCycle: 'h23',
+      month: 'short', day: '2-digit',
+      hour: '2-digit', minute: '2-digit'
+    }).formatToParts(date).forEach(function(p){ parts[p.type] = p.value; });
+    return parts;
   }
   function pad2(n){ return n < 10 ? '0' + n : String(n); }
   function ordinalSuffix(day){
@@ -8707,7 +8723,7 @@ try {
   }
   function dateLabelFor(epochMs){
     if (!epochMs) return '\u2014';
-    var p = stationParts(new Date(epochMs));
+    var p = displayDateParts(new Date(epochMs));
     return (+p.day) + ordinalSuffix(+p.day) + ' ' + p.month + ' ' + p.hour + ':' + p.minute;
   }
 
