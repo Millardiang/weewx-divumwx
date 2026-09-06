@@ -682,6 +682,18 @@ try {
       if (lastForecastJson) renderOutlook(lastForecastJson);
     }
   });
+  // Fired once strings.json finishes loading, AND again on every live
+  // language switch (see cardI18n.js's own header comment). Without this,
+  // the outlook's first paint races DivumWXI18N's own strings.json fetch
+  // against this card's forecastcard.txt fetch -- forecastcard.txt is the
+  // much smaller file and usually wins, so computeOutlookHtml() calls
+  // DivumWXI18N.t() before the dictionary has loaded, silently falls back
+  // to the English key for every fragment, and (unlike unitsystemchange
+  // above, which already had this re-render) nothing ever revisits it
+  // until the next 5-minute refreshOutlook() interval tick.
+  window.addEventListener('i18nready', function(){
+    if (lastForecastJson) renderOutlook(lastForecastJson);
+  });
 
   function pickKey(Hh, candidates){
     for (var i = 0; i < candidates.length; i++){ if (Hh[candidates[i]] !== undefined) return candidates[i]; }
