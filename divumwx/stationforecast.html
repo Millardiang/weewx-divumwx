@@ -163,13 +163,13 @@ table.hourly .rain-cell{color:var(--bw-sky);font-family:'JetBrains Mono',monospa
   <span style="color:var(--bs-secondary-color);font-size:12px;"><span class="live-dot" id="liveDot"></span><span id="liveLabel">Connecting…</span></span>
 </div>
 
-<div class="section-label">Forecast</div>
+<div class="section-label" id="stationForecastLabel">Forecast</div>
 <div class="day-strip d-flex flex-wrap gap-3" id="dayStrip"></div>
 
 <div class="card hourly-panel mt-4 p-4">
   <div class="hourly-title d-flex align-items-baseline justify-content-between mb-3">
     <h2 id="hourlyTitle">Today — hourly</h2>
-    <span>Forecast source: Open‑Meteo</span>
+    <span id="stationForecastSource1">Forecast source: Open‑Meteo</span>
   </div>
   <div class="table-responsive">
     <table class="hourly table table-borderless mb-0" id="hourlyTable"></table>
@@ -178,8 +178,8 @@ table.hourly .rain-cell{color:var(--bw-sky);font-family:'JetBrains Mono',monospa
 
 <div class="mt-4">
   <div class="hourly-title d-flex align-items-baseline justify-content-between mb-2">
-    <h2>7-Day Meteogram</h2>
-    <span>Forecast source: Open‑Meteo</span>
+    <h2 id="stationMeteogramTitle">7-Day Meteogram</h2>
+    <span id="stationForecastSource2">Forecast source: Open‑Meteo</span>
   </div>
 
   <iframe src="charts-d3.html?type=meteogram&embed=1" title="7-day meteogram"
@@ -187,8 +187,29 @@ table.hourly .rain-cell{color:var(--bw-sky);font-family:'JetBrains Mono',monospa
 </div>
 
 <div id="emptyState" class="text-center py-5" style="display:none;color:var(--bs-secondary-color);">
-  <p>No forecast data available.</p>
+  <p id="stationEmptyStateText">No forecast data available.</p>
 </div>
+
+<script src="cardI18n.js?v=s3n2026a"></script>
+<script>
+// This page previously had NO i18n wiring at all -- no cardI18n.js
+// include, no DivumWXI18N calls anywhere. Adding the include is step
+// one; everything below applyStaticLabels()/the DivumWXI18N.t() calls
+// further down is new. forecast.js's own getDays()/dayLabel()/wmoText()
+// have also been updated (uploaded and patched separately) to route
+// through DivumWXI18N.t() the same way this page's inline script does.
+(function applyStaticLabels(){
+  DivumWXI18N.applyLabel(document.getElementById('stationForecastLabel'), 'Forecast');
+  DivumWXI18N.applyLabel(document.getElementById('stationForecastSource1'), 'Forecast source: Open\u2011Meteo');
+  DivumWXI18N.applyLabel(document.getElementById('stationForecastSource2'), 'Forecast source: Open\u2011Meteo');
+  DivumWXI18N.applyLabel(document.getElementById('stationMeteogramTitle'), '7-Day Meteogram');
+  DivumWXI18N.applyLabel(document.getElementById('stationEmptyStateText'), 'No forecast data available.');
+  // liveLabel and hourlyTitle are NOT here -- both are fully rewritten by
+  // setLive()/renderPage() respectively every time those run, so they
+  // already pick up a live language switch via the 'i18nready' listener
+  // added near renderPage() below.
+})();
+</script>
 
 <script src="units.js"></script>
 <script>
@@ -259,8 +280,10 @@ function windUnitAbbr(unit){
 }
 function degToCompass(deg){
   if(deg==null) return '—';
+  // Reuses the same 16-point compass keys already translated elsewhere
+  // in the project (e.g. cardWindCompass.js), same fix as locationforecast.html.
   const dirs=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
-  return dirs[Math.round(deg/22.5)%16];
+  return DivumWXI18N.t(dirs[Math.round(deg/22.5)%16]);
 }
 function windDirBadge(dirDeg, gustMs, unit){
   const col = windColor(gustMs) || 'var(--bs-secondary-color)';
@@ -272,7 +295,7 @@ function windDirBadge(dirDeg, gustMs, unit){
           <path d="M22 1 L31.5 10.4 L22 5 L12.5 10.4 Z" fill="${col}"/>
         </g>
       </svg>` : '';
-  return `<div class="wind-badge" style="--wind-col:${col}" title="${dirDeg!=null ? 'From '+degToCompass(dirDeg) : ''}">
+  return `<div class="wind-badge" style="--wind-col:${col}" title="${dirDeg!=null ? DivumWXI18N.t('From')+' '+degToCompass(dirDeg) : ''}">
       ${arrow}<span class="wind-badge-value">${val}</span>
     </div>`;
 }
@@ -331,11 +354,16 @@ function renderPage(){
       <div class="dcond">${d.cond||''}</div>
       <div class="dtemps">${tempSpan(d.hi,sys.temp)} <span class="lo">${tempSpan(d.lo,sys.temp)}</span></div>
     </div>`).join('');
+  // d.name/d.cond above are now translated too -- forecast.js's
+  // getDays()/dayLabel()/wmoText() route through DivumWXI18N.t(). The
+  // mock/demo fallback data (used only before the real forecast has
+  // ever loaded) keeps its own fixed English strings, since it has no
+  // weather code to translate from and is placeholder content anyway.
   strip.querySelectorAll('.day-card').forEach(el=>{
     el.addEventListener('click', ()=>{ activeDay = parseInt(el.dataset.i,10); renderPage(); });
   });
 
-  document.getElementById('hourlyTitle').textContent = days[activeDay].name + ' — hourly';
+  document.getElementById('hourlyTitle').textContent = days[activeDay].name + ' \u2014 ' + DivumWXI18N.t('hourly');
   const table = document.getElementById('hourlyTable');
   const fmtHour = h => String(h).padStart(2, '0') + ':00';
   const TRACK_RANGE = 56;
@@ -345,18 +373,22 @@ function renderPage(){
   const tempOffset = t => (t==null || tMax===tMin) ? TRACK_RANGE/2 : Math.round((1-(t-tMin)/(tMax-tMin))*TRACK_RANGE);
 
   table.innerHTML = `
-    <tr><th class="rowlabel">Time</th>${hrs.map(h=>`<th>${fmtHour(h.h)}</th>`).join('')}</tr>
+    <tr><th class="rowlabel">${DivumWXI18N.t('Time')}</th>${hrs.map(h=>`<th>${fmtHour(h.h)}</th>`).join('')}</tr>
     <tr class="track-row">
-      <td class="rowlabel">Weather</td>
+      <td class="rowlabel">${DivumWXI18N.t('Weather')}</td>
       ${hrs.map(h=>`<td class="track-cell"><div class="track-marker" style="top:${tempOffset(h.tempC)}px">${iconImg(h.icon,'hicon')}<span class="temp-cell">${tempSpan(h.tempC, sys.temp)}</span></div></td>`).join('')}
     </tr>
-    <tr><td class="rowlabel">Rain</td>${hrs.map(h=>`<td class="rain-cell">${h.rainMm>0 ? fmtRain(h.rainMm, sys.rain) : '—'}</td>`).join('')}</tr>
+    <tr><td class="rowlabel">${DivumWXI18N.t('Rain')}</td>${hrs.map(h=>`<td class="rain-cell">${h.rainMm>0 ? fmtRain(h.rainMm, sys.rain) : '\u2014'}</td>`).join('')}</tr>
     <tr>
-      <td class="rowlabel">Gust (${windUnitAbbr(sys.wind)})</td>
+      <td class="rowlabel">${DivumWXI18N.t('Gust')} (${windUnitAbbr(sys.wind)})</td>
       ${hrs.map(h=>`<td>${windDirBadge(h.windDirDeg, h.gustMs ?? h.windMs, sys.wind)}</td>`).join('')}
     </tr>`;
   reportHeight();
 }
+window.addEventListener('i18nready', function(){
+  renderPage();
+  setLive(forecastStatus);
+});
 
 const THEME_ISDAY_POLL_MS = 5 * 60 * 1000;
 let lastIsDay = null;
@@ -439,10 +471,10 @@ fetch('./jsondata/archive.json?_=' + Date.now(), {cache:'no-store'})
 function setLive(status){
   const dot = document.getElementById('liveDot');
   const label = document.getElementById('liveLabel');
-  if(status==='live'){ dot.style.background = '#5BBB8A'; label.textContent = 'Live'; }
-  else if(status==='stale'){ dot.style.background = '#D6BE4E'; label.textContent = 'Live (stale)'; }
-  else if(status==='demo'){ dot.style.background = 'var(--bs-secondary-color)'; label.textContent = 'Demo data'; }
-  else { dot.style.background = 'var(--bs-secondary-color)'; label.textContent = 'Connecting…'; }
+  if(status==='live'){ dot.style.background = '#5BBB8A'; label.textContent = DivumWXI18N.t('Live'); }
+  else if(status==='stale'){ dot.style.background = '#D6BE4E'; label.textContent = DivumWXI18N.t('Live (stale)'); }
+  else if(status==='demo'){ dot.style.background = 'var(--bs-secondary-color)'; label.textContent = DivumWXI18N.t('Demo data'); }
+  else { dot.style.background = 'var(--bs-secondary-color)'; label.textContent = DivumWXI18N.t('Connecting\u2026'); }
 }
 renderPage();
 setLive('connecting');

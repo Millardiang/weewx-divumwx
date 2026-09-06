@@ -114,11 +114,11 @@ footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neu
 
   <div class="d-flex align-items-baseline justify-content-between flex-wrap gap-2 mt-1">
     <div>
-      <h1 class="page-title">Range Gauges</h1>
+      <h1 class="page-title" id="gauges2Title">Range Gauges</h1>
     </div>
     <div class="font-mono small d-flex align-items-center gap-2" style="color:var(--bs-secondary-color);">
       <span class="live-status-wrap"><span id="gauges2StatusDot" title="Connecting…" style="background:var(--bs-secondary-color);"></span><span id="gauges2StatusRing" class="live-status-ripple"></span></span>
-      <span id="gauges2StatusLabel">CONNECTING</span> · UPDATED <span id="gauges2Clock">--:--:--</span>
+      <span id="gauges2StatusLabel">CONNECTING</span> · <span id="gauges2UpdatedLabel">UPDATED</span> <span id="gauges2Clock">--:--:--</span>
     </div>
   </div>
 
@@ -163,7 +163,7 @@ footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neu
     </div>
   </div>
 
-  <footer class="text-center py-3">DivumWX — Range Gauges</footer>
+  <footer class="text-center py-3" id="gauges2Footer">DivumWX — Range Gauges</footer>
 </div>
 
 <script src="cardI18n.js?v=s3n2026a"></script>
@@ -171,6 +171,15 @@ footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neu
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script src="units.js"></script>
 <script src="gaugeDiverging.js?v=11db3261"></script>
+<script>
+// ===================== Static text i18n =====================
+(function applyStaticLabels(){
+  DivumWXI18N.applyLabel(document.getElementById('gauges2Title'), 'Range Gauges');
+  DivumWXI18N.applyAttr(document.getElementById('gauges2StatusDot'), 'title', 'Connecting\u2026');
+  DivumWXI18N.applyLabel(document.getElementById('gauges2UpdatedLabel'), 'UPDATED');
+  DivumWXI18N.applyLabel(document.getElementById('gauges2Footer'), 'DivumWX \u2014 Range Gauges');
+})();
+</script>
 <script>
 var currentSystem = (function(){
   var stored = localStorage.getItem('dashboardUnitSystem');
@@ -231,7 +240,7 @@ function rainRateTick(mmPerHr, unit){ return unit==='in' ? Math.round(mm2in(mmPe
 var COMPASS_16 = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
 function degToCompass16(deg){
   if(deg==null) return '--';
-  return COMPASS_16[Math.round(((deg%360)+360)%360/22.5) % 16];
+  return DivumWXI18N.t(COMPASS_16[Math.round(((deg%360)+360)%360/22.5) % 16]);
 }
 
 function rainNiceMax(mm){
@@ -270,7 +279,7 @@ function renderOutTemp(c, dayMin, dayMax){
     majorTicks: majorsForTemp(unit),
     minorPerInterval: 4,
     tickFormat: function(v){ return Math.round(v) + '°'; },
-    title: 'Outside Temperature',
+    title: DivumWXI18N.t('Outside Temperature'),
     valueText: c==null ? '--' : tempLabel(c, unit),
     minText: dayMin==null ? null : tempLabel(dayMin, unit),
     maxText: dayMax==null ? null : tempLabel(dayMax, unit)
@@ -285,11 +294,11 @@ function renderWind(speedMs, gustMs){
     domain: [0,36], value: speedMs==null ? null : speedMs, bandHalfWidth: 6,
     majorTicks: majors, minorPerInterval: 4,
     tickFormat: function(v){ return String(windTick(v, unit)); },
-    title: 'Wind Speed', valueText: speedMs==null ? '--' : windLabel(speedMs, unit)
+    title: DivumWXI18N.t('Wind Speed'), valueText: speedMs==null ? '--' : windLabel(speedMs, unit)
   };
   var innerCfg = {
     domain: [0,36], value: gustMs==null ? null : gustMs, bandHalfWidth: 6,
-    title: 'Gust', valueText: gustMs==null ? '--' : windLabel(gustMs, unit)
+    title: DivumWXI18N.t('Gust'), valueText: gustMs==null ? '--' : windLabel(gustMs, unit)
   };
   GaugeDiverging.renderDual('g2Wind', outerCfg, innerCfg);
 }
@@ -301,12 +310,12 @@ function renderWind(speedMs, gustMs){
 function renderWindDir(dirNow, dir10){
   var outerCfg = {
     value: dirNow, bandHalfDeg: 130,
-    title: 'Wind Direction',
+    title: DivumWXI18N.t('Wind Direction'),
     valueText: dirNow==null ? '--' : (degToCompass16(dirNow) + ' / ' + Math.round(dirNow) + '°')
   };
   var innerCfg = {
     value: dir10, bandHalfDeg: 130,
-    title: '10-min Avg',
+    title: DivumWXI18N.t('10-min Avg'),
     valueText: dir10==null ? '--' : (degToCompass16(dir10) + ' / ' + Math.round(dir10) + '°')
   };
   GaugeDiverging.renderCompassDual('g2WindDir', outerCfg, innerCfg);
@@ -319,7 +328,7 @@ function renderBaro(current, dayMin, dayMax){
     domain: [940,1060], value: current, bandHalfWidth: 15,
     majorTicks: [940,960,980,1000,1020,1040,1060], minorPerInterval: 4,
     tickFormat: function(v){ return String(pressureTick(v, unit)); },
-    title: 'Barometer', valueText: current==null ? '--' : pressureLabel(current, unit),
+    title: DivumWXI18N.t('Barometer'), valueText: current==null ? '--' : pressureLabel(current, unit),
     minText: dayMin==null ? null : pressureLabel(dayMin, unit),
     maxText: dayMax==null ? null : pressureLabel(dayMax, unit)
   });
@@ -333,7 +342,7 @@ function renderRain(dayMm){
     domain: [0,max], value: dayMm==null ? 0 : dayMm, bandHalfWidth: max*0.15,
     majorTicks: niceMajors(0,max,5), minorPerInterval: 4,
     tickFormat: function(v){ return String(rainTick(v, unit)); },
-    title: 'Rainfall', valueText: rainLabel(dayMm==null ? 0 : dayMm, unit)
+    title: DivumWXI18N.t('Rainfall'), valueText: rainLabel(dayMm==null ? 0 : dayMm, unit)
   });
 }
 
@@ -345,7 +354,7 @@ function renderRainRate(rate){
     domain: [0,max], value: rate==null ? 0 : rate, bandHalfWidth: max*0.2,
     majorTicks: niceMajors(0,max,4), minorPerInterval: 4,
     tickFormat: function(v){ return String(rainRateTick(v, unit)); },
-    title: 'Rain Rate', valueText: rainRateLabel(rate==null ? 0 : rate, unit)
+    title: DivumWXI18N.t('Rain Rate'), valueText: rainRateLabel(rate==null ? 0 : rate, unit)
   });
 }
 
@@ -355,7 +364,7 @@ function renderUvi(uv){
     domain: [0,14], value: uv==null ? 0 : uv, bandHalfWidth: 3,
     majorTicks: niceMajors(0,14,7), minorPerInterval: 1,
     tickFormat: function(v){ return String(Math.round(v)); },
-    title: 'UV Index', valueText: (uv==null ? 0 : uv).toFixed(1)
+    title: DivumWXI18N.t('UV Index'), valueText: (uv==null ? 0 : uv).toFixed(1)
   });
 }
 
@@ -365,7 +374,7 @@ function renderSolar(radiation){
     domain: [0,1200], value: radiation==null ? 0 : radiation, bandHalfWidth: 150,
     majorTicks: niceMajors(0,1200,6), minorPerInterval: 3,
     tickFormat: function(v){ return String(Math.round(v)); },
-    title: 'Solar Radiation', valueText: (radiation==null ? 0 : Math.round(radiation)) + ' W/m²'
+    title: DivumWXI18N.t('Solar Radiation'), valueText: (radiation==null ? 0 : Math.round(radiation)) + ' W/m²'
   });
 }
 
@@ -375,7 +384,7 @@ function renderHumid(pct, dayMin, dayMax){
     domain: [0,100], value: pct==null ? 0 : pct, bandHalfWidth: 15,
     majorTicks: niceMajors(0,100,5), minorPerInterval: 3,
     tickFormat: function(v){ return Math.round(v) + '%'; },
-    title: 'Humidity', valueText: (pct==null ? 0 : pct).toFixed(1) + '%',
+    title: DivumWXI18N.t('Humidity'), valueText: (pct==null ? 0 : pct).toFixed(1) + '%',
     minText: dayMin==null ? null : round1(dayMin) + '%',
     maxText: dayMax==null ? null : round1(dayMax) + '%'
   });
@@ -393,7 +402,7 @@ function renderDew(c, dayMin, dayMax){
     domain: domain, value: value, bandHalfWidth: unit==='F' ? 14 : 8,
     majorTicks: majors, minorPerInterval: 4,
     tickFormat: function(v){ return Math.round(v) + '°'; },
-    title: 'Dew Point', valueText: c==null ? '--' : tempLabel(c, unit),
+    title: DivumWXI18N.t('Dew Point'), valueText: c==null ? '--' : tempLabel(c, unit),
     minText: dayMin==null ? null : tempLabel(dayMin, unit),
     maxText: dayMax==null ? null : tempLabel(dayMax, unit)
   });
@@ -405,7 +414,7 @@ function renderAq(aqi){
     domain: [0,200], value: aqi==null ? 0 : aqi, bandHalfWidth: 30,
     majorTicks: niceMajors(0,200,4), minorPerInterval: 4,
     tickFormat: function(v){ return String(Math.round(v)); },
-    title: 'Air Quality', valueText: String(aqi==null ? 0 : Math.round(aqi))
+    title: DivumWXI18N.t('Air Quality'), valueText: String(aqi==null ? 0 : Math.round(aqi))
   });
 }
 
@@ -416,7 +425,7 @@ function renderLightning(count){
     domain: [0,max], value: count==null ? 0 : count, bandHalfWidth: max*0.2,
     majorTicks: niceMajors(0,max,5), minorPerInterval: 1,
     tickFormat: function(v){ return String(Math.round(v)); },
-    title: 'Lightning Strike Count', valueText: count==null ? 'None' : String(Math.round(count))
+    title: DivumWXI18N.t('Lightning Strike Count'), valueText: count==null ? DivumWXI18N.t('None') : String(Math.round(count))
   });
 }
 
@@ -519,14 +528,20 @@ var liveValues = {
   aqi:null, lightningCount:null
 };
 
+var lastGauges2Status = 'connecting';
 function setGauges2Status(status){
+  lastGauges2Status = status;
   var dot = document.getElementById('gauges2StatusDot');
   var label = document.getElementById('gauges2StatusLabel');
-  if(status==='live'){ dot.style.background = 'var(--bw-good)'; label.textContent = 'LIVE'; pulseStatusDot(); }
-  else if(status==='stale'){ dot.style.background = 'var(--bw-accent)'; label.textContent = 'LIVE (stale)'; }
-  else if(status==='error'){ dot.style.background = 'var(--bw-danger)'; label.textContent = 'OFFLINE'; }
-  else { dot.style.background = 'var(--bs-secondary-color)'; label.textContent = 'CONNECTING'; }
+  if(status==='live'){ dot.style.background = 'var(--bw-good)'; label.textContent = DivumWXI18N.t('LIVE'); pulseStatusDot(); }
+  else if(status==='stale'){ dot.style.background = 'var(--bw-accent)'; label.textContent = DivumWXI18N.t('LIVE (stale)'); }
+  else if(status==='error'){ dot.style.background = 'var(--bw-danger)'; label.textContent = DivumWXI18N.t('OFFLINE'); }
+  else { dot.style.background = 'var(--bs-secondary-color)'; label.textContent = DivumWXI18N.t('CONNECTING'); }
 }
+window.addEventListener('i18nready', function(){
+  setGauges2Status(lastGauges2Status);
+  renderAll();
+});
 
 function pulseStatusDot(){
   var ring = document.getElementById('gauges2StatusRing');
@@ -567,7 +582,7 @@ function pollLoop(){
       console.warn('SǢL gauges2: loop.json poll failed —', e.message);
       setGauges2Status(liveValues.outTemp!=null ? 'stale' : 'error');
       var errEl = document.getElementById('gauges2Err');
-      errEl.textContent = 'Live data unavailable: ' + e.message;
+      errEl.textContent = DivumWXI18N.t('Live data unavailable:') + ' ' + e.message;
       errEl.style.display = '';
       renderAll();
     });

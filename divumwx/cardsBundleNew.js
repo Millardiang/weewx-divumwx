@@ -2588,7 +2588,15 @@ try {
     if (!entry) return '<span style="font-size:20px">\u2753</span>';
     var iconName = isNight ? entry.night : entry.day;
     var emoji = entry.emoji || '\u2753';
-    var label = entry.label || DivumWXI18N.t('Unknown');
+    // entry.label is a plain English string loaded at runtime from the
+    // icon-map JSON (ICON_MAP_URL), not a hardcoded literal here -- it
+    // was never passed through DivumWXI18N.t() before, so the icon's
+    // alt/title text stayed in English regardless of site language even
+    // though the 'Unknown' fallback right below it already did. It
+    // happens to match the same WMO condition-word keys already defined
+    // for locationforecast.html/stationforecast.html, so no new
+    // dictionary keys are needed.
+    var label = entry.label ? DivumWXI18N.t(entry.label) : DivumWXI18N.t('Unknown');
     if (iconName) {
       return '<img src="' + ICON_BASE + iconName + '.svg" alt="' + label + '" title="' + label +
         '" width="34" height="34" style="width:34px;height:34px;display:block;margin:2px 0;">';
@@ -2596,7 +2604,8 @@ try {
     return '<span title="' + label + '" style="font-size:20px">' + emoji + '</span>';
   }
   function weatherText(code, map){
-    return (map && map[code] && map[code].label) || DivumWXI18N.t('Unknown');
+    var entry = map && map[code];
+    return (entry && entry.label) ? DivumWXI18N.t(entry.label) : DivumWXI18N.t('Unknown');
   }
 
   function safeSlice(arr, offset, length, fallback){
@@ -2627,6 +2636,20 @@ try {
     var rainUnit = hu.precipitation;
     var windUnit = hu.windspeed_10m || hu.wind_speed_10m;
 
+    // Open-Meteo's own daily aggregate -- forecast.js (stationforecast.html's
+    // day-strip) reads tmax/code straight from here. This function used to
+    // derive "today"'s high and condition purely from a 12-hour slice of the
+    // hourly array (6am-6pm) instead, which can pick a different max and a
+    // single noon-only weather code rather than Open-Meteo's own whole-day
+    // aggregate -- the two cards showing visibly different numbers for the
+    // same "today" was that mismatch, not a data-freshness problem. There's
+    // no equivalent "tonight" aggregate in the plain daily block, so Night
+    // segments still derive tminC/code from their own hourly window below.
+    var d = data.daily || {};
+    var du = data.daily_units || {};
+    var dailyDates = d.time || [];
+    var dailyTempUnit = du.temperature_2m_max || tempUnit;
+
     function makeSegment(offset, period, codeIdx){
       var temps = safeSlice(h.temperature_2m, offset, 12, 0).map(function(v){ return toCelsius(v, tempUnit); });
       var rains = safeSlice(h.precipitation, offset, 12, 0).map(function(v){ return toMM(v, rainUnit); });
@@ -2635,18 +2658,33 @@ try {
       var dirs  = safeSlice(h.winddirection_10m || h.wind_direction_10m, offset, 12, 0);
       var hum   = safeSlice(h.relative_humidity_2m, offset, 12, 50);
       var uv    = safeSlice(h.uv_index, offset, 12, 0);
+      var date  = String(hours[offset >= count ? count - 1 : offset]).slice(0, 10);
+
+      var tmaxC = maxOf(temps);
+      var code = pickAt(h, ['weathercode', 'weather_code'], codeIdx, 0);
+      if (period === 'Day') {
+        var dayIdx = dailyDates.indexOf(date);
+        if (dayIdx !== -1) {
+          if (d.temperature_2m_max && d.temperature_2m_max[dayIdx] != null) {
+            tmaxC = toCelsius(d.temperature_2m_max[dayIdx], dailyTempUnit);
+          }
+          if (d.weather_code && d.weather_code[dayIdx] != null) {
+            code = d.weather_code[dayIdx];
+          }
+        }
+      }
 
       return {
-        date: String(hours[offset >= count ? count - 1 : offset]).slice(0, 10),
+        date: date,
         period: period,
-        tmaxC: maxOf(temps), tminC: minOf(temps),
+        tmaxC: tmaxC, tminC: minOf(temps),
         rainMM: sumOf(rains),
         rainProb: maxOf(probs),
         windMS: maxOf(winds),
         windDir: deg2compass(dirs[5] || 0),
         humidity: Math.round(sumOf(hum) / Math.max(hum.length, 1)),
         uv: Math.round((maxOf(uv) || 0) * 10) / 10,
-        code: pickAt(h, ['weathercode', 'weather_code'], codeIdx, 0)
+        code: code
       };
     }
 

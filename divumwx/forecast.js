@@ -36,7 +36,18 @@ function mockHourlyForDay(seed){
   return hours.filter(x=>x.h%2===0);
 }
 
-function getDays(){ return (forecastData && forecastData.days) || mockDays; }
+function getDays(){
+  const raw = (forecastData && forecastData.days) || mockDays;
+  // mockDays (demo/fallback data, used only when the real forecast has
+  // never loaded) keeps its own hardcoded name/cond strings as-is -- it
+  // has no dateStr/code to derive them from, and is placeholder content
+  // rather than real forecast text anyway.
+  if (!forecastData || !forecastData.days) return raw;
+  return raw.map((d, i) => Object.assign({}, d, {
+    name: dayLabel(d.dateStr, i),
+    cond: wmoText(d.code),
+  }));
+}
 function getHourly(dayIndex){
   if(forecastData && forecastData.hourlyByDay && forecastData.hourlyByDay[dayIndex]){
     return forecastData.hourlyByDay[dayIndex];
@@ -51,10 +62,18 @@ const FORECAST_POLL_MS  = 10 * 60 * 1000;
 let forecastData = null;
 let forecastStatus = 'connecting';
 
+// WEEKDAYS reuses cardForecast.js's own keys (Sun/Mon/.../Sat already
+// exist in every lang/<code>.conf) -- same fix as locationforecast.html.
+// The previous version called toLocaleDateString('en-GB',
+// {weekday:'short'}), which is the *browser's* own English locale
+// formatting, completely untouched by DivumWXI18N -- every non-"Today"
+// day label stayed in English regardless of the site's selected
+// language.
+const WEEKDAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 function dayLabel(dateStr, index){
-  if(index===0) return 'Today';
+  if(index===0) return DivumWXI18N.t('Today');
   const d = new Date(dateStr+'T00:00:00');
-  return d.toLocaleDateString('en-GB', {weekday:'short'}) + ' ' + d.getDate();
+  return DivumWXI18N.t(WEEKDAYS[d.getDay()]) + ' ' + d.getDate();
 }
 
 async function pollForecast(){
@@ -106,13 +125,19 @@ async function pollForecast(){
 
     const d = j.daily || {};
     const dailyDates = d.time || [];
+    // dateStr/code are kept raw here; name/cond are computed fresh every
+    // time getDays() is called (below) rather than baked in once at poll
+    // time. pollForecast() only runs every 10 minutes or on demand, so
+    // baking in translated strings here would freeze them at whatever
+    // language was active at the last poll, with nothing to revisit them
+    // on a later live language switch -- same bug class documented
+    // throughout this project, just one step removed since a network
+    // poll is the trigger instead of page boot.
     const days = dailyDates.map((dateStr, i) => {
       const code = d.weather_code ? d.weather_code[i] : 0;
       return {
-        dateStr,
-        name: dayLabel(dateStr, i),
+        dateStr, code,
         icon: wmoToIconKey(code, true),
-        cond: wmoText(code),
         hi: d.temperature_2m_max ? d.temperature_2m_max[i] : null,
         lo: d.temperature_2m_min ? d.temperature_2m_min[i] : null,
         rainProbPct: d.precipitation_probability_max ? d.precipitation_probability_max[i] : null,
@@ -136,7 +161,12 @@ async function pollForecast(){
 }
 
 // ===================== Open-Meteo WMO weather-code mapping =====================
-const WMO_TEXT = {
+// Same key set as locationforecast.html's WMO_TEXT_KEYS (deliberately
+// separate from cardCurrent.js's differently-phrased condition set --
+// see that file's comment for why). Reusing the identical English key
+// strings here means both pages share one set of dictionary entries
+// across all 29 lang/<code>.conf files rather than needing two.
+const WMO_TEXT_KEYS = {
   0:'Clear sky', 1:'Mainly clear', 2:'Partly cloudy', 3:'Overcast',
   45:'Fog', 48:'Freezing fog',
   51:'Light drizzle', 53:'Drizzle', 55:'Dense drizzle',
@@ -148,7 +178,7 @@ const WMO_TEXT = {
   85:'Snow showers', 86:'Heavy snow showers',
   95:'Thunderstorm', 96:'Thunderstorm with hail', 99:'Severe thunderstorm with hail',
 };
-function wmoText(code){ return WMO_TEXT[code] || 'Unknown'; }
+function wmoText(code){ return DivumWXI18N.t(WMO_TEXT_KEYS[code] || 'Unknown'); }
 function wmoToIconKey(code, isDay){
   if(code===0 || code===1) return isDay ? 'sun' : 'moon';
   if(code===2) return isDay ? 'partly' : 'partlyNight';

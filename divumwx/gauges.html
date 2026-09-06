@@ -111,11 +111,11 @@ footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neu
 
   <div class="d-flex align-items-baseline justify-content-between flex-wrap gap-2 mt-1">
     <div>
-      <h1 class="page-title">Live Gauges</h1>
+      <h1 class="page-title" id="gaugesTitle">Live Gauges</h1>
     </div>
     <div class="font-mono small d-flex align-items-center gap-2" style="color:var(--bs-secondary-color);">
       <span class="live-status-wrap"><span id="gaugesStatusDot" title="Connecting…" style="background:var(--bs-secondary-color);"></span><span id="gaugesStatusRing" class="live-status-ripple"></span></span>
-      <span id="gaugesStatusLabel">CONNECTING</span> · UPDATED <span id="gaugesClock">--:--:--</span>
+      <span id="gaugesStatusLabel">CONNECTING</span> · <span id="gaugesUpdatedLabel">UPDATED</span> <span id="gaugesClock">--:--:--</span>
     </div>
   </div>
 
@@ -160,14 +160,29 @@ footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neu
     </div>
   </div>
 
-  <footer class="text-center py-3">DivumWX — Gauges</footer>
+  <footer class="text-center py-3" id="gaugesFooter">DivumWX — Gauges</footer>
 </div>
+
 
 <script src="cardI18n.js?v=s3n2026a"></script>
 <script src="siteHeader.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script src="units.js"></script>
 <script src="iopctrl.js"></script>
+<script>
+// ===================== Static text i18n =====================
+(function applyStaticLabels(){
+  DivumWXI18N.applyLabel(document.getElementById('gaugesTitle'), 'Live Gauges');
+  DivumWXI18N.applyAttr(document.getElementById('gaugesStatusDot'), 'title', 'Connecting\u2026');
+  DivumWXI18N.applyLabel(document.getElementById('gaugesUpdatedLabel'), 'UPDATED');
+  DivumWXI18N.applyLabel(document.getElementById('gaugesFooter'), 'DivumWX \u2014 Gauges');
+  // gaugesStatusLabel is NOT here -- it's fully rewritten by
+  // setGaugesStatus() every time that runs, and the 'i18nready' listener
+  // added near setGaugesStatus() below re-invokes it with the
+  // last-known status so a live language switch doesn't have to wait
+  // for the next poll cycle.
+})();
+</script>
 <script>
 var currentSystem = (function(){
   var stored = localStorage.getItem('dashboardUnitSystem');
@@ -410,7 +425,7 @@ function renderRadialGauge(id, cfg){
 
   // ---- Title / top label / detail ----
   inst.titleText.text('');
-  inst.topLabelText.style('font-size', '14px').style('font-weight', 700).style('fill', cc.label).text(cfg.title || cfg.topLabel || '');
+  inst.topLabelText.style('font-size', '14px').style('font-weight', 700).style('fill', cc.label).text(DivumWXI18N.t(cfg.title || cfg.topLabel || ''));
   inst.detailText.attr('x', 0).attr('y', 0.70 * RG_R).style('font-size', '26px').style('fill', cfg.color)
     .text(cfg.detail == null ? '' : cfg.detail);
 
@@ -424,7 +439,7 @@ function renderRadialGauge(id, cfg){
       .attr('fill', cfg.color2);
     rgRotateTo(inst.needleG2, 'angle2', inst, targetAngle2, 700);
     inst.anchor2.attr('r', (cfg.anchor2Size || 11) / 2).attr('fill', cfg.color2).attr('cx', 0).attr('cy', 0);
-    inst.title2Text.attr('x', x2).attr('y', 0.78 * RG_R).style('font-size', '13px').style('fill', cfg.color2).text(cfg.title2 || '');
+    inst.title2Text.attr('x', x2).attr('y', 0.78 * RG_R).style('font-size', '13px').style('fill', cfg.color2).text(DivumWXI18N.t(cfg.title2 || ''));
     inst.detail2Text.attr('x', x2).attr('y', 0.95 * RG_R).style('font-size', '18px').style('fill', cfg.color2).text(cfg.detail2 || '');
   }
 }
@@ -466,7 +481,7 @@ function renderWind(speedMs, gustMs){
   var inst = rgInstances['gWind'];
   if(inst){
     var x = -0.38 * RG_R;
-    inst.titleText.attr('x', x).attr('y', 0.78 * RG_R).style('font-size', '13px').style('font-weight', 400).style('fill', '#5EE6F5').text('Speed');
+    inst.titleText.attr('x', x).attr('y', 0.78 * RG_R).style('font-size', '13px').style('font-weight', 400).style('fill', '#5EE6F5').text(DivumWXI18N.t('Speed'));
     inst.detailText.attr('x', x).attr('y', 0.95 * RG_R).style('font-size', '18px').style('fill', '#5EE6F5').text(windLabel(speedVal, unit));
   }
 }
@@ -484,7 +499,7 @@ var windRoseTotal = 0;
 var COMPASS_16 = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
 function degToCompass(deg){
   if(deg==null) return '--';
-  return COMPASS_16[Math.round(((deg%360)+360)%360/22.5) % 16];
+  return DivumWXI18N.t(COMPASS_16[Math.round(((deg%360)+360)%360/22.5) % 16]);
 }
 
 function windRoseSpeedBinIndex(ms){
@@ -544,7 +559,7 @@ function windDirEnsureSvg(){
   windDirTitleText = windDirSvg.append('text')
     .attr('x', WIND_DIR_CX).attr('y', WIND_DIR_CY - (WIND_DIR_RING_OUTER_R + 42))
     .attr('text-anchor', 'middle').attr('dy', '.35em').style('font-size', '14px').style('font-weight', 700)
-    .text('Wind Vector');
+    .text(DivumWXI18N.t('Wind Vector'));
   var root = windDirSvg.append('g').attr('transform', 'translate(' + WIND_DIR_CX + ',' + WIND_DIR_CY + ')');
   windDirGridG = root.append('g').attr('class', 'wind-dir-grid');
   windDirPetalsG = root.append('g').attr('class', 'wind-dir-petals');
@@ -610,7 +625,7 @@ function renderWindDir(dirNow, dir10){
     .attr('y', function(i){ return -labelR * Math.cos(windDirDeg2rad(i * 45)); })
     .attr('text-anchor', 'middle').attr('dy', '.35em')
     .style('font-size', '12px').style('fill', cc.label)
-    .text(function(i){ return WIND_ROSE_DIRS[i]; });
+    .text(function(i){ return DivumWXI18N.t(WIND_ROSE_DIRS[i]); });
 
   windDirGridG.selectAll('line').data(d3.range(8)).join('line')
     .attr('x1', 0).attr('y1', 0)
@@ -645,7 +660,7 @@ function renderWindDir(dirNow, dir10){
         key: sector + '-' + b, startAngle: a0, endAngle: a1,
         innerRadius: radiusScale(cum), outerRadius: radiusScale(cum + v),
         fill: WIND_ROSE_COLORS[b],
-        title: hasData ? (windRoseSpeedBinLabel(b, unit) + ' ' + unit + ' from ' + WIND_ROSE_DIRS[sector] + ': ' + v + '%') : ''
+        title: hasData ? (windRoseSpeedBinLabel(b, unit) + ' ' + unit + ' ' + DivumWXI18N.t('from') + ' ' + DivumWXI18N.t(WIND_ROSE_DIRS[sector]) + ': ' + v + '%') : ''
       });
       cum += v;
     }
@@ -654,7 +669,7 @@ function renderWindDir(dirNow, dir10){
       key: sector + '-now', startAngle: a0, endAngle: a1,
       innerRadius: radiusScale(cum), outerRadius: radiusScale(cum + nowV),
       fill: '#5EE6F5',
-      title: (sectorNow === sector && dirNow != null) ? ('Now: ' + round1(dirNow) + '\u00b0 ' + degToCompass(dirNow)) : ''
+      title: (sectorNow === sector && dirNow != null) ? (DivumWXI18N.t('Now:') + ' ' + round1(dirNow) + '\u00b0 ' + degToCompass(dirNow)) : ''
     });
     cum += nowV;
     var avg10V = sector10 === sector ? spikeHeight : 0;
@@ -662,7 +677,7 @@ function renderWindDir(dirNow, dir10){
       key: sector + '-avg10', startAngle: a0, endAngle: a1,
       innerRadius: radiusScale(cum), outerRadius: radiusScale(cum + avg10V),
       fill: '#7DEB87',
-      title: (sector10 === sector && dir10 != null) ? ('10-min avg: ' + round1(dir10) + '\u00b0 ' + degToCompass(dir10)) : ''
+      title: (sector10 === sector && dir10 != null) ? (DivumWXI18N.t('10-min avg:') + ' ' + round1(dir10) + '\u00b0 ' + degToCompass(dir10)) : ''
     });
   });
 
@@ -681,7 +696,7 @@ function renderWindDir(dirNow, dir10){
 
   var pointerShape = windDirPointerG.select('path.wind-dir-pointer-shape');
   pointerShape.style('display', dirNow == null ? 'none' : null);
-  pointerShape.select('title').text(dirNow == null ? '' : ('Now: ' + round1(dirNow) + '\u00b0 ' + degToCompass(dirNow)));
+  pointerShape.select('title').text(dirNow == null ? '' : (DivumWXI18N.t('Now:') + ' ' + round1(dirNow) + '\u00b0 ' + degToCompass(dirNow)));
   if(dirNow != null){
     var fromAngle = windDirPointerAngle;
     var toAngle = dirNow;
@@ -866,7 +881,7 @@ function renderLightning(count){
     min: 0, max: max, splitNumber: 5, ring: ring,
     value: count==null ? 0 : Math.round(count), color: col, needleOpacity: count==null ? 0.2 : 1,
     anchorSize: 16, title: 'Lightning Strike Count',
-    detail: count==null ? 'None' : String(Math.round(count))
+    detail: count==null ? DivumWXI18N.t('None') : String(Math.round(count))
   });
 }
 
@@ -966,14 +981,20 @@ function applyGaugeVisibility(){
 
 var liveValues = { outTemp:null, windSpeed:null, windGust:null, windDir:null, windDir10:null, barometer:null, dayRain:null, rainRate:null, uv:null, radiation:null, outHumidity:null, dewpoint:null, aqi:null, lightningCount:null, baroDayMin:null, baroDayMax:null };
 
+var lastGaugesStatus = 'connecting';
 function setGaugesStatus(status){
+  lastGaugesStatus = status;
   var dot = document.getElementById('gaugesStatusDot');
   var label = document.getElementById('gaugesStatusLabel');
-  if(status==='live'){ dot.style.background = 'var(--bw-good)'; label.textContent = 'LIVE'; pulseStatusDot(); }
-  else if(status==='stale'){ dot.style.background = 'var(--bw-accent)'; label.textContent = 'LIVE (stale)'; }
-  else if(status==='error'){ dot.style.background = 'var(--bw-danger)'; label.textContent = 'OFFLINE'; }
-  else { dot.style.background = 'var(--bs-secondary-color)'; label.textContent = 'CONNECTING'; }
+  if(status==='live'){ dot.style.background = 'var(--bw-good)'; label.textContent = DivumWXI18N.t('LIVE'); pulseStatusDot(); }
+  else if(status==='stale'){ dot.style.background = 'var(--bw-accent)'; label.textContent = DivumWXI18N.t('LIVE (stale)'); }
+  else if(status==='error'){ dot.style.background = 'var(--bw-danger)'; label.textContent = DivumWXI18N.t('OFFLINE'); }
+  else { dot.style.background = 'var(--bs-secondary-color)'; label.textContent = DivumWXI18N.t('CONNECTING'); }
 }
+window.addEventListener('i18nready', function(){
+  setGaugesStatus(lastGaugesStatus);
+  renderAll(liveValues);
+});
 
 function pulseStatusDot(){
   var ring = document.getElementById('gaugesStatusRing');
@@ -1014,7 +1035,7 @@ function pollLoop(){
       console.warn('SǢL gauges: loop.json poll failed —', e.message);
       setGaugesStatus(liveValues.outTemp!=null ? 'stale' : 'error');
       var errEl = document.getElementById('gaugesErr');
-      errEl.textContent = 'Live data unavailable: ' + e.message;
+      errEl.textContent = DivumWXI18N.t('Live data unavailable:') + ' ' + e.message;
       errEl.style.display = '';
       renderAll(liveValues);
     });

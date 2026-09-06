@@ -435,8 +435,8 @@ footer{font-size:12px;color:var(--bs-secondary-color);}
 
   <div w3-include-html="navbar.html"></div>
 
-  <h1 class="fw-bold fs-2 mb-1">Forecasts</h1>
-  <p class="mb-4" style="color:var(--bs-secondary-color);max-width:640px;">
+  <h1 class="fw-bold fs-2 mb-1" id="locPageTitle">Forecasts</h1>
+  <p class="mb-4" id="locIntro" style="color:var(--bs-secondary-color);max-width:640px;">
     Look up the forecast for anywhere — not just this station. Use your
     device's location, search by place name or postcode/ZIP, or enter
     coordinates directly.
@@ -444,25 +444,25 @@ footer{font-size:12px;color:var(--bs-secondary-color);}
 
   <div class="card loc-search-card p-3 p-md-4 mb-4">
     <div class="loc-tabs" role="tablist">
-      <button type="button" class="loc-tab-btn active" data-tab="geo">My Location</button>
-      <button type="button" class="loc-tab-btn" data-tab="name">Place name</button>
-      <button type="button" class="loc-tab-btn" data-tab="postcode">Postcode / ZIP</button>
-      <button type="button" class="loc-tab-btn" data-tab="coords">Coordinates</button>
+      <button type="button" class="loc-tab-btn active" data-tab="geo" id="tabBtnGeo">My Location</button>
+      <button type="button" class="loc-tab-btn" data-tab="name" id="tabBtnName">Place name</button>
+      <button type="button" class="loc-tab-btn" data-tab="postcode" id="tabBtnPostcode">Postcode / ZIP</button>
+      <button type="button" class="loc-tab-btn" data-tab="coords" id="tabBtnCoords">Coordinates</button>
     </div>
 
     <div id="tab-geo" class="loc-tab-panel active">
       <button type="button" id="geoBtn" class="btn btn-sm" style="background:var(--bw-accent);color:#1B3A57;font-weight:600;">Use my current location</button>
-      <div class="loc-hint">Your browser will ask permission before sharing your location. Nothing is sent anywhere except the forecast lookup itself.</div>
+      <div class="loc-hint" id="geoHint">Your browser will ask permission before sharing your location. Nothing is sent anywhere except the forecast lookup itself.</div>
       <div id="status-geo" class="loc-status"></div>
     </div>
 
     <div id="tab-name" class="loc-tab-panel">
       <form id="nameForm" class="loc-field-row">
         <div class="flex-grow-1" style="min-width:220px;">
-          <label for="nameInput">Town or city</label>
+          <label for="nameInput" id="nameInputLabel">Town or city</label>
           <input type="text" id="nameInput" class="form-control form-control-sm" placeholder="e.g. Steeple Claydon, or Paris">
         </div>
-        <button type="submit" class="btn btn-sm btn-outline-secondary nav-btn">Search</button>
+        <button type="submit" class="btn btn-sm btn-outline-secondary nav-btn" id="nameSearchBtn">Search</button>
       </form>
       <div id="status-name" class="loc-status"></div>
     </div>
@@ -470,26 +470,26 @@ footer{font-size:12px;color:var(--bs-secondary-color);}
     <div id="tab-postcode" class="loc-tab-panel">
       <form id="postcodeForm" class="loc-field-row">
         <div class="flex-grow-1" style="min-width:220px;">
-          <label for="postcodeInput">Postcode / ZIP</label>
+          <label for="postcodeInput" id="postcodeInputLabel">Postcode / ZIP</label>
           <input type="text" id="postcodeInput" class="form-control form-control-sm" placeholder="e.g. 90210, or MK18">
         </div>
-        <button type="submit" class="btn btn-sm btn-outline-secondary nav-btn">Search</button>
+        <button type="submit" class="btn btn-sm btn-outline-secondary nav-btn" id="postcodeSearchBtn">Search</button>
       </form>
-      <div class="loc-hint">Best results with US ZIP codes and the outward/area part of other postcodes (e.g. "MK18" rather than the full "MK18 1AB") — the lookup matches places, not a dedicated postcode index. If it can't find yours, try the place name or Coordinates tab instead.</div>
+      <div class="loc-hint" id="postcodeHint">Best results with US ZIP codes and the outward/area part of other postcodes (e.g. «MK18» rather than the full «MK18 1AB») — the lookup matches places, not a dedicated postcode index. If it can't find yours, try the place name or Coordinates tab instead.</div>
       <div id="status-postcode" class="loc-status"></div>
     </div>
 
     <div id="tab-coords" class="loc-tab-panel">
       <form id="coordsForm" class="loc-field-row">
         <div>
-          <label for="latInput">Latitude</label>
+          <label for="latInput" id="latInputLabel">Latitude</label>
           <input type="number" id="latInput" class="form-control form-control-sm loc-coord-field" step="any" min="-90" max="90" placeholder="51.9573">
         </div>
         <div>
-          <label for="lonInput">Longitude</label>
+          <label for="lonInput" id="lonInputLabel">Longitude</label>
           <input type="number" id="lonInput" class="form-control form-control-sm loc-coord-field" step="any" min="-180" max="180" placeholder="-1.0807">
         </div>
-        <button type="submit" class="btn btn-sm btn-outline-secondary nav-btn">Go</button>
+        <button type="submit" class="btn btn-sm btn-outline-secondary nav-btn" id="coordsGoBtn">Go</button>
       </form>
       <div id="status-coords" class="loc-status"></div>
     </div>
@@ -504,13 +504,13 @@ footer{font-size:12px;color:var(--bs-secondary-color);}
       <button type="button" id="locClearBtn" class="btn btn-sm btn-outline-secondary nav-btn">Search another location</button>
     </div>
 
-    <div class="section-label">Forecast</div>
+    <div class="section-label" id="locForecastLabel">Forecast</div>
     <div class="day-strip d-flex flex-wrap gap-3" id="locDayStrip"></div>
 
     <div class="card hourly-panel mt-4 p-4">
       <div class="hourly-title d-flex align-items-baseline justify-content-between mb-3">
         <h2 id="locHourlyTitle">Today — hourly</h2>
-        <span>Forecast source: Open‑Meteo</span>
+        <span id="locForecastSource">Forecast source: Open‑Meteo</span>
       </div>
       <div class="table-responsive">
         <table class="hourly table table-borderless mb-0" id="locHourlyTable"></table>
@@ -519,14 +519,14 @@ footer{font-size:12px;color:var(--bs-secondary-color);}
   </div>
 
   <div id="locEmptyState" class="text-center py-5" style="color:var(--bs-secondary-color);">
-    <p>Search for a location above to see its forecast.</p>
+    <p id="locEmptyStateText">Search for a location above to see its forecast.</p>
   </div>
 
 </div>
 
 <footer class="container-xl mt-5 pt-3 border-top d-flex justify-content-between flex-wrap gap-2">
   <span>DivumWX</span>
-  <span>Forecast &amp; place search: Open‑Meteo · Device-location lookup: OpenStreetMap Nominatim</span>
+  <span id="locFooterCredit">Forecast &amp; place search: Open‑Meteo · Device-location lookup: OpenStreetMap Nominatim</span>
 </footer>
 
 <script src="cardI18n.js?v=s3n2026a"></script>
@@ -534,6 +534,48 @@ footer{font-size:12px;color:var(--bs-secondary-color);}
 <script src="units.js"></script>
 <script>
 // =====================================================================
+
+// ===================== Static text i18n =====================
+// Every one of these is set once at boot; applyLabel/applyAttr handle
+// both the English-first-paint race against strings.json's own fetch
+// AND correctly re-apply on a later live language switch -- see
+// cardI18n.js's own header comment. Plain textContent/setAttribute here
+// would exhibit exactly the "frozen in English" bug class documented in
+// the project handoff.
+(function applyStaticLabels(){
+  DivumWXI18N.applyLabel(document.getElementById('locPageTitle'), 'Forecasts');
+  DivumWXI18N.applyLabel(document.getElementById('locIntro'),
+    "Look up the forecast for anywhere — not just this station. Use your device's location, search by place name or postcode/ZIP, or enter coordinates directly.");
+  DivumWXI18N.applyLabel(document.getElementById('tabBtnGeo'), 'My Location');
+  DivumWXI18N.applyLabel(document.getElementById('tabBtnName'), 'Place name');
+  DivumWXI18N.applyLabel(document.getElementById('tabBtnPostcode'), 'Postcode / ZIP');
+  DivumWXI18N.applyLabel(document.getElementById('tabBtnCoords'), 'Coordinates');
+  DivumWXI18N.applyLabel(document.getElementById('geoBtn'), 'Use my current location');
+  DivumWXI18N.applyLabel(document.getElementById('geoHint'),
+    'Your browser will ask permission before sharing your location. Nothing is sent anywhere except the forecast lookup itself.');
+  DivumWXI18N.applyLabel(document.getElementById('nameInputLabel'), 'Town or city');
+  DivumWXI18N.applyAttr(document.getElementById('nameInput'), 'placeholder', 'e.g. Steeple Claydon, or Paris');
+  DivumWXI18N.applyLabel(document.getElementById('nameSearchBtn'), 'Search');
+  DivumWXI18N.applyLabel(document.getElementById('postcodeInputLabel'), 'Postcode / ZIP');
+  DivumWXI18N.applyAttr(document.getElementById('postcodeInput'), 'placeholder', 'e.g. 90210, or MK18');
+  DivumWXI18N.applyLabel(document.getElementById('postcodeSearchBtn'), 'Search');
+  DivumWXI18N.applyLabel(document.getElementById('postcodeHint'),
+    'Best results with US ZIP codes and the outward/area part of other postcodes (e.g. «MK18» rather than the full «MK18 1AB») — the lookup matches places, not a dedicated postcode index. If it can\'t find yours, try the place name or Coordinates tab instead.');
+  DivumWXI18N.applyLabel(document.getElementById('latInputLabel'), 'Latitude');
+  DivumWXI18N.applyLabel(document.getElementById('lonInputLabel'), 'Longitude');
+  DivumWXI18N.applyLabel(document.getElementById('coordsGoBtn'), 'Go');
+  DivumWXI18N.applyLabel(document.getElementById('locClearBtn'), 'Search another location');
+  DivumWXI18N.applyLabel(document.getElementById('locForecastLabel'), 'Forecast');
+  DivumWXI18N.applyLabel(document.getElementById('locForecastSource'), 'Forecast source: Open\u2011Meteo');
+  DivumWXI18N.applyLabel(document.getElementById('locEmptyStateText'), 'Search for a location above to see its forecast.');
+  DivumWXI18N.applyLabel(document.getElementById('locFooterCredit'),
+    'Forecast & place search: Open\u2011Meteo \u00B7 Device-location lookup: OpenStreetMap Nominatim');
+  // locHourlyTitle and locTitle are NOT here -- both are fully rebuilt by
+  // renderForecast()/loadForecast() every time, so they already pick up
+  // a live language switch correctly via the 'i18nready' listener added
+  // near renderForecast() below, same as every dynamically-built card.
+})();
+
 
 function round1(v){ return v==null ? null : Math.round(v*10)/10; }
 function round2(v){ return v==null ? null : Math.round(v*100)/100; }
@@ -614,15 +656,18 @@ function windDirBadge(dirDeg, gustMs, unit){
           <path d="M22 1 L31.5 10.4 L22 5 L12.5 10.4 Z" fill="${col}"/>
         </g>
       </svg>` : '';
-  return `<div class="wind-badge" style="--wind-col:${col}" title="${dirDeg!=null ? 'From '+degToCompass(dirDeg) : ''}">
+  return `<div class="wind-badge" style="--wind-col:${col}" title="${dirDeg!=null ? DivumWXI18N.t('From')+' '+degToCompass(dirDeg) : ''}">
       ${arrow}<span class="wind-badge-value">${val}</span>
     </div>`;
 }
 function fmtRain(mm, unit){ if(mm==null) return '--'; return unit==='in' ? round2(mm2in(mm))+' in' : round2(mm)+' mm'; }
 function degToCompass(deg){
   if(deg==null) return '—';
+  // Same 16-point abbreviations already translated elsewhere in the
+  // project (e.g. cardWindCompass.js) -- reused via t() rather than
+  // defining a second copy of these keys.
   const dirs=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
-  return dirs[Math.round(deg/22.5)%16];
+  return DivumWXI18N.t(dirs[Math.round(deg/22.5)%16]);
 }
 
 // ===================== Icons (mirrors allseasons.js's ICON_MAP) =====================
@@ -636,7 +681,12 @@ function iconUrl(name){ return METEOCONS_BASE + (ICON_MAP[name] || ICON_MAP.part
 function iconImg(name, cls, label){ return `<img class="${cls}" src="${iconUrl(name)}" alt="${label||name}" loading="lazy">`; }
 
 // ===================== WMO weather-code mapping (mirrors forecast.js) =====================
-const WMO_TEXT = {
+// Deliberately separate keys from cardCurrent.js's condition phrases
+// (e.g. "Overcast" here vs. "Overcast Conditions" there) -- different
+// display context (a single short WMO-code word under a day/hour cell,
+// not a full current-conditions sentence), so reusing those would read
+// oddly here even where the English happens to be close.
+const WMO_TEXT_KEYS = {
   0:'Clear sky', 1:'Mainly clear', 2:'Partly cloudy', 3:'Overcast',
   45:'Fog', 48:'Freezing fog',
   51:'Light drizzle', 53:'Drizzle', 55:'Dense drizzle',
@@ -648,7 +698,7 @@ const WMO_TEXT = {
   85:'Snow showers', 86:'Heavy snow showers',
   95:'Thunderstorm', 96:'Thunderstorm with hail', 99:'Severe thunderstorm with hail',
 };
-function wmoText(code){ return WMO_TEXT[code] || 'Unknown'; }
+function wmoText(code){ return DivumWXI18N.t(WMO_TEXT_KEYS[code] || 'Unknown'); }
 function wmoToIconKey(code, isDay){
   if(code===0 || code===1) return isDay ? 'sun' : 'moon';
   if(code===2) return isDay ? 'partly' : 'partlyNight';
@@ -661,10 +711,19 @@ function wmoToIconKey(code, isDay){
   if(code===95 || code===96 || code===99) return isDay ? 'thunder' : 'thunderNight';
   return isDay ? 'partly' : 'partlyNight';
 }
+// WEEKDAYS reuses cardForecast.js's own keys (Sun/Mon/.../Sat already
+// exist in every lang/<code>.conf) -- same pattern, so no new keys
+// needed here. The previous version called toLocaleDateString('en-GB',
+// {weekday:'short'}), which is the *browser's* own English locale
+// formatting, completely untouched by DivumWXI18N -- every non-"Today"
+// day label stayed in English regardless of the site's selected
+// language. getDay() (0=Sunday) indexes the same array cardForecast.js
+// uses, resolved through t() instead of a hardcoded locale string.
+const WEEKDAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 function dayLabel(dateStr, index){
-  if(index===0) return 'Today';
+  if(index===0) return DivumWXI18N.t('Today');
   const d = new Date(dateStr+'T00:00:00');
-  return d.toLocaleDateString('en-GB', {weekday:'short'}) + ' ' + d.getDate();
+  return DivumWXI18N.t(WEEKDAYS[d.getDay()]) + ' ' + d.getDate();
 }
 function escapeHtml(s){ return (s==null?'':String(s)).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
@@ -744,11 +803,19 @@ function parseForecastJson(j){
   });
   const d = j.daily || {};
   const dailyDates = d.time || [];
+  // dateStr/code are stored raw, NOT dayLabel(dateStr,i)/wmoText(code) --
+  // those are resolved at render time in renderForecast() instead. Baking
+  // the translated strings in here would freeze them at whatever language
+  // was active at fetch time, with nothing to revisit them on a later
+  // live language switch (the forecast itself isn't re-fetched just
+  // because the language changed) -- same bug class as everywhere else
+  // in the project, just one step removed since the trigger here is a
+  // user action (picking a location) rather than page boot.
   const days = dailyDates.map((dateStr, i) => {
     const code = d.weather_code ? d.weather_code[i] : 0;
     return {
-      dateStr, name: dayLabel(dateStr, i),
-      icon: wmoToIconKey(code, true), cond: wmoText(code),
+      dateStr, code,
+      icon: wmoToIconKey(code, true),
       hi: d.temperature_2m_max ? d.temperature_2m_max[i] : null,
       lo: d.temperature_2m_min ? d.temperature_2m_min[i] : null,
       rainProbPct: d.precipitation_probability_max ? d.precipitation_probability_max[i] : null,
@@ -802,7 +869,7 @@ function renderRecent(){
   const wrap = document.getElementById('locRecent');
   if(!list.length){ wrap.style.display='none'; wrap.innerHTML=''; return; }
   wrap.style.display='block';
-  wrap.innerHTML = 'Recent: ' + list.map((l,i)=>
+  wrap.innerHTML = DivumWXI18N.t('Recent:') + ' ' + list.map((l,i)=>
     `<button type="button" class="btn btn-sm btn-link p-0 me-3 align-baseline" data-i="${i}" style="color:var(--bw-sky);">${escapeHtml(l.label)}</button>`
   ).join('');
   wrap.querySelectorAll('button').forEach(btn=>{
@@ -822,7 +889,7 @@ async function loadForecast(){
   document.getElementById('locEmptyState').style.display = 'none';
   document.getElementById('forecastWrap').style.display = '';
   document.getElementById('locTitle').textContent = currentLocation.label;
-  document.getElementById('locDayStrip').innerHTML = `<div class="text-center py-4 w-100" style="color:var(--bs-secondary-color);">Loading forecast for ${escapeHtml(currentLocation.label)}…</div>`;
+  document.getElementById('locDayStrip').innerHTML = `<div class="text-center py-4 w-100" style="color:var(--bs-secondary-color);">${DivumWXI18N.t('Loading forecast for')} ${escapeHtml(currentLocation.label)}\u2026</div>`;
   document.getElementById('locHourlyTable').innerHTML = '';
   try{
     const json = await fetchForecastFor(currentLocation.latitude, currentLocation.longitude);
@@ -831,7 +898,7 @@ async function loadForecast(){
     renderForecast();
   }catch(e){
     console.warn('Sǣl: location forecast fetch failed —', e.message);
-    document.getElementById('locDayStrip').innerHTML = `<div class="text-center py-4 w-100" style="color:var(--bw-danger);">Couldn't load the forecast for this location — check your connection and try again.</div>`;
+    document.getElementById('locDayStrip').innerHTML = `<div class="text-center py-4 w-100" style="color:var(--bw-danger);">${DivumWXI18N.t("Couldn't load the forecast for this location — check your connection and try again.")}</div>`;
   }
 }
 
@@ -842,18 +909,22 @@ function renderForecast(){
   const hrs = forecastData.hourlyByDay[activeDay] || [];
 
   const strip = document.getElementById('locDayStrip');
-  strip.innerHTML = days.map((d,i)=>`
+  strip.innerHTML = days.map((d,i)=>{
+    const name = dayLabel(d.dateStr, i);
+    const cond = wmoText(d.code);
+    return `
     <div class="day-card card ${i===activeDay?'active':''}" data-i="${i}">
-      <div class="dname">${d.name}</div>
-      ${iconImg(d.icon,'dicon',d.cond)}
-      <div class="dcond">${d.cond}</div>
+      <div class="dname">${name}</div>
+      ${iconImg(d.icon,'dicon',cond)}
+      <div class="dcond">${cond}</div>
       <div class="dtemps">${tempSpan(d.hi,sys.temp)} <span class="lo">${tempSpan(d.lo,sys.temp)}</span></div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
   strip.querySelectorAll('.day-card').forEach(el=>{
     el.addEventListener('click', ()=>{ activeDay = parseInt(el.dataset.i,10); renderForecast(); });
   });
 
-  document.getElementById('locHourlyTitle').textContent = days[activeDay].name + ' — hourly';
+  document.getElementById('locHourlyTitle').textContent = dayLabel(days[activeDay].dateStr, activeDay) + ' \u2014 ' + DivumWXI18N.t('hourly');
   const table = document.getElementById('locHourlyTable');
   const fmtHour = h => String(h).padStart(2, '0') + ':00';
   const TRACK_RANGE = 56;
@@ -863,17 +934,26 @@ function renderForecast(){
   const tempOffset = t => (t==null || tMax===tMin) ? TRACK_RANGE/2 : Math.round((1-(t-tMin)/(tMax-tMin))*TRACK_RANGE);
 
   table.innerHTML = `
-    <tr><th class="rowlabel">Time</th>${hrs.map(h=>`<th>${fmtHour(h.h)}</th>`).join('')}</tr>
+    <tr><th class="rowlabel">${DivumWXI18N.t('Time')}</th>${hrs.map(h=>`<th>${fmtHour(h.h)}</th>`).join('')}</tr>
     <tr class="track-row">
-      <td class="rowlabel">Weather</td>
+      <td class="rowlabel">${DivumWXI18N.t('Weather')}</td>
       ${hrs.map(h=>`<td class="track-cell"><div class="track-marker" style="top:${tempOffset(h.tempC)}px">${iconImg(h.icon,'hicon')}<span class="temp-cell">${tempSpan(h.tempC, sys.temp)}</span></div></td>`).join('')}
     </tr>
-    <tr><td class="rowlabel">Rain</td>${hrs.map(h=>`<td class="rain-cell">${h.rainMm>0 ? fmtRain(h.rainMm, sys.rain) : '—'}</td>`).join('')}</tr>
+    <tr><td class="rowlabel">${DivumWXI18N.t('Rain')}</td>${hrs.map(h=>`<td class="rain-cell">${h.rainMm>0 ? fmtRain(h.rainMm, sys.rain) : '\u2014'}</td>`).join('')}</tr>
     <tr>
-      <td class="rowlabel">Gust (${windUnitAbbr(sys.wind)})</td>
+      <td class="rowlabel">${DivumWXI18N.t('Gust')} (${windUnitAbbr(sys.wind)})</td>
       ${hrs.map(h=>`<td>${windDirBadge(h.windDirDeg, h.gustMs ?? h.windMs, sys.wind)}</td>`).join('')}
     </tr>`;
 }
+// Re-render on a live language switch (or once strings.json finishes
+// loading after this had already rendered in English) -- see the big
+// comment on parseForecastJson's `days` array above for why this alone
+// is enough: name/cond are computed fresh here from raw dateStr/code,
+// nothing is baked in ahead of time.
+window.addEventListener('i18nready', function(){
+  if (forecastData) renderForecast();
+  renderRecent();
+});
 
 // ===================== Tab switching =====================
 document.querySelectorAll('.loc-tab-btn').forEach(btn=>{
@@ -887,45 +967,49 @@ document.querySelectorAll('.loc-tab-btn').forEach(btn=>{
 // ===================== Tab 1: My Location =====================
 document.getElementById('geoBtn').addEventListener('click', ()=>{
   if(!('geolocation' in navigator)){
-    setStatus('geo', "This browser doesn't support automatic location lookup — try Coordinates instead.", true);
+    setStatus('geo', DivumWXI18N.t("This browser doesn't support automatic location lookup — try Coordinates instead."), true);
     return;
   }
-  setStatus('geo', 'Locating your device…', false, true);
+  setStatus('geo', DivumWXI18N.t('Locating your device\u2026'), false, true);
   navigator.geolocation.getCurrentPosition(async (pos)=>{
     const {latitude, longitude} = pos.coords;
-    setStatus('geo', 'Got your location — loading forecast…', false, true);
+    setStatus('geo', DivumWXI18N.t('Got your location — loading forecast\u2026'), false, true);
     const label = await reverseGeocode(latitude, longitude);
     selectLocation({
-      label: label || `Your location (${latitude.toFixed(3)}, ${longitude.toFixed(3)})`,
+      label: label || `${DivumWXI18N.t('Your location')} (${latitude.toFixed(3)}, ${longitude.toFixed(3)})`,
       latitude, longitude, source:'device',
     });
   }, (err)=>{
-    const msgs = {1:'Location permission was denied — allow it in your browser settings, or use one of the other tabs.', 2:'Your location is unavailable right now — try again, or use one of the other tabs.', 3:'Locating your device timed out — try again, or use one of the other tabs.'};
-    setStatus('geo', msgs[err.code] || 'Could not get your location.', true);
+    const msgs = {
+      1: DivumWXI18N.t('Location permission was denied — allow it in your browser settings, or use one of the other tabs.'),
+      2: DivumWXI18N.t('Your location is unavailable right now — try again, or use one of the other tabs.'),
+      3: DivumWXI18N.t('Locating your device timed out — try again, or use one of the other tabs.'),
+    };
+    setStatus('geo', msgs[err.code] || DivumWXI18N.t('Could not get your location.'), true);
   }, {enableHighAccuracy:false, timeout:12000, maximumAge:5*60*1000});
 });
 
 // ===================== Tab 2 & 3: Place name / Postcode (same lookup) =====================
 async function runSearch(tab, query){
-  if(!query){ setStatus(tab, 'Type something to search for.', true); return; }
-  setStatus(tab, 'Searching…', false, true);
+  if(!query){ setStatus(tab, DivumWXI18N.t('Type something to search for.'), true); return; }
+  setStatus(tab, DivumWXI18N.t('Searching\u2026'), false, true);
   clearSuggestions();
   try{
     const results = await geocodeSearch(query);
     if(!results.length){
-      setStatus(tab, `No matches found for "${query}". Try a different spelling, or use the Coordinates tab.`, true);
+      setStatus(tab, `${DivumWXI18N.t('No matches found for')} "${query}". ${DivumWXI18N.t('Try a different spelling, or use the Coordinates tab.')}`, true);
       return;
     }
     if(results.length===1){
       setStatus(tab, '', false);
       selectLocation(resultToLocation(results[0]));
     } else {
-      setStatus(tab, `${results.length} matches — pick one below:`, false);
+      setStatus(tab, `${results.length} ${DivumWXI18N.t('matches — pick one below:')}`, false);
       showSuggestions(results);
     }
   }catch(e){
     console.warn('Sǣl: geocoding failed —', e.message);
-    setStatus(tab, 'Search failed — check your connection and try again.', true);
+    setStatus(tab, DivumWXI18N.t('Search failed — check your connection and try again.'), true);
   }
 }
 document.getElementById('nameForm').addEventListener('submit', e=>{
@@ -943,7 +1027,7 @@ document.getElementById('coordsForm').addEventListener('submit', e=>{
   const lat = parseFloat(document.getElementById('latInput').value);
   const lon = parseFloat(document.getElementById('lonInput').value);
   if(Number.isNaN(lat) || Number.isNaN(lon) || lat<-90 || lat>90 || lon<-180 || lon>180){
-    setStatus('coords', 'Enter a valid latitude (-90 to 90) and longitude (-180 to 180).', true);
+    setStatus('coords', DivumWXI18N.t('Enter a valid latitude (-90 to 90) and longitude (-180 to 180).'), true);
     return;
   }
   setStatus('coords', '', false);
