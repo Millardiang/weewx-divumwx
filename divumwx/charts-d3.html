@@ -379,20 +379,20 @@ footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neu
       <span class="chart-data-info" id="chartDataInfo"></span>
     </div>
     <div class="aurora-toolbar" id="auroraToolbar" style="display:none;">
-      <span class="font-mono small" style="color:var(--bs-secondary-color);">Live geomagnetic activity — AuroraWatch UK</span>
+      <span class="font-mono small" id="auroraCaption" style="color:var(--bs-secondary-color);">Live geomagnetic activity — AuroraWatch UK</span>
       <span class="aurora-badge aurora-green" id="auroraBadge">Loading…</span>
     </div>
     <div class="d3-legend" id="chartLegend"></div>
     <div class="chart-container" id="chartContainer"></div>
     <div class="chart-category-note" id="chartCategoryNote"></div>
     <div class="aurora-thresh-legend" id="auroraLegend" style="display:none;">
-      <span class="aurora-thresh-item"><span class="aurora-thresh-swatch" style="background:#22c55e"></span><span><b>Green</b> — No significant activity (&lt;50 nT)</span></span>
-      <span class="aurora-thresh-item"><span class="aurora-thresh-swatch" style="background:#facc15"></span><span><b>Yellow</b> — Minor activity (50–100 nT) — aurora possible from northern Scotland</span></span>
-      <span class="aurora-thresh-item"><span class="aurora-thresh-swatch" style="background:#f97316"></span><span><b>Amber</b> — Moderate activity (100–200 nT) — aurora likely from Scotland, possible further south</span></span>
-      <span class="aurora-thresh-item"><span class="aurora-thresh-swatch" style="background:#ef4444"></span><span><b>Red</b> — Strong activity (&gt;200 nT) — aurora visible across much of UK</span></span>
+      <span class="aurora-thresh-item"><span class="aurora-thresh-swatch" style="background:#22c55e"></span><span><b id="auroraGreenLabel">Green</b> <span id="auroraGreenText">— No significant activity (&lt;50 nT)</span></span></span>
+      <span class="aurora-thresh-item"><span class="aurora-thresh-swatch" style="background:#facc15"></span><span><b id="auroraYellowLabel">Yellow</b> <span id="auroraYellowText">— Minor activity (50–100 nT) — aurora possible from northern Scotland</span></span></span>
+      <span class="aurora-thresh-item"><span class="aurora-thresh-swatch" style="background:#f97316"></span><span><b id="auroraAmberLabel">Amber</b> <span id="auroraAmberText">— Moderate activity (100–200 nT) — aurora likely from Scotland, possible further south</span></span></span>
+      <span class="aurora-thresh-item"><span class="aurora-thresh-swatch" style="background:#ef4444"></span><span><b id="auroraRedLabel">Red</b> <span id="auroraRedText">— Strong activity (&gt;200 nT) — aurora visible across much of UK</span></span></span>
     </div>
     <div class="meteogram-toolbar" id="meteogramToolbar" style="display:none;">
-      <span class="font-mono small" style="color:var(--bs-secondary-color);">7-day hourly forecast — temperature, precipitation, pressure &amp; wind</span>
+      <span class="font-mono small" id="meteogramCaption" style="color:var(--bs-secondary-color);">7-day hourly forecast — temperature, precipitation, pressure &amp; wind</span>
     </div>
     <div class="meteogram-wrap" id="meteogramWrap" style="display:none;">
       <div class="d3-legend" id="meteogramLegend"></div>
@@ -410,7 +410,7 @@ footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neu
       <div class="roses-row">
         <div class="rose-panel">
           <div class="rose-panel-header">
-            <span class="rose-panel-title" style="color:#FF6B6B;">Wind Speed</span>
+            <span class="rose-panel-title" id="roseSpeedTitle" style="color:#FF6B6B;">Wind Speed</span>
             <span class="rose-panel-sub" id="wrCalmSpeed"></span>
           </div>
           <div class="rose-svg-wrap" id="roseSpeed"></div>
@@ -419,7 +419,7 @@ footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neu
         </div>
         <div class="rose-panel">
           <div class="rose-panel-header">
-            <span class="rose-panel-title" style="color:var(--bw-accent);">Wind Gust</span>
+            <span class="rose-panel-title" id="roseGustTitle" style="color:var(--bw-accent);">Wind Gust</span>
             <span class="rose-panel-sub" id="wrCalmGust"></span>
           </div>
           <div class="rose-svg-wrap" id="roseGust"></div>
@@ -428,21 +428,21 @@ footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neu
         </div>
       </div>
       <div class="extreme-values-container">
-        <div class="extreme-values-title">Wind Speed, Gust &amp; Prevailing Direction</div>
+        <div class="extreme-values-title" id="extremeValuesTitle">Wind Speed, Gust &amp; Prevailing Direction</div>
         <div class="extreme-values-grid" id="wrExtremeGrid"></div>
-        <div class="extreme-values-note">Maximum values shown for each period. Prevailing direction uses vector averaging.</div>
+        <div class="extreme-values-note" id="extremeValuesNote">Maximum values shown for each period. Prevailing direction uses vector averaging.</div>
       </div>
     </div>
   </div>
 
   <div id="recordsSection">
-  <h2 class="records-section-title">Records</h2>
+  <h2 class="records-section-title" id="recordsSectionTitle">Records</h2>
   <div class="card p-4 mb-4">
     <div class="records-periods-row" id="recordsPeriodsRow"></div>
   </div>
   </div>
 
-  <footer class="text-center py-3">DivumWX — Charts</footer>
+  <footer class="text-center py-3" id="chartsFooter">DivumWX — Charts</footer>
 </div>
 
 
@@ -450,9 +450,52 @@ footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neu
 <script src="cardI18n.js?v=s3n2026a"></script>
 <script src="siteHeader.js"></script>
 <script>
+// ===================== Static text i18n =====================
+(function applyStaticLabels(){
+  DivumWXI18N.applyAttr(document.getElementById('chartHistYear'), 'title', 'Historical year');
+  DivumWXI18N.applyLabel(document.getElementById('auroraCaption'), 'Live geomagnetic activity \u2014 AuroraWatch UK');
+  DivumWXI18N.applyLabel(document.getElementById('auroraGreenLabel'), 'Green');
+  DivumWXI18N.applyLabel(document.getElementById('auroraGreenText'), '\u2014 No significant activity (<50 nT)');
+  DivumWXI18N.applyLabel(document.getElementById('auroraYellowLabel'), 'Yellow');
+  DivumWXI18N.applyLabel(document.getElementById('auroraYellowText'), '\u2014 Minor activity (50\u2013100 nT) \u2014 aurora possible from northern Scotland');
+  DivumWXI18N.applyLabel(document.getElementById('auroraAmberLabel'), 'Amber');
+  DivumWXI18N.applyLabel(document.getElementById('auroraAmberText'), '\u2014 Moderate activity (100\u2013200 nT) \u2014 aurora likely from Scotland, possible further south');
+  DivumWXI18N.applyLabel(document.getElementById('auroraRedLabel'), 'Red');
+  DivumWXI18N.applyLabel(document.getElementById('auroraRedText'), '\u2014 Strong activity (>200 nT) \u2014 aurora visible across much of UK');
+  DivumWXI18N.applyLabel(document.getElementById('meteogramCaption'), '7-day hourly forecast \u2014 temperature, precipitation, pressure & wind');
+  DivumWXI18N.applyLabel(document.getElementById('roseSpeedTitle'), 'Wind Speed');
+  DivumWXI18N.applyLabel(document.getElementById('roseGustTitle'), 'Wind Gust');
+  DivumWXI18N.applyLabel(document.getElementById('extremeValuesTitle'), 'Wind Speed, Gust & Prevailing Direction');
+  DivumWXI18N.applyLabel(document.getElementById('extremeValuesNote'), 'Maximum values shown for each period. Prevailing direction uses vector averaging.');
+  DivumWXI18N.applyLabel(document.getElementById('recordsSectionTitle'), 'Records');
+  DivumWXI18N.applyLabel(document.getElementById('chartsFooter'), 'DivumWX \u2014 Charts');
+  // pageTitle, the .records-tab / .chart-tf-btn buttons, auroraBadge, and
+  // chartDataInfo are NOT here -- all of them are fully rewritten by JS
+  // (updatePageTitle(), the tab-button map below, renderAuroraD3(),
+  // pollChartsJson()) every time those run, so translating them there
+  // instead already covers both the first paint and any later language
+  // switch.
+})();
+</script>
+<script>
 
 function round1(v){ return v==null ? null : Math.round(v*10)/10; }
 function round2(v){ return v==null ? null : Math.round(v*100)/100; }
+// Shared everywhere a month/weekday name is needed in this file (date
+// captions, chart x-axis labels, tooltips) -- same keys already used by
+// records.html/heatmaps.js. Every toLocaleDateString('en-GB', ...) call
+// in this file previously used the browser's own English locale
+// formatting for month/weekday NAMES specifically (numeric day/year and
+// 24-hour time are locale-neutral and left as-is) -- same bug class
+// fixed elsewhere on this site.
+const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONTHS_FULL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const WEEKDAYS_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const WEEKDAYS_FULL = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+function tMonthShort(i){ return DivumWXI18N.t(MONTHS_SHORT[i]); }
+function tMonthFull(i){ return DivumWXI18N.t(MONTHS_FULL[i]); }
+function tWeekdayShort(i){ return DivumWXI18N.t(WEEKDAYS_SHORT[i]); }
+function tWeekdayFull(i){ return DivumWXI18N.t(WEEKDAYS_FULL[i]); }
 function fmtTemp(c, unit){ return unit==='F' ? round1(C2F(c))+'°F' : round1(c)+'°C'; }
 function fmtWind(ms, unit){
   switch(unit){
@@ -483,7 +526,7 @@ function fmtDist(km, unit){
 }
 function fmtPollen(v){ return round1(v); }
 function fmtConc(v, unit){ return round1(v)+' '+unit; }
-function fmtLightningCount(v){ return v >= 1 ? Math.round(v)+' strikes' : 'None'; }
+function fmtLightningCount(v){ return v >= 1 ? Math.round(v)+' '+DivumWXI18N.t('strikes') : DivumWXI18N.t('None'); }
 function fmtCloudPercent(v){ return round1(v)+'%'; }
 
 function convTemp(c, unit){ return unit==='F' ? C2F(c) : c; }
@@ -547,7 +590,9 @@ function dataAggregate(slice, agg){
   return {value: slice.reduce((s,pt)=>s+pt[1], 0) / slice.length, date:null};
 }
 function fmtDateOnly(ts){
-  return ts==null ? '' : new Date(ts).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
+  if(ts==null) return '';
+  const d = new Date(ts);
+  return d.getDate() + ' ' + tMonthShort(d.getMonth()) + ' ' + d.getFullYear();
 }
 
 async function fetchChartsJson(){
@@ -561,10 +606,10 @@ async function fetchChartsJson(){
 async function pollChartsJson(){
   try{
     dataSeries = await fetchChartsJson();
-    document.getElementById('chartDataInfo').textContent = 'Live data';
+    document.getElementById('chartDataInfo').textContent = DivumWXI18N.t('Live data');
   }catch(e){
     console.warn('Re-ImaginedWX charts: poll failed —', e.message);
-    document.getElementById('chartDataInfo').textContent = 'Data unavailable';
+    document.getElementById('chartDataInfo').textContent = DivumWXI18N.t('Data unavailable');
   }
   populateHistoricalYears();
   renderChart();
@@ -732,7 +777,7 @@ function renderMeteogramLegendD3(defs){
     .each(function(d){
       const item = d3.select(this);
       item.append('span').attr('class','d3-legend-swatch').style('background', d.color);
-      item.append('span').text(d.name);
+      item.append('span').text(DivumWXI18N.t(d.name));
     });
 }
 
@@ -753,26 +798,24 @@ function attachMeteogramHover(g, svg, ctx){
       i = Math.min(times.length-1, Math.max(0, i));
 
       const dt = new Date(times[i]);
-      const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
       const next = new Date(dt.getTime() + 3600000);
       const pad = n => String(n).padStart(2,'0');
-      const hdr = `${days[dt.getDay()]}, ${months[dt.getMonth()]} ${dt.getDate()}, `
+      const hdr = `${tWeekdayShort(dt.getDay())}, ${tMonthShort(dt.getMonth())} ${dt.getDate()}, `
         + `${pad(dt.getHours())}:${pad(dt.getMinutes())} - ${pad(next.getHours())}:${pad(next.getMinutes())}`;
       const wmo = METEOGRAM_WMO[weatherCode[i]] || {text:'Unknown'};
 
-      let html = `<small>${hdr}</small><br><strong>${wmo.text}</strong><br>`;
-      html += `<div><span style="color:${tempColor};">●</span> Temperature: <strong>${tempData[i].v}${tempUnitLabel(sys)}</strong></div>`;
-      if(precipData[i].v > 0) html += `<div><span style="color:${precipColor};">●</span> Precipitation: <strong>${precipData[i].v} ${rainUnitLabel(sys)}</strong></div>`;
-      html += `<div><span style="color:${pressureColor};">●</span> Barometer: <strong>${pressureData[i].v} ${pressureUnitLabel(sys)}</strong></div>`;
+      let html = `<small>${hdr}</small><br><strong>${DivumWXI18N.t(wmo.text)}</strong><br>`;
+      html += `<div><span style="color:${tempColor};">●</span> ${DivumWXI18N.t('Temperature')}: <strong>${tempData[i].v}${tempUnitLabel(sys)}</strong></div>`;
+      if(precipData[i].v > 0) html += `<div><span style="color:${precipColor};">●</span> ${DivumWXI18N.t('Precipitation')}: <strong>${precipData[i].v} ${rainUnitLabel(sys)}</strong></div>`;
+      html += `<div><span style="color:${pressureColor};">●</span> ${DivumWXI18N.t('Barometer')}: <strong>${pressureData[i].v} ${pressureUnitLabel(sys)}</strong></div>`;
       const w = wind[i];
       if(w){
         const b = beaufort(w.speed);
         const speedDisp = Math.round(convWind(w.speed, sys.wind));
         const gustDisp = Math.round(convWind(w.gust || 0, sys.wind));
-        html += `<div><span style="color:#DD8C1E;">●</span> Wind: <strong>${speedDisp} ${windUnitLabel(sys)}</strong> `
-          + `(F${b.force} · ${b.label}) from <strong>${meteogramBearing(w.dir)}</strong> (${Math.round(w.dir)}°)`;
-        if(gustDisp > speedDisp) html += ` gusts <strong>${gustDisp}</strong>`;
+        html += `<div><span style="color:#DD8C1E;">●</span> ${DivumWXI18N.t('Wind')}: <strong>${speedDisp} ${windUnitLabel(sys)}</strong> `
+          + `(F${b.force} · ${b.label}) ${DivumWXI18N.t('from')} <strong>${DivumWXI18N.t(meteogramBearing(w.dir))}</strong> (${Math.round(w.dir)}°)`;
+        if(gustDisp > speedDisp) html += ` ${DivumWXI18N.t('gusts')} <strong>${gustDisp}</strong>`;
         html += `</div>`;
       }
       showTip(html, event);
@@ -789,7 +832,7 @@ function renderMeteogramD3(){
 
   if(!meteogramData || !meteogramData.times.length){
     d3.select('#meteogramLegend').selectAll('*').remove();
-    emptyMsg(container, colors, meteogramData ? 'No forecast data available' : 'Loading…');
+    emptyMsg(container, colors, meteogramData ? DivumWXI18N.t('No forecast data available') : DivumWXI18N.t('Loading…'));
     return;
   }
 
@@ -828,7 +871,7 @@ function renderMeteogramD3(){
   g.append('g').attr('class','d3-gridline').call(d3.axisLeft(yTemp).tickSize(-innerW).tickFormat(''));
 
   const xAxisG = g.append('g').attr('class','d3-axis').attr('transform', `translate(0,${innerH})`)
-    .call(d3.axisBottom(x).ticks(d3.timeHour.every(3)).tickFormat(d => d.getHours()===0 ? d3.timeFormat('%a')(d) : d3.timeFormat('%H')(d)));
+    .call(d3.axisBottom(x).ticks(d3.timeHour.every(3)).tickFormat(d => d.getHours()===0 ? tWeekdayShort(d.getDay()) : d3.timeFormat('%H')(d)));
   xAxisG.selectAll('text').style('font-weight', d => d.getHours()===0 ? 'bold' : 'normal');
 
   g.append('g').attr('class','d3-axis').call(d3.axisLeft(yTemp).ticks(6).tickFormat(v => round1(v)+tempUnitLabel(sys)));
@@ -988,21 +1031,22 @@ function renderRecordsPanel(){
   const category = RECORDS_CATEGORIES[currentCategory];
   const row = document.getElementById('recordsPeriodsRow');
   if(!category){
-    row.innerHTML = '<div class="text-center">Select a category to see records.</div>';
+    row.innerHTML = '<div class="text-center">' + DivumWXI18N.t('Select a category to see records.') + '</div>';
     return;
   }
   row.innerHTML = RECORDS_PERIODS.map(period => {
     const tiles = category.metrics.map(metric => {
+      const label = DivumWXI18N.t(metric.label);
       if(!dataSeries){
-        return `<div class="records-tile"><div class="records-label">${metric.label}</div><div class="records-value">--</div></div>`;
+        return `<div class="records-tile"><div class="records-label">${label}</div><div class="records-value">--</div></div>`;
       }
       const slice = dataSlice(dataSeries[metric.series], period.days);
       const {value, date} = dataAggregate(slice, metric.agg);
       const valueHtml = value!=null ? metric.fmt(value, sys) : '--';
       const dateHtml = (metric.withDate && date!=null) ? `<div class="records-value-date">${fmtDateOnly(date)}</div>` : '';
-      return `<div class="records-tile"><div class="records-label">${metric.label}</div><div class="records-value">${valueHtml}</div>${dateHtml}</div>`;
+      return `<div class="records-tile"><div class="records-label">${label}</div><div class="records-value">${valueHtml}</div>${dateHtml}</div>`;
     }).join('');
-    return `<div class="records-period-card"><div class="records-period-label">${period.label}</div><div class="records-grid">${tiles}</div></div>`;
+    return `<div class="records-period-card"><div class="records-period-label">${DivumWXI18N.t(period.label)}</div><div class="records-grid">${tiles}</div></div>`;
   }).join('');
 }
 
@@ -1226,11 +1270,11 @@ const UNIT_LABELS = {
   pressure: sys=>pressureUnitLabel(sys),
   rain:     sys=>rainUnitLabel(sys),
   humid:    ()=>'%',
-  uv:       ()=>'UV Index',
+  uv:       ()=>DivumWXI18N.t('UV Index'),
   solar:    ()=>'W/m²',
   cloud:    ()=>'%',
   dist:     sys=>distUnitLabel(sys),
-  count:    ()=>'Strikes',
+  count:    ()=>DivumWXI18N.t('Strikes'),
   pollen:   ()=>'grains/m³',
   conc:     sys=>concUnitLabel(sys),
   gas:      ()=>'',
@@ -1300,11 +1344,26 @@ const CATEGORY_LABELS = {
   windrose: 'Wind Rose',
 };
 function updatePageTitle(){
-  const label = CATEGORY_LABELS[currentCategory] || 'Weather';
-  document.getElementById('pageTitle').innerHTML = label + ' Charts<span class="d3-badge">D3</span>';
-  document.title = label + ' Charts (D3) — Responsive Dashboard';
+  const label = DivumWXI18N.t(CATEGORY_LABELS[currentCategory] || 'Weather');
+  document.getElementById('pageTitle').innerHTML = label + ' ' + DivumWXI18N.t('Charts') + '<span class="d3-badge">D3</span>';
+  document.title = label + ' ' + DivumWXI18N.t('Charts') + ' (D3) \u2014 ' + DivumWXI18N.t('Responsive Dashboard');
 }
 updatePageTitle();
+
+function applyTabLabels(){
+  document.querySelectorAll('.records-tab').forEach(btn => {
+    const key = CATEGORY_LABELS[btn.dataset.cat];
+    if (key) btn.textContent = DivumWXI18N.t(key);
+  });
+  document.querySelectorAll('.chart-tf-btn[data-tf]').forEach(btn => {
+    btn.textContent = DivumWXI18N.t(TIMEFRAME_LABELS[btn.dataset.tf]);
+  });
+  document.querySelectorAll('.chart-tf-btn[data-wrperiod]').forEach(btn => {
+    btn.textContent = DivumWXI18N.t(TIMEFRAME_LABELS[btn.dataset.wrperiod]);
+  });
+}
+const TIMEFRAME_LABELS = { day:'Day', week:'Week', month:'Month', year:'Year' };
+applyTabLabels();
 
 // METAR cross-link — only relevant (and only shown) when this page is
 // loaded embedded as the Cloud & Visibility chart modal, mirroring the
@@ -1388,8 +1447,14 @@ function unitForDef(d, sys){
 // Mirrors the special-cased branches from charts.html's tooltipFormatter (both the daily
 // and hourly versions collapsed into one — the branches that don't add real information
 // beyond "value + unit" were dropped since they're equivalent to the fallback anyway).
+// `name` here is always the definition's raw, untranslated English identifier (e.g.
+// 'UV Index', 'Strikes', 'Alder') -- every branch below matches against that fixed
+// English string regardless of site language, exactly as before this file had any i18n
+// wiring at all. Only the two things actually shown to the user -- the series label and
+// the colour-coded severity word inside `extra` -- are translated, at the very end.
 function tooltipRowHTML(name, val, unit, color){
-  if(val == null) return `<div><span style="color:${color};font-weight:600;">${name}</span>: <strong>&mdash;</strong></div>`;
+  const displayName = DivumWXI18N.t(name);
+  if(val == null) return `<div><span style="color:${color};font-weight:600;">${displayName}</span>: <strong>&mdash;</strong></div>`;
   const u = unit ? (unit.startsWith('°') || unit === '%' ? unit : ' ' + unit) : '';
   let displayVal = round1(val);
   let extra = '';
@@ -1413,7 +1478,12 @@ function tooltipRowHTML(name, val, unit, color){
   } else if(/rain|rate/i.test(name)){
     displayVal = round2(val);
   }
-  return `<div><span style="color:${color};font-weight:600;">${name}</span>: <strong>${displayVal}</strong>${u}${extra?' '+extra:''}</div>`;
+  // extra is "<emoji> <English phrase>" or empty -- translate just the phrase, keep the emoji.
+  if(extra){
+    const spaceAt = extra.indexOf(' ');
+    extra = extra.slice(0, spaceAt) + ' ' + DivumWXI18N.t(extra.slice(spaceAt + 1));
+  }
+  return `<div><span style="color:${color};font-weight:600;">${displayName}</span>: <strong>${displayVal}</strong>${u}${extra?' '+extra:''}</div>`;
 }
 
 // Colour-band backgrounds — mirrors the markArea blocks in charts.html's renderHourly.
@@ -1462,7 +1532,7 @@ function renderLegend(defs){
     .each(function(d){
       const item = d3.select(this);
       item.append('span').attr('class','d3-legend-swatch').style('background', seriesColor(d, colors));
-      item.append('span').text(d.unit ? `${d.name} (${d.unit})` : d.name);
+      item.append('span').text(d.unit ? `${DivumWXI18N.t(d.name)} (${d.unit})` : DivumWXI18N.t(d.name));
     });
 }
 
@@ -1528,7 +1598,7 @@ function renderDailyD3(sys, cat, {trailingDays, historicalYear}={}){
   const container = document.getElementById('chartContainer');
 
   const base = (dataSeries[allDefs[0].series] || []).filter(pt => pt && pt[1] != null);
-  if(!base.length){ emptyMsg(container, colors, 'No data available yet.'); return; }
+  if(!base.length){ emptyMsg(container, colors, DivumWXI18N.t('No data available yet.')); return; }
 
   let points;
   if(historicalYear != null){
@@ -1536,13 +1606,13 @@ function renderDailyD3(sys, cat, {trailingDays, historicalYear}={}){
   } else {
     points = trailingDays ? base.slice(Math.max(0, base.length - trailingDays)) : base;
   }
-  if(!points.length){ emptyMsg(container, colors, 'No data for this period.'); return; }
+  if(!points.length){ emptyMsg(container, colors, DivumWXI18N.t('No data for this period.')); return; }
 
   const dates = points.map(pt => pt[0]);
-  const labels = dates.map(ts => new Date(ts).toLocaleDateString('en-GB', {day:'numeric', month:'short'}));
+  const labels = dates.map(ts => { const d = new Date(ts); return d.getDate() + ' ' + tMonthShort(d.getMonth()); });
 
   const defs = allDefs.filter(d => !hiddenSeries.has(d.name));
-  if(!defs.length){ emptyMsg(container, colors, 'All series hidden — click a legend item to re-enable.'); return; }
+  if(!defs.length){ emptyMsg(container, colors, DivumWXI18N.t('All series hidden — click a legend item to re-enable.')); return; }
 
   const seriesData = defs.map(d => {
     const arr = dataSeries[d.series] || [];
@@ -1614,18 +1684,18 @@ function renderHourlyD3(sys, cat){
 
   if(!allDefs || !allDefs.length){
     d3.select('#chartLegend').selectAll('*').remove();
-    emptyMsg(container, colors, 'No 24-hour data available for this category.');
+    emptyMsg(container, colors, DivumWXI18N.t('No 24-hour data available for this category.'));
     return;
   }
   renderLegend(allDefs);
 
   const base = (dataSeries[allDefs[0].series] || []).filter(pt => pt && pt[1] != null);
-  if(!base.length){ emptyMsg(container, colors, 'No 24-hour data available yet.'); return; }
+  if(!base.length){ emptyMsg(container, colors, DivumWXI18N.t('No 24-hour data available yet.')); return; }
   const dates = base.map(pt => pt[0]);
   const labels = dates.map(t => new Date(t).getHours().toString().padStart(2,'0') + ':00');
 
   const defs = allDefs.filter(d => !hiddenSeries.has(d.name));
-  if(!defs.length){ emptyMsg(container, colors, 'All series hidden — click a legend item to re-enable.'); return; }
+  if(!defs.length){ emptyMsg(container, colors, DivumWXI18N.t('All series hidden — click a legend item to re-enable.')); return; }
 
   const seriesData = defs.map(d => {
     const arr = dataSeries[d.series] || [];
@@ -1727,10 +1797,10 @@ function renderAuroraD3(){
   d3.select('#chartLegend').selectAll('*').remove();
 
   if(!auroraData || !auroraData.readings || !auroraData.readings.length){
-    badgeEl.textContent = 'Data unavailable';
+    badgeEl.textContent = DivumWXI18N.t('Data unavailable');
     badgeEl.className = 'aurora-badge aurora-green';
     noteEl.textContent = '';
-    emptyMsg(container, colors, 'No aurora data available');
+    emptyMsg(container, colors, DivumWXI18N.t('No aurora data available'));
     return;
   }
 
@@ -1738,12 +1808,16 @@ function renderAuroraD3(){
   const latest = readings[readings.length - 1];
   const latestStatus = latest.status_id || auroraStatusForValue(latest.value);
   const latestCfg = AURORA_STATUS[latestStatus] || AURORA_STATUS.green;
-  badgeEl.textContent = latestCfg.label;
+  badgeEl.textContent = DivumWXI18N.t(latestCfg.label);
   badgeEl.className = `aurora-badge ${latestCfg.badgeClass}`;
-  noteEl.textContent = updatedAt
-    ? `Updated: ${new Date(updatedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})} `
-      + `${new Date(updatedAt).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})} UTC · Source: AuroraWatch UK / Lancaster University`
-    : '';
+  if(updatedAt){
+    const ud = new Date(updatedAt);
+    const pad = n => String(n).padStart(2,'0');
+    noteEl.textContent = DivumWXI18N.t('Updated:') + ' ' + ud.getDate() + ' ' + tMonthShort(ud.getMonth()) + ' ' + ud.getFullYear() + ' '
+      + pad(ud.getHours()) + ':' + pad(ud.getMinutes()) + ' UTC \u00B7 ' + DivumWXI18N.t('Source:') + ' AuroraWatch UK / Lancaster University';
+  } else {
+    noteEl.textContent = '';
+  }
 
   const maxVal = Math.max(...readings.map(r => r.value));
   const yMax = Math.max(250, Math.ceil(maxVal * 1.2 / 50) * 50);
@@ -1777,7 +1851,7 @@ function renderAuroraD3(){
     .call(d3.axisBottom(x).tickValues(x.domain().filter((d,i) => i % tickEvery === 0))
       .tickFormat(i => new Date(readings[i].datetime).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})));
   g.append('g').attr('class','d3-axis').call(d3.axisLeft(y).ticks(6));
-  g.append('text').attr('x', 4).attr('y', -8).attr('font-size',10).attr('fill', colors.text).text('Activity (nT)');
+  g.append('text').attr('x', 4).attr('y', -8).attr('font-size',10).attr('fill', colors.text).text(DivumWXI18N.t('Activity (nT)'));
 
   [{v: thresholds.yellow||50, label:'Minor', color:'#facc15'},
    {v: thresholds.amber||100, label:'Moderate', color:'#f97316'},
@@ -1787,7 +1861,7 @@ function renderAuroraD3(){
       g.append('line').attr('x1',0).attr('x2',innerW).attr('y1',y(t.v)).attr('y2',y(t.v))
         .attr('stroke', t.color).attr('stroke-dasharray','4,3').attr('stroke-width',1).attr('opacity',0.7);
       g.append('text').attr('x', innerW-4).attr('y', y(t.v)-4).attr('text-anchor','end')
-        .attr('font-size',9).attr('fill', t.color).text(t.label);
+        .attr('font-size',9).attr('fill', t.color).text(DivumWXI18N.t(t.label));
     });
 
   const barW = Math.max(2, (innerW/readings.length) * 0.7);
@@ -1803,11 +1877,12 @@ function renderAuroraD3(){
       const sid = d.status_id || auroraStatusForValue(d.value);
       const cfg = AURORA_STATUS[sid] || AURORA_STATUS.green;
       const dt = new Date(d.datetime);
-      const hdr = dt.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})
-        + ' ' + dt.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) + ' UTC';
+      const pad = n => String(n).padStart(2,'0');
+      const hdr = tWeekdayFull(dt.getDay()) + ' ' + dt.getDate() + ' ' + tMonthFull(dt.getMonth())
+        + ' ' + pad(dt.getHours()) + ':' + pad(dt.getMinutes()) + ' UTC';
       showTip(`<strong>${hdr}</strong>`
-        + `<div><span style="color:${cfg.color};font-weight:600;">●</span> Activity: <strong>${round1(d.value)} nT</strong></div>`
-        + `<div style="font-size:11px;opacity:.8;">${cfg.label}</div>`, event);
+        + `<div><span style="color:${cfg.color};font-weight:600;">●</span> ${DivumWXI18N.t('Activity:')} <strong>${round1(d.value)} nT</strong></div>`
+        + `<div style="font-size:11px;opacity:.8;">${DivumWXI18N.t(cfg.label)}</div>`, event);
     })
     .on('mouseleave', hideTip);
 }
@@ -1847,13 +1922,13 @@ function renderChart(){
 
   const sys = SYSTEMS[currentSystem];
   const cat = CHART_CATEGORIES[currentCategory];
-  document.getElementById('chartCategoryNote').textContent = cat ? cat.note : '';
+  document.getElementById('chartCategoryNote').textContent = cat && cat.note ? DivumWXI18N.t(cat.note) : '';
   setActiveTimeframeButton();
 
   if(!dataSeries || !cat){
     clearChartArea();
     d3.select('#chartLegend').selectAll('*').remove();
-    emptyMsg(document.getElementById('chartContainer'), chartColors(), dataSeries ? 'No category data' : 'Loading…');
+    emptyMsg(document.getElementById('chartContainer'), chartColors(), dataSeries ? DivumWXI18N.t('No category data') : DivumWXI18N.t('Loading\u2026'));
     return;
   }
 
@@ -1977,9 +2052,9 @@ function wrHideEmpty(containerId){
 
 function drawRoseD3(containerId, roseData, isGust, dataReady, dirFieldMissing){
   const container = document.getElementById(containerId);
-  if(!dataReady){ wrShowEmpty(containerId, 'No wind data available yet.'); return; }
-  if(dirFieldMissing){ wrShowEmpty(containerId, 'Direction data unavailable in charts.json — rose cannot be drawn.'); return; }
-  if(roseData.total === 0){ wrShowEmpty(containerId, 'No observations for this period.'); return; }
+  if(!dataReady){ wrShowEmpty(containerId, DivumWXI18N.t('No wind data available yet.')); return; }
+  if(dirFieldMissing){ wrShowEmpty(containerId, DivumWXI18N.t('Direction data unavailable in charts.json \u2014 rose cannot be drawn.')); return; }
+  if(roseData.total === 0){ wrShowEmpty(containerId, DivumWXI18N.t('No observations for this period.')); return; }
   wrHideEmpty(containerId);
 
   const TC = wrThemeColors();
@@ -2039,12 +2114,12 @@ function drawRoseD3(containerId, roseData, isGust, dataReady, dirFieldMissing){
       .attr('font-family','system-ui, sans-serif')
       .attr('font-size', lbl==='N' ? 13 : 11).attr('font-weight', lbl==='N' ? 'bold' : 'normal')
       .attr('fill', lbl==='N' ? (isGust?'#D3A94C':'#FF6B6B') : TC.cardTxt)
-      .text(lbl);
+      .text(DivumWXI18N.t(lbl));
   });
   g.append('circle').attr('r',3).attr('fill', isGust ? '#D3A94C' : '#FF6B6B');
 
   document.getElementById(isGust ? 'wrCalmGust' : 'wrCalmSpeed').textContent =
-    'Calm: ' + ((calm/total) * 100).toFixed(1) + '%';
+    DivumWXI18N.t('Calm:') + ' ' + ((calm/total) * 100).toFixed(1) + '%';
 }
 
 function wrShowRoseTooltip({di,bi,cnt,total,isGust,roseData}, event){
@@ -2055,11 +2130,11 @@ function wrShowRoseTooltip({di,bi,cnt,total,isGust,roseData}, event){
   const binLabel = WR_BINS[bi].label.replace(/[\d.]+/g, n => (parseFloat(n)*wrConv()).toFixed(wrConv()===1?1:0)) + ' ' + wrUlbl();
   const binCount = total > 0 ? ((cnt/total)*100).toFixed(1)+'%' : '—';
   showTip(
-    `<strong style="color:${titleColor};">${dir} — ${isGust?'Gust':'Speed'}</strong>` +
-    `<div>Direction freq.: <strong>${freq}%</strong></div>` +
-    `<div>Speed band: <strong>${binLabel}</strong></div>` +
-    `<div>Band share: <strong>${binCount}</strong></div>` +
-    `<div>Obs. in sector: <strong>${dirCount}</strong></div>`,
+    `<strong style="color:${titleColor};">${DivumWXI18N.t(dir)} \u2014 ${isGust?DivumWXI18N.t('Gust'):DivumWXI18N.t('Speed')}</strong>` +
+    `<div>${DivumWXI18N.t('Direction freq.:')} <strong>${freq}%</strong></div>` +
+    `<div>${DivumWXI18N.t('Speed band:')} <strong>${binLabel}</strong></div>` +
+    `<div>${DivumWXI18N.t('Band share:')} <strong>${binCount}</strong></div>` +
+    `<div>${DivumWXI18N.t('Obs. in sector:')} <strong>${dirCount}</strong></div>`,
     event
   );
 }
@@ -2067,9 +2142,9 @@ function wrShowCalmTooltip(calm, total, isGust, event){
   const titleColor = isGust ? '#D3A94C' : '#FF6B6B';
   const pct = total > 0 ? ((calm/total)*100).toFixed(1) : '0.0';
   showTip(
-    `<strong style="color:${titleColor};">Calm</strong>` +
-    `<div>Below: <strong>${(0.5*wrConv()).toFixed(1)} ${wrUlbl()}</strong></div>` +
-    `<div>Share of obs.: <strong>${pct}%</strong></div>`,
+    `<strong style="color:${titleColor};">${DivumWXI18N.t('Calm')}</strong>` +
+    `<div>${DivumWXI18N.t('Below:')} <strong>${(0.5*wrConv()).toFixed(1)} ${wrUlbl()}</strong></div>` +
+    `<div>${DivumWXI18N.t('Share of obs.:')} <strong>${pct}%</strong></div>`,
     event
   );
 }
@@ -2098,12 +2173,12 @@ function wrPrevailingDir(slice){
   deg = Math.round(deg);
   return {deg, abbr: WR_DIRS_16[Math.round(deg/22.5) % 16]};
 }
-function wrFmtDate(ts){ return new Date(ts).toLocaleDateString('en-GB', {day:'2-digit', month:'short'}); }
+function wrFmtDate(ts){ const d = new Date(ts); return d.getDate() + ' ' + tMonthShort(d.getMonth()); }
 
 function wrBuildExtremes(allData, dirFieldMissing){
   const grid = document.getElementById('wrExtremeGrid'); grid.innerHTML = '';
   if(!allData.length){
-    grid.innerHTML = '<div class="extreme-period" style="grid-column:1/-1;color:var(--bs-secondary-color);">No data available.</div>';
+    grid.innerHTML = '<div class="extreme-period" style="grid-column:1/-1;color:var(--bs-secondary-color);">' + DivumWXI18N.t('No data available.') + '</div>';
     return;
   }
   const periods = [
@@ -2115,28 +2190,29 @@ function wrBuildExtremes(allData, dirFieldMissing){
     const maxSpd = slice.filter(d => d.speedMs != null).reduce((a,b) => b.speedMs > a.speedMs ? b : a, {speedMs:-Infinity, ts:null});
     const maxGst = slice.filter(d => d.gustMs != null).reduce((a,b) => (b.gustMs||0) > (a.gustMs||0) ? b : a, {gustMs:-Infinity, ts:null});
     const dir = dirFieldMissing ? {deg:null, abbr:'N/A'} : wrPrevailingDir(slice);
+    const naText = DivumWXI18N.t('N/A');
     const col = document.createElement('div'); col.className = 'extreme-period';
     col.innerHTML =
-      '<div class="period-label">' + p.label + '</div>' +
+      '<div class="period-label">' + DivumWXI18N.t(p.label) + '</div>' +
       '<div class="metric-box wind-speed-max">' +
-        (maxSpd.ts ? '<div class="metric-value">' + wrFmtV(maxSpd.speedMs) + '<span class="metric-unit">' + wrUlbl() + '</span></div><div class="metric-date">' + wrFmtDate(maxSpd.ts) + ' (speed)</div>'
-          : '<div class="metric-value" style="opacity:.5;">N/A</div>') +
+        (maxSpd.ts ? '<div class="metric-value">' + wrFmtV(maxSpd.speedMs) + '<span class="metric-unit">' + wrUlbl() + '</span></div><div class="metric-date">' + wrFmtDate(maxSpd.ts) + ' (' + DivumWXI18N.t('speed') + ')</div>'
+          : '<div class="metric-value" style="opacity:.5;">' + naText + '</div>') +
       '</div>' +
       '<div class="metric-box wind-gust-max">' +
-        (maxGst.ts && maxGst.gustMs > 0 ? '<div class="metric-value">' + wrFmtV(maxGst.gustMs) + '<span class="metric-unit">' + wrUlbl() + '</span></div><div class="metric-date">' + wrFmtDate(maxGst.ts) + ' (gust)</div>'
-          : '<div class="metric-value" style="opacity:.5;">N/A</div>') +
+        (maxGst.ts && maxGst.gustMs > 0 ? '<div class="metric-value">' + wrFmtV(maxGst.gustMs) + '<span class="metric-unit">' + wrUlbl() + '</span></div><div class="metric-date">' + wrFmtDate(maxGst.ts) + ' (' + DivumWXI18N.t('gust') + ')</div>'
+          : '<div class="metric-value" style="opacity:.5;">' + naText + '</div>') +
       '</div>' +
       '<div class="metric-box wind-dir-prev">' +
-        (dir.deg != null ? '<div class="metric-value">' + dir.abbr + '<span class="metric-unit"> (' + dir.deg + '°)</span></div><div class="metric-date">prevailing</div>'
-          : '<div class="metric-value" style="opacity:.5;">N/A</div>') +
+        (dir.deg != null ? '<div class="metric-value">' + DivumWXI18N.t(dir.abbr) + '<span class="metric-unit"> (' + dir.deg + '°)</span></div><div class="metric-date">' + DivumWXI18N.t('prevailing') + '</div>'
+          : '<div class="metric-value" style="opacity:.5;">' + naText + '</div>') +
       '</div>';
     grid.appendChild(col);
   });
 }
 
 function wrUpdateUnitDisplay(){
-  document.getElementById('windroseUnitDisplay').textContent = 'Units: ' + wrUlbl() +
-    (wrWindUnit() === 'bf' ? ' (Beaufort shown as m/s here)' : '');
+  document.getElementById('windroseUnitDisplay').textContent = DivumWXI18N.t('Units:') + ' ' + wrUlbl() +
+    (wrWindUnit() === 'bf' ? ' (' + DivumWXI18N.t('Beaufort shown as m/s here') + ')' : '');
 }
 
 function renderWindRoseD3(){
@@ -2151,7 +2227,7 @@ function renderWindRoseD3(){
   wrBuildLegend('legendSpeed', false);
   wrBuildLegend('legendGust', true);
   wrBuildExtremes(allData, dirFieldMissing);
-  document.getElementById('windroseUnitDisplay').textContent += dirFieldMissing ? ' · Direction data unavailable' : '';
+  document.getElementById('windroseUnitDisplay').textContent += dirFieldMissing ? ' \u00B7 ' + DivumWXI18N.t('Direction data unavailable') : '';
 }
 
 document.querySelectorAll('.chart-tf-btn[data-wrperiod]').forEach(btn => {
@@ -2408,6 +2484,13 @@ includeHTML(() => {
     });
   }
   syncThemeNavUI();
+});
+
+window.addEventListener('i18nready', () => {
+  applyTabLabels();
+  updatePageTitle();
+  renderChart();
+  renderRecordsPanel();
 });
 
 // ===================== Bootstrap =====================
