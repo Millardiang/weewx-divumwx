@@ -1,7 +1,4 @@
 # Change Log
-# The following conventions apply:
-# ! = Bug Fix
-# * = New Addition
-# @ = Information
+* Entries will commence as soon as out of Beta/RC testing
 
 ## 
