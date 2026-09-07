@@ -167,14 +167,14 @@ footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neu
 <div class="container-xl">
   <div class="site-navbar-include" w3-include-html="navbar.html"></div>
 
-  <h1 class="records-page-title">Climate Report</h1>
+  <h1 class="records-page-title" id="climateTitle">Climate Report</h1>
 
   <div class="noaa-report">
     <div class="noaa-controls">
-      <label for="moSel">Monthly Report:</label>
+      <label for="moSel" id="moSelLabel">Monthly Report:</label>
       <select id="moSel"></select>
       <span class="noaa-sep">|</span>
-      <label for="yrSel">Yearly Report:</label>
+      <label for="yrSel" id="yrSelLabel">Yearly Report:</label>
       <select id="yrSel"></select>
     </div>
 
@@ -199,12 +199,12 @@ footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neu
         <div class="noaa-table-wrap"><table class="noaa-table">
           <thead>
             <tr>
-              <th rowspan="2">DAY</th>
+              <th rowspan="2" id="moDayHeader">DAY</th>
               <th colspan="3" class="t-tp" id="moTempHeader">TEMPERATURE</th>
-              <th colspan="2" class="t-hd">DEGREE DAYS</th>
+              <th colspan="2" class="t-hd" id="moDegreeDaysHeader">DEGREE DAYS</th>
               <th rowspan="2" class="t-rn" id="moRainHeader">RAIN</th>
               <th colspan="2" class="t-wn" id="moWindHeader">WIND SPEED</th>
-              <th colspan="2" class="t-wd">WIND DIR</th>
+              <th colspan="2" class="t-wd" id="moWindDirHeader">WIND DIR</th>
             </tr>
             <tr>
               <th class="sub t-tp">MEAN</th><th class="sub t-tp">HIGH</th><th class="sub t-tp">LOW</th>
@@ -219,16 +219,19 @@ footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neu
 
       <div id="tab-yr" class="noaa-tab-panel">
         <div class="noaa-sec-title" id="yrTitle"></div>
-        <div class="noaa-sec-sub">Click any row to view that month's daily detail &nbsp;|&nbsp; Green = currently selected month</div>
+        <div class="noaa-sec-sub">
+          <span id="yrSubNote1">Click any row to view that month's daily detail</span> &nbsp;|&nbsp;
+          <span id="yrSubNote2">Green: currently selected month</span>
+        </div>
         <div class="noaa-table-wrap"><table class="noaa-table">
           <thead>
             <tr>
-              <th>MONTH</th>
+              <th id="yrMonthHeader">MONTH</th>
               <th colspan="3" class="t-tp" id="yrTempHeader">TEMPERATURE</th>
-              <th colspan="2" class="t-hd">DEGREE DAYS</th>
+              <th colspan="2" class="t-hd" id="yrDegreeDaysHeader">DEGREE DAYS</th>
               <th class="t-rn" id="yrRainHeader">RAIN</th>
               <th colspan="2" class="t-wn" id="yrWindHeader">WIND</th>
-              <th>DATA</th>
+              <th id="yrDataHeader">DATA</th>
             </tr>
             <tr>
               <th class="sub"></th>
@@ -246,18 +249,70 @@ footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neu
   </div>
 
   <p class="records-page-sub mt-3" style="font-size:12.5px;font-style:italic;">
-    Degree days use base 15.5&deg;C (the UK convention), computed from daily mean temperature, regardless of the unit system selected above.
-    The Yearly tab's monthly HDD/CDD figures use the month's mean temperature &times; day count — a coarser approximation than summing each
-    day's own HDD/CDD (which the Monthly tab does) — carried over as-is from the original report.
+    <span id="climateDisclaimer1">Degree days use base 15.5&deg;C (the UK convention), computed from daily mean temperature, regardless of the unit system selected above.</span>
+    <span id="climateDisclaimer2">The Yearly tab's monthly HDD/CDD figures use the month's mean temperature &times; day count — a coarser approximation than summing each
+    day's own HDD/CDD (which the Monthly tab does) — carried over as-is from the original report.</span>
   </p>
 
-  <footer class="text-center py-3">DivumWX — Climate Report</footer>
+  <footer class="text-center py-3" id="climateFooter">DivumWX — Climate Report</footer>
 </div>
 
 <script src="units.js"></script>
 <script src="cardI18n.js?v=s3n2026a"></script>
 <script src="siteHeader.js"></script>
 <script>
+// ===================== Static text i18n =====================
+(function applyStaticLabels(){
+  DivumWXI18N.applyLabel(document.getElementById('climateTitle'), 'Climate Report');
+  DivumWXI18N.applyLabel(document.getElementById('moSelLabel'), 'Monthly Report:');
+  DivumWXI18N.applyLabel(document.getElementById('yrSelLabel'), 'Yearly Report:');
+  DivumWXI18N.applyLabel(document.getElementById('tabBtnMonthly'), 'Monthly');
+  DivumWXI18N.applyLabel(document.getElementById('tabBtnYearly'), 'Yearly');
+  DivumWXI18N.applyLabel(document.getElementById('moDegreeDaysHeader'), 'DEGREE DAYS');
+  DivumWXI18N.applyLabel(document.getElementById('moWindDirHeader'), 'WIND DIR');
+  DivumWXI18N.applyLabel(document.getElementById('yrMonthHeader'), 'MONTH');
+  DivumWXI18N.applyLabel(document.getElementById('yrDegreeDaysHeader'), 'DEGREE DAYS');
+  DivumWXI18N.applyLabel(document.getElementById('yrDataHeader'), 'DATA');
+  DivumWXI18N.applyLabel(document.getElementById('yrSubNote1'), "Click any row to view that month's daily detail");
+  DivumWXI18N.applyLabel(document.getElementById('yrSubNote2'), 'Green: currently selected month');
+  DivumWXI18N.applyLabel(document.getElementById('climateDisclaimer1'),
+    'Degree days use base 15.5\u00B0C (the UK convention), computed from daily mean temperature, regardless of the unit system selected above.');
+  DivumWXI18N.applyLabel(document.getElementById('climateDisclaimer2'),
+    "The Yearly tab's monthly HDD/CDD figures use the month's mean temperature \u00D7 day count \u2014 a coarser approximation than summing each day's own HDD/CDD (which the Monthly tab does) \u2014 carried over as-is from the original report.");
+  DivumWXI18N.applyLabel(document.getElementById('climateFooter'), 'DivumWX \u2014 Climate Report');
+  // moDayHeader ("DAY") and every two-row-header sub-column (MEAN, HIGH,
+  // LOW, HDD, CDD, AVG, MAX, DEG, DIR, DAYS) are deliberately left as
+  // fixed English report abbreviations rather than run through t() --
+  // this table's columns are only wide enough for the current 2-4
+  // character labels, and translating "AVG"/"MAX"/"DEG" etc into full
+  // words in every language risks breaking the tight NOAA-style layout
+  // in exactly the way the temperature/wind rows already needed fixing
+  // for elsewhere on this site. HDD/CDD in particular are standard
+  // international climate-science abbreviations, not English words with
+  // an obvious per-language translation. moTempHeader/moRainHeader/
+  // moWindHeader/yrTempHeader/yrRainHeader/yrWindHeader are NOT here --
+  // renderMonthly()/renderYearly() rebuild them every call (they append
+  // the live unit label), so translating them there instead already
+  // covers both the first paint and any later language switch.
+})();
+
+function renderStationLabels(){
+  var nameEl = document.getElementById('noaaStnName');
+  var latEl = document.getElementById('noaaStnLat');
+  var longEl = document.getElementById('noaaStnLong');
+  var elevEl = document.getElementById('noaaStnElev');
+  // Each field keeps whatever value it currently has (initial placeholder
+  // text, or the real value setStationTitle() already filled in) -- only
+  // the bold "NAME:"/"LAT:"/etc prefix gets re-translated here, matching
+  // the same "label: value" split every other translated field on this
+  // page already uses.
+  if (nameEl) nameEl.innerHTML = '<b>' + DivumWXI18N.t('NAME:') + '</b> ' + (nameEl.dataset.value || 'Steeple Claydon, Buckinghamshire');
+  if (latEl) latEl.innerHTML = '<b>' + DivumWXI18N.t('LAT:') + '</b> ' + (latEl.dataset.value || "51\u00B0 57.0' N");
+  if (longEl) longEl.innerHTML = '<b>' + DivumWXI18N.t('LONG:') + '</b> ' + (longEl.dataset.value || "1\u00B0 04.8' W");
+  if (elevEl) elevEl.innerHTML = '<b>' + DivumWXI18N.t('ELEV / HW:') + '</b> ' + (elevEl.dataset.value || DivumWXI18N.t('not yet configured \u2014 add real values when known'));
+}
+renderStationLabels();
+
 function convTemp(c, unit){ return unit==='F' ? C2F(c) : c; }
 function convWind(ms, unit){
   switch(unit){ case 'mph': return ms2mph(ms); case 'kmh': return ms2kmh(ms); case 'kt': return ms2kt(ms); case 'bf': return beaufort(ms).force; default: return ms; }
@@ -326,7 +381,7 @@ async function loadClimateData(){
     errEl.style.display = 'none';
   }catch(e){
     console.warn('Re-ImaginedWX climate report: load failed —', e.message);
-    errEl.textContent = 'Cannot load data: ' + e.message;
+    errEl.textContent = DivumWXI18N.t('Cannot load data:') + ' ' + e.message;
     errEl.style.display = '';
   }
 }
@@ -344,6 +399,8 @@ let { year: selYear, month: selMonth } = getInitialState();
 
 const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const MONTH_SHORT = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+function monthNameFor(i){ return DivumWXI18N.t(MONTH_NAMES[i]); }
+function monthShortFor(i){ return DivumWXI18N.t(MONTH_SHORT[i]); }
 
 function daysInMonth(year, month){ return new Date(year, month, 0).getDate(); }
 
@@ -401,7 +458,7 @@ function buildMonthlyRecords(year){
 function populateSelectors(){
   const moSel = document.getElementById('moSel');
   const yrSel = document.getElementById('yrSel');
-  moSel.innerHTML = MONTH_NAMES.map((mn,i)=>`<option value="${i+1}">${mn}</option>`).join('');
+  moSel.innerHTML = MONTH_NAMES.map((mn,i)=>`<option value="${i+1}">${monthNameFor(i)}</option>`).join('');
   let yrOpts = '';
   for(let yr=lastYear; yr>=firstYear; yr--) yrOpts += `<option value="${yr}">${yr}</option>`;
   yrSel.innerHTML = yrOpts;
@@ -421,12 +478,12 @@ function updateUrl(){
 function renderMonthly(){
   const sys = SYSTEMS[currentSystem];
   const tUnit = tempUnitLabel(sys), wUnit = windUnitLabel(sys), rUnit = rainUnitLabel(sys);
-  document.getElementById('moTempHeader').textContent = `TEMPERATURE (${tUnit})`;
-  document.getElementById('moRainHeader').innerHTML = `RAIN<br>${rUnit}`;
-  document.getElementById('moWindHeader').textContent = `WIND SPEED (${wUnit})`;
-  const monthYearStr = (MONTH_NAMES[selMonth-1]+' '+selYear).toUpperCase();
-  document.getElementById('moTitle').textContent = 'MONTHLY CLIMATOLOGICAL SUMMARY FOR '+monthYearStr;
-  document.getElementById('moSub').textContent = `TEMPERATURE (${tUnit}) | RAIN (${rUnit}) | WIND SPEED (${wUnit}) | DEGREE DAYS BASE 15.5°C`;
+  document.getElementById('moTempHeader').textContent = `${DivumWXI18N.t('TEMPERATURE')} (${tUnit})`;
+  document.getElementById('moRainHeader').innerHTML = `${DivumWXI18N.t('RAIN')}<br>${rUnit}`;
+  document.getElementById('moWindHeader').textContent = `${DivumWXI18N.t('WIND SPEED')} (${wUnit})`;
+  const monthYearStr = (monthNameFor(selMonth-1)+' '+selYear).toUpperCase();
+  document.getElementById('moTitle').textContent = DivumWXI18N.t('MONTHLY CLIMATOLOGICAL SUMMARY FOR').toUpperCase()+' '+monthYearStr;
+  document.getElementById('moSub').textContent = `${DivumWXI18N.t('TEMPERATURE')} (${tUnit}) | ${DivumWXI18N.t('RAIN')} (${rUnit}) | ${DivumWXI18N.t('WIND SPEED')} (${wUnit}) | ${DivumWXI18N.t('DEGREE DAYS BASE 15.5\u00B0C').toUpperCase()}`;
 
   const recs = buildDailyRecords(selYear, selMonth);
   let sMn=0,nMn=0,hiH=null,loL=null,sRn=0,sWa=0,nWa=0,hiW=null,sHdd=0,sCdd=0;
@@ -474,10 +531,10 @@ function renderMonthly(){
 function renderYearly(){
   const sys = SYSTEMS[currentSystem];
   const tUnit = tempUnitLabel(sys), wUnit = windUnitLabel(sys), rUnit = rainUnitLabel(sys);
-  document.getElementById('yrTempHeader').textContent = `TEMPERATURE (${tUnit})`;
-  document.getElementById('yrRainHeader').textContent = `RAIN (${rUnit})`;
-  document.getElementById('yrWindHeader').textContent = `WIND (${wUnit})`;
-  document.getElementById('yrTitle').textContent = 'YEARLY CLIMATOLOGICAL SUMMARY FOR '+selYear;
+  document.getElementById('yrTempHeader').textContent = `${DivumWXI18N.t('TEMPERATURE')} (${tUnit})`;
+  document.getElementById('yrRainHeader').textContent = `${DivumWXI18N.t('RAIN')} (${rUnit})`;
+  document.getElementById('yrWindHeader').textContent = `${DivumWXI18N.t('WIND')} (${wUnit})`;
+  document.getElementById('yrTitle').textContent = DivumWXI18N.t('YEARLY CLIMATOLOGICAL SUMMARY FOR').toUpperCase()+' '+selYear;
 
   const recs = buildMonthlyRecords(selYear);
   let ysMn=0,ynMn=0,yhiH=null,yloL=null,ysRn=0,ysHdd=0,ysCdd=0,ysWa=0,ynWa=0,yhiW=null;
@@ -492,7 +549,7 @@ function renderYearly(){
     if(mr.wsAvg!=null){ ysWa+=mr.wsAvg; ynWa++; }
     if(mr.wsMax!=null && (yhiW===null||mr.wsMax>yhiW)) yhiW=mr.wsMax;
     return `<tr class="cl${act?' am':''}" data-month="${mr.month}">
-      <td class="dc">${MONTH_SHORT[mr.month-1]}</td>
+      <td class="dc">${monthShortFor(mr.month-1)}</td>
       <td class="temp">${fmtT(mr.meanTemp,sys)}</td>
       <td class="temp">${fmtT(mr.maxTemp,sys)}</td>
       <td class="temp">${fmtT(mr.minTemp,sys)}</td>
@@ -506,7 +563,7 @@ function renderYearly(){
   }).join('');
 
   const summaryRow = `<tr class="sr">
-    <td class="dc">ANNUAL</td>
+    <td class="dc">${DivumWXI18N.t('ANNUAL')}</td>
     <td class="temp">${ynMn>0 ? fmtT(ysMn/ynMn,sys) : '—'}</td>
     <td class="temp">${fmtT(yhiH,sys)}</td>
     <td class="temp">${fmtT(yloL,sys)}</td>
@@ -588,27 +645,31 @@ function setStationTitle(){
       // directly into the HTML (one real station's actual details baked
       // into the shared template, wrong for every other install) with
       // zero JS wiring to update it at all. Each field only overwrites
-      // its hardcoded fallback text if the corresponding archive.json
+      // its hardcoded fallback value if the corresponding archive.json
       // value actually parses -- an absent/malformed field leaves the
-      // page showing its old static text rather than a blank or "—".
+      // page showing its old placeholder value rather than a blank or "—".
+      // The raw value (not the translated "NAME:"-style prefix) is stored
+      // in a data attribute; renderStationLabels() combines it with the
+      // current language's prefix and re-runs on every 'i18nready' too.
       const nameEl = document.getElementById('noaaStnName');
-      if(nameEl && loc) nameEl.innerHTML = '<b>NAME:</b> ' + loc;
+      if(nameEl && loc) nameEl.dataset.value = loc;
 
       const latEl = document.getElementById('noaaStnLat');
       const latDM = formatDM(meta.latitude, 'N', 'S');
-      if(latEl && latDM) latEl.innerHTML = '<b>LAT:</b> ' + latDM;
+      if(latEl && latDM) latEl.dataset.value = latDM;
 
       const longEl = document.getElementById('noaaStnLong');
       const longDM = formatDM(meta.longitude, 'E', 'W');
-      if(longEl && longDM) longEl.innerHTML = '<b>LONG:</b> ' + longDM;
+      if(longEl && longDM) longEl.dataset.value = longDM;
 
       const elevEl = document.getElementById('noaaStnElev');
       if(elevEl && typeof meta.elevation_m === 'number' && !isNaN(meta.elevation_m)){
         const elevText = Math.round(meta.elevation_m) + 'm';
         const hwText = meta.station_hardware ? (' / ' + meta.station_hardware) : '';
-        elevEl.innerHTML = '<b>ELEV / HW:</b> ' + elevText + hwText;
+        elevEl.dataset.value = elevText + hwText;
         elevEl.style.opacity = '';
       }
+      renderStationLabels();
     })
     .catch(e => console.warn('Re-ImaginedWX climate: station_location fetch failed —', e.message));
 }
@@ -698,6 +759,12 @@ setInterval(pollIsDayForTheme, THEME_ISDAY_POLL_MS);
   populateSelectors();
   renderAll();
 })();
+
+window.addEventListener('i18nready', function(){
+  renderStationLabels();
+  populateSelectors(); // month-name <option> text is baked in at populate time
+  renderAll();
+});
 
 includeHTML(() => {
   initSharedHeader();
