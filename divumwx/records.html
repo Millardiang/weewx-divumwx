@@ -193,6 +193,19 @@ table.records-table {
 <script src="cardI18n.js?v=s3n2026a"></script>
 <script src="siteHeader.js"></script>
 <script>
+// ===================== Static text i18n =====================
+(function applyStaticLabels(){
+  DivumWXI18N.applyLabel(document.getElementById('recordsTitle'), 'Records');
+  DivumWXI18N.applyLabel(document.getElementById('recordsSubtitle'),
+    'Max, min and average for every measured value \u2014 day, week, month, year and all\u2011time.');
+  DivumWXI18N.applyAttr(document.getElementById('metricSearch'), 'placeholder', 'Filter by name (e.g. temperature, wind, PM2.5)\u2026');
+  // recordsStatus and recordsLegend are NOT here -- both are fully
+  // rewritten by loadRecords() once the fetch resolves (or fails), and
+  // that function itself is translated below, so the initial static text
+  // is only ever momentarily visible before the fetch completes.
+})();
+</script>
+<script>
 // ==== THEME HANDLING ====
 // Deliberately the very first thing in <body>, before .container (navbar
 // include + page content) can paint. Previously this whole block lived
@@ -330,8 +343,8 @@ setInterval(() => {
 <div class="container">
   <div class="site-header-include" w3-include-html="navbar.html"></div>
 
-  <h1 class="page-title">Records</h1>
-  <p class="page-subtitle">Max, min and average for every measured value — day, week, month, year and all&#8209;time.</p>
+  <h1 class="page-title" id="recordsTitle">Records</h1>
+  <p class="page-subtitle" id="recordsSubtitle">Max, min and average for every measured value — day, week, month, year and all&#8209;time.</p>
 
   <div class="records-toolbar">
     <input type="text" id="metricSearch" placeholder="Filter by name (e.g. temperature, wind, PM2.5)&hellip;">
@@ -570,6 +583,17 @@ function reduceExtreme(pts, cmp) {
 const reduceMax = pts => reduceExtreme(pts, (a, b) => a > b);
 const reduceMin = pts => reduceExtreme(pts, (a, b) => a < b);
 
+// MONTHS_FULL reuses the same full month-name keys already defined for
+// climate.html (January, February, ... -- normal-case, suits inline use
+// here directly). MONTHS_SHORT is a NEW, separate mixed-case set
+// (Jan, Feb, ...) rather than reusing climate.html's own short-month
+// keys, which are ALL-CAPS (JAN, FEB, ...) for that page's NOAA-report
+// style -- shouting "6 JAN" inline in a sentence here would look wrong.
+const MONTHS_FULL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function fmtDayShort(d) {
+  return d.getDate() + ' ' + DivumWXI18N.t(MONTHS_SHORT[d.getMonth()]);
+}
 function buildPeriods(now) {
   const y = now.getFullYear(), m = now.getMonth(), d = now.getDate();
   const dow = now.getDay();
@@ -581,13 +605,18 @@ function buildPeriods(now) {
   const monthEnd = new Date(y, m + 1, 1, 0, 0, 0, 0).getTime();
   const yearStart = new Date(y, 0, 1, 0, 0, 0, 0).getTime();
   const yearEnd = new Date(y + 1, 0, 1, 0, 0, 0, 0).getTime();
-  const fmtRange = (a, b) => a.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + '–' + b.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  // fmtRange previously called toLocaleDateString('en-GB', {month:'short'})
+  // directly -- the browser's own English locale formatting, completely
+  // untouched by DivumWXI18N regardless of the site's selected language
+  // (same bug class as elsewhere on this site). fmtDayShort above routes
+  // the month name through t() instead.
+  const fmtRange = (a, b) => fmtDayShort(a) + '\u2013' + fmtDayShort(b);
   return {
-    day:   { start: null, end: null, label: 'Last 24 hours' },
-    week:  { start: weekStart, end: weekEndDate.getTime() + 86400000, label: 'Week: ' + fmtRange(weekStartDate, weekEndDate) },
-    month: { start: monthStart, end: monthEnd, label: now.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }) },
+    day:   { start: null, end: null, label: DivumWXI18N.t('Last 24 hours') },
+    week:  { start: weekStart, end: weekEndDate.getTime() + 86400000, label: DivumWXI18N.t('Week:') + ' ' + fmtRange(weekStartDate, weekEndDate) },
+    month: { start: monthStart, end: monthEnd, label: DivumWXI18N.t(MONTHS_FULL[m]) + ' ' + y },
     year:  { start: yearStart, end: yearEnd, label: String(y) },
-    alltime: { start: null, end: null, label: 'All time' }
+    alltime: { start: null, end: null, label: DivumWXI18N.t('All time') }
   };
 }
 function filterInPeriod(pts, period) {
@@ -694,10 +723,11 @@ function convertValue(value, family) {
 }
 function fmtDayTime(ts) {
   const d = new Date(ts);
-  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ', ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  return fmtDayShort(d) + ', ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
 }
 function fmtDateOnly(ts) {
-  return new Date(ts).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  const d = new Date(ts);
+  return fmtDayShort(d) + ' ' + d.getFullYear();
 }
 
 function cellHtml(point, family, dateStyle) {
@@ -712,29 +742,47 @@ function avgCellHtml(avgValue, family, periodLabel) {
   return '<span class="record-value">' + c.text + (c.unit ? ' ' + c.unit : '') + '</span><span class="record-sub">' + periodLabel + '</span>';
 }
 
-const PERIOD_LABELS = { day: 'Day', week: 'Week', month: 'Month', year: 'Year', alltime: 'All-time' };
+const PERIOD_LABEL_KEYS = { day: 'Day', week: 'Week', month: 'Month', year: 'Year', alltime: 'All-time' };
 
 function renderMetricCard(metric, records, periods) {
-  const unitFlagHtml = metric.family === 'flagged' ? '<span class="unit-flag">unconfirmed unit' + (metric.note ? ' &middot; ' + metric.note : '') + '</span>'
+  const label = DivumWXI18N.t(metric.label);
+  const unitFlagHtml = metric.family === 'flagged' ? '<span class="unit-flag">' + DivumWXI18N.t('unconfirmed unit') + (metric.note ? ' &middot; ' + metric.note : '') + '</span>'
     : (metric.note ? '<span class="unit-flag">' + metric.note + '</span>' : '');
   let rows = '';
   ['day', 'week', 'month', 'year', 'alltime'].forEach(pk => {
     const rec = records[pk];
     const dateStyle = pk === 'day' ? 'time' : 'date';
     rows += '<tr>' +
-      '<td class="period-cell">' + PERIOD_LABELS[pk] + '</td>' +
+      '<td class="period-cell">' + DivumWXI18N.t(PERIOD_LABEL_KEYS[pk]) + '</td>' +
       '<td>' + cellHtml(rec.max, metric.family, dateStyle) + '</td>' +
       '<td>' + cellHtml(rec.min, metric.family, dateStyle) + '</td>' +
       '<td>' + avgCellHtml(rec.avgValue, metric.family, periods[pk].label) + '</td>' +
       '</tr>';
   });
-  return '<div class="record-card" data-label="' + metric.label.toLowerCase() + '">' +
-    '<h3>' + metric.label + unitFlagHtml + '</h3>' +
-    '<table class="records-table"><thead><tr><th>Period</th><th>Max</th><th>Min</th><th>Avg</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+  return '<div class="record-card" data-label="' + label.toLowerCase() + '">' +
+    '<h3>' + label + unitFlagHtml + '</h3>' +
+    '<table class="records-table"><thead><tr><th>' + DivumWXI18N.t('Period') + '</th><th>' + DivumWXI18N.t('Max') + '</th><th>' + DivumWXI18N.t('Min') + '</th><th>' + DivumWXI18N.t('Avg') + '</th></tr></thead><tbody>' + rows + '</tbody></table>' +
     '</div>';
 }
 
 let SERIES_INDEX = null;
+let lastLoadCount = null;
+let lastLoadError = null;
+
+function renderStatusAndLegend(){
+  const statusEl = document.getElementById('recordsStatus');
+  if (lastLoadError) {
+    statusEl.textContent = DivumWXI18N.t('Could not load charts.json \u2014') + ' ' + lastLoadError;
+    return;
+  }
+  if (lastLoadCount == null) return; // still loading -- static placeholder text stands
+  statusEl.textContent = lastLoadCount + ' ' + DivumWXI18N.t('measured values loaded from charts.json.');
+  document.getElementById('recordsLegend').innerHTML =
+    '<p>' + DivumWXI18N.t('Week runs Monday\u2013Sunday, month and year are calendar periods. "Day" is a rolling last 24 hours using real hour-by-hour timestamps.') + '</p>' +
+    '<p>' + DivumWXI18N.t('Week/Month/Year/All-time Max and Min dates come from charts.json\u2019s daily-aggregate series, which only stores one timestamp per day (local midnight) \u2014 so the date shown is correct but no time-of-day is available for those periods.') + '</p>' +
+    '<p><span class="unit-flag">' + DivumWXI18N.t('unconfirmed unit') + '</span> \u2014 ' + DivumWXI18N.t('this project\u2019s confirmed unit-system shape (units.js) only covers temperature, wind and rain; other values are shown in a best-guess unit and don\u2019t respond to the unit-system selector.') + '</p>' +
+    '<p>' + DivumWXI18N.t('\u2021 wind direction min/max/avg are plain numeric extremes over 0\u2013360\u00B0, not circular-mean-aware \u2014 a reading near 359\u00B0 and one near 1\u00B0 won\u2019t average to "north" here.') + '</p>';
+}
 function renderAll() {
   if (!SERIES_INDEX) return;
   const now = new Date();
@@ -765,7 +813,7 @@ function renderAll() {
     if (!byCategory['Other']) byCategory['Other'] = [];
     leftovers.forEach(baseLower => {
       const entry = SERIES_INDEX[baseLower];
-      const metric = { base: entry.displayBase, label: prettifyBase(entry.displayBase) + ' (unrecognised)', category: 'Other', family: 'flagged' };
+      const metric = { base: entry.displayBase, label: prettifyBase(entry.displayBase) + ' (' + DivumWXI18N.t('unrecognised') + ')', category: 'Other', family: 'flagged' };
       const records = computeRecords(entry, periods);
       byCategory['Other'].push(renderMetricCard(metric, records, periods));
     });
@@ -776,7 +824,7 @@ function renderAll() {
     if (!cards || !cards.length) return;
     const section = document.createElement('div');
     section.className = 'category-section';
-    section.innerHTML = '<h2 class="category-title">' + cat + '</h2><div class="records-grid">' + cards.join('') + '</div>';
+    section.innerHTML = '<h2 class="category-title">' + DivumWXI18N.t(cat) + '</h2><div class="records-grid">' + cards.join('') + '</div>';
     root.appendChild(section);
   });
 
@@ -803,22 +851,23 @@ function loadRecords() {
       const seriesObjects = items.map(it => (it && it.chartPlot && it.chartPlot.series) || {}).filter(s => Object.keys(s).length);
       if (!seriesObjects.length) throw new Error('no chartPlot.series found in charts.json');
       SERIES_INDEX = buildSeriesIndex(seriesObjects);
-      const count = Object.keys(SERIES_INDEX).length;
-      document.getElementById('recordsStatus').textContent = count + ' measured values loaded from charts.json.';
-      document.getElementById('recordsLegend').innerHTML =
-        '<p>Week runs Monday&ndash;Sunday, month and year are calendar periods. "Day" is a rolling last 24 hours using real hour-by-hour timestamps.</p>' +
-        '<p>Week/Month/Year/All-time Max and Min dates come from charts.json&rsquo;s daily-aggregate series, which only stores one timestamp per day (local midnight) &mdash; so the date shown is correct but no time-of-day is available for those periods.</p>' +
-        '<p><span class="unit-flag">unconfirmed unit</span> — this project&rsquo;s confirmed unit-system shape (units.js) only covers temperature, wind and rain; other values are shown in a best-guess unit and don&rsquo;t respond to the unit-system selector.</p>' +
-        '<p>‡ wind direction min/max/avg are plain numeric extremes over 0&ndash;360°, not circular-mean-aware — a reading near 359° and one near 1° won&rsquo;t average to "north" here.</p>';
+      lastLoadCount = Object.keys(SERIES_INDEX).length;
+      lastLoadError = null;
+      renderStatusAndLegend();
       renderAll();
     })
     .catch(e => {
-      document.getElementById('recordsStatus').textContent = 'Could not load charts.json — ' + e.message;
+      lastLoadError = e.message;
+      renderStatusAndLegend();
       console.warn('records: charts.json load failed —', e.message);
     });
 }
 loadRecords();
 window.addEventListener('unitsystemchange', renderAll);
+window.addEventListener('i18nready', function(){
+  renderStatusAndLegend();
+  renderAll();
+});
 </script>
 </body>
 </html>
