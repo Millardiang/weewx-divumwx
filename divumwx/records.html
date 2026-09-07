@@ -192,6 +192,7 @@ table.records-table {
 <body class="light">
 <script src="cardI18n.js?v=s3n2026a"></script>
 <script src="siteHeader.js"></script>
+<script src="stationTime.js"></script>
 <script>
 // ===================== Static text i18n =====================
 (function applyStaticLabels(){
@@ -592,19 +593,54 @@ const reduceMin = pts => reduceExtreme(pts, (a, b) => a < b);
 const MONTHS_FULL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function fmtDayShort(d) {
-  return d.getDate() + ' ' + DivumWXI18N.t(MONTHS_SHORT[d.getMonth()]);
+  return d.getUTCDate() + ' ' + DivumWXI18N.t(MONTHS_SHORT[d.getUTCMonth()]);
 }
+// Converts a real epoch timestamp into the same "fake UTC" representation
+// stationNow() uses, so every date/time this page displays -- whether it's
+// "now" or when a specific record happened -- is consistently in the
+// station's own timezone, not whichever timezone the visitor's browser
+// happens to be in.
+function tsToStationDate(ts){
+  var p = stationParts(new Date(ts));
+  return new Date(Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second));
+}
+// Constructs a Date object whose UTC-getter fields (getUTCFullYear,
+// getUTCMonth, getUTCDate, getUTCDay, ...) represent the station's own
+// wall-clock date/time, rather than the plain `new Date()` this file
+// used before -- which always reports its LOCAL calendar fields in the
+// *visitor's* browser timezone, not the station's. Near any day/week/
+// month/year boundary, a visitor in a different timezone than the
+// station was seeing records bucketed into the wrong period entirely
+// (e.g. "this week" starting a day early or late) -- not just a display
+// oddity, a real difference in which data points counted. Every
+// function that consumes this "fake UTC" Date must keep using UTC
+// getters/Date.UTC() throughout, never local ones, or the two domains
+// get mixed and shift results by the browser's own offset again.
+function stationParts(date){
+  var parts = {};
+  new Intl.DateTimeFormat('en-GB', {
+    timeZone: (window.StationTime ? window.StationTime.getTZ() : undefined), hourCycle: 'h23',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit'
+  }).formatToParts(date).forEach(function(p){ parts[p.type] = p.value; });
+  return parts;
+}
+function stationNow(){
+  var p = stationParts(new Date());
+  return new Date(Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second));
+}
+
 function buildPeriods(now) {
-  const y = now.getFullYear(), m = now.getMonth(), d = now.getDate();
-  const dow = now.getDay();
+  const y = now.getUTCFullYear(), m = now.getUTCMonth(), d = now.getUTCDate();
+  const dow = now.getUTCDay();
   const diffToMonday = (dow === 0 ? -6 : 1 - dow);
-  const weekStartDate = new Date(y, m, d + diffToMonday, 0, 0, 0, 0);
+  const weekStartDate = new Date(Date.UTC(y, m, d + diffToMonday, 0, 0, 0, 0));
   const weekStart = weekStartDate.getTime();
-  const weekEndDate = new Date(weekStartDate); weekEndDate.setDate(weekEndDate.getDate() + 6);
-  const monthStart = new Date(y, m, 1, 0, 0, 0, 0).getTime();
-  const monthEnd = new Date(y, m + 1, 1, 0, 0, 0, 0).getTime();
-  const yearStart = new Date(y, 0, 1, 0, 0, 0, 0).getTime();
-  const yearEnd = new Date(y + 1, 0, 1, 0, 0, 0, 0).getTime();
+  const weekEndDate = new Date(weekStartDate); weekEndDate.setUTCDate(weekEndDate.getUTCDate() + 6);
+  const monthStart = Date.UTC(y, m, 1, 0, 0, 0, 0);
+  const monthEnd = Date.UTC(y, m + 1, 1, 0, 0, 0, 0);
+  const yearStart = Date.UTC(y, 0, 1, 0, 0, 0, 0);
+  const yearEnd = Date.UTC(y + 1, 0, 1, 0, 0, 0, 0);
   // fmtRange previously called toLocaleDateString('en-GB', {month:'short'})
   // directly -- the browser's own English locale formatting, completely
   // untouched by DivumWXI18N regardless of the site's selected language
@@ -722,12 +758,13 @@ function convertValue(value, family) {
   }
 }
 function fmtDayTime(ts) {
-  const d = new Date(ts);
-  return fmtDayShort(d) + ', ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  const d = tsToStationDate(ts);
+  const pad = n => String(n).padStart(2, '0');
+  return fmtDayShort(d) + ', ' + pad(d.getUTCHours()) + ':' + pad(d.getUTCMinutes());
 }
 function fmtDateOnly(ts) {
-  const d = new Date(ts);
-  return fmtDayShort(d) + ' ' + d.getFullYear();
+  const d = tsToStationDate(ts);
+  return fmtDayShort(d) + ' ' + d.getUTCFullYear();
 }
 
 function cellHtml(point, family, dateStyle) {
@@ -785,7 +822,7 @@ function renderStatusAndLegend(){
 }
 function renderAll() {
   if (!SERIES_INDEX) return;
-  const now = new Date();
+  const now = stationNow();
   const periods = buildPeriods(now);
   const root = document.getElementById('recordsRoot');
   root.innerHTML = '';
@@ -868,6 +905,7 @@ window.addEventListener('i18nready', function(){
   renderStatusAndLegend();
   renderAll();
 });
+window.addEventListener('stationtimeready', renderAll);
 </script>
 </body>
 </html>

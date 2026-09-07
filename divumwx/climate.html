@@ -260,6 +260,7 @@ footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neu
 <script src="units.js"></script>
 <script src="cardI18n.js?v=s3n2026a"></script>
 <script src="siteHeader.js"></script>
+<script src="stationTime.js"></script>
 <script>
 // ===================== Static text i18n =====================
 (function applyStaticLabels(){
@@ -339,11 +340,33 @@ function compass(deg){
 
 const CHARTS_JSON_URL = './jsondata/charts.json';
 let sTmax={}, sTmin={}, sTavg={}, sRain={}, sWsav={}, sWsmx={}, sWdir={};
-let firstYear = new Date().getFullYear(), lastYear = new Date().getFullYear();
+
+// Every date/time this page shows or buckets data by needs to be in the
+// station's own timezone, not the visitor's -- dateKey() below used to
+// call new Date(ts).getFullYear()/getMonth()/getDate(), which reports
+// those fields in whatever timezone the visitor's browser happens to be
+// in. A reading recorded late in the station's day (e.g. 23:30
+// station-local) could land on the *previous* calendar day for a
+// visitor further west, misattributing it in the monthly/yearly
+// aggregates rather than just displaying incorrectly.
+function stationParts(date){
+  var parts = {};
+  new Intl.DateTimeFormat('en-GB', {
+    timeZone: (window.StationTime ? window.StationTime.getTZ() : undefined), hourCycle: 'h23',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit'
+  }).formatToParts(date).forEach(function(p){ parts[p.type] = p.value; });
+  return parts;
+}
+function stationNow(){
+  var p = stationParts(new Date());
+  return new Date(Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second));
+}
+let firstYear = stationNow().getUTCFullYear(), lastYear = stationNow().getUTCFullYear();
 
 function dateKey(ts){
-  const d = new Date(ts);
-  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  const p = stationParts(new Date(ts));
+  return p.year + '-' + p.month + '-' + p.day;
 }
 function parseSeries(series, key){
   const out = {};
@@ -390,12 +413,14 @@ function getInitialState(){
   const url = new URL(window.location.href);
   const y = parseInt(url.searchParams.get('year'), 10);
   const m = parseInt(url.searchParams.get('month'), 10);
+  const monthFromUrl = Number.isFinite(m) && m>=1 && m<=12;
   return {
     year: Number.isFinite(y) ? y : null,
-    month: Number.isFinite(m) && m>=1 && m<=12 ? m : (new Date().getMonth()+1),
+    month: monthFromUrl ? m : (stationNow().getUTCMonth()+1),
+    monthFromUrl: monthFromUrl,
   };
 }
-let { year: selYear, month: selMonth } = getInitialState();
+let { year: selYear, month: selMonth, monthFromUrl } = getInitialState();
 
 const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const MONTH_SHORT = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
@@ -763,6 +788,11 @@ setInterval(pollIsDayForTheme, THEME_ISDAY_POLL_MS);
 window.addEventListener('i18nready', function(){
   renderStationLabels();
   populateSelectors(); // month-name <option> text is baked in at populate time
+  renderAll();
+});
+window.addEventListener('stationtimeready', function(){
+  if (!monthFromUrl) selMonth = stationNow().getUTCMonth() + 1;
+  populateSelectors();
   renderAll();
 });
 

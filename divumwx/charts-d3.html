@@ -449,6 +449,7 @@ footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neu
 <script src="units.js"></script>
 <script src="cardI18n.js?v=s3n2026a"></script>
 <script src="siteHeader.js"></script>
+<script src="stationTime.js"></script>
 <script>
 // ===================== Static text i18n =====================
 (function applyStaticLabels(){
@@ -589,10 +590,28 @@ function dataAggregate(slice, agg){
   if(agg === 'sum'){ return {value: slice.reduce((s,pt)=>s+pt[1], 0), date:null}; }
   return {value: slice.reduce((s,pt)=>s+pt[1], 0) / slice.length, date:null};
 }
+// A record's date is meaningful relative to the STATION's calendar day,
+// not whichever timezone the visitor's browser happens to be in --
+// fmtDateOnly() below used to call new Date(ts).getDate()/getMonth()/
+// getFullYear() directly, which reports those fields in the visitor's
+// own local timezone, same bug class as elsewhere on this site.
+function stationParts(date){
+  var parts = {};
+  new Intl.DateTimeFormat('en-GB', {
+    timeZone: (window.StationTime ? window.StationTime.getTZ() : undefined), hourCycle: 'h23',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit'
+  }).formatToParts(date).forEach(function(p){ parts[p.type] = p.value; });
+  return parts;
+}
+function stationNow(){
+  var p = stationParts(new Date());
+  return new Date(Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second));
+}
 function fmtDateOnly(ts){
   if(ts==null) return '';
-  const d = new Date(ts);
-  return d.getDate() + ' ' + tMonthShort(d.getMonth()) + ' ' + d.getFullYear();
+  const p = stationParts(new Date(ts));
+  return (+p.day) + ' ' + tMonthShort(+p.month - 1) + ' ' + p.year;
 }
 
 async function fetchChartsJson(){
@@ -1402,7 +1421,7 @@ function populateHistoricalYears(){
   }
   const baseSeries = dataSeries[cat.daily[0].series] || [];
   const years = Array.from(new Set(
-    baseSeries.filter(pt=>pt && pt[1]!=null).map(pt => new Date(pt[0]).getFullYear())
+    baseSeries.filter(pt=>pt && pt[1]!=null).map(pt => +stationParts(new Date(pt[0])).year)
   )).sort((a,b)=>b-a);
   const prevValue = historicalYear;
   sel.innerHTML = years.map(y=>`<option value="${y}">${y}</option>`).join('');
@@ -1602,7 +1621,7 @@ function renderDailyD3(sys, cat, {trailingDays, historicalYear}={}){
 
   let points;
   if(historicalYear != null){
-    points = base.filter(pt => new Date(pt[0]).getFullYear() === Number(historicalYear));
+    points = base.filter(pt => +stationParts(new Date(pt[0])).year === Number(historicalYear));
   } else {
     points = trailingDays ? base.slice(Math.max(0, base.length - trailingDays)) : base;
   }
@@ -1813,8 +1832,8 @@ function renderAuroraD3(){
   if(updatedAt){
     const ud = new Date(updatedAt);
     const pad = n => String(n).padStart(2,'0');
-    noteEl.textContent = DivumWXI18N.t('Updated:') + ' ' + ud.getDate() + ' ' + tMonthShort(ud.getMonth()) + ' ' + ud.getFullYear() + ' '
-      + pad(ud.getHours()) + ':' + pad(ud.getMinutes()) + ' UTC \u00B7 ' + DivumWXI18N.t('Source:') + ' AuroraWatch UK / Lancaster University';
+    noteEl.textContent = DivumWXI18N.t('Updated:') + ' ' + ud.getUTCDate() + ' ' + tMonthShort(ud.getUTCMonth()) + ' ' + ud.getUTCFullYear() + ' '
+      + pad(ud.getUTCHours()) + ':' + pad(ud.getUTCMinutes()) + ' UTC \u00B7 ' + DivumWXI18N.t('Source:') + ' AuroraWatch UK / Lancaster University';
   } else {
     noteEl.textContent = '';
   }
@@ -2489,6 +2508,10 @@ includeHTML(() => {
 window.addEventListener('i18nready', () => {
   applyTabLabels();
   updatePageTitle();
+  renderChart();
+  renderRecordsPanel();
+});
+window.addEventListener('stationtimeready', () => {
   renderChart();
   renderRecordsPanel();
 });

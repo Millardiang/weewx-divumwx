@@ -166,6 +166,7 @@ footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neu
 
 <script src="cardI18n.js?v=s3n2026a"></script>
 <script src="siteHeader.js"></script>
+<script src="stationTime.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script src="units.js"></script>
 <script src="iopctrl.js"></script>
@@ -995,6 +996,10 @@ window.addEventListener('i18nready', function(){
   setGaugesStatus(lastGaugesStatus);
   renderAll(liveValues);
 });
+window.addEventListener('stationtimeready', function(){
+  setGaugesStatus(lastGaugesStatus);
+  renderAll(liveValues);
+});
 
 function pulseStatusDot(){
   var ring = document.getElementById('gaugesStatusRing');
@@ -1026,7 +1031,7 @@ function pollLoop(){
       liveValues.lightningCount = o.lightning_strike_count ?? null;
       if(o.isDay != null) lastIsDay = o.isDay;
 
-      document.getElementById('gaugesClock').textContent = new Date().toLocaleTimeString('en-GB', {hour12:false});
+      document.getElementById('gaugesClock').textContent = new Date().toLocaleTimeString('en-GB', {hour12:false, timeZone: (window.StationTime ? window.StationTime.getTZ() : undefined)});
       setGaugesStatus('live');
       document.getElementById('gaugesErr').style.display = 'none';
       if(themeMode==='auto') applyTheme(); else renderAll(liveValues);

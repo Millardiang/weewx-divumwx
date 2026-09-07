@@ -26,7 +26,18 @@
 
   function applyMeta(data){
     var m = data && data.meta;
-    if (m && m.timezone) tz = m.timezone;
+    if (m && m.timezone && m.timezone !== tz) {
+      // Fires on the first successful fetch (tz goes from null to a real
+      // value -- the common case, closing the race window below) AND on
+      // any later refresh where the station's configured timezone
+      // actually changes, so a long-lived open tab corrects itself too.
+      // Deliberately NOT fired on every 5-minute refresh unconditionally
+      // -- most of them are a no-op reapplication of the same value, and
+      // firing a global event every 5 minutes for nothing would just
+      // train every listener to ignore it.
+      tz = m.timezone;
+      window.dispatchEvent(new CustomEvent('stationtimeready', { detail: { tz: tz } }));
+    }
   }
 
   function refresh(){

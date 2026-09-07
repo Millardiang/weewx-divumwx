@@ -691,9 +691,11 @@ try {
   // to the English key for every fragment, and (unlike unitsystemchange
   // above, which already had this re-render) nothing ever revisits it
   // until the next 5-minute refreshOutlook() interval tick.
-  window.addEventListener('i18nready', function(){
+  function __i18nAndStationTimeRefresh_1(){
     if (lastForecastJson) renderOutlook(lastForecastJson);
-  });
+  }
+  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_1);
+  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_1);
 
   function pickKey(Hh, candidates){
     for (var i = 0; i < candidates.length; i++){ if (Hh[candidates[i]] !== undefined) return candidates[i]; }
@@ -1349,6 +1351,7 @@ try {
   // on the NEXT scheduled poll (up to POLL_MS away), not immediately
   // once translations load, unlike every other card.
   window.addEventListener('i18nready', refresh);
+  window.addEventListener('stationtimeready', refresh);
 })();
 } catch (e) {
   console.error("cardsBundle: alertBar.js failed:", e);
@@ -1508,6 +1511,7 @@ try {
     }
   });
   window.addEventListener('i18nready', refresh);
+  window.addEventListener('stationtimeready', refresh);
 
   function mphToMs(v){ return v * 0.44704; }
   function windLabel(mphValue){
@@ -1941,9 +1945,11 @@ try {
   // fetching) before DivumWXI18N's own fetch resolves. Re-render once it
   // has, same pattern as unitsystemchange/resize above -- swaps the
   // already-rendered English labels for translated ones in place.
-  window.addEventListener('i18nready', function(){
+  function __i18nAndStationTimeRefresh_2(){
     if (lastData) render(lastData);
-  });
+  }
+  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_2);
+  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_2);
 
   var mount = document.getElementById('thermometerCard3');
   if (!mount || !window.d3) return;
@@ -2442,9 +2448,11 @@ try {
       if (lastForecastJson) renderCard(lastForecastJson, iconMap);
     }
   });
-  window.addEventListener('i18nready', function(){
+  function __i18nAndStationTimeRefresh_3(){
     if (lastForecastJson) renderCard(lastForecastJson, iconMap);
-  });
+  }
+  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_3);
+  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_3);
 
   function toCelsius(v, sourceUnit){
     return (String(sourceUnit || '').indexOf('F') !== -1) ? (v - 32) * 5 / 9 : v;
@@ -2885,9 +2893,11 @@ try {
       if (lastData) renderCard(lastData);
     }
   });
-  window.addEventListener('i18nready', function(){
+  function __i18nAndStationTimeRefresh_4(){
     if (lastData) renderCard(lastData);
-  });
+  }
+  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_4);
+  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_4);
 
   var WIND_UNIT_LABEL = { mph: 'mph', kmh: 'km/h', kt: 'kt', ms: 'm/s', bf: 'Bft' };
   function windFromMS(ms){
@@ -3393,9 +3403,11 @@ try {
       if (lastData) renderCard(lastData);
     }
   });
-  window.addEventListener('i18nready', function(){
+  function __i18nAndStationTimeRefresh_5(){
     if (lastData) renderCard(lastData);
-  });
+  }
+  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_5);
+  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_5);
 
   var WIND_UNIT_LABEL = { mph: 'mph', kmh: 'km/h', kt: 'kt', ms: 'm/s', bf: 'Bft' };
   function windFromMS(ms){
@@ -3848,9 +3860,11 @@ try {
       if (lastData) renderCard(lastData);
     }
   });
-  window.addEventListener('i18nready', function(){
+  function __i18nAndStationTimeRefresh_6(){
     if (lastData) renderCard(lastData);
-  });
+  }
+  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_6);
+  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_6);
 
   var PRESSURE_CONFIG = {
     hpa:  { factor: 1,                  dp: 1, domain: [940, 1060], ticks: 12, tickDp: 0, label: 'hPa',  badgeUnit: 'inHg', badgeFactor: 0.029529983071445, badgeDp: 2 },
@@ -4247,9 +4261,11 @@ try {
       if (lastData) renderCard(lastData);
     }
   });
-  window.addEventListener('i18nready', function(){
+  function __i18nAndStationTimeRefresh_7(){
     if (lastData) renderCard(lastData);
-  });
+  }
+  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_7);
+  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_7);
   function mm2in(mm){ return mm / 25.400013716; }
   function rainLabel(mm){
     return currentUnits.rain === 'in'
@@ -4708,9 +4724,11 @@ try {
       if (lastData) renderCard(lastData);
     }
   });
-  window.addEventListener('i18nready', function(){
+  function __i18nAndStationTimeRefresh_8(){
     if (lastData) renderCard(lastData);
-  });
+  }
+  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_8);
+  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_8);
   function mm2in(mm){ return mm / 25.400013716; }
   function rainLabel(mm){
     return currentUnits.rain === 'in'
@@ -5138,9 +5156,11 @@ try {
       if (lastData) renderCard(lastData);
     }
   });
-  window.addEventListener('i18nready', function(){
+  function __i18nAndStationTimeRefresh_9(){
     if (lastData) renderCard(lastData);
-  });
+  }
+  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_9);
+  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_9);
   function mm2in(mm){ return mm / 25.400013716; }
   function rainLabel(mm){
     return currentUnits.rain === 'in'
@@ -6110,9 +6130,11 @@ try {
   }
 
   var lastData = null;
-  window.addEventListener('i18nready', function(){
+  function __i18nAndStationTimeRefresh_10(){
     if (lastData) renderCard(lastData);
-  });
+  }
+  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_10);
+  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_10);
   function refresh(){
     Promise.allSettled([
       fetch(LOOP_JSON_URL + ((LOOP_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
@@ -6471,9 +6493,11 @@ try {
   }
 
   var lastData = null;
-  window.addEventListener('i18nready', function(){
+  function __i18nAndStationTimeRefresh_11(){
     if (lastData) renderCard(lastData);
-  });
+  }
+  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_11);
+  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_11);
   function refresh(){
     Promise.allSettled([
       fetch(LOOP_JSON_URL + ((LOOP_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
@@ -6841,9 +6865,11 @@ try {
   }
 
   var lastData = null;
-  window.addEventListener('i18nready', function(){
+  function __i18nAndStationTimeRefresh_12(){
     if (lastData) renderCard(lastData);
-  });
+  }
+  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_12);
+  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_12);
   function refresh(){
     Promise.allSettled([
       fetch(LOOP_JSON_URL + ((LOOP_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
@@ -7328,9 +7354,11 @@ try {
   }
 
   var lastData = null, stationLat = 51.94, stationLon = -0.987;
-  window.addEventListener('i18nready', function(){
+  function __i18nAndStationTimeRefresh_13(){
     if (lastData) renderCard(lastData, stationLat, stationLon);
-  });
+  }
+  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_13);
+  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_13);
   function refresh(){
     Promise.allSettled([
       fetch(ASTRO_JSON_URL + ((ASTRO_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
@@ -7724,9 +7752,11 @@ try {
   }
 
   var lastData = null;
-  window.addEventListener('i18nready', function(){
+  function __i18nAndStationTimeRefresh_14(){
     if (lastData) renderCard(lastData);
-  });
+  }
+  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_14);
+  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_14);
   function refresh(){
     fetch(ASTRO_JSON_URL + ((ASTRO_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
       .then(function(alm){
@@ -8187,9 +8217,11 @@ try {
   // No prior unitsystemchange/resize re-render pattern existed in this
   // card to follow -- this is the first such listener here, same idea as
   // cardTemperature.js's.
-  window.addEventListener('i18nready', function(){
+  function __i18nAndStationTimeRefresh_15(){
     if (lastData) { renderCard(lastData, stationLat); renderAnalemma(lastData); }
-  });
+  }
+  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_15);
+  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_15);
 })();
 } catch (e) {
   console.error("cardsBundle: cardGeocentric.js failed:", e);
@@ -8631,9 +8663,11 @@ try {
   }
 
   var lastData = null;
-  window.addEventListener('i18nready', function(){
+  function __i18nAndStationTimeRefresh_16(){
     if (lastData) renderCard(lastData);
-  });
+  }
+  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_16);
+  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_16);
   function refresh(){
     fetch(ASTRO_JSON_URL + ((ASTRO_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
       .then(function(alm){
@@ -8992,9 +9026,11 @@ try {
   }
 
   var lastData = null;
-  window.addEventListener('i18nready', function(){
+  function __i18nAndStationTimeRefresh_17(){
     if (lastData) renderCard(lastData);
-  });
+  }
+  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_17);
+  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_17);
   function refresh(){
     fetch(ARCHIVE_JSON_URL + ((ARCHIVE_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
       .then(function(arch){
@@ -9315,9 +9351,11 @@ try {
   }
 
   var lastData = null;
-  window.addEventListener('i18nready', function(){
+  function __i18nAndStationTimeRefresh_18(){
     if (lastData) renderCard(lastData);
-  });
+  }
+  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_18);
+  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_18);
   function refresh(){
     fetch(LOOP_JSON_URL + ((LOOP_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
       .then(function(loop){
@@ -9713,9 +9751,11 @@ try {
   }
 
   var lastData = null;
-  window.addEventListener('i18nready', function(){
+  function __i18nAndStationTimeRefresh_19(){
     if (lastData) renderCard(lastData);
-  });
+  }
+  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_19);
+  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_19);
   function refresh(){
     fetch(LOOP_JSON_URL + ((LOOP_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
       .then(function(loop){
@@ -10213,9 +10253,11 @@ try {
   window.addEventListener('themechange', function(){
     if (lastData) renderCard(lastData);
   });
-  window.addEventListener('i18nready', function(){
+  function __i18nAndStationTimeRefresh_20(){
     if (lastData) renderCard(lastData);
-  });
+  }
+  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_20);
+  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_20);
 })();
 } catch (e) {
   console.error("cardsBundle: cardAirquality.js failed:", e);
@@ -10482,9 +10524,11 @@ try {
   }
 
   var lastData = null;
-  window.addEventListener('i18nready', function(){
+  function __i18nAndStationTimeRefresh_21(){
     if (lastData) renderCard(lastData);
-  });
+  }
+  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_21);
+  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_21);
   function refresh(){
     fetch(ARCHIVE_JSON_URL + ((ARCHIVE_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
       .then(function(arch){
@@ -10759,9 +10803,11 @@ try {
   }
 
   var lastData = null;
-  window.addEventListener('i18nready', function(){
+  function __i18nAndStationTimeRefresh_22(){
     if (lastData) renderCard(lastData);
-  });
+  }
+  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_22);
+  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_22);
   function refresh(){
     fetch(ARCHIVE_JSON_URL + ((ARCHIVE_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
       .then(function(arch){
@@ -11101,9 +11147,11 @@ try {
   }
 
   var lastData = null;
-  window.addEventListener('i18nready', function(){
+  function __i18nAndStationTimeRefresh_23(){
     if (lastData) renderCard(lastData);
-  });
+  }
+  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_23);
+  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_23);
   function refresh(){
     Promise.allSettled([
       fetch(EQ_JSON_URL + ((EQ_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
@@ -11403,7 +11451,7 @@ try {
     refresh();
     setInterval(refresh, POLL_MS);
   });
-  window.addEventListener('i18nready', function(){
+  function __i18nAndStationTimeRefresh_24(){
     // refresh() already re-derives titleLabel.textContent from lastIsDay
     // every poll cycle -- this just avoids waiting up to POLL_MS for the
     // very first translated paint.
@@ -11418,7 +11466,9 @@ try {
     // again once it does finish, so between the two this always ends
     // up correct regardless of which finishes first).
     imgLink.setAttribute('data-title', DivumWXI18N.t('Timelapse') + ' - ' + MODAL_TITLE);
-  });
+  }
+  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_24);
+  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_24);
 })();
 } catch (e) {
   console.error("cardsBundle: cardWebcam.js failed:", e);
@@ -11558,7 +11608,7 @@ try {
   body.appendChild(img);
 
   var titleOverriddenByConfig = false;
-  window.addEventListener('i18nready', function(){
+  function __i18nAndStationTimeRefresh_25(){
     // Only re-apply the translated fallback if the station owner hasn't
     // set their own custom title -- that's arbitrary user-typed text
     // (e.g. "Backyard Cam"), never something DivumWX should translate.
@@ -11566,7 +11616,9 @@ try {
       STATION_IMAGE_TITLE = DivumWXI18N.t('Station Image');
       img.alt = STATION_IMAGE_TITLE;
     }
-  });
+  }
+  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_25);
+  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_25);
 
   function refresh(){
     img.onload = function(){ setStatus(true); };
@@ -12048,6 +12100,7 @@ try {
   // fetches and renders in one step, so re-running it is the correct way
   // to pick up translations once strings.json has loaded.
   window.addEventListener('i18nready', refresh);
+  window.addEventListener('stationtimeready', refresh);
 })();
 } catch (e) {
   console.error("cardsBundle: cardSolarEnergy.js failed:", e);

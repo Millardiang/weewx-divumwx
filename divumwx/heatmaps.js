@@ -907,8 +907,8 @@
     ).join('');
   }
 
-  let currentYear = new Date().getFullYear();
-  let currentMonth = new Date().getMonth();
+  let currentYear = stationNow().getUTCFullYear();
+  let currentMonth = stationNow().getUTCMonth();
 
   function responsiveFontSizes(){
     const w = els.chart.offsetWidth || window.innerWidth;
@@ -921,6 +921,25 @@
   const WEEKDAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   function getDayOfWeek(year, month, day){
     return DivumWXI18N.t(WEEKDAYS[new Date(year, month, day).getDay()]);
+  }
+  // Constructs a Date whose UTC-getter fields represent the station's own
+  // wall-clock date, not the visitor's browser-local one -- new
+  // Date().getFullYear()/getMonth() below used to reflect the *visitor's*
+  // timezone, so near a month boundary someone in a different timezone
+  // than the station would land on the wrong default month, and clicking
+  // "jump to current month" could jump to the wrong one too.
+  function stationParts(date){
+    var parts = {};
+    new Intl.DateTimeFormat('en-GB', {
+      timeZone: (window.StationTime ? window.StationTime.getTZ() : undefined), hourCycle: 'h23',
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    }).formatToParts(date).forEach(function(p){ parts[p.type] = p.value; });
+    return parts;
+  }
+  function stationNow(){
+    var p = stationParts(new Date());
+    return new Date(Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second));
   }
 
   function colorForValue(display, unit){
@@ -1078,9 +1097,9 @@
     buildHeatmap();
   });
   els.currentMonth.addEventListener('dblclick', () => {
-    const now = new Date();
-    currentYear = now.getFullYear();
-    currentMonth = now.getMonth();
+    const now = stationNow();
+    currentYear = now.getUTCFullYear();
+    currentMonth = now.getUTCMonth();
     buildHeatmap();
   });
   document.querySelectorAll('.hm-tab').forEach(btn => {
@@ -1104,6 +1123,17 @@
     });
     updatePageTitle();
     buildMetricSelector();
+    if (dataAvailable) buildHeatmap(); else buildStats();
+  });
+  window.addEventListener('stationtimeready', () => {
+    // currentYear/currentMonth were captured once from stationNow() at
+    // load time (see "let currentYear = ..." above) -- if the page
+    // rendered before stationTime.js's timezone fetch resolved, those
+    // two values are stuck on the browser-local fallback's idea of
+    // "today" and a plain re-render won't fix them, only resetting them
+    // does.
+    currentYear = stationNow().getUTCFullYear();
+    currentMonth = stationNow().getUTCMonth();
     if (dataAvailable) buildHeatmap(); else buildStats();
   });
 
