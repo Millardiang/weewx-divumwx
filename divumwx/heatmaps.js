@@ -129,11 +129,13 @@
     { min: 15, color: '#ff00ff', label: '>15 UV' },
   ];
 
-  const HUMID_PIECES = [
-    { max: 30, color: '#ff6347', label: '0\u201330% (Dry)' },
-    { min: 30, max: 70, color: '#2e8b57', label: '30\u201370% (Comfortable)' },
-    { min: 70, color: '#007fff', label: '>70% (Humid)' },
-  ];
+  function humidPieces(){
+    return [
+      { max: 30, color: '#ff6347', label: '0\u201330% (' + DivumWXI18N.t('Dry') + ')' },
+      { min: 30, max: 70, color: '#2e8b57', label: '30\u201370% (' + DivumWXI18N.t('Comfortable') + ')' },
+      { min: 70, color: '#007fff', label: '>70% (' + DivumWXI18N.t('Humid') + ')' },
+    ];
+  }
 
   const RAIN_CONV = { mm: 1, in: 1 / 25.4 };
   const RAIN_PIECES = {
@@ -182,17 +184,25 @@
         const avg = total / dates.length;
         const sortedDates = dates.slice().sort();
         return [
-          { icon: '\uD83C\uDF27\uFE0F', label: 'Wettest Day', color: '#3b7fc4', value: this.fmt(wettest.valueC, unit), sub: fmtDateFull(wettest.date) },
-          { icon: '\uD83D\uDCA7', label: 'Total Rainfall', color: null, value: this.fmt(total, unit), sub: dates.length + ' days' },
-          { icon: '\uD83D\uDCCA', label: 'Average Daily', color: null, value: this.fmt(avg, unit), sub: 'Overall' },
-          { icon: '\uD83D\uDCC5', label: 'Data Range', color: null, value: fmtDateMonth(sortedDates[0]), sub: 'to ' + fmtDateMonth(sortedDates[sortedDates.length - 1]) },
+          { icon: '\uD83C\uDF27\uFE0F', label: DivumWXI18N.t('Wettest Day'), color: '#3b7fc4', value: this.fmt(wettest.valueC, unit), sub: fmtDateFull(wettest.date) },
+          { icon: '\uD83D\uDCA7', label: DivumWXI18N.t('Total Rainfall'), color: null, value: this.fmt(total, unit), sub: dates.length + ' ' + DivumWXI18N.t('days') },
+          { icon: '\uD83D\uDCCA', label: DivumWXI18N.t('Average Daily'), color: null, value: this.fmt(avg, unit), sub: DivumWXI18N.t('Overall') },
+          { icon: '\uD83D\uDCC5', label: DivumWXI18N.t('Data Range'), color: null, value: fmtDateMonth(sortedDates[0]), sub: DivumWXI18N.t('to') + ' ' + fmtDateMonth(sortedDates[sortedDates.length - 1]) },
         ];
       },
     };
   }
 
-  function fmtDateFull(ds){ return new Date(ds + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }); }
-  function fmtDateMonth(ds){ return new Date(ds + 'T00:00:00').toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }); }
+  function fmtDateFull(ds){ const d = new Date(ds + 'T00:00:00'); return DivumWXI18N.t(MONTHS[d.getMonth()]) + ' ' + d.getDate() + ', ' + d.getFullYear(); }
+  function fmtDateMonth(ds){ const d = new Date(ds + 'T00:00:00'); return DivumWXI18N.t(MONTHS[d.getMonth()]) + ' ' + d.getFullYear(); }
+  // Reused everywhere a month abbreviation is needed in this file (stat
+  // date captions, calendar month display, tooltip date line) -- same
+  // mixed-case Jan/Feb/... keys already defined for records.html, not
+  // climate.html's ALL-CAPS report-style set. fmtDateFull/fmtDateMonth
+  // previously called toLocaleDateString('en-GB', {month:'short',...}),
+  // the browser's own English locale formatting -- same bug class fixed
+  // elsewhere on this site (cardLightning.js, records.html).
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
   // ===================== Category config =====================
 
@@ -223,10 +233,10 @@
         const avgC = values.reduce((a, b) => a + b, 0) / values.length;
         const sortedDates = maxDates.slice().sort();
         return [
-          { icon: '\uD83D\uDD25', label: 'Hottest Day', color: '#e26870', value: this.toDisplay(hottest.valueC, unit).toFixed(1) + '\u00B0', sub: fmtDateFull(hottest.date) },
-          { icon: '\u2744\uFE0F', label: 'Coldest Day', color: '#487ea9', value: minDates.length ? this.toDisplay(coldest.valueC, unit).toFixed(1) + '\u00B0' : 'N/A', sub: minDates.length ? fmtDateFull(coldest.date) : '' },
-          { icon: '\uD83D\uDCCA', label: 'Average Max', color: null, value: this.toDisplay(avgC, unit).toFixed(1) + '\u00B0', sub: 'Overall' },
-          { icon: '\uD83D\uDCC5', label: 'Data Range', color: null, value: fmtDateMonth(sortedDates[0]), sub: 'to ' + fmtDateMonth(sortedDates[sortedDates.length - 1]) },
+          { icon: '\uD83D\uDD25', label: DivumWXI18N.t('Hottest Day'), color: '#e26870', value: this.toDisplay(hottest.valueC, unit).toFixed(1) + '\u00B0', sub: fmtDateFull(hottest.date) },
+          { icon: '\u2744\uFE0F', label: DivumWXI18N.t('Coldest Day'), color: '#487ea9', value: minDates.length ? this.toDisplay(coldest.valueC, unit).toFixed(1) + '\u00B0' : DivumWXI18N.t('N/A'), sub: minDates.length ? fmtDateFull(coldest.date) : '' },
+          { icon: '\uD83D\uDCCA', label: DivumWXI18N.t('Average Max'), color: null, value: this.toDisplay(avgC, unit).toFixed(1) + '\u00B0', sub: DivumWXI18N.t('Overall') },
+          { icon: '\uD83D\uDCC5', label: DivumWXI18N.t('Data Range'), color: null, value: fmtDateMonth(sortedDates[0]), sub: DivumWXI18N.t('to') + ' ' + fmtDateMonth(sortedDates[sortedDates.length - 1]) },
         ];
       },
     },
@@ -257,10 +267,10 @@
         const avgMs = avgValues.reduce((a, b) => a + b, 0) / avgValues.length;
         const allDates = maxDates.concat(avgDates).sort();
         return [
-          { icon: '\uD83D\uDCA8', label: 'Peak Gust', color: '#c8420d', value: this.toDisplay(peak.valueC, unit).toFixed(1) + ' ' + (WIND_LABEL[unit] || 'm/s'), sub: fmtDateFull(peak.date) },
-          { icon: '\uD83C\uDF2C\uFE0F', label: avgDates.length ? 'Avg Gust' : 'Avg Gust (from Max)', color: '#39a239', value: this.toDisplay(avgMs, unit).toFixed(1) + ' ' + (WIND_LABEL[unit] || 'm/s'), sub: 'Overall average' },
-          { icon: '\uD83D\uDCCA', label: 'Data Points', color: null, value: String(maxDates.length), sub: avgDates.length ? (avgDates.length + ' avg gusts') : 'Gust Max only' },
-          { icon: '\uD83D\uDCC5', label: 'Data Range', color: null, value: fmtDateMonth(allDates[0]), sub: 'to ' + fmtDateMonth(allDates[allDates.length - 1]) },
+          { icon: '\uD83D\uDCA8', label: DivumWXI18N.t('Peak Gust'), color: '#c8420d', value: this.toDisplay(peak.valueC, unit).toFixed(1) + ' ' + (WIND_LABEL[unit] || 'm/s'), sub: fmtDateFull(peak.date) },
+          { icon: '\uD83C\uDF2C\uFE0F', label: avgDates.length ? DivumWXI18N.t('Avg Gust') : (DivumWXI18N.t('Avg Gust') + ' (' + DivumWXI18N.t('from Max') + ')'), color: '#39a239', value: this.toDisplay(avgMs, unit).toFixed(1) + ' ' + (WIND_LABEL[unit] || 'm/s'), sub: DivumWXI18N.t('Overall average') },
+          { icon: '\uD83D\uDCCA', label: DivumWXI18N.t('Data Points'), color: null, value: String(maxDates.length), sub: avgDates.length ? (avgDates.length + ' ' + DivumWXI18N.t('avg gusts')) : (DivumWXI18N.t('Gust Max') + ' ' + DivumWXI18N.t('only')) },
+          { icon: '\uD83D\uDCC5', label: DivumWXI18N.t('Data Range'), color: null, value: fmtDateMonth(allDates[0]), sub: DivumWXI18N.t('to') + ' ' + fmtDateMonth(allDates[allDates.length - 1]) },
         ];
       },
     },
@@ -293,10 +303,10 @@
         const allDates = maxDates.concat(minDates, avgDates).sort();
         const dp = this.decimals(unit);
         return [
-          { icon: '\uD83D\uDCC8', label: 'Highest Pressure', color: '#d73027', value: maxDates.length ? this.toDisplay(highest.valueC, unit).toFixed(dp) + ' ' + (PRESSURE_LABEL[unit] || 'hPa') : 'N/A', sub: maxDates.length ? fmtDateFull(highest.date) : '' },
-          { icon: '\uD83D\uDCC9', label: 'Lowest Pressure', color: '#4575b4', value: minDates.length ? this.toDisplay(lowest.valueC, unit).toFixed(dp) + ' ' + (PRESSURE_LABEL[unit] || 'hPa') : 'N/A', sub: minDates.length ? fmtDateFull(lowest.date) : '' },
-          { icon: '\uD83D\uDCCA', label: 'Average Pressure', color: null, value: this.toDisplay(avgVal, unit).toFixed(dp) + ' ' + (PRESSURE_LABEL[unit] || 'hPa'), sub: avgDates.length ? 'Overall' : 'From Max' },
-          { icon: '\uD83D\uDCC5', label: 'Data Range', color: null, value: fmtDateMonth(allDates[0]), sub: 'to ' + fmtDateMonth(allDates[allDates.length - 1]) },
+          { icon: '\uD83D\uDCC8', label: DivumWXI18N.t('Highest Pressure'), color: '#d73027', value: maxDates.length ? this.toDisplay(highest.valueC, unit).toFixed(dp) + ' ' + (PRESSURE_LABEL[unit] || 'hPa') : DivumWXI18N.t('N/A'), sub: maxDates.length ? fmtDateFull(highest.date) : '' },
+          { icon: '\uD83D\uDCC9', label: DivumWXI18N.t('Lowest Pressure'), color: '#4575b4', value: minDates.length ? this.toDisplay(lowest.valueC, unit).toFixed(dp) + ' ' + (PRESSURE_LABEL[unit] || 'hPa') : DivumWXI18N.t('N/A'), sub: minDates.length ? fmtDateFull(lowest.date) : '' },
+          { icon: '\uD83D\uDCCA', label: DivumWXI18N.t('Average Pressure'), color: null, value: this.toDisplay(avgVal, unit).toFixed(dp) + ' ' + (PRESSURE_LABEL[unit] || 'hPa'), sub: avgDates.length ? DivumWXI18N.t('Overall') : DivumWXI18N.t('From Max') },
+          { icon: '\uD83D\uDCC5', label: DivumWXI18N.t('Data Range'), color: null, value: fmtDateMonth(allDates[0]), sub: DivumWXI18N.t('to') + ' ' + fmtDateMonth(allDates[allDates.length - 1]) },
         ];
       },
     },
@@ -325,10 +335,10 @@
         const avgVal = avgSourceDates.map(d => avgSource[d].valueC).reduce((a, b) => a + b, 0) / avgSourceDates.length;
         const allDates = maxDates.concat(avgDates).sort();
         return [
-          { icon: '\u2600\uFE0F', label: 'Peak Radiation', color: '#ff0000', value: Math.round(peak.valueC) + ' W/m\u00B2', sub: fmtDateFull(peak.date) },
-          { icon: '\uD83D\uDCCA', label: avgDates.length ? 'Average Radiation' : 'Average (from Max)', color: null, value: Math.round(avgVal) + ' W/m\u00B2', sub: avgDates.length ? 'Overall' : 'From Max' },
-          { icon: '\uD83D\uDCC8', label: 'Data Points', color: null, value: String(maxDates.length), sub: avgDates.length ? (avgDates.length + ' avg readings') : 'Max only' },
-          { icon: '\uD83D\uDCC5', label: 'Data Range', color: null, value: fmtDateMonth(allDates[0]), sub: 'to ' + fmtDateMonth(allDates[allDates.length - 1]) },
+          { icon: '\u2600\uFE0F', label: DivumWXI18N.t('Peak Radiation'), color: '#ff0000', value: Math.round(peak.valueC) + ' W/m\u00B2', sub: fmtDateFull(peak.date) },
+          { icon: '\uD83D\uDCCA', label: avgDates.length ? DivumWXI18N.t('Average Radiation') : (DivumWXI18N.t('Average') + ' (' + DivumWXI18N.t('from Max') + ')'), color: null, value: Math.round(avgVal) + ' W/m\u00B2', sub: avgDates.length ? DivumWXI18N.t('Overall') : DivumWXI18N.t('From Max') },
+          { icon: '\uD83D\uDCC8', label: DivumWXI18N.t('Data Points'), color: null, value: String(maxDates.length), sub: avgDates.length ? (avgDates.length + ' ' + DivumWXI18N.t('avg readings')) : (DivumWXI18N.t('Max') + ' ' + DivumWXI18N.t('only')) },
+          { icon: '\uD83D\uDCC5', label: DivumWXI18N.t('Data Range'), color: null, value: fmtDateMonth(allDates[0]), sub: DivumWXI18N.t('to') + ' ' + fmtDateMonth(allDates[allDates.length - 1]) },
         ];
       },
     },
@@ -357,10 +367,10 @@
         const avgVal = avgSourceDates.map(d => avgSource[d].valueC).reduce((a, b) => a + b, 0) / avgSourceDates.length;
         const allDates = maxDates.concat(avgDates).sort();
         return [
-          { icon: '\u2600\uFE0F', label: 'Peak UV', color: '#ff0000', value: peak.valueC.toFixed(0) + ' UV', sub: fmtDateFull(peak.date) },
-          { icon: '\uD83D\uDCCA', label: avgDates.length ? 'Average UV' : 'Average (from Max)', color: null, value: avgVal.toFixed(0) + ' UV', sub: avgDates.length ? 'Overall' : 'From Max' },
-          { icon: '\uD83D\uDCC8', label: 'Data Points', color: null, value: String(maxDates.length), sub: avgDates.length ? (avgDates.length + ' avg readings') : 'Max only' },
-          { icon: '\uD83D\uDCC5', label: 'Data Range', color: null, value: fmtDateMonth(allDates[0]), sub: 'to ' + fmtDateMonth(allDates[allDates.length - 1]) },
+          { icon: '\u2600\uFE0F', label: DivumWXI18N.t('Peak UV'), color: '#ff0000', value: peak.valueC.toFixed(0) + ' UV', sub: fmtDateFull(peak.date) },
+          { icon: '\uD83D\uDCCA', label: avgDates.length ? DivumWXI18N.t('Average UV') : (DivumWXI18N.t('Average') + ' (' + DivumWXI18N.t('from Max') + ')'), color: null, value: avgVal.toFixed(0) + ' UV', sub: avgDates.length ? DivumWXI18N.t('Overall') : DivumWXI18N.t('From Max') },
+          { icon: '\uD83D\uDCC8', label: DivumWXI18N.t('Data Points'), color: null, value: String(maxDates.length), sub: avgDates.length ? (avgDates.length + ' ' + DivumWXI18N.t('avg readings')) : (DivumWXI18N.t('Max') + ' ' + DivumWXI18N.t('only')) },
+          { icon: '\uD83D\uDCC5', label: DivumWXI18N.t('Data Range'), color: null, value: fmtDateMonth(allDates[0]), sub: DivumWXI18N.t('to') + ' ' + fmtDateMonth(allDates[allDates.length - 1]) },
         ];
       },
     },
@@ -377,7 +387,7 @@
       toDisplay: v => v,
       decimals: () => 0,
       unitLabel: () => '%',
-      pieces: () => HUMID_PIECES,
+      pieces: () => humidPieces(),
       fmt(v){ return Math.round(v) + '%'; },
       buildStats(metricData, unit){
         const maxData = metricData.max || {}, minData = metricData.min || {}, avgData = metricData.avg || {};
@@ -391,10 +401,10 @@
         const avgVal = avgSourceDates.map(d => avgSource[d].valueC).reduce((a, b) => a + b, 0) / avgSourceDates.length;
         const allDates = maxDates.concat(minDates, avgDates).sort();
         return [
-          { icon: '\uD83D\uDCA7', label: 'Most Humid', color: '#007fff', value: maxDates.length ? Math.round(highest.valueC) + '%' : 'N/A', sub: maxDates.length ? fmtDateFull(highest.date) : '' },
-          { icon: '\u2600\uFE0F', label: 'Driest', color: '#ff6347', value: minDates.length ? Math.round(lowest.valueC) + '%' : 'N/A', sub: minDates.length ? fmtDateFull(lowest.date) : '' },
-          { icon: '\uD83D\uDCCA', label: avgDates.length ? 'Average Humidity' : 'Average (from Max)', color: null, value: Math.round(avgVal) + '%', sub: avgDates.length ? 'Overall' : 'From Max' },
-          { icon: '\uD83D\uDCC5', label: 'Data Range', color: null, value: fmtDateMonth(allDates[0]), sub: 'to ' + fmtDateMonth(allDates[allDates.length - 1]) },
+          { icon: '\uD83D\uDCA7', label: DivumWXI18N.t('Most Humid'), color: '#007fff', value: maxDates.length ? Math.round(highest.valueC) + '%' : DivumWXI18N.t('N/A'), sub: maxDates.length ? fmtDateFull(highest.date) : '' },
+          { icon: '\u2600\uFE0F', label: DivumWXI18N.t('Driest'), color: '#ff6347', value: minDates.length ? Math.round(lowest.valueC) + '%' : DivumWXI18N.t('N/A'), sub: minDates.length ? fmtDateFull(lowest.date) : '' },
+          { icon: '\uD83D\uDCCA', label: avgDates.length ? DivumWXI18N.t('Average Humidity') : (DivumWXI18N.t('Average') + ' (' + DivumWXI18N.t('from Max') + ')'), color: null, value: Math.round(avgVal) + '%', sub: avgDates.length ? DivumWXI18N.t('Overall') : DivumWXI18N.t('From Max') },
+          { icon: '\uD83D\uDCC5', label: DivumWXI18N.t('Data Range'), color: null, value: fmtDateMonth(allDates[0]), sub: DivumWXI18N.t('to') + ' ' + fmtDateMonth(allDates[allDates.length - 1]) },
         ];
       },
     },
@@ -568,7 +578,7 @@
     <div class="site-navbar-include" w3-include-html="navbar.html"></div>
     <div class="hm-tabs" id="hmTabs">
       ${Object.keys(HEATMAP_CATEGORIES).map(k =>
-        `<button class="hm-tab${k === categoryKey ? ' active' : ''}" data-cat="${k}">${HEATMAP_CATEGORIES[k].title}</button>`
+        `<button class="hm-tab${k === categoryKey ? ' active' : ''}" data-cat="${k}">${DivumWXI18N.t(HEATMAP_CATEGORIES[k].title)}</button>`
       ).join('')}
     </div>
     <div class="hm-title-row">
@@ -577,9 +587,9 @@
     </div>
     <div class="hm-toolbar">
       <div class="hm-nav-group">
-        <button class="hm-btn" id="hmPrev">\u25C0 Prev</button>
+        <button class="hm-btn" id="hmPrev">\u25C0 <span id="hmPrevLabel">Prev</span></button>
         <span class="hm-current-month" id="hmCurrentMonth" title="Double-click to jump to the current month"></span>
-        <button class="hm-btn" id="hmNext">Next \u25B6</button>
+        <button class="hm-btn" id="hmNext"><span id="hmNextLabel">Next</span> \u25B6</button>
       </div>
       <div class="hm-metric-selector" id="hmMetricSelector" style="display:none;"></div>
       <span class="hm-data-info" id="hmDataInfo">\u2013</span>
@@ -622,10 +632,18 @@
   };
 
   function updatePageTitle(){
-    els.pageTitle.textContent = (stationLocation ? stationLocation + ' \u2014 ' : '') + category.title + ' Heatmap';
-    els.emptyState.textContent = 'No ' + category.title.toLowerCase() + ' history available yet.';
+    els.pageTitle.textContent = (stationLocation ? stationLocation + ' \u2014 ' : '') + DivumWXI18N.t(category.title) + ' ' + DivumWXI18N.t('Heatmap');
+    // Worded as "<Category> history not available yet." rather than
+    // "No <category> history..." -- the latter would need a standalone
+    // "No" dictionary key, which is too ambiguous out of context (No as
+    // in "none" vs. a literal negative reply) for translators to get
+    // right reliably.
+    els.emptyState.textContent = DivumWXI18N.t(category.title) + ' ' + DivumWXI18N.t('history not available yet.');
   }
   updatePageTitle();
+  DivumWXI18N.applyAttr(els.currentMonth, 'title', 'Double-click to jump to the current month');
+  DivumWXI18N.applyLabel(document.getElementById('hmPrevLabel'), 'Prev');
+  DivumWXI18N.applyLabel(document.getElementById('hmNextLabel'), 'Next');
 
   function currentUnit(){
     try {
@@ -693,8 +711,8 @@
   if (window.parent !== window) new ResizeObserver(reportHeight).observe(document.body);
 
   function setLive(status){
-    if (status === 'live') { els.liveDot.style.background = '#5BBB8A'; els.liveLabel.textContent = 'Live'; }
-    else { els.liveDot.style.background = 'var(--bs-secondary-color)'; els.liveLabel.textContent = 'Unavailable'; }
+    if (status === 'live') { els.liveDot.style.background = '#5BBB8A'; els.liveLabel.textContent = DivumWXI18N.t('Live'); }
+    else { els.liveDot.style.background = 'var(--bs-secondary-color)'; els.liveLabel.textContent = DivumWXI18N.t('Unavailable'); }
   }
 
   fetch('./jsondata/archive.json?_=' + Date.now(), { cache: 'no-store' })
@@ -775,8 +793,12 @@
       const hasData = Object.keys(metricDataByKey[m.key] || {}).length > 0;
       const disabled = !hasData;
       const checked = m.key === cellMetric ? 'checked' : '';
-      return '<label class="hm-metric-option' + (disabled ? ' is-disabled' : '') + '" title="' + (disabled ? 'No ' + m.label + ' data available' : '') + '">' +
-        '<input type="radio" name="hmMetric" value="' + m.key + '" ' + checked + (disabled ? ' disabled' : '') + '> ' + m.icon + ' ' + m.label +
+      const label = DivumWXI18N.t(m.label);
+      // "<Label> data not available" rather than "No <label> data
+      // available" -- same reasoning as updatePageTitle() above, avoids
+      // needing a standalone ambiguous "No" key.
+      return '<label class="hm-metric-option' + (disabled ? ' is-disabled' : '') + '" title="' + (disabled ? label + ' ' + DivumWXI18N.t('data not available') : '') + '">' +
+        '<input type="radio" name="hmMetric" value="' + m.key + '" ' + checked + (disabled ? ' disabled' : '') + '> ' + m.icon + ' ' + label +
         '</label>';
     }).join('');
     els.metricSelector.querySelectorAll('input[name="hmMetric"]').forEach(radio => {
@@ -799,7 +821,7 @@
   function applyCategoryData(){
     if (!rawSeries) {
       metricDataByKey = {}; monthDataByMonth = {}; dataAvailable = false;
-      els.dataInfo.textContent = 'Unavailable';
+      els.dataInfo.textContent = DivumWXI18N.t('Unavailable');
       setLive('down');
       els.statsCard.style.display = 'none';
       buildMetricSelector();
@@ -812,14 +834,14 @@
       if (!primaryCount) throw new Error('No ' + category.metrics.find(m => m.key === category.cellMetric).series + ' data in charts.json');
       monthDataByMonth = buildMonthly(metricDataByKey);
       dataAvailable = true;
-      els.dataInfo.textContent = primaryCount + ' days';
+      els.dataInfo.textContent = primaryCount + ' ' + DivumWXI18N.t('days');
       setLive('live');
       buildMetricSelector();
       buildStats();
     } catch (e) {
       console.warn('heatmaps (' + categoryKey + '): ' + e.message);
       metricDataByKey = {}; monthDataByMonth = {}; dataAvailable = false;
-      els.dataInfo.textContent = 'Unavailable';
+      els.dataInfo.textContent = DivumWXI18N.t('Unavailable');
       setLive('down');
       els.statsCard.style.display = 'none';
       buildMetricSelector();
@@ -871,7 +893,7 @@
     els.colorGradient.style.background = 'linear-gradient(to right, ' + gradientColors.join(', ') + ')';
     if (category.visualMapType === 'continuous'){
       els.scaleCaption.style.display = '';
-      els.scaleCaption.textContent = '\uD83D\uDD35 Low \u00B7 \u26AA Normal \u00B7 \uD83D\uDD34 High';
+      els.scaleCaption.textContent = '\uD83D\uDD35 ' + DivumWXI18N.t('Low') + ' \u00B7 \u26AA ' + DivumWXI18N.t('Normal') + ' \u00B7 \uD83D\uDD34 ' + DivumWXI18N.t('High');
     } else {
       els.scaleCaption.style.display = 'none';
     }
@@ -896,8 +918,9 @@
     return { value: 16, day: 10 };
   }
 
+  const WEEKDAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   function getDayOfWeek(year, month, day){
-    return new Date(year, month, day).toLocaleDateString('en-GB', { weekday: 'short' });
+    return DivumWXI18N.t(WEEKDAYS[new Date(year, month, day).getDay()]);
   }
 
   function colorForValue(display, unit){
@@ -925,15 +948,15 @@
     els.tooltip.style.top = ty + 'px';
   }
   function hideHmTooltip(){ els.tooltip.style.display = 'none'; }
-  function showHmTooltip(d, unit, months, event){
+  function showHmTooltip(d, unit, event){
     const dow = getDayOfWeek(currentYear, currentMonth, d.dayNumber);
-    let tip = '<b>' + dow + ', ' + months[currentMonth] + ' ' + d.dayNumber + ', ' + currentYear + '</b><hr style="margin:6px 0;opacity:.3;">';
+    let tip = '<b>' + dow + ', ' + DivumWXI18N.t(MONTHS[currentMonth]) + ' ' + d.dayNumber + ', ' + currentYear + '</b><hr style="margin:6px 0;opacity:.3;">';
     if (!d.cellData) {
-      tip += '<span style="opacity:.7;">No data</span>';
+      tip += '<span style="opacity:.7;">' + DivumWXI18N.t('No data') + '</span>';
     } else {
       category.metrics.forEach(m => {
         const mv = d.cellData[m.key];
-        if (mv) tip += m.icon + ' ' + m.label + ': <b>' + category.fmt(mv.valueC, unit) + '</b><br>';
+        if (mv) tip += m.icon + ' ' + DivumWXI18N.t(m.label) + ': <b>' + category.fmt(mv.valueC, unit) + '</b><br>';
       });
     }
     els.tooltip.innerHTML = tip;
@@ -958,9 +981,9 @@
     const weeks = Math.ceil((daysInMonth + startOffset) / 7);
     const monthKey = currentYear + '-' + currentMonth;
     const monthData = monthDataByMonth[monthKey] || {};
-    const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(k => DivumWXI18N.t(k));
     const weekLabels = [];
-    for (let w = 0; w < weeks; w++) weekLabels.push('Week ' + (weeks - w));
+    for (let w = 0; w < weeks; w++) weekLabels.push(DivumWXI18N.t('Week') + ' ' + (weeks - w));
     const fontSizes = responsiveFontSizes();
     const activeMetric = category.metrics.find(m => m.key === cellMetric) || category.metrics[0];
     const dp = category.decimals ? category.decimals(unit) : 1;
@@ -978,8 +1001,7 @@
       }
     }
 
-    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    els.currentMonth.textContent = months[currentMonth] + ' ' + currentYear;
+    els.currentMonth.textContent = DivumWXI18N.t(MONTHS[currentMonth]) + ' ' + currentYear;
 
     buildLegend(unit);
     const dark = isDarkTheme();
@@ -1000,7 +1022,7 @@
     if (category.showMetricSelector){
       svg.append('text').attr('x', width/2).attr('y', 18).attr('text-anchor','middle')
         .attr('font-size',13).attr('fill', textColor)
-        .text(months[currentMonth] + ' ' + currentYear + ' \u2014 Daily ' + activeMetric.label);
+        .text(DivumWXI18N.t(MONTHS[currentMonth]) + ' ' + currentYear + ' \u2014 ' + DivumWXI18N.t('Daily') + ' ' + DivumWXI18N.t(activeMetric.label));
     }
 
     const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
@@ -1025,7 +1047,7 @@
       .style('cursor', d => d.valid ? 'pointer' : 'default')
       .on('mousemove', function(event, d){
         if (!d.valid) { hideHmTooltip(); return; }
-        showHmTooltip(d, unit, months, event);
+        showHmTooltip(d, unit, event);
       })
       .on('mouseleave', hideHmTooltip);
 
@@ -1071,6 +1093,19 @@
     if (e.key === 'dashboardThemeMode') { themeMode = e.newValue || 'auto'; applyTheme(); }
   });
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+  window.addEventListener('i18nready', () => {
+    // Tab button text is only ever set once, in the big document.body.innerHTML
+    // template above -- everything else here (title, prev/next, stats,
+    // legend, the heatmap grid itself) is rebuilt fresh by the functions
+    // below every time they run, so re-invoking them is enough.
+    document.querySelectorAll('.hm-tab').forEach(btn => {
+      const cat = HEATMAP_CATEGORIES[btn.dataset.cat];
+      if (cat) btn.textContent = DivumWXI18N.t(cat.title);
+    });
+    updatePageTitle();
+    buildMetricSelector();
+    if (dataAvailable) buildHeatmap(); else buildStats();
+  });
 
   // includeHTML() now lives in siteHeader.js -- one shared copy.
 
