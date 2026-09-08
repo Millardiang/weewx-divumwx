@@ -959,80 +959,85 @@ const RECORDS_CATEGORIES = {
   temperature: {
     note: 'Daily high / low / average outdoor temperature.',
     metrics: [
-      {label:'Highest', series:'outTempMax', agg:'max', fmt:(v,sys)=>fmtTemp(v, sys.temp), withDate:true},
-      {label:'Lowest',  series:'outTempMin', agg:'min', fmt:(v,sys)=>fmtTemp(v, sys.temp), withDate:true},
-      {label:'Average', series:'outTempAvg', agg:'avg', fmt:(v,sys)=>fmtTemp(v, sys.temp), withDate:false},
+      {label:'Highest', series:'outTempMax', daySeries:'outTempHourly', agg:'max', fmt:(v,sys)=>fmtTemp(v, sys.temp), withDate:true},
+      {label:'Lowest',  series:'outTempMin', daySeries:'outTempHourly', agg:'min', fmt:(v,sys)=>fmtTemp(v, sys.temp), withDate:true},
+      {label:'Average', series:'outTempAvg', daySeries:'outTempHourly', agg:'avg', fmt:(v,sys)=>fmtTemp(v, sys.temp), withDate:false},
     ],
   },
   wind: {
     note: 'Average wind speed, highest sustained wind, and highest gust.',
     metrics: [
-      {label:'Average Wind', series:'windSpeedAvg', agg:'avg', fmt:(v,sys)=>fmtWind(v, sys.wind), withDate:false},
-      {label:'Highest Wind',  series:'windSpeedMax', agg:'max', fmt:(v,sys)=>fmtWind(v, sys.wind), withDate:true},
-      {label:'Highest Gust',  series:'windGustMax',  agg:'max', fmt:(v,sys)=>fmtWind(v, sys.wind), withDate:true},
+      {label:'Average Wind', series:'windSpeedAvg', daySeries:'windSpeedHourly', agg:'avg', fmt:(v,sys)=>fmtWind(v, sys.wind), withDate:false},
+      {label:'Highest Wind',  series:'windSpeedMax', daySeries:'windSpeedHourly', agg:'max', fmt:(v,sys)=>fmtWind(v, sys.wind), withDate:true},
+      {label:'Highest Gust',  series:'windGustMax',  daySeries:'windGustHourly', agg:'max', fmt:(v,sys)=>fmtWind(v, sys.wind), withDate:true},
     ],
   },
   rain: {
     note: '"Highest Rate" isn\'t available — charts.json\'s rainRate field duplicates the daily total rather than a true rate. Showing Wettest Day instead.',
     metrics: [
-      {label:'Total Rain',  series:'rain', agg:'sum', fmt:(v,sys)=>fmtRain(v, sys.rain), withDate:false},
-      {label:'Wettest Day', series:'rain', agg:'max', fmt:(v,sys)=>fmtRain(v, sys.rain), withDate:true},
+      {label:'Total Rain',  series:'rain', daySeries:'rainHourly', agg:'sum', fmt:(v,sys)=>fmtRain(v, sys.rain), withDate:false},
+      {label:'Wettest Day', series:'rain', daySeries:'rainHourly', agg:'max', fmt:(v,sys)=>fmtRain(v, sys.rain), withDate:true},
     ],
   },
   barometer: {
     note: 'Daily high / low / average barometric pressure.',
     metrics: [
-      {label:'Highest', series:'baromMax', agg:'max', fmt:(v,sys)=>fmtPressure(v, sys.pressure), withDate:true},
-      {label:'Lowest',  series:'baromMin', agg:'min', fmt:(v,sys)=>fmtPressure(v, sys.pressure), withDate:true},
-      {label:'Average', series:'baromAvg', agg:'avg', fmt:(v,sys)=>fmtPressure(v, sys.pressure), withDate:false},
+      {label:'Highest', series:'baromMax', daySeries:'baromMaxHourly', agg:'max', fmt:(v,sys)=>fmtPressure(v, sys.pressure), withDate:true},
+      {label:'Lowest',  series:'baromMin', daySeries:'baromMinHourly', agg:'min', fmt:(v,sys)=>fmtPressure(v, sys.pressure), withDate:true},
+      {label:'Average', series:'baromAvg', daySeries:'baromAvgHourly', agg:'avg', fmt:(v,sys)=>fmtPressure(v, sys.pressure), withDate:false},
     ],
   },
   solaruv: {
     note: 'UV Index (0-11+) and solar radiation. UV Index categories: 0-2 Low, 3-5 Moderate, 6-7 High, 8-10 Very High, 11+ Extreme.',
     metrics: [
-      {label:'Max UV Index', series:'UVMax', agg:'max', fmt:(v,sys)=>round1(v)+' UV', withDate:true},
-      {label:'Max Solar',    series:'solarMax', agg:'max', fmt:(v,sys)=>round1(v)+' W/m²', withDate:true},
-      {label:'Avg Solar',    series:'solarAvg', agg:'avg', fmt:(v,sys)=>round1(v)+' W/m²', withDate:false},
+      {label:'Max UV Index', series:'UVMax', daySeries:'uvHourly', agg:'max', fmt:(v,sys)=>round1(v)+' UV', withDate:true},
+      {label:'Max Solar',    series:'solarMax', daySeries:'solarHourly', agg:'max', fmt:(v,sys)=>round1(v)+' W/m²', withDate:true},
+      {label:'Avg Solar',    series:'solarAvg', daySeries:'solarHourly', agg:'avg', fmt:(v,sys)=>round1(v)+' W/m²', withDate:false},
     ],
   },
   cloud: {
+    // Avg Cloud Cover has no daySeries: charts.json has no intraday
+    // cloudCover field at all (unlike every other metric here), so its
+    // "Day" tile still shows the last completed calendar day's average,
+    // same as the pre-fix behavior -- a known gap, not fixable without
+    // a new data field from the generator.
     note: 'Cloud cover (%), visibility distance, and estimated cloud base. Visibility categories: <1km Very Poor, 1-4km Poor, 4-10km Moderate, 10-20km Good, >20km Excellent.',
     metrics: [
       {label:'Avg Cloud Cover', series:'cloudCover', agg:'avg', fmt:(v,sys)=>round1(v)+'%', withDate:false},
-      {label:'Best Visibility', series:'lightDist', agg:'max', fmt:(v,sys)=>fmtDist(v, sys.dist), withDate:true},
-      {label:'Worst Visibility', series:'lightDist', agg:'min', fmt:(v,sys)=>fmtDist(v, sys.dist), withDate:true},
+      {label:'Best Visibility', series:'lightDist', daySeries:'lightDistHourly', agg:'max', fmt:(v,sys)=>fmtDist(v, sys.dist), withDate:true},
+      {label:'Worst Visibility', series:'lightDist', daySeries:'lightDistHourly', agg:'min', fmt:(v,sys)=>fmtDist(v, sys.dist), withDate:true},
     ],
   },
   lightning: {
     note: 'Lightning strike count and closest distance. Distance categories: <5km Very Close (⚡ DANGER), 5-10km Close, 10-20km Moderate, >20km Far.',
     metrics: [
-      {label:'Total Strikes',  series:'lightCount', agg:'sum', fmt:(v,sys)=>fmtLightningCount(v), withDate:false},
-      {label:'Most Strikes',   series:'lightCount', agg:'max', fmt:(v,sys)=>fmtLightningCount(v), withDate:true},
-      {label:'Closest Strike', series:'lightDist',  agg:'min', fmt:(v,sys)=>fmtDist(v, sys.dist), withDate:true},
+      {label:'Total Strikes',  series:'lightCount', daySeries:'lightCountHourly', agg:'sum', fmt:(v,sys)=>fmtLightningCount(v), withDate:false},
+      {label:'Most Strikes',   series:'lightCount', daySeries:'lightCountHourly', agg:'max', fmt:(v,sys)=>fmtLightningCount(v), withDate:true},
+      {label:'Closest Strike', series:'lightDist',  daySeries:'lightDistHourly', agg:'min', fmt:(v,sys)=>fmtDist(v, sys.dist), withDate:true},
     ],
   },
   pollen: {
     note: 'Pollen counts (grains/m³) for six common pollen types. Severity: 0-10 Low, 10-50 Moderate, 50-200 High, 200+ Very High.',
     metrics: [
-      {label:'Alder (max)', series:'alder', agg:'max', fmt:(v,sys)=>fmtPollen(v), withDate:true},
-      {label:'Birch (max)', series:'birch', agg:'max', fmt:(v,sys)=>fmtPollen(v), withDate:true},
-      {label:'Grass (max)', series:'grass', agg:'max', fmt:(v,sys)=>fmtPollen(v), withDate:true},
+      {label:'Alder (max)', series:'alder', daySeries:'alderHourly', agg:'max', fmt:(v,sys)=>fmtPollen(v), withDate:true},
+      {label:'Birch (max)', series:'birch', daySeries:'birchHourly', agg:'max', fmt:(v,sys)=>fmtPollen(v), withDate:true},
+      {label:'Grass (max)', series:'grass', daySeries:'grassHourly', agg:'max', fmt:(v,sys)=>fmtPollen(v), withDate:true},
     ],
   },
   airquality: {
     note: 'Particulate matter (PM) concentrations in µg/m³. PM2.5 and PM10 are the main regulatory metrics. PM1.0 and PM4.0 shown for additional context.',
     metrics: [
-      {label:'PM2.5 (max)', series:'pm2_5', agg:'max', fmt:(v,sys)=>fmtConc(v, sys.conc), withDate:true},
-      {label:'PM10 (max)', series:'pm10_0', agg:'max', fmt:(v,sys)=>fmtConc(v, sys.conc), withDate:true},
-      {label:'PM2.5 (avg)', series:'pm2_5', agg:'avg', fmt:(v,sys)=>fmtConc(v, sys.conc), withDate:false},
+      {label:'PM2.5 (max)', series:'pm2_5', daySeries:'pm2_5Hourly', agg:'max', fmt:(v,sys)=>fmtConc(v, sys.conc), withDate:true},
+      {label:'PM10 (max)', series:'pm10_0', daySeries:'pm10_0Hourly', agg:'max', fmt:(v,sys)=>fmtConc(v, sys.conc), withDate:true},
+      {label:'PM2.5 (avg)', series:'pm2_5', daySeries:'pm2_5Hourly', agg:'avg', fmt:(v,sys)=>fmtConc(v, sys.conc), withDate:false},
     ],
   },
   gases: {
     note: 'Greenhouse gas and air pollutant concentrations. CO₂ in ppm, all others in µg/m³.',
     metrics: [
-      {label:'CO₂ (max)', series:'co2Max', agg:'max', fmt:(v,sys)=>round1(v)+' ppm', withDate:true},
-      {label:'O₃ (max)',  series:'o3Max',  agg:'max', fmt:(v,sys)=>fmtConc(v, sys.conc), withDate:true},
-      {label:'NO₂ (max)', series:'no2Max', agg:'max', fmt:(v,sys)=>fmtConc(v, sys.conc), withDate:true},
+      {label:'CO₂ (max)', series:'co2Max', daySeries:'co2Hourly', agg:'max', fmt:(v,sys)=>round1(v)+' ppm', withDate:true},
+      {label:'O₃ (max)',  series:'o3Max',  daySeries:'o3Hourly', agg:'max', fmt:(v,sys)=>fmtConc(v, sys.conc), withDate:true},
+      {label:'NO₂ (max)', series:'no2Max', daySeries:'no2Hourly', agg:'max', fmt:(v,sys)=>fmtConc(v, sys.conc), withDate:true},
     ],
   },
 };
@@ -1053,13 +1058,37 @@ function renderRecordsPanel(){
     row.innerHTML = '<div class="text-center">' + DivumWXI18N.t('Select a category to see records.') + '</div>';
     return;
   }
+  // charts.json's plain Max/Min/Avg series (e.g. outTempMax, windGustMax)
+  // are DAILY aggregates -- one point per calendar day, dated at day's
+  // end. For every period except "Day" that's exactly right (each
+  // period slices N of those daily points). But for "Day", a calendar
+  // day still in progress has no finished daily point yet -- "the last 1
+  // point" from that series is actually the most recently *completed*
+  // day, which this code was mislabelling with today's date.
+  // records.html's own dayRecord() already gets this right by preferring
+  // intraday data instead; mirror that here via each metric's explicit
+  // daySeries (set below, only where the feed actually has an intraday
+  // field -- see the per-metric comments for which). Deriving the name
+  // programmatically (e.g. stripping "Max" and appending "Hourly") was
+  // tried and rejected: the feed's casing isn't consistent enough for
+  // that (UVMax's intraday counterpart is "uvHourly", lowercase u), so
+  // explicit beats clever here.
   row.innerHTML = RECORDS_PERIODS.map(period => {
     const tiles = category.metrics.map(metric => {
       const label = DivumWXI18N.t(metric.label);
       if(!dataSeries){
         return `<div class="records-tile"><div class="records-label">${label}</div><div class="records-value">--</div></div>`;
       }
-      const slice = dataSlice(dataSeries[metric.series], period.days);
+      let seriesName = metric.series, sliceDays = period.days;
+      if (period.key === 'day' && metric.daySeries) {
+        // The intraday series is already scoped to today/the rolling
+        // 24h window, so take every point in it rather than re-slicing
+        // by a day count (which counts POINTS, not time, and would
+        // just cut off most of a single day's worth of samples).
+        seriesName = metric.daySeries;
+        sliceDays = Infinity;
+      }
+      const slice = dataSlice(dataSeries[seriesName], sliceDays);
       const {value, date} = dataAggregate(slice, metric.agg);
       const valueHtml = value!=null ? metric.fmt(value, sys) : '--';
       const dateHtml = (metric.withDate && date!=null) ? `<div class="records-value-date">${fmtDateOnly(date)}</div>` : '';
