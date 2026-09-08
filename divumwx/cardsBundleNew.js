@@ -7220,10 +7220,21 @@ try {
     svg = svgSel.append('svg').attr('viewBox', '0 0 ' + W + ' ' + H).attr('width', '100%').attr('height', '100%');
     var defs = svg.append('defs');
 
-    var now = stationNow();
     var eclipticDeg = v.eclipticAngle;
 
-    var sunPos = solarPosition(now.getTime());
+    // solarPosition() computes the sub-solar point from Earth's true
+    // rotational position, which depends on the real UTC instant -- NOT
+    // on the station's local wall-clock time. stationNow() deliberately
+    // returns a Date whose UTC getters read back the station's local
+    // time (a "fake UTC" trick used elsewhere in this file for display
+    // purposes); its .getTime() is NOT a real epoch value and must never
+    // be fed into an absolute-time calculation like this one. Using it
+    // here silently shifted the sun/moon position by however far the
+    // station's current UTC offset happens to be (e.g. +1h under BST),
+    // which is exactly why this card's globe disagreed with the Solar
+    // Dial card -- that card gets its sun/moon position pre-computed
+    // server-side in almanac.json and never routes through stationNow().
+    var sunPos = solarPosition(Date.now());
 
 
     var moonPos = [sunPos[0] + v.moonEclipticAngle, v.moonDec];
