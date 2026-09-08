@@ -244,7 +244,7 @@
       title: 'Wind',
       metrics: [
         { key: 'gustmax', series: 'windGustMax', label: 'Gust Max', icon: '\uD83D\uDCA8' },
-        { key: 'gustavg', series: 'windGustAvg', label: 'Gust Avg', icon: '\uD83C\uDF2C\uFE0F' },
+        { key: 'gustavg', series: 'windGustAvg', label: 'Avg Gust', icon: '\uD83C\uDF2C\uFE0F' },
       ],
       cellMetric: 'gustmax',
       showMetricSelector: true,
