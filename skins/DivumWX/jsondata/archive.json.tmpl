@@ -50,6 +50,7 @@
 #import time
 #import math
 #import platform
+#import os
 ##
 ## safeMs — guards every int(raw * 1000) timestamp conversion below.
 ## $X.raw can legitimately come back None (derived/extension obs types like
@@ -122,6 +123,19 @@ null
 #set $osVersion = platform.platform()
 #end try
 "os_version": "$osVersion",#slurp
+#try
+#set $tzName = open('/etc/timezone').read().strip()
+#if not $tzName
+#set $tzName = os.path.realpath('/etc/localtime').split('zoneinfo/')[-1]
+#end if
+#except
+#try
+#set $tzName = os.path.realpath('/etc/localtime').split('zoneinfo/')[-1]
+#except
+#set $tzName = 'UTC'
+#end try
+#end try
+"timezone": "$tzName",#slurp
 "latitude": $station.stn_info.latitude_f,
 "longitude": $station.stn_info.longitude_f,
 "elevation_m": $station.altitude.meter.raw,
