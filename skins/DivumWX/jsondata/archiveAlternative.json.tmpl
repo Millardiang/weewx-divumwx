@@ -365,16 +365,31 @@ null
   "month": $month.rain.sum.format(format_string="%.2f", None_string="0", add_label=False, localize=False),
   "year": $year.rain.sum.format(format_string="%.2f", None_string="0", add_label=False, localize=False),
   #set $storm_start_val = None
+  #set $storm_end_val = None
   #if $current.stormRain.has_data
     #set $eventRainStr = "0"
     #try
-      #set $storm_start_ts = $time_since('stormRain=0').raw
-      #if $storm_start_ts is not None
-        #set $storm_start_val = int($storm_start_ts * 1000)
+      #set $stormRainRaw = $current.stormRain.raw
+      #if $stormRainRaw is not None and $stormRainRaw > 0
+        ## Event still in progress -- find when it started. No end yet.
+        #set $storm_start_ts = $time_since('stormRain=0').raw
+        #if $storm_start_ts is not None
+          #set $storm_start_val = int($storm_start_ts * 1000)
+        #end if
+      #else
+        ## Not currently raining -- report the most recently closed
+        ## event's end (when it was last actually raining), if one
+        ## has ever happened. Mirrors the start lookup above, just
+        ## with the condition inverted.
+        #set $storm_end_ts = $time_since('stormRain>0').raw
+        #if $storm_end_ts is not None
+          #set $storm_end_val = int($storm_end_ts * 1000)
+        #end if
       #end if
       #set $eventRainStr = $current.stormRain.format(format_string="%.2f", None_string="0", add_label=False, localize=False)
     #except
       #set $storm_start_val = None
+      #set $storm_end_val = None
     #end try
     "event": $eventRainStr,
   #else
@@ -384,18 +399,36 @@ null
       #if $eventRainRaw is not None and $eventRainRaw > 0
         #set $storm_start_ts = $time_since('eventRain=0').raw
         #if $storm_start_ts is not None
-          #set $storm_start_val = int((time.time() - $storm_start_ts) * 1000)
+          ## BUGFIX: this used to be int((time.time() - $storm_start_ts) *
+          ## 1000) -- an ELAPSED duration, not an absolute timestamp.
+          ## That's inconsistent with the stormRain branch above, and
+          ## with what every client reading this field does with it
+          ## (new Date(epochMs)). Store the same absolute epoch-ms
+          ## convention the primary branch uses.
+          #set $storm_start_val = int($storm_start_ts * 1000)
+        #end if
+      #else
+        #set $storm_end_ts = $time_since('eventRain>0').raw
+        #if $storm_end_ts is not None
+          #set $storm_end_val = int($storm_end_ts * 1000)
         #end if
       #end if
       #set $eventRainStr = $current.eventRain.format(format_string="%.2f", None_string="0", add_label=False, localize=False)
     #except
       #set $storm_start_val = None
+      #set $storm_end_val = None
     #end try
     "event": $eventRainStr,
   #end if
   "storm_start":
   #if $storm_start_val is not None
-    $storm_start_val
+    $storm_start_val,
+  #else
+    null,
+  #end if
+  "storm_end":
+  #if $storm_end_val is not None
+    $storm_end_val
   #else
     null
   #end if
@@ -414,7 +447,45 @@ null
 "week": $week.hail.sum.format(format_string="%.2f", None_string="0", add_label=False, localize=False),
 "month": $month.hail.sum.format(format_string="%.2f", None_string="0", add_label=False, localize=False),
 "year": $year.hail.sum.format(format_string="%.2f", None_string="0", add_label=False, localize=False),
-"event": $current.erain_piezo.format(format_string="%.2f", None_string="0", add_label=False, localize=False)
+#set $p_storm_start_val = None
+#set $p_storm_end_val = None
+#set $eventRainPiezoStr = "0"
+#try
+  ## Assumes erain_piezo resets to 0 the same way stormRain/eventRain do
+  ## (structurally it's this codebase's piezo-sensor analog of those
+  ## fields) -- worth a live check against a real piezo rain event,
+  ## since this hasn't been independently confirmed the way
+  ## stormRain/eventRain's behavior was.
+  #set $eventRainPiezoRaw = $current.erain_piezo.raw
+  #if $eventRainPiezoRaw is not None and $eventRainPiezoRaw > 0
+    #set $p_storm_start_ts = $time_since('erain_piezo=0').raw
+    #if $p_storm_start_ts is not None
+      #set $p_storm_start_val = int($p_storm_start_ts * 1000)
+    #end if
+  #else
+    #set $p_storm_end_ts = $time_since('erain_piezo>0').raw
+    #if $p_storm_end_ts is not None
+      #set $p_storm_end_val = int($p_storm_end_ts * 1000)
+    #end if
+  #end if
+  #set $eventRainPiezoStr = $current.erain_piezo.format(format_string="%.2f", None_string="0", add_label=False, localize=False)
+#except
+  #set $p_storm_start_val = None
+  #set $p_storm_end_val = None
+#end try
+"event": $eventRainPiezoStr,
+"storm_start":
+#if $p_storm_start_val is not None
+  $p_storm_start_val,
+#else
+  null,
+#end if
+"storm_end":
+#if $p_storm_end_val is not None
+  $p_storm_end_val
+#else
+  null
+#end if
 },
 #end if
 
