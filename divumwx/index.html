@@ -369,6 +369,36 @@ body.dark .chart-modal-iframe {
 .card-not-enabled {
   display: none !important;
 }
+
+/* Placed last in this stylesheet deliberately, not just after .wrapper
+   -- a media query does NOT add any extra CSS specificity, so a later
+   plain .card{width:...} rule (the base rule, further up this file)
+   would win the cascade over an earlier media-query rule of equal
+   specificity regardless of which viewport actually matched. That's
+   exactly what happened the first time this was added right after
+   .wrapper: the .wrapper override worked (nothing later redefines
+   .wrapper), but the .card override silently lost to the later base
+   .card rule on every viewport width, media query or not. Keeping this
+   block last guarantees it can never lose to a rule added earlier in
+   the file again, without needing to track down every place .card's
+   width might get set.
+   Below 660px, .wrapper's own auto-fit grid has already dropped to a
+   single column on its own (two 315px cards + the 4px gap need 634px,
+   which doesn't fit) -- but each card was still rendered at the fixed
+   --card-width (315px) rather than stretching to fill the newly-spare
+   width, leaving empty space on both sides on a phone instead of using
+   the screen. */
+@media (max-width: 660px) {
+  .wrapper {
+    grid-template-columns: 1fr;
+    max-width: 100%;
+    padding: 0 10px;
+    box-sizing: border-box;
+  }
+  .card {
+    width: 100%;
+  }
+}
 </style>
 </head>
 <body class="dark">
@@ -909,8 +939,8 @@ window.addEventListener('load', updateFooterVisibility);
 })();
 </script>
 <script src="js/d3.7.9.0.min.js"></script>
-<script src="js/topojson.3.0.2.min.js"></script>
 <script src="js/d3-geo-projection.4.0.0.min.js"></script>
+<script src="js/topojson.3.0.2.min.js"></script>
 <script src="cardsBundleNew.js?v=c99e7d44-4"></script>
 </body>
 </html>
