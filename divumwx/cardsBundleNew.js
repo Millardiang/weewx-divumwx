@@ -4622,9 +4622,20 @@ try {
     last24hText.textContent = rainLabel(v.last24h);
     rateText.textContent = rainLabel(v.rate) + '/hr';
     yearText.textContent = rainLabel(v.year);
-    eventText.textContent = v.event > 0
-      ? rainLabel(v.event) + (v.stormStart ? ' (since ' + v.stormStart + ')' : '')
-      : '\u2014';
+    // Rain Event only appears in the card at all while one is in
+    // force -- no row, no em-dash placeholder, once it's closed.
+    // rateText's row picks up the "last row, no divider" styling
+    // whenever eventText's row is hidden, so there's never a stray
+    // border trailing the pane's actual last visible row.
+    if (v.event > 0) {
+      var stormLabel = timeLabelFor(v.stormStart);
+      eventText.parentElement.style.display = '';
+      rateText.parentElement.style.borderBottom = '1px solid var(--bs-border-color)';
+      eventText.textContent = rainLabel(v.event) + (stormLabel ? ' (since ' + stormLabel + ')' : '');
+    } else {
+      eventText.parentElement.style.display = 'none';
+      rateText.parentElement.style.borderBottom = 'none';
+    }
   }
 
   var lastData = null;
@@ -4653,7 +4664,7 @@ try {
         year: num(pRain.year, 0),
         rate: num(pRain.rate, 0),
         event: num(pRain.event, 0),
-        stormStart: pRain.storm_start || '',
+        stormStart: typeof pRain.storm_start === 'number' ? pRain.storm_start : 0,
         rainColor: o.rainColor || 'var(--bw-accent)',
         rateColor: o.rainRateColor || 'var(--bw-accent)'
       };
@@ -5046,10 +5057,20 @@ try {
     last24hText.textContent = rainLabel(v.last24h);
     rateText.textContent = rainLabel(v.rate) + '/hr';
     yearText.textContent = rainLabel(v.year);
-    var stormLabel = timeLabelFor(v.stormStart);
-    eventText.textContent = v.event > 0
-      ? rainLabel(v.event) + (stormLabel ? ' (since ' + stormLabel + ')' : '')
-      : '\u2014';
+    // Rain Event only appears in the card at all while one is in
+    // force -- no row, no em-dash placeholder, once it's closed.
+    // rateText's row picks up the "last row, no divider" styling
+    // whenever eventText's row is hidden, so there's never a stray
+    // border trailing the pane's actual last visible row.
+    if (v.event > 0) {
+      var stormLabel = timeLabelFor(v.stormStart);
+      eventText.parentElement.style.display = '';
+      rateText.parentElement.style.borderBottom = '1px solid var(--bs-border-color)';
+      eventText.textContent = rainLabel(v.event) + (stormLabel ? ' (since ' + stormLabel + ')' : '');
+    } else {
+      eventText.parentElement.style.display = 'none';
+      rateText.parentElement.style.borderBottom = 'none';
+    }
   }
 
   var lastData = null;
@@ -5797,10 +5818,20 @@ try {
     last24hText.textContent = rainLabel(v.last24h);
     rateText.textContent = rainLabel(v.rate) + '/hr';
     yearText.textContent = rainLabel(v.year);
-    var stormLabel = timeLabelFor(v.stormStart);
-    eventText.textContent = v.event > 0
-      ? rainLabel(v.event) + (stormLabel ? ' (since ' + stormLabel + ')' : '')
-      : '\u2014';
+    // Rain Event only appears in the card at all while one is in
+    // force -- no row, no em-dash placeholder, once it's closed.
+    // rateText's row picks up the "last row, no divider" styling
+    // whenever eventText's row is hidden, so there's never a stray
+    // border trailing the pane's actual last visible row.
+    if (v.event > 0) {
+      var stormLabel = timeLabelFor(v.stormStart);
+      eventText.parentElement.style.display = '';
+      rateText.parentElement.style.borderBottom = '1px solid var(--bs-border-color)';
+      eventText.textContent = rainLabel(v.event) + (stormLabel ? ' (since ' + stormLabel + ')' : '');
+    } else {
+      eventText.parentElement.style.display = 'none';
+      rateText.parentElement.style.borderBottom = 'none';
+    }
   }
 
   var lastData = null;
@@ -5826,7 +5857,7 @@ try {
         year: num(rain.year, 0),
         rate: num(rain.rate, 0),
         event: num(rain.event, 0),
-        stormStart: typeof rain.storm_start === 'number' ? rain.storm_start : 0
+        stormStart: typeof rain.storm_start === 'number' ? rain.storm_start : 0,
       };
       renderCard(lastData);
       setStatus(loopResult.status === 'fulfilled' && archResult.status === 'fulfilled');
