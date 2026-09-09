@@ -567,11 +567,11 @@ function pollLoop(){
       liveValues.windGust = o.windGust ?? null;
       liveValues.windDir = o.windDir ?? null;
       liveValues.windDir10 = o.windDir10 ?? null;
-      liveValues.barometer = o.barometer ?? null;
+      liveValues.barometer = o.barometer ?? o.relbarometer ?? null;
       if(o.dayRain != null) liveValues.dayRain = o.dayRain;
       liveValues.rainRate = o.rainRate ?? null;
       liveValues.uv = o.UV ?? null;
-      liveValues.radiation = o.radiation ?? null;
+      liveValues.radiation = o.radiation ?? o.uvradiation ?? null;
       liveValues.outHumidity = o.outHumidity ?? null;
       liveValues.dewpoint = o.dewpoint ?? null;
       liveValues.aqi = o.pm25_RealAQI_co2 ?? null;
