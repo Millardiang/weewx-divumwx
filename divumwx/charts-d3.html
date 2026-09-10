@@ -1098,7 +1098,8 @@ function renderRecordsPanel(){
       const dateHtml = (metric.withDate && date!=null) ? `<div class="records-value-date">${fmtDateOnly(date)}</div>` : '';
       return `<div class="records-tile"><div class="records-label">${label}</div><div class="records-value">${valueHtml}</div>${dateHtml}</div>`;
     }).join('');
-    return `<div class="records-period-card"><div class="records-period-label">${DivumWXI18N.t(period.label)}</div><div class="records-grid">${tiles}</div></div>`;
+    const periodLabelHtml = period.key === 'day' ? ('24' + DivumWXI18N.t('hr')) : DivumWXI18N.t(period.label);
+    return `<div class="records-period-card"><div class="records-period-label">${periodLabelHtml}</div><div class="records-grid">${tiles}</div></div>`;
   }).join('');
 }
 
@@ -1408,10 +1409,10 @@ function applyTabLabels(){
     if (key) btn.textContent = DivumWXI18N.t(key);
   });
   document.querySelectorAll('.chart-tf-btn[data-tf]').forEach(btn => {
-    btn.textContent = DivumWXI18N.t(TIMEFRAME_LABELS[btn.dataset.tf]);
+    btn.textContent = btn.dataset.tf === 'day' ? ('24' + DivumWXI18N.t('hr')) : DivumWXI18N.t(TIMEFRAME_LABELS[btn.dataset.tf]);
   });
   document.querySelectorAll('.chart-tf-btn[data-wrperiod]').forEach(btn => {
-    btn.textContent = DivumWXI18N.t(TIMEFRAME_LABELS[btn.dataset.wrperiod]);
+    btn.textContent = btn.dataset.wrperiod === 'day' ? ('24' + DivumWXI18N.t('hr')) : DivumWXI18N.t(TIMEFRAME_LABELS[btn.dataset.wrperiod]);
   });
 }
 const TIMEFRAME_LABELS = { day:'24hr', week:'Week', month:'Month', year:'Year' };
