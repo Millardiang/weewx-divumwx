@@ -1043,7 +1043,7 @@ const RECORDS_CATEGORIES = {
 };
 
 const RECORDS_PERIODS = [
-  {key:'day',     label:'Day',      days:1},
+  {key:'day',     label:'24hr',     days:1},
   {key:'week',    label:'Week',     days:7},
   {key:'month',   label:'Month',    days:30},
   {key:'year',    label:'Year',     days:365},
@@ -1054,6 +1054,7 @@ function renderRecordsPanel(){
   const sys = SYSTEMS[currentSystem];
   const category = RECORDS_CATEGORIES[currentCategory];
   const row = document.getElementById('recordsPeriodsRow');
+  if(!row) return; // records section not mounted/visible yet -- nothing to update
   if(!category){
     row.innerHTML = '<div class="text-center">' + DivumWXI18N.t('Select a category to see records.') + '</div>';
     return;
@@ -1081,10 +1082,13 @@ function renderRecordsPanel(){
       }
       let seriesName = metric.series, sliceDays = period.days;
       if (period.key === 'day' && metric.daySeries) {
-        // The intraday series is already scoped to today/the rolling
-        // 24h window, so take every point in it rather than re-slicing
-        // by a day count (which counts POINTS, not time, and would
-        // just cut off most of a single day's worth of samples).
+        // The intraday series is already scoped to the rolling last-24h
+        // window, so take every point in it rather than re-slicing by a
+        // day count (which counts POINTS, not time, and would just cut
+        // off most of a day's worth of samples). This tile is labelled
+        // "24hr" rather than "Day" precisely because it's this rolling
+        // window, not a calendar day -- it can span parts of two
+        // different days, which is by design, not a bug.
         seriesName = metric.daySeries;
         sliceDays = Infinity;
       }
@@ -1410,7 +1414,7 @@ function applyTabLabels(){
     btn.textContent = DivumWXI18N.t(TIMEFRAME_LABELS[btn.dataset.wrperiod]);
   });
 }
-const TIMEFRAME_LABELS = { day:'Day', week:'Week', month:'Month', year:'Year' };
+const TIMEFRAME_LABELS = { day:'24hr', week:'Week', month:'Month', year:'Year' };
 applyTabLabels();
 
 // METAR cross-link — only relevant (and only shown) when this page is
