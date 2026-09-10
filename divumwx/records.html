@@ -779,7 +779,7 @@ function avgCellHtml(avgValue, family, periodLabel) {
   return '<span class="record-value">' + c.text + (c.unit ? ' ' + c.unit : '') + '</span><span class="record-sub">' + periodLabel + '</span>';
 }
 
-const PERIOD_LABEL_KEYS = { day: 'Day', week: 'Week', month: 'Month', year: 'Year', alltime: 'All-time' };
+const PERIOD_LABEL_KEYS = { day: '24hr', week: 'Week', month: 'Month', year: 'Year', alltime: 'All-time' };
 
 function renderMetricCard(metric, records, periods) {
   const label = DivumWXI18N.t(metric.label);
@@ -815,7 +815,7 @@ function renderStatusAndLegend(){
   if (lastLoadCount == null) return; // still loading -- static placeholder text stands
   statusEl.textContent = lastLoadCount + ' ' + DivumWXI18N.t('measured values loaded from charts.json.');
   document.getElementById('recordsLegend').innerHTML =
-    '<p>' + DivumWXI18N.t('Week runs Monday\u2013Sunday, month and year are calendar periods. "Day" is a rolling last 24 hours using real hour-by-hour timestamps.') + '</p>' +
+    '<p>' + DivumWXI18N.t('Week runs Monday\u2013Sunday, month and year are calendar periods. "24hr" is a rolling last 24 hours using real hour-by-hour timestamps.') + '</p>' +
     '<p>' + DivumWXI18N.t('Week/Month/Year/All-time Max and Min dates come from charts.json\u2019s daily-aggregate series, which only stores one timestamp per day (local midnight) \u2014 so the date shown is correct but no time-of-day is available for those periods.') + '</p>' +
     '<p><span class="unit-flag">' + DivumWXI18N.t('unconfirmed unit') + '</span> \u2014 ' + DivumWXI18N.t('this project\u2019s confirmed unit-system shape (units.js) only covers temperature, wind and rain; other values are shown in a best-guess unit and don\u2019t respond to the unit-system selector.') + '</p>' +
     '<p>' + DivumWXI18N.t('\u2021 wind direction min/max/avg are plain numeric extremes over 0\u2013360\u00B0, not circular-mean-aware \u2014 a reading near 359\u00B0 and one near 1\u00B0 won\u2019t average to "north" here.') + '</p>';
