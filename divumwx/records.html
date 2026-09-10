@@ -790,7 +790,7 @@ function renderMetricCard(metric, records, periods) {
     const rec = records[pk];
     const dateStyle = pk === 'day' ? 'time' : 'date';
     rows += '<tr>' +
-      '<td class="period-cell">' + DivumWXI18N.t(PERIOD_LABEL_KEYS[pk]) + '</td>' +
+      '<td class="period-cell">' + (pk === 'day' ? ('24' + DivumWXI18N.t('hr')) : DivumWXI18N.t(PERIOD_LABEL_KEYS[pk])) + '</td>' +
       '<td>' + cellHtml(rec.max, metric.family, dateStyle) + '</td>' +
       '<td>' + cellHtml(rec.min, metric.family, dateStyle) + '</td>' +
       '<td>' + avgCellHtml(rec.avgValue, metric.family, periods[pk].label) + '</td>' +
