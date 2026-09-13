@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<!--
+##############################################################################################
+# divumwf.html version 0.0.1
+#  DivumWF -- Divum Weather Forecast: a mobile-first "forecast for anywhere in the world"
+#  section, sharing DivumWX's theme, navbar, unit system and i18n with the rest of the site.
+#  Layout/feature set modelled in part on chicagoeas/sky-monitor (github.com/chicagoeas/sky-monitor).
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  GPLv3
+##############################################################################################
+-->
+<html lang="en" data-bs-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#111834">
+<title>DivumWF &mdash; Weather Forecast</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="header.css?v=s3n2026i">
+<link rel="icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===================== Shared palette (identical to locationforecast.html / index.html) ===================== */
+:root,
+[data-bs-theme="light"]{
+  --bw-accent:#B45309;
+  --bw-accent-soft:#3A2E1A;
+  --bw-lime:#C9DA1E;
+  --bw-lime-soft:#2E331A;
+  --bw-sky:#6FB6DD;
+  --bw-sky-soft:#1C2E38;
+  --bw-good:#5BBB8A;
+  --bw-danger:#E36B57;
+  --bw-danger-soft:#3A2220;
+  --bw-yellow:#D6BE4E;
+  --bw-yellow-soft:#3A341A;
+  --bw-line:#2C5478;
+  --bw-radius:18px;
+  --bw-radius-sm:10px;
+  --bw-shadow:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.5);
+
+  --bs-body-bg: #EFECE2;
+  --bs-body-color: #1D2C4E;
+  --bs-secondary-color: #5C6672;
+  --bs-tertiary-bg: #FFFFFF;
+  --bs-secondary-bg: #FFFFFF;
+  --bs-border-color: #C9CFD8;
+  --bs-border-color-translucent: rgba(0,0,0,0.15);
+  --bs-card-bg: #FFFFFF;
+  --bs-emphasis-color: #000;
+  --bs-primary:#B45309;
+  --bs-primary-rgb:180,83,9;
+  --bs-link-color:#B45309;
+  --bs-link-hover-color:#F2BC6B;
+  --bs-warning-rgb:180,83,9;
+  --bs-font-sans-serif:'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+[data-bs-theme="dark"]{
+  --bw-accent:#D3A94C;
+  --bw-accent-soft:#3A2E1A;
+  --bw-sky:#6FB6DD;
+  --bw-sky-soft:#1C2E38;
+  --bw-good:#5BBB8A;
+  --bw-danger:#E36B57;
+  --bw-danger-soft:#3A2220;
+  --bw-yellow:#D6BE4E;
+  --bw-yellow-soft:#3A341A;
+  --bw-line:#343E43;
+  --bw-shadow:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.5);
+
+  --bs-body-bg: #0A0F22;
+  --bs-body-color: #E9E4D4;
+  --bs-secondary-color: #8B93B8;
+  --bs-tertiary-bg: #111834;
+  --bs-secondary-bg: #111834;
+  --bs-border-color: #2A3358;
+  --bs-border-color-translucent: rgba(255,255,255,0.15);
+  --bs-card-bg: #111834;
+  --bs-emphasis-color: #fff;
+  --bs-primary:#D3A94C;
+  --bs-primary-rgb:211,169,76;
+  --bs-link-color:#D3A94C;
+  --bs-link-hover-color:#F2BC6B;
+}
+
+html{scroll-behavior:smooth;}
+body{
+  font-family:var(--bs-font-sans-serif);
+  padding-bottom:48px;
+  transition:background-color .25s ease, color .25s ease;
+}
+.font-mono{font-family:'JetBrains Mono','Courier New',monospace;}
+.card{background:var(--bs-card-bg); border-radius:var(--bw-radius-sm); box-shadow:var(--bw-shadow);}
+.shadow-card{box-shadow:var(--bw-shadow) !important;}
+.nav-btn{color:var(--bs-body-color);border-color:var(--bs-body-color);background-color:var(--bs-tertiary-bg);font-weight:600;font-size:15px;white-space:nowrap;}
+.nav-btn:hover,.nav-btn:focus,.nav-btn.show{color:var(--bs-body-color);border-color:var(--bw-accent);background-color:var(--bs-secondary-bg);}
+
+/* ===================== Phone-app shell ===================== */
+.wf-shell{max-width:520px;margin:0 auto;padding:14px 14px 0;}
+@keyframes wf-spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+
+/* ---------- App bar: brand + settings gear (no site navbar on this page) ---------- */
+.wf-appbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;}
+.wf-brand{display:flex;align-items:baseline;gap:8px;min-width:0;}
+.wf-brand-name{
+  font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:1.7rem;
+  color:var(--bw-accent);letter-spacing:.01em;white-space:nowrap;
+}
+.wf-brand-version{font-size:11.5px;color:var(--bs-secondary-color);font-family:'JetBrains Mono',monospace;white-space:nowrap;}
+.wf-tagline{font-size:12.5px;color:var(--bs-secondary-color);margin:0 0 14px;}
+.wf-gear-btn{
+  flex:0 0 auto;width:38px;height:38px;border-radius:50%;border:none;background:transparent;
+  font-size:19px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--bs-secondary-color);transition:color .15s, background .15s;
+}
+.wf-gear-btn:hover{color:var(--bw-accent);background:var(--bs-tertiary-bg);}
+
+/* ---------- Search bar: one rounded bar holding input + Sync + GPS ---------- */
+.wf-searchrow{margin-bottom:8px;}
+.wf-searchbar-outer{
+  display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:26px;
+  background:var(--bs-tertiary-bg);border:1px solid var(--bs-border-color);
+}
+.wf-locbar-search{position:relative;flex:1 1 auto;min-width:0;}
+.wf-locbar-search input{
+  width:100%;box-sizing:border-box;background:transparent;border:none;border-bottom:1px solid var(--bs-border-color);
+  color:var(--bs-body-color);padding:6px 4px;font-size:14px;border-radius:0;
+}
+.wf-locbar-search input:focus{outline:none;border-bottom-color:var(--bw-accent);}
+.wf-sync-btn{
+  flex:0 0 auto;border:none;border-radius:20px;background:var(--bw-sky);color:#0B2233;
+  font-weight:700;font-size:13px;padding:9px 18px;cursor:pointer;white-space:nowrap;
+  transition:filter .15s;
+}
+.wf-sync-btn:hover{filter:brightness(1.08);}
+.wf-sync-btn.is-busy{opacity:.7;cursor:default;}
+.wf-gps-pill-btn{
+  flex:0 0 auto;border:1px solid var(--bs-border-color);border-radius:20px;background:var(--bs-secondary-bg);
+  color:var(--bs-body-color);font-weight:600;font-size:12.5px;padding:8px 14px;cursor:pointer;white-space:nowrap;
+  transition:border-color .15s, color .15s;display:inline-flex;align-items:center;gap:5px;
+}
+.wf-icon{display:inline-block;vertical-align:middle;flex-shrink:0;}
+.wf-gps-pill-btn:hover{border-color:var(--bw-accent);color:var(--bw-accent);}
+.wf-gps-pill-btn.is-busy{animation:wf-spin 1s linear infinite;}
+.wf-suggestions{
+  position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:20;
+  background:var(--bs-tertiary-bg);border:1px solid var(--bs-border-color);border-radius:var(--bw-radius-sm);
+  box-shadow:var(--bw-shadow);display:none;flex-direction:column;overflow:hidden;max-height:280px;overflow-y:auto;
+}
+.wf-suggestions.show{display:flex;}
+.wf-suggestion-item{
+  display:flex;justify-content:space-between;gap:10px;align-items:baseline;text-align:left;width:100%;
+  padding:10px 14px;border:none;border-bottom:1px solid var(--bs-border-color);background:transparent;color:var(--bs-body-color);
+}
+.wf-suggestion-item:last-child{border-bottom:none;}
+.wf-suggestion-item:hover{background:var(--bs-secondary-bg);color:var(--bw-accent);}
+.wf-suggestion-name{font-weight:600;}
+.wf-suggestion-country{font-size:11.5px;color:var(--bs-secondary-color);font-family:'JetBrains Mono',monospace;flex-shrink:0;}
+.wf-status{font-size:12.5px;color:var(--bs-secondary-color);min-height:1.3em;margin:6px 6px 10px;}
+.wf-status.is-error{color:var(--bw-danger);}
+.wf-status.is-busy::before{content:'\23F3 ';}
+.wf-recent{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
+.wf-recent-chip{
+  font-family:'JetBrains Mono',monospace;font-size:11.5px;padding:5px 12px;border-radius:16px;
+  border:1px solid var(--bs-border-color);background:var(--bs-tertiary-bg);color:var(--bs-secondary-color);
+}
+.wf-recent-chip:hover{border-color:var(--bw-accent);color:var(--bw-accent);}
+
+/* ---------- Settings panel (replaces the site navbar's controls on this page) ---------- */
+.wf-settings-overlay{
+  display:none;position:fixed;inset:0;z-index:1300;background:rgba(0,0,0,.45);
+  align-items:flex-start;justify-content:center;padding:70px 16px 16px;box-sizing:border-box;
+}
+.wf-settings-overlay.open{display:flex;}
+.wf-settings-panel{
+  width:100%;max-width:340px;background:var(--bs-tertiary-bg);border:1px solid var(--bs-border-color);
+  border-radius:var(--bw-radius);box-shadow:var(--bw-shadow);padding:16px 18px;box-sizing:border-box;
+}
+.wf-settings-head{display:flex;align-items:center;justify-content:space-between;font-weight:700;font-size:15px;margin-bottom:12px;}
+.wf-settings-close{border:none;background:none;color:var(--bs-secondary-color);cursor:pointer;padding:4px 6px;display:inline-flex;align-items:center;justify-content:center;}
+.wf-settings-close:hover{color:var(--bw-accent);}
+.wf-settings-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--bs-border-color);}
+.wf-settings-row:first-of-type{border-top:none;}
+.wf-settings-label{font-size:13.5px;color:var(--bs-secondary-color);}
+.wf-settings-row #unitSystem, .wf-settings-row #languageSystem{
+  font-family:inherit;font-size:13px;padding:5px 8px;border-radius:6px;border:1px solid var(--bs-border-color);
+  background:var(--bs-secondary-bg);color:var(--bs-body-color);cursor:pointer;
+}
+.wf-select-wrap--lang{display:flex;align-items:center;gap:6px;}
+#languageFlag{width:18px;height:12px;object-fit:cover;border-radius:2px;box-shadow:0 0 0 1px rgba(128,128,128,.35);}
+.wf-theme-btn{border:1px solid var(--bs-border-color);background:var(--bs-secondary-bg);border-radius:8px;padding:6px 12px;cursor:pointer;line-height:1;color:var(--bs-body-color);display:inline-flex;align-items:center;justify-content:center;}
+.wf-theme-btn:hover{border-color:var(--bw-accent);}
+.wf-settings-row--stacked{flex-direction:column;align-items:stretch;gap:6px;}
+.wf-settings-input{
+  width:100%;box-sizing:border-box;font-family:'JetBrains Mono',monospace;font-size:12.5px;
+  padding:7px 10px;border-radius:6px;border:1px solid var(--bs-border-color);
+  background:var(--bs-secondary-bg);color:var(--bs-body-color);
+}
+.wf-settings-input:focus{outline:none;border-color:var(--bw-accent);}
+.wf-settings-hint{font-size:11px;color:var(--bs-secondary-color);margin:0;line-height:1.4;}
+.wf-settings-hint a{color:var(--bw-accent);}
+
+/* ---------- Empty state ---------- */
+#wfEmptyState{text-align:center;padding:56px 10px;color:var(--bs-secondary-color);}
+#wfEmptyState .wf-empty-icon{display:block;margin:0 auto 14px;height:52px;width:auto;opacity:.75;}
+
+/* ---------- Hero current-conditions card ---------- */
+.hero-card{padding:20px 20px 16px;}
+.hero-top{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.hero-place{min-width:0;}
+.hero-place-name{font-weight:700;font-size:15.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hero-place-sub{font-size:11.5px;color:var(--bs-secondary-color);font-family:'JetBrains Mono',monospace;}
+.wf-refresh-btn{
+  flex:0 0 auto;background:none;border:none;color:var(--bs-secondary-color);font-size:16px;cursor:pointer;
+  padding:4px;line-height:1;
+}
+.wf-refresh-btn:hover{color:var(--bw-accent);}
+.wf-refresh-btn.is-busy{animation:wf-spin 1s linear infinite;}
+.hero-now-label{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--bs-secondary-color);margin-top:14px;}
+.hero-main{display:flex;align-items:center;gap:14px;margin-top:2px;}
+.hero-temp{font-weight:700;font-size:clamp(48px,15vw,64px);line-height:1;}
+.hero-icon{width:64px;height:64px;flex-shrink:0;object-fit:contain;}
+.hero-cond-col{min-width:0;}
+.hero-cond{font-size:15.5px;font-weight:600;}
+.hero-feels{font-size:12.5px;color:var(--bs-secondary-color);}
+.hero-hilo{font-size:12.5px;color:var(--bs-secondary-color);margin-top:2px;}
+.hero-mini-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:16px;padding-top:14px;border-top:1px solid var(--bs-border-color);}
+.hero-mini{display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;}
+.hero-mini-label{font-size:10.5px;color:var(--bs-secondary-color);text-transform:uppercase;letter-spacing:.03em;}
+.hero-mini-value{font-size:15px;font-weight:700;font-family:'JetBrains Mono',monospace;}
+.hero-mini-sub{font-size:10.5px;color:var(--bs-secondary-color);}
+
+/* ---------- Wind card ---------- */
+.wind-card{padding:16px 18px;display:flex;align-items:center;gap:16px;}
+.wind-compass-mini{position:relative;width:64px;height:64px;flex-shrink:0;}
+.wind-compass-mini-ring{width:100%;height:100%;display:block;}
+.wind-compass-mini-arrow{transform-origin:40px 40px;transition:transform .5s cubic-bezier(.4,0,.2,1);}
+.wind-compass-mini-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;line-height:1.15;pointer-events:none;}
+.wind-compass-mini-label span:first-child{font-size:13px;font-weight:700;}
+.wind-compass-mini-label span:last-child{font-size:9px;color:var(--bs-secondary-color);}
+.wind-card-body{flex:1 1 auto;min-width:0;}
+.wind-card-title{font-size:11.5px;color:var(--bs-secondary-color);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px;}
+.wind-card-row{display:flex;justify-content:space-between;font-size:13px;padding:2px 0;}
+.wind-card-row .k{color:var(--bs-secondary-color);}
+.wind-card-row .v{font-family:'JetBrains Mono',monospace;font-weight:600;}
+.beaufort-chip{display:inline-block;margin-top:4px;font-family:'JetBrains Mono',monospace;font-size:10.5px;background:var(--bw-sky-soft);color:var(--bw-sky);padding:2px 8px;border-radius:10px;}
+
+/* ---------- Minutely rain forecast ---------- */
+.minutely-card{padding:16px 18px 14px;}
+.minutely-bars{display:flex;align-items:flex-end;gap:2px;overflow:hidden;}
+.minutely-bar{flex:1 1 0;min-width:2px;border-radius:2px 2px 0 0;}
+.minutely-xaxis{
+  display:flex;justify-content:space-between;font-size:11px;color:var(--bw-sky);
+  font-family:'JetBrains Mono',monospace;margin-top:6px;
+}
+.minutely-source{font-size:10px;color:var(--bs-secondary-color);margin-top:10px;text-align:right;}
+
+/* ---------- 24-hour meteogram ---------- */
+.meteogram-card{padding:14px 8px 10px;}
+.meteogram-svg{width:100%;height:auto;display:block;}
+.meteogram-hourlabel{font-size:11px;fill:var(--bs-secondary-color);font-family:'JetBrains Mono',monospace;}
+.meteogram-hourlabel--now{fill:var(--bw-accent);font-weight:700;}
+.meteogram-daylabel{font-size:10px;fill:var(--bw-accent);font-weight:700;font-family:'JetBrains Mono',monospace;}
+.meteogram-templabel{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;}
+
+/* ---------- Highlights (UV / AQI / Sun&Moon / Precip) ---------- */
+.section-label{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--bs-secondary-color);margin:22px 0 10px;display:flex;align-items:center;gap:10px;}
+.section-label::after{content:"";flex:1;height:1px;background:var(--bs-border-color);}
+.wf-highlights{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.metric-card{padding:14px 16px;}
+.metric-card .mlabel{font-size:11.5px;color:var(--bs-secondary-color);display:flex;align-items:center;gap:6px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.03em;}
+.metric-card .mvalue{font-size:23px;font-weight:700;}
+.metric-card .mvalue small{font-size:12px;color:var(--bs-secondary-color);font-weight:400;}
+.metric-card .msub{font-size:12px;color:var(--bs-secondary-color);margin-top:4px;}
+.aqi-pill,.uv-pill{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;padding:4px 11px;border-radius:20px;margin-top:6px;}
+.aqi-pill--low,.uv-pill--low{background:rgba(91,187,138,.15);color:var(--bw-good);}
+.aqi-pill--mod,.uv-pill--mod{background:rgba(214,190,78,.15);color:var(--bw-yellow);}
+.aqi-pill--high,.uv-pill--high{background:rgba(227,107,87,.15);color:var(--bw-danger);}
+.sunmoon-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:3px 0;}
+.sunmoon-row .k{display:flex;align-items:center;gap:6px;color:var(--bs-secondary-color);}
+.sunmoon-row .v{font-family:'JetBrains Mono',monospace;font-weight:600;}
+.moon-emoji{display:inline-flex;align-items:center;color:var(--bs-secondary-color);}
+.daylight-bar{height:4px;border-radius:2px;background:var(--bs-border-color);margin:8px 0 2px;overflow:hidden;position:relative;}
+.daylight-bar-fill{position:absolute;left:0;top:0;bottom:0;background:var(--bw-accent);border-radius:2px;}
+
+/* ---------- Day strip ---------- */
+.day-strip{display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch;}
+.day-card{
+  flex:0 0 auto;width:80px;padding:12px 6px;text-align:center;cursor:pointer;position:relative;
+}
+.day-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:transparent;border-radius:3px 3px 0 0;}
+.day-card.active::before{background:var(--bw-lime);}
+.day-card.active{background:var(--bs-tertiary-bg);}
+.day-card .dname{font-size:11.5px;font-weight:700;color:var(--bs-secondary-color);text-transform:uppercase;letter-spacing:.02em;}
+.day-card.active .dname{color:var(--bw-accent);}
+.day-card .dicon{width:32px;height:32px;margin:8px auto 4px;display:block;object-fit:contain;}
+.day-card .drain{font-size:10px;color:var(--bw-sky);height:14px;display:flex;align-items:center;justify-content:center;gap:2px;}
+.day-card .dtemps{font-family:'JetBrains Mono',monospace;font-size:13px;margin-top:2px;}
+.day-card .dtemps .lo{color:var(--bs-secondary-color);}
+
+/* ---------- Hourly ---------- */
+.card.hourly-panel{background:var(--bs-tertiary-bg);padding:16px;}
+.hourly-title{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;}
+.hourly-title h2{font-size:15px;font-weight:700;margin:0;}
+.hourly-title span{font-size:11px;color:var(--bs-secondary-color);}
+.hourly-scroll{display:flex;gap:0;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.hcell{flex:0 0 auto;width:52px;text-align:center;font-size:11.5px;padding:2px 0;}
+.hcell .htime{color:var(--bs-secondary-color);font-family:'JetBrains Mono',monospace;font-size:10.5px;}
+.hcell img.hicon{width:26px;height:26px;display:block;margin:6px auto 4px;object-fit:contain;}
+.hcell .htemp{font-family:'JetBrains Mono',monospace;font-weight:600;}
+.hcell .hrain{color:var(--bw-sky);font-size:10px;font-family:'JetBrains Mono',monospace;min-height:13px;}
+.wind-badge{position:relative;width:36px;height:36px;margin:4px auto 0;display:flex;align-items:center;justify-content:center;}
+.wind-badge-ring{position:absolute;inset:0;width:100%;height:100%;}
+.wind-badge-value{position:relative;font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;color:var(--wind-col, var(--bs-secondary-color));}
+
+/* ---------- Icon contrast (mirrors locationforecast.html) ---------- */
+[data-bs-theme="light"] .hero-icon,[data-bs-theme="light"] .dicon,[data-bs-theme="light"] .hicon{
+  filter:brightness(0.88) contrast(1.12) saturate(1.08) drop-shadow(0 0.5px 1px rgba(20,24,27,.40)) drop-shadow(0 1.5px 4px rgba(20,24,27,.26)) drop-shadow(0 4px 7px rgba(20,24,27,.18));
+}
+[data-bs-theme="dark"] .hero-icon,[data-bs-theme="dark"] .dicon,[data-bs-theme="dark"] .hicon{
+  filter:brightness(1.45) contrast(1.2) drop-shadow(0 0 2px rgba(255,255,255,.32)) drop-shadow(0 0 8px rgba(255,255,255,.18));
+}
+
+.wf-footer-credit{font-size:11px;color:var(--bs-secondary-color);text-align:center;margin-top:26px;line-height:1.6;}
+.wf-footer-credit a{color:inherit;}
+
+@media (max-width:400px){
+  .hero-temp{font-size:44px;}
+  .hero-icon{width:52px;height:52px;}
+}
+</style>
+</head>
+<body>
+
+<div class="wf-shell">
+
+  <div class="wf-appbar">
+    <div class="wf-brand">
+      <span class="wf-brand-name">DivumWF</span>
+      <span class="wf-brand-version" id="wfBrandVersion">v0.0.1</span>
+    </div>
+    <button type="button" class="wf-gear-btn" id="wfSettingsBtn" title="Settings" aria-label="Settings"></button>
+  </div>
+  <p class="wf-tagline" id="wfTagline">Forecast Anywhere</p>
+
+  <div class="wf-searchrow">
+    <div class="wf-searchbar-outer">
+      <div class="wf-locbar-search">
+        <input type="text" id="wfSearchInput" autocomplete="off" placeholder="Enter city, zip, address&hellip;">
+        <div id="wfSuggestions" class="wf-suggestions"></div>
+      </div>
+      <button type="button" class="wf-sync-btn" id="wfSyncBtn">Sync</button>
+      <button type="button" class="wf-gps-pill-btn" id="wfGpsBtn" title="Use my location" aria-label="Use my location"> GPS</button>
+    </div>
+  </div>
+  <div id="wfStatus" class="wf-status"></div>
+  <div id="wfRecent" class="wf-recent"></div>
+
+  <div id="wfSettingsPanel" class="wf-settings-overlay">
+    <div class="wf-settings-panel">
+      <div class="wf-settings-head">
+        <span id="wfSettingsTitle">Settings</span>
+        <button type="button" class="wf-settings-close" id="wfSettingsCloseBtn" aria-label="Close" title="Close"></button>
+      </div>
+      <div class="wf-settings-row">
+        <span class="wf-settings-label" id="wfSettingsUnitsLabel">Select units</span>
+        <span class="wf-select-wrap">
+          <select id="unitSystem" aria-label="Unit system"></select>
+        </span>
+      </div>
+      <div class="wf-settings-row">
+        <span class="wf-settings-label" id="wfSettingsLangLabel">Select language</span>
+        <span class="wf-select-wrap wf-select-wrap--lang">
+          <img id="languageFlag" class="select-flag" alt="" aria-hidden="true" style="display:none;">
+          <select id="languageSystem" aria-label="Language"></select>
+        </span>
+      </div>
+      <div class="wf-settings-row">
+        <span class="wf-settings-label" id="wfSettingsThemeLabel">Theme</span>
+        <button id="themeToggle" class="wf-theme-btn" aria-label="Toggle Theme (dark, light, auto)"></button>
+      </div>
+      <div class="wf-settings-row wf-settings-row--stacked">
+        <span class="wf-settings-label" id="wfSettingsPwLabel">Pirate Weather API key</span>
+        <input type="password" id="wfPirateWeatherKey" class="wf-settings-input" autocomplete="off" placeholder="Optional">
+        <p class="wf-settings-hint" id="wfSettingsPwHint">For true minute-by-minute rain instead of the 15-minute estimate. Get a free key at <a href="https://pirateweather.net/" target="_blank" rel="noopener">pirateweather.net</a> &mdash; stored only on this device, sent only to Pirate Weather.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="wfForecastWrap" style="display:none;">
+
+    <div class="card hero-card shadow-card mb-3" id="wfHeroCard"></div>
+
+    <div class="card wind-card shadow-card mb-3" id="wfWindCard"></div>
+
+    <div class="section-label" id="wfMinutelyLabel">Rain in the next 60min</div>
+    <div class="card minutely-card shadow-card mb-3" id="wfMinutelyCard" style="display:none;"></div>
+
+    <div class="section-label" id="wfHighlightsLabel">Today's highlights</div>
+    <div class="wf-highlights mb-1" id="wfHighlights"></div>
+
+    <div class="section-label" id="wfForecastLabel">7-day forecast</div>
+    <div class="day-strip" id="wfDayStrip"></div>
+
+    <div class="card hourly-panel mt-3 mb-3">
+      <div class="hourly-title">
+        <h2 id="wfHourlyTitle">Hourly</h2>
+        <span id="wfForecastSource">Open&#8209;Meteo</span>
+      </div>
+      <div class="hourly-scroll" id="wfHourlyScroll"></div>
+    </div>
+
+    <div class="section-label" id="wfMeteogramLabel">Next 24 hours</div>
+    <div class="card meteogram-card shadow-card mb-3" id="wfMeteogramCard"></div>
+
+  </div>
+
+  <div id="wfEmptyState">
+    <img class="wf-empty-icon" src="./img/divumwxLogo2.svg" alt="DivumWX" aria-hidden="true">
+    <p id="wfEmptyStateText">Search for a place above, or use your current location, to see its forecast.</p>
+  </div>
+
+  <div class="wf-footer-credit" id="wfFooterCredit">
+    DivumWF &middot; part of DivumWX<br>
+    Forecast, air quality &amp; place search: Open&#8209;Meteo &middot; Device-location lookup: OpenStreetMap Nominatim
+  </div>
+
+</div>
+
+<script src="cardI18n.js?v=s3n2026a"></script>
+<script src="siteHeader.js"></script>
+<script src="units.js"></script>
+<script src="divumwf.js"></script>
+<script>
+// ===================== UI-chrome icons (SVG, not emoji -- see divumwf.js's wfIcon() comment) =====================
+document.getElementById('wfSettingsBtn').innerHTML = wfIcon('gear', 20);
+document.getElementById('wfGpsBtn').innerHTML = wfIcon('pin', 13) + ' GPS';
+document.getElementById('wfSettingsCloseBtn').innerHTML = wfIcon('close', 15);
+
+// ===================== Static text i18n =====================
+(function applyStaticLabels(){
+  DivumWXI18N.applyLabel(document.getElementById('wfTagline'), 'Forecast Anywhere');
+  DivumWXI18N.applyAttr(document.getElementById('wfSearchInput'), 'placeholder', 'Enter city, zip, address\u2026');
+  DivumWXI18N.applyAttr(document.getElementById('wfGpsBtn'), 'title', 'Use my location');
+  DivumWXI18N.applyAttr(document.getElementById('wfGpsBtn'), 'aria-label', 'Use my location');
+  DivumWXI18N.applyLabel(document.getElementById('wfSyncBtn'), 'Sync');
+  DivumWXI18N.applyAttr(document.getElementById('wfSettingsBtn'), 'title', 'Settings');
+  DivumWXI18N.applyAttr(document.getElementById('wfSettingsBtn'), 'aria-label', 'Settings');
+  DivumWXI18N.applyLabel(document.getElementById('wfSettingsTitle'), 'Settings');
+  DivumWXI18N.applyAttr(document.getElementById('wfSettingsCloseBtn'), 'title', 'Close');
+  DivumWXI18N.applyAttr(document.getElementById('wfSettingsCloseBtn'), 'aria-label', 'Close');
+  DivumWXI18N.applyLabel(document.getElementById('wfSettingsUnitsLabel'), 'Select units');
+  DivumWXI18N.applyLabel(document.getElementById('wfSettingsLangLabel'), 'Select language');
+  DivumWXI18N.applyLabel(document.getElementById('wfSettingsThemeLabel'), 'Theme');
+  DivumWXI18N.applyLabel(document.getElementById('wfSettingsPwLabel'), 'Pirate Weather API key');
+  DivumWXI18N.applyLabel(document.getElementById('wfMinutelyLabel'), 'Rain in the next 60min');
+  DivumWXI18N.applyLabel(document.getElementById('wfHighlightsLabel'), "Today's highlights");
+  DivumWXI18N.applyLabel(document.getElementById('wfMeteogramLabel'), 'Next 24 hours');
+  DivumWXI18N.applyLabel(document.getElementById('wfForecastLabel'), '7-day forecast');
+  DivumWXI18N.applyLabel(document.getElementById('wfForecastSource'), 'Open\u2011Meteo');
+  DivumWXI18N.applyLabel(document.getElementById('wfEmptyStateText'), 'Search for a place above, or use your current location, to see its forecast.');
+  // wfHourlyTitle, hero/wind/highlights/day-strip content are all fully
+  // rebuilt by render*() every time -- not registered here, same
+  // reasoning as locationforecast.html's own equivalent comment: they
+  // already pick up a live language switch correctly via the
+  // 'i18nready' listener near the render functions below.
+})();
+
+// ===================== State =====================
+let currentSystem = (localStorage.getItem('dashboardUnitSystem') && SYSTEMS[localStorage.getItem('dashboardUnitSystem')]) ? localStorage.getItem('dashboardUnitSystem') : 'uk';
+let activeDay = 0;
+let currentLocation = null;
+let forecastData = null;
+let airQualityData = null;
+let pirateMinutely = null;
+const PW_KEY_STORAGE = 'divumwfPirateWeatherKey';
+const RECENT_KEY = 'divumwf-recent';
+const MAX_RECENT = 1; // only the most recent search is kept
+
+// ===================== Recent locations =====================
+function loadRecent(){ try{ return JSON.parse(localStorage.getItem(RECENT_KEY)) || []; }catch(e){ return []; } }
+function saveRecent(loc){
+  const list = loadRecent().filter(l => !(Math.abs(l.latitude-loc.latitude)<0.001 && Math.abs(l.longitude-loc.longitude)<0.001));
+  list.unshift({label:loc.label, latitude:loc.latitude, longitude:loc.longitude, source:loc.source});
+  localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, MAX_RECENT)));
+  renderRecent();
+}
+function renderRecent(){
+  const list = loadRecent();
+  const wrap = document.getElementById('wfRecent');
+  if(!list.length){ wrap.innerHTML=''; return; }
+  wrap.innerHTML = list.map((l,i)=>
+    `<button type="button" class="wf-recent-chip" data-i="${i}">${escapeHtml(l.label)}</button>`
+  ).join('');
+  wrap.querySelectorAll('button').forEach(btn=>{
+    btn.addEventListener('click', ()=> selectLocation(list[parseInt(btn.dataset.i,10)]));
+  });
+}
+
+// ===================== Status / suggestions ===================
+function setStatus(text, isError, isBusy){
+  const el = document.getElementById('wfStatus');
+  el.textContent = text || '';
+  el.classList.toggle('is-error', !!isError);
+  el.classList.toggle('is-busy', !!isBusy && !isError);
+}
+function clearSuggestions(){
+  const wrap = document.getElementById('wfSuggestions');
+  wrap.classList.remove('show'); wrap.innerHTML = '';
+}
+function showSuggestions(results){
+  const wrap = document.getElementById('wfSuggestions');
+  wrap.innerHTML = results.map((r,i)=>`
+    <button type="button" class="wf-suggestion-item" data-i="${i}">
+      <span class="wf-suggestion-name">${escapeHtml(r.name)}${r.admin1 ? ', '+escapeHtml(r.admin1) : ''}</span>
+      <span class="wf-suggestion-country">${escapeHtml(r.country||'')}</span>
+    </button>`).join('');
+  wrap.classList.add('show');
+  wrap.querySelectorAll('.wf-suggestion-item').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const r = results[parseInt(btn.dataset.i,10)];
+      clearSuggestions();
+      document.getElementById('wfSearchInput').value = '';
+      selectLocation(resultToLocation(r));
+    });
+  });
+}
+
+// ===================== Selecting a location =====================
+function selectLocation(loc){
+  currentLocation = loc;
+  setStatus('', false); clearSuggestions();
+  saveRecent(loc);
+  loadForecast();
+}
+async function loadForecast(){
+  document.getElementById('wfEmptyState').style.display = 'none';
+  document.getElementById('wfForecastWrap').style.display = '';
+  const gpsBtn = document.getElementById('wfGpsBtn');
+  const syncBtn = document.getElementById('wfSyncBtn');
+  syncBtn.classList.add('is-busy');
+  document.getElementById('wfHeroCard').innerHTML = `<div class="text-center py-4" style="color:var(--bs-secondary-color);">${DivumWXI18N.t('Loading forecast for')} ${escapeHtml(currentLocation.label)}\u2026</div>`;
+  document.getElementById('wfWindCard').innerHTML = '';
+  document.getElementById('wfMinutelyCard').style.display = 'none';
+  document.getElementById('wfMinutelyLabel').style.display = 'none';
+  document.getElementById('wfMeteogramCard').innerHTML = '';
+  pirateMinutely = null;
+  document.getElementById('wfHighlights').innerHTML = '';
+  document.getElementById('wfDayStrip').innerHTML = '';
+  document.getElementById('wfHourlyScroll').innerHTML = '';
+  try{
+    const [fcJson, aqJson] = await Promise.all([
+      fetchForecastFor(currentLocation.latitude, currentLocation.longitude),
+      fetchAirQualityFor(currentLocation.latitude, currentLocation.longitude).catch(e=>{
+        console.warn('DivumWF: air quality fetch failed \u2014', e.message);
+        return null;
+      }),
+    ]);
+    forecastData = parseForecastJson(fcJson);
+    airQualityData = aqJson ? parseAirQualityJson(aqJson) : null;
+    activeDay = 0;
+    renderAll();
+    refreshPirateMinutely(); // fire-and-forget: upgrades the minutely card in place if a key is configured, without blocking or slowing down the main forecast
+  }catch(e){
+    console.warn('DivumWF: forecast fetch failed \u2014', e.message);
+    document.getElementById('wfHeroCard').innerHTML = `<div class="text-center py-4" style="color:var(--bw-danger);">${DivumWXI18N.t("Couldn't load the forecast for this location \u2014 check your connection and try again.")}</div>`;
+  }finally{
+    syncBtn.classList.remove('is-busy');
+    gpsBtn.classList.remove('is-busy');
+  }
+}
+
+// ===================== Render: everything =====================
+function renderAll(){
+  if(!forecastData) return;
+  renderHero();
+  renderWindCard();
+  renderMinutely();
+  renderMeteogram();
+  renderHighlights();
+  renderDayStrip();
+  renderHourly();
+}
+
+function renderHero(){
+  const sys = SYSTEMS[currentSystem];
+  const c = forecastData.current;
+  const today = forecastData.days[0] || {};
+  const cond = wmoText(c.code);
+  const tzNote = forecastData.timezone ? forecastData.timezone.replace('_',' ') : '';
+  document.getElementById('wfHeroCard').innerHTML = `
+    <div class="hero-top">
+      <div class="hero-place">
+        <div class="hero-place-name">${escapeHtml(currentLocation.label)}</div>
+        <div class="hero-place-sub">${escapeHtml(tzNote)}</div>
+      </div>
+    </div>
+    <div class="hero-now-label">${DivumWXI18N.t('Now')}</div>
+    <div class="hero-main">
+      ${iconImg(c.icon,'hero-icon',cond)}
+      <div class="hero-temp">${tempSpan(c.tempC, sys.temp)}</div>
+      <div class="hero-cond-col">
+        <div class="hero-cond">${cond}</div>
+        <div class="hero-feels">${DivumWXI18N.t('Feels like')} ${fmtTemp(c.feelsC, sys.temp)}</div>
+        <div class="hero-hilo">${DivumWXI18N.t('High')} ${tempSpan(today.hi, sys.temp)} &middot; ${DivumWXI18N.t('Low')} ${tempSpan(today.lo, sys.temp)}</div>
+      </div>
+    </div>
+    <div class="hero-mini-grid">
+      <div class="hero-mini">
+        <div class="hero-mini-label">${DivumWXI18N.t('Humidity')}</div>
+        <div class="hero-mini-value">${c.humidity!=null ? c.humidity+'%' : '--'}</div>
+      </div>
+      <div class="hero-mini">
+        <div class="hero-mini-label">${DivumWXI18N.t('Pressure')}</div>
+        <div class="hero-mini-value">${fmtPressure(c.pressureHpa, sys.pressure)}</div>
+      </div>
+      <div class="hero-mini">
+        <div class="hero-mini-label">${DivumWXI18N.t('Cloud Cover')}</div>
+        <div class="hero-mini-value">${c.cloudPct!=null ? c.cloudPct+'%' : '--'}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderWindCard(){
+  const sys = SYSTEMS[currentSystem];
+  const c = forecastData.current;
+  const col = windColor(c.gustMs) || 'var(--bs-secondary-color)';
+  const dirTxt = c.windDirDeg!=null ? degToCompass(c.windDirDeg) : '\u2014';
+  const b = c.windMs!=null ? beaufort(c.windMs) : null;
+  // Same arrow-outside-the-ring positioning as windDirBadge()'s hourly
+  // badges (viewBox 44x44, ring r=13), scaled up to ring r=22 here --
+  // NOT r=30 as an earlier version used, because that scaled the tip to
+  // y=-8.5, outside this viewBox's valid 0-80 range, and got silently
+  // clipped by the browser (a real Chromium render caught this; an
+  // earlier cairosvg-based check of the same markup did not, so it
+  // shipped unnoticed -- cairosvg doesn't clip out-of-viewBox content
+  // the same strict way real browsers do). r=22 keeps the exact same
+  // tip-distance:ring-radius ratio as the hourly badge while keeping
+  // every point safely inside 0-80.
+  const arrow = c.windDirDeg!=null ? `
+      <g transform="rotate(${c.windDirDeg} 40 40)">
+        <path d="M40,4.5 L56.1,20.4 L40,11.2 L23.9,20.4 Z" fill="${col}"/>
+      </g>` : '';
+  document.getElementById('wfWindCard').innerHTML = `
+    <div class="wind-compass-mini">
+      <svg class="wind-compass-mini-ring" viewBox="0 0 80 80" aria-hidden="true">
+        <circle cx="40" cy="40" r="22" fill="none" stroke="var(--bs-border-color)" stroke-width="2"/>
+        <circle cx="40" cy="40" r="2" fill="var(--bs-secondary-color)"/>
+        <g class="wind-compass-mini-arrow">${arrow}</g>
+      </svg>
+      <div class="wind-compass-mini-label"><span>${fmtWindValueOnly(c.windMs, sys.wind)}</span><span>${windUnitAbbr(sys.wind)}</span></div>
+    </div>
+    <div class="wind-card-body">
+      <div class="wind-card-title">${DivumWXI18N.t('Wind')}</div>
+      <div class="wind-card-row"><span class="k">${DivumWXI18N.t('From')}</span><span class="v">${dirTxt}</span></div>
+      <div class="wind-card-row"><span class="k">${DivumWXI18N.t('Gust')}</span><span class="v">${fmtWind(c.gustMs, sys.wind)}</span></div>
+      ${b ? `<span class="beaufort-chip">F${b.force} \u00B7 ${DivumWXI18N.t(b.label)}</span>` : ''}
+    </div>
+  `;
+}
+
+function renderMinutely(){
+  const card = document.getElementById('wfMinutelyCard');
+  const label = document.getElementById('wfMinutelyLabel');
+  let rates, summaryText, sourceLabel;
+  if(pirateMinutely && pirateMinutely.minutes && pirateMinutely.minutes.length >= 2){
+    rates = pirateMinutely.minutes.slice(0,60).map(m => m.rateMmH);
+    summaryText = pirateMinutely.summaryText || null;
+    sourceLabel = 'Pirate Weather';
+  } else {
+    const interpolated = buildMinutelyRainWindow(forecastData);
+    if(!interpolated){ card.style.display = 'none'; label.style.display = 'none'; return; }
+    rates = interpolated.slice(0,60);
+    summaryText = null;
+    sourceLabel = DivumWXI18N.t('Open\u2011Meteo (15-min, interpolated)');
+  }
+  const anyWet = rates.some(r => rainRateTier(r).tier!=='dry');
+  if(!anyWet){ card.style.display = 'none'; label.style.display = 'none'; return; } // nothing to chart -- same as the no-data case
+  card.style.display = '';
+  label.style.display = '';
+  if(!summaryText){
+    const summary = summarizeMinutelyRain(rates);
+    summaryText = DivumWXI18N.t(summary.key);
+    if(summary.vars.tier) summaryText = summaryText.replace('{tier}', DivumWXI18N.t(summary.vars.tier));
+    if(summary.vars.mins!=null) summaryText = summaryText.replace('{mins}', summary.vars.mins);
+  }
+
+  // Bars use an absolute pixel height (capped at BAR_MAX_PX) rather
+  // than a percentage of a fixed-height box, so the card's own height
+  // just follows whatever the tallest bar happens to be that hour --
+  // short for a light drizzle, taller for a genuine downpour -- instead
+  // of every chart always occupying the same fixed vertical space
+  // regardless of how much rain is actually forecast.
+  const CHART_MAX_MMH = 12;
+  const BAR_MAX_PX = 90;
+  const bars = rates.map(rate => {
+    const tier = rainRateTier(rate);
+    const px = tier.tier==='dry' ? 3 : Math.max(6, Math.min(BAR_MAX_PX, Math.round(rate/CHART_MAX_MMH*BAR_MAX_PX)));
+    const colorVar = tier.tier==='dry' ? 'var(--bs-border-color)' : tier.tier==='light' ? 'var(--bw-good)' : tier.tier==='moderate' ? 'var(--bw-yellow)' : 'var(--bw-danger)';
+    return `<div class="minutely-bar" style="height:${px}px;background:${colorVar};"></div>`;
+  }).join('');
+
+  card.innerHTML = `
+    <div class="minutely-bars" role="img" aria-label="${escapeHtml(summaryText)}">${bars}</div>
+    <div class="minutely-xaxis">
+      <span>${DivumWXI18N.t('NOW')}</span><span>15m</span><span>30m</span><span>45m</span><span>60m</span>
+    </div>
+    <div class="minutely-source">${escapeHtml(sourceLabel)}</div>
+  `;
+}
+
+// ===================== 24-hour meteogram (temperature + precipitation) =====================
+function renderMeteogram(){
+  const card = document.getElementById('wfMeteogramCard');
+  const win = buildRolling24h(forecastData);
+  if(!win){ card.innerHTML = ''; return; }
+  const sys = SYSTEMS[currentSystem];
+  const n = win.length;
+
+  // ---- geometry ----
+  const W = 720, H = 210;
+  const xLeft = 8, xRight = W-8;
+  const step = n>1 ? (xRight-xLeft)/(n-1) : 0;
+  const xAt = i => xLeft + i*step;
+  const tempTop = 14, tempBottom = 118; // temperature plot zone
+  const precipTop = 132, precipBottom = 180; // precipitation plot zone
+  const labelY = 200;
+
+  const temps = win.map(h => h.tempC).filter(t => t!=null);
+  let tMin = Math.min(...temps), tMax = Math.max(...temps);
+  if(tMax - tMin < 2){ const mid=(tMax+tMin)/2; tMin=mid-1; tMax=mid+1; } // keep a flat forecast from rendering as a flat line glued to one edge
+  const yTemp = t => tempBottom - (t-tMin)/(tMax-tMin) * (tempBottom-tempTop);
+
+  const CHART_MAX_MMH = 12; // same scale as the minutely rain chart, so the two are visually comparable
+  const yPrecipH = mm => mm==null ? 0 : Math.max(0, Math.min(1, mm/CHART_MAX_MMH)) * (precipBottom-precipTop);
+
+  // ---- temperature line, colour-segmented by tempColor() like every other reading on this page ----
+  let segs = '';
+  for(let i=0;i<n-1;i++){
+    if(win[i].tempC==null || win[i+1].tempC==null) continue;
+    const x1=xAt(i), y1=yTemp(win[i].tempC), x2=xAt(i+1), y2=yTemp(win[i+1].tempC);
+    const col = tempColor((win[i].tempC+win[i+1].tempC)/2);
+    segs += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${col}" stroke-width="2.5" stroke-linecap="round"/>`;
+  }
+  // filled area under the line, using the theme accent rather than
+  // per-segment colour so it reads as one soft wash, not a rainbow fill
+  let areaPts = win.map((h,i) => h.tempC!=null ? `${xAt(i).toFixed(1)},${yTemp(h.tempC).toFixed(1)}` : null).filter(Boolean);
+  const areaPath = areaPts.length>1
+    ? `M${areaPts[0]} L${areaPts.join(' L')} L${xAt(n-1).toFixed(1)},${tempBottom} L${xAt(0).toFixed(1)},${tempBottom} Z`
+    : '';
+
+  // ---- precipitation bars, same tier colours as the minutely chart ----
+  const barW = Math.max(2, step*0.6);
+  let bars = '';
+  win.forEach((h,i) => {
+    const mm = h.rainMm || 0;
+    const bh = yPrecipH(mm);
+    if(bh<=0) return;
+    const tier = rainRateTier(mm);
+    const col = tier.tier==='light' ? 'var(--bw-good)' : tier.tier==='moderate' ? 'var(--bw-yellow)' : tier.tier==='heavy' ? 'var(--bw-danger)' : 'var(--bs-border-color)';
+    bars += `<rect x="${(xAt(i)-barW/2).toFixed(1)}" y="${(precipBottom-bh).toFixed(1)}" width="${barW.toFixed(1)}" height="${bh.toFixed(1)}" rx="1.5" fill="${col}"/>`;
+  });
+
+  // ---- x-axis: a label every 3 hours, "Now" at the start, plus a
+  // dashed midnight marker + weekday label whenever the rolling window
+  // crosses into a new calendar day ----
+  let axisLabels = '', gridLines = '';
+  win.forEach((h,i) => {
+    const hourOfDay = parseInt(h.iso.slice(11,13),10);
+    const anchor = i===0 ? 'start' : i===n-1 ? 'end' : 'middle';
+    if(hourOfDay===0 && i>0){
+      const x = xAt(i);
+      gridLines += `<line x1="${x.toFixed(1)}" y1="${tempTop}" x2="${x.toFixed(1)}" y2="${precipBottom}" stroke="var(--bs-border-color)" stroke-width="1" stroke-dasharray="3,3"/>`;
+      const d = new Date(h.iso+':00');
+      axisLabels += `<text x="${x.toFixed(1)}" y="${labelY}" text-anchor="${anchor}" class="meteogram-daylabel">${DivumWXI18N.t(WEEKDAYS[d.getDay()])}</text>`;
+    } else if(i===0 || i%3===0){
+      const x = xAt(i);
+      const label = i===0 ? DivumWXI18N.t('Now') : h.iso.slice(11,16);
+      axisLabels += `<text x="${x.toFixed(1)}" y="${labelY}" text-anchor="${anchor}" class="meteogram-hourlabel${i===0?' meteogram-hourlabel--now':''}">${label}</text>`;
+    }
+  });
+
+  // ---- temperature value labels every 3 hours ----
+  let tempLabels = '';
+  win.forEach((h,i) => {
+    if(h.tempC==null || (i%3!==0 && i!==0)) return;
+    const anchor = i===0 ? 'start' : i===n-1 ? 'end' : 'middle';
+    const x = xAt(i), y = yTemp(h.tempC);
+    tempLabels += `<text x="${x.toFixed(1)}" y="${(y-8).toFixed(1)}" text-anchor="${anchor}" class="meteogram-templabel" fill="${tempColor(h.tempC)}">${fmtTemp(h.tempC, sys.temp)}</text>`;
+  });
+
+  card.innerHTML = `
+    <svg viewBox="0 0 ${W} ${H}" class="meteogram-svg" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="wfMeteogramFill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="var(--bw-accent)" stop-opacity="0.35"/>
+          <stop offset="100%" stop-color="var(--bw-accent)" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <line x1="${xLeft}" y1="${precipBottom}" x2="${xRight}" y2="${precipBottom}" stroke="var(--bs-border-color)" stroke-width="1"/>
+      ${gridLines}
+      ${areaPath ? `<path d="${areaPath}" fill="url(#wfMeteogramFill)"/>` : ''}
+      ${segs}
+      ${bars}
+      ${tempLabels}
+      ${axisLabels}
+    </svg>
+  `;
+}
+// Fetches Pirate Weather's real per-minute data for the current
+// location if a key is configured, then re-renders just the minutely
+// card in place. Never awaited by loadForecast() itself -- an
+// optional third-party key shouldn't be able to slow down or break
+// the primary forecast.
+async function refreshPirateMinutely(){
+  const apiKey = (localStorage.getItem(PW_KEY_STORAGE) || '').trim();
+  if(!apiKey || !currentLocation){ pirateMinutely = null; renderMinutely(); return; }
+  const lang = localStorage.getItem('dashboardLanguage') || null;
+  try{
+    const json = await fetchPirateWeatherMinutely(currentLocation.latitude, currentLocation.longitude, apiKey, lang);
+    pirateMinutely = parsePirateWeatherMinutely(json);
+  }catch(e){
+    console.warn('DivumWF: Pirate Weather minutely fetch failed \u2014', e.message);
+    pirateMinutely = null;
+  }
+  if(forecastData) renderMinutely();
+}
+
+function renderHighlights(){
+  const today = forecastData.days[0] || {};
+  const uv = uvCategory(today.uvMax);
+  const wrap = document.getElementById('wfHighlights');
+  const cards = [];
+
+  // UV Index
+  cards.push(`
+    <div class="card metric-card shadow-card">
+      <div class="mlabel">${wfIcon('sun',14)} ${DivumWXI18N.t('UV Index')}</div>
+      <div class="mvalue">${today.uvMax!=null ? Math.round(today.uvMax) : '--'}</div>
+      <span class="uv-pill uv-pill--${uv.tier}">${DivumWXI18N.t(uv.key)}</span>
+    </div>`);
+
+  // Air Quality
+  if(airQualityData && airQualityData.usAqi!=null){
+    const aq = usAqiCategory(airQualityData.usAqi);
+    cards.push(`
+      <div class="card metric-card shadow-card">
+        <div class="mlabel">${wfIcon('haze',14)} ${DivumWXI18N.t('Air Quality')}</div>
+        <div class="mvalue">${airQualityData.usAqi}<small> US AQI</small></div>
+        <span class="aqi-pill aqi-pill--${aq.tier}">${DivumWXI18N.t(aq.key)}</span>
+      </div>`);
+  } else {
+    cards.push(`
+      <div class="card metric-card shadow-card">
+        <div class="mlabel">${wfIcon('haze',14)} ${DivumWXI18N.t('Air Quality')}</div>
+        <div class="mvalue">--</div>
+        <div class="msub">${DivumWXI18N.t('Unavailable for this location')}</div>
+      </div>`);
+  }
+
+  // Precipitation
+  const sysRain = SYSTEMS[currentSystem].rain;
+  cards.push(`
+    <div class="card metric-card shadow-card">
+      <div class="mlabel">${wfIcon('drop',14)} ${DivumWXI18N.t('Precipitation')}</div>
+      <div class="mvalue">${today.rainProbPct!=null ? today.rainProbPct+'%' : '--'}</div>
+      <div class="msub">${DivumWXI18N.t('Today\u2019s total')}: ${fmtRain(today.rainSumMm, sysRain)}</div>
+    </div>`);
+
+  // Sun & Moon
+  const now = new Date();
+  const moon = moonPhaseFor(now);
+  let daylightTxt = '\u2014';
+  let pct = 50;
+  if(today.sunrise && today.sunset){
+    const offset = forecastData.utcOffsetSeconds || 0;
+    const srMs = localIsoToUtcMs(today.sunrise, offset);
+    const ssMs = localIsoToUtcMs(today.sunset, offset);
+    const mins = Math.round((ssMs - srMs)/60000);
+    daylightTxt = Math.floor(mins/60)+'h '+(mins%60)+'m';
+    const nowMins = (Date.now() - srMs)/60000;
+    pct = Math.max(0, Math.min(100, Math.round(nowMins/mins*100)));
+  }
+  cards.push(`
+    <div class="card metric-card shadow-card" style="grid-column:1 / -1;">
+      <div class="mlabel">${DivumWXI18N.t('Sun & Moon')}</div>
+      <div class="sunmoon-row">
+        <span class="k">${wfIcon('sunrise',14)} ${DivumWXI18N.t('Sunrise')}</span><span class="v">${hm(today.sunrise)}</span>
+      </div>
+      <div class="daylight-bar"><div class="daylight-bar-fill" style="width:${pct}%;"></div></div>
+      <div class="sunmoon-row">
+        <span class="k">${wfIcon('sunset',14)} ${DivumWXI18N.t('Sunset')}</span><span class="v">${hm(today.sunset)}</span>
+      </div>
+      <div class="sunmoon-row"><span class="k">${DivumWXI18N.t('Daylight')}</span><span class="v">${daylightTxt}</span></div>
+      <div class="sunmoon-row">
+        <span class="k"><span class="moon-emoji">${wfIcon('moon',18)}</span> ${DivumWXI18N.t(moon.key)}</span>
+        <span class="v">${moon.illum}%</span>
+      </div>
+    </div>`);
+
+  wrap.innerHTML = cards.join('');
+}
+
+function renderDayStrip(){
+  const sys = SYSTEMS[currentSystem];
+  const days = forecastData.days;
+  const strip = document.getElementById('wfDayStrip');
+  strip.innerHTML = days.map((d,i)=>{
+    const name = dayLabel(d.dateStr, i);
+    const cond = wmoText(d.code);
+    return `
+    <div class="day-card card ${i===activeDay?'active':''}" data-i="${i}">
+      <div class="dname">${name}</div>
+      ${iconImg(d.icon,'dicon',cond)}
+      <div class="drain">${d.rainProbPct>10 ? wfIcon('drop',9)+d.rainProbPct+'%' : ''}</div>
+      <div class="dtemps">${tempSpan(d.hi,sys.temp)} <span class="lo">${tempSpan(d.lo,sys.temp)}</span></div>
+    </div>`;
+  }).join('');
+  strip.querySelectorAll('.day-card').forEach(el=>{
+    el.addEventListener('click', ()=>{ activeDay = parseInt(el.dataset.i,10); renderDayStrip(); renderHourly(); });
+  });
+}
+
+function renderHourly(){
+  const sys = SYSTEMS[currentSystem];
+  const days = forecastData.days;
+  const hrs = (forecastData.hourlyByDay[activeDay] || []).filter(h => h.h % 2 === 0);
+  document.getElementById('wfHourlyTitle').textContent = dayLabel(days[activeDay].dateStr, activeDay) + ' \u2014 ' + DivumWXI18N.t('hourly');
+  const fmtHour = h => String(h).padStart(2,'0')+':00';
+  document.getElementById('wfHourlyScroll').innerHTML = hrs.map(h => `
+    <div class="hcell">
+      <div class="htime">${fmtHour(h.h)}</div>
+      ${iconImg(h.icon,'hicon')}
+      <div class="htemp">${tempSpan(h.tempC, sys.temp)}</div>
+      <div class="hrain">${h.rainProbPct>10 ? h.rainProbPct+'%' : (h.rainMm>0 ? fmtRain(h.rainMm, sys.rain) : '')}</div>
+      ${windDirBadge(h.windDirDeg, h.gustMs ?? h.windMs, sys.wind)}
+    </div>`).join('');
+}
+
+// Re-render on a live language switch, same pattern as locationforecast.html.
+window.addEventListener('i18nready', function(){
+  if (forecastData) renderAll();
+  renderRecent();
+});
+
+// ===================== Search wiring =====================
+let searchDebounceTimer = null;
+document.getElementById('wfSearchInput').addEventListener('input', (e)=>{
+  const q = e.target.value.trim();
+  clearTimeout(searchDebounceTimer);
+  if(!q){ clearSuggestions(); setStatus('', false); return; }
+  searchDebounceTimer = setTimeout(async ()=>{
+    setStatus(DivumWXI18N.t('Searching\u2026'), false, true);
+    try{
+      const results = await geocodeSearch(q);
+      if(!results.length){
+        setStatus(`${DivumWXI18N.t('No matches found for')} "${q}".`, true);
+        clearSuggestions();
+      } else {
+        setStatus('', false);
+        showSuggestions(results);
+      }
+    }catch(err){
+      console.warn('DivumWF: geocoding failed \u2014', err.message);
+      setStatus(DivumWXI18N.t('Search failed \u2014 check your connection and try again.'), true);
+    }
+  }, 350);
+});
+document.getElementById('wfSearchInput').addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    const wrap = document.getElementById('wfSuggestions');
+    const first = wrap.querySelector('.wf-suggestion-item');
+    if(first) first.click();
+  }
+});
+document.addEventListener('click', (e)=>{
+  if(!e.target.closest('.wf-locbar-search')) clearSuggestions();
+});
+
+document.getElementById('wfGpsBtn').addEventListener('click', ()=>{
+  if(!('geolocation' in navigator)){
+    setStatus(DivumWXI18N.t("This browser doesn't support automatic location lookup."), true);
+    return;
+  }
+  const btn = document.getElementById('wfGpsBtn');
+  btn.classList.add('is-busy');
+  setStatus(DivumWXI18N.t('Locating your device\u2026'), false, true);
+  navigator.geolocation.getCurrentPosition(async (pos)=>{
+    const {latitude, longitude} = pos.coords;
+    setStatus(DivumWXI18N.t('Got your location \u2014 loading forecast\u2026'), false, true);
+    const label = await reverseGeocode(latitude, longitude);
+    selectLocation({
+      label: label || `${DivumWXI18N.t('Your location')} (${latitude.toFixed(3)}, ${longitude.toFixed(3)})`,
+      latitude, longitude, source:'device',
+    });
+  }, (err)=>{
+    btn.classList.remove('is-busy');
+    const msgs = {
+      1: DivumWXI18N.t('Location permission was denied \u2014 allow it in your browser settings, or search for a place instead.'),
+      2: DivumWXI18N.t('Your location is unavailable right now \u2014 try again, or search for a place instead.'),
+      3: DivumWXI18N.t('Locating your device timed out \u2014 try again, or search for a place instead.'),
+    };
+    setStatus(msgs[err.code] || DivumWXI18N.t('Could not get your location.'), true);
+  }, {enableHighAccuracy:false, timeout:12000, maximumAge:5*60*1000});
+});
+
+// ===================== Sync button =====================
+// Mirrors SkyMonitor's "SYNC" button: with something typed in the
+// search box it runs that search (same as pressing Enter -- picks the
+// top match); with the box empty and a location already loaded, it
+// just re-fetches that location's forecast instead, so the button is
+// never a dead click once a place is showing.
+document.getElementById('wfSyncBtn').addEventListener('click', ()=>{
+  const q = document.getElementById('wfSearchInput').value.trim();
+  if(q){
+    const wrap = document.getElementById('wfSuggestions');
+    const first = wrap.querySelector('.wf-suggestion-item');
+    if(first){ first.click(); return; }
+    // No suggestions fetched yet (e.g. typed fast then hit Sync before
+    // the debounce fired) -- search directly instead of doing nothing.
+    (async ()=>{
+      setStatus(DivumWXI18N.t('Searching\u2026'), false, true);
+      try{
+        const results = await geocodeSearch(q);
+        if(!results.length){ setStatus(`${DivumWXI18N.t('No matches found for')} "${q}".`, true); return; }
+        setStatus('', false);
+        document.getElementById('wfSearchInput').value = '';
+        selectLocation(resultToLocation(results[0]));
+      }catch(err){
+        setStatus(DivumWXI18N.t('Search failed \u2014 check your connection and try again.'), true);
+      }
+    })();
+  } else if(currentLocation){
+    loadForecast();
+  }
+});
+
+// ===================== Settings panel (units / language / theme) =====================
+// This page has no site navbar, so the unit/language selectors and the
+// theme toggle -- normally populated by siteHeader.js's
+// populateUnitSelector()/populateLanguageSelector() once navbar.html is
+// fetched in -- live in this panel instead. Those functions only look
+// for #unitSystem/#languageSystem/#themeToggle by id and no-op if
+// missing, so keeping the same ids here and calling them directly
+// (nothing to fetch, so no includeHTML() wait needed) reuses that same
+// shared, already-translated logic untouched.
+const wfSettingsOverlay = document.getElementById('wfSettingsPanel');
+document.getElementById('wfSettingsBtn').addEventListener('click', ()=> wfSettingsOverlay.classList.add('open'));
+document.getElementById('wfSettingsCloseBtn').addEventListener('click', ()=> wfSettingsOverlay.classList.remove('open'));
+wfSettingsOverlay.addEventListener('click', (e)=>{ if(e.target === wfSettingsOverlay) wfSettingsOverlay.classList.remove('open'); });
+
+// ===================== Pirate Weather API key =====================
+const wfPirateWeatherKeyInput = document.getElementById('wfPirateWeatherKey');
+wfPirateWeatherKeyInput.value = localStorage.getItem(PW_KEY_STORAGE) || '';
+wfPirateWeatherKeyInput.addEventListener('change', ()=>{
+  const v = wfPirateWeatherKeyInput.value.trim();
+  if(v) localStorage.setItem(PW_KEY_STORAGE, v); else localStorage.removeItem(PW_KEY_STORAGE);
+  refreshPirateMinutely();
+});
+
+renderRecent();
+
+// ===================== Theme: Auto / Light / Dark (identical to locationforecast.html) =====================
+const root = document.documentElement;
+let themeMode = localStorage.getItem('dashboardThemeMode') || 'dark';
+let lastIsDay = null;
+const LOOP_JSON_URL_FOR_THEME = './jsondata/loop.json';
+const ASTRO_JSON_URL_FOR_THEME = './jsondata/almanac.json';
+const THEME_ISDAY_POLL_MS = 5 * 60 * 1000;
+const WF_THEME_ICON_NAMES = { auto: 'auto', light: 'sun', dark: 'moon' };
+const THEME_ORDER = ['dark', 'light', 'auto'];
+if (!THEME_ORDER.includes(themeMode)) themeMode = 'dark';
+function resolveAutoIsDay(){
+  if(lastIsDay != null) return !!lastIsDay;
+  return !window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+function resolveTheme(){
+  return themeMode==='light' ? 'light' : themeMode==='dark' ? 'dark' : (resolveAutoIsDay() ? 'light' : 'dark');
+}
+function applyTheme(){
+  root.setAttribute('data-bs-theme', resolveTheme());
+  syncThemeNavUI();
+}
+function syncThemeNavUI(){
+  const btn = document.getElementById('themeToggle');
+  if(!btn) return;
+  const resolved = resolveTheme();
+  btn.innerHTML = wfIcon(WF_THEME_ICON_NAMES[themeMode], 18);
+  btn.title = themeMode === 'auto' ? ('Auto (currently ' + resolved + ')') : (themeMode.charAt(0).toUpperCase() + themeMode.slice(1));
+}
+function pollIsDayForTheme(){
+  fetch(ASTRO_JSON_URL_FOR_THEME + '?_=' + Date.now(), {cache:'no-store'})
+    .then(res => { if(!res.ok) throw new Error('HTTP '+res.status); return res.json(); })
+    .then(alm => {
+      const sunAlt = alm['almanac.sun.alt'];
+      if(typeof sunAlt === 'number' && !isNaN(sunAlt)){
+        lastIsDay = sunAlt > 0;
+        if(themeMode==='auto') applyTheme();
+      } else { pollIsDayForThemeFallback(); }
+    })
+    .catch(()=> pollIsDayForThemeFallback());
+}
+function pollIsDayForThemeFallback(){
+  fetch(LOOP_JSON_URL_FOR_THEME + '?_=' + Date.now(), {cache:'no-store'})
+    .then(res => { if(!res.ok) throw new Error('HTTP '+res.status); return res.json(); })
+    .then(j => {
+      const o = (j && j.observations) || {};
+      if(o.isDay != null){ lastIsDay = o.isDay; if(themeMode==='auto') applyTheme(); }
+    })
+    .catch(()=>{});
+}
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', ()=>{
+  if(themeMode==='auto') applyTheme();
+});
+window.addEventListener('storage', (e)=>{
+  if(e.key === 'dashboardThemeMode'){ themeMode = e.newValue || 'auto'; applyTheme(); }
+});
+applyTheme();
+pollIsDayForTheme();
+setInterval(pollIsDayForTheme, THEME_ISDAY_POLL_MS);
+
+// No site navbar on this page (see the settings-panel comment above)
+// -- these elements are already in the page's own markup, not fetched
+// in, so there's no includeHTML() wait needed before wiring them up.
+populateUnitSelector();
+populateLanguageSelector();
+// Beaufort is a shared units.js preset used by the main dashboard's own
+// navbar too, so rather than editing that shared file (and changing the
+// main dashboard's unit choices along with it), it's just removed from
+// DivumWF's own copy of the dropdown here. If a device's stored
+// site-wide preference happens to be 'beaufort' (chosen on the main
+// dashboard), DivumWF falls back to 'uk' for its own display only --
+// the shared preference itself is left untouched for other pages.
+const wfUnitSelect = document.getElementById('unitSystem');
+const wfBeaufortOpt = wfUnitSelect.querySelector('option[value="beaufort"]');
+if(wfBeaufortOpt) wfBeaufortOpt.remove();
+if(currentSystem === 'beaufort') currentSystem = 'uk';
+wfUnitSelect.value = currentSystem;
+wfUnitSelect.addEventListener('change', e=>{
+  currentSystem = e.target.value;
+  localStorage.setItem('dashboardUnitSystem', currentSystem);
+  if(forecastData) renderAll();
+});
+document.getElementById('themeToggle').addEventListener('click', () => {
+  themeMode = THEME_ORDER[(THEME_ORDER.indexOf(themeMode) + 1) % THEME_ORDER.length];
+  localStorage.setItem('dashboardThemeMode', themeMode);
+  applyTheme();
+});
+syncThemeNavUI();
+</script>
+</body>
+</html>
