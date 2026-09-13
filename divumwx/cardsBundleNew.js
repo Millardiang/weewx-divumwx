@@ -682,20 +682,6 @@ try {
       if (lastForecastJson) renderOutlook(lastForecastJson);
     }
   });
-  // Fired once strings.json finishes loading, AND again on every live
-  // language switch (see cardI18n.js's own header comment). Without this,
-  // the outlook's first paint races DivumWXI18N's own strings.json fetch
-  // against this card's forecastcard.txt fetch -- forecastcard.txt is the
-  // much smaller file and usually wins, so computeOutlookHtml() calls
-  // DivumWXI18N.t() before the dictionary has loaded, silently falls back
-  // to the English key for every fragment, and (unlike unitsystemchange
-  // above, which already had this re-render) nothing ever revisits it
-  // until the next 5-minute refreshOutlook() interval tick.
-  function __i18nAndStationTimeRefresh_1(){
-    if (lastForecastJson) renderOutlook(lastForecastJson);
-  }
-  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_1);
-  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_1);
 
   function pickKey(Hh, candidates){
     for (var i = 0; i < candidates.length; i++){ if (Hh[candidates[i]] !== undefined) return candidates[i]; }
@@ -793,18 +779,13 @@ try {
     }
 
     var isSnow = precipCode != null && [71,73,75,77,85,86].indexOf(precipCode) !== -1;
-    // precipUnit is now just the raw unit symbol (never translated, same as
-    // tempSuffix/speedSuffix above) -- the precip *type* word ("Rain"/
-    // "Snow"/etc.) is already stated by typeWord below, so repeating a
-    // translated "rain"/"snow" noun here would be redundant and would need
-    // its own separate lowercase dictionary key just for this one spot.
     var precipOut, precipUnit;
     if (isSnow){
-      if (wantRainIn){ precipOut = Math.round(precipTotalMM / 25.4 * 100) / 100; precipUnit = ' in'; }
-      else { precipOut = Math.round(precipTotalMM / 10 * 10) / 10; precipUnit = ' cm'; }
+      if (wantRainIn){ precipOut = Math.round(precipTotalMM / 25.4 * 100) / 100; precipUnit = ' in snow'; }
+      else { precipOut = Math.round(precipTotalMM / 10 * 10) / 10; precipUnit = ' cm snow'; }
     } else {
       precipOut = wantRainIn ? Math.round(precipTotalMM / 25.4 * 100) / 100 : Math.round(precipTotalMM * 10) / 10;
-      precipUnit = wantRainIn ? ' in' : ' mm';
+      precipUnit = wantRainIn ? ' in rain' : ' mm rain';
     }
 
     var spdMeanMS = spdVals.length ? spdVals.reduce(function(a, b){ return a + b; }, 0) / spdVals.length : null;
@@ -819,30 +800,26 @@ try {
     var out = [];
 
     if (selTempOut !== null){
-      var tempPhrase = DivumWXI18N.t('Temperature') + ' ' + DivumWXI18N.t(isNight ? 'low' : 'high') + ' ' + DivumWXI18N.t('around') + ' ' + selTempOut + tempSuffix;
+      var tempPhrase = 'Temperature ' + (isNight ? 'low' : 'high') + ' around ' + selTempOut + tempSuffix;
       var windPhrase = '';
       if (dirOut !== null || spdOut !== null || gustOut !== null){
-        windPhrase = ', ' + DivumWXI18N.t('winds') + ' ' + (dirOut || '');
+        windPhrase = ', winds ' + (dirOut || '');
         if (spdOut !== null) windPhrase += ' ' + spdOut + speedSuffix;
-        if (gustOut !== null && (spdOut === null || gustOut > spdOut)) windPhrase += ' ' + DivumWXI18N.t('gusting to') + ' ' + gustOut + speedSuffix;
+        if (gustOut !== null && (spdOut === null || gustOut > spdOut)) windPhrase += ' gusting to ' + gustOut + speedSuffix;
       }
       out.push(tempPhrase + windPhrase + '.');
     }
 
     if (precipTotalMM > 0.05){
-      // Reuses the same rain-intensity keys cardLightning.js already
-      // defines ('Heavy Rain' / 'Light Rain') so translators don't have
-      // to maintain two near-duplicate phrases; 'Rain' and 'Snow' are the
-      // only genuinely new keys this needs.
-      var typeWord = isSnow ? DivumWXI18N.t('Snow') : DivumWXI18N.t('Light Rain');
-      if (precipTotalMM > 2.0 && !isSnow) typeWord = DivumWXI18N.t('Rain');
-      if (precipTotalMM > 5.0 && !isSnow) typeWord = DivumWXI18N.t('Heavy Rain');
-      out.push(typeWord + ', ' + DivumWXI18N.t('total') + ' ' + precipOut + precipUnit + ' ' + DivumWXI18N.t('through to') + ' ' + until + '.');
+      var typeWord = isSnow ? 'Snow' : 'Light rain';
+      if (precipTotalMM > 2.0 && !isSnow) typeWord = 'Rain';
+      if (precipTotalMM > 5.0 && !isSnow) typeWord = 'Heavy rain';
+      out.push(typeWord + ', total ' + precipOut + precipUnit + ' through to ' + until + '.');
     } else {
-      out.push(DivumWXI18N.t('Remaining dry through to') + ' ' + until + '.');
+      out.push('Remaining dry through to ' + until + '.');
     }
 
-    return '<span style="color:' + overlayTextColor + ';font-weight:600;">' + DivumWXI18N.t('Outlook For Next Three Hours') + '</span><br><span style="color:var(--bw-accent);">' + out.join(' ') + '</span>';
+    return '<span style="color:' + overlayTextColor + ';font-weight:600;">Outlook For Next Three Hours</span><br><span style="color:var(--bw-accent);">' + out.join(' ') + '</span>';
   }
 
   var lastForecastJson = null;
@@ -1351,7 +1328,6 @@ try {
   // on the NEXT scheduled poll (up to POLL_MS away), not immediately
   // once translations load, unlike every other card.
   window.addEventListener('i18nready', refresh);
-  window.addEventListener('stationtimeready', refresh);
 })();
 } catch (e) {
   console.error("cardsBundle: alertBar.js failed:", e);
@@ -1511,7 +1487,6 @@ try {
     }
   });
   window.addEventListener('i18nready', refresh);
-  window.addEventListener('stationtimeready', refresh);
 
   function mphToMs(v){ return v * 0.44704; }
   function windLabel(mphValue){
@@ -1945,11 +1920,9 @@ try {
   // fetching) before DivumWXI18N's own fetch resolves. Re-render once it
   // has, same pattern as unitsystemchange/resize above -- swaps the
   // already-rendered English labels for translated ones in place.
-  function __i18nAndStationTimeRefresh_2(){
+  window.addEventListener('i18nready', function(){
     if (lastData) render(lastData);
-  }
-  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_2);
-  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_2);
+  });
 
   var mount = document.getElementById('thermometerCard3');
   if (!mount || !window.d3) return;
@@ -2423,16 +2396,6 @@ try {
     var d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
     return DivumWXI18N.t(WEEKDAYS[d.getUTCDay()]);
   }
-  // Used for the card's third heading (e.g. "Wednesday") -- separate key
-  // set from WEEKDAYS' abbreviations since a full weekday name is a
-  // different, independently-translated string in every language, not
-  // just the abbreviation spelled out.
-  var WEEKDAYS_FULL = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  function weekdayFull(dateStr){
-    var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateStr);
-    var d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
-    return DivumWXI18N.t(WEEKDAYS_FULL[d.getUTCDay()]);
-  }
 
   var currentUnits = loadStoredUnits();
   function loadStoredUnits(){
@@ -2448,11 +2411,9 @@ try {
       if (lastForecastJson) renderCard(lastForecastJson, iconMap);
     }
   });
-  function __i18nAndStationTimeRefresh_3(){
+  window.addEventListener('i18nready', function(){
     if (lastForecastJson) renderCard(lastForecastJson, iconMap);
-  }
-  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_3);
-  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_3);
+  });
 
   function toCelsius(v, sourceUnit){
     return (String(sourceUnit || '').indexOf('F') !== -1) ? (v - 32) * 5 / 9 : v;
@@ -2606,24 +2567,15 @@ try {
     if (!entry) return '<span style="font-size:20px">\u2753</span>';
     var iconName = isNight ? entry.night : entry.day;
     var emoji = entry.emoji || '\u2753';
-    // entry.label is a plain English string loaded at runtime from the
-    // icon-map JSON (ICON_MAP_URL), not a hardcoded literal here -- it
-    // was never passed through DivumWXI18N.t() before, so the icon's
-    // alt/title text stayed in English regardless of site language even
-    // though the 'Unknown' fallback right below it already did. It
-    // happens to match the same WMO condition-word keys already defined
-    // for locationforecast.html/stationforecast.html, so no new
-    // dictionary keys are needed.
-    var label = entry.label ? DivumWXI18N.t(entry.label) : DivumWXI18N.t('Unknown');
+    var label = entry.label || DivumWXI18N.t('Unknown');
     if (iconName) {
       return '<img src="' + ICON_BASE + iconName + '.svg" alt="' + label + '" title="' + label +
         '" width="34" height="34" style="width:34px;height:34px;display:block;margin:2px 0;">';
     }
-    return '<span title="' + label + '" style="font-size:34px;line-height:1;">' + emoji + '</span>';
+    return '<span title="' + label + '" style="font-size:20px">' + emoji + '</span>';
   }
   function weatherText(code, map){
-    var entry = map && map[code];
-    return (entry && entry.label) ? DivumWXI18N.t(entry.label) : DivumWXI18N.t('Unknown');
+    return (map && map[code] && map[code].label) || DivumWXI18N.t('Unknown');
   }
 
   function safeSlice(arr, offset, length, fallback){
@@ -2643,93 +2595,78 @@ try {
     return fallback;
   }
 
-  function buildDays(data){
+  function buildSegments(data){
     var h = data.hourly;
     var hu = data.hourly_units || {};
     var hours = h.time;
     var count = hours.length;
-    var days = [];
+    var segments = [];
 
     var tempUnit = hu.temperature_2m;
     var rainUnit = hu.precipitation;
     var windUnit = hu.windspeed_10m || hu.wind_speed_10m;
 
-    // Open-Meteo's own daily aggregate -- confirmed present in this same
-    // forecastcard.txt (forecast.js/stationforecast.html's day-strip reads
-    // tmax/tmin/code from exactly this block). Used here for temperature
-    // and condition since it's the authoritative whole-day figure; rain,
-    // wind and UV aren't confirmed to exist as daily fields in this
-    // station's feed, so those are still aggregated from the full 24-hour
-    // hourly window (00:00-23:59 station-local) rather than guessed at.
-    var d = data.daily || {};
-    var du = data.daily_units || {};
-    var dailyDates = d.time || [];
-    var dailyMaxUnit = du.temperature_2m_max || tempUnit;
-    var dailyMinUnit = du.temperature_2m_min || tempUnit;
+    function makeSegment(offset, period, codeIdx){
+      var temps = safeSlice(h.temperature_2m, offset, 12, 0).map(function(v){ return toCelsius(v, tempUnit); });
+      var rains = safeSlice(h.precipitation, offset, 12, 0).map(function(v){ return toMM(v, rainUnit); });
+      var probs = safeSlice(h.precipitation_probability, offset, 12, 0);
+      var winds = safeSlice(h.windspeed_10m || h.wind_speed_10m, offset, 12, 0).map(function(v){ return toMS(v, windUnit); });
+      var dirs  = safeSlice(h.winddirection_10m || h.wind_direction_10m, offset, 12, 0);
+      var hum   = safeSlice(h.relative_humidity_2m, offset, 12, 50);
+      var uv    = safeSlice(h.uv_index, offset, 12, 0);
 
-    for (var i = 0; i < count; i += 24){
-      var temps = safeSlice(h.temperature_2m, i, 24, 0).map(function(v){ return toCelsius(v, tempUnit); });
-      var rains = safeSlice(h.precipitation, i, 24, 0).map(function(v){ return toMM(v, rainUnit); });
-      var probs = safeSlice(h.precipitation_probability, i, 24, 0);
-      var winds = safeSlice(h.windspeed_10m || h.wind_speed_10m, i, 24, 0).map(function(v){ return toMS(v, windUnit); });
-      var dirs  = safeSlice(h.winddirection_10m || h.wind_direction_10m, i, 24, 0);
-      var uv    = safeSlice(h.uv_index, i, 24, 0);
-      var date  = String(hours[i >= count ? count - 1 : i]).slice(0, 10);
-
-      var tmaxC = maxOf(temps);
-      var tminC = minOf(temps);
-      var code = pickAt(h, ['weathercode', 'weather_code'], i + 12, 0); // noon sample, used only if the daily lookup below misses
-      var dayIdx = dailyDates.indexOf(date);
-      if (dayIdx !== -1) {
-        if (d.temperature_2m_max && d.temperature_2m_max[dayIdx] != null) {
-          tmaxC = toCelsius(d.temperature_2m_max[dayIdx], dailyMaxUnit);
-        }
-        if (d.temperature_2m_min && d.temperature_2m_min[dayIdx] != null) {
-          tminC = toCelsius(d.temperature_2m_min[dayIdx], dailyMinUnit);
-        }
-        if (d.weather_code && d.weather_code[dayIdx] != null) {
-          code = d.weather_code[dayIdx];
-        }
-      }
-
-      days.push({
-        date: date,
-        tmaxC: tmaxC, tminC: tminC,
+      return {
+        date: String(hours[offset >= count ? count - 1 : offset]).slice(0, 10),
+        period: period,
+        tmaxC: maxOf(temps), tminC: minOf(temps),
         rainMM: sumOf(rains),
         rainProb: maxOf(probs),
         windMS: maxOf(winds),
-        // A single midday sample, same "pick one representative hour"
-        // approach the old 12-hour segments used (dirs[5]) -- not a true
-        // vector-averaged dominant direction, since nothing else on this
-        // card computes one either.
-        windDir: deg2compass(dirs[12] || 0),
+        windDir: deg2compass(dirs[5] || 0),
+        humidity: Math.round(sumOf(hum) / Math.max(hum.length, 1)),
         uv: Math.round((maxOf(uv) || 0) * 10) / 10,
-        code: code
-      });
+        code: pickAt(h, ['weathercode', 'weather_code'], codeIdx, 0)
+      };
     }
-    return days;
+
+    for (var i = 0; i < count; i += 24){
+      segments.push(makeSegment(i + 6, 'Day', i + 12));
+      segments.push(makeSegment(i + 18, 'Night', i + 18));
+    }
+    return segments;
   }
 
-  function pickStartIndex(days, todayStr){
-    for (var i = 0; i < days.length; i++){
-      if (days[i].date === todayStr) return i;
+  function pickStartIndex(segments){
+    var now = stationNow();
+    var todayStr = fmtDate(now);
+    var hr = now.getUTCHours();
+    for (var i = 0; i < segments.length; i++){
+      var s = segments[i];
+      if (s.date === todayStr && s.period === 'Day' && hr >= 6 && hr < 18) return i;
+      if (s.date === todayStr && s.period === 'Night' && (hr < 6 || hr >= 18)) return i;
     }
     return 0;
   }
 
-  function labelForDay(dateStr, todayStr, tomorrowStr){
-    if (dateStr === todayStr) return DivumWXI18N.t('Today');
-    if (dateStr === tomorrowStr) return DivumWXI18N.t('Tomorrow');
-    return weekdayFull(dateStr);
+  function labelFor(s, todayStr, tomorrowStr){
+    if (s.period === 'Day') {
+      if (s.date === todayStr) return DivumWXI18N.t('Today');
+      if (s.date === tomorrowStr) return DivumWXI18N.t('Tomorrow');
+      return weekdayAbbrev(s.date);
+    }
+    if (s.date === todayStr) return DivumWXI18N.t('Tonight');
+    if (s.date === tomorrowStr) return DivumWXI18N.t('Tomorrow Night');
+    return weekdayAbbrev(s.date) + ' ' + DivumWXI18N.t('Night');
   }
 
   function renderCard(data, map){
-    var days = buildDays(data);
+    var segments = buildSegments(data);
+    var startIdx = pickStartIndex(segments);
+    var view = segments.slice(startIdx, startIdx + 3);
+
     var now = stationNow();
     var todayStr = fmtDate(now);
     var tomorrowStr = fmtDate(addDays(now, 1));
-    var startIdx = pickStartIndex(days, todayStr);
-    var view = days.slice(startIdx, startIdx + 3);
 
     titleLabel.textContent = DivumWXI18N.t('Forecast') + ' (\u00B0' + currentUnits.temp + ')';
 
@@ -2761,37 +2698,24 @@ try {
     var html = '';
     for (var i = 0; i < view.length; i++){
       var s = view[i];
-      var lbl = labelForDay(s.date, todayStr, tomorrowStr);
-      // Single trailing unit letter (on the low value only) rather than
-      // repeating "°C"/"°F" on both numbers -- shortens the string enough
-      // to fit one line at this card's font size, and white-space:nowrap
-      // below stops it wrapping onto two lines even if a translated
-      // temperature format runs a little longer.
-      var hiVal = currentUnits.temp === 'F' ? (s.tmaxC * 9 / 5 + 32).toFixed(1) : s.tmaxC.toFixed(1);
-      var tempText = hiVal + '\u00B0 <span style="color:var(--bs-secondary-color);">/ ' + tempLabel(s.tminC) + '</span>';
-      var extra = 'UV-I ' + s.uv;
-      var icon = getIconHtml(s.code, 'Day', map); // always the day icon variant -- every column is now a whole calendar day, not a day/night split
+      var lbl = labelFor(s, todayStr, tomorrowStr);
+      var isDay = s.period === 'Day';
+      var tempText = tempLabel(isDay ? s.tmaxC : s.tminC);
+      var extra = isDay ? ('UV-I ' + s.uv) : (s.humidity + '% ' + DivumWXI18N.t('hum'));
+      var icon = getIconHtml(s.code, s.period, map);
       var text = weatherText(s.code, map);
 
       if (i > 0) html += DIVIDER;
-      // Every row below has an explicit height (rather than the previous
-      // justify-content:space-evenly, which distributes *remaining* space
-      // and therefore drifts differently per column whenever one column's
-      // content is a different total height than another -- e.g. a longer
-      // translated weekday name, or an icon-map miss falling back to the
-      // smaller emoji glyph instead of the 34px icon). Fixed heights make
-      // every row land at the same vertical position in all three columns
-      // regardless of content differences.
       html +=
-        '<div style="display:flex;flex-direction:column;align-items:flex-start;height:100%;overflow:hidden;padding:0 6px;box-sizing:border-box;">' +
-          '<div style="height:16px;font-size:11px;line-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;margin-bottom:4px;">' + lbl + '</div>' +
-          '<div style="height:38px;display:flex;align-items:center;margin-bottom:4px;">' + icon + '</div>' +
-          '<div style="height:13px;font-size:9.5px;line-height:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;margin-bottom:6px;">' + text + '</div>' +
-          '<div style="font-size:8px;line-height:2.3;color:var(--bw-accent);">' +
-            '<span style="white-space:nowrap;">' + miniIcon('thermometer', 26, -8) + tempText + '</span><br>' +
-            '<span style="white-space:nowrap;">' + miniIcon('raindrop') + rainLabel(s.rainMM) + ' (' + s.rainProb + '%)</span><br>' +
-            '<span style="white-space:nowrap;">' + miniIcon('wind', 19, -5, true) + s.windDir + ' ' + windLabel(s.windMS) + '</span><br>' +
-            '<span style="white-space:nowrap;">' + extra + '</span>' +
+        '<div style="display:flex;flex-direction:column;align-items:flex-start;justify-content:space-evenly;height:100%;overflow:hidden;padding:0 6px;box-sizing:border-box;">' +
+          '<div style="font-size:11px;">' + lbl + '</div>' +
+          icon +
+          '<div style="font-size:9.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;">' + text + '</div>' +
+          '<div style="font-size:9px;line-height:2.3;color:var(--bw-accent);">' +
+            miniIcon('thermometer', 26, -8) + tempText + '<br>' +
+            miniIcon('raindrop') + rainLabel(s.rainMM) + ' (' + s.rainProb + '%)<br>' +
+            miniIcon('wind', 19, -5, true) + s.windDir + ' ' + windLabel(s.windMS) + '<br>' +
+            extra +
           '</div>' +
         '</div>';
     }
@@ -2893,11 +2817,9 @@ try {
       if (lastData) renderCard(lastData);
     }
   });
-  function __i18nAndStationTimeRefresh_4(){
+  window.addEventListener('i18nready', function(){
     if (lastData) renderCard(lastData);
-  }
-  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_4);
-  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_4);
+  });
 
   var WIND_UNIT_LABEL = { mph: 'mph', kmh: 'km/h', kt: 'kt', ms: 'm/s', bf: 'Bft' };
   function windFromMS(ms){
@@ -3403,11 +3325,9 @@ try {
       if (lastData) renderCard(lastData);
     }
   });
-  function __i18nAndStationTimeRefresh_5(){
+  window.addEventListener('i18nready', function(){
     if (lastData) renderCard(lastData);
-  }
-  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_5);
-  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_5);
+  });
 
   var WIND_UNIT_LABEL = { mph: 'mph', kmh: 'km/h', kt: 'kt', ms: 'm/s', bf: 'Bft' };
   function windFromMS(ms){
@@ -3860,11 +3780,9 @@ try {
       if (lastData) renderCard(lastData);
     }
   });
-  function __i18nAndStationTimeRefresh_6(){
+  window.addEventListener('i18nready', function(){
     if (lastData) renderCard(lastData);
-  }
-  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_6);
-  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_6);
+  });
 
   var PRESSURE_CONFIG = {
     hpa:  { factor: 1,                  dp: 1, domain: [940, 1060], ticks: 12, tickDp: 0, label: 'hPa',  badgeUnit: 'inHg', badgeFactor: 0.029529983071445, badgeDp: 2 },
@@ -4261,11 +4179,9 @@ try {
       if (lastData) renderCard(lastData);
     }
   });
-  function __i18nAndStationTimeRefresh_7(){
+  window.addEventListener('i18nready', function(){
     if (lastData) renderCard(lastData);
-  }
-  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_7);
-  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_7);
+  });
   function mm2in(mm){ return mm / 25.400013716; }
   function rainLabel(mm){
     return currentUnits.rain === 'in'
@@ -4622,20 +4538,9 @@ try {
     last24hText.textContent = rainLabel(v.last24h);
     rateText.textContent = rainLabel(v.rate) + '/hr';
     yearText.textContent = rainLabel(v.year);
-    // Rain Event only appears in the card at all while one is in
-    // force -- no row, no em-dash placeholder, once it's closed.
-    // rateText's row picks up the "last row, no divider" styling
-    // whenever eventText's row is hidden, so there's never a stray
-    // border trailing the pane's actual last visible row.
-    if (v.event > 0) {
-      var stormLabel = timeLabelFor(v.stormStart);
-      eventText.parentElement.style.display = '';
-      rateText.parentElement.style.borderBottom = '1px solid var(--bs-border-color)';
-      eventText.textContent = rainLabel(v.event) + (stormLabel ? ' (since ' + stormLabel + ')' : '');
-    } else {
-      eventText.parentElement.style.display = 'none';
-      rateText.parentElement.style.borderBottom = 'none';
-    }
+    eventText.textContent = v.event > 0
+      ? rainLabel(v.event) + (v.stormStart ? ' (since ' + v.stormStart + ')' : '')
+      : '\u2014';
   }
 
   var lastData = null;
@@ -4664,7 +4569,7 @@ try {
         year: num(pRain.year, 0),
         rate: num(pRain.rate, 0),
         event: num(pRain.event, 0),
-        stormStart: typeof pRain.storm_start === 'number' ? pRain.storm_start : 0,
+        stormStart: pRain.storm_start || '',
         rainColor: o.rainColor || 'var(--bw-accent)',
         rateColor: o.rainRateColor || 'var(--bw-accent)'
       };
@@ -4735,11 +4640,9 @@ try {
       if (lastData) renderCard(lastData);
     }
   });
-  function __i18nAndStationTimeRefresh_8(){
+  window.addEventListener('i18nready', function(){
     if (lastData) renderCard(lastData);
-  }
-  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_8);
-  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_8);
+  });
   function mm2in(mm){ return mm / 25.400013716; }
   function rainLabel(mm){
     return currentUnits.rain === 'in'
@@ -5057,20 +4960,10 @@ try {
     last24hText.textContent = rainLabel(v.last24h);
     rateText.textContent = rainLabel(v.rate) + '/hr';
     yearText.textContent = rainLabel(v.year);
-    // Rain Event only appears in the card at all while one is in
-    // force -- no row, no em-dash placeholder, once it's closed.
-    // rateText's row picks up the "last row, no divider" styling
-    // whenever eventText's row is hidden, so there's never a stray
-    // border trailing the pane's actual last visible row.
-    if (v.event > 0) {
-      var stormLabel = timeLabelFor(v.stormStart);
-      eventText.parentElement.style.display = '';
-      rateText.parentElement.style.borderBottom = '1px solid var(--bs-border-color)';
-      eventText.textContent = rainLabel(v.event) + (stormLabel ? ' (since ' + stormLabel + ')' : '');
-    } else {
-      eventText.parentElement.style.display = 'none';
-      rateText.parentElement.style.borderBottom = 'none';
-    }
+    var stormLabel = timeLabelFor(v.stormStart);
+    eventText.textContent = v.event > 0
+      ? rainLabel(v.event) + (stormLabel ? ' (since ' + stormLabel + ')' : '')
+      : '\u2014';
   }
 
   var lastData = null;
@@ -5177,11 +5070,9 @@ try {
       if (lastData) renderCard(lastData);
     }
   });
-  function __i18nAndStationTimeRefresh_9(){
+  window.addEventListener('i18nready', function(){
     if (lastData) renderCard(lastData);
-  }
-  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_9);
-  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_9);
+  });
   function mm2in(mm){ return mm / 25.400013716; }
   function rainLabel(mm){
     return currentUnits.rain === 'in'
@@ -5818,20 +5709,10 @@ try {
     last24hText.textContent = rainLabel(v.last24h);
     rateText.textContent = rainLabel(v.rate) + '/hr';
     yearText.textContent = rainLabel(v.year);
-    // Rain Event only appears in the card at all while one is in
-    // force -- no row, no em-dash placeholder, once it's closed.
-    // rateText's row picks up the "last row, no divider" styling
-    // whenever eventText's row is hidden, so there's never a stray
-    // border trailing the pane's actual last visible row.
-    if (v.event > 0) {
-      var stormLabel = timeLabelFor(v.stormStart);
-      eventText.parentElement.style.display = '';
-      rateText.parentElement.style.borderBottom = '1px solid var(--bs-border-color)';
-      eventText.textContent = rainLabel(v.event) + (stormLabel ? ' (since ' + stormLabel + ')' : '');
-    } else {
-      eventText.parentElement.style.display = 'none';
-      rateText.parentElement.style.borderBottom = 'none';
-    }
+    var stormLabel = timeLabelFor(v.stormStart);
+    eventText.textContent = v.event > 0
+      ? rainLabel(v.event) + (stormLabel ? ' (since ' + stormLabel + ')' : '')
+      : '\u2014';
   }
 
   var lastData = null;
@@ -5857,7 +5738,7 @@ try {
         year: num(rain.year, 0),
         rate: num(rain.rate, 0),
         event: num(rain.event, 0),
-        stormStart: typeof rain.storm_start === 'number' ? rain.storm_start : 0,
+        stormStart: typeof rain.storm_start === 'number' ? rain.storm_start : 0
       };
       renderCard(lastData);
       setStatus(loopResult.status === 'fulfilled' && archResult.status === 'fulfilled');
@@ -6161,11 +6042,9 @@ try {
   }
 
   var lastData = null;
-  function __i18nAndStationTimeRefresh_10(){
+  window.addEventListener('i18nready', function(){
     if (lastData) renderCard(lastData);
-  }
-  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_10);
-  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_10);
+  });
   function refresh(){
     Promise.allSettled([
       fetch(LOOP_JSON_URL + ((LOOP_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
@@ -6524,11 +6403,9 @@ try {
   }
 
   var lastData = null;
-  function __i18nAndStationTimeRefresh_11(){
+  window.addEventListener('i18nready', function(){
     if (lastData) renderCard(lastData);
-  }
-  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_11);
-  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_11);
+  });
   function refresh(){
     Promise.allSettled([
       fetch(LOOP_JSON_URL + ((LOOP_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
@@ -6896,11 +6773,9 @@ try {
   }
 
   var lastData = null;
-  function __i18nAndStationTimeRefresh_12(){
+  window.addEventListener('i18nready', function(){
     if (lastData) renderCard(lastData);
-  }
-  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_12);
-  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_12);
+  });
   function refresh(){
     Promise.allSettled([
       fetch(LOOP_JSON_URL + ((LOOP_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
@@ -7251,21 +7126,10 @@ try {
     svg = svgSel.append('svg').attr('viewBox', '0 0 ' + W + ' ' + H).attr('width', '100%').attr('height', '100%');
     var defs = svg.append('defs');
 
+    var now = stationNow();
     var eclipticDeg = v.eclipticAngle;
 
-    // solarPosition() computes the sub-solar point from Earth's true
-    // rotational position, which depends on the real UTC instant -- NOT
-    // on the station's local wall-clock time. stationNow() deliberately
-    // returns a Date whose UTC getters read back the station's local
-    // time (a "fake UTC" trick used elsewhere in this file for display
-    // purposes); its .getTime() is NOT a real epoch value and must never
-    // be fed into an absolute-time calculation like this one. Using it
-    // here silently shifted the sun/moon position by however far the
-    // station's current UTC offset happens to be (e.g. +1h under BST),
-    // which is exactly why this card's globe disagreed with the Solar
-    // Dial card -- that card gets its sun/moon position pre-computed
-    // server-side in almanac.json and never routes through stationNow().
-    var sunPos = solarPosition(Date.now());
+    var sunPos = solarPosition(now.getTime());
 
 
     var moonPos = [sunPos[0] + v.moonEclipticAngle, v.moonDec];
@@ -7396,11 +7260,9 @@ try {
   }
 
   var lastData = null, stationLat = 51.94, stationLon = -0.987;
-  function __i18nAndStationTimeRefresh_13(){
+  window.addEventListener('i18nready', function(){
     if (lastData) renderCard(lastData, stationLat, stationLon);
-  }
-  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_13);
-  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_13);
+  });
   function refresh(){
     Promise.allSettled([
       fetch(ASTRO_JSON_URL + ((ASTRO_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
@@ -7794,11 +7656,9 @@ try {
   }
 
   var lastData = null;
-  function __i18nAndStationTimeRefresh_14(){
+  window.addEventListener('i18nready', function(){
     if (lastData) renderCard(lastData);
-  }
-  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_14);
-  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_14);
+  });
   function refresh(){
     fetch(ASTRO_JSON_URL + ((ASTRO_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
       .then(function(alm){
@@ -8259,11 +8119,9 @@ try {
   // No prior unitsystemchange/resize re-render pattern existed in this
   // card to follow -- this is the first such listener here, same idea as
   // cardTemperature.js's.
-  function __i18nAndStationTimeRefresh_15(){
+  window.addEventListener('i18nready', function(){
     if (lastData) { renderCard(lastData, stationLat); renderAnalemma(lastData); }
-  }
-  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_15);
-  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_15);
+  });
 })();
 } catch (e) {
   console.error("cardsBundle: cardGeocentric.js failed:", e);
@@ -8705,11 +8563,9 @@ try {
   }
 
   var lastData = null;
-  function __i18nAndStationTimeRefresh_16(){
+  window.addEventListener('i18nready', function(){
     if (lastData) renderCard(lastData);
-  }
-  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_16);
-  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_16);
+  });
   function refresh(){
     fetch(ASTRO_JSON_URL + ((ASTRO_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
       .then(function(alm){
@@ -8764,31 +8620,15 @@ try {
     var parts = {};
     new Intl.DateTimeFormat('en-GB', {
       timeZone: StationTime.getTZ(), hourCycle: 'h23',
-      year: 'numeric', month: '2-digit', day: '2-digit',
+      year: 'numeric', month: 'short', day: '2-digit',
       hour: '2-digit', minute: '2-digit', second: '2-digit'
     }).formatToParts(date).forEach(function(p){ parts[p.type] = p.value; });
     return parts;
   }
   function stationNow(){
     var p = stationParts(new Date());
-    return new Date(Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second));
-  }
-  // Separate formatter for the "Last Detected" display text (wants a
-  // readable month name, e.g. "6th Sept"), kept apart from stationParts()
-  // above -- en-GB's short-month name for September is "Sept", not the
-  // 3-letter "Sep" a months.indexOf(['Jan',...,'Sep',...]) lookup expects,
-  // so reusing one formatter for both display text and date reconstruction
-  // silently rolled every September back to December 2025 (months.indexOf
-  // returning -1). stationNow() now takes a numeric month instead, which
-  // has no locale-spelling ambiguity to get wrong.
-  function displayDateParts(date){
-    var parts = {};
-    new Intl.DateTimeFormat('en-GB', {
-      timeZone: StationTime.getTZ(), hourCycle: 'h23',
-      month: 'short', day: '2-digit',
-      hour: '2-digit', minute: '2-digit'
-    }).formatToParts(date).forEach(function(p){ parts[p.type] = p.value; });
-    return parts;
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return new Date(Date.UTC(+p.year, months.indexOf(p.month), +p.day, +p.hour, +p.minute, +p.second));
   }
   function pad2(n){ return n < 10 ? '0' + n : String(n); }
   function ordinalSuffix(day){
@@ -8799,7 +8639,7 @@ try {
   }
   function dateLabelFor(epochMs){
     if (!epochMs) return '\u2014';
-    var p = displayDateParts(new Date(epochMs));
+    var p = stationParts(new Date(epochMs));
     return (+p.day) + ordinalSuffix(+p.day) + ' ' + p.month + ' ' + p.hour + ':' + p.minute;
   }
 
@@ -9068,11 +8908,9 @@ try {
   }
 
   var lastData = null;
-  function __i18nAndStationTimeRefresh_17(){
+  window.addEventListener('i18nready', function(){
     if (lastData) renderCard(lastData);
-  }
-  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_17);
-  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_17);
+  });
   function refresh(){
     fetch(ARCHIVE_JSON_URL + ((ARCHIVE_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
       .then(function(arch){
@@ -9393,11 +9231,9 @@ try {
   }
 
   var lastData = null;
-  function __i18nAndStationTimeRefresh_18(){
+  window.addEventListener('i18nready', function(){
     if (lastData) renderCard(lastData);
-  }
-  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_18);
-  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_18);
+  });
   function refresh(){
     fetch(LOOP_JSON_URL + ((LOOP_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
       .then(function(loop){
@@ -9793,11 +9629,9 @@ try {
   }
 
   var lastData = null;
-  function __i18nAndStationTimeRefresh_19(){
+  window.addEventListener('i18nready', function(){
     if (lastData) renderCard(lastData);
-  }
-  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_19);
-  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_19);
+  });
   function refresh(){
     fetch(LOOP_JSON_URL + ((LOOP_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
       .then(function(loop){
@@ -10295,11 +10129,9 @@ try {
   window.addEventListener('themechange', function(){
     if (lastData) renderCard(lastData);
   });
-  function __i18nAndStationTimeRefresh_20(){
+  window.addEventListener('i18nready', function(){
     if (lastData) renderCard(lastData);
-  }
-  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_20);
-  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_20);
+  });
 })();
 } catch (e) {
   console.error("cardsBundle: cardAirquality.js failed:", e);
@@ -10566,11 +10398,9 @@ try {
   }
 
   var lastData = null;
-  function __i18nAndStationTimeRefresh_21(){
+  window.addEventListener('i18nready', function(){
     if (lastData) renderCard(lastData);
-  }
-  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_21);
-  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_21);
+  });
   function refresh(){
     fetch(ARCHIVE_JSON_URL + ((ARCHIVE_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
       .then(function(arch){
@@ -10845,11 +10675,9 @@ try {
   }
 
   var lastData = null;
-  function __i18nAndStationTimeRefresh_22(){
+  window.addEventListener('i18nready', function(){
     if (lastData) renderCard(lastData);
-  }
-  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_22);
-  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_22);
+  });
   function refresh(){
     fetch(ARCHIVE_JSON_URL + ((ARCHIVE_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
       .then(function(arch){
@@ -11189,11 +11017,9 @@ try {
   }
 
   var lastData = null;
-  function __i18nAndStationTimeRefresh_23(){
+  window.addEventListener('i18nready', function(){
     if (lastData) renderCard(lastData);
-  }
-  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_23);
-  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_23);
+  });
   function refresh(){
     Promise.allSettled([
       fetch(EQ_JSON_URL + ((EQ_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
@@ -11493,7 +11319,7 @@ try {
     refresh();
     setInterval(refresh, POLL_MS);
   });
-  function __i18nAndStationTimeRefresh_24(){
+  window.addEventListener('i18nready', function(){
     // refresh() already re-derives titleLabel.textContent from lastIsDay
     // every poll cycle -- this just avoids waiting up to POLL_MS for the
     // very first translated paint.
@@ -11508,9 +11334,7 @@ try {
     // again once it does finish, so between the two this always ends
     // up correct regardless of which finishes first).
     imgLink.setAttribute('data-title', DivumWXI18N.t('Timelapse') + ' - ' + MODAL_TITLE);
-  }
-  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_24);
-  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_24);
+  });
 })();
 } catch (e) {
   console.error("cardsBundle: cardWebcam.js failed:", e);
@@ -11650,7 +11474,7 @@ try {
   body.appendChild(img);
 
   var titleOverriddenByConfig = false;
-  function __i18nAndStationTimeRefresh_25(){
+  window.addEventListener('i18nready', function(){
     // Only re-apply the translated fallback if the station owner hasn't
     // set their own custom title -- that's arbitrary user-typed text
     // (e.g. "Backyard Cam"), never something DivumWX should translate.
@@ -11658,9 +11482,7 @@ try {
       STATION_IMAGE_TITLE = DivumWXI18N.t('Station Image');
       img.alt = STATION_IMAGE_TITLE;
     }
-  }
-  window.addEventListener('i18nready', __i18nAndStationTimeRefresh_25);
-  window.addEventListener('stationtimeready', __i18nAndStationTimeRefresh_25);
+  });
 
   function refresh(){
     img.onload = function(){ setStatus(true); };
@@ -11748,13 +11570,61 @@ try {
   // sky.cloud_cover instead (already present, already used the same way
   // by cardCurrent.js's icon picker) so this card doesn't need a data
   // source nothing else in the current architecture depends on.
+  // Returns a path into the SHARED meteocons library (already used
+  // elsewhere on the site) rather than a dedicated pv*.svg -- this card
+  // used to ship its own six weather-icon files with the panel and a
+  // bolt baked into each one; now the weather glyph, the panel, and the
+  // bolt indicator are three independent pieces (an <img>, an inline
+  // <svg> coloured via a CSS variable, and a second inline <svg>),
+  // composited together in the DOM instead of pre-rendered into one
+  // image per condition. No dedicated "mostly-cloudy-day" file exists in
+  // meteocons -- falls back to the condition-agnostic cloudy.svg for
+  // that one tier.
   function pickPvIcon(cloudCoverPct, isDay){
-    if (!isDay) return 'img/pvNight.svg';
-    if (cloudCoverPct > 0 && cloudCoverPct < 7)   return 'img/pvClearDay.svg';
-    if (cloudCoverPct < 32)  return 'img/pvMostlyClearDay.svg';
-    if (cloudCoverPct < 70)  return 'img/pvPartlyCloudyDay.svg';
-    if (cloudCoverPct < 95)  return 'img/pvMostlyCloudyDay.svg';
-    return 'img/pvOvercastDay.svg';
+    if (!isDay) return 'meteocons/fill/svg/clear-night.svg';
+    if (cloudCoverPct > 0 && cloudCoverPct < 7)   return 'meteocons/fill/svg/clear-day.svg';
+    if (cloudCoverPct < 32)  return 'meteocons/fill/svg/mostly-clear-day.svg';
+    if (cloudCoverPct < 70)  return 'meteocons/fill/svg/partly-cloudy-day.svg';
+    if (cloudCoverPct < 95)  return 'meteocons/fill/svg/cloudy.svg';
+    return 'meteocons/fill/svg/overcast-day.svg';
+  }
+
+  // Mirrors pickPvIcon() exactly (same branches, same thresholds) -- the
+  // colour the panel's panes (and the bolt indicator below) render in
+  // for each condition. Was originally reverse-engineered from each
+  // pv*.svg's own actual rendered pane colour (checking each file's
+  // style="...fill:X" override, which won CSS priority over its plain
+  // fill= attribute) back when those six files still existed; kept
+  // as the same hardcoded values now that they're gone, since the
+  // colours themselves were never the part that needed to change.
+  function pickPvColor(cloudCoverPct, isDay){
+    if (!isDay) return 'silver';
+    if (cloudCoverPct > 0 && cloudCoverPct < 7)   return '#ff7400';
+    if (cloudCoverPct < 32)  return '#fd8b17';
+    if (cloudCoverPct < 70)  return '#ffa242';
+    if (cloudCoverPct < 95)  return '#ffc367';
+    return '#ffeeaa';
+  }
+
+  // How many bolts show for a given pane colour. Four buckets by how
+  // dark/saturated the orange is (roughly: how favourable the condition
+  // is for generation), collapsing the six actual pickPvColor() outputs
+  // onto four bolt counts -- partly-cloudy and mostly-cloudy share a
+  // count (both "light orange"), as do mostly-clear and clear (both
+  // "dark orange"). Night doesn't pulse; every other tier does.
+  var BOLT_TIERS = [
+    { color: 'silver',  count: 1, pulse: false },
+    { color: '#ffeeaa', count: 2, pulse: true  },
+    { color: '#ffc367', count: 3, pulse: true  },
+    { color: '#ffa242', count: 3, pulse: true  },
+    { color: '#fd8b17', count: 4, pulse: true  },
+    { color: '#ff7400', count: 4, pulse: true  }
+  ];
+  function boltInfoForColor(color){
+    for (var i = 0; i < BOLT_TIERS.length; i++){
+      if (BOLT_TIERS[i].color === color) return BOLT_TIERS[i];
+    }
+    return { color: color, count: 1, pulse: false };
   }
 
   var mount = document.getElementById('solarEnergyCard26');
@@ -11859,11 +11729,108 @@ try {
   leftPane.style.justifyContent = 'center';
   contentWrap.appendChild(leftPane);
 
-  var pvIcon = document.createElement('img');
-  pvIcon.style.width = '96px';
-  pvIcon.style.height = '96px';
-  pvIcon.style.objectFit = 'contain';
-  leftPane.appendChild(pvIcon);
+  var graphicWrap = document.createElement('div');
+  graphicWrap.style.width = '139px';
+  graphicWrap.style.height = '120px';
+  graphicWrap.style.flex = '0 0 auto';
+  leftPane.appendChild(graphicWrap);
+
+  // One SVG, one shared coordinate space. Recentred once already: the
+  // first version of this viewBox was 0-260 wide with the panel's own
+  // centre sitting at x=165, not x=130 -- it read as centred purely
+  // because the sun filled the reserved space on the left, not because
+  // the geometry actually was centred. Every element below was shifted
+  // by the same -55 delta to make the panel's centre land exactly on
+  // the new 220-wide viewBox's own centre (x=110), preserving each
+  // element's position relative to the panel rather than recomputing
+  // each one from scratch.
+  //
+  // The weather glyph is an <image> pointing at the site's existing
+  // shared meteocons library (meteocons/fill/svg/...) -- no separate
+  // weather-icon file for this card at all, so a fix or a style change
+  // to those icons anywhere else on the site applies here too, for
+  // free. Sets both href and the legacy xlink:href attribute in
+  // renderCard() below -- plain href alone is SVG2 and not honoured by
+  // every renderer, xlink:href is the safer-everywhere legacy form.
+  // The panel's panes take their colour from the --pane-color custom
+  // property, set on graphicWrap in renderCard() (CSS custom properties
+  // inherit down into SVG same as HTML, so one property covers every
+  // pane path here). The bolt row is rebuilt from scratch on every
+  // render since its count, colour, and spacing all change together.
+  graphicWrap.innerHTML =
+    '<svg width="100%" height="100%" viewBox="0 0 220 190" xmlns:xlink="http://www.w3.org/1999/xlink" style="overflow:visible">' +
+      '<image id="pvWeatherGlyph" x="-19" y="10.5" width="65" height="65" />' +
+      '<g id="pvBoltsGroup" transform="translate(110,52.5)"></g>' +
+      '<g transform="translate(10,77.5)">' +
+        '<path d="M46 8 L154 8 L192 100 L8 100 Z" fill="#6b6b67" stroke="#333" stroke-width="1.5"/>' +
+        '<path d="M8 100 L192 100" stroke="#333" stroke-width="4" stroke-linecap="round"/>' +
+        '<path d="M50 12 L150 12 L186 96 L12 96 Z" fill="#2c2c2a"/>' +
+        '<g style="fill:var(--pane-color)">' +
+          '<path d="M49.1,12.2 L80.3,12.2 L74.6,52.8 L32.0,52.8 Z"/>' +
+          '<path d="M30.7,57.2 L73.3,57.2 L67.6,97.8 L13.6,97.8 Z"/>' +
+          '<path d="M84.4,12.2 L115.6,12.2 L121.3,52.8 L78.7,52.8 Z"/>' +
+          '<path d="M78.7,57.2 L121.3,57.2 L127.0,97.8 L73.0,97.8 Z"/>' +
+          '<path d="M119.7,12.2 L150.9,12.2 L168.0,52.8 L125.4,52.8 Z"/>' +
+          '<path d="M126.7,57.2 L169.3,57.2 L186.4,97.8 L132.4,97.8 Z"/>' +
+        '</g>' +
+      '</g>' +
+    '</svg>';
+  var pvWeatherGlyph = graphicWrap.querySelector('#pvWeatherGlyph');
+  var pvBoltsGroup = graphicWrap.querySelector('#pvBoltsGroup');
+
+  // One-time stylesheet injection for the ripple-pulse keyframes --
+  // opacity-only, deliberately no transform: scale() (an earlier version
+  // of this scaled bolts up on pulse, which at this size read as one
+  // bolt suddenly looking oversized rather than a subtle pulse).
+  if (!document.getElementById('solarEnergyBoltPulseStyle')) {
+    var pulseStyle = document.createElement('style');
+    pulseStyle.id = 'solarEnergyBoltPulseStyle';
+    pulseStyle.textContent =
+      '@keyframes solarEnergyBoltPulse {' +
+      '0% { opacity: 1; }' +
+      '35% { opacity: 0.35; }' +
+      '100% { opacity: 1; }' +
+      '}' +
+      '.bolt-pulse { animation: solarEnergyBoltPulse 0.6s ease; }';
+    document.head.appendChild(pulseStyle);
+  }
+
+  // Rebuilds the bolt row for the given colour: count and whether it
+  // pulses both come from boltInfoForColor() above, width/spacing is
+  // fixed so that at the maximum count (4) the row's total width
+  // exactly matches the panel's own top-edge width (108 viewBox units)
+  // -- 20.8-unit-wide bolts with an 8.3-unit gap between them, worked
+  // out algebraically against that 108 figure rather than guessed.
+  var PV_BOLT_D = 'M11.5,0 L0,14.4 L8.7,14.4 L3.6,23.9 L20.8,8.7 L12.1,8.7 Z';
+  var PV_BOLT_W = 20.8, PV_BOLT_GAP = 8.3;
+  function renderBolts(color, staggerDelayMs){
+    var info = boltInfoForColor(color);
+    pvBoltsGroup.innerHTML = '';
+    var totalWidth = info.count * PV_BOLT_W + (info.count - 1) * PV_BOLT_GAP;
+    var startX = -totalWidth / 2;
+    for (var i = 0; i < info.count; i++){
+      var x = startX + i * (PV_BOLT_W + PV_BOLT_GAP);
+      var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', PV_BOLT_D);
+      path.setAttribute('transform', 'translate(' + x + ',0)');
+      path.setAttribute('fill', info.color);
+      // The pale cream tier is hard to read without a keyline against a
+      // light card background -- the other three tiers are dark/bold
+      // enough not to need one.
+      if (info.color === '#ffeeaa'){
+        path.setAttribute('stroke', '#000');
+        path.setAttribute('stroke-width', '0.75');
+      }
+      pvBoltsGroup.appendChild(path);
+      if (info.pulse){
+        (function(el, idx){
+          el.style.animationDelay = (idx * staggerDelayMs) + 'ms';
+          el.classList.add('bolt-pulse');
+        })(path, i);
+      }
+    }
+    return info.count;
+  }
 
   var pvHeroLabel = document.createElement('div');
   DivumWXI18N.applyLabel(pvHeroLabel, 'PV Array Generating');
@@ -11982,7 +11949,13 @@ try {
   }
 
   function renderCard(v){
-    pvIcon.src = v.icon;
+    pvWeatherGlyph.setAttribute('href', v.icon);
+    pvWeatherGlyph.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', v.icon);
+    graphicWrap.style.setProperty('--pane-color', v.iconColor);
+    // Same 120ms-per-bolt stagger used throughout design/testing, so the
+    // ripple's speed on the real card matches what was actually reviewed
+    // rather than an untested new value.
+    renderBolts(v.iconColor, 120);
     pvHeroValue.textContent = fmtPower(v.pvPower);
 
     gridText.textContent = v.gridState + ' ' + fmtPower(v.gridPower);
@@ -12113,6 +12086,7 @@ try {
 
       renderCard({
         icon: pickPvIcon(cloudCoverPct, isDay),
+        iconColor: pickPvColor(cloudCoverPct, isDay),
         pvPower: pvPower,
         pvEfficiency: pvEfficiency,
         batteryState: batteryState,
@@ -12142,7 +12116,6 @@ try {
   // fetches and renders in one step, so re-running it is the correct way
   // to pick up translations once strings.json has loaded.
   window.addEventListener('i18nready', refresh);
-  window.addEventListener('stationtimeready', refresh);
 })();
 } catch (e) {
   console.error("cardsBundle: cardSolarEnergy.js failed:", e);
