@@ -370,7 +370,16 @@ try {
   var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   function dateStrFor(date){
     var p = stationParts(date);
-    return p.weekday + ' ' + ordinal(+p.day) + ' ' + MONTHS[+p.month - 1] + ' ' + p.year;
+    // p.weekday ('Mon','Tue',...) and the MONTHS entry ('Jan','Feb',...)
+    // are the same short-form keys already translated elsewhere in this
+    // project (see e.g. cardCurrent.js's WEEKDAYS + DivumWXI18N.t()) --
+    // reused here rather than introducing parallel duplicate keys.
+    // ordinal()'s "th"/"st"/"nd"/"rd" suffix is still English-only; a
+    // fully locale-correct date would need Intl.DateTimeFormat with the
+    // active language's own tag instead of this hand-built string, which
+    // is a bigger rework than this fix -- flagging it rather than
+    // quietly leaving it half-done.
+    return DivumWXI18N.t(p.weekday) + ' ' + ordinal(+p.day) + ' ' + DivumWXI18N.t(MONTHS[+p.month - 1]) + ' ' + p.year;
   }
   function pad(n){ return n < 10 ? '0' + n : String(n); }
   function formatUptime(totalSeconds){
@@ -611,8 +620,8 @@ try {
     var serverStr = serverUptimeBaseSec != null ? formatUptime(serverUptimeBaseSec + elapsed) : '\u2014';
     var lineStyle = 'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
     uptimeDiv.innerHTML =
-      '<div style="' + lineStyle + '">Station uptime: <b>' + stationStr + '</b></div>' +
-      '<div style="' + lineStyle + '">Server uptime: <b>' + serverStr + '</b></div>';
+      '<div style="' + lineStyle + '">' + DivumWXI18N.t('Station uptime:') + ' <b>' + stationStr + '</b></div>' +
+      '<div style="' + lineStyle + '">' + DivumWXI18N.t('Server uptime:') + ' <b>' + serverStr + '</b></div>';
   }
   function refreshUptime(){
     var ARCHIVE_JSON_URL = './jsondata/archive.json';
@@ -781,11 +790,17 @@ try {
     var isSnow = precipCode != null && [71,73,75,77,85,86].indexOf(precipCode) !== -1;
     var precipOut, precipUnit;
     if (isSnow){
-      if (wantRainIn){ precipOut = Math.round(precipTotalMM / 25.4 * 100) / 100; precipUnit = ' in snow'; }
-      else { precipOut = Math.round(precipTotalMM / 10 * 10) / 10; precipUnit = ' cm snow'; }
+      // "Snow"/"Rain" reused from the same WMO condition-text keys
+      // already translated elsewhere (see e.g. wmoText() in
+      // divumwf.js) rather than adding parallel lowercase duplicates --
+      // the minor stylistic cost is a capitalised word appearing
+      // mid-sentence in some languages, which is far better than no
+      // translation at all.
+      if (wantRainIn){ precipOut = Math.round(precipTotalMM / 25.4 * 100) / 100; precipUnit = ' in ' + DivumWXI18N.t('Snow').toLowerCase(); }
+      else { precipOut = Math.round(precipTotalMM / 10 * 10) / 10; precipUnit = ' cm ' + DivumWXI18N.t('Snow').toLowerCase(); }
     } else {
       precipOut = wantRainIn ? Math.round(precipTotalMM / 25.4 * 100) / 100 : Math.round(precipTotalMM * 10) / 10;
-      precipUnit = wantRainIn ? ' in rain' : ' mm rain';
+      precipUnit = wantRainIn ? ' in ' + DivumWXI18N.t('Rain').toLowerCase() : ' mm ' + DivumWXI18N.t('Rain').toLowerCase();
     }
 
     var spdMeanMS = spdVals.length ? spdVals.reduce(function(a, b){ return a + b; }, 0) / spdVals.length : null;
@@ -800,26 +815,37 @@ try {
     var out = [];
 
     if (selTempOut !== null){
-      var tempPhrase = 'Temperature ' + (isNight ? 'low' : 'high') + ' around ' + selTempOut + tempSuffix;
+      // Two complete phrase templates (rather than translating "low"/
+      // "high" as standalone words and splicing them into a fixed
+      // English sentence shape) so a translation can reorder freely
+      // within its own language's grammar instead of being forced to
+      // mirror English word order.
+      var tempPhrase = DivumWXI18N.t(isNight ? 'Temperature low around {temp}' : 'Temperature high around {temp}')
+        .replace('{temp}', selTempOut + tempSuffix);
       var windPhrase = '';
       if (dirOut !== null || spdOut !== null || gustOut !== null){
-        windPhrase = ', winds ' + (dirOut || '');
+        windPhrase = ', ' + DivumWXI18N.t('winds') + ' ' + (dirOut || '');
         if (spdOut !== null) windPhrase += ' ' + spdOut + speedSuffix;
-        if (gustOut !== null && (spdOut === null || gustOut > spdOut)) windPhrase += ' gusting to ' + gustOut + speedSuffix;
+        if (gustOut !== null && (spdOut === null || gustOut > spdOut)) windPhrase += ' ' + DivumWXI18N.t('gusting to') + ' ' + gustOut + speedSuffix;
       }
       out.push(tempPhrase + windPhrase + '.');
     }
 
     if (precipTotalMM > 0.05){
-      var typeWord = isSnow ? 'Snow' : 'Light rain';
-      if (precipTotalMM > 2.0 && !isSnow) typeWord = 'Rain';
-      if (precipTotalMM > 5.0 && !isSnow) typeWord = 'Heavy rain';
-      out.push(typeWord + ', total ' + precipOut + precipUnit + ' through to ' + until + '.');
+      // "Snow"/"Light rain"/"Rain"/"Heavy rain" reuse the same
+      // condition-description keys already translated elsewhere in
+      // this project's WMO weather-code text, rather than introducing
+      // parallel duplicate keys for the same words.
+      var typeWord = isSnow ? DivumWXI18N.t('Snow') : DivumWXI18N.t('Light rain');
+      if (precipTotalMM > 2.0 && !isSnow) typeWord = DivumWXI18N.t('Rain');
+      if (precipTotalMM > 5.0 && !isSnow) typeWord = DivumWXI18N.t('Heavy rain');
+      out.push(typeWord + DivumWXI18N.t(', total {amount}{unit} through to {time}.')
+        .replace('{amount}', precipOut).replace('{unit}', precipUnit).replace('{time}', until));
     } else {
-      out.push('Remaining dry through to ' + until + '.');
+      out.push(DivumWXI18N.t('Remaining dry through to {time}.').replace('{time}', until));
     }
 
-    return '<span style="color:' + overlayTextColor + ';font-weight:600;">Outlook For Next Three Hours</span><br><span style="color:var(--bw-accent);">' + out.join(' ') + '</span>';
+    return '<span style="color:' + overlayTextColor + ';font-weight:600;">' + DivumWXI18N.t('Outlook For Next Three Hours') + '</span><br><span style="color:var(--bw-accent);">' + out.join(' ') + '</span>';
   }
 
   var lastForecastJson = null;
