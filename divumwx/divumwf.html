@@ -308,7 +308,7 @@ body{
 .hourly-title{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;}
 .hourly-title h2{font-size:15px;font-weight:700;margin:0;}
 .hourly-title span{font-size:11px;color:var(--bs-secondary-color);}
-.hourly-scroll{display:flex;gap:0;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.hourly-scroll{display:flex;gap:0;overflow-x:auto;-webkit-overflow-scrolling:touch;position:relative;}
 .hcell{flex:0 0 auto;width:52px;text-align:center;font-size:11.5px;padding:2px 0;}
 .hcell .htime{color:var(--bs-secondary-color);font-family:'JetBrains Mono',monospace;font-size:10.5px;}
 .hcell img.hicon{width:26px;height:26px;display:block;margin:6px auto 4px;object-fit:contain;}
@@ -930,10 +930,11 @@ function renderDayStrip(){
 function renderHourly(){
   const sys = SYSTEMS[currentSystem];
   const days = forecastData.days;
-  const hrs = (forecastData.hourlyByDay[activeDay] || []).filter(h => h.h % 2 === 0);
+  const hrs = (forecastData.hourlyByDay[activeDay] || []);
   document.getElementById('wfHourlyTitle').textContent = dayLabel(days[activeDay].dateStr, activeDay) + ' \u2014 ' + DivumWXI18N.t('hourly');
   const fmtHour = h => String(h).padStart(2,'0')+':00';
-  document.getElementById('wfHourlyScroll').innerHTML = hrs.map(h => `
+  const scrollEl = document.getElementById('wfHourlyScroll');
+  scrollEl.innerHTML = hrs.map(h => `
     <div class="hcell">
       <div class="htime">${fmtHour(h.h)}</div>
       ${iconImg(h.icon,'hicon')}
@@ -941,6 +942,24 @@ function renderHourly(){
       <div class="hrain">${h.rainProbPct>10 ? h.rainProbPct+'%' : (h.rainMm>0 ? fmtRain(h.rainMm, sys.rain) : '')}</div>
       ${windDirBadge(h.windDirDeg, h.gustMs ?? h.windMs, sys.wind)}
     </div>`).join('');
+
+  // Open on the current hour rather than always 00:00 -- on a narrow
+  // (phone) viewport, defaulting to the very start of the strip means
+  // only the first one or two cells are visible before anyone notices
+  // it's horizontally scrollable at all, which looks a lot like "only
+  // a couple of hours are shown" even though the rest is one swipe
+  // away. Only applies to today (activeDay 0); other days have no
+  // "current hour" of their own, so they still open at their start.
+  if (activeDay === 0 && hrs.length) {
+    const offset = forecastData.utcOffsetSeconds || 0;
+    const nowLocalHour = new Date(Date.now() + offset*1000).getUTCHours();
+    let targetIdx = 0;
+    for (let i=0;i<hrs.length;i++){ if (hrs[i].h <= nowLocalHour) targetIdx = i; }
+    const targetCell = scrollEl.children[targetIdx];
+    if (targetCell) scrollEl.scrollLeft = targetCell.offsetLeft;
+  } else {
+    scrollEl.scrollLeft = 0;
+  }
 }
 
 // Re-render on a live language switch, same pattern as locationforecast.html.
