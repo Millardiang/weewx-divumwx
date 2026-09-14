@@ -50,6 +50,7 @@ import math
 import glob
 import shutil
 import subprocess
+import collections
 import weewx
 import weewx.almanac
 import weewx.units
@@ -5255,3 +5256,245 @@ class TimelapseService(StdService):
                 os.remove(path)
             except OSError:
                 pass
+
+
+##############################################################################
+#
+# calc_rain_event -- "rain event" (aka "stormRain") continuous-accumulation
+# calculation, called from archive.json.tmpl's "rain" block, and again
+# from its "p_rain" block for stations with a second, piezo rain gauge.
+#
+# Replaces reliance on the station/driver's own native stormRain/eventRain
+# fields (and, for the piezo gauge, erain_piezo), whose reset behaviour is
+# opaque and hardware/firmware-specific, and was found not to match the
+# definition actually wanted here. This is computed instead from the
+# plain per-interval archive column each gauge already writes to -- 'rain'
+# for the standard gauge, 'hail' for the piezo gauge in THIS deployment's
+# schema (see the obs_type parameter below, and the "p_rain" block's own
+# comment on why piezo readings live under 'hail' -- a common Ecowitt/
+# WeeWX workaround, since the default schema has no dedicated piezo-rain
+# pair and 'hail' is otherwise unused on most stations) -- so one
+# calculation now covers every station and both gauges, rather than
+# needing a separate branch per native field.
+#
+# DEFINITION:
+#   - Start: an event begins accumulating as soon as rain is detected.
+#   - Continuation: it keeps accumulating the total as long as rain
+#     continues.
+#   - Reset/End: the event ends (total resets to zero) once EITHER:
+#       (a) the trailing 1-hour window has under 1mm of rain (effectively
+#           "no further rainfall"), OR
+#       (b) the trailing 24-hour window has under 1mm total AND the most
+#           recent hour was itself dry.
+#     (b) is logically a strict subset of (a) -- if a full day totals
+#     under 1mm, the last hour of that day (being part of it) must too,
+#     so (b) can never fire without (a) also firing. It's kept as its own
+#     explicit check anyway, both to match the specification exactly as
+#     given and as a safety net, in case that reasoning misses some edge
+#     case (e.g. a clock/timezone boundary oddity) not anticipated here.
+#   - A new event begins tracking from zero as soon as rain resumes after
+#     a reset.
+#
+# USAGE from archive.json.tmpl -- see that template's own "rain" block for
+# the full pattern, but in short: only call calc_rain_event() once a cheap
+# tag-only check ($span($hour_delta=1).rain.sum.mm / $span($hour_delta=24)
+# .rain.sum.mm, both well-covered by WeeWX's own tag system already) has
+# established that a rain event is CURRENTLY active. That covers "no event
+# right now" -- the common case, for most stations, most of the time --
+# without this module ever touching the archive database. This function
+# is the more expensive part, only reached mid-event, to pin down exactly
+# when that event started:
+#
+#   #import user.divumwx
+#   #set $eventMm, $eventStartTs, $_unusedEndTs = \
+#       $user.divumwx.calc_rain_event($db_lookup(), $current.dateTime.raw)
+#
+# For the piezo gauge, pass obs_type='hail' the same way -- see the
+# "p_rain" block in archive.json.tmpl for the full pattern:
+#
+#   #set $pEventMm, $pEventStartTs, $_pUnusedEndTs = \
+#       $user.divumwx.calc_rain_event($db_lookup(), $current.dateTime.raw, 'hail')
+#
+# NOTE ON CONFIGURABILITY: obs_type is a plain function argument, set
+# directly in archive.json.tmpl's own template text -- it is NOT read
+# from a weewx.conf setting. This matches how the "p_rain" block already
+# hardcoded 'hail'/'hailRate' directly in the template before this change
+# (and how $data_binding='divumwx_extras_binding' and similar names are
+# hardcoded elsewhere in that same file) -- consistent with this
+# codebase's existing convention, and correct because there wasn't
+# already a config-driven mechanism for this to plug into: a Cheetah
+# template only sees whatever tags CheetahGenerator's SearchList exposes,
+# it doesn't get generic read access to arbitrary weewx.conf sections the
+# way a running StdService does via self.config_dict (see e.g.
+# AirDensityService's __init__ elsewhere in this file for that pattern).
+# Making obs_type a genuine weewx.conf setting instead would need a small
+# custom SearchList extension (this file already has two: Colorize,
+# TimeSince) to read a weewx.conf section and expose it as a template
+# tag -- real, buildable, but new infrastructure, not a one-line change.
+# If a future station's piezo readings ever live somewhere other than
+# 'hail', the fix today is editing that one argument in
+# archive.json.tmpl, not a config file.
+#
+# TESTING: this was developed against a standalone test suite covering
+# continuous rain, dry gaps of varying length, sporadic trace rain, missing
+# (None) readings, multiple archive intervals (1/5/10-minute), and a
+# multi-day continuous event exercising the adaptive lookback widening --
+# see the project's own test notes for the three real bugs that testing
+# against realistic (not conveniently-sized synthetic) data caught before
+# this shipped: a false reset in a fresh event's own first ~25 minutes, a
+# single dry tick right after a rain burst wiping an event that was only
+# minutes old, and an eviction-boundary off-by-one that made the "has this
+# window really spanned a full hour" check mathematically impossible to
+# ever satisfy for evenly-spaced archive records.
+#
+##############################################################################
+
+RAINEVENT_MM_THRESHOLD = 1.0        # mm -- the reset threshold from the specification
+RAINEVENT_ONE_HOUR = 3600
+RAINEVENT_ONE_DAY = 86400
+RAINEVENT_DEFAULT_LOOKBACK = 7 * RAINEVENT_ONE_DAY   # generous for virtually any real rain event
+RAINEVENT_MAX_LOOKBACK = 30 * RAINEVENT_ONE_DAY       # hard cap so a pathological case can't scan forever
+
+
+def _rainevent_mm(rec, obs_type='rain'):
+    """
+    A single archive record's precipitation field, converted to
+    millimetres. obs_type defaults to 'rain' (the standard tipping-bucket
+    gauge) but is parametrised so the same logic covers a piezo rain
+    gauge too, wherever this codebase's schema stores it (see
+    calc_rain_event's own docstring). Returns 0.0 for missing/None values
+    rather than raising, since a rain gauge legitimately reports nothing
+    during a dry interval -- that's data, not an error, and this
+    function's job is purely unit conversion.
+    """
+    raw = rec.get(obs_type)
+    if raw is None:
+        return 0.0
+    unit, group = weewx.units.getStandardUnitType(rec['usUnits'], obs_type)
+    value = weewx.units.convert((raw, unit, group), 'mm')[0]
+    return value if value is not None else 0.0
+
+
+def _rainevent_scan(records, obs_type='rain'):
+    """
+    Walks archive records (oldest first) applying the continuous-
+    accumulation / dry-reset logic described above. Returns a dict with
+    event_mm (float), start_ts (int or None), end_ts (int or None) -- only
+    one of start_ts/end_ts is ever populated, mirroring how the original
+    stormRain-based code reported "currently raining" vs "most recently
+    closed event" as mutually exclusive states.
+    """
+    event_mm = 0.0
+    event_start_ts = None
+    last_rain_ts = None
+
+    # Sliding trailing-window sums, maintained with deques so dropping the
+    # oldest entry as the window slides forward is O(1), not O(n) the way
+    # popping from the front of a plain list would be -- matters here
+    # since this can run over a week or more of 5-minute records.
+    window_1h = collections.deque()   # each entry: (dateTime, rain_mm)
+    window_24h = collections.deque()
+    sum_1h = 0.0
+    sum_24h = 0.0
+
+    for rec in records:
+        dt = rec['dateTime']
+        rain_mm = _rainevent_mm(rec, obs_type)
+
+        window_1h.append((dt, rain_mm))
+        sum_1h += rain_mm
+        # Strict "<", not "<=": evict only once an entry is MORE than an
+        # hour old. Using <= evicts an entry the instant it turns exactly
+        # 3600s old, which -- for perfectly evenly-spaced archive records
+        # (5-minute intervals are typical) -- means the window's span can
+        # never actually reach a full 3600s at all; it gets capped one
+        # interval short (3300s for 5-minute records) forever, so the
+        # "has this window really observed a full hour" check below could
+        # never pass. A real bug caught by testing against realistic
+        # evenly-spaced data, not synthetic gaps of convenient sizes.
+        while window_1h and window_1h[0][0] < dt - RAINEVENT_ONE_HOUR:
+            sum_1h -= window_1h.popleft()[1]
+
+        window_24h.append((dt, rain_mm))
+        sum_24h += rain_mm
+        while window_24h and window_24h[0][0] < dt - RAINEVENT_ONE_DAY:
+            sum_24h -= window_24h.popleft()[1]
+
+        if rain_mm > 0:
+            if event_start_ts is None:
+                event_start_ts = dt
+            event_mm += rain_mm
+            last_rain_ts = dt
+        else:
+            # Only ever evaluate the reset condition on a tick where it is
+            # NOT currently raining -- a trailing-window *sum* alone can't
+            # tell "it just started raining a few minutes ago" apart from
+            # "it's been dry with one stray trace reading a few minutes
+            # ago"; gating on "this tick itself is dry" is what actually
+            # captures "no further rainfall" from the specification.
+            #
+            # That alone isn't quite enough, though: a single dry/missing
+            # tick immediately after a modest rain burst also has a low
+            # trailing-hour SUM simply because barely any time has passed,
+            # not because it's genuinely been dry for an hour -- the same
+            # underlying ambiguity, just one tick removed. So the window
+            # also has to have actually SPANNED the full hour (or day) it
+            # claims to summarise before its sum is trusted; a window
+            # still shorter than that hasn't observed enough real time
+            # yet to rule out "still within the same burst".
+            hour_is_dry = (dt - window_1h[0][0] >= RAINEVENT_ONE_HOUR) and (sum_1h < RAINEVENT_MM_THRESHOLD)
+            day_is_dry = (dt - window_24h[0][0] >= RAINEVENT_ONE_DAY) and (sum_24h < RAINEVENT_MM_THRESHOLD)  # subset of hour_is_dry; see module docstring
+            if hour_is_dry or day_is_dry:
+                event_mm = 0.0
+                event_start_ts = None
+
+    return {
+        'event_mm': event_mm,
+        'start_ts': event_start_ts,
+        'end_ts': (last_rain_ts if event_start_ts is None else None),
+    }
+
+
+def calc_rain_event(manager, now_ts, obs_type='rain', lookback_seconds=RAINEVENT_DEFAULT_LOOKBACK,
+                     max_lookback_seconds=RAINEVENT_MAX_LOOKBACK):
+    """
+    Entry point called from archive.json.tmpl, only when a cheap trailing-
+    window check has already established that a rain event is currently
+    active (see the template for that fast path) -- this is the more
+    expensive call that pins down exactly when it started.
+
+    manager: a weewx.manager.Manager (or subclass) for the binding that
+        holds the archive column named by obs_type -- pass $db_lookup()
+        from the template.
+    now_ts: unix timestamp to treat as "now" -- pass $current.dateTime.raw
+        from the template, matching every other "current" calculation in
+        archive.json.tmpl, which is anchored to the latest archive
+        record's own time rather than literal wall-clock time.
+    obs_type: which archive column to read the precipitation depth from.
+        Defaults to 'rain' (the standard tipping-bucket gauge). Pass
+        'hail' for the piezo rain gauge's event total -- this codebase's
+        schema stores piezo rain readings in the 'hail' column (see the
+        "p_rain" block in archive.json.tmpl, and its own comment on why),
+        not the native erain_piezo field, which -- like stormRain/
+        eventRain for the main gauge -- is a hardware/firmware-defined
+        counter this function replaces rather than reads.
+
+    Returns (event_mm, start_ts, end_ts) -- see _rainevent_scan()'s
+    docstring for what each means. If the scan reaches the very start of
+    its lookback window still mid-event, the window is doubled and
+    retried (up to max_lookback_seconds) rather than silently
+    under-reporting a longer event's true start.
+    """
+    lookback = lookback_seconds
+    while True:
+        records = list(manager.genBatchRecords(now_ts - lookback, now_ts))
+        result = _rainevent_scan(records, obs_type)
+        truncated = (
+            result['start_ts'] is not None
+            and records
+            and result['start_ts'] <= records[0]['dateTime']
+        )
+        if truncated and lookback < max_lookback_seconds:
+            lookback = min(lookback * 2, max_lookback_seconds)
+            continue
+        return result['event_mm'], result['start_ts'], result['end_ts']
