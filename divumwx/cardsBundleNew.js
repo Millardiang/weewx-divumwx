@@ -4161,6 +4161,11 @@ try {
     return new Date(Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second));
   }
   function pad2(n){ return n < 10 ? '0' + n : String(n); }
+  function timeLabelFor(epochMs){
+    if (!epochMs) return null;
+    var p = stationParts(new Date(epochMs));
+    return p.hour + ':' + p.minute;
+  }
   // Fixed water colour — same blue as the raindrop icons, used for the
   // tube fill regardless of rain amount (no longer a range-based colour).
   var WATER_COLOR = '#007fff';
@@ -4538,9 +4543,15 @@ try {
     last24hText.textContent = rainLabel(v.last24h);
     rateText.textContent = rainLabel(v.rate) + '/hr';
     yearText.textContent = rainLabel(v.year);
-    eventText.textContent = v.event > 0
-      ? rainLabel(v.event) + (v.stormStart ? ' (since ' + v.stormStart + ')' : '')
-      : '\u2014';
+    var stormLabel = timeLabelFor(v.stormStart);
+    if (v.event > 0) {
+      eventText.parentElement.style.display = '';
+      rateText.parentElement.style.borderBottom = '1px solid var(--bs-border-color)';
+      eventText.textContent = rainLabel(v.event) + (stormLabel ? ' (since ' + stormLabel + ')' : '');
+    } else {
+      eventText.parentElement.style.display = 'none';
+      rateText.parentElement.style.borderBottom = 'none';
+    }
   }
 
   var lastData = null;
@@ -4556,7 +4567,17 @@ try {
       var loop = loopResult.status === 'fulfilled' ? loopResult.value : {};
       var arch = archResult.status === 'fulfilled' ? archResult.value : {};
       var o = loop.observations || {};
-      var pRain = arch.p_rain || {};
+      // Sensor-selection logic: a station with BOTH a tipping-bucket and a
+      // piezo rain gauge maps the piezo gauge onto archive.json's "p_rain"
+      // block (see archive_json.tmpl's own comment on why "hail" is where
+      // piezo readings live). A station with ONLY a piezo gauge and no
+      // tipping bucket has nothing to put in a second slot for, so its
+      // piezo readings are simply the station's one and only "rain" block
+      // instead -- "p_rain" is entirely absent from the JSON in that case
+      // (archive.json.tmpl omits the whole key, not even a null), which is
+      // exactly the signal used here: prefer p_rain when it's actually
+      // present (both gauges), otherwise fall back to rain (piezo-only).
+      var pRain = (arch.p_rain && typeof arch.p_rain === 'object') ? arch.p_rain : (arch.rain || {});
       function num(x, fallback){ return (typeof x === 'number' && !isNaN(x)) ? x : (fallback || 0); }
 
       lastData = {
@@ -4569,7 +4590,7 @@ try {
         year: num(pRain.year, 0),
         rate: num(pRain.rate, 0),
         event: num(pRain.event, 0),
-        stormStart: pRain.storm_start || '',
+        stormStart: typeof pRain.storm_start === 'number' ? pRain.storm_start : 0,
         rainColor: o.rainColor || 'var(--bw-accent)',
         rateColor: o.rainRateColor || 'var(--bw-accent)'
       };
@@ -4961,9 +4982,14 @@ try {
     rateText.textContent = rainLabel(v.rate) + '/hr';
     yearText.textContent = rainLabel(v.year);
     var stormLabel = timeLabelFor(v.stormStart);
-    eventText.textContent = v.event > 0
-      ? rainLabel(v.event) + (stormLabel ? ' (since ' + stormLabel + ')' : '')
-      : '\u2014';
+    if (v.event > 0) {
+      eventText.parentElement.style.display = '';
+      rateText.parentElement.style.borderBottom = '1px solid var(--bs-border-color)';
+      eventText.textContent = rainLabel(v.event) + (stormLabel ? ' (since ' + stormLabel + ')' : '');
+    } else {
+      eventText.parentElement.style.display = 'none';
+      rateText.parentElement.style.borderBottom = 'none';
+    }
   }
 
   var lastData = null;
@@ -5710,9 +5736,14 @@ try {
     rateText.textContent = rainLabel(v.rate) + '/hr';
     yearText.textContent = rainLabel(v.year);
     var stormLabel = timeLabelFor(v.stormStart);
-    eventText.textContent = v.event > 0
-      ? rainLabel(v.event) + (stormLabel ? ' (since ' + stormLabel + ')' : '')
-      : '\u2014';
+    if (v.event > 0) {
+      eventText.parentElement.style.display = '';
+      rateText.parentElement.style.borderBottom = '1px solid var(--bs-border-color)';
+      eventText.textContent = rainLabel(v.event) + (stormLabel ? ' (since ' + stormLabel + ')' : '');
+    } else {
+      eventText.parentElement.style.display = 'none';
+      rateText.parentElement.style.borderBottom = 'none';
+    }
   }
 
   var lastData = null;
