@@ -269,6 +269,7 @@ function translateNavbar() {
     attrs.forEach(function(attr){ DivumWXI18N.applyAttr(el, attr.trim(), key); });
   });
 }
+
 // Registered at file load time, unconditionally -- works even if
 // DivumWXI18N's own script tag hasn't finished loading yet when this
 // line runs (addEventListener just registers interest in a future
