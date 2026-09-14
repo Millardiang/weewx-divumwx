@@ -23,6 +23,22 @@ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LIC
 * Kiosk mode, 3 x 3 grid for displaying on tablet sized screens.
 * Instant language selection for homepage dashboard from drop down menu
 * Introducing DivumWF Forecast - install on your mobile phone desktop as a take-anywhere forecasting app.
+* Rain event: -
+
+        Definition
+        A rain event is calculated using a continuous accumulation logic:
+        Start: The event counter begins tracking rainfall as soon as precipitation is detected.
+        Continuation: It keeps accumulating the total as long as the rain continues.
+        Reset / End Condition: The rain event value resets to zero (signaling that the event has ended) when accumulated rainfall drops below 1 mm (0.039 in) and the preceding 1-hour window registers no further rainfall (or when the last 24-hour rainfall total remains under 1 mm with a dry final hour).
+
+        If a new storm or shower starts after that threshold is met, a new "rain event" begins tracking from zero.
+
+        Sensor types
+        When tipping rain only selected at install, rain values used
+        When piezo rain install selected on install, rain values used
+        When both tipping and piezo selected on install, p_rain values used for piezo rain sensor
+
+        Rain Event field only appears in either of the rain cards when value is not null and >0
 
 # Languages supported
 * Arabic
