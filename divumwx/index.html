@@ -11,10 +11,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DivumWX Weather</title>
-<link rel="stylesheet" href="header.css?v=s3n2026j">
+<link rel="stylesheet" href="header.css?v=s3n2026k">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&family=Lexend:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root {
   --light-body: #EFECE2;     --dark-body: #0A0F22;      --light-bg: #EFECE2;
@@ -369,36 +369,6 @@ body.dark .chart-modal-iframe {
 .card-not-enabled {
   display: none !important;
 }
-
-/* Placed last in this stylesheet deliberately, not just after .wrapper
-   -- a media query does NOT add any extra CSS specificity, so a later
-   plain .card{width:...} rule (the base rule, further up this file)
-   would win the cascade over an earlier media-query rule of equal
-   specificity regardless of which viewport actually matched. That's
-   exactly what happened the first time this was added right after
-   .wrapper: the .wrapper override worked (nothing later redefines
-   .wrapper), but the .card override silently lost to the later base
-   .card rule on every viewport width, media query or not. Keeping this
-   block last guarantees it can never lose to a rule added earlier in
-   the file again, without needing to track down every place .card's
-   width might get set.
-   Below 660px, .wrapper's own auto-fit grid has already dropped to a
-   single column on its own (two 315px cards + the 4px gap need 634px,
-   which doesn't fit) -- but each card was still rendered at the fixed
-   --card-width (315px) rather than stretching to fill the newly-spare
-   width, leaving empty space on both sides on a phone instead of using
-   the screen. */
-@media (max-width: 660px) {
-  .wrapper {
-    grid-template-columns: 1fr;
-    max-width: 100%;
-    padding: 0 10px;
-    box-sizing: border-box;
-  }
-  .card {
-    width: 100%;
-  }
-}
 </style>
 </head>
 <body class="dark">
@@ -407,8 +377,37 @@ body.dark .chart-modal-iframe {
 const STATION_LAT = 51.94;
 const STATION_LON = -0.987;
 const THEME_KEY = 'dashboardThemeMode';
-const THEME_ICONS = { auto: '\u{1F313}', light: '\u2600\uFE0F', dark: '\u{1F319}' };
-const THEME_ORDER = ['dark', 'light', 'auto'];
+// lexend/hyperlegible are accessibility typeface themes, added as two
+// extra positions in the same cycle rather than a separate page each --
+// see applyDashboardTheme()'s own comment for how "dark versions only"
+// is implemented (always resolves to the dark colour scheme, with the
+// typeface swapped on top via a body class). "Lx"/"AH" rather than an
+// emoji for these two specifically: this is the one button most likely
+// to matter to someone who'd notice a missing-glyph tofu box, so it
+// uses plain text guaranteed to render in any font, instead of relying
+// on a colour-emoji font being installed the way dark/light/auto's
+// icons already do.
+const THEME_ICONS = { auto: '\u{1F313}', light: '\u2600\uFE0F', dark: '\u{1F319}', lexend: 'Lx', hyperlegible: 'AH' };
+// Spyglass/magnifying-glass icon with the typeface's short label inside
+// the lens, used for the two accessibility theme positions instead of
+// bare text. Bare text alone surfaced a real, previously-invisible bug:
+// #themeToggle never had its own `color` set, relying entirely on
+// emoji rendering in full colour regardless of the CSS `color`
+// property -- harmless for dark/light/auto's emoji, but plain "Lx"/"AH"
+// text fell back to the browser's default button text colour (normally
+// black), unreadable against the dark background these two modes
+// always use. Fixed at the source too (color:inherit added to
+// #themeToggle in header.css), but the spyglass reads better than bare
+// text either way and was suggested directly. currentColor throughout
+// so it always matches whatever that fix resolves to, in any theme.
+function themeAccessibilityIcon(label) {
+  return `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="10" cy="10" r="7"/>
+    <line x1="15" y1="15" x2="21" y2="21"/>
+    <text x="10" y="12.5" text-anchor="middle" font-size="6" font-weight="700" letter-spacing="-0.4" fill="currentColor" stroke="none" font-family="system-ui, sans-serif">${label}</text>
+  </svg>`;
+}
+const THEME_ORDER = ['dark', 'light', 'auto', 'lexend', 'hyperlegible'];
 
 const SEASON_ICONS = { winter: '\u2744\uFE0F', spring: '\u{1F338}', summer: '\u{1F33B}', autumn: '\u{1F342}' };
 const SEASON_CLASSES = ['season-winter', 'season-spring', 'season-summer', 'season-autumn'];
@@ -476,6 +475,7 @@ function getThemeMode() {
 
 function effectiveTheme(mode) {
   if (mode === 'light' || mode === 'dark') return mode;
+  if (mode === 'lexend' || mode === 'hyperlegible') return 'dark'; // "dark versions only"
   if (mode === 'seasonal') return 'light';
   if (lastIsDay != null) return lastIsDay ? 'light' : 'dark';
   const now = new Date();
@@ -502,6 +502,16 @@ function applyDashboardTheme() {
   // exercises that same null path today.
   const currentSeason = null;
 
+  // Accessibility typeface themes -- always clear BOTH classes first
+  // (not just the one that might apply) so switching away from lexend
+  // or hyperlegible back to dark/light/auto never leaves a stale font
+  // override behind. The actual font-family rules live in header.css,
+  // gated on these same two class names, so any other page that later
+  // adopts this same theme-mode convention gets the font swap for free.
+  document.body.classList.remove('font-lexend', 'font-hyperlegible');
+  if (mode === 'lexend') document.body.classList.add('font-lexend');
+  if (mode === 'hyperlegible') document.body.classList.add('font-hyperlegible');
+
   if (resolved !== lastAppliedTheme) {
     lastAppliedTheme = resolved;
     window.dispatchEvent(new CustomEvent('themechange', { detail: { theme: resolved, season: currentSeason } }));
@@ -511,8 +521,14 @@ function applyDashboardTheme() {
   if (mode === 'seasonal') {
     btn.textContent = SEASON_ICONS[currentSeason];
     btn.title = 'Seasonal (' + seasonLabel(currentSeason) + ')';
+    btn.style.fontSize = '';
+  } else if (mode === 'lexend' || mode === 'hyperlegible') {
+    btn.innerHTML = themeAccessibilityIcon(THEME_ICONS[mode]);
+    btn.style.fontSize = '';
+    btn.title = (mode === 'lexend' ? 'Lexend' : 'Atkinson Hyperlegible') + ' (accessible, dark)';
   } else {
     btn.textContent = THEME_ICONS[mode];
+    btn.style.fontSize = '';
     btn.title = mode === 'auto' ? ('Auto (currently ' + resolved + ')') : mode.charAt(0).toUpperCase() + mode.slice(1);
   }
 }
@@ -568,6 +584,7 @@ setInterval(() => {
   <div id="rainCard8" data-card-id="cardPiezoRain" class="card" draggable="true"></div>
   <div id="tippingRainCard9" data-card-id="cardTippingRain" class="card" draggable="true"></div>
   <div id="solarCard10" data-card-id="cardSolarRadiation" class="card" draggable="true"></div>
+  <div id="solarEnergyCard26" data-card-id="cardSolarEnergy" class="card" draggable="true"></div>
   <div id="uvCard11" data-card-id="cardUvIndex" class="card" draggable="true"></div>
   <div id="humidityCard12" data-card-id="cardHumidity" class="card" draggable="true"></div>
   <div id="earthCard13" data-card-id="cardEarthDaylight" class="card" draggable="true"></div>
@@ -582,7 +599,9 @@ setInterval(() => {
   <div id="etCard22" data-card-id="cardEvapoTranspiration" class="card" draggable="true"></div>
   <div id="earthquakeCard23" data-card-id="cardEarthquake" class="card" draggable="true"></div>
   <div id="webcamCard24" data-card-id="cardWebcam" class="card" draggable="true"></div>
-  <div id="stationImageCard25" data-card-id="cardStationImage" class="card fixed" draggable="false"></div>
+  <!--div id="stationImageCard25" data-card-id="cardStationImage" class="card fixed" draggable="false"></div-->
+  <!--div id="solarEnergyCard26" data-card-id="cardSolarEnergy" class="card" draggable="true"></div-->
+ 
 
   <footer>
     <div class="footer-left">
@@ -590,7 +609,7 @@ setInterval(() => {
     </div>
     <div class="footer-center">
       <div class="footer-credit">Charts, Heatmaps, Gauges and Card Images rendered using D3</div>
-      <div class="footer-version mono">DivumWX-H-Beta-2 &middot; WeeWX ver <span id="footerWeewxVer">x.x.x</span>, Python ver <span id="footerPyVer">y.y.y</span>, OS version <span id="footerOsVer">z.z.z</span></div>
+      <div class="footer-version mono">DivumWX-H-0.0.1 &middot; WeeWX ver <span id="footerWeewxVer">x.x.x</span>, Python ver <span id="footerPyVer">y.y.y</span>, OS version <span id="footerOsVer">z.z.z</span></div>
     </div>
     <div class="footer-right">
       <a href="http://weewx.com" title="WeeWX Weather Software" target="_blank" rel="noopener" class="footer-weewx-link">
