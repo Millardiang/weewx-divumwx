@@ -1,4 +1,4 @@
-# Welcome to the DivumWX skin for WeeWX Beta 1
+# Welcome to the DivumWX skin for WeeWX Beta 2
 Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LICENSE Version 3](https://github.com/Millardiang/weewx-divumwx/blob/dev/license.txt)
  
 # Features
@@ -22,6 +22,7 @@ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LIC
 * Automatic timelapse video generation from webcam images.
 * Kiosk mode, 3 x 3 grid for displaying on tablet sized screens.
 * Instant language selection for homepage dashboard from drop down menu
+* Introducing DivumWF Forecast - install on your mobile phone desktop as a take-anywhere forecasting app.
 
 # Languages supported
 * Arabic
@@ -72,7 +73,7 @@ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LIC
 * The late David Marshall, my very first collaborator, for his ingenious method of estimating cloud cover by counting pixels on radar images.
 * Mike Isacson for providing test server resources and being brave enough to test early developments.
 * Vince Skahan constantly giving me food for thought.
-* Early adopters, in particular Kjell, Gert, Jon, Gary, Alex for helping me squash some bugs and many helpful suggestions.
+* Early adopters, in particular Kjell, Gert, Jon, Gary, Alex and many others for helping me squash some bugs and many helpful suggestions.
 * Open-Meteo for weather forecasts, pollen data, greenhouse gas data.
 * OpenWeather for global weather alerts.
 * Aviation Weather for METAR data.
