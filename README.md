@@ -65,7 +65,11 @@ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LIC
 
 <img width="1462" height="1047" alt="Screenshot 2026-08-28 at 23 25 27" src="https://github.com/user-attachments/assets/4d917240-2b00-4e0e-9fad-8a7008f80d39" />
 
+# DivumWF - Forecasts and Current Conditions Anywhere
 
+<img width="590" height="1278" alt="Screenshot 2026-09-14 at 10 01 46" src="https://github.com/user-attachments/assets/c2d73daf-f8b5-4bd3-995e-80fd1cb14117" />
+
+* Save ..../divumwf.html to your mobile phone desktop as an app.
 
 # Credits
 * Tom Keffer, Matthew Wall and colleagues for their unstinting development, support and maintainence of WeeWX.
