@@ -347,6 +347,7 @@ body.dark #languageSystem option, [data-bs-theme="dark"] #languageSystem option 
 
 #themeToggle {
   font-size: 22px;
+  color: var(--bs-body-color);
   background: none;
   border: none;
   cursor: pointer;
@@ -389,4 +390,26 @@ body.menu-open .menu {
 .menu-inner {
   padding: 16px 20px;
   box-sizing: border-box;
+}
+
+/* ---------------------------------------------------------------------
+   Accessibility typeface themes -- "Lexend" and "Atkinson Hyperlegible"
+   as two extra positions in the same dark/light/auto theme cycle
+   (dark colour scheme only; see index.html's applyDashboardTheme() for
+   how the "dark versions only" resolution works), rather than a
+   separate page each. Gated on a plain body class here rather than
+   applied unconditionally, so any page that adopts the same
+   dashboardThemeMode convention gets the font swap just by including
+   this file -- nothing page-specific about the rule itself.
+   !important is needed for the same reason it always is on this
+   project's font overrides: some cards set their own font-family as an
+   inline style (cardsBundleNew.js), which normal stylesheet specificity
+   can never beat regardless of selector. Font WEIGHT is deliberately
+   left alone -- only the typeface changes, whatever weight was already
+   set at any given spot stays exactly as it was. */
+body.font-lexend, body.font-lexend * {
+  font-family: 'Lexend', system-ui, sans-serif !important;
+}
+body.font-hyperlegible, body.font-hyperlegible * {
+  font-family: 'Atkinson Hyperlegible', system-ui, sans-serif !important;
 }
