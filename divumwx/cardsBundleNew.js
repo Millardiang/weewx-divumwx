@@ -873,6 +873,17 @@ try {
   }
   refreshOutlook();
   setInterval(refreshOutlook, 5 * 60 * 1000);
+  // This card renders once on load, in English, since strings.json is
+  // still fetching asynchronously at that point -- computeOutlookHtml()
+  // is only ever re-run on the next 5-minute poll otherwise, so without
+  // this listener a translation that finishes loading a moment after
+  // first render stays stuck in English for up to 5 minutes. Same
+  // "if (cached data) re-render" pattern already used by every other
+  // card in this bundle (see e.g. cardTemperature.js) -- re-renders
+  // from the already-fetched forecast JSON in place, no extra fetch.
+  window.addEventListener('i18nready', function(){
+    if (lastForecastJson) renderOutlook(lastForecastJson);
+  });
 })();
 } catch (e) {
   console.error("cardsBundle: cardClockOutlook.js failed:", e);
@@ -2449,6 +2460,14 @@ try {
       ? (celsius * 9 / 5 + 32).toFixed(1) + '\u00B0F'
       : celsius.toFixed(1) + '\u00B0C';
   }
+  // Numeric value only, no unit suffix -- used for the max/high side of
+  // the "high-low" pairing so the unit is only printed once, at the end
+  // (see renderCard()), rather than repeated on both numbers.
+  function tempValueOnly(celsius){
+    return currentUnits.temp === 'F'
+      ? (celsius * 9 / 5 + 32).toFixed(1)
+      : celsius.toFixed(1);
+  }
   function toMM(v, sourceUnit){
     return String(sourceUnit || '').toLowerCase().indexOf('in') !== -1 ? v * 25.4 : v;
   }
@@ -2587,13 +2606,19 @@ try {
   cardLink.style.display = 'block';
   mount.appendChild(cardLink);
 
-  function getIconHtml(code, period, map){
-    var isNight = period === 'Night';
+  function getIconHtml(code, map){
+    // Always the "day" icon variant now -- each segment is a whole
+    // calendar day's summary (see buildSegments()), not a day/night
+    // half, so a sun-bearing icon is the correct representative image
+    // the same way most weather apps show a daily-forecast tile.
     var entry = map && map[code];
     if (!entry) return '<span style="font-size:20px">\u2753</span>';
-    var iconName = isNight ? entry.night : entry.day;
+    var iconName = entry.day;
     var emoji = entry.emoji || '\u2753';
-    var label = entry.label || DivumWXI18N.t('Unknown');
+    // See weatherText()'s own comment: entry.label is always plain
+    // English from the static icon-mapping file, reusing the same WMO
+    // condition-description keys already translated elsewhere.
+    var label = DivumWXI18N.t(entry.label || 'Unknown');
     if (iconName) {
       return '<img src="' + ICON_BASE + iconName + '.svg" alt="' + label + '" title="' + label +
         '" width="34" height="34" style="width:34px;height:34px;display:block;margin:2px 0;">';
@@ -2601,7 +2626,15 @@ try {
     return '<span title="' + label + '" style="font-size:20px">' + emoji + '</span>';
   }
   function weatherText(code, map){
-    return (map && map[code] && map[code].label) || DivumWXI18N.t('Unknown');
+    var label = map && map[code] && map[code].label;
+    // meteocons_wmo_map.json's own "label" field is always plain English
+    // (it's a static, hand-authored icon-mapping file, not something
+    // DivumWXI18N ever touches on its own) -- these are the same WMO
+    // condition-description phrases ("Clear sky", "Partly cloudy",
+    // "Overcast", etc.) already translated elsewhere in this project
+    // (see wmoText() in divumwf.js), so this reuses those existing keys
+    // rather than needing any new lang-file entries.
+    return DivumWXI18N.t(label || 'Unknown');
   }
 
   function safeSlice(arr, offset, length, fallback){
@@ -2632,63 +2665,56 @@ try {
     var rainUnit = hu.precipitation;
     var windUnit = hu.windspeed_10m || hu.wind_speed_10m;
 
-    function makeSegment(offset, period, codeIdx){
-      var temps = safeSlice(h.temperature_2m, offset, 12, 0).map(function(v){ return toCelsius(v, tempUnit); });
-      var rains = safeSlice(h.precipitation, offset, 12, 0).map(function(v){ return toMM(v, rainUnit); });
-      var probs = safeSlice(h.precipitation_probability, offset, 12, 0);
-      var winds = safeSlice(h.windspeed_10m || h.wind_speed_10m, offset, 12, 0).map(function(v){ return toMS(v, windUnit); });
-      var dirs  = safeSlice(h.winddirection_10m || h.wind_direction_10m, offset, 12, 0);
-      var hum   = safeSlice(h.relative_humidity_2m, offset, 12, 50);
-      var uv    = safeSlice(h.uv_index, offset, 12, 0);
+    // One segment per WHOLE calendar day now, not a Day/Night half each
+    // (see labelFor()'s own comment for why) -- so this pulls a full
+    // 24-hour slice per day and reports both the day's max AND min
+    // temperature together, rather than picking just one depending on
+    // whether the segment happened to be the "Day" or "Night" half.
+    function makeDaySegment(dayOffset){
+      var offset = dayOffset * 24;
+      var temps = safeSlice(h.temperature_2m, offset, 24, 0).map(function(v){ return toCelsius(v, tempUnit); });
+      var rains = safeSlice(h.precipitation, offset, 24, 0).map(function(v){ return toMM(v, rainUnit); });
+      var probs = safeSlice(h.precipitation_probability, offset, 24, 0);
+      var winds = safeSlice(h.windspeed_10m || h.wind_speed_10m, offset, 24, 0).map(function(v){ return toMS(v, windUnit); });
+      var dirs  = safeSlice(h.winddirection_10m || h.wind_direction_10m, offset, 24, 0);
+      var uv    = safeSlice(h.uv_index, offset, 24, 0);
+      // Midday (hour 12 of this day) is the representative moment for
+      // the day's icon/condition text and wind direction -- reads more
+      // naturally as "today's weather" than an arbitrary hour, and
+      // matches how the icon variant is now always the "day" one.
+      var midIdx = Math.min(offset + 12, count - 1);
 
       return {
-        date: String(hours[offset >= count ? count - 1 : offset]).slice(0, 10),
-        period: period,
+        date: String(hours[Math.min(offset, count - 1)]).slice(0, 10),
         tmaxC: maxOf(temps), tminC: minOf(temps),
         rainMM: sumOf(rains),
         rainProb: maxOf(probs),
         windMS: maxOf(winds),
-        windDir: deg2compass(dirs[5] || 0),
-        humidity: Math.round(sumOf(hum) / Math.max(hum.length, 1)),
+        windDir: deg2compass(dirs[Math.min(12, dirs.length - 1)] || 0),
         uv: Math.round((maxOf(uv) || 0) * 10) / 10,
-        code: pickAt(h, ['weathercode', 'weather_code'], codeIdx, 0)
+        code: pickAt(h, ['weathercode', 'weather_code'], midIdx, 0)
       };
     }
 
-    for (var i = 0; i < count; i += 24){
-      segments.push(makeSegment(i + 6, 'Day', i + 12));
-      segments.push(makeSegment(i + 18, 'Night', i + 18));
+    for (var i = 0; i * 24 < count; i++){
+      segments.push(makeDaySegment(i));
     }
     return segments;
   }
 
-  function pickStartIndex(segments){
-    var now = stationNow();
-    var todayStr = fmtDate(now);
-    var hr = now.getUTCHours();
-    for (var i = 0; i < segments.length; i++){
-      var s = segments[i];
-      if (s.date === todayStr && s.period === 'Day' && hr >= 6 && hr < 18) return i;
-      if (s.date === todayStr && s.period === 'Night' && (hr < 6 || hr >= 18)) return i;
-    }
-    return 0;
-  }
-
   function labelFor(s, todayStr, tomorrowStr){
-    if (s.period === 'Day') {
-      if (s.date === todayStr) return DivumWXI18N.t('Today');
-      if (s.date === tomorrowStr) return DivumWXI18N.t('Tomorrow');
-      return weekdayAbbrev(s.date);
-    }
-    if (s.date === todayStr) return DivumWXI18N.t('Tonight');
-    if (s.date === tomorrowStr) return DivumWXI18N.t('Tomorrow Night');
-    return weekdayAbbrev(s.date) + ' ' + DivumWXI18N.t('Night');
+    // Today / Tomorrow / the following day's name -- three whole
+    // calendar days now, replacing the previous Today/Tonight/Tomorrow
+    // Day-Night alternation (which mixed a half-day view in with two
+    // full-day ones and never showed a day name at all).
+    if (s.date === todayStr) return DivumWXI18N.t('Today');
+    if (s.date === tomorrowStr) return DivumWXI18N.t('Tomorrow');
+    return weekdayAbbrev(s.date);
   }
 
   function renderCard(data, map){
     var segments = buildSegments(data);
-    var startIdx = pickStartIndex(segments);
-    var view = segments.slice(startIdx, startIdx + 3);
+    var view = segments.slice(0, 3);
 
     var now = stationNow();
     var todayStr = fmtDate(now);
@@ -2725,10 +2751,19 @@ try {
     for (var i = 0; i < view.length; i++){
       var s = view[i];
       var lbl = labelFor(s, todayStr, tomorrowStr);
-      var isDay = s.period === 'Day';
-      var tempText = tempLabel(isDay ? s.tmaxC : s.tminC);
-      var extra = isDay ? ('UV-I ' + s.uv) : (s.humidity + '% ' + DivumWXI18N.t('hum'));
-      var icon = getIconHtml(s.code, s.period, map);
+      // Both the day's high AND low now, rather than picking one or the
+      // other depending on a Day/Night half that no longer exists.
+      // Non-breaking spaces either side of the dash (not plain spaces) --
+      // a plain space is a valid line-wrap point, and this sits in a
+      // narrow column where "23.0\u00B0C" wrapping away from "- 7.0\u00B0C"
+      // onto its own line was a real, visible problem.
+      // Unit shown once, at the end, not on both numbers -- and no
+      // spaces at all around the dash (not even non-breaking ones) for
+      // the tightest possible width, since this whole pairing sits in a
+      // narrow column where every character of margin matters.
+      var tempText = tempValueOnly(s.tmaxC) + '-' + tempLabel(s.tminC);
+      var extra = 'UV-I ' + s.uv;
+      var icon = getIconHtml(s.code, map);
       var text = weatherText(s.code, map);
 
       if (i > 0) html += DIVIDER;
