@@ -8289,15 +8289,15 @@ try {
     { s: [12,21], e: [12,22], t: 'Ursids peak' },
     { s: [12,23], e: [12,25], t: 'Ursids active' }
   ];
-  function currentMeteorShower(now){
+  function currentMeteorShowerKey(now){
     var m = now.getUTCMonth() + 1, d = now.getUTCDate();
     var todayNum = m * 100 + d;
     for (var i = 0; i < METEOR_EVENTS.length; i++){
       var ev = METEOR_EVENTS[i];
       var startNum = ev.s[0] * 100 + ev.s[1], endNum = ev.e[0] * 100 + ev.e[1];
-      if (todayNum >= startNum && todayNum <= endNum) return DivumWXI18N.t(ev.t);
+      if (todayNum >= startNum && todayNum <= endNum) return ev.t;
     }
-    return DivumWXI18N.t('No Meteor Showers');
+    return 'No Meteor Showers';
   }
 
   var MOON_TEXTURE_MARKUP =
@@ -8639,10 +8639,29 @@ try {
     tiltGroup.append('path').attr('d', moonPathD).style('fill', 'rgba(41,46,53,0.80)').style('pointer-events', 'none');
 
     // Hero value — phase name, below the disc, same accent colour + mono
-    // font as Current Conditions.
-    svg.append('text').attr('x', cx).attr('y', cy + R + 20).style('text-anchor', 'middle')
-      .style('font-family', '"IBM Plex Mono", ui-monospace, monospace').style('font-size', '13px').style('fill', 'var(--bw-accent)')
-      .text(v.phaseName);
+    // font as Current Conditions. Was a plain SVG <text> element, which
+    // has no word-wrap of its own at all -- any translation longer than
+    // the panel's width (Spanish's "Luna creciente (creciente inicial)"
+    // being the case that surfaced this) just overflowed and got clipped
+    // by the panel's own overflow:hidden, cutting off both ends. A
+    // foreignObject wrapping a normal HTML <div> gets real, native,
+    // whole-word wrapping from the browser's own text engine instead of
+    // hand-rolled line-breaking logic. The gap before the hero text was
+    // trimmed from 20 to 10 (disc radius R unchanged) to free up enough
+    // of the panel's fixed 175px height for a second line without
+    // changing that overall height, which other parts of this card's
+    // layout depend on staying fixed; font-size dropped from 13 to 11
+    // for the same reason. Two lines at 11px fit inside the resulting
+    // 33px budget with a few px to spare (checked numerically, then
+    // confirmed by actually rendering the Spanish string that surfaced
+    // this in the first place).
+    svg.append('foreignObject')
+      .attr('x', cx - 88).attr('y', cy + R + 10).attr('width', 176).attr('height', 30)
+      .append('xhtml:div')
+      .style('font-family', '"IBM Plex Mono", ui-monospace, monospace').style('font-size', '11px')
+      .style('color', 'var(--bw-accent)').style('text-align', 'center').style('line-height', '1.25')
+      .style('white-space', 'normal').style('overflow-wrap', 'normal').style('word-break', 'normal')
+      .text(DivumWXI18N.t(v.phaseName));
 
     // ---- Right pane: 7 readouts as label/value chip rows ----
     riseText.textContent = v.moonRise;
@@ -8651,7 +8670,7 @@ try {
     illumText.textContent = v.luminancePct.toFixed(2) + ' %';
     fullMoonText.textContent = v.fullMoonLabel;
     newMoonText.textContent = v.newMoonLabel;
-    meteorText.textContent = v.meteorShower;
+    meteorText.textContent = DivumWXI18N.t(v.meteorShower);
   }
 
   var lastData = null;
@@ -8667,6 +8686,20 @@ try {
         lastData = {
           moonRise: epochToHHMM(alm['almanac.moon.next_rising.unix_epoch.raw'], false),
           moonSet: epochToHHMM(alm['almanac.moon.next_setting.unix_epoch.raw'], false),
+          // Raw, untranslated key stored here -- DivumWXI18N.t() is
+          // applied at render time instead (see renderCard() below), not
+          // baked in here. Baking a resolved translation into cached
+          // data is a real bug, not just a style choice: if this object
+          // is built before strings.json finishes its async load, the
+          // English fallback gets locked into lastData permanently, and
+          // re-rendering from that same cached object on a later
+          // i18nready event reuses the same stale English string rather
+          // than re-translating it -- i18nready firing doesn't help if
+          // the thing it re-renders already has the wrong value frozen
+          // into it. almanac.moon.phase_name comes back as one of the 8
+          // standard English phase names (New Moon, Waxing Crescent,
+          // etc.), reusing the same keys already translated elsewhere
+          // in this project (see divumwf.js's own moon-phase handling).
           phaseName: alm['almanac.moon.phase_name'] || '--',
           luminancePct: num(alm['almanac.moon.phase'], 0),
           tiltDeg: num(alm['almanac.moon.parallactic_angle'], 0),
@@ -8677,7 +8710,8 @@ try {
           distanceKm: num(alm['almanac.moon.earth_distance'], 0) * 149597870.7,
           fullMoonLabel: fmtEpochDate(alm['almanac.next_full_moon.unix_epoch.raw']) || '--',
           newMoonLabel: fmtEpochDate(alm['almanac.next_new_moon.unix_epoch.raw']) || '--',
-          meteorShower: currentMeteorShower(now)
+          // Same raw-key-not-baked-translation fix as phaseName above.
+          meteorShower: currentMeteorShowerKey(now)
         };
         renderCard(lastData);
         setStatus(true);
@@ -11689,27 +11723,30 @@ try {
   // fill= attribute) back when those six files still existed; kept
   // as the same hardcoded values now that they're gone, since the
   // colours themselves were never the part that needed to change.
-  function pickPvColor(cloudCoverPct, isDay){
-    if (!isDay) return 'silver';
-    if (cloudCoverPct > 0 && cloudCoverPct < 7)   return '#ff7400';
-    if (cloudCoverPct < 32)  return '#fd8b17';
-    if (cloudCoverPct < 70)  return '#ffa242';
-    if (cloudCoverPct < 95)  return '#ffc367';
-    return '#ffeeaa';
+  // Driven by actual measured PV power output (watts, from the solar
+  // inverter feed) rather than cloud cover -- cloud cover was only ever
+  // an inferred proxy for "how favourable conditions probably are",
+  // not a readout of what's actually being generated, which could
+  // visibly disagree with real power output (e.g. a cloud passing over
+  // registers on the inverter immediately, but cloud-cover data has its
+  // own separate, slower update path). pickPvIcon() above is unrelated
+  // and still cloud/day driven -- it's a separate sky-condition icon,
+  // not this bolt colour.
+  function pickPvPowerColor(watts){
+    if (watts <= 0) return 'silver';
+    if (watts <= 1500) return '#FFD700';
+    if (watts <= 3000) return '#ffa242';
+    return '#ff7400';
   }
 
-  // How many bolts show for a given pane colour. Four buckets by how
-  // dark/saturated the orange is (roughly: how favourable the condition
-  // is for generation), collapsing the six actual pickPvColor() outputs
-  // onto four bolt counts -- partly-cloudy and mostly-cloudy share a
-  // count (both "light orange"), as do mostly-clear and clear (both
-  // "dark orange"). Night doesn't pulse; every other tier does.
+  // How many bolts show for a given pane colour -- one bucket per power
+  // tier now (was six cloud-cover-derived shades collapsed onto four
+  // counts; now it's a direct one-to-one with the four power tiers
+  // above). 0 W doesn't pulse; every generating tier does.
   var BOLT_TIERS = [
     { color: 'silver',  count: 1, pulse: false },
-    { color: '#ffeeaa', count: 2, pulse: true  },
-    { color: '#ffc367', count: 3, pulse: true  },
+    { color: '#FFD700', count: 2, pulse: true  },
     { color: '#ffa242', count: 3, pulse: true  },
-    { color: '#fd8b17', count: 4, pulse: true  },
     { color: '#ff7400', count: 4, pulse: true  }
   ];
   function boltInfoForColor(color){
@@ -12178,7 +12215,7 @@ try {
 
       renderCard({
         icon: pickPvIcon(cloudCoverPct, isDay),
-        iconColor: pickPvColor(cloudCoverPct, isDay),
+        iconColor: pickPvPowerColor(pvPower),
         pvPower: pvPower,
         pvEfficiency: pvEfficiency,
         batteryState: batteryState,
