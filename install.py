@@ -1931,6 +1931,22 @@ DIVUMWX_ROOT_SUBDIR = 'divumwx'
 
 DIVUMWX_FRONTEND_EXCLUDED_FILES = {'bootstrap.min.js'}
 
+# Files sitting directly in the extension's repo root (README.md, license.txt,
+# install.py itself, etc.) that get mirrored alongside weewx.conf -- see
+# copy_divumwx_root_files() below. This is an exclusion list, not an
+# inclusion list: every *file* directly in the repo root is copied except
+# the ones named here, so a new root file added later doesn't need an
+# entry here to be picked up. Subdirectories (bin/, divumwx/, skins/,
+# .github/) are never candidates in the first place -- the copy loop only
+# ever looks at os.path.isfile() entries -- so they don't need listing
+# here either.
+DIVUMWX_ROOT_DOCS_EXCLUDED_FILES = {
+    '.gitignore',
+    # Dev-only tooling for maintainers building the bundled cardsBundle
+    # from source -- not something an installed site needs a copy of.
+    'build_card_bundle.py',
+}
+
 
 def copy_divumwx_frontend(source_dir, dest_dir, printer):
     """
@@ -2002,6 +2018,89 @@ def set_divumwx_permissions(dest_dir, printer, mode=DIVUMWX_FRONTEND_MODE):
 
     if all_ok:
         printer.out(f"Set {oct(mode)} recursively on {dest_dir}", level=2)
+    return all_ok
+
+
+def copy_divumwx_root_files(extension_dir, dest_dir, printer):
+    """
+    Copies the extension's own repo-root files (README.md, license.txt,
+    install.py, etc. -- anything directly in extension_dir that isn't a
+    subdirectory and isn't in DIVUMWX_ROOT_DOCS_EXCLUDED_FILES) to
+    dest_dir. dest_dir is the directory weewx.conf itself lives in --
+    see the configure() call site, which derives it from
+    engine.config_path rather than WEEWX_ROOT, since the two aren't
+    always the same directory.
+
+    Existing files at the destination are overwritten (shutil.copy2,
+    same as copy_divumwx_frontend) -- re-running the installer to pick
+    up an updated README/CHANGE_LOG is expected to just work.
+    """
+    count = 0
+    try:
+        for entry in sorted(os.listdir(extension_dir)):
+            if entry in DIVUMWX_ROOT_DOCS_EXCLUDED_FILES:
+                continue
+            src_path = os.path.join(extension_dir, entry)
+            if not os.path.isfile(src_path) or os.path.islink(src_path):
+                # Skips bin/, divumwx/, skins/, .github/ (directories)
+                # and any stray symlink without needing to name them.
+                continue
+            os.makedirs(dest_dir, exist_ok=True)
+            shutil.copy2(src_path, os.path.join(dest_dir, entry))
+            count += 1
+    except PermissionError as e:
+        printer.out(
+            f"WARNING: permission denied writing to {dest_dir} ({e}). The "
+            f"extension's root files (readme, changelog, license, etc.) "
+            f"were NOT copied this run (only {count} file(s) got copied "
+            "before this happened). Copy them by hand from the extension "
+            f"package if needed, or re-run with sudo.", level=1)
+        return count
+
+    printer.out(f"Copied {count} root file(s) to {dest_dir}", level=2)
+    return count
+
+
+def set_divumwx_root_files_ownership(dest_dir, config_path, printer):
+    """
+    Chowns every file copy_divumwx_root_files() just placed in dest_dir
+    to match whoever already owns weewx.conf (config_path) -- i.e.
+    <username>:<username> for the account WeeWX actually runs as, not
+    necessarily whoever happens to be running this installer (which
+    matters when install is run via sudo). Falls back to a warning
+    rather than aborting if this process isn't permitted to chown
+    (e.g. not root and not already that user) -- the files are still
+    there and readable, just not re-owned.
+    """
+    try:
+        conf_stat = os.stat(config_path)
+    except OSError as e:
+        printer.out(f"WARNING: could not stat {config_path} to determine "
+                    f"ownership ({e}) -- leaving root files' ownership "
+                    "as-is.", level=1)
+        return False
+
+    uid, gid = conf_stat.st_uid, conf_stat.st_gid
+    all_ok = True
+    chowned = 0
+    for entry in sorted(os.listdir(dest_dir)):
+        path = os.path.join(dest_dir, entry)
+        if not os.path.isfile(path):
+            continue
+        try:
+            os.chown(path, uid, gid)
+            chowned += 1
+        except OSError as e:
+            printer.out(f"WARNING: could not chown {path} to match "
+                        f"{config_path}'s owner ({e}). Fix by hand if "
+                        "needed, e.g.:\n"
+                        f"        sudo chown <username>:<username> {path}",
+                        level=1)
+            all_ok = False
+
+    if all_ok and chowned:
+        printer.out(f"Set ownership of {chowned} root file(s) in {dest_dir} "
+                    f"to match {config_path} (uid={uid}, gid={gid})", level=2)
     return all_ok
 
 
@@ -2389,6 +2488,17 @@ class DivumwxInstaller(ExtensionInstaller):
         else:
             printer.out(f"WARNING: {divumwx_source} not found, skipping frontend copy "
                         f"(expected if testing configure() logic in isolation).", level=1)
+
+        # Copy the extension's own repo-root files (README.md, license.txt,
+        # install.py, etc.) alongside weewx.conf itself -- not WEEWX_ROOT,
+        # which can differ from weewx.conf's own directory, and not the
+        # invoking user's home folder, which may not be who WeeWX actually
+        # runs as (e.g. installed via sudo, or run as a dedicated service
+        # account). engine.config_path is the one thing that's always
+        # exactly right here: WeeWX resolved it to find weewx.conf itself.
+        weewx_conf_dir = os.path.dirname(engine.config_path)
+        copy_divumwx_root_files(extension_dir, weewx_conf_dir, printer)
+        set_divumwx_root_files_ownership(weewx_conf_dir, engine.config_path, printer)
 
         # --- In additions-file order ---
 
