@@ -18,12 +18,12 @@
 <meta name="theme-color" content="#111834">
 <title>DivumWF &mdash; Weather Forecast</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="header.css?v=s3n2026i">
+<link rel="stylesheet" href="header.css?v=s3n2026k">
 <link rel="icon" href="favicon.ico">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ===================== Shared palette (identical to locationforecast.html / index.html) ===================== */
 :root,
@@ -58,7 +58,7 @@
   --bs-link-color:#B45309;
   --bs-link-hover-color:#F2BC6B;
   --bs-warning-rgb:180,83,9;
-  --bs-font-sans-serif:'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --bs-font-sans-serif:'Lexend', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 [data-bs-theme="dark"]{
   --bw-accent:#D3A94C;
@@ -94,7 +94,7 @@ body{
   padding-bottom:48px;
   transition:background-color .25s ease, color .25s ease;
 }
-.font-mono{font-family:'JetBrains Mono','Courier New',monospace;}
+.font-mono{font-family:'Lexend', system-ui, sans-serif;}
 .card{background:var(--bs-card-bg); border-radius:var(--bw-radius-sm); box-shadow:var(--bw-shadow);}
 .shadow-card{box-shadow:var(--bw-shadow) !important;}
 .nav-btn{color:var(--bs-body-color);border-color:var(--bs-body-color);background-color:var(--bs-tertiary-bg);font-weight:600;font-size:15px;white-space:nowrap;}
@@ -108,10 +108,10 @@ body{
 .wf-appbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;}
 .wf-brand{display:flex;align-items:baseline;gap:8px;min-width:0;}
 .wf-brand-name{
-  font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:1.7rem;
+  font-family:'Lexend', system-ui, sans-serif;font-weight:700;font-size:1.7rem;
   color:var(--bw-accent);letter-spacing:.01em;white-space:nowrap;
 }
-.wf-brand-version{font-size:11.5px;color:var(--bs-secondary-color);font-family:'JetBrains Mono',monospace;white-space:nowrap;}
+.wf-brand-version{font-size:11.5px;color:var(--bs-secondary-color);font-family:'Lexend', system-ui, sans-serif;white-space:nowrap;}
 .wf-tagline{font-size:12.5px;color:var(--bs-secondary-color);margin:0 0 14px;}
 .wf-gear-btn{
   flex:0 0 auto;width:38px;height:38px;border-radius:50%;border:none;background:transparent;
@@ -160,13 +160,13 @@ body{
 .wf-suggestion-item:last-child{border-bottom:none;}
 .wf-suggestion-item:hover{background:var(--bs-secondary-bg);color:var(--bw-accent);}
 .wf-suggestion-name{font-weight:600;}
-.wf-suggestion-country{font-size:11.5px;color:var(--bs-secondary-color);font-family:'JetBrains Mono',monospace;flex-shrink:0;}
+.wf-suggestion-country{font-size:11.5px;color:var(--bs-secondary-color);font-family:'Lexend', system-ui, sans-serif;flex-shrink:0;}
 .wf-status{font-size:12.5px;color:var(--bs-secondary-color);min-height:1.3em;margin:6px 6px 10px;}
 .wf-status.is-error{color:var(--bw-danger);}
 .wf-status.is-busy::before{content:'\23F3 ';}
 .wf-recent{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
 .wf-recent-chip{
-  font-family:'JetBrains Mono',monospace;font-size:11.5px;padding:5px 12px;border-radius:16px;
+  font-family:'Lexend', system-ui, sans-serif;font-size:11.5px;padding:5px 12px;border-radius:16px;
   border:1px solid var(--bs-border-color);background:var(--bs-tertiary-bg);color:var(--bs-secondary-color);
 }
 .wf-recent-chip:hover{border-color:var(--bw-accent);color:var(--bw-accent);}
@@ -197,7 +197,7 @@ body{
 .wf-theme-btn:hover{border-color:var(--bw-accent);}
 .wf-settings-row--stacked{flex-direction:column;align-items:stretch;gap:6px;}
 .wf-settings-input{
-  width:100%;box-sizing:border-box;font-family:'JetBrains Mono',monospace;font-size:12.5px;
+  width:100%;box-sizing:border-box;font-family:'Lexend', system-ui, sans-serif;font-size:12.5px;
   padding:7px 10px;border-radius:6px;border:1px solid var(--bs-border-color);
   background:var(--bs-secondary-bg);color:var(--bs-body-color);
 }
@@ -214,7 +214,7 @@ body{
 .hero-top{display:flex;align-items:center;justify-content:space-between;gap:10px;}
 .hero-place{min-width:0;}
 .hero-place-name{font-weight:700;font-size:15.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.hero-place-sub{font-size:11.5px;color:var(--bs-secondary-color);font-family:'JetBrains Mono',monospace;}
+.hero-place-sub{font-size:11.5px;color:var(--bs-secondary-color);font-family:'Lexend', system-ui, sans-serif;}
 .wf-refresh-btn{
   flex:0 0 auto;background:none;border:none;color:var(--bs-secondary-color);font-size:16px;cursor:pointer;
   padding:4px;line-height:1;
@@ -232,23 +232,15 @@ body{
 .hero-mini-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:16px;padding-top:14px;border-top:1px solid var(--bs-border-color);}
 .hero-mini{display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;}
 .hero-mini-label{font-size:10.5px;color:var(--bs-secondary-color);text-transform:uppercase;letter-spacing:.03em;}
-.hero-mini-value{font-size:15px;font-weight:700;font-family:'JetBrains Mono',monospace;}
+.hero-mini-value{font-size:15px;font-weight:700;font-family:'Lexend', system-ui, sans-serif;}
 .hero-mini-sub{font-size:10.5px;color:var(--bs-secondary-color);}
 
-/* ---------- Wind card ---------- */
-.wind-card{padding:16px 18px;display:flex;align-items:center;gap:16px;}
-.wind-compass-mini{position:relative;width:64px;height:64px;flex-shrink:0;}
-.wind-compass-mini-ring{width:100%;height:100%;display:block;}
-.wind-compass-mini-arrow{transform-origin:40px 40px;transition:transform .5s cubic-bezier(.4,0,.2,1);}
-.wind-compass-mini-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;line-height:1.15;pointer-events:none;}
-.wind-compass-mini-label span:first-child{font-size:13px;font-weight:700;}
-.wind-compass-mini-label span:last-child{font-size:9px;color:var(--bs-secondary-color);}
-.wind-card-body{flex:1 1 auto;min-width:0;}
-.wind-card-title{font-size:11.5px;color:var(--bs-secondary-color);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px;}
-.wind-card-row{display:flex;justify-content:space-between;font-size:13px;padding:2px 0;}
-.wind-card-row .k{color:var(--bs-secondary-color);}
-.wind-card-row .v{font-family:'JetBrains Mono',monospace;font-weight:600;}
-.beaufort-chip{display:inline-block;margin-top:4px;font-family:'JetBrains Mono',monospace;font-size:10.5px;background:var(--bw-sky-soft);color:var(--bw-sky);padding:2px 8px;border-radius:10px;}
+/* Standalone wind-card layout (compass ring + side panel) retired --
+   wind is now the fourth Today's Highlights tile instead (see
+   renderHighlights()), reusing .metric-card styling like the other
+   three. .beaufort-chip is the one piece kept: still used by that
+   tile's badge, unchanged. */
+.beaufort-chip{display:inline-block;margin-top:4px;font-family:'Lexend', system-ui, sans-serif;font-size:10.5px;background:var(--bw-sky-soft);color:var(--bw-sky);padding:2px 8px;border-radius:10px;}
 
 /* ---------- Minutely rain forecast ---------- */
 .minutely-card{padding:16px 18px 14px;}
@@ -256,23 +248,27 @@ body{
 .minutely-bar{flex:1 1 0;min-width:2px;border-radius:2px 2px 0 0;}
 .minutely-xaxis{
   display:flex;justify-content:space-between;font-size:11px;color:var(--bw-sky);
-  font-family:'JetBrains Mono',monospace;margin-top:6px;
+  font-family:'Lexend', system-ui, sans-serif;margin-top:6px;
 }
 .minutely-source{font-size:10px;color:var(--bs-secondary-color);margin-top:10px;text-align:right;}
 
 /* ---------- 24-hour meteogram ---------- */
 .meteogram-card{padding:14px 8px 10px;}
 .meteogram-svg{width:100%;height:auto;display:block;}
-.meteogram-hourlabel{font-size:11px;fill:var(--bs-secondary-color);font-family:'JetBrains Mono',monospace;}
+.meteogram-hourlabel{font-size:11px;fill:var(--bs-secondary-color);font-family:'Lexend', system-ui, sans-serif;}
 .meteogram-hourlabel--now{fill:var(--bw-accent);font-weight:700;}
-.meteogram-daylabel{font-size:10px;fill:var(--bw-accent);font-weight:700;font-family:'JetBrains Mono',monospace;}
-.meteogram-templabel{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;}
+.meteogram-daylabel{font-size:10px;fill:var(--bw-accent);font-weight:700;font-family:'Lexend', system-ui, sans-serif;}
+.meteogram-templabel{font-size:11px;font-weight:700;font-family:'Lexend', system-ui, sans-serif;}
 
 /* ---------- Highlights (UV / AQI / Sun&Moon / Precip) ---------- */
 .section-label{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--bs-secondary-color);margin:22px 0 10px;display:flex;align-items:center;gap:10px;}
 .section-label::after{content:"";flex:1;height:1px;background:var(--bs-border-color);}
 .wf-highlights{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .metric-card{padding:14px 16px;}
+/* Wind tile's corner compass -- see renderHighlights()'s own comment
+   for why direction+degrees rather than speed sits in its centre. */
+.wind-tile{position:relative;}
+.wind-mini-compass{position:absolute;top:8px;right:8px;width:66px;height:66px;}
 .metric-card .mlabel{font-size:11.5px;color:var(--bs-secondary-color);display:flex;align-items:center;gap:6px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.03em;}
 .metric-card .mvalue{font-size:23px;font-weight:700;}
 .metric-card .mvalue small{font-size:12px;color:var(--bs-secondary-color);font-weight:400;}
@@ -283,7 +279,7 @@ body{
 .aqi-pill--high,.uv-pill--high{background:rgba(227,107,87,.15);color:var(--bw-danger);}
 .sunmoon-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:3px 0;}
 .sunmoon-row .k{display:flex;align-items:center;gap:6px;color:var(--bs-secondary-color);}
-.sunmoon-row .v{font-family:'JetBrains Mono',monospace;font-weight:600;}
+.sunmoon-row .v{font-family:'Lexend', system-ui, sans-serif;font-weight:600;}
 .moon-emoji{display:inline-flex;align-items:center;color:var(--bs-secondary-color);}
 .daylight-bar{height:4px;border-radius:2px;background:var(--bs-border-color);margin:8px 0 2px;overflow:hidden;position:relative;}
 .daylight-bar-fill{position:absolute;left:0;top:0;bottom:0;background:var(--bw-accent);border-radius:2px;}
@@ -300,7 +296,7 @@ body{
 .day-card.active .dname{color:var(--bw-accent);}
 .day-card .dicon{width:32px;height:32px;margin:8px auto 4px;display:block;object-fit:contain;}
 .day-card .drain{font-size:10px;color:var(--bw-sky);height:14px;display:flex;align-items:center;justify-content:center;gap:2px;}
-.day-card .dtemps{font-family:'JetBrains Mono',monospace;font-size:13px;margin-top:2px;}
+.day-card .dtemps{font-family:'Lexend', system-ui, sans-serif;font-size:13px;margin-top:2px;}
 .day-card .dtemps .lo{color:var(--bs-secondary-color);}
 
 /* ---------- Hourly ---------- */
@@ -310,13 +306,13 @@ body{
 .hourly-title span{font-size:11px;color:var(--bs-secondary-color);}
 .hourly-scroll{display:flex;gap:0;overflow-x:auto;-webkit-overflow-scrolling:touch;position:relative;}
 .hcell{flex:0 0 auto;width:52px;text-align:center;font-size:11.5px;padding:2px 0;}
-.hcell .htime{color:var(--bs-secondary-color);font-family:'JetBrains Mono',monospace;font-size:10.5px;}
+.hcell .htime{color:var(--bs-secondary-color);font-family:'Lexend', system-ui, sans-serif;font-size:10.5px;}
 .hcell img.hicon{width:26px;height:26px;display:block;margin:6px auto 4px;object-fit:contain;}
-.hcell .htemp{font-family:'JetBrains Mono',monospace;font-weight:600;}
-.hcell .hrain{color:var(--bw-sky);font-size:10px;font-family:'JetBrains Mono',monospace;min-height:13px;}
+.hcell .htemp{font-family:'Lexend', system-ui, sans-serif;font-weight:600;}
+.hcell .hrain{color:var(--bw-sky);font-size:10px;font-family:'Lexend', system-ui, sans-serif;min-height:13px;}
 .wind-badge{position:relative;width:36px;height:36px;margin:4px auto 0;display:flex;align-items:center;justify-content:center;}
 .wind-badge-ring{position:absolute;inset:0;width:100%;height:100%;}
-.wind-badge-value{position:relative;font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;color:var(--wind-col, var(--bs-secondary-color));}
+.wind-badge-value{position:relative;font-family:'Lexend', system-ui, sans-serif;font-size:8.5px;font-weight:700;color:var(--wind-col, var(--bs-secondary-color));}
 
 /* ---------- Icon contrast (mirrors locationforecast.html) ---------- */
 [data-bs-theme="light"] .hero-icon,[data-bs-theme="light"] .dicon,[data-bs-theme="light"] .hicon{
@@ -395,8 +391,6 @@ body{
   <div id="wfForecastWrap" style="display:none;">
 
     <div class="card hero-card shadow-card mb-3" id="wfHeroCard"></div>
-
-    <div class="card wind-card shadow-card mb-3" id="wfWindCard"></div>
 
     <div class="section-label" id="wfMinutelyLabel">Rain in the next 60min</div>
     <div class="card minutely-card shadow-card mb-3" id="wfMinutelyCard" style="display:none;"></div>
@@ -545,7 +539,6 @@ async function loadForecast(){
   const syncBtn = document.getElementById('wfSyncBtn');
   syncBtn.classList.add('is-busy');
   document.getElementById('wfHeroCard').innerHTML = `<div class="text-center py-4" style="color:var(--bs-secondary-color);">${DivumWXI18N.t('Loading forecast for')} ${escapeHtml(currentLocation.label)}\u2026</div>`;
-  document.getElementById('wfWindCard').innerHTML = '';
   document.getElementById('wfMinutelyCard').style.display = 'none';
   document.getElementById('wfMinutelyLabel').style.display = 'none';
   document.getElementById('wfMeteogramCard').innerHTML = '';
@@ -579,7 +572,6 @@ async function loadForecast(){
 function renderAll(){
   if(!forecastData) return;
   renderHero();
-  renderWindCard();
   renderMinutely();
   renderMeteogram();
   renderHighlights();
@@ -623,44 +615,6 @@ function renderHero(){
         <div class="hero-mini-label">${DivumWXI18N.t('Cloud Cover')}</div>
         <div class="hero-mini-value">${c.cloudPct!=null ? c.cloudPct+'%' : '--'}</div>
       </div>
-    </div>
-  `;
-}
-
-function renderWindCard(){
-  const sys = SYSTEMS[currentSystem];
-  const c = forecastData.current;
-  const col = windColor(c.gustMs) || 'var(--bs-secondary-color)';
-  const dirTxt = c.windDirDeg!=null ? degToCompass(c.windDirDeg) : '\u2014';
-  const b = c.windMs!=null ? beaufort(c.windMs) : null;
-  // Same arrow-outside-the-ring positioning as windDirBadge()'s hourly
-  // badges (viewBox 44x44, ring r=13), scaled up to ring r=22 here --
-  // NOT r=30 as an earlier version used, because that scaled the tip to
-  // y=-8.5, outside this viewBox's valid 0-80 range, and got silently
-  // clipped by the browser (a real Chromium render caught this; an
-  // earlier cairosvg-based check of the same markup did not, so it
-  // shipped unnoticed -- cairosvg doesn't clip out-of-viewBox content
-  // the same strict way real browsers do). r=22 keeps the exact same
-  // tip-distance:ring-radius ratio as the hourly badge while keeping
-  // every point safely inside 0-80.
-  const arrow = c.windDirDeg!=null ? `
-      <g transform="rotate(${c.windDirDeg} 40 40)">
-        <path d="M40,4.5 L56.1,20.4 L40,11.2 L23.9,20.4 Z" fill="${col}"/>
-      </g>` : '';
-  document.getElementById('wfWindCard').innerHTML = `
-    <div class="wind-compass-mini">
-      <svg class="wind-compass-mini-ring" viewBox="0 0 80 80" aria-hidden="true">
-        <circle cx="40" cy="40" r="22" fill="none" stroke="var(--bs-border-color)" stroke-width="2"/>
-        <circle cx="40" cy="40" r="2" fill="var(--bs-secondary-color)"/>
-        <g class="wind-compass-mini-arrow">${arrow}</g>
-      </svg>
-      <div class="wind-compass-mini-label"><span>${fmtWindValueOnly(c.windMs, sys.wind)}</span><span>${windUnitAbbr(sys.wind)}</span></div>
-    </div>
-    <div class="wind-card-body">
-      <div class="wind-card-title">${DivumWXI18N.t('Wind')}</div>
-      <div class="wind-card-row"><span class="k">${DivumWXI18N.t('From')}</span><span class="v">${dirTxt}</span></div>
-      <div class="wind-card-row"><span class="k">${DivumWXI18N.t('Gust')}</span><span class="v">${fmtWind(c.gustMs, sys.wind)}</span></div>
-      ${b ? `<span class="beaufort-chip">F${b.force} \u00B7 ${DivumWXI18N.t(b.label)}</span>` : ''}
     </div>
   `;
 }
@@ -871,6 +825,48 @@ function renderHighlights(){
       <div class="mlabel">${wfIcon('drop',14)} ${DivumWXI18N.t('Precipitation')}</div>
       <div class="mvalue">${today.rainProbPct!=null ? today.rainProbPct+'%' : '--'}</div>
       <div class="msub">${DivumWXI18N.t('Today\u2019s total')}: ${fmtRain(today.rainSumMm, sysRain)}</div>
+    </div>`);
+
+  // Wind -- moved here from its own standalone card (compass ring +
+  // side panel), which had a lot of empty vertical space at this
+  // card's width and didn't earn a full-width section of its own.
+  // Fourth tile fills what was previously an empty slot in this grid's
+  // second row (3 tiles didn't divide evenly into the 2-column layout).
+  const sysWind = SYSTEMS[currentSystem].wind;
+  const c = forecastData.current;
+  const windDirTxt = c.windDirDeg!=null ? degToCompass(c.windDirDeg) : '\u2014';
+  const b = c.windMs!=null ? beaufort(c.windMs) : null;
+  // Small compass in the tile's top-right corner. First pass reused the
+  // old standalone card's dart/chevron-shaped arrow (a 4-point concave
+  // path) -- wrong shape entirely: a plain, solid triangle sitting at
+  // the ring's top edge with its apex dipping inward past the ring line
+  // toward centre, matching the reference image. Second pass fixed the
+  // shape but was still too small: since the arrow can rotate to point
+  // in ANY direction and the tip's reach traces a full circle, it isn't
+  // enough to just check it clears the text at N/S/E/W -- the diagonal
+  // angles reach closer to the text block's corners than its flat
+  // edges do, and that's genuinely where it overlapped (checked all 8
+  // compass points individually, not just eyeballed one angle). Ring
+  // enlarged and arrow shortened so the tip's closest possible approach
+  // to centre clears the text block's half-diagonal with margin, at
+  // every rotation, not just the one angle a screenshot happened to
+  // show.
+  const windCompassSvg = c.windDirDeg!=null ? `
+    <svg class="wind-mini-compass" viewBox="0 0 120 120" aria-hidden="true">
+      <circle cx="60" cy="60" r="50" fill="none" stroke="var(--bs-border-color)" stroke-width="3"/>
+      <g transform="rotate(${c.windDirDeg} 60 60)">
+        <path d="M52,8 L68,8 L60,24 Z" fill="var(--bw-accent)"/>
+      </g>
+      <text x="60" y="65" text-anchor="middle" font-size="15" font-weight="600" fill="var(--bs-body-color)">${windDirTxt}</text>
+      <text x="60" y="80" text-anchor="middle" font-size="10.5" fill="var(--bs-secondary-color)">${Math.round(c.windDirDeg)}\u00B0</text>
+    </svg>` : '';
+  cards.push(`
+    <div class="card metric-card shadow-card wind-tile">
+      <div class="mlabel">${wfIcon('haze',14)} ${DivumWXI18N.t('Wind')}</div>
+      <div class="mvalue">${fmtWindValueOnly(c.windMs, sysWind)}<small> ${windUnitAbbr(sysWind)}</small></div>
+      <div class="msub">${DivumWXI18N.t('From')} ${windDirTxt} &middot; ${DivumWXI18N.t('Gust')} ${fmtWind(c.gustMs, sysWind)}</div>
+      ${b ? `<span class="beaufort-chip">F${b.force} \u00B7 ${DivumWXI18N.t(b.label)}</span>` : ''}
+      ${windCompassSvg}
     </div>`);
 
   // Sun & Moon
