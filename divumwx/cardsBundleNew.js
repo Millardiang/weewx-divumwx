@@ -208,6 +208,7 @@ try {
     gr: 'gr',      // Greek -> Greece
     hi: 'in',      // Hindi -> India
     it: 'it',      // Italian -> Italy
+    ja: 'jp',      // Japanese -> Japan
     nl: 'nl',      // Dutch -> Netherlands
     no: 'no',      // Norwegian -> Norway
     pl: 'pl',      // Polish -> Poland
