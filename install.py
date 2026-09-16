@@ -388,9 +388,9 @@ DIVUMWX_REPORT_SEARCH_LIST_EXTENSIONS = [
 # lang/<code>.conf next to these (en.conf is the template to copy), (2) add
 # its files= entry in DivumwxInstaller.__init__ below, (3) add it here.
 #
-# All 25 below carry the full 267-key set (every card, not just the
-# barometer trend phrases) -- verified via ConfigObj parse + Cheetah
-# render before being added here.
+# All 30 below carry the full 740-key [Texts] set from en.conf (every
+# card, not just the barometer trend phrases) -- verified via ConfigObj
+# parse + Cheetah render before being added here.
 DIVUMWX_LANG_CHOICES = {
     'en':    'English',
     'en_US': 'English (US)',
@@ -408,6 +408,7 @@ DIVUMWX_LANG_CHOICES = {
     'gr':    'Ελληνικά (Greek)',
     'hi':    'हिन्दी (Hindi)',
     'it':    'Italiano (Italian)',
+    'ja':    '日本語 (Japanese)',
     'nl':    'Nederlands (Dutch)',
     'no':    'Norsk (Norwegian)',
     'pl':    'Polski (Polish)',
@@ -2397,6 +2398,7 @@ class DivumwxInstaller(ExtensionInstaller):
                     'skins/DivumWX/lang/gr.conf',
                     'skins/DivumWX/lang/hi.conf',
                     'skins/DivumWX/lang/it.conf',
+                    'skins/DivumWX/lang/ja.conf',
                     'skins/DivumWX/lang/nl.conf',
                     'skins/DivumWX/lang/no.conf',
                     'skins/DivumWX/lang/pl.conf',
