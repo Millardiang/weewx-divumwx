@@ -65,7 +65,7 @@ Make sure you have to hand: -
 ## Uninstall process
 Hopefully you will not feel the need to do so but the process is: -
 
-          cd <to_your_bin/user_folder>
+          cd <to_the_folder_where_weewx.conf_exists>
           python3 divumwx_uninstall_helper.py
           sudo weectl extension uninstall divumwx          
 
