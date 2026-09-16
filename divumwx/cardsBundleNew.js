@@ -2116,7 +2116,7 @@ try {
     valueEl.style.fontSize = '9.5px';
     valueEl.style.lineHeight = '1.2';
     valueEl.style.color = 'var(--bw-accent)';
-    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis';
+    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis'; valueEl.style.minWidth = '0'; valueEl.style.flex = '1 1 auto';
     valueEl.style.fontFamily = '"IBM Plex Mono", ui-monospace, monospace';
     valueRow.appendChild(valueEl);
 
@@ -3031,7 +3031,7 @@ try {
     valueEl.style.fontSize = '9.5px';
     valueEl.style.fontFamily = '"IBM Plex Mono", ui-monospace, monospace';
     valueEl.style.color = 'var(--bw-accent)';
-    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis';
+    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis'; valueEl.style.display = 'block'; valueEl.style.width = '100%'; valueEl.style.minWidth = '0';
     row.appendChild(valueEl);
 
     rightPane.appendChild(row);
@@ -3534,7 +3534,7 @@ try {
     valueEl.style.fontSize = '9.5px';
     valueEl.style.fontFamily = '"IBM Plex Mono", ui-monospace, monospace';
     valueEl.style.color = 'var(--bw-accent)';
-    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis';
+    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis'; valueEl.style.display = 'block'; valueEl.style.width = '100%'; valueEl.style.minWidth = '0';
     row.appendChild(valueEl);
 
     rightPane.appendChild(row);
@@ -3982,7 +3982,7 @@ try {
     valueEl.style.fontSize = '9.5px';
     valueEl.style.fontFamily = '"IBM Plex Mono", ui-monospace, monospace';
     valueEl.style.color = 'var(--bw-accent)';
-    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis';
+    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis'; valueEl.style.display = 'block'; valueEl.style.width = '100%'; valueEl.style.minWidth = '0';
     row.appendChild(valueEl);
 
     rightPane.appendChild(row);
@@ -4383,7 +4383,7 @@ try {
     valueEl.style.fontSize = '9.5px';
     valueEl.style.fontFamily = '"IBM Plex Mono", ui-monospace, monospace';
     valueEl.style.color = 'var(--bw-accent)';
-    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis';
+    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis'; valueEl.style.display = 'block'; valueEl.style.width = '100%'; valueEl.style.minWidth = '0';
     row.appendChild(valueEl);
 
     rightPane.appendChild(row);
@@ -4860,7 +4860,7 @@ try {
     valueEl.style.fontSize = '9.5px';
     valueEl.style.fontFamily = '"IBM Plex Mono", ui-monospace, monospace';
     valueEl.style.color = 'var(--bw-accent)';
-    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis';
+    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis'; valueEl.style.display = 'block'; valueEl.style.width = '100%'; valueEl.style.minWidth = '0';
     row.appendChild(valueEl);
 
     rightPane.appendChild(row);
@@ -5291,7 +5291,7 @@ try {
     valueEl.style.fontSize = '9.5px';
     valueEl.style.fontFamily = '"IBM Plex Mono", ui-monospace, monospace';
     valueEl.style.color = 'var(--bw-accent)';
-    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis';
+    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis'; valueEl.style.display = 'block'; valueEl.style.width = '100%'; valueEl.style.minWidth = '0';
     row.appendChild(valueEl);
 
     rightPane.appendChild(row);
@@ -6011,7 +6011,7 @@ try {
     valueEl.style.fontSize = '9.5px';
     valueEl.style.fontFamily = '"IBM Plex Mono", ui-monospace, monospace';
     valueEl.style.color = 'var(--bw-accent)';
-    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis';
+    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis'; valueEl.style.display = 'block'; valueEl.style.width = '100%'; valueEl.style.minWidth = '0';
     row.appendChild(valueEl);
 
     rightPane.appendChild(row);
@@ -6358,7 +6358,7 @@ try {
     valueEl.style.fontSize = '9.5px';
     valueEl.style.fontFamily = '"IBM Plex Mono", ui-monospace, monospace';
     valueEl.style.color = 'var(--bw-accent)';
-    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis';
+    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis'; valueEl.style.display = 'block'; valueEl.style.width = '100%'; valueEl.style.minWidth = '0';
     row.appendChild(valueEl);
 
     rightPane.appendChild(row);
@@ -6714,7 +6714,7 @@ try {
     valueEl.style.fontSize = '9.5px';
     valueEl.style.fontFamily = '"IBM Plex Mono", ui-monospace, monospace';
     valueEl.style.color = 'var(--bw-accent)';
-    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis';
+    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis'; valueEl.style.display = 'block'; valueEl.style.width = '100%'; valueEl.style.minWidth = '0';
     row.appendChild(valueEl);
 
     rightPane.appendChild(row);
@@ -7138,7 +7138,7 @@ try {
     valueEl.style.fontSize = '9.5px';
     valueEl.style.fontFamily = '"IBM Plex Mono", ui-monospace, monospace';
     valueEl.style.color = 'var(--bw-accent)';
-    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis';
+    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis'; valueEl.style.display = 'block'; valueEl.style.width = '100%'; valueEl.style.minWidth = '0';
     row.appendChild(valueEl);
 
     rightPane.appendChild(row);
@@ -7615,7 +7615,7 @@ try {
     valueEl.style.fontSize = '9.5px';
     valueEl.style.fontFamily = '"IBM Plex Mono", ui-monospace, monospace';
     valueEl.style.color = 'var(--bw-accent)';
-    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis';
+    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis'; valueEl.style.display = 'block'; valueEl.style.width = '100%'; valueEl.style.minWidth = '0';
     row.appendChild(valueEl);
 
     rightPane.appendChild(row);
@@ -9255,7 +9255,7 @@ try {
     var valueEl = document.createElement('span');
     valueEl.style.fontSize = '8.5px';
     valueEl.style.fontFamily = '"IBM Plex Mono", ui-monospace, monospace';
-    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis';
+    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis'; valueEl.style.display = 'block'; valueEl.style.width = '100%'; valueEl.style.minWidth = '0';
     row.appendChild(valueEl);
 
     rightPane.appendChild(row);
@@ -9557,7 +9557,7 @@ try {
     valueEl.style.fontSize = '8.5px';
     valueEl.style.fontFamily = '"IBM Plex Mono", ui-monospace, monospace';
     valueEl.style.color = 'var(--bw-accent)';
-    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis';
+    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis'; valueEl.style.display = 'block'; valueEl.style.width = '100%'; valueEl.style.minWidth = '0';
     row.appendChild(valueEl);
 
     rightPane.appendChild(row);
@@ -10139,7 +10139,7 @@ try {
     valueEl.style.fontSize = '9.5px';
     valueEl.style.fontFamily = '"IBM Plex Mono", ui-monospace, monospace';
     valueEl.style.color = 'var(--bw-accent)';
-    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis';
+    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis'; valueEl.style.display = 'block'; valueEl.style.width = '100%'; valueEl.style.minWidth = '0';
     row.appendChild(valueEl);
 
     rightPane.appendChild(row);
@@ -10445,7 +10445,7 @@ try {
     valueEl.style.fontSize = '9.5px';
     valueEl.style.fontFamily = '"IBM Plex Mono", ui-monospace, monospace';
     valueEl.style.color = 'var(--bw-accent)';
-    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis';
+    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis'; valueEl.style.display = 'block'; valueEl.style.width = '100%'; valueEl.style.minWidth = '0';
     row.appendChild(valueEl);
 
     rightPane.appendChild(row);
@@ -10716,7 +10716,7 @@ try {
     valueEl.style.fontSize = '9.5px';
     valueEl.style.fontFamily = '"IBM Plex Mono", ui-monospace, monospace';
     valueEl.style.color = 'var(--bw-accent)';
-    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis';
+    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis'; valueEl.style.display = 'block'; valueEl.style.width = '100%'; valueEl.style.minWidth = '0';
     row.appendChild(valueEl);
 
     rightPane.appendChild(row);
@@ -11920,7 +11920,14 @@ try {
       '35% { opacity: 0.35; }' +
       '100% { opacity: 1; }' +
       '}' +
-      '.bolt-pulse { animation: solarEnergyBoltPulse 0.6s ease; }';
+      // infinite -- previously played once per renderBolts() call (i.e.
+      // once per 10s refresh, see POLL_MS below), which read as a single
+      // pulse followed by ~9.4s sitting static rather than a continuous
+      // ripple. Looping here means it never stops animating while
+      // generating; boltInfoForColor's pulse:false for the 0W/silver
+      // tier still keeps .bolt-pulse off the element entirely, so zero
+      // watts stays static exactly as before, not just "paused".
+      '.bolt-pulse { animation: solarEnergyBoltPulse 1.1s ease infinite; }';
     document.head.appendChild(pulseStyle);
   }
 
@@ -12084,7 +12091,7 @@ try {
     // Same 120ms-per-bolt stagger used throughout design/testing, so the
     // ripple's speed on the real card matches what was actually reviewed
     // rather than an untested new value.
-    renderBolts(v.iconColor, 120);
+    renderBolts(v.iconColor, 220);
     pvHeroValue.textContent = fmtPower(v.pvPower);
 
     gridText.textContent = v.gridState + ' ' + fmtPower(v.gridPower);
