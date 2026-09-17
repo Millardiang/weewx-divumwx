@@ -1534,7 +1534,7 @@ try {
       case 'kmh': return d3.format('.1f')(ms2kmh(ms)) + ' km/h';
       case 'kt':  return d3.format('.1f')(ms2kt(ms)) + ' kt';
       case 'ms':  return d3.format('.1f')(ms) + ' m/s';
-      case 'bf':  var b = beaufort(ms); return b.force + ' Bft (' + b.label + ')';
+      case 'bf':  var b = beaufort(ms); return b.force + ' Bft (' + DivumWXI18N.t(b.label) + ')';
       default:    return d3.format('.1f')(ms2kmh(ms)) + ' km/h';
     }
   }
@@ -2488,7 +2488,7 @@ try {
       case 'kmh': return (ms * 3.6).toFixed(1) + ' km/h';
       case 'kt':  return (ms / 0.514444).toFixed(1) + ' kt';
       case 'ms':  return ms.toFixed(1) + ' m/s';
-      case 'bf':  var b = beaufort(ms); return b.force + ' Bft (' + b.label + ')';
+      case 'bf':  var b = beaufort(ms); return b.force + ' Bft (' + DivumWXI18N.t(b.label) + ')';
       default:    return (ms * 3.6).toFixed(1) + ' km/h';
     }
   }
@@ -2895,7 +2895,7 @@ try {
     }
   }
   function windLabel(ms){
-    if (currentUnits.wind === 'bf'){ var b = beaufort(ms); return b.force + ' Bft (' + b.label + ')'; }
+    if (currentUnits.wind === 'bf'){ var b = beaufort(ms); return b.force + ' Bft (' + DivumWXI18N.t(b.label) + ')'; }
     return windFromMS(ms).toFixed(1) + ' ' + (WIND_UNIT_LABEL[currentUnits.wind] || 'km/h');
   }
   var GAUGE_CONFIG = { kmh: [130, 13], mph: [80, 9], ms: [35, 9], kt: [70, 9], bf: [130, 13] };
@@ -3277,7 +3277,7 @@ try {
     maxGustText.textContent = windLabel(v.gustMax) + ' (' + timeLabelFor(v.gustMaxTime) + ')';
     bearingText.textContent = skynet(v.windDir) + '\u00B0';
     ordinalText.textContent = toOrdinal(v.windDir);
-    beaufortText.textContent = v.beaufortScale + ' Bft (' + v.beaufortDesc + ')';
+    beaufortText.textContent = v.beaufortScale + ' Bft (' + DivumWXI18N.t(v.beaufortDesc) + ')';
 
     var windRunUnit = (currentUnits.wind === 'mph' || currentUnits.wind === 'kt') ? 'mi' : 'km';
     var windRunVal = windRunUnit === 'mi' ? v.windRunMi : v.windRunMi * 1.609344;
@@ -3403,7 +3403,7 @@ try {
     }
   }
   function windLabel(ms){
-    if (currentUnits.wind === 'bf'){ var b = beaufort(ms); return b.force + ' Bft (' + b.label + ')'; }
+    if (currentUnits.wind === 'bf'){ var b = beaufort(ms); return b.force + ' Bft (' + DivumWXI18N.t(b.label) + ')'; }
     return windFromMS(ms).toFixed(1) + ' ' + (WIND_UNIT_LABEL[currentUnits.wind] || 'km/h');
   }
 
@@ -3743,7 +3743,7 @@ try {
 
     // ---- Right pane: 3 readouts as label/value chip rows ----
     maxGustText.textContent = windLabel(v.gustMax) + ' (' + timeLabelFor(v.gustMaxTime) + ')';
-    beaufortText.textContent = v.beaufortScale + ' Bft (' + v.beaufortDesc + ')';
+    beaufortText.textContent = v.beaufortScale + ' Bft (' + DivumWXI18N.t(v.beaufortDesc) + ')';
 
     var windRunUnit = (currentUnits.wind === 'mph' || currentUnits.wind === 'kt') ? 'mi' : 'km';
     var windRunVal = windRunUnit === 'mi' ? v.windRunMi : v.windRunMi * 1.609344;
@@ -7743,7 +7743,7 @@ try {
     elevationText.textContent = v.sunAlt.toFixed(2) + '\u00B0';
     sunriseText.textContent = epochToHHMM(v.sunRiseTs, true) + ' (' + epochToHHMM(v.civilTwilightBeginTs, false) + ')';
     sunsetText.textContent = epochToHHMM(v.sunSetTs, true) + ' (' + epochToHHMM(v.civilTwilightEndTs, false) + ')';
-    moonPhaseText.textContent = v.moonPhaseName;
+    moonPhaseText.textContent = DivumWXI18N.t(v.moonPhaseName);
     moonRiseSetText.textContent = epochToHHMM(v.moonRiseTs, false) + ' | ' + epochToHHMM(v.moonSetTs, false);
     illumText.textContent = v.luminancePct.toFixed(2) + ' %';
   }
