@@ -118,7 +118,7 @@ html[data-bs-theme="dark"] body.season-summer header, html[data-bs-theme="dark"]
   flex: 1 1 auto;
   min-width: 0;
   max-width: 100%;
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: 'Lexend', system-ui, sans-serif;
   font-variant-caps: small-caps;
   letter-spacing: .08em;
   font-size: 1.15rem;
@@ -172,7 +172,7 @@ html[data-bs-theme="dark"] body.season-summer header, html[data-bs-theme="dark"]
 
 .site-nav-link {
   color: inherit;
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: 'Lexend', system-ui, sans-serif;
   letter-spacing: .03em;
   text-decoration: none;
   font-size: 14.2px;
@@ -384,8 +384,25 @@ html[data-bs-theme="dark"] body.season-winter .menu, html[data-bs-theme="dark"] 
 html[data-bs-theme="dark"] body.season-summer .menu, html[data-bs-theme="dark"] body.season-autumn .menu {
   background: var(--dark-bg);
 }
+/* max-height: 500px used to be the open-state cap here -- a fixed pixel
+   guess that was smaller than the actual content height once every item
+   (home icon, 9 nav links, unit select, language select, theme toggle)
+   was accounted for, so overflow: hidden silently clipped the theme
+   toggle -- the last item -- off the bottom on every device, not just
+   short ones. 80vh (relative to the *viewport*, not a pixel guess) plus
+   overflow-y: auto on the open state means: on a tall viewport the whole
+   menu fits and no scrollbar appears at all; on a short one, or if more
+   items get added to the nav later, the panel caps at 80% of the visible
+   screen and scrolls internally instead -- so the theme toggle is always
+   at most one scroll away, never permanently unreachable regardless of
+   content length or device height.
+   overflow-x stays hidden (nothing in this panel is meant to scroll
+   sideways); only vertical overflow is now allowed to scroll rather than
+   simply being cut off. */
 body.menu-open .menu {
-  max-height: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 .menu-inner {
   padding: 16px 20px;
@@ -393,23 +410,18 @@ body.menu-open .menu {
 }
 
 /* ---------------------------------------------------------------------
-   Accessibility typeface themes -- "Lexend" and "Atkinson Hyperlegible"
-   as two extra positions in the same dark/light/auto theme cycle
-   (dark colour scheme only; see index.html's applyDashboardTheme() for
-   how the "dark versions only" resolution works), rather than a
-   separate page each. Gated on a plain body class here rather than
-   applied unconditionally, so any page that adopts the same
-   dashboardThemeMode convention gets the font swap just by including
-   this file -- nothing page-specific about the rule itself.
-   !important is needed for the same reason it always is on this
-   project's font overrides: some cards set their own font-family as an
-   inline style (cardsBundleNew.js), which normal stylesheet specificity
-   can never beat regardless of selector. Font WEIGHT is deliberately
-   left alone -- only the typeface changes, whatever weight was already
-   set at any given spot stays exactly as it was. */
-body.font-lexend, body.font-lexend * {
+   Lexend now applies everywhere, in every theme -- Inter, IBM Plex
+   Mono, Georgia, and Atkinson Hyperlegible are all retired site-wide
+   in favour of this one typeface, at the same weights each spot
+   already used. This used to be two extra "accessibility theme"
+   positions in the theme cycle (dark-only, opt-in); now that Lexend is
+   the default for everyone, those two positions are gone (see
+   index.html's THEME_ORDER, back down to dark/light/auto) and this
+   rule applies unconditionally instead of being gated on a body class.
+   !important is still needed for the same reason it always was: some
+   cards set their own font-family as an inline style
+   (cardsBundleNew.js), which normal stylesheet specificity can never
+   beat regardless of selector. */
+* {
   font-family: 'Lexend', system-ui, sans-serif !important;
-}
-body.font-hyperlegible, body.font-hyperlegible * {
-  font-family: 'Atkinson Hyperlegible', system-ui, sans-serif !important;
 }
