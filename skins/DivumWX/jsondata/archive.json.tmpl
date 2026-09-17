@@ -39,6 +39,44 @@
 ##      call now lives inside the same #try, with a safe "0" default set
 ##      beforehand, exactly like storm_start_val's own fallback.
 ##
+## Merged with archiveAlternative.json.tmpl this session. That variant
+## existed only because some users' installs keep a handful of derived/
+## extension obs types (AirDensity, cloudbase, cloudcover, threshold,
+## sunshine_time, vpd) in a second database, bound as
+## 'divumwx_extras_binding' in weewx.conf, rather than in the single
+## default weewx.sdb binding this file otherwise reads everything from.
+## Maintaining two near-duplicate templates meant every other fix in this
+## file (the trend-cascade bug, the eventRain #try/#except bug, the
+## localize=False fix, etc.) had to be applied twice and could drift out
+## of sync. Instead, each of those five value groups now tries the
+## default binding first and falls through to divumwx_extras_binding
+## only when the default binding has no data for that specific value,
+## e.g. in the air_density block:
+##   #set $adCurrentObj = $current.AirDensity
+##   #if not $adCurrentObj.has_data
+##   #try
+##   #set $adCurrentObj = $current(data_binding='divumwx_extras_binding').AirDensity
+##   #except
+##   #pass
+##   #end try
+##   #end if
+## The #try/#except around every extras-binding reference matters: most
+## installs never configure 'divumwx_extras_binding' at all, and asking
+## Cheetah to open an unconfigured binding raises immediately, which
+## #errorCatcher Echo does NOT catch inside a #set statement (only bare
+## $var placeholders get that protection -- see the safeMs comment
+## above), so an unguarded reference would take down the whole file's
+## generation rather than just one field. Guarded this way, a station
+## with everything in the default database behaves exactly as
+## archive.json.tmpl always did (the extras binding is never even
+## touched), while a station using the legacy split-database layout
+## gets the same values from the second binding, field by field, and a
+## station with no extras binding configured at all just falls through
+## to null for whichever fields the default binding doesn't have --
+## with no separate template to maintain. archiveAlternative.json.tmpl
+## is no longer needed and can be retired once installs have migrated
+## to this file.
+##
 ## Page-theme/almanac concerns from the original file (ephem sun/moon
 ## ecliptic calculations, daylight-length, day/night body theme) are left
 ## out on purpose — they're not observation data, and astronomical.json
@@ -166,11 +204,57 @@ null
 },
 
 "air_density": {
-#if $current.AirDensity.has_data
-"avg": $day.AirDensity.avg.format(format_string="%.4f", None_string="null", add_label=False, localize=False),
-"max": $day.AirDensity.max.format(format_string="%.4f", None_string="null", add_label=False, localize=False),
-"min": $day.AirDensity.min.format(format_string="%.4f", None_string="null", add_label=False, localize=False),
-"current": $current.AirDensity.format(format_string="%.4f", None_string="null", add_label=False, localize=False)
+#set $adObj = None
+#try
+#set $adObj = $current.AirDensity
+#except
+#pass
+#end try
+#set $adUseExtras = False
+#if $adObj is None or not $adObj.has_data
+#try
+#set $adExtrasObj = $current(data_binding='divumwx_extras_binding').AirDensity
+#if $adExtrasObj.has_data
+#set $adObj = $adExtrasObj
+#set $adUseExtras = True
+#end if
+#except
+#pass
+#end try
+#end if
+#if $adObj is not None and $adObj.has_data
+#set $adDayAvgObj = None
+#set $adDayMaxObj = None
+#set $adDayMinObj = None
+#try
+#if $adUseExtras
+#set $adDayAvgObj = $day(data_binding='divumwx_extras_binding').AirDensity.avg
+#set $adDayMaxObj = $day(data_binding='divumwx_extras_binding').AirDensity.max
+#set $adDayMinObj = $day(data_binding='divumwx_extras_binding').AirDensity.min
+#else
+#set $adDayAvgObj = $day.AirDensity.avg
+#set $adDayMaxObj = $day.AirDensity.max
+#set $adDayMinObj = $day.AirDensity.min
+#end if
+#except
+#pass
+#end try
+#if $adDayAvgObj is not None
+"avg": $adDayAvgObj.format(format_string="%.4f", None_string="null", add_label=False, localize=False),
+#else
+"avg": null,
+#end if
+#if $adDayMaxObj is not None
+"max": $adDayMaxObj.format(format_string="%.4f", None_string="null", add_label=False, localize=False),
+#else
+"max": null,
+#end if
+#if $adDayMinObj is not None
+"min": $adDayMinObj.format(format_string="%.4f", None_string="null", add_label=False, localize=False),
+#else
+"min": null,
+#end if
+"current": $adObj.format(format_string="%.4f", None_string="null", add_label=False, localize=False)
 #else
 "current": null
 #end if
@@ -550,8 +634,48 @@ null
 #end if
 
 "sky": {
-"cloud_base": $current.cloudbase.format(format_string="%.0f", None_string="null", add_label=False, localize=False),
-"cloud_cover": $current.cloudcover.format(format_string="%.0f", None_string="0", add_label=False, localize=False)
+#set $skyCloudBaseObj = None
+#try
+#set $skyCloudBaseObj = $current.cloudbase
+#except
+#pass
+#end try
+#if $skyCloudBaseObj is None or not $skyCloudBaseObj.has_data
+#try
+#set $skyCloudBaseExtras = $current(data_binding='divumwx_extras_binding').cloudbase
+#if $skyCloudBaseExtras.has_data
+#set $skyCloudBaseObj = $skyCloudBaseExtras
+#end if
+#except
+#pass
+#end try
+#end if
+#set $skyCloudCoverObj = None
+#try
+#set $skyCloudCoverObj = $current.cloudcover
+#except
+#pass
+#end try
+#if $skyCloudCoverObj is None or not $skyCloudCoverObj.has_data
+#try
+#set $skyCloudCoverExtras = $current(data_binding='divumwx_extras_binding').cloudcover
+#if $skyCloudCoverExtras.has_data
+#set $skyCloudCoverObj = $skyCloudCoverExtras
+#end if
+#except
+#pass
+#end try
+#end if
+#if $skyCloudBaseObj is not None
+"cloud_base": $skyCloudBaseObj.format(format_string="%.0f", None_string="null", add_label=False, localize=False),
+#else
+"cloud_base": null,
+#end if
+#if $skyCloudCoverObj is not None
+"cloud_cover": $skyCloudCoverObj.format(format_string="%.0f", None_string="0", add_label=False, localize=False)
+#else
+"cloud_cover": 0
+#end if
 },
 
 "solar": {
@@ -572,9 +696,55 @@ null
 "lux": $current.luminosity.format(format_string="%.1f", None_string="null", add_label=False, localize=False),
 "day_lux_max": $day.luminosity.max.format(format_string="%.1f", None_string="null", add_label=False, localize=False),
 "day_lux_maxtime": $safeMs($day.luminosity.maxtime.raw),
-"threshold": $current.threshold.format(format_string="%.1f", None_string="null", add_label=False, localize=False),
-"sun_duration_minutes": $day.sunshine_time.sum.format(format_string="%.1f", None_string="0", add_label=False, localize=False),
-"sunshine_minutes_yesterday": $(float($yesterday.sunshine_time.sum.raw or 0) * 60)
+#set $solarThresholdObj = None
+#try
+#set $solarThresholdObj = $current.threshold
+#except
+#pass
+#end try
+#if $solarThresholdObj is None or not $solarThresholdObj.has_data
+#try
+#set $solarThresholdExtras = $current(data_binding='divumwx_extras_binding').threshold
+#if $solarThresholdExtras.has_data
+#set $solarThresholdObj = $solarThresholdExtras
+#end if
+#except
+#pass
+#end try
+#end if
+#set $solarSunDurationRaw = None
+#try
+#set $solarSunDurationRaw = $day.sunshine_time.sum.raw
+#except
+#pass
+#end try
+#if $solarSunDurationRaw is None
+#try
+#set $solarSunDurationRaw = $day(data_binding='divumwx_extras_binding').sunshine_time.sum.raw
+#except
+#pass
+#end try
+#end if
+#set $solarSunshineYestRaw = None
+#try
+#set $solarSunshineYestRaw = $yesterday.sunshine_time.sum.raw
+#except
+#pass
+#end try
+#if $solarSunshineYestRaw is None
+#try
+#set $solarSunshineYestRaw = $yesterday(data_binding='divumwx_extras_binding').sunshine_time.sum.raw
+#except
+#pass
+#end try
+#end if
+#if $solarThresholdObj is not None
+"threshold": $solarThresholdObj.format(format_string="%.1f", None_string="null", add_label=False, localize=False),
+#else
+"threshold": null,
+#end if
+"sun_duration_minutes": $(("%.1f" % $solarSunDurationRaw) if $solarSunDurationRaw is not None else "0"),
+"sunshine_minutes_yesterday": $(float($solarSunshineYestRaw or 0) * 60)
 #else
 "current": null
 #end if
@@ -682,19 +852,121 @@ null
 },
 
 "vpd": {
-#if $current.vpd.has_data
-"current": $current.vpd.kPa.format(format_string="%.4f", None_string="0", add_label=False, localize=False),
-"day_max": $day.vpd.max.kPa.format(format_string="%.4f", None_string="null", add_label=False, localize=False),
-"day_min": $day.vpd.min.kPa.format(format_string="%.4f", None_string="null", add_label=False, localize=False),
-"day_avg": $day.vpd.avg.kPa.format(format_string="%.4f", None_string="null", add_label=False, localize=False),
-"day_maxtime": $safeMs($day.vpd.maxtime.raw),
-"day_mintime": $safeMs($day.vpd.mintime.raw),
-"month_max": $month.vpd.max.kPa.format(format_string="%.4f", None_string="null", add_label=False, localize=False),
-"month_min": $month.vpd.min.kPa.format(format_string="%.4f", None_string="null", add_label=False, localize=False),
-"month_avg": $month.vpd.avg.kPa.format(format_string="%.4f", None_string="null", add_label=False, localize=False),
-"year_max": $year.vpd.max.kPa.format(format_string="%.4f", None_string="null", add_label=False, localize=False),
-"year_min": $year.vpd.min.kPa.format(format_string="%.4f", None_string="null", add_label=False, localize=False),
-"year_avg": $year.vpd.avg.kPa.format(format_string="%.4f", None_string="null", add_label=False, localize=False)
+#set $vpdObj = None
+#try
+#set $vpdObj = $current.vpd
+#except
+#pass
+#end try
+#set $vpdUseExtras = False
+#if $vpdObj is None or not $vpdObj.has_data
+#try
+#set $vpdExtrasObj = $current(data_binding='divumwx_extras_binding').vpd
+#if $vpdExtrasObj.has_data
+#set $vpdObj = $vpdExtrasObj
+#set $vpdUseExtras = True
+#end if
+#except
+#pass
+#end try
+#end if
+#if $vpdObj is not None and $vpdObj.has_data
+#set $vpdDayMaxObj = None
+#set $vpdDayMinObj = None
+#set $vpdDayAvgObj = None
+#set $vpdDayMaxTimeObj = None
+#set $vpdDayMinTimeObj = None
+#set $vpdMonthMaxObj = None
+#set $vpdMonthMinObj = None
+#set $vpdMonthAvgObj = None
+#set $vpdYearMaxObj = None
+#set $vpdYearMinObj = None
+#set $vpdYearAvgObj = None
+#try
+#if $vpdUseExtras
+#set $vpdDayMaxObj = $day(data_binding='divumwx_extras_binding').vpd.max
+#set $vpdDayMinObj = $day(data_binding='divumwx_extras_binding').vpd.min
+#set $vpdDayAvgObj = $day(data_binding='divumwx_extras_binding').vpd.avg
+#set $vpdDayMaxTimeObj = $day(data_binding='divumwx_extras_binding').vpd.maxtime
+#set $vpdDayMinTimeObj = $day(data_binding='divumwx_extras_binding').vpd.mintime
+#set $vpdMonthMaxObj = $month(data_binding='divumwx_extras_binding').vpd.max
+#set $vpdMonthMinObj = $month(data_binding='divumwx_extras_binding').vpd.min
+#set $vpdMonthAvgObj = $month(data_binding='divumwx_extras_binding').vpd.avg
+#set $vpdYearMaxObj = $year(data_binding='divumwx_extras_binding').vpd.max
+#set $vpdYearMinObj = $year(data_binding='divumwx_extras_binding').vpd.min
+#set $vpdYearAvgObj = $year(data_binding='divumwx_extras_binding').vpd.avg
+#else
+#set $vpdDayMaxObj = $day.vpd.max
+#set $vpdDayMinObj = $day.vpd.min
+#set $vpdDayAvgObj = $day.vpd.avg
+#set $vpdDayMaxTimeObj = $day.vpd.maxtime
+#set $vpdDayMinTimeObj = $day.vpd.mintime
+#set $vpdMonthMaxObj = $month.vpd.max
+#set $vpdMonthMinObj = $month.vpd.min
+#set $vpdMonthAvgObj = $month.vpd.avg
+#set $vpdYearMaxObj = $year.vpd.max
+#set $vpdYearMinObj = $year.vpd.min
+#set $vpdYearAvgObj = $year.vpd.avg
+#end if
+#except
+#pass
+#end try
+"current": $vpdObj.kPa.format(format_string="%.4f", None_string="0", add_label=False, localize=False),
+#if $vpdDayMaxObj is not None
+"day_max": $vpdDayMaxObj.kPa.format(format_string="%.4f", None_string="null", add_label=False, localize=False),
+#else
+"day_max": null,
+#end if
+#if $vpdDayMinObj is not None
+"day_min": $vpdDayMinObj.kPa.format(format_string="%.4f", None_string="null", add_label=False, localize=False),
+#else
+"day_min": null,
+#end if
+#if $vpdDayAvgObj is not None
+"day_avg": $vpdDayAvgObj.kPa.format(format_string="%.4f", None_string="null", add_label=False, localize=False),
+#else
+"day_avg": null,
+#end if
+#if $vpdDayMaxTimeObj is not None
+"day_maxtime": $safeMs($vpdDayMaxTimeObj.raw),
+#else
+"day_maxtime": null,
+#end if
+#if $vpdDayMinTimeObj is not None
+"day_mintime": $safeMs($vpdDayMinTimeObj.raw),
+#else
+"day_mintime": null,
+#end if
+#if $vpdMonthMaxObj is not None
+"month_max": $vpdMonthMaxObj.kPa.format(format_string="%.4f", None_string="null", add_label=False, localize=False),
+#else
+"month_max": null,
+#end if
+#if $vpdMonthMinObj is not None
+"month_min": $vpdMonthMinObj.kPa.format(format_string="%.4f", None_string="null", add_label=False, localize=False),
+#else
+"month_min": null,
+#end if
+#if $vpdMonthAvgObj is not None
+"month_avg": $vpdMonthAvgObj.kPa.format(format_string="%.4f", None_string="null", add_label=False, localize=False),
+#else
+"month_avg": null,
+#end if
+#if $vpdYearMaxObj is not None
+"year_max": $vpdYearMaxObj.kPa.format(format_string="%.4f", None_string="null", add_label=False, localize=False),
+#else
+"year_max": null,
+#end if
+#if $vpdYearMinObj is not None
+"year_min": $vpdYearMinObj.kPa.format(format_string="%.4f", None_string="null", add_label=False, localize=False),
+#else
+"year_min": null,
+#end if
+#if $vpdYearAvgObj is not None
+"year_avg": $vpdYearAvgObj.kPa.format(format_string="%.4f", None_string="null", add_label=False, localize=False)
+#else
+"year_avg": null
+#end if
 #else
 "current": null
 #end if
