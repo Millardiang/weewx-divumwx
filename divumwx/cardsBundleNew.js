@@ -4403,6 +4403,18 @@ try {
   var last24hText = addChipRow('Last 24hr');
   var rateText = addChipRow('Rain Rate');
   var eventText = addChipRow('Rain Event');
+  // The old '(since HH:MM)' suffix already overflowed this 40%-pane's real width on its
+  // own (measured against this site's actual card width: ~102px available, ~120px of text)
+  // -- text-overflow:ellipsis (set on every chip value by addChipRow above) was clipping it
+  // mid-word rather than showing the full time. An '@ time' shorthand was tried here first,
+  // but that drops the "this is when it started" meaning 'since' carries -- reverted to
+  // keeping the word 'since', instead moving the wrap point: the parentheses are dropped
+  // (redundant once it is its own line) and this element specifically (not addChipRow's
+  // shared default) now wraps instead of clipping, with an explicit <br> forced right before
+  // 'since' so it always breaks there -- amount on its own line, 'since time' on the next --
+  // rather than relying on the browser's own word-wrap to land in a sensible spot.
+  eventText.style.whiteSpace = 'normal';
+  eventText.style.textOverflow = 'clip';
   eventText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
 
   // Whole card is a click-through to the rain chart/records page — an
@@ -4615,7 +4627,7 @@ try {
     if (v.event > 0) {
       eventText.parentElement.style.display = '';
       rateText.parentElement.style.borderBottom = '1px solid var(--bs-border-color)';
-      eventText.textContent = rainLabel(v.event) + (stormLabel ? ' (since ' + stormLabel + ')' : '');
+      eventText.innerHTML = rainLabel(v.event) + (stormLabel ? '<br>since ' + stormLabel : '');
     } else {
       eventText.parentElement.style.display = 'none';
       rateText.parentElement.style.borderBottom = 'none';
@@ -4880,6 +4892,18 @@ try {
   var last24hText = addChipRow('Last 24hr');
   var rateText = addChipRow('Rain Rate');
   var eventText = addChipRow('Rain Event');
+  // The old '(since HH:MM)' suffix already overflowed this 40%-pane's real width on its
+  // own (measured against this site's actual card width: ~102px available, ~120px of text)
+  // -- text-overflow:ellipsis (set on every chip value by addChipRow above) was clipping it
+  // mid-word rather than showing the full time. An '@ time' shorthand was tried here first,
+  // but that drops the "this is when it started" meaning 'since' carries -- reverted to
+  // keeping the word 'since', instead moving the wrap point: the parentheses are dropped
+  // (redundant once it is its own line) and this element specifically (not addChipRow's
+  // shared default) now wraps instead of clipping, with an explicit <br> forced right before
+  // 'since' so it always breaks there -- amount on its own line, 'since time' on the next --
+  // rather than relying on the browser's own word-wrap to land in a sensible spot.
+  eventText.style.whiteSpace = 'normal';
+  eventText.style.textOverflow = 'clip';
   eventText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
 
   // Whole card is a click-through to the rain chart/records page — an
@@ -5053,7 +5077,7 @@ try {
     if (v.event > 0) {
       eventText.parentElement.style.display = '';
       rateText.parentElement.style.borderBottom = '1px solid var(--bs-border-color)';
-      eventText.textContent = rainLabel(v.event) + (stormLabel ? ' (since ' + stormLabel + ')' : '');
+      eventText.innerHTML = rainLabel(v.event) + (stormLabel ? '<br>since ' + stormLabel : '');
     } else {
       eventText.parentElement.style.display = 'none';
       rateText.parentElement.style.borderBottom = 'none';
@@ -5311,6 +5335,18 @@ try {
   var last24hText = addChipRow('Last 24hr');
   var rateText = addChipRow('Rain Rate');
   var eventText = addChipRow('Rain Event');
+  // The old '(since HH:MM)' suffix already overflowed this 40%-pane's real width on its
+  // own (measured against this site's actual card width: ~102px available, ~120px of text)
+  // -- text-overflow:ellipsis (set on every chip value by addChipRow above) was clipping it
+  // mid-word rather than showing the full time. An '@ time' shorthand was tried here first,
+  // but that drops the "this is when it started" meaning 'since' carries -- reverted to
+  // keeping the word 'since', instead moving the wrap point: the parentheses are dropped
+  // (redundant once it is its own line) and this element specifically (not addChipRow's
+  // shared default) now wraps instead of clipping, with an explicit <br> forced right before
+  // 'since' so it always breaks there -- amount on its own line, 'since time' on the next --
+  // rather than relying on the browser's own word-wrap to land in a sensible spot.
+  eventText.style.whiteSpace = 'normal';
+  eventText.style.textOverflow = 'clip';
   eventText.parentElement.style.borderBottom = 'none';
 
   // Whole card is a click-through to the same rain chart/records page the
@@ -5807,7 +5843,7 @@ try {
     if (v.event > 0) {
       eventText.parentElement.style.display = '';
       rateText.parentElement.style.borderBottom = '1px solid var(--bs-border-color)';
-      eventText.textContent = rainLabel(v.event) + (stormLabel ? ' (since ' + stormLabel + ')' : '');
+      eventText.innerHTML = rainLabel(v.event) + (stormLabel ? '<br>since ' + stormLabel : '');
     } else {
       eventText.parentElement.style.display = 'none';
       rateText.parentElement.style.borderBottom = 'none';
@@ -12210,14 +12246,13 @@ try {
         source: (isDay && cloudPercentFromCamera !== null) ? 'cloud_coverage.json' : 'loop.json/archive.json'
       });
 
-      // Ported directly from the PHP module: <0 means charging/exporting,
-      // >=0 means discharging/importing. Display value is the magnitude
-      // (abs), same as the PHP's abs() calls -- the state label already
-      // carries the direction. Sign convention for grid_power specifically
-      // is assumed to match the old module's (not separately confirmed
-      // against this integration's own docs) -- worth double-checking
-      // against a real export event if the label ever looks backwards.
-      var batteryState = (batteryPowerRaw !== null && batteryPowerRaw < 0) ? DivumWXI18N.t('Charging') : DivumWXI18N.t('Discharging');
+      // Solar Assistant's battery_power sign is the opposite of what the
+      // old PHP comment assumed: <0 means discharging (power leaving the
+      // battery), >=0 means charging. Confirmed against a live reading of
+      // -13W showing as "Charging" when the battery was in fact idle/
+      // discharging. Display value is the magnitude (abs) -- the state
+      // label already carries the direction.
+      var batteryState = (batteryPowerRaw !== null && batteryPowerRaw < 0) ? DivumWXI18N.t('Discharging') : DivumWXI18N.t('Charging');
       // "to Grid"/"from Grid" dropped -- this row's own label already says
       // GRID, so the full phrase was redundant and was the direct cause of
       // this row wrapping to 2 lines, which left too little vertical room
@@ -12734,7 +12769,7 @@ try {
     var gridState2  = (v.gridPower === null) ? 'grey' : (v.gridPower < 0 ? 'green' : (v.gridPower > 0 ? 'red' : 'grey'));
     var loadState   = (v.houseLoadPower !== null && v.houseLoadPower > 0) ? 'green' : 'grey';
     var upsState    = (v.upsLoadPower !== null && Math.abs(v.upsLoadPower) > 1) ? 'green' : 'grey';
-    var battState   = (v.batteryPower === null) ? 'grey' : (v.batteryPower < 0 ? 'green' : (v.batteryPower > 0 ? 'amber' : 'grey'));
+    var battState   = (v.batteryPower === null) ? 'grey' : (v.batteryPower < 0 ? 'amber' : (v.batteryPower > 0 ? 'green' : 'grey'));
     var battColor   = COLORS[battState === 'grey' ? 'grey' : battState];
     var gridColor   = COLORS[gridState2 === 'grey' ? 'grey' : gridState2];
 
@@ -12777,7 +12812,7 @@ try {
       '<span style="'+HERO_LABEL_STYLE+'" data-i18n-label="UPS Load"></span></span></div>';
 
     var battStateLabel = (v.batteryPower === null) ? '' :
-      (v.batteryPower < 0 ? DivumWXI18N.t('Charging') : (v.batteryPower > 0 ? DivumWXI18N.t('Discharging') : DivumWXI18N.t('Idle')));
+      (v.batteryPower < 0 ? DivumWXI18N.t('Discharging') : (v.batteryPower > 0 ? DivumWXI18N.t('Charging') : DivumWXI18N.t('Idle')));
     html += '<div class="seh-node" style="'+nodeStyle(NODES.battery)+'" data-i18n-title="Battery">' +
       '<span style="'+HERO_ICON_WRAP+'">'+iconBatteryGlyph(battColor, v.batterySOC)+'</span>' +
       '<span style="'+HERO_TEXT_WRAP+HERO_BATTERY_TEXT_STYLE+'">' +
@@ -12922,14 +12957,13 @@ try {
         source: (isDay && cloudPercentFromCamera !== null) ? 'cloud_coverage.json' : 'loop.json/archive.json'
       });
 
-      // Ported directly from the PHP module: <0 means charging/exporting,
-      // >=0 means discharging/importing. Display value is the magnitude
-      // (abs), same as the PHP's abs() calls -- the state label already
-      // carries the direction. Sign convention for grid_power specifically
-      // is assumed to match the old module's (not separately confirmed
-      // against this integration's own docs) -- worth double-checking
-      // against a real export event if the label ever looks backwards.
-      var batteryState = (batteryPowerRaw !== null && batteryPowerRaw < 0) ? DivumWXI18N.t('Charging') : DivumWXI18N.t('Discharging');
+      // Solar Assistant's battery_power sign is the opposite of what the
+      // old PHP comment assumed: <0 means discharging (power leaving the
+      // battery), >=0 means charging. Confirmed against a live reading of
+      // -13W showing as "Charging" when the battery was in fact idle/
+      // discharging. Display value is the magnitude (abs) -- the state
+      // label already carries the direction.
+      var batteryState = (batteryPowerRaw !== null && batteryPowerRaw < 0) ? DivumWXI18N.t('Discharging') : DivumWXI18N.t('Charging');
       // "to Grid"/"from Grid" dropped -- this row's own label already says
       // GRID, so the full phrase was redundant and was the direct cause of
       // this row wrapping to 2 lines, which left too little vertical room
