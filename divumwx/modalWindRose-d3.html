@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# modalWindRose.html version 0.0.1
+# modalWindRose.html version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -9,6 +9,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Wind Roses</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
@@ -32,7 +35,7 @@
   --bs-border-color: #2A3358;
 }
 * { box-sizing: border-box; }
-html, body { margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+html, body { margin: 0; font-family: 'Lexend', 'Helvetica Neue', Helvetica, Arial, sans-serif; }
 body {
   background: var(--bs-body-bg);
   color: var(--bs-body-color);
@@ -417,7 +420,7 @@ function drawRoseD3(containerId, roseData, isGust){
     const pct = Math.round((i / 4) * (maxCount / total) * 100);
     g.append('text')
       .attr('x', 0).attr('y', -r - 4).attr('text-anchor', 'middle')
-      .attr('font-size', 9).attr('font-family', 'system-ui, sans-serif').attr('fill', TC.ringTxt)
+      .attr('font-size', 9).attr('font-family', "'Lexend', system-ui, sans-serif").attr('fill', TC.ringTxt)
       .text(pct + '%');
   }
 
@@ -464,7 +467,7 @@ function drawRoseD3(containerId, roseData, isGust){
     g.append('text')
       .attr('x', Math.sin(a) * labR).attr('y', -Math.cos(a) * labR)
       .attr('text-anchor', 'middle').attr('dominant-baseline', 'middle')
-      .attr('font-family', 'system-ui, sans-serif')
+      .attr('font-family', "'Lexend', system-ui, sans-serif")
       .attr('font-size', lbl === 'N' ? 13 : 11).attr('font-weight', lbl === 'N' ? 'bold' : 'normal')
       .attr('fill', lbl === 'N' ? (isGust ? '#D3A94C' : '#FF6B6B') : TC.cardTxt)
       .text(lbl);

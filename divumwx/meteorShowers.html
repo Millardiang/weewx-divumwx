@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# meteorShowers.html version 0.1.0
+# meteorShowers.html version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -11,7 +11,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Meteor Showers — DivumWX</title>
-<link rel="stylesheet" href="header.css?v=s3n2026i">
+<link rel="stylesheet" href="header.css?v=s3n2026k">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 
 :root {
@@ -50,7 +53,7 @@ body.dark.season-summer { --dark-card: #332c16; }
 body.dark.season-autumn { --dark-card: #2c2118; }
 body {
   margin: 0;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: 'Lexend', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   transition: background 0.3s, color 0.3s;
 }
 
@@ -72,13 +75,10 @@ body {
   color: var(--bs-secondary-color);
 }
 
-/* ---- Meteor content — same design language as modalMeteorShowers.html,
-   adapted from [data-theme] to body.light/body.dark since this is a real
-   standalone page (theme applied to <body> directly), not an iframe. ---- */
 .meteor-section{ margin-bottom:30px; }
 .meteor-section:last-child{ margin-bottom:0; }
 .meteor-section-title{
-  font-family:Georgia, 'Times New Roman', serif;
+  font-family:'Lexend', system-ui, sans-serif;
   font-variant-caps:small-caps;
   letter-spacing:.04em;
   font-size:20px;
@@ -153,9 +153,7 @@ body.dark .meteor-card{ box-shadow:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rg
 <script src="siteHeader.js"></script>
 <script>
 // ==== THEME HANDLING ====
-// Copied verbatim from records.html's own boilerplate — same station
-// coordinates, same auto/seasonal logic, same "run before .container
-// paints" ordering to avoid a flash of the wrong theme.
+
 const STATION_LAT = 51.94;
 const STATION_LON = -0.987;
 const THEME_KEY = 'dashboardThemeMode';
@@ -233,15 +231,6 @@ function applyDashboardTheme() {
   document.body.classList.remove('light', 'dark');
   document.body.classList.add(resolved);
 
-  // Seasonal accent mode retired site-wide -- see header.js's
-  // applySeasonClass() for the full rationale. This page has its own
-  // independent inline implementation (doesn't call the shared
-  // header.js function at all), so it needed the identical no-op
-  // treatment applied directly here. currentSeason kept as a variable
-  // (always null now) since it's still referenced below (themechange
-  // event detail, theme-toggle button label) and those call sites
-  // already handle null correctly -- every other themeMode already
-  // exercises that same null path today.
   const currentSeason = null;
 
   const btn = document.getElementById('themeToggle');
@@ -361,12 +350,6 @@ function setStationTitle() {
     .catch(e => console.warn('meteorShowers: station_location fetch failed —', e.message));
 }
 
-// updateNavCollapse, includeHTML, fixDivumwxNavLinks,
-// hideCurrentPageNavLink (now normalizePath, folded into
-// initSharedHeader itself), populateLanguageSelector, and
-// translateNavbar all now live in siteHeader.js -- one shared copy for
-// every page, instead of this page's own separate copies.
-
 window.addEventListener('storage', e => {
   if (e.key === THEME_KEY) applyDashboardTheme();
 });
@@ -387,8 +370,6 @@ includeHTML(() => {
 <script>
 (function(){
 
-  // Same IAU-catalog snapshot as modalMeteorShowers.html's fallback —
-  // used only if ./jsondata/meteor.txt can't be fetched or fails to parse.
   var FALLBACK_SHOWERS = [
     { code:'ANT', name:'Antihelion Source', start:'Dec 10', end:'Sep 10', peak:'Jan 01', ra:187.0, de:-4.0, v:30.0, r:3.0, zhr:4 },
     { code:'QUA', name:'Quadrantids', start:'Dec 26', end:'Jan 12', peak:'Jan 04', ra:230.0, de:49.0, v:41.0, r:2.1, zhr:120 },

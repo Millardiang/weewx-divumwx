@@ -1,28 +1,11 @@
 <!--
 ##############################################################################################
-# astronomyNavbar.html version 0.2.0
+# astronomyNavbar.html version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
 -->
 
-<!-- All links here are root-relative (leading "/divumwx/") rather than
-     plain relative paths -- this navbar is included from pages at two
-     different directory depths (astronomy.html/constellations.html/
-     meteorShowers.html at the DivumWX root, and skyfield/index.html/
-     celestial/index.html one level down), and a plain relative href
-     like "constellations.html" or "./skyfield" resolves against
-     whichever page included it. From skyfield/index.html that turned
-     "./celestial/index.html" into skyfield/celestial/index.html (a
-     page that doesn't exist) -- root-relative paths resolve the same
-     way regardless of which page included this file.
-
-     The "/divumwx/" prefix itself is REQUIRED, not optional: DivumWX's
-     own HTML_ROOT is a subdirectory of the site's web root
-     (<site_root>/divumwx/...), not the web root itself -- a bare
-     "/index.html" resolves to <site_root>/index.html, not
-     <site_root>/divumwx/index.html, landing on whatever unrelated page
-     (or nothing) the site happens to serve at its actual root. -->
 <header>
   <a class="site-title" href="/divumwx/index.html"><span class="brand-text">Astronomy</span></a>
 
@@ -38,7 +21,7 @@
       <a class="site-nav-link" href="/divumwx/constellations.html" data-i18n="Constellations">Constellations</a>
       <a class="site-nav-link" href="/divumwx/meteorShowers.html" data-i18n="Meteor Showers">Meteor Showers</a>
       <a class="site-nav-link" href="/divumwx/visualisations.html" data-i18n="Visualisations">Visualisations</a>
-      <!-- More astronomy pages get their own link here as they're built. -->
+
       <span class="select-wrap select-wrap--lang">
         <select id="languageSystem" aria-label="Language" data-i18n-attr="aria-label:Select language"></select>
         <img id="languageFlag" class="select-flag" alt="" aria-hidden="true">

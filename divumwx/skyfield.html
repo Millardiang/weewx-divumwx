@@ -1,23 +1,9 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# skyfield.html version 0.1.0
+# skyfield.html version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
-##############################################################################################
-#
-# A home for Skyfield-powered views, laid out the same way charts-d3.html
-# and heatmaps.html are: navbar, then a row of pill buttons
-# (.records-tabs/.records-tab -- the exact same classes/CSS those two
-# pages use, copied verbatim for visual consistency) that switch which
-# view is showing below. Each view is a full standalone page loaded into
-# an <iframe> rather than reimplemented inline here, since that's what
-# celestial/index.html already is.
-#
-# Only one button exists so far: "Live" -> ./celestial/index.html. Adding
-# another view later is just one more <button class="records-tab"
-# data-src="...">Label</button> in #skyfieldTabs -- the click handler at
-# the bottom of the file is generic over however many there are.
 ##############################################################################################
 -->
 <html lang="en" data-bs-theme="light">
@@ -45,7 +31,10 @@
 })();
 </script>
 <link href="css/bootstrap.5.3.8.min.css" rel="stylesheet">
-<link rel="stylesheet" href="header.css?v=s3n2026i">
+<link rel="stylesheet" href="header.css?v=s3n2026k">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script>
   document.documentElement.dataset.embed = (new URL(location.href).searchParams.get('embed') === '1') ? '1' : '0';
 </script>
@@ -81,7 +70,7 @@
   --bs-link-color:#B45309;
   --bs-link-hover-color:#F2BC6B;
   --bs-warning-rgb:180,83,9;
-  --bs-font-sans-serif:'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --bs-font-sans-serif:'Lexend', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 [data-bs-theme="dark"]{
   --bw-accent:#D3A94C;
@@ -139,7 +128,7 @@ body{
 
 .records-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;}
 .records-tab{
-  font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:13px;font-weight:600;
+  font-family:'Lexend', system-ui, sans-serif;font-size:13px;font-weight:600;
   padding:9px 18px;border-radius:999px;border:1px solid var(--bs-border-color);
   background-color:var(--bs-tertiary-bg);color:var(--bs-body-color);
   cursor:pointer;transition:.15s;
@@ -197,13 +186,6 @@ body{
 <script src="siteHeader.js"></script>
 <script>
 
-// Seasonal accent mode retired site-wide -- was:
-// applySeasonClass(localStorage.getItem('dashboardThemeMode') || 'auto', 51.94);
-// That function no longer exists anywhere on the site; this leftover
-// top-level call threw immediately on page load, before anything else
-// in this script block (including the tab-switching setup and the
-// includeHTML() call that loads the navbar) ever ran.
-
 // ==== Tab switching: click a .records-tab, load its data-src into the frame ====
 var skyfieldFrame = document.getElementById('skyfieldFrame');
 var skyfieldTabs = document.querySelectorAll('#skyfieldTabs .records-tab[data-src]');
@@ -217,7 +199,7 @@ skyfieldTabs.forEach(function(btn){
 if (skyfieldTabs.length) skyfieldTabs[0].click();
 
 // ==== Shared navbar/menu behaviour (same as every other page) ====
-// includeHTML() now lives in siteHeader.js -- one shared copy.
+
 includeHTML(function(){
   initSharedHeader();
   document.getElementById('themeToggle').onclick = function(){
@@ -231,7 +213,7 @@ includeHTML(function(){
       resolved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     }
     document.documentElement.setAttribute('data-bs-theme', resolved);
-    // Seasonal accent mode retired site-wide -- was: applySeasonClass(next, 51.94);
+
   };
 });
 </script>

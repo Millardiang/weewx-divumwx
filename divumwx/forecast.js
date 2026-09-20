@@ -1,6 +1,6 @@
 /*
 ##############################################################################################
-# forecast.js version 0.0.1
+# forecast.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -38,10 +38,7 @@ function mockHourlyForDay(seed){
 
 function getDays(){
   const raw = (forecastData && forecastData.days) || mockDays;
-  // mockDays (demo/fallback data, used only when the real forecast has
-  // never loaded) keeps its own hardcoded name/cond strings as-is -- it
-  // has no dateStr/code to derive them from, and is placeholder content
-  // rather than real forecast text anyway.
+
   if (!forecastData || !forecastData.days) return raw;
   return raw.map((d, i) => Object.assign({}, d, {
     name: dayLabel(d.dateStr, i),
@@ -62,13 +59,6 @@ const FORECAST_POLL_MS  = 10 * 60 * 1000;
 let forecastData = null;
 let forecastStatus = 'connecting';
 
-// WEEKDAYS reuses cardForecast.js's own keys (Sun/Mon/.../Sat already
-// exist in every lang/<code>.conf) -- same fix as locationforecast.html.
-// The previous version called toLocaleDateString('en-GB',
-// {weekday:'short'}), which is the *browser's* own English locale
-// formatting, completely untouched by DivumWXI18N -- every non-"Today"
-// day label stayed in English regardless of the site's selected
-// language.
 const WEEKDAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 function dayLabel(dateStr, index){
   if(index===0) return DivumWXI18N.t('Today');
@@ -103,16 +93,7 @@ async function pollForecast(){
       (hourlyByDate[dateStr] = hourlyByDate[dateStr] || []).push({
         h: hour,
         tempC: h.temperature_2m ? h.temperature_2m[i] : null,
-        // Prefers Open-Meteo's own per-hour is_day (sunrise/sunset-accurate)
-        // if the server-side poller that builds forecastcard.txt happens to
-        // have requested it -- falls back to the fixed 6am-8pm clock guess
-        // otherwise, unchanged from before. h.is_day here would come from
-        // that same raw Open-Meteo passthrough (this file only reads
-        // forecastcard.txt, it doesn't build the Open-Meteo request itself),
-        // so getting this fully correct year-round (not just approximately
-        // right outside of DST/seasonal daylight swings) requires the
-        // server-side poller's own `hourly` parameter list to include
-        // is_day -- not something visible or editable from this file.
+
         icon: wmoToIconKey(h.weather_code ? h.weather_code[i] : current.weatherCode,
           (h.is_day && h.is_day[i] != null) ? h.is_day[i] === 1 : (hour>=6 && hour<20)),
         rainMm: h.precipitation ? h.precipitation[i] : 0,
@@ -125,14 +106,7 @@ async function pollForecast(){
 
     const d = j.daily || {};
     const dailyDates = d.time || [];
-    // dateStr/code are kept raw here; name/cond are computed fresh every
-    // time getDays() is called (below) rather than baked in once at poll
-    // time. pollForecast() only runs every 10 minutes or on demand, so
-    // baking in translated strings here would freeze them at whatever
-    // language was active at the last poll, with nothing to revisit them
-    // on a later live language switch -- same bug class documented
-    // throughout this project, just one step removed since a network
-    // poll is the trigger instead of page boot.
+
     const days = dailyDates.map((dateStr, i) => {
       const code = d.weather_code ? d.weather_code[i] : 0;
       return {
@@ -161,11 +135,7 @@ async function pollForecast(){
 }
 
 // ===================== Open-Meteo WMO weather-code mapping =====================
-// Same key set as locationforecast.html's WMO_TEXT_KEYS (deliberately
-// separate from cardCurrent.js's differently-phrased condition set --
-// see that file's comment for why). Reusing the identical English key
-// strings here means both pages share one set of dictionary entries
-// across all 29 lang/<code>.conf files rather than needing two.
+
 const WMO_TEXT_KEYS = {
   0:'Clear sky', 1:'Mainly clear', 2:'Partly cloudy', 3:'Overcast',
   45:'Fog', 48:'Freezing fog',

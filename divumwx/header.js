@@ -1,6 +1,6 @@
 /*
 ##############################################################################################
-# header.js version 0.0.1
+# header.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -26,30 +26,7 @@ function seasonLabel(season) {
 }
 
 function applySeasonClass(mode, lat) {
-  // Seasonal accent mode retired site-wide (removed on request -- the
-  // parchment/tan seasonal tinting it applied to cards, hourly panels,
-  // and the active day-strip button was broadly disliked and had also
-  // developed a genuine CSS specificity bug where the active day-card
-  // and the hourly panel resolved to different colours under a season
-  // class). Always a no-op now regardless of what mode is passed --
-  // including a stale 'seasonal' value some users may still have saved
-  // in localStorage from before this was removed, and regardless of
-  // whether a page's own THEME_ORDER array still lists 'seasonal' as a
-  // cyclable option. document.body still gets any leftover season-*
-  // class stripped off (harmless if already absent) so a page that was
-  // showing seasonal tinting before this deploy clears it immediately
-  // on next load rather than waiting for something else to remove it.
-  //
-  // Kept as a real function, not deleted -- every calling page still
-  // invokes this positionally and several assign its return value to
-  // currentSeason, which already handles null today (every existing
-  // non-'seasonal' mode already returned null via the old early-return,
-  // so this is an already-exercised code path, not a new one).
-  //
-  // stationforecast.html defines its OWN local applySeasonClass() that
-  // shadows this one on that page specifically -- it needed (and got)
-  // the identical no-op treatment applied directly in that file, since
-  // it doesn't call through to this shared header.js copy at all.
+
   document.body.classList.remove.apply(document.body.classList, SEASON_CLASSES);
   return null;
 }
@@ -111,13 +88,6 @@ function initSharedHeader(){
     document.body.classList.toggle('menu-open');
   };
 
-  // Hides whichever nav link points at the page currently being viewed.
-  // Compares resolved *pathnames* via the anchor's own .pathname DOM
-  // property (browser-resolved, so it works the same for the main
-  // navbar's plain relative hrefs like "records.html" and the astronomy
-  // navbar's root-relative ones like "/skyfield"), rather than the raw
-  // href text against window.location's last segment -- that string
-  // comparison silently never matched the root-relative style.
   function normalizePath(path){
     path = path.replace(/\/+$/, '') || '/';
     if (!/\.[a-z0-9]+$/i.test(path)) path += '/index.html';

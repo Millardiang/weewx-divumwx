@@ -1,23 +1,6 @@
 /*
 ##############################################################################################
-# moonDisc.js
-#  Shared, dependency-free renderer for the textured, dynamically-shaded moon disc used by
-#  cardMoonPhase.js (cardsBundle.js) on the main dashboard.  Factored out here so the same
-#  graphic can be dropped into pages that don't load d3/cardsBundle.js -- currently just the
-#  weewx-skyfield "Sky" page (skyfield-sky-page/index.html.tmpl), which replaced its old
-#  $sky_page.moon_svg() icon with this.
-#
-#  Usage:
-#    <script src="../moonDisc.js"></script>
-#    <div id="someMount"></div>
-#    <script>
-#      DivumWXMoonDisc.render(document.getElementById('someMount'), {
-#        phasex: <phase angle, 0-360, 0=new/180=full, drives terminator shape+side>,
-#        tiltDeg: <rotation of the whole disc, degrees>,
-#        size: <diameter in px, default 110>
-#      });
-#    </script>
-#
+# moonDisc.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# gauges.html version 0.0.1
+# gauges.html version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -12,7 +12,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>DivumWX Weather</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="header.css?v=s3n2026i">
+<link rel="stylesheet" href="header.css?v=s3n2026k">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 
 :root,
@@ -36,7 +39,7 @@
   --bs-secondary-bg: #FFFFFF;
   --bs-border-color: #C9CFD8;
   --bs-card-bg: #FFFFFF;
-  --bs-font-sans-serif:'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --bs-font-sans-serif:'Lexend', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 [data-bs-theme="dark"]{
   --bw-accent:#D3A94C;
@@ -62,10 +65,9 @@ body{
   padding-bottom:48px;
   transition:background-color .25s ease, color .25s ease;
 }
-.font-mono{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;}
+.font-mono{font-family:'Lexend', system-ui, sans-serif;}
 .card{background:var(--bs-card-bg); border-radius:var(--bw-radius-sm); box-shadow:var(--bw-shadow);}
-/* Seasonal accent mode — tints the card background the same way index.html's
-   dashboard does, using the same palette (kept in sync with header.css). */
+
 body.season-winter { --bs-card-bg: #e9f2ec; }
 [data-bs-theme="dark"] body.season-winter { --bs-card-bg: #24312a; }
 body.season-spring { --bs-card-bg: #eef7e3; }
@@ -101,7 +103,7 @@ body.season-autumn { --bs-card-bg: #f2e6d8; }
 .gauge-wrap{width:100%;max-width:330px;aspect-ratio:330/322;}
 .gauge-wrap > div{width:100%;height:100%;}
 
-footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;}
+footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Lexend', system-ui, sans-serif;}
 </style>
 </head>
 <body>
@@ -163,7 +165,6 @@ footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neu
   <footer class="text-center py-3" id="gaugesFooter">DivumWX — Gauges</footer>
 </div>
 
-
 <script src="cardI18n.js?v=s3n2026a"></script>
 <script src="siteHeader.js"></script>
 <script src="stationTime.js"></script>
@@ -177,11 +178,7 @@ footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neu
   DivumWXI18N.applyAttr(document.getElementById('gaugesStatusDot'), 'title', 'Connecting\u2026');
   DivumWXI18N.applyLabel(document.getElementById('gaugesUpdatedLabel'), 'UPDATED');
   DivumWXI18N.applyLabel(document.getElementById('gaugesFooter'), 'DivumWX \u2014 Gauges');
-  // gaugesStatusLabel is NOT here -- it's fully rewritten by
-  // setGaugesStatus() every time that runs, and the 'i18nready' listener
-  // added near setGaugesStatus() below re-invokes it with the
-  // last-known status so a live language switch doesn't have to wait
-  // for the next poll cycle.
+
 })();
 </script>
 <script>
@@ -913,10 +910,6 @@ var LOOP_POLL_MS = 15 * 1000;
 var ARCHIVE_POLL_MS = 60 * 1000;
 var CHARTS_POLL_MS = 60 * 60 * 1000;
 
-// Card <-> sensor mapping, inlined directly in this page -- see
-// records.html's copy of this same table for why it's duplicated rather
-// than shared from one file (a shared file silently failed in the field
-// when it wasn't deployed alongside the pages referencing it).
 var DIVUMWX_CARD_TO_BASES = {
   cardTemperature:            ['outTemp', 'outDew'],
   cardHumidity:                ['outHumid'],
@@ -947,11 +940,6 @@ function isBaseCardEnabled(base, enabledCards) {
   return enabledCards.indexOf(card) !== -1;
 }
 
-// Maps each gauge's mount element id to the base series it represents;
-// gRain/gRainRate check whether EITHER a tipping-bucket or piezo rain
-// card is enabled, since this page shows a single rain gauge fed from
-// loop.json's plain 'rain' object regardless of which physical sensor
-// type is configured (see pollArchive() below reading j.rain.day).
 var GAUGE_BASES = {
   gTemp: ['outTemp'],
   gWind: ['windSpeed', 'windGust'],
@@ -966,7 +954,7 @@ var GAUGE_BASES = {
   gAq: ['pm1_0', 'pm2_5', 'pm4_0', 'pm10_0'],
   gLightning: ['lightCount', 'lightDist'],
 };
-var ENABLED_CARDS = null; // null = unknown yet / fetch failed -- fail open
+var ENABLED_CARDS = null;
 
 function applyGaugeVisibility(){
   Object.keys(GAUGE_BASES).forEach(function(gaugeId){
@@ -1083,8 +1071,6 @@ function pollWindRose(){
     .finally(function(){ renderWindDir(liveValues.windDir, liveValues.windDir10); });
 }
 
-// includeHTML() now lives in siteHeader.js -- one shared copy.
-
 function setStationTitle(){
   fetch(ARCHIVE_JSON_URL + ((ARCHIVE_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'})
     .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
@@ -1109,19 +1095,13 @@ function resolveAutoIsDay(){
   return !window.matchMedia('(prefers-color-scheme: dark)').matches;
 }
 function resolveTheme(){
-  // Seasonal is a fixed standalone theme, never affected by day/night auto-switching.
+
   if (themeMode === 'seasonal') return 'light';
   return themeMode==='light' ? 'light' : themeMode==='dark' ? 'dark' : (resolveAutoIsDay() ? 'light' : 'dark');
 }
 function applyTheme(){
   root.setAttribute('data-bs-theme', resolveTheme());
-  // Seasonal accent mode retired site-wide -- was: currentSeason =
-  // applySeasonClass(themeMode). That function no longer exists
-  // anywhere on the site; the leftover call here threw
-  // 'applySeasonClass is not defined' on every applyTheme() call,
-  // which (since applyTheme() runs before includeHTML()'s callback on
-  // this page) silently prevented the navbar from ever loading at all
-  // -- not a siteHeader.js problem, a much older dead-code reference.
+
   currentSeason = null;
   syncThemeNavUI();
   renderAll(liveValues);

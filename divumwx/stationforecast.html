@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# stationforecast.html version 0.0.1
+# stationforecast.html version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -14,7 +14,7 @@
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/css/bootstrap.min.css" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap');
 
 :root,
 [data-bs-theme="light"]{
@@ -32,7 +32,7 @@
   --bs-secondary-bg: #FFFFFF;
   --bs-border-color: #C9CFD8;
   --bs-card-bg: #FFFFFF;
-  --bs-font-sans-serif:'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --bs-font-sans-serif:'Lexend', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 [data-bs-theme="dark"]{
   --bw-accent:#D3A94C;
@@ -57,15 +57,6 @@ body{
 }
 .card{background:var(--bs-card-bg); border-radius:var(--bw-radius-sm); box-shadow:var(--bw-shadow);}
 
-/* Seasonal accent theming removed entirely (retired site-wide -- see
-   header.js's applySeasonClass() for the full rationale). --bs-card-bg,
-   --bs-body-bg, and --bs-tertiary-bg now always resolve to their plain
-   :root/[data-bs-theme] values above, regardless of any body.season-*
-   class -- this page no longer has any CSS that reacts to one at all,
-   so it's correct even if a stray season-* class somehow still ends up
-   on <body> (a stale cached header.js, etc.) rather than depending on
-   the JS side never adding it. */
-
 .section-label{
   font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--bs-secondary-color);
   margin:20px 0 12px;display:flex;align-items:center;gap:10px;
@@ -82,28 +73,17 @@ body{
 .day-card .dname{font-size:12.5px;font-weight:700;color:var(--bs-secondary-color);text-transform:uppercase;letter-spacing:.03em;}
 .day-card .dicon{width:38px;height:38px;margin:8px auto 4px;display:block;object-fit:contain;}
 .day-card .dcond{font-size:11.5px;color:var(--bs-secondary-color);height:28px;display:flex;align-items:center;justify-content:center;}
-.day-card .dtemps{font-family:'JetBrains Mono',monospace;font-size:14px;margin-top:4px;}
+.day-card .dtemps{font-family:'Lexend', system-ui, sans-serif;font-size:14px;margin-top:4px;}
 .day-card .dtemps .lo{color:var(--bs-secondary-color);}
 .day-card.active{background:var(--bs-tertiary-bg);}
-/* Hourly panel now matches the active day-card's background (both use
-   --bs-tertiary-bg) instead of the generic .card background
-   (--bs-card-bg), which under the seasonal theme overrides above reads
-   as a much warmer "parchment" tone -- was visually inconsistent with
-   the day strip's own highlighted state directly above it. */
+
 .card.hourly-panel{background:var(--bs-tertiary-bg);}
 .day-card.active .dname{color:var(--bw-accent);}
 
 /* ---------- Hourly table ---------- */
 .hourly-title h2{font-size:18px;font-weight:700;margin:0;}
 .hourly-title span{font-size:12px;color:var(--bs-secondary-color);}
-/* Bootstrap's own .table component defaults --bs-table-bg to
-   var(--bs-body-bg) and paints that directly onto every <td>/<th> cell,
-   independent of the parent .card -- this was the actual, entire cause
-   of the table area showing a different (parchment) colour than the
-   surrounding panel this whole time, nothing to do with seasonal
-   theming at all. Overriding it to transparent here lets the parent
-   .card.hourly-panel's own background (--bs-tertiary-bg) show through
-   uniformly instead. */
+
 table.hourly{ --bs-table-bg: transparent; }
 table.hourly{min-width:760px;}
 table.hourly th, table.hourly td{text-align:center;font-size:13px;vertical-align:middle;}
@@ -127,8 +107,8 @@ table.hourly .track-marker{
   transition:top .4s ease;
 }
 table.hourly .track-marker img.hicon{margin-bottom:2px;}
-table.hourly .temp-cell{font-family:'JetBrains Mono',monospace;font-weight:600;}
-table.hourly .rain-cell{color:var(--bw-sky);font-family:'JetBrains Mono',monospace;font-size:12px;}
+table.hourly .temp-cell{font-family:'Lexend', system-ui, sans-serif;font-weight:600;}
+table.hourly .rain-cell{color:var(--bw-sky);font-family:'Lexend', system-ui, sans-serif;font-size:12px;}
 
 /* ---------- Meteocons contrast filter, light theme only ---------- */
 [data-bs-theme="light"] .dicon,
@@ -151,7 +131,7 @@ table.hourly .rain-cell{color:var(--bw-sky);font-family:'JetBrains Mono',monospa
 
 .wind-badge{ position:relative; width:44px; height:44px; margin:0 auto; display:flex; align-items:center; justify-content:center; }
 .wind-badge-ring{ position:absolute; inset:0; width:100%; height:100%; transition:transform .4s ease; }
-.wind-badge-value{ position:relative; font-family:'JetBrains Mono',monospace; font-size:9.5px; font-weight:700; color:var(--wind-col, var(--bs-secondary-color)); }
+.wind-badge-value{ position:relative; font-family:'Lexend', system-ui, sans-serif; font-size:9.5px; font-weight:700; color:var(--wind-col, var(--bs-secondary-color)); }
 
 .live-dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--bs-secondary-color); margin-right:6px; }
 </style>
@@ -192,22 +172,14 @@ table.hourly .rain-cell{color:var(--bw-sky);font-family:'JetBrains Mono',monospa
 
 <script src="cardI18n.js?v=s3n2026a"></script>
 <script>
-// This page previously had NO i18n wiring at all -- no cardI18n.js
-// include, no DivumWXI18N calls anywhere. Adding the include is step
-// one; everything below applyStaticLabels()/the DivumWXI18N.t() calls
-// further down is new. forecast.js's own getDays()/dayLabel()/wmoText()
-// have also been updated (uploaded and patched separately) to route
-// through DivumWXI18N.t() the same way this page's inline script does.
+
 (function applyStaticLabels(){
   DivumWXI18N.applyLabel(document.getElementById('stationForecastLabel'), 'Forecast');
   DivumWXI18N.applyLabel(document.getElementById('stationForecastSource1'), 'Forecast source: Open\u2011Meteo');
   DivumWXI18N.applyLabel(document.getElementById('stationForecastSource2'), 'Forecast source: Open\u2011Meteo');
   DivumWXI18N.applyLabel(document.getElementById('stationMeteogramTitle'), '7-Day Meteogram');
   DivumWXI18N.applyLabel(document.getElementById('stationEmptyStateText'), 'No forecast data available.');
-  // liveLabel and hourlyTitle are NOT here -- both are fully rewritten by
-  // setLive()/renderPage() respectively every time those run, so they
-  // already pick up a live language switch via the 'i18nready' listener
-  // added near renderPage() below.
+
 })();
 </script>
 
@@ -280,8 +252,7 @@ function windUnitAbbr(unit){
 }
 function degToCompass(deg){
   if(deg==null) return '—';
-  // Reuses the same 16-point compass keys already translated elsewhere
-  // in the project (e.g. cardWindCompass.js), same fix as locationforecast.html.
+
   const dirs=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
   return DivumWXI18N.t(dirs[Math.round(deg/22.5)%16]);
 }
@@ -354,11 +325,7 @@ function renderPage(){
       <div class="dcond">${d.cond||''}</div>
       <div class="dtemps">${tempSpan(d.hi,sys.temp)} <span class="lo">${tempSpan(d.lo,sys.temp)}</span></div>
     </div>`).join('');
-  // d.name/d.cond above are now translated too -- forecast.js's
-  // getDays()/dayLabel()/wmoText() route through DivumWXI18N.t(). The
-  // mock/demo fallback data (used only before the real forecast has
-  // ever loaded) keeps its own fixed English strings, since it has no
-  // weather code to translate from and is placeholder content anyway.
+
   strip.querySelectorAll('.day-card').forEach(el=>{
     el.addEventListener('click', ()=>{ activeDay = parseInt(el.dataset.i,10); renderPage(); });
   });
@@ -402,10 +369,7 @@ function getMeteorologicalSeason(date, lat){
   return ((typeof lat === 'number') ? lat : 51.94) >= 0 ? season : SEASON_SWAP_SOUTH[season];
 }
 function applySeasonClass(){
-  // Seasonal accent mode retired site-wide -- see header.js's
-  // applySeasonClass() for the full rationale. This page defines its
-  // own local copy (shadowing header.js's) so it needed the identical
-  // no-op treatment applied directly here.
+
   document.body.classList.remove('season-winter', 'season-spring', 'season-summer', 'season-autumn');
 }
 function resolveAutoIsDay(){
@@ -422,12 +386,7 @@ function applyTheme(){
   applySeasonClass();
 }
 function pollIsDayForTheme(){
-  // Primary source: almanac.json's actual sun altitude -- "day" is
-  // precisely "between sunrise and sunset" by definition (sun above
-  // the horizon), astronomically exact regardless of what loop.json's
-  // hardware-derived isDay flag happens to mean. Falls back to
-  // loop.json's own observations.isDay only if almanac.json's fetch
-  // fails or its own value is missing.
+
   fetch('./jsondata/almanac.json?_=' + Date.now(), {cache:'no-store'})
     .then(r => { if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
     .then(alm => {

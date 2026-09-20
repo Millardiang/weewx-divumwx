@@ -1,9 +1,18 @@
-
+<!--
+##############################################################################################
+# modalZodiacMap.html version 1.0.0
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  GPLv3
+##############################################################################################
+-->
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
 <title>Zodiac Map</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <style>
@@ -15,7 +24,7 @@
 }
 html, body { margin: 0; padding: 0; }
 body {
-  font-family: Helvetica, Arial, sans-serif;
+  font-family: 'Lexend', Helvetica, Arial, sans-serif;
   background: var(--bg-color-dark);
   color: var(--text-color-dark);
 }
@@ -33,11 +42,11 @@ body {
   <div class="zodiacHeader">Zodiac Map</div>
   <div id="zodiacHost">
     <svg
-  width="1600" height="350.54301788965364" 
+  width="1600" height="350.54301788965364"
   viewBox="0 0 373.6666333333333 81.86639333333332"
   xmlns="http://www.w3.org/2000/svg">
 <desc>Sky map for 51.9400&#176; N, 000.9870&#176; W on 2026-08-14T12:40:00 BST</desc>
-<!-- Created using WeeWX and weewx-skymap-almanac extension -->
+
 <defs><clipPath id="weewxskymapbackgroundclippath269444"><rect x="11.2" y="11.2" width="359.6" height="59.6" /></clipPath></defs>
 <rect fill="#C0C0F0" stroke="currentColor" stroke-width="0.4" x="11" y="11" width="360" height="60" />
 <g clip-path="url(#weewxskymapbackgroundclippath269444)" id="horizon">
@@ -598,8 +607,7 @@ Distance: 370&#8239;521 km</title>
 
 <script>
 (function(){
-  // Theme (passive &#8212; follows the site, no toggle of its own, same
-  // pattern as every other converted modal in this project)
+
   function applyTheme(){
     var mode = localStorage.getItem('dashboardThemeMode') || 'auto';
     var resolved = mode === 'light' ? 'light' : mode === 'dark' ? 'dark'

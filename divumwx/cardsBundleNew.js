@@ -1,6 +1,6 @@
 /*
 ##############################################################################################
-# cardsBundleNew.js
+# cardsBundleNew.js version 1.0.0
 ##############################################################################################
 */
 
@@ -8,143 +8,22 @@
 try {
 /*
 ##############################################################################################
-# cardI18n.js version 0.0.3
+# cardI18n.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
 */
 
 // ===================== cardI18n.js =====================
-//
-// Loads jsondata/strings.json ONCE for the whole page -- generated
-// server-side by strings.json.tmpl, which now contains EVERY language's
-// full phrase set in one payload, nested by code:
-//
-//   {"_default": "da", "da": {"Temperature": "Temperatur", ...},
-//    "fr": {...}, ...}
-//
-// "_default" is this report's own configured WeeWX `lang` setting -- the
-// language a fresh visitor sees before ever touching the language
-// dropdown. Everything else is a real language code mapped to that
-// language's dictionary.
-//
-// window.DivumWXI18N.t(key)
-//   Synchronous lookup against the CURRENTLY ACTIVE language (see
-//   setLanguage() below). Returns the translated string if the payload
-//   has loaded and the active language's dictionary has an entry for
-//   `key`, otherwise returns `key` itself unchanged -- correct, not just
-//   a fallback of convenience, because every key IS the English phrase
-//   (same convention as the server-side [Texts] files). A card can call
-//   t() before the fetch resolves and will simply get English back for
-//   that first paint.
-//
-// window.DivumWXI18N.applyLabel(el, key)
-//   For text that gets set ONCE at card-boot time and never touched
-//   again afterwards (a card's own addChipRow(label) helper is the main
-//   case). Plain t(key) is wrong for that case for two separate reasons,
-//   both handled here: (1) card boot always runs before the initial
-//   fetch can possibly resolve (JS is single-threaded), so a bare t()
-//   call at boot always returns the English fallback, permanently, even
-//   after the payload loads; (2) even after it loads, switching language
-//   later needs this same text updated again, and nothing else would
-//   ever revisit it. applyLabel sets el.textContent = t(key) right away
-//   (same correct English-first-paint behaviour as t()), and PERMANENTLY
-//   registers the {el, key} pair -- re-applied not just once when the
-//   payload first loads, but every time setLanguage() is called
-//   afterwards too. Cards using addChipRow(DivumWXI18N.t('X')) need to
-//   change to addChipRow('X') and have addChipRow itself call
-//   DivumWXI18N.applyLabel(labelEl, label) instead of a bare
-//   labelEl.textContent = label -- see cardTemperature.js's addChipRow
-//   for a card that never needed this fix, because it rebuilds every
-//   label fresh inside renderCard() instead of once at boot (and so
-//   picks up a live language switch correctly too, via the 'i18nready'
-//   re-render below).
-//
-// window.DivumWXI18N.applyAttr(el, attr, key)
-//   The same idea as applyLabel, for setAttribute-based text (tooltips'
-//   data-title, mainly). Same permanent registration, same re-apply on
-//   every setLanguage() call.
-//
-// window.DivumWXI18N.getLanguage()
-//   The currently active language code.
-//
-// window.DivumWXI18N.getLanguageName(code)
-//   That language's own self-name, read directly from its [Texts]
-//   section's "Language" key (e.g. "Dansk", "Français", "العربية") --
-//   NOT translated into the currently active language, always that
-//   language's own name for itself, the way a language picker should
-//   read. Falls back to the raw code if that language isn't in the
-//   loaded payload. Lets a language-picker dropdown build its own
-//   option labels straight from the same payload everything else reads
-//   from, rather than needing a second hardcoded code-to-name list kept
-//   in sync separately (which is exactly the trap DIVUMWX_LANG_CHOICES
-//   in install.py already had to be careful about on the server side).
-//
-// window.DivumWXI18N.getLanguageFlagEmoji(code) /
-// window.DivumWXI18N.getLanguageFlagUrl(code)
-//   A representative country flag for that language -- a judgment call
-//   for languages with no country of their own (Breton, Catalan, Welsh,
-//   Basque) or spoken across several (Arabic, Hindi, Tamil, Urdu), see
-//   LANGUAGE_FLAG_COUNTRY's own comment for the specific choices made.
-//   getLanguageFlagEmoji returns a Unicode flag emoji (works directly as
-//   plain text, including inside a native <option> -- real image files
-//   can't be embedded in <option> elements in any browser); returns ''
-//   if the code isn't recognized. getLanguageFlagUrl returns a path to
-//   the matching SVG under img/flags/ (for use in an actual <img>
-//   element next to the closed selector, where images work fine -- it's
-//   only inside the open <option> list itself that's restricted to
-//   plain text). Both driven by the same country-code table, so the
-//   emoji and the SVG can never show two different countries for the
-//   same language.
-//
-// window.DivumWXI18N.getAvailableLanguages()
-//   Array of every language code present in the loaded payload (empty
-//   array before the payload has loaded) -- e.g. for a language-picker
-//   dropdown to populate its own options from, rather than hardcoding
-//   the list separately somewhere else. Order matches the order
-//   strings.json.tmpl's Python side produced them in (alphabetical by
-//   code), not necessarily the order a UI wants to display them in.
-//
-// window.DivumWXI18N.setLanguage(code)
-//   Switches the active language, in the browser, with no server round
-//   trip -- every language's text already arrived in the one payload
-//   fetch. Persists the choice to localStorage (key 'dashboardLanguage',
-//   read back on the next page load ahead of "_default") so it survives
-//   a refresh, same convention as the existing unit-system dropdown's
-//   'dashboardUnitSystem' key. No-ops (returns false) if `code` isn't a
-//   language actually present in the loaded payload, rather than
-//   silently switching to an all-English-fallback state.  Re-applies
-//   every applyLabel/applyAttr-registered element immediately, then
-//   fires 'i18nready' again so every card's own re-render listener (the
-//   same one used for the very first load) picks up the switch too --
-//   this is deliberately the SAME event as the initial-load signal, not
-//   a separate 'languagechange' event, so no card needs new listener
-//   code to support live switching; whatever already made a card
-//   correctly show translations on page load makes it correctly react
-//   to a live switch too. Returns true on a successful switch.
-//
-// window.DivumWXI18N.ready
-//   A Promise that resolves once the initial payload load has settled
-//   (loaded or failed -- a network hiccup here should degrade to "page
-//   stays in English", never break the page).
-//
-// 'i18nready' event on window
-//   Fired once after the initial payload loads, AND again every time
-//   setLanguage() successfully switches languages. Cards do this via the
-//   same "cache lastData, re-render on an event" pattern already used
-//   for 'unitsystemchange' and 'resize' (see cardTemperature.js) -- one
-//   more event in that same family, not a new pattern. This event alone
-//   does NOT fix applyLabel/applyAttr-created labels -- those are
-//   handled internally, automatically, without the card needing to do
-//   anything on this event.
+
 (function(){
   var STRINGS_JSON_URL = './jsondata/strings.json';
   var LANG_STORAGE_KEY = 'dashboardLanguage';
-  var payload = null;      // the full {"_default": "...", "da": {...}, ...} object once loaded
-  var activeLang = null;   // resolved once the payload loads: localStorage override, or "_default"
+  var payload = null;
+  var activeLang = null;
   var loaded = false;
-  var registeredLabels = []; // {el, key} pairs -- permanent, re-applied on every language switch
-  var registeredAttrs = [];  // {el, attr, key} pairs -- same
+  var registeredLabels = [];
+  var registeredAttrs = [];
 
   function t(key){
     if (loaded && payload[activeLang] && Object.prototype.hasOwnProperty.call(payload[activeLang], key)) {
@@ -171,68 +50,41 @@ try {
     return (payload && payload[code] && payload[code]['Language']) || code;
   }
 
-  // Flags are COUNTRY (or, for the four marked below, REGION) symbols,
-  // not language symbols, so this is a deliberate representative choice
-  // for every code, not a lookup that could be derived automatically --
-  // most are a direct match (fr->fr, de->de) but several of DivumWX's
-  // languages are regional/minority languages spoken across multiple
-  // countries (Arabic, Hindi, Tamil, Urdu), where the "obvious" flag is
-  // a judgment call, not a fact. Two of the country ones are NOT the
-  // same 2 letters as the language code, on purpose -- 'da' (Danish)
-  // needs Denmark's flag ('dk'), not a (nonexistent) country called
-  // "da"; 'uk' (Ukrainian) needs Ukraine's flag ('ua'), NOT the United
-  // Kingdom's ('gb') -- a genuinely easy mix-up since "UK" reads as
-  // "United Kingdom" to a human but is this project's language code for
-  // Ukrainian, inherited from ISO 639-1. Likewise 'sv' (Swedish) needs
-  // Sweden's flag ('se'), NOT El Salvador's ('sv' is El Salvador's ISO
-  // 3166-1 country code, an entirely unrelated coincidence).
-  //
-  // cy/ca/eu/br use actual REGIONAL flags (Wales, Catalonia, Basque
-  // Country, Brittany), not a nearby country's flag -- sourced from
   // HatScripts/circle-flags (MIT licensed), the values below are that
-  // project's own subdivision codes (gb-wls, es-ct, es-pv, fr-bre), not
-  // ISO 3166-1 country codes, since none of these four regions has one
-  // of their own. These four are also circular artwork, not the
-  // rectangular style every other flag in img/flags/ uses -- a real,
-  // visible style inconsistency, traded deliberately for actual
-  // correctness (a Welsh person's own flag, not the Union Jack) rather
-  // than left as the earlier country-flag approximation.
+
   var LANGUAGE_FLAG_COUNTRY = {
-    ar: 'sa',      // Arabic -> Saudi Arabia (representative choice; Arabic has no single country)
-    br: 'fr-bre',  // Breton -> Brittany (regional flag, not France's)
-    ca: 'es-ct',   // Catalan -> Catalonia (regional flag, not Spain's)
-    cn: 'cn',      // Chinese -> China
-    cy: 'gb-wls',  // Welsh -> Wales (regional flag, not the UK's)
-    cz: 'cz',      // Czech -> Czech Republic
-    da: 'dk',      // Danish -> Denmark (NOT "da" -- no such country code)
-    de: 'de',      // German -> Germany
-    en: 'gb',      // English -> United Kingdom (this project's own default/reference)
-    en_US: 'us',   // English (US) -> United States
-    es: 'es',      // Spanish -> Spain
-    eu: 'es-pv',   // Basque -> Basque Country (regional flag; also spoken in France, but this is the larger Spanish side)
-    fr: 'fr',      // French -> France
-    gr: 'gr',      // Greek -> Greece
-    hi: 'in',      // Hindi -> India
-    it: 'it',      // Italian -> Italy
-    ja: 'jp',      // Japanese -> Japan
-    nl: 'nl',      // Dutch -> Netherlands
-    no: 'no',      // Norwegian -> Norway
-    pl: 'pl',      // Polish -> Poland
-    pt: 'pt',      // Portuguese -> Portugal
-    sv: 'se',      // Swedish -> Sweden (NOT "sv" -- that's El Salvador's country code)
-    fi: 'fi',      // Finnish -> Finland
-    hu: 'hu',      // Hungarian -> Hungary
-    is: 'is',      // Icelandic -> Iceland
-    ta: 'in',      // Tamil -> India (representative choice; also widely spoken in Sri Lanka)
-    th: 'th',      // Thai -> Thailand
-    tr: 'tr',      // Turkish -> Turkey
-    uk: 'ua',      // Ukrainian -> Ukraine (NOT "uk"/United Kingdom -- see note above)
-    ur: 'pk'       // Urdu -> Pakistan
+    ar: 'sa',
+    br: 'fr-bre',
+    ca: 'es-ct',
+    cn: 'cn',
+    cy: 'gb-wls',
+    cz: 'cz',
+    da: 'dk',
+    de: 'de',
+    en: 'gb',
+    en_US: 'us',
+    es: 'es',
+    eu: 'es-pv',
+    fr: 'fr',
+    gr: 'gr',
+    hi: 'in',
+    it: 'it',
+    ja: 'jp',
+    nl: 'nl',
+    no: 'no',
+    pl: 'pl',
+    pt: 'pt',
+    sv: 'se',
+    fi: 'fi',
+    hu: 'hu',
+    is: 'is',
+    ta: 'in',
+    th: 'th',
+    tr: 'tr',
+    uk: 'ua',
+    ur: 'pk'
   };
-  // Same country-code table drives both the emoji (built from Unicode
-  // "regional indicator symbol" letters -- every flag emoji is just two
-  // of these back to back) and the real SVG file path, so the two can
-  // never drift out of sync with each other.
+
   function countryCodeToEmoji(cc){
     if (!cc || cc.length !== 2) return '';
     var A = 0x1F1E6, base = 'a'.charCodeAt(0);
@@ -279,16 +131,10 @@ try {
       payload = json || {};
       var saved = null;
       try { saved = localStorage.getItem(LANG_STORAGE_KEY); } catch (e) {}
-      // A saved choice only wins if that language actually exists in
-      // THIS payload -- a station that's since dropped a language (or a
-      // stale value from a much older install) falls back to the
-      // server's own configured default instead of silently landing on
-      // an all-English page.
+
       activeLang = (saved && payload[saved]) ? saved : (payload['_default'] || 'en');
       loaded = true;
-      // Fix up every label/attr that was registered before this point --
-      // this is the only thing that makes applyLabel/applyAttr different
-      // from a bare t()/setAttribute call at boot time.
+
       reapplyAll();
       resolveReady();
     })
@@ -296,16 +142,11 @@ try {
       console.warn('cardI18n: strings.json fetch failed \u2014 staying in English:', e.message);
       payload = {};
       activeLang = 'en';
-      loaded = true; // so t() falls through to the (already-correct) English key cleanly
+      loaded = true;
       resolveReady();
     })
     .then(function(){
-      // Deliberately OUTSIDE the fetch/parse .then()-.catch() pair above,
-      // in its own link of the chain: dispatchEvent is a native browser
-      // method that should never throw in practice, but if it somehow
-      // did, we don't want that exception being mistaken for a fetch
-      // failure and reverting payload/activeLang back to the all-English
-      // fallback state right after a genuinely successful load.
+
       window.dispatchEvent(new CustomEvent('i18nready'));
     });
 
@@ -330,7 +171,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardClockOutlook.js version 0.0.1
+# cardClockOutlook.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -377,15 +218,7 @@ try {
   var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   function dateStrFor(date){
     var p = stationParts(date);
-    // p.weekday ('Mon','Tue',...) and the MONTHS entry ('Jan','Feb',...)
-    // are the same short-form keys already translated elsewhere in this
-    // project (see e.g. cardCurrent.js's WEEKDAYS + DivumWXI18N.t()) --
-    // reused here rather than introducing parallel duplicate keys.
-    // ordinal()'s "th"/"st"/"nd"/"rd" suffix is still English-only; a
-    // fully locale-correct date would need Intl.DateTimeFormat with the
-    // active language's own tag instead of this hand-built string, which
-    // is a bigger rework than this fix -- flagging it rather than
-    // quietly leaving it half-done.
+
     return DivumWXI18N.t(p.weekday) + ' ' + ordinal(+p.day) + ' ' + DivumWXI18N.t(MONTHS[+p.month - 1]) + ' ' + p.year;
   }
   function pad(n){ return n < 10 ? '0' + n : String(n); }
@@ -410,10 +243,7 @@ try {
   mount.style.position = 'relative';
   mount.style.display = 'flex';
   mount.style.flexDirection = 'column';
-  // No bottom-border band or toolbar on this card (link removed below) —
-  // override the shared .card CSS's 18px border-bottom just for this mount
-  // so the content pane can reclaim that space. Card height stays 195px:
-  // 20px title band (border-top, unchanged) + 175px content (was 157px).
+
   mount.style.borderBottom = '0';
 
   var ringColor   = '#6b9b6f';
@@ -517,10 +347,6 @@ try {
   rightPane.style.padding = '0 10px 0 14px';
   contentWrap.appendChild(rightPane);
 
-  // -- Analogue clock face. R=42 (was 50) — the full time/date/uptime
-  // stack below didn't fit the 175px pane at R=50 without clipping the
-  // top of the clock and hiding the server uptime line off the bottom;
-  // this, plus the tightened gaps below, is what fixes that overflow.
   var W = 180, cx = 90, cy = 50, R = 42;
   var clockWrap = document.createElement('div');
   clockWrap.style.flex = '0 0 auto';
@@ -568,7 +394,6 @@ try {
     .attr('cx', cx).attr('cy', cy).attr('r', 3.5)
     .style('fill', centreColor);
 
-  // -- Date, digital time (pill) and uptime, stacked below the clock face --
   var dateTextDiv = document.createElement('div');
   dateTextDiv.style.flex = '0 0 auto';
   dateTextDiv.style.marginTop = '2px';
@@ -650,7 +475,6 @@ try {
   tick();
   setInterval(tick, 1000);
 
-  // -- Outlook phrase, right pane --------------------------------------
   var outlookDiv = document.createElement('div');
   outlookDiv.style.width = '100%';
   outlookDiv.style.boxSizing = 'border-box';
@@ -661,13 +485,6 @@ try {
   outlookDiv.style.color = overlayTextColor;
   rightPane.appendChild(outlookDiv);
 
-  // Whole card is a click-through to the climatological summary report —
-  // an absolutely-positioned transparent overlay anchor, appended last so
-  // it paints on top of titleBar/contentWrap and actually receives the
-  // click. top/bottom match the title band (-20px) and this card's own
-  // border-bottom override (0, set above) — same technique used on the
-  // Forecast card and to fix the card outline extending into the card
-  // below.
   var cardLink = document.createElement('a');
   cardLink.className = 'card-whole-link';
   cardLink.href = 'climate.html?embed=1';
@@ -797,12 +614,7 @@ try {
     var isSnow = precipCode != null && [71,73,75,77,85,86].indexOf(precipCode) !== -1;
     var precipOut, precipUnit;
     if (isSnow){
-      // "Snow"/"Rain" reused from the same WMO condition-text keys
-      // already translated elsewhere (see e.g. wmoText() in
-      // divumwf.js) rather than adding parallel lowercase duplicates --
-      // the minor stylistic cost is a capitalised word appearing
-      // mid-sentence in some languages, which is far better than no
-      // translation at all.
+
       if (wantRainIn){ precipOut = Math.round(precipTotalMM / 25.4 * 100) / 100; precipUnit = ' in ' + DivumWXI18N.t('Snow').toLowerCase(); }
       else { precipOut = Math.round(precipTotalMM / 10 * 10) / 10; precipUnit = ' cm ' + DivumWXI18N.t('Snow').toLowerCase(); }
     } else {
@@ -822,11 +634,7 @@ try {
     var out = [];
 
     if (selTempOut !== null){
-      // Two complete phrase templates (rather than translating "low"/
-      // "high" as standalone words and splicing them into a fixed
-      // English sentence shape) so a translation can reorder freely
-      // within its own language's grammar instead of being forced to
-      // mirror English word order.
+
       var tempPhrase = DivumWXI18N.t(isNight ? 'Temperature low around {temp}' : 'Temperature high around {temp}')
         .replace('{temp}', selTempOut + tempSuffix);
       var windPhrase = '';
@@ -839,10 +647,7 @@ try {
     }
 
     if (precipTotalMM > 0.05){
-      // "Snow"/"Light rain"/"Rain"/"Heavy rain" reuse the same
-      // condition-description keys already translated elsewhere in
-      // this project's WMO weather-code text, rather than introducing
-      // parallel duplicate keys for the same words.
+
       var typeWord = isSnow ? DivumWXI18N.t('Snow') : DivumWXI18N.t('Light rain');
       if (precipTotalMM > 2.0 && !isSnow) typeWord = DivumWXI18N.t('Rain');
       if (precipTotalMM > 5.0 && !isSnow) typeWord = DivumWXI18N.t('Heavy rain');
@@ -880,14 +685,7 @@ try {
   }
   refreshOutlook();
   setInterval(refreshOutlook, 5 * 60 * 1000);
-  // This card renders once on load, in English, since strings.json is
-  // still fetching asynchronously at that point -- computeOutlookHtml()
-  // is only ever re-run on the next 5-minute poll otherwise, so without
-  // this listener a translation that finishes loading a moment after
-  // first render stays stuck in English for up to 5 minutes. Same
-  // "if (cached data) re-render" pattern already used by every other
-  // card in this bundle (see e.g. cardTemperature.js) -- re-renders
-  // from the already-fetched forecast JSON in place, no extra fetch.
+
   window.addEventListener('i18nready', function(){
     if (lastForecastJson) renderOutlook(lastForecastJson);
   });
@@ -900,7 +698,7 @@ try {
 try {
 /*
 ##############################################################################################
-# alertBar.js version 0.0.1
+# alertBar.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -923,8 +721,7 @@ try {
     return fetch(url + (url.indexOf('?') > -1 ? '&' : '?') + '_=' + Date.now(), { cache: 'no-store' })
       .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); });
   }
-  // almanac.json now gives raw unix_epoch timestamps rather than
-  // pre-formatted strings.
+
   function fmtEpochDate(ts){
     if (ts == null) return null;
     var opts = { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false };
@@ -932,7 +729,6 @@ try {
     return new Date(ts * 1000).toLocaleString(undefined, opts);
   }
 
-  // -- Aurora, same parsing approach as modalGeomagneticChart.html --
   function parseAuroraXml(xmlText){
     var xml = new DOMParser().parseFromString(xmlText, 'text/xml');
     if (xml.querySelector('parsererror')) throw new Error('aurora.txt did not parse as XML');
@@ -986,39 +782,18 @@ try {
   }
   function levelFromEventText(event){
     var e = String(event || '').toLowerCase();
-    // UK warnings (Met Office, via OpenWeatherMap or the RSS fallback) are
-    // literally colour-coded in their own text — trust that colour word
-    // directly, checked with word boundaries so an unrelated word that
-    // merely CONTAINS "red" (e.g. "prepared", "covered", "required") or
-    // "extreme" (e.g. "extremely") can't be mistaken for the colour red
-    // the way a plain substring search would. An amber warning whose
-    // prose happens to say "extremely difficult conditions" was
-    // previously being silently promoted to a red warning this way.
+
     if (/\bred\b/.test(e)) return 'EX';
     if (/\bamber\b/.test(e)) return 'SV';
     if (/\byellow\b/.test(e)) return 'MD';
-    // No explicit colour word found — fall back to generic severity language.
+
     if (/\bextreme\b/.test(e)) return 'EX';
     if (/\bsevere\b/.test(e)) return 'SV';
     if (/\bminor\b/.test(e)) return 'MN';
     return 'MD';
   }
   function dedupeAlerts(alerts){
-    // Keyed on the exact text shown to the person (event + start + end),
-    // not on any source/sender field the API response may or may not
-    // include -- two alert objects with identical wording and window are
-    // a duplicate regardless of what fed them into the array, and two
-    // objects with the SAME wording but a genuinely different window are
-    // kept as separate, legitimate alerts.
-    //
-    // Keeps the LATEST occurrence of each key, not the first: OpenWeatherMap's
-    // own alerts array can contain both an original alert AND a subsequent
-    // re-issue of that SAME alert (same event/start/end, updated
-    // description -- e.g. "Information on update: Warning area
-    // extended..."), with the update appearing LATER in the array. Keeping
-    // the first-seen copy would silently show the stale pre-update text.
-    // Display order still follows first-seen position, only the VALUE
-    // shown for each slot is the latest one.
+
     var order = [];
     var latest = {};
     for (var i = 0; i < alerts.length; i++){
@@ -1056,7 +831,6 @@ try {
   var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   var MONTHS3 = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
 
-  // -- Met Office RSS fallback, ported from parseMetOfficeRSSFromFile() --
   function parseMetOfficeRss(xmlText){
     var xml = new DOMParser().parseFromString(xmlText, 'text/xml');
     if (xml.querySelector('parsererror')) throw new Error('metofficerss.txt did not parse as XML');
@@ -1118,7 +892,6 @@ try {
     return WD[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()].slice(0,3) + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
   }
 
-  // -- Section builder, ported from displayAlertSection() --
   var sectionCount = 0;
   function buildSection(opts){
     sectionCount++;
@@ -1139,10 +912,7 @@ try {
 
     var outer = document.createElement('div');
     outer.className = 'alert-outer';
-    // Column stack, set inline (not via the stylesheet) so this is
-    // guaranteed regardless of whatever .alert-inner's own row/flex
-    // rules do — the description block below is a sibling of the
-    // icon+headline row, not a third item inside it.
+
     outer.style.display = 'flex';
     outer.style.flexDirection = 'column';
 
@@ -1165,8 +935,7 @@ try {
       var more = document.createElement('div');
       more.className = 'alert-more';
       more.style.display = 'none';
-      // Full width so it reads as a continuation paragraph under the
-      // headline, not a second column next to it.
+
       more.style.width = '100%';
       more.style.boxSizing = 'border-box';
       more.innerHTML = '<p>' + descriptionHtml + '</p>';
@@ -1235,7 +1004,6 @@ try {
       var sections = [];
       var now = Date.now();
 
-      // -- Aurora (amber/red only — yellow is "Minor geomagnetic activity", skip it) --
       if (auroraText) {
         var aurora = getAuroraData(auroraText);
         if (aurora && aurora !== AURORA_LEVELS.yellow) {
@@ -1249,13 +1017,7 @@ try {
         }
       }
 
-      // -- Eclipse announcement (almanac.json's next_eclipse*, written by
-      // SkyfieldLoopData — lunar eclipses only; see that service's own
-      // comments for why solar eclipses aren't covered). Not a danger-level
-      // warning like the sections above, so it gets its own night-sky
-      // colour rather than the yellow/amber/red palette, and only appears
-      // once the eclipse is close enough to be worth mentioning. --
-      var ECLIPSE_ANNOUNCE_WINDOW_MS = 14 * 24 * 60 * 60 * 1000; // 14 days
+      var ECLIPSE_ANNOUNCE_WINDOW_MS = 14 * 24 * 60 * 60 * 1000;
       var eclipseTs = almanac && almanac['almanac.next_eclipse.unix_epoch.raw'];
       if (eclipseTs) {
         var eclipseMs = eclipseTs * 1000;
@@ -1271,7 +1033,6 @@ try {
         }
       }
 
-      // -- Health alert: cold first, then heat --
       var healthData = null;
       [['cold', cold], ['heat', heat]].some(function(pair){
         var type = pair[0], json = pair[1];
@@ -1308,7 +1069,6 @@ try {
         }));
       }
 
-      // -- OpenWeatherMap alerts, else Met Office RSS fallback --
       var owmAlerts = (owm && owm.alerts) || [];
       owmAlerts = dedupeAlerts(owmAlerts);
       var rssFallbackUsed = false;
@@ -1346,7 +1106,6 @@ try {
         }
       }
 
-      // -- Flood alerts (unfiltered — see header comment) --
       var floodItems = (flood && flood.items) || [];
       floodItems.forEach(function(item){
         var cfg = getAlertLevelConfig(item.severityLevel != null ? item.severityLevel : 4, 'flood');
@@ -1367,10 +1126,7 @@ try {
 
   refresh();
   setInterval(refresh, POLL_MS);
-  // No i18nready listener existed here at all previously -- without one,
-  // the compass/More-Less/section text was only ever guaranteed correct
-  // on the NEXT scheduled poll (up to POLL_MS away), not immediately
-  // once translations load, unlike every other card.
+
   window.addEventListener('i18nready', refresh);
 })();
 } catch (e) {
@@ -1381,7 +1137,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardCurrent.js version 0.0.1
+# cardCurrent.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -1400,8 +1156,6 @@ try {
 
   function pickIcon(d){
     var night = !d.isDay;
-
-
 
     if (d.rainRate > 0 && d.windSpeedAvg > 15) return night ? 'extreme-night-rain.svg' : 'extreme-day-rain.svg';
     if (d.rainRate > 10) return night ? 'extreme-night-rain.svg' : 'extreme-day-rain.svg';
@@ -1452,10 +1206,6 @@ try {
     return '8 oktas';
   }
 
-  // Parses METAR's visib notation ("6+", "10+", "1/2", "1 1/2", "3") into
-  // a numeric statute-miles value plus whether a "+" (>=) was present.
-  // Returns null if the string doesn't parse as any recognized METAR
-  // visibility format, rather than guessing.
   function parseMetarVisibilityMiles(visib){
     if (visib === null || visib === undefined || visib === '') return null;
     var str = String(visib).trim();
@@ -1482,18 +1232,6 @@ try {
     return valid ? { miles: total, plus: plus } : null;
   }
 
-  // Imperial (currentUnits.wind === 'mph', the same proxy cloudBaseLabel
-  // above already uses for lack of a dedicated distance-unit toggle):
-  // shows METAR's own string completely unchanged -- "6+" means "6
-  // statute miles or greater" (AWC's API caps visibility reporting at
-  // this value even when the raw observation is effectively unlimited,
-  // per the raw METAR line's own "9999"/CAVOK-equivalent), and this is
-  // the native, correctly-understood notation for that unit system.
-  // Metric: parses and converts to km, preserving the "+"/fraction
-  // semantics rather than dropping them -- "6+" mi becomes "9.7+" km,
-  // not a bare "9.7" that quietly loses the >= meaning. Falls back to
-  // the raw string (still with a unit, just not converted) if the
-  // format doesn't parse, rather than showing nothing.
   function metarVisibilityLabel(visib){
     if (visib === null || visib === undefined || visib === '') return '\u2014';
     if (currentUnits.wind === 'mph') return visib + ' mi';
@@ -1566,10 +1304,7 @@ try {
   mount.style.position = 'relative';
   mount.style.display = 'flex';
   mount.style.flexDirection = 'column';
-  // No bottom-border band or toolbar on this card (links removed below) —
-  // override the shared .card CSS's 18px border-bottom just for this mount
-  // so the content pane can reclaim that space. Card height stays 195px:
-  // 20px title band (border-top, unchanged) + 175px content (was 157px).
+
   mount.style.borderBottom = '0';
 
   var textColor    = 'var(--bs-body-color)';
@@ -1638,8 +1373,7 @@ try {
   }
 
   // ---- 60:40 content split (left: icon + description, right: readouts) ----
-  // Height is 175px now (was 157px) — reclaims the 18px that used to be the
-  // border-bottom band, now that the toolbar/links below are gone.
+
   var contentWrap = document.createElement('div');
   contentWrap.style.height = '175px';
   contentWrap.style.width = '100%';
@@ -1649,10 +1383,6 @@ try {
   contentWrap.style.alignItems = 'stretch';
   mount.appendChild(contentWrap);
 
-  // Vertical divider is a child of `mount` (not contentWrap) so its extent
-  // isn't tied to the content pane's own box — stops 6px short of the top
-  // border line and 6px short of the card's true bottom edge (there's no
-  // border-bottom band to run through on this card any more).
   var divider = document.createElement('div');
   divider.style.position = 'absolute';
   divider.style.left = '60%';
@@ -1682,9 +1412,6 @@ try {
   iconImg.style.display = 'block';
   leftPane.appendChild(iconImg);
 
-  // Description text is a reading (today's condition summary), not a
-  // static label, so it follows the same value-colour rule as every
-  // number on the dashboard rather than the plain theme text colour.
   var summaryText = document.createElement('div');
   summaryText.style.fontSize = '13px';
   summaryText.style.lineHeight = '1.3';
@@ -1702,9 +1429,6 @@ try {
   rightPane.style.padding = '0 10px 0 14px';
   contentWrap.appendChild(rightPane);
 
-  // Fixed row height (rather than sizing purely to font metrics) so 8 rows
-  // always land within the 175px content pane regardless of font
-  // rendering quirks — 8 * 20px = 160px, comfortably inside 175px.
   function addChipRow(label){
     var row = document.createElement('div');
     row.style.display = 'flex';
@@ -1755,14 +1479,8 @@ try {
   dirValueEl.appendChild(dirText.base);
   dirValueEl.appendChild(document.createTextNode(' '));
   dirValueEl.appendChild(dirText.suffix);
-  dirValueEl.parentElement.style.borderBottom = 'none'; // last row — no divider under it
+  dirValueEl.parentElement.style.borderBottom = 'none';
 
-  // Whole card is a click-through to the nearby METAR report — an
-  // absolutely-positioned transparent overlay anchor, appended last so it
-  // paints on top of titleBar/contentWrap and actually receives the
-  // click. top/bottom match the title band (-20px) and this card's own
-  // border-bottom override (0, set above) — same technique used on the
-  // Forecast and StationTime|Outlook cards.
   var cardLink = document.createElement('a');
   cardLink.className = 'card-whole-link';
   cardLink.href = 'modalMetar.html';
@@ -1792,23 +1510,13 @@ try {
       if(loopResult.status === 'rejected') console.warn('cardCurrent: loop.json fetch failed —', loopResult.reason.message);
       if(archResult.status === 'rejected') console.warn('cardCurrent: archive.json fetch failed —', archResult.reason.message);
       if(astroResult.status === 'rejected') console.warn('cardCurrent: almanac.json fetch failed —', astroResult.reason.message);
-      // cloud_coverage.json is optional -- absent-and-rejected is a
-      // normal state on installs without it, so this logs at info (not
-      // warn) rather than looking like an error. Still logged, not
-      // silent, so "is it actually being used?" is answerable from the
-      // console instead of guessing: covers both fetch failure (wrong
-      // path, 404, network) and fetch-succeeded-but-malformed
-      // (cloudPercent missing/not a number) -- two different failure
-      // modes that would otherwise look identical from the outside.
+
       if(cloudResult.status === 'rejected'){
         console.info('cardCurrent: cloud_coverage.json fetch failed (falling back to loop.json/archive.json) —', cloudResult.reason.message);
       } else if(typeof cloudResult.value.cloudPercent !== 'number' || isNaN(cloudResult.value.cloudPercent)){
         console.info('cardCurrent: cloud_coverage.json fetched but cloudPercent is missing/invalid (falling back) —', JSON.stringify(cloudResult.value));
       }
-      // me.txt (METAR) is likewise optional -- only configured if the
-      // person supplied an ICAO code during install (install.py's own
-      // apply_weatherapi_metar_merge() leaves url/data_path unset
-      // otherwise). Same info-not-warn logging rationale as above.
+
       if(metarResult.status === 'rejected'){
         console.info('cardCurrent: me.txt fetch failed (Visibility will show —) —', metarResult.reason.message);
       }
@@ -1818,10 +1526,7 @@ try {
       var o = loop.observations || {};
       var alm = astroResult.status === 'fulfilled' ? astroResult.value : {};
       var cloudCoverage = cloudResult.status === 'fulfilled' ? cloudResult.value : null;
-      // me.txt is a JSON ARRAY (one METAR report per configured ICAO
-      // station, and this install only configures one) -- confirmed via
-      // a real capture: [{"icaoId":"EGTK",...,"visib":"6+",...}]. Take
-      // the first (only) element.
+
       var metarReport = (metarResult.status === 'fulfilled' && Array.isArray(metarResult.value) && metarResult.value.length > 0)
         ? metarResult.value[0] : null;
       var sky = arch.sky || {};
@@ -1829,12 +1534,6 @@ try {
       var rain = arch.rain || {};
       var temp = arch.temp || {};
 
-      // Primary source: almanac.json's actual sun altitude -- "day" is
-      // precisely "between sunrise and sunset" by definition (sun above
-      // the horizon), astronomically exact regardless of what a
-      // hardware-derived isDay flag happens to mean. Falls back to
-      // loop.json's own observations.isDay only if almanac.json's fetch
-      // failed.
       var sunAltRaw = alm['almanac.sun.alt'];
       var sunAlt = (typeof sunAltRaw === 'number' && !isNaN(sunAltRaw)) ? sunAltRaw : null;
       var isDay       = (sunAlt !== null) ? (sunAlt > 0) : (o.isDay === 1);
@@ -1842,25 +1541,7 @@ try {
       var tdDiff       = outTemp - ((typeof o.dewpoint === 'number') ? o.dewpoint : 0);
       var windSpeedAvg = (typeof wind.speed_avg === 'number') ? wind.speed_avg : 0;
       var rainRate     = (typeof rain.rate === 'number') ? rain.rate : 0;
-      // Was: prefer archive.json's sky.cloud_cover, fall back to
-      // loop.json's o.cloudcover only if the former isn't a number.
-      // Bug: archive.json's sky.cloud_cover has been observed stuck at
-      // 0 in every sample captured this whole conversation -- 0 is
-      // still a valid number, so that fallback never actually
-      // triggered, and the live, correct loop.json reading (confirmed
-      // 94.0 in a real capture while the card showed 0%) was never
-      // used. loop.json is the live per-loop-packet value and is the
-      // right primary source for something this fast-changing anyway;
-      // archive.json is now only a fallback for the rare case
-      // loop.json's own field is genuinely absent.
-      // Between sunrise and sunset, cloud_coverage.json (a sky-camera-
-      // derived reading, when available) takes priority over
-      // loop.json/archive.json -- but only during the day, since it's
-      // presumably not meaningful after dark. "Available" means the
-      // fetch succeeded AND cloudPercent is actually a valid number,
-      // not just that the file exists. Falls back to the existing
-      // loop.json-primary/archive.json-fallback logic at night, or any
-      // time cloud_coverage.json's fetch failed or its data was invalid.
+
       var cloudPercentFromCamera = (cloudCoverage && typeof cloudCoverage.cloudPercent === 'number' && !isNaN(cloudCoverage.cloudPercent))
         ? cloudCoverage.cloudPercent : null;
       var cloudCover = (isDay && cloudPercentFromCamera !== null)
@@ -1905,7 +1586,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardTemperature.js version 0.0.1
+# cardTemperature.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -1926,10 +1607,7 @@ try {
   }
 
   // ---- Media mode (2 or 1 dashboard columns) ----
-  // At narrow widths the card itself shrinks along with the grid, so the
-  // 9-row text zone gets cramped. Checked against the dashboard's own
-  // grid rather than window width directly, since that's what actually
-  // determines this card's rendered size.
+
   function currentColumnCount(){
     var grid = document.querySelector('.wrapper');
     if (!grid) return null;
@@ -1960,10 +1638,7 @@ try {
   window.addEventListener('resize', function(){
     if (lastData) render(lastData);
   });
-  // Card typically renders once (in English, since strings.json is still
-  // fetching) before DivumWXI18N's own fetch resolves. Re-render once it
-  // has, same pattern as unitsystemchange/resize above -- swaps the
-  // already-rendered English labels for translated ones in place.
+
   window.addEventListener('i18nready', function(){
     if (lastData) render(lastData);
   });
@@ -1974,10 +1649,7 @@ try {
   mount.style.position = 'relative';
   mount.style.display = 'flex';
   mount.style.flexDirection = 'column';
-  // No bottom-border band or toolbar on this card (links removed below) —
-  // override the shared .card CSS's 18px border-bottom just for this mount
-  // so the content pane can reclaim that space. Card height stays 195px:
-  // 20px title band (border-top, unchanged) + 175px content (was 157px).
+
   mount.style.borderBottom = '0';
 
   var overlayTextColor = 'var(--bs-body-color)';
@@ -2051,9 +1723,6 @@ try {
   contentWrap.style.alignItems = 'stretch';
   mount.appendChild(contentWrap);
 
-  // Vertical divider is a child of `mount` (not contentWrap) — same pattern
-  // as the Current Conditions / Forecast cards — stopping 6px short of the
-  // top border line and 6px short of the card's true bottom edge.
   var divider = document.createElement('div');
   divider.style.position = 'absolute';
   divider.style.left = '60%';
@@ -2086,11 +1755,6 @@ try {
   rightPane.style.padding = '0 10px 0 14px';
   contentWrap.appendChild(rightPane);
 
-  // Same chip-row idiom as Current Conditions / Barometer — was a 3x3 grid
-  // when this pane was 70% wide, but that grid doesn't fit in 40% without
-  // clipping the values, so it's now the same single-column list every
-  // other 60:40 gauge card already uses. render()'s population loop below
-  // is unchanged — it only ever addressed rows by index, not grid position.
   function addChipRow(){
     var row = document.createElement('div');
     row.style.display = 'flex';
@@ -2137,14 +1801,8 @@ try {
 
   var readoutRows = [];
   for (var ri = 0; ri < 9; ri++) readoutRows.push(addChipRow());
-  readoutRows[readoutRows.length - 1].row.style.borderBottom = 'none'; // last row — no divider under it
+  readoutRows[readoutRows.length - 1].row.style.borderBottom = 'none';
 
-  // Whole card is a click-through to the temperature chart/records page —
-  // an absolutely-positioned transparent overlay anchor, appended last so
-  // it paints on top of everything else and actually receives the click.
-  // top/bottom match the title band (-20px) and this card's own
-  // border-bottom override (0, set above) — same technique used on the
-  // other cards' whole-card links.
   var cardLink = document.createElement('a');
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=temperature&embed=1';
@@ -2163,11 +1821,7 @@ try {
   mount.appendChild(cardLink);
 
   function render(v){
-    // Gauge geometry is untouched from the 30%-pane version — bulb_cx,
-    // tubeWidth etc. still describe the same ~90-unit-wide subsystem. Only
-    // the viewBox changed, to a wider window that recenters that same
-    // artwork within the new 60%-wide pane, rather than rescaling any of
-    // the drawing math itself.
+
     var height = 175;
     var bulbRadius = 25.5, tubeWidth = 16.5, tubeBorderWidth = 1,
         innerBulbColor = 'rgb(230, 200, 200)', tubeBorderColor = '#999999';
@@ -2180,20 +1834,6 @@ try {
     }
     svg.selectAll('*').remove();
 
-    // Read units live from the module-scoped currentUnits (updated
-    // immediately by the unitsystemchange listener above) rather than
-    // from v.unitsTemp -- v.unitsTemp was baked into lastData once,
-    // inside refresh(), at whatever units were active at the time of
-    // the last loop.json/archive.json fetch. Since unitsystemchange's
-    // handler calls render(lastData) directly (to react instantly,
-    // without waiting for a fresh fetch), v.unitsTemp still held the
-    // OLD units at that point -- so switching units appeared to do
-    // nothing until the next scheduled refresh() rebuilt lastData with
-    // the new value, which is exactly the "slow to react" symptom
-    // reported (every other card already reads its live currentUnits
-    // directly at render time, e.g. cardClockOutlook's
-    // computeOutlookHtml(json, currentUnits) -- this brings
-    // cardTemperature in line with that same, correct pattern).
     var unitsTemp = currentUnits.temp;
     function tc(c){ return unitsTemp === 'F' ? (c * 9 / 5 + 32) : c; }
     function td(d){ return unitsTemp === 'F' ? (d * 9 / 5) : d; }
@@ -2218,9 +1858,6 @@ try {
     bulbGradient.append('stop').attr('offset', '0%').style('stop-color', innerBulbColor);
     bulbGradient.append('stop').attr('offset', '90%').style('stop-color', v.tempColor);
 
-    // Tube outline height is derived from bulb_cy (rather than the old
-    // hardcoded 100, which was only correct for the original height=150
-    // layout) so it keeps visually containing the fill at any canvas height.
     var outlineHeight = bulb_cy - bulbRadius / 2 - 6.75;
     svg.append('rect')
       .attr('rx', 7.5).attr('x', 37.5).attr('y', 7)
@@ -2279,20 +1916,9 @@ try {
       .attr('stroke', tubeBorderColor).style('stroke-linecap', 'round').attr('stroke-width', 1.0);
 
     // ---- Right pane: label/value/trend rows ----
-    // Indoor Temp is dropped from this list in media mode (2 or 1
-    // dashboard columns) — the freed row is redistributed across the
-    // remaining ones (see the height/media-mode loop below) rather than
-    // left as blank space, so the text zone gets more breathing room
-    // where the card is narrowest and legibility matters most.
+
     var mediaMode = isMediaMode();
-    // Each row carries a stable `id` (never translated, never shown --
-    // used only for the media-mode filter below) separate from `label`
-    // (translated display text). Before this change the filter compared
-    // against the English label text directly ("Indoor Temp") -- once
-    // that label is translated, that comparison would silently stop
-    // matching and Indoor Temp would stop being hidden in media mode.
-    // Filtering on `id` instead means the label can be translated to
-    // anything without touching the filter logic at all.
+
     var weatherData = [
       { id: 'maxMin',      label: DivumWXI18N.t('Max | Min'),   value: globalMaxTemp.toFixed(1) + '\u00B0' + unitsTemp + ' | ' + globalMinTemp.toFixed(1) + '\u00B0' + unitsTemp, color: 'transparent', trend: 0 },
       { id: 'trend',       label: DivumWXI18N.t('Trend'),       value: trend_outTemp.toFixed(1) + '\u00B0' + unitsTemp, color: v.tempColor, trend: trend_outTemp },
@@ -2308,13 +1934,6 @@ try {
       weatherData = weatherData.filter(function(d){ return d.id !== 'indoorTemp'; });
     }
 
-    // Rows beyond weatherData.length (only happens in media mode) are
-    // hidden; the visible ones share the pane's full 175px height evenly,
-    // so hiding Indoor Temp actually grows the rest rather than just
-    // leaving a gap. Border/display/height are set unconditionally from
-    // scratch every render (not just adjusted incrementally) so toggling
-    // in and out of media mode across a resize can't leave a stale
-    // border behind on whichever row used to be last.
     var rowHeight = 175 / weatherData.length;
     for (var ri2 = 0; ri2 < readoutRows.length; ri2++){
       var visible = ri2 < weatherData.length;
@@ -2399,7 +2018,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardForecast.js version 0.0.1
+# cardForecast.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -2467,9 +2086,7 @@ try {
       ? (celsius * 9 / 5 + 32).toFixed(1) + '\u00B0F'
       : celsius.toFixed(1) + '\u00B0C';
   }
-  // Numeric value only, no unit suffix -- used for the max/high side of
-  // the "high-low" pairing so the unit is only printed once, at the end
-  // (see renderCard()), rather than repeated on both numbers.
+
   function tempValueOnly(celsius){
     return currentUnits.temp === 'F'
       ? (celsius * 9 / 5 + 32).toFixed(1)
@@ -2509,10 +2126,7 @@ try {
   mount.style.position = 'relative';
   mount.style.display = 'flex';
   mount.style.flexDirection = 'column';
-  // No bottom-border band or toolbar on this card (links removed below) —
-  // override the shared .card CSS's 18px border-bottom just for this mount
-  // so the content pane can reclaim that space. Card height stays 195px:
-  // 20px title band (border-top, unchanged) + 175px content (was 157px).
+
   mount.style.borderBottom = '0';
 
   var overlayTextColor = 'var(--bs-body-color)';
@@ -2569,10 +2183,6 @@ try {
     statusTime.textContent = pad2(t.getUTCHours()) + ':' + pad2(t.getUTCMinutes()) + ':' + pad2(t.getUTCSeconds());
   }
 
-  // Grid columns are 1fr / 1px / 1fr / 1px / 1fr — the 1px tracks are the
-  // two dividers themselves (added as literal grid items in renderCard()
-  // below), so they land exactly on the true column boundaries regardless
-  // of rounding, rather than being separately positioned over the grid.
   var contentWrap = document.createElement('div');
   contentWrap.style.height = '175px';
   contentWrap.style.width = '100%';
@@ -2589,13 +2199,6 @@ try {
   contentWrap.style.color = 'var(--bs-body-color)';
   mount.appendChild(contentWrap);
 
-  // Whole card is a click-through to the station's full 7-day forecast —
-  // an absolutely-positioned transparent overlay anchor, appended last so
-  // it paints on top of titleBar/contentWrap and actually receives the
-  // click (an earlier sibling would just sit underneath them instead).
-  // top/bottom match the title band (-20px) and this card's own
-  // border-bottom override (0, set above) — same technique used to fix
-  // the card outline extending into the card below.
   var cardLink = document.createElement('a');
   cardLink.className = 'card-whole-link';
   cardLink.href = 'stationforecast.html';
@@ -2614,17 +2217,12 @@ try {
   mount.appendChild(cardLink);
 
   function getIconHtml(code, map){
-    // Always the "day" icon variant now -- each segment is a whole
-    // calendar day's summary (see buildSegments()), not a day/night
-    // half, so a sun-bearing icon is the correct representative image
-    // the same way most weather apps show a daily-forecast tile.
+
     var entry = map && map[code];
     if (!entry) return '<span style="font-size:20px">\u2753</span>';
     var iconName = entry.day;
     var emoji = entry.emoji || '\u2753';
-    // See weatherText()'s own comment: entry.label is always plain
-    // English from the static icon-mapping file, reusing the same WMO
-    // condition-description keys already translated elsewhere.
+
     var label = DivumWXI18N.t(entry.label || 'Unknown');
     if (iconName) {
       return '<img src="' + ICON_BASE + iconName + '.svg" alt="' + label + '" title="' + label +
@@ -2634,13 +2232,7 @@ try {
   }
   function weatherText(code, map){
     var label = map && map[code] && map[code].label;
-    // meteocons_wmo_map.json's own "label" field is always plain English
-    // (it's a static, hand-authored icon-mapping file, not something
-    // DivumWXI18N ever touches on its own) -- these are the same WMO
-    // condition-description phrases ("Clear sky", "Partly cloudy",
-    // "Overcast", etc.) already translated elsewhere in this project
-    // (see wmoText() in divumwf.js), so this reuses those existing keys
-    // rather than needing any new lang-file entries.
+
     return DivumWXI18N.t(label || 'Unknown');
   }
 
@@ -2672,11 +2264,6 @@ try {
     var rainUnit = hu.precipitation;
     var windUnit = hu.windspeed_10m || hu.wind_speed_10m;
 
-    // One segment per WHOLE calendar day now, not a Day/Night half each
-    // (see labelFor()'s own comment for why) -- so this pulls a full
-    // 24-hour slice per day and reports both the day's max AND min
-    // temperature together, rather than picking just one depending on
-    // whether the segment happened to be the "Day" or "Night" half.
     function makeDaySegment(dayOffset){
       var offset = dayOffset * 24;
       var temps = safeSlice(h.temperature_2m, offset, 24, 0).map(function(v){ return toCelsius(v, tempUnit); });
@@ -2685,10 +2272,7 @@ try {
       var winds = safeSlice(h.windspeed_10m || h.wind_speed_10m, offset, 24, 0).map(function(v){ return toMS(v, windUnit); });
       var dirs  = safeSlice(h.winddirection_10m || h.wind_direction_10m, offset, 24, 0);
       var uv    = safeSlice(h.uv_index, offset, 24, 0);
-      // Midday (hour 12 of this day) is the representative moment for
-      // the day's icon/condition text and wind direction -- reads more
-      // naturally as "today's weather" than an arbitrary hour, and
-      // matches how the icon variant is now always the "day" one.
+
       var midIdx = Math.min(offset + 12, count - 1);
 
       return {
@@ -2710,10 +2294,7 @@ try {
   }
 
   function labelFor(s, todayStr, tomorrowStr){
-    // Today / Tomorrow / the following day's name -- three whole
-    // calendar days now, replacing the previous Today/Tonight/Tomorrow
-    // Day-Night alternation (which mixed a half-day view in with two
-    // full-day ones and never showed a day name at all).
+
     if (s.date === todayStr) return DivumWXI18N.t('Today');
     if (s.date === tomorrowStr) return DivumWXI18N.t('Tomorrow');
     return weekdayAbbrev(s.date);
@@ -2729,13 +2310,6 @@ try {
 
     titleLabel.textContent = DivumWXI18N.t('Forecast') + ' (\u00B0' + currentUnits.temp + ')';
 
-    // wind.svg's own gradient is a pale grey (#d4d7dd→#bec1c6) — barely
-    // visible against a white/light card face, so light theme darkens it
-    // to a solid silhouette. It reads fine in dark theme technically, but
-    // looks washed out next to the more saturated icons (thermometer's
-    // reds, raindrop's blues), so this now also boosts dark theme instead
-    // of leaving it untouched — inverted to a bright, unambiguous white
-    // rather than left as its own dim grey.
     function miniIcon(name, size, valign, boostContrast){
       var px = size || 19;
       var va = valign || -5;
@@ -2748,26 +2322,13 @@ try {
       return '<img src="' + ICON_BASE + name + '.svg" style="width:' + px + 'px;height:' + px + 'px;vertical-align:' + va + 'px;margin-right:3px;' + filterCss + '">';
     }
 
-    // Divider — a literal 1px grid track (see gridTemplateColumns above),
-    // not an absolutely-positioned overlay, so it lines up with the true
-    // column boundary exactly. margin insets it 6px top/bottom, short of
-    // the content pane's own top/bottom edges.
     var DIVIDER = '<div style="align-self:stretch;width:1px;margin:6px 0;background:var(--bs-border-color);"></div>';
 
     var html = '';
     for (var i = 0; i < view.length; i++){
       var s = view[i];
       var lbl = labelFor(s, todayStr, tomorrowStr);
-      // Both the day's high AND low now, rather than picking one or the
-      // other depending on a Day/Night half that no longer exists.
-      // Non-breaking spaces either side of the dash (not plain spaces) --
-      // a plain space is a valid line-wrap point, and this sits in a
-      // narrow column where "23.0\u00B0C" wrapping away from "- 7.0\u00B0C"
-      // onto its own line was a real, visible problem.
-      // Unit shown once, at the end, not on both numbers -- and no
-      // spaces at all around the dash (not even non-breaking ones) for
-      // the tightest possible width, since this whole pairing sits in a
-      // narrow column where every character of margin matters.
+
       var tempText = tempValueOnly(s.tmaxC) + '-' + tempLabel(s.tminC);
       var extra = 'UV-I ' + s.uv;
       var icon = getIconHtml(s.code, map);
@@ -2826,7 +2387,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardAnemometer.js version 0.0.1
+# cardAnemometer.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -2912,10 +2473,7 @@ try {
   mount.style.position = 'relative';
   mount.style.display = 'flex';
   mount.style.flexDirection = 'column';
-  // No bottom-border band or toolbar on this card (links removed below) —
-  // override the shared .card CSS's 18px border-bottom just for this mount
-  // so the content pane can reclaim that space. Card height stays 195px:
-  // 20px title band (border-top, unchanged) + 175px content (was 157px).
+
   mount.style.borderBottom = '0';
 
   var overlayTextColor = 'var(--bs-body-color)';
@@ -2981,9 +2539,6 @@ try {
   contentWrap.style.alignItems = 'stretch';
   mount.appendChild(contentWrap);
 
-  // Vertical divider is a child of `mount` (not contentWrap) — same pattern
-  // as Current Conditions — stopping 6px short of the top border line and
-  // 6px short of the card's true bottom edge.
   var divider = document.createElement('div');
   divider.style.position = 'absolute';
   divider.style.left = '60%';
@@ -3015,8 +2570,6 @@ try {
   rightPane.style.padding = '0 10px 0 14px';
   contentWrap.appendChild(rightPane);
 
-  // Same chip-row idiom as Current Conditions: label small-caps above,
-  // value (uniform accent colour, matching Current Conditions) below.
   function addChipRow(label){
     var row = document.createElement('div');
     row.style.display = 'flex';
@@ -3050,16 +2603,8 @@ try {
   var ordinalText = addChipRow('Ordinal');
   var beaufortText = addChipRow('Beaufort');
   var windRunText = addChipRow('Wind Run');
-  windRunText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
+  windRunText.parentElement.style.borderBottom = 'none';
 
-  // Whole card is a click-through to the wind chart/records page — an
-  // absolutely-positioned transparent overlay anchor, appended last so it
-  // paints on top of everything else and actually receives the click.
-  // top/bottom match the title band (-20px) and this card's own
-  // border-bottom override (0, set above) — same technique used on the
-  // other cards' whole-card links. Class name lets the shared hover-
-  // tooltip script (indexNew.html) find it and read data-modal for the
-  // "click to open X" message.
   var cardLink = document.createElement('a');
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=wind&embed=1';
@@ -3085,32 +2630,18 @@ try {
     [32.6, 36.0, '#f1ff6c']
   ];
 
-  // cy nudged down from 78 and hero-text baselines pulled in from the
-  // canvas edges (H-16/H-4 → H-19/H-8 below) — the dial's top ticks and
-  // the second hero line were both landing within ~4-10px of the canvas
-  // edge, reading as cramped against the top/bottom of the pane.
   var W = 180, H = 175, cx = 90, cy = 81, R = 54;
   var ICON_BASE = './meteocons/fill/svg/';
 
   // ---- Damped-spring needle animation ----------------------------------
-  // Not a CSS/d3 transition — a genuine second-order damped spring:
-  // angular acceleration proportional to how far the needle is from its
-  // target, minus a term proportional to its own angular velocity
-  // (accel = k*(target-angle) - c*velocity). zeta=0.8 is deliberately
-  // underdamped — the analytic overshoot for a step input is
-  // exp(-zeta*pi/sqrt(1-zeta^2)), which comes out to ~1.5% here (closer
-  // to ~1.3% at zeta~0.81; 0.8 is close enough to still read as "just
-  // past and settling back" without being sloppy about it) — so a big
-  // jump (calm to gale, say) swings a little past the target and eases
-  // back, the way a real moving-coil meter does, rather than gliding to
-  // a stop like an eased CSS transition would.
+
   function createNeedleSpring(applyAngle, opts){
     opts = opts || {};
     var zeta = opts.zeta || 0.8;
-    var omega = opts.omega || 4; // rad/s — higher settles faster
+    var omega = opts.omega || 4;
     var k = omega * omega;
     var c = 2 * zeta * omega;
-    var wrap = !!opts.wrap; // true for a full 360° dial (shortest-path wraparound), false for a bounded arc
+    var wrap = !!opts.wrap;
 
     var angle = (typeof opts.initial === 'number') ? opts.initial : 0;
     var vel = 0;
@@ -3121,13 +2652,12 @@ try {
     function tick(now){
       rafId = null;
       if (lastT === null) lastT = now;
-      var dt = Math.min((now - lastT) / 1000, 0.1); // clamp so a backgrounded tab doesn't produce one huge jump on return
+      var dt = Math.min((now - lastT) / 1000, 0.1);
       lastT = now;
 
       var delta = target - angle;
       if (wrap){
-        // Shortest path round the dial — e.g. 350° -> 10° is a +20°
-        // nudge, not a -340° lap the other way round.
+
         delta = ((delta + 180) % 360 + 360) % 360 - 180;
       }
       var accel = k * delta - c * vel;
@@ -3156,9 +2686,6 @@ try {
     var gaugeCfg = GAUGE_CONFIG[currentUnits.wind] || GAUGE_CONFIG.kmh;
     var gaugeDomain = gaugeCfg[0], tickCount = gaugeCfg[1];
 
-    // ---- Left pane: dial + hero values only. Max Gust, Bearing, Ordinal,
-    // Beaufort and Wind Run all moved to the right pane's chip rows below;
-    // the conversion badge is gone entirely (per requirement).
     var svgSel = d3.select(leftPane);
     var svg = svgSel.select('svg');
     if (svg.empty()){
@@ -3168,11 +2695,6 @@ try {
     var colorScale = d3.scaleLinear().domain([0, 36]).range([-135, 135]);
     var arcScale   = d3.scaleLinear().domain([0, gaugeDomain]).range([-135, 135]).clamp(true);
 
-    // Static chrome (arc bands + ticks) only depends on gaugeDomain, which
-    // only changes when the unit system changes — so it's rebuilt then,
-    // not on every 30s data refresh. Inserted as the first child so later
-    // elements (needle, gust markers) always paint on top of it regardless
-    // of rebuild order.
     if (svg.select('g.a-chrome').empty() || lastGaugeDomain !== gaugeDomain){
       lastGaugeDomain = gaugeDomain;
       svg.select('g.a-chrome').remove();
@@ -3216,11 +2738,6 @@ try {
       }
     }
 
-    // Needle group — created once, then only ever has its rotate() angle
-    // updated by needleSpring below; never destroyed and rebuilt like the
-    // chrome above, since the whole point of the spring is to animate a
-    // persistent element smoothly rather than re-snap a fresh one to its
-    // target every refresh. Hub dot lives outside the rotating group.
     var needleG = svg.select('g.a-needle');
     if (needleG.empty()){
       needleG = svg.append('g').attr('class', 'a-needle');
@@ -3230,18 +2747,13 @@ try {
       svg.append('circle').attr('cx', cx).attr('cy', cy).attr('r', 4).style('fill', 'red');
     }
     if (!needleSpring){
-      // Starts at -135° — this dial's own "calm" position (0° would point
-      // straight up, which isn't where calm sits on this arc) — so the
-      // very first refresh swings up from calm to the live reading, like
-      // a meter powering on, rather than appearing mid-arc.
+
       needleSpring = createNeedleSpring(function(deg){
         needleG.attr('transform', 'translate(' + cx + ',' + cy + ') rotate(' + deg + ')');
       }, { zeta: 0.8, omega: 4, wrap: false, initial: -135 });
     }
     needleSpring.setTarget(arcScale(windFromMS(v.windSpeed)));
 
-    // ---- Everything else redraws each refresh — all cheap (two thin
-    // tick-lines, an icon, two lines of text), not worth persisting ----
     svg.selectAll('.a-dynamic').remove();
     var dynG = svg.append('g').attr('class', 'a-dynamic');
 
@@ -3256,11 +2768,8 @@ try {
       .attr('x1', 0).attr('y1', -(R)).attr('x2', 0).attr('y2', -(R + 7))
       .style('stroke', '#ff6347').style('stroke-width', 2);
 
-    var iconSize = 24.3; // 18 * 1.35
-    // wind.svg's own gradient is a pale grey (#d4d7dd→#bec1c6) — barely
-    // visible against either theme's card face without help. Same fix as
-    // the Forecast card's wind icon: darken to a solid silhouette in
-    // light theme, invert to bright white in dark theme.
+    var iconSize = 24.3;
+
     var windIconFilter = document.body.classList.contains('light')
       ? 'brightness(0) saturate(100%) opacity(0.6)'
       : 'brightness(0) invert(1) opacity(0.9)';
@@ -3270,8 +2779,6 @@ try {
       .attr('width', iconSize).attr('height', iconSize)
       .style('filter', windIconFilter);
 
-    // Hero values — same styling as Current Conditions' readouts: the
-    // mono numeric font as well as the accent colour, not just the colour.
     dynG.append('text').attr('x', cx).attr('y', H - 19).style('text-anchor', 'middle')
       .style('font-family', '"IBM Plex Mono", ui-monospace, monospace').style('font-size', '13px').style('fill', 'var(--bw-accent)')
       .text(windLabel(v.windSpeed));
@@ -3336,7 +2843,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardWindCompass.js version 0.0.1
+# cardWindCompass.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -3419,10 +2926,7 @@ try {
   mount.style.position = 'relative';
   mount.style.display = 'flex';
   mount.style.flexDirection = 'column';
-  // No bottom-border band or toolbar on this card (links removed below) —
-  // override the shared .card CSS's 18px border-bottom just for this mount
-  // so the content pane can reclaim that space. Card height stays 195px:
-  // 20px title band (border-top, unchanged) + 175px content (was 157px).
+
   mount.style.borderBottom = '0';
 
   var overlayTextColor = 'var(--bs-body-color)';
@@ -3519,7 +3023,6 @@ try {
   rightPane.style.padding = '0 10px 0 14px';
   contentWrap.appendChild(rightPane);
 
-  // Same chip-row idiom as Current Conditions / Anemometer.
   function addChipRow(label){
     var row = document.createElement('div');
     row.style.display = 'flex';
@@ -3548,20 +3051,11 @@ try {
     return valueEl;
   }
 
-  // Bearing/Ordinal are already shown directly on the compass dial itself
-  // (unlike Anemometer's simpler needle gauge), so the right pane only
-  // needs the three readouts that don't have a natural home on the dial.
   var maxGustText = addChipRow('Max Gust');
   var beaufortText = addChipRow('Beaufort');
   var windRunText = addChipRow('Wind Run');
-  windRunText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
+  windRunText.parentElement.style.borderBottom = 'none';
 
-  // Whole card is a click-through to the wind chart/records page — an
-  // absolutely-positioned transparent overlay anchor, appended last so it
-  // paints on top of everything else and actually receives the click.
-  // top/bottom match the title band (-20px) and this card's own
-  // border-bottom override (0, set above). Class name lets the shared
-  // hover-tooltip script (indexNew.html) find it and read data-modal.
   var cardLink = document.createElement('a');
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=wind&embed=1';
@@ -3579,30 +3073,15 @@ try {
   cardLink.style.display = 'block';
   mount.appendChild(cardLink);
 
-  // Nudged up from cy=78 (same balancing treatment as Anemometer, just
-  // in the other direction — this dial's bottom margin was tighter than
-  // its top, not the reverse) so the ring and the hero text below it
-  // split the pane's vertical space more evenly.
   var W = 180, H = 175, cx = 90, cy = 74;
   var dotR = 32, nsewR = 41, tickInnerR = 46, tickOuterR = 53, tickLabelR = 60;
 
   // ---- Damped-spring needle animation ----------------------------------
-  // Not a CSS/d3 transition (this used to be a d3 .transition().tween(),
-  // eased with d3.easePoly over a fixed 900ms) — a genuine second-order
-  // damped spring instead: angular acceleration proportional to how far
-  // the arrow is from its target, minus a term proportional to its own
-  // angular velocity (accel = k*(target-angle) - c*velocity). zeta=0.8 is
-  // deliberately underdamped — the analytic overshoot for a step input is
-  // exp(-zeta*pi/sqrt(1-zeta^2)), ~1.5% here (closer to ~1.3% at
-  // zeta~0.81) — so a big bearing change swings a little past the target
-  // and eases back, the way a real moving-coil instrument does, rather
-  // than gliding to a stop like the old eased transition. wrap:true means
-  // the delta driving the spring is always the shortest way round the
-  // dial — 350° -> 10° is a +20° nudge, not a -340° lap the other way.
+
   function createNeedleSpring(applyAngle, opts){
     opts = opts || {};
     var zeta = opts.zeta || 0.8;
-    var omega = opts.omega || 4; // rad/s — higher settles faster
+    var omega = opts.omega || 4;
     var k = omega * omega;
     var c = 2 * zeta * omega;
     var wrap = !!opts.wrap;
@@ -3616,7 +3095,7 @@ try {
     function tick(now){
       rafId = null;
       if (lastT === null) lastT = now;
-      var dt = Math.min((now - lastT) / 1000, 0.1); // clamp so a backgrounded tab doesn't produce one huge jump on return
+      var dt = Math.min((now - lastT) / 1000, 0.1);
       lastT = now;
 
       var delta = target - angle;
@@ -3641,10 +3120,7 @@ try {
       }
     };
   }
-  // Two independent springs — the main (blue) arrow tracks the instant
-  // wind direction, the secondary (green) arrow tracks the 10-minute
-  // average — created once, the first time the static compass ring is
-  // built (see the arrowSpring/arrowxSpring assignments below).
+
   var arrowSpring = null, arrowxSpring = null;
 
   function ringArrowPath(ringR, len){
@@ -3722,10 +3198,6 @@ try {
     arrowSpring.setTarget(v.windDir);
     arrowxSpring.setTarget(v.windDir10);
 
-    // Bearing/ordinal readouts stay on the dial itself — same accent colour
-    // as every other value on the card now, per the "values are always
-    // coloured" rule (the arrows keep their own blue/green so the two rings
-    // stay visually distinguishable; that's graphic encoding, not text).
     chromeG.append('text').attr('x', cx).attr('y', cy - 4).style('text-anchor', 'middle')
       .style('font-family', 'inherit').style('font-size', '9px').style('fill', 'var(--bw-accent)')
       .text(skynet(v.windDir) + '\u00B0');
@@ -3736,9 +3208,6 @@ try {
       .style('font-family', 'inherit').style('font-size', '9px').style('fill', 'var(--bw-accent)')
       .text(skynet(v.windDir10) + '\u00B0');
 
-    // Hero values — stacked below the ring (there's no room to flank it
-    // left/right in a 60%-width pane the way the old 310-wide canvas did),
-    // same accent colour + mono font as Current Conditions.
     var heroY = cy + tickLabelR + 14;
     chromeG.append('text').attr('x', cx).attr('y', heroY).style('text-anchor', 'middle')
       .style('font-family', '"IBM Plex Mono", ui-monospace, monospace').style('font-size', '13px').style('fill', 'var(--bw-accent)')
@@ -3803,7 +3272,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardBarometer.js version 0.0.1
+# cardBarometer.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -3867,10 +3336,7 @@ try {
   mount.style.position = 'relative';
   mount.style.display = 'flex';
   mount.style.flexDirection = 'column';
-  // No bottom-border band or toolbar on this card (links removed below) —
-  // override the shared .card CSS's 18px border-bottom just for this mount
-  // so the content pane can reclaim that space. Card height stays 195px:
-  // 20px title band (border-top, unchanged) + 175px content (was 157px).
+
   mount.style.borderBottom = '0';
 
   var overlayTextColor = 'var(--bs-body-color)';
@@ -3967,7 +3433,6 @@ try {
   rightPane.style.padding = '0 10px 0 14px';
   contentWrap.appendChild(rightPane);
 
-  // Same chip-row idiom as Current Conditions.
   function addChipRow(label){
     var row = document.createElement('div');
     row.style.display = 'flex';
@@ -4001,14 +3466,8 @@ try {
   var trendText = addChipRow('Trend');
   var altitudeText = addChipRow('Station Alt');
   var airDensityText = addChipRow('Air Density');
-  airDensityText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
+  airDensityText.parentElement.style.borderBottom = 'none';
 
-  // Whole card is a click-through to the barometer chart/records page —
-  // an absolutely-positioned transparent overlay anchor, appended last so
-  // it paints on top of everything else and actually receives the click.
-  // top/bottom match the title band (-20px) and this card's own
-  // border-bottom override (0, set above). Class name lets the shared
-  // hover-tooltip script (indexNew.html) find it and read data-modal.
   var cardLink = document.createElement('a');
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=barometer&embed=1';
@@ -4026,15 +3485,12 @@ try {
   cardLink.style.display = 'block';
   mount.appendChild(cardLink);
 
-
   var W = 180, H = 175, cx = 90, cy = 81, R = 54;
   var ICON_BASE = './meteocons/fill/svg/';
   var ARC_BANDS_HPA = [
     [940, 970, '#ff00ff'], [970, 990, '#f8d747'], [990, 1010, '#007fff'],
     [1010, 1030, '#2e8b57'], [1030, 1060, '#ff6347']
   ];
-
-
 
   var TREND_LABELS = [
     { name: 'STORMY', offset: '6.25%', anchor: 'middle' },
@@ -4126,13 +3582,12 @@ try {
       .attr('x1', 0).attr('y1', -R).attr('x2', 0).attr('y2', -(R + 7))
       .style('stroke', '#ff6347').style('stroke-width', 2);
 
-    var iconSize = 24.3; // 18 * 1.35
+    var iconSize = 24.3;
     svg.append('image')
       .attr('xlink:href', ICON_BASE + 'barometer.svg')
       .attr('x', cx - iconSize / 2).attr('y', cy + R - iconSize / 2)
       .attr('width', iconSize).attr('height', iconSize);
 
-    // Hero value — same accent colour + mono font as Current Conditions.
     svg.append('text').attr('x', cx).attr('y', H - 16).style('text-anchor', 'middle')
       .style('font-family', '"IBM Plex Mono", ui-monospace, monospace').style('font-size', '13px').style('fill', 'var(--bw-accent)')
       .text(currentDisp.toFixed(cfg.dp) + ' ' + cfg.label);
@@ -4167,10 +3622,7 @@ try {
       var trendCode = num(barom.trend_code, 0);
 
       lastData = {
-        // Same live-vs-archive priority fix as cardSolarRadiation/
-        // cardUvIndex elsewhere in this file -- loop.json's own reading
-        // is live, archive.json's barom.current only a periodic
-        // snapshot, used here only as a fallback.
+
         current: num(o.barometer, num(barom.current, 1013.25)),
         max: num(barom.day_max, 1013.25),
         min: num(barom.day_min, 1013.25),
@@ -4203,7 +3655,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardPiezoRain.js version 0.0.1
+# cardPiezoRain.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -4234,8 +3686,7 @@ try {
     var p = stationParts(new Date(epochMs));
     return p.hour + ':' + p.minute;
   }
-  // Fixed water colour — same blue as the raindrop icons, used for the
-  // tube fill regardless of rain amount (no longer a range-based colour).
+
   var WATER_COLOR = '#007fff';
 
   var currentUnits = loadStoredUnits();
@@ -4268,10 +3719,7 @@ try {
   mount.style.position = 'relative';
   mount.style.display = 'flex';
   mount.style.flexDirection = 'column';
-  // No bottom-border band or toolbar on this card (links removed below) —
-  // override the shared .card CSS's 18px border-bottom just for this mount
-  // so the content pane can reclaim that space. Card height stays 195px:
-  // 20px title band (border-top, unchanged) + 175px content (was 157px).
+
   mount.style.borderBottom = '0';
 
   var overlayTextColor = 'var(--bs-body-color)';
@@ -4368,7 +3816,6 @@ try {
   rightPane.style.padding = '0 10px 0 14px';
   contentWrap.appendChild(rightPane);
 
-  // Same chip-row idiom as Current Conditions.
   function addChipRow(label){
     var row = document.createElement('div');
     row.style.display = 'flex';
@@ -4403,26 +3850,11 @@ try {
   var last24hText = addChipRow('Last 24hr');
   var rateText = addChipRow('Rain Rate');
   var eventText = addChipRow('Rain Event');
-  // The old '(since HH:MM)' suffix already overflowed this 40%-pane's real width on its
-  // own (measured against this site's actual card width: ~102px available, ~120px of text)
-  // -- text-overflow:ellipsis (set on every chip value by addChipRow above) was clipping it
-  // mid-word rather than showing the full time. An '@ time' shorthand was tried here first,
-  // but that drops the "this is when it started" meaning 'since' carries -- reverted to
-  // keeping the word 'since', instead moving the wrap point: the parentheses are dropped
-  // (redundant once it is its own line) and this element specifically (not addChipRow's
-  // shared default) now wraps instead of clipping, with an explicit <br> forced right before
-  // 'since' so it always breaks there -- amount on its own line, 'since time' on the next --
-  // rather than relying on the browser's own word-wrap to land in a sensible spot.
+
   eventText.style.whiteSpace = 'normal';
   eventText.style.textOverflow = 'clip';
-  eventText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
+  eventText.parentElement.style.borderBottom = 'none';
 
-  // Whole card is a click-through to the rain chart/records page — an
-  // absolutely-positioned transparent overlay anchor, appended last so it
-  // paints on top of everything else and actually receives the click.
-  // top/bottom match the title band (-20px) and this card's own
-  // border-bottom override (0, set above). Class name lets the shared
-  // hover-tooltip script (indexNew.html) find it and read data-modal.
   var cardLink = document.createElement('a');
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=rain&embed=1';
@@ -4440,8 +3872,6 @@ try {
   cardLink.style.display = 'block';
   mount.appendChild(cardLink);
 
-  // Shared across any cards on the page — guarded so a second card
-  // doesn't insert a duplicate <style> block.
   if (!document.getElementById('raindrop-pulse-style')) {
     var pulseStyle = document.createElement('style');
     pulseStyle.id = 'raindrop-pulse-style';
@@ -4468,33 +3898,11 @@ try {
     var svgSel = d3.select(leftPane);
     var svg = svgSel.select('svg');
     if (svg.empty()){
-      // Cropped viewport (nonzero min-x) rather than rewriting every
-      // hardcoded line()/rect() coordinate below — the funnel/tube/
-      // raindrop drawing was already a self-contained subsystem sitting
-      // inside the old 310-wide canvas, so this just frames that region
-      // directly.
-      //
-      // Vertically: the visible content's true top isn't the funnel rim
-      // (y=13) but the decorative arc above it, whose apex reaches y=3.5
-      // (radius 70, centred at y=73.5) — 9.5 units higher. min-y is
-      // -13.75 so that full 3.5->144 span (140.5 tall) sits centred
-      // within the 175-tall pane (17.25px margin top and bottom).
-      //
-      // Horizontally: the device itself (funnel/housing/tube/arc, not
-      // the raindrops off to the side) spans x=40.25->109.5, centred on
-      // x≈74.9 — not x=85, the old viewBox's own centre (25->145,
-      // sized to include the raindrops without compensating on the
-      // left). min-x is 5 (not 25) so the device sits centred at x≈75
-      // within the wider 140-unit-wide viewBox; the right edge stays at
-      // 145, so the raindrops keep exactly the margin they had before.
+
       svg = svgSel.append('svg').attr('viewBox', '5 -13.75 140 175').attr('width', '100%').attr('height', '100%');
     }
     svg.selectAll('*').remove();
 
-    // Fixed at the light theme's own value (was var(--bs-secondary-color),
-    // which is a different, lighter grey in dark mode) — the funnel and
-    // housing lines should read the same regardless of theme, matching
-    // Tipping Rain's own housingColor, which was never theme-dependent.
     var lineColor = '#5C6672';
 
     var arc = d3.arc().innerRadius(70).outerRadius(70);
@@ -4541,12 +3949,6 @@ try {
     line(69.5, 28.5, 69.5, 39);
     line(80, 28.5, 80, 39);
 
-    // The outer <g> carries position/base-size as an SVG transform
-    // attribute; the inner <path> carries the CSS pulse animation. Kept
-    // separate because a CSS transform on an element overrides (rather
-    // than composes with) its SVG "transform" attribute — animating the
-    // same element that's positioned via translate/scale would snap it
-    // back to the SVG viewport origin every frame.
     function raindrop(x, y, scale, pulsing){
       var g = svg.append('g').attr('transform', 'translate(' + x + ',' + y + ') scale(' + scale + ')');
       var path = g.append('path')
@@ -4554,7 +3956,7 @@ try {
         .style('fill', '#007fff');
       if (pulsing) path.attr('class', 'raindrop-pulse');
     }
-    // Pulse only while it's actually raining (rate > 0).
+
     raindrop(122, 112, 1.15, v.rate > 0);
     raindrop(131, 122, 0.85, v.rate > 0);
 
@@ -4586,9 +3988,6 @@ try {
 
     var fillTop = scale(currentDisplay);
 
-    // Both the fill and its meniscus only draw once there's actually
-    // some rain to show — at 0mm the tube reads as genuinely empty
-    // rather than showing a thin sliver of water with nothing behind it.
     if (currentRainMm > 0) {
       svg.append('rect')
         .attr('x', 76.5 - 18.75).attr('y', fillTop - 2)
@@ -4613,9 +4012,6 @@ try {
     svgAxis.select('path').style('stroke', 'none').style('fill', 'none');
     svgAxis.selectAll('.tick line')
       .style('stroke', tubeBorderColor).style('stroke-linecap', 'round').style('stroke-width', 2);
-
-    // Hero value already appears above the funnel (currentDisplay text) —
-    // no conversion badge here any more.
 
     // ---- Right pane: 6 readouts as label/value chip rows ----
     monthText.textContent = rainLabel(v.month);
@@ -4647,23 +4043,13 @@ try {
       var loop = loopResult.status === 'fulfilled' ? loopResult.value : {};
       var arch = archResult.status === 'fulfilled' ? archResult.value : {};
       var o = loop.observations || {};
-      // Sensor-selection logic: a station with BOTH a tipping-bucket and a
-      // piezo rain gauge maps the piezo gauge onto archive.json's "p_rain"
-      // block (see archive_json.tmpl's own comment on why "hail" is where
-      // piezo readings live). A station with ONLY a piezo gauge and no
-      // tipping bucket has nothing to put in a second slot for, so its
-      // piezo readings are simply the station's one and only "rain" block
-      // instead -- "p_rain" is entirely absent from the JSON in that case
-      // (archive.json.tmpl omits the whole key, not even a null), which is
-      // exactly the signal used here: prefer p_rain when it's actually
-      // present (both gauges), otherwise fall back to rain (piezo-only).
+
       var pRain = (arch.p_rain && typeof arch.p_rain === 'object') ? arch.p_rain : (arch.rain || {});
       function num(x, fallback){ return (typeof x === 'number' && !isNaN(x)) ? x : (fallback || 0); }
 
       lastData = {
         day: num(pRain.day, 0),
         hour: num(pRain.hour, 0),
-
 
         last24h: num(pRain['24hour'], num(pRain.last24h, 0)),
         month: num(pRain.month, 0),
@@ -4692,7 +4078,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardRainfall.js version 0.0.1
+# cardRainfall.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -4723,8 +4109,7 @@ try {
     var p = stationParts(new Date(epochMs));
     return p.hour + ':' + p.minute;
   }
-  // Fixed water colour — same blue as the raindrop icons, used for the
-  // tube fill regardless of rain amount (no longer a range-based colour).
+
   var WATER_COLOR = '#007fff';
 
   var currentUnits = loadStoredUnits();
@@ -4757,10 +4142,7 @@ try {
   mount.style.position = 'relative';
   mount.style.display = 'flex';
   mount.style.flexDirection = 'column';
-  // No bottom-border band or toolbar on this card (links removed below) —
-  // override the shared .card CSS's 18px border-bottom just for this mount
-  // so the content pane can reclaim that space. Card height stays 195px:
-  // 20px title band (border-top, unchanged) + 175px content (was 157px).
+
   mount.style.borderBottom = '0';
 
   var overlayTextColor = 'var(--bs-body-color)';
@@ -4857,7 +4239,6 @@ try {
   rightPane.style.padding = '0 10px 0 14px';
   contentWrap.appendChild(rightPane);
 
-  // Same chip-row idiom as Current Conditions.
   function addChipRow(label){
     var row = document.createElement('div');
     row.style.display = 'flex';
@@ -4892,26 +4273,11 @@ try {
   var last24hText = addChipRow('Last 24hr');
   var rateText = addChipRow('Rain Rate');
   var eventText = addChipRow('Rain Event');
-  // The old '(since HH:MM)' suffix already overflowed this 40%-pane's real width on its
-  // own (measured against this site's actual card width: ~102px available, ~120px of text)
-  // -- text-overflow:ellipsis (set on every chip value by addChipRow above) was clipping it
-  // mid-word rather than showing the full time. An '@ time' shorthand was tried here first,
-  // but that drops the "this is when it started" meaning 'since' carries -- reverted to
-  // keeping the word 'since', instead moving the wrap point: the parentheses are dropped
-  // (redundant once it is its own line) and this element specifically (not addChipRow's
-  // shared default) now wraps instead of clipping, with an explicit <br> forced right before
-  // 'since' so it always breaks there -- amount on its own line, 'since time' on the next --
-  // rather than relying on the browser's own word-wrap to land in a sensible spot.
+
   eventText.style.whiteSpace = 'normal';
   eventText.style.textOverflow = 'clip';
-  eventText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
+  eventText.parentElement.style.borderBottom = 'none';
 
-  // Whole card is a click-through to the rain chart/records page — an
-  // absolutely-positioned transparent overlay anchor, appended last so it
-  // paints on top of everything else and actually receives the click.
-  // top/bottom match the title band (-20px) and this card's own
-  // border-bottom override (0, set above). Class name lets the shared
-  // hover-tooltip script (indexNew.html) find it and read data-modal.
   var cardLink = document.createElement('a');
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=rain&embed=1';
@@ -4929,8 +4295,6 @@ try {
   cardLink.style.display = 'block';
   mount.appendChild(cardLink);
 
-  // Shared across any cards on the page — guarded so a second card
-  // doesn't insert a duplicate <style> block.
   if (!document.getElementById('raindrop-pulse-style')) {
     var pulseStyle = document.createElement('style');
     pulseStyle.id = 'raindrop-pulse-style';
@@ -4943,7 +4307,6 @@ try {
       'animation: raindropPulse 1.3s ease-in-out infinite; }';
     document.head.appendChild(pulseStyle);
   }
-
 
   var THRESHOLDS = [
     { limit: 2, val: 1 }, { limit: 5, val: 2 }, { limit: 10, val: 3 },
@@ -4958,22 +4321,13 @@ try {
     var svgSel = d3.select(leftPane);
     var svg = svgSel.select('svg');
     if (svg.empty()){
-      // Cropped viewport (nonzero min-x), same window as Piezo Rain's
-      // sibling card — the tube/raindrop drawing below is untouched.
-      // min-y is -9.5 (not 0): this drawing's own content spans roughly
-      // y=8 (tubeTop) to y=148 (tubeBottom), which read as sitting near
-      // the top of the 175-tall pane with all the slack at the bottom —
-      // shifting the viewport's origin up by 9.5 recenters that same
-      // content vertically (~17.5px margin top and bottom) without
-      // touching any of the drawing's own coordinates.
+
       svg = svgSel.append('svg').attr('viewBox', '25 -9.5 120 175').attr('width', '100%').attr('height', '100%');
     }
     svg.selectAll('*').remove();
 
     var tubeBorderColor = '#999999';
-    // Shifted right from the original cx=52 to match Piezo Rain's visual
-    // center (~75.5) — the funnel was sitting noticeably further left
-    // than the piezo device, unbalancing the two sibling cards.
+
     var cx = 75.5;
     var bodyHalfW = 18.25;
     var topHalfW = 30;
@@ -4981,12 +4335,6 @@ try {
     var taperBottomY = 46;
     var tubeBottom = 148;
 
-    // The outer <g> carries position/base-size as an SVG transform
-    // attribute; the inner <path> carries the CSS pulse animation. Kept
-    // separate because a CSS transform on an element overrides (rather
-    // than composes with) its SVG "transform" attribute — animating the
-    // same element that's positioned via translate/scale would snap it
-    // back to the SVG viewport origin every frame.
     function raindrop(x, y, scale, pulsing){
       var g = svg.append('g').attr('transform', 'translate(' + x + ',' + y + ') scale(' + scale + ')');
       var path = g.append('path')
@@ -4994,9 +4342,7 @@ try {
         .style('fill', '#007fff');
       if (pulsing) path.attr('class', 'raindrop-pulse');
     }
-    // x shifted by the same +23.5 as cx, to preserve the original gap
-    // between the tube's right edge and the raindrops. Pulse only while
-    // it's actually raining (rate > 0).
+
     raindrop(126.5, 118, 1.15, v.rate > 0);
     raindrop(135.5, 128, 0.85, v.rate > 0);
 
@@ -5012,20 +4358,10 @@ try {
     if (domain[1] - currentDisplay < 0.66 * stepping) domain[1] += stepping;
 
     var yScale = d3.scaleLinear().domain(domain).range([tubeBottom, taperBottomY + 3]);
-    // Piezo Rain's tube math has a built-in ~3.75px floor (an accidental
-    // byproduct of its bulb geometry) that keeps a sliver of water
-    // visible at the bottom even at 0mm. Rainfall's math has no such
-    // floor and collapses to a flat, empty-looking bottom at 0mm —
-    // clamping fillTop here reproduces the same visible baseline, in
-    // both light and dark themes (WATER_COLOR and --card-bg below are
-    // already theme-safe, this just guarantees they're never 0-height).
+
     var MIN_WATER_HEIGHT = 3.75;
     var fillTop = Math.min(yScale(currentDisplay), tubeBottom - MIN_WATER_HEIGHT);
-    // Water rect's bottom edge is pinned to tubeBottom (the actual floor
-    // line drawn below) via this height formula, rather than derived
-    // independently from fillTop — the old height calc always left the
-    // water sitting a fixed 5px above the floor at every fill level,
-    // not just at 0mm, it just wasn't visually obvious until empty.
+
     var waterHeight = (tubeBottom - fillTop) + 2;
 
     svg.append('rect')
@@ -5064,9 +4400,6 @@ try {
       .style('font-family', 'inherit').style('font-weight', '600').style('font-size', '11px').style('fill', overlayTextColor)
       .text(currentDisplay.toFixed(displayIsIn ? 2 : 1) + ' ' + (displayIsIn ? 'in' : 'mm'));
 
-    // Hero value already appears inside the tube (currentDisplay text) —
-    // no conversion badge here any more.
-
     // ---- Right pane: 6 readouts as label/value chip rows ----
     monthText.textContent = rainLabel(v.month);
     hourText.textContent = rainLabel(v.hour);
@@ -5104,7 +4437,6 @@ try {
         day: num(rain.day, 0),
         hour: num(rain.hour, 0),
 
-
         last24h: num(rain.last24h, 0),
         month: num(rain.month, 0),
         year: num(rain.year, 0),
@@ -5132,16 +4464,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardTippingRain.js version 0.0.1
-#  Alternative to cardRainfall.js — same data (loop.json/archive.json rain block), same 60:40
-#  layout and right-pane chip rows, but the left pane's "measuring cylinder" (a static tube
-#  with a rising water level) is replaced with a cross-sectional, animated tipping-bucket
-#  rain gauge: a funnel feeds a small pivoted seesaw with a bucket on each end; whichever
-#  bucket sits under the funnel throat fills, and on reaching its calibrated volume the seesaw
-#  snaps over, dumping that bucket out through the drain at the base and swinging the empty
-#  bucket into place — which is literally how a real tipping-bucket gauge measures rain (each
-#  tip is a fixed volume, so tip frequency is what rate is derived from). The animation's tip
-#  rate is driven by the station's actual rain rate rather than being decorative.
+# cardTippingRain.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -5300,7 +4623,6 @@ try {
   rightPane.style.padding = '0 10px 0 14px';
   contentWrap.appendChild(rightPane);
 
-  // Same chip-row idiom as Rainfall/Current Conditions.
   function addChipRow(label){
     var row = document.createElement('div');
     row.style.display = 'flex';
@@ -5335,23 +4657,11 @@ try {
   var last24hText = addChipRow('Last 24hr');
   var rateText = addChipRow('Rain Rate');
   var eventText = addChipRow('Rain Event');
-  // The old '(since HH:MM)' suffix already overflowed this 40%-pane's real width on its
-  // own (measured against this site's actual card width: ~102px available, ~120px of text)
-  // -- text-overflow:ellipsis (set on every chip value by addChipRow above) was clipping it
-  // mid-word rather than showing the full time. An '@ time' shorthand was tried here first,
-  // but that drops the "this is when it started" meaning 'since' carries -- reverted to
-  // keeping the word 'since', instead moving the wrap point: the parentheses are dropped
-  // (redundant once it is its own line) and this element specifically (not addChipRow's
-  // shared default) now wraps instead of clipping, with an explicit <br> forced right before
-  // 'since' so it always breaks there -- amount on its own line, 'since time' on the next --
-  // rather than relying on the browser's own word-wrap to land in a sensible spot.
+
   eventText.style.whiteSpace = 'normal';
   eventText.style.textOverflow = 'clip';
   eventText.parentElement.style.borderBottom = 'none';
 
-  // Whole card is a click-through to the same rain chart/records page the
-  // Rainfall card opens — this is an alternative visualisation of the same
-  // underlying data, not a different data source.
   var cardLink = document.createElement('a');
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=rain&embed=1';
@@ -5369,8 +4679,6 @@ try {
   cardLink.style.display = 'block';
   mount.appendChild(cardLink);
 
-  // Shared with cardRainfall.js — guarded so whichever card loads first
-  // creates it, and neither inserts a duplicate.
   if (!document.getElementById('raindrop-pulse-style')) {
     var pulseStyle = document.createElement('style');
     pulseStyle.id = 'raindrop-pulse-style';
@@ -5385,80 +4693,35 @@ try {
   }
 
   // ---- Tipping-bucket cross-section geometry --------------------------
-  // Drawn as a cutaway: the funnel and housing are open profiles (we're
-  // looking straight into the mechanism, not at a solid case), so the
-  // pivoted seesaw and its two buckets are genuinely visible inside,
-  // the same way Piezo Rain's tube shows its water level through an open
-  // cross-section rather than a sealed cylinder.
-  //
-  // Vertical layout now matches Piezo Rain's own coordinate scheme
-  // exactly, so the two cards read as the same size device: funnel/
-  // housing top at y=13, the point where the mechanism empties into the
-  // collection tube at y=76 (a height of 63 for the "upper section" —
-  // identical to Piezo Rain's own 13->76 funnel span), and the tube
-  // floor at y=144 (another 68, identical to Piezo Rain's own 76->144
-  // tube span). The original mechanism (funnel, housing, seesaw, drain)
-  // is still drawn in its own local coordinates below, unchanged, then
-  // wrapped in one scaled <g> (see mechG in buildStatic) that maps its
-  // local 6->143 span onto the shared 13->76 span — every relative
-  // proportion inside the mechanism (funnel taper, pivot position,
-  // bucket size) is preserved automatically by the uniform scale, only
-  // its overall size shrinks. Stroke widths are the one thing scaling
-  // would otherwise shrink along with the shapes, so every stroke-width
-  // used inside that group is pre-divided by the same factor (see
-  // MECH_LINE_W), so they come out matching Piezo Rain's 1.5px lines
-  // once rendered.
+
   var W = 130, H = 175;
   var cx = 65;
-  var housingColor = '#5C6672'; // matches Piezo Rain's own fixed lineColor
+  var housingColor = '#5C6672';
 
   var bodyHalfW = 32;
   var funnelTopY0 = 6, funnelHalfTop = 44;
-  // funnelThroatRefY0/funnelHalfThroatRef is the funnel's own original full
-  // endpoint (same taper angle and length as before the housing-touching
-  // change) — drawn in full, independent of the housing.
+
   var funnelThroatRefY0 = 52, funnelHalfThroatRef = 7;
-  // Housing vertical walls shortened by 25px at the bottom (152 -> 127).
+
   var bodyBottom0 = 127;
-  // Drain spout keeps its own original ~16px length rather than stretching
-  // when bodyBottom0 moved up.
+
   var spoutY0 = bodyBottom0 + 16;
   var pivotY0 = 76;
   var beamHalfLen = 21;
-  var bucketW = 15, bucketH = 17, bucketTaper = 0.55; // taper: bottom width as a fraction of top width
-  var tiltAngle = 14; // degrees off horizontal at rest, either side
+  var bucketW = 15, bucketH = 17, bucketTaper = 0.55;
+  var tiltAngle = 14;
   var drainHalfW = 7;
-  // The drain spout no longer closes to a single point — it stops short
-  // on each side, leaving a small gap at the tip: the outlet where
-  // dumped water actually leaves the housing on its way into the tube.
+
   var spoutGapHalf = 3;
 
-  // Shared vertical reference points, matching Piezo Rain's own y values
-  // exactly for the mechanism and tube (13/76/144) — the canvas's own
-  // vertical centring is computed separately below, once the hero text's
-  // position above the image is known too.
   var mechTopY = 13, mechBottomY = 76, tubeBottomY = 144;
-  var MECH_SCALE = (mechBottomY - mechTopY) / (spoutY0 - funnelTopY0); // local mechanism height -> its new target height
-  var MECH_LINE_W = 1.5 / MECH_SCALE; // pre-compensated so rendered stroke width matches Piezo Rain's 1.5px
+  var MECH_SCALE = (mechBottomY - mechTopY) / (spoutY0 - funnelTopY0);
+  var MECH_LINE_W = 1.5 / MECH_SCALE;
 
-  // Collection tube — same construction as Piezo Rain's: a short taper
-  // down from the drain's small opening to the tube's full width, then
-  // straight walls to the floor, with a d3-scaled fill + axis inside
-  // that redraw on every refresh.
   var tubeHalfW = 18.25, tubeFillHalfW = 17.25;
   var tubeTaperBottomY = mechBottomY + 8;
-  var tubeOpenHalfW = spoutGapHalf * MECH_SCALE + 1; // matches the mechanism's own opening width once scaled
+  var tubeOpenHalfW = spoutGapHalf * MECH_SCALE + 1;
 
-  // Widen the top section (funnel + housing) so its widest point — the
-  // funnel's open top rim — renders at exactly twice the collection
-  // tube's width, matching Piezo Rain's own top-section/tube proportions.
-  // Applied to every horizontal-extent constant used inside the
-  // mechanism group (never to bucketH/tiltAngle/bucketTaper, which
-  // aren't widths), so the whole upper section — housing and seesaw
-  // alike — widens evenly with no distortion. funnelJunctionY0, computed
-  // below in buildStatic, still comes out at the same relative height
-  // either way, since it only depends on ratios between three of these
-  // values, all widened equally.
   var WIDEN = (2 * tubeHalfW) / (funnelHalfTop * MECH_SCALE);
   funnelHalfTop *= WIDEN;
   funnelHalfThroatRef *= WIDEN;
@@ -5467,33 +4730,12 @@ try {
   beamHalfLen *= WIDEN;
   bucketW *= WIDEN;
 
-  // Hero value — moved down into the funnel's own vertical section (the
-  // straight-walled collar above the tapered funnel rim, mechTopY)
-  // rather than floating above the whole image, per feedback on the
-  // rendered card. The collar height is now an independent, fixed value
-  // (funnelCollarH) — previously funnelExtTopY was derived FROM the
-  // hero text's position; that's inverted now, since the hero sits
-  // inside the collar rather than above it. heroY (baseline) is placed
-  // so the glyphs sit vertically centred within the collar: roughly one
-  // font-size of ascent above the baseline (11px font, so ~9px) and
-  // negligible descent (digits and "mm" have no descenders), so the
-  // glyphs' own visual centre sits ~heroAscent/2 above the baseline —
-  // matches the same 11px/9px assumption the original heroY/heroTopY
-  // comment already used.
   var funnelCollarH = 26;
   var funnelExtTopY = mechTopY - funnelCollarH;
   var heroAscent = 9;
-  var heroY = (funnelExtTopY + mechTopY) / 2 + heroAscent / 2; // baseline
-  var heroTopY = heroY - heroAscent; // visual top edge estimate, kept for any other reader relying on it
+  var heroY = (funnelExtTopY + mechTopY) / 2 + heroAscent / 2;
+  var heroTopY = heroY - heroAscent;
 
-  // Recentre the whole drawing (funnel collar top down to the tube
-  // floor) vertically within the fixed H-tall canvas — equal margins
-  // top and bottom. Anchored to funnelExtTopY (the collar's top edge)
-  // rather than heroTopY now, since the collar is the topmost thing on
-  // the card once the hero text moved down inside it — heroTopY no
-  // longer marks the top of the drawing. H itself is left untouched
-  // (still matching Piezo Rain's own canvas height, so the mechanism/
-  // tube keep the same rendered size as Piezo Rain's).
   var CONTENT_H = tubeBottomY - funnelExtTopY;
   var V_MARGIN = (H - CONTENT_H) / 2;
   var VIEW_MIN_Y = funnelExtTopY - V_MARGIN;
@@ -5506,8 +4748,8 @@ try {
   ];
 
   var svg, mechG, beamG, bucketFillL, bucketFillR, dripG, funnelDropsG, ambientDropsG, tubeDynG;
-  var tipping = false;          // true only during the brief flip animation
-  var activeSide = 0;           // 0 = left bucket currently under the funnel, 1 = right
+  var tipping = false;
+  var activeSide = 0;
   var fillStartTime = null;
   var rafId = null;
 
@@ -5526,43 +4768,21 @@ try {
   }
 
   function buildStatic(){
-    // VIEW_MIN_Y centres the whole card (hero text down to the tube
-    // floor) inside the fixed H-tall canvas with equal margins top and
-    // bottom — see its computation above, alongside heroY/heroTopY.
+
     svg = d3.select(leftPane).append('svg').attr('viewBox', '0 ' + VIEW_MIN_Y + ' ' + W + ' ' + H).attr('width', '100%').attr('height', '100%');
 
-    // Mechanism group — everything below in this function up to the tube
-    // is drawn in the original local coordinate space (cx=65,
-    // funnelTopY0=6 .. spoutY0=143); this one transform maps that whole
-    // span onto mechTopY..mechBottomY, shrinking the mechanism to match
-    // Piezo Rain's own upper-section height while preserving every
-    // internal proportion.
     mechG = svg.append('g').attr('transform',
       'translate(' + (cx - cx * MECH_SCALE) + ',' + (mechTopY - funnelTopY0 * MECH_SCALE) + ') scale(' + MECH_SCALE + ')');
 
     function mline(x1, y1, x2, y2){
-      // Piezo Rain's own line() helper applies round linecap to every
-      // stroke unconditionally, funnel taper and straight tube walls
-      // alike — matched here the same way, no exceptions.
+
       return mechG.append('line').attr('x1', x1).attr('y1', y1).attr('x2', x2).attr('y2', y2)
         .style('stroke', housingColor).style('stroke-width', MECH_LINE_W).style('fill', 'none').style('stroke-linecap', 'round');
     }
 
-    // Funnel — open top (no horizontal cap: the two vertical extension
-    // walls below continue the opening upward instead, see
-    // funnelExtTopY/svg extension lines just after), tapers down its
-    // full original length to its own spout end, which hangs visibly
-    // inside the wider housing below.
     mline(cx - funnelHalfTop, funnelTopY0, cx - funnelHalfThroatRef, funnelThroatRefY0);
     mline(cx + funnelHalfTop, funnelTopY0, cx + funnelHalfThroatRef, funnelThroatRefY0);
 
-    // Vertical extension on top of the funnel, using the gap that used
-    // to sit empty between the funnel's rim and the hero value text
-    // above it. Drawn at the outer (unscaled) level directly from the
-    // mechanism's own rendered rim position — cx ± funnelHalfTop scaled
-    // by MECH_SCALE, since that's where the taper lines above actually
-    // land once mechG's transform is applied — so these come out as
-    // true vertical walls rather than being warped by that transform.
     svg.append('line').attr('x1', cx - funnelHalfTop * MECH_SCALE).attr('y1', mechTopY)
       .attr('x2', cx - funnelHalfTop * MECH_SCALE).attr('y2', funnelExtTopY)
       .style('stroke', housingColor).style('stroke-width', 1.5).style('stroke-linecap', 'round').style('fill', 'none');
@@ -5570,36 +4790,19 @@ try {
       .attr('x2', cx + funnelHalfTop * MECH_SCALE).attr('y2', funnelExtTopY)
       .style('stroke', housingColor).style('stroke-width', 1.5).style('stroke-linecap', 'round').style('fill', 'none');
 
-    // Where the housing's vertical walls actually cross the funnel's
-    // slant (x = bodyHalfW) — this is where they start, extending down
-    // to bodyBottom0. The funnel's own slant is drawn in full down to
-    // funnelThroatRefY0 regardless, so its narrow spout end hangs
-    // visibly inside the wider housing below the wall-junction point.
     var funnelJunctionY0 = funnelTopY0 + (funnelHalfTop - bodyHalfW) / (funnelHalfTop - funnelHalfThroatRef) * (funnelThroatRefY0 - funnelTopY0);
 
-    // Housing side walls, cross-sectioned (open) from the funnel junction
-    // down to the base, and the base floor itself with a gap in the
-    // middle for the drain — a solid floor would trap the dumped water
-    // on-screen.
     mline(cx - bodyHalfW, funnelJunctionY0, cx - bodyHalfW, bodyBottom0);
     mline(cx + bodyHalfW, funnelJunctionY0, cx + bodyHalfW, bodyBottom0);
     mline(cx - bodyHalfW, bodyBottom0, cx - drainHalfW, bodyBottom0);
     mline(cx + drainHalfW, bodyBottom0, cx + bodyHalfW, bodyBottom0);
 
-    // Drain spout — tapers from the base gap almost to a point, but stops
-    // short on each side, leaving a small opening at the tip where dumped
-    // water actually exits the housing on its way into the tube below,
-    // rather than closing to a fully sealed point.
     mline(cx - drainHalfW, bodyBottom0, cx - spoutGapHalf, spoutY0);
     mline(cx + drainHalfW, bodyBottom0, cx + spoutGapHalf, spoutY0);
 
-    // Pivot support column, rising from the drain gap to the seesaw.
     mechG.append('line').attr('x1', cx).attr('y1', bodyBottom0).attr('x2', cx).attr('y2', pivotY0 + 3)
       .style('stroke', housingColor).style('stroke-width', MECH_LINE_W).style('stroke-linecap', 'round');
 
-    // The seesaw itself — beam + pivot dot + two buckets — all inside one
-    // rotatable group so a tip is a single transform change, not a
-    // per-element animation.
     beamG = mechG.append('g').attr('class', 'tip-beam').attr('transform', 'translate(' + cx + ',' + pivotY0 + ') rotate(' + tiltAngle + ')');
     beamG.append('rect').attr('x', -beamHalfLen).attr('y', -1.5 / MECH_SCALE).attr('width', beamHalfLen * 2).attr('height', 3 / MECH_SCALE)
       .attr('rx', 1.5 / MECH_SCALE).style('fill', housingColor);
@@ -5614,14 +4817,10 @@ try {
     bucketFillR = rightBucketG.append('rect').attr('x', -(bucketW * bucketTaper) / 2 + 0.5).attr('width', bucketW * bucketTaper - 1)
       .attr('y', bucketH).attr('height', 0).style('fill', WATER_COLOR);
 
-    // Pivot dot drawn last so it sits on top of the beam visually.
     mechG.append('circle').attr('cx', cx).attr('cy', pivotY0).attr('r', 2.6 / MECH_SCALE).style('fill', housingColor);
 
     // ---- Collection tube — same construction as Piezo Rain's ----------
-    // A short taper down from the drain's small opening to the tube's
-    // full width, then straight walls to the floor. Drawn at the outer
-    // (unscaled) level, directly below the mechanism group, so its line
-    // weight matches Piezo Rain's 1.5px without any compensation.
+
     function tline(x1, y1, x2, y2){
       svg.append('line').attr('x1', x1).attr('y1', y1).attr('x2', x2).attr('y2', y2)
         .style('stroke', housingColor).style('stroke-width', 1.5).style('stroke-linecap', 'round').style('fill', 'none');
@@ -5632,19 +4831,11 @@ try {
     tline(cx + tubeHalfW, tubeTaperBottomY, cx + tubeHalfW, tubeBottomY);
     tline(cx - tubeHalfW, tubeBottomY, cx + tubeHalfW, tubeBottomY);
 
-    // Drops entering the funnel, the ambient pair beside the tube (same
-    // convention as Piezo Rain/Rainfall's floating drops, only shown/
-    // pulsing while it's actually raining), a group for the brief
-    // dribble each time a bucket dumps, and the tube's fill+axis group
-    // (rebuilt every refresh, since the reading changes).
     funnelDropsG = svg.append('g');
     ambientDropsG = svg.append('g');
     dripG = svg.append('g');
     tubeDynG = svg.append('g');
 
-    // Hero value sits inside the funnel's vertical collar section (see
-    // heroY, computed above alongside the collar/vertical recentring
-    // maths) rather than floating above the whole image.
     svg.append('text').attr('class', 'tr-hero').attr('x', cx).attr('y', heroY)
       .style('text-anchor', 'middle').style('font-family', '"IBM Plex Mono", ui-monospace, monospace').style('font-weight', '600')
       .style('font-size', '11px').style('fill', 'var(--bw-accent)');
@@ -5663,13 +4854,7 @@ try {
   }
 
   function spawnDrip(localX){
-    // localX is the dumping bucket's x-offset from the pivot at rest tilt
-    // — approximated at the drain rather than tracked through the beam's
-    // own rotation, since the drop only needs to read as "coming from
-    // about that side", not trace the exact bucket path. dripG lives at
-    // the outer (unscaled) level, same as the tube below it, so this
-    // drops from the mechanism's opening (mechBottomY) into the tube's
-    // taper — not the mechanism's own local coordinates.
+
     var x = cx + (localX > 0 ? drainHalfW * MECH_SCALE * 1.4 : -drainHalfW * MECH_SCALE * 1.4);
     var d = dripG.append('circle').attr('cx', x).attr('cy', mechBottomY - 2).attr('r', 2.2)
       .style('fill', WATER_COLOR).style('opacity', 0.9);
@@ -5683,9 +4868,7 @@ try {
     var toAngle = dumpingSide === 0 ? -tiltAngle : tiltAngle;
     setBeamAngle(toAngle, true);
     spawnDrip(dumpingSide === 0 ? -1 : 1);
-    // The bucket that just dumped empties instantly (a real bucket empties
-    // in the same snap the tip happens); the newly-lowered bucket starts
-    // collecting from empty on the next animation frame.
+
     (dumpingSide === 0 ? bucketFillL : bucketFillR).attr('y', bucketH).attr('height', 0);
     activeSide = dumpingSide === 0 ? 1 : 0;
     updateBucketFill(0);
@@ -5694,13 +4877,7 @@ try {
   function computeMsPerTip(){
     var rate = (lastData && lastData.rate) || 0;
     if (rate <= 0) return null;
-    // Not the literal physical tip interval — at a real 0.2mm bucket size,
-    // even a respectable 5mm/hr only tips once every ~2.4 minutes, which
-    // would just look static on a glanceable card. Instead this maps rate
-    // onto a fixed, perceptible animation-speed range (9s at a trickle
-    // down to 1.2s at/above a heavy 30mm/hr), still monotonic with rate —
-    // heavier rain visibly tips faster, just compressed to be watchable
-    // rather than physically literal.
+
     var SATURATION_RATE = 30, MAX_MS = 9000, MIN_MS = 1200;
     var frac = Math.min(rate / SATURATION_RATE, 1);
     return MAX_MS - (MAX_MS - MIN_MS) * Math.sqrt(frac);
@@ -5708,9 +4885,9 @@ try {
 
   function animFrame(now){
     rafId = null;
-    if (tipping) return; // resumes itself once the flip's pause elapses (see doTip's caller below)
+    if (tipping) return;
     var msPerTip = computeMsPerTip();
-    if (msPerTip == null) return; // not raining — sit at rest with whatever partial fill it had
+    if (msPerTip == null) return;
     if (fillStartTime == null) fillStartTime = now;
     var frac = (now - fillStartTime) / msPerTip;
     if (frac >= 1){
@@ -5720,7 +4897,7 @@ try {
         tipping = false;
         fillStartTime = null;
         ensureAnimating();
-      }, 260); // matches setBeamAngle's 220ms transition plus a beat to let the tip read clearly
+      }, 260);
     } else {
       updateBucketFill(frac);
       rafId = requestAnimationFrame(animFrame);
@@ -5743,27 +4920,16 @@ try {
     var currentDisplay = displayIsIn ? mm2in(currentRainMm) : currentRainMm;
     svg.select('.tr-hero').text(rainLabel(currentRainMm));
 
-    // Funnel-entry drops, pulsing only while it's actually raining —
-    // sized down a little from Piezo Rain/Rainfall's own drops to suit
-    // the now-smaller funnel opening they're falling into. Positioned
-    // relative to funnelExtTopY (the top of the new vertical extension)
-    // rather than mechTopY, so they still read as falling in from above
-    // the funnel's rim rather than appearing already inside it.
     funnelDropsG.selectAll('*').remove();
     if (v.rate > 0){
       raindrop(funnelDropsG, cx - 14, funnelExtTopY + 5, 0.65, true);
       raindrop(funnelDropsG, cx + 10, funnelExtTopY + 2, 0.55, true);
     }
 
-    // Ambient pair beside the tube — same convention and position as
-    // Piezo Rain's own two floating drops.
     ambientDropsG.selectAll('*').remove();
     raindrop(ambientDropsG, cx + tubeHalfW + 20, 112, 1.15, v.rate > 0);
     raindrop(ambientDropsG, cx + tubeHalfW + 29, 122, 0.85, v.rate > 0);
 
-    // ---- Collection tube fill + scale, rebuilt every refresh — same
-    // domain/threshold logic as Piezo Rain, so the two gauges' tubes
-    // read the same amount of rain at the same fill height. ----
     tubeDynG.selectAll('*').remove();
 
     var currentRainMmForThreshold = (currentUnits.rain === 'mm') ? currentRainMm : currentRainMm * 25.4;
@@ -5780,42 +4946,18 @@ try {
 
     var fillTop = tubeScale(currentDisplay);
 
-    // The fill and both its menisci only draw once there's actually some
-    // rain to show — at 0mm the tube reads as genuinely empty rather
-    // than showing a thin sliver of water with nothing behind it.
     if (currentRainMm > 0) {
       tubeDynG.append('rect')
         .attr('x', cx - tubeFillHalfW).attr('y', fillTop - 2)
-        // The fill's bottom edge is fixed (the fillTop terms cancel out
-        // of y+height), by the same construction Piezo Rain's own tube
-        // fill uses — only the top moves with the reading. What matters
-        // is landing that fixed bottom close to the floor line so the
-        // meniscus below has real water to cut into: Piezo Rain's own
-        // math lands 1 unit short of its floor; this matches that
-        // exactly (tubeBottomY+1-fillTop, so bottom = tubeBottomY-1).
+
         .attr('width', tubeFillHalfW * 2).attr('height', Math.max(0, tubeBottomY + 1 - fillTop))
         .style('fill', WATER_COLOR);
 
-      // Water's surface — same construction as Piezo Rain's own: a
-      // rounded card-bg rect notched into the top of the fill, reading
-      // as the water's curved top edge rather than a flat cut-off. Its
-      // own bottom edge sits 2 units inside the fill's straight sides,
-      // never at one of the fill's corners, so it always nests cleanly.
       tubeDynG.append('rect')
         .attr('x', cx - tubeFillHalfW).attr('y', fillTop - 4)
         .attr('rx', 3).attr('width', tubeFillHalfW * 2).attr('height', 4)
         .style('fill', 'var(--card-bg)');
 
-      // No bottom meniscus here, deliberately — unlike the top surface,
-      // where a curved highlight reads as water meeting the glass, the
-      // bottom of the fill rests against a flat floor with nothing to
-      // curve against. A matching card-bg notch was tried here previously
-      // but just painted a dark gap across the bottom of the water,
-      // making it look like the level stopped short of the floor instead
-      // of sitting flush on it. The fill rect above already lands its
-      // fixed bottom edge 1 unit short of tubeBottomY (matching Piezo
-      // Rain's own tube fill construction) — that's the correct visual
-      // floor contact, and needs nothing drawn on top of it.
     }
 
     var tickValues = d3.range((domain[1] - domain[0]) / stepping + 1)
@@ -5893,7 +5035,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardSolarRadiation.js version 0.0.1
+# cardSolarRadiation.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -5932,10 +5074,7 @@ try {
   mount.style.position = 'relative';
   mount.style.display = 'flex';
   mount.style.flexDirection = 'column';
-  // No bottom-border band or toolbar on this card (links removed below) —
-  // override the shared .card CSS's 18px border-bottom just for this mount
-  // so the content pane can reclaim that space. Card height stays 195px:
-  // 20px title band (border-top, unchanged) + 175px content (was 157px).
+
   mount.style.borderBottom = '0';
 
   var overlayTextColor = 'var(--bs-body-color)';
@@ -6032,7 +5171,6 @@ try {
   rightPane.style.padding = '0 10px 0 14px';
   contentWrap.appendChild(rightPane);
 
-  // Same chip-row idiom as Current Conditions.
   function addChipRow(label){
     var row = document.createElement('div');
     row.style.display = 'flex';
@@ -6067,17 +5205,8 @@ try {
   var monthMaxText = addChipRow('Month Max');
   var sunshineText = addChipRow('Sunshine Today');
   var luxText = addChipRow('Illuminance');
-  luxText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
+  luxText.parentElement.style.borderBottom = 'none';
 
-  // Whole card is a click-through to the chart/records page — an
-  // absolutely-positioned transparent overlay anchor, appended last so it
-  // paints on top of everything else and actually receives the click.
-  // top/bottom match the title band (-20px) and this card's own
-  // border-bottom override (0, set above). Class name lets the shared
-  // hover-tooltip script (indexNew.html) find it and read data-modal.
-  // Solar Radiation shares a chart page with UV Index (data-modal keeps
-  // the tooltip saying "Solar Radiation" even though the page covers
-  // both).
   var cardLink = document.createElement('a');
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=solaruv&embed=1';
@@ -6155,13 +5284,12 @@ try {
     var needleG = svg.append('g').attr('transform', 'translate(' + cx + ',' + cy + ') rotate(' + needleAngle + ')');
     needleG.append('polygon').attr('points', '0,' + (-(R - 6)) + ' 2.2,10 -2.2,10').style('fill', 'red');
     svg.append('circle').attr('cx', cx).attr('cy', cy).attr('r', 4).style('fill', 'red');
-    var iconSize = 24.3; // 18 * 1.35
+    var iconSize = 24.3;
     svg.append('image')
       .attr('xlink:href', ICON_BASE + (v.isDay ? 'clear-day' : 'clear-night') + '.svg')
       .attr('x', cx - iconSize / 2).attr('y', cy + R - iconSize / 2)
       .attr('width', iconSize).attr('height', iconSize);
 
-    // Hero value — same accent colour + mono font as Current Conditions.
     svg.append('text').attr('x', cx).attr('y', H - 16).style('text-anchor', 'middle')
       .style('font-family', '"IBM Plex Mono", ui-monospace, monospace').style('font-size', '13px').style('fill', 'var(--bw-accent)')
       .text(Math.round(v.current) + ' W/m\u00B2');
@@ -6199,13 +5327,7 @@ try {
       function num(x, fallback){ return (typeof x === 'number' && !isNaN(x)) ? x : (fallback || 0); }
 
       lastData = {
-        // loop.json's own radiation reading is the live, instantaneous
-        // value (correctly 0 after dark); archive.json's solar.current
-        // is only a periodic snapshot (as stale as the last archive
-        // interval) and used here only as a fallback if loop.json
-        // itself is unavailable -- previously this was backwards, so
-        // solar.current's stale non-zero reading always won even once
-        // loop.json had already dropped to 0 after sunset.
+
         current: num(o.radiation, num(solar.current, 0)),
         dayMax: num(solar.day_max, 0),
         dayMaxTime: num(solar.day_maxtime, 0),
@@ -6214,10 +5336,7 @@ try {
         alltimeMax: num(solar.alltime_max, 0),
         sunMinutes: num(solar.sun_duration_minutes, 0),
         lux: num(solar.lux, num(o.illuminance, 0)),
-        // Primary source: almanac.json's actual sun altitude -- "day" is
-        // precisely "between sunrise and sunset" by definition (sun
-        // above the horizon). Falls back to loop.json's own
-        // observations.isDay only if almanac.json's fetch failed.
+
         isDay: (typeof alm['almanac.sun.alt'] === 'number' && !isNaN(alm['almanac.sun.alt']))
           ? (alm['almanac.sun.alt'] > 0) : (o.isDay === 1),
         currentColor: o.radiationColor || 'var(--bw-accent)'
@@ -6240,7 +5359,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardUvIndex.js version 0.0.1
+# cardUvIndex.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -6279,10 +5398,7 @@ try {
   mount.style.position = 'relative';
   mount.style.display = 'flex';
   mount.style.flexDirection = 'column';
-  // No bottom-border band or toolbar on this card (links removed below) —
-  // override the shared .card CSS's 18px border-bottom just for this mount
-  // so the content pane can reclaim that space. Card height stays 195px:
-  // 20px title band (border-top, unchanged) + 175px content (was 157px).
+
   mount.style.borderBottom = '0';
 
   var overlayTextColor = 'var(--bs-body-color)';
@@ -6379,7 +5495,6 @@ try {
   rightPane.style.padding = '0 10px 0 14px';
   contentWrap.appendChild(rightPane);
 
-  // Same chip-row idiom as Current Conditions.
   function addChipRow(label){
     var row = document.createElement('div');
     row.style.display = 'flex';
@@ -6414,16 +5529,8 @@ try {
   var monthMaxText = addChipRow('Month Max');
   var yearMaxText = addChipRow('Year Max');
   var alltimeMaxText = addChipRow('All-Time Max');
-  alltimeMaxText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
+  alltimeMaxText.parentElement.style.borderBottom = 'none';
 
-  // Whole card is a click-through to the chart/records page — an
-  // absolutely-positioned transparent overlay anchor, appended last so it
-  // paints on top of everything else and actually receives the click.
-  // top/bottom match the title band (-20px) and this card's own
-  // border-bottom override (0, set above). Class name lets the shared
-  // hover-tooltip script (indexNew.html) find it and read data-modal.
-  // UV Index shares a chart page with Solar Radiation (data-modal keeps
-  // the tooltip saying "UV Index" even though the page covers both).
   var cardLink = document.createElement('a');
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=solaruv&embed=1';
@@ -6443,8 +5550,6 @@ try {
 
   var W = 180, H = 175, cx = 90, cy = 81, R = 54;
   var ICON_BASE = './meteocons/fill/svg/';
-
-
 
   function uvIconName(uv){
     var n = Math.max(1, Math.min(11, Math.round(uv)));
@@ -6517,13 +5622,12 @@ try {
     var needleG = svg.append('g').attr('transform', 'translate(' + cx + ',' + cy + ') rotate(' + needleAngle + ')');
     needleG.append('polygon').attr('points', '0,' + (-(R - 6)) + ' 2.2,10 -2.2,10').style('fill', 'red');
     svg.append('circle').attr('cx', cx).attr('cy', cy).attr('r', 4).style('fill', 'red');
-    var iconSize = 24.3; // 18 * 1.35
+    var iconSize = 24.3;
     svg.append('image')
       .attr('xlink:href', ICON_BASE + uvIconName(v.current) + '.svg')
       .attr('x', cx - iconSize / 2).attr('y', cy + R - iconSize / 2)
       .attr('width', iconSize).attr('height', iconSize);
 
-    // Hero value — same accent colour + mono font as Current Conditions.
     svg.append('text').attr('x', cx).attr('y', H - 16).style('text-anchor', 'middle')
       .style('font-family', '"IBM Plex Mono", ui-monospace, monospace').style('font-size', '13px').style('fill', 'var(--bw-accent)')
       .text('UV-I ' + v.current.toFixed(0));
@@ -6560,10 +5664,7 @@ try {
       function num(x, fallback){ return (typeof x === 'number' && !isNaN(x)) ? x : (fallback || 0); }
 
       lastData = {
-        // Same fix as cardSolarRadiation's identical bug just above in
-        // this file -- loop.json's own UV reading is live and correctly
-        // 0 after dark; archive.json's uv.current is only a periodic
-        // snapshot, used here only as a fallback.
+
         current: num(o.UV, num(uv.current, 0)),
         dayMax: num(uv.day_max, 0),
         dayMaxTime: num(uv.day_maxtime, 0),
@@ -6571,10 +5672,7 @@ try {
         monthMax: num(uv.month_max, 0),
         yearMax: num(uv.year_max, 0),
         alltimeMax: num(uv.alltime_max, 0),
-        // Primary source: almanac.json's actual sun altitude -- "day" is
-        // precisely "between sunrise and sunset" by definition (sun
-        // above the horizon). Falls back to loop.json's own
-        // observations.isDay only if almanac.json's fetch failed.
+
         isDay: (typeof alm['almanac.sun.alt'] === 'number' && !isNaN(alm['almanac.sun.alt']))
           ? (alm['almanac.sun.alt'] > 0) : (o.isDay === 1),
         currentColor: o.uvColor || 'var(--bw-accent)'
@@ -6597,7 +5695,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardHumidity.js version 0.0.1
+# cardHumidity.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -6635,10 +5733,7 @@ try {
   mount.style.position = 'relative';
   mount.style.display = 'flex';
   mount.style.flexDirection = 'column';
-  // No bottom-border band or toolbar on this card (links removed below) —
-  // override the shared .card CSS's 18px border-bottom just for this mount
-  // so the content pane can reclaim that space. Card height stays 195px:
-  // 20px title band (border-top, unchanged) + 175px content (was 157px).
+
   mount.style.borderBottom = '0';
 
   var overlayTextColor = 'var(--bs-body-color)';
@@ -6735,7 +5830,6 @@ try {
   rightPane.style.padding = '0 10px 0 14px';
   contentWrap.appendChild(rightPane);
 
-  // Same chip-row idiom as Current Conditions.
   function addChipRow(label){
     var row = document.createElement('div');
     row.style.display = 'flex';
@@ -6770,17 +5864,8 @@ try {
   var evapoTText = addChipRow('Evapo T');
   var trendText = addChipRow('Trend');
   var dayMinText = addChipRow('Min');
-  dayMinText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
+  dayMinText.parentElement.style.borderBottom = 'none';
 
-  // Whole card is a click-through to the chart/records page — an
-  // absolutely-positioned transparent overlay anchor, appended last so it
-  // paints on top of everything else and actually receives the click.
-  // top/bottom match the title band (-20px) and this card's own
-  // border-bottom override (0, set above). Class name lets the shared
-  // hover-tooltip script (indexNew.html) find it and read data-modal.
-  // Humidity has no chart page of its own — it's charted alongside
-  // temperature, so this points there (data-modal keeps the tooltip
-  // saying "Humidity" even though the page itself is titled Temperature).
   var cardLink = document.createElement('a');
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=temperature&embed=1';
@@ -6886,13 +5971,12 @@ try {
     var needleG = svg.append('g').attr('transform', 'translate(' + cx + ',' + cy + ') rotate(' + needleAngle + ')');
     needleG.append('polygon').attr('points', '0,' + (-(R - 6)) + ' 2.2,10 -2.2,10').style('fill', 'red');
     svg.append('circle').attr('cx', cx).attr('cy', cy).attr('r', 4).style('fill', 'red');
-    var iconSize = 24.3; // 18 * 1.35
+    var iconSize = 24.3;
     svg.append('image')
       .attr('xlink:href', ICON_BASE + 'humidity.svg')
       .attr('x', cx - iconSize / 2).attr('y', cy + R - iconSize / 2)
       .attr('width', iconSize).attr('height', iconSize);
 
-    // Hero value — same accent colour + mono font as Current Conditions.
     svg.append('text').attr('x', cx).attr('y', H - 16).style('text-anchor', 'middle')
       .style('font-family', '"IBM Plex Mono", ui-monospace, monospace').style('font-size', '13px').style('fill', 'var(--bw-accent)')
       .text(Math.round(v.current) + ' %');
@@ -6929,8 +6013,7 @@ try {
       function num(x, fallback){ return (typeof x === 'number' && !isNaN(x)) ? x : (fallback || 0); }
 
       lastData = {
-        // Same live-vs-archive priority fix as cardSolarRadiation/
-        // cardUvIndex elsewhere in this file.
+
         current: num(o.outHumidity, num(humid.current, 0)),
         dayMax: num(humid.day_max, 0),
         dayMaxTime: num(humid.day_maxtime, 0),
@@ -6958,7 +6041,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardEarthDaylight.js version 0.0.1
+# cardEarthDaylight.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -7030,14 +6113,8 @@ try {
   }
   function antipode(pos){ return [pos[0] + 180, -pos[1]]; }
 
-
-
   function almDateTimeFromEpoch(ts){
-    // almanac.json now gives raw unix_epoch timestamps rather than a
-    // pre-formatted string (the old string format this used to parse,
-    // "DD/MM/YY HH:MM", didn't actually match what the server produced
-    // anyway -- "DD-Mon-YYYY HH:MM" -- so this also fixes a pre-existing
-    // latent formatting mismatch as a side effect).
+
     if (ts == null) return { date: '\u2014', time: '' };
     var dOpts = { day: '2-digit', month: '2-digit', year: 'numeric' };
     var tOpts = { hour: '2-digit', minute: '2-digit', hour12: false };
@@ -7056,10 +6133,7 @@ try {
   mount.style.position = 'relative';
   mount.style.display = 'flex';
   mount.style.flexDirection = 'column';
-  // No bottom-border band or toolbar on this card (links removed below) —
-  // override the shared .card CSS's 18px border-bottom just for this mount
-  // so the content pane can reclaim that space. Card height stays 195px:
-  // 20px title band (border-top, unchanged) + 175px content (was 157px).
+
   mount.style.borderBottom = '0';
 
   var overlayTextColor = 'var(--bs-body-color)';
@@ -7156,8 +6230,6 @@ try {
   rightPane.style.padding = '0 10px 0 14px';
   contentWrap.appendChild(rightPane);
 
-  // 8 items in a fixed-row-height list, same idiom as Current Conditions'
-  // 8-row layout.
   function addChipRow(label){
     var row = document.createElement('div');
     row.style.display = 'flex';
@@ -7195,14 +6267,8 @@ try {
   var sunDecText = addChipRow('Sun Dec \u03B4');
   var eclipticText = addChipRow("Earth's Ecliptic Angle");
   var sunRaText = addChipRow('Sun Ra \u03BB');
-  sunRaText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
+  sunRaText.parentElement.style.borderBottom = 'none';
 
-  // Whole card is a click-through to the world daylight map — an
-  // absolutely-positioned transparent overlay anchor, appended last so it
-  // paints on top of everything else and actually receives the click.
-  // top/bottom match the title band (-20px) and this card's own
-  // border-bottom override (0, set above). Class name lets the shared
-  // hover-tooltip script (indexNew.html) find it and read data-modal.
   var cardLink = document.createElement('a');
   cardLink.className = 'card-whole-link';
   cardLink.href = 'modalDaylightMap.html';
@@ -7241,8 +6307,6 @@ try {
     return entry ? entry[2] : null;
   }
 
-
-
   function parallelAt(latDeg){
     var coords = [];
     for (var lon = -180; lon <= 180; lon += 5) coords.push([lon, latDeg]);
@@ -7266,7 +6330,6 @@ try {
 
     var sunPos = solarPosition(now.getTime());
 
-
     var moonPos = [sunPos[0] + v.moonEclipticAngle, v.moonDec];
     var antiSunPos = antipode(sunPos);
 
@@ -7277,7 +6340,6 @@ try {
     var path = d3.geoPath().projection(projection);
     var graticule = d3.geoGraticule();
 
-
     var sunProjection  = d3.geoOrthographic().scale(R * SUN_SCALE_RATIO).translate([cx, cy]).rotate(rotBase).precision(0.3);
     var moonProjection = d3.geoOrthographic().scale(R * MOON_SCALE_RATIO).translate([cx, cy]).rotate(rotBase).precision(0.3);
     var sunScale  = d3.scaleLinear().domain([0, 1]).range([1.5 * (R / 50), 9 * (R / 50)]);
@@ -7286,7 +6348,6 @@ try {
     function degreesFromCenter(pos, proj){
       return toDegrees(d3.geoDistance(pos, (proj || projection).invert([cx, cy])));
     }
-
 
     var sunXYForGrad = projection(sunPos) || [cx, cy];
     function dayNightGradient(id, light, dark){
@@ -7319,7 +6380,6 @@ try {
 
     globeG.append('path').datum(graticule).attr('d', path).style('fill', 'none').style('stroke', '#888').style('stroke-width', 0.2).style('stroke-opacity', 0.5);
 
-
     function refLine(datum, stroke, dash){
       var p = globeG.append('path').datum(datum).attr('d', path)
         .style('fill', 'none').style('stroke', stroke).style('stroke-width', 0.6);
@@ -7333,12 +6393,9 @@ try {
     refLine(parallelAt(66.563444), '#e64bd6', '2,2');
     refLine(parallelAt(-66.563444), '#e64bd6', '2,2');
 
-
     globeG.append('path')
       .datum({ type: 'LineString', coordinates: [[-180, 0], [-90, -eclipticDeg], [0, 0], [90, eclipticDeg], [180, 0]] })
       .attr('d', path).style('fill', 'none').style('stroke', '#f8d747').style('stroke-width', 0.7);
-
-
 
     var bands = [
       { r: 90, opacity: 0.20 }, { r: 84, opacity: 0.35 }, { r: 78, opacity: 0.50 }, { r: 72, opacity: 0.60 }
@@ -7352,10 +6409,6 @@ try {
     if (stationXY){
       svg.append('circle').attr('cx', stationXY[0]).attr('cy', stationXY[1]).attr('r', 1.8).style('fill', '#ff4444');
     }
-
-
-
-
 
     var sphereSilhouetteD = path({ type: 'Sphere' });
     function addMaskedCircle(id, xy, r, fillUrl, hideOverlap){
@@ -7428,9 +6481,7 @@ try {
         moonFullness: num(alm['almanac.moon.phase'], 0),
         nextEquinoxTs: alm['almanac.next_equinox.unix_epoch.raw'],
         nextSolsticeTs: alm['almanac.next_solstice.unix_epoch.raw'],
-        // almanac.sun.earth_distance is in AU (standardised schema); this
-        // card's label is hardcoded "km" (see distanceText above), so
-        // convert here rather than showing an AU figure under a km label.
+
         sunDistanceKm: num(alm['almanac.sun.earth_distance'], 0) * 149597870.7,
         auroraPct: ovation ? auroraProbabilityAt(ovation.coordinates, stationLat, stationLon) : null
       };
@@ -7453,7 +6504,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardSolarDial.js version 0.0.1
+# cardSolarDial.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -7479,10 +6530,6 @@ try {
   }
   function pad2(n){ return n < 10 ? '0' + n : String(n); }
 
-  // almanac.json now gives raw unix_epoch timestamps rather than
-  // pre-formatted "HH:MM"/date strings -- these two replace
-  // timeToDegrees()'s string-parsing job going straight from epoch,
-  // reading hour/minute in the station's own timezone.
   function epochParts(ts){
     if (ts == null) return null;
     var p = {};
@@ -7505,9 +6552,6 @@ try {
     return p.hour + ':' + p.minute + (withSeconds ? ':' + p.second : '');
   }
 
-
-  // almanac.sun.daylight_seconds is now raw seconds rather than a
-  // pre-formatted "HH:MM" string -- format the same way here.
   function secondsToHHMM(totalSeconds){
     if (totalSeconds == null || isNaN(totalSeconds)) return '00:00';
     var h = Math.floor(totalSeconds / 3600);
@@ -7530,10 +6574,7 @@ try {
   mount.style.position = 'relative';
   mount.style.display = 'flex';
   mount.style.flexDirection = 'column';
-  // No bottom-border band or toolbar on this card (links removed below) —
-  // override the shared .card CSS's 18px border-bottom just for this mount
-  // so the content pane can reclaim that space. Card height stays 195px:
-  // 20px title band (border-top, unchanged) + 175px content (was 157px).
+
   mount.style.borderBottom = '0';
 
   var overlayTextColor = 'var(--bs-body-color)';
@@ -7630,11 +6671,6 @@ try {
   rightPane.style.padding = '0 10px 0 14px';
   contentWrap.appendChild(rightPane);
 
-  // 8 items in a fixed-row-height list, same idiom as Current Conditions —
-  // several pairs of readouts that used to sit side-by-side around the
-  // dial (Daylight/Darkness, Sunrise/First Light, Sunset/Last Light,
-  // Moonrise/Moonset) are combined into one row's value each, to keep the
-  // row count at a familiar 8 instead of the original 12 separate figures.
   function addChipRow(label){
     var row = document.createElement('div');
     row.style.display = 'flex';
@@ -7673,14 +6709,8 @@ try {
   var moonPhaseText  = addChipRow('Moon Phase');
   var moonRiseSetText = addChipRow('Moonrise | Moonset');
   var illumText      = addChipRow('Illumination');
-  illumText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
+  illumText.parentElement.style.borderBottom = 'none';
 
-  // Whole card is a click-through to the celestial modal — an
-  // absolutely-positioned transparent overlay anchor, appended last so it
-  // paints on top of everything else and actually receives the click.
-  // top/bottom match the title band (-20px) and this card's own
-  // border-bottom override (0, set above). Class name lets the shared
-  // hover-tooltip script (indexNew.html) find it and read data-modal.
   var cardLink = document.createElement('a');
   cardLink.className = 'card-whole-link';
   cardLink.href = 'modalCelestial.html';
@@ -7706,9 +6736,6 @@ try {
     svg.remove();
     svg = svgSel.append('svg').attr('viewBox', '0 0 ' + W + ' ' + H).attr('width', '100%').attr('height', '100%');
 
-
-
-
     var sunAngle = ((v.hourSun % 360) + 360) % 360;
     var moonAngle = ((v.hourMoon % 360) + 360) % 360;
     var sunriseAngle = epochToDegrees(v.sunRiseTs);
@@ -7719,9 +6746,6 @@ try {
 
     dialG.append('circle').attr('r', R).style('fill', 'none').style('stroke', 'var(--bs-border-color)').style('stroke-width', R * (7 / 52.5));
 
-
-
-
     function tickPoint(angleDeg, r){
       var rad = angleDeg * Math.PI / 180;
       return [-r * Math.sin(rad), r * Math.cos(rad)];
@@ -7731,7 +6755,6 @@ try {
     var a0 = (sunriseAngle + 180) * Math.PI / 180, a1 = (sunsetAngle + 180) * Math.PI / 180;
     if (a1 < a0) a1 += 2 * Math.PI;
     dialG.append('path').attr('d', arcGen({ startAngle: a0, endAngle: a1 })).style('fill', '#007fff');
-
 
     for (var i = 0; i < 24; i++){
       var p1 = tickPoint(i / 24 * 360, R * (43 / 52.5));
@@ -7759,8 +6782,6 @@ try {
     var sunColor = v.sunAlt > 0.5 ? '#ff7c39' : (v.sunAlt > -4 ? 'rgba(255,112,50,0.5)' : 'rgba(86,95,103,0.7)');
     dialG.append('circle').attr('cx', Math.cos(sunRad) * R).attr('cy', Math.sin(sunRad) * R).attr('r', R * (5.5 / 52.5))
       .style('fill', sunColor).style('stroke', sunColor).style('stroke-width', 1);
-
-
 
     var isDay = v.sunAlt > 0;
     var futureMs = isDay ? v.sunSetTs * 1000 : v.sunRiseTs * 1000;
@@ -7833,7 +6854,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardGeocentric.js version 0.0.1
+# cardGeocentric.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -7897,18 +6918,11 @@ try {
   mount.style.position = 'relative';
   mount.style.display = 'flex';
   mount.style.flexDirection = 'column';
-  // No bottom-border band or toolbar on this card — override the shared
-  // .card CSS's 18px border-bottom just for this mount so the content pane
-  // can reclaim that space. Card height stays 195px: 20px title band
-  // (border-top, unchanged) + 175px content (was 157px). Now on the same
-  // 60:40 split as the rest of the redone cards (left: sky-path chart,
-  // narrowed to fit 60%; right: analemma), plus the whole-card
-  // click-through link (see cardLink, appended after both panes).
+
   mount.style.borderBottom = '0';
 
   var overlayTextColor = 'var(--bs-body-color)';
 
-  // -- Title bar --------------------------------------------------------
   var titleBar = document.createElement('div');
   titleBar.style.position = 'absolute';
   titleBar.style.top = '-20px';
@@ -8002,13 +7016,6 @@ try {
   rightPane.style.justifyContent = 'center';
   contentWrap.appendChild(rightPane);
 
-  // Whole card is a click-through to the geocentric chart (Meeus Live) —
-  // an absolutely-positioned transparent overlay anchor, appended last so
-  // it paints on top of both panes and actually receives the click.
-  // top/bottom match the title band (-20px) and this card's own
-  // border-bottom override (0, set above) — same technique used on the
-  // METAR and Celestial cards. Class name lets the shared hover-tooltip
-  // script (indexNew.html) find it and read data-modal.
   var cardLink = document.createElement('a');
   cardLink.className = 'card-whole-link';
   cardLink.href = 'modalMeeusLive.html';
@@ -8026,14 +7033,6 @@ try {
   cardLink.style.display = 'block';
   mount.appendChild(cardLink);
 
-  // -- Left pane: sky-path chart, squeezed to fit the 60% column --------
-  // Was a full-card-width viewBox (W=310) when this was the only thing on
-  // the card; narrowed to W=176 to fit the 60% pane (padding included)
-  // without visually stretching/distorting — the viewBox itself is redrawn
-  // at the narrower width rather than non-uniformly scaling the old one, so
-  // the sun/moon discs stay circular and the axis ticks stay evenly spaced.
-  // The x-axis tick list is thinned from 9 labels to 5 (0/90/180/270/360)
-  // since 9 labels at this width would collide.
   var chartWrap = document.createElement('div');
   chartWrap.style.height = '100%';
   chartWrap.style.width = '100%';
@@ -8096,20 +7095,6 @@ try {
     svg.append('circle').attr('cx', xScale(sunX)).attr('cy', yScale(v.sunAlt)).attr('r', 5.5).style('fill', 'url(#geoSunGrad)');
   }
 
-  // -- Right pane: dynamic analemma ---------------------------------------
-  // almanac.json is a single live snapshot (today's sun position only), not
-  // a year of daily history, so there's no stored feed this card could pull
-  // a year of declination samples from. The analemma's *shape* is instead
-  // computed locally from the same NOAA/Meeus solar-position formulae
-  // already duplicated in modalSolarTerminator.html and
-  // modalAuroraTerminator.html elsewhere in this project (equation of time
-  // vs. solar declination, sampled once per day across the current year) —
-  // that shape is fixed by orbital mechanics and doesn't need live data.
-  // What *is* dynamic and *is* sourced from almanac.json is the "today"
-  // marker: its declination comes straight from the live sun_declination
-  // field on every refresh() poll, the same field the sky-path chart on the
-  // left already uses, so the dot tracks the station's own live feed rather
-  // than a locally-computed value.
   var analemmaWrap = document.createElement('div');
   analemmaWrap.style.height = '100%';
   analemmaWrap.style.width = '100%';
@@ -8153,9 +7138,6 @@ try {
   function julianCenturies(date){ return (date.getTime() - Date.UTC(2000, 0, 1, 12)) / 864e5 / 36525; }
   function isLeapYear(y){ return (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0; }
 
-  // Sampled once per day (noon UTC, arbitrary but consistent) across the
-  // current calendar year — computed once at load, not on every refresh,
-  // since the curve itself never changes within a session.
   var analemmaCurve = (function(){
     var year = stationNow().getUTCFullYear();
     var n = isLeapYear(year) ? 366 : 365;
@@ -8189,8 +7171,6 @@ try {
       .style('font-family', 'inherit').style('font-size', '6px').style('fill', overlayTextColor)
       .style('font-variant-caps', 'small-caps').style('letter-spacing', '.04em').text(DivumWXI18N.t('Analemma'));
 
-    // Light celestial-equator reference line (dec = 0), matching the
-    // horizon/zenith crosshair convention used in the sky-path chart.
     svg.append('line').attr('x1', padLeft2).attr('y1', yScale2(0)).attr('x2', W2 - padRight2).attr('y2', yScale2(0))
       .style('stroke', 'var(--bs-border-color)').style('stroke-width', 1).style('stroke-dasharray', '2,2');
 
@@ -8208,9 +7188,6 @@ try {
     sunGrad2.append('stop').attr('offset', '0%').style('stop-color', 'rgb(230,200,200)');
     sunGrad2.append('stop').attr('offset', '90%').style('stop-color', 'tomato');
 
-    // "Today" marker — the one part of this pane actually driven by the
-    // live almanac.json feed rather than the locally-computed curve (see
-    // the comment above analemmaWrap).
     var todayT = julianCenturies(stationNow());
     var todayX = equationOfTimeMinutes(todayT);
     svg.append('circle').attr('cx', xScale2(todayX)).attr('cy', yScale2(v.sunDec)).attr('r', 3.5).style('fill', 'url(#geoAnalemmaSunGrad)');
@@ -8251,9 +7228,7 @@ try {
   }
   refresh();
   setInterval(refresh, POLL_MS);
-  // No prior unitsystemchange/resize re-render pattern existed in this
-  // card to follow -- this is the first such listener here, same idea as
-  // cardTemperature.js's.
+
   window.addEventListener('i18nready', function(){
     if (lastData) { renderCard(lastData, stationLat); renderAnalemma(lastData); }
   });
@@ -8266,7 +7241,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardMoonPhase.js version 0.0.1
+# cardMoonPhase.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -8294,8 +7269,6 @@ try {
   }
   function pad2(n){ return n < 10 ? '0' + n : String(n); }
 
-  // almanac.json now gives raw unix_epoch timestamps rather than
-  // pre-formatted strings.
   function epochToHHMM(ts, withSeconds){
     if (ts == null) return '--:--';
     var opts = { hour: '2-digit', minute: '2-digit', hour12: false };
@@ -8461,10 +7434,7 @@ try {
   mount.style.position = 'relative';
   mount.style.display = 'flex';
   mount.style.flexDirection = 'column';
-  // No bottom-border band or toolbar on this card (links removed below) —
-  // override the shared .card CSS's 18px border-bottom just for this mount
-  // so the content pane can reclaim that space. Card height stays 195px:
-  // 20px title band (border-top, unchanged) + 175px content (was 157px).
+
   mount.style.borderBottom = '0';
 
   var overlayTextColor = 'var(--bs-body-color)';
@@ -8561,13 +7531,6 @@ try {
   rightPane.style.padding = '0 10px 0 14px';
   contentWrap.appendChild(rightPane);
 
-  // Fixed row height (rather than sizing purely to font metrics). Loosened
-  // from 20px to 22px — the label+value combination lands at ~19.8px of
-  // natural content height, which left only ~0.2px of slack inside the
-  // old 20px/overflow:hidden box; any small font-metric variance between
-  // browsers could clip a row's own bottom pixel or two, especially on
-  // the lower rows where that stacks with the pane's own bottom edge.
-  // 7 * 22px = 154px, still comfortably inside the 175px pane.
   function addChipRow(label){
     var row = document.createElement('div');
     row.style.display = 'flex';
@@ -8588,14 +7551,6 @@ try {
     labelEl.style.whiteSpace = 'nowrap';
     row.appendChild(labelEl);
 
-    // white-space/overflow/text-overflow are the actual fix for the
-    // clipping — without them, a long value (the meteor shower text
-    // especially, e.g. "Perseids Aug 1st-24th") wraps onto a second
-    // line, which pushes the row's natural content height well past its
-    // fixed 22px/overflow:hidden box, and the centered content gets
-    // clipped top and bottom instead of the row just holding one line.
-    // Forcing nowrap + ellipsis guarantees every value stays one line,
-    // whatever its length.
     var valueEl = document.createElement('span');
     valueEl.style.fontSize = '9.5px';
     valueEl.style.fontFamily = '"IBM Plex Mono", ui-monospace, monospace';
@@ -8616,14 +7571,8 @@ try {
   var fullMoonText     = addChipRow('Next Full Moon');
   var newMoonText      = addChipRow('Next New Moon');
   var meteorText       = addChipRow('Meteor Shower');
-  meteorText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
+  meteorText.parentElement.style.borderBottom = 'none';
 
-  // Whole card is a click-through to the celestial data modal — an
-  // absolutely-positioned transparent overlay anchor, appended last so it
-  // paints on top of everything else and actually receives the click.
-  // top/bottom match the title band (-20px) and this card's own
-  // border-bottom override (0, set above). Class name lets the shared
-  // hover-tooltip script (indexNew.html) find it and read data-modal.
   var cardLink = document.createElement('a');
   cardLink.className = 'card-whole-link';
   cardLink.href = 'modalCelestial.html';
@@ -8641,11 +7590,6 @@ try {
   cardLink.style.display = 'block';
   mount.appendChild(cardLink);
 
-  // R nudged up from 50 to 56 ("slightly increase size of image"), cy
-  // recomputed so the disc + hero label beneath it still centre as a
-  // group within the pane (was cy=72; the label position is derived from
-  // cy+R so it stays correctly attached to the disc's new size
-  // automatically, no separate adjustment needed there).
   var W = 180, H = 175, cx = 90, cy = 76, R = 56;
 
   function getX(phase, angle, radius, centerX){
@@ -8681,23 +7625,6 @@ try {
     moonPathD += 'Z';
     tiltGroup.append('path').attr('d', moonPathD).style('fill', 'rgba(41,46,53,0.80)').style('pointer-events', 'none');
 
-    // Hero value — phase name, below the disc, same accent colour + mono
-    // font as Current Conditions. Was a plain SVG <text> element, which
-    // has no word-wrap of its own at all -- any translation longer than
-    // the panel's width (Spanish's "Luna creciente (creciente inicial)"
-    // being the case that surfaced this) just overflowed and got clipped
-    // by the panel's own overflow:hidden, cutting off both ends. A
-    // foreignObject wrapping a normal HTML <div> gets real, native,
-    // whole-word wrapping from the browser's own text engine instead of
-    // hand-rolled line-breaking logic. The gap before the hero text was
-    // trimmed from 20 to 10 (disc radius R unchanged) to free up enough
-    // of the panel's fixed 175px height for a second line without
-    // changing that overall height, which other parts of this card's
-    // layout depend on staying fixed; font-size dropped from 13 to 11
-    // for the same reason. Two lines at 11px fit inside the resulting
-    // 33px budget with a few px to spare (checked numerically, then
-    // confirmed by actually rendering the Spanish string that surfaced
-    // this in the first place).
     svg.append('foreignObject')
       .attr('x', cx - 88).attr('y', cy + R + 10).attr('width', 176).attr('height', 30)
       .append('xhtml:div')
@@ -8729,31 +7656,16 @@ try {
         lastData = {
           moonRise: epochToHHMM(alm['almanac.moon.next_rising.unix_epoch.raw'], false),
           moonSet: epochToHHMM(alm['almanac.moon.next_setting.unix_epoch.raw'], false),
-          // Raw, untranslated key stored here -- DivumWXI18N.t() is
-          // applied at render time instead (see renderCard() below), not
-          // baked in here. Baking a resolved translation into cached
-          // data is a real bug, not just a style choice: if this object
-          // is built before strings.json finishes its async load, the
-          // English fallback gets locked into lastData permanently, and
-          // re-rendering from that same cached object on a later
-          // i18nready event reuses the same stale English string rather
-          // than re-translating it -- i18nready firing doesn't help if
-          // the thing it re-renders already has the wrong value frozen
-          // into it. almanac.moon.phase_name comes back as one of the 8
-          // standard English phase names (New Moon, Waxing Crescent,
-          // etc.), reusing the same keys already translated elsewhere
-          // in this project (see divumwf.js's own moon-phase handling).
+
           phaseName: alm['almanac.moon.phase_name'] || '--',
           luminancePct: num(alm['almanac.moon.phase'], 0),
           tiltDeg: num(alm['almanac.moon.parallactic_angle'], 0),
           phasex: num(alm['almanac.moon.ecliptic_angle'], 0),
-          // almanac.moon.earth_distance is in AU (standardised schema);
-          // this card's label is hardcoded "km" (see distanceText
-          // below), so convert here rather than showing AU under a km label.
+
           distanceKm: num(alm['almanac.moon.earth_distance'], 0) * 149597870.7,
           fullMoonLabel: fmtEpochDate(alm['almanac.next_full_moon.unix_epoch.raw']) || '--',
           newMoonLabel: fmtEpochDate(alm['almanac.next_new_moon.unix_epoch.raw']) || '--',
-          // Same raw-key-not-baked-translation fix as phaseName above.
+
           meteorShower: currentMeteorShowerKey(now)
         };
         renderCard(lastData);
@@ -8774,7 +7686,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardLightning.js version 0.0.1
+# cardLightning.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -8818,15 +7730,11 @@ try {
   mount.style.position = 'relative';
   mount.style.display = 'flex';
   mount.style.flexDirection = 'column';
-  // No bottom-border band or toolbar on this card (links removed below) —
-  // override the shared .card CSS's 18px border-bottom just for this mount
-  // so the content pane can reclaim that space. Card height stays 195px:
-  // 20px title band (border-top, unchanged) + 175px content (was 157px).
+
   mount.style.borderBottom = '0';
 
   var overlayTextColor = 'var(--bs-body-color)';
 
-  // -- Title bar --------------------------------------------------------
   var titleBar = document.createElement('div');
   titleBar.style.position = 'absolute';
   titleBar.style.top = '-20px';
@@ -8919,12 +7827,6 @@ try {
   rightPane.style.padding = '0 10px 0 14px';
   contentWrap.appendChild(rightPane);
 
-  // Fixed-height/nowrap/ellipsis by default. Last Detected passes
-  // wrap:true instead — it's a full date+time string (e.g. "21:18:45 4
-  // Aug 2026"), long enough to need more than one line at this column
-  // width, and there's slack in the pane (7 rows at 20px only use 140 of
-  // the 175px available) to just let it wrap rather than truncating a
-  // date with an ellipsis.
   function addChipRow(label, opts){
     var wrap = opts && opts.wrap;
     var row = document.createElement('div');
@@ -8976,14 +7878,8 @@ try {
   var alltimeText        = addChipRow('All-Time Total');
   var lastDetectedText     = addChipRow('Last Detected', { wrap: true });
   var lastDistanceText      = addChipRow('Last Distance');
-  lastDistanceText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
+  lastDistanceText.parentElement.style.borderBottom = 'none';
 
-  // Whole card is a click-through to the lightning chart/records page —
-  // an absolutely-positioned transparent overlay anchor, appended last so
-  // it paints on top of everything else and actually receives the click.
-  // top/bottom match the title band (-20px) and this card's own
-  // border-bottom override (0, set above). Class name lets the shared
-  // hover-tooltip script (indexNew.html) find it and read data-modal.
   var cardLink = document.createElement('a');
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=lightning&embed=1';
@@ -9003,7 +7899,6 @@ try {
 
   var W = 180, H = 175;
 
-  // -- Fractal bolt, ported from the PHP's own recursive algorithm ------
   function midpointPath(startX, startY, endX, endY, displace){
     if (displace < 2) return [[startX, startY], [endX, endY]];
     var midX = (startX + endX) / 2 + (Math.random() - 0.5) * displace;
@@ -9025,12 +7920,6 @@ try {
     var lineGen = d3.line().x(function(d){ return d[0]; }).y(function(d){ return d[1]; });
     var points = midpointPath(trunkX, trunkTopY, trunkX, trunkBottomY, 18);
 
-    // Trunk stroke was a literal 'white', which is invisible against the
-    // light theme's white card face — swapped for the theme's own body-
-    // text variable, which is dark ink in light mode and pale parchment in
-    // dark mode, so the bolt reads against either card background. The
-    // steel-blue glow (drop-shadow) is unaffected — it's already a
-    // saturated colour that shows up on both backgrounds.
     svg.append('path').datum(points).attr('d', lineGen)
       .attr('fill', 'none').attr('stroke', 'var(--bs-body-color)').attr('stroke-width', 1)
       .style('filter', 'drop-shadow(0 0 3px #6ca6cd)');
@@ -9114,7 +8003,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardPollen.js version 0.0.1
+# cardPollen.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -9140,7 +8029,6 @@ try {
     return new Date(Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second));
   }
 
-  // -- Risk classifier, ported from the PHP's pollenRisk() ---------------
   var GRASS_BANDS = [
     [0,        'None',      '#59C239'],
     [4,        'Low',       '#FFE000'],
@@ -9164,7 +8052,6 @@ try {
     return { risk: last[1], color: last[2] };
   }
 
-
   var GRASS_ICON_SVG = '<svg width="50" height="450" preserveAspectRatio="xMidYMid" version="1.0" viewBox="0 0 150 337.5" xmlns="http://www.w3.org/2000/svg"><path d="M7061 12738c-31-98-153-512-231-783-313-1092-638-2386-890-3540-51-231-94-427-97-435-7-19 0-38-118 365-281 961-650 2059-1043 3100-153 405-176 464-180 461-2-3 4-172 12-378 31-746 50-1377 66-2238 11-591 13-2362 3-2602l-6-156-99 231c-119 278-391 830-518 1052-215 373-445 705-648 933-36 40-66 71-68 70-1-2 19-84 46-183 142-532 274-1191 365-1825 31-220 95-726 95-754 0-12-47 69-103 179-352 682-713 1213-1157 1700-153 168-254 266-246 240 34-123 186-801 250-1115 251-1242 426-2505 486-3515 6-99 12-204 15-234 2-30 0-50-5-45-4 5-50 81-100 169-673 1168-1562 2195-2475 2860-127 92-277 193-360 241l-50 29 30-40c191-254 284-382 379-523 792-1179 1356-2660 1645-4317 83-474 148-1021 166-1400 3-66 8-157 11-202l6-83h7663l2 191c5 562 136 1105 408 1698 297 648 804 1345 1380 1899 81 78 142 142 135 142s-94-27-194-61c-978-329-1789-826-2511-1541l-141-138 38 332c114 1020 181 2007 196 2892 23 1340-52 2423-233 3378-143 755-371 1428-612 1802-24 37-46 66-48 64-3-2 2-119 10-259 29-509 38-857 38-1479 0-882-26-1514-99-2380-47-573-159-1554-176-1544-4 3-8 20-8 39 0 40-29 298-66 575-104 804-266 1613-465 2335-45 163-166 559-202 660l-14 40-7-60c-3-33-25-226-47-430-101-931-267-2184-393-2965-30-190-32-179-51 420-81 2527-13 4801 210 6930 12 124 22 226 20 228s-8-12-14-30z" fill="var(--grass-color)" stroke="var(--stroke-color)" stroke-width="20" transform="matrix(.01268 0 0 -.02643 -.063 337.5)"/></svg>';
   var TREE_ICON_SVG = '<svg width="50" height="449.991" viewBox="0 0 52.917 119.06" xmlns="http://www.w3.org/2000/svg"><path d="m24.113 0-.03.748a453 453 0 0 0-.059 2.76l-.028 2.012-.865-1.169c-.998-1.36-1.132-1.415-1.127-.48.002.38.408 1.272.9 1.985.787 1.142.897 1.502.944 3.019.035 1.145-.033 1.657-.197 1.524-.135-.11-.24-.4-.24-.642-.001-.244-.106-.441-.235-.441-.13 0-.235-.535-.235-1.189 0-1.36-.59-2.312-.96-1.552-.118.242-.167.602-.108.805.124.447-.55.155-1.005-.431-.17-.22-.443-.394-.614-.394-.636 0-.53.866.24 2.023.92 1.376.969 1.65.36 1.86-.298.101-.401.34-.322.737.132.66.76.778 1.186.22.319-.417.328-.395.38.758.047.962.004.983-.797.383-.785-.588-.937-.573-.937.125 0 .325.342.94.761 1.37.572.585.635.74.263.613-.324-.11-.544 0-.638.317-.201.688-.363.631-1.924-.7-.766-.653-1.509-1.133-1.65-1.064-.487.245-.177 1.416.507 1.907l.689.49-.63.095c-.345.054-.68.289-.748.518-.131.448.455.887.806.604.117-.095.22-.026.22.153 0 .178.185.331.41.345.298.017.32.068.08.192-.248.128-.2.302.213.709l.549.536-.982.22c-1.008.224-1.24.717-.635 1.371q.336.37.73.077c.444-.324 1.276-.142 1.276.278 0 .149.21.278.468.278s.469-.138.469-.307.237-.303.527-.297l.527.01-.578.623c-.45.49-.506.68-.256.881.352.285.959.077 1.259-.43.107-.185.138.046.058.517-.117.702-.063.843.33.843.26 0 .481-.172.49-.383q.016-.393.148.048c.094.313.213.228.431-.307l.3-.738.293.843c.162.463.218.941.124 1.064-.093.123-.932.274-1.867.336-1.561.103-1.788.041-2.82-.815-1.026-.853-1.778-.995-1.778-.335 0 .145.29.483.645.747l.644.48-.82-.202c-.811-.194-2.177-1.114-2.777-1.878-.169-.218-.511-.394-.762-.394-.475 0-.6.594-.225 1.084.14.184-.22.332-.982.392-.663.053-1.295.166-1.399.25-.77.623 1.128 1.755 2.505 1.495l.945-.173-.659.49c-.4.294-.635.693-.586 1.006.113.748 1.125.497 1.772-.442.3-.437.705-.723.937-.651.324.1.282.202-.213.47-.797.43-1.04.936-.555 1.178a.52.52 0 0 1 .262.586c-.063.217.042.472.228.564.185.092.337.049.337-.095 0-.252.757-.681 1.324-.758.15-.021.492-.303.762-.622.27-.32.492-.479.492-.356 0 .319-.513.945-1.12 1.37-.289.203-.52.504-.52.673 0 .58.721.668 1.164.144.422-.503.436-.497.314.113-.178.896.3.807.776-.144.297-.592.443-.687.593-.383.164.33.23.328.396-.01a.65.65 0 0 1 .644-.334c.947.157 2.189-.948 2.226-1.984.021-.558.045-.542.19.126.14.631.026.938-.666 1.754-.459.54-1.488 1.432-2.284 1.981l-1.45.997-1.128-.736c-.621-.405-1.258-.767-1.42-.807-.42-.104-.363.49.117 1.227.368.57.366.586.007.22-.22-.22-.49-.327-.6-.238-.112.089-.497-.034-.858-.28-.862-.585-1.131-.555-.974.099.105.432-.005.527-.57.506-.386-.016-.757-.108-.827-.2-.286-.374-1.04.175-1.04.758 0 .47.112.576.49.448.47-.16.473-.145.081.423-.424.613-.356.696.535.604.407-.043.492.058.372.47-.126.432-.044.502.44.383.486-.123.568-.05.477.41-.127.63.023.697.606.289.575-.399 1.301.87.828 1.447-.265.323-.345.31-.446-.04-.07-.239-.487-.435-.946-.46-.45-.02-.764.083-.694.23.068.15-.08.197-.337.108-.593-.202-.612.264-.03.736.308.251.402.589.323 1.14-.143.973-.179.98-1.04.032-.383-.424-.85-.767-1.034-.767-.392 0-.413.15-.108.89.246.6.091.616-1.685.174-.579-.147-.879-.104-.879.114 0 .395 1.216 1.275 1.772 1.275.32 0 .34.077.103.451-.234.365-.225.494.052.632.187.095.44.144.555.113.49-.12.794.056.74.414-.037.234.19.375.586.362.495-.012.645.13.652.614.007.607.025.6.468-.095.366-.574.462-.617.462-.212 0 .282.105.432.234.328.13-.104.335.166.462.604.127.436.389.868.586.966.194.099.358.368.358.605 0 .236.17.432.38.432.213 0 .518.233.682.528.281.5.333.496.848-.077l.55-.604-.416.64c-.253.393-1.034.838-2.023 1.15-2.062.654-2.56.633-3.404-.094-.78-.675-1.163-.55-.952.316.117.484.028.595-.527.595-.37 0-.778-.138-.91-.307q-.233-.312-.686.123c-.436.417-.426.457.3.996.546.408.72.721.621 1.123-.087.359-.019.533.183.497.68-.12.942.03.813.472-.225.767.63 1.132 1.282.546.426-.387.49-.405.279-.058-.396.644-.017 1.318.6 1.064.888-.368 1.127.22.257.632-1.118.527-2.233.518-2.652-.028-.462-.607-1.18-.613-1.003-.01.11.372-.054.42-.914.268-1.261-.227-1.42.285-.258.834.565.267.764.524.689.901-.124.626.614.973 1.186.556.311-.227.389-.138.389.469 0 .622.084.727.503.586.415-.145.476-.083.345.361-.127.439-.061.525.316.396.26-.089.476-.04.476.114 0 .536.494.266 1.12-.605.752-1.049 1.197-1.282 1.75-.91.643.432.48.782-.292.634q-1.215-.234-.345 1.399c.34.635.34.68-.096.68-.255 0-.626.206-.82.46-.192.252-.506.46-.703.46-.195 0-.415.13-.49.286-.075.16-.546.28-1.047.27-.502-.01-1.048.095-1.217.23-.166.135-.646.218-1.061.18-.623-.054-.764.056-.827.636-.054.5-.237.702-.659.727-.323.018-.691.07-.82.116-.129.043-.42.05-.644.018-.225-.03-.41.068-.41.212 0 .405 1.295 1.313 1.881 1.313.513 0 .523.015.11.613s-.41.613.19.613c.46 0 .581.114.476.47-.113.386-.014.438.534.267.373-.114.727-.203.792-.2.731.019.9.123.79.497-.244.834.363.813.71-.028.333-.8.351-.81.36-.162.006.377.095.7.19.718 1.432.272 1.667.184 1.955-.727l.293-.92.206.726.204.74.455-.767c.45-.767.447-.767.454-.077.007.93.424.877.607-.076.082-.424.25-.767.373-.767.124 0 .147.147.058.334-.11.236.07.276.603.126.562-.163.738-.126.665.162-.143.565-1.612 1.525-2.336 1.525-.342 0-.67.171-.731.383-.07.233-.528.368-1.195.353-.596-.013-1.083.082-1.083.211 0 .59.813 1.23 1.458 1.141.382-.052.712.025.73.181.064.512-1.31.797-4.649.97-3.763.19-5.272.407-5.272.738 0 .126-.265.166-.586.086-.333-.086-.586-.006-.586.181 0 .43.767.97 1.383.97.267 0 .492.137.492.306s-.115.307-.248.307c-.136 0-.478.285-.762.64l-.513.654.761-.135c.504-.092.762-.012.762.24 0 .226.187.315.469.22.262-.089.468-.01.468.18 0 .498.596.424.938-.113.159-.254.393-.46.527-.46s.073.246-.14.556c-.214.306-.387.653-.387.766 0 .325.893.246 1.054-.095.232-.494.542-.356.703.307.188.776.455.77 1.303-.022l.682-.631-.148.938c-.175 1.156.251 1.248 1.202.27.624-.644.643-.644.394-.04-.29.715-.15 1.052.338.807.182-.092.49.003.682.211.24.261.351.276.351.037 0-.19.157-.343.352-.343.192 0 .351.19.351.429 0 .298.206.411.644.347 2.44-.362-.717 1.493-3.552 2.088-1.854.39-2.039.374-2.65-.153-.361-.313-.783-.564-.945-.564-.485-.003-.33.61.235.929.386.218.246.242-.528.086-.58-.117-1.319-.194-1.64-.172-.323.021-1.108-.163-1.743-.405-.635-.24-1.188-.399-1.23-.343-.244.319 1.255 1.585 2.094 1.763l.996.212-.879.037c-.611.027-.878.177-.878.5 0 .25.185.48.41.505.225.028.515.077.644.117.13.04.385.086.572.104.248.028.216.15-.117.47-.581.555-.305.953.342.5.405-.283.492-.255.492.162 0 .393.166.472.762.365.42-.077.972-.242 1.23-.365.462-.22.455-.22.007.258-.457.487-.359.6.403.5.232-.031.41.156.41.429 0 .656.19.604.748-.209l.475-.69-.382.834c-.206.457-.372.973-.372 1.15 0 .473 1.148.123 1.699-.518.459-.54.464-.527.286.221-.249 1.04-.537 1.257-2.695 2.107-1.795.705-1.903.715-2.87.23-1.058-.527-2.513-.678-2.513-.258 0 .135.122.418.279.623.19.248-.124.209-.96-.117-.685-.263-1.405-.404-1.604-.306-.307.156-.278.306.176.941l.534.746-.792-.295c-1.02-.383-2.256-.383-2.437 0-.187.393 1.38 1.233 2.306 1.236h.74l-.688.718c-.68.711-.673 1.644.007 1.303.227-.113.33.07.33.595 0 .543.122.758.445.758.251 0 .617.208.813.469.3.39.439.399.837.077.263-.215.483-.497.483-.623 0-.129.185.01.417.307.447.567.576 1.303.227 1.303-.115 0-.133.147-.044.334.112.237-.061.28-.572.135-.466-.135-.731-.098-.731.114 0 .19-.457.337-1.055.337-1.099 0-1.305.264-.703.92.235.255.731.322 1.465.2l1.113-.181-.872.604c-.604.42-.83.751-.733 1.082.089.298.283.396.52.267a3.2 3.2 0 0 1 .733-.276c.193-.043.22-.015.06.058-.594.267-.29.758.35.565.462-.141.547-.11.3.104-.62.54-.07.696.673.193.4-.27.726-.362.726-.202s-.13.356-.292.432c-.162.074-.211.252-.11.393.1.14.485.107.857-.077.553-.273.659-.254.555.095-.09.31-.007.365.307.221.366-.169.39-.129.134.23-.241.334-1.047.414-3.69.365-2.049-.04-3.385.052-3.385.23 0 .163.164.298.366.298.204 0 .516.193.696.429.281.371.276.457-.038.613-.199.101-.696.181-1.106.184-.86.003-1.45.405-1.244.844.255.54 1.42.638 2.38.199 1.283-.583 1.35-.549.69.316-.827 1.083-.766 1.736.124 1.402.382-.145.804-.353.937-.46.132-.108.251.058.27.361.02.307.051.712.065.911.017.2.099.463.186.577.182.242 1.595-.795 1.595-1.169 0-.144.096-.178.22-.076.144.116.144.46 0 .957-.124.426-.22.913-.22 1.082 0 .405 1.106-.644 2.22-2.098.829-1.085.946-.901.175.276-.19.292-.274.76-.192 1.046.136.46.213.433.748-.22l.609-.728-.082.767c-.075.703-.234.795-1.955 1.169-1.209.26-2 .3-2.233.113-.588-.472-1.867-.754-1.867-.41 0 .171.185.373.41.45.225.074-.117.074-.762 0-.942-.107-1.115-.061-.879.248.448.592.347.813-.293.654-.756-.19-1.82.162-1.64.546.077.162.38.297.673.297 1.003 0 .862.42-.359 1.064-2.078 1.092-1.624 1.905.513.92 1.083-.5 1.505-.414.71.141-.27.19-.482.562-.482.825 0 .372.14.436.62.28.554-.181.596-.154.324.276-.633.996.038 1 1.083 0 .49-.467.508-.46.375.22-.127.641-.101.672.255.289.354-.378.377-.362.234.153-.14.51-.084.49.424-.113.598-.712.966-.654.741.113-.178.61.382.53 1.275-.181.424-.34.761-.457.761-.27 0 .209.246.264.645.144.436-.129.53-.1.293.086-.195.154-.933.433-1.64.623-1.526.414-2.002.748-1.765 1.248.162.34.476.304 1.882-.193.358-.126.29.067-.293.806-.42.528-.762 1.025-.762 1.11 0 .304 1.303-.073 2.05-.594.82-.57.947-.396.404.545-.476.825-.432 1.187.124.997.304-.104.468 0 .468.28 0 .573.214.542.762-.105.431-.512.452-.51.373.077-.125.935 1.174.653 1.867-.405l.542-.822-.153.997c-.204 1.318.385 1.352 1.296.076.361-.506.687-.92.731-.92.047 0 .099.356.117.795.054 1.205.436 1.53.924.785.384-.59.44-.598.724-.114.283.479.314.473.447-.144.087-.399.272-.604.462-.509.202.101.375-.138.476-.66.107-.567.218-.708.344-.441.1.215.403.435.673.488.382.076.607-.203 1.005-1.273.513-1.383 1.055-1.917.776-.767-.18.742-.045.76.71.114.318-.273.586-.789.6-1.15.02-.525.053-.546.14-.114.178.892.542.273.549-.942.004-.917.046-1.027.24-.591.132.294.46.536.725.536.462 0 .48.11.33 2.377-.105 1.583-.351 2.874-.73 3.861a32 32 0 0 0-.507 1.38h5.828c.26-.27.143-.745-.124-1.582-.415-1.3-.574-3.96-.249-4.1.13-.056.415.306.645.815.426.945.951 1.294.71.47-.277-.945.16-.43.476.564.253.791.457 1.027.878.987.305-.03.706.09.886.267.24.233.359.224.427-.037.06-.242.246-.165.548.23.602.789.905.752.762-.095-.068-.405-.033-.558.08-.365.271.454 1.019.782 1.019.451 0-.31 1.293-.2 1.968.163.356.19.422.132.31-.258-.08-.273-.024-.549.13-.626.214-.1.216-.236-.006-.545-.532-.736-.312-.832.562-.249.968.647 1.24.552.77-.257-.25-.436-.254-.47-.008-.184.17.199.452.29.63.202.178-.089.33-.04.33.113 0 .157.143.543.321.865.282.503.385.525.72.163.335-.365.429-.322.761.297l.38.709.213-.74c.195-.683.232-.699.511-.199.373.657.537.666.996.068.286-.374.302-.561.075-.92-.157-.249-.218-.451-.134-.451.087 0 .033-.313-.117-.69-.227-.58-.14-.546.52.239 1.46 1.724 1.556 1.788 1.971 1.245.206-.27.293-.66.197-.87-.096-.222.024-.185.279.085 1.24 1.3 2.493 1.558 1.647.334-.382-.552-.368-.595.242-.794l.637-.212-.689-.726c-.9-.963-.417-.966.872 0 .562.417 1.157.763 1.32.766.473.003.334-.484-.235-.843-.476-.3-.438-.337.417-.356.523-.012 1.155-.22 1.406-.47.433-.428.426-.45-.241-.46-1.003-.014-4.575-.864-5.317-1.266-.912-.49-1.083-1.239-.183-.794.79.39 1.188.067.607-.488-.338-.325-.228-.362.668-.27 1.14.12 1.384-.257.534-.825-.457-.303-.38-.34.614-.276 1.342.086 1.72-.49.565-.864l-.77-.249.762-.113q1.337-.21.235-.951c-.431-.288-.249-.328.996-.19 1.401.153 1.48.129 1.061-.307-.25-.26-.64-.47-.864-.47s-.476-.152-.563-.336c-.098-.209.047-.316.394-.276.98.104 1.612.002 1.612-.27 0-.148-.743-.362-1.647-.479-.905-.116-1.596-.325-1.53-.46.063-.138.738-.432 1.5-.653 1.436-.417 2.345-1.04 2.057-1.417-.146-.193-1.45.086-3.192.69-.537.184-.523.129.21-.7 1.21-1.36.528-1.502-1.213-.248-1.75 1.258-2.751 1.359-4.687.488-2.198-.99-5.762-3.358-6.027-4.005-.328-.804-.143-.782.455.055.262.37.483.558.483.423 0-.138.157-.077.351.135.29.313.352.285.352-.175s.12-.405.73.347l.734.901-.14-.987c-.139-.975-.13-.985.499-.632.349.193.794.512.989.709.909.914 1.014.895.848-.184-.124-.813-.099-.954.124-.66.408.534 1.371.472 1.371-.086 0-.573.377-.6.63-.049.103.227.48.65.835.948.531.45.644.466.644.098 0-.248-.21-.693-.469-.997-.257-.306-.468-.702-.468-.874 0-.168.058-.218.138-.113.08.104.312-.025.513-.289.253-.33.635-.432 1.244-.325.607.108.921.025 1.003-.26.094-.313.307-.344.896-.123 2.066.776 2.446-.11.452-1.055-1.348-.638-1.516-.963-.256-.488 1.603.601 3.689.145 2.805-.613-.194-.169-.827-.325-1.406-.347-.895-.033-.953-.064-.375-.23.378-.107.732-.386.792-.622.092-.359-.278-.399-2.27-.221-2.346.212-2.383.212-2.095-.393.431-.898.136-1.055-1.031-.536-.63.279-1.442.398-2.074.297-1.355-.218-5.835-2.183-6.362-2.788-.551-.634-.52-1.076.058-.834.263.108.469.052.469-.125 0-.332.351-.237 1.523.432.387.22 1.235.405 1.889.41.654.007 1.286.038 1.406.068.548.138.607-.073.197-.708q-.439-.69.271.153c.811.96 1.04 1.04 1.04.374 0-.404.076-.404.6.046.355.304.67.4.762.23.087-.159.471-.466.858-.69.673-.386.682-.417.248-.834-.53-.506-.396-.549.439-.132.454.224.609.203.609-.098 0-.242.595-.561 1.523-.813.837-.23 1.523-.542 1.523-.69 0-.15.099-.18.228-.076.126.101.419.049.644-.117.356-.26.323-.331-.241-.518-.49-.16-.614-.347-.514-.767.099-.408-.004-.573-.403-.65-.38-.074-.11-.288.924-.718 1.6-.668 1.994-1.272.593-.91-1.296.33-4.511.407-4.511.104 0-.144.105-.258.234-.258s.234-.14.234-.307c0-.168-.501-.294-1.113-.279-1.537.04-3.995-.631-4.145-1.14-.085-.286.068-.42.461-.42.32 0 .58-.136.58-.298 0-.166.156-.224.35-.126s.352.015.352-.18c0-.237.176-.191.52.122.286.264.788.475 1.114.472l.592-.012-.54-.592-.538-.586 1.123-.095 1.127-.107-.82-.516-.82-.518.717-.009c.457-.01.925-.291 1.275-.776.302-.423.658-.767.796-.767.14 0 .394-.282.558-.622.429-.899-.117-1.08-1.465-.482-1.452.647-1.755.629-1.602-.122.147-.743.107-.746-1.364-.117-1.118.478-1.235.466-3.023-.2-2.414-.901-3.03-1.741-1.172-1.6a.58.58 0 0 0 .511-.316c.117-.245.312-.187.637.2.368.435.675.508 1.423.346 1.064-.236 1.13-.353.541-.988-.422-.454-.267-.441.738.086.361.187.422.132.303-.279-.113-.377-.024-.506.335-.506q.49 0 .358-.442c-.07-.242-.007-.509.148-.595.197-.107.169-.282-.103-.573-.356-.383-.34-.472.176-1.123.843-1.064.688-1.285-.549-.766-3.077 1.29-4.204 1.367-4.958.316-.427-.595-.453-.758-.169-.902.192-.095.663-.018 1.054.175 1.003.493 1.217 0 .382-.884-.585-.62-.625-.733-.234-.69.82.092 1.289-.027 1.289-.343 0-.169-.185-.316-.41-.328-.333-.016-.321-.074.08-.285.271-.145.557-.479.637-.749.124-.426.08-.448-.373-.116-.818.6-5.701.509-6.73-.123-.72-.442-.757-.506-.272-.528.446-.021.535-.147.434-.662-.115-.573-.091-.598.262-.2.514.574 1.217.896 1.217.556 0-.147.21-.203.468-.117.263.092.469.01.469-.18 0-.188.262-.335.586-.335.778 0 .74-.307-.162-1.276l-.755-.803 1.254.257c1.291.267 1.76.157 1.514-.365-.239-.509.391-1.187 1.099-1.187.8 0 .91-.506.155-.72-.3-.083-.174-.138.293-.114.531.025.799-.083.761-.325-.033-.205.052-.374.197-.374.178 0 .169-.156-.035-.481-.195-.304-.525-.427-.91-.326-.332.09-.468.092-.306 0 .54-.306.3-.797-.293-.604-.476.157-.549.095-.424-.325.11-.377.06-.445-.17-.257-.173.138-.583.279-.915.315a6 6 0 0 0-1.186.276l-.586.212.644-.718c.746-.837.853-1.328.19-.861-.653.457-1.134.417-.768-.059.525-.69.318-1.233-.22-.576-.275.337-.828.816-1.23 1.064-1.433.89-5.294-.322-5.294-1.656 0-.27-.132-.653-.286-.856-.188-.245-.195-.362-.021-.362.14 0 .314.206.386.46.087.292.422.445.91.42.421-.018 1.005.068 1.295.194.434.184.528.1.528-.424v-.631l.796.613c.574.442.849.525.968.267.091-.193.024-.485-.155-.641-.276-.245 1.09-.212 2.023.049.129.034.473-.04.768-.163.495-.208.504-.272.162-.766-.344-.5-.326-.55.227-.73.675-.221.811-.798.19-.816-.258-.006-.15-.163.293-.43.387-.232 1.012-.757 1.392-1.168l.68-.748-.856-.212c-.475-.116-.864-.343-.864-.509 0-.172-.275-.215-.645-.095-.562.184-.614.156-.351-.258.452-.72-.223-.938-.917-.297-.323.3-1.028.524-1.706.537-.923.018-1.054-.043-.651-.28.455-.266.501-.515.3-1.686-.01-.055-.37.187-.806.536-.434.353-1.146.635-1.582.635-1.46-.006-3.974-1.282-5.573-2.827-.614-.598-.485-.721.228-.221.37.257.454.214.461-.23.007-.525.02-.528.249-.01.133.298.337.467.454.375.118-.095.48.055.807.334.585.503.588.494.592-.374.003-.485.08-.724.176-.537.204.402 1.09 1.046 1.441 1.046.139 0 .267-.313.28-.69.023-.656.027-.653.182.077.091.42.213.702.272.631.058-.07.326.025.593.212.396.276.546.23.806-.24.176-.318.41-.502.52-.413s.127-.193.042-.632c-.145-.764-.126-.785.492-.478.762.377.999.19.586-.46-.246-.39-.223-.46.124-.46.394 0 .39-.034.007-.586-.222-.322-.302-.66-.182-.758.119-.098.403.092.63.423.356.516.586.562 1.493.325.049-.012-.024-.205-.17-.432-.304-.481-.123-.813.448-.813.223 0 .654-.273.959-.604l.558-.604-.703-.058a8 8 0 0 0-1.275.009c-.495.061-.532.003-.263-.42.511-.81.15-.807-.754 0-.982.874-1.575 1.024-1.106.288.248-.393.234-.442-.09-.28-.445.225-.51-.192-.11-.717.603-.788-.035-.668-.775.141-1.455 1.598-1.636 1.65-3.28.997-1.726-.68-2.883-1.536-3.23-2.386-.213-.518-.164-.592.345-.555.32.025.632.258.695.518.064.258.338.491.607.519.396.036.467-.086.359-.614-.117-.589-.068-.567.417.172.3.457.778.834 1.071.834.46 0 .513-.116.394-.892-.176-1.16.372-1.482.946-.546.39.638 1.709 1.085 1.713.586 0-.126-.342-.595-.761-1.055-.584-.638-.663-.838-.345-.844.23-.006.476.187.549.442.075.251.225.392.33.306.105-.088.255-.018.337.154.08.169.43.316.77.316.59 0 .594-.025.16-.442-.44-.423-.43-.448.205-.767.363-.18.785-.33.937-.334.152-.006.014-.208-.307-.442-.572-.414-.565-.423.321-.315.577.067 1.033-.05 1.247-.329.513-.671.15-1.051-1.013-1.051-.646 0-.995-.13-.906-.316.295-.626-.57-.638-1.547-.022-1.195.758-1.415.794-1.237.184.084-.291-.003-.46-.235-.46s-.318-.172-.234-.46c.16-.54.077-.558-.696-.175-.501.252-.555.212-.452-.306.122-.617-.272-.832-.527-.286-.082.17-.58.605-1.107.957-.85.568-1.07.595-1.905.27-.778-.307-.876-.423-.548-.662.218-.16.403-.5.403-.758 0-.362-.241-.448-1.061-.383-.8.064-1.167-.065-1.51-.519-.513-.68-1.012-3.11-.688-3.372.199-.162.311.492.227 1.333-.021.215.185.804.461 1.313.401.739.572.85.835.564.18-.196.337-.715.351-1.16.021-.637.056-.677.148-.19.176.951.785 1.687 1.399 1.687.478 0 .522-.086.314-.595-.307-.748-.31-1.03-.007-.785.129.104.234.043.234-.135s.106-.325.234-.325c.13 0 .235.193.235.43 0 .552 1.368 2.082 1.654 1.849.117-.095.22-.439.22-.767 0-.325.106-.592.242-.592s.185-.175.103-.383c-.084-.212.042-.07.286.316.241.386.52.604.614.478.096-.126.4-.273.689-.325.635-.116 1.582-.727 1.582-1.027 0-.12-.314-.387-.696-.592-.382-.209-.673-.537-.645-.73.028-.195-.27-.366-.665-.383-.82-.036-2.013-.764-1.568-.959.16-.07.293-.326.293-.565 0-.486-1.172-.61-1.537-.163-.356.433-1.275.717-1.275.393 0-.162.267-.38.6-.489.499-.164.555-.283.323-.651-.232-.365-.197-.443.16-.45.522-.013 1.403-.828 1.195-1.103-.082-.106-.63-.259-1.217-.345-1.171-.173-1.167-.168-.82-1.016.225-.55.281-.558.8-.115.52.447.564.432.71-.163.084-.35.252-.557.372-.46s.22.035.22-.144.211-.326.469-.326.469-.196.469-.43c0-.47-.495-.796-1.196-.796-.531 0-.602-.563-.1-.815.192-.097.3-.277.241-.402-.058-.126.155-.408.476-.633.79-.553.595-1.064-.41-1.064h-.827l.592-1.016c.462-.793.525-1.09.3-1.38-.222-.289-.45-.131-1.054.728-.717 1.02-.79 1.059-1.04.537-.148-.31-.373-.556-.497-.556-.28 0-1.02 1.716-1.18 2.741-.119.758-2.274 3.176-2.6 2.914-.092-.075-.138-.894-.11-1.821.028-.928-.04-1.687-.153-1.687s-.17-.51-.13-1.13c.058-.944.177-1.172.723-1.362.567-.197.638-.153.52.336-.213.881.359 1.105.814.316.239-.418.466-.574.555-.384.16.339 1.092.16 1.092-.21 0-.286-1.167-1.714-1.37-1.678-.085.016-.34-.038-.563-.115-.661-.226-.232-.657.468-.47 1.174.316 2.234.257 2.337-.133.054-.211-.054-.384-.242-.384-.19 0-.47-.209-.63-.46s-.384-.38-.5-.287c-.112.092-.203.06-.203-.077 0-.136.316-.525.703-.863.71-.62.904-1.073.462-1.073-.427 0-1.962.929-2.168 1.313-.122.227-.145.11-.059-.297.078-.365.04-.745-.082-.843-.255-.207-1.2 1.766-1.2 2.501 0 .271-.07.407-.154.297s-.3.033-.476.326c-.279.464-.302.338-.197-.968.096-1.214.317-1.806 1.172-3.115.579-.89 1.062-1.815 1.062-2.06 0-.737-1.18-.253-1.42.584-.39 1.332-.814.87-.727-.786.066-1.208-.019-1.664-.41-2.214zm-1.589 10.763c.106.008.361.274.652.7.48.706.703 1.343.703 2.041 0 .56-.045 1.025-.096 1.025-.127 0-.427-.95-.535-1.677a3 3 0 0 0-.43-1.092c-.19-.275-.345-.692-.345-.92 0-.057.014-.08.051-.077zm-.572 4.505c.446.042 1.528 1.019 1.7 1.61.304 1.05.13 1.246-.397.44-.23-.353-.55-.642-.71-.642-.272 0-.911-1.186-.74-1.37.035-.036.084-.045.147-.038zm6.4 2.501q.085 0 .2.038c.386.133.295.315-.61 1.218-.586.584-1.27 1.087-1.516 1.111-.244.024-.438.145-.438.278a.26.26 0 0 1-.258.25c-.136 0-.216-.311-.176-.69.066-.598.2-.682.961-.595.675.077.879-.011.879-.383 0-.266.157-.48.351-.48.192 0 .352-.194.352-.43 0-.208.086-.318.255-.317zm-2.716 4.39.549.354c.302.192.803.265 1.113.163.32-.105.564-.052.564.125 0 .172-.1.316-.22.316-.117 0-.365.071-.548.163s-.584-.125-.895-.48zm2.57.757c.052.01.132.081.242.2.263.285.352.29.352.02 0-.2.115-.264.262-.144.188.151.138.346-.16.633-.604.577-.805.515-.805-.24 0-.34.02-.487.11-.47zm3.53 1.12c.201 0 .307.139.227.308-.187.396-.586.396-.586 0 0-.17.157-.307.359-.307zm-5.514 4.91c.129 0 .234.69.234 1.533 0 1.554-.035 1.686-.316 1.321-.248-.328-.176-2.855.082-2.855zm-1.788 4.09c.084-.018.148.05.148.181 0 .181-.106.328-.235.328-.3 0-.3-.217 0-.46a.2.2 0 0 1 .087-.049zm1.891.654c.012-.004.035.024.05.076.065.206.067.62.009.92-.061.298-.113.132-.117-.374-.005-.38.016-.62.058-.622zm-2.915.162c.129 0 .234.058.234.132 0 .077-.105.224-.234.328s-.234.043-.234-.135.105-.325.234-.325zm-1.172.613c.13 0 .235.059.235.132 0 .077-.106.224-.235.329-.129.104-.234.042-.234-.135s.105-.326.234-.326zm-4.876.01c.16.018.358.16.51.41.476.786 1.264.89 1.7.221.386-.588.937-.598.66-.009-.075.157.026.289.218.289a.6.6 0 0 0 .5-.307c.19-.402.585-.405.585 0 0 .172-.29.463-.644.64-.354.179-1.247.393-1.978.48-1.162.137-1.359.085-1.582-.46-.14-.341-.248-.767-.248-.948 0-.233.117-.338.279-.316zm21.5 16.245c.136 0 .248.138.248.306 0 .393-.166.393-.351 0-.08-.168-.035-.306.103-.306zm-19.59 3.68c.143 0-.134.276-.614.613-.85.595-1.34.764-1.34.46 0-.19 1.61-1.073 1.954-1.073zm20.235 13.102c.258-.003.513.03.672.113.321.166.162.234-.54.249-.55.012-.997-.03-.997-.095 0-.163.434-.264.865-.267zm5.242 1.656a.53.53 0 0 1 .265.058c.185.098.126.166-.148.181-.246.016-.384-.061-.307-.162.038-.05.108-.07.19-.077zm.059 7.64c.011-.006.028 0 .044 0 .129 0 .391.132.586.297.192.163.246.298.117.298s-.394-.135-.586-.298c-.169-.144-.234-.27-.162-.297zm-40.82 12.39c.113-.022.143.043.083.174-.08.166-.24.307-.359.307-.337 0-.267-.23.138-.432.052-.028.103-.04.139-.05zm3.787 2.637.535.749.527.745.403-.804c.366-.733.417-.748.63-.248.174.408.282.438.417.153.13-.276.223-.2.338.267.16.66.6.923.6.356 0-.169.29-.31.644-.307h.645l-.703.488c-.455.313-1.06.426-1.7.334-.545-.077-.934-.012-.864.135.185.392-.164.319-.886-.172-.368-.251-.658-.307-.703-.135-.042.163-.267.203-.499.086-.387-.193-.377-.258.103-.93zm5.449.334c.049 0 .096 0 .138.019.176.077.068.218-.248.328-.39.132-.48.092-.307-.135.1-.135.27-.208.417-.212zm-2.381 12.642c.084-.018.148.05.148.181 0 .181-.106.329-.235.329-.3 0-.3-.218 0-.46a.2.2 0 0 1 .087-.05z" fill="var(--tree-color)" stroke="var(--stroke-color)" stroke-width=".268"/></svg>';
   var WEED_ICON_SVG = '<svg width="50" height="450" preserveAspectRatio="xMidYMid" version="1.0" viewBox="0 0 200 450" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="pollenWeedGrad" x1="200.2" x2="6197.9" y1="6396.5" y2="6396.5" gradientUnits="userSpaceOnUse"><stop offset="0"/></linearGradient></defs><path d="M2548 12784c-33-17-35-44-13-116 8-27 21-103 30-170 28-206 90-440 137-516 11-18 18-36 15-39-12-11-149 30-192 59-67 45-134 124-174 208-33 69-36 82-36 169 0 84-2 95-21 107-18 13-25 12-55-9-43-29-47-57-15-99 13-18 38-68 55-111 16-43 42-99 57-124 43-74 141-163 234-213 46-25 85-50 87-57 6-17-58-27-138-20-47 4-89 16-141 40-83 39-121 75-141 132-10 28-22 43-42 50-24 8-30 6-52-19-13-16-23-38-21-49 3-21 7-24 69-50 19-8 56-33 82-55 67-58 142-84 262-89 55-3 134 0 175 5s77 8 79 6-4-61-13-131-16-173-16-228c0-137 25-389 55-570 14-82 28-207 32-278 7-146 5-150-79-193-67-34-88-31-148 20-28 24-78 53-110 65s-86 42-120 67c-77 59-245 237-356 379-74 95-334 475-334 488 0 3 21 10 46 16 67 17 154 64 191 103 44 46 110 173 124 238 6 30 20 70 31 88 26 43 18 76-23 93-63 25-113-38-75-93 27-38 20-98-20-177-59-118-164-211-239-211-33 0-32 8 9 69 103 152 136 434 72 606-15 38-26 88-26 116 0 54-20 84-64 95-39 9-66-11-66-51 0-27 9-43 49-82 63-62 82-120 88-274 7-163-25-292-94-378-25-31-38-23-59 42-23 72-74 172-155 305-74 120-139 242-139 260 0 16-34 32-69 32-58 0-82-62-33-86 91-45 317-390 367-559 14-45 14-51-1-62-20-15-83 3-150 42-121 71-284 283-284 369 0 45-24 70-59 61-29-7-61-33-61-48 0-5 21-35 48-65 26-30 73-87 105-126 83-101 152-171 230-233 37-30 65-58 62-63-21-35-239-15-330 30-115 57-255 200-255 261 0 18-10 40-24 54-22 22-29 23-53 14-34-13-63-38-63-54 0-7 15-24 33-38s71-63 117-109c93-92 149-133 225-165 61-26 173-50 278-59 42-4 77-10 77-14 0-12-172-87-225-98-58-12-112-3-151 24-64 46-81 54-111 54-61 0-85-62-32-87 43-21 169-35 269-31 110 4 157 22 297 113 47 31 89 53 93 48 4-4 42-60 85-123 196-288 365-497 603-745 185-193 222-249 202-309-16-48-45-64-163-85-56-10-119-26-141-35-21-9-52-16-68-16-67 0-476 138-694 233-77 34-260 133-282 152-1 1 25 36 58 77 33 42 67 92 75 112 21 49 21 361 1 411-25 60-83 72-119 24-25-35-12-61 46-90 23-12 45-27 49-33 12-17 9-158-3-218-24-113-101-230-131-200-6 6-14 87-18 181-7 155-10 176-34 224-58 119-286 367-337 367-24 0-49-38-49-72 0-24 5-28 38-33 20-4 49-9 64-11 57-11 158-125 220-249 58-114 86-273 58-326-15-28-26-24-82 26-27 24-99 73-160 107-61 35-133 82-159 106-37 33-55 43-76 40-33-4-54-40-46-79 4-23 12-26 73-37 124-21 278-107 364-203 49-54 56-78 30-99-22-19-186 4-293 42-200 70-389 185-420 256-11 24-21 32-41 32-38 0-82-43-78-76 3-24 10-28 68-43 39-10 89-33 125-57 152-104 327-166 537-189 32-4 61-11 64-17 10-16-87-107-144-134-71-34-200-49-299-36-94 13-129 35-147 95-8 27-71 23-101-8-33-32-31-51 6-74 48-30 145-42 327-42s210 5 299 60c27 17 53 31 57 31 19 0-2-31-71-101-112-115-217-163-279-126-12 6-31 18-42 24-18 11-25 9-51-13-17-14-31-34-31-44 0-25 58-73 79-65 9 4 64 22 122 41 88 29 118 45 171 88 78 64 155 159 197 243l31 62 76-45c266-157 714-322 1069-394 61-12 117-26 126-31 24-12 30-58 13-98-36-85-186-220-309-277-190-88-637-190-917-209l-96-7-21 73c-46 161-84 233-163 305-61 57-116 87-236 130-57 20-119 48-138 60-41 28-61 30-92 8-19-13-23-23-20-62 4-55 15-61 93-42 43 10 61 10 113-4 89-23 202-77 250-120 45-41 140-212 125-227-5-5-30 7-58 27-161 117-358 158-576 119-128-22-163-37-167-69-8-64 48-74 122-21 27 19 66 40 85 45 54 15 187 12 260-6 85-20 218-84 262-125 30-28 32-32 16-44-9-6-54-15-99-18-46-4-137-20-203-36s-140-32-165-36c-84-13-113-52-70-95 28-28 50-25 101 14 78 61 233 106 364 106 70 0 105-12 105-35 0-63-275-233-455-280-33-8-115-22-183-29-67-8-129-20-138-27-24-19-14-62 18-73 20-7 42-4 90 13 35 13 132 45 215 71 178 56 285 107 400 190l83 59v-59c0-102-56-223-149-323-59-63-101-84-202-99-74-12-85-16-99-40-13-25-13-31 0-55 21-37 55-41 89-10 14 14 67 50 117 81 97 59 191 149 237 228 14 25 38 88 53 142 15 53 31 96 36 96s16-17 25-37c12-29 14-65 11-158-5-155-27-206-102-245-53-27-71-61-60-107 5-18 13-23 38-23 60 0 74 10 92 59 9 25 26 68 37 95 20 45 22 67 22 225 0 147-3 184-18 224-11 26-17 54-14 61 7 17 90 36 157 36 111 0 321 51 733 177 284 86 404 115 453 105 16-3 33-16 43-35 9-16 41-59 71-94l54-65-38-112c-22-61-47-127-57-147-47-95-281-349-494-538-154-136-288-241-309-241-9 0-28 25-47 62-67 132-118 172-297 236-162 57-184 60-211 33-37-37-19-111 27-111 9 0 33 10 52 21 104 64 345-63 394-208 9-25 14-48 12-50-2-3-30 9-62 25-88 44-158 62-270 69-132 8-247-10-352-53-46-19-105-39-132-45-39-8-49-15-54-35-4-14-1-37 7-52 17-36 53-33 109 8 142 103 186 123 301 141 105 16 257-16 340-73 37-26 34-45-10-64-108-45-152-73-363-234-58-44-129-90-157-102-50-20-53-24-53-58 0-84 67-108 104-36 58 109 461 416 547 416 25 0 31-28 19-90-15-80-63-150-172-256-74-71-115-101-168-126-52-24-72-39-77-57-7-29 7-55 34-59 59-9 301 238 392 400 63 111 84 102 89-35 5-117-15-204-73-323-53-109-99-155-179-178-56-17-76-36-76-75 0-54 88-84 111-38 6 12 40 61 75 108 146 198 181 287 192 499l7 135 42-63c52-78 67-126 67-217-1-52-7-86-27-134-33-78-34-105-5-125 56-39 83 44 76 230-7 162-19 191-153 377l-35 49 23 27c12 15 88 85 170 157 189 166 412 390 569 574 129 150 183 204 225 223 31 14 37 5 58-88 8-39 30-100 48-135 32-64 32-66 31-205-3-293-59-868-94-959l-9-24-77 30c-147 57-256 48-429-36-105-51-135-76-135-114 0-35 17-52 51-52 30 0 44 14 54 53 19 74 149 132 296 132 77 0 90-3 127-28 54-35 55-57 4-57-87 0-217-66-320-163-67-63-115-128-170-227-22-42-52-86-66-99-34-32-34-74-1-106 29-30 49-31 75-5 16 16 20 33 20 83 0 48 7 76 29 122 33 69 106 170 156 213 78 70 257 154 279 132 6-6-5-61-32-157-23-81-51-192-62-246-30-150-50-219-71-253-26-43-24-85 4-112 25-24 62-29 73-11 4 6 11 73 15 148 16 254 44 391 105 519 56 117 98 121 131 13 14-44 18-94 18-231 0-212-5-238-53-284-41-40-39-52 11-90 36-27 52-11 67 67 20 106 25 442 7 514-20 88-7 96 67 41l56-41V5861c0-1660-9-3508-26-5168l-7-693h293l1 2883c0 2706 10 4410 25 4485 5 24 14 36 38 46 61 26 75 113 21 129-49 15-59 22-69 53-11 35-14 1504-3 1584 4 30 12 62 17 70 15 24 44-2 52-47 3-21 29-84 57-139 28-54 75-165 105-245 101-269 209-492 346-710 82-131 87-160 30-170-79-13-239-105-283-163-14-18-38-61-55-97-16-35-43-81-61-103-49-61-39-136 19-136 41 0 58 30 69 127 11 100 37 158 97 213 44 40 145 95 163 88 5-2-15-57-45-122s-60-141-65-169c-12-53-7-390 5-419 11-24 64-44 85-31 29 18 25 66-13 136-24 46-36 85-41 131-15 136 42 335 118 414 54 56 69 40 81-83 12-112 44-239 104-400 30-82 65-181 77-220 24-79 51-99 100-77 42 20 34 63-24 125-73 78-123 183-172 362-48 178-50 365-5 365 28 0 80-57 127-136 67-114 100-205 108-296 8-98 19-110 69-82 20 12 38 31 40 42 2 10-10 42-27 70-16 27-62 114-101 192-40 78-93 167-117 197l-45 55 68-3c58-4 86-12 174-56 61-29 123-68 147-91 55-53 132-208 140-282 7-70 18-90 48-90 87 0 72 60-69 277-90 140-167 198-378 288-49 21-88 41-88 46s26 16 57 25c172 50 452-43 517-172 38-74 73-101 109-82 14 7 17 19 15 51-3 41-5 43-113 115-162 108-190 119-320 127-60 3-152 2-203-3-81-8-100-14-138-41-25-17-50-31-57-31-35 0-152 191-296 480-161 325-200 465-203 727-1 118 1 145 15 167 10 15 27 26 39 26s63-22 114-49c51-28 110-54 131-60 22-6 100-47 174-92 234-140 528-276 769-355 74-25 141-47 147-49 9-3 0-25-27-66-79-122-106-278-77-436 9-48 20-110 24-138 7-45 11-50 35-53 84-10 93 73 17 153-77 82-78 251-2 374 46 73 58 66 59-31 0-146 29-228 119-338 65-79 218-230 234-230 17 0 61 46 61 64 0 20-57 66-83 66-91 0-224 150-262 295-17 68-20 201-4 211 6 3 26-7 44-22 195-168 237-197 418-293 65-35 138-78 162-97 51-38 89-44 105-15 31 58-5 97-93 103-100 6-260 91-431 228-103 83-158 153-154 194l3 31 65-1c102-1 270-80 369-173 62-59 77-66 106-47 60 39 17 89-130 152-118 49-288 108-348 119-57 11-66 30-25 55 50 31 134 60 222 78 65 13 94 14 165 5 126-16 197-46 252-104 62-67 119-66 119 2 0 37-37 59-186 109-109 36-128 40-227 40-122 0-233-20-314-56-65-28-73-29-73-8 0 25 155 178 213 210 47 26 64 29 163 32 98 4 117 1 163-19 60-25 72-22 108 31 30 43 29 58-4 67-40 9-225-13-337-42-213-53-310-139-370-325l-22-65-44 2c-131 4-609 203-857 357-117 72-174 124-233 211-27 40-62 84-79 98s-31 33-31 42c0 10 13 45 30 80 43 89 60 96 280 106 96 5 272 13 390 19 305 14 388 34 680 162 74 32 139 57 146 54 6-2 26-48 45-102 57-166 138-253 311-334 88-41 153-51 176-28 7 7 12 27 12 45 0 47-36 63-86 40-69-33-133-13-227 73-59 53-144 167-133 177 3 3 27-8 53-25 65-42 166-86 233-103 68-17 287-17 350 1 50 13 60 23 60 61 0 56-65 69-100 19-49-69-267-76-387-12-50 26-201 149-202 165-1 4 29 7 67 7 141 0 394 55 546 120 50 21 117 43 149 50 42 8 62 18 73 36 15 22 15 26 1 48-30 45-88 39-144-17-40-40-173-107-296-149-110-37-265-49-381-28l-70 13 64 61c104 98 272 176 380 176 46 0 60 4 78 23 26 27 28 59 6 81-23 24-56 19-100-14-21-17-100-59-175-94-75-34-164-80-198-101-34-20-64-35-67-32-10 10 36 239 55 275 25 48 100 134 177 204 83 75 111 92 147 90 59-5 99 47 61 79-27 22-196 25-251 4s-113-12-210 34c-62 30-163 116-163 140 0 14 8 13 105-13 74-20 192-21 282-1 187 39 403 150 403 205 0 18-53 70-70 70-15 0-50-52-60-89-26-97-290-177-499-152-88 11-161 33-161 50 0 15 23 28 80 46 106 34 274 129 368 208 24 20 59 39 78 43 20 4 38 13 41 20 10 27-8 84-32 100-33 22-61 4-75-46-6-21-23-54-38-71-54-65-280-194-385-220-56-14-97-1-97 29 0 29 69 128 144 209 130 140 260 236 379 282 57 22 23 101-44 101-20 0-35-12-65-52-21-29-105-113-187-188-134-123-181-172-243-256-18-24-25-27-40-18-28 17-37 69-31 199 5 132 27 218 79 318 36 67 98 127 132 127s50 23 39 57-48 53-85 46c-22-4-30-13-38-43-5-20-29-66-52-101-63-98-96-179-114-281-20-116-15-304 9-361 14-33 14-39 2-43-8-3-29 3-48 15-76 47-150 200-151 314-1 65 0 69 32 95 49 41 45 81-13 138-34 33-45 51-45 74 0 19-6 33-16 37-26 10-82-24-107-65-34-52-89-99-134-112-60-16-143-22-208-13-85 12-80 32 15 61 190 59 233 89 318 222 30 47 70 105 89 129 55 73 37 141-38 141-30 0-39-19-39-87 0-138-141-305-297-353-59-18-193-28-193-15 0 3 30 40 66 83 96 112 116 153 194 393 38 119 77 222 85 229 17 14 20 53 5 80-11 20-77 46-88 35-4-4-8-50-8-103-1-69-9-127-28-201-50-196-113-314-232-439-56-59-64-64-80-51-14 12-16 27-11 114 9 149 54 298 109 363 32 37 35 67 12 100-18 27-65 29-89 5-13-12-15-25-10-52 11-56 8-88-19-170-14-42-34-116-46-166-27-118-38-145-61-145-19 0-62 53-119 147-92 152-123 390-61 473 11 16 21 40 21 54 0 46-59 81-89 52-13-14-16-37-14-137 6-306 69-480 225-622 43-39 76-72 75-74-8-7-175 19-214 33-48 18-138 109-160 163-10 23-13 49-8 77 5 35 2 47-14 63-52 52-120 26-101-39 12-42 172-250 213-278 53-35 125-59 202-67 39-4 76-12 83-17 42-34-43-292-202-613-128-257-200-375-243-394-15-7-58-33-94-58-80-54-113-62-254-63h-111l-56 93c-31 50-65 119-76 152-48 143-74 397-74 722 0 240 10 329 40 356 9 9 61 23 114 31 113 18 163 36 236 84 71 46 121 108 189 231 31 57 67 117 80 132 42 49 18 139-36 139-29 0-39-19-56-119-20-116-42-176-89-239-47-64-88-95-189-141-158-73-179-62-83 40 78 82 129 177 156 291 22 91 43 299 38 368l-3 45-43 3c-57 4-61-11-28-101 62-170 2-409-140-555-94-97-99-93-101 103-5 385-6 403-31 421-21 14-25 14-47 0-45-30-48-50-14-104 68-110 80-399 20-492-26-39-110 62-152 183-38 110-57 236-69 451-10 199-16 215-62 190zm2106-1111c3-10 12-79 21-153 23-206 30-232 82-301 26-34 68-77 95-97 26-20 48-43 48-51 0-58-532-460-765-578-118-60-175-79-270-92-48-7-95-23-152-52l-82-41-33 20c-18 12-53 41-77 66l-44 44 61 114c33 62 92 174 132 248 84 156 171 342 228 485 39 98 102 286 102 304 0 6 4 21 9 35l10 24 78-30c153-60 313-49 457 32 80 45 92 47 100 23zm369-690c118-161 207-218 363-233 53-5 98-11 101-14 11-10-11-48-78-137-114-150-135-201-153-377-8-68-17-126-20-130-24-24-96 100-116 200-13 69-6 168 16 210 8 16 36 39 63 53 58 29 68 50 45 99-24 50-41 52-80 11-60-64-100-241-84-370 11-87 20-111 72-198 22-37 38-70 35-73-13-13-204-90-337-135-202-70-339-92-539-87-154 3-157 4-211 35-30 17-97 43-149 58-132 37-136 40-171 153-17 53-30 104-30 113 0 30 184 160 409 288 237 136 449 287 680 485 68 58 128 106 133 106 4 0 27-26 51-57zM3042 8967c3-161 7-484 7-719l1-428h-64c-88 0-113 11-125 55-5 20-8 50-5 68 56 436 62 504 74 839 14 392 21 458 57 493 15 15 17 15 32 0 14-13 17-59 23-308zm-10-1204c13-12 15-19 7-29-17-21-79 13-79 44 0 18 46 8 72-15z" fill="var(--weed-color)" stroke-width="10" transform="matrix(.03335 0 0 -.03517 -6.694 450)" stroke="url(#pollenWeedGrad)"/></svg>';
@@ -9175,15 +8062,11 @@ try {
   mount.style.position = 'relative';
   mount.style.display = 'flex';
   mount.style.flexDirection = 'column';
-  // No bottom-border band or toolbar on this card (link removed below) —
-  // override the shared .card CSS's 18px border-bottom just for this mount
-  // so the body can reclaim that space. Card height stays 195px: 20px
-  // title band (border-top, unchanged) + 175px body (was 157px).
+
   mount.style.borderBottom = '0';
 
   var overlayTextColor = 'var(--bs-body-color)';
 
-  // -- Title bar ("Current Pollen Risk" -- from the actual screenshot) --
   var titleBar = document.createElement('div');
   titleBar.style.position = 'absolute';
   titleBar.style.top = '-20px';
@@ -9277,7 +8160,6 @@ try {
   rightPane.style.padding = '0 10px 0 14px';
   contentWrap.appendChild(rightPane);
 
-  // Same chip-row idiom as Current Conditions.
   function addChipRow(label){
     var row = document.createElement('div');
     row.style.display = 'flex';
@@ -9344,12 +8226,6 @@ try {
       svgEl.style.maxWidth = '100%';
     }
 
-    // Risk badge — black text on a risk-coloured pill, not coloured text
-    // on its own. Coloured text (the previous treatment) was hard to
-    // read in light theme, since several risk colours (yellow, pale
-    // green) have poor contrast against a white/light card face; a solid
-    // colour swatch behind fixed black text reads clearly in both
-    // themes regardless of how light the risk colour itself is.
     var imageLabel = document.createElement('div');
     DivumWXI18N.applyLabel(imageLabel, icon.shortKey);
     imageLabel.style.fontSize = '9px';
@@ -9366,12 +8242,6 @@ try {
     return { col: col, iconWrap: iconWrap, imageLabel: imageLabel, riskLabel: riskLabel, icon: icon };
   });
 
-  // Whole card is a click-through to the pollen chart/records page — an
-  // absolutely-positioned transparent overlay anchor, appended last so it
-  // paints on top of everything else and actually receives the click.
-  // top/bottom match the title band (-20px) and this card's own
-  // border-bottom override (0, set above). Class name lets the shared
-  // hover-tooltip script (indexNew.html) find it and read data-modal.
   var cardLink = document.createElement('a');
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=pollen&embed=1';
@@ -9436,7 +8306,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardGreenhouseGas.js version 0.0.1
+# cardGreenhouseGas.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -9468,15 +8338,11 @@ try {
   mount.style.position = 'relative';
   mount.style.display = 'flex';
   mount.style.flexDirection = 'column';
-  // No bottom-border band or toolbar on this card (links removed below) —
-  // override the shared .card CSS's 18px border-bottom just for this mount
-  // so the content pane can reclaim that space. Card height stays 195px:
-  // 20px title band (border-top, unchanged) + 175px content (was 157px).
+
   mount.style.borderBottom = '0';
 
   var overlayTextColor = 'var(--bs-body-color)';
 
-  // -- Title bar ----------------------------------------------------------
   var titleBar = document.createElement('div');
   titleBar.style.position = 'absolute';
   titleBar.style.top = '-20px';
@@ -9569,11 +8435,6 @@ try {
   rightPane.style.padding = '0 10px 0 14px';
   contentWrap.appendChild(rightPane);
 
-  // Fixed row height (rather than sizing purely to font metrics) so the 6
-  // rows sit with real breathing room and recenter as a group within the
-  // pane, rather than each row's height being derived from font metrics
-  // that left the whole list reading as cramped. Font sizes nudged down
-  // slightly too (7px/9.5px → 6.5px/8.5px).
   function addChipRow(label){
     var row = document.createElement('div');
     row.style.display = 'flex';
@@ -9613,15 +8474,8 @@ try {
   var so2Text    = addChipRow('Sulphur Dioxide');
   var aodText     = addChipRow('Aerosol Optical Depth');
   var nh3Text      = addChipRow('Ammonia');
-  nh3Text.parentElement.style.borderBottom = 'none'; // last row — no divider under it
+  nh3Text.parentElement.style.borderBottom = 'none';
 
-  // Whole card is a click-through to the greenhouse gas chart/records
-  // page — an absolutely-positioned transparent overlay anchor, appended
-  // last so it paints on top of everything else and actually receives
-  // the click. top/bottom match the title band (-20px) and this card's
-  // own border-bottom override (0, set above). Class name lets the
-  // shared hover-tooltip script (indexNew.html) find it and read
-  // data-modal.
   var cardLink = document.createElement('a');
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=gases&embed=1';
@@ -9665,28 +8519,13 @@ try {
     svg.append('line').attr('x1', x1).attr('y1', y1).attr('x2', x2).attr('y2', y2)
       .style('stroke', color).style('stroke-width', '3px').style('stroke-linecap', 'round');
   }
-  // Identifies which cluster is which — the numeric readings live in the
-  // chip rows now, but the image needs at least the gas name to be
-  // legible on its own. Centered in each cluster's main bubble (same x,y
-  // as that cluster's own center, passed to clusterGroup() below) rather
-  // than off to the side, so it reads as a label on the bubble itself.
-  // Font-size is 13px, not the intended 9px, because every call site sits
-  // inside a cluster group scaled by 0.7 (see clusterGroup()) — 13 * 0.7
-  // = 9.1 actual rendered pixels, keeping the text a normal size instead
-  // of shrinking along with the bubble artwork around it.
-  // Fixed black, not theme-aware — it sits on the bubble's own gradient
-  // fill rather than the card background, so it needs to stay readable
-  // against that light-centred gradient in both themes, not flip to
-  // near-white in dark mode where it would disappear.
+
   function addLabel(svg, x, y, text){
     svg.append('text').text(text).attr('x', x).attr('y', y).attr('dy', '0.35em').attr('text-anchor', 'middle')
       .style('font-size', '13px').style('font-family', 'inherit').style('font-weight', 'bold')
       .style('fill', '#111111');
   }
 
-  // Recenters+rescales one gas's cluster of circles/lines (still using its
-  // original hand-tuned coordinates, unchanged) into a grid cell in the new
-  // narrower pane — a group transform, not a rewrite of every coordinate.
   function clusterGroup(svg, oldCx, oldCy, newCx, newCy, scale){
     return svg.append('g').attr('transform',
       'translate(' + newCx + ',' + newCy + ') scale(' + scale + ') translate(' + (-oldCx) + ',' + (-oldCy) + ')');
@@ -9699,12 +8538,6 @@ try {
     svg = svgSel.append('svg').attr('viewBox', '0 0 ' + W + ' ' + H).attr('width', '100%').attr('height', '100%');
     var defs = svg.append('defs');
 
-    // 2 columns x 3 rows of gas clusters (was 3x2 in the old wide canvas) —
-    // each cluster's own internal circle/line coordinates are untouched,
-    // just recentered via clusterGroup() into its new grid cell. Scale
-    // nudged down from 0.75 — slightly smaller clusters read as less
-    // crowded, and happen to centre the whole grid a little more evenly
-    // top-to-bottom within the pane as a side effect.
     var scale = 0.7;
 
     var gNo2 = makeGradient(defs, 'ghgNo2Gradient', gasColors.no2);
@@ -9833,7 +8666,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardAirquality.js version 0.0.1
+# cardAirquality.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -9860,7 +8693,6 @@ try {
     return new Date(Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second));
   }
 
-  // -- DAQI band tables, ported from the PHP's $daqiBands -----------------
   var STANDARD_BANDS = [
     { max: 11,  band: 1,  desc: 'Low' },
     { max: 22,  band: 2,  desc: 'Low' },
@@ -9899,8 +8731,6 @@ try {
     return bands[0];
   }
 
-  // -- AQI category imagery, ported from cardAQI.js's UK DAQI band->image
-  // assignments (bands 1-3 goodair, 4-6 modair, 7 uhfsair, 8-9 uhair, 10 vhair)
   var ICON_BASE = './svg/aqi/';
   var ICON_VER = '?ver=1.4';
   var DAQI_ICONS = {
@@ -9927,15 +8757,11 @@ try {
   mount.style.position = 'relative';
   mount.style.display = 'flex';
   mount.style.flexDirection = 'column';
-  // No bottom-border band or toolbar on this card (links removed below) —
-  // override the shared .card CSS's 18px border-bottom just for this mount
-  // so the body can reclaim that space. Card height stays 195px: 20px
-  // title band (border-top, unchanged) + 175px body (was 157px).
+
   mount.style.borderBottom = '0';
 
   var overlayTextColor = 'var(--bs-body-color)';
 
-  // -- Title bar ------------------------------------------------------------
   var titleBar = document.createElement('div');
   titleBar.style.position = 'absolute';
   titleBar.style.top = '-20px';
@@ -10026,9 +8852,6 @@ try {
   grid.style.minHeight = '0';
   leftPane.appendChild(grid);
 
-  // Overall reading — moved down here into the image section (was a row
-  // in the chip list) so it reads as the hero value under the icons,
-  // same idiom as the gauge cards' hero-value-below-the-dial.
   var overallCaption = document.createElement('div');
   overallCaption.style.flex = '0 0 auto';
   overallCaption.style.textAlign = 'center';
@@ -10044,10 +8867,6 @@ try {
   overallLabel.style.opacity = '0.85';
   overallCaption.appendChild(overallLabel);
 
-  // Black text on a band-coloured pill, same treatment as each
-  // pollutant's own label above (and the Pollen card's image labels) —
-  // coloured text alone was hard to read in light theme against some of
-  // the lighter band colours.
   var overallValue = document.createElement('div');
   overallValue.style.display = 'inline-block';
   overallValue.style.fontSize = '12px';
@@ -10067,12 +8886,6 @@ try {
   rightPane.style.padding = '0 10px 0 14px';
   contentWrap.appendChild(rightPane);
 
-  // Whole card is a click-through to the air quality chart/records page —
-  // an absolutely-positioned transparent overlay anchor, appended last so
-  // it paints on top of everything else and actually receives the click.
-  // top/bottom match the title band (-20px) and this card's own
-  // border-bottom override (0, set above). Class name lets the shared
-  // hover-tooltip script (indexNew.html) find it and read data-modal.
   var cardLink = document.createElement('a');
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=airquality&embed=1';
@@ -10101,12 +8914,6 @@ try {
     return { circle: 44, icon: 58.5, label: 8 };
   }
 
-  // Icon inside a round hazard-coloured pill (icons are fixed black/dark
-  // artwork, so the coloured circle behind them is what carries the
-  // severity — same "colour carries meaning" idea as the rest of the
-  // dashboard, just as a badge here instead of a filled row). Labelled
-  // underneath with the particle size, same colour as the pill so the
-  // label and its reading tie together visually.
   function buildIconCell(size){
     var cell = document.createElement('div');
     cell.style.display = 'flex';
@@ -10123,9 +8930,7 @@ try {
     circle.style.height = size.circle + 'px';
     circle.style.flexShrink = '0';
     circle.style.borderRadius = '50%';
-    // Icon can now be larger than the pill itself (see sizeFor above), so
-    // this clips it to the circle rather than letting the square icon
-    // spill out past the round pill's edge.
+
     circle.style.overflow = 'hidden';
     circle.style.display = 'flex';
     circle.style.alignItems = 'center';
@@ -10138,10 +8943,6 @@ try {
     icon.style.objectFit = 'contain';
     circle.appendChild(icon);
 
-    // Risk badge — black text on a band-coloured pill, not coloured text
-    // on its own, same treatment as the Pollen card's image labels
-    // (coloured text was hard to read in light theme against several of
-    // the lighter band colours).
     var label = document.createElement('div');
     label.style.fontSize = size.label + 'px';
     label.style.fontWeight = '700';
@@ -10154,11 +8955,6 @@ try {
     return { cell: cell, circle: circle, icon: icon, label: label };
   }
 
-  // Same chip-row idiom as Current Conditions — single line now that the
-  // band description lives on the icon's pill/label in the image and the
-  // overall reading has its own spot below the icons, instead of every
-  // row carrying a second detail line (which is what was overflowing the
-  // pane before).
   function addChipRow(label){
     var row = document.createElement('div');
     row.style.display = 'flex';
@@ -10212,11 +9008,7 @@ try {
       placeholder.style.fontSize = '10px';
       placeholder.style.color = overlayTextColor;
       placeholder.style.opacity = '0.7';
-      // ensureGrid only actually rebuilds the DOM when the set of
-      // available pollutants changes (see the layoutKey guard above) --
-      // if there's genuinely no particle sensor, that never changes, so
-      // this text is effectively set once and never revisited, same
-      // class of bug as everything else fixed this session.
+
       DivumWXI18N.applyLabel(placeholder, 'No particle sensor data available');
       grid.appendChild(placeholder);
       return;
@@ -10234,7 +9026,7 @@ try {
       var chipValue = addChipRow(p.label);
       return { key: p.key, els: built, chipValue: chipValue };
     });
-    rightPane.lastElementChild.style.borderBottom = 'none'; // last row — no divider under it
+    rightPane.lastElementChild.style.borderBottom = 'none';
   }
 
   function renderCard(v){
@@ -10292,9 +9084,6 @@ try {
   refresh();
   setInterval(refresh, POLL_MS);
 
-
-
-
   window.addEventListener('themechange', function(){
     if (lastData) renderCard(lastData);
   });
@@ -10310,7 +9099,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardVapourPressureDeficit.js version 0.0.1
+# cardVapourPressureDeficit.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -10361,16 +9150,12 @@ try {
   mount.style.position = 'relative';
   mount.style.display = 'flex';
   mount.style.flexDirection = 'column';
-  // No bottom-border band or toolbar on this card (links removed below) —
-  // override the shared .card CSS's 18px border-bottom just for this mount
-  // so the content pane can reclaim that space. Card height stays 195px:
-  // 20px title band (border-top, unchanged) + 175px content (was 157px).
+
   mount.style.borderBottom = '0';
 
   var overlayTextColor = 'var(--bs-body-color)';
   var units = 'kPa';
 
-  // -- Title bar ------------------------------------------------------------
   var titleBar = document.createElement('div');
   titleBar.style.position = 'absolute';
   titleBar.style.top = '-20px';
@@ -10422,7 +9207,6 @@ try {
     statusTime.textContent = pad2(t.getUTCHours()) + ':' + pad2(t.getUTCMinutes()) + ':' + pad2(t.getUTCSeconds());
   }
 
-  // -- 60:40 content split (left: tree + hero value, right: readouts) ------
   var contentWrap = document.createElement('div');
   contentWrap.style.height = '175px';
   contentWrap.style.width = '100%';
@@ -10463,10 +9247,6 @@ try {
   rightPane.style.padding = '0 10px 0 14px';
   contentWrap.appendChild(rightPane);
 
-  // Same chip-row idiom as Current Conditions — padding and gap trimmed
-  // slightly from the standard 3px/2px, since six rows (Day/Month/Year
-  // Min/Max) in this card's pane add up to a couple pixels more than the
-  // 175px available, reading as a tight fit at the very top and bottom.
   function addChipRow(label){
     var row = document.createElement('div');
     row.style.display = 'flex';
@@ -10501,16 +9281,8 @@ try {
   var monthMaxText    = addChipRow('Month Max');
   var yearMinText       = addChipRow('Year Min');
   var yearMaxText        = addChipRow('Year Max');
-  yearMaxText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
+  yearMaxText.parentElement.style.borderBottom = 'none';
 
-  // Whole card is a click-through to the records page — an absolutely-
-  // positioned transparent overlay anchor, appended last so it paints on
-  // top of everything else and actually receives the click. top/bottom
-  // match the title band (-20px) and this card's own border-bottom
-  // override (0, set above). Class name lets the shared hover-tooltip
-  // script (indexNew.html) find it and read data-modal. VPD has no
-  // dedicated chart page (charts-d3.html doesn't cover it) — records.html
-  // does list it, so that's the link target instead.
   var cardLink = document.createElement('a');
   cardLink.className = 'card-whole-link';
   cardLink.href = 'records.html';
@@ -10538,20 +9310,13 @@ try {
 
     var treeViewBox = { w: 117.74, h: 106.411 };
     var treeH = 130, treeW = treeH * (treeViewBox.w / treeViewBox.h);
-    // treeY nudged down slightly (5→12) and the hero value pulled up
-    // close beneath the tree (was a fixed H-8, independent of the tree's
-    // own position, leaving a ~32px gap between them with the whole
-    // composition nearly filling the pane edge-to-edge) — heroY is now
-    // derived from the tree's own bottom edge instead, so the two sit
-    // close together as one group, vertically centered as a group within
-    // the pane rather than each pinned to an opposite edge.
+
     var treeY = 12;
     svg.append('use')
       .attr('href', '#vpdTreeArt').attr('xlink:href', '#vpdTreeArt')
       .attr('height', treeH).attr('width', treeW)
       .attr('x', (W - treeW) / 2).attr('y', treeY);
 
-    // Hero value — same accent colour + mono font as Current Conditions.
     var heroY = treeY + treeH + 15;
     var currentEl = svg.append('text').attr('x', W / 2).attr('y', heroY).style('text-anchor', 'middle')
       .style('font-family', '"IBM Plex Mono", ui-monospace, monospace').style('font-size', '13px').style('fill', 'var(--bw-accent)')
@@ -10603,7 +9368,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardEvapoTranspiration.js version 0.0.1
+# cardEvapoTranspiration.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -10636,15 +9401,11 @@ try {
   mount.style.position = 'relative';
   mount.style.display = 'flex';
   mount.style.flexDirection = 'column';
-  // No bottom-border band or toolbar on this card (links removed below) —
-  // override the shared .card CSS's 18px border-bottom just for this mount
-  // so the content pane can reclaim that space. Card height stays 195px:
-  // 20px title band (border-top, unchanged) + 175px content (was 157px).
+
   mount.style.borderBottom = '0';
 
   var overlayTextColor = 'var(--bs-body-color)';
 
-  // -- Title bar --------------------------------------------------------------
   var titleBar = document.createElement('div');
   titleBar.style.position = 'absolute';
   titleBar.style.top = '-20px';
@@ -10696,7 +9457,6 @@ try {
     statusTime.textContent = pad2(t.getUTCHours()) + ':' + pad2(t.getUTCMinutes()) + ':' + pad2(t.getUTCSeconds());
   }
 
-  // -- 60:40 content split (left: leaf + hero value, right: readouts) ------
   var contentWrap = document.createElement('div');
   contentWrap.style.height = '175px';
   contentWrap.style.width = '100%';
@@ -10737,7 +9497,6 @@ try {
   rightPane.style.padding = '0 10px 0 14px';
   contentWrap.appendChild(rightPane);
 
-  // Same chip-row idiom as Current Conditions.
   function addChipRow(label){
     var row = document.createElement('div');
     row.style.display = 'flex';
@@ -10770,16 +9529,8 @@ try {
   var last24hText = addChipRow('Last 24 Hours');
   var monthText     = addChipRow('This Month');
   var yearText          = addChipRow('This Year');
-  yearText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
+  yearText.parentElement.style.borderBottom = 'none';
 
-  // Whole card is a click-through to the records page — an absolutely-
-  // positioned transparent overlay anchor, appended last so it paints on
-  // top of everything else and actually receives the click. top/bottom
-  // match the title band (-20px) and this card's own border-bottom
-  // override (0, set above). Class name lets the shared hover-tooltip
-  // script (indexNew.html) find it and read data-modal. Evapotranspiration
-  // has no dedicated chart page (charts-d3.html doesn't cover it) —
-  // records.html does list it, so that's the link target instead.
   var cardLink = document.createElement('a');
   cardLink.className = 'card-whole-link';
   cardLink.href = 'records.html';
@@ -10822,12 +9573,6 @@ try {
     var leafHeight = 90, leafX = W / 2, leafY = 20;
     drawLeaf(svg, leafX - (leafHeight * 37.891 / 50.412) / 2, leafY, leafHeight);
 
-    // Hero value — same accent colour + mono font as Current Conditions.
-    // heroY derived from the leaf's own bottom edge (was a fixed H-16,
-    // independent of the leaf's position, leaving a ~57px dead gap
-    // between the leaf and the value beneath it) so the two sit close
-    // together as one group, vertically centered as a group within the
-    // pane rather than each pinned toward an opposite edge.
     var heroY = leafY + leafHeight + 18;
     svg.append('text').attr('x', leafX).attr('y', heroY).style('text-anchor', 'middle')
       .style('font-family', '"IBM Plex Mono", ui-monospace, monospace').style('font-size', '13px').style('fill', 'var(--bw-accent)')
@@ -10885,7 +9630,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardEarthquake.js version 0.0.1
+# cardEarthquake.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -10954,15 +9699,11 @@ try {
   mount.style.position = 'relative';
   mount.style.display = 'flex';
   mount.style.flexDirection = 'column';
-  // No bottom-border band or toolbar on this card (links removed below) —
-  // override the shared .card CSS's 18px border-bottom just for this mount
-  // so the content pane can reclaim that space. Card height stays 195px:
-  // 20px title band (border-top, unchanged) + 175px content (was 157px).
+
   mount.style.borderBottom = '0';
 
   var overlayTextColor = 'var(--bs-body-color)';
 
-  // -- Title bar --------------------------------------------------------------
   var titleBar = document.createElement('div');
   titleBar.style.position = 'absolute';
   titleBar.style.top = '-20px';
@@ -11014,7 +9755,6 @@ try {
     statusTime.textContent = pad2(t.getUTCHours()) + ':' + pad2(t.getUTCMinutes()) + ':' + pad2(t.getUTCSeconds());
   }
 
-  // -- 60:40 content split (left: pulse rings + magnitude, right: readouts) --
   var contentWrap = document.createElement('div');
   contentWrap.style.height = '175px';
   contentWrap.style.width = '100%';
@@ -11055,13 +9795,6 @@ try {
   rightPane.style.padding = '0 10px 0 14px';
   contentWrap.appendChild(rightPane);
 
-  // Fixed-height/nowrap/ellipsis by default (Time, Depth, Category are
-  // short, predictable values that don't need more). Location and
-  // Epicenter pass wrap:true instead — USGS region names and station
-  // names can be long, and there's plenty of vertical room in this pane
-  // (5 short rows only need ~100px of the 175px available) to just let
-  // those wrap onto a second line rather than truncating a real place
-  // name with an ellipsis.
   function addChipRow(label, opts){
     var wrap = opts && opts.wrap;
     var row = document.createElement('div');
@@ -11112,16 +9845,8 @@ try {
   var depthText         = addChipRow('Depth');
   var epicenterText        = addChipRow('Epicenter', { wrap: true });
   var categoryText            = addChipRow('Category');
-  categoryText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
+  categoryText.parentElement.style.borderBottom = 'none';
 
-  // Whole card is a click-through to the earthquake map — an absolutely-
-  // positioned transparent overlay anchor, appended last so it paints on
-  // top of everything else and actually receives the click. top/bottom
-  // match the title band (-20px) and this card's own border-bottom
-  // override (0, set above). Class name lets the shared hover-tooltip
-  // script (indexNew.html) find it and read data-modal. No dedicated
-  // chart exists for earthquakes — this links to the same worldwide map
-  // modal the card's old toolbar used to.
   var cardLink = document.createElement('a');
   cardLink.className = 'card-whole-link';
   cardLink.href = 'modalEarthquakeMap.html';
@@ -11154,12 +9879,7 @@ try {
     svg = svgSel.append('svg').attr('viewBox', '0 0 ' + W + ' ' + H).attr('width', '100%').attr('height', '100%');
 
     var cx = W / 2, cy = 95;
-    // "Magnitude" label used to sit at cy-48 (=37 with the old cy=85),
-    // which put it inside the outer ring's own radius (top edge at
-    // cy-53=32) — the label and the ring's top arc were overlapping.
-    // Given a fixed position clear of the rings instead of one anchored
-    // to cy, and cy itself nudged down so the ring + hero number sit
-    // centered as their own group beneath it.
+
     addCenter(svg, cx, 24, DivumWXI18N.t('Magnitude'));
     addCenter(svg, cx, cy + 6, v.magnitude.toFixed(1), 'var(--bw-accent)', 22);
 
@@ -11235,7 +9955,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardWebcam.js version 0.0.1
+# cardWebcam.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -11248,10 +9968,6 @@ try {
   var ASTRO_JSON_URL = './jsondata/almanac.json';
   var POLL_MS = 30 * 1000;
 
-  // Fallback defaults — used until the one-off config fetch below resolves,
-  // and permanently if [DivumWXCards][[webcam_title]]/[[webcam_image]]
-  // were never set (e.g. cardWebcam wasn't selected during install, or
-  // an install predating this option).
   var MODAL_TITLE = 'Looking Towards North West of Steeple Claydon, UK';
   var WEBCAM_IMAGE_PATH = 'img/picam.jpg';
 
@@ -11280,20 +9996,11 @@ try {
   mount.style.position = 'relative';
   mount.style.display = 'flex';
   mount.style.flexDirection = 'column';
-  // No bottom-border band or toolbar on this card (the standalone "Webcam"
-  // modal link is removed below — the image itself is still a click-
-  // through to the Timelapse modal, that's unrelated and stays) —
-  // override the shared .card CSS's 18px border-bottom just for this
-  // mount so the body can reclaim that space. Card height stays 195px:
-  // 20px title band (border-top, unchanged) + 175px body (was 157px).
-  // This card is just the camera image, no numeric readouts, so unlike
-  // most other cards there's no 60:40 split to apply here — just the
-  // shared "no toolbar / no border-bottom band" treatment.
+
   mount.style.borderBottom = '0';
 
   var overlayTextColor = 'var(--bs-body-color)';
 
-  // -- Title bar (label swaps Webcam/Timelapse based on day/night) -------------
   var titleBar = document.createElement('div');
   titleBar.style.position = 'absolute';
   titleBar.style.top = '-20px';
@@ -11345,10 +10052,6 @@ try {
     statusTime.textContent = pad2(t.getUTCHours()) + ':' + pad2(t.getUTCMinutes()) + ':' + pad2(t.getUTCSeconds());
   }
 
-  // -- Body: the webcam image itself, wrapped in the timelapse link ------------
-  // No padding — the image fills the entire content area edge-to-edge
-  // (up to the title band above, and flush with the card's own left/
-  // right/bottom edges), rather than sitting in a 2px/6px inset margin.
   var body = document.createElement('div');
   body.style.height = '175px';
   body.style.width = '100%';
@@ -11359,13 +10062,7 @@ try {
   mount.appendChild(body);
 
   var imgLink = document.createElement('a');
-  // href (not just data-url) is what chartModalOpen() actually reads —
-  // this was previously left as the placeholder '#', which meant clicking
-  // the webcam image did nothing at all. Now points at the real Timelapse
-  // modal (data-url kept in sync purely for convention, as on every other
-  // card link). class="card-whole-link" also wires this into index.html's
-  // shared hover tooltip (see the "Timelapse" special-case there), which
-  // this link never had before.
+
   imgLink.className = 'card-whole-link';
   imgLink.href = 'modalTimelapse.html';
   imgLink.setAttribute('data-modal', 'Timelapse');
@@ -11388,14 +10085,6 @@ try {
   img.style.borderRadius = '5px';
   imgLink.appendChild(img);
 
-  // The status badge reflects the *timelapse pipeline's* health, not just
-  // whether the raw source image loaded — those are two different things.
-  // picam.jpg is written by a separate capture process on its own cadence;
-  // day.mp4 only updates when TimelapseService actually captured and
-  // appended a new frame. Checking the image's own mtime was checking the
-  // wrong signal — it could easily be fresh while the timelapse itself had
-  // stalled, or read stale for reasons that have nothing to do with
-  // whether the timelapse is actually working.
   var DAY_TIMELAPSE_PATH = './webcam-timelapse/day.mp4';
 
   function checkStaleness(url){
@@ -11403,11 +10092,7 @@ try {
       var lastModifiedHeader = r.headers.get('Last-Modified');
       if (!lastModifiedHeader) return true;
       var ageSeconds = (Date.now() - new Date(lastModifiedHeader).getTime()) / 1000;
-      // An unparseable Last-Modified value makes ageSeconds NaN, and every
-      // comparison against NaN (including "<= 300") is false in JS — that
-      // silently forced the badge to permanently read stale/red regardless
-      // of how recently the image actually changed. Fail open here the
-      // same way the missing-header branch above already does.
+
       if (isNaN(ageSeconds)) return true;
       return ageSeconds <= 300;
     }).catch(function(){ return true; });
@@ -11425,12 +10110,7 @@ try {
 
         var o = loopResult.value.observations || {};
         var alm = astroResult.status === 'fulfilled' ? astroResult.value : {};
-        // Primary source: almanac.json's actual sun altitude -- "day" is
-        // precisely "between sunrise and sunset" by definition (sun
-        // above the horizon), astronomically exact regardless of what a
-        // hardware-derived isDay flag happens to mean. Falls back to
-        // loop.json's own observations.isDay only if almanac.json's
-        // fetch failed.
+
         var sunAltRaw = alm['almanac.sun.alt'];
         var sunAlt = (typeof sunAltRaw === 'number' && !isNaN(sunAltRaw)) ? sunAltRaw : null;
         var isDay = (sunAlt !== null) ? (sunAlt > 0) : (o.isDay === 1);
@@ -11446,10 +10126,6 @@ try {
         titleLabel.textContent = DivumWXI18N.t('Webcam');
         var url = WEBCAM_IMAGE_PATH + '?v=' + cacheBustToken();
 
-        // Both checks run concurrently and independently; the final status
-        // is only "fresh" once both have resolved and both agree — an
-        // image load failure shouldn't get silently overwritten by a
-        // later-resolving "day.mp4 is fresh" result, or vice versa.
         var imageOk = null, timelapseFresh = null;
         function maybeSetStatus(){
           if (imageOk === null || timelapseFresh === null) return;
@@ -11475,8 +10151,7 @@ try {
         var m = data && data.meta;
         if (m && m.webcam_title) MODAL_TITLE = m.webcam_title;
         if (m && m.webcam_image) WEBCAM_IMAGE_PATH = m.webcam_image;
-        // The image-link modal was already built with the fallback title
-        // above (before this fetch could resolve) — update it in place.
+
         imgLink.setAttribute('data-title', DivumWXI18N.t('Timelapse') + ' - ' + MODAL_TITLE);
       })
       .catch(function(e){
@@ -11489,19 +10164,9 @@ try {
     setInterval(refresh, POLL_MS);
   });
   window.addEventListener('i18nready', function(){
-    // refresh() already re-derives titleLabel.textContent from lastIsDay
-    // every poll cycle -- this just avoids waiting up to POLL_MS for the
-    // very first translated paint.
+
     if (lastIsDay !== null) refresh();
-    // The Timelapse tooltip is set at two points that can each run
-    // before OR after strings.json loads (card boot, and whenever
-    // fetchWebcamConfig's own separate fetch resolves) -- neither is
-    // guaranteed to run after i18n is ready, so re-apply here too,
-    // using whatever MODAL_TITLE currently holds (already correct by
-    // now if fetchWebcamConfig finished first, or still the fallback
-    // otherwise -- that fetch's own .then() re-applies this same line
-    // again once it does finish, so between the two this always ends
-    // up correct regardless of which finishes first).
+
     imgLink.setAttribute('data-title', DivumWXI18N.t('Timelapse') + ' - ' + MODAL_TITLE);
   });
 })();
@@ -11513,23 +10178,14 @@ try {
 try {
 /*
 ##############################################################################################
-# cardStationImage.js version 0.2.0
+# cardStationImage.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
 */
 
 // ===================== cardStationImage.js =====================
-// Same structure and mechanics as cardWebcam.js — full-bleed image, no
-// toolbar, status dot in the title bar — just a different, static image
-// (a photo of the station itself rather than a live outdoor view) and a
-// fixed "Station Image" title bar label instead of the Webcam/Timelapse
-// day-night swap. STATION_IMAGE_PATH/STATION_IMAGE_TITLE below are
-// fallback defaults, used until the one-off config fetch resolves, and
-// permanently if [DivumWXCards] station_image_path/station_image_title
-// were never set (e.g. cardStationImage wasn't selected during install,
-// or an install predating this option) -- same pattern as
-// cardWebcam.js's MODAL_TITLE/WEBCAM_IMAGE_PATH fallback+fetch.
+
 (function(){
   var ARCHIVE_JSON_URL = './jsondata/archive.json';
   var STATION_IMAGE_TITLE = DivumWXI18N.t('Station Image');
@@ -11557,18 +10213,11 @@ try {
   mount.style.position = 'relative';
   mount.style.display = 'flex';
   mount.style.flexDirection = 'column';
-  // No bottom-border band or toolbar on this card — override the shared
-  // .card CSS's 18px border-bottom just for this mount so the body can
-  // reclaim that space. Card height stays 195px: 20px title band
-  // (border-top, unchanged) + 175px body (was 157px). This card is just
-  // an image, no numeric readouts, so unlike most other cards there's no
-  // 60:40 split to apply here — just the shared "no toolbar / no
-  // border-bottom band" treatment, same as cardWebcam.js.
+
   mount.style.borderBottom = '0';
 
   var overlayTextColor = 'var(--bs-body-color)';
 
-  // -- Title bar ----------------------------------------------------------
   var titleBar = document.createElement('div');
   titleBar.style.position = 'absolute';
   titleBar.style.top = '-20px';
@@ -11620,10 +10269,6 @@ try {
     statusTime.textContent = pad2(t.getUTCHours()) + ':' + pad2(t.getUTCMinutes()) + ':' + pad2(t.getUTCSeconds());
   }
 
-  // -- Body: the station image, full-bleed --------------------------------
-  // No padding — the image fills the entire content area edge-to-edge
-  // (up to the title band above, and flush with the card's own left/
-  // right/bottom edges), same as cardWebcam.js.
   var body = document.createElement('div');
   body.style.height = '175px';
   body.style.width = '100%';
@@ -11644,9 +10289,7 @@ try {
 
   var titleOverriddenByConfig = false;
   window.addEventListener('i18nready', function(){
-    // Only re-apply the translated fallback if the station owner hasn't
-    // set their own custom title -- that's arbitrary user-typed text
-    // (e.g. "Backyard Cam"), never something DivumWX should translate.
+
     if (!titleOverriddenByConfig) {
       STATION_IMAGE_TITLE = DivumWXI18N.t('Station Image');
       img.alt = STATION_IMAGE_TITLE;
@@ -11683,19 +10326,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardSolarEnergy.js version 0.0.2
-#  Ported from the legacy dvmSolarEnergyModule.php (PHP/D3v4 standalone module) to this
-#  card architecture -- same underlying data (solar/battery/grid/load), same weather-
-#  conditioned PV icon selection, redone as a 60:40 hero/readouts card matching every
-#  other card added since. Data source is jsondata/solar_data.json -- an MQTT-topic-keyed
-#  capture from a Solar Assistant integration (topics like
-#  "solar_assistant/inverter_1/pv_power/state", each {value, timestamp, raw}), NOT
-#  loop.json/archive.json as an earlier version of this file assumed -- see topicValue()
-#  below for the lookup helper, and refresh() for the exact topic names used, confirmed
-#  against a real capture. inverter_1-scoped topics are used for instantaneous power
-#  (pv_power, grid_power, load_power) since that's the only place they're exposed;
-#  total-scoped topics are used for battery power/SOC and all daily cumulative energy
-#  figures, since inverter_1 doesn't expose those at all -- only "total" aggregates them.
+# cardSolarEnergy.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -11708,16 +10339,8 @@ try {
   var SOLAR_JSON_URL   = './jsondata/solar_data.json';
   var ASTRO_JSON_URL   = './jsondata/almanac.json';
   var CLOUD_JSON_URL   = './jsondata/cloud_coverage.json';
-  var POLL_MS = 10 * 1000; // power/SOC/grid readings are live values, not slow-changing -- same interval class as the other live-gauge cards (wind, barometer, etc.), not the 30s used by webcam/earthquake's much slower-changing sources.
+  var POLL_MS = 10 * 1000;
 
-  // Legacy PHP hardcoded 4050 (W) as the array's rated capacity to turn
-  // instantaneous power into a percentage. No per-installation array-size
-  // config exists anywhere in the current install.py/[DivumWXCards]
-  // pipeline, so this stays a hardcoded constant here too -- ported
-  // as-is, not improved, since getting this wrong per-station would be
-  // worse than an admitted limitation. Worth making configurable
-  // (a new [DivumWXCards] array_rated_watts key + install.py prompt) if
-  // this card gets adopted for real.
   var ARRAY_RATED_WATTS = 4050;
 
   function pad2(n){ return n < 10 ? '0' + n : String(n); }
@@ -11731,24 +10354,6 @@ try {
     return new Date(Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second));
   }
 
-  // Ported directly from the PHP module's cloud-icon if/else-if chain --
-  // same five cloud-cover bands, same night override to a single dark
-  // icon regardless of cover. cloudCover source changed: the PHP read a
-  // dedicated jsondata/awc.txt (Aviation Weather Center) fetch that's
-  // specific to the old PHP subsystem; this uses archive.json's own
-  // sky.cloud_cover instead (already present, already used the same way
-  // by cardCurrent.js's icon picker) so this card doesn't need a data
-  // source nothing else in the current architecture depends on.
-  // Returns a path into the SHARED meteocons library (already used
-  // elsewhere on the site) rather than a dedicated pv*.svg -- this card
-  // used to ship its own six weather-icon files with the panel and a
-  // bolt baked into each one; now the weather glyph, the panel, and the
-  // bolt indicator are three independent pieces (an <img>, an inline
-  // <svg> coloured via a CSS variable, and a second inline <svg>),
-  // composited together in the DOM instead of pre-rendered into one
-  // image per condition. No dedicated "mostly-cloudy-day" file exists in
-  // meteocons -- falls back to the condition-agnostic cloudy.svg for
-  // that one tier.
   function pickPvIcon(cloudCoverPct, isDay){
     if (!isDay) return 'meteocons/fill/svg/clear-night.svg';
     if (cloudCoverPct > 0 && cloudCoverPct < 7)   return 'meteocons/fill/svg/clear-day.svg';
@@ -11758,23 +10363,6 @@ try {
     return 'meteocons/fill/svg/overcast-day.svg';
   }
 
-  // Mirrors pickPvIcon() exactly (same branches, same thresholds) -- the
-  // colour the panel's panes (and the bolt indicator below) render in
-  // for each condition. Was originally reverse-engineered from each
-  // pv*.svg's own actual rendered pane colour (checking each file's
-  // style="...fill:X" override, which won CSS priority over its plain
-  // fill= attribute) back when those six files still existed; kept
-  // as the same hardcoded values now that they're gone, since the
-  // colours themselves were never the part that needed to change.
-  // Driven by actual measured PV power output (watts, from the solar
-  // inverter feed) rather than cloud cover -- cloud cover was only ever
-  // an inferred proxy for "how favourable conditions probably are",
-  // not a readout of what's actually being generated, which could
-  // visibly disagree with real power output (e.g. a cloud passing over
-  // registers on the inverter immediately, but cloud-cover data has its
-  // own separate, slower update path). pickPvIcon() above is unrelated
-  // and still cloud/day driven -- it's a separate sky-condition icon,
-  // not this bolt colour.
   function pickPvPowerColor(watts){
     if (watts <= 0) return 'silver';
     if (watts <= 1500) return '#FFD700';
@@ -11782,10 +10370,6 @@ try {
     return '#ff7400';
   }
 
-  // How many bolts show for a given pane colour -- one bucket per power
-  // tier now (was six cloud-cover-derived shades collapsed onto four
-  // counts; now it's a direct one-to-one with the four power tiers
-  // above). 0 W doesn't pulse; every generating tier does.
   var BOLT_TIERS = [
     { color: 'silver',  count: 1, pulse: false },
     { color: '#FFD700', count: 2, pulse: true  },
@@ -11805,19 +10389,11 @@ try {
   mount.style.position = 'relative';
   mount.style.display = 'flex';
   mount.style.flexDirection = 'column';
-  // No bottom-border band or toolbar on this card (links removed below) —
-  // override the shared .card CSS's 18px border-bottom just for this mount
-  // so the content pane can reclaim that space. Card height stays 195px:
-  // 20px title band (border-top, unchanged) + 175px content. This exact
-  // line is what VPD/Earthquake both have and this card was missing --
-  // every "content overflows past the visible border" symptom traced
-  // back to using their 175px content height without this override, so
-  // the true available space was only 157px (195 - 20 - 18), not 175px.
+
   mount.style.borderBottom = '0';
 
   var overlayTextColor = 'var(--bs-body-color)';
 
-  // -- Title bar --------------------------------------------------------------
   var titleBar = document.createElement('div');
   titleBar.style.position = 'absolute';
   titleBar.style.top = '-20px';
@@ -11907,28 +10483,6 @@ try {
   graphicWrap.style.flex = '0 0 auto';
   leftPane.appendChild(graphicWrap);
 
-  // One SVG, one shared coordinate space. Recentred once already: the
-  // first version of this viewBox was 0-260 wide with the panel's own
-  // centre sitting at x=165, not x=130 -- it read as centred purely
-  // because the sun filled the reserved space on the left, not because
-  // the geometry actually was centred. Every element below was shifted
-  // by the same -55 delta to make the panel's centre land exactly on
-  // the new 220-wide viewBox's own centre (x=110), preserving each
-  // element's position relative to the panel rather than recomputing
-  // each one from scratch.
-  //
-  // The weather glyph is an <image> pointing at the site's existing
-  // shared meteocons library (meteocons/fill/svg/...) -- no separate
-  // weather-icon file for this card at all, so a fix or a style change
-  // to those icons anywhere else on the site applies here too, for
-  // free. Sets both href and the legacy xlink:href attribute in
-  // renderCard() below -- plain href alone is SVG2 and not honoured by
-  // every renderer, xlink:href is the safer-everywhere legacy form.
-  // The panel's panes take their colour from the --pane-color custom
-  // property, set on graphicWrap in renderCard() (CSS custom properties
-  // inherit down into SVG same as HTML, so one property covers every
-  // pane path here). The bolt row is rebuilt from scratch on every
-  // render since its count, colour, and spacing all change together.
   graphicWrap.innerHTML =
     '<svg width="100%" height="100%" viewBox="0 0 220 190" xmlns:xlink="http://www.w3.org/1999/xlink" style="overflow:visible">' +
       '<image id="pvWeatherGlyph" x="-19" y="10.5" width="65" height="65" />' +
@@ -11950,10 +10504,6 @@ try {
   var pvWeatherGlyph = graphicWrap.querySelector('#pvWeatherGlyph');
   var pvBoltsGroup = graphicWrap.querySelector('#pvBoltsGroup');
 
-  // One-time stylesheet injection for the ripple-pulse keyframes --
-  // opacity-only, deliberately no transform: scale() (an earlier version
-  // of this scaled bolts up on pulse, which at this size read as one
-  // bolt suddenly looking oversized rather than a subtle pulse).
   if (!document.getElementById('solarEnergyBoltPulseStyle')) {
     var pulseStyle = document.createElement('style');
     pulseStyle.id = 'solarEnergyBoltPulseStyle';
@@ -11963,23 +10513,11 @@ try {
       '35% { opacity: 0.35; }' +
       '100% { opacity: 1; }' +
       '}' +
-      // infinite -- previously played once per renderBolts() call (i.e.
-      // once per 10s refresh, see POLL_MS below), which read as a single
-      // pulse followed by ~9.4s sitting static rather than a continuous
-      // ripple. Looping here means it never stops animating while
-      // generating; boltInfoForColor's pulse:false for the 0W/silver
-      // tier still keeps .bolt-pulse off the element entirely, so zero
-      // watts stays static exactly as before, not just "paused".
+
       '.bolt-pulse { animation: solarEnergyBoltPulse 1.1s ease infinite; }';
     document.head.appendChild(pulseStyle);
   }
 
-  // Rebuilds the bolt row for the given colour: count and whether it
-  // pulses both come from boltInfoForColor() above, width/spacing is
-  // fixed so that at the maximum count (4) the row's total width
-  // exactly matches the panel's own top-edge width (108 viewBox units)
-  // -- 20.8-unit-wide bolts with an 8.3-unit gap between them, worked
-  // out algebraically against that 108 figure rather than guessed.
   var PV_BOLT_D = 'M11.5,0 L0,14.4 L8.7,14.4 L3.6,23.9 L20.8,8.7 L12.1,8.7 Z';
   var PV_BOLT_W = 20.8, PV_BOLT_GAP = 8.3;
   function renderBolts(color, staggerDelayMs){
@@ -11993,9 +10531,7 @@ try {
       path.setAttribute('d', PV_BOLT_D);
       path.setAttribute('transform', 'translate(' + x + ',0)');
       path.setAttribute('fill', info.color);
-      // The pale cream tier is hard to read without a keyline against a
-      // light card background -- the other three tiers are dark/bold
-      // enough not to need one.
+
       if (info.color === '#ffeeaa'){
         path.setAttribute('stroke', '#000');
         path.setAttribute('stroke-width', '0.75');
@@ -12038,14 +10574,6 @@ try {
   rightPane.style.padding = '0 10px 0 14px';
   contentWrap.appendChild(rightPane);
 
-  // wrap:true (matching cardEarthquake.js's identical addChipRow) lets a
-  // long value ("Importing from Grid", "Discharging — (SOC 87%)") wrap
-  // onto a second line at its natural width instead of being clipped
-  // with an ellipsis. With 6 rows total (2 of them wrapping to 2 lines)
-  // packed into the fixed 175px content budget every card gets, spacing
-  // is tightened here (row padding, line-height, fixed-row height) vs.
-  // Earthquake's more spacious 5-row version -- text size/wrapping
-  // itself is unchanged, only the vertical space around it.
   function addChipRow(label, opts){
     var wrap = opts && opts.wrap;
     var row = document.createElement('div');
@@ -12097,14 +10625,8 @@ try {
   var dailyEnergyText       = addChipRow('Solar Daily Energy');
   var dailyExportText          = addChipRow('Grid Daily Export');
   var efficiencyText              = addChipRow('PV Efficiency');
-  efficiencyText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
+  efficiencyText.parentElement.style.borderBottom = 'none';
 
-  // Whole card is a click-through to the solar/energy chart -- same
-  // pattern every other card's whole-card link uses. Assumes a 'solar'
-  // chart type exists in charts-d3.html (the legacy module linked to a
-  // dedicated dvmhighcharts/dvmSolarEnergyChart.php that has no
-  // equivalent here yet) -- confirm/add that chart type before relying
-  // on this link actually going anywhere useful.
   var cardLink = document.createElement('a');
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=solar&embed=1';
@@ -12131,9 +10653,7 @@ try {
     pvWeatherGlyph.setAttribute('href', v.icon);
     pvWeatherGlyph.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', v.icon);
     graphicWrap.style.setProperty('--pane-color', v.iconColor);
-    // Same 120ms-per-bolt stagger used throughout design/testing, so the
-    // ripple's speed on the real card matches what was actually reviewed
-    // rather than an untested new value.
+
     renderBolts(v.iconColor, 220);
     pvHeroValue.textContent = fmtPower(v.pvPower);
 
@@ -12149,13 +10669,6 @@ try {
 
   function num(x){ return (typeof x === 'number' && !isNaN(x)) ? x : null; }
 
-  // solar_data.json's actual shape (confirmed against a real capture):
-  //   { last_updated, message_count, packet_count, connected, unique_topics,
-  //     data: { "<mqtt/topic/path>/state": { value, timestamp, raw }, ... } }
-  // Every reading lives at solarData.data[topic].value -- this just does that
-  // lookup safely, returning null (not throwing) if the topic is absent (e.g.
-  // a station with a different inverter model/topic naming) or the payload
-  // isn't shaped as expected.
   function topicValue(solarData, topic){
     var entry = solarData && solarData.data && solarData.data[topic];
     return entry ? entry.value : null;
@@ -12174,28 +10687,13 @@ try {
       if (archResult.status === 'rejected') console.warn('cardSolarEnergy: archive.json fetch failed --', archResult.reason.message);
       if (solarResult.status === 'rejected') console.warn('cardSolarEnergy: solar_data.json fetch failed --', solarResult.reason.message);
       if (astroResult.status === 'rejected') console.warn('cardSolarEnergy: almanac.json fetch failed --', astroResult.reason.message);
-      // cloud_coverage.json is optional -- logs at info (not warn) since
-      // absent-and-rejected is a normal state on installs without it,
-      // but still logged (not silent) so "is it actually being used?"
-      // is answerable from the console: covers both fetch failure and
-      // fetch-succeeded-but-malformed (cloudPercent missing/not a
-      // number), two different failure modes that otherwise look
-      // identical from the outside.
+
       if(cloudResult.status === 'rejected'){
         console.info('cardSolarEnergy: cloud_coverage.json fetch failed (falling back to loop.json/archive.json) --', cloudResult.reason.message);
       } else if(typeof cloudResult.value.cloudPercent !== 'number' || isNaN(cloudResult.value.cloudPercent)){
         console.info('cardSolarEnergy: cloud_coverage.json fetched but cloudPercent is missing/invalid (falling back) --', JSON.stringify(cloudResult.value));
       }
 
-      // BUGFIX: this used to read loopResult.value directly (the whole
-      // loop.json object) rather than its .observations sub-object, the
-      // way every other card in this file does. isDay (and cloudcover)
-      // only actually exist under .observations, so o.isDay was always
-      // undefined -- "undefined === 1" is always false -- meaning this
-      // card thought it was permanently night, regardless of actual
-      // time. That alone fully explained the reported symptom (night
-      // icon shown well past sunrise) before the almanac-based fix
-      // below was even added.
       var o = loopResult.status === 'fulfilled' ? (loopResult.value.observations || {}) : {};
       var arch = archResult.status === 'fulfilled' ? archResult.value : {};
       var cloudCoverage = cloudResult.status === 'fulfilled' ? cloudResult.value : null;
@@ -12203,9 +10701,6 @@ try {
       var solarData = solarResult.status === 'fulfilled' ? solarResult.value : {};
       var alm = astroResult.status === 'fulfilled' ? astroResult.value : {};
 
-      // inverter_1-scoped: instantaneous power. total-scoped: battery
-      // power/SOC and all daily cumulative energy figures -- inverter_1
-      // doesn't expose those at all, only "total" aggregates them.
       var pvPower       = num(topicValue(solarData, 'solar_assistant/inverter_1/pv_power/state'));
       var gridPowerRaw   = num(topicValue(solarData, 'solar_assistant/inverter_1/grid_power/state'));
       var loadPower       = num(topicValue(solarData, 'solar_assistant/inverter_1/load_power/state'));
@@ -12214,27 +10709,9 @@ try {
       var pvEnergyToday               = num(topicValue(solarData, 'solar_assistant/total/pv_energy/state'));
       var gridEnergyOutToday               = num(topicValue(solarData, 'solar_assistant/total/grid_energy_out/state'));
 
-      // Primary source: almanac.json's actual sun altitude (matches
-      // cardSolarDial.js's own isDay logic) -- "day" is precisely
-      // "between sunrise and sunset" by definition (sun above the
-      // horizon), astronomically exact regardless of what any hardware-
-      // derived isDay flag happens to mean. Falls back to loop.json's
-      // observations.isDay only if almanac.json's own fetch failed.
       var sunAlt = num(alm['almanac.sun.alt']);
       var isDay = (sunAlt !== null) ? (sunAlt > 0) : (o.isDay === 1);
-      // Same fix as cardCurrent.js's identical bug -- see its comment
-      // for the full explanation. loop.json's o.cloudcover is the
-      // live/correct value; archive.json's sky.cloud_cover has been
-      // observed stuck at 0 in every sample seen this whole
-      // conversation, and the old priority order never actually fell
-      // back away from it since 0 is still a valid number.
-      //
-      // Between sunrise and sunset, cloud_coverage.json (a sky-camera-
-      // derived reading, when available) takes priority over
-      // loop.json/archive.json -- but only during the day. "Available"
-      // means the fetch succeeded AND cloudPercent is actually a valid
-      // number. Falls back to loop.json/archive.json at night, or any
-      // time cloud_coverage.json's fetch failed or its data was invalid.
+
       var cloudPercentFromCamera = (cloudCoverage && typeof cloudCoverage.cloudPercent === 'number' && !isNaN(cloudCoverage.cloudPercent))
         ? cloudCoverage.cloudPercent : null;
       var cloudCoverPct = (isDay && cloudPercentFromCamera !== null)
@@ -12246,18 +10723,8 @@ try {
         source: (isDay && cloudPercentFromCamera !== null) ? 'cloud_coverage.json' : 'loop.json/archive.json'
       });
 
-      // Solar Assistant's battery_power sign is the opposite of what the
-      // old PHP comment assumed: <0 means discharging (power leaving the
-      // battery), >=0 means charging. Confirmed against a live reading of
-      // -13W showing as "Charging" when the battery was in fact idle/
-      // discharging. Display value is the magnitude (abs) -- the state
-      // label already carries the direction.
       var batteryState = (batteryPowerRaw !== null && batteryPowerRaw < 0) ? DivumWXI18N.t('Discharging') : DivumWXI18N.t('Charging');
-      // "to Grid"/"from Grid" dropped -- this row's own label already says
-      // GRID, so the full phrase was redundant and was the direct cause of
-      // this row wrapping to 2 lines, which left too little vertical room
-      // for the 6 rows to fit within the card's fixed height without the
-      // last row (PV Efficiency) crowding the bottom border.
+
       var gridState = (gridPowerRaw !== null && gridPowerRaw < 0) ? DivumWXI18N.t('Exporting') : DivumWXI18N.t('Importing');
 
       var pvEfficiency = (pvPower !== null) ? (pvPower / ARRAY_RATED_WATTS * 100) : null;
@@ -12276,11 +10743,7 @@ try {
         solarDailyEnergy: pvEnergyToday,
         gridDailyExport: gridEnergyOutToday
       });
-      // "connected" (solar_data.json's own top-level flag) reflects
-      // whether the Solar Assistant MQTT feed itself is live -- a more
-      // meaningful health signal than just "did the file fetch", since
-      // the file can still exist and fetch fine with stale contents if
-      // the underlying MQTT connection has dropped.
+
       var solarConnected = solarResult.status === 'fulfilled' && solarData.connected === true;
       setStatus(loopResult.status === 'fulfilled' && archResult.status === 'fulfilled' && solarConnected);
     }).catch(function(e){
@@ -12290,9 +10753,7 @@ try {
   }
   refresh();
   setInterval(refresh, POLL_MS);
-  // No lastData cache in this card (unlike most others) -- refresh() both
-  // fetches and renders in one step, so re-running it is the correct way
-  // to pick up translations once strings.json has loaded.
+
   window.addEventListener('i18nready', refresh);
 })();
 } catch (e) {
@@ -12303,25 +10764,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardSolarEnergyFlow.js version 0.7.0
-#  A second, separate card from cardSolarEnergy.js -- NOT a modification of it, and mounted
-#  under its own distinct element (solarEnergyFlowCard27, not cardSolarEnergy.js's own
-#  solarEnergyCard26), so both can sit on the same dashboard at once. Forked from
-#  cardSolarEnergy.js's own data-fetch/refresh() pipeline (identical topicValue() lookups
-#  against solar_data.json, same pickPvIcon weather-conditioned icon logic, same six-row right
-#  pane) rather than written from scratch, since the two need to read the same live figures --
-#  but the left 60% pane is this file's own power-flow diagram (Solar/Grid/Inverter/Load/UPS
-#  Load/Battery pill nodes joined by animated flow lines, ported from this card's own earlier
-#  full-card-diagram iterations) in place of cardSolarEnergy.js's static solar-panel-plus-bolts
-#  graphic -- see renderDiagram() and the NODES/font sizing above it, sized for the narrower
-#  60%-pane budget rather than a full card. The right pane's six readout rows are unchanged
-#  from cardSolarEnergy.js's own. Two data topics are read here purely to feed the diagram's
-#  separate Load/UPS Load nodes (solar_assistant/inverter_1/load_power_non-essential and
-#  _essential/state, confirmed against a real solar_data.json capture) -- the House Load
-#  readout row still reads the original total load_power topic, same as cardSolarEnergy.js.
-#  Chip background uses this site's actual --light-body/--dark-body (confirmed from
-#  index.html: #EFECE2 parchment / #0A0F22 dark navy), reactive via the same real body.dark
-#  class toggle --bs-body-color already uses.
+# cardSolarEnergyFlow.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -12334,16 +10777,8 @@ try {
   var SOLAR_JSON_URL   = './jsondata/solar_data.json';
   var ASTRO_JSON_URL   = './jsondata/almanac.json';
   var CLOUD_JSON_URL   = './jsondata/cloud_coverage.json';
-  var POLL_MS = 10 * 1000; // power/SOC/grid readings are live values, not slow-changing -- same interval class as the other live-gauge cards (wind, barometer, etc.), not the 30s used by webcam/earthquake's much slower-changing sources.
+  var POLL_MS = 10 * 1000;
 
-  // Legacy PHP hardcoded 4050 (W) as the array's rated capacity to turn
-  // instantaneous power into a percentage. No per-installation array-size
-  // config exists anywhere in the current install.py/[DivumWXCards]
-  // pipeline, so this stays a hardcoded constant here too -- ported
-  // as-is, not improved, since getting this wrong per-station would be
-  // worse than an admitted limitation. Worth making configurable
-  // (a new [DivumWXCards] array_rated_watts key + install.py prompt) if
-  // this card gets adopted for real.
   var ARRAY_RATED_WATTS = 4050;
 
   function pad2(n){ return n < 10 ? '0' + n : String(n); }
@@ -12357,24 +10792,6 @@ try {
     return new Date(Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second));
   }
 
-  // Ported directly from the PHP module's cloud-icon if/else-if chain --
-  // same five cloud-cover bands, same night override to a single dark
-  // icon regardless of cover. cloudCover source changed: the PHP read a
-  // dedicated jsondata/awc.txt (Aviation Weather Center) fetch that's
-  // specific to the old PHP subsystem; this uses archive.json's own
-  // sky.cloud_cover instead (already present, already used the same way
-  // by cardCurrent.js's icon picker) so this card doesn't need a data
-  // source nothing else in the current architecture depends on.
-  // Returns a path into the SHARED meteocons library (already used
-  // elsewhere on the site) rather than a dedicated pv*.svg -- this card
-  // used to ship its own six weather-icon files with the panel and a
-  // bolt baked into each one; now the weather glyph, the panel, and the
-  // bolt indicator are three independent pieces (an <img>, an inline
-  // <svg> coloured via a CSS variable, and a second inline <svg>),
-  // composited together in the DOM instead of pre-rendered into one
-  // image per condition. No dedicated "mostly-cloudy-day" file exists in
-  // meteocons -- falls back to the condition-agnostic cloudy.svg for
-  // that one tier.
   function pickPvIcon(cloudCoverPct, isDay){
     if (!isDay) return 'meteocons/fill/svg/clear-night.svg';
     if (cloudCoverPct > 0 && cloudCoverPct < 7)   return 'meteocons/fill/svg/clear-day.svg';
@@ -12384,23 +10801,6 @@ try {
     return 'meteocons/fill/svg/overcast-day.svg';
   }
 
-  // Mirrors pickPvIcon() exactly (same branches, same thresholds) -- the
-  // colour the panel's panes (and the bolt indicator below) render in
-  // for each condition. Was originally reverse-engineered from each
-  // pv*.svg's own actual rendered pane colour (checking each file's
-  // style="...fill:X" override, which won CSS priority over its plain
-  // fill= attribute) back when those six files still existed; kept
-  // as the same hardcoded values now that they're gone, since the
-  // colours themselves were never the part that needed to change.
-  // Driven by actual measured PV power output (watts, from the solar
-  // inverter feed) rather than cloud cover -- cloud cover was only ever
-  // an inferred proxy for "how favourable conditions probably are",
-  // not a readout of what's actually being generated, which could
-  // visibly disagree with real power output (e.g. a cloud passing over
-  // registers on the inverter immediately, but cloud-cover data has its
-  // own separate, slower update path). pickPvIcon() above is unrelated
-  // and still cloud/day driven -- it's a separate sky-condition icon,
-  // not this bolt colour.
   function pickPvPowerColor(watts){
     if (watts <= 0) return 'silver';
     if (watts <= 1500) return '#FFD700';
@@ -12414,19 +10814,11 @@ try {
   mount.style.position = 'relative';
   mount.style.display = 'flex';
   mount.style.flexDirection = 'column';
-  // No bottom-border band or toolbar on this card (links removed below) —
-  // override the shared .card CSS's 18px border-bottom just for this mount
-  // so the content pane can reclaim that space. Card height stays 195px:
-  // 20px title band (border-top, unchanged) + 175px content. This exact
-  // line is what VPD/Earthquake both have and this card was missing --
-  // every "content overflows past the visible border" symptom traced
-  // back to using their 175px content height without this override, so
-  // the true available space was only 157px (195 - 20 - 18), not 175px.
+
   mount.style.borderBottom = '0';
 
   var overlayTextColor = 'var(--bs-body-color)';
 
-  // -- Title bar --------------------------------------------------------------
   var titleBar = document.createElement('div');
   titleBar.style.position = 'absolute';
   titleBar.style.top = '-20px';
@@ -12444,8 +10836,8 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  DivumWXI18N.applyLabel(titleLabel, 'Solar Power Flow'); // distinct label from cardSolarEnergy.js's own 'Solar Energy' so the two are told apart if both sit on a dashboard together.
-  DivumWXI18N.applyAttr(titleLabel, 'title', 'Solar Power Flow'); // translated hover tooltip on the main title too, same helper already proven on cardLink's data-title below.
+  DivumWXI18N.applyLabel(titleLabel, 'Solar Power Flow');
+  DivumWXI18N.applyAttr(titleLabel, 'title', 'Solar Power Flow');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -12511,14 +10903,6 @@ try {
   leftPane.style.justifyContent = 'center';
   contentWrap.appendChild(leftPane);
 
-  // ---- The power-flow diagram (Solar/Grid/Inverter/Load/UPS Load/Battery pill nodes joined
-  // by animated flow lines) fills this pane in place of cardSolarEnergy.js's own static
-  // solar-panel-plus-bolts graphic -- see this file's own header comment. Node layout/fonts
-  // below are a dedicated smaller pass, not this diagram's full-card numbers reused as-is:
-  // this pane is real-width 189px (60% of this site's actual 315px --card-width, confirmed
-  // from index.html), well under the ~315px the diagram gets when it fills a whole card, so
-  // pill widths, fonts and icon sizes are all scaled down to fit three columns
-  // (Grid | Inverter | Load/UPS) side by side in that narrower budget without truncating.
   var graphicWrap = document.createElement('div');
   graphicWrap.style.position = 'relative';
   graphicWrap.style.width = '100%';
@@ -12530,12 +10914,6 @@ try {
   var COLORS = { green: '#33cc55', red: '#e6483f', amber: '#f2a93b', grey: '#4a4a4e' };
   var PULSE_COLORS = COLORS;
 
-  // The wire needs a real CSS class (var() inside an SVG stroke="..." presentation attribute
-  // has been unreliable), and the chip background needs a reactive custom property since this
-  // site's --light-body/--dark-body (the actual parchment/dark-navy from index.html) aren't
-  // reactive on their own -- only --bs-body-color is, via the same body.dark class toggle
-  // this hooks into. Distinct ids/classes/var names (seh- not sef-) from any other card's own
-  // similar injection, so nothing collides if several are mounted at once.
   if (!document.getElementById('solarEnergyHeroWireStyle')) {
     var wireStyle = document.createElement('style');
     wireStyle.id = 'solarEnergyHeroWireStyle';
@@ -12544,10 +10922,6 @@ try {
     document.head.appendChild(wireStyle);
   }
 
-  // Node geometry, percent of graphicWrap's own box. Narrower three-column budget than the
-  // standalone Flow card (189px vs ~315px) -- Grid/Load/UPS widened relative to Inverter
-  // (which only needs to hold a small icon+label) to give the value+label text columns as
-  // much of that reduced width as possible.
   var NODES = {
     solar:   { l: 36,   t: 3.5, w: 32, h: 13 },
     grid:    { l: 4.5,  t: 42.5,w: 27, h: 13 },
@@ -12575,16 +10949,7 @@ try {
     }
     var s = '<line class="seh-wire" x1="'+x1+'%" y1="'+y1+'%" x2="'+x2+'%" y2="'+y2+'%" stroke-width="0.9" stroke-linecap="round" vector-effect="non-scaling-stroke"/>';
     if (state !== 'grey') {
-      // The jerk was never the animation's timing -- it was that the path ran edge-to-edge,
-      // exactly matching the visible wire, so the loop's instant reset (path end snapping
-      // back to path start) happened out in the open, on visible wire. Fixed here by running
-      // the motion path from node A's own CENTRE through to node B's own CENTRE instead --
-      // well past each visible edge, into the area the pill's own opaque background already
-      // covers (pills paint over the SVG, being later in the DOM). The thread now travels
-      // the whole centre-to-centre distance every cycle, so it visibly emerges from under the
-      // "from" pill, crosses the open wire, and slides fully out of sight under the "to"
-      // pill before the loop resets -- the reset itself is never seen, since both path ends
-      // sit hidden under a pill rather than in the open gap.
+
       var ex1, ey1, ex2, ey2;
       if (vertical) {
         ex1 = ex2 = ref.cx;
@@ -12626,10 +10991,7 @@ try {
       '<rect x="4" y="9" width="'+innerW+'" height="6" fill="'+color+'"/></svg>';
   }
   function iconInverterGlyph(){
-    // Light theme's parchment pill (#EFECE2) sits too close to the body's own pale grey fill
-    // (#e9e9ec) for the body to read as a distinct shape -- a visible stroke fixes that
-    // regardless of what the pill background actually is, rather than picking a body fill
-    // colour that only happens to contrast against one specific background.
+
     return '<svg viewBox="0 0 24 30" fill="none">' +
       '<rect x="1" y="1" width="22" height="28" rx="4" fill="#e9e9ec" stroke="#8a8a90" stroke-width="1.2"/>' +
       '<rect x="6" y="6" width="12" height="6" rx="1.5" fill="#2b2b2e"/>' +
@@ -12655,12 +11017,7 @@ try {
   var HERO_BATTERY_TEXT_STYLE = 'flex:1 1 auto;min-width:0;';
   var HERO_ICON_WRAP = 'flex:0 0 auto;width:12px;height:12px;display:flex;align-items:center;justify-content:center;';
   var HERO_TEXT_WRAP = 'display:flex;flex-direction:column;line-height:1.05;overflow:hidden;min-width:0;';
-  // Colour convention matched to this card's own right-pane addChipRow(): values in
-  // var(--bw-accent) (the burnt-orange/gold accent every number in the right pane already
-  // uses), labels in var(--bs-body-color) at 0.85 opacity with small-caps + letter-spacing
-  // (identical to addChipRow's own labelEl) -- these pills were using body-color for the
-  // value and secondary-color for the label, neither of which matches how this card treats
-  // "value text" vs "label text" everywhere else on it.
+
   var HERO_VALUE_STYLE = 'color:var(--bw-accent, #B45309);font-weight:700;font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:\'IBM Plex Mono\',ui-monospace,monospace;';
   var HERO_LABEL_STYLE = 'color:var(--bs-body-color, #9aa1a8);opacity:0.85;font-variant-caps:small-caps;letter-spacing:.04em;font-size:5.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
 
@@ -12675,14 +11032,6 @@ try {
   rightPane.style.padding = '0 10px 0 14px';
   contentWrap.appendChild(rightPane);
 
-  // wrap:true (matching cardEarthquake.js's identical addChipRow) lets a
-  // long value ("Importing from Grid", "Discharging — (SOC 87%)") wrap
-  // onto a second line at its natural width instead of being clipped
-  // with an ellipsis. With 6 rows total (2 of them wrapping to 2 lines)
-  // packed into the fixed 175px content budget every card gets, spacing
-  // is tightened here (row padding, line-height, fixed-row height) vs.
-  // Earthquake's more spacious 5-row version -- text size/wrapping
-  // itself is unchanged, only the vertical space around it.
   function addChipRow(label, opts){
     var wrap = opts && opts.wrap;
     var row = document.createElement('div');
@@ -12734,18 +11083,12 @@ try {
   var dailyEnergyText       = addChipRow('Solar Daily Energy');
   var dailyExportText          = addChipRow('Grid Daily Export');
   var efficiencyText              = addChipRow('PV Efficiency');
-  efficiencyText.parentElement.style.borderBottom = 'none'; // last row — no divider under it
+  efficiencyText.parentElement.style.borderBottom = 'none';
 
-  // Whole card is a click-through to the solar/energy chart -- same
-  // pattern every other card's whole-card link uses. Assumes a 'solar'
-  // chart type exists in charts-d3.html (the legacy module linked to a
-  // dedicated dvmhighcharts/dvmSolarEnergyChart.php that has no
-  // equivalent here yet) -- confirm/add that chart type before relying
-  // on this link actually going anywhere useful.
   var cardLink = document.createElement('a');
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=solar&embed=1';
-  DivumWXI18N.applyAttr(cardLink, 'data-modal', 'Solar Power Flow'); // was a plain setAttribute -- the one spot in this file that skipped the translation helper.
+  DivumWXI18N.applyAttr(cardLink, 'data-modal', 'Solar Power Flow');
   DivumWXI18N.applyAttr(cardLink, 'data-title', 'Solar Power Flow Chart & Records');
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-url', 'charts-d3.html?type=solar&embed=1');
@@ -12784,10 +11127,7 @@ try {
     var html = svg;
 
     html += '<div class="seh-node" style="'+nodeStyle(NODES.solar)+'" data-i18n-title="Solar PV">' +
-      // meteocons are thin/pale line icons -- against this same parchment-ish pill background
-      // they were washing out. A small contrast plate behind the icon (a subtle darkened
-      // circle, via color-mix off body-color so it's automatically right for both themes)
-      // fixes that without touching the shared icon files themselves.
+
       '<span style="'+HERO_ICON_WRAP+'background:color-mix(in srgb, var(--bs-body-color, #888) 14%, transparent);border-radius:50%;padding:1.5px;box-sizing:border-box;"><img src="'+v.icon+'" style="width:100%;height:100%;object-fit:contain;"/></span>' +
       '<span style="'+HERO_TEXT_WRAP+'"><span style="'+HERO_VALUE_STYLE+'">'+fmtPower(v.pvPower)+'</span>' +
       '<span style="'+HERO_LABEL_STYLE+'" data-i18n-label="Solar PV"></span></span></div>';
@@ -12823,12 +11163,6 @@ try {
 
     graphicWrap.innerHTML = html;
 
-    // The whole diagram is rebuilt from scratch every render, so DivumWXI18N.applyLabel's
-    // normal {el,key} permanent registry would just leak a duplicate entry each time -- apply
-    // translations directly by key against the freshly-built nodes instead. Covers both the
-    // visible pill captions (data-i18n-label) and each pill's hover tooltip (data-i18n-title,
-    // added so every node -- not just the ones with visible text -- has a translated title
-    // attribute, same as the card's own title bar below).
     graphicWrap.querySelectorAll('[data-i18n-label]').forEach(function(el){
       el.textContent = DivumWXI18N.t(el.getAttribute('data-i18n-label'));
     });
@@ -12852,13 +11186,6 @@ try {
 
   function num(x){ return (typeof x === 'number' && !isNaN(x)) ? x : null; }
 
-  // solar_data.json's actual shape (confirmed against a real capture):
-  //   { last_updated, message_count, packet_count, connected, unique_topics,
-  //     data: { "<mqtt/topic/path>/state": { value, timestamp, raw }, ... } }
-  // Every reading lives at solarData.data[topic].value -- this just does that
-  // lookup safely, returning null (not throwing) if the topic is absent (e.g.
-  // a station with a different inverter model/topic naming) or the payload
-  // isn't shaped as expected.
   function topicValue(solarData, topic){
     var entry = solarData && solarData.data && solarData.data[topic];
     return entry ? entry.value : null;
@@ -12877,28 +11204,13 @@ try {
       if (archResult.status === 'rejected') console.warn('cardSolarEnergyFlow: archive.json fetch failed --', archResult.reason.message);
       if (solarResult.status === 'rejected') console.warn('cardSolarEnergyFlow: solar_data.json fetch failed --', solarResult.reason.message);
       if (astroResult.status === 'rejected') console.warn('cardSolarEnergyFlow: almanac.json fetch failed --', astroResult.reason.message);
-      // cloud_coverage.json is optional -- logs at info (not warn) since
-      // absent-and-rejected is a normal state on installs without it,
-      // but still logged (not silent) so "is it actually being used?"
-      // is answerable from the console: covers both fetch failure and
-      // fetch-succeeded-but-malformed (cloudPercent missing/not a
-      // number), two different failure modes that otherwise look
-      // identical from the outside.
+
       if(cloudResult.status === 'rejected'){
         console.info('cardSolarEnergyFlow: cloud_coverage.json fetch failed (falling back to loop.json/archive.json) --', cloudResult.reason.message);
       } else if(typeof cloudResult.value.cloudPercent !== 'number' || isNaN(cloudResult.value.cloudPercent)){
         console.info('cardSolarEnergyFlow: cloud_coverage.json fetched but cloudPercent is missing/invalid (falling back) --', JSON.stringify(cloudResult.value));
       }
 
-      // BUGFIX: this used to read loopResult.value directly (the whole
-      // loop.json object) rather than its .observations sub-object, the
-      // way every other card in this file does. isDay (and cloudcover)
-      // only actually exist under .observations, so o.isDay was always
-      // undefined -- "undefined === 1" is always false -- meaning this
-      // card thought it was permanently night, regardless of actual
-      // time. That alone fully explained the reported symptom (night
-      // icon shown well past sunrise) before the almanac-based fix
-      // below was even added.
       var o = loopResult.status === 'fulfilled' ? (loopResult.value.observations || {}) : {};
       var arch = archResult.status === 'fulfilled' ? archResult.value : {};
       var cloudCoverage = cloudResult.status === 'fulfilled' ? cloudResult.value : null;
@@ -12906,9 +11218,6 @@ try {
       var solarData = solarResult.status === 'fulfilled' ? solarResult.value : {};
       var alm = astroResult.status === 'fulfilled' ? astroResult.value : {};
 
-      // inverter_1-scoped: instantaneous power. total-scoped: battery
-      // power/SOC and all daily cumulative energy figures -- inverter_1
-      // doesn't expose those at all, only "total" aggregates them.
       var pvPower       = num(topicValue(solarData, 'solar_assistant/inverter_1/pv_power/state'));
       var gridPowerRaw   = num(topicValue(solarData, 'solar_assistant/inverter_1/grid_power/state'));
       var loadPower       = num(topicValue(solarData, 'solar_assistant/inverter_1/load_power/state'));
@@ -12916,36 +11225,13 @@ try {
       var batterySOC             = num(topicValue(solarData, 'solar_assistant/total/battery_state_of_charge/state'));
       var pvEnergyToday               = num(topicValue(solarData, 'solar_assistant/total/pv_energy/state'));
       var gridEnergyOutToday               = num(topicValue(solarData, 'solar_assistant/total/grid_energy_out/state'));
-      // House/UPS split, read alongside (not instead of) the total load_power above --
-      // loadText on the right still shows the total, unchanged. These two are only for the
-      // hero flow diagram's separate House Load/UPS Load nodes, matching the split
-      // cardSolarEnergyFlow.js confirmed against a real solar_data.json capture: essential +
-      // non-essential reconcile exactly to load_power, so this is the same total broken into
-      // its two circuits, not a second independent reading.
+
       var houseLoadPower       = num(topicValue(solarData, 'solar_assistant/inverter_1/load_power_non-essential/state'));
       var upsLoadPower       = num(topicValue(solarData, 'solar_assistant/inverter_1/load_power_essential/state'));
 
-      // Primary source: almanac.json's actual sun altitude (matches
-      // cardSolarDial.js's own isDay logic) -- "day" is precisely
-      // "between sunrise and sunset" by definition (sun above the
-      // horizon), astronomically exact regardless of what any hardware-
-      // derived isDay flag happens to mean. Falls back to loop.json's
-      // observations.isDay only if almanac.json's own fetch failed.
       var sunAlt = num(alm['almanac.sun.alt']);
       var isDay = (sunAlt !== null) ? (sunAlt > 0) : (o.isDay === 1);
-      // Same fix as cardCurrent.js's identical bug -- see its comment
-      // for the full explanation. loop.json's o.cloudcover is the
-      // live/correct value; archive.json's sky.cloud_cover has been
-      // observed stuck at 0 in every sample seen this whole
-      // conversation, and the old priority order never actually fell
-      // back away from it since 0 is still a valid number.
-      //
-      // Between sunrise and sunset, cloud_coverage.json (a sky-camera-
-      // derived reading, when available) takes priority over
-      // loop.json/archive.json -- but only during the day. "Available"
-      // means the fetch succeeded AND cloudPercent is actually a valid
-      // number. Falls back to loop.json/archive.json at night, or any
-      // time cloud_coverage.json's fetch failed or its data was invalid.
+
       var cloudPercentFromCamera = (cloudCoverage && typeof cloudCoverage.cloudPercent === 'number' && !isNaN(cloudCoverage.cloudPercent))
         ? cloudCoverage.cloudPercent : null;
       var cloudCoverPct = (isDay && cloudPercentFromCamera !== null)
@@ -12957,18 +11243,8 @@ try {
         source: (isDay && cloudPercentFromCamera !== null) ? 'cloud_coverage.json' : 'loop.json/archive.json'
       });
 
-      // Solar Assistant's battery_power sign is the opposite of what the
-      // old PHP comment assumed: <0 means discharging (power leaving the
-      // battery), >=0 means charging. Confirmed against a live reading of
-      // -13W showing as "Charging" when the battery was in fact idle/
-      // discharging. Display value is the magnitude (abs) -- the state
-      // label already carries the direction.
       var batteryState = (batteryPowerRaw !== null && batteryPowerRaw < 0) ? DivumWXI18N.t('Discharging') : DivumWXI18N.t('Charging');
-      // "to Grid"/"from Grid" dropped -- this row's own label already says
-      // GRID, so the full phrase was redundant and was the direct cause of
-      // this row wrapping to 2 lines, which left too little vertical room
-      // for the 6 rows to fit within the card's fixed height without the
-      // last row (PV Efficiency) crowding the bottom border.
+
       var gridState = (gridPowerRaw !== null && gridPowerRaw < 0) ? DivumWXI18N.t('Exporting') : DivumWXI18N.t('Importing');
 
       var pvEfficiency = (pvPower !== null) ? (pvPower / ARRAY_RATED_WATTS * 100) : null;
@@ -12989,11 +11265,7 @@ try {
         solarDailyEnergy: pvEnergyToday,
         gridDailyExport: gridEnergyOutToday
       });
-      // "connected" (solar_data.json's own top-level flag) reflects
-      // whether the Solar Assistant MQTT feed itself is live -- a more
-      // meaningful health signal than just "did the file fetch", since
-      // the file can still exist and fetch fine with stale contents if
-      // the underlying MQTT connection has dropped.
+
       var solarConnected = solarResult.status === 'fulfilled' && solarData.connected === true;
       setStatus(loopResult.status === 'fulfilled' && archResult.status === 'fulfilled' && solarConnected);
     }).catch(function(e){
@@ -13003,9 +11275,7 @@ try {
   }
   refresh();
   setInterval(refresh, POLL_MS);
-  // No lastData cache in this card (unlike most others) -- refresh() both
-  // fetches and renders in one step, so re-running it is the correct way
-  // to pick up translations once strings.json has loaded.
+
   window.addEventListener('i18nready', refresh);
 })();
 } catch (e) {

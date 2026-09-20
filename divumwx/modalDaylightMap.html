@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# modalDaylightMap.html version 0.0.1
+# modalDaylightMap.html version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -42,11 +42,7 @@ body {
 }
 </style>
 <style>
-/* Seasonal accent mode — detected from the parent dashboard (index.html)
-   via the JS snippet at the end of <body>, which sets data-season on
-   this document's <html> element. Overrides whichever of the various
-   background variable names this modal happens to use, with the
-   seasonal light card tint — background and panels alike, per season. */
+
 [data-season="winter"] {
   --card-bg: #e9f2ec; --card-bg-dark: #e9f2ec; --card-bg-light: #e9f2ec;
   --bg-color: #e9f2ec; --bg-color-dark: #e9f2ec; --bg-color-light: #e9f2ec;
@@ -109,15 +105,7 @@ html[data-season="summer"] body, html[data-season="autumn"] body {
   } catch (e) {}
 
   // ---- Make the map itself responsive ----
-  // js/daylightMap.js (third-party) draws the SVG at a fixed pixel
-  // width/height and never revisits it -- fine at its own native size, but
-  // it doesn't shrink to fit a narrower card/modal, so on small screens
-  // the map either overflows or gets cropped. Rather than touch that
-  // library, this retrofits the responsiveness once the library has set
-  // its width/height attributes: converts them into a viewBox (so the
-  // drawing's own coordinate system is preserved) and switches to a
-  // percentage width/height, which the browser then scales fluidly on
-  // any resize with no further JS needed.
+
   function makeMapResponsive(){
     var svg = document.getElementById('daylight-map');
     if (!svg || svg.hasAttribute('viewBox')) return false;
@@ -170,7 +158,6 @@ html[data-season="summer"] body, html[data-season="autumn"] body {
   if (window.parent !== window) {
     new ResizeObserver(reportSize).observe(document.body);
     window.addEventListener('load', reportSize);
-
 
     setTimeout(reportSize, 500);
     setTimeout(reportSize, 1500);
