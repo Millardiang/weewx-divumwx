@@ -1,4 +1,4 @@
-# Welcome to the DivumWX skin for WeeWX Beta 2
+# Welcome to the DivumWX skin for WeeWX Version 1.0.0
 Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LICENSE Version 3](https://github.com/Millardiang/weewx-divumwx/blob/dev/license.txt)
  
 # Features
@@ -59,6 +59,7 @@ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LIC
 * Hungarian
 * Icelandic
 * Italian
+* Japanese
 * Norwegian
 * Polish
 * Portuguese
@@ -93,7 +94,7 @@ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LIC
 * The late David Marshall, my very first collaborator, for his ingenious method of estimating cloud cover by counting pixels on radar images.
 * Mike Isacson for providing test server resources and being brave enough to test early developments.
 * Vince Skahan constantly giving me food for thought.
-* Early adopters, in particular Kjell, Gert, Jon, Gary, Alex and many others for helping me squash some bugs and many helpful suggestions.
+* Early adopters, in particular Kjell, Gert, Jon, Gary, Alex and many others for helping me squash some bugs, helpful suggestions and excellent feedback.
 * Open-Meteo for weather forecasts, pollen data, greenhouse gas data.
 * OpenWeather for global weather alerts.
 * Aviation Weather for METAR data.
