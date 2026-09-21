@@ -1,6 +1,6 @@
 /*
 ##############################################################################################
-# divumwf.js version 0.0.1
+# divumwf.js version 1.0.0
 #  DivumWF -- weather forecast for anywhere in the world, mobile-first.
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
@@ -8,26 +8,6 @@
 */
 
 // ===================== divumwf.js =====================
-//
-// Sibling of locationforecast.html's inline "anywhere" forecast engine --
-// same data sources (Open-Meteo forecast + geocoding, no API key, works
-// for any place on Earth), same unit-system/format helpers (SYSTEMS,
-// tempSpan, windDirBadge, degToCompass, wmoText... from units.js /
-// this file), same DivumWXI18N-driven i18n discipline (see cardI18n.js's
-// own header comment for the English-first-paint + live-switch rules
-// every one of these follows). Kept as its own self-contained file
-// rather than reusing locationforecast.html's copies directly, since
-// those live inline in that page's own <script> block, not in a
-// loadable shared module -- duplicating the same well-tested formatting
-// functions here is the same trade-off forecast.js and
-// locationforecast.html already each independently made.
-//
-// Adds on top of locationforecast.html's engine: air quality (Open-Meteo
-// Air Quality API, also keyless and worldwide), a UV index reading,
-// and a client-side sunrise/sunset + moon-phase panel -- the extra
-// "at a glance" cards a phone weather app is expected to have (see
-// SkyMonitor, github.com/chicagoeas/sky-monitor, for the shape this was
-// modelled on).
 
 // ===================== Formatting helpers (mirrors locationforecast.html) =====================
 function round1(v){ return v==null ? null : Math.round(v*10)/10; }
@@ -135,18 +115,7 @@ function degToCompass(deg){
 function escapeHtml(s){ return (s==null?'':String(s)).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 // ===================== UI-chrome icons (inline SVG, not emoji) =====================
-// Emoji rely on the platform having a colour-emoji font installed --
-// several deployment targets for a Pi-hosted dashboard (kiosk browsers,
-// older embedded WebViews, minimal Linux installs) don't, and every
-// missing glyph falls back to a bare tofu box ("?" / "??"), not to the
-// character's own shape. Every one of these draws identically on any
-// device with basic SVG support (which every real browser has),
-// regardless of which fonts happen to be installed -- same reasoning
-// navbar.html's own home-icon already follows for its <svg>, just
-// applied to DivumWF's own new icons too (gear, pin, sun/haze/drop,
-// sunrise/sunset, moon, weather). Each returns raw markup using
-// currentColor, so it always matches whatever text color surrounds it
-// without needing its own separate color logic.
+
 const WF_ICON_PATHS = {
   gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06c.5.5 1.24.65 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09c0 .69.4 1.32 1 1.51.58.32 1.32.17 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06c-.5.5-.65 1.24-.33 1.82V9c.32.58.95.99 1.64.99H21a2 2 0 0 1 0 4h-.09c-.69 0-1.32.4-1.64 1z"/>',
   pin: '<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
@@ -159,8 +128,7 @@ const WF_ICON_PATHS = {
   auto: '<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 3a9 9 0 0 1 0 18z"/>',
   close: '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
 };
-// name -> {stroke:true} for stroke-drawn (line) icons, everything else
-// fills solid (pin/drop/moon/weather read better filled at small sizes).
+
 const WF_ICON_STROKE = { gear:1, sun:1, haze:1, sunrise:1, sunset:1, close:1 };
 function wfIcon(name, size){
   size = size || 16;
@@ -214,15 +182,7 @@ function dayLabel(dateStr, index){
   return DivumWXI18N.t(WEEKDAYS[d.getDay()]) + ' ' + d.getDate();
 }
 function hm(iso){ return iso ? iso.slice(11,16) : '--:--'; }
-// Open-Meteo's daily.sunrise/sunset (and hourly.time) come back as
-// wall-clock strings in the QUERIED LOCATION's own local time (that's
-// what timezone=auto buys us), with no offset/Z suffix -- new
-// Date(iso) would parse that string as if it were wall-clock time in
-// the BROWSER's own timezone instead, which is only correct by luck
-// when the two timezones happen to match. Converting via the API's own
-// utc_offset_seconds keeps any "how far through the day are we"
-// comparison against a real Date.now() correct for a location on the
-// other side of the world from whoever is looking at the page.
+
 function localIsoToUtcMs(iso, utcOffsetSeconds){
   if(!iso) return null;
   const [datePart, timePart] = iso.split('T');
@@ -253,17 +213,7 @@ function usAqiCategory(aqi){
 }
 
 // ===================== Next-60-minutes rain forecast =====================
-// Open-Meteo's minutely_15 gives real precipitation totals every 15
-// minutes (native resolution over Central Europe/North America, linearly
-// interpolated from hourly data elsewhere -- see Open-Meteo's own docs).
-// It is NOT true per-minute nowcasting the way a proprietary radar-fed
-// service like Pirate Weather's "minutely" endpoint is -- there's no
-// free, keyless, worldwide source of that. To get the smooth
-// SkyMonitor-style 60-bar strip without pretending to a precision the
-// data doesn't have, this takes 5 *real* 15-min data points (now, +15,
-// +30, +45, +60) and linearly interpolates the 55 minutes between them
-// for display -- every bar traces back to an actual forecast value,
-// none are invented.
+
 const RAIN_INTENSITY = [
   {max:0.1, tier:'dry',      key:'Dry'},
   {max:2.5, tier:'light',    key:'Light'},
@@ -275,18 +225,13 @@ function rainRateTier(mmPerHour){
   for(const level of RAIN_INTENSITY){ if(mmPerHour <= level.max) return level; }
   return RAIN_INTENSITY[RAIN_INTENSITY.length-1];
 }
-// Finds the 5 quarter-hour anchor points (now, +15, +30, +45, +60) in
-// the minutely_15 series and linearly interpolates every minute in
-// between. Returns null if there isn't enough forecast data to cover
-// the window (e.g. right at the edge of the model's range).
+
 function buildMinutelyRainWindow(forecastData){
   const m = forecastData && forecastData.minutely15;
   if(!m || !m.time || !m.time.length) return null;
   const offset = forecastData.utcOffsetSeconds || 0;
   const nowMs = Date.now();
-  // Anchor on the last quarter-hour slot at or before "now" so the
-  // first bar represents current conditions, not a slot up to 15
-  // minutes in the future.
+
   let anchorIdx = -1;
   for(let i=0;i<m.time.length;i++){
     const t = localIsoToUtcMs(m.time[i], offset);
@@ -297,7 +242,7 @@ function buildMinutelyRainWindow(forecastData){
   const anchorRates = [];
   for(let k=0;k<5;k++){
     const mm15 = m.precipMm[anchorIdx+k];
-    anchorRates.push(mm15==null ? 0 : mm15*4); // mm/15min -> mm/h
+    anchorRates.push(mm15==null ? 0 : mm15*4);
   }
   const minutes = [];
   for(let seg=0; seg<4; seg++){
@@ -309,20 +254,11 @@ function buildMinutelyRainWindow(forecastData){
     }
   }
   minutes.push(Math.max(0, anchorRates[4]));
-  return minutes; // 61 values: minute 0 (now) .. minute 60
+  return minutes;
 }
-// Builds a short, honest one-line summary from the interpolated
-// minute-by-minute tiers -- deliberately a handful of simple cases
-// rather than an exhaustive phrase-generator, since anything more
-// elaborate risks implying more forecast confidence than 15-minutely
-// data (interpolated, at that) actually supports.
+
 // ===================== Rolling 24-hour window (meteogram) =====================
-// "Rolling" means anchored to the current moment rather than a fixed
-// calendar day -- the same "last slot at-or-before now, then step
-// forward" anchoring already used for the minutely rain window above,
-// just walking the existing per-day hourly arrays instead of
-// minutely_15 data. No extra API call: this reuses forecastData's
-// hourlyByDay, which already covers 7 days.
+
 function buildRolling24h(forecastData){
   if(!forecastData || !forecastData.hourlyByDay) return null;
   const flat = [].concat(...forecastData.hourlyByDay);
@@ -359,9 +295,7 @@ function summarizeMinutelyRain(minutes){
 }
 
 // ===================== Moon phase (simple synodic-month approximation) =====================
-// Good to well within a day's accuracy, which is all a "what does the
-// moon look like tonight" card needs -- no ephemeris library required.
-// Reference new moon: 2000-01-06 18:14 UTC.
+
 const MOON_PHASE_KEYS = [
   'New Moon','Waxing Crescent','First Quarter','Waxing Gibbous',
   'Full Moon','Waning Gibbous','Last Quarter','Waning Crescent',
@@ -495,30 +429,7 @@ function parseForecastJson(j){
   };
 }
 // ===================== Pirate Weather (optional, user-supplied key) =====================
-// Open-Meteo's minutely_15 (used above) is real data but only every 15
-// minutes, interpolated for display. Pirate Weather's /forecast minutely
-// block is genuine minute-by-minute precipitation intensity -- the same
-// kind of nowcast Dark Sky used to provide.
-//
-// This calls Pirate Weather directly from the browser. An older
-// (2024) CORS bug report against their API was closed, and their own
-// README points to a live, client-side-only front end (merrysky.net)
-// as a working example -- consistent with direct browser fetches
-// working today. If that ever turns out not to hold for a specific
-// deployment, the fix would be a same-origin server-side relay in
-// whatever language that server actually supports; without one, a
-// blocked request here is caught below and DivumWF simply falls back
-// to the interpolated Open-Meteo view.
-//
-// Requires a free personal API key from https://pirateweather.net/.
-// Pirate Weather's own docs are explicit that a key must never be
-// hard-coded into shipped application source. Consistent with that,
-// DivumWF never embeds one: the person pastes their own into Settings,
-// it's kept in their own browser's localStorage, and every request
-// goes straight from their browser to Pirate Weather -- the same
-// pattern as configuring a personal API key in any self-hosted
-// dashboard. Without a key, the Open-Meteo view is used instead; both
-// paths are fully functional.
+
 const PIRATE_WEATHER_BASE = 'https://api.pirateweather.net/forecast/';
 async function fetchPirateWeatherMinutely(lat, lon, apiKey, lang){
   const langParam = lang ? `&lang=${encodeURIComponent(lang)}` : '';
