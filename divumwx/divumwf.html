@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# divumwf.html version 0.0.1
+# divumwf.html version 1.0.0
 #  DivumWF -- Divum Weather Forecast: a mobile-first "forecast for anywhere in the world"
 #  section, sharing DivumWX's theme, navbar, unit system and i18n with the rest of the site.
 #  Layout/feature set modelled in part on chicagoeas/sky-monitor (github.com/chicagoeas/sky-monitor).
@@ -129,7 +129,7 @@ body{
 .wf-locbar-search{position:relative;flex:1 1 auto;min-width:0;}
 .wf-locbar-search input{
   width:100%;box-sizing:border-box;background:transparent;border:none;border-bottom:1px solid var(--bs-border-color);
-  color:var(--bs-body-color);padding:6px 4px;font-size:14px;border-radius:0;
+  color:var(--bs-body-color);padding:6px 4px;font-size:16px;border-radius:0;
 }
 .wf-locbar-search input:focus{outline:none;border-bottom-color:var(--bw-accent);}
 .wf-sync-btn{
@@ -188,7 +188,7 @@ body{
 .wf-settings-row:first-of-type{border-top:none;}
 .wf-settings-label{font-size:13.5px;color:var(--bs-secondary-color);}
 .wf-settings-row #unitSystem, .wf-settings-row #languageSystem{
-  font-family:inherit;font-size:13px;padding:5px 8px;border-radius:6px;border:1px solid var(--bs-border-color);
+  font-family:inherit;font-size:16px;padding:5px 8px;border-radius:6px;border:1px solid var(--bs-border-color);
   background:var(--bs-secondary-bg);color:var(--bs-body-color);cursor:pointer;
 }
 .wf-select-wrap--lang{display:flex;align-items:center;gap:6px;}
@@ -197,7 +197,7 @@ body{
 .wf-theme-btn:hover{border-color:var(--bw-accent);}
 .wf-settings-row--stacked{flex-direction:column;align-items:stretch;gap:6px;}
 .wf-settings-input{
-  width:100%;box-sizing:border-box;font-family:'Lexend', system-ui, sans-serif;font-size:12.5px;
+  width:100%;box-sizing:border-box;font-family:'Lexend', system-ui, sans-serif;font-size:16px;
   padding:7px 10px;border-radius:6px;border:1px solid var(--bs-border-color);
   background:var(--bs-secondary-bg);color:var(--bs-body-color);
 }
@@ -235,11 +235,6 @@ body{
 .hero-mini-value{font-size:15px;font-weight:700;font-family:'Lexend', system-ui, sans-serif;}
 .hero-mini-sub{font-size:10.5px;color:var(--bs-secondary-color);}
 
-/* Standalone wind-card layout (compass ring + side panel) retired --
-   wind is now the fourth Today's Highlights tile instead (see
-   renderHighlights()), reusing .metric-card styling like the other
-   three. .beaufort-chip is the one piece kept: still used by that
-   tile's badge, unchanged. */
 .beaufort-chip{display:inline-block;margin-top:4px;font-family:'Lexend', system-ui, sans-serif;font-size:10.5px;background:var(--bw-sky-soft);color:var(--bw-sky);padding:2px 8px;border-radius:10px;}
 
 /* ---------- Minutely rain forecast ---------- */
@@ -265,8 +260,7 @@ body{
 .section-label::after{content:"";flex:1;height:1px;background:var(--bs-border-color);}
 .wf-highlights{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .metric-card{padding:14px 16px;}
-/* Wind tile's corner compass -- see renderHighlights()'s own comment
-   for why direction+degrees rather than speed sits in its centre. */
+
 .wind-tile{position:relative;}
 .wind-mini-compass{position:absolute;top:8px;right:8px;width:66px;height:66px;}
 .metric-card .mlabel{font-size:11.5px;color:var(--bs-secondary-color);display:flex;align-items:center;gap:6px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.03em;}
@@ -338,7 +332,7 @@ body{
   <div class="wf-appbar">
     <div class="wf-brand">
       <span class="wf-brand-name">DivumWF</span>
-      <span class="wf-brand-version" id="wfBrandVersion">v0.0.1</span>
+      <span class="wf-brand-version" id="wfBrandVersion">v1.0.0</span>
     </div>
     <button type="button" class="wf-gear-btn" id="wfSettingsBtn" title="Settings" aria-label="Settings"></button>
   </div>
@@ -458,11 +452,7 @@ document.getElementById('wfSettingsCloseBtn').innerHTML = wfIcon('close', 15);
   DivumWXI18N.applyLabel(document.getElementById('wfForecastLabel'), '7-day forecast');
   DivumWXI18N.applyLabel(document.getElementById('wfForecastSource'), 'Open\u2011Meteo');
   DivumWXI18N.applyLabel(document.getElementById('wfEmptyStateText'), 'Search for a place above, or use your current location, to see its forecast.');
-  // wfHourlyTitle, hero/wind/highlights/day-strip content are all fully
-  // rebuilt by render*() every time -- not registered here, same
-  // reasoning as locationforecast.html's own equivalent comment: they
-  // already pick up a live language switch correctly via the
-  // 'i18nready' listener near the render functions below.
+
 })();
 
 // ===================== State =====================
@@ -474,7 +464,7 @@ let airQualityData = null;
 let pirateMinutely = null;
 const PW_KEY_STORAGE = 'divumwfPirateWeatherKey';
 const RECENT_KEY = 'divumwf-recent';
-const MAX_RECENT = 1; // only the most recent search is kept
+const MAX_RECENT = 1;
 
 // ===================== Recent locations =====================
 function loadRecent(){ try{ return JSON.parse(localStorage.getItem(RECENT_KEY)) || []; }catch(e){ return []; } }
@@ -558,7 +548,7 @@ async function loadForecast(){
     airQualityData = aqJson ? parseAirQualityJson(aqJson) : null;
     activeDay = 0;
     renderAll();
-    refreshPirateMinutely(); // fire-and-forget: upgrades the minutely card in place if a key is configured, without blocking or slowing down the main forecast
+    refreshPirateMinutely();
   }catch(e){
     console.warn('DivumWF: forecast fetch failed \u2014', e.message);
     document.getElementById('wfHeroCard').innerHTML = `<div class="text-center py-4" style="color:var(--bw-danger);">${DivumWXI18N.t("Couldn't load the forecast for this location \u2014 check your connection and try again.")}</div>`;
@@ -635,7 +625,7 @@ function renderMinutely(){
     sourceLabel = DivumWXI18N.t('Open\u2011Meteo (15-min, interpolated)');
   }
   const anyWet = rates.some(r => rainRateTier(r).tier!=='dry');
-  if(!anyWet){ card.style.display = 'none'; label.style.display = 'none'; return; } // nothing to chart -- same as the no-data case
+  if(!anyWet){ card.style.display = 'none'; label.style.display = 'none'; return; }
   card.style.display = '';
   label.style.display = '';
   if(!summaryText){
@@ -645,12 +635,6 @@ function renderMinutely(){
     if(summary.vars.mins!=null) summaryText = summaryText.replace('{mins}', summary.vars.mins);
   }
 
-  // Bars use an absolute pixel height (capped at BAR_MAX_PX) rather
-  // than a percentage of a fixed-height box, so the card's own height
-  // just follows whatever the tallest bar happens to be that hour --
-  // short for a light drizzle, taller for a genuine downpour -- instead
-  // of every chart always occupying the same fixed vertical space
-  // regardless of how much rain is actually forecast.
   const CHART_MAX_MMH = 12;
   const BAR_MAX_PX = 90;
   const bars = rates.map(rate => {
@@ -682,16 +666,16 @@ function renderMeteogram(){
   const xLeft = 8, xRight = W-8;
   const step = n>1 ? (xRight-xLeft)/(n-1) : 0;
   const xAt = i => xLeft + i*step;
-  const tempTop = 14, tempBottom = 118; // temperature plot zone
-  const precipTop = 132, precipBottom = 180; // precipitation plot zone
+  const tempTop = 14, tempBottom = 118;
+  const precipTop = 132, precipBottom = 180;
   const labelY = 200;
 
   const temps = win.map(h => h.tempC).filter(t => t!=null);
   let tMin = Math.min(...temps), tMax = Math.max(...temps);
-  if(tMax - tMin < 2){ const mid=(tMax+tMin)/2; tMin=mid-1; tMax=mid+1; } // keep a flat forecast from rendering as a flat line glued to one edge
+  if(tMax - tMin < 2){ const mid=(tMax+tMin)/2; tMin=mid-1; tMax=mid+1; }
   const yTemp = t => tempBottom - (t-tMin)/(tMax-tMin) * (tempBottom-tempTop);
 
-  const CHART_MAX_MMH = 12; // same scale as the minutely rain chart, so the two are visually comparable
+  const CHART_MAX_MMH = 12;
   const yPrecipH = mm => mm==null ? 0 : Math.max(0, Math.min(1, mm/CHART_MAX_MMH)) * (precipBottom-precipTop);
 
   // ---- temperature line, colour-segmented by tempColor() like every other reading on this page ----
@@ -702,8 +686,7 @@ function renderMeteogram(){
     const col = tempColor((win[i].tempC+win[i+1].tempC)/2);
     segs += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${col}" stroke-width="2.5" stroke-linecap="round"/>`;
   }
-  // filled area under the line, using the theme accent rather than
-  // per-segment colour so it reads as one soft wash, not a rainbow fill
+
   let areaPts = win.map((h,i) => h.tempC!=null ? `${xAt(i).toFixed(1)},${yTemp(h.tempC).toFixed(1)}` : null).filter(Boolean);
   const areaPath = areaPts.length>1
     ? `M${areaPts[0]} L${areaPts.join(' L')} L${xAt(n-1).toFixed(1)},${tempBottom} L${xAt(0).toFixed(1)},${tempBottom} Z`
@@ -721,9 +704,6 @@ function renderMeteogram(){
     bars += `<rect x="${(xAt(i)-barW/2).toFixed(1)}" y="${(precipBottom-bh).toFixed(1)}" width="${barW.toFixed(1)}" height="${bh.toFixed(1)}" rx="1.5" fill="${col}"/>`;
   });
 
-  // ---- x-axis: a label every 3 hours, "Now" at the start, plus a
-  // dashed midnight marker + weekday label whenever the rolling window
-  // crosses into a new calendar day ----
   let axisLabels = '', gridLines = '';
   win.forEach((h,i) => {
     const hourOfDay = parseInt(h.iso.slice(11,13),10);
@@ -767,11 +747,7 @@ function renderMeteogram(){
     </svg>
   `;
 }
-// Fetches Pirate Weather's real per-minute data for the current
-// location if a key is configured, then re-renders just the minutely
-// card in place. Never awaited by loadForecast() itself -- an
-// optional third-party key shouldn't be able to slow down or break
-// the primary forecast.
+
 async function refreshPirateMinutely(){
   const apiKey = (localStorage.getItem(PW_KEY_STORAGE) || '').trim();
   if(!apiKey || !currentLocation){ pirateMinutely = null; renderMinutely(); return; }
@@ -792,7 +768,6 @@ function renderHighlights(){
   const wrap = document.getElementById('wfHighlights');
   const cards = [];
 
-  // UV Index
   cards.push(`
     <div class="card metric-card shadow-card">
       <div class="mlabel">${wfIcon('sun',14)} ${DivumWXI18N.t('UV Index')}</div>
@@ -800,7 +775,6 @@ function renderHighlights(){
       <span class="uv-pill uv-pill--${uv.tier}">${DivumWXI18N.t(uv.key)}</span>
     </div>`);
 
-  // Air Quality
   if(airQualityData && airQualityData.usAqi!=null){
     const aq = usAqiCategory(airQualityData.usAqi);
     cards.push(`
@@ -818,7 +792,6 @@ function renderHighlights(){
       </div>`);
   }
 
-  // Precipitation
   const sysRain = SYSTEMS[currentSystem].rain;
   cards.push(`
     <div class="card metric-card shadow-card">
@@ -827,30 +800,11 @@ function renderHighlights(){
       <div class="msub">${DivumWXI18N.t('Today\u2019s total')}: ${fmtRain(today.rainSumMm, sysRain)}</div>
     </div>`);
 
-  // Wind -- moved here from its own standalone card (compass ring +
-  // side panel), which had a lot of empty vertical space at this
-  // card's width and didn't earn a full-width section of its own.
-  // Fourth tile fills what was previously an empty slot in this grid's
-  // second row (3 tiles didn't divide evenly into the 2-column layout).
   const sysWind = SYSTEMS[currentSystem].wind;
   const c = forecastData.current;
   const windDirTxt = c.windDirDeg!=null ? degToCompass(c.windDirDeg) : '\u2014';
   const b = c.windMs!=null ? beaufort(c.windMs) : null;
-  // Small compass in the tile's top-right corner. First pass reused the
-  // old standalone card's dart/chevron-shaped arrow (a 4-point concave
-  // path) -- wrong shape entirely: a plain, solid triangle sitting at
-  // the ring's top edge with its apex dipping inward past the ring line
-  // toward centre, matching the reference image. Second pass fixed the
-  // shape but was still too small: since the arrow can rotate to point
-  // in ANY direction and the tip's reach traces a full circle, it isn't
-  // enough to just check it clears the text at N/S/E/W -- the diagonal
-  // angles reach closer to the text block's corners than its flat
-  // edges do, and that's genuinely where it overlapped (checked all 8
-  // compass points individually, not just eyeballed one angle). Ring
-  // enlarged and arrow shortened so the tip's closest possible approach
-  // to centre clears the text block's half-diagonal with margin, at
-  // every rotation, not just the one angle a screenshot happened to
-  // show.
+
   const windCompassSvg = c.windDirDeg!=null ? `
     <svg class="wind-mini-compass" viewBox="0 0 120 120" aria-hidden="true">
       <circle cx="60" cy="60" r="50" fill="none" stroke="var(--bs-border-color)" stroke-width="3"/>
@@ -869,7 +823,6 @@ function renderHighlights(){
       ${windCompassSvg}
     </div>`);
 
-  // Sun & Moon
   const now = new Date();
   const moon = moonPhaseFor(now);
   let daylightTxt = '\u2014';
@@ -939,13 +892,6 @@ function renderHourly(){
       ${windDirBadge(h.windDirDeg, h.gustMs ?? h.windMs, sys.wind)}
     </div>`).join('');
 
-  // Open on the current hour rather than always 00:00 -- on a narrow
-  // (phone) viewport, defaulting to the very start of the strip means
-  // only the first one or two cells are visible before anyone notices
-  // it's horizontally scrollable at all, which looks a lot like "only
-  // a couple of hours are shown" even though the rest is one swipe
-  // away. Only applies to today (activeDay 0); other days have no
-  // "current hour" of their own, so they still open at their start.
   if (activeDay === 0 && hrs.length) {
     const offset = forecastData.utcOffsetSeconds || 0;
     const nowLocalHour = new Date(Date.now() + offset*1000).getUTCHours();
@@ -958,7 +904,6 @@ function renderHourly(){
   }
 }
 
-// Re-render on a live language switch, same pattern as locationforecast.html.
 window.addEventListener('i18nready', function(){
   if (forecastData) renderAll();
   renderRecent();
@@ -1027,19 +972,14 @@ document.getElementById('wfGpsBtn').addEventListener('click', ()=>{
 });
 
 // ===================== Sync button =====================
-// Mirrors SkyMonitor's "SYNC" button: with something typed in the
-// search box it runs that search (same as pressing Enter -- picks the
-// top match); with the box empty and a location already loaded, it
-// just re-fetches that location's forecast instead, so the button is
-// never a dead click once a place is showing.
+
 document.getElementById('wfSyncBtn').addEventListener('click', ()=>{
   const q = document.getElementById('wfSearchInput').value.trim();
   if(q){
     const wrap = document.getElementById('wfSuggestions');
     const first = wrap.querySelector('.wf-suggestion-item');
     if(first){ first.click(); return; }
-    // No suggestions fetched yet (e.g. typed fast then hit Sync before
-    // the debounce fired) -- search directly instead of doing nothing.
+
     (async ()=>{
       setStatus(DivumWXI18N.t('Searching\u2026'), false, true);
       try{
@@ -1058,14 +998,7 @@ document.getElementById('wfSyncBtn').addEventListener('click', ()=>{
 });
 
 // ===================== Settings panel (units / language / theme) =====================
-// This page has no site navbar, so the unit/language selectors and the
-// theme toggle -- normally populated by siteHeader.js's
-// populateUnitSelector()/populateLanguageSelector() once navbar.html is
-// fetched in -- live in this panel instead. Those functions only look
-// for #unitSystem/#languageSystem/#themeToggle by id and no-op if
-// missing, so keeping the same ids here and calling them directly
-// (nothing to fetch, so no includeHTML() wait needed) reuses that same
-// shared, already-translated logic untouched.
+
 const wfSettingsOverlay = document.getElementById('wfSettingsPanel');
 document.getElementById('wfSettingsBtn').addEventListener('click', ()=> wfSettingsOverlay.classList.add('open'));
 document.getElementById('wfSettingsCloseBtn').addEventListener('click', ()=> wfSettingsOverlay.classList.remove('open'));
@@ -1141,18 +1074,9 @@ applyTheme();
 pollIsDayForTheme();
 setInterval(pollIsDayForTheme, THEME_ISDAY_POLL_MS);
 
-// No site navbar on this page (see the settings-panel comment above)
-// -- these elements are already in the page's own markup, not fetched
-// in, so there's no includeHTML() wait needed before wiring them up.
 populateUnitSelector();
 populateLanguageSelector();
-// Beaufort is a shared units.js preset used by the main dashboard's own
-// navbar too, so rather than editing that shared file (and changing the
-// main dashboard's unit choices along with it), it's just removed from
-// DivumWF's own copy of the dropdown here. If a device's stored
-// site-wide preference happens to be 'beaufort' (chosen on the main
-// dashboard), DivumWF falls back to 'uk' for its own display only --
-// the shared preference itself is left untouched for other pages.
+
 const wfUnitSelect = document.getElementById('unitSystem');
 const wfBeaufortOpt = wfUnitSelect.querySelector('option[value="beaufort"]');
 if(wfBeaufortOpt) wfBeaufortOpt.remove();
