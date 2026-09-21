@@ -918,7 +918,14 @@ document.getElementById('wfSearchInput').addEventListener('input', (e)=>{
   searchDebounceTimer = setTimeout(async ()=>{
     setStatus(DivumWXI18N.t('Searching\u2026'), false, true);
     try{
-      const results = await geocodeSearch(q);
+      let results = [];
+      if(looksLikeUkPostcode(q)){
+        try{ results = await postcodeSearch(q); }
+        catch(e){ console.warn('DivumWF: postcode search failed \u2014', e.message); }
+      }
+      if(!results.length){
+        results = await geocodeSearch(q);
+      }
       if(!results.length){
         setStatus(`${DivumWXI18N.t('No matches found for')} "${q}".`, true);
         clearSuggestions();
