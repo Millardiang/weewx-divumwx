@@ -4,12 +4,11 @@
 # divumwf.html version 1.0.0
 #  DivumWF -- Divum Weather Forecast: a mobile-first "forecast for anywhere in the world"
 #  section, sharing DivumWX's theme, navbar, unit system and i18n with the rest of the site.
-#  Layout/feature set modelled in part on chicagoeas/sky-monitor (github.com/chicagoeas/sky-monitor).
-#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  Copyright (C) 2026 Ian Millard
 #  GPLv3
 ##############################################################################################
 -->
-<html lang="en" data-bs-theme="dark">
+<html lang="en" data-bs-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -1024,7 +1023,7 @@ renderRecent();
 
 // ===================== Theme: Auto / Light / Dark (identical to locationforecast.html) =====================
 const root = document.documentElement;
-let themeMode = localStorage.getItem('dashboardThemeMode') || 'dark';
+let themeMode = localStorage.getItem('dashboardThemeMode') || 'auto';
 let lastIsDay = null;
 const LOOP_JSON_URL_FOR_THEME = './jsondata/loop.json';
 const ASTRO_JSON_URL_FOR_THEME = './jsondata/almanac.json';
