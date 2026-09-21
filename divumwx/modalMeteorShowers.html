@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# modalMeteorShowers.html version 0.1.0
+# modalMeteorShowers.html version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -9,6 +9,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
 <title>Meteor Showers</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
@@ -42,9 +45,7 @@
   --bs-tertiary-bg:#161F3C;
   --bs-border-color:#2A3358;
 }
-/* Seasonal accent mode — detected from the parent dashboard via the JS at
-   the end of <body>, which sets data-season on this document's <html>
-   element. Kept in sync with header.css's seasonal palette. */
+
 :root[data-season="winter"]{ --bs-body-bg:#e9f2ec; --bs-card-bg:#f4f9f6; }
 :root[data-season="spring"]{ --bs-body-bg:#eef7e3; --bs-card-bg:#f5faef; }
 :root[data-season="summer"]{ --bs-body-bg:#fff6d9; --bs-card-bg:#fffbef; }
@@ -55,7 +56,7 @@ html, body{ margin:0; padding:0; }
 body{
   background:var(--bs-body-bg);
   color:var(--bs-body-color);
-  font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family:'Lexend', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size:13.5px;
   line-height:1.5;
   transition:background-color .2s, color .2s;
@@ -66,7 +67,7 @@ body{
 .meteor-section{ margin-bottom:30px; }
 .meteor-section:last-child{ margin-bottom:0; }
 .meteor-section-title{
-  font-family:Georgia, 'Times New Roman', serif;
+  font-family:'Lexend', system-ui, sans-serif;
   font-variant-caps:small-caps;
   letter-spacing:.04em;
   font-size:20px;
@@ -132,8 +133,7 @@ body{
   overflow-x:auto;
   overflow-y:auto;
   max-height:400px;
-  /* Scrollable, but the scrollbar itself is hidden — Firefox, then
-     Chrome/Safari/Edge via the pseudo-element below. */
+
   scrollbar-width:none;
   -ms-overflow-style:none;
 }
@@ -254,9 +254,6 @@ body{
 <script>
 (function(){
 
-  // Used only if ./jsondata/meteor.txt can't be fetched or fails to parse —
-  // a snapshot of the same IAU working list, so the page still shows
-  // something useful rather than staying blank.
   var FALLBACK_SHOWERS = [
     { code:'ANT', name:'Antihelion Source', start:'Dec 10', end:'Sep 10', peak:'Jan 01', ra:187.0, de:-4.0, v:30.0, r:3.0, zhr:4 },
     { code:'QUA', name:'Quadrantids', start:'Dec 26', end:'Jan 12', peak:'Jan 04', ra:230.0, de:49.0, v:41.0, r:2.1, zhr:120 },
@@ -311,10 +308,6 @@ body{
 
   var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-  // Parses "Mon DD" (no year) into a comparable integer month*100+day —
-  // deliberately NOT a real Date, since none of this data has a year and
-  // several showers (like ANT) cross the Jan 1 boundary, which a
-  // same-year Date object can't represent cleanly.
   function parseMD(str){
     var parts = str.split(' ');
     var month = MONTHS.indexOf(parts[0]);
@@ -326,12 +319,10 @@ body{
     var start = parseMD(shower.start).key;
     var end = parseMD(shower.end).key;
     if (start <= end) return todayKey >= start && todayKey <= end;
-    // Wraps across the year boundary (e.g. ANT: Dec 10 -> Sep 10).
+
     return todayKey >= start || todayKey <= end;
   }
 
-  // Days from today until this shower's next peak, wrapping to next year
-  // if this year's peak has already passed.
   function daysUntilPeak(shower, today){
     var peak = parseMD(shower.peak);
     var target = new Date(today.getFullYear(), peak.month, peak.day);
@@ -342,11 +333,6 @@ body{
   function fmtRange(shower){ return shower.start + ' \u2013 ' + shower.end; }
   function fmtZhr(shower){ return shower.zhr === null ? '\u2014' : String(shower.zhr); }
 
-  // ./jsondata/meteor.txt is the same IAU-format XML this page was built
-  // from — parsed the same way the almanac data was originally converted
-  // (IAU_code -> code, RA/DE/V/r/ZHR -> ra/de/v/r/zhr), so a refreshed
-  // catalog dropped in at that path picks up automatically without
-  // touching this page.
   function parseShowerXml(xmlText){
     var xml = new DOMParser().parseFromString(xmlText, 'application/xml');
     if (xml.querySelector('parsererror')) throw new Error('meteor.txt did not parse as XML');
@@ -409,15 +395,7 @@ body{
     }
 
     // ---- Next peak ----
-    // Prefer the server-side computation (almanac.json's
-    // almanac.next_meteor_shower.*, written by SkyfieldLoopData -- the
-    // same "next peak, handling year-wraparound" logic this page used to
-    // compute itself, now ported server-side per project decision) --
-    // matched back to this page's own catalog entry (for peak
-    // date/range/ZHR text) by shower name. Falls back to the local
-    // daysUntilPeak() computation below if almanac.json didn't have the
-    // field (older SkyfieldLoopData version, fetch failure, etc.) or the
-    // name didn't match anything in this catalog.
+
     var nextPeak = null;
     if (almanacNextShower && almanacNextShower.label && almanacNextShower.ts != null) {
       var matched = SHOWERS.filter(function(s){ return s.name === almanacNextShower.label; })[0];
@@ -479,10 +457,7 @@ body{
     .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
     .then(function(xmlText){
       var showers = parseShowerXml(xmlText);
-      // almanac.json is fetched separately and best-effort -- a failure
-      // here just means render() falls back to the local calculation,
-      // not a page failure the way a meteor.txt failure is (that has its
-      // own FALLBACK_SHOWERS catch below).
+
       fetch('./jsondata/almanac.json?_=' + Date.now(), { cache: 'no-store' })
         .then(function(r){ return r.ok ? r.json() : null; })
         .then(function(alm){

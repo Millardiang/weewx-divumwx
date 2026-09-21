@@ -1,15 +1,11 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# gauges2.html version 0.0.2
+# gauges2.html version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 #
-#  "Range Gauges" — grey track + blue/red diverging band centred on the live value,
-#  tangential tick labels. See gaugeDiverging.js. Same gauge order as gauges.html: Temp,
-#  Wind (dual — speed ring with a smaller inset Gust ring), Wind Direction (compass),
-#  Barometer, Rainfall, Rain Rate, UV Index, Solar Radiation, Humidity, Dew Point,
-#  Air Quality, Lightning.
+#  "Range Gauges" — grey track + blue/red diverging band centred on the live value.
 ##############################################################################################
 -->
 <html lang="en" data-bs-theme="light">
@@ -18,7 +14,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>DivumWX Weather</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="header.css?v=s3n2026i">
+<link rel="stylesheet" href="header.css?v=s3n2026k">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 
 :root,
@@ -42,7 +41,7 @@
   --bs-secondary-bg: #FFFFFF;
   --bs-border-color: #C9CFD8;
   --bs-card-bg: #FFFFFF;
-  --bs-font-sans-serif:'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --bs-font-sans-serif:'Lexend', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 [data-bs-theme="dark"]{
   --bw-accent:#D3A94C;
@@ -68,10 +67,9 @@ body{
   padding-bottom:48px;
   transition:background-color .25s ease, color .25s ease;
 }
-.font-mono{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;}
+.font-mono{font-family:'Lexend', system-ui, sans-serif;}
 .card{background:var(--bs-card-bg); border-radius:var(--bw-radius-sm); box-shadow:var(--bw-shadow);}
-/* Seasonal accent mode — tints the card background the same way index.html's
-   dashboard does, using the same palette (kept in sync with header.css). */
+
 body.season-winter { --bs-card-bg: #e9f2ec; }
 [data-bs-theme="dark"] body.season-winter { --bs-card-bg: #24312a; }
 body.season-spring { --bs-card-bg: #eef7e3; }
@@ -104,7 +102,7 @@ body.season-autumn { --bs-card-bg: #f2e6d8; }
 .gauge-wrap{width:100%;max-width:360px;aspect-ratio:340/330;}
 .gauge-wrap > div{width:100%;height:100%;}
 
-footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;}
+footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Lexend', system-ui, sans-serif;}
 </style>
 </head>
 <body>
@@ -261,10 +259,10 @@ function lightningNiceMax(count){
 }
 
 // ===================== 1. Temperature =====================
-// Domain and tick set match the reference screenshot's temperature gauge.
+
 var TEMP_DOMAIN_C = [-20, 40];
 var TEMP_MAJORS_C = [-20, -10, 0, 10, 20, 30, 40];
-var TEMP_BAND_HALF_C = 8; // how far above/below the live reading the diverging band extends
+var TEMP_BAND_HALF_C = 8;
 
 function domainForTemp(unit){ return unit==='F' ? TEMP_DOMAIN_C.map(C2F) : TEMP_DOMAIN_C; }
 function majorsForTemp(unit){ return unit==='F' ? TEMP_MAJORS_C.map(function(v){ return Math.round(C2F(v)); }) : TEMP_MAJORS_C; }
@@ -305,9 +303,7 @@ function renderWind(speedMs, gustMs){
 }
 
 // ===================== 3. Wind direction (compass) =====================
-// Note: the station doesn't report a separate "gust direction" — only current heading
-// (windDir) and a 10-minute average (windDir10). The inset ring uses the 10-min average
-// rather than inventing a gust-direction figure that doesn't exist in the data.
+
 function renderWindDir(dirNow, dir10){
   var outerCfg = {
     value: dirNow, bandHalfDeg: 130,
@@ -454,10 +450,6 @@ var ARCHIVE_JSON_URL = './jsondata/archive.json';
 var LOOP_POLL_MS = 15 * 1000;
 var ARCHIVE_POLL_MS = 60 * 1000;
 
-// Card <-> sensor mapping, inlined directly in this page -- see
-// records.html's copy of this same table for why it's duplicated rather
-// than shared from one file (a shared file silently failed in the field
-// when it wasn't deployed alongside the pages referencing it).
 var DIVUMWX_CARD_TO_BASES = {
   cardTemperature:            ['outTemp', 'outDew'],
   cardHumidity:                ['outHumid'],
@@ -488,9 +480,6 @@ function isBaseCardEnabled(base, enabledCards) {
   return enabledCards.indexOf(card) !== -1;
 }
 
-// Same reasoning and same rain/prain OR-case as gauges.html's
-// GAUGE_BASES -- kept in sync with that file's mapping since this page
-// mirrors its gauge set exactly (same order, g2 prefix instead of g).
 var GAUGE_BASES = {
   g2Temp: ['outTemp'],
   g2Wind: ['windSpeed', 'windGust'],
@@ -505,7 +494,7 @@ var GAUGE_BASES = {
   g2Aq: ['pm1_0', 'pm2_5', 'pm4_0', 'pm10_0'],
   g2Lightning: ['lightCount', 'lightDist'],
 };
-var ENABLED_CARDS = null; // null = unknown yet / fetch failed -- fail open
+var ENABLED_CARDS = null;
 
 function applyGaugeVisibility(){
   Object.keys(GAUGE_BASES).forEach(function(gaugeId){
@@ -618,8 +607,6 @@ function pollArchive(){
     });
 }
 
-// includeHTML() now lives in siteHeader.js -- one shared copy.
-
 function setStationTitle(){
   fetch(ARCHIVE_JSON_URL + ((ARCHIVE_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'})
     .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
@@ -644,19 +631,13 @@ function resolveAutoIsDay(){
   return !window.matchMedia('(prefers-color-scheme: dark)').matches;
 }
 function resolveTheme(){
-  // Seasonal is a fixed standalone theme, never affected by day/night auto-switching.
+
   if (themeMode === 'seasonal') return 'light';
   return themeMode==='light' ? 'light' : themeMode==='dark' ? 'dark' : (resolveAutoIsDay() ? 'light' : 'dark');
 }
 function applyTheme(){
   root.setAttribute('data-bs-theme', resolveTheme());
-  // Seasonal accent mode retired site-wide -- was: currentSeason =
-  // applySeasonClass(themeMode). That function no longer exists
-  // anywhere on the site; the leftover call here threw
-  // 'applySeasonClass is not defined' on every applyTheme() call,
-  // which (since applyTheme() runs before includeHTML()'s callback on
-  // this page) silently prevented the navbar from ever loading at all
-  // -- not a siteHeader.js problem, a much older dead-code reference.
+
   currentSeason = null;
   syncThemeNavUI();
   renderAll();

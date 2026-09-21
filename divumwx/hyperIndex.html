@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# index.html version 1.0.0
+# hyperIndex.html version 1.0.0
+#  Alternative home page for users with frail/low vision -- identical to index.html, with
+#  Atkinson Hyperlegible replacing every other typeface (Inter, IBM Plex Mono, Georgia).
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -10,383 +12,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DivumWX Weather</title>
-<link rel="stylesheet" href="header.css?v=s3n2026k">
+<title>DivumWX Weather &mdash; Atkinson Hyperlegible</title>
+<link rel="stylesheet" href="header.css?v=s3n2026j">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
 <style>
-:root {
-  --light-body: #EFECE2;     --dark-body: #0A0F22;      --light-bg: #EFECE2;
-  --light-card: #FFFFFF;     --light-text: #1D2C4E;     --dark-bg: #FFFFFF;        --dark-card: #111834;
-  --dark-text: #E9E4D4;      --card-width: 315px;
-  --card-height: 195px;
-  --card-bg: var(--light-card);
-
-  --bs-body-color: var(--light-text);
-  --bs-secondary-color: #5C6672;     --bs-tertiary-bg: var(--dark-bg);
-  --bs-border-color: #C9CFD8;        --bw-accent: #B45309;              --bw-good: #39a239;
-  --bw-sky: #4a90d9;
-    --card-outline-color: var(--bs-border-color);
-
-    --col-6: #000000;
-}
-
-body.light {
-  background: var(--light-body);
-  color: var(--light-text);
-}
-
-body.light img[src*="meteocons/"],
-body.light image[*|href*="meteocons/"] {
-  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.28));
-}
-
-body.dark {
-  background: var(--dark-body);
-  color: var(--dark-text);
-  --bs-body-color: var(--dark-text);
-  --bs-secondary-color: #8B93B8;     --bs-border-color: #2A3358;        --card-outline-color: #465180;     --bw-accent: #D3A94C;              --dark-bg: #111834;                --card-bg: #111834;                --col-6: #FFFFFF;                }
-
-body {
-  margin: 0;
-  font-family: 'Lexend', system-ui, sans-serif;
-  transition: background 0.3s, color 0.3s;
-  overflow-x: hidden;
-}
-.mono {
-  font-family: 'Lexend', system-ui, sans-serif;
-  font-variant-numeric: tabular-nums;
-}
-
-.wrapper {
-  display: grid;
-  justify-content: center;
-  grid-template-columns: repeat(auto-fit, var(--card-width));
-  gap: 4px;
-  margin: 10px auto;
-  max-width: calc(var(--card-width) * 5 + 4px * 4);
-}
-
-.site-header-include {
-  display: contents;
-}
-
-footer {
-  grid-column: 1 / -1;
-  background: var(--dark-bg);
-  border: 1px solid var(--bs-border-color);
-  border-radius: 5px;
-  padding: 8px 10px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  box-sizing: border-box;
-  transition: background 0.3s;
-  min-height: var(--header-height);
-  z-index: 1100;
-  position: relative;
-  justify-content: space-between;
-}
-footer.footer-hidden {
-  display: none;
-}
-.footer-left, .footer-right {
-  flex: 1 1 0;
-  display: flex;
-  align-items: center;
-  min-width: 0;
-}
-.footer-right {
-  justify-content: flex-end;
-}
-.footer-center {
-  flex: 1 1 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  text-align: center;
-  min-width: 0;
-}
-.footer-credit {
-  font-size: 13px;
-  font-weight: 600;
-}
-.footer-version {
-  font-size: 11px;
-  font-weight: 400;
-  opacity: 0.75;
-}
-.footer-logo {
-  height: 24px;
-  width: auto;
-  display: block;
-}
-.footer-weewx-link {
-  display: flex;
-  align-items: center;
-}
-.footer-weewx-icon {
-  height: 24px;
-  width: auto;
-  display: block;
-}
-
-.alertbar-mount {
-  grid-column: 1 / -1;
-  display: none;
-  margin-top: -4px;
-}
-.alertbar-mount.has-content {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.alertbar {
-  border-radius: 5px;
-  padding: 10px 20px;
-  font-weight: 500;
-  font-size: 12px;
-  box-sizing: border-box;
-}
-.alertbar a:link, .alertbar a:visited { color: inherit; text-decoration: underline; }
-.alertbar a:hover { color: #0645ad; text-decoration: underline; }
-.alertbar a:active { color: green; text-decoration: underline; }
-.alertbar .alert-inner {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-}
-.alertbar .alert-icon {
-  width: 24px;
-  height: 24px;
-  flex: 0 0 auto;
-  margin-top: 1px;
-}
-.alertbar .alert-headline {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-.alertbar .alert-more { display: none; margin-top: 8px; }
-.alertbar .alert-more p { margin: 0; }
-.alertbar .alert-read {
-  display: inline-block;
-  vertical-align: baseline;
-  margin-left: 10px;
-  border: none;
-  background: rgba(0,0,0,0.08);
-  color: inherit;
-  font: inherit;
-  font-size: 12px;
-  padding: 3px 10px;
-  border-radius: 3px;
-  cursor: pointer;
-}
-.alertbar .alert-less-btn {
-  display: inline-block;
-  margin-left: 0;
-  margin-top: 8px;
-}
-
-.card {
-  position: relative;
-  width: var(--card-width);
-  height: var(--card-height);
-  box-sizing: border-box;
-  border-radius: 5px;
-  background: var(--light-card);
-  border-top: 20px solid var(--dark-bg);
-  border-bottom: 18px solid var(--dark-bg);
-  transition: background 0.3s, border-color 0.3s;
-  user-select: none;
-}
-
-.card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: var(--bs-border-color);
-  pointer-events: none;
-}
-
-.card::after {
-  content: '';
-  position: absolute;
-  top: -20px;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border: 1px solid var(--card-outline-color);
-  border-radius: 5px;
-  pointer-events: none;
-}
-
-.card a:hover,
-.card a:focus,
-.card a:focus-visible {
-  color: var(--bw-accent) !important;
-  transition: color 0.15s ease;
-}
-
-#cardHoverTip {
-  position: fixed;
-  z-index: 9999;
-  pointer-events: none;
-  background: var(--card-bg);
-  color: var(--bs-body-color);
-  border: 1px solid var(--card-outline-color);
-  border-radius: 5px;
-  padding: 6px 10px;
-  font-size: 10.5px;
-  line-height: 1.6;
-  white-space: nowrap;
-  opacity: 0;
-  transition: opacity 0.12s ease;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-}
-#cardHoverTip.visible {
-  opacity: 1;
-}
-body.dark .card {
-  background: var(--card-bg);
-  border-color: var(--dark-bg);
-}
-
-@media (max-width: 660px) {
-  .wrapper {
-    grid-template-columns: 1fr;
-    max-width: 100%;
-    padding: 0 10px;
-    box-sizing: border-box;
-  }
-  .card {
-    width: 100%;
-  }
-}
-
-.dragging {
-  opacity: 0.5;
-  transform: scale(0.95);
-}
-
-.chart-modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  box-sizing: border-box;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.2s;
-  z-index: 1200;
-}
-.chart-modal-overlay.open {
-  opacity: 1;
-  visibility: visible;
-}
-.chart-modal-box {
-  background: var(--light-card);
-  border: 1px solid var(--bs-border-color);
-  border-radius: 8px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-  max-width: 1400px;
-  max-height: 92vh;
-  overflow: hidden;
-  transform: scale(0.97);
-  opacity: 0;
-  transition: transform 0.2s ease, opacity 0.2s ease;
-}
-.chart-modal-overlay.open .chart-modal-box {
-  transform: scale(1);
-  opacity: 1;
-}
-body.dark .chart-modal-box {
-  background: var(--card-bg);
-}
-.chart-modal-header {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 10px 16px;
-  background: var(--dark-bg);
-  border-bottom: 1px solid var(--bs-border-color);
-}
-body.dark .chart-modal-header {
-  background: var(--dark-bg);
-}
-body.dark.season-winter .chart-modal-header, body.dark.season-spring .chart-modal-header,
-body.dark.season-summer .chart-modal-header, body.dark.season-autumn .chart-modal-header {
-  background: var(--dark-bg);
-}
-.chart-modal-title {
-  font-family: 'Lexend', system-ui, sans-serif;
-  font-variant-caps: small-caps;
-  letter-spacing: .04em;
-  font-weight: 600;
-  font-size: 1rem;
-  color: var(--light-text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-body.dark .chart-modal-title {
-  color: var(--dark-text);
-}
-.chart-modal-close {
-  flex: 0 0 auto;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: none;
-  background: transparent;
-  color: inherit;
-  font-size: 20px;
-  line-height: 1;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s, color 0.15s;
-}
-.chart-modal-close:hover,
-.chart-modal-close:focus {
-  color: #fff;
-  background: #e74c3c;
-}
-.chart-modal-body {
-  flex: 1 1 auto;
-  min-height: 0;
-}
-.chart-modal-iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
-  display: block;
-  background: var(--light-body);
-}
-body.dark .chart-modal-iframe {
-  background: var(--dark-body);
-}
-@media (max-width: 600px) {
-  .chart-modal-overlay { padding: 0; }
-  .chart-modal-box { max-width: none; max-height: none; border-radius: 0; }
-}
-.card-not-enabled {
-  display: none !important;
-}
 </style>
 </head>
 <body class="dark">
@@ -547,6 +178,7 @@ setInterval(() => {
   <div id="rainCard8" data-card-id="cardPiezoRain" class="card" draggable="true"></div>
   <div id="tippingRainCard9" data-card-id="cardTippingRain" class="card" draggable="true"></div>
   <div id="solarCard10" data-card-id="cardSolarRadiation" class="card" draggable="true"></div>
+  <div id="solarEnergyCard26" data-card-id="cardSolarEnergy" class="card" draggable="true"></div>
   <div id="uvCard11" data-card-id="cardUvIndex" class="card" draggable="true"></div>
   <div id="humidityCard12" data-card-id="cardHumidity" class="card" draggable="true"></div>
   <div id="earthCard13" data-card-id="cardEarthDaylight" class="card" draggable="true"></div>
@@ -561,14 +193,14 @@ setInterval(() => {
   <div id="etCard22" data-card-id="cardEvapoTranspiration" class="card" draggable="true"></div>
   <div id="earthquakeCard23" data-card-id="cardEarthquake" class="card" draggable="true"></div>
   <div id="webcamCard24" data-card-id="cardWebcam" class="card" draggable="true"></div>
-  <div id="stationImageCard25" data-card-id="cardStationImage" class="card fixed" draggable="false"></div>
+
   <footer>
     <div class="footer-left">
       <img src="./img/divumwxLogo2.svg" alt="DivumWX" class="footer-logo">
     </div>
     <div class="footer-center">
-      <div class="footer-credit">Charts, Heatmaps, Gauges and Card Images D3 rendered &middot; Weather Icons by Meteocons</div>
-      <div class="footer-version mono">DivumWX v1.0.0 &middot; WeeWX ver <span id="footerWeewxVer">x.x.x</span>, Python ver <span id="footerPyVer">y.y.y</span>, OS version <span id="footerOsVer">z.z.z &middot; Weather Icons by Meteocons</span></div>
+      <div class="footer-credit">Charts, Heatmaps, Gauges and Card Images rendered using D3</div>
+      <div class="footer-version mono">DivumWX-H-0.0.1 &middot; WeeWX ver <span id="footerWeewxVer">x.x.x</span>, Python ver <span id="footerPyVer">y.y.y</span>, OS version <span id="footerOsVer">z.z.z</span></div>
     </div>
     <div class="footer-right">
       <a href="http://weewx.com" title="WeeWX Weather Software" target="_blank" rel="noopener" class="footer-weewx-link">
@@ -878,6 +510,7 @@ includeHTML(() => {
   broadcastUnitSystem();
   populateLanguageSelector();
   translateNavbar();
+  populateA11yViewToggle();
   updateNavCollapse();
   setStationTitle();
 });

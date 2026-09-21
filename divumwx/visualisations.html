@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# visualisations.html version 0.0.1
+# visualisations.html version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -12,7 +12,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Visualisations</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="header.css?v=s3n2026i">
+<link rel="stylesheet" href="header.css?v=s3n2026k">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 
 :root,
@@ -36,17 +39,8 @@
   --bs-primary-rgb:180,83,9;
   --bs-link-color:#B45309;
   --bs-link-hover-color:#D3A94C;
-  --bs-font-sans-serif:'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --bs-font-sans-serif:'Lexend', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 
-  /* header.css's shared navbar reads --dark-bg/--card-bg for its own
-     background, but only ever DEFINES them inside its body.season-*
-     blocks -- there's no plain, non-seasonal default in that file at
-     all. Every page is expected to supply its own mapping (this is
-     what sky.css already does for Skyfield); without it, the navbar
-     silently falls through to header.css's generic placeholder
-     fallback (rgb(189,206,244)) instead of this page's actual light
-     palette. Pointing both at --bs-tertiary-bg keeps the navbar
-     visually consistent with this page's own card backgrounds. */
   --dark-bg: var(--bs-tertiary-bg);
   --card-bg: var(--bs-tertiary-bg);
 }
@@ -69,7 +63,6 @@
   --bs-link-color:#D3A94C;
   --bs-link-hover-color:#E8C578;
 
-  /* Same mapping, dark palette -- see the light-mode comment above. */
   --dark-bg: var(--bs-tertiary-bg);
   --card-bg: var(--bs-tertiary-bg);
 }
@@ -79,7 +72,7 @@ body.season-winter, body.season-spring, body.season-summer, body.season-autumn {
 }
 
 html{
-  overflow-y: scroll; /* fallback for browsers without scrollbar-gutter */
+  overflow-y: scroll;
   scrollbar-gutter: stable;
 }
 
@@ -105,7 +98,7 @@ body.season-autumn { --bs-card-bg: #f2e6d8; }
 /* ---------- Visualisation picker ---------- */
 .records-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;}
 .records-tab{
-  font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:13px;font-weight:600;
+  font-family:'Lexend', system-ui, sans-serif;font-size:13px;font-weight:600;
   padding:9px 18px;border-radius:999px;border:1px solid var(--bs-border-color);
   background-color:var(--bs-tertiary-bg);color:var(--bs-body-color);
   cursor:pointer;transition:.15s;
@@ -116,12 +109,6 @@ body.season-autumn { --bs-card-bg: #f2e6d8; }
 /* ---------- Visualisation panel ---------- */
 #visCard{position:relative;padding:0;overflow:hidden;}
 
-/* The wrapper always fills the card. The iframe inside it is drawn at
-   the visualisation's own natural pixel size (each modal page is a
-   fixed-size D3/SVG drawing, not a fluid layout) and then scaled down
-   with a CSS transform to fit whatever width is available — see
-   applyVisFit() below. This is what makes the content itself shrink as
-   the page narrows, rather than just clipping or scrolling. */
 .vis-frame-wrap{
   position:relative;
   width:100%;
@@ -139,8 +126,6 @@ body.season-autumn { --bs-card-bg: #f2e6d8; }
   transform-origin:top left;
 }
 
-/* Title floats over the visualisation itself, pinned to the card's
-   top-left corner, rather than sitting in a toolbar row above it. */
 .vis-title-overlay{
   position:absolute;
   top:14px;
@@ -164,7 +149,7 @@ body.season-autumn { --bs-card-bg: #f2e6d8; }
   .vis-title-overlay{font-size:12.5px;padding:5px 12px;}
 }
 
-footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;}
+footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Lexend', system-ui, sans-serif;}
 
 </style>
 </head>
@@ -205,27 +190,8 @@ const visFrame = document.getElementById('visFrame');
 const visFrameWrap = document.getElementById('visFrameWrap');
 const visSubtitle = document.getElementById('visSubtitle');
 
-// Each visualisation is drawn by its own page at a fixed pixel size (a
-// D3/SVG drawing, not a fluid layout) — "natural" tracks that size, seeded
-// from the picker button's data-width/data-height as a best guess before
-// the iframe has loaded, then refined by the postMessage below once the
-// page reports its real content box.
 let visNatural = { width: 840, height: 600 };
 
-// Some visualisations measure their own content dynamically at runtime
-// (e.g. modalMeeusLive.html unions several elements' bounding rects) and
-// can't be seeded exactly from a static data-width/data-height guess.
-// When the seed doesn't closely match the real size, .vis-frame-wrap
-// visibly snaps to the correct size once the real postMessage arrives —
-// and on macOS in particular, ANY change in scrollable page height
-// flashes the overlay scrollbar briefly, regardless of overflow-y /
-// scrollbar-gutter CSS (that's OS-level scrollbar behaviour, not
-// something page CSS can suppress). So rather than chasing every
-// visualisation's exact pixel size, the frame now stays hidden until the
-// FIRST real size is known, then reveals already at the correct size —
-// nothing visible changes size after being shown, so there's no snap for
-// the scrollbar to react to. A timeout reveals it anyway if a modal never
-// reports back, so a broken/slow page doesn't stay hidden forever.
 let awaitingFirstFit = true;
 let revealTimer = null;
 
@@ -239,21 +205,13 @@ function reveal(){
   if (!awaitingFirstFit) return;
   awaitingFirstFit = false;
   clearTimeout(revealTimer);
-  // Snap to the final height instantly for this first reveal — the wrap's
-  // own CSS transition (used for later, already-visible resizes) may
-  // still be mid-animation from the seeded/wrong height at this point;
-  // disabling it for one frame stops that catch-up animation from being
-  // visible the moment the frame appears.
+
   visFrameWrap.style.transition = 'none';
   visFrameWrap.style.visibility = 'visible';
-  void visFrameWrap.offsetHeight; // force reflow so 'none' actually applies
+  void visFrameWrap.offsetHeight;
   visFrameWrap.style.transition = '';
 }
 
-// Scales the iframe down (never up — Math.min caps it at 1) to fit
-// whatever width the card currently has, and centres it. This is what
-// makes each visualisation's own content responsive as the page narrows,
-// rather than just clipping it or leaving it to scroll.
 function applyVisFit(){
   const available = visFrameWrap.clientWidth;
   const scale = Math.min(1, available / visNatural.width);
@@ -291,30 +249,13 @@ visTabs.forEach(btn => {
   btn.addEventListener('click', () => selectVisualisation(btn, true));
 });
 
-// Each visualisation reports its own natural content size back via
-// postMessage (the same 'chartModalContentHeight' message used by the
-// dashboard's chart-modal popup) once it has actually rendered, so this
-// refines the seeded guess above to the real size.
 window.addEventListener('message', (e) => {
   if (!e.data || e.data.type !== 'chartModalContentHeight') return;
   if (e.source !== visFrame.contentWindow) return;
 
   visNatural = {
     width: e.data.width || visNatural.width,
-    // Previously capped to 85% of the browser window's height
-    // (Math.round(window.innerHeight * 0.85)) -- but #visCard and
-    // .vis-frame-wrap both have overflow:hidden (see their CSS above),
-    // so on a normal laptop screen that cap silently hard-clipped
-    // content with no scrollbar, rather than making the card scroll or
-    // grow. modalMeeusLive.html's own content genuinely needs around
-    // 1400px (see its data-height hint above) -- the viewport-percentage
-    // cap was cutting that off well before the actual content ended,
-    // which is exactly the "text at the bottom of the chart being
-    // chopped off" bug reported for the Meeus Live visualisation.
-    // Replaced with a generous fixed ceiling instead: high enough that
-    // every current visualisation's real content fits under it
-    // comfortably, low enough to still guard against some future
-    // visualisation reporting a runaway height due to its own bug.
+
     height: Math.min(e.data.height || visNatural.height, 2200)
   };
   applyVisFit();
@@ -347,13 +288,7 @@ function resolveTheme(){
 }
 function applyTheme(){
   root.setAttribute('data-bs-theme', resolveTheme());
-  // Seasonal accent mode retired site-wide -- was: currentSeason =
-  // applySeasonClass(themeMode). That function no longer exists
-  // anywhere on the site; the leftover call here threw
-  // 'applySeasonClass is not defined' on every applyTheme() call,
-  // which (since applyTheme() runs before includeHTML()'s callback on
-  // this page) silently prevented the navbar from ever loading at all
-  // -- not a siteHeader.js problem, a much older dead-code reference.
+
   currentSeason = null;
   syncThemeNavUI();
 }
@@ -399,8 +334,6 @@ setInterval(() => {
 }, 60 * 1000);
 
 // ==== SHARED NAVBAR INCLUDE ====
-// includeHTML(), fixDivumwxNavLinks(), and initSharedHeader() all now
-// live in siteHeader.js -- one shared copy.
 
 // ==== SITE TITLE ====
 const ARCHIVE_JSON_URL = './jsondata/archive.json';

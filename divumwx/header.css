@@ -1,10 +1,7 @@
 /*
 ##############################################################################################
-# header.css version 0.0.1
-#  Shared header/nav styling for every page. The hardcoded colours that used to bypass
-#  the theme variables (dark header/menu bg, unit-select option colours, menu-btn accent)
-#  now read the shared variables instead, and nav typography picks up the Skyfield serif/
-#  small-caps look. Seasonal accent palette below is unchanged.
+# header.css version 1.0.0
+#  Shared header/nav styling for every page.
 #  Copyright © 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -14,23 +11,6 @@
   --header-height: 60px;
 }
 
-/*
- ---- Site-wide default header/card colour, used whenever a page hasn't
- supplied its own --dark-bg/--card-bg mapping (see e.g. gauges.html's or
- Skyfield's sky.css, which map these onto their own --bs-tertiary-bg for
- an exact match to that page's palette — this is only the fallback for
- pages that don't). Matches the --bs-tertiary-bg / card-surface colour
- already used identically across every page this covers. Deliberately
- plain selectors (:root / [data-bs-theme]) so any page's own same-
- specificity mapping, declared later in that page's own <style> block,
- still correctly wins — and so body.season-* below (which includes an
- element selector, giving it higher specificity) always overrides both.
- Before this existed, --dark-bg/--card-bg were only ever defined inside
- the season-specific rules below, so any page in plain light/dark mode
- with no mapping of its own fell through to the header's hardcoded
- rgb(189,206,244) fallback — a generic placeholder never meant to be a
- real colour, but the only thing left once nothing else resolved.
-*/
 :root, [data-bs-theme="light"] {
   --dark-bg: #FFFFFF;
   --card-bg: #FFFFFF;
@@ -277,18 +257,6 @@ body.dark #unitSystem option, [data-bs-theme="dark"] #unitSystem option {
   color: var(--dark-text, #f5f5f5);
 }
 
-/* #languageSystem deliberately mirrors #unitSystem's rules above exactly
-   (same properties, same values bar width) -- it's the same select-wrap
-   pattern (see .select-wrap/.select-label above, which already applied
-   correctly since those rules are class-based, not ID-based -- this is
-   only the ID-specific half #unitSystem had and #languageSystem was
-   missing). Narrower than #unitSystem (180px vs 232px) since language
-   names are generally shorter than the unit-system labels
-   (HEADER_UNIT_SYSTEM_LABELS's "Aviation (°C, kt, mbar)" style strings),
-   and DivumWXI18N.getLanguageName() returns each language's own short
-   self-name (e.g. "Dansk", not "Dansk (Danish)"). Adjust if a language's
-   own name turns out to run long enough to still get clipped by the
-   .select-label max-width/ellipsis rule above. */
 #languageSystem {
   font-family: inherit;
   font-size: 13px;
@@ -312,18 +280,6 @@ body.dark #languageSystem option, [data-bs-theme="dark"] #languageSystem option 
   color: var(--dark-text, #f5f5f5);
 }
 
-/* Real flag <img> for the CLOSED selector state only -- native <option>
-   elements can't embed images in any browser, so the open dropdown list
-   uses an emoji flag prefix in each option's own text instead (built
-   client-side in index.html's populateLanguageSelector(), from the same
-   country-code table as this image's src -- see
-   DivumWXI18N.getLanguageFlagUrl/getLanguageFlagEmoji in cardI18n.js).
-   Pinned to the select-wrap's left edge; the label text (now the current
-   language's own name, not a static "Select language" caption, once a
-   flag makes "which language is this" worth actually answering) is
-   pushed right to make room for it, and left-aligned rather than
-   centered like #unitSystem's label -- centering would put it visually
-   underneath the flag at this width. */
 #languageFlag {
   position: absolute;
   left: 8px;
@@ -384,21 +340,7 @@ html[data-bs-theme="dark"] body.season-winter .menu, html[data-bs-theme="dark"] 
 html[data-bs-theme="dark"] body.season-summer .menu, html[data-bs-theme="dark"] body.season-autumn .menu {
   background: var(--dark-bg);
 }
-/* max-height: 500px used to be the open-state cap here -- a fixed pixel
-   guess that was smaller than the actual content height once every item
-   (home icon, 9 nav links, unit select, language select, theme toggle)
-   was accounted for, so overflow: hidden silently clipped the theme
-   toggle -- the last item -- off the bottom on every device, not just
-   short ones. 80vh (relative to the *viewport*, not a pixel guess) plus
-   overflow-y: auto on the open state means: on a tall viewport the whole
-   menu fits and no scrollbar appears at all; on a short one, or if more
-   items get added to the nav later, the panel caps at 80% of the visible
-   screen and scrolls internally instead -- so the theme toggle is always
-   at most one scroll away, never permanently unreachable regardless of
-   content length or device height.
-   overflow-x stays hidden (nothing in this panel is meant to scroll
-   sideways); only vertical overflow is now allowed to scroll rather than
-   simply being cut off. */
+
 body.menu-open .menu {
   max-height: 80vh;
   overflow-y: auto;
@@ -409,19 +351,6 @@ body.menu-open .menu {
   box-sizing: border-box;
 }
 
-/* ---------------------------------------------------------------------
-   Lexend now applies everywhere, in every theme -- Inter, IBM Plex
-   Mono, Georgia, and Atkinson Hyperlegible are all retired site-wide
-   in favour of this one typeface, at the same weights each spot
-   already used. This used to be two extra "accessibility theme"
-   positions in the theme cycle (dark-only, opt-in); now that Lexend is
-   the default for everyone, those two positions are gone (see
-   index.html's THEME_ORDER, back down to dark/light/auto) and this
-   rule applies unconditionally instead of being gated on a body class.
-   !important is still needed for the same reason it always was: some
-   cards set their own font-family as an inline style
-   (cardsBundleNew.js), which normal stylesheet specificity can never
-   beat regardless of selector. */
 * {
   font-family: 'Lexend', system-ui, sans-serif !important;
 }

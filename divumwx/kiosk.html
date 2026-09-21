@@ -1,46 +1,9 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# kiosk.html version 0.3.0
+# kiosk.html version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
-##############################################################################################
-#
-# A fixed, 9-card "wall display" page — Clock/Outlook, Current, Forecast,
-# Temperature, Barometer, Wind Compass, Anemometer, Rain, UV (or Humidity,
-# see below). Deliberately stripped down from index.html: no navbar/menu,
-# no theme-toggle button, no drag-and-drop reordering, no incomplete-row
-# hiding — a kiosk is meant to sit untouched on a wall/tablet showing the
-# same 9 cards every time.
-#
-# A small fixed close (×) button, top-right, is the only way back to
-# index.html — v0.2.0 used Escape / click-outside-the-grid for this, but
-# that's a poor fit for what's usually a touchscreen kiosk with no
-# keyboard, and index.html itself no longer has a navbar to signal "this
-# is home" either way. A visible button doesn't depend on either.
-#
-# Still shares localStorage with the main dashboard (same THEME_KEY/UNIT_KEY
-# names), so if the station operator has already picked dark/seasonal mode
-# or a unit system on index.html, this page picks it up automatically —
-# nothing to configure twice. Falls back to the same defaults index.html
-# itself uses when nothing is stored yet (dark theme, UK units).
-#
-# Two card slots are a runtime, hardware-driven choice rather than a fixed
-# card, each shipping both candidates in the markup and resolving to one
-# via the script near the bottom of the file:
-#
-#   Slot 8 (rain): both piezo + tipping enabled -> piezo
-#                  piezo only                   -> piezo
-#                  tipping (rainfall) only       -> rainfall
-#
-#   Slot 9:        UV enabled                    -> UV
-#                  UV not enabled                 -> Humidity
-#
-# Both pairs use the .card-not-enabled class (display:none !important)
-# rather than element.style.display, since every card's own script in
-# cardsBundle.js unconditionally sets mount.style.display = 'flex' the
-# moment it runs — a plain inline style loses that race and can leave
-# both cards of a pair visible at once; !important reliably wins instead.
 ##############################################################################################
 -->
 <html lang="en">
@@ -48,7 +11,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DivumWX Kiosk</title>
-<link rel="stylesheet" href="header.css?v=s3n2026i">
+<link rel="stylesheet" href="header.css?v=s3n2026k">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
   --light-body: #EFECE2;
@@ -89,7 +55,7 @@ body.dark {
 
 body {
   margin: 0;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: 'Lexend', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   transition: background 0.3s, color 0.3s;
   overflow-x: hidden;
 }
@@ -402,11 +368,6 @@ function applyDashboardTheme() {
   document.body.classList.add(resolved);
 
   document.body.classList.remove.apply(document.body.classList, SEASON_CLASSES);
-  // Seasonal accent mode retired site-wide -- see header.js's
-  // applySeasonClass() for the full rationale. This page has its own
-  // independent implementation (doesn't call the shared header.js
-  // function at all), so it needed the identical no-op treatment
-  // applied directly here.
 
   if (resolved !== lastAppliedTheme) {
     lastAppliedTheme = resolved;

@@ -1,6 +1,6 @@
 /*
 ##############################################################################################
-# heatmaps.js version 0.0.1
+# heatmaps.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -195,13 +195,7 @@
 
   function fmtDateFull(ds){ const d = new Date(ds + 'T00:00:00'); return DivumWXI18N.t(MONTHS[d.getMonth()]) + ' ' + d.getDate() + ', ' + d.getFullYear(); }
   function fmtDateMonth(ds){ const d = new Date(ds + 'T00:00:00'); return DivumWXI18N.t(MONTHS[d.getMonth()]) + ' ' + d.getFullYear(); }
-  // Reused everywhere a month abbreviation is needed in this file (stat
-  // date captions, calendar month display, tooltip date line) -- same
-  // mixed-case Jan/Feb/... keys already defined for records.html, not
-  // climate.html's ALL-CAPS report-style set. fmtDateFull/fmtDateMonth
-  // previously called toLocaleDateString('en-GB', {month:'short',...}),
-  // the browser's own English locale formatting -- same bug class fixed
-  // elsewhere on this site (cardLightning.js, records.html).
+
   const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
   // ===================== Category config =====================
@@ -421,10 +415,6 @@
   let cellMetric = category.cellMetric;
   let stationLocation = '';
 
-  // Maps each heatmap category to the base series it represents -- clean
-  // 1:1 mapping for every category here, since this file already
-  // separates tipping-bucket rain ('rain') from piezo rain ('prain')
-  // into distinct categories.
   const HEATMAP_CATEGORY_TO_BASE = {
     temperature: 'outTemp',
     wind: 'windGust',
@@ -436,13 +426,6 @@
     prain: 'prain',
   };
 
-  // Card <-> sensor mapping, inlined directly in this file -- see
-  // records.html's copy of this same table for why it's duplicated
-  // rather than shared from one file (a shared file silently failed in
-  // the field when it wasn't deployed alongside the pages referencing
-  // it -- every isBaseCardEnabled() call threw a plain ReferenceError,
-  // with no visible symptom at all: tabs just stayed visible, as if the
-  // feature didn't exist).
   const DIVUMWX_CARD_TO_BASES = {
     cardTemperature:            ['outTemp', 'outDew'],
     cardHumidity:                ['outHumid'],
@@ -469,10 +452,10 @@
   function isBaseCardEnabled(base, enabledCards) {
     if (!Array.isArray(enabledCards) || enabledCards.length === 0) return true;
     const card = DIVUMWX_BASE_TO_CARD[String(base).toLowerCase()];
-    if (!card) return true; // unmapped base -- deliberately always shown
+    if (!card) return true;
     return enabledCards.indexOf(card) !== -1;
   }
-  let enabledCards = null; // null = unknown yet / fetch failed -- fail open
+  let enabledCards = null;
 
   const style = document.createElement('style');
   style.textContent = `
@@ -633,11 +616,7 @@
 
   function updatePageTitle(){
     els.pageTitle.textContent = (stationLocation ? stationLocation + ' \u2014 ' : '') + DivumWXI18N.t(category.title) + ' ' + DivumWXI18N.t('Heatmap');
-    // Worded as "<Category> history not available yet." rather than
-    // "No <category> history..." -- the latter would need a standalone
-    // "No" dictionary key, which is too ambiguous out of context (No as
-    // in "none" vs. a literal negative reply) for translators to get
-    // right reliably.
+
     els.emptyState.textContent = DivumWXI18N.t(category.title) + ' ' + DivumWXI18N.t('history not available yet.');
   }
   updatePageTitle();
@@ -670,13 +649,7 @@
   }
   function applyTheme(){
     document.documentElement.setAttribute('data-bs-theme', resolveTheme());
-    // Seasonal accent mode retired site-wide -- see the other pages'
-    // identical comment for the full rationale. The leftover
-    // applySeasonClass(themeMode) call here threw 'applySeasonClass is
-    // not defined' on every applyTheme() call, and since buildHeatmap()
-    // below never ran until AFTER that line, this silently produced a
-    // blank page every time -- not a rendering bug in the heatmap code
-    // itself, a dead-code reference blocking it from ever running.
+
     currentSeason = null;
     syncThemeNavUI();
     if (dataAvailable) buildHeatmap();
@@ -794,9 +767,7 @@
       const disabled = !hasData;
       const checked = m.key === cellMetric ? 'checked' : '';
       const label = DivumWXI18N.t(m.label);
-      // "<Label> data not available" rather than "No <label> data
-      // available" -- same reasoning as updatePageTitle() above, avoids
-      // needing a standalone ambiguous "No" key.
+
       return '<label class="hm-metric-option' + (disabled ? ' is-disabled' : '') + '" title="' + (disabled ? label + ' ' + DivumWXI18N.t('data not available') : '') + '">' +
         '<input type="radio" name="hmMetric" value="' + m.key + '" ' + checked + (disabled ? ' disabled' : '') + '> ' + m.icon + ' ' + label +
         '</label>';
@@ -922,12 +893,7 @@
   function getDayOfWeek(year, month, day){
     return DivumWXI18N.t(WEEKDAYS[new Date(year, month, day).getDay()]);
   }
-  // Constructs a Date whose UTC-getter fields represent the station's own
-  // wall-clock date, not the visitor's browser-local one -- new
-  // Date().getFullYear()/getMonth() below used to reflect the *visitor's*
-  // timezone, so near a month boundary someone in a different timezone
-  // than the station would land on the wrong default month, and clicking
-  // "jump to current month" could jump to the wrong one too.
+
   function stationParts(date){
     var parts = {};
     new Intl.DateTimeFormat('en-GB', {
@@ -1113,10 +1079,7 @@
   });
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
   window.addEventListener('i18nready', () => {
-    // Tab button text is only ever set once, in the big document.body.innerHTML
-    // template above -- everything else here (title, prev/next, stats,
-    // legend, the heatmap grid itself) is rebuilt fresh by the functions
-    // below every time they run, so re-invoking them is enough.
+
     document.querySelectorAll('.hm-tab').forEach(btn => {
       const cat = HEATMAP_CATEGORIES[btn.dataset.cat];
       if (cat) btn.textContent = DivumWXI18N.t(cat.title);
@@ -1126,18 +1089,11 @@
     if (dataAvailable) buildHeatmap(); else buildStats();
   });
   window.addEventListener('stationtimeready', () => {
-    // currentYear/currentMonth were captured once from stationNow() at
-    // load time (see "let currentYear = ..." above) -- if the page
-    // rendered before stationTime.js's timezone fetch resolved, those
-    // two values are stuck on the browser-local fallback's idea of
-    // "today" and a plain re-render won't fix them, only resetting them
-    // does.
+
     currentYear = stationNow().getUTCFullYear();
     currentMonth = stationNow().getUTCMonth();
     if (dataAvailable) buildHeatmap(); else buildStats();
   });
-
-  // includeHTML() now lives in siteHeader.js -- one shared copy.
 
   includeHTML(() => {
     initSharedHeader();

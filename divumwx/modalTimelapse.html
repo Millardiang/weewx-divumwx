@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# modalTimelapse.html version 0.0.2
+# modalTimelapse.html version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -9,6 +9,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
 <title>Timelapse</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
@@ -40,8 +43,7 @@
   --bs-tertiary-bg:#161F3C;
   --bs-border-color:#2A3358;
 }
-/* Seasonal accent mode — detected from the parent dashboard via the JS at
-   the end of <body>, kept in sync with header.css's seasonal palette. */
+
 :root[data-season="winter"]{ --bs-body-bg:#e9f2ec; --bs-card-bg:#f4f9f6; }
 :root[data-season="spring"]{ --bs-body-bg:#eef7e3; --bs-card-bg:#f5faef; }
 :root[data-season="summer"]{ --bs-body-bg:#fff6d9; --bs-card-bg:#fffbef; }
@@ -52,7 +54,7 @@ html, body{ margin:0; padding:0; }
 body{
   background:var(--bs-body-bg);
   color:var(--bs-body-color);
-  font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family:'Lexend', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size:13.5px;
   line-height:1.5;
   transition:background-color .2s, color .2s;
@@ -63,7 +65,7 @@ body{
 .tl-stage{
   position:relative;
   width:100%;
-  height:220px; /* fallback until the video's real dimensions are known */
+  height:220px;
   background:var(--bs-tertiary-bg);
   border-radius:var(--bw-radius);
   overflow:hidden;
@@ -220,11 +222,7 @@ body{
   } catch (e) {}
 
   // ---- Config ----
-  // Capture happens entirely inside WeeWX's own process (see
-  // user/timelapse.py) — the same mechanism that already produces
-  // archive.json/loop.json. It maintains five independently-sampled
-  // videos (day/week/month/year/alltime); this page just plays whichever
-  // one is selected and checks periodically for it having grown.
+
   var POLL_MS = 30 * 1000;
   var BUCKET_INFO = {
     day:     { label: 'today\u2019s',     note: '<b>Resets daily</b> \u2014 builds up as the day goes on; a fresh one starts each midnight.' },
@@ -266,12 +264,6 @@ body{
   var speedsEl = document.getElementById('tlSpeeds');
   var pageEl = document.querySelector('.tl-page');
 
-  // The stage otherwise always spans the full page width with no definite
-  // height, which leaves height:100% on the video with nothing to resolve
-  // against — it then renders at an unpredictable size and can clip the
-  // video's own native control bar (fullscreen button included) against
-  // overflow:hidden. Once the video's real dimensions are known, set an
-  // explicit pixel height here so it renders correctly and in full.
   video.addEventListener('loadedmetadata', function(){
     if (video.videoWidth && video.videoHeight) {
       var w = Math.max(320, Math.min(video.videoWidth, 720));
@@ -305,14 +297,6 @@ body{
     if (btn) setSpeed(Number(btn.getAttribute('data-speed')));
   });
 
-  // Applies a timestamp to both the "Updated" text and the date badge.
-  // headerValue is the video's own Last-Modified response header — i.e.
-  // the real time its most recent frame was appended — not the browser's
-  // clock at poll time, so this reflects the actual capture time rather
-  // than drifting by however long the 30s poll cycle + request took.
-  // Falls back to the browser's current time only if that header is
-  // missing or unparseable (fail open, same pattern as the webcam card's
-  // own staleness check).
   function applyFrameTimestamp(headerValue){
     var d = headerValue ? new Date(headerValue) : null;
     if (!d || isNaN(d.getTime())) d = new Date();
@@ -327,7 +311,7 @@ body{
     var videoUrl = videoUrlFor(currentBucket);
     var bucketAtRequest = currentBucket;
     fetch(videoUrl, { method: 'HEAD', cache: 'no-store' }).then(function(r){
-      if (bucketAtRequest !== currentBucket) return; // user switched tabs while this was in flight
+      if (bucketAtRequest !== currentBucket) return;
       if (!r.ok) throw new Error('HTTP ' + r.status);
       var lm = r.headers.get('Last-Modified');
       if (lm === lastModifiedSeen && loaded) {
@@ -341,7 +325,7 @@ body{
       stageEmpty.style.display = 'none';
       video.load();
       video.playbackRate = currentSpeed;
-      video.play().catch(function(){ /* autoplay can be blocked — controls are still there */ });
+      video.play().catch(function(){  });
       downloadLink.href = bust;
       downloadLink.removeAttribute('aria-disabled');
       loaded = true;

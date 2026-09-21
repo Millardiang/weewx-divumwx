@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# modalCelestial.html version 0.0.2
+# modalCelestial.html version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -9,6 +9,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
 <title>Celestial Data</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
@@ -42,11 +45,7 @@
   --bs-tertiary-bg:#161F3C;
   --bs-border-color:#2A3358;
 }
-/* Seasonal accent mode — detected from the parent dashboard via the JS at
-   the end of <body>, which sets data-season on this document's <html>
-   element. Seasonal mode always resolves the parent to the light theme,
-   so no dark-mode variant is needed here — kept in sync with header.css's
-   seasonal palette. */
+
 :root[data-season="winter"]{ --bs-body-bg:#e9f2ec; --bs-card-bg:#f4f9f6; }
 :root[data-season="spring"]{ --bs-body-bg:#eef7e3; --bs-card-bg:#f5faef; }
 :root[data-season="summer"]{ --bs-body-bg:#fff6d9; --bs-card-bg:#fffbef; }
@@ -57,7 +56,7 @@ html, body{ margin:0; padding:0; }
 body{
   background:var(--bs-body-bg);
   color:var(--bs-body-color);
-  font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family:'Lexend', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size:13.5px;
   line-height:1.5;
   transition:background-color .2s, color .2s;
@@ -68,7 +67,7 @@ body{
 .cel-section{ margin-bottom:30px; }
 .cel-section:last-child{ margin-bottom:0; }
 .cel-section-title{
-  font-family:Georgia, 'Times New Roman', serif;
+  font-family:'Lexend', system-ui, sans-serif;
   font-variant-caps:small-caps;
   letter-spacing:.04em;
   font-size:20px;
@@ -109,7 +108,6 @@ body{
 .cel-card a{ color:var(--bw-accent); text-decoration:none; }
 .cel-card a:hover{ text-decoration:underline; }
 
-/* Wide info/guide cards read better spanning more columns on larger screens */
 .cel-card.cel-wide{ grid-column:span 2; }
 @media (max-width:560px){ .cel-card.cel-wide{ grid-column:span 1; } }
 
@@ -117,13 +115,11 @@ body{
 .cel-accent-good{ color:var(--bw-good); font-weight:700; }
 .cel-accent-danger{ color:var(--bw-danger); font-weight:700; }
 
-/* ---- KP / A-Index badges — same green/yellow/amber/red language as the
-   dashboard's Aurora chart (see charts-d3.html's .aurora-badge). ---- */
 .cel-index-row{ display:flex; align-items:baseline; gap:10px; margin-bottom:10px; }
 .cel-index-badge{
   font-size:26px; font-weight:700; line-height:1;
   padding:10px 16px; border-radius:var(--bw-radius-sm);
-  font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family:'Lexend', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 .cel-index-badge small{ display:block; font-size:10px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; margin-top:3px; opacity:.85; }
 .cel-index-quiet{ background:#1a7f3c; color:#d4fce4; }
@@ -409,9 +405,7 @@ body{
     var n = Number(v);
     return isNaN(n) ? '\u2014' : n.toFixed(decimals);
   }
-  // almanac.json now gives raw unix_epoch timestamps rather than
-  // pre-formatted strings for rise/set/full-moon/new-moon -- format
-  // client-side, in the station's own timezone where known.
+
   function fmtEpochTime(ts, withSeconds){
     if (ts == null) return '\u2014';
     var opts = { hour: '2-digit', minute: '2-digit', hour12: false };
@@ -489,9 +483,7 @@ body{
   setText('kiLastUpdated', new Date().toLocaleTimeString());
 
   // ---- Meteor showers ----
-  // meteorDefaultText/meteorNextEventText are populated as empty strings —
-  // "currently visible" shower detection was never implemented upstream of
-  // this page (kept as-is rather than inventing new logic in a redesign).
+
   setText('meteorDefaultText', '');
   setText('meteorNextEventText', '');
   setText('todayDateStr', new Date().toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }));
@@ -506,9 +498,7 @@ body{
   setText('moonAgeText', fmt(alm['almanac.moon.age_days'], 2));
   setText('luminanceText', fmt(alm['almanac.moon.phase'], 2));
   setText('moonphaseText', alm['almanac.moon.phase_name'] != null ? String(alm['almanac.moon.phase_name']) : '\u2014');
-  // almanac.moon.earth_distance is in AU (standardised schema); this
-  // page's label is hardcoded "km" (see the datarow markup), so convert
-  // here rather than silently showing an AU figure under a km label.
+
   setText('moonDistanceText', fmt(alm['almanac.moon.earth_distance'] != null ? alm['almanac.moon.earth_distance'] * 149597870.7 : null, 2));
   setText('eclipticLonText', fmt(alm['almanac.moon.ecliptic_angle'], 4));
   setText('parallacticAngleText', fmt(alm['almanac.moon.parallactic_angle'], 4));

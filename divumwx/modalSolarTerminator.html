@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# modalSolarTerminator.html version 0.0.1
+# modalSolarTerminator.html version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -14,12 +14,7 @@
 
 <style>
 :root{
-  /* Values now match modalAuroraTerminator.html's --bg-color-dark/
-     --bg-color-light exactly (#111834 navy / #FFFFFF white). The
-     previous values (#292E35 grey / #EFECE2 cream) were simply the
-     wrong colors -- not a theme-detection or specificity problem at
-     all, data-theme was already resolving correctly, it just pointed
-     at colors that didn't match Aurora's. */
+
   --bs-body-bg: #111834;
   --bs-body-color: #E9E4D4;
   --bs-secondary-color: #8B93B8;
@@ -103,9 +98,11 @@ html[data-season="summer"] body, html[data-season="autumn"] body {
 <body>
 
 <div class="solarTerminator"></div>
+
 <script src="js/d3.7.9.0.min.js"></script>
 <script src="js/topojson.3.0.2.min.js"></script>
 <script src="js/d3-geo-projection.4.0.0.min.js"></script>
+
 <script>
 (function(){
 

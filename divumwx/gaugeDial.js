@@ -1,14 +1,9 @@
 /*
 ##############################################################################################
-# gaugeDial.js version 0.0.1
+# gaugeDial.js version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
-#
-#  Shared dial renderer used by cardAnemometer.js, cardBarometer.js, cardSolarRadiation.js,
-#  cardUvIndex.js and cardHumidity.js, so all five gauges share exactly the same geometry,
-#  tick styling, and pointer style. Keeping this in one place is deliberate: five copies of
-#  the same trig would drift out of sync the first time any one of them got tweaked.
-# ============================================================================================
+##############################################################################################
 */
 
 (function (global) {

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# modalAstroclock.html version 0.0.1
+# modalAstroclock.html version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -9,6 +9,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Astronomical Clock</title>
 
@@ -120,16 +123,6 @@ html[data-season="summer"] body, html[data-season="autumn"] body {
   var toDeg = function(x){ return x * (180 / Math.PI); };
   var toDegRad = function(x, f){ return toRad(x * f); };
 
-  // (timeToDeg(), which parsed pre-formatted "HH:MM" strings, is gone --
-  // almanac.json now gives raw unix_epoch timestamps; epochToDeg() below
-  // goes straight from epoch to the same clock-face degrees.)
-
-  // almanac.json now gives raw unix_epoch timestamps rather than
-  // pre-formatted local-time strings for rise/set/transit/twilight --
-  // this goes straight from epoch to the same clock-face degrees
-  // timeToDeg() used to produce, reading hour/minute in the station's
-  // own timezone (matching the old server-side formatting, which used
-  // the server OS timezone under the same station-timezone assumption).
   function epochToDeg(ts){
     if (ts == null) return null;
     var opts = { hour: '2-digit', minute: '2-digit', hour12: false };
@@ -155,7 +148,7 @@ html[data-season="summer"] body, html[data-season="autumn"] body {
 
   function appendText(x, y, text, fill, size, weight){
     return svg.append('text').attr('x', x).attr('y', y)
-      .style('fill', fill).style('font-family', 'Helvetica')
+      .style('fill', fill).style('font-family', "'Lexend', system-ui, sans-serif")
       .style('font-size', (size || 14) + 'px').style('text-anchor', 'left')
       .style('font-weight', weight || 'normal').text(text);
   }
@@ -183,7 +176,7 @@ html[data-season="summer"] body, html[data-season="autumn"] body {
   appendText(520, 168, 'Astronomical Clock', 'rgba(255,99,71,1)', 14, 'bold');
   (function(){
     var t = svg.append('text').attr('x', 520).attr('y', 186)
-      .style('font-family', 'Helvetica').style('font-size', '14px').style('text-anchor', 'left');
+      .style('font-family', "'Lexend', system-ui, sans-serif").style('font-size', '14px').style('text-anchor', 'left');
     t.append('tspan').style('fill', 'rgba(46,139,87,1)').text('Based on the ');
     t.append('tspan').style('fill', 'rgba(0,127,255,1)').text('Orloj');
     t.append('tspan').style('fill', 'rgba(46,139,87,1)').text(' in the City of Prague');
@@ -290,7 +283,7 @@ html[data-season="summer"] body, html[data-season="autumn"] body {
     .attr('x', function(d, i){ return 155.5 * Math.cos(i * 0.2616 + 45.552); })
     .attr('y', function(d, i){ return 155.5 * Math.sin(i * 0.2616 + 45.552); })
     .attr('text-anchor', 'middle')
-    .style('fill', 'yellow').style('font-family', 'Helvetica')
+    .style('fill', 'yellow').style('font-family', "'Lexend', system-ui, sans-serif")
     .style('font-size', '12px').style('font-weight', 'bold').style('dominant-baseline', 'central')
     .text(function(d){ return d; });
 

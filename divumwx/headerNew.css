@@ -1,11 +1,7 @@
 /*
 ##############################################################################################
-# headerNew.css version 0.0.1
+# headerNew.css version 1.0.0
 #  Fork of header.css for indexNew.html only — other pages keep header.css untouched.
-#  Same selectors/structure; the hardcoded colours that used to bypass the theme
-#  variables (dark header/menu bg, unit-select option colours, menu-btn accent) now
-#  read the shared variables instead, and nav typography picks up the Skyfield serif/
-#  small-caps look. Seasonal accent palette below is unchanged from header.css.
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -252,8 +248,6 @@ body.dark #unitSystem option, [data-bs-theme="dark"] #unitSystem option {
   color: var(--dark-text, #f5f5f5);
 }
 
-/* #languageSystem mirrors #unitSystem's rules above -- see header.css's
-   identical block for the full explanation. */
 #languageSystem {
   font-family: inherit;
   font-size: 13px;
@@ -277,7 +271,6 @@ body.dark #languageSystem option, [data-bs-theme="dark"] #languageSystem option 
   color: var(--dark-text, #f5f5f5);
 }
 
-/* See header.css's identical block for the full explanation. */
 #languageFlag {
   position: absolute;
   left: 8px;

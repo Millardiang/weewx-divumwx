@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# locationforecast.html version 0.0.1
+# locationforecast.html version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -12,7 +12,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>DivumWX Weather</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="header.css?v=s3n2026i">
+<link rel="stylesheet" href="header.css?v=s3n2026k">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ===================== Shared palette/components (from index.html's <head>) ===================== */
 :root,
@@ -49,7 +52,7 @@
   --bs-link-color:#B45309;
   --bs-link-hover-color:#F2BC6B;
   --bs-warning-rgb:180,83,9;
-  --bs-font-sans-serif:'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --bs-font-sans-serif:'Lexend', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 [data-bs-theme="dark"]{
   --bw-instrument-headspace:#222A2E;
@@ -88,15 +91,9 @@ body{
   padding-bottom:48px;
   transition:background-color .25s ease, color .25s ease;
 }
-.font-mono{font-family:'JetBrains Mono','Courier New',monospace;}
+.font-mono{font-family:'Lexend', system-ui, sans-serif;}
 .card{background:var(--bs-card-bg); border-radius:var(--bw-radius-sm); box-shadow:var(--bw-shadow);}
-/* Seasonal accent theming removed entirely (retired site-wide -- see
-   header.js's applySeasonClass() for the full rationale). --bs-card-bg,
-   --bs-body-bg, and --bs-tertiary-bg now always resolve to their plain
-   :root/[data-bs-theme] values, regardless of any body.season-* class --
-   this page no longer has any CSS that reacts to one at all, so it's
-   correct even if a stray season-* class somehow still ends up on
-   <body> rather than depending on the JS side never adding it. */
+
 .shadow-card{box-shadow:var(--bw-shadow) !important;}
 
 /* ---------- Birch bark signature motif ---------- */
@@ -153,10 +150,10 @@ body{
 .cc-stats-row{border-top:1px solid var(--bs-border-color);}
 .cc-stat{display:flex;flex-direction:column;gap:2px;}
 .cc-stat-label{font-size:11.5px;color:var(--bs-secondary-color);text-transform:uppercase;letter-spacing:.03em;}
-.cc-stat-value{font-size:18px;font-weight:700;font-family:'JetBrains Mono',monospace;}
+.cc-stat-value{font-size:18px;font-weight:700;font-family:'Lexend', system-ui, sans-serif;}
 .cc-mini{display:flex;flex-direction:column;justify-content:center;}
 .cc-mini-label{font-size:12px;color:var(--bs-secondary-color);margin-bottom:4px;}
-.cc-mini-value{font-size:20px;font-weight:700;font-family:'JetBrains Mono',monospace;}
+.cc-mini-value{font-size:20px;font-weight:700;font-family:'Lexend', system-ui, sans-serif;}
 .cc-mini-sub{font-size:11.5px;color:var(--bs-secondary-color);margin-top:2px;}
 .cc-mini-sub b{color:var(--bs-body-color);font-weight:600;}
 .cc-wind .cc-stat-value{font-size:16px;}
@@ -175,7 +172,7 @@ body{
 .uv-pill--mod{background:rgba(214,190,78,.15);color:var(--bw-yellow);}
 .uv-pill--high{background:rgba(227,107,87,.15);color:var(--bw-danger);}
 .hero-suntimes{border-top:1px solid var(--bs-border-color);}
-.hero-suntime{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:13.5px;color:var(--bs-body-color);}
+.hero-suntime{display:inline-flex;align-items:center;gap:6px;font-family:'Lexend', system-ui, sans-serif;font-size:13.5px;color:var(--bs-body-color);}
 .hero-suntime-icon{display:inline-flex;line-height:0;flex-shrink:0;}
 .hero-suntime-icon--sun-rise,.hero-suntime-icon--sun-set{color:var(--bw-accent);}
 .hero-suntime-icon--moon{color:var(--bs-secondary-color);}
@@ -189,7 +186,7 @@ body{
 }
 .wind-compass-mini-label{
   position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  font-family:'JetBrains Mono',monospace;line-height:1.15;pointer-events:none;
+  font-family:'Lexend', system-ui, sans-serif;line-height:1.15;pointer-events:none;
 }
 .wind-compass-mini-label span:first-child{font-size:13px;font-weight:700;}
 .wind-compass-mini-label span:last-child{font-size:9.5px;color:var(--bs-secondary-color);}
@@ -235,15 +232,11 @@ body{
 .day-card .dname{font-size:12.5px;font-weight:700;color:var(--bs-secondary-color);text-transform:uppercase;letter-spacing:.03em;}
 .day-card .dicon{width:38px;height:38px;margin:8px auto 4px;display:block;object-fit:contain;}
 .day-card .dcond{font-size:11.5px;color:var(--bs-secondary-color);height:28px;display:flex;align-items:center;justify-content:center;}
-.day-card .dtemps{font-family:'JetBrains Mono',monospace;font-size:14px;margin-top:4px;}
+.day-card .dtemps{font-family:'Lexend', system-ui, sans-serif;font-size:14px;margin-top:4px;}
 .day-card .dtemps .lo{color:var(--bs-secondary-color);}
 .day-card .dwarn{position:absolute;top:6px;right:6px;display:block;}
 .day-card.active{background:var(--bs-tertiary-bg);}
-/* Hourly panel now matches the active day-card's background (both use
-   --bs-tertiary-bg) instead of the generic .card background
-   (--bs-card-bg), which under the seasonal theme overrides above reads
-   as a much warmer "parchment" tone -- was visually inconsistent with
-   the day strip's own highlighted state directly above it. */
+
 .card.hourly-panel{background:var(--bs-tertiary-bg);}
 .day-card.active .dname{color:var(--bw-accent);}
 
@@ -259,7 +252,7 @@ body{
 .metric-card .mvalue{font-size:26px;font-weight:700;}
 .metric-card .mvalue small{font-size:13px;color:var(--bs-secondary-color);font-weight:400;}
 .metric-card .msub{font-size:12.5px;color:var(--bs-secondary-color);margin-top:4px;}
-.beaufort-chip{display:inline-block;margin-top:6px;font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--bw-sky-soft);color:var(--bw-sky);padding:2px 8px;border-radius:10px;}
+.beaufort-chip{display:inline-block;margin-top:6px;font-family:'Lexend', system-ui, sans-serif;font-size:11px;background:var(--bw-sky-soft);color:var(--bw-sky);padding:2px 8px;border-radius:10px;}
 .mlabel-icon{width:14px;height:14px;object-fit:contain;}
 
 /* ---------- Temperature feature card (Today's Observations) ---------- */
@@ -276,7 +269,7 @@ body{
 .obs-subcol-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--bs-secondary-color);margin-bottom:8px;}
 .obs-stat-row{display:flex;justify-content:space-between;align-items:baseline;font-size:13.5px;padding:3px 0;gap:8px;}
 .obs-stat-row .obs-stat-label{color:var(--bs-secondary-color);}
-.obs-stat-row .obs-stat-value{font-family:'JetBrains Mono',monospace;font-weight:600;text-align:right;}
+.obs-stat-row .obs-stat-value{font-family:'Lexend', system-ui, sans-serif;font-weight:600;text-align:right;}
 .obs-stat-time{font-size:10.5px;color:var(--bs-secondary-color);font-weight:400;margin-left:4px;}
 .obs-trend-rising{color:#E8826F;}
 .obs-trend-falling{color:var(--bw-sky);}
@@ -288,14 +281,7 @@ body{
 /* ---------- Hourly table ---------- */
 .hourly-title h2{font-size:18px;font-weight:700;margin:0;}
 .hourly-title span{font-size:12px;color:var(--bs-secondary-color);}
-/* Bootstrap's own .table component defaults --bs-table-bg to
-   var(--bs-body-bg) and paints that directly onto every <td>/<th> cell,
-   independent of the parent .card -- this was the actual, entire cause
-   of the table area showing a different (parchment) colour than the
-   surrounding panel this whole time, nothing to do with seasonal
-   theming at all. Overriding it to transparent here lets the parent
-   .card.hourly-panel's own background (--bs-tertiary-bg) show through
-   uniformly instead. */
+
 table.hourly{ --bs-table-bg: transparent; }
 table.hourly{min-width:760px;}
 table.hourly th, table.hourly td{text-align:center;font-size:13px;vertical-align:middle;}
@@ -334,7 +320,7 @@ table.hourly .track-marker img.hicon{margin-bottom:2px;}
 }
 .wind-badge-value{
   position:relative;
-  font-family:'JetBrains Mono',monospace;
+  font-family:'Lexend', system-ui, sans-serif;
   font-size:9.5px;font-weight:700;
   color:var(--wind-col, var(--bs-secondary-color));
 }
@@ -361,8 +347,8 @@ table.hourly .track-marker img.hicon{margin-bottom:2px;}
     drop-shadow(0 0 2px rgba(255,255,255,.32))
     drop-shadow(0 0 8px rgba(255,255,255,.18));
 }
-table.hourly .temp-cell{font-family:'JetBrains Mono',monospace;font-weight:600;}
-table.hourly .rain-cell{color:var(--bw-sky);font-family:'JetBrains Mono',monospace;font-size:12px;}
+table.hourly .temp-cell{font-family:'Lexend', system-ui, sans-serif;font-weight:600;}
+table.hourly .rain-cell{color:var(--bw-sky);font-family:'Lexend', system-ui, sans-serif;font-size:12px;}
 
 /* ---------- Sun/pollen/aq strip ---------- */
 .strip-card .slabel{font-size:12px;color:var(--bs-secondary-color);margin-bottom:10px;display:flex;justify-content:space-between;}
@@ -374,7 +360,7 @@ table.hourly .rain-cell{color:var(--bw-sky);font-family:'JetBrains Mono',monospa
 .species-row{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12.5px;}
 .species-row .species-name{color:var(--bs-secondary-color);display:flex;align-items:center;gap:6px;}
 .species-row .species-name .level-dot{width:7px;height:7px;flex:none;}
-.species-row .species-value{font-family:'JetBrains Mono',monospace;font-weight:600;text-align:right;}
+.species-row .species-value{font-family:'Lexend', system-ui, sans-serif;font-weight:600;text-align:right;}
 
 footer{font-size:12px;color:var(--bs-secondary-color);}
 
@@ -399,7 +385,7 @@ footer{font-size:12px;color:var(--bs-secondary-color);}
 .loc-search-card{max-width:900px;}
 .loc-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
 .loc-tab-btn{
-  font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;
+  font-family:'Lexend', system-ui, sans-serif;font-size:13px;font-weight:600;
   padding:7px 14px;border-radius:20px;border:1px solid var(--bs-border-color);
   background:var(--bs-tertiary-bg);color:var(--bs-secondary-color);
 }
@@ -408,7 +394,7 @@ footer{font-size:12px;color:var(--bs-secondary-color);}
 .loc-tab-panel{display:none;}
 .loc-tab-panel.active{display:block;}
 .loc-field-row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;}
-.loc-field-row .form-control, .loc-field-row .form-label{font-family:'JetBrains Mono',monospace;}
+.loc-field-row .form-control, .loc-field-row .form-label{font-family:'Lexend', system-ui, sans-serif;}
 .loc-field-row label{font-size:11.5px;color:var(--bs-secondary-color);text-transform:uppercase;letter-spacing:.03em;display:block;margin-bottom:4px;}
 .loc-coord-field{width:160px;}
 .loc-hint{font-size:12px;color:var(--bs-secondary-color);margin-top:8px;}
@@ -423,9 +409,9 @@ footer{font-size:12px;color:var(--bs-secondary-color);}
 }
 .loc-suggestion-item:hover{border-color:var(--bw-accent);background:var(--bs-secondary-bg);}
 .loc-suggestion-name{font-weight:600;}
-.loc-suggestion-country{font-size:12px;color:var(--bs-secondary-color);font-family:'JetBrains Mono',monospace;flex-shrink:0;}
+.loc-suggestion-country{font-size:12px;color:var(--bs-secondary-color);font-family:'Lexend', system-ui, sans-serif;flex-shrink:0;}
 .loc-recent{font-size:12px;color:var(--bs-secondary-color);margin-top:10px;}
-.loc-recent button{font-family:'JetBrains Mono',monospace;}
+.loc-recent button{font-family:'Lexend', system-ui, sans-serif;}
 #locEmptyState p{font-size:15px;}
 </style>
 </head>
@@ -536,12 +522,7 @@ footer{font-size:12px;color:var(--bs-secondary-color);}
 // =====================================================================
 
 // ===================== Static text i18n =====================
-// Every one of these is set once at boot; applyLabel/applyAttr handle
-// both the English-first-paint race against strings.json's own fetch
-// AND correctly re-apply on a later live language switch -- see
-// cardI18n.js's own header comment. Plain textContent/setAttribute here
-// would exhibit exactly the "frozen in English" bug class documented in
-// the project handoff.
+
 (function applyStaticLabels(){
   DivumWXI18N.applyLabel(document.getElementById('locPageTitle'), 'Forecasts');
   DivumWXI18N.applyLabel(document.getElementById('locIntro'),
@@ -570,12 +551,8 @@ footer{font-size:12px;color:var(--bs-secondary-color);}
   DivumWXI18N.applyLabel(document.getElementById('locEmptyStateText'), 'Search for a location above to see its forecast.');
   DivumWXI18N.applyLabel(document.getElementById('locFooterCredit'),
     'Forecast & place search: Open\u2011Meteo \u00B7 Device-location lookup: OpenStreetMap Nominatim');
-  // locHourlyTitle and locTitle are NOT here -- both are fully rebuilt by
-  // renderForecast()/loadForecast() every time, so they already pick up
-  // a live language switch correctly via the 'i18nready' listener added
-  // near renderForecast() below, same as every dynamically-built card.
-})();
 
+})();
 
 function round1(v){ return v==null ? null : Math.round(v*10)/10; }
 function round2(v){ return v==null ? null : Math.round(v*100)/100; }
@@ -663,9 +640,7 @@ function windDirBadge(dirDeg, gustMs, unit){
 function fmtRain(mm, unit){ if(mm==null) return '--'; return unit==='in' ? round2(mm2in(mm))+' in' : round2(mm)+' mm'; }
 function degToCompass(deg){
   if(deg==null) return '—';
-  // Same 16-point abbreviations already translated elsewhere in the
-  // project (e.g. cardWindCompass.js) -- reused via t() rather than
-  // defining a second copy of these keys.
+
   const dirs=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
   return DivumWXI18N.t(dirs[Math.round(deg/22.5)%16]);
 }
@@ -681,11 +656,7 @@ function iconUrl(name){ return METEOCONS_BASE + (ICON_MAP[name] || ICON_MAP.part
 function iconImg(name, cls, label){ return `<img class="${cls}" src="${iconUrl(name)}" alt="${label||name}" loading="lazy">`; }
 
 // ===================== WMO weather-code mapping (mirrors forecast.js) =====================
-// Deliberately separate keys from cardCurrent.js's condition phrases
-// (e.g. "Overcast" here vs. "Overcast Conditions" there) -- different
-// display context (a single short WMO-code word under a day/hour cell,
-// not a full current-conditions sentence), so reusing those would read
-// oddly here even where the English happens to be close.
+
 const WMO_TEXT_KEYS = {
   0:'Clear sky', 1:'Mainly clear', 2:'Partly cloudy', 3:'Overcast',
   45:'Fog', 48:'Freezing fog',
@@ -711,14 +682,7 @@ function wmoToIconKey(code, isDay){
   if(code===95 || code===96 || code===99) return isDay ? 'thunder' : 'thunderNight';
   return isDay ? 'partly' : 'partlyNight';
 }
-// WEEKDAYS reuses cardForecast.js's own keys (Sun/Mon/.../Sat already
-// exist in every lang/<code>.conf) -- same pattern, so no new keys
-// needed here. The previous version called toLocaleDateString('en-GB',
-// {weekday:'short'}), which is the *browser's* own English locale
-// formatting, completely untouched by DivumWXI18N -- every non-"Today"
-// day label stayed in English regardless of the site's selected
-// language. getDay() (0=Sunday) indexes the same array cardForecast.js
-// uses, resolved through t() instead of a hardcoded locale string.
+
 const WEEKDAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 function dayLabel(dateStr, index){
   if(index===0) return DivumWXI18N.t('Today');
@@ -771,8 +735,6 @@ async function fetchForecastFor(lat, lon){
   const params = new URLSearchParams({
     latitude: lat, longitude: lon,
 
-
-
     current: 'weather_code',
     hourly: 'temperature_2m,weather_code,precipitation,wind_speed_10m,wind_gusts_10m,wind_direction_10m,is_day',
     daily: 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max',
@@ -803,14 +765,7 @@ function parseForecastJson(j){
   });
   const d = j.daily || {};
   const dailyDates = d.time || [];
-  // dateStr/code are stored raw, NOT dayLabel(dateStr,i)/wmoText(code) --
-  // those are resolved at render time in renderForecast() instead. Baking
-  // the translated strings in here would freeze them at whatever language
-  // was active at fetch time, with nothing to revisit them on a later
-  // live language switch (the forecast itself isn't re-fetched just
-  // because the language changed) -- same bug class as everywhere else
-  // in the project, just one step removed since the trigger here is a
-  // user action (picking a location) rather than page boot.
+
   const days = dailyDates.map((dateStr, i) => {
     const code = d.weather_code ? d.weather_code[i] : 0;
     return {
@@ -945,11 +900,7 @@ function renderForecast(){
       ${hrs.map(h=>`<td>${windDirBadge(h.windDirDeg, h.gustMs ?? h.windMs, sys.wind)}</td>`).join('')}
     </tr>`;
 }
-// Re-render on a live language switch (or once strings.json finishes
-// loading after this had already rendered in English) -- see the big
-// comment on parseForecastJson's `days` array above for why this alone
-// is enough: name/cond are computed fresh here from raw dateStr/code,
-// nothing is baked in ahead of time.
+
 window.addEventListener('i18nready', function(){
   if (forecastData) renderForecast();
   renderRecent();
@@ -1044,7 +995,6 @@ document.getElementById('locClearBtn').addEventListener('click', ()=>{
 renderRecent();
 
 // ===================== HTML includes (w3-include-html) =====================
-// includeHTML() now lives in siteHeader.js -- one shared copy.
 
 const STATION_TITLE_JSON_URL = './jsondata/archive.json';
 function setStationTitle(){
@@ -1074,19 +1024,13 @@ function resolveAutoIsDay(){
   return !window.matchMedia('(prefers-color-scheme: dark)').matches;
 }
 function resolveTheme(){
-  // Seasonal is a fixed standalone theme, never affected by day/night auto-switching.
+
   if (themeMode === 'seasonal') return 'light';
   return themeMode==='light' ? 'light' : themeMode==='dark' ? 'dark' : (resolveAutoIsDay() ? 'light' : 'dark');
 }
 function applyTheme(){
   root.setAttribute('data-bs-theme', resolveTheme());
-  // Seasonal accent mode retired site-wide -- was: currentSeason =
-  // applySeasonClass(themeMode). That function no longer exists
-  // anywhere on the site; the leftover call here threw
-  // 'applySeasonClass is not defined' on every applyTheme() call,
-  // which (since applyTheme() runs before includeHTML()'s callback on
-  // this page) silently prevented the navbar from ever loading at all
-  // -- not a siteHeader.js problem, a much older dead-code reference.
+
   currentSeason = null;
   syncThemeNavUI();
 }
@@ -1104,12 +1048,7 @@ function syncThemeNavUI(){
 }
 const ASTRO_JSON_URL_FOR_THEME = './jsondata/almanac.json';
 function pollIsDayForTheme(){
-  // Primary source: almanac.json's actual sun altitude -- "day" is
-  // precisely "between sunrise and sunset" by definition (sun above
-  // the horizon), astronomically exact regardless of what loop.json's
-  // hardware-derived isDay flag happens to mean. Falls back to
-  // loop.json's own observations.isDay only if almanac.json's fetch
-  // fails or its own value is missing.
+
   fetch(ASTRO_JSON_URL_FOR_THEME + ((ASTRO_JSON_URL_FOR_THEME).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'})
     .then(res => { if(!res.ok) throw new Error('HTTP '+res.status); return res.json(); })
     .then(alm => {

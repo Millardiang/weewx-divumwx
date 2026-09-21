@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# modalAuroraTerminator.html version 0.0.1
+# modalAuroraTerminator.html version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
 -->
 <html lang='en'>
 <meta charset='utf-8'>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg-color-light: #FFFFFF;
@@ -253,7 +256,7 @@ if (lat > 0.0) {
     .attr('y', 15)
     .attr('text-anchor', 'middle')
     .style('font-size', '18px')
-    .style('font-family', 'Helvetica')
+    .style('font-family', "'Lexend', system-ui, sans-serif")
     .style('font-weight', 'Bold')
     .style('fill', baseTextColor)
     .text(borealis);
@@ -488,7 +491,7 @@ var text = svg.selectAll(null)
     .attr('y', (d, i) => { return 30 + i * 30; })
 
     .style('fill', baseTextColor)
-    .style('font-family', 'Helvetica')
+    .style('font-family', "'Lexend', system-ui, sans-serif")
     .style('font-size', '11px')
     .style('text-anchor', 'middle')
     .style('font-weight', 'normal')

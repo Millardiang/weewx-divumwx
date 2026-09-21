@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# charts.html version 0.0.1
+# charts.html version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -12,7 +12,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Weather Charts (D3)</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="header.css?v=s3n2026i">
+<link rel="stylesheet" href="header.css?v=s3n2026k">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script>
   document.documentElement.dataset.embed = (new URL(location.href).searchParams.get('embed') === '1') ? '1' : '0';
@@ -53,7 +56,7 @@
   --bs-link-color:#B45309;
   --bs-link-hover-color:#D3A94C;
   --bs-warning-rgb:180,83,9;
-  --bs-font-sans-serif:'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --bs-font-sans-serif:'Lexend', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 [data-bs-theme="dark"]{
   --bw-instrument-headspace:#222A2E;
@@ -85,11 +88,6 @@
   --bs-link-hover-color:#E8C578;
 }
 
-/* Seasonal accent mode — inactive buttons (.records-tab, .chart-tf-btn,
-   .chart-hist-select) and panels (.records-period-card, .rose-panel,
-   .extreme-values-container) all read --bs-tertiary-bg, so aliasing it
-   to the site's seasonal card tint (--card-bg, from header.css) covers
-   all of them in one place. */
 body.season-winter, body.season-spring, body.season-summer, body.season-autumn {
   --bs-tertiary-bg: var(--card-bg);
 }
@@ -98,11 +96,6 @@ body.season-winter, body.season-spring, body.season-summer, body.season-autumn {
 
 [data-embed="1"] .records-page-title{ display:none; }
 
-/* Strip the card chrome (border/shadow/background/padding) in embed
-   mode so the chart stretches flush to the full width of whatever page
-   is embedding it, instead of sitting inset inside a bordered card —
-   the ID selector + !important is needed to beat Bootstrap's own
-   !important on the .p-4 utility class. */
 [data-embed="1"] #chartCard{
   border: 0 !important;
   box-shadow: none !important;
@@ -110,9 +103,7 @@ body.season-winter, body.season-spring, body.season-summer, body.season-autumn {
   padding: 0 !important;
   margin-bottom: 0 !important;
 }
-/* The meteogram's own caption line is redundant once the embedding page
-   has already labelled the chart itself (e.g. stationforecast.html's
-   "7-Day Meteogram" heading above it). */
+
 [data-embed="1"] #meteogramToolbar{ display:none; }
 
 [data-embed="1"] .site-navbar-include{ display:none; }
@@ -122,10 +113,9 @@ body{
   padding-bottom:48px;
   transition:background-color .25s ease, color .25s ease;
 }
-.font-mono{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;}
+.font-mono{font-family:'Lexend', system-ui, sans-serif;}
 .card{background:var(--bs-card-bg); border-radius:var(--bw-radius-sm); box-shadow:var(--bw-shadow);}
-/* Seasonal accent mode — tints the card background the same way index.html's
-   dashboard does, using the same palette (kept in sync with header.css). */
+
 body.season-winter { --bs-card-bg: #e9f2ec; }
 [data-bs-theme="dark"] body.season-winter { --bs-card-bg: #24312a; }
 body.season-spring { --bs-card-bg: #eef7e3; }
@@ -143,7 +133,7 @@ body.season-autumn { --bs-card-bg: #f2e6d8; }
 
 .records-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;}
 .records-tab{
-  font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:13px;font-weight:600;
+  font-family:'Lexend', system-ui, sans-serif;font-size:13px;font-weight:600;
   padding:9px 18px;border-radius:999px;border:1px solid var(--bs-border-color);
   background-color:var(--bs-tertiary-bg);color:var(--bs-body-color);
   cursor:pointer;transition:.15s;
@@ -154,7 +144,7 @@ body.season-autumn { --bs-card-bg: #f2e6d8; }
 .chart-toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;}
 .chart-timeframes{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
 .chart-tf-btn{
-  font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12.5px;font-weight:600;
+  font-family:'Lexend', system-ui, sans-serif;font-size:12.5px;font-weight:600;
   padding:7px 14px;border-radius:999px;border:1px solid var(--bs-border-color);
   background-color:var(--bs-tertiary-bg);color:var(--bs-body-color);
   cursor:pointer;transition:.15s;
@@ -162,7 +152,7 @@ body.season-autumn { --bs-card-bg: #f2e6d8; }
 .chart-tf-btn:hover{border-color:var(--bw-accent);}
 .chart-tf-btn.active{background-color:var(--bw-accent);color:#1B1407;border-color:var(--bw-accent);}
 .chart-hist-select{
-  font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12.5px;font-weight:600;
+  font-family:'Lexend', system-ui, sans-serif;font-size:12.5px;font-weight:600;
   background-color:var(--bs-tertiary-bg);color:var(--bs-body-color);border:1px solid var(--bs-border-color);
   border-radius:999px;padding:7px 14px;
 }
@@ -186,9 +176,7 @@ body.season-autumn { --bs-card-bg: #f2e6d8; }
 .meteogram-toolbar{display:flex;align-items:center;margin-bottom:14px;}
 .meteogram-wrap{width:100%;overflow-x:auto;}
 #meteogramContainer{min-width:1260px;max-width:1820px;height:520px;margin:0 auto;}
-/* Embedded (e.g. inside stationforecast.html) has no page chrome fighting
-   it for space, so let the chart fill whatever width it's given instead
-   of holding to the standalone page's fixed min/max-width and scrolling. */
+
 [data-embed="1"] #meteogramContainer{ min-width:0; max-width:none; width:100%; }
 
 .records-periods-row{
@@ -205,8 +193,8 @@ body.season-autumn { --bs-card-bg: #f2e6d8; }
 }
 .records-grid{display:flex;flex-direction:column;gap:16px;}
 .records-label{font-size:12.5px;color:var(--bs-secondary-color);margin-bottom:3px;}
-.records-value{font-size:20px;font-weight:600;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;line-height:1.15;}
-.records-value-date{font-size:11px;color:var(--bs-secondary-color);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;margin-top:2px;}
+.records-value{font-size:20px;font-weight:600;font-family:'Lexend', system-ui, sans-serif;line-height:1.15;}
+.records-value-date{font-size:11px;color:var(--bs-secondary-color);font-family:'Lexend', system-ui, sans-serif;margin-top:2px;}
 .records-section-title{font-size:20px;font-weight:700;margin:28px 0 14px;}
 
 @media (max-width:900px){
@@ -220,7 +208,7 @@ body.season-autumn { --bs-card-bg: #f2e6d8; }
   .records-periods-row{grid-template-columns:1fr;}
 }
 
-footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;}
+footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Lexend', system-ui, sans-serif;}
 
 .pollen-label{display:inline-flex;align-items:center;gap:6px;}
 .pollen-dot{width:12px;height:12px;border-radius:50%;display:inline-block;}
@@ -283,7 +271,7 @@ footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neu
 }
 .d3-hover-line{stroke:var(--bs-secondary-color);stroke-width:1;stroke-dasharray:3,3;pointer-events:none;}
 .d3-axis path,.d3-axis line{stroke:var(--bs-border-color);}
-.d3-axis text{fill:var(--bs-body-color);font-size:10.5px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;}
+.d3-axis text{fill:var(--bs-body-color);font-size:10.5px;font-family:'Lexend', system-ui, sans-serif;}
 .d3-gridline line{stroke:var(--bs-border-color);stroke-opacity:.35;}
 .d3-gridline path{stroke:none;}
 .chart-container svg{width:100%;height:100%;display:block;overflow:visible;}
@@ -350,7 +338,7 @@ footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neu
   <div id="cloudCrossLinkBar" style="display:none;justify-content:flex-end;margin:-8px 0 12px;">
     <button type="button" id="openMetarBtn" class="chart-tf-btn">METAR</button>
   </div>
- 
+
   <div class="records-tabs" id="recordsTabs">
     <button class="records-tab" data-cat="temperature">Temperature</button>
     <button class="records-tab" data-cat="wind">Wind &amp; Gust</button>
@@ -445,7 +433,6 @@ footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neu
   <footer class="text-center py-3" id="chartsFooter">DivumWX — Charts</footer>
 </div>
 
-
 <script src="units.js"></script>
 <script src="cardI18n.js?v=s3n2026a"></script>
 <script src="siteHeader.js"></script>
@@ -470,25 +457,14 @@ footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Helvetica Neu
   DivumWXI18N.applyLabel(document.getElementById('extremeValuesNote'), 'Maximum values shown for each period. Prevailing direction uses vector averaging.');
   DivumWXI18N.applyLabel(document.getElementById('recordsSectionTitle'), 'Records');
   DivumWXI18N.applyLabel(document.getElementById('chartsFooter'), 'DivumWX \u2014 Charts');
-  // pageTitle, the .records-tab / .chart-tf-btn buttons, auroraBadge, and
-  // chartDataInfo are NOT here -- all of them are fully rewritten by JS
-  // (updatePageTitle(), the tab-button map below, renderAuroraD3(),
-  // pollChartsJson()) every time those run, so translating them there
-  // instead already covers both the first paint and any later language
-  // switch.
+
 })();
 </script>
 <script>
 
 function round1(v){ return v==null ? null : Math.round(v*10)/10; }
 function round2(v){ return v==null ? null : Math.round(v*100)/100; }
-// Shared everywhere a month/weekday name is needed in this file (date
-// captions, chart x-axis labels, tooltips) -- same keys already used by
-// records.html/heatmaps.js. Every toLocaleDateString('en-GB', ...) call
-// in this file previously used the browser's own English locale
-// formatting for month/weekday NAMES specifically (numeric day/year and
-// 24-hour time are locale-neutral and left as-is) -- same bug class
-// fixed elsewhere on this site.
+
 const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const MONTHS_FULL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const WEEKDAYS_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -590,11 +566,7 @@ function dataAggregate(slice, agg){
   if(agg === 'sum'){ return {value: slice.reduce((s,pt)=>s+pt[1], 0), date:null}; }
   return {value: slice.reduce((s,pt)=>s+pt[1], 0) / slice.length, date:null};
 }
-// A record's date is meaningful relative to the STATION's calendar day,
-// not whichever timezone the visitor's browser happens to be in --
-// fmtDateOnly() below used to call new Date(ts).getDate()/getMonth()/
-// getFullYear() directly, which reports those fields in the visitor's
-// own local timezone, same bug class as elsewhere on this site.
+
 function stationParts(date){
   var parts = {};
   new Intl.DateTimeFormat('en-GB', {
@@ -765,7 +737,7 @@ async function pollMeteogram(){
 
 function drawWindBarbD3(g, px, py, w, barbColor){
   const speedKt = Math.round(w.speed * 1.94384);
-  const rotationDeg = w.dir + 180; // SVG rotate() takes degrees directly — no radian conversion needed, unlike the ECharts graphic 'rotation' prop
+  const rotationDeg = w.dir + 180;
   const bg = g.append('g').attr('transform', `translate(${px},${py}) rotate(${rotationDeg})`);
   bg.append('line').attr('x1',0).attr('y1',-10).attr('x2',0).attr('y2',10).attr('stroke',barbColor).attr('stroke-width',1.5);
   bg.append('polygon').attr('points','-3,-10 0,-15 3,-10').attr('fill',barbColor);
@@ -900,23 +872,19 @@ function renderMeteogramD3(){
   g.append('text').attr('x', innerW).attr('y', -12).attr('text-anchor','end')
     .attr('font-size',10).attr('fill', pressureColor).text(pressureUnitLabel(sys));
 
-  // Precipitation bars (against the hidden 0..maxPrecip scale, same as the ECharts version's secondary axis)
   const barW = Math.max(1, (innerW/times.length) * 0.7);
   g.selectAll('.precip-bar').data(precipData).join('rect')
     .attr('x', d => x(new Date(d.t)) - barW/2).attr('width', barW)
     .attr('y', d => yPrecip(d.v)).attr('height', d => innerH - yPrecip(d.v))
     .attr('fill', precipColor).attr('opacity', 0.85);
 
-  // Barometer (dashed, drawn under the temperature line)
   const pressLine = d3.line().x(d => x(new Date(d.t))).y(d => yPress(d.v)).curve(d3.curveMonotoneX);
   g.append('path').datum(pressureData).attr('fill','none').attr('stroke', pressureColor)
     .attr('stroke-width',1.5).attr('stroke-dasharray','4,4').attr('d', pressLine);
 
-  // Temperature (on top)
   const tempLine = d3.line().x(d => x(new Date(d.t))).y(d => yTemp(d.v));
   g.append('path').datum(tempData).attr('fill','none').attr('stroke', tempColor).attr('stroke-width',2).attr('d', tempLine);
 
-  // Weather icons every 2 hours, floated above the temperature line
   times.forEach((t,i) => {
     if(i % 2 !== 0) return;
     const hour = new Date(t).getHours();
@@ -928,7 +896,6 @@ function renderMeteogramD3(){
       .attr('x', px-15).attr('y', py-45).attr('width',30).attr('height',30);
   });
 
-  // Day/night tick blocks along the bottom (taller on the hour, matching the original)
   times.forEach((t,i) => {
     const px = x(new Date(t));
     const tickLen = i % 2 === 0 ? 20 : 6;
@@ -936,7 +903,6 @@ function renderMeteogramD3(){
       .attr('stroke', colors.grid).attr('stroke-width',1);
   });
 
-  // Wind barbs every 2 hours
   const barbY = innerH + 55;
   wind.forEach((w,i) => {
     if(i % 2 !== 0 || !w) return;
@@ -953,7 +919,6 @@ function renderMeteogramD3(){
 }
 
 new ResizeObserver(() => { if(currentCategory === 'meteogram') renderMeteogramD3(); }).observe(document.getElementById('meteogramContainer'));
-
 
 const RECORDS_CATEGORIES = {
   temperature: {
@@ -996,11 +961,7 @@ const RECORDS_CATEGORIES = {
     ],
   },
   cloud: {
-    // Avg Cloud Cover has no daySeries: charts.json has no intraday
-    // cloudCover field at all (unlike every other metric here), so its
-    // "Day" tile still shows the last completed calendar day's average,
-    // same as the pre-fix behavior -- a known gap, not fixable without
-    // a new data field from the generator.
+
     note: 'Cloud cover (%), visibility distance, and estimated cloud base. Visibility categories: <1km Very Poor, 1-4km Poor, 4-10km Moderate, 10-20km Good, >20km Excellent.',
     metrics: [
       {label:'Avg Cloud Cover', series:'cloudCover', agg:'avg', fmt:(v,sys)=>round1(v)+'%', withDate:false},
@@ -1054,26 +1015,12 @@ function renderRecordsPanel(){
   const sys = SYSTEMS[currentSystem];
   const category = RECORDS_CATEGORIES[currentCategory];
   const row = document.getElementById('recordsPeriodsRow');
-  if(!row) return; // records section not mounted/visible yet -- nothing to update
+  if(!row) return;
   if(!category){
     row.innerHTML = '<div class="text-center">' + DivumWXI18N.t('Select a category to see records.') + '</div>';
     return;
   }
-  // charts.json's plain Max/Min/Avg series (e.g. outTempMax, windGustMax)
-  // are DAILY aggregates -- one point per calendar day, dated at day's
-  // end. For every period except "Day" that's exactly right (each
-  // period slices N of those daily points). But for "Day", a calendar
-  // day still in progress has no finished daily point yet -- "the last 1
-  // point" from that series is actually the most recently *completed*
-  // day, which this code was mislabelling with today's date.
-  // records.html's own dayRecord() already gets this right by preferring
-  // intraday data instead; mirror that here via each metric's explicit
-  // daySeries (set below, only where the feed actually has an intraday
-  // field -- see the per-metric comments for which). Deriving the name
-  // programmatically (e.g. stripping "Max" and appending "Hourly") was
-  // tried and rejected: the feed's casing isn't consistent enough for
-  // that (UVMax's intraday counterpart is "uvHourly", lowercase u), so
-  // explicit beats clever here.
+
   row.innerHTML = RECORDS_PERIODS.map(period => {
     const tiles = category.metrics.map(metric => {
       const label = DivumWXI18N.t(metric.label);
@@ -1082,13 +1029,7 @@ function renderRecordsPanel(){
       }
       let seriesName = metric.series, sliceDays = period.days;
       if (period.key === 'day' && metric.daySeries) {
-        // The intraday series is already scoped to the rolling last-24h
-        // window, so take every point in it rather than re-slicing by a
-        // day count (which counts POINTS, not time, and would just cut
-        // off most of a day's worth of samples). This tile is labelled
-        // "24hr" rather than "Day" precisely because it's this rolling
-        // window, not a calendar day -- it can span parts of two
-        // different days, which is by design, not a bug.
+
         seriesName = metric.daySeries;
         sliceDays = Infinity;
       }
@@ -1340,8 +1281,6 @@ function chartColors(){
   return {
     text: cssVar('--bs-body-color'),
 
-
-
     grid: isDarkTheme() ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)',
     tempHigh: cssVar('--bw-danger'),
     tempLow:  cssVar('--bw-sky'),
@@ -1365,10 +1304,8 @@ function getTooltipBgColor() {
     return 'rgba(20,20,25,0.9)';
   }
 
-
   return 'rgba(204,218,246,0.97)';
 }
-
 
 const VALID_CATS = [...Object.keys(CHART_CATEGORIES), 'aurora', 'meteogram', 'windrose'];
 function getInitialCategory(){
@@ -1418,11 +1355,6 @@ function applyTabLabels(){
 const TIMEFRAME_LABELS = { day:'24hr', week:'Week', month:'Month', year:'Year' };
 applyTabLabels();
 
-// METAR cross-link — only relevant (and only shown) when this page is
-// loaded embedded as the Cloud & Visibility chart modal, mirroring the
-// same button added to modalMetar.html. Reuses the parent page's own
-// chartModalOpen(link) function rather than window.open, so it swaps the
-// shared chart-modal iframe in place instead of stacking a second modal.
 (function setUpMetarCrossLink(){
   if (document.documentElement.dataset.embed !== '1' || currentCategory !== 'cloud') return;
   var bar = document.getElementById('cloudCrossLinkBar');
@@ -1444,7 +1376,6 @@ applyTabLabels();
   });
 })();
 
-
 function populateHistoricalYears(){
   const sel = document.getElementById('chartHistYear');
   if(!dataSeries) return;
@@ -1465,7 +1396,6 @@ function populateHistoricalYears(){
   }
 }
 
-
 function setActiveTimeframeButton(){
   document.querySelectorAll('.chart-tf-btn').forEach(btn=>{
     btn.classList.toggle('active', btn.dataset.tf === currentTimeframe);
@@ -1473,14 +1403,9 @@ function setActiveTimeframeButton(){
   document.getElementById('chartHistYear').classList.toggle('active', currentTimeframe === 'historical');
 }
 
-
 // ===================== D3 rendering engine =====================
-// Replaces the ECharts renderHourly/renderDaily/renderAuroraChart/getChart from charts.html.
-// Meteogram's D3 renderer (renderMeteogramD3) lives further up, right after its data-parsing
-// code — it re-implements the weather icons, day/night ticks, and wind barbs that the ECharts
-// version built via convertToPixel graphics, using SVG coordinates directly instead.
 
-let hiddenSeries = new Set(); // legend toggles, keyed by series name, reset per category switch
+let hiddenSeries = new Set();
 
 function seriesColor(d, colors){ return (d.color && d.color.startsWith('#')) ? d.color : (colors[d.color] || colors.tempAvg); }
 
@@ -1493,18 +1418,10 @@ function barColorForCount(val){
 }
 
 function unitForDef(d, sys){
-  if(d.unit) return ''; // gases already carry their unit in the series name
+  if(d.unit) return '';
   return UNIT_LABELS[d.kind] ? UNIT_LABELS[d.kind](sys) : '';
 }
 
-// Mirrors the special-cased branches from charts.html's tooltipFormatter (both the daily
-// and hourly versions collapsed into one — the branches that don't add real information
-// beyond "value + unit" were dropped since they're equivalent to the fallback anyway).
-// `name` here is always the definition's raw, untranslated English identifier (e.g.
-// 'UV Index', 'Strikes', 'Alder') -- every branch below matches against that fixed
-// English string regardless of site language, exactly as before this file had any i18n
-// wiring at all. Only the two things actually shown to the user -- the series label and
-// the colour-coded severity word inside `extra` -- are translated, at the very end.
 function tooltipRowHTML(name, val, unit, color){
   const displayName = DivumWXI18N.t(name);
   if(val == null) return `<div><span style="color:${color};font-weight:600;">${displayName}</span>: <strong>&mdash;</strong></div>`;
@@ -1531,7 +1448,7 @@ function tooltipRowHTML(name, val, unit, color){
   } else if(/rain|rate/i.test(name)){
     displayVal = round2(val);
   }
-  // extra is "<emoji> <English phrase>" or empty -- translate just the phrase, keep the emoji.
+
   if(extra){
     const spaceAt = extra.indexOf(' ');
     extra = extra.slice(0, spaceAt) + ' ' + DivumWXI18N.t(extra.slice(spaceAt + 1));
@@ -1539,13 +1456,11 @@ function tooltipRowHTML(name, val, unit, color){
   return `<div><span style="color:${color};font-weight:600;">${displayName}</span>: <strong>${displayVal}</strong>${u}${extra?' '+extra:''}</div>`;
 }
 
-// Colour-band backgrounds — mirrors the markArea blocks in charts.html's renderHourly.
-// Only ever used in the hourly view, matching the original (renderDaily never set markArea).
 function bandsFor(d){
   let bands = null;
   if(d.kind === 'uv') bands = [[0,3,'#1F8C3F'],[3,6,'#F7E400'],[6,8,'#F85900'],[8,11,'#D8001D'],[11,15,'#6B49C8']];
   else if(d.kind === 'dist') bands = [[0,1,'#D8001D'],[1,4,'#E36B57'],[4,10,'#D6BE4E'],[10,20,'#6FB6DD'],[20,999,'#5BBB8A']];
-  if(d.name === 'Distance') bands = [[0,5,'#D8001D'],[5,10,'#E36B57'],[10,20,'#D6BE4E'],[20,999,'#6FB6DD']]; // overrides the generic dist bands, same precedence as the original
+  if(d.name === 'Distance') bands = [[0,5,'#D8001D'],[5,10,'#E36B57'],[10,20,'#D6BE4E'],[20,999,'#6FB6DD']];
   return bands;
 }
 function drawBands(g, d, yScale, innerW){
@@ -1602,9 +1517,6 @@ function showTip(html, event){
 }
 function hideTip(){ document.getElementById('chartTooltip').style.display = 'none'; }
 
-// Shared axis-hover overlay (vertical guideline + dot per visible series + tooltip),
-// used by both renderDailyD3 and renderHourlyD3. `yFor(def)` returns the y-scale for a
-// given series definition, so callers with a single axis just return the same scale for all.
 function attachAxisHover(g, svg, {x, seriesData, innerW, innerH, margin, sys, dateFmt, yFor}){
   const domain = x.domain();
   const bisectIndex = (mx) => {
@@ -1808,7 +1720,6 @@ function renderHourlyD3(sys, cat){
     g.append('text').attr('x', innerW-4).attr('y', -8).attr('text-anchor','end').attr('font-size',10).attr('fill', colors.text).text(axisLabel1);
   }
 
-  // Colour bands sit behind the data
   seriesData.forEach(s => drawBands(g, s.def, yFor(s.def), innerW));
 
   const lineGen = yScale => d3.line().defined(v => v != null).x((v,i) => x(i)).y(v => yScale(v)).curve(d3.curveMonotoneX);
@@ -1997,15 +1908,10 @@ function renderChart(){
   }
 }
 
-// Redraw the D3 chart on container resize (D3 has no chart.resize() equivalent).
-// Meteogram manages its own resize via the ECharts instance's window listener, so skip it here.
 new ResizeObserver(() => { if(currentCategory !== 'meteogram') renderChart(); }).observe(document.getElementById('chartContainer'));
 
-
 // ===================== Wind Rose (adapted from modalWindRose-d3.html) =====================
-// Reuses the same dataSeries this page already fetches from charts.json, rather than a
-// separate fetch — the modal version loaded charts.json on its own since it's a standalone
-// popup, but here we're already polling it for the other tabs.
+
 const WR_DIR_FIELD_CANDIDATES = ['windDirAvg', 'windDirVecAvg', 'windDir'];
 const WR_BINS = [
   { label:'< 1.5',  cs:'rgba(255,107,107,0.22)', cg:'rgba(232,163,61,0.28)' },
@@ -2018,9 +1924,7 @@ const WR_BINS = [
 const WR_BIN_MAX = [1.5, 3.3, 5.5, 8.0, 11.0, Infinity];
 const WR_DIRS_16 = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
 const WR_COMPASS_8 = ['N','NE','E','SE','S','SW','W','NW'];
-// Beaufort has no sensible "×factor" mapping onto a speed-range bin label, so the rose
-// deliberately falls back to displaying m/s when the dashboard's unit system is Beaufort —
-// matching the original modal's behaviour.
+
 const WR_CONV_FACTOR = { mph: 2.23694, kmh: 3.6, kt: 1.94384, ms: 1, bf: 1 };
 const WR_CONV_LABEL  = { mph: 'mph', kmh: 'km/h', kt: 'kt', ms: 'm/s', bf: 'm/s' };
 
@@ -2127,7 +2031,7 @@ function drawRoseD3(containerId, roseData, isGust, dataReady, dirFieldMissing){
     g.append('circle').attr('r',r).attr('fill','none').attr('stroke',TC.ring).attr('stroke-width',0.8);
     const pct = Math.round((i/4) * (maxCount/total) * 100);
     g.append('text').attr('x',0).attr('y',-r-4).attr('text-anchor','middle')
-      .attr('font-size',9).attr('font-family','system-ui, sans-serif').attr('fill',TC.ringTxt).text(pct + '%');
+      .attr('font-size',9).attr('font-family',"'Lexend', system-ui, sans-serif").attr('fill',TC.ringTxt).text(pct + '%');
   }
   for(let i=0; i<16; i++){
     const a = (i/16) * 2 * Math.PI;
@@ -2164,7 +2068,7 @@ function drawRoseD3(containerId, roseData, isGust, dataReady, dirFieldMissing){
     const a = (i/8) * 2 * Math.PI;
     g.append('text').attr('x', Math.sin(a)*labR).attr('y', -Math.cos(a)*labR)
       .attr('text-anchor','middle').attr('dominant-baseline','middle')
-      .attr('font-family','system-ui, sans-serif')
+      .attr('font-family',"'Lexend', system-ui, sans-serif")
       .attr('font-size', lbl==='N' ? 13 : 11).attr('font-weight', lbl==='N' ? 'bold' : 'normal')
       .attr('fill', lbl==='N' ? (isGust?'#D3A94C':'#FF6B6B') : TC.cardTxt)
       .text(DivumWXI18N.t(lbl));
@@ -2294,7 +2198,6 @@ document.querySelector('.chart-tf-btn[data-wrperiod="week"]').classList.add('act
 
 new ResizeObserver(() => { if(currentCategory === 'windrose') renderWindRoseD3(); }).observe(document.getElementById('windroseWrap'));
 
-
 // ===================== Wiring =====================
 document.querySelectorAll('.records-tab').forEach(btn=>{
   btn.addEventListener('click', ()=>{
@@ -2329,7 +2232,6 @@ document.getElementById('chartHistYear').addEventListener('click', ()=>{
 });
 document.querySelectorAll('.records-tab').forEach(b=>b.classList.toggle('active', b.dataset.cat===currentCategory));
 
-
 const root = document.documentElement;
 let themeMode = localStorage.getItem('dashboardThemeMode') || 'auto';
 let lastIsDay = null;
@@ -2346,19 +2248,13 @@ function resolveAutoIsDay(){
   return !window.matchMedia('(prefers-color-scheme: dark)').matches;
 }
 function resolveTheme(){
-  // Seasonal is a fixed standalone theme, never affected by day/night auto-switching.
+
   if (themeMode === 'seasonal') return 'light';
   return themeMode==='light' ? 'light' : themeMode==='dark' ? 'dark' : (resolveAutoIsDay() ? 'light' : 'dark');
 }
 function applyTheme(){
   root.setAttribute('data-bs-theme', resolveTheme());
-  // Seasonal accent mode retired site-wide -- was: currentSeason =
-  // applySeasonClass(themeMode). That function no longer exists
-  // anywhere on the site; the leftover call here threw
-  // 'applySeasonClass is not defined' on every applyTheme() call,
-  // which (since applyTheme() runs before includeHTML()'s callback on
-  // this page) silently prevented the navbar from ever loading at all
-  // -- not a siteHeader.js problem, a much older dead-code reference.
+
   currentSeason = null;
   syncThemeNavUI();
   renderChart();
@@ -2409,10 +2305,6 @@ setInterval(pollIsDayForTheme, THEME_ISDAY_POLL_MS);
 
 const STATION_TITLE_JSON_URL = './jsondata/archive.json';
 
-// Card <-> sensor mapping, inlined directly in this page -- see
-// records.html's copy of this same table for why it's duplicated rather
-// than shared from one file (a shared file silently failed in the field
-// when it wasn't deployed alongside the pages referencing it).
 const DIVUMWX_CARD_TO_BASES = {
   cardTemperature:            ['outTemp', 'outDew'],
   cardHumidity:                ['outHumid'],
@@ -2443,22 +2335,6 @@ function isBaseCardEnabled(base, enabledCards) {
   return enabledCards.indexOf(card) !== -1;
 }
 
-// Maps each .records-tab category to the card(s) whose data it draws
-// from. Categories are deliberately NOT all mapped:
-//   - 'cloud' mixes cloudCover (no dedicated card) with lightDist
-//     (cardLightning) purely to approximate visibility -- gating this
-//     tab on cardLightning would hide "Cloud & Visibility" because
-//     Lightning was disabled, which would make no sense to a user. Left
-//     always visible.
-//   - 'aurora' / 'meteogram' / 'windrose' aren't backed by a selectable
-//     card at all. Left always visible.
-//   - 'rain' uses only 'rain'/'rainHourly'/'rainRateHourly' -- there is
-//     no piezo-rain (prain) variant anywhere in CHART_CATEGORIES, so
-//     this gates on cardTippingRain specifically. A piezo-only station
-//     getting an empty rain chart here is a pre-existing gap in this
-//     page (it never drew piezo data), not something papered over.
-//   - 'solaruv' combines UV and Solar Radiation, which have separate
-//     cards -- shown if EITHER is enabled.
 const TAB_CATEGORY_BASES = {
   temperature: { any: ['outTemp'] },
   wind:        { any: ['windSpeed'] },
@@ -2470,7 +2346,7 @@ const TAB_CATEGORY_BASES = {
   airquality:  { any: ['pm2_5'] },
   gases:       { any: ['co2'] },
 };
-let ENABLED_CARDS = null; // null = unknown yet / fetch failed -- fail open
+let ENABLED_CARDS = null;
 
 function applyTabVisibility(){
   let currentTabHidden = false;
@@ -2513,8 +2389,6 @@ function setStationTitle(){
     })
     .catch(e => console.warn('Re-ImaginedWX charts: station_location/enabled_cards fetch failed —', e.message));
 }
-
-// includeHTML() now lives in siteHeader.js -- one shared copy.
 
 includeHTML(() => {
   initSharedHeader();

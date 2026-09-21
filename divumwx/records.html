@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# records.html version 0.0.1
+# records.html version 1.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -11,7 +11,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Records — DivumWX</title>
-<link rel="stylesheet" href="header.css?v=s3n2026i">
+<link rel="stylesheet" href="header.css?v=s3n2026k">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 
 :root {
@@ -42,22 +45,17 @@ body.dark {
   --bs-secondary-color: #8B93B8;
   --bw-accent: #D3A94C;
   --bs-border-color: #2A3358;
-  /* header.css's shared nav header/menu background reads --dark-bg (see
-     the seasonal palette comment in header.css) — without an override
-     here it stays pinned at the :root value above (#FFFFFF), so the
-     header/hamburger menu stay light-styled even in dark mode. */
+
   --dark-bg: var(--dark-card);
 }
-/* --dark-card is local to this page (record-card / search box background);
-   header.css's shared seasonal palette doesn't know about it, so mirror the
-   same dark-mode tints here. */
+
 body.dark.season-winter { --dark-card: #24312a; }
 body.dark.season-spring { --dark-card: #26301f; }
 body.dark.season-summer { --dark-card: #332c16; }
 body.dark.season-autumn { --dark-card: #2c2118; }
 body {
   margin: 0;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: 'Lexend', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   transition: background 0.3s, color 0.3s;
 }
 
@@ -200,25 +198,12 @@ table.records-table {
   DivumWXI18N.applyLabel(document.getElementById('recordsSubtitle'),
     'Max, min and average for every measured value \u2014 day, week, month, year and all\u2011time.');
   DivumWXI18N.applyAttr(document.getElementById('metricSearch'), 'placeholder', 'Filter by name (e.g. temperature, wind, PM2.5)\u2026');
-  // recordsStatus and recordsLegend are NOT here -- both are fully
-  // rewritten by loadRecords() once the fetch resolves (or fails), and
-  // that function itself is translated below, so the initial static text
-  // is only ever momentarily visible before the fetch completes.
+
 })();
 </script>
 <script>
 // ==== THEME HANDLING ====
-// Deliberately the very first thing in <body>, before .container (navbar
-// include + page content) can paint. Previously this whole block lived
-// further down, and — worse — there was no immediate top-level call to
-// applyDashboardTheme() at all: it only ran once includeHTML()'s
-// navbar.html fetch resolved, in the callback near the bottom of the
-// page. That's what caused the flash: body stayed class="light" (the
-// static HTML default) for however long that network request took.
-// Logic below is otherwise unchanged; includeHTML()'s callback still
-// calls applyDashboardTheme() again once the navbar exists, purely to
-// set the #themeToggle button's icon/title (this early call already
-// no-ops that part, since the button doesn't exist yet).
+
 const STATION_LAT = 51.94;
 const STATION_LON = -0.987;
 const THEME_KEY = 'dashboardThemeMode';
@@ -296,15 +281,6 @@ function applyDashboardTheme() {
   document.body.classList.remove('light', 'dark');
   document.body.classList.add(resolved);
 
-  // Seasonal accent mode retired site-wide -- see header.js's
-  // applySeasonClass() for the full rationale. This page has its own
-  // independent inline implementation (doesn't call the shared
-  // header.js function at all), so it needed the identical no-op
-  // treatment applied directly here. currentSeason kept as a variable
-  // (always null now) since it's still referenced below (themechange
-  // event detail, theme-toggle button label) and those call sites
-  // already handle null correctly -- every other themeMode already
-  // exercises that same null path today.
   const currentSeason = null;
 
   const btn = document.getElementById('themeToggle');
@@ -330,8 +306,6 @@ function pollIsDayForTheme() {
     .catch(e => console.warn('records: loop.json poll (theme) failed —', e.message));
 }
 
-// Applied immediately, synchronously, before anything else in <body> is
-// parsed — this is what prevents the flash.
 applyDashboardTheme();
 pollIsDayForTheme();
 setInterval(pollIsDayForTheme, THEME_ISDAY_POLL_MS);
@@ -359,24 +333,9 @@ setInterval(() => {
 
 <script src="units.js"></script>
 <script>
-// NAV_UNIT_KEY/NAV_UNIT_LABELS now come from siteHeader.js -- removed
-// the identical const declarations that used to be here (as UNIT_KEY/
-// UNIT_LABELS). They MUST come from there now, not be redeclared: a
-// later const/let redeclaring an existing var of the same name in the
-// same scope is a SyntaxError that would take out this page's entire
-// script block, including the records engine below. siteHeader.js uses
-// the NAV_-prefixed names specifically to avoid colliding with any
-// page's own same-named globals (charts-d3.html has its own unrelated
-// UNIT_LABELS, for instance) -- this page's references below were
-// updated to match.
+
 let currentUnitSystem = localStorage.getItem(NAV_UNIT_KEY) || 'uk';
-// This page's own populateUnitSelector() overrides siteHeader.js's
-// generic one (last function declaration with a given name wins, so
-// initSharedHeader()'s internal call to populateUnitSelector() picks up
-// THIS version) -- kept here rather than folded into the shared file
-// because it has page-specific side effects the generic version
-// shouldn't have: tracking currentUnitSystem and calling renderAll() to
-// actually refresh the records table when units change.
+
 function populateUnitSelector() {
   const select = document.getElementById('unitSystem');
   if (!select) return;
@@ -404,23 +363,8 @@ function currentSystemConfig() {
 }
 
 const ARCHIVE_JSON_URL = './jsondata/archive.json';
-var ENABLED_CARDS = null; // null = unknown yet / fetch failed -- fail open (show everything)
+var ENABLED_CARDS = null;
 
-// Card <-> sensor mapping, inlined directly in this page rather than a
-// shared external file. A shared cardSensorMap.js was tried first and
-// silently failed in the field -- when it wasn't deployed alongside the
-// pages that referenced it, every isBaseCardEnabled() call threw a plain
-// ReferenceError, which fails with no visible symptom at all (no crash,
-// nothing on screen -- gauges/tabs/records just stay visible, exactly as
-// if the feature didn't exist). Duplicating this small table in every
-// page that needs it costs a little repetition but removes that whole
-// failure mode -- there's no second file to forget to deploy.
-//
-// DELIBERATELY UNMAPPED (left always shown, never hidden): airDen (air
-// density -- a software calculation, not a discrete sensor with its own
-// card), cloudCover, solarGeneration/solarExport (no confirmed dedicated
-// card name for these in any enabled_cards sample seen). Guessing a card
-// name for these risks hiding legitimate data, so they're left alone.
 var DIVUMWX_CARD_TO_BASES = {
   cardTemperature:            ['outTemp', 'outDew'],
   cardHumidity:                ['outHumid'],
@@ -447,7 +391,7 @@ Object.keys(DIVUMWX_CARD_TO_BASES).forEach(function(card){
 function isBaseCardEnabled(base, enabledCards) {
   if (!Array.isArray(enabledCards) || enabledCards.length === 0) return true;
   var card = DIVUMWX_BASE_TO_CARD[String(base).toLowerCase()];
-  if (!card) return true; // unmapped base -- see DELIBERATELY UNMAPPED above
+  if (!card) return true;
   return enabledCards.indexOf(card) !== -1;
 }
 
@@ -467,10 +411,6 @@ function setStationTitle() {
     .catch(e => console.warn('records: station_location/enabled_cards fetch failed —', e.message));
 }
 
-// includeHTML, populateLanguageSelector, and translateNavbar all now
-// live in siteHeader.js -- one shared copy for every page, instead of
-// this page's own separate copies.
-
 window.addEventListener('storage', e => {
   if (e.key === THEME_KEY) applyDashboardTheme();
 });
@@ -486,10 +426,6 @@ includeHTML(() => {
   applyDashboardTheme();
   setStationTitle();
 });
-
-/* ============================================================
-   RECORDS ENGINE
-   ============================================================ */
 
 const METRICS = [
   { base: 'outTemp',        label: 'Outside Temperature',  category: 'Temperature & Humidity', family: 'temp' },
@@ -534,7 +470,6 @@ const METRICS = [
 ];
 const CATEGORY_ORDER = ['Temperature & Humidity', 'Wind', 'Rain', 'Pressure', 'Solar & UV', 'Air Quality', 'Pollen', 'Other'];
 
-// -- key parsing: base + kind (max/min/avg/raw) + granularity (hourly/daily) --
 function parseSeriesKey(key) {
   const suffixMap = [
     ['MaxHourly', 'max', 'hourly'], ['MinHourly', 'min', 'hourly'], ['AvgHourly', 'avg', 'hourly'],
@@ -554,8 +489,6 @@ function prettifyBase(base) {
 }
 
 function buildSeriesIndex(rawSeriesObjects) {
-
-
 
   const index = {};
   rawSeriesObjects.forEach(seriesObj => {
@@ -584,38 +517,17 @@ function reduceExtreme(pts, cmp) {
 const reduceMax = pts => reduceExtreme(pts, (a, b) => a > b);
 const reduceMin = pts => reduceExtreme(pts, (a, b) => a < b);
 
-// MONTHS_FULL reuses the same full month-name keys already defined for
-// climate.html (January, February, ... -- normal-case, suits inline use
-// here directly). MONTHS_SHORT is a NEW, separate mixed-case set
-// (Jan, Feb, ...) rather than reusing climate.html's own short-month
-// keys, which are ALL-CAPS (JAN, FEB, ...) for that page's NOAA-report
-// style -- shouting "6 JAN" inline in a sentence here would look wrong.
 const MONTHS_FULL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function fmtDayShort(d) {
   return d.getUTCDate() + ' ' + DivumWXI18N.t(MONTHS_SHORT[d.getUTCMonth()]);
 }
-// Converts a real epoch timestamp into the same "fake UTC" representation
-// stationNow() uses, so every date/time this page displays -- whether it's
-// "now" or when a specific record happened -- is consistently in the
-// station's own timezone, not whichever timezone the visitor's browser
-// happens to be in.
+
 function tsToStationDate(ts){
   var p = stationParts(new Date(ts));
   return new Date(Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second));
 }
-// Constructs a Date object whose UTC-getter fields (getUTCFullYear,
-// getUTCMonth, getUTCDate, getUTCDay, ...) represent the station's own
-// wall-clock date/time, rather than the plain `new Date()` this file
-// used before -- which always reports its LOCAL calendar fields in the
-// *visitor's* browser timezone, not the station's. Near any day/week/
-// month/year boundary, a visitor in a different timezone than the
-// station was seeing records bucketed into the wrong period entirely
-// (e.g. "this week" starting a day early or late) -- not just a display
-// oddity, a real difference in which data points counted. Every
-// function that consumes this "fake UTC" Date must keep using UTC
-// getters/Date.UTC() throughout, never local ones, or the two domains
-// get mixed and shift results by the browser's own offset again.
+
 function stationParts(date){
   var parts = {};
   new Intl.DateTimeFormat('en-GB', {
@@ -641,11 +553,7 @@ function buildPeriods(now) {
   const monthEnd = Date.UTC(y, m + 1, 1, 0, 0, 0, 0);
   const yearStart = Date.UTC(y, 0, 1, 0, 0, 0, 0);
   const yearEnd = Date.UTC(y + 1, 0, 1, 0, 0, 0, 0);
-  // fmtRange previously called toLocaleDateString('en-GB', {month:'short'})
-  // directly -- the browser's own English locale formatting, completely
-  // untouched by DivumWXI18N regardless of the site's selected language
-  // (same bug class as elsewhere on this site). fmtDayShort above routes
-  // the month name through t() instead.
+
   const fmtRange = (a, b) => fmtDayShort(a) + '\u2013' + fmtDayShort(b);
   return {
     day:   { start: null, end: null, label: DivumWXI18N.t('Last 24 hours') },
@@ -720,7 +628,6 @@ function computeRecords(entry, periods) {
   return out;
 }
 
-// -- unit conversion / formatting --
 function convertValue(value, family) {
   if (value == null || isNaN(value)) return { text: '—', unit: '' };
   const sys = currentSystemConfig();
@@ -812,7 +719,7 @@ function renderStatusAndLegend(){
     statusEl.textContent = DivumWXI18N.t('Could not load charts.json \u2014') + ' ' + lastLoadError;
     return;
   }
-  if (lastLoadCount == null) return; // still loading -- static placeholder text stands
+  if (lastLoadCount == null) return;
   statusEl.textContent = lastLoadCount + ' ' + DivumWXI18N.t('measured values loaded from charts.json.');
   document.getElementById('recordsLegend').innerHTML =
     '<p>' + DivumWXI18N.t('Week runs Monday\u2013Sunday, month and year are calendar periods. "24hr" is a rolling last 24 hours using real hour-by-hour timestamps.') + '</p>' +
@@ -834,16 +741,12 @@ function renderAll() {
   METRICS.forEach(metric => {
     const entry = SERIES_INDEX[metric.base.toLowerCase()];
     if (!entry) return;
-    // Mark as "used" regardless of enabled state -- otherwise a
-    // recognised-but-disabled base would fall through into the
-    // leftovers/"unrecognised" section below instead of being hidden.
+
     usedBases.add(metric.base.toLowerCase());
     if (!isBaseCardEnabled(metric.base, ENABLED_CARDS)) return;
     const records = computeRecords(entry, periods);
     byCategory[metric.category].push(renderMetricCard(metric, records, periods));
   });
-
-
 
   const leftovers = Object.keys(SERIES_INDEX).filter(b => !usedBases.has(b)).sort();
   if (leftovers.length) {
