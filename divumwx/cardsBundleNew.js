@@ -11115,6 +11115,7 @@ try {
     var battState   = (v.batteryPower === null) ? 'grey' : (v.batteryPower < 0 ? 'amber' : (v.batteryPower > 0 ? 'green' : 'grey'));
     var battColor   = COLORS[battState === 'grey' ? 'grey' : battState];
     var gridColor   = COLORS[gridState2 === 'grey' ? 'grey' : gridState2];
+    var gridLabel   = (v.gridPower !== null && v.gridPower < 0) ? 'Export' : 'Grid';
 
     var svg = '<svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;top:0;left:0;width:100%;height:100%;">' +
       buildLine('solar', 'inv', solarState, false) +
@@ -11132,10 +11133,10 @@ try {
       '<span style="'+HERO_TEXT_WRAP+'"><span style="'+HERO_VALUE_STYLE+'">'+fmtPower(v.pvPower)+'</span>' +
       '<span style="'+HERO_LABEL_STYLE+'" data-i18n-label="Solar PV"></span></span></div>';
 
-    html += '<div class="seh-node" style="'+nodeStyle(NODES.grid)+'" data-i18n-title="Grid">' +
+    html += '<div class="seh-node" style="'+nodeStyle(NODES.grid)+'" data-i18n-title="'+gridLabel+'">' +
       '<span style="'+HERO_ICON_WRAP+'">'+iconPylon(gridColor)+'</span>' +
       '<span style="'+HERO_TEXT_WRAP+'"><span style="'+HERO_VALUE_STYLE+'">'+fmtPower(v.gridPower)+'</span>' +
-      '<span style="'+HERO_LABEL_STYLE+'" data-i18n-label="Grid"></span></span></div>';
+      '<span style="'+HERO_LABEL_STYLE+'" data-i18n-label="'+gridLabel+'"></span></span></div>';
 
     html += '<div class="seh-node" style="'+nodeStyle(NODES.inv)+HERO_INVERTER_STYLE+'" data-i18n-title="Inverter">' +
       '<span style="width:18px;height:22px;flex:0 0 auto;">'+iconInverterGlyph()+'</span>' +
