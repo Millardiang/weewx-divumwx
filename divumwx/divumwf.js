@@ -321,17 +321,72 @@ async function geocodeSearch(query){
 }
 function resultToLocation(r){
   const parts = [r.name, r.admin1, r.country].filter((v,i,arr)=> v && arr.indexOf(v)===i);
-  return { label: parts.join(', '), latitude:r.latitude, longitude:r.longitude, source:'geocode' };
+  return { label: parts.join(', '), latitude:r.latitude, longitude:r.longitude, source:r.source || 'geocode' };
+}
+
+// ===================== UK postcode search (postcodes.io) =====================
+// Open-Meteo's geocoder is a place-name gazetteer -- it doesn't resolve
+// postcodes. Matches full ("SW1A 1AA") and partial/outward ("SW1A", "M1")
+// UK postcodes, tolerating case, no space, and irregular spacing, so
+// results start appearing while the user is still typing.
+const UK_POSTCODE_PARTIAL_RE = /^[A-Z]{1,2}\d[A-Z\d]?(\s*\d[A-Z]{0,2})?$/i;
+const UK_POSTCODE_FULL_RE = /^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i;
+function normalizePostcodeQuery(query){
+  return query.trim().replace(/\s+/g, ' ').toUpperCase();
+}
+function looksLikeUkPostcode(query){
+  const s = normalizePostcodeQuery(query);
+  return s.length >= 2 && s.length <= 8 && UK_POSTCODE_PARTIAL_RE.test(s);
+}
+function postcodeResultToEntry(r){
+  // Ward is the finer-grained area; district/region is what it sits in --
+  // same granular-first, no-repeat pairing as reverseGeocode() below.
+  const ward = r.admin_ward;
+  const district = r.admin_district || r.region || '';
+  const admin1 = ward && district && ward !== district ? `${ward}, ${district}` : (district || ward || '');
+  return {
+    name: r.postcode,
+    admin1,
+    country: 'United Kingdom',
+    latitude: r.latitude,
+    longitude: r.longitude,
+    source: 'postcode',
+  };
+}
+async function postcodeSearch(query){
+  const s = normalizePostcodeQuery(query);
+  if(UK_POSTCODE_FULL_RE.test(s)){
+    // A complete postcode gets its own exact lookup -- pins that
+    // postcode's real address point instead of a fuzzy nearby match.
+    const url = `https://api.postcodes.io/postcodes/${encodeURIComponent(s)}`;
+    const res = await fetch(url);
+    if(res.status === 404) return [];
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const j = await res.json();
+    return j.result ? [postcodeResultToEntry(j.result)] : [];
+  }
+  // Partial/outward code: fuzzy autocomplete-style search, several candidates.
+  const url = `https://api.postcodes.io/postcodes?q=${encodeURIComponent(s)}`;
+  const res = await fetch(url);
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  const j = await res.json();
+  return (j.result || []).map(postcodeResultToEntry);
 }
 async function reverseGeocode(lat, lon){
   try{
-    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&addressdetails=1`;
+    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=14&addressdetails=1`;
     const res = await fetch(url, {headers:{'Accept':'application/json'}});
     if(!res.ok) throw new Error('HTTP '+res.status);
     const j = await res.json();
     const a = j.address || {};
-    const place = a.city || a.town || a.village || a.suburb || a.county || j.name;
-    const region = a.state || a.county || '';
+    // Most granular first (neighbourhood/suburb), then the settlement it
+    // sits in if that's a different name, then region/country.
+    const granular = a.neighbourhood || a.quarter || a.suburb || a.city_district || a.hamlet;
+    const settlement = a.city || a.town || a.village || a.municipality;
+    const place = granular && settlement && granular !== settlement
+      ? `${granular}, ${settlement}`
+      : (granular || settlement || a.county || j.name);
+    const region = a.state || (settlement ? a.county : '') || '';
     const country = a.country || '';
     return [place, region, country].filter(Boolean).join(', ') || null;
   }catch(e){
