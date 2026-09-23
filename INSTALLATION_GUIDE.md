@@ -50,7 +50,7 @@ sudo apt install python3-skyfield python3-requests
 ### Install or upgrade
 
 ```
-sudo weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/heads/ver101.zip
+sudo weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/heads/main.zip
 sudo systemctl restart weewx
 sudo weectl report run DivumWXReport
 ```
@@ -71,6 +71,7 @@ sudo journalctl -u weewx -n 100 --no-pager | grep -i divumwx
 cd /etc/weewx
 sudo python3 divumwx_uninstall_helper.py
 sudo weectl extension uninstall divumwx
+sudo systemctl restart weewx
 ```
 
 ---
@@ -95,7 +96,7 @@ sudo mkdir -p /var/www/html/divumwx
 sudo chown -R $(whoami):$(whoami) /var/www/html/divumwx
 
 source ~/weewx-venv/bin/activate
-weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/heads/ver101.zip
+weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/heads/main.zip
 sudo systemctl restart weewx
 weectl report run DivumWXReport
 ```
@@ -107,6 +108,7 @@ source ~/weewx-venv/bin/activate
 cd ~/weewx-data
 python3 divumwx_uninstall_helper.py
 weectl extension uninstall divumwx
+sudo systemctl restart weewx
 ```
 
 ---
