@@ -10621,7 +10621,7 @@ try {
 
   var gridText      = addChipRow('Grid', { wrap: true });
   var batteryText    = addChipRow('Battery', { wrap: true });
-  var loadText          = addChipRow('House Load');
+  var loadText          = addChipRow('Total Load');
   var dailyEnergyText       = addChipRow('Solar Daily Energy');
   var dailyExportText          = addChipRow('Grid Daily Export');
   var efficiencyText              = addChipRow('PV Efficiency');
@@ -10660,7 +10660,7 @@ try {
     gridText.textContent = v.gridState + ' ' + fmtPower(v.gridPower);
     batteryText.textContent = v.batteryState + ' ' + fmtPower(v.batteryPower) + ', ' +
       (typeof v.batterySOC === 'number' ? v.batterySOC.toFixed(0) : '\u2014') + '%';
-    loadText.textContent = fmtPower(v.loadPower);
+    loadText.textContent = fmtPower(v.totalLoadPower);
     dailyEnergyText.textContent = fmtEnergy(v.solarDailyEnergy);
     dailyExportText.textContent = fmtEnergy(v.gridDailyExport);
     efficiencyText.textContent = (typeof v.pvEfficiency === 'number' && !isNaN(v.pvEfficiency))
@@ -10703,7 +10703,9 @@ try {
 
       var pvPower       = num(topicValue(solarData, 'solar_assistant/inverter_1/pv_power/state'));
       var gridPowerRaw   = num(topicValue(solarData, 'solar_assistant/inverter_1/grid_power/state'));
-      var loadPower       = num(topicValue(solarData, 'solar_assistant/inverter_1/load_power/state'));
+      // Solar Assistant's load_power_non-essential reading is the TOTAL (house + UPS) on this
+      // inverter; load_power is the house load without the UPS (non-essential = load_power + essential).
+      var totalLoadPower  = num(topicValue(solarData, 'solar_assistant/inverter_1/load_power_non-essential/state'));
       var batteryPowerRaw   = num(topicValue(solarData, 'solar_assistant/total/battery_power/state'));
       var batterySOC             = num(topicValue(solarData, 'solar_assistant/total/battery_state_of_charge/state'));
       var pvEnergyToday               = num(topicValue(solarData, 'solar_assistant/total/pv_energy/state'));
@@ -10739,7 +10741,7 @@ try {
         batterySOC: batterySOC,
         gridState: gridState,
         gridPower: gridPowerRaw,
-        loadPower: loadPower,
+        totalLoadPower: totalLoadPower,
         solarDailyEnergy: pvEnergyToday,
         gridDailyExport: gridEnergyOutToday
       });
@@ -11079,7 +11081,7 @@ try {
 
   var gridText      = addChipRow('Grid', { wrap: true });
   var batteryText    = addChipRow('Battery', { wrap: true });
-  var loadText          = addChipRow('House Load');
+  var loadText          = addChipRow('Total Load');
   var dailyEnergyText       = addChipRow('Solar Daily Energy');
   var dailyExportText          = addChipRow('Grid Daily Export');
   var efficiencyText              = addChipRow('PV Efficiency');
@@ -11142,10 +11144,10 @@ try {
       '<span style="width:18px;height:22px;flex:0 0 auto;">'+iconInverterGlyph()+'</span>' +
       '<span style="'+HERO_LABEL_STYLE+'color:var(--bs-body-color);font-weight:600;" data-i18n-label="Inverter"></span></div>';
 
-    html += '<div class="seh-node" style="'+nodeStyle(NODES.load)+'" data-i18n-title="Total Load">' +
+    html += '<div class="seh-node" style="'+nodeStyle(NODES.load)+'" data-i18n-title="House Load">' +
       '<span style="'+HERO_ICON_WRAP+'">'+iconHouse(loadState === 'grey' ? COLORS.grey : '#3ecf6a')+'</span>' +
       '<span style="'+HERO_TEXT_WRAP+'"><span style="'+HERO_VALUE_STYLE+'">'+fmtPower(v.houseLoadPower)+'</span>' +
-      '<span style="'+HERO_LABEL_STYLE+'" data-i18n-label="Total Load"></span></span></div>';
+      '<span style="'+HERO_LABEL_STYLE+'" data-i18n-label="House Load"></span></span></div>';
 
     html += '<div class="seh-node" style="'+nodeStyle(NODES.ups)+'" data-i18n-title="UPS Load">' +
       '<span style="'+HERO_ICON_WRAP+'">'+iconUPS(upsState === 'grey' ? COLORS.grey : '#a970ff')+'</span>' +
@@ -11178,7 +11180,7 @@ try {
     gridText.textContent = v.gridState + ' ' + fmtPower(v.gridPower);
     batteryText.textContent = v.batteryState + ' ' + fmtPower(v.batteryPower) + ', ' +
       (typeof v.batterySOC === 'number' ? v.batterySOC.toFixed(0) : '\u2014') + '%';
-    loadText.textContent = fmtPower(v.loadPower);
+    loadText.textContent = fmtPower(v.totalLoadPower);
     dailyEnergyText.textContent = fmtEnergy(v.solarDailyEnergy);
     dailyExportText.textContent = fmtEnergy(v.gridDailyExport);
     efficiencyText.textContent = (typeof v.pvEfficiency === 'number' && !isNaN(v.pvEfficiency))
@@ -11221,13 +11223,15 @@ try {
 
       var pvPower       = num(topicValue(solarData, 'solar_assistant/inverter_1/pv_power/state'));
       var gridPowerRaw   = num(topicValue(solarData, 'solar_assistant/inverter_1/grid_power/state'));
-      var loadPower       = num(topicValue(solarData, 'solar_assistant/inverter_1/load_power/state'));
+      // Solar Assistant's load_power_non-essential reading is the TOTAL (house + UPS) on this
+      // inverter; load_power is the house load without the UPS (non-essential = load_power + essential).
+      var totalLoadPower  = num(topicValue(solarData, 'solar_assistant/inverter_1/load_power_non-essential/state'));
       var batteryPowerRaw   = num(topicValue(solarData, 'solar_assistant/total/battery_power/state'));
       var batterySOC             = num(topicValue(solarData, 'solar_assistant/total/battery_state_of_charge/state'));
       var pvEnergyToday               = num(topicValue(solarData, 'solar_assistant/total/pv_energy/state'));
       var gridEnergyOutToday               = num(topicValue(solarData, 'solar_assistant/total/grid_energy_out/state'));
 
-      var houseLoadPower       = num(topicValue(solarData, 'solar_assistant/inverter_1/load_power_non-essential/state'));
+      var houseLoadPower  = num(topicValue(solarData, 'solar_assistant/inverter_1/load_power/state'));
       var upsLoadPower       = num(topicValue(solarData, 'solar_assistant/inverter_1/load_power_essential/state'));
 
       var sunAlt = num(alm['almanac.sun.alt']);
@@ -11260,7 +11264,7 @@ try {
         batterySOC: batterySOC,
         gridState: gridState,
         gridPower: gridPowerRaw,
-        loadPower: loadPower,
+        totalLoadPower: totalLoadPower,
         houseLoadPower: houseLoadPower,
         upsLoadPower: upsLoadPower,
         solarDailyEnergy: pvEnergyToday,
