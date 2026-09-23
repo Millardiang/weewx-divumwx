@@ -52,6 +52,7 @@ sudo apt install python3-skyfield python3-requests
 ```
 sudo weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/tags/ver.1.0.1.zip
 sudo systemctl restart weewx
+sudo weectl report run DivumWXReport
 ```
 
 The installer creates `/var/www/html/divumwx` and sets its ownership to the
@@ -96,6 +97,7 @@ sudo chown -R $(whoami):$(whoami) /var/www/html/divumwx
 source ~/weewx-venv/bin/activate
 weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/tags/ver.1.0.1.zip
 sudo systemctl restart weewx
+weectl report run DivumWXReport
 ```
 
 ### Uninstall
