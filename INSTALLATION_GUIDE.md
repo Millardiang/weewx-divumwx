@@ -11,13 +11,6 @@ Tested on Debian 13 (Trixie) with:
 **Always back up your database and `weewx.conf` before installing or upgrading.**
 It is not a nice-to-have; it is a necessity whenever you change your WeeWX installation.
 
-> **Install the tagged release, not `main`.** The download links below point at
-> a fixed release tag. The `main` branch moves as development continues, so
-> installing `main.zip` can give you code newer than, and different from, the
-> release described here. For the newest release, check the
-> [Releases page](https://github.com/Millardiang/weewx-divumwx/releases) and
-> substitute its tag in the URLs below.
-
 ## Before you start
 
 The installer asks several questions. Have these ready:
