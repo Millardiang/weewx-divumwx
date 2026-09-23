@@ -11,6 +11,13 @@ Tested on Debian 13 (Trixie) with:
 **Always back up your database and `weewx.conf` before installing or upgrading.**
 It is not a nice-to-have; it is a necessity whenever you change your WeeWX installation.
 
+> **Install the tagged release, not `main`.** The download links below point at
+> a fixed release tag. The `main` branch moves as development continues, so
+> installing `main.zip` can give you code newer than, and different from, the
+> release described here. For the newest release, check the
+> [Releases page](https://github.com/Millardiang/weewx-divumwx/releases) and
+> substitute its tag in the URLs below.
+
 ## Before you start
 
 The installer asks several questions. Have these ready:
@@ -43,7 +50,7 @@ sudo apt install python3-skyfield python3-requests
 ### Install or upgrade
 
 ```
-sudo weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/heads/main.zip
+sudo weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/tags/ver.1.0.1.zip
 sudo systemctl restart weewx
 sudo weectl report run DivumWXReport
 ```
@@ -89,7 +96,7 @@ sudo mkdir -p /var/www/html/divumwx
 sudo chown -R $(whoami):$(whoami) /var/www/html/divumwx
 
 source ~/weewx-venv/bin/activate
-weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/heads/main.zip
+weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/tags/ver.1.0.1.zip
 sudo systemctl restart weewx
 weectl report run DivumWXReport
 ```
