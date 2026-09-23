@@ -62,6 +62,12 @@ from typing import Any, Dict, Optional
 
 log = logging.getLogger("user.LiveDataService")
 
+try:
+    from user.divumwx_version import DIVUMWX_VERSION
+except ImportError:  # divumwx_version.py missing (partial manual install)
+    DIVUMWX_VERSION = 'unknown'
+logging.getLogger("user.divumwx").info("DivumWX %s loaded", DIVUMWX_VERSION)
+
 if weewx.__version__ < "5":
     raise weewx.UnsupportedFeature("This service requires WeeWX 5.2 or later")
 
@@ -3996,7 +4002,7 @@ class DivumwxExtrasService(StdService):
 #
 ##############################################################################
 
-SKYFIELDLOOPDATA_VERSION = '0.1.0'
+SKYFIELDLOOPDATA_VERSION = '0.1.1'
 
 # Skyfield's seasons()/moon_phases() event codes (see the Skyfield almanac
 # module docs, and confirmed against weewx-skyfield's own SEASON_EVENTS/
@@ -4767,13 +4773,19 @@ class SkyfieldLoopData(StdService):
 
         bodies: Dict[str, Any] = dict(sky.orbs)  # sun, moon, mercury, ... pluto
         for star_name in _NAMED_STARS:
-            entry = sky.stars.get(star_name) if getattr(sky, 'stars', None) else None
+            stars = getattr(sky, 'stars', None)
+            entry = stars.get(star_name) if stars else None
             if entry is None:
                 if not self._warned_missing_stars:
-                    log.warning("SkyfieldLoopData: named star '%s' not available "
-                                "(weewx-skyfield's 'stars' option may be disabled, "
-                                "or this name isn't in its catalog) -- "
-                                "almanac.%s.* will be null." % (star_name, star_name))
+                    if stars is None:
+                        # Expected: no star catalogue is loaded (see
+                        # _NAMED_STARS), so these fields are always null.
+                        log.debug("SkyfieldLoopData: no star catalogue loaded -- "
+                                  "almanac.%s.* is null by design." % star_name)
+                    else:
+                        log.warning("SkyfieldLoopData: named star '%s' not found in the "
+                                    "loaded star catalogue -- almanac.%s.* will be null."
+                                    % (star_name, star_name))
                     self._warned_missing_stars = True
                 bodies[star_name] = None
             else:
