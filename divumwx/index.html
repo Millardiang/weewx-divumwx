@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# index.html version 1.0.0
+# index.html version 1.0.1
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -568,7 +568,7 @@ setInterval(() => {
     </div>
     <div class="footer-center">
       <div class="footer-credit">Charts, Heatmaps, Gauges and Card Images D3 rendered &middot; Weather Icons by Meteocons</div>
-      <div class="footer-version mono">DivumWX v1.0.0 &middot; WeeWX ver <span id="footerWeewxVer">x.x.x</span>, Python ver <span id="footerPyVer">y.y.y</span>, OS version <span id="footerOsVer">z.z.z &middot; Weather Icons by Meteocons</span></div>
+      <div class="footer-version mono">DivumWX v<span id="footerDivumwxVer">1.0.1</span> &middot; WeeWX ver <span id="footerWeewxVer">x.x.x</span>, Python ver <span id="footerPyVer">y.y.y</span>, OS version <span id="footerOsVer">z.z.z &middot; Weather Icons by Meteocons</span></div>
     </div>
     <div class="footer-right">
       <a href="http://weewx.com" title="WeeWX Weather Software" target="_blank" rel="noopener" class="footer-weewx-link">
@@ -848,6 +848,9 @@ function setStationTitle() {
       const loc = data && data.meta && data.meta.station_location;
       const el = document.querySelector('.brand-text');
       if (loc && el) el.textContent = loc;
+      const dvmVer = data && data.meta && data.meta.divumwx_version;
+      const dvmEl = document.getElementById('footerDivumwxVer');
+      if (dvmVer && dvmEl) dvmEl.textContent = dvmVer;
       const weewxVer = data && data.meta && data.meta.software_version;
       const weewxEl = document.getElementById('footerWeewxVer');
       if (weewxVer && weewxEl) weewxEl.textContent = weewxVer;

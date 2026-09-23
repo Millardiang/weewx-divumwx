@@ -71,9 +71,37 @@ import shutil
 import sys
 from datetime import datetime
 
+def _apt_weewx_bindir():
+    """
+    Debian/APT installs put WeeWX's packages in /usr/share/weewx (or
+    WEEWX_BINDIR from /etc/default/weewx) and run them via a /bin/sh
+    wrapper at /usr/bin/weectl, so the system python3 can import them
+    once that directory is on sys.path -- exactly what the wrapper does.
+    """
+    bindir = '/usr/share/weewx'
+    try:
+        with open('/etc/default/weewx') as f:
+            for line in f:
+                line = line.strip()
+                if line.startswith('WEEWX_BINDIR='):
+                    bindir = line.split('=', 1)[1].strip().strip('"\'') or bindir
+    except OSError:
+        pass
+    return bindir
+
+
 try:
     import weecfg
 except ImportError:
+    _bindir = _apt_weewx_bindir()
+    if os.path.isfile(os.path.join(_bindir, 'weecfg', '__init__.py')):
+        sys.path.insert(0, _bindir)
+        try:
+            import weecfg
+        except ImportError:
+            pass
+
+if 'weecfg' not in sys.modules:
     # This script is meant to be run directly ('python3
     # divumwx_uninstall_helper.py'), per install.py's own closing message --
     # but weecfg only exists inside whatever Python environment WeeWX itself
@@ -83,17 +111,16 @@ except ImportError:
     # that's never heard of weecfg (beta report, Gert -- a bare
     # ModuleNotFoundError traceback with no indication of why). Rather than
     # let that traceback stand, try to point at the interpreter that DOES
-    # have it: weectl (WeeWX's own CLI, which imports weecfg successfully
-    # every time it runs) is launched via a shebang line naming that exact
-    # interpreter, so reading it is a reliable way to find the right one
-    # without guessing at venv locations ourselves.
+    # have it: for pip installs, weectl is launched via a shebang line naming
+    # that exact interpreter. (APT installs are handled above; their weectl
+    # is a /bin/sh wrapper, whose shebang is not a Python interpreter.)
     weectl_path = shutil.which('weectl')
     hint = None
     if weectl_path:
         try:
             with open(weectl_path) as f:
                 first_line = f.readline().strip()
-            if first_line.startswith('#!'):
+            if first_line.startswith('#!') and 'python' in first_line:
                 hint = first_line[2:].strip()
         except OSError:
             pass

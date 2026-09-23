@@ -1,10 +1,15 @@
-# Versioning scheme
+## Versioning scheme
 
+- **Release version (authoritative)** — `bin/user/divumwx_version.py`
+  (`DIVUMWX_VERSION`). This is the one number that identifies a DivumWX
+  release: `weectl extension list` reports it, WeeWX logs it at startup,
+  and the dashboard footer displays it (via `archive.json`). Change it
+  there when cutting a release, then run `python3 tools/check_version.py`,
+  which fails if any label below, the guide's download URL or the latest
+  changelog entry disagrees.
 - **Collection version** — tracked in `index.html`'s own header banner
-  (`# index.html version X.Y.Z`). This is the release number for the whole
-  DivumWX collection. Bump it when a set of per-file changes is being
-  called a "release" of the site as a whole — not on every individual file
-  edit.
+  (`# index.html version X.Y.Z`). Always equal to the release version;
+  `tools/check_version.py` enforces this.
 - **Per-file version** — every `.html`, `.js` and `.css` file carries its own
   `# <filename> version X.Y.Z` line in its header banner, and bumps
   independently of the collection version whenever *that file* is amended.
@@ -47,4 +52,3 @@ no-build-step site that typically means:
   page relies on.
 - In practice this should be rare on a site this size — most work here is
   PATCH or MINOR.
-

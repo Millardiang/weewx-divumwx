@@ -1,6 +1,6 @@
 /*
 ##############################################################################################
-# cardsBundleNew.js version 1.0.0
+# cardsBundleNew.js version 1.0.1
 ##############################################################################################
 */
 
@@ -10764,7 +10764,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardSolarEnergyFlow.js version 1.0.0
+# cardSolarEnergyFlow.js version 1.0.1
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -11142,10 +11142,10 @@ try {
       '<span style="width:18px;height:22px;flex:0 0 auto;">'+iconInverterGlyph()+'</span>' +
       '<span style="'+HERO_LABEL_STYLE+'color:var(--bs-body-color);font-weight:600;" data-i18n-label="Inverter"></span></div>';
 
-    html += '<div class="seh-node" style="'+nodeStyle(NODES.load)+'" data-i18n-title="House Load">' +
+    html += '<div class="seh-node" style="'+nodeStyle(NODES.load)+'" data-i18n-title="Total Load">' +
       '<span style="'+HERO_ICON_WRAP+'">'+iconHouse(loadState === 'grey' ? COLORS.grey : '#3ecf6a')+'</span>' +
       '<span style="'+HERO_TEXT_WRAP+'"><span style="'+HERO_VALUE_STYLE+'">'+fmtPower(v.houseLoadPower)+'</span>' +
-      '<span style="'+HERO_LABEL_STYLE+'" data-i18n-label="House Load"></span></span></div>';
+      '<span style="'+HERO_LABEL_STYLE+'" data-i18n-label="Total Load"></span></span></div>';
 
     html += '<div class="seh-node" style="'+nodeStyle(NODES.ups)+'" data-i18n-title="UPS Load">' +
       '<span style="'+HERO_ICON_WRAP+'">'+iconUPS(upsState === 'grey' ? COLORS.grey : '#a970ff')+'</span>' +

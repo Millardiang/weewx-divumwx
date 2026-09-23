@@ -23,6 +23,38 @@ from weecfg.extension import ExtensionInstaller
 from weeutil.weeutil import y_or_n
 
 
+def _load_divumwx_version():
+    """
+    Reads DIVUMWX_VERSION from bin/user/divumwx_version.py -- the single
+    source of truth also used by the runtime and the dashboard. Loaded by
+    path because bin/user isn't importable while weectl runs this file.
+
+    Two locations, because weectl loads this file from two places:
+      - the unpacked release archive during install:
+            <archive>/bin/user/divumwx_version.py
+      - its saved copy for `weectl extension list/uninstall`:
+            <USER_ROOT>/installer/divumwx/install.py -> <USER_ROOT>/divumwx_version.py
+    Must never raise: a failure here makes weectl unable to list or
+    uninstall the extension at all.
+    """
+    here = os.path.dirname(os.path.abspath(__file__))
+    for path in (os.path.join(here, 'bin', 'user', 'divumwx_version.py'),
+                 os.path.join(here, os.pardir, os.pardir, 'divumwx_version.py')):
+        if not os.path.isfile(path):
+            continue
+        try:
+            spec = importlib.util.spec_from_file_location('_divumwx_version', path)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            return module.DIVUMWX_VERSION
+        except Exception:
+            continue
+    return 'unknown'
+
+
+DIVUMWX_VERSION = _load_divumwx_version()
+
+
 # =====================================================================
 # Pre-flight checks: WeeWX version + required Python packages.
 #
@@ -136,9 +168,13 @@ def check_all_dependencies(printer):
     missing_packages = check_python_dependencies()
     if missing_packages:
         ok = False
+        apt_names = ' '.join(f'python3-{pkg}' for pkg in missing_packages)
         printer.out(
-            f"ERROR: missing required Python package(s): {', '.join(missing_packages)}. "
-            f"Install with: pip install {' '.join(missing_packages)}", level=1)
+            f"ERROR: missing required Python package(s): {', '.join(missing_packages)}.\n"
+            f"  WeeWX installed from the Debian package (APT):\n"
+            f"      sudo apt install {apt_names}\n"
+            f"  WeeWX installed with pip (activate its virtual environment first):\n"
+            f"      python3 -m pip install {' '.join(missing_packages)}", level=1)
 
     return ok
 
@@ -1954,8 +1990,12 @@ def copy_divumwx_frontend(source_dir, dest_dir, printer):
     Recursively copies source_dir (the extension's bundled divumwx/
     static frontend) to dest_dir (the resolved HTML_ROOT + 'divumwx').
     Symlinks are skipped, not followed.
+
+    Returns the list of copied paths relative to dest_dir ('/'-separated),
+    or None if a permission error stopped the copy part-way -- in which
+    case no obsolete-file pruning should be attempted.
     """
-    count = 0
+    copied = []
     skipped_symlinks = 0
     try:
         for root, dirs, files in os.walk(source_dir):
@@ -1970,12 +2010,13 @@ def copy_divumwx_frontend(source_dir, dest_dir, printer):
                     skipped_symlinks += 1
                     continue
                 shutil.copy2(src_path, os.path.join(dest_root, filename))
-                count += 1
+                rel = filename if rel_root == '.' else os.path.join(rel_root, filename)
+                copied.append(rel.replace(os.sep, '/'))
     except PermissionError as e:
         printer.out(
             f"WARNING: permission denied writing to {dest_dir} ({e}). The "
             f"dashboard frontend was NOT installed/updated this run (only "
-            f"{count} file(s) got copied before this happened). This "
+            f"{len(copied)} file(s) got copied before this happened). This "
             "directory isn't writable by your user account. Either:\n"
             f"    (a) re-run this install with sudo, or\n"
             f"    (b) fix it by hand first:\n"
@@ -1984,15 +2025,120 @@ def copy_divumwx_frontend(source_dir, dest_dir, printer):
             "        then re-run weectl extension install.\n"
             "The rest of this install (weewx.conf settings, database "
             "columns, etc.) will continue normally.", level=1)
-        printer.out(f"Copied {count} files to {dest_dir} before the permission "
+        printer.out(f"Copied {len(copied)} files to {dest_dir} before the permission "
                     f"error" + (f" ({skipped_symlinks} symlinks skipped)" if skipped_symlinks else ""),
                     level=2)
-        return count
+        return None
 
-    printer.out(f"Copied {count} files to {dest_dir}"
+    printer.out(f"Copied {len(copied)} files to {dest_dir}"
                 + (f" ({skipped_symlinks} symlinks skipped)" if skipped_symlinks else ""),
                 level=2)
-    return count
+    return copied
+
+
+# Written into the DivumWX web root on every install: the exact list of
+# frontend files that release installed. The next install removes files
+# listed there that the new release no longer ships -- and nothing else,
+# so user assets (webcam/station images, timelapse output, generated
+# jsondata) are never touched.
+DIVUMWX_FRONTEND_MANIFEST = '.divumwx-manifest.txt'
+
+# Release-owned frontend files shipped by an earlier release (<= 1.0.0,
+# before manifests existed) and no longer shipped. Derived from the git
+# history of divumwx/. divumwx/stationImage.jpg is deliberately absent:
+# users may have replaced it with their own photo.
+DIVUMWX_RETIRED_FRONTEND_FILES = (
+    '.DS_Store',
+    'CHANGELOG.md',
+    'VERSIONING_SCHEME.md',
+)
+
+# Leftovers with these extensions, found on an upgrade without a
+# manifest, are listed for the operator to review (e.g. PHP pages from
+# the early betas) but not deleted, since their origin is unknown.
+DIVUMWX_FRONTEND_CODE_EXTENSIONS = ('.php', '.html', '.htm', '.js', '.css')
+
+
+def _read_manifest(dest_dir):
+    path = os.path.join(dest_dir, DIVUMWX_FRONTEND_MANIFEST)
+    try:
+        with open(path, encoding='utf-8') as f:
+            return [line.strip() for line in f
+                    if line.strip() and not line.startswith('#')]
+    except OSError:
+        return None
+
+
+def _safe_rel(rel):
+    """Rejects absolute paths and '..' so a tampered manifest can't reach outside dest_dir."""
+    norm = os.path.normpath(rel)
+    return not (os.path.isabs(norm) or norm == '..' or norm.startswith('..' + os.sep))
+
+
+def prune_obsolete_frontend(dest_dir, installed, printer, version):
+    """
+    Removes frontend files an earlier DivumWX release installed that this
+    release no longer ships, then writes this release's manifest.
+
+    With a previous manifest: removes exactly (previous - installed).
+    Without one (upgrade from <= 1.0.0): removes the known retired files,
+    and lists any other leftover code files for manual review.
+    Empty directories left behind are removed. Returns the removed list.
+    """
+    installed_set = set(installed)
+    previous = _read_manifest(dest_dir)
+    if previous is not None:
+        obsolete = sorted(set(previous) - installed_set)
+    else:
+        obsolete = [p for p in DIVUMWX_RETIRED_FRONTEND_FILES if p not in installed_set]
+
+    removed = []
+    for rel in obsolete:
+        if not _safe_rel(rel):
+            continue
+        path = os.path.join(dest_dir, rel)
+        if os.path.isfile(path) or os.path.islink(path):
+            try:
+                os.remove(path)
+                removed.append(rel)
+            except OSError as e:
+                printer.out(f"WARNING: could not remove obsolete file {path}: {e}", level=1)
+            parent = os.path.dirname(path)
+            while os.path.normpath(parent) != os.path.normpath(dest_dir):
+                try:
+                    os.rmdir(parent)  # only succeeds if empty
+                except OSError:
+                    break
+                parent = os.path.dirname(parent)
+
+    if removed:
+        printer.out(f"Removed {len(removed)} obsolete frontend file(s) from an earlier "
+                    f"release: " + ", ".join(removed), level=1)
+
+    if previous is None:
+        leftovers = []
+        for root, dirs, files in os.walk(dest_dir):
+            for name in files:
+                rel = os.path.relpath(os.path.join(root, name), dest_dir).replace(os.sep, '/')
+                if rel not in installed_set and name.lower().endswith(DIVUMWX_FRONTEND_CODE_EXTENSIONS):
+                    leftovers.append(rel)
+        if leftovers:
+            printer.out(
+                f"NOTE: {len(leftovers)} page/script file(s) in {dest_dir} are not part of "
+                f"this release and may be left over from an earlier beta. They were NOT "
+                f"removed; review them and delete any you don't use:\n    "
+                + "\n    ".join(sorted(leftovers)), level=1)
+
+    try:
+        with open(os.path.join(dest_dir, DIVUMWX_FRONTEND_MANIFEST), 'w', encoding='utf-8') as f:
+            f.write(f"# DivumWX {version} frontend manifest -- written by the installer.\n"
+                    "# Files listed here are removed by a later install if that release\n"
+                    "# no longer ships them. Do not edit.\n")
+            f.write("\n".join(sorted(installed_set)) + "\n")
+    except OSError as e:
+        printer.out(f"WARNING: could not write {DIVUMWX_FRONTEND_MANIFEST} in {dest_dir}: {e}. "
+                    f"Obsolete files may not be cleaned up on the next upgrade.", level=1)
+    return removed
 
 
 DIVUMWX_FRONTEND_MODE = 0o775
@@ -2034,9 +2180,12 @@ def copy_divumwx_root_files(extension_dir, dest_dir, printer):
 
     Existing files at the destination are overwritten (shutil.copy2,
     same as copy_divumwx_frontend) -- re-running the installer to pick
-    up an updated README/CHANGE_LOG is expected to just work.
+    up an updated README/CHANGELOG is expected to just work.
+
+    Returns the list of file names copied, so ownership can be set on
+    exactly those files and nothing else in dest_dir.
     """
-    count = 0
+    copied = []
     try:
         for entry in sorted(os.listdir(extension_dir)):
             if entry in DIVUMWX_ROOT_DOCS_EXCLUDED_FILES:
@@ -2048,30 +2197,27 @@ def copy_divumwx_root_files(extension_dir, dest_dir, printer):
                 continue
             os.makedirs(dest_dir, exist_ok=True)
             shutil.copy2(src_path, os.path.join(dest_dir, entry))
-            count += 1
+            copied.append(entry)
     except PermissionError as e:
         printer.out(
             f"WARNING: permission denied writing to {dest_dir} ({e}). The "
             f"extension's root files (readme, changelog, license, etc.) "
-            f"were NOT copied this run (only {count} file(s) got copied "
+            f"were NOT copied this run (only {len(copied)} file(s) got copied "
             "before this happened). Copy them by hand from the extension "
             f"package if needed, or re-run with sudo.", level=1)
-        return count
+        return copied
 
-    printer.out(f"Copied {count} root file(s) to {dest_dir}", level=2)
-    return count
+    printer.out(f"Copied {len(copied)} root file(s) to {dest_dir}", level=2)
+    return copied
 
 
-def set_divumwx_root_files_ownership(dest_dir, config_path, printer):
+def set_divumwx_root_files_ownership(dest_dir, config_path, printer, filenames):
     """
-    Chowns every file copy_divumwx_root_files() just placed in dest_dir
-    to match whoever already owns weewx.conf (config_path) -- i.e.
-    <username>:<username> for the account WeeWX actually runs as, not
-    necessarily whoever happens to be running this installer (which
-    matters when install is run via sudo). Falls back to a warning
-    rather than aborting if this process isn't permitted to chown
-    (e.g. not root and not already that user) -- the files are still
-    there and readable, just not re-owned.
+    Chowns the files copy_divumwx_root_files() just placed in dest_dir
+    (filenames -- ONLY those; dest_dir is WeeWX's own config directory
+    and other files in it are not DivumWX's to touch) to match whoever
+    already owns weewx.conf (config_path). Falls back to a warning
+    rather than aborting if this process isn't permitted to chown.
     """
     try:
         conf_stat = os.stat(config_path)
@@ -2084,7 +2230,7 @@ def set_divumwx_root_files_ownership(dest_dir, config_path, printer):
     uid, gid = conf_stat.st_uid, conf_stat.st_gid
     all_ok = True
     chowned = 0
-    for entry in sorted(os.listdir(dest_dir)):
+    for entry in filenames:
         path = os.path.join(dest_dir, entry)
         if not os.path.isfile(path):
             continue
@@ -2103,6 +2249,76 @@ def set_divumwx_root_files_ownership(dest_dir, config_path, printer):
         printer.out(f"Set ownership of {chowned} root file(s) in {dest_dir} "
                     f"to match {config_path} (uid={uid}, gid={gid})", level=2)
     return all_ok
+
+
+def resolve_service_owner(cfg, weewx_root, config_path):
+    """
+    Returns (uid, gid, source_path) for the account the WeeWX service runs
+    as, or None if it can't be determined.
+
+    The owner of the SQLite database directory is the most reliable
+    signal: weewxd has to write there, whatever the install layout
+    (APT: /var/lib/weewx owned by weewx:weewx; pip: ~/weewx-data/archive
+    owned by the user). weewx.conf's owner is the fallback.
+    """
+    candidates = []
+    sqlite_root = _cfg_get(cfg, 'DatabaseTypes', 'SQLite', 'SQLITE_ROOT')
+    if sqlite_root:
+        if not os.path.isabs(sqlite_root):
+            sqlite_root = os.path.join(weewx_root, sqlite_root)
+        candidates.append(sqlite_root)
+    candidates.append(config_path)
+    for path in candidates:
+        try:
+            st = os.stat(path)
+        except OSError:
+            continue
+        return st.st_uid, st.st_gid, path
+    return None
+
+
+def set_divumwx_ownership(dest_dir, owner, printer):
+    """
+    Recursively chowns dest_dir (the DivumWX web root: frontend, jsondata,
+    timelapse output) to the WeeWX service account, so the service can
+    write its JSON and timelapse files without a manual chown after
+    `sudo weectl extension install`.
+
+    Only acts when running as root: a non-root install (e.g. pip, as the
+    same user WeeWX runs as) already created everything under the right
+    account and couldn't chown to anyone else anyway.
+    """
+    if owner is None:
+        printer.out(f"WARNING: could not determine the WeeWX service account; "
+                    f"ownership of {dest_dir} left unchanged. If WeeWX logs "
+                    f"permission errors, run:\n"
+                    f"        sudo chown -R <weewx-service-user>: {dest_dir}", level=1)
+        return False
+    if not hasattr(os, 'geteuid') or os.geteuid() != 0:
+        return True
+    uid, gid, source = owner
+    failures = 0
+
+    def _chown(path):
+        nonlocal failures
+        try:
+            os.lchown(path, uid, gid)
+        except OSError:
+            failures += 1
+
+    _chown(dest_dir)
+    for root, dirs, files in os.walk(dest_dir):
+        for name in dirs + files:
+            _chown(os.path.join(root, name))
+
+    if failures:
+        printer.out(f"WARNING: could not change ownership of {failures} path(s) under "
+                    f"{dest_dir}. Fix by hand with:\n"
+                    f"        sudo chown -R {uid}:{gid} {dest_dir}", level=1)
+        return False
+    printer.out(f"Set ownership of {dest_dir} to uid={uid}, gid={gid} "
+                f"(matching {source})", level=1)
+    return True
 
 
 # NOT CALLED FROM configure() AT THIS STAGE -- see check_all_dependencies()'s
@@ -2183,9 +2399,9 @@ def strip_astro_nav_links(html_root, printer):
         except OSError as e:
             printer.out(f"WARNING: could not write {path} to strip astronomy links: {e}", level=1)
     elif removed == 0:
-        printer.out(f"WARNING: expected astronomy nav links not found in {path} -- "
-                    f"navbar left unchanged (astronomyNavbar.html may have changed "
-                    f"shape; update strip_astro_nav_links()'s patterns to match).", level=1)
+        # The shipped navbar has not contained these links since 1.0.0,
+        # so this is the normal case, not a problem worth a WARNING.
+        printer.out(f"No Skyfield/Celestial nav links to remove in {path}.", level=2)
 
 
 # Services this extension used to declare but no longer does. WeeWX's own
@@ -2298,6 +2514,148 @@ def remove_divumwx_services(cfg, printer):
                     f"{', '.join(removed_any)}", level=1)
 
 
+def _cfg_get(cfg, *path):
+    """cfg['a']['b']['c'] or None if any level is missing. Never creates sections."""
+    node = cfg
+    for key in path:
+        if not hasattr(node, 'get'):
+            return None
+        node = node.get(key)
+        if node is None:
+            return None
+    return node
+
+
+def _bool_answer(value):
+    """'True'/'False' (as ConfigObj stores them) -> 'y'/'n'; anything else -> None."""
+    if value is None:
+        return None
+    return 'y' if str(value).strip().lower() in ('true', 'yes', '1') else 'n'
+
+
+_METAR_ICAO_RE = re.compile(r'[?&]ids=([A-Za-z0-9]{3,4})\b')
+
+
+def read_existing_answers(cfg):
+    """
+    Reads back, from an existing weewx.conf, the value each interactive
+    prompt in configure() would set -- so an upgrade can offer the current
+    value as the prompt default (pressing Enter keeps it) instead of a
+    generic one. Every value is None when there is nothing on record,
+    which configure() treats as "fresh install: use the generic default".
+
+    Region answers (hemisphere/England/UK) were not persisted before
+    1.0.1. For those older configs they are derived from the enabled
+    flags the answers originally controlled; from 1.0.1 on the answers
+    themselves are stored in [DivumWXCards] and take precedence.
+    """
+    alerts = ('WeatherAPI', 'Alerts')
+    metar_url = _cfg_get(cfg, 'WeatherAPI', 'Metar', 'url') or ''
+    icao_match = _METAR_ICAO_RE.search(metar_url)
+
+    location_code = _cfg_get(cfg, 'WeatherAPI', 'HeatAlert', 'location_code') \
+        or _cfg_get(cfg, 'WeatherAPI', 'ColdAlert', 'location_code') or ''
+    location_digit = location_code[-1] if location_code in DIVUMWX_HEALTH_ALERT_LOCATIONS else None
+
+    region_code = _cfg_get(cfg, 'WeatherAPI', 'MetOfficeRSS', 'region_code') or ''
+
+    in_northern = _bool_answer(_cfg_get(cfg, 'DivumWXCards', 'in_northern_hemisphere'))
+    if in_northern is None:
+        in_northern = _bool_answer(_cfg_get(cfg, 'WeatherAPI', 'AuroraWatch', 'enabled'))
+
+    in_england = _bool_answer(_cfg_get(cfg, 'DivumWXCards', 'in_england'))
+    if in_england is None:
+        england_flags = [_cfg_get(cfg, 'WeatherAPI', s, 'enabled')
+                         for s in ('Flood', 'HeatAlert', 'ColdAlert')]
+        if any(f is not None for f in england_flags):
+            in_england = 'y' if any(_bool_answer(f) == 'y' for f in england_flags) else 'n'
+
+    in_uk = _bool_answer(_cfg_get(cfg, 'DivumWXCards', 'in_uk'))
+    if in_uk is None:
+        in_uk = _bool_answer(_cfg_get(cfg, 'WeatherAPI', 'MetOfficeRSS', 'enabled'))
+
+    return {
+        'update_interval': _cfg_get(cfg, 'LiveData', 'update_interval'),
+        'app_id': _cfg_get(cfg, *alerts, 'app_id') or None,
+        'alerts_poll_interval': _cfg_get(cfg, *alerts, 'poll_interval'),
+        'forecast_model': _cfg_get(cfg, 'WeatherAPI', 'Forecast', 'forecast_model'),
+        'icao_code': icao_match.group(1).upper() if icao_match else None,
+        'metar_poll_interval': _cfg_get(cfg, 'WeatherAPI', 'Metar', 'poll_interval'),
+        'in_northern_hemisphere': in_northern,
+        'in_england': in_england,
+        'in_uk': in_uk,
+        'location_digit': location_digit,
+        'region_code': region_code if region_code in DIVUMWX_METOFFICE_REGIONS else None,
+    }
+
+
+def apply_changed_answers(cfg, existing, answers, printer):
+    """
+    The merge functions are deliberately set-once: they never overwrite a
+    value already in weewx.conf. That protects hand edits, but it also
+    meant a new value typed at an upgrade prompt was silently discarded.
+    This runs BEFORE the merges and writes only the answers that differ
+    from what is already on record, so a deliberate change is applied and
+    everything else is left exactly as it was. Returns the list of
+    human-readable changes made.
+    """
+    changes = []
+
+    def _set(path, value, label, secret=False):
+        node = cfg
+        for key in path[:-1]:
+            node = node.setdefault(key, {})
+        if node.get(path[-1]) != value:
+            node[path[-1]] = value
+            changes.append(f"{label} -> {'(new value)' if secret else value}")
+
+    def _changed(key):
+        old, new = existing.get(key), answers.get(key)
+        return old is not None and new not in (None, '') and str(new) != str(old)
+
+    if _changed('update_interval'):
+        _set(('LiveData', 'update_interval'), str(answers['update_interval']), 'LiveData update_interval')
+    if _changed('app_id'):
+        _set(('WeatherAPI', 'Alerts', 'app_id'), answers['app_id'], 'OpenWeatherMap app_id', secret=True)
+    if _changed('alerts_poll_interval'):
+        _set(('WeatherAPI', 'Alerts', 'poll_interval'), str(answers['alerts_poll_interval']),
+             'Alerts poll_interval')
+    # forecast_model: '' is a real choice (best match), so compare directly.
+    if existing.get('forecast_model') is not None and answers.get('forecast_model') is not None \
+            and answers['forecast_model'] != existing['forecast_model'] \
+            and answers['forecast_model'] in DIVUMWX_OPENMETEO_MODEL_CHOICES:
+        _set(('WeatherAPI', 'Forecast', 'forecast_model'), answers['forecast_model'], 'Forecast model')
+    if answers.get('icao_code') and answers['icao_code'] != existing.get('icao_code') \
+            and _cfg_get(cfg, 'WeatherAPI', 'Metar', 'url'):
+        _set(('WeatherAPI', 'Metar', 'url'),
+             DIVUMWX_WEATHERAPI_METAR_URL_TEMPLATE.format(icao_code=answers['icao_code']),
+             f"METAR airport {answers['icao_code']}; Metar url")
+    if _changed('metar_poll_interval'):
+        _set(('WeatherAPI', 'Metar', 'poll_interval'), str(answers['metar_poll_interval']),
+             'Metar poll_interval')
+    if _changed('in_northern_hemisphere'):
+        _set(('WeatherAPI', 'AuroraWatch', 'enabled'),
+             'True' if answers['in_northern_hemisphere'] == 'y' else 'False', 'AuroraWatch enabled')
+    if _changed('in_england'):
+        flag = 'True' if answers['in_england'] == 'y' else 'False'
+        for section in ('Flood', 'HeatAlert', 'ColdAlert'):
+            _set(('WeatherAPI', section, 'enabled'), flag, f'{section} enabled')
+    if _changed('in_uk'):
+        _set(('WeatherAPI', 'MetOfficeRSS', 'enabled'),
+             'True' if answers['in_uk'] == 'y' else 'False', 'MetOfficeRSS enabled')
+    if _changed('location_digit'):
+        code = DIVUMWX_HEALTH_ALERT_LOCATION_PREFIX + answers['location_digit']
+        for section in ('HeatAlert', 'ColdAlert'):
+            _set(('WeatherAPI', section, 'location_code'), code, f'{section} location_code')
+    if _changed('region_code'):
+        _set(('WeatherAPI', 'MetOfficeRSS', 'region_code'), answers['region_code'],
+             'MetOfficeRSS region_code')
+
+    for change in changes:
+        printer.out(f"Updated: {change}", level=1)
+    return changes
+
+
 def loader():
     return DivumwxInstaller()
 
@@ -2306,7 +2664,7 @@ class DivumwxInstaller(ExtensionInstaller):
 
     def __init__(self):
         super(DivumwxInstaller, self).__init__(
-            version="0.1.0",
+            version=DIVUMWX_VERSION,
             name='divumwx',
             description='DivumWX weather dashboard',
             author="",
@@ -2351,6 +2709,7 @@ class DivumwxInstaller(ExtensionInstaller):
                 ('bin/user', [
                     'bin/user/divumwx.py',
                     'bin/user/divumwx_cards.py',
+                    'bin/user/divumwx_version.py',
                     'bin/user/lastrain.py',
                     'bin/user/stats.py',
                     'bin/user/time_since.py',
@@ -2461,6 +2820,14 @@ class DivumwxInstaller(ExtensionInstaller):
         fresh_install = is_fresh_divumwx_install(cfg)
         printer.out(f"Fresh install: {fresh_install}", level=2)
 
+        # Read back what's already configured BEFORE any merge below writes
+        # defaults, so every prompt can offer the current value.
+        existing = read_existing_answers(cfg)
+        if not fresh_install:
+            printer.out("Existing DivumWX configuration found. Values in [brackets] "
+                        "are your current settings: press Enter to keep them, or "
+                        "type a new value to change them.", level=1)
+
         # Absolute install root, derived from the site's existing HTML_ROOT
         # + a fixed subdirectory.
         site_html_root = cfg['StdReport']['HTML_ROOT']
@@ -2477,7 +2844,9 @@ class DivumwxInstaller(ExtensionInstaller):
         extension_dir = os.path.dirname(os.path.abspath(__file__))
         divumwx_source = os.path.join(extension_dir, 'divumwx')
         if os.path.isdir(divumwx_source):
-            copy_divumwx_frontend(divumwx_source, html_root, printer)
+            installed_frontend = copy_divumwx_frontend(divumwx_source, html_root, printer)
+            if installed_frontend is not None:
+                prune_obsolete_frontend(html_root, installed_frontend, printer, DIVUMWX_VERSION)
             set_divumwx_permissions(html_root, printer)
             # Unconditional now, not gated behind a declined-prompt branch --
             # DivumWXSkyfield/DivumWXCelestial are permanently absent at this
@@ -2499,8 +2868,8 @@ class DivumwxInstaller(ExtensionInstaller):
         # account). engine.config_path is the one thing that's always
         # exactly right here: WeeWX resolved it to find weewx.conf itself.
         weewx_conf_dir = os.path.dirname(engine.config_path)
-        copy_divumwx_root_files(extension_dir, weewx_conf_dir, printer)
-        set_divumwx_root_files_ownership(weewx_conf_dir, engine.config_path, printer)
+        copied_root_files = copy_divumwx_root_files(extension_dir, weewx_conf_dir, printer)
+        set_divumwx_root_files_ownership(weewx_conf_dir, engine.config_path, printer, copied_root_files)
 
         # --- In additions-file order ---
 
@@ -2541,7 +2910,9 @@ class DivumwxInstaller(ExtensionInstaller):
         apply_datainject_merge(cfg, html_root=html_root)
 
         update_interval = weecfg.prompt_with_limits(
-            "LiveData update interval, in seconds", default='2', low_limit=1, high_limit=3600)
+            "LiveData update interval, in seconds",
+            default=existing['update_interval'] or DIVUMWX_LIVEDATA_DEFAULT_UPDATE_INTERVAL,
+            low_limit=1, high_limit=3600)
         apply_livedata_merge(cfg, html_root=html_root, update_interval=update_interval)
 
         apply_skyfieldloopdata_merge(cfg, html_root=html_root)
@@ -2550,10 +2921,18 @@ class DivumwxInstaller(ExtensionInstaller):
 
         # --- [WeatherAPI] ---
 
-        app_id = weecfg.prompt_with_options(
-            "OpenWeatherMap app_id (for weather alerts, leave blank to configure later)", default='')
+        if existing['app_id']:
+            # Never echo the stored key back as a [default].
+            app_id = weecfg.prompt_with_options(
+                "OpenWeatherMap app_id (an app_id is already configured -- "
+                "press Enter to keep it, or paste a new one)", default='')
+        else:
+            app_id = weecfg.prompt_with_options(
+                "OpenWeatherMap app_id (for weather alerts, leave blank to configure later)", default='')
         alerts_poll_interval = weecfg.prompt_with_limits(
-            "Alerts poll interval, in seconds", default='1800', low_limit=60, high_limit=86400)
+            "Alerts poll interval, in seconds",
+            default=existing['alerts_poll_interval'] or DIVUMWX_WEATHERAPI_ALERTS_DEFAULT_POLL_INTERVAL,
+            low_limit=60, high_limit=86400)
         alerts_report = apply_weatherapi_alerts_merge(
             cfg, html_root=html_root, app_id=app_id, poll_interval=alerts_poll_interval)
         if alerts_report['enabled_disabled_no_app_id']:
@@ -2570,7 +2949,8 @@ class DivumwxInstaller(ExtensionInstaller):
             printer.out(f"  {code if code else '(blank)'}: {label}", level=1)
         forecast_model = weecfg.prompt_with_options(
             "Open-Meteo forecast model, leave blank for best match",
-            default='', options=model_options)
+            default=existing['forecast_model'] if existing['forecast_model'] in model_options else '',
+            options=model_options)
         apply_weatherapi_forecast_merge(cfg, html_root=html_root, forecast_model=forecast_model)
 
         for section_name, spec in DIVUMWX_WEATHERAPI_SIMPLE_SECTIONS.items():
@@ -2578,16 +2958,23 @@ class DivumwxInstaller(ExtensionInstaller):
                 cfg, section_name, spec['api_type'], spec['path_suffix'], html_root=html_root)
 
         icao_code = weecfg.prompt_with_options(
-            "ICAO airport code for local METAR conditions (e.g. EGTK), leave blank to configure later", default='').upper()
+            "ICAO airport code for local METAR conditions (e.g. EGTK), leave blank to configure later",
+            default=existing['icao_code'] or '').upper()
         metar_poll_interval = weecfg.prompt_with_limits(
-            "Metar poll interval, in seconds", default='300', low_limit=60, high_limit=86400)
+            "Metar poll interval, in seconds",
+            default=existing['metar_poll_interval'] or DIVUMWX_WEATHERAPI_METAR_DEFAULT_POLL_INTERVAL,
+            low_limit=60, high_limit=86400)
         apply_weatherapi_metar_merge(
             cfg, html_root=html_root, icao_code=icao_code, poll_interval=metar_poll_interval)
 
-        in_northern_hemisphere = y_or_n("Are you in the Northern Hemisphere? (y/n) ") == 'y'
-        in_england = y_or_n("Are you in England? (y/n) ") == 'y'
-        in_uk = in_england or (
-            y_or_n("Are you in the United Kingdom (but not England)? (y/n) ") == 'y')
+        def _yn(question, key):
+            current = existing[key]
+            suffix = f" [{current}] " if current else " "
+            return y_or_n(f"{question} (y/n){suffix}", default=current) == 'y'
+
+        in_northern_hemisphere = _yn("Are you in the Northern Hemisphere?", 'in_northern_hemisphere')
+        in_england = _yn("Are you in England?", 'in_england')
+        in_uk = in_england or _yn("Are you in the United Kingdom (but not England)?", 'in_uk')
 
         # Persisted unconditionally, every run -- NOT inside the
         # "if 'enabled_cards' not in ..." gate a few lines below that
@@ -2608,6 +2995,10 @@ class DivumwxInstaller(ExtensionInstaller):
         # more accurate and should be preferred when available.
         cfg.setdefault('DivumWXCards', {})
         cfg['DivumWXCards']['in_uk'] = 'True' if in_uk else 'False'
+        # Persisted from 1.0.1 so the next upgrade can offer them as the
+        # prompt defaults directly (see read_existing_answers()).
+        cfg['DivumWXCards']['in_england'] = 'True' if in_england else 'False'
+        cfg['DivumWXCards']['in_northern_hemisphere'] = 'True' if in_northern_hemisphere else 'False'
 
         apply_weatherapi_flood_merge(cfg, html_root=html_root, in_england=in_england)
 
@@ -2625,7 +3016,8 @@ class DivumwxInstaller(ExtensionInstaller):
             location_digit = weecfg.prompt_with_options(
                 "UK Health Security Agency location code -- last digit only "
                 "(1-9), leave blank to configure later",
-                default='', options=[str(n) for n in range(1, 10)] + [''])
+                default=existing['location_digit'] or '',
+                options=[str(n) for n in range(1, 10)] + [''])
             if location_digit:
                 location_code = DIVUMWX_HEALTH_ALERT_LOCATION_PREFIX + location_digit
         apply_weatherapi_heatalert_merge(
@@ -2640,8 +3032,25 @@ class DivumwxInstaller(ExtensionInstaller):
             for code, label in DIVUMWX_METOFFICE_REGIONS.items():
                 printer.out(f"  {code}: {label}", level=1)
             region_code = weecfg.prompt_with_options(
-                "Met Office region code", default='', options=region_options + [''])
+                "Met Office region code", default=existing['region_code'] or '',
+                options=region_options + [''])
         apply_weatherapi_metofficerss_merge(cfg, html_root=html_root, in_uk=in_uk, region_code=region_code)
+
+        # Upgrade runs: apply any answer that differs from what was already
+        # configured (the merges above only ever fill in missing values).
+        apply_changed_answers(cfg, existing, {
+            'update_interval': update_interval,
+            'app_id': app_id,
+            'alerts_poll_interval': alerts_poll_interval,
+            'forecast_model': forecast_model,
+            'icao_code': icao_code,
+            'metar_poll_interval': metar_poll_interval,
+            'in_northern_hemisphere': 'y' if in_northern_hemisphere else 'n',
+            'in_england': 'y' if in_england else 'n',
+            'in_uk': 'y' if in_uk else 'n',
+            'location_digit': location_code[-1] if location_code else None,
+            'region_code': region_code,
+        }, printer)
 
         # --- [DivumWXCards] ---
         if 'enabled_cards' not in cfg.get('DivumWXCards', {}):
@@ -2751,6 +3160,16 @@ class DivumwxInstaller(ExtensionInstaller):
             ffmpeg_available=ffmpeg_available)
         create_timelapse_output_dir(
             html_root, cfg['Timelapse']['output_dir'], printer)
+
+        # Last filesystem step, so it covers everything created above
+        # (frontend, jsondata, timelapse output). Without this a
+        # `sudo weectl extension install` left the web root owned by root
+        # and the service hit permission errors until chowned by hand.
+        if os.path.isdir(html_root):
+            set_divumwx_ownership(
+                html_root,
+                resolve_service_owner(cfg, engine.root_dict['WEEWX_ROOT'], engine.config_path),
+                printer)
 
         printer.out("DivumWX configuration complete.", level=1)
         printer.out(

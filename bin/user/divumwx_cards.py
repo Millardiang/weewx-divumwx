@@ -151,6 +151,11 @@ from weewx.cheetahgenerator import SearchList
 
 log = logging.getLogger(__name__)
 
+try:
+    from user.divumwx_version import DIVUMWX_VERSION
+except ImportError:  # divumwx_version.py missing (partial manual install)
+    DIVUMWX_VERSION = None
+
 
 class DivumwxCards(SearchList):
 
@@ -215,6 +220,8 @@ class DivumwxCards(SearchList):
             'divumwx_in_uk': json.dumps(in_uk),
             'divumwx_lang': json.dumps(lang),
             'divumwx_strings_payload': json.dumps(strings_payload),
+            # Release version for the dashboard footer (archive.json meta).
+            'divumwx_version': json.dumps(DIVUMWX_VERSION),
         }
         return [search_list_extension]
 

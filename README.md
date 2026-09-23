@@ -1,5 +1,5 @@
-# Welcome to the DivumWX skin for WeeWX Version 1.0.0
-Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LICENSE Version 3](https://github.com/Millardiang/weewx-divumwx/blob/dev/license.txt)
+# Welcome to the DivumWX skin for WeeWX Version 1.0.1
+Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LICENSE Version 3](https://github.com/Millardiang/weewx-divumwx/blob/main/license.txt)
  
 # Features
 * Compatible with WeeWX version 5.5.0 onwards and Python version 3.13.5 onwards. (Not tested with earlier versions).
