@@ -6325,10 +6325,11 @@ try {
     svg = svgSel.append('svg').attr('viewBox', '0 0 ' + W + ' ' + H).attr('width', '100%').attr('height', '100%');
     var defs = svg.append('defs');
 
-    var now = stationNow();
     var eclipticDeg = v.eclipticAngle;
 
-    var sunPos = solarPosition(now.getTime());
+    // Real epoch time: stationNow() is station wall-clock labelled as UTC
+    // (display only), which would shift the terminator by the UTC offset.
+    var sunPos = solarPosition(Date.now());
 
     var moonPos = [sunPos[0] + v.moonEclipticAngle, v.moonDec];
     var antiSunPos = antipode(sunPos);
@@ -7188,7 +7189,7 @@ try {
     sunGrad2.append('stop').attr('offset', '0%').style('stop-color', 'rgb(230,200,200)');
     sunGrad2.append('stop').attr('offset', '90%').style('stop-color', 'tomato');
 
-    var todayT = julianCenturies(stationNow());
+    var todayT = julianCenturies(new Date()); // real epoch time, not stationNow()
     var todayX = equationOfTimeMinutes(todayT);
     svg.append('circle').attr('cx', xScale2(todayX)).attr('cy', yScale2(v.sunDec)).attr('r', 3.5).style('fill', 'url(#geoAnalemmaSunGrad)');
   }

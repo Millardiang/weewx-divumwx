@@ -1970,6 +1970,10 @@ class APIConfig:
             'vapour_pressure_deficit,wind_speed_10m,wind_direction_10m,wind_gusts_10m,is_day'
             '&current=temperature_2m,is_day,wind_speed_10m,wind_direction_10m,wind_gusts_10m,'
             'precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,surface_pressure'
+            # Without timezone Open-Meteo returns GMT times; every frontend
+            # consumer (forecast.js, cardsBundleNew.js, charts-d3.html)
+            # treats these strings as station-local wall-clock time.
+            '&timezone=auto'
         ),
         'requires_app_id': False,
         'uses_coordinates': True
@@ -1985,6 +1989,7 @@ class APIConfig:
             'sulphur_dioxide,ozone,aerosol_optical_depth,dust,ammonia,'
             'alder_pollen,birch_pollen,grass_pollen,mugwort_pollen,olive_pollen,'
             'ragweed_pollen'
+            '&timezone=auto'  # station-local times, consistent with OPENMETEO
         ),
         'requires_app_id': False,
         'uses_coordinates': True

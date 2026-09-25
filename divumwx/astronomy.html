@@ -99,6 +99,7 @@ body {
   transition:transform .15s ease, box-shadow .15s ease;
 }
 .astro-hub-card:hover{ transform:translateY(-2px); box-shadow:0 4px 10px rgba(0,0,0,0.18), 0 14px 28px -10px rgba(0,0,0,0.3); }
+.astro-hub-card[hidden]{ display:none; }
 .astro-hub-glyph{ font-size:34px; color:var(--bw-accent); line-height:1; margin-bottom:12px; }
 .astro-hub-title{ font-size:16px; font-weight:700; margin:0 0 6px; }
 .astro-hub-desc{ font-size:12.5px; color:var(--bs-secondary-color); margin:0; line-height:1.5; }
@@ -247,6 +248,17 @@ setInterval(() => {
       <div class="astro-hub-glyph">&#10022;</div>
       <div class="astro-hub-title">Visualisations</div>
       <p class="astro-hub-desc">Interactive visualisations of the sky and solar system.</p>
+    </a>
+    <!-- Optional pages: hidden until siteHeader.js confirms the target index.html exists -->
+    <a class="astro-hub-card" href="skyfield/index.html" data-astro-optional="skyfield" hidden>
+      <div class="astro-hub-glyph">&#9790;</div>
+      <div class="astro-hub-title">Skyfield</div>
+      <p class="astro-hub-desc">Sun, Moon and planet positions, rise and set times, and a sky chart for tonight.</p>
+    </a>
+    <a class="astro-hub-card" href="celestial/index.html" data-astro-optional="celestial" hidden>
+      <div class="astro-hub-glyph">&#10036;</div>
+      <div class="astro-hub-title">Celestial</div>
+      <p class="astro-hub-desc">A live view of the sky dome with pass charts for what's overhead.</p>
     </a>
     <div class="astro-hub-card astro-hub-more">
       <p class="astro-hub-desc">More astronomy pages will appear here as they're built.</p>

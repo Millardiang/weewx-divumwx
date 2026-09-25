@@ -82,9 +82,36 @@ function initSharedHeader(){
     if (normalizePath(a.pathname) === here) a.style.display = 'none';
   });
 
+  revealOptionalNavLinks(here);
+
   populateUnitSelector();
   populateLanguageSelector();
   translateNavbar();
+}
+
+// ---------------------------------------------------------------------
+// Optional nav links (e.g. Skyfield / Celestial on astronomyNavbar.html)
+// ship with the `hidden` attribute and data-astro-optional. Each one is
+// only shown once its target (e.g. ./skyfield/index.html, already
+// rewritten to the real DivumWX root by fixDivumwxNavLinks) is confirmed
+// to exist on the server. The link for the page currently being viewed
+// stays hidden, matching the rest of the navbar.
+// ---------------------------------------------------------------------
+function revealOptionalNavLinks(here) {
+  document.querySelectorAll('a[data-astro-optional][href]').forEach(function(a){
+    if (here && normalizePath(a.pathname) === here) return;
+    var url = a.href;
+    var show = function(){ a.hidden = false; };
+    fetch(url, { method: 'HEAD', cache: 'no-store' })
+      .then(function(res){
+        if (res.ok) return show();
+        // Some servers refuse HEAD; fall back to a GET before giving up.
+        if (res.status === 405 || res.status === 501) {
+          return fetch(url, { cache: 'no-store' }).then(function(r){ if (r.ok) show(); });
+        }
+      })
+      .catch(function(){ /* not installed / unreachable -- keep hidden */ });
+  });
 }
 
 function normalizePath(path) {
