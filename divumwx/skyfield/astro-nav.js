@@ -315,8 +315,32 @@
 
   includeHTML(function(){
     fixDivumwxNavLinks(navHost);
+    // Language selection isn't used on the Skyfield/Celestial pages
+    // (their content is generated server-side), so drop the selector.
+    if (navHost) {
+      var langWrap = navHost.querySelector('.select-wrap--lang');
+      if (langWrap) langWrap.parentNode.removeChild(langWrap);
+    }
     applyTheme();
     if (typeof initSharedHeader === 'function') initSharedHeader();
+
+    // Optional Skyfield/Celestial links in astronomyNavbar.html stay hidden
+    // until their index.html is confirmed to exist. siteHeader.js does this
+    // inside initSharedHeader(); this is the fallback when it isn't loaded.
+    if (typeof revealOptionalNavLinks !== 'function' && navHost) {
+      navHost.querySelectorAll('a[data-astro-optional][href]').forEach(function(a){
+        var norm = function(p){ return p.replace(/\/index\.html$/i, '').replace(/\/+$/, '').toLowerCase(); };
+        if (norm(a.pathname) === norm(window.location.pathname)) return;
+        fetch(a.href, { method: 'HEAD', cache: 'no-store' })
+          .then(function(res){
+            if (res.ok) { a.hidden = false; return; }
+            if (res.status === 405 || res.status === 501) {
+              return fetch(a.href, { cache: 'no-store' }).then(function(r){ if (r.ok) a.hidden = false; });
+            }
+          })
+          .catch(function(){});
+      });
+    }
 
     var themeBtn = document.getElementById('themeToggle');
     if (themeBtn) {
