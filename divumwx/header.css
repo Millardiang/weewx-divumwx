@@ -55,14 +55,32 @@ body.dark.season-autumn, html[data-bs-theme="dark"] body.season-autumn {
   --dark-bg: #3c4d13; --card-bg: #2c2118; --dark-body: #1a130d; --bs-body-bg: #1a130d;
 }
 
-body.season-winter { background: #f4f8f6 !important; }
-body.dark.season-winter, html[data-bs-theme="dark"] body.season-winter { background: #16201b !important; }
-body.season-spring { background: #f7fbf1 !important; }
-body.dark.season-spring, html[data-bs-theme="dark"] body.season-spring { background: #171f13 !important; }
-body.season-summer { background: #fffbf0 !important; }
-body.dark.season-summer, html[data-bs-theme="dark"] body.season-summer { background: #1f1a0d !important; }
-body.season-autumn { background: #f9f1ea !important; }
-body.dark.season-autumn, html[data-bs-theme="dark"] body.season-autumn { background: #1a130d !important; }
+body.season-winter { background-color: #f4f8f6 !important; }
+body.dark.season-winter, html[data-bs-theme="dark"] body.season-winter { background-color: #16201b !important; }
+body.season-spring { background-color: #f7fbf1 !important; }
+body.dark.season-spring, html[data-bs-theme="dark"] body.season-spring { background-color: #171f13 !important; }
+body.season-summer { background-color: #fffbf0 !important; }
+body.dark.season-summer, html[data-bs-theme="dark"] body.season-summer { background-color: #1f1a0d !important; }
+body.season-autumn { background-color: #f9f1ea !important; }
+body.dark.season-autumn, html[data-bs-theme="dark"] body.season-autumn { background-color: #1a130d !important; }
+
+/* Page body background photo (autumn leaves, Jeremy Thomas / Unsplash).
+   A translucent veil in the current season/theme body colour sits over the
+   photo so cards and text stay readable in both light and dark modes. The
+   season rules above set background-color only, so they no longer clear it. */
+body {
+  --body-photo-veil: color-mix(in srgb, var(--bs-body-bg, #ffffff) 55%, transparent);
+  background-image:
+    linear-gradient(var(--body-photo-veil), var(--body-photo-veil)),
+    url("img/autumnLeaves.jpg") !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-attachment: fixed !important;
+}
+body.dark, html[data-bs-theme="dark"] body {
+  --body-photo-veil: color-mix(in srgb, var(--bs-body-bg, #000000) 65%, transparent);
+}
 
 header {
   grid-column: 1 / -1;
