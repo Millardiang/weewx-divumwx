@@ -1790,6 +1790,16 @@ DIVUMWX_CARD_TARGET_TOTAL = 25  # theoretical max (8 mandatory + 7 automatic + 2
 DIVUMWX_WEBCAM_DEFAULT_TITLE = 'Webcam'
 DIVUMWX_WEBCAM_DEFAULT_IMAGE = 'img/picam.jpg'
 
+# Page body background, stored as [DivumWXCards] page_background and published
+# in archive.json for seasonalBackground.js. 'seasonal' shows a photo that
+# changes with the meteorological season at the station (swapped for the
+# southern hemisphere); 'solid' keeps the plain theme colour.
+DIVUMWX_PAGE_BACKGROUND_CHOICES = {
+    'seasonal': 'Seasonal photo (changes with the seasons at your station)',
+    'solid': 'Solid colour (plain light/dark theme background)',
+}
+DIVUMWX_PAGE_BACKGROUND_DEFAULT = 'seasonal'
+
 DIVUMWX_STATION_IMAGE_DEFAULT_TITLE = 'Station Image'
 DIVUMWX_STATION_IMAGE_DEFAULT_PATH = 'img/stationImage.jpg'
 
@@ -2570,6 +2580,10 @@ def read_existing_answers(cfg):
         if any(f is not None for f in england_flags):
             in_england = 'y' if any(_bool_answer(f) == 'y' for f in england_flags) else 'n'
 
+    page_background = _cfg_get(cfg, 'DivumWXCards', 'page_background')
+    if page_background not in DIVUMWX_PAGE_BACKGROUND_CHOICES:
+        page_background = None
+
     in_uk = _bool_answer(_cfg_get(cfg, 'DivumWXCards', 'in_uk'))
     if in_uk is None:
         in_uk = _bool_answer(_cfg_get(cfg, 'WeatherAPI', 'MetOfficeRSS', 'enabled'))
@@ -2586,6 +2600,7 @@ def read_existing_answers(cfg):
         'in_uk': in_uk,
         'location_digit': location_digit,
         'region_code': region_code if region_code in DIVUMWX_METOFFICE_REGIONS else None,
+        'page_background': page_background,
     }
 
 
@@ -2999,6 +3014,18 @@ class DivumwxInstaller(ExtensionInstaller):
         # prompt defaults directly (see read_existing_answers()).
         cfg['DivumWXCards']['in_england'] = 'True' if in_england else 'False'
         cfg['DivumWXCards']['in_northern_hemisphere'] = 'True' if in_northern_hemisphere else 'False'
+
+        # Page background: asked every run and written every run (like the
+        # region answers above), so an upgrade can switch it. Enter keeps
+        # the current choice, or 'seasonal' on a fresh install.
+        printer.out("Page background options:", level=1)
+        for code, label in DIVUMWX_PAGE_BACKGROUND_CHOICES.items():
+            printer.out(f"  {code}: {label}", level=1)
+        page_background = weecfg.prompt_with_options(
+            "Page background",
+            default=existing['page_background'] or DIVUMWX_PAGE_BACKGROUND_DEFAULT,
+            options=list(DIVUMWX_PAGE_BACKGROUND_CHOICES.keys()))
+        cfg['DivumWXCards']['page_background'] = page_background
 
         apply_weatherapi_flood_merge(cfg, html_root=html_root, in_england=in_england)
 
