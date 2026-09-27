@@ -199,6 +199,14 @@ class DivumwxCards(SearchList):
         in_uk_raw = cards_section.get('in_uk', None)
         in_uk = to_bool(in_uk_raw) if in_uk_raw not in (None, '') else None
 
+        # page_background: the installer's "seasonal or solid" answer
+        # ([DivumWXCards] page_background). Anything unset or unrecognised
+        # is published as 'seasonal', the installer's default, so
+        # seasonalBackground.js always gets a known value.
+        page_background = str(cards_section.get('page_background', '') or '').strip().lower()
+        if page_background not in ('seasonal', 'solid'):
+            page_background = 'seasonal'
+
         # Read from [StdReport][[DivumWXReport]], not [DivumWXCards] -- this
         # is WeeWX's own real report-level lang setting (the same one
         # CheetahGenerator itself consulted to select this render's
@@ -218,6 +226,7 @@ class DivumwxCards(SearchList):
             'divumwx_station_image_title': json.dumps(station_image_title),
             'divumwx_station_image_path': json.dumps(station_image_path),
             'divumwx_in_uk': json.dumps(in_uk),
+            'divumwx_page_background': json.dumps(page_background),
             'divumwx_lang': json.dumps(lang),
             'divumwx_strings_payload': json.dumps(strings_payload),
             # Release version for the dashboard footer (archive.json meta).
