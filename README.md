@@ -1,4 +1,4 @@
-# Welcome to the DivumWX skin for WeeWX Version 1.0.1
+# Welcome to the DivumWX skin for WeeWX Version 1.1.0
 Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LICENSE Version 3](https://github.com/Millardiang/weewx-divumwx/blob/main/license.txt)
  
 # Features
@@ -23,6 +23,7 @@ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LIC
 * Kiosk mode, 3 x 3 grid for displaying on tablet sized screens.
 * Instant language selection for homepage dashboard from drop down menu
 * Introducing DivumWF Forecast - install on your mobile phone desktop as a take-anywhere forecasting app.
+* Choice of solid or seasonally themed body background.
 * Rain event: -
 
         Definition
