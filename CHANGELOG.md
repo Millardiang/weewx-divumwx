@@ -1,6 +1,10 @@
 # DivumWX Changelog
 
-## 1.0.1 — Unreleased — Maintenance release
+## 1.0.2 — Maintenance release
+
+Fixes timezone shift issues for forecast, earth daylight and terminator.
+
+## 1.0.1 — Maintenance release
 
 Fixes the findings from the 1.0.0 APT upgrade test (Debian 13, WeeWX 5.5.1
 from the official APT repository). No change to dashboard behaviour.
