@@ -64,15 +64,14 @@ body.dark.season-summer, html[data-bs-theme="dark"] body.season-summer { backgro
 body.season-autumn { background-color: #f9f1ea !important; }
 body.dark.season-autumn, html[data-bs-theme="dark"] body.season-autumn { background-color: #1a130d !important; }
 
-/* Page body background photo (autumn leaves, Jeremy Thomas / Unsplash).
-   A translucent veil in the current season/theme body colour sits over the
-   photo so cards and text stay readable in both light and dark modes. The
-   season rules above set background-color only, so they no longer clear it. */
+/* Seasonal page body background photo. seasonalBackground.js sets
+   <html data-bg-season="..."> from the date and the station latitude (seasons
+   are swapped for the southern hemisphere), and each value maps to a photo in
+   img/seasons/. A translucent veil in the current theme's body colour sits over
+   the photo so cards and text stay readable in both light and dark modes. The
+   season rules above set background-color only, so they don't clear it. */
 body {
   --body-photo-veil: color-mix(in srgb, var(--bs-body-bg, #ffffff) 55%, transparent);
-  background-image:
-    linear-gradient(var(--body-photo-veil), var(--body-photo-veil)),
-    url("img/autumnLeaves.jpg") !important;
   background-size: cover !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
@@ -80,6 +79,18 @@ body {
 }
 body.dark, html[data-bs-theme="dark"] body {
   --body-photo-veil: color-mix(in srgb, var(--bs-body-bg, #000000) 65%, transparent);
+}
+html[data-bg-season="winter"] body {
+  background-image: linear-gradient(var(--body-photo-veil), var(--body-photo-veil)), url("img/seasons/winter.jpg") !important;
+}
+html[data-bg-season="spring"] body {
+  background-image: linear-gradient(var(--body-photo-veil), var(--body-photo-veil)), url("img/seasons/spring.jpg") !important;
+}
+html[data-bg-season="summer"] body {
+  background-image: linear-gradient(var(--body-photo-veil), var(--body-photo-veil)), url("img/seasons/summer.jpg") !important;
+}
+html[data-bg-season="autumn"] body {
+  background-image: linear-gradient(var(--body-photo-veil), var(--body-photo-veil)), url("img/seasons/autumn.jpg") !important;
 }
 
 header {

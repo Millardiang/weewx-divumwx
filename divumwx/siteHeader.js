@@ -8,6 +8,16 @@
 
 // ===================== siteHeader.js =====================
 
+// Seasonal body background photo: loads seasonalBackground.js from the same
+// folder as this file, unless the page already includes it.
+(function loadSeasonalBackground(){
+  if (document.querySelector('script[src*="seasonalBackground.js"]')) return;
+  var base = (document.currentScript && document.currentScript.src) || window.location.href;
+  var s = document.createElement('script');
+  s.src = new URL('seasonalBackground.js', base).href;
+  document.head.appendChild(s);
+})();
+
 // ---------------------------------------------------------------------
 
 // ---------------------------------------------------------------------
