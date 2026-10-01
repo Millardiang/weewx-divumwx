@@ -1,5 +1,35 @@
 # DivumWX Changelog
 
+## 1.0.3 — Maintenance release
+
+Renames the Aviation unit group to **ICAO** and corrects its units.
+
+### Units
+- **Aviation is now ICAO.** The unit selector reads
+  "ICAO (°C, kt, hPa, NM, ft)". A browser that had Aviation selected is
+  moved to ICAO automatically on its next visit; no action is needed.
+- **Pressure / altimeter setting in hPa** (was mbar).
+- **Horizontal speed in knots (kt)** and **horizontal distance in nautical
+  miles**, now labelled "NM" instead of "nm" on the charts, gauges and
+  forecast pages.
+- **Altitude / elevation in feet.** Under ICAO, the barometer card's
+  Station Alt row and the climate page's ELEV line show the station
+  elevation in ft. All other unit groups keep metres.
+- **Vertical speed in ft/min.** Every unit group now defines `alt` and
+  `vspeed` units in `units.js`, with `m2ft`, `ms2fpm`, `fmtAlt` and
+  `fmtVSpeed` helpers. No page displays a vertical speed yet.
+
+### Versioning
+- Release version set to 1.0.3 in `bin/user/divumwx_version.py`, which
+  had not been raised for 1.0.2.
+
+### Files changed
+`units.js` 1.0.1, `header.js` 1.0.1, `siteHeader.js` 1.0.1,
+`charts-d3.html` 1.0.1, `climate.html` 1.0.1, `gauges.html` 1.0.1,
+`divumwf.js` 1.0.1, `cardsBundleNew.js` 1.0.2 (cardBarometer 1.0.1),
+`index.html` 1.0.3, `divumwf.html`, `README.md`, `INSTALLATION_GUIDE.md`,
+`bin/user/divumwx_version.py`.
+
 ## 1.0.2 — Maintenance release
 
 Fixes timezone shift issues for forecast, earth daylight and terminator.
