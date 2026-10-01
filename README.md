@@ -1,4 +1,4 @@
-# Welcome to the DivumWX skin for WeeWX Version 1.1.0
+# Welcome to the DivumWX skin for WeeWX Version 1.0.3
 Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LICENSE Version 3](https://github.com/Millardiang/weewx-divumwx/blob/main/license.txt)
  
 # Features
@@ -12,7 +12,7 @@ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LIC
 * Direct data injection of external weather data into WeeWX database (a kind of souped-up weewx-FilePile).
 * Unlike previous beta versions PHP code has been removed. HTML/JS Libraries/CSS only.
 * Ability to reorder dashboard cards locally in browser by drag and drop.
-* Switch between seven unit groups in real time (UK, US, Metric, Canadian, Scandinavian, Aviation, Beaufort).
+* Switch between seven unit groups in real time (UK, US, Metric, Canadian, Scandinavian, ICAO, Beaufort).
 * 24/7 Statiion forecast.
 * 24/7 Alternative Locations forecasts.
 * Animated graphics.
@@ -23,7 +23,6 @@ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LIC
 * Kiosk mode, 3 x 3 grid for displaying on tablet sized screens.
 * Instant language selection for homepage dashboard from drop down menu
 * Introducing DivumWF Forecast - install on your mobile phone desktop as a take-anywhere forecasting app.
-* Choice of solid or seasonally themed body background.
 * Rain event: -
 
         Definition
