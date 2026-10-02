@@ -1,11 +1,11 @@
-# Welcome to the DivumWX skin for WeeWX Version 1.0.3
+# Welcome to the DivumWX skin for WeeWX Version 1.2.0
 Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LICENSE Version 3](https://github.com/Millardiang/weewx-divumwx/blob/main/license.txt)
  
 # Features
 * Compatible with WeeWX version 5.5.0 onwards and Python version 3.13.5 onwards. (Not tested with earlier versions).
 * Tested with Pip and Deb installs.
 * Fully prompted install process allowing user custom settings.
-* Realtime gauges and range gauges
+* Live gauges in the CarbonSteel Series style, with 24-hour sparklines and a year-at-a-glance calendar
 * Live (realtime) loop json data.
 * Live (realtime) almanac json data from Skyfield.
 * Astronomy section including Sean Balfour's visualisations. 

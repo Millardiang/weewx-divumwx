@@ -1,5 +1,49 @@
 # DivumWX Changelog
 
+## 1.2.0 — Live gauges
+
+The Live Gauges and Range Gauges pages are replaced by a single **Live
+Gauges** page using the gauges from weewx-carbonsteel-series, fed by DivumWX's
+own data.
+
+### Gauges
+- Twelve gauges: temperature (outside or inside), dew point (or feels like,
+  wind chill, heat index, humidex), humidity (outside or inside), barometer,
+  wind speed, wind direction, wind rose, rain today, rain rate, UV index,
+  solar radiation and cloud base. A gauge whose sensor reports nothing, or
+  whose card is turned off in the installer, is left out.
+- Today's low and high on each gauge, with their times; 10-minute average
+  wind and gust; the range of wind direction over the last 10 minutes;
+  3-hour pressure change and tendency; rain this month and year.
+- A 24-hour sparkline under each gauge; click it for a detail chart.
+- **Year at a glance**: a calendar heat-map of the last 366 days (max, mean
+  and min temperature, rain, max gust, UV, solar).
+
+### Data, theme and units
+- Live readings come from `jsondata/loop.json`, today's highs and lows,
+  rain totals and 10-minute wind from `archive.json`, and the 24-hour
+  history, wind rose and calendar from `charts.json`. No CarbonSteel
+  service or `realtime.json` is needed.
+- The gauges follow the DivumWX theme: light gives chrome bezels and beige
+  faces, dark gives black-metal bezels and carbon-fibre faces, and auto
+  switches with day and night.
+- Units follow the navbar's unit selector, including ICAO (knots, hPa,
+  cloud base in feet) and Beaufort.
+- The wind rose covers the last 24 hours, from the hourly averages in
+  `charts.json`.
+
+### Pages and files
+- The navbar has one **Live Gauges** link. `gauges2.html` now just forwards
+  to `gauges.html`, so old links and bookmarks still work.
+- New: `csGauges.js` 1.0.0, `csGauges.css` 1.0.0. Changed: `gauges.html`
+  1.1.0, `gauges2.html` 1.1.0, `navbar.html` 1.0.1, `index.html` 1.2.0.
+- Removed: `iopctrl.js` and `gaugeDiverging.js` (only the old gauge pages
+  used them). Upgrades remove them automatically.
+
+## 1.1.0 — Feature release
+
+Installer now offers the choice of solid colour or seasonal switching theme for body background.
+
 ## 1.0.3 — Maintenance release
 
 Renames the Aviation unit group to **ICAO** and corrects its units.
