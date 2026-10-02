@@ -2061,6 +2061,10 @@ DIVUMWX_RETIRED_FRONTEND_FILES = (
     '.DS_Store',
     'CHANGELOG.md',
     'VERSIONING_SCHEME.md',
+    # 1.2.0: the old Live and Range gauge pages' scripts (gauges.html now
+    # uses csGauges.js; gauges2.html only forwards to it)
+    'gaugeDiverging.js',
+    'iopctrl.js',
 )
 
 # Leftovers with these extensions, found on an upgrade without a
