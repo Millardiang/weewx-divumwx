@@ -15,6 +15,14 @@ Renames the Aviation unit group to **ICAO** and corrects its units.
 - **Altitude / elevation in feet.** Under ICAO, the barometer card's
   Station Alt row and the climate page's ELEV line show the station
   elevation in ft. All other unit groups keep metres.
+- **Cloud base in feet.** The current conditions card shows cloud base in ft
+  under ICAO (UK and US already used ft).
+- **Visibility in NM.** Under ICAO, visibility on the current conditions card
+  and in the METAR modal is shown in nautical miles, converted from the
+  METAR report; unlimited visibility ("10+" statute miles) shows as
+  "> 8.7 NM".
+- **METAR airport distance in NM.** Under ICAO, the METAR modal gives the
+  distance to the reporting airport in NM, with km in brackets.
 - **Vertical speed in ft/min.** Every unit group now defines `alt` and
   `vspeed` units in `units.js`, with `m2ft`, `ms2fpm`, `fmtAlt` and
   `fmtVSpeed` helpers. No page displays a vertical speed yet.
@@ -26,7 +34,8 @@ Renames the Aviation unit group to **ICAO** and corrects its units.
 ### Files changed
 `units.js` 1.0.1, `header.js` 1.0.1, `siteHeader.js` 1.0.1,
 `charts-d3.html` 1.0.1, `climate.html` 1.0.1, `gauges.html` 1.0.1,
-`divumwf.js` 1.0.1, `cardsBundleNew.js` 1.0.2 (cardBarometer 1.0.1),
+`divumwf.js` 1.0.1, `modalMetar.html` 1.0.1,
+`cardsBundleNew.js` 1.0.3 (cardBarometer 1.0.1, cardCurrent 1.0.1),
 `index.html` 1.0.3, `divumwf.html`, `README.md`, `INSTALLATION_GUIDE.md`,
 `bin/user/divumwx_version.py`.
 

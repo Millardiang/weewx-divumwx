@@ -1,6 +1,6 @@
 /*
 ##############################################################################################
-# cardsBundleNew.js version 1.0.2
+# cardsBundleNew.js version 1.0.3
 ##############################################################################################
 */
 
@@ -1137,7 +1137,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardCurrent.js version 1.0.0
+# cardCurrent.js version 1.0.1
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -1237,6 +1237,9 @@ try {
     if (currentUnits.wind === 'mph') return visib + ' mi';
     var parsed = parseMetarVisibilityMiles(visib);
     if (parsed === null) return visib + ' mi';
+    if (currentUnits.vis === 'nm') {
+      return d3.format('.1f')(parsed.miles * 0.868976) + (parsed.plus ? '+' : '') + ' NM';
+    }
     var km = parsed.miles * 1.60934;
     return d3.format('.1f')(km) + (parsed.plus ? '+' : '') + ' km';
   }
@@ -1293,7 +1296,7 @@ try {
       : d3.format('.1f')(mmValue) + ' mm';
   }
   function cloudBaseLabel(metres){
-    return currentUnits.wind === 'mph'
+    return (currentUnits.alt === 'ft' || currentUnits.wind === 'mph')
       ? Math.round(metres * 3.281) + ' ft'
       : Math.round(metres) + ' m';
   }
