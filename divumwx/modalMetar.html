@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# modalMetar.html version 1.0.0
+# modalMetar.html version 1.0.1
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -410,8 +410,8 @@ body{
   var unitKey = localStorage.getItem('dashboardUnitSystem') || 'uk';
   var units = (typeof SYSTEMS !== 'undefined' && SYSTEMS[unitKey]) ? SYSTEMS[unitKey] : { temp: 'C', wind: 'mph', rain: 'mm' };
   var pressureUnit = 'hPa';
-  var distancePrimary = 'km';
-  var visibilityMode = (unitKey === 'us') ? 'us' : 'international';
+  var distancePrimary = (units.dist === 'nm') ? 'nm' : 'km';
+  var visibilityMode = (unitKey === 'us') ? 'us' : (units.vis === 'nm' ? 'nm' : 'international');
 
   var CONDITIONS = {
     '-SHRA':   ['rain.svg',                      'rain.svg',                      'Light Rain Showers'],
@@ -533,10 +533,12 @@ body{
     var visibUnlimited   = metarVisMilesRaw !== '' && metarVisMilesRaw.indexOf('+') !== -1;
     var metarVisMiles    = metarVisMilesRaw !== '' ? parseFloat(metarVisMilesRaw) : '';
     var metarVisibility  = metarVisMiles !== '' ? Math.round(metarVisMiles * 1609.34) : '';
-    var metarVisStrUs = '', metarVisStrInt = '';
+    var metarVisStrUs = '', metarVisStrInt = '', metarVisStrNm = '';
     if (metarVisMilesRaw !== ''){
       metarVisStrUs  = visibUnlimited ? ('> ' + Math.trunc(metarVisMiles) + ' miles') : (metarVisMilesRaw + ' miles');
       metarVisStrInt = visibUnlimited ? '> 9,999 m' : (metarVisibility.toLocaleString('en-GB') + ' m');
+      var metarVisNm = (metarVisMiles * 0.868976).toLocaleString('en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+      metarVisStrNm  = (visibUnlimited ? '> ' : '') + metarVisNm + ' NM';
     }
 
     var metarPressureMb = (typeof d.altim === 'number') ? d.altim : '';
@@ -564,7 +566,11 @@ body{
     }
 
     var metdist1, metdist2, metunit1, metunit2;
-    if (distancePrimary === 'km') {
+    if (distancePrimary === 'nm') {
+      metdist1 = (airport1dist * 0.539957).toLocaleString('en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+      metdist2 = airport1dist.toLocaleString('en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+      metunit1 = 'NM'; metunit2 = 'km';
+    } else if (distancePrimary === 'km') {
       metdist1 = airport1dist.toLocaleString('en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
       metdist2 = (airport1dist / 1.609).toLocaleString('en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
       metunit1 = 'km'; metunit2 = 'mi';
@@ -581,7 +587,7 @@ body{
       ? (metarPressureMb + ' ' + pressureUnit + ' \u2013 ' + metarPressureHg + ' inHg')
       : (metarPressureHg + ' inHg \u2013 ' + metarPressureMb + ' mbar');
     document.getElementById('pressureLine').textContent = pressureLine;
-    document.getElementById('visibilityLine').textContent = visibilityMode === 'us' ? metarVisStrUs : metarVisStrInt;
+    document.getElementById('visibilityLine').textContent = visibilityMode === 'us' ? metarVisStrUs : (visibilityMode === 'nm' ? metarVisStrNm : metarVisStrInt);
 
     document.getElementById('stationIdText').textContent = metarStationId || '\u2014';
     var locHtml = (metarStationName || '\u2014') + ' &mdash; <span class="metar-accent">' + metdist1 + '</span> ' + metunit1 +
