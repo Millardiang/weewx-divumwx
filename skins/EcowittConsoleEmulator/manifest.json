@@ -1,0 +1,13 @@
+{
+  "_copyright": "Copyright (c) Ian Millard 2026",
+  "name": "Weather Station",
+  "short_name": "Weather",
+  "start_url": "index.html",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#11185a",
+  "theme_color": "#11185a",
+  "icons": [
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

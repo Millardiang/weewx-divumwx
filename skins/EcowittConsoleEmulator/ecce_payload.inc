@@ -1,0 +1,2 @@
+## Copyright (c) Ian Millard 2026
+{"data":$ecce_json,"almanac":{"sunrise":$ecce_jv($almanac.sunrise.raw),"sunset":$ecce_jv($almanac.sunset.raw),"moonIndex":$ecce_jv($almanac.moon_index),"moonPhase":$ecce_jv($almanac.moon_phase),"moonFullness":$ecce_jv($almanac.moon_fullness)}}

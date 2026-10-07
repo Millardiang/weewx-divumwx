@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- Copyright (c) Ian Millard 2026 -->
+  <rect width="128" height="128" rx="26" fill="#11185a"/>
+  <circle cx="64" cy="64" r="40" fill="none" stroke="#ffa23a" stroke-width="9"/>
+  <path d="M64 30 L56 16 L64 21 L72 16 Z" fill="#5fb7ff"/>
+  <text x="64" y="76" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="34" fill="#fff">23°</text>
+</svg>
