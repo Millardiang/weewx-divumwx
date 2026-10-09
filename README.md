@@ -1,4 +1,4 @@
-# Welcome to the DivumWX skin for WeeWX Version 1.2.0
+# Welcome to the DivumWX skin for WeeWX Version 1.3.0
 Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LICENSE Version 3](https://github.com/Millardiang/weewx-divumwx/blob/main/license.txt)
  
 # Features
@@ -8,7 +8,7 @@ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LIC
 * Live gauges in the CarbonSteel Series style, with 24-hour sparklines and a year-at-a-glance calendar
 * Live (realtime) loop json data.
 * Live (realtime) almanac json data from Skyfield.
-* Astronomy section including Sean Balfour's visualisations. 
+* Astronomy section including Sean Balfour's visualisations, and an Equal Earth world map with live day and night, twilight bands and the station marked.
 * Direct data injection of external weather data into WeeWX database (a kind of souped-up weewx-FilePile).
 * Unlike previous beta versions PHP code has been removed. HTML/JS Libraries/CSS only.
 * Ability to reorder dashboard cards locally in browser by drag and drop.

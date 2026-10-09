@@ -1,0 +1,544 @@
+diff --git a/INSTALLATION_GUIDE.md b/INSTALLATION_GUIDE.md
+index 09a2cbc..7abca7d 100644
+--- a/INSTALLATION_GUIDE.md
++++ b/INSTALLATION_GUIDE.md
+@@ -1,6 +1,6 @@
+ # DivumWX Installation Guide
+ 
+-This guide covers DivumWX **1.2.0**. It assumes you already have a stable
++This guide covers DivumWX **1.3.0**. It assumes you already have a stable
+ WeeWX 5 installation running with your own hardware driver.
+ 
+ Tested on Debian 13 (Trixie) with:
+@@ -50,7 +50,7 @@ sudo apt install python3-skyfield python3-requests
+ ### Install or upgrade
+ 
+ ```
+-sudo weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/tags/ver.1.2.0.zip
++sudo weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/tags/ver.1.3.0.zip
+ sudo systemctl restart weewx
+ sudo weectl report run DivumWXReport
+ ```
+@@ -96,7 +96,7 @@ sudo mkdir -p /var/www/html/divumwx
+ sudo chown -R $(whoami):$(whoami) /var/www/html/divumwx
+ 
+ source ~/weewx-venv/bin/activate
+-weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/tags/ver.1.2.0.zip
++weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/tags/ver.1.3.0.zip
+ sudo systemctl restart weewx
+ weectl report run DivumWXReport
+ ```
+diff --git a/bin/user/divumwx_version.py b/bin/user/divumwx_version.py
+index aa822fc..b4f3083 100644
+--- a/bin/user/divumwx_version.py
++++ b/bin/user/divumwx_version.py
+@@ -11,4 +11,4 @@ Change it here, and only here, when cutting a release. Then run
+ in the frontend match.
+ """
+ 
+-DIVUMWX_VERSION = "1.2.0"
++DIVUMWX_VERSION = "1.3.0"
+diff --git a/divumwx/astronomy.html b/divumwx/astronomy.html
+index 992f633..419ca16 100644
+--- a/divumwx/astronomy.html
++++ b/divumwx/astronomy.html
+@@ -1,7 +1,7 @@
+ <!DOCTYPE html>
+ <!--
+ ##############################################################################################
+-# astronomy.html version 1.0.0
++# astronomy.html version 1.1.0
+ #  Copyright (C) 2026 Ian Millard, Sean Balfour
+ #  GPLv3
+ ##############################################################################################
+@@ -249,6 +249,11 @@ setInterval(() => {
+       <div class="astro-hub-title">Visualisations</div>
+       <p class="astro-hub-desc">Interactive visualisations of the sky and solar system.</p>
+     </a>
++    <a class="astro-hub-card" href="equalEarthMap.html">
++      <div class="astro-hub-glyph">&#8853;</div>
++      <div class="astro-hub-title">Equal Earth Map</div>
++      <p class="astro-hub-desc">The world at true relative size, with today's day and night, the subsolar point and this station marked.</p>
++    </a>
+     <!-- Optional pages: hidden until siteHeader.js confirms the target index.html exists -->
+     <a class="astro-hub-card" href="skyfield/index.html" data-astro-optional="skyfield" hidden>
+       <div class="astro-hub-glyph">&#9790;</div>
+diff --git a/divumwx/astronomyNavbar.html b/divumwx/astronomyNavbar.html
+index 107d1f4..e3c0332 100644
+--- a/divumwx/astronomyNavbar.html
++++ b/divumwx/astronomyNavbar.html
+@@ -1,6 +1,6 @@
+ <!--
+ ##############################################################################################
+-# astronomyNavbar.html version 1.0.0
++# astronomyNavbar.html version 1.1.0
+ #  Copyright (C) 2026 Ian Millard, Sean Balfour
+ #  GPLv3
+ ##############################################################################################
+@@ -21,6 +21,7 @@
+       <a class="site-nav-link" href="/divumwx/constellations.html" data-i18n="Constellations">Constellations</a>
+       <a class="site-nav-link" href="/divumwx/meteorShowers.html" data-i18n="Meteor Showers">Meteor Showers</a>
+       <a class="site-nav-link" href="/divumwx/visualisations.html" data-i18n="Visualisations">Visualisations</a>
++      <a class="site-nav-link" href="/divumwx/equalEarthMap.html" data-i18n="Equal Earth Map">Equal Earth Map</a>
+       <!-- Optional pages: hidden until siteHeader.js confirms the target index.html exists -->
+       <a class="site-nav-link" href="/divumwx/skyfield/index.html" data-astro-optional="skyfield" data-i18n="Skyfield" hidden>Skyfield</a>
+       <a class="site-nav-link" href="/divumwx/celestial/index.html" data-astro-optional="celestial" data-i18n="Celestial" hidden>Celestial</a>
+diff --git a/divumwx/divumwf.html b/divumwx/divumwf.html
+index f78bf83..3fc6b71 100644
+--- a/divumwx/divumwf.html
++++ b/divumwx/divumwf.html
+@@ -331,7 +331,7 @@ body{
+   <div class="wf-appbar">
+     <div class="wf-brand">
+       <span class="wf-brand-name">DivumWF</span>
+-      <span class="wf-brand-version" id="wfBrandVersion">v1.2.0</span>
++      <span class="wf-brand-version" id="wfBrandVersion">v1.3.0</span>
+     </div>
+     <button type="button" class="wf-gear-btn" id="wfSettingsBtn" title="Settings" aria-label="Settings"></button>
+   </div>
+diff --git a/divumwx/index.html b/divumwx/index.html
+index 3585b34..0018054 100644
+--- a/divumwx/index.html
++++ b/divumwx/index.html
+@@ -1,7 +1,7 @@
+ <!DOCTYPE html>
+ <!--
+ ##############################################################################################
+-# index.html version 1.2.0
++# index.html version 1.3.0
+ #  Copyright (C) 2026 Ian Millard, Sean Balfour
+ #  GPLv3
+ ##############################################################################################
+@@ -568,7 +568,7 @@ setInterval(() => {
+     </div>
+     <div class="footer-center">
+       <div class="footer-credit">Charts, Heatmaps, Gauges and Card Images D3 rendered &middot; Weather Icons by Meteocons</div>
+-      <div class="footer-version mono">DivumWX v<span id="footerDivumwxVer">1.2.0</span> &middot; WeeWX ver <span id="footerWeewxVer">x.x.x</span>, Python ver <span id="footerPyVer">y.y.y</span>, OS version <span id="footerOsVer">z.z.z &middot; Weather Icons by Meteocons</span></div>
++      <div class="footer-version mono">DivumWX v<span id="footerDivumwxVer">1.3.0</span> &middot; WeeWX ver <span id="footerWeewxVer">x.x.x</span>, Python ver <span id="footerPyVer">y.y.y</span>, OS version <span id="footerOsVer">z.z.z &middot; Weather Icons by Meteocons</span></div>
+     </div>
+     <div class="footer-right">
+       <a href="http://weewx.com" title="WeeWX Weather Software" target="_blank" rel="noopener" class="footer-weewx-link">
+diff --git a/skins/DivumWX/lang/ar.conf b/skins/DivumWX/lang/ar.conf
+index 381cccc..e03806d 100644
+--- a/skins/DivumWX/lang/ar.conf
++++ b/skins/DivumWX/lang/ar.conf
+@@ -423,6 +423,7 @@
+     Constellations = الأبراج
+     Meteor Showers = زخات الشهب
+     Visualisations = التصورات المرئية
++    Equal Earth Map = خريطة Equal Earth
+     
+     ###########################################################################
+     # cardClockOutlook.js -- 3-hour outlook sentence built by
+diff --git a/skins/DivumWX/lang/br.conf b/skins/DivumWX/lang/br.conf
+index b62c64e..af41069 100644
+--- a/skins/DivumWX/lang/br.conf
++++ b/skins/DivumWX/lang/br.conf
+@@ -423,6 +423,7 @@
+     Constellations = Steredennoù
+     Meteor Showers = Glavioù Meteor
+     Visualisations = Gweledadurioù
++    Equal Earth Map = Kartenn Equal Earth
+     
+     ###########################################################################
+     # cardClockOutlook.js -- 3-hour outlook sentence built by
+diff --git a/skins/DivumWX/lang/ca.conf b/skins/DivumWX/lang/ca.conf
+index fcac049..4623330 100644
+--- a/skins/DivumWX/lang/ca.conf
++++ b/skins/DivumWX/lang/ca.conf
+@@ -423,6 +423,7 @@
+     Constellations = Constel·lacions
+     Meteor Showers = Pluges de meteors
+     Visualisations = Visualitzacions
++    Equal Earth Map = Mapa Equal Earth
+     
+     ###########################################################################
+     # cardClockOutlook.js -- 3-hour outlook sentence built by
+diff --git a/skins/DivumWX/lang/cn.conf b/skins/DivumWX/lang/cn.conf
+index 3c5e7b9..4826569 100644
+--- a/skins/DivumWX/lang/cn.conf
++++ b/skins/DivumWX/lang/cn.conf
+@@ -423,6 +423,7 @@
+     Constellations = 星座
+     Meteor Showers = 流星雨
+     Visualisations = 可视化
++    Equal Earth Map = Equal Earth 地图
+     
+     ###########################################################################
+     # cardClockOutlook.js -- 3-hour outlook sentence built by
+diff --git a/skins/DivumWX/lang/cy.conf b/skins/DivumWX/lang/cy.conf
+index 0bc79de..9c10cc3 100644
+--- a/skins/DivumWX/lang/cy.conf
++++ b/skins/DivumWX/lang/cy.conf
+@@ -423,6 +423,7 @@
+     Constellations = Cytserau
+     Meteor Showers = Cawodydd Meteor
+     Visualisations = Delweddoliadau
++    Equal Earth Map = Map Equal Earth
+     
+     ###########################################################################
+     # cardClockOutlook.js -- 3-hour outlook sentence built by
+diff --git a/skins/DivumWX/lang/cz.conf b/skins/DivumWX/lang/cz.conf
+index 510d90b..f23ec49 100644
+--- a/skins/DivumWX/lang/cz.conf
++++ b/skins/DivumWX/lang/cz.conf
+@@ -423,6 +423,7 @@
+     Constellations = Souhvězdí
+     Meteor Showers = Meteorické roje
+     Visualisations = Vizualizace
++    Equal Earth Map = Mapa Equal Earth
+     
+     ###########################################################################
+     # cardClockOutlook.js -- 3-hour outlook sentence built by
+diff --git a/skins/DivumWX/lang/da.conf b/skins/DivumWX/lang/da.conf
+index 6e9df49..1a77abf 100644
+--- a/skins/DivumWX/lang/da.conf
++++ b/skins/DivumWX/lang/da.conf
+@@ -431,6 +431,7 @@
+     Constellations = Stjernebilleder
+     Meteor Showers = Meteorsværme
+     Visualisations = Visualiseringer
++    Equal Earth Map = Equal Earth-kort
+     
+     ###########################################################################
+     # cardClockOutlook.js -- 3-hour outlook sentence built by
+diff --git a/skins/DivumWX/lang/de.conf b/skins/DivumWX/lang/de.conf
+index 100844f..6502802 100644
+--- a/skins/DivumWX/lang/de.conf
++++ b/skins/DivumWX/lang/de.conf
+@@ -423,6 +423,7 @@
+     Constellations = Sternbilder
+     Meteor Showers = Meteorschauer
+     Visualisations = Visualisierungen
++    Equal Earth Map = Equal-Earth-Karte
+     
+     ###########################################################################
+     # cardClockOutlook.js -- 3-hour outlook sentence built by
+diff --git a/skins/DivumWX/lang/en.conf b/skins/DivumWX/lang/en.conf
+index fac2a75..f261798 100644
+--- a/skins/DivumWX/lang/en.conf
++++ b/skins/DivumWX/lang/en.conf
+@@ -483,6 +483,7 @@
+     Constellations = Constellations
+     Meteor Showers = Meteor Showers
+     Visualisations = Visualisations
++    Equal Earth Map = Equal Earth Map
+     
+     ###########################################################################
+     # cardClockOutlook.js -- 3-hour outlook sentence built by
+diff --git a/skins/DivumWX/lang/en_US.conf b/skins/DivumWX/lang/en_US.conf
+index 0d78044..043aeed 100644
+--- a/skins/DivumWX/lang/en_US.conf
++++ b/skins/DivumWX/lang/en_US.conf
+@@ -451,6 +451,7 @@
+     Constellations = Constellations
+     Meteor Showers = Meteor Showers
+     Visualisations = Visualizations
++    Equal Earth Map = Equal Earth Map
+     
+     ###########################################################################
+     # cardClockOutlook.js -- 3-hour outlook sentence built by
+diff --git a/skins/DivumWX/lang/es.conf b/skins/DivumWX/lang/es.conf
+index b391ce9..7707f66 100644
+--- a/skins/DivumWX/lang/es.conf
++++ b/skins/DivumWX/lang/es.conf
+@@ -423,6 +423,7 @@
+     Constellations = Constelaciones
+     Meteor Showers = Lluvias de meteoros
+     Visualisations = Visualizaciones
++    Equal Earth Map = Mapa Equal Earth
+     
+     ###########################################################################
+     # cardClockOutlook.js -- 3-hour outlook sentence built by
+diff --git a/skins/DivumWX/lang/eu.conf b/skins/DivumWX/lang/eu.conf
+index 7536ada..bc70cad 100644
+--- a/skins/DivumWX/lang/eu.conf
++++ b/skins/DivumWX/lang/eu.conf
+@@ -423,6 +423,7 @@
+     Constellations = Konstelazioak
+     Meteor Showers = Meteoro-euriak
+     Visualisations = Bisualizazioak
++    Equal Earth Map = Equal Earth mapa
+     
+     ###########################################################################
+     # cardClockOutlook.js -- 3-hour outlook sentence built by
+diff --git a/skins/DivumWX/lang/fi.conf b/skins/DivumWX/lang/fi.conf
+index f168282..fc06d35 100644
+--- a/skins/DivumWX/lang/fi.conf
++++ b/skins/DivumWX/lang/fi.conf
+@@ -309,6 +309,7 @@
+     Constellations = Tähdistöt
+     Meteor Showers = Meteorisateet
+     Visualisations = Visualisoinnit
++    Equal Earth Map = Equal Earth -kartta
+     
+     ###########################################################################
+     # cardClockOutlook.js -- 3-hour outlook sentence built by
+diff --git a/skins/DivumWX/lang/fr.conf b/skins/DivumWX/lang/fr.conf
+index 3b95dcb..a06faac 100644
+--- a/skins/DivumWX/lang/fr.conf
++++ b/skins/DivumWX/lang/fr.conf
+@@ -423,6 +423,7 @@
+     Constellations = Constellations
+     Meteor Showers = Pluies de météores
+     Visualisations = Visualisations
++    Equal Earth Map = Carte Equal Earth
+     
+     ###########################################################################
+     # cardClockOutlook.js -- 3-hour outlook sentence built by
+diff --git a/skins/DivumWX/lang/gr.conf b/skins/DivumWX/lang/gr.conf
+index a1dd40c..9a894a0 100644
+--- a/skins/DivumWX/lang/gr.conf
++++ b/skins/DivumWX/lang/gr.conf
+@@ -423,6 +423,7 @@
+     Constellations = Αστερισμοί
+     Meteor Showers = Μετεωρικές βροχές
+     Visualisations = Οπτικοποιήσεις
++    Equal Earth Map = Χάρτης Equal Earth
+     
+     ###########################################################################
+     # cardClockOutlook.js -- 3-hour outlook sentence built by
+diff --git a/skins/DivumWX/lang/hi.conf b/skins/DivumWX/lang/hi.conf
+index 4ad7329..ac9eb78 100644
+--- a/skins/DivumWX/lang/hi.conf
++++ b/skins/DivumWX/lang/hi.conf
+@@ -423,6 +423,7 @@
+     Constellations = तारामंडल
+     Meteor Showers = उल्का वर्षा
+     Visualisations = विज़ुअलाइज़ेशन
++    Equal Earth Map = Equal Earth मानचित्र
+     
+     ###########################################################################
+     # cardClockOutlook.js -- 3-hour outlook sentence built by
+diff --git a/skins/DivumWX/lang/hu.conf b/skins/DivumWX/lang/hu.conf
+index 6fb6249..03b3572 100644
+--- a/skins/DivumWX/lang/hu.conf
++++ b/skins/DivumWX/lang/hu.conf
+@@ -309,6 +309,7 @@
+     Constellations = Csillagképek
+     Meteor Showers = Meteorrajok
+     Visualisations = Vizualizációk
++    Equal Earth Map = Equal Earth térkép
+     
+     ###########################################################################
+     # cardClockOutlook.js -- 3-hour outlook sentence built by
+diff --git a/skins/DivumWX/lang/is.conf b/skins/DivumWX/lang/is.conf
+index 82aa35b..0156a24 100644
+--- a/skins/DivumWX/lang/is.conf
++++ b/skins/DivumWX/lang/is.conf
+@@ -309,6 +309,7 @@
+     Constellations = Stjörnumerki
+     Meteor Showers = Loftsteinadrífur
+     Visualisations = Sjónrænar framsetningar
++    Equal Earth Map = Equal Earth kort
+     
+     ###########################################################################
+     # cardClockOutlook.js -- 3-hour outlook sentence built by
+diff --git a/skins/DivumWX/lang/it.conf b/skins/DivumWX/lang/it.conf
+index ac97c9c..cbaa70f 100644
+--- a/skins/DivumWX/lang/it.conf
++++ b/skins/DivumWX/lang/it.conf
+@@ -423,6 +423,7 @@
+     Constellations = Costellazioni
+     Meteor Showers = Sciami meteorici
+     Visualisations = Visualizzazioni
++    Equal Earth Map = Mappa Equal Earth
+     
+     ###########################################################################
+     # cardClockOutlook.js -- 3-hour outlook sentence built by
+diff --git a/skins/DivumWX/lang/ja.conf b/skins/DivumWX/lang/ja.conf
+index 5c240e0..585d152 100644
+--- a/skins/DivumWX/lang/ja.conf
++++ b/skins/DivumWX/lang/ja.conf
+@@ -483,6 +483,7 @@
+     Constellations = 星座
+     Meteor Showers = 流星群
+     Visualisations = ビジュアライゼーション
++    Equal Earth Map = Equal Earth 地図
+     
+     ###########################################################################
+     # cardClockOutlook.js -- 3-hour outlook sentence built by
+diff --git a/skins/DivumWX/lang/nl.conf b/skins/DivumWX/lang/nl.conf
+index 8f2df06..331c98b 100644
+--- a/skins/DivumWX/lang/nl.conf
++++ b/skins/DivumWX/lang/nl.conf
+@@ -423,6 +423,7 @@
+     Constellations = Sterrenbeelden
+     Meteor Showers = Meteorenregens
+     Visualisations = Visualisaties
++    Equal Earth Map = Equal Earth-kaart
+     
+     ###########################################################################
+     # cardClockOutlook.js -- 3-hour outlook sentence built by
+diff --git a/skins/DivumWX/lang/no.conf b/skins/DivumWX/lang/no.conf
+index 1925bce..bf43e9f 100644
+--- a/skins/DivumWX/lang/no.conf
++++ b/skins/DivumWX/lang/no.conf
+@@ -432,6 +432,7 @@
+     Constellations = Stjernebilder
+     Meteor Showers = Meteorsvermer
+     Visualisations = Visualiseringer
++    Equal Earth Map = Equal Earth-kart
+     
+     ###########################################################################
+     # cardClockOutlook.js -- 3-hour outlook sentence built by
+diff --git a/skins/DivumWX/lang/pl.conf b/skins/DivumWX/lang/pl.conf
+index ce450d9..d27dcf7 100644
+--- a/skins/DivumWX/lang/pl.conf
++++ b/skins/DivumWX/lang/pl.conf
+@@ -423,6 +423,7 @@
+     Constellations = Gwiazdozbiory
+     Meteor Showers = Roje meteorów
+     Visualisations = Wizualizacje
++    Equal Earth Map = Mapa Equal Earth
+     
+     ###########################################################################
+     # cardClockOutlook.js -- 3-hour outlook sentence built by
+diff --git a/skins/DivumWX/lang/pt.conf b/skins/DivumWX/lang/pt.conf
+index 43566f9..0b17922 100644
+--- a/skins/DivumWX/lang/pt.conf
++++ b/skins/DivumWX/lang/pt.conf
+@@ -423,6 +423,7 @@
+     Constellations = Constelações
+     Meteor Showers = Chuvas de meteoros
+     Visualisations = Visualizações
++    Equal Earth Map = Mapa Equal Earth
+     
+     ###########################################################################
+     # cardClockOutlook.js -- 3-hour outlook sentence built by
+diff --git a/skins/DivumWX/lang/sv.conf b/skins/DivumWX/lang/sv.conf
+index 1082e49..f28daa4 100644
+--- a/skins/DivumWX/lang/sv.conf
++++ b/skins/DivumWX/lang/sv.conf
+@@ -309,6 +309,7 @@
+     Constellations = Stjärnbilder
+     Meteor Showers = Meteorsvärmar
+     Visualisations = Visualiseringar
++    Equal Earth Map = Equal Earth-karta
+     
+     ###########################################################################
+     # cardClockOutlook.js -- 3-hour outlook sentence built by
+diff --git a/skins/DivumWX/lang/ta.conf b/skins/DivumWX/lang/ta.conf
+index 62841e9..80c11e2 100644
+--- a/skins/DivumWX/lang/ta.conf
++++ b/skins/DivumWX/lang/ta.conf
+@@ -423,6 +423,7 @@
+     Constellations = விண்மீன் கூட்டங்கள்
+     Meteor Showers = விண்கல் மழைகள்
+     Visualisations = காட்சிப்படுத்தல்கள்
++    Equal Earth Map = Equal Earth வரைபடம்
+     
+     ###########################################################################
+     # cardClockOutlook.js -- 3-hour outlook sentence built by
+diff --git a/skins/DivumWX/lang/th.conf b/skins/DivumWX/lang/th.conf
+index 3b101f7..7224aaa 100644
+--- a/skins/DivumWX/lang/th.conf
++++ b/skins/DivumWX/lang/th.conf
+@@ -423,6 +423,7 @@
+     Constellations = กลุ่มดาว
+     Meteor Showers = ฝนดาวตก
+     Visualisations = การแสดงผลข้อมูล
++    Equal Earth Map = แผนที่ Equal Earth
+     
+     ###########################################################################
+     # cardClockOutlook.js -- 3-hour outlook sentence built by
+diff --git a/skins/DivumWX/lang/tr.conf b/skins/DivumWX/lang/tr.conf
+index 82a5e1e..48977cf 100644
+--- a/skins/DivumWX/lang/tr.conf
++++ b/skins/DivumWX/lang/tr.conf
+@@ -423,6 +423,7 @@
+     Constellations = Takımyıldızlar
+     Meteor Showers = Meteor Yağmurları
+     Visualisations = Görselleştirmeler
++    Equal Earth Map = Equal Earth haritası
+     
+     ###########################################################################
+     # cardClockOutlook.js -- 3-hour outlook sentence built by
+diff --git a/skins/DivumWX/lang/uk.conf b/skins/DivumWX/lang/uk.conf
+index 1f1f316..0f48eaa 100644
+--- a/skins/DivumWX/lang/uk.conf
++++ b/skins/DivumWX/lang/uk.conf
+@@ -423,6 +423,7 @@
+     Constellations = Сузір'я
+     Meteor Showers = Метеорні потоки
+     Visualisations = Візуалізації
++    Equal Earth Map = Карта Equal Earth
+     
+     ###########################################################################
+     # cardClockOutlook.js -- 3-hour outlook sentence built by
+diff --git a/skins/DivumWX/lang/ur.conf b/skins/DivumWX/lang/ur.conf
+index 57bf91f..4d912ad 100644
+--- a/skins/DivumWX/lang/ur.conf
++++ b/skins/DivumWX/lang/ur.conf
+@@ -423,6 +423,7 @@
+     Constellations = برج
+     Meteor Showers = شہابی بارشیں
+     Visualisations = بصری تشکیلات
++    Equal Earth Map = Equal Earth نقشہ
+     
+     ###########################################################################
+     # cardClockOutlook.js -- 3-hour outlook sentence built by
+--- a/README.md
++++ b/README.md
+@@ -1,4 +1,4 @@
+-# Welcome to the DivumWX skin for WeeWX Version 1.2.0
++# Welcome to the DivumWX skin for WeeWX Version 1.3.0
+ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LICENSE Version 3](https://github.com/Millardiang/weewx-divumwx/blob/main/license.txt)
+  
+ # Features
+@@ -8,7 +8,7 @@
+ * Live gauges in the CarbonSteel Series style, with 24-hour sparklines and a year-at-a-glance calendar
+ * Live (realtime) loop json data.
+ * Live (realtime) almanac json data from Skyfield.
+-* Astronomy section including Sean Balfour's visualisations. 
++* Astronomy section including Sean Balfour's visualisations, and an Equal Earth world map with live day and night, twilight bands and the station marked.
+ * Direct data injection of external weather data into WeeWX database (a kind of souped-up weewx-FilePile).
+ * Unlike previous beta versions PHP code has been removed. HTML/JS Libraries/CSS only.
+ * Ability to reorder dashboard cards locally in browser by drag and drop.
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -1,5 +1,44 @@
+ # DivumWX Changelog
+ 
++## 1.3.0 — Equal Earth map
++
++A new **Equal Earth Map** page in the Astronomy section: an interactive world
++map in the equal-area Equal Earth projection (Šavrič, Jenny & Patterson,
++2018), drawn with D3.
++
++### Map
++- Day and night drawn live, with civil, nautical and astronomical twilight
++  bands and a marker at the subsolar point (where the Sun is overhead).
++  Recalculated from the current time every minute.
++- The station is marked from `archive.json` (`meta.latitude` /
++  `meta.longitude`), falling back to the page's built-in coordinates.
++- Click a country for its true area in km² and its size on the map relative
++  to the equator. This reads ×1.00 on Equal Earth. A **Mercator** toggle
++  shows the difference (Greenland ×8.6, Russia ×4.8).
++- Optional **Tissot circles** (500 km radius) show how each projection
++  distorts area and shape.
++- Centre the map on 0°, the station or 150°E, drag it sideways, use the
++  arrow keys, or let it rotate.
++- Follows the DivumWX theme (light, dark, auto) and uses the shared
++  astronomy navbar.
++
++### Data
++- Country boundaries come from the new `jsondata/countries-110m.json`
++  (Natural Earth 1:110m, from world-atlas 2.0.2). The existing
++  `worldmap.json` has no country names, so it is left unchanged.
++- Uses the bundled `js/d3.7.9.0.min.js` and `js/topojson.3.0.2.min.js`, so
++  no new external scripts are loaded.
++
++### Pages and files
++- The astronomy navbar has an **Equal Earth Map** link after
++  Visualisations, and the Astronomy hub page has an Equal Earth Map card.
++- "Equal Earth Map" is translated in all 30 language files in
++  `skins/DivumWX/lang`.
++- New: `equalEarthMap.html` 1.0.0, `jsondata/countries-110m.json`.
++  Changed: `astronomy.html` 1.1.0, `astronomyNavbar.html` 1.1.0,
++  `index.html` 1.3.0, `divumwf.html`, `skins/DivumWX/lang/*.conf`,
++  `bin/user/divumwx_version.py`, `README.md`, `INSTALLATION_GUIDE.md`.
++
+ ## 1.2.0 — Live gauges
+ 
+ The Live Gauges and Range Gauges pages are replaced by a single **Live
