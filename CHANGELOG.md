@@ -1,5 +1,44 @@
 # DivumWX Changelog
 
+## 1.3.0 — Equal Earth map
+
+A new **Equal Earth Map** page in the Astronomy section: an interactive world
+map in the equal-area Equal Earth projection (Šavrič, Jenny & Patterson,
+2018), drawn with D3.
+
+### Map
+- Day and night drawn live, with civil, nautical and astronomical twilight
+  bands and a marker at the subsolar point (where the Sun is overhead).
+  Recalculated from the current time every minute.
+- The station is marked from `archive.json` (`meta.latitude` /
+  `meta.longitude`), falling back to the page's built-in coordinates.
+- Click a country for its true area in km² and its size on the map relative
+  to the equator. This reads ×1.00 on Equal Earth. A **Mercator** toggle
+  shows the difference (Greenland ×8.6, Russia ×4.8).
+- Optional **Tissot circles** (500 km radius) show how each projection
+  distorts area and shape.
+- Centre the map on 0°, the station or 150°E, drag it sideways, use the
+  arrow keys, or let it rotate.
+- Follows the DivumWX theme (light, dark, auto) and uses the shared
+  astronomy navbar.
+
+### Data
+- Country boundaries come from the new `jsondata/countries-110m.json`
+  (Natural Earth 1:110m, from world-atlas 2.0.2). The existing
+  `worldmap.json` has no country names, so it is left unchanged.
+- Uses the bundled `js/d3.7.9.0.min.js` and `js/topojson.3.0.2.min.js`, so
+  no new external scripts are loaded.
+
+### Pages and files
+- The astronomy navbar has an **Equal Earth Map** link after
+  Visualisations, and the Astronomy hub page has an Equal Earth Map card.
+- "Equal Earth Map" is translated in all 30 language files in
+  `skins/DivumWX/lang`.
+- New: `equalEarthMap.html` 1.0.0, `jsondata/countries-110m.json`.
+  Changed: `astronomy.html` 1.1.0, `astronomyNavbar.html` 1.1.0,
+  `index.html` 1.3.0, `divumwf.html`, `skins/DivumWX/lang/*.conf`,
+  `bin/user/divumwx_version.py`, `README.md`, `INSTALLATION_GUIDE.md`.
+
 ## 1.2.0 — Live gauges
 
 The Live Gauges and Range Gauges pages are replaced by a single **Live
