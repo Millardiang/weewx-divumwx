@@ -1,5 +1,23 @@
 # DivumWX Changelog
 
+## 1.3.1 — Maintenance release
+
+Fixes the Equal Earth map's day and night shading, which stopped updating
+after the page was opened.
+
+### Equal Earth map
+- **Night and twilight shading now update every minute.** In 1.3.0 the
+  first one-minute refresh failed with a script error, so the shading stayed
+  where it was when the page loaded until the page was reloaded. The
+  subsolar point readout kept updating, which hid the problem.
+- The map also redraws as soon as you return to its tab, or come back to it
+  with the browser's Back button. Browsers slow or pause timers in background
+  tabs, so the shading could otherwise be up to several minutes out of date.
+
+### Files changed
+`equalEarthMap.html` 1.0.1, `index.html` 1.3.1, `divumwf.html`,
+`bin/user/divumwx_version.py`, `README.md`, `INSTALLATION_GUIDE.md`.
+
 ## 1.3.0 — Equal Earth map
 
 A new **Equal Earth Map** page in the Astronomy section: an interactive world

@@ -1,4 +1,4 @@
-# Welcome to the DivumWX skin for WeeWX Version 1.3.0
+# Welcome to the DivumWX skin for WeeWX Version 1.3.1
 Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LICENSE Version 3](https://github.com/Millardiang/weewx-divumwx/blob/main/license.txt)
  
 # Features

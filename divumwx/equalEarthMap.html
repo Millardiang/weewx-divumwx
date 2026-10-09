@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# equalEarthMap.html version 1.0.0
+# equalEarthMap.html version 1.0.1
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -428,7 +428,10 @@ includeHTML(() => {
     .datum({ type: 'LineString', coordinates: [[-180, 0], [-90, 0], [0, 0], [90, 0], [180, 0]] });
   var landG = svg.append('g');
   var nightG = svg.append('g');
-  var nightBands = nightG.selectAll('path').data([90, 96, 102, 108]).join('path').attr('class', 'ee-night');
+  // Sun zenith distance at each band edge: night, then civil, nautical, astronomical twilight
+  var nightBands = nightG.selectAll('path')
+    .data([90, 96, 102, 108].map(function(z){ return { zenith: z, circle: null }; }))
+    .join('path').attr('class', 'ee-night');
   var tissotG = svg.append('g').attr('display', 'none');
   tissotG.selectAll('path').data(tissots).join('path').attr('class', 'ee-tissot');
   svg.append('path').attr('class', 'ee-rim').datum(sphere);
@@ -467,13 +470,14 @@ includeHTML(() => {
   function updateSun(){
     sunLL = subsolarPoint(new Date());
     var anti = [wrap(sunLL[0] + 180), -sunLL[1]];
-    nightBands.datum(function(r){ return d3.geoCircle().center(anti).radius(180 - r)(); });
+    nightBands.each(function(b){ b.circle = d3.geoCircle().center(anti).radius(180 - b.zenith)(); });
     $('eeSubsolar').textContent = fmt(sunLL[1], 'N', 'S') + ' ' + fmt(sunLL[0], 'E', 'W');
   }
 
   function render(){
     projection.rotate([-lon, 0]);
-    svg.selectAll('.ee-sphere,.ee-graticule,.ee-equator,.ee-rim,.ee-country,.ee-night,.ee-tissot').attr('d', path);
+    svg.selectAll('.ee-sphere,.ee-graticule,.ee-equator,.ee-rim,.ee-country,.ee-tissot').attr('d', path);
+    nightBands.attr('d', function(b){ return b.circle ? path(b.circle) : null; });
     placeDot(sunDot, sunLL);
     placeDot(stationDot, [station.lon, station.lat]);
     $('eeCm').textContent = fmt(wrap(lon), 'E', 'W');
@@ -565,7 +569,10 @@ includeHTML(() => {
   // ---- Data ----
   updateSun();
   render();
-  setInterval(function(){ updateSun(); render(); }, POLL_MS);
+  function refreshSun(){ updateSun(); render(); }
+  setInterval(refreshSun, POLL_MS);
+  document.addEventListener('visibilitychange', function(){ if (!document.hidden) refreshSun(); });
+  window.addEventListener('pageshow', function(e){ if (e.persisted) refreshSun(); });
 
   fetch(WORLD_URL, { cache: 'force-cache' })
     .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
