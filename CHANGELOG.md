@@ -1,96 +1,203 @@
-# Changelog
+# DivumWX Changelog
 
-All notable changes to weewx-ecowitt_console_emulator are recorded here.
+## 1.3.0 — Equal Earth map
 
-The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
-version numbers follow the rules in [VERSIONING.md](VERSIONING.md).
+A new **Equal Earth Map** page in the Astronomy section: an interactive world
+map in the equal-area Equal Earth projection (Šavrič, Jenny & Patterson,
+2018), drawn with D3.
 
-## [Unreleased]
-
-## [1.0.0] – 2026-10-07
-
-First public release. A WeeWX 5 skin and extension that turns a tablet, phone or
-browser into a full-screen emulation of the Ecowitt WH2560/HP2560 console.
-
-### Dashboard
-- Console-style layout: outdoor temperature ring, wind dial, a temperature/humidity
-  channel pair (Indoor and WN31 CH1–8), soil moisture and leaf wetness, lightning,
-  leak indicators, PM2.5 and CO₂, barometer with 3-hour trend and pressure-tendency
-  forecast, sun arc with a moon track, moon phase, and a readings row that includes
-  feels-like, dew point, VPD (kPa), 10-minute average wind, max daily gust and Beaufort.
-- Wind gauge with a blue arrow for the current direction and a grey arrow for the
-  10-minute average direction.
-- Rain section for a tipping gauge, a piezo gauge or both, with daily, rate, event,
-  hourly, weekly, monthly and yearly totals.
-- Signal bars next to each reading. A battery icon appears only when a battery is low.
-- Three layouts chosen from the screen's shape: landscape 1280 × 800, portrait
-  800 × 1518 and phone 540 wide. Settings → Layout can force one of them.
-- Three themes: Navy (console), Black (OLED / night) and Light.
-- All times are always shown in the station's time zone, whatever the time zone of
-  the viewing device. The zone is read from the WeeWX machine and can be set in
-  `skin.conf` (`timezone`) if that comes out wrong.
-
-### Charts
-- Full-screen Day, Week, Month and Year charts drawn in the browser, following the
-  theme and display units, with tooltips by mouse or touch.
-- Temperature, humidity, VPD, wind, wind direction (Day tab), rain, barometer,
-  solar radiation and UV.
-- One rain chart with a separate column per gauge in each interval (tipping blue,
-  piezo violet). The tooltip shows both values and the difference, and the legend
-  shows the same period totals as the rain table.
-- The Year chart covers 12 calendar months.
-
-### Panels
-- Windy radar centred on the station, in a panel over the dashboard or as a link.
-- Sensors panel with battery and signal for every sensor that reports them.
-- Settings: language, units, layout, theme, 12/24-hour clock, seconds, keep screen awake,
-  full screen on touch, and data status.
-- Every panel opens inside the dashboard, so the page never leaves full screen.
-
-### Languages
-- Everything on the dashboard can be shown in 30 languages, the same as weewx-divumwx:
-  Arabic, Basque, Breton, Catalan, Chinese (simplified), Czech, Danish, Dutch, English,
-  English (US), Finnish, French, German, Greek, Hindi, Hungarian, Icelandic, Italian,
-  Japanese, Norwegian, Polish, Portuguese, Spanish, Swedish, Tamil, Thai, Turkish,
-  Ukrainian, Urdu and Welsh.
-- Chosen under Settings → Language, with a default set by `language` in `skin.conf`.
-  The choice is shared with weewx-divumwx through the `dashboardLanguage` browser
-  setting when both are served from the same web server.
-- Day and month names follow the language. Where weewx-divumwx already translates
-  the same text, its wording is used.
-- Labels that would not fit their place in a language are made smaller, or put on two
-  lines, to fit. In Arabic and Urdu each label reads right to left.
-
-### Units
-- Data feeds are always written in METRICWX and converted in the browser to the
-  DivumWX presets: uk, us, metric, scandi, canada and icao.
-- The unit choice is shared with weewx-divumwx through the `dashboardUnitSystem`
-  browser setting when both are served from the same web server.
+### Map
+- Day and night drawn live, with civil, nautical and astronomical twilight
+  bands and a marker at the subsolar point (where the Sun is overhead).
+  Recalculated from the current time every minute.
+- The station is marked from `archive.json` (`meta.latitude` /
+  `meta.longitude`), falling back to the page's built-in coordinates.
+- Click a country for its true area in km² and its size on the map relative
+  to the equator. This reads ×1.00 on Equal Earth. A **Mercator** toggle
+  shows the difference (Greenland ×8.6, Russia ×4.8).
+- Optional **Tissot circles** (500 km radius) show how each projection
+  distorts area and shape.
+- Centre the map on 0°, the station or 150°E, drag it sideways, use the
+  arrow keys, or let it rotate.
+- Follows the DivumWX theme (light, dark, auto) and uses the shared
+  astronomy navbar.
 
 ### Data
-- The skin keeps its own database (`ecowitt_console_emulator.sdb`, binding
-  `ecce_binding`) and never changes the station's main database.
-- The skin's database is created only if missing, with the main database's schema
-  plus extra Ecowitt fields. It is filled with history from the main database
-  (400 days by default), then gaps are filled at each start and every new archive
-  record is written to it.
-- Piezo rain history is read from `p_rain` and from `hail`, so records copied from
-  the main database keep their piezo rain.
-- Live data every few seconds from the skin's own `live.json`, or from
-  weewx-EcowittGateway's `ecwLoop.json` when that driver is installed and chosen.
-- Missing driver fields are worked out from the archive: feels-like, 10-minute wind
-  direction, max daily gust, VPD and period rain totals.
+- Country boundaries come from the new `jsondata/countries-110m.json`
+  (Natural Earth 1:110m, from world-atlas 2.0.2). The existing
+  `worldmap.json` has no country names, so it is left unchanged.
+- Uses the bundled `js/d3.7.9.0.min.js` and `js/topojson.3.0.2.min.js`, so
+  no new external scripts are loaded.
 
-### Installation
-- `weectl extension install` installer that asks which rain sensor(s) the station
-  has and, only when weewx-EcowittGateway is installed, where live data comes from.
-- Unattended installs with `--yes --rain=tipping|piezo|both --live=driver|skin`.
-- weewx-EcowittGateway is optional; the skin works with any driver for an Ecowitt
-  gateway or console.
+### Pages and files
+- The astronomy navbar has an **Equal Earth Map** link after
+  Visualisations, and the Astronomy hub page has an Equal Earth Map card.
+- "Equal Earth Map" is translated in all 30 language files in
+  `skins/DivumWX/lang`.
+- New: `equalEarthMap.html` 1.0.0, `jsondata/countries-110m.json`.
+  Changed: `astronomy.html` 1.1.0, `astronomyNavbar.html` 1.1.0,
+  `index.html` 1.3.0, `divumwf.html`, `skins/DivumWX/lang/*.conf`,
+  `bin/user/divumwx_version.py`, `README.md`, `INSTALLATION_GUIDE.md`.
 
-[Unreleased]: https://github.com/Millardiang/weewx-ecowitt_console_emulator/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/Millardiang/weewx-ecowitt_console_emulator/releases/tag/v1.0.0
+## 1.2.0 — Live gauges
 
----
+The Live Gauges and Range Gauges pages are replaced by a single **Live
+Gauges** page using the gauges from weewx-carbonsteel-series, fed by DivumWX's
+own data.
 
-Copyright (c) Ian Millard 2026
+### Gauges
+- Twelve gauges: temperature (outside or inside), dew point (or feels like,
+  wind chill, heat index, humidex), humidity (outside or inside), barometer,
+  wind speed, wind direction, wind rose, rain today, rain rate, UV index,
+  solar radiation and cloud base. A gauge whose sensor reports nothing, or
+  whose card is turned off in the installer, is left out.
+- Today's low and high on each gauge, with their times; 10-minute average
+  wind and gust; the range of wind direction over the last 10 minutes;
+  3-hour pressure change and tendency; rain this month and year.
+- A 24-hour sparkline under each gauge; click it for a detail chart.
+- **Year at a glance**: a calendar heat-map of the last 366 days (max, mean
+  and min temperature, rain, max gust, UV, solar).
+
+### Data, theme and units
+- Live readings come from `jsondata/loop.json`, today's highs and lows,
+  rain totals and 10-minute wind from `archive.json`, and the 24-hour
+  history, wind rose and calendar from `charts.json`. No CarbonSteel
+  service or `realtime.json` is needed.
+- The gauges follow the DivumWX theme: light gives chrome bezels and beige
+  faces, dark gives black-metal bezels and carbon-fibre faces, and auto
+  switches with day and night.
+- Units follow the navbar's unit selector, including ICAO (knots, hPa,
+  cloud base in feet) and Beaufort.
+- The wind rose covers the last 24 hours, from the hourly averages in
+  `charts.json`.
+
+### Pages and files
+- The navbar has one **Live Gauges** link. `gauges2.html` now just forwards
+  to `gauges.html`, so old links and bookmarks still work.
+- New: `csGauges.js` 1.0.0, `csGauges.css` 1.0.0. Changed: `gauges.html`
+  1.1.0, `gauges2.html` 1.1.0, `navbar.html` 1.0.1, `index.html` 1.2.0.
+- Removed: `iopctrl.js` and `gaugeDiverging.js` (only the old gauge pages
+  used them). Upgrades remove them automatically.
+
+## 1.1.0 — Feature release
+
+Installer now offers the choice of solid colour or seasonal switching theme for body background.
+
+## 1.0.3 — Maintenance release
+
+Renames the Aviation unit group to **ICAO** and corrects its units.
+
+### Units
+- **Aviation is now ICAO.** The unit selector reads
+  "ICAO (°C, kt, hPa, NM, ft)". A browser that had Aviation selected is
+  moved to ICAO automatically on its next visit; no action is needed.
+- **Pressure / altimeter setting in hPa** (was mbar).
+- **Horizontal speed in knots (kt)** and **horizontal distance in nautical
+  miles**, now labelled "NM" instead of "nm" on the charts, gauges and
+  forecast pages.
+- **Altitude / elevation in feet.** Under ICAO, the barometer card's
+  Station Alt row and the climate page's ELEV line show the station
+  elevation in ft. All other unit groups keep metres.
+- **Cloud base in feet.** The current conditions card shows cloud base in ft
+  under ICAO (UK and US already used ft).
+- **Visibility in NM.** Under ICAO, visibility on the current conditions card
+  and in the METAR modal is shown in nautical miles, converted from the
+  METAR report; unlimited visibility ("10+" statute miles) shows as
+  "> 8.7 NM".
+- **METAR airport distance in NM.** Under ICAO, the METAR modal gives the
+  distance to the reporting airport in NM, with km in brackets.
+- **Vertical speed in ft/min.** Every unit group now defines `alt` and
+  `vspeed` units in `units.js`, with `m2ft`, `ms2fpm`, `fmtAlt` and
+  `fmtVSpeed` helpers. No page displays a vertical speed yet.
+
+### Versioning
+- Release version set to 1.0.3 in `bin/user/divumwx_version.py`, which
+  had not been raised for 1.0.2.
+
+### Files changed
+`units.js` 1.0.1, `header.js` 1.0.1, `siteHeader.js` 1.0.1,
+`charts-d3.html` 1.0.1, `climate.html` 1.0.1, `gauges.html` 1.0.1,
+`divumwf.js` 1.0.1, `modalMetar.html` 1.0.1,
+`cardsBundleNew.js` 1.0.3 (cardBarometer 1.0.1, cardCurrent 1.0.1),
+`index.html` 1.0.3, `divumwf.html`, `README.md`, `INSTALLATION_GUIDE.md`,
+`bin/user/divumwx_version.py`.
+
+## 1.0.2 — Maintenance release
+
+Fixes timezone shift issues for forecast, earth daylight and terminator.
+
+## 1.0.1 — Maintenance release
+
+Fixes the findings from the 1.0.0 APT upgrade test (Debian 13, WeeWX 5.5.1
+from the official APT repository). No change to dashboard behaviour.
+
+### Upgrade behaviour
+- **Prompts now default to your existing settings.** Every installer prompt
+  (LiveData interval, alert/METAR poll intervals, forecast model, METAR
+  airport, hemisphere/England/UK, UKHSA and Met Office regions) offers the
+  value already in `weewx.conf`; press Enter to keep it. Previously most
+  prompts offered generic or blank defaults.
+- **Changed answers are applied.** A new value typed at an upgrade prompt
+  used to be silently ignored because existing settings are never
+  overwritten; deliberate changes are now written and listed.
+- The stored OpenWeatherMap key is never shown; Enter keeps it.
+- The hemisphere and England answers are now saved in `[DivumWXCards]`
+  (alongside `in_uk`) so later upgrades can offer them as defaults.
+
+### Files and permissions
+- **Obsolete frontend files are removed.** The installer writes
+  `.divumwx-manifest.txt` into the web root and, on the next upgrade,
+  removes files the previous release installed that the new one no longer
+  ships. Upgrading from 1.0.0 or a beta removes known retired files and
+  lists any other leftover page/script files for you to review; your own
+  images, timelapse output and generated data are never touched.
+- **Ownership is set automatically.** After `sudo weectl extension install`
+  the web root is owned by the WeeWX service account (e.g. `weewx`), so no
+  manual `chown` is needed.
+- The installer no longer changes ownership of unrelated files in the
+  `weewx.conf` directory; only the files it copies there.
+
+### Versioning
+- `weectl extension list` now reports the real release version (1.0.0
+  reported `0.1.0`). `bin/user/divumwx_version.py` is the single source,
+  used by the installer, logged at startup, and shown in the dashboard
+  footer via `archive.json` (`meta.divumwx_version`).
+- New `tools/check_version.py` release check.
+
+### Other
+- Installation guide rewritten: tagged download URLs instead of the moving
+  `main` branch, Debian/APT first, upgrade steps, corrected UKHSA prompt.
+- Missing-dependency error now gives the APT command first, then pip.
+- SkyfieldLoopData (0.1.1): the always-null named-star fields no longer log
+  a startup warning that referred to weewx-skyfield; logged at debug level.
+
+## 1.0.0 — 2026-09-21 — Full Release
+
+First full release. Highlights:
+
+- **Collection version reset to 1.0.0** in `index.html`, marking this as the
+  1.0.0 baseline for the whole site.
+- **Every file's version reset to 1.0.0** (previously a mix of 0.0.1–0.3.0
+  across different files) to mark this common release point. Going forward,
+  each file's version increments independently on its own amendments (see
+  Versioning scheme above).
+- **Comment cleanup across the entire collection.** Removed explanatory
+  "why"/narrative comments from every `.html`, `.js` and `.css` file. Kept:
+  - License, copyright and version-header banners.
+  - Short section-divider comments (e.g. `// ===== Section =====`) used to
+    organise code for readability.
+- **Added missing license/version banners** to five files that had none:
+  `astro-nav.js`, `moonDisc.js` (version line added to its existing banner),
+  `modalSkymap.html`, `modalZodiacMap.html`, `sunDisc.html`.
+- **Release/version labels updated for 1.0.0:**
+  - `index.html` footer: `DivumWX-H-Beta-3` → `DivumWX v1.0.0`.
+  - `divumwf.html` version badge: `v0.0.1` → `v1.0.0`.
+
+### Known issues in 1.0.0 (fixed in 1.0.1)
+- `weectl extension list` reports `divumwx 0.1.0`.
+- The bundled installation guide still describes the beta and links to the
+  `main` branch archive; install from the `ver.1.0.0` tag instead.
+- Upgrade prompts don't default to existing values; re-enter your METAR
+  code and region answers when upgrading.
+- Frontend files removed since a beta are not deleted.
+- After a `sudo` install, run `sudo chown -R weewx:weewx /var/www/html/divumwx`.
