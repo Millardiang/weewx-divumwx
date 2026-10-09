@@ -1,0 +1,167 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index c10e3af..b3843c6 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -1,5 +1,23 @@
+ # DivumWX Changelog
+ 
++## 1.3.1 — Maintenance release
++
++Fixes the Equal Earth map's day and night shading, which stopped updating
++after the page was opened.
++
++### Equal Earth map
++- **Night and twilight shading now update every minute.** In 1.3.0 the
++  first one-minute refresh failed with a script error, so the shading stayed
++  where it was when the page loaded until the page was reloaded. The
++  subsolar point readout kept updating, which hid the problem.
++- The map also redraws as soon as you return to its tab, or come back to it
++  with the browser's Back button. Browsers slow or pause timers in background
++  tabs, so the shading could otherwise be up to several minutes out of date.
++
++### Files changed
++`equalEarthMap.html` 1.0.1, `index.html` 1.3.1, `divumwf.html`,
++`bin/user/divumwx_version.py`, `README.md`, `INSTALLATION_GUIDE.md`.
++
+ ## 1.3.0 — Equal Earth map
+ 
+ A new **Equal Earth Map** page in the Astronomy section: an interactive world
+diff --git a/INSTALLATION_GUIDE.md b/INSTALLATION_GUIDE.md
+index 7abca7d..0665896 100644
+--- a/INSTALLATION_GUIDE.md
++++ b/INSTALLATION_GUIDE.md
+@@ -1,6 +1,6 @@
+ # DivumWX Installation Guide
+ 
+-This guide covers DivumWX **1.3.0**. It assumes you already have a stable
++This guide covers DivumWX **1.3.1**. It assumes you already have a stable
+ WeeWX 5 installation running with your own hardware driver.
+ 
+ Tested on Debian 13 (Trixie) with:
+@@ -50,7 +50,7 @@ sudo apt install python3-skyfield python3-requests
+ ### Install or upgrade
+ 
+ ```
+-sudo weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/tags/ver.1.3.0.zip
++sudo weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/tags/ver.1.3.1.zip
+ sudo systemctl restart weewx
+ sudo weectl report run DivumWXReport
+ ```
+@@ -96,7 +96,7 @@ sudo mkdir -p /var/www/html/divumwx
+ sudo chown -R $(whoami):$(whoami) /var/www/html/divumwx
+ 
+ source ~/weewx-venv/bin/activate
+-weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/tags/ver.1.3.0.zip
++weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/tags/ver.1.3.1.zip
+ sudo systemctl restart weewx
+ weectl report run DivumWXReport
+ ```
+diff --git a/README.md b/README.md
+index a190197..eaf4cda 100644
+--- a/README.md
++++ b/README.md
+@@ -1,4 +1,4 @@
+-# Welcome to the DivumWX skin for WeeWX Version 1.3.0
++# Welcome to the DivumWX skin for WeeWX Version 1.3.1
+ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LICENSE Version 3](https://github.com/Millardiang/weewx-divumwx/blob/main/license.txt)
+  
+ # Features
+diff --git a/bin/user/divumwx_version.py b/bin/user/divumwx_version.py
+index b4f3083..5f0a2ca 100644
+--- a/bin/user/divumwx_version.py
++++ b/bin/user/divumwx_version.py
+@@ -11,4 +11,4 @@ Change it here, and only here, when cutting a release. Then run
+ in the frontend match.
+ """
+ 
+-DIVUMWX_VERSION = "1.3.0"
++DIVUMWX_VERSION = "1.3.1"
+diff --git a/divumwx/divumwf.html b/divumwx/divumwf.html
+index 3fc6b71..fe46a0a 100644
+--- a/divumwx/divumwf.html
++++ b/divumwx/divumwf.html
+@@ -331,7 +331,7 @@ body{
+   <div class="wf-appbar">
+     <div class="wf-brand">
+       <span class="wf-brand-name">DivumWF</span>
+-      <span class="wf-brand-version" id="wfBrandVersion">v1.3.0</span>
++      <span class="wf-brand-version" id="wfBrandVersion">v1.3.1</span>
+     </div>
+     <button type="button" class="wf-gear-btn" id="wfSettingsBtn" title="Settings" aria-label="Settings"></button>
+   </div>
+diff --git a/divumwx/equalEarthMap.html b/divumwx/equalEarthMap.html
+index b8b2e9d..2d53047 100644
+--- a/divumwx/equalEarthMap.html
++++ b/divumwx/equalEarthMap.html
+@@ -1,7 +1,7 @@
+ <!DOCTYPE html>
+ <!--
+ ##############################################################################################
+-# equalEarthMap.html version 1.0.0
++# equalEarthMap.html version 1.0.1
+ #  Copyright (C) 2026 Ian Millard, Sean Balfour
+ #  GPLv3
+ ##############################################################################################
+@@ -428,7 +428,10 @@ includeHTML(() => {
+     .datum({ type: 'LineString', coordinates: [[-180, 0], [-90, 0], [0, 0], [90, 0], [180, 0]] });
+   var landG = svg.append('g');
+   var nightG = svg.append('g');
+-  var nightBands = nightG.selectAll('path').data([90, 96, 102, 108]).join('path').attr('class', 'ee-night');
++  // Sun zenith distance at each band edge: night, then civil, nautical, astronomical twilight
++  var nightBands = nightG.selectAll('path')
++    .data([90, 96, 102, 108].map(function(z){ return { zenith: z, circle: null }; }))
++    .join('path').attr('class', 'ee-night');
+   var tissotG = svg.append('g').attr('display', 'none');
+   tissotG.selectAll('path').data(tissots).join('path').attr('class', 'ee-tissot');
+   svg.append('path').attr('class', 'ee-rim').datum(sphere);
+@@ -467,13 +470,14 @@ includeHTML(() => {
+   function updateSun(){
+     sunLL = subsolarPoint(new Date());
+     var anti = [wrap(sunLL[0] + 180), -sunLL[1]];
+-    nightBands.datum(function(r){ return d3.geoCircle().center(anti).radius(180 - r)(); });
++    nightBands.each(function(b){ b.circle = d3.geoCircle().center(anti).radius(180 - b.zenith)(); });
+     $('eeSubsolar').textContent = fmt(sunLL[1], 'N', 'S') + ' ' + fmt(sunLL[0], 'E', 'W');
+   }
+ 
+   function render(){
+     projection.rotate([-lon, 0]);
+-    svg.selectAll('.ee-sphere,.ee-graticule,.ee-equator,.ee-rim,.ee-country,.ee-night,.ee-tissot').attr('d', path);
++    svg.selectAll('.ee-sphere,.ee-graticule,.ee-equator,.ee-rim,.ee-country,.ee-tissot').attr('d', path);
++    nightBands.attr('d', function(b){ return b.circle ? path(b.circle) : null; });
+     placeDot(sunDot, sunLL);
+     placeDot(stationDot, [station.lon, station.lat]);
+     $('eeCm').textContent = fmt(wrap(lon), 'E', 'W');
+@@ -565,7 +569,10 @@ includeHTML(() => {
+   // ---- Data ----
+   updateSun();
+   render();
+-  setInterval(function(){ updateSun(); render(); }, POLL_MS);
++  function refreshSun(){ updateSun(); render(); }
++  setInterval(refreshSun, POLL_MS);
++  document.addEventListener('visibilitychange', function(){ if (!document.hidden) refreshSun(); });
++  window.addEventListener('pageshow', function(e){ if (e.persisted) refreshSun(); });
+ 
+   fetch(WORLD_URL, { cache: 'force-cache' })
+     .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+diff --git a/divumwx/index.html b/divumwx/index.html
+index 0018054..47390ec 100644
+--- a/divumwx/index.html
++++ b/divumwx/index.html
+@@ -1,7 +1,7 @@
+ <!DOCTYPE html>
+ <!--
+ ##############################################################################################
+-# index.html version 1.3.0
++# index.html version 1.3.1
+ #  Copyright (C) 2026 Ian Millard, Sean Balfour
+ #  GPLv3
+ ##############################################################################################
+@@ -568,7 +568,7 @@ setInterval(() => {
+     </div>
+     <div class="footer-center">
+       <div class="footer-credit">Charts, Heatmaps, Gauges and Card Images D3 rendered &middot; Weather Icons by Meteocons</div>
+-      <div class="footer-version mono">DivumWX v<span id="footerDivumwxVer">1.3.0</span> &middot; WeeWX ver <span id="footerWeewxVer">x.x.x</span>, Python ver <span id="footerPyVer">y.y.y</span>, OS version <span id="footerOsVer">z.z.z &middot; Weather Icons by Meteocons</span></div>
++      <div class="footer-version mono">DivumWX v<span id="footerDivumwxVer">1.3.1</span> &middot; WeeWX ver <span id="footerWeewxVer">x.x.x</span>, Python ver <span id="footerPyVer">y.y.y</span>, OS version <span id="footerOsVer">z.z.z &middot; Weather Icons by Meteocons</span></div>
+     </div>
+     <div class="footer-right">
+       <a href="http://weewx.com" title="WeeWX Weather Software" target="_blank" rel="noopener" class="footer-weewx-link">
