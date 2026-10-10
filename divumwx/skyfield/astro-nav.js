@@ -320,6 +320,10 @@
     if (navHost) {
       var langWrap = navHost.querySelector('.select-wrap--lang');
       if (langWrap) langWrap.parentNode.removeChild(langWrap);
+      // The full-screen button is driven by siteHeader.js; drop it on
+      // pages that don't load siteHeader.js, where it would do nothing.
+      var fsBtn = navHost.querySelector('#fullscreenToggle');
+      if (fsBtn && typeof initSharedHeader !== 'function') fsBtn.parentNode.removeChild(fsBtn);
     }
     applyTheme();
     if (typeof initSharedHeader === 'function') initSharedHeader();

@@ -1,5 +1,59 @@
 # DivumWX Changelog
 
+## 1.4.0 — Equal Earth globe
+
+The Equal Earth Map page now opens as a rotating globe, with the Sun and Moon
+and their ground tracks. The flat Equal Earth map is still one click away.
+The navbar also gains a full-screen button.
+
+### Globe
+- **Flat map / Globe.** The map wraps smoothly from the Equal Earth
+  projection onto a globe and back. A Wrap slider can stop it partway.
+- **Auto view** (on by default) keeps the station, and the Sun and Moon
+  whenever they are above the station's horizon, on the visible side of the
+  globe, and follows them as they move. Dragging, Spin, the arrow keys or
+  the Face station / Face Sun / Face Moon buttons switch it off; press
+  Auto view to return.
+- **Sun and Moon tracks** show the points each passes directly over during
+  one full trip round the Earth (24 hours for the Sun, about 24 h 50 min for
+  the Moon), with a dot for each hour.
+- **The Moon** is drawn with its current phase. New readouts give the
+  sublunar point, the Moon's altitude at the station, and the phase with the
+  percentage lit.
+- **Sun at station** gives the Sun's altitude with Day, civil, nautical or
+  astronomical twilight, or Night.
+- A **Time** slider moves the Sun and Moon up to 12 hours either side of now.
+- Day and night shading, tracks and readouts update every 5 seconds, and as
+  soon as you return to the tab.
+- Drawn on a canvas for smooth rotation. The Mercator comparison, Tissot
+  circles and click-for-area readout from 1.3 are removed.
+
+### Station position
+- The page takes the station's latitude and longitude only from weewx.conf
+  (`[Station]`), via `archive.json` (`meta.latitude` / `meta.longitude`).
+  The coordinates previously written into the page are gone, including the
+  ones its auto theme used before `loop.json` reports day or night. Until
+  `archive.json` loads, the globe centres on the daylit side and the station
+  readouts show a dash.
+
+### Full screen
+- A **full-screen button** on the navbar, next to the theme button, on the
+  dashboard and on every astronomy page. The choice is remembered, so the
+  site returns to full screen on the first click, tap or key press on each
+  new page (browsers only allow full screen from a user action). Press the
+  button again, or Esc, to turn it off. Browsers without the Fullscreen API,
+  such as Safari on iPhone, don't show the button.
+- The Skyfield and Celestial pages don't load `siteHeader.js`, so their
+  `astro-nav.js` removes the button there rather than show one that does
+  nothing.
+
+### Files changed
+`equalEarthMap.html` 1.1.0, `astronomy.html` 1.1.1,
+`astronomyNavbar.html` 1.2.0, `navbar.html` 1.0.2, `header.css` 1.0.1,
+`siteHeader.js` 1.0.2, `skyfield/astro-nav.js`, `celestial/astro-nav.js`,
+`index.html` 1.4.0, `divumwf.html`, `bin/user/divumwx_version.py`,
+`README.md`, `INSTALLATION_GUIDE.md`.
+
 ## 1.3.1 — Maintenance release
 
 Fixes the Equal Earth map's day and night shading, which stopped updating

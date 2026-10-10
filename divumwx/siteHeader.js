@@ -1,6 +1,6 @@
 /*
 ##############################################################################################
-# siteHeader.js version 1.0.1
+# siteHeader.js version 1.0.2
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -215,3 +215,108 @@ window.addEventListener('i18nready', function(){
   populateLanguageSelector();
   translateNavbar();
 });
+
+// ---------------------------------------------------------------------
+// Full-screen toggle (#fullscreenToggle in navbar.html / astronomyNavbar.html)
+//
+// The choice is remembered in localStorage so that it applies to every
+// page. Browsers always leave full screen when a new page loads, and only
+// allow it to be entered from a user action, so on each new page the site
+// returns to full screen on the visitor's first click, tap or key press.
+// Pressing the button again, or leaving full screen with Esc, turns it off.
+// ---------------------------------------------------------------------
+(function(){
+  var FS_KEY = 'dashboardFullscreen';
+  var root = document.documentElement;
+  var unloading = false;
+
+  function fsSupported() {
+    return !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
+  }
+  function fsActive() {
+    return !!(document.fullscreenElement || document.webkitFullscreenElement);
+  }
+  function enterFs() {
+    try {
+      if (root.requestFullscreen) {
+        var p = root.requestFullscreen({ navigationUI: 'hide' });
+        if (p && p.catch) p.catch(function(e){ console.warn('siteHeader: full screen refused —', e.message); });
+      } else if (root.webkitRequestFullscreen) {
+        root.webkitRequestFullscreen();
+      }
+    } catch (e) { console.warn('siteHeader: full screen refused —', e.message); }
+  }
+  function exitFs() {
+    if (document.exitFullscreen) {
+      var p = document.exitFullscreen();
+      if (p && p.catch) p.catch(function(){});
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    }
+  }
+  function getPref() {
+    try { return localStorage.getItem(FS_KEY) === '1'; } catch (e) { return false; }
+  }
+  function setPref(on) {
+    try { localStorage.setItem(FS_KEY, on ? '1' : '0'); } catch (e) {}
+  }
+  function syncButton() {
+    var btn = document.getElementById('fullscreenToggle');
+    if (btn) btn.setAttribute('aria-pressed', fsActive() ? 'true' : 'false');
+  }
+
+  if (!fsSupported()) {
+    root.classList.add('no-fullscreen');
+    return;
+  }
+
+  // Button: event delegation, because the navbar is injected after load
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest && e.target.closest('#fullscreenToggle');
+    if (!btn) return;
+    if (fsActive()) {
+      setPref(false);
+      exitFs();
+    } else {
+      setPref(true);
+      enterFs();
+    }
+  });
+
+  // Keep the button in step, and treat leaving full screen (e.g. Esc)
+  // as turning it off -- unless it happened because the page is unloading.
+  function onFsChange() {
+    syncButton();
+    if (!fsActive() && !unloading) setPref(false);
+  }
+  document.addEventListener('fullscreenchange', onFsChange);
+  document.addEventListener('webkitfullscreenchange', onFsChange);
+  window.addEventListener('pagehide', function(){ unloading = true; });
+  window.addEventListener('beforeunload', function(){ unloading = true; });
+  window.addEventListener('pageshow', function(){ unloading = false; syncButton(); });
+
+  // Resume full screen on this page at the first user interaction
+  function resume(e) {
+    if (e.type === 'keydown' && e.key === 'Escape') return;
+    if (e.target && e.target.closest && e.target.closest('#fullscreenToggle')) { stop(); return; }
+    stop();
+    if (getPref() && !fsActive()) enterFs();
+  }
+  function stop() {
+    document.removeEventListener('click', resume, true);
+    document.removeEventListener('keydown', resume, true);
+    document.removeEventListener('touchend', resume, true);
+  }
+  if (getPref()) {
+    document.addEventListener('click', resume, true);
+    document.addEventListener('keydown', resume, true);
+    document.addEventListener('touchend', resume, true);
+  }
+
+  window.addEventListener('i18nready', syncButton);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', syncButton);
+  } else {
+    syncButton();
+  }
+})();

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# equalEarthMap.html version 1.0.1
+# equalEarthMap.html version 1.1.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -79,42 +79,45 @@ body {
   font-size: 0.9rem;
   color: var(--bs-secondary-color);
 }
-/* ---- Equal Earth map ---- */
+/* ---- Equal Earth globe ---- */
 :root {
   --map-ocean: #D5E2EA;
   --map-land: #B7C4A3;
-  --map-land-hover: #B45309;
-  --map-border: #FFFFFF;
+  --map-coast: #FFFFFF;
   --map-grid: #A9BCC8;
   --map-rim: #1D2C4E;
-  --map-night: #0A0F22;
-  --map-night-opacity: .13;
-  --map-tissot: #B4413A;
-  --map-station: #B45309;
+  --map-night: 10, 15, 34;
+  --map-night-alpha: .13;
+  --map-halo: 74, 144, 217;
   --map-sun: #E8A317;
-  --map-bad: #B4413A;
+  --map-station: #B45309;
+  --map-moon-lit: #FBF8EE;
+  --map-moon-dark: #6B7488;
+  --map-moon-track: #4F5F82;
 }
 body.dark {
   --map-ocean: #16203F;
   --map-land: #3E4F48;
-  --map-land-hover: #D3A94C;
-  --map-border: #111834;
+  --map-coast: #111834;
   --map-grid: #2A3358;
   --map-rim: #8B93B8;
-  --map-night: #000000;
-  --map-night-opacity: .3;
-  --map-tissot: #EF7A6E;
-  --map-station: #D3A94C;
+  --map-night: 0, 0, 0;
+  --map-night-alpha: .22;
+  --map-halo: 120, 170, 255;
   --map-sun: #F5C542;
-  --map-bad: #EF7A6E;
+  --map-station: #D3A94C;
+  --map-moon-lit: #EDE8D8;
+  --map-moon-dark: #2A3358;
+  --map-moon-track: #AEB8D8;
 }
 .ee-card{
   background:var(--bs-card-bg);
   border-radius:var(--bw-radius-sm);
   box-shadow:var(--bw-shadow);
   padding:16px;
+  display:grid; gap:14px;
 }
-.ee-toolbar{ display:flex; flex-wrap:wrap; gap:10px 22px; align-items:center; margin-bottom:12px; }
+.ee-toolbar{ display:flex; flex-wrap:wrap; gap:10px 22px; align-items:center; }
 .ee-group{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
 .ee-group-label{
   font-size:11px; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
@@ -129,32 +132,18 @@ body.dark {
 .ee-btn:hover{ border-color:var(--bw-accent); }
 .ee-btn[aria-pressed="true"]{ background:var(--bw-accent); border-color:var(--bw-accent); color:#FFFFFF; }
 body.dark .ee-btn[aria-pressed="true"]{ color:#0A0F22; }
-.ee-btn:focus-visible, #eeSvg:focus-visible{ outline:2px solid var(--bw-accent); outline-offset:2px; }
+.ee-btn:focus-visible, .ee-slider input:focus-visible, #eeCanvas:focus-visible{ outline:2px solid var(--bw-accent); outline-offset:2px; }
+.ee-slider{ display:flex; align-items:center; gap:10px; flex:1 1 220px; min-width:0; }
+.ee-slider input{ flex:1; min-width:0; accent-color:var(--bw-accent); }
+.ee-slider output{ font-size:12px; font-variant-numeric:tabular-nums; min-width:6.5ch; text-align:right; }
+.ee-timebar{ display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center; }
 
-.ee-map{ position:relative; width:100%; }
-#eeSvg{ display:block; width:100%; height:auto; cursor:grab; touch-action:pan-y; }
-#eeSvg.dragging{ cursor:grabbing; }
-.ee-sphere{ fill:var(--map-ocean); }
-.ee-rim{ fill:none; stroke:var(--map-rim); stroke-width:1.2; }
-.ee-graticule{ fill:none; stroke:var(--map-grid); stroke-width:0.5; }
-.ee-equator{ fill:none; stroke:var(--map-rim); stroke-width:0.8; stroke-dasharray:3 3; opacity:.5; }
-.ee-country{ fill:var(--map-land); stroke:var(--map-border); stroke-width:0.5; cursor:pointer; transition:fill .12s; }
-.ee-country:hover{ fill:var(--map-land-hover); }
-.ee-country.active{ fill:var(--map-land-hover); stroke:var(--map-rim); stroke-width:1; }
-.ee-night{ fill:var(--map-night); fill-opacity:var(--map-night-opacity); pointer-events:none; }
-.ee-tissot{ fill:var(--map-tissot); fill-opacity:.45; stroke:var(--map-tissot); stroke-width:.8; pointer-events:none; }
-.ee-sun{ fill:var(--map-sun); stroke:var(--map-rim); stroke-width:1; pointer-events:none; }
-.ee-station{ fill:var(--map-station); stroke:var(--map-border); stroke-width:1.5; pointer-events:none; }
-.ee-tip{
-  position:absolute; pointer-events:none; white-space:nowrap;
-  background:var(--light-text); color:#FFFFFF; font-size:12px; padding:4px 8px; border-radius:6px;
-  transform:translate(-50%, calc(-100% - 10px));
-}
-body.dark .ee-tip{ background:var(--dark-text); color:var(--dark-body); }
+#eeCanvas{ display:block; width:100%; height:auto; aspect-ratio:960 / 540; max-width:100%; cursor:grab; touch-action:pan-y; }
+#eeCanvas.dragging{ cursor:grabbing; }
 
 .ee-readout{
-  display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr));
-  gap:14px; margin:14px 0 0;
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));
+  gap:14px; margin:0;
 }
 .ee-readout div{ min-width:0; }
 .ee-readout dt{
@@ -162,17 +151,13 @@ body.dark .ee-tip{ background:var(--dark-text); color:var(--dark-body); }
   color:var(--bs-secondary-color);
 }
 .ee-readout dd{ margin:3px 0 0; font-size:15px; font-weight:600; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
-.ee-chip{
+.ee-pill{
   display:inline-block; font-size:10.5px; font-weight:600; padding:1px 6px; border-radius:4px;
-  margin-left:6px; vertical-align:2px; border:1px solid currentColor;
+  margin-left:6px; vertical-align:2px; border:1px solid currentColor; color:var(--bs-secondary-color);
 }
-.ee-chip.ok{ color:var(--bw-good); }
-.ee-chip.bad{ color:var(--map-bad); }
-.ee-legend{ display:flex; flex-wrap:wrap; gap:6px 18px; margin-top:12px; font-size:11.5px; color:var(--bs-secondary-color); }
-.ee-legend span{ display:inline-flex; align-items:center; gap:6px; }
-.ee-swatch{ width:10px; height:10px; border-radius:50%; display:inline-block; }
-.ee-note{ font-size:11px; color:var(--bs-secondary-color); margin:14px 0 0; line-height:1.55; max-width:80ch; }
-@media (prefers-reduced-motion: reduce){ .ee-country{ transition:none; } }
+.ee-pill.day{ color:var(--map-sun); }
+.ee-pill.civil{ color:var(--bw-accent); }
+.ee-note{ font-size:11px; color:var(--bs-secondary-color); margin:0; line-height:1.55; width:100%; min-width:0; overflow-wrap:break-word; }
 </style>
 </head>
 <body class="light">
@@ -181,8 +166,9 @@ body.dark .ee-tip{ background:var(--dark-text); color:var(--dark-body); }
 <script>
 // ==== THEME HANDLING ====
 
-const STATION_LAT = 51.94;
-const STATION_LON = -0.987;
+// Station position comes from weewx.conf [Station] via archive.json (meta.latitude / meta.longitude)
+let STATION_LAT = null;
+let STATION_LON = null;
 const THEME_KEY = 'dashboardThemeMode';
 const THEME_ICONS = { auto: '\u{1F313}', light: '\u2600\uFE0F', dark: '\u{1F319}' };
 const THEME_ORDER = ['dark', 'light', 'auto'];
@@ -247,6 +233,7 @@ function effectiveTheme(mode) {
   if (mode === 'light' || mode === 'dark') return mode;
   if (mode === 'seasonal') return 'light';
   if (lastIsDay != null) return lastIsDay ? 'light' : 'dark';
+  if (STATION_LAT == null || STATION_LON == null) return 'light';
   const now = new Date();
   const sun = getSunTimes(now, STATION_LAT, STATION_LON);
   if (!sun) return 'light';
@@ -280,7 +267,7 @@ function pollIsDayForTheme() {
         if (getThemeMode() === 'auto') applyDashboardTheme();
       }
     })
-    .catch(e => console.warn('meteorShowers: loop.json poll (theme) failed —', e.message));
+    .catch(e => console.warn('equalEarthMap: loop.json poll (theme) failed —', e.message));
 }
 
 applyDashboardTheme();
@@ -297,56 +284,67 @@ setInterval(() => {
   <div class="site-header-include" w3-include-html="astronomyNavbar.html"></div>
 
   <h1 class="page-title">Equal Earth Map</h1>
-  <p class="page-subtitle">The world in the equal-area Equal Earth projection, with today's day and night, the subsolar point and this station marked.</p>
+  <p class="page-subtitle">The Equal Earth map wrapped onto a globe, with live day and night, the Sun and Moon with their ground tracks, and this station marked.</p>
 
   <div class="ee-card">
     <div class="ee-toolbar">
-      <div class="ee-group" role="group" aria-label="Projection">
-        <span class="ee-group-label">Projection</span>
-        <button type="button" class="ee-btn" id="eeProjEE" data-proj="ee" aria-pressed="true">Equal Earth</button>
-        <button type="button" class="ee-btn" id="eeProjMerc" data-proj="merc" aria-pressed="false">Mercator</button>
+      <div class="ee-group" role="group" aria-label="View">
+        <span class="ee-group-label">View</span>
+        <button type="button" class="ee-btn" id="eeFlat" aria-pressed="false">Flat map</button>
+        <button type="button" class="ee-btn" id="eeGlobe" aria-pressed="true">Globe</button>
       </div>
-      <div class="ee-group" role="group" aria-label="Central meridian">
-        <span class="ee-group-label">Centre</span>
-        <button type="button" class="ee-btn" id="eeCm0" data-lon="0" aria-pressed="true">0&deg;</button>
-        <button type="button" class="ee-btn" id="eeCmStation" data-lon="station" aria-pressed="false">Station</button>
-        <button type="button" class="ee-btn" id="eeCm150" data-lon="150" aria-pressed="false">150&deg;E</button>
-        <button type="button" class="ee-btn" id="eeSpin" aria-pressed="false">Rotate</button>
+      <div class="ee-group" role="group" aria-label="Motion">
+        <span class="ee-group-label">Motion</span>
+        <button type="button" class="ee-btn" id="eeAuto" aria-pressed="true">Auto view</button>
+        <button type="button" class="ee-btn" id="eeSpin" aria-pressed="false">Spin</button>
+        <button type="button" class="ee-btn" id="eeFaceStation">Face station</button>
+        <button type="button" class="ee-btn" id="eeFaceSun">Face Sun</button>
+        <button type="button" class="ee-btn" id="eeFaceMoon">Face Moon</button>
       </div>
       <div class="ee-group" role="group" aria-label="Overlays">
         <span class="ee-group-label">Overlay</span>
         <button type="button" class="ee-btn" id="eeNightBtn" aria-pressed="true">Day &amp; night</button>
-        <button type="button" class="ee-btn" id="eeTissotBtn" aria-pressed="false">Tissot circles</button>
+        <button type="button" class="ee-btn" id="eeSunTrackBtn" aria-pressed="true">Sun track</button>
+        <button type="button" class="ee-btn" id="eeMoonBtn" aria-pressed="true">Moon &amp; track</button>
       </div>
+      <label class="ee-slider" for="eeWrap">
+        <span class="ee-group-label">Wrap</span>
+        <input type="range" id="eeWrap" min="0" max="100" value="100" step="1">
+        <output id="eeWrapOut" for="eeWrap">100%</output>
+      </label>
     </div>
 
-    <div class="ee-map" id="eeMap">
-      <svg id="eeSvg" tabindex="0" aria-label="World map. Drag sideways or use the arrow keys to change the central meridian. Click a country to measure it."></svg>
-      <div class="ee-tip" id="eeTip" hidden></div>
-    </div>
+    <canvas id="eeCanvas" tabindex="0" aria-label="Globe. Drag to rotate, arrow keys to turn, or use the controls above."></canvas>
 
-    <div class="ee-legend">
-      <span><i class="ee-swatch" style="background:var(--map-sun)"></i>Subsolar point</span>
-      <span><i class="ee-swatch" style="background:var(--map-station)"></i>This station</span>
-      <span><i class="ee-swatch" style="background:var(--map-night);opacity:.5"></i>Night, with civil, nautical and astronomical twilight bands</span>
+    <div class="ee-timebar">
+      <label class="ee-slider" for="eeTime">
+        <span class="ee-group-label">Time</span>
+        <input type="range" id="eeTime" min="-720" max="720" value="0" step="10">
+        <output id="eeTimeOut" for="eeTime">Now</output>
+      </label>
+      <button type="button" class="ee-btn" id="eeNow">Back to now</button>
     </div>
 
     <dl class="ee-readout">
-      <div><dt>Selected country</dt><dd id="eeName">&mdash;</dd></div>
-      <div><dt>True area</dt><dd id="eeArea">&mdash;</dd></div>
-      <div><dt>Map size vs equator</dt><dd id="eeDist">&mdash;</dd></div>
+      <div><dt>Shown time (UTC)</dt><dd id="eeShown">&mdash;</dd></div>
       <div><dt>Subsolar point</dt><dd id="eeSubsolar">&mdash;</dd></div>
-      <div><dt>Central meridian</dt><dd id="eeCm">&mdash;</dd></div>
-      <div><dt>Cursor</dt><dd id="eeCursor">&mdash;</dd></div>
+      <div><dt>Sun at station</dt><dd id="eeSunAlt">&mdash;</dd></div>
+      <div><dt>Sublunar point</dt><dd id="eeSublunar">&mdash;</dd></div>
+      <div><dt>Moon at station</dt><dd id="eeMoonAlt">&mdash;</dd></div>
+      <div><dt>Moon phase</dt><dd id="eePhase">&mdash;</dd></div>
+      <div><dt>View centre</dt><dd id="eeCentre">&mdash;</dd></div>
     </dl>
 
-    <p class="ee-note">Equal Earth (&Scaron;avri&ccaron;, Jenny &amp; Patterson, 2018) keeps every country at its true relative
-      size, so &ldquo;map size vs equator&rdquo; reads &times;1.00 wherever you click. Switch to Mercator and click
-      Greenland, Russia or Canada to see how much a conformal map inflates high latitudes. Tissot circles are all
-      500&nbsp;km in radius on the ground: Equal Earth keeps their area and stretches their shape toward the edges,
-      Mercator keeps them round and lets them grow. The day/night shading is drawn from the Sun's position at the
-      current time and refreshes every minute. Drag sideways or use the arrow keys to rotate. Boundaries: Natural
-      Earth 1:110m; areas computed on a sphere of radius 6,371&nbsp;km.</p>
+    <p class="ee-note">Wrap blends the Equal Earth projection (&Scaron;avri&ccaron;, Jenny &amp; Patterson, 2018) into an
+      orthographic view of a sphere: at 0% every country has its true relative area, and at 100% you see one hemisphere
+      as it would look from space. Auto view keeps this station, and the Sun and Moon whenever they are above the
+      station's horizon, on the near side of the globe. Dragging, spinning, the arrow keys or the Face buttons switch it
+      off; press Auto view to return. Shading marks night and the civil, nautical and astronomical twilight bands. The Sun
+      and Moon tracks trace the points they pass directly over for one full trip round the Earth: 24 hours for the Sun
+      and about 24 hours 50 minutes for the Moon, which moves on in its orbit. There is a dot for each hour. The time
+      slider moves the Sun and Moon up to 12 hours either side of now. Everything updates every 5 seconds. Positions use
+      low-precision almanac formulae, accurate to about 0.01&deg; for the Sun and 0.3&deg; for the Moon. Boundaries:
+      Natural Earth 1:110m.</p>
   </div>
 </div>
 
@@ -383,237 +381,421 @@ includeHTML(() => {
 <script src="js/d3.7.9.0.min.js"></script>
 <script src="js/topojson.3.0.2.min.js"></script>
 <script>
-(function(){
-  var WORLD_URL = './jsondata/countries-110m.json';
-  var W = 960, H = 468, R_KM = 6371.0088, POLL_MS = 60000;
-  var $ = function(id){ return document.getElementById(id); };
-  var svg = d3.select('#eeSvg').attr('viewBox', '0 0 ' + W + ' ' + H);
-  var tip = $('eeTip'), mapEl = $('eeMap');
-  var sphere = { type: 'Sphere' };
-  var lon = 0, projName = 'ee', selected = null, countries = [];
-  var station = { lat: STATION_LAT, lon: STATION_LON };
-
-  var ee = d3.geoEqualEarth().fitExtent([[8, 8], [W - 8, H - 8]], sphere);
-  var ms = (H / 2) / Math.log(Math.tan(Math.PI / 4 + 78 * Math.PI / 360));
-  var merc = d3.geoMercator().scale(ms).translate([W / 2, H / 2])
-    .clipExtent([[W / 2 - Math.PI * ms, 0], [W / 2 + Math.PI * ms, H]]);
-  var projection = ee;
-  var path = d3.geoPath(projection);
-
-  // ---- Sun position (low-precision, ~0.01 deg; Astronomical Almanac formulae) ----
-  function subsolarPoint(date){
-    var rad = Math.PI / 180;
-    var n = date.valueOf() / 86400000 + 2440587.5 - 2451545.0;
-    var L = (280.460 + 0.9856474 * n) % 360;
-    var g = ((357.528 + 0.9856003 * n) % 360) * rad;
-    var lambda = (L + 1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g)) * rad;
-    var eps = (23.439 - 0.0000004 * n) * rad;
-    var ra = Math.atan2(Math.cos(eps) * Math.sin(lambda), Math.cos(lambda)) / rad;
-    var dec = Math.asin(Math.sin(eps) * Math.sin(lambda)) / rad;
-    var gmst = (280.46061837 + 360.98564736629 * n) % 360;
-    var sLon = ((ra - gmst) % 360 + 540) % 360 - 180;
-    return [sLon, dec];
-  }
-
-  // ---- Static layers ----
-  var rDeg = 500 / R_KM * 180 / Math.PI;
-  var tissots = [];
-  for (var la = -60; la <= 60; la += 30)
-    for (var lo = -180; lo < 180; lo += 30)
-      tissots.push(d3.geoCircle().center([lo + 15, la]).radius(rDeg)());
-
-  svg.append('path').attr('class', 'ee-sphere').datum(sphere);
-  svg.append('path').attr('class', 'ee-graticule').datum(d3.geoGraticule().step([15, 15])());
-  svg.append('path').attr('class', 'ee-equator')
-    .datum({ type: 'LineString', coordinates: [[-180, 0], [-90, 0], [0, 0], [90, 0], [180, 0]] });
-  var landG = svg.append('g');
-  var nightG = svg.append('g');
-  // Sun zenith distance at each band edge: night, then civil, nautical, astronomical twilight
-  var nightBands = nightG.selectAll('path')
-    .data([90, 96, 102, 108].map(function(z){ return { zenith: z, circle: null }; }))
-    .join('path').attr('class', 'ee-night');
-  var tissotG = svg.append('g').attr('display', 'none');
-  tissotG.selectAll('path').data(tissots).join('path').attr('class', 'ee-tissot');
-  svg.append('path').attr('class', 'ee-rim').datum(sphere);
-  var sunDot = svg.append('circle').attr('class', 'ee-sun').attr('r', 6);
-  var stationDot = svg.append('circle').attr('class', 'ee-station').attr('r', 4.5);
-  var land = landG.selectAll('path');
-
-  var fmt = function(v, pos, neg){ return Math.abs(v).toFixed(1) + '°' + (v >= 0 ? pos : neg); };
-  var wrap = function(v){ return ((v + 540) % 360) - 180; };
-  var nf = new Intl.NumberFormat();
-  var sunLL = subsolarPoint(new Date());
-
-  function placeDot(sel, ll){
-    var p = projection(ll);
-    var visible = p && isFinite(p[0]) && isFinite(p[1]) && p[1] >= 0 && p[1] <= H;
-    sel.attr('display', visible ? null : 'none');
-    if (visible) sel.attr('cx', p[0]).attr('cy', p[1]);
-  }
-
-  function equatorScale(){
-    var c = d3.geoCircle().center([lon, 0]).radius(1)();
-    return path.area(c) / d3.geoArea(c);
-  }
-
-  function updateReadout(){
-    if (!selected) { $('eeName').textContent = '—'; $('eeArea').textContent = '—'; $('eeDist').textContent = '—'; return; }
-    var sr = d3.geoArea(selected);
-    $('eeName').textContent = selected.properties.name;
-    $('eeArea').textContent = nf.format(Math.round(sr * R_KM * R_KM)) + ' km²';
-    var ratio = path.area(selected) / sr / equatorScale();
-    var ok = Math.abs(ratio - 1) < 0.05;
-    $('eeDist').innerHTML = '×' + ratio.toFixed(2) +
-      '<span class="ee-chip ' + (ok ? 'ok' : 'bad') + '">' + (ok ? 'true size' : 'inflated') + '</span>';
-  }
-
-  function updateSun(){
-    sunLL = subsolarPoint(new Date());
-    var anti = [wrap(sunLL[0] + 180), -sunLL[1]];
-    nightBands.each(function(b){ b.circle = d3.geoCircle().center(anti).radius(180 - b.zenith)(); });
-    $('eeSubsolar').textContent = fmt(sunLL[1], 'N', 'S') + ' ' + fmt(sunLL[0], 'E', 'W');
-  }
-
-  function render(){
-    projection.rotate([-lon, 0]);
-    svg.selectAll('.ee-sphere,.ee-graticule,.ee-equator,.ee-rim,.ee-country,.ee-tissot').attr('d', path);
-    nightBands.attr('d', function(b){ return b.circle ? path(b.circle) : null; });
-    placeDot(sunDot, sunLL);
-    placeDot(stationDot, [station.lon, station.lat]);
-    $('eeCm').textContent = fmt(wrap(lon), 'E', 'W');
-    updateReadout();
-  }
-
-  // ---- Controls ----
-  var lonBtns = document.querySelectorAll('.ee-btn[data-lon]');
-  function setLon(v, btn){
-    lon = v;
-    lonBtns.forEach(function(b){ b.setAttribute('aria-pressed', String(b === btn)); });
-    render();
-  }
-  lonBtns.forEach(function(b){
-    b.addEventListener('click', function(){
-      stopSpin();
-      setLon(b.dataset.lon === 'station' ? station.lon : +b.dataset.lon, b);
-    });
-  });
-  document.querySelectorAll('.ee-btn[data-proj]').forEach(function(b){
-    b.addEventListener('click', function(){
-      projName = b.dataset.proj;
-      projection = projName === 'ee' ? ee : merc;
-      path.projection(projection);
-      document.querySelectorAll('.ee-btn[data-proj]').forEach(function(x){ x.setAttribute('aria-pressed', String(x === b)); });
-      render();
-    });
-  });
-  function toggle(btnId, g){
-    $(btnId).addEventListener('click', function(){
-      var on = this.getAttribute('aria-pressed') !== 'true';
-      this.setAttribute('aria-pressed', String(on));
-      g.attr('display', on ? null : 'none');
-    });
-  }
-  toggle('eeNightBtn', nightG);
-  toggle('eeTissotBtn', tissotG);
-
-  // ---- Pointer: cursor readout, tooltip, drag to rotate ----
-  function local(ev){
-    var r = svg.node().getBoundingClientRect(), m = mapEl.getBoundingClientRect();
-    return [(ev.clientX - r.left) * W / r.width, (ev.clientY - r.top) * H / r.height, ev.clientX - m.left, ev.clientY - m.top];
-  }
-  svg.on('pointermove.cursor', function(ev){
-    var xy = local(ev);
-    var ll = projection.invert([xy[0], xy[1]]);
-    var inside = false;
-    if (ll && isFinite(ll[0]) && isFinite(ll[1])) {
-      if (projName === 'ee') {
-        var back = projection(ll);
-        inside = Math.hypot(back[0] - xy[0], back[1] - xy[1]) < 0.5;
-      } else {
-        inside = Math.abs(xy[0] - W / 2) <= Math.PI * ms;
-      }
-    }
-    $('eeCursor').textContent = inside ? fmt(ll[1], 'N', 'S') + ' ' + fmt(wrap(ll[0]), 'E', 'W') : '—';
-  }).on('pointerleave.cursor', function(){ $('eeCursor').textContent = '—'; });
-
-  var start = null, moved = false;
-  svg.on('pointerdown', function(ev){
-    moved = false;
-    if (ev.pointerType === 'touch') return;
-    start = { x: ev.clientX, lon: lon };
-  });
-  window.addEventListener('pointerup', function(){ start = null; svg.classed('dragging', false); });
-  window.addEventListener('pointermove', function(ev){
-    if (!start) return;
-    if (!moved && Math.abs(ev.clientX - start.x) < 4) return;
-    if (!moved) { moved = true; stopSpin(); svg.classed('dragging', true); tip.hidden = true; }
-    var r = svg.node().getBoundingClientRect();
-    setLon(start.lon + (ev.clientX - start.x) * 360 / r.width * 0.9, null);
-  });
-  svg.node().addEventListener('keydown', function(ev){
-    if (ev.key === 'ArrowLeft')  { stopSpin(); setLon(lon - 5, null); ev.preventDefault(); }
-    if (ev.key === 'ArrowRight') { stopSpin(); setLon(lon + 5, null); ev.preventDefault(); }
-  });
-
-  var spinBtn = $('eeSpin'), timer = null;
-  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function stopSpin(){ if (timer) { timer.stop(); timer = null; spinBtn.setAttribute('aria-pressed', 'false'); } }
-  spinBtn.addEventListener('click', function(){
-    if (timer) return stopSpin();
-    spinBtn.setAttribute('aria-pressed', 'true');
-    lonBtns.forEach(function(b){ if (b !== spinBtn) b.setAttribute('aria-pressed', 'false'); });
-    var last = 0;
-    timer = d3.timer(function(t){ lon += (t - last) * (reduceMotion ? 0.004 : 0.012); last = t; render(); });
-  });
+(function () {
+  const W = 960, H = 540, CX = W / 2, CY = H / 2;
+  const WORLD_URL = "./jsondata/countries-110m.json";
+  let STATION = null;   // { lat, lon, name } from weewx.conf via archive.json
+  const $ = id => document.getElementById(id);
+  const cv = $("eeCanvas"), ctx = cv.getContext("2d");
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // ---- Data ----
-  updateSun();
-  render();
-  function refreshSun(){ updateSun(); render(); }
-  setInterval(refreshSun, POLL_MS);
-  document.addEventListener('visibilitychange', function(){ if (!document.hidden) refreshSun(); });
-  window.addEventListener('pageshow', function(e){ if (e.persisted) refreshSun(); });
+  let land = null, borders = null;
+  const graticule = d3.geoGraticule10();
+  const sphere = { type: "Sphere" };
 
-  fetch(WORLD_URL, { cache: 'force-cache' })
-    .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-    .then(function(world){
-      countries = topojson.feature(world, world.objects.countries).features;
-      land = landG.selectAll('path').data(countries).join('path').attr('class', 'ee-country');
-      land.on('pointerenter', function(ev, d){ tip.textContent = d.properties.name; tip.hidden = false; })
-        .on('pointermove', function(ev){ var p = local(ev); tip.style.left = p[2] + 'px'; tip.style.top = p[3] + 'px'; })
-        .on('pointerleave', function(){ tip.hidden = true; })
-        .on('click', function(ev, d){
-          if (moved) return;
-          selected = selected === d ? null : d;
-          land.classed('active', function(x){ return x === selected; });
-          updateReadout();
-        });
-      selected = countries.find(function(f){ return f.properties.name === 'Greenland'; }) || null;
-      land.classed('active', function(x){ return x === selected; });
-      render();
-    })
-    .catch(function(e){
-      console.warn('equalEarthMap: world map load failed —', e.message);
-      $('eeName').textContent = 'Map data unavailable';
+  // ---- Morphing projection: Equal Earth (t=0) to orthographic (t=1) ----
+  // Blend of the Equal Earth and orthographic formulas. The far hemisphere folds
+  // back behind the near one, like paper wrapped round a ball, so it is drawn
+  // first (shaded) and the near hemisphere is drawn over it.
+  const mutate = d3.geoProjectionMutator(t => (x, y) => {
+    const a = d3.geoEqualEarthRaw(x, y), b = d3.geoOrthographicRaw(x, y);
+    return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+  });
+  const projection = mutate(1);
+  const path = d3.geoPath(projection, ctx);
+  const S_FLAT = (W - 24) / 2 / 2.7066, S_GLOBE = H / 2 - 22;
+
+  let t = 1, lambda = 0, phi = -30, night = true, offsetMin = 0, showSunTrack = true, showMoon = true;
+  // The far side shrinks away over the first half of the wrap
+  const backClip = () => (t > 0.001 ? 180 - 90 * Math.min(1, t * 2) : null);
+  function applyProjection(clip) {
+    mutate(t);
+    projection
+      .scale(S_FLAT + (S_GLOBE - S_FLAT) * t)
+      .translate([CX, CY])
+      .rotate([lambda, phi * t])
+      .clipAngle(clip)
+      .precision(0.3);
+  }
+
+  // ---- Sun and Moon ----
+  // Low-precision formulae from the Astronomical Almanac: Sun to ~0.01 deg,
+  // Moon to ~0.3 deg. Sub-points are geocentric (no parallax).
+  const RAD = Math.PI / 180;
+  function gmstDeg(n) { return (280.46061837 + 360.98564736629 * n) % 360; }
+  function subPoint(raDeg, decDeg, n) { return [((raDeg - gmstDeg(n)) % 360 + 540) % 360 - 180, decDeg]; }
+  function daysJ2000(date) { return date.valueOf() / 864e5 + 2440587.5 - 2451545.0; }
+  function sunPos(date) {
+    const n = daysJ2000(date);
+    const L = (280.460 + 0.9856474 * n) % 360, g = ((357.528 + 0.9856003 * n) % 360) * RAD;
+    const lam = (L + 1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g)) * RAD;
+    const eps = (23.439 - 0.0000004 * n) * RAD;
+    const ra = Math.atan2(Math.cos(eps) * Math.sin(lam), Math.cos(lam)) / RAD;
+    const dec = Math.asin(Math.sin(eps) * Math.sin(lam)) / RAD;
+    return { sub: subPoint(ra, dec, n), eclLon: lam / RAD };
+  }
+  function moonPos(date) {
+    const n = daysJ2000(date), T = n / 36525, s = d => Math.sin(d * RAD);
+    const lam = 218.32 + 481267.881 * T + 6.29 * s(135.0 + 477198.87 * T) - 1.27 * s(259.3 - 413335.36 * T)
+      + 0.66 * s(235.7 + 890534.22 * T) + 0.21 * s(269.9 + 954397.74 * T) - 0.19 * s(357.5 + 35999.05 * T)
+      - 0.11 * s(186.5 + 966404.03 * T);
+    const bet = 5.13 * s(93.3 + 483202.02 * T) + 0.28 * s(228.2 + 960400.89 * T)
+      - 0.28 * s(318.3 + 6003.15 * T) - 0.17 * s(217.6 - 407332.21 * T);
+    const eps = (23.439 - 0.0000004 * n) * RAD, l = lam * RAD, b = bet * RAD;
+    const x = Math.cos(b) * Math.cos(l);
+    const y = Math.cos(eps) * Math.cos(b) * Math.sin(l) - Math.sin(eps) * Math.sin(b);
+    const z = Math.sin(eps) * Math.cos(b) * Math.sin(l) + Math.cos(eps) * Math.sin(b);
+    return { sub: subPoint(Math.atan2(y, x) / RAD, Math.asin(z) / RAD, n), eclLon: lam };
+  }
+  // Ground track from `when` until the body has gone once round the Earth
+  // (360 deg of longitude westward): 24 h for the Sun, about 24 h 50 min for the Moon.
+  function track(fn, when) {
+    const line = [], hours = [];
+    let prev = null, swept = 0;
+    for (let m = 0; m <= 1620; m += 10) {
+      const p = fn(new Date(when.valueOf() + m * 60000)).sub;
+      if (prev) {
+        const step = ((prev[0] - p[0]) % 360 + 540) % 360 - 180;
+        if (swept + step >= 360) {
+          line.push(d3.geoInterpolate(prev, p)((360 - swept) / step));
+          break;
+        }
+        swept += step;
+      }
+      line.push(p);
+      if (m > 0 && m % 60 === 0) hours.push(p);
+      prev = p;
+    }
+    return { line: { type: "LineString", coordinates: line }, hours };
+  }
+  const PHASES = ["New Moon", "Waxing crescent", "First quarter", "Waxing gibbous", "Full Moon", "Waning gibbous", "Last quarter", "Waning crescent"];
+
+  let sun = [0, 0], moon = [0, 0], bands = [], sunTrack = null, moonTrack = null, illum = 0, waxing = true;
+  function stationAlt(ll) { return STATION ? 90 - d3.geoDistance([STATION.lon, STATION.lat], ll) / RAD : null; }
+  function signed(v) { return (v >= 0 ? "+" : "−") + Math.abs(v).toFixed(1) + "°"; }
+  function updateSun() {
+    const when = new Date(Date.now() + offsetMin * 60000);
+    const S = sunPos(when), M = moonPos(when);
+    sun = S.sub; moon = M.sub;
+    const anti = [sun[0] + 180, -sun[1]];
+    bands = [90, 96, 102, 108].map(z => d3.geoCircle().center(anti).radius(180 - z)());
+    sunTrack = track(sunPos, when); moonTrack = track(moonPos, when);
+
+    const elong = d3.geoDistance(moon, sun) / RAD;
+    waxing = ((M.eclLon - S.eclLon) % 360 + 360) % 360 < 180;
+    illum = (1 - Math.cos(elong * RAD)) / 2;
+    const phaseAngle = waxing ? elong : 360 - elong;
+
+    $("eeShown").textContent = when.toISOString().slice(0, 16).replace("T", " ");
+    $("eeSubsolar").textContent = fmtLL(sun);
+    $("eeSublunar").textContent = fmtLL(moon);
+    if (!STATION) {
+      $("eeSunAlt").textContent = "\u2014"; $("eeMoonAlt").textContent = "\u2014";
+    } else {
+    const alt = stationAlt(sun);
+    const phase = alt > -0.833 ? ["Day", "day"] : alt > -6 ? ["Civil twilight", "civil"]
+      : alt > -12 ? ["Nautical twilight", ""] : alt > -18 ? ["Astronomical twilight", ""] : ["Night", ""];
+    $("eeSunAlt").innerHTML = signed(alt) + `<span class="ee-pill ${phase[1]}">${phase[0]}</span>`;
+    const malt = stationAlt(moon);
+    $("eeMoonAlt").innerHTML = signed(malt) + `<span class="ee-pill">${malt > -0.3 ? "Up" : "Set"}</span>`;
+    }
+    $("eePhase").textContent = PHASES[Math.round(phaseAngle / 45) % 8] + " · " + Math.round(illum * 100) + "% lit";
+  }
+  const fmt = (v, p, n) => Math.abs(v).toFixed(1) + "°" + (v >= 0 ? p : n);
+  const wrap180 = v => ((v + 540) % 360) - 180;
+  const fmtLL = ll => fmt(ll[1], "N", "S") + " " + fmt(wrap180(ll[0]), "E", "W");
+
+  // ---- Theme colours for canvas (follow body.light / body.dark) ----
+  let C = {};
+  function readColours() {
+    const cs = getComputedStyle(document.body), v = k => cs.getPropertyValue(k).trim();
+    for (const k of ["ocean", "land", "coast", "grid", "rim", "sun", "station", "moon-lit", "moon-dark", "moon-track"]) C[k] = v("--map-" + k);
+    C.card = v("--bs-card-bg") || "#FFFFFF";
+    C.night = v("--map-night");
+    C.nightAlpha = parseFloat(v("--map-night-alpha")) || .15;
+    C.halo = v("--map-halo");
+  }
+  readColours();
+  new MutationObserver(() => { readColours(); draw(); }).observe(document.body, { attributes: true, attributeFilter: ["class"] });
+
+  // ---- Canvas sizing ----
+  let dpr = 1;
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = W * dpr; cv.height = H * dpr;
+    draw();
+  }
+
+  const frontClip = () => (t > 0.001 ? 90 : null);
+  function visible(ll) {
+    const c = frontClip();
+    return c === null || d3.geoDistance(ll, [-lambda, -phi * t]) < Math.PI / 2 - 1e-6;
+  }
+  function drawTrack(tr, colour) {
+    ctx.save();
+    ctx.strokeStyle = colour; ctx.lineCap = "round";
+    ctx.globalAlpha = 0.9; ctx.lineWidth = 2;
+    ctx.beginPath(); path(tr.line); ctx.stroke();
+    ctx.fillStyle = colour;
+    for (const h of tr.hours) {
+      if (!visible(h)) continue;
+      const p = projection(h); if (!p || !isFinite(p[0])) continue;
+      ctx.beginPath(); ctx.arc(p[0], p[1], 2, 0, 2 * Math.PI); ctx.fill();
+    }
+    ctx.restore();
+  }
+  function moonGlyph(ll, r) {
+    if (!visible(ll)) return;
+    const p = projection(ll); if (!p || !isFinite(p[0])) return;
+    const [x, y] = p;
+    ctx.save();
+    ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); ctx.fillStyle = C["moon-dark"]; ctx.fill();
+    ctx.beginPath();
+    if (waxing) ctx.arc(x, y, r, -Math.PI / 2, Math.PI / 2); else ctx.arc(x, y, r, Math.PI / 2, 3 * Math.PI / 2);
+    ctx.closePath(); ctx.fillStyle = C["moon-lit"]; ctx.fill();
+    ctx.beginPath(); ctx.ellipse(x, y, Math.max(0.01, r * Math.abs(1 - 2 * illum)), r, 0, 0, 2 * Math.PI);
+    ctx.fillStyle = illum > 0.5 ? C["moon-lit"] : C["moon-dark"]; ctx.fill();
+    ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); ctx.lineWidth = 1.2; ctx.strokeStyle = C.rim; ctx.stroke();
+    ctx.restore();
+  }
+  function dot(ll, r, fill, stroke) {
+    if (!visible(ll)) return;
+    const p = projection(ll);
+    if (!p || !isFinite(p[0])) return;
+    ctx.beginPath(); ctx.arc(p[0], p[1], r, 0, 2 * Math.PI);
+    ctx.fillStyle = fill; ctx.fill();
+    ctx.lineWidth = 1.5; ctx.strokeStyle = stroke; ctx.stroke();
+  }
+
+  // ---- Draw ----
+  function layers(shade, ocean = true, shadeNight = true) {
+    if (ocean) { ctx.beginPath(); path(sphere); ctx.fillStyle = C.ocean; ctx.fill(); }
+    ctx.beginPath(); path(graticule); ctx.lineWidth = .5; ctx.strokeStyle = C.grid; ctx.stroke();
+    if (land) {
+      ctx.beginPath(); path(land); ctx.fillStyle = C.land; ctx.fill();
+      ctx.beginPath(); path(borders); ctx.lineWidth = .5; ctx.strokeStyle = C.coast; ctx.stroke();
+    }
+    if (night && shadeNight) {
+      ctx.fillStyle = `rgba(${C.night}, ${C.nightAlpha})`;
+      for (const b of bands) { ctx.beginPath(); path(b); ctx.fill(); }
+    }
+    if (shade > 0) { ctx.beginPath(); path(sphere); ctx.fillStyle = `rgba(${C.night}, ${shade})`; ctx.fill(); }
+  }
+
+  function draw() {
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    applyProjection(90);
+    const R = projection.scale();
+
+    // atmosphere halo, fading in as the map becomes a globe
+    if (t > 0.6) {
+      const k = (t - 0.6) / 0.4;
+      const g = ctx.createRadialGradient(CX, CY, R * 0.98, CX, CY, R * 1.12);
+      g.addColorStop(0, `rgba(${C.halo}, ${0.35 * k})`);
+      g.addColorStop(1, `rgba(${C.halo}, 0)`);
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(CX, CY, R * 1.12, 0, 2 * Math.PI); ctx.fill();
+    }
+
+    // far side: the part of the sheet curling round behind
+    const clip = backClip();
+    if (clip === null) {
+      applyProjection(null);
+      layers(0);
+      ctx.beginPath(); path(sphere); ctx.lineWidth = 1.2; ctx.strokeStyle = C.rim; ctx.stroke();
+    } else if (clip > 90) {
+      applyProjection(clip);
+      ctx.globalAlpha = Math.max(0, 1 - 2 * t) * 0.85;
+      layers(0, false, false);
+      ctx.globalAlpha = 1;
+    }
+
+    // near side
+    if (t > 0.001) {
+      applyProjection(90);
+      layers(0);
+      // gentle sphere shading, strongest when fully wrapped
+      const g = ctx.createRadialGradient(CX - R * .35, CY - R * .35, R * .1, CX, CY, R);
+      g.addColorStop(0, "rgba(255,255,255,0)");
+      g.addColorStop(1, `rgba(${C.night}, ${0.18 * t * t})`);
+      ctx.beginPath(); path(sphere); ctx.fillStyle = g; ctx.fill();
+      ctx.beginPath(); path(sphere); ctx.lineWidth = 1.2;
+      ctx.globalAlpha = Math.min(1, t * t * 1.5); ctx.strokeStyle = C.rim; ctx.stroke(); ctx.globalAlpha = 1;
+    }
+
+    applyProjection(frontClip());
+    if (showSunTrack && sunTrack) drawTrack(sunTrack, C.sun);
+    if (showMoon && moonTrack) drawTrack(moonTrack, C["moon-track"]);
+    dot(sun, 6.5, C.sun, C.rim);
+    if (showMoon) moonGlyph(moon, 7);
+    if (STATION) dot([STATION.lon, STATION.lat], 4.5, C.station, C.card);
+    $("eeCentre").textContent = fmtLL([-lambda, -phi * t]);
+  }
+
+  // ---- Wrap animation ----
+  let anim = null;
+  function setWrap(target, animate) {
+    if (anim) anim.stop();
+    const from = t;
+    const done = () => { $("eeGlobe").setAttribute("aria-pressed", String(t === 1)); $("eeFlat").setAttribute("aria-pressed", String(t === 0)); };
+    if (!animate || reduceMotion || from === target) { t = target; syncWrapUI(); draw(); done(); return; }
+    const dur = 1600 * Math.abs(target - from);
+    anim = d3.timer(el => {
+      const k = Math.min(1, el / dur);
+      t = from + (target - from) * d3.easeCubicInOut(k);
+      if (k === 1) { t = target; anim.stop(); anim = null; done(); }
+      syncWrapUI(); draw();
     });
+  }
+  function syncWrapUI() {
+    $("eeWrap").value = Math.round(t * 100);
+    $("eeWrapOut").textContent = Math.round(t * 100) + "%";
+  }
+  $("eeFlat").onclick = () => setWrap(0, true);
+  $("eeGlobe").onclick = () => setWrap(1, true);
+  $("eeWrap").addEventListener("input", e => {
+    if (anim) { anim.stop(); anim = null; }
+    t = +e.target.value / 100; syncWrapUI(); draw();
+    $("eeGlobe").setAttribute("aria-pressed", String(t === 1)); $("eeFlat").setAttribute("aria-pressed", String(t === 0));
+  });
 
-  fetch('./jsondata/archive.json?_=' + Date.now(), { cache: 'no-store' })
-    .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-    .then(function(data){
-      var m = data && data.meta;
-      if (m && typeof m.latitude === 'number' && typeof m.longitude === 'number') {
-        station = { lat: m.latitude, lon: m.longitude };
-        render();
+  // ---- Turn to a point ----
+  let turn = null, autoView = true;
+  function setAuto(on) { autoView = on; $("eeAuto").setAttribute("aria-pressed", String(on)); }
+  // Centre that keeps the station, and the Sun and Moon when they are up there, on the near side
+  function autoCentre() {
+    if (!STATION) return [sun[0], Math.max(-60, Math.min(60, sun[1] + 25))];
+    const st = [STATION.lon, STATION.lat], pts = [st];
+    if (stationAlt(sun) > -0.833) pts.push(sun);
+    if (showMoon && stationAlt(moon) > -0.3) pts.push(moon);
+    let x = 0, y = 0, z = 0;
+    for (const [lo, la] of pts) {
+      const a = lo * RAD, b = la * RAD;
+      x += Math.cos(b) * Math.cos(a); y += Math.cos(b) * Math.sin(a); z += Math.sin(b);
+    }
+    const c = [Math.atan2(y, x) / RAD, Math.atan2(z, Math.hypot(x, y)) / RAD];
+    return pts.every(p => d3.geoDistance(p, c) / RAD < 80) ? c : st;
+  }
+  function jumpTo(ll) {
+    lambda += ((-ll[0] - lambda) % 360 + 540) % 360 - 180;
+    phi = -ll[1];
+  }
+  function faceTo(ll, keepAuto = false) {
+    setAuto(keepAuto);
+    stopSpin(); if (turn) turn.stop();
+    const r0 = [lambda, phi], r1 = [-ll[0], -ll[1]];
+    let dl = ((r1[0] - r0[0]) % 360 + 540) % 360 - 180;
+    const from = [lambda, phi];
+    if (reduceMotion) { lambda = from[0] + dl; phi = r1[1]; draw(); return; }
+    turn = d3.timer(el => {
+      const k = Math.min(1, el / 1100), e = d3.easeCubicInOut(k);
+      lambda = from[0] + dl * e; phi = from[1] + (r1[1] - from[1]) * e;
+      draw();
+      if (k === 1) { turn.stop(); turn = null; }
+    });
+  }
+  $("eeFaceStation").disabled = true;
+  $("eeFaceStation").onclick = () => { if (STATION) faceTo([STATION.lon, STATION.lat]); };
+  $("eeAuto").onclick = () => faceTo(autoCentre(), true);
+  $("eeFaceSun").onclick = () => faceTo(sun);
+  $("eeNightBtn").onclick = function () { night = !night; this.setAttribute("aria-pressed", String(night)); draw(); };
+  $("eeSunTrackBtn").onclick = function () { showSunTrack = !showSunTrack; this.setAttribute("aria-pressed", String(showSunTrack)); draw(); };
+  $("eeMoonBtn").onclick = function () { showMoon = !showMoon; this.setAttribute("aria-pressed", String(showMoon)); draw(); };
+  $("eeFaceMoon").onclick = () => faceTo(moon);
+
+  // ---- Spin ----
+  let spin = null;
+  function stopSpin() { if (spin) { spin.stop(); spin = null; $("eeSpin").setAttribute("aria-pressed", "false"); } }
+  $("eeSpin").onclick = () => {
+    if (spin) return stopSpin();
+    if (turn) { turn.stop(); turn = null; }
+    setAuto(false);
+    $("eeSpin").setAttribute("aria-pressed", "true");
+    let last = 0;
+    spin = d3.timer(el => { lambda += (el - last) * (reduceMotion ? 0.003 : 0.012); last = el; draw(); });
+  };
+
+  // ---- Drag ----
+  let drag = null;
+  cv.addEventListener("pointerdown", e => {
+    if (e.pointerType === "touch" && t < 1) return;
+    stopSpin(); setAuto(false); if (turn) { turn.stop(); turn = null; }
+    drag = { x: e.clientX, y: e.clientY, l: lambda, p: phi };
+    cv.setPointerCapture(e.pointerId); cv.classList.add("dragging");
+  });
+  cv.addEventListener("pointermove", e => {
+    if (!drag) return;
+    const rect = cv.getBoundingClientRect(), k = W / rect.width;
+    applyProjection(90);
+    const R = projection.scale();
+    const degPerPx = t > 0.5 ? 90 / R : 360 / (W - 24);
+    lambda = drag.l + (e.clientX - drag.x) * k * degPerPx;
+    if (t > 0.05) phi = Math.max(-90, Math.min(90, drag.p - (e.clientY - drag.y) * k * degPerPx));
+    draw();
+  });
+  const endDrag = () => { drag = null; cv.classList.remove("dragging"); };
+  cv.addEventListener("pointerup", endDrag);
+  cv.addEventListener("pointercancel", endDrag);
+  cv.addEventListener("keydown", e => {
+    const step = 5, keys = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, step], ArrowDown: [0, -step] };
+    if (!keys[e.key]) return;
+    stopSpin(); setAuto(false); lambda += keys[e.key][0]; phi = Math.max(-90, Math.min(90, phi + keys[e.key][1])); draw(); e.preventDefault();
+  });
+
+  // ---- Time scrubber ----
+  function fmtOffset(m) {
+    if (m === 0) return "Now";
+    const s = m < 0 ? "−" : "+", a = Math.abs(m);
+    return s + Math.floor(a / 60) + "h" + String(a % 60).padStart(2, "0");
+  }
+  $("eeTime").addEventListener("input", e => { offsetMin = +e.target.value; $("eeTimeOut").textContent = fmtOffset(offsetMin); refresh(); });
+  $("eeNow").onclick = () => { offsetMin = 0; $("eeTime").value = 0; $("eeTimeOut").textContent = "Now"; refresh(); };
+
+  // ---- Live refresh ----
+  function refresh() {
+    updateSun();
+    if (autoView && !turn && !drag && !spin) jumpTo(autoCentre());
+    draw();
+  }
+  setInterval(refresh, 5000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh(); });
+
+  updateSun();
+  jumpTo(autoCentre());
+  resize();
+  window.addEventListener("resize", resize);
+
+  fetch(WORLD_URL, { cache: "force-cache" })
+    .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+    .then(world => {
+      land = topojson.feature(world, world.objects.countries);
+      borders = topojson.mesh(world, world.objects.countries, (a, b) => a !== b);
+      draw();
+    })
+    .catch(e => console.warn("equalEarthMap: world map load failed \u2014", e.message));
+
+  fetch("./jsondata/archive.json?_=" + Date.now(), { cache: "no-store" })
+    .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+    .then(data => {
+      const m = data && data.meta;
+      if (m && typeof m.latitude === "number" && typeof m.longitude === "number") {
+        STATION = { lat: m.latitude, lon: m.longitude };
+        STATION_LAT = m.latitude; STATION_LON = m.longitude;
+        $("eeFaceStation").disabled = false;
+        if (autoView) jumpTo(autoCentre());
+        refresh();
+        applyDashboardTheme();
       }
     })
-    .catch(function(e){ console.warn('equalEarthMap: station location fetch failed —', e.message); });
+    .catch(e => console.warn("equalEarthMap: station location fetch failed \u2014", e.message));
 
-  function reportHeight(){
+  function reportHeight() {
     if (window.parent === window || !document.body) return;
-    window.parent.postMessage({ type: 'chartModalContentHeight', height: document.body.scrollHeight, width: document.body.scrollWidth }, '*');
+    window.parent.postMessage({ type: "chartModalContentHeight", height: document.body.scrollHeight, width: document.body.scrollWidth }, "*");
   }
   if (window.parent !== window) {
-    window.addEventListener('load', function(){
+    window.addEventListener("load", () => {
       reportHeight();
       new ResizeObserver(reportHeight).observe(document.body);
     });

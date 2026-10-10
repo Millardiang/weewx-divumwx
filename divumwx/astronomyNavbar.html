@@ -1,6 +1,6 @@
 <!--
 ##############################################################################################
-# astronomyNavbar.html version 1.1.0
+# astronomyNavbar.html version 1.2.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -32,6 +32,14 @@
         <span class="select-label" id="languageLabel" data-i18n="Select language" aria-hidden="true">Select language</span>
       </span>
       <button id="themeToggle" aria-label="Toggle Theme (dark, light, seasonal, auto)" data-i18n-attr="aria-label:Toggle Theme (dark, light, seasonal, auto)"></button>
+      <button id="fullscreenToggle" type="button" aria-pressed="false" aria-label="Full screen" title="Full screen" data-i18n-attr="aria-label,title:Full screen">
+        <svg class="fs-icon fs-icon--enter" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 9 V4 H9"/><path d="M15 4 H20 V9"/><path d="M20 15 V20 H15"/><path d="M9 20 H4 V15"/>
+        </svg>
+        <svg class="fs-icon fs-icon--exit" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M9 4 V9 H4"/><path d="M20 9 H15 V4"/><path d="M15 20 V15 H20"/><path d="M4 15 H9 V20"/>
+        </svg>
+      </button>
     </nav>
     <button id="menuBtn" class="menu-btn" aria-label="Menu" data-i18n-attr="aria-label:Menu">
       <span></span><span></span><span></span>

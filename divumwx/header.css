@@ -1,6 +1,6 @@
 /*
 ##############################################################################################
-# header.css version 1.0.0
+# header.css version 1.0.1
 #  Shared header/nav styling for every page.
 #  Copyright © 2026 Ian Millard, Sean Balfour
 #  GPLv3
@@ -337,6 +337,37 @@ body.dark #languageSystem option, [data-bs-theme="dark"] #languageSystem option 
   border: none;
   cursor: pointer;
   line-height: 1;
+}
+#fullscreenToggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  color: var(--bs-body-color);
+  background: none;
+  border: none;
+  cursor: pointer;
+  line-height: 1;
+  opacity: 0.85;
+  transition: opacity 0.2s;
+}
+#fullscreenToggle:hover,
+#fullscreenToggle[aria-pressed="true"] {
+  opacity: 1;
+}
+#fullscreenToggle .fs-icon--exit,
+#fullscreenToggle[aria-pressed="true"] .fs-icon--enter {
+  display: none;
+}
+#fullscreenToggle[aria-pressed="true"] .fs-icon--exit {
+  display: block;
+}
+/* Browsers without the Fullscreen API (e.g. Safari on iPhone) don't get the button */
+html.no-fullscreen #fullscreenToggle {
+  display: none;
+}
+.site-nav.site-nav--menu #fullscreenToggle {
+  margin-top: 8px;
 }
 #seasonToggle {
   font-size: 22px;
