@@ -1,5 +1,31 @@
 # DivumWX Changelog
 
+## 1.5.0 — Flat map tools
+
+The measuring tools from the original Equal Earth map are back, shown
+whenever the map is fully flat (View → Flat map, or Wrap at 0%).
+
+### Flat map
+- **Equal Earth / Mercator** switch, to compare an equal-area map with a
+  conformal one. Wrapping back to the globe always starts from Equal Earth.
+- **Tissot circles**: a grid of identical 500 km circles. Equal Earth keeps
+  their area and stretches their shape toward the edges; Mercator keeps them
+  round and lets them grow toward the poles.
+- **Click a country** for its true area in km² and its size on the map
+  compared with the same area at the equator. Equal Earth reads ×1.00
+  everywhere; under Mercator Greenland reads about ×16, Russia about ×5,
+  and Antarctica, which reaches the pole, ∞. Areas are measured on the
+  whole country, even where Mercator's top and bottom edges cut it off.
+  Click the country again, or the sea, to clear it.
+- **Hover** over a country to see its name, with the cursor's latitude
+  and longitude in the readout.
+- The day and night shading, Sun and Moon tracks and station marker all
+  carry on as before on both flat projections.
+
+### Files changed
+`equalEarthMap.html` 1.2.0, `index.html` 1.5.0, `divumwf.html`,
+`bin/user/divumwx_version.py`, `README.md`, `INSTALLATION_GUIDE.md`.
+
 ## 1.4.0 — Equal Earth globe
 
 The Equal Earth Map page now opens as a rotating globe, with the Sun and Moon

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# equalEarthMap.html version 1.1.0
+# equalEarthMap.html version 1.2.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -94,6 +94,9 @@ body {
   --map-moon-lit: #FBF8EE;
   --map-moon-dark: #6B7488;
   --map-moon-track: #4F5F82;
+  --map-select: #B45309;
+  --map-tissot: 180, 65, 58;
+  --map-bad: #B4413A;
 }
 body.dark {
   --map-ocean: #16203F;
@@ -109,6 +112,9 @@ body.dark {
   --map-moon-lit: #EDE8D8;
   --map-moon-dark: #2A3358;
   --map-moon-track: #AEB8D8;
+  --map-select: #D3A94C;
+  --map-tissot: 239, 122, 110;
+  --map-bad: #EF7A6E;
 }
 .ee-card{
   background:var(--bs-card-bg);
@@ -140,6 +146,16 @@ body.dark .ee-btn[aria-pressed="true"]{ color:#0A0F22; }
 
 #eeCanvas{ display:block; width:100%; height:auto; aspect-ratio:960 / 540; max-width:100%; cursor:grab; touch-action:pan-y; }
 #eeCanvas.dragging{ cursor:grabbing; }
+.ee-stage{ position:relative; width:100%; min-width:0; }
+.ee-tip{
+  position:absolute; pointer-events:none; white-space:nowrap; z-index:2;
+  background:var(--light-text); color:#FFFFFF; font-size:12px; padding:4px 8px; border-radius:6px;
+  transform:translate(-50%, calc(-100% - 10px));
+}
+body.dark .ee-tip{ background:var(--dark-text); color:var(--dark-body); }
+.ee-pill.ok{ color:var(--bw-good); }
+.ee-pill.bad{ color:var(--map-bad); }
+.ee-group[hidden], .ee-readout[hidden]{ display:none; }
 
 .ee-readout{
   display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));
@@ -301,6 +317,12 @@ setInterval(() => {
         <button type="button" class="ee-btn" id="eeFaceSun">Face Sun</button>
         <button type="button" class="ee-btn" id="eeFaceMoon">Face Moon</button>
       </div>
+      <div class="ee-group" role="group" aria-label="Flat map projection" id="eeFlatTools" hidden>
+        <span class="ee-group-label">Flat map</span>
+        <button type="button" class="ee-btn" id="eeProjEE" aria-pressed="true">Equal Earth</button>
+        <button type="button" class="ee-btn" id="eeProjMerc" aria-pressed="false">Mercator</button>
+        <button type="button" class="ee-btn" id="eeTissotBtn" aria-pressed="false">Tissot circles</button>
+      </div>
       <div class="ee-group" role="group" aria-label="Overlays">
         <span class="ee-group-label">Overlay</span>
         <button type="button" class="ee-btn" id="eeNightBtn" aria-pressed="true">Day &amp; night</button>
@@ -314,7 +336,10 @@ setInterval(() => {
       </label>
     </div>
 
-    <canvas id="eeCanvas" tabindex="0" aria-label="Globe. Drag to rotate, arrow keys to turn, or use the controls above."></canvas>
+    <div class="ee-stage" id="eeStage">
+      <canvas id="eeCanvas" tabindex="0" aria-label="Globe. Drag to rotate, arrow keys to turn, or use the controls above. On the flat map, click a country to measure it."></canvas>
+      <div class="ee-tip" id="eeTip" hidden></div>
+    </div>
 
     <div class="ee-timebar">
       <label class="ee-slider" for="eeTime">
@@ -335,6 +360,13 @@ setInterval(() => {
       <div><dt>View centre</dt><dd id="eeCentre">&mdash;</dd></div>
     </dl>
 
+    <dl class="ee-readout" id="eeFlatReadout" hidden>
+      <div><dt>Selected country</dt><dd id="eeCountry">&mdash;</dd></div>
+      <div><dt>True area</dt><dd id="eeArea">&mdash;</dd></div>
+      <div><dt>Map size vs equator</dt><dd id="eeDist">&mdash;</dd></div>
+      <div><dt>Cursor</dt><dd id="eeCursor">&mdash;</dd></div>
+    </dl>
+
     <p class="ee-note">Wrap blends the Equal Earth projection (&Scaron;avri&ccaron;, Jenny &amp; Patterson, 2018) into an
       orthographic view of a sphere: at 0% every country has its true relative area, and at 100% you see one hemisphere
       as it would look from space. Auto view keeps this station, and the Sun and Moon whenever they are above the
@@ -342,7 +374,11 @@ setInterval(() => {
       off; press Auto view to return. Shading marks night and the civil, nautical and astronomical twilight bands. The Sun
       and Moon tracks trace the points they pass directly over for one full trip round the Earth: 24 hours for the Sun
       and about 24 hours 50 minutes for the Moon, which moves on in its orbit. There is a dot for each hour. The time
-      slider moves the Sun and Moon up to 12 hours either side of now. Everything updates every 5 seconds. Positions use
+      slider moves the Sun and Moon up to 12 hours either side of now. On the flat map, click a country for its true area
+      and its size on the map compared with the same area at the equator: it reads &times;1.00 everywhere on Equal Earth,
+      while Mercator inflates high latitudes (Greenland about &times;16, Russia about &times;5) and Antarctica, which reaches the pole, without limit. Tissot circles are all 500&nbsp;km in radius on
+      the ground: Equal Earth keeps their area and stretches their shape toward the edges, Mercator keeps them round and
+      lets them grow. Areas are computed on a sphere of radius 6,371&nbsp;km. Everything updates every 5 seconds. Positions use
       low-precision almanac formulae, accurate to about 0.01&deg; for the Sun and 0.3&deg; for the Moon. Boundaries:
       Natural Earth 1:110m.</p>
   </div>
@@ -405,6 +441,25 @@ includeHTML(() => {
   const projection = mutate(1);
   const path = d3.geoPath(projection, ctx);
   const S_FLAT = (W - 24) / 2 / 2.7066, S_GLOBE = H / 2 - 22;
+
+  // ---- Flat-map tools: Equal Earth or Mercator, Tissot circles, country areas ----
+  const R_KM = 6371.0088;
+  const eeFlat = d3.geoEqualEarth().scale(S_FLAT).translate([CX, CY]).precision(0.3);
+  const MS = (H / 2 - 4) / Math.log(Math.tan(Math.PI / 4 + 78 * Math.PI / 360));   // Mercator to 78 deg N/S
+  const mercFlat = d3.geoMercator().scale(MS).translate([CX, CY]).precision(0.3)
+    .clipExtent([[CX - Math.PI * MS, 0], [CX + Math.PI * MS, H]]);
+  let flatProjName = "ee", showTissot = false, countries = [], selected = null;
+  const flatProj = () => (flatProjName === "merc" ? mercFlat : eeFlat).rotate([lambda, 0]);
+  // Areas are measured without the map's edge clipping, so a country cut off at the
+  // top of the Mercator map (Greenland, Antarctica) is still measured whole.
+  const mercArea = d3.geoMercator().scale(MS).translate([CX, CY]).precision(0.3);
+  const areaProj = () => (flatProjName === "merc" ? mercArea : eeFlat).rotate([lambda, 0]);
+  const areaPath = d3.geoPath();
+  const tissots = [];
+  for (let la = -60; la <= 60; la += 30)
+    for (let lo = -180; lo < 180; lo += 30)
+      tissots.push(d3.geoCircle().center([lo + 15, la]).radius(500 / R_KM * 180 / Math.PI)());
+  let proj = projection;   // the projection markers and tracks are drawn with
 
   let t = 1, lambda = 0, phi = -30, night = true, offsetMin = 0, showSunTrack = true, showMoon = true;
   // The far side shrinks away over the first half of the wrap
@@ -515,6 +570,8 @@ includeHTML(() => {
     C.night = v("--map-night");
     C.nightAlpha = parseFloat(v("--map-night-alpha")) || .15;
     C.halo = v("--map-halo");
+    C.select = v("--map-select");
+    C.tissot = v("--map-tissot");
   }
   readColours();
   new MutationObserver(() => { readColours(); draw(); }).observe(document.body, { attributes: true, attributeFilter: ["class"] });
@@ -527,6 +584,7 @@ includeHTML(() => {
     draw();
   }
 
+  const isFlat = () => t <= 0.001;
   const frontClip = () => (t > 0.001 ? 90 : null);
   function visible(ll) {
     const c = frontClip();
@@ -540,14 +598,14 @@ includeHTML(() => {
     ctx.fillStyle = colour;
     for (const h of tr.hours) {
       if (!visible(h)) continue;
-      const p = projection(h); if (!p || !isFinite(p[0])) continue;
+      const p = proj(h); if (!p || !isFinite(p[0])) continue;
       ctx.beginPath(); ctx.arc(p[0], p[1], 2, 0, 2 * Math.PI); ctx.fill();
     }
     ctx.restore();
   }
   function moonGlyph(ll, r) {
     if (!visible(ll)) return;
-    const p = projection(ll); if (!p || !isFinite(p[0])) return;
+    const p = proj(ll); if (!p || !isFinite(p[0])) return;
     const [x, y] = p;
     ctx.save();
     ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); ctx.fillStyle = C["moon-dark"]; ctx.fill();
@@ -561,7 +619,7 @@ includeHTML(() => {
   }
   function dot(ll, r, fill, stroke) {
     if (!visible(ll)) return;
-    const p = projection(ll);
+    const p = proj(ll);
     if (!p || !isFinite(p[0])) return;
     ctx.beginPath(); ctx.arc(p[0], p[1], r, 0, 2 * Math.PI);
     ctx.fillStyle = fill; ctx.fill();
@@ -583,9 +641,37 @@ includeHTML(() => {
     if (shade > 0) { ctx.beginPath(); path(sphere); ctx.fillStyle = `rgba(${C.night}, ${shade})`; ctx.fill(); }
   }
 
+  function drawMarkers() {
+    if (showSunTrack && sunTrack) drawTrack(sunTrack, C.sun);
+    if (showMoon && moonTrack) drawTrack(moonTrack, C["moon-track"]);
+    dot(sun, 6.5, C.sun, C.rim);
+    if (showMoon) moonGlyph(moon, 7);
+    if (STATION) dot([STATION.lon, STATION.lat], 4.5, C.station, C.card);
+  }
+
+  function drawFlat() {
+    const fp = flatProj();
+    path.projection(fp); proj = fp;
+    layers(0);
+    if (selected) {
+      ctx.beginPath(); path(selected); ctx.fillStyle = C.select; ctx.fill();
+      ctx.lineWidth = 1; ctx.strokeStyle = C.rim; ctx.stroke();
+    }
+    if (showTissot) {
+      ctx.fillStyle = `rgba(${C.tissot}, .45)`; ctx.strokeStyle = `rgba(${C.tissot}, .9)`; ctx.lineWidth = .8;
+      for (const c of tissots) { ctx.beginPath(); path(c); ctx.fill(); ctx.stroke(); }
+    }
+    ctx.beginPath(); path(sphere); ctx.lineWidth = 1.2; ctx.strokeStyle = C.rim; ctx.stroke();
+    drawMarkers();
+    path.projection(projection); proj = projection;
+    $("eeCentre").textContent = fmtLL([-lambda, 0]);
+    updateFlatReadout();
+  }
+
   function draw() {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, W, H);
+    if (isFlat()) { drawFlat(); return; }
     applyProjection(90);
     const R = projection.scale();
 
@@ -625,18 +711,26 @@ includeHTML(() => {
     }
 
     applyProjection(frontClip());
-    if (showSunTrack && sunTrack) drawTrack(sunTrack, C.sun);
-    if (showMoon && moonTrack) drawTrack(moonTrack, C["moon-track"]);
-    dot(sun, 6.5, C.sun, C.rim);
-    if (showMoon) moonGlyph(moon, 7);
-    if (STATION) dot([STATION.lon, STATION.lat], 4.5, C.station, C.card);
+    drawMarkers();
     $("eeCentre").textContent = fmtLL([-lambda, -phi * t]);
   }
 
   // ---- Wrap animation ----
   let anim = null;
+  function syncFlatUI() {
+    const flat = isFlat();
+    $("eeFlatTools").hidden = !flat;
+    $("eeFlatReadout").hidden = !flat;
+    if (!flat) { tip.hidden = true; }
+  }
+  function leaveMercator() {
+    if (flatProjName !== "merc") return;
+    flatProjName = "ee";
+    $("eeProjEE").setAttribute("aria-pressed", "true"); $("eeProjMerc").setAttribute("aria-pressed", "false");
+  }
   function setWrap(target, animate) {
     if (anim) anim.stop();
+    if (target > 0) leaveMercator();
     const from = t;
     const done = () => { $("eeGlobe").setAttribute("aria-pressed", String(t === 1)); $("eeFlat").setAttribute("aria-pressed", String(t === 0)); };
     if (!animate || reduceMotion || from === target) { t = target; syncWrapUI(); draw(); done(); return; }
@@ -651,13 +745,86 @@ includeHTML(() => {
   function syncWrapUI() {
     $("eeWrap").value = Math.round(t * 100);
     $("eeWrapOut").textContent = Math.round(t * 100) + "%";
+    syncFlatUI();
   }
   $("eeFlat").onclick = () => setWrap(0, true);
   $("eeGlobe").onclick = () => setWrap(1, true);
   $("eeWrap").addEventListener("input", e => {
     if (anim) { anim.stop(); anim = null; }
-    t = +e.target.value / 100; syncWrapUI(); draw();
+    t = +e.target.value / 100;
+    if (t > 0) leaveMercator();
+    syncWrapUI(); draw();
     $("eeGlobe").setAttribute("aria-pressed", String(t === 1)); $("eeFlat").setAttribute("aria-pressed", String(t === 0));
+  });
+
+  // ---- Flat-map tools ----
+  const tip = $("eeTip"), stage = $("eeStage");
+  const nf = new Intl.NumberFormat();
+  function setFlatProj(name) {
+    flatProjName = name;
+    $("eeProjEE").setAttribute("aria-pressed", String(name === "ee"));
+    $("eeProjMerc").setAttribute("aria-pressed", String(name === "merc"));
+    draw();
+  }
+  $("eeProjEE").onclick = () => setFlatProj("ee");
+  $("eeProjMerc").onclick = () => setFlatProj("merc");
+  $("eeTissotBtn").onclick = function () { showTissot = !showTissot; this.setAttribute("aria-pressed", String(showTissot)); draw(); };
+
+  // Map size of a country relative to the same area at the equator on the
+  // central meridian: 1.00 everywhere on an equal-area map.
+  function updateFlatReadout() {
+    if (!selected) { $("eeCountry").textContent = "\u2014"; $("eeArea").textContent = "\u2014"; $("eeDist").textContent = "\u2014"; return; }
+    areaPath.projection(areaProj());
+    const sr = d3.geoArea(selected);
+    const ref = d3.geoCircle().center([-lambda, 0]).radius(1)();
+    let ratio = areaPath.area(selected) / sr / (areaPath.area(ref) / d3.geoArea(ref));
+    // Mercator stretches the poles to infinity, so a country that reaches a pole has no finite map size
+    const reachesPole = flatProjName === "merc" && d3.geoBounds(selected).some(([, la]) => Math.abs(la) > 89.9);
+    if (reachesPole || !isFinite(ratio)) ratio = Infinity;
+    const ok = Math.abs(ratio - 1) < 0.05;
+    $("eeCountry").textContent = selected.properties.name;
+    $("eeArea").textContent = nf.format(Math.round(sr * R_KM * R_KM)) + " km\u00B2";
+    $("eeDist").innerHTML = (isFinite(ratio) ? "\u00D7" + ratio.toFixed(2) : "\u221E") +
+      `<span class="ee-pill ${ok ? "ok" : "bad"}">${ok ? "true size" : "inflated"}</span>`;
+  }
+  function canvasPoint(e) {
+    const r = cv.getBoundingClientRect();
+    return [(e.clientX - r.left) * W / r.width, (e.clientY - r.top) * H / r.height, e.clientX - r.left, e.clientY - r.top];
+  }
+  // Longitude/latitude under a canvas point on the flat map, or null if off the map
+  function flatInvert(x, y) {
+    const fp = flatProj(), ll = fp.invert([x, y]);
+    if (!ll || !isFinite(ll[0]) || !isFinite(ll[1])) return null;
+    if (flatProjName === "merc") return Math.abs(x - CX) <= Math.PI * MS && y >= 0 && y <= H ? ll : null;
+    const back = fp(ll);
+    return back && Math.hypot(back[0] - x, back[1] - y) < 0.5 ? ll : null;
+  }
+  function countryAt(ll) {
+    if (!ll) return null;
+    for (const f of countries) if (d3.geoContains(f, ll)) return f;
+    return null;
+  }
+  let hoverFrame = 0, lastHover = null;
+  cv.addEventListener("pointermove", e => {
+    if (!isFlat() || drag) return;
+    lastHover = e;
+    if (hoverFrame) return;
+    hoverFrame = requestAnimationFrame(() => {
+      hoverFrame = 0;
+      const [x, y, px, py] = canvasPoint(lastHover), ll = flatInvert(x, y);
+      $("eeCursor").textContent = ll ? fmtLL(ll) : "\u2014";
+      const c = countryAt(ll);
+      cv.style.cursor = c ? "pointer" : "";
+      if (c) { tip.textContent = c.properties.name; tip.style.left = px + "px"; tip.style.top = py + "px"; tip.hidden = false; }
+      else tip.hidden = true;
+    });
+  });
+  cv.addEventListener("pointerleave", () => { tip.hidden = true; $("eeCursor").textContent = "\u2014"; cv.style.cursor = ""; });
+  cv.addEventListener("click", e => {
+    if (!isFlat() || dragMoved) return;
+    const [x, y] = canvasPoint(e), c = countryAt(flatInvert(x, y));
+    selected = c && c !== selected ? c : null;
+    draw();
   });
 
   // ---- Turn to a point ----
@@ -717,15 +884,20 @@ includeHTML(() => {
   };
 
   // ---- Drag ----
-  let drag = null;
+  let drag = null, dragMoved = false;
   cv.addEventListener("pointerdown", e => {
+    dragMoved = false;
     if (e.pointerType === "touch" && t < 1) return;
-    stopSpin(); setAuto(false); if (turn) { turn.stop(); turn = null; }
-    drag = { x: e.clientX, y: e.clientY, l: lambda, p: phi };
-    cv.setPointerCapture(e.pointerId); cv.classList.add("dragging");
+    drag = { x: e.clientX, y: e.clientY, l: lambda, p: phi, id: e.pointerId };
   });
   cv.addEventListener("pointermove", e => {
     if (!drag) return;
+    if (!dragMoved) {
+      if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 4) return;
+      dragMoved = true; tip.hidden = true;
+      stopSpin(); setAuto(false); if (turn) { turn.stop(); turn = null; }
+      cv.setPointerCapture(drag.id); cv.classList.add("dragging");
+    }
     const rect = cv.getBoundingClientRect(), k = W / rect.width;
     applyProjection(90);
     const R = projection.scale();
@@ -770,6 +942,8 @@ includeHTML(() => {
     .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
     .then(world => {
       land = topojson.feature(world, world.objects.countries);
+      countries = land.features;
+      selected = countries.find(f => f.properties.name === "Greenland") || null;
       borders = topojson.mesh(world, world.objects.countries, (a, b) => a !== b);
       draw();
     })
