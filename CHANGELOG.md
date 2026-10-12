@@ -1,5 +1,102 @@
 # DivumWX Changelog
 
+## 1.7.0 — Celestial and Skyfield pages
+
+Two live astronomy pages, linked from the Astronomy navbar and hub, drawn
+with D3 from DivumWX's own Skyfield service. They replace the old Cheetah
+report pages that needed the weewx-celestial, weewx-skyfield and
+weewx-loopdata extensions; none of those, and no pandas, is needed.
+
+### Celestial (Astronomy → Celestial)
+- **Countdowns**: the next visible satellite pass (live while it's on),
+  sunset or sunrise, astronomical darkness, the next meteor shower's peak
+  with the Moon's illumination, and — within 30 days — equinox or solstice,
+  Earth's perihelion or aphelion, a supermoon, an eclipse and a comet's
+  perihelion. Each counts down and rolls on to the next event by itself.
+- **The Geocentric**: Earth at the centre, the Sun, Moon, planets, Proxima
+  Centauri and comets at their compass bearing and distance, an hour-long
+  trail behind each, and a roster whose distances tick between updates.
+- **The Sky Overhead**: the live sky dome — 2,851 stars, the constellation
+  figures, the ecliptic, the planets, comets, and any satellite crossing it
+  (solid when sunlit, hollow in Earth's shadow) — with what's up now and
+  the constellation overhead.
+- **The Next Visible Pass**: the sky at the pass's highest point with its
+  arc and times, the satellite moving along it live during the pass, and
+  every satellite's next pass and next visible pass.
+
+### Skyfield (Astronomy → Skyfield)
+- The Moon with its phase, rise and set, and dated chips for the next new
+  and full moon, equinox, solstice, eclipse, meteor shower and comet
+  perihelion.
+- The live sky dome beside each body's day: up now or its next rise or
+  set, constellation, magnitude, distance and angle from the Sun, with
+  Jupiter's central meridians and Saturn's ring tilt.
+- Rise & set ribbons over today's twilight, the Sun's and Moon's paths,
+  an orrery, the solar year day by day (sunrise, sunset, solar noon and
+  every twilight, clock changes included), the equation of time, the
+  analemma, the lunar month with perigee, apogee and supermoons, and the
+  almanac table with live altitude and azimuth.
+- Checked against weewx-skyfield's own published sample page: rise,
+  transit and set to the minute, magnitudes, distances, constellations,
+  elongations, Jupiter's CML, Saturn's ring tilt, twilight, the equation
+  of time and the Moon's apsides all agree.
+
+### SkyfieldLoopData 0.4.0 (bin/user/divumwx.py)
+- New almanac.json fields for the countdowns: the next few sunrises,
+  sunsets and astronomical darkness, Earth's perihelion and aphelion, the
+  next supermoon, meteor shower peaks, Proxima Centauri and the station's
+  position.
+- **Satellites**: orbital elements from CelesTrak, falling back to SatNOGS
+  and then the TLE API when CelesTrak can't be reached; checksums verified;
+  weewx-skyfield's cached copies reused when present. Passes are predicted
+  on a background thread.
+- **Comets**: elements from the Minor Planet Center, with magnitudes.
+- **jsondata/sky.json**: the Skyfield page's daily almanac, computed on its
+  own thread every 15 minutes and at local midnight (the year's twilight
+  once a day).
+- All optional in `[SkyfieldLoopData]`: `[[Satellites]]`, `[[Comets]]`,
+  `tle_refresh_hours`, `comet_refresh_hours`, `visible_pass_days`,
+  `supermoon_km`, `sky_atlas`, `sky_atlas_refresh`. Defaults: the ISS,
+  Tiangong, Terra and NOAA-21; Halley and Hale-Bopp.
+- Downloads back off after a failure (six hours after an HTTP 403), and
+  the pages say why a satellite or comet has no data rather than guessing.
+
+### Header and languages
+- The language selector now works on pages in a subdirectory
+  (`cardI18n.js` finds its strings and flags relative to itself).
+- The navbar no longer sometimes stays in English when the translations
+  load before it does (`siteHeader.js`).
+
+### Pages and files
+- New: `celestial/celestial.js` 1.0.0, `celestial/dome.js` 1.0.0,
+  `celestial/sky-data.json`, `skyfield/index.html` 1.0.1,
+  `skyfield/skyfield.js` 1.0.1, `skyfield/skyfield.css` 1.0.1,
+  `tools/build_sky_data.py`.
+- Replaced: `celestial/index.html` 1.0.1 (was a placeholder),
+  `celestial/celestial.css` 1.0.1.
+- Changed: `cardI18n.js` 1.0.1, `siteHeader.js` 1.0.3, `index.html` 1.7.0,
+  `divumwf.html`, `bin/user/divumwx.py`, `bin/user/divumwx_version.py`,
+  `README.md`, `INSTALLATION_GUIDE.md`.
+- Removed: `celestial/astro-nav.js`, `skyfield/astro-nav.js`,
+  `skyfield/sky.css`, `skyfield/sky.js` (from the old report pages), and
+  `js/daylightMap.js`, which 1.6.0 meant to remove but still shipped.
+  Upgrades remove them automatically.
+
+### Installer
+- Turns off (`enable = false`) any report that would overwrite the new
+  pages every report cycle: the retired DivumWXSkyfield/DivumWXCelestial
+  reports, and a weewx-skyfield or weewx-celestial report whose HTML_ROOT
+  is DivumWX's `skyfield/` or `celestial/` folder. A report writing
+  anywhere else is left alone. Set `enable = true` to undo.
+- Changed: `install.py`.
+
+### Credits
+- Page designs after John A Kline's weewx-celestial and weewx-skyfield;
+  each page carries his copyright line: weewx-celestial / weewx-skyfield
+  Copyright (C)2022-2026 by John A Kline (john@johnkline.com).
+- Star catalogue and constellation figures from Olaf Frohn's d3-celestial
+  (BSD licence).
+
 ## 1.6.0 — World Daylight Map
 
 The World Daylight Map that opens from the dashboard's daylight card is

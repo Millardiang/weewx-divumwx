@@ -903,6 +903,53 @@ def apply_divumwx_celestial_report_merge(cfg, html_root, page_update_pwd=None):
     return report
 
 
+DIVUMWX_LIVE_ASTRO_DIRS = ('skyfield', 'celestial')
+DIVUMWX_RETIRED_ASTRO_SKINS = ('DivumWXSkyfield', 'DivumWXCelestial')
+
+
+def disable_reports_overwriting_astro_pages(cfg, weewx_root, html_root, printer):
+    """
+    Since 1.7.0 DivumWX ships its own live Skyfield and Celestial pages as
+    static files in <html_root>/skyfield/ and <html_root>/celestial/. A
+    report that still generates into either directory -- the retired
+    DivumWXSkyfield/DivumWXCelestial report pages from earlier releases, or
+    the weewx-skyfield/weewx-celestial extensions' own reports pointed at
+    the same place -- overwrites the new index.html every report cycle with
+    its old page, which then renders unstyled.
+
+    Disables (enable = false) every report that either uses one of the
+    retired DivumWX skins or whose HTML_ROOT resolves to one of those two
+    directories. Reversible, and nothing else in weewx.conf is touched; a
+    weewx-skyfield/weewx-celestial report writing anywhere else keeps
+    running. Returns the names disabled.
+    """
+    std = cfg.get('StdReport', {})
+    site_root = std.get('HTML_ROOT', '')
+    targets = {os.path.normpath(os.path.join(html_root, d)) for d in DIVUMWX_LIVE_ASTRO_DIRS}
+    disabled = []
+    for name in list(std.sections) if hasattr(std, 'sections') else []:
+        if name == 'Defaults':
+            continue
+        section = std[name]
+        if not hasattr(section, 'get') or str(section.get('enable', 'true')).lower() == 'false':
+            continue
+        out = section.get('HTML_ROOT', site_root)
+        if out and not os.path.isabs(out):
+            out = os.path.join(weewx_root, out)
+        out = os.path.normpath(out) if out else ''
+        if section.get('skin') in DIVUMWX_RETIRED_ASTRO_SKINS or out in targets:
+            section['enable'] = 'false'
+            disabled.append(name)
+            if out in targets:
+                why = (f"it writes into {out}, which now holds DivumWX's own live "
+                       f"{os.path.basename(out)} page, and would overwrite it every report cycle")
+            else:
+                why = "that page is retired; DivumWX now ships live Skyfield and Celestial pages"
+            printer.out(f"Disabled report [[{name}]] (skin {section.get('skin', '?')}): {why}. "
+                        f"Set enable = true there to undo.", level=1)
+    return disabled
+
+
 # NOT CALLED FROM configure() AT THIS STAGE -- see check_all_dependencies()'s
 # docstring near the top of this file. Kept defined, not deleted, so the fixes
 # already reviewed here aren't lost when this gets re-enabled.
@@ -2867,17 +2914,18 @@ class DivumwxInstaller(ExtensionInstaller):
             if installed_frontend is not None:
                 prune_obsolete_frontend(html_root, installed_frontend, printer, DIVUMWX_VERSION)
             set_divumwx_permissions(html_root, printer)
-            # Unconditional now, not gated behind a declined-prompt branch --
-            # DivumWXSkyfield/DivumWXCelestial are permanently absent at this
-            # stage (see check_all_dependencies()'s docstring above), not
-            # conditionally opted out of, so the shipped astronomyNavbar.html's
-            # "Celestial Live"/"Skyfield" links need stripping on every install,
-            # not only when a person happened to answer a prompt that no
-            # longer exists.
+            # Removes the retired report pages' old "Celestial Live" /
+            # "Skyfield" navbar links if an earlier install left them. The
+            # 1.7.0 navbar's own links to the live pages use different markup
+            # and are not matched.
             strip_astro_nav_links(html_root, printer)
         else:
             printer.out(f"WARNING: {divumwx_source} not found, skipping frontend copy "
                         f"(expected if testing configure() logic in isolation).", level=1)
+
+        # 1.7.0: the live Skyfield/Celestial pages are static files; stop any
+        # report that would regenerate over them.
+        disable_reports_overwriting_astro_pages(cfg, engine.root_dict['WEEWX_ROOT'], html_root, printer)
 
         # Copy the extension's own repo-root files (README.md, license.txt,
         # install.py, etc.) alongside weewx.conf itself -- not WEEWX_ROOT,

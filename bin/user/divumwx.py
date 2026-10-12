@@ -47,6 +47,7 @@ import threading
 import logging
 import datetime
 import math
+import re
 import glob
 import shutil
 import subprocess
@@ -109,6 +110,7 @@ try:
     import skyfield.framelib
     from skyfield.nutationlib import mean_obliquity
     from skyfield import eclipselib
+    import skyfield.searchlib
     SKYFIELD_AVAILABLE = True
     log.info("skyfield library available for SkyfieldLoopData")
 except ImportError:
@@ -4007,7 +4009,7 @@ class DivumwxExtrasService(StdService):
 #
 ##############################################################################
 
-SKYFIELDLOOPDATA_VERSION = '0.1.1'
+SKYFIELDLOOPDATA_VERSION = '0.4.0'
 
 # Skyfield's seasons()/moon_phases() event codes (see the Skyfield almanac
 # module docs, and confirmed against weewx-skyfield's own SEASON_EVENTS/
@@ -4048,6 +4050,44 @@ _NAMED_STARS = ('proxima_centauri',)
 # reusing weewx-skyfield's -- covers 1899-2053, ~17MB, standard choice
 # for this kind of loop-rate solar-system almanac work.
 _EPHEMERIS_FILE = 'de421.bsp'
+
+# Proxima Centauri, for the Celestial page's Geocentric dial. Not a
+# catalogue lookup -- one hand-entered star (Hipparcos 70890, Gaia DR3
+# proper motion/parallax), so no star catalogue file is needed. Filled
+# into _Sky.stars by _load_sky(), which is what
+# _compute_dotted_fields() already looks in for _NAMED_STARS.
+_PROXIMA_CENTAURI = dict(
+    ra_hours=(14, 29, 42.9487), dec_degrees=(-62, 40, 46.141),
+    ra_mas_per_year=-3781.31, dec_mas_per_year=769.77,
+    parallax_mas=768.07, radial_km_per_s=-22.4)
+
+# Major annual meteor showers for the Celestial page's countdown row,
+# from the IMO Meteor Shower Calendar: peak as solar longitude (J2000,
+# degrees) -- which, unlike a calendar date, is the same every year --
+# plus nominal ZHR and radiant (RA, Dec in degrees).
+#   (code, name, peak solar longitude, ZHR, radiant RA, radiant Dec)
+_METEOR_SHOWERS = (
+    ('QUA', 'Quadrantids', 283.15, 80, 230, 49),
+    ('LYR', 'Lyrids', 32.32, 18, 271, 34),
+    ('ETA', 'Eta Aquariids', 45.5, 50, 338, -1),
+    ('SDA', 'Southern Delta Aquariids', 127.0, 25, 340, -16),
+    ('PER', 'Perseids', 140.0, 100, 48, 58),
+    ('DRA', 'Draconids', 195.4, 10, 262, 54),
+    ('ORI', 'Orionids', 208.0, 20, 95, 16),
+    ('LEO', 'Leonids', 235.27, 15, 152, 22),
+    ('GEM', 'Geminids', 262.2, 150, 112, 33),
+    ('URS', 'Ursids', 270.7, 10, 217, 76),
+)
+
+# A full moon counts as a supermoon when the Moon is closer than this
+# (geocentric, km) -- the threshold most almanacs use. Overridable as
+# supermoon_km in [SkyfieldLoopData].
+_SUPERMOON_KM = 360000.0
+
+# How many days of sunrise/sunset/astronomical-darkness instants to
+# emit for the Celestial page, so its countdown chips can roll on to
+# the next event client-side without waiting for the hourly slow refresh.
+_CELESTIAL_SUN_EVENT_DAYS = 3
 
 # Name(s) to try, in order, when looking up each body in the loaded
 # kernel. de421.bsp (like most JPL kernels) exposes the Sun/Moon/Earth
@@ -4098,6 +4138,1056 @@ class _Sky:
         self.moon = bodies['moon']
         self.orbs = {name: body for name, body in bodies.items() if name != 'earth'}
         self.stars = None      # no star catalog loaded standalone -- see _NAMED_STARS comment
+
+
+##############################################################################
+#
+# Satellites and comets for the Celestial page.
+#
+# Configured in weewx.conf (shown with the defaults used when a section is
+# absent; an empty section turns that family off):
+#
+#     [SkyfieldLoopData]
+#         tle_refresh_hours = 12       # CelesTrak asks for no more than every 2 h
+#         comet_refresh_hours = 48
+#         visible_pass_days = 10       # how far ahead to look for a visible pass
+#         [[Satellites]]
+#             iss = 25544              # tag = NORAD catalogue number[, display name]
+#             tiangong = 48274
+#             terra = 25994
+#             noaa21 = 54234
+#         [[Comets]]
+#             halley = 1P              # tag = MPC designation[, display name]
+#             hale_bopp = C/1995 O1
+#
+# Orbital elements are downloaded (TLEs from CelesTrak, falling back to
+# SatNOGS and then the TLE API when CelesTrak can't be reached; the comet
+# file from the Minor Planet Center) and cached in ephemeris_dir. No
+# pandas is needed. Pass predictions
+# are computed on a background thread. Nothing here ever blocks a loop
+# packet on the network or on a pass search: each write only reads the
+# latest results and computes the cheap live positions.
+#
+##############################################################################
+
+_SATELLITE_DEFAULTS = (
+    ('iss', 25544, 'ISS'),
+    ('tiangong', 48274, 'Tiangong'),
+    ('terra', 25994, 'Terra'),
+    ('noaa21', 54234, 'NOAA-21'),
+)
+_COMET_DEFAULTS = (
+    ('halley', '1P', 'Halley'),
+    ('hale_bopp', 'C/1995 O1', 'Hale-Bopp'),
+)
+# Where a satellite's elements come from, tried in order: a source that
+# fails is skipped for the rest of that cycle and backed off (so one
+# unreachable server doesn't cost a timeout per satellite every cycle).
+#   (name, URL with %d for the NORAD number, reply format)
+_TLE_SOURCES = (
+    ('CelesTrak', 'https://celestrak.org/NORAD/elements/gp.php?CATNR=%d&FORMAT=TLE', 'tle'),
+    ('SatNOGS', 'https://db.satnogs.org/api/tle/?norad_cat_id=%d&format=json', 'satnogs'),
+    ('TLE API', 'https://tle.ivanstanojevic.me/api/tle/%d', 'tleapi'),
+)
+_MPC_COMET_URL = 'https://www.minorplanetcenter.net/iau/MPCORB/CometEls.txt'
+_FETCH_TIMEOUT_S = 20
+
+
+def _tle_checksum_ok(line: str) -> bool:
+    """A TLE line's last digit is the sum of its digits (minus signs count
+    as 1) modulo 10."""
+    if len(line) < 69 or not line[68].isdigit():
+        return False
+    total = sum(int(c) if c.isdigit() else (1 if c == '-' else 0) for c in line[:68])
+    return total % 10 == int(line[68])
+
+
+def _comet_orbit(row, ts):
+    """skyfield.data.mpc.comet_orbit() without importing skyfield.data.mpc,
+    which needs pandas at import time even though comet_orbit() itself
+    doesn't. Falls back to Skyfield's own function if its internals ever
+    change shape."""
+    from skyfield.constants import GM_SUN_Pitjeva_2005_km3_s2 as GM_SUN
+    try:
+        from skyfield.keplerlib import _KeplerOrbit
+        from skyfield.data.spice import inertial_frames
+        e, q = row['eccentricity'], row['perihelion_distance_au']
+        p = q * 2.0 if e == 1.0 else (q / (1.0 - e)) * (1.0 - e * e)
+        t_peri = ts.tt(row['perihelion_year'], row['perihelion_month'], row['perihelion_day'])
+        comet = _KeplerOrbit._from_periapsis(
+            p, e, row['inclination_degrees'], row['longitude_of_ascending_node_degrees'],
+            row['argument_of_perihelion_degrees'], t_peri, GM_SUN, 10, row['designation'])
+        comet._rotation = inertial_frames['ECLIPJ2000'].T
+        return comet
+    except (ImportError, AttributeError, TypeError, KeyError):
+        import skyfield.data.mpc
+        return skyfield.data.mpc.comet_orbit(row, ts, GM_SUN)
+_COMET_FILE = 'CometEls.txt'
+_DOWNLOAD_RETRY_S = 3600          # after a failed download, wait this long before trying again
+_PASS_REFRESH_S = 1800            # re-predict passes at least this often
+_PASS_TRACK_STEP_S = 10           # sampling of each pass's sky track
+_VISIBLE_MIN_ALT = 10.0           # a pass is "visible" when sunlit, at least this high,
+_VISIBLE_MAX_SUN_ALT = -6.0       # ...and the station's sky at least civil-twilight dark
+_TAG_OK = re.compile(r'^[a-z][a-z0-9_]*$')
+
+
+class _Row(dict):
+    """A comet-file row that skyfield.data.mpc.comet_orbit() can read
+    both as row.field and row['field'] -- without needing pandas."""
+    __getattr__ = dict.__getitem__
+
+
+def _parse_comet_line(line: str) -> Optional[_Row]:
+    """One line of the MPC's CometEls.txt, by the column layout Skyfield
+    itself uses (skyfield.data.mpc._COMET_COLUMNS)."""
+    if len(line) < 103:
+        return None
+
+    def f(a, b):
+        s = line[a:b].strip()
+        return float(s) if s else None
+    try:
+        row = _Row(
+            perihelion_year=int(line[14:18]),
+            perihelion_month=int(line[19:21]),
+            perihelion_day=float(line[22:29]),
+            perihelion_distance_au=float(line[30:39]),
+            eccentricity=float(line[41:49]),
+            argument_of_perihelion_degrees=float(line[51:59]),
+            longitude_of_ascending_node_degrees=float(line[61:69]),
+            inclination_degrees=float(line[71:79]),
+            magnitude_g=f(91, 95),
+            magnitude_k=f(96, 100),
+            designation=line[102:158].strip(),
+        )
+        y, m, d = line[81:85].strip(), line[85:87].strip(), line[87:89].strip()
+        row['epoch'] = (int(y), int(m), int(d)) if y and m and d else None
+        return row
+    except ValueError:
+        return None
+
+
+def _comet_matches(designation: str, wanted: str) -> bool:
+    """'1P' matches '1P/Halley'; 'C/1995 O1' matches 'C/1995 O1 (Hale-Bopp)'."""
+    base = designation.split(' (')[0].strip()
+    return base == wanted or base.startswith(wanted + '/')
+
+
+class _CelestialOrbits:
+    """Satellites and comets: downloads, pass predictions (background
+    thread) and the live fields SkyfieldLoopData merges into each write."""
+
+    def __init__(self, svc_dict, cache_dir: str, extra_tle_dirs=()):
+        self.cache_dir = cache_dir
+        self.extra_tle_dirs = [d for d in extra_tle_dirs if d]
+        self._status: Dict[str, Dict[str, Any]] = {}
+        self.sat_cfg = self._parse_section(svc_dict, 'Satellites', _SATELLITE_DEFAULTS, int)
+        self.comet_cfg = self._parse_section(svc_dict, 'Comets', _COMET_DEFAULTS, str)
+        try:
+            self.tle_refresh_s = max(2.0, float(svc_dict.get('tle_refresh_hours', 12))) * 3600
+            self.comet_refresh_s = max(6.0, float(svc_dict.get('comet_refresh_hours', 48))) * 3600
+            self.visible_days = min(30.0, max(1.0, float(svc_dict.get('visible_pass_days', 10))))
+        except (TypeError, ValueError):
+            self.tle_refresh_s, self.comet_refresh_s, self.visible_days = 12 * 3600, 48 * 3600, 10.0
+        self.enabled = bool(self.sat_cfg or self.comet_cfg)
+        self._lock = threading.Lock()
+        self._stop = threading.Event()
+        self._thread = None
+        self._sats: Dict[str, Dict[str, Any]] = {}
+        self._comets: Dict[str, Dict[str, Any]] = {}
+        self._passes: Dict[str, Dict[str, Any]] = {}
+        self._loaded_mtime: Dict[str, float] = {}
+        self._retry_after: Dict[str, float] = {}
+        self._source_down: Dict[str, float] = {}
+        self._source_why: Dict[str, str] = {}
+        self._warned_missing: set = set()
+
+    @staticmethod
+    def _parse_section(svc_dict, name, defaults, conv):
+        """{tag: (key, label)} in configured order. Absent section ->
+        defaults; empty section -> nothing."""
+        out: Dict[str, Any] = {}
+        if name not in svc_dict:
+            for tag, key, label in defaults:
+                out[tag] = (key, label)
+            return out
+        default_labels = {tag: label for tag, _, label in defaults}
+        reserved = set(_BODY_NAME_CANDIDATES) | set(_NAMED_STARS)
+        for tag, value in svc_dict[name].items():
+            tag = str(tag).strip().lower()
+            parts = value if isinstance(value, (list, tuple)) else [value]
+            parts = [str(p).strip() for p in parts if str(p).strip()]
+            if not _TAG_OK.match(tag) or tag in reserved or not parts:
+                log.warning("SkyfieldLoopData: ignoring [[%s]] entry '%s' -- the tag must be a "
+                            "lowercase identifier that isn't a body name, with a value." % (name, tag))
+                continue
+            try:
+                key = conv(parts[0])
+            except (TypeError, ValueError):
+                log.warning("SkyfieldLoopData: ignoring [[%s]] %s = %r -- not a valid %s."
+                            % (name, tag, value, 'NORAD number' if conv is int else 'designation'))
+                continue
+            label = ', '.join(parts[1:]) or default_labels.get(tag) or (parts[0] if conv is str else tag.upper())
+            out[tag] = (key, label)
+        return out
+
+    # -- lifecycle ---------------------------------------------------------
+
+    def start(self, sky, geographic, observer):
+        if not self.enabled or self._thread is not None:
+            return
+        self.sky, self.geo, self.observer = sky, geographic, observer
+        os.makedirs(self.cache_dir, exist_ok=True)
+        self._thread = threading.Thread(target=self._run, name='SkyfieldLoopData-orbits', daemon=True)
+        self._thread.start()
+        log.info("SkyfieldLoopData: tracking %d satellite(s) and %d comet(s)"
+                 % (len(self.sat_cfg), len(self.comet_cfg)))
+
+    def stop(self):
+        self._stop.set()
+
+    def _run(self):
+        while not self._stop.is_set():
+            try:
+                self._cycle()
+            except Exception as e:
+                log.error("SkyfieldLoopData: satellite/comet update failed: %s" % e)
+                log_traceback(log.error, "SkyfieldLoopData: ")
+            self._stop.wait(60)
+
+    # -- downloads -----------------------------------------------------------
+
+    def _due(self, path: str, max_age_s: float) -> bool:
+        try:
+            return time.time() - os.path.getmtime(path) >= max_age_s
+        except OSError:
+            return True
+
+    @staticmethod
+    def _fetch(url: str) -> str:
+        """GET url and return the body as text; raises on any failure."""
+        import urllib.request
+        req = urllib.request.Request(url, headers={'User-Agent': 'DivumWX-SkyfieldLoopData (WeeWX weather station)'})
+        with urllib.request.urlopen(req, timeout=_FETCH_TIMEOUT_S) as resp:
+            return resp.read().decode('utf-8', errors='replace')
+
+    @staticmethod
+    def _why(e: Exception) -> str:
+        code = getattr(e, 'code', None)
+        if code == 403:
+            return 'refused (HTTP 403) \u2014 the server locks out addresses that download too often'
+        if code:
+            return 'HTTP %s' % code
+        reason = getattr(e, 'reason', None)        # URLError: timed out, refused, DNS...
+        return str(reason if reason is not None else e)
+
+    @staticmethod
+    def _backoff(e: Exception, have_copy: bool) -> float:
+        """Six hours after a 403 (retrying sooner only extends a lock-out),
+        otherwise an hour, or 15 minutes while there is no copy at all."""
+        if getattr(e, 'code', None) == 403:
+            return 6 * 3600
+        return _DOWNLOAD_RETRY_S if have_copy else 900
+
+    def _parse_tle_reply(self, kind: str, text: str):
+        """(name, line1, line2) from one source's reply, checksums verified."""
+        if kind == 'tle':
+            parsed = self._tle_lines(text)
+        else:
+            obj = json.loads(text)
+            if kind == 'satnogs':
+                obj = obj[0] if isinstance(obj, list) and obj else {}
+                parsed = (str(obj.get('tle0', '')).lstrip('0 ').strip() or None,
+                          obj.get('tle1'), obj.get('tle2')) if obj.get('tle1') else None
+            else:
+                parsed = (obj.get('name'), obj.get('line1'), obj.get('line2')) if obj.get('line1') else None
+        if not parsed:
+            first = text.strip().splitlines()[0][:100] if text.strip() else '(empty)'
+            raise ValueError('no elements in the reply: %s' % first)
+        name, l1, l2 = parsed
+        if not (l1.startswith('1 ') and l2.startswith('2 ') and _tle_checksum_ok(l1) and _tle_checksum_ok(l2)):
+            raise ValueError('elements failed their checksum')
+        return name, l1.rstrip(), l2.rstrip()
+
+    def _download_tle(self, norad: int, key: str) -> bool:
+        """Try each source in _TLE_SOURCES until one gives valid elements."""
+        now = time.time()
+        if now < self._retry_after.get(key, 0):
+            return False
+        path = os.path.join(self.cache_dir, 'sat_%d.tle' % norad)
+        have = os.path.isfile(self._tle_path(norad))
+        errors = []
+        for name, url, kind in _TLE_SOURCES:
+            if now < self._source_down.get(name, 0):
+                errors.append('%s: %s' % (name, self._source_why.get(name, 'unavailable')))
+                continue
+            try:
+                n, l1, l2 = self._parse_tle_reply(kind, self._fetch(url % norad))
+            except Exception as e:
+                why = self._why(e)
+                errors.append('%s: %s' % (name, why))
+                # A server-level failure (timeout, refusal, 5xx) takes the
+                # source out for every satellite; a bad reply for one
+                # satellite doesn't.
+                if not isinstance(e, ValueError) and getattr(e, 'code', None) != 404:
+                    self._source_down[name] = now + self._backoff(e, have)
+                    self._source_why[name] = why
+                    log.warning("SkyfieldLoopData: %s unreachable (%s) -- trying the next source; "
+                                "skipped for %d min" % (name, why, self._backoff(e, have) // 60))
+                continue
+            tmp = path + '.tmp'
+            with open(tmp, 'w', encoding='utf-8') as fh:
+                fh.write('%s\n%s\n%s\n' % (n or '', l1, l2))
+            os.replace(tmp, path)
+            log.info("SkyfieldLoopData: satellite %d elements from %s" % (norad, name))
+            self._set_status(key, 'ok', None, source=name)
+            return True
+        wait = _DOWNLOAD_RETRY_S if have else 900
+        self._retry_after[key] = now + wait
+        why = '; '.join(errors)
+        log.warning("SkyfieldLoopData: no source gave elements for satellite %d (%s) -- %s"
+                    % (norad, why, 'using the cached copy' if have else 'next try in %d min' % (wait // 60)))
+        self._set_status(key, 'ok' if have else 'error', why, retry=now + wait)
+        return False
+
+    def _download_comets(self, path: str) -> bool:
+        now = time.time()
+        if now < self._retry_after.get('comets', 0):
+            return False
+        have = os.path.isfile(path)
+        try:
+            text = self._fetch(_MPC_COMET_URL)
+            if text.count('\n') < 100:
+                raise ValueError('unexpected reply: %s' % (text.strip().splitlines() or ['(empty)'])[0][:100])
+            tmp = path + '.tmp'
+            with open(tmp, 'w', encoding='utf-8') as fh:
+                fh.write(text)
+            os.replace(tmp, path)
+            log.info("SkyfieldLoopData: downloaded the MPC comet file")
+            self._set_status('comets', 'ok', None)
+            return True
+        except Exception as e:
+            wait = self._backoff(e, have)
+            self._retry_after['comets'] = now + wait
+            log.warning("SkyfieldLoopData: MPC comet file download failed: %s -- %s"
+                        % (self._why(e), 'using the cached copy' if have else 'next try in %d min' % (wait // 60)))
+            self._set_status('comets', 'ok' if have else 'error', self._why(e), retry=now + wait)
+            return False
+
+    def _set_status(self, key: str, state: str, error: Optional[str], retry: Optional[float] = None,
+                    source: Optional[str] = None):
+        with self._lock:
+            prev = self._status.get(key) or {}
+            self._status[key] = {'state': state, 'error': error, 'retry': retry, 'at': time.time(),
+                                 'source': source or prev.get('source')}
+
+    def _tle_path(self, norad: int) -> str:
+        """Our cached TLE, or weewx-skyfield's own cached copy of the same
+        satellite if that is newer (or ours doesn't exist yet) -- a station
+        that runs weewx-skyfield too needn't download it twice."""
+        ours = os.path.join(self.cache_dir, 'sat_%d.tle' % norad)
+        best, best_m = ours, (os.path.getmtime(ours) if os.path.isfile(ours) else -1)
+        for d in self.extra_tle_dirs:
+            p = os.path.join(d, 'wxskyfield_sat_%d.tle' % norad)
+            try:
+                m = os.path.getmtime(p)
+            except OSError:
+                continue
+            if m > best_m:
+                best, best_m = p, m
+        return best
+
+    @staticmethod
+    def _tle_lines(text: str):
+        lines = [ln.rstrip() for ln in text.strip().splitlines() if ln.strip()]
+        for i in range(len(lines) - 1):
+            if lines[i].startswith('1 ') and lines[i + 1].startswith('2 '):
+                name = lines[i - 1].strip() if i > 0 else None
+                return name, lines[i], lines[i + 1]
+        return None
+
+    # -- the background cycle ----------------------------------------------------
+
+    def _cycle(self):
+        ts = self.sky.ts
+        changed = set()
+        for tag, (norad, label) in self.sat_cfg.items():
+            key = 'sat:' + tag
+            if key not in self._status:
+                self._set_status(key, 'pending', None)
+            if self._due(self._tle_path(norad), self.tle_refresh_s):
+                self._download_tle(norad, key)
+            path = self._tle_path(norad)
+            try:
+                mtime = os.path.getmtime(path)
+            except OSError:
+                continue
+            if self._loaded_mtime.get(path) == mtime:
+                continue
+            parsed = self._tle_lines(open(path, encoding='utf-8', errors='replace').read())
+            if not parsed:
+                log.warning("SkyfieldLoopData: no usable TLE in %s" % path)
+                self._set_status(key, 'error', 'the cached orbit file has no usable elements')
+                continue
+            if os.path.basename(path).startswith('wxskyfield_'):
+                log.info("SkyfieldLoopData: %s -- using weewx-skyfield's cached elements %s" % (tag, path))
+            self._set_status(key, 'ok', None)
+            name, l1, l2 = parsed
+            sat = skyfield.api.EarthSatellite(l1, l2, name or label, ts)
+            with self._lock:
+                self._sats[tag] = {'sat': sat, 'norad': norad, 'label': label,
+                                   'epoch': sat.epoch.utc_datetime().timestamp()}
+            self._loaded_mtime[path] = mtime
+            changed.add(tag)
+
+        if self.comet_cfg:
+            path = os.path.join(self.cache_dir, _COMET_FILE)
+            if 'comets' not in self._status:
+                self._set_status('comets', 'pending', None)
+            if self._due(path, self.comet_refresh_s):
+                self._download_comets(path)
+            elif self._status['comets']['state'] == 'pending':
+                self._set_status('comets', 'ok', None)
+            try:
+                mtime = os.path.getmtime(path)
+            except OSError:
+                mtime = None
+            if mtime is not None and self._loaded_mtime.get(path) != mtime:
+                # Marked as handled even if loading fails, so a bad file or a
+                # bug logs once, not every minute until the next download.
+                self._loaded_mtime[path] = mtime
+                try:
+                    self._load_comets(path)
+                except Exception as e:
+                    log.error("SkyfieldLoopData: could not read the comet file %s: %s" % (path, e))
+                    log_traceback(log.error, "SkyfieldLoopData: ")
+                    self._set_status('comets', 'error', 'could not read the comet file: %s' % e)
+
+        now = time.time()
+        for tag in list(self._sats):
+            p = self._passes.get(tag)
+            np_ = p and p.get('next_pass')
+            if (tag in changed or p is None or now - p['computed'] >= _PASS_REFRESH_S
+                    or (np_ and now > np_['set'])):
+                result = self._predict(self._sats[tag]['sat'], now)
+                with self._lock:
+                    self._passes[tag] = result
+
+    def _load_comets(self, path):
+        ts = self.sky.ts
+        best: Dict[str, _Row] = {}
+        with open(path, encoding='utf-8', errors='replace') as fh:
+            for line in fh:
+                for tag, (wanted, _) in self.comet_cfg.items():
+                    if wanted.split('/')[0] not in line:
+                        continue
+                    row = _parse_comet_line(line.rstrip('\n'))
+                    if row and _comet_matches(row['designation'], wanted):
+                        prev = best.get(tag)
+                        if prev is None or (row['epoch'] or (0,)) > (prev['epoch'] or (0,)):
+                            best[tag] = row
+        comets = {}
+        for tag, (wanted, label) in self.comet_cfg.items():
+            row = best.get(tag)
+            if row is None:
+                if tag not in self._warned_missing:
+                    log.warning("SkyfieldLoopData: comet %s (%s) is not in the MPC comet file -- "
+                                "the page shows it as absent." % (tag, wanted))
+                    self._warned_missing.add(tag)
+                continue
+            orbit = _comet_orbit(row, ts)
+            tp = ts.tt(row['perihelion_year'], row['perihelion_month'], row['perihelion_day'])
+            e, q = row['eccentricity'], row['perihelion_distance_au']
+            period_days = 365.25 * (q / (1.0 - e)) ** 1.5 if e < 1.0 else None
+            comets[tag] = {
+                'orbit': orbit, 'body': self.sky.sun + orbit, 'label': label,
+                'designation': row['designation'], 'g': row['magnitude_g'], 'k': row['magnitude_k'],
+                'perihelion_ts': (tp.tt - 2440587.5) * 86400.0 - 69.184,   # TT -> Unix, close enough for a date
+                'period_days': period_days,
+                'elements_epoch': row['epoch'],
+            }
+        with self._lock:
+            self._comets = comets
+
+    # -- pass prediction -------------------------------------------------------------
+
+    def _predict(self, sat, now: float) -> Dict[str, Any]:
+        ts = self.sky.ts
+        t0 = ts.from_datetime(datetime.datetime.fromtimestamp(now - 1200, datetime.timezone.utc))
+        t1 = ts.tt_jd(t0.tt + self.visible_days)
+        times, events = sat.find_events(self.geo, t0, t1, altitude_degrees=0.0)
+        passes, cur = [], None
+        for ti, ev in zip(times, events):
+            if ev == 0:
+                cur = {'rise': ti}
+            elif ev == 1 and cur is not None:
+                cur.setdefault('culm', ti)
+            elif ev == 2 and cur is not None and 'culm' in cur:
+                cur['set'] = ti
+                passes.append(cur)
+                cur = None
+        out: Dict[str, Any] = {'computed': now, 'next_pass': None, 'next_visible_pass': None}
+        for p in passes:
+            if p['set'].utc_datetime().timestamp() <= now:
+                continue
+            d = self._describe(sat, p)
+            if out['next_pass'] is None:
+                out['next_pass'] = d
+            if d['visible']:
+                out['next_visible_pass'] = d
+                break
+        return out
+
+    def _describe(self, sat, p) -> Dict[str, Any]:
+        ts = self.sky.ts
+        rise, culm, set_ = p['rise'], p['culm'], p['set']
+        unix = lambda tt: tt.utc_datetime().timestamp()
+        dur = (set_.tt - rise.tt) * 86400.0
+        n = max(2, int(dur // _PASS_TRACK_STEP_S) + 2)
+        times = ts.linspace(rise, set_, n)
+        alt, az, _ = (sat - self.geo).at(times).altaz()
+        lit = sat.at(times).is_sunlit(self.sky.planets)
+        sun_alt = self.observer.at(times).observe(self.sky.sun).apparent().altaz()[0].degrees
+        seen = lit & (sun_alt <= _VISIBLE_MAX_SUN_ALT) & (alt.degrees >= _VISIBLE_MIN_ALT)
+        calt, caz, _ = (sat - self.geo).at(culm).altaz()
+        csun = self.observer.at(culm).observe(self.sky.sun).apparent().altaz()[0].degrees
+        stamps = [unix(x) for x in times]
+        d = {
+            'rise': unix(rise), 'culmination': unix(culm), 'set': unix(set_),
+            'duration': round(dur, 1),
+            'max_altitude': round(float(calt.degrees), 2),
+            'rise_azimuth': round(float(az.degrees[0]), 1),
+            'culmination_azimuth': round(float(caz.degrees), 1),
+            'set_azimuth': round(float(az.degrees[-1]), 1),
+            'sun_altitude': round(float(csun), 1),
+            'visible': bool(seen.any()),
+            'visible_start': None, 'visible_end': None,
+            # [seconds after rise, altitude, azimuth, sunlit 0/1]
+            'track': [[int(round(s - stamps[0])), round(float(a), 1), round(float(z), 1), int(bool(l))]
+                      for s, a, z, l in zip(stamps, alt.degrees, az.degrees, lit)],
+        }
+        if d['visible']:
+            idx = [i for i, v in enumerate(seen) if v]
+            d['visible_start'], d['visible_end'] = stamps[idx[0]], stamps[idx[-1]]
+        return d
+
+    # -- live fields (loop thread) ---------------------------------------------------
+
+    def fields(self, t, now_ts: float) -> Dict[str, Any]:
+        with self._lock:
+            sats, comets, passes = dict(self._sats), dict(self._comets), dict(self._passes)
+            status = {k: dict(v) for k, v in self._status.items()}
+        out: Dict[str, Any] = {
+            # Lets the page tell "still starting" from "stopped".
+            'celestial.orbits.running': bool(self._thread and self._thread.is_alive()),
+        }
+        sat_list = []
+        for tag, (norad, label) in self.sat_cfg.items():
+            p = 'almanac.%s.' % tag
+            s = sats.get(tag)
+            entry: Dict[str, Any] = {'tag': tag, 'label': label, 'norad': norad,
+                                     'status': status.get('sat:' + tag)}
+            out[p + 'label'] = label
+            if s is None:
+                out[p + 'az'] = out[p + 'alt'] = out[p + 'sunlit'] = None
+                entry['missing'] = True
+            else:
+                topo = (s['sat'] - self.geo).at(t)
+                alt, az, dist = topo.altaz()
+                lit = bool(s['sat'].at(t).is_sunlit(self.sky.planets))
+                out[p + 'az'], out[p + 'alt'], out[p + 'sunlit'] = float(az.degrees), float(alt.degrees), lit
+                out[p + 'range_km'] = float(dist.km)
+                entry['elements_epoch'] = s['epoch']
+                pr = passes.get(tag) or {}
+                np_ = pr.get('next_pass')
+                vp = pr.get('next_visible_pass')
+                # The next pass's track is only needed to move the live
+                # marker, so it is sent from half an hour before rise; the
+                # visible pass's track (the pass chart) is always sent, once.
+                if np_ is not None and vp is not np_ and np_['rise'] - now_ts > 1800:
+                    np_ = {k: v for k, v in np_.items() if k != 'track'}
+                entry['next_pass'] = np_
+                entry['next_visible_pass'] = 'next_pass' if (vp is not None and vp is pr.get('next_pass')) else vp
+            sat_list.append(entry)
+        if self.sat_cfg:
+            out['celestial.satellites'] = sat_list
+
+        comet_list = []
+        for tag, (wanted, label) in self.comet_cfg.items():
+            p = 'almanac.%s.' % tag
+            c = comets.get(tag)
+            out[p + 'label'] = label
+            entry = {'tag': tag, 'label': label, 'designation': wanted, 'status': status.get('comets')}
+            if c is None:
+                for k in ('az', 'alt', 'earth_distance', 'sun_distance', 'mag', 'perihelion.unix_epoch.raw'):
+                    out[p + k] = None
+                entry['missing'] = True
+            else:
+                app = self.observer.at(t).observe(c['body']).apparent()
+                alt, az, dist = app.altaz()
+                r = float(c['orbit'].at(t).distance().au)
+                mag = None
+                if c['g'] is not None and c['k'] is not None and r > 0:
+                    mag = c['g'] + 5.0 * math.log10(dist.au) + 2.5 * c['k'] * math.log10(r)
+                nxt = c['perihelion_ts']
+                if c['period_days']:
+                    while nxt < now_ts:
+                        nxt += c['period_days'] * 86400.0
+                elif nxt < now_ts:
+                    nxt = None
+                out[p + 'az'], out[p + 'alt'] = float(az.degrees), float(alt.degrees)
+                out[p + 'earth_distance'], out[p + 'sun_distance'] = float(dist.au), r
+                out[p + 'mag'] = None if mag is None else round(mag, 2)
+                out[p + 'perihelion.unix_epoch.raw'] = nxt
+                entry.update({'full_designation': c['designation'], 'mag': out[p + 'mag'],
+                              'sun_distance': r, 'perihelion': nxt,
+                              'period_years': round(c['period_days'] / 365.25, 2) if c['period_days'] else None,
+                              'elements_epoch': c['elements_epoch']})
+            comet_list.append(entry)
+        if self.comet_cfg:
+            out['celestial.comets'] = comet_list
+        return out
+
+    def comet_bodies(self) -> Dict[str, Dict[str, Any]]:
+        """The loaded comets, for _SkyAtlas: {tag: {'body', 'orbit', 'label', 'g', 'k'}}."""
+        with self._lock:
+            return {tag: dict(c) for tag, c in self._comets.items()}
+
+
+##############################################################################
+#
+# _SkyAtlas -- the Skyfield page's slow data: jsondata/sky.json.
+#
+# Everything on the Skyfield page that describes today or the year rather
+# than this second: each body's rise, transit and set today and the spans
+# it is up, the twilight states, the Sun's and Moon's paths, the solar year
+# (sunrise, sunset, noon and the three twilights for every day), the
+# equation of time, the analemma, the current lunation, the Moon's next
+# perigee and apogee, the orrery, and the almanac table's magnitudes,
+# distances, elongations, constellations, Jupiter's central meridians and
+# Saturn's ring tilt. (The live positions come from almanac.json.)
+#
+# Computed on its own thread -- the year's twilight search is a few seconds
+# on a Raspberry Pi -- every `sky_atlas_refresh` seconds (default 900) and
+# at local midnight; the year part only once a day. Writes beside
+# almanac.json. Turned off with sky_atlas = false in [SkyfieldLoopData].
+#
+# "Today" and clock times are the station computer's local time zone, the
+# same as WeeWX's own reports.
+#
+##############################################################################
+
+_ATLAS_BODIES = (
+    ('sun', 'Sun'), ('moon', 'Moon'), ('mercury', 'Mercury'), ('venus', 'Venus'),
+    ('mars', 'Mars'), ('jupiter', 'Jupiter'), ('saturn', 'Saturn'),
+    ('uranus', 'Uranus'), ('neptune', 'Neptune'),
+)
+_ATLAS_PATH_STEP_S = 600          # Sun and Moon path samples
+_SUN_MAG = -26.74
+
+
+def _local_midnight(ts: float) -> float:
+    lt = time.localtime(ts)
+    return time.mktime((lt.tm_year, lt.tm_mon, lt.tm_mday, 0, 0, 0, 0, 0, -1))
+
+
+def _minutes_of_day(ts: Optional[float]) -> Optional[int]:
+    if ts is None:
+        return None
+    lt = time.localtime(ts)
+    return lt.tm_hour * 60 + lt.tm_min + (1 if lt.tm_sec >= 30 else 0)
+
+
+def _jupiter_cml(earth_at_t, jupiter, t) -> Dict[str, float]:
+    """Central meridian longitudes of Jupiter, Systems I and II, in degrees:
+    the sub-Earth longitude from light-time corrected geometry, with the
+    pole from the IAU Working Group on Cartographic Coordinates and the
+    System I/II rotation rates of the Explanatory Supplement."""
+    import numpy
+    astrometric = earth_at_t.observe(jupiter)
+    p = astrometric.position.au
+    d = (t.tdb - 2451545.0) - astrometric.light_time      # days, at Jupiter
+    T = d / 36525.0
+    a0 = math.radians(268.056595 - 0.006499 * T)
+    d0 = math.radians(64.495303 + 0.002413 * T)
+    pole = numpy.array([math.cos(d0) * math.cos(a0), math.cos(d0) * math.sin(a0), math.sin(d0)])
+    node = numpy.cross([0.0, 0.0, 1.0], pole)
+    node /= numpy.linalg.norm(node)
+    y = numpy.cross(pole, node)
+    s = -p / numpy.linalg.norm(p)                           # Jupiter -> Earth
+    theta = math.degrees(math.atan2(numpy.dot(s, y), numpy.dot(s, node)))
+    return {'cml1': (67.1 + 877.900 * d - theta) % 360.0,
+            'cml2': (43.3 + 870.270 * d - theta) % 360.0}
+
+
+def _saturn_ring_tilt(earth_at_t, saturn, t) -> float:
+    """Saturnicentric latitude of the Earth on the ring plane, degrees,
+    southern negative (Meeus, Astronomical Algorithms, ch. 45)."""
+    T = (t.tt - 2451545.0) / 36525.0
+    i = math.radians(28.075216 - 0.012998 * T + 0.000004 * T * T)
+    node = 169.508470 + 1.394681 * T + 0.000412 * T * T
+    lat, lon, _ = earth_at_t.observe(saturn).apparent().frame_latlon(skyfield.framelib.ecliptic_frame)
+    return math.degrees(math.asin(math.sin(i) * math.cos(lat.radians) * math.sin(math.radians(lon.degrees - node))
+                                  - math.cos(i) * math.sin(lat.radians)))
+
+
+class _SkyAtlas:
+
+    def __init__(self, svc_dict, target_path: str):
+        self.enabled = to_bool(svc_dict.get('sky_atlas', True))
+        self.path = os.path.join(os.path.dirname(target_path), 'sky.json')
+        try:
+            self.refresh_s = max(120.0, float(svc_dict.get('sky_atlas_refresh', 900)))
+        except (TypeError, ValueError):
+            self.refresh_s = 900.0
+        self._stop = threading.Event()
+        self._thread = None
+        self._year_cache: Dict[str, Any] = {}
+
+    def start(self, sky, geographic, observer, lat, lon, altitude_m, orbits, supermoon_km):
+        if not self.enabled or self._thread is not None:
+            return
+        self.sky, self.geo, self.observer = sky, geographic, observer
+        self.lat, self.lon, self.altitude_m = lat, lon, altitude_m
+        self.orbits, self.supermoon_km = orbits, supermoon_km
+        self._thread = threading.Thread(target=self._run, name='SkyfieldLoopData-atlas', daemon=True)
+        self._thread.start()
+
+    def stop(self):
+        self._stop.set()
+
+    def _run(self):
+        # Let the first loop-packet write and the orbit downloads go first.
+        if self._stop.wait(5):
+            return
+        comets_seen = None
+        while not self._stop.is_set():
+            t0 = time.time()
+            try:
+                self.write(t0)
+                log.debug("SkyfieldLoopData: wrote %s in %.1fs" % (self.path, time.time() - t0))
+            except Exception as e:
+                log.error("SkyfieldLoopData: sky atlas failed: %s" % e)
+                log_traceback(log.error, "SkyfieldLoopData: ")
+            # Sleep until the next refresh or local midnight, whichever is
+            # first -- waking early, once, when the comets first load.
+            midnight = _local_midnight(time.time()) + 86400 + 5
+            deadline = min(t0 + self.refresh_s, midnight)
+            while not self._stop.is_set() and time.time() < deadline:
+                self._stop.wait(min(30.0, max(1.0, deadline - time.time())))
+                names = tuple(sorted(self.orbits.comet_bodies())) if self.orbits.enabled else ()
+                if comets_seen is not None and names != comets_seen:
+                    break
+                comets_seen = names
+            comets_seen = tuple(sorted(self.orbits.comet_bodies())) if self.orbits.enabled else ()
+
+    # ------------------------------------------------------------------
+
+    def _ts(self, unix):
+        return self.sky.ts.from_datetime(datetime.datetime.fromtimestamp(unix, datetime.timezone.utc))
+
+    def _ts_many(self, unixes):
+        ts = self.sky.ts
+        return ts.from_datetimes([datetime.datetime.fromtimestamp(u, datetime.timezone.utc) for u in unixes])
+
+    @staticmethod
+    def _unix(t) -> float:
+        return t.utc_datetime().timestamp()
+
+    def write(self, now: float) -> None:
+        data = self.compute(now)
+        tmp = self.path + '.tmp'
+        with open(tmp, 'w', encoding='utf-8') as fh:
+            json.dump(data, fh, separators=(',', ':'))
+        os.replace(tmp, self.path)
+
+    def compute(self, now: float) -> Dict[str, Any]:
+        sky = self.sky
+        day0 = _local_midnight(now)
+        day1 = _local_midnight(day0 + 86400 + 3600)        # DST-safe next midnight
+        t_now = self._ts(now)
+        out: Dict[str, Any] = {
+            'generated': now,
+            'version': SKYFIELDLOOPDATA_VERSION,
+            'station': {'lat': self.lat, 'lon': self.lon, 'alt_m': self.altitude_m},
+            'day': {'start': day0, 'end': day1},
+            'tz_offset_std_min': -time.timezone // 60,
+        }
+        out['sky_states'] = self._sky_states(day0, day1)
+        bodies = [(key, name, sky.orbs[key] if key in sky.orbs else getattr(sky, key)) for key, name in _ATLAS_BODIES]
+        comets = self.orbits.comet_bodies() if self.orbits.enabled else {}
+        out['bodies'] = [self._body(key, name, body, day0, day1, t_now) for key, name, body in bodies]
+        for tag, c in comets.items():
+            out['bodies'].append(self._body(tag, c['label'], c['body'], day0, day1, t_now, comet=c))
+        out['paths'] = self._paths(day0, day1)
+        out['orrery'] = self._orrery(t_now, comets)
+        out['lunation'] = self._lunation(now)
+        year = time.localtime(now).tm_year
+        key = '%d|%.3f|%.3f' % (year, self.lat, self.lon)
+        if self._year_cache.get('key') != key:
+            self._year_cache = {'key': key, 'data': self._year(year)}
+        out['year'] = self._year_cache['data']
+        out['analemma_today'] = self._noon_sun([self._standard_noon(now)])[0]
+        return out
+
+    # -- today -------------------------------------------------------------
+
+    def _sky_states(self, day0, day1):
+        """[[unix, state], ...]: the state at day0, then each change.
+        0 night, 1 astronomical, 2 nautical, 3 civil twilight, 4 day."""
+        f = skyfield.almanac.dark_twilight_day(self.sky.planets, self.geo)
+        t0, t1 = self._ts(day0), self._ts(day1)
+        times, states = skyfield.almanac.find_discrete(t0, t1, f)
+        out = [[day0, int(f(t0))]]
+        out += [[round(self._unix(t), 1), int(s)] for t, s in zip(times, states)]
+        return out
+
+    def _body(self, key, name, body, day0, day1, t_now, comet=None):
+        sky, obs = self.sky, self.observer
+        t0, t1 = self._ts(day0), self._ts(day1)
+        rises, r_ok = skyfield.almanac.find_risings(obs, body, t0, t1)
+        sets, s_ok = skyfield.almanac.find_settings(obs, body, t0, t1)
+        transits = skyfield.almanac.find_transits(obs, body, t0, t1)
+        events = sorted([(self._unix(t), 1) for t, ok in zip(rises, r_ok) if ok]
+                        + [(self._unix(t), 0) for t, ok in zip(sets, s_ok) if ok])
+        # Up at midnight? Judged from the first event, or -- with no event
+        # all day -- from the failed searches' own verdict.
+        if events:
+            up = events[0][1] == 0
+        else:
+            alt = obs.at(t0).observe(body).apparent().altaz()[0].degrees
+            up = alt > -0.5667
+        spans, start = [], (day0 if up else None)
+        for ts_, kind in events:
+            if kind == 1 and start is None:
+                start = ts_
+            elif kind == 0 and start is not None:
+                spans.append([round(start, 1), round(ts_, 1)])
+                start = None
+        if start is not None:
+            spans.append([round(start, 1), day1])
+        d: Dict[str, Any] = {
+            'key': key, 'name': name, 'comet': comet is not None,
+            'rise': next((round(t, 1) for t, k in events if k == 1), None),
+            'set': next((round(t, 1) for t, k in events if k == 0), None),
+            'transit': round(self._unix(transits[0]), 1) if len(transits) else None,
+            'up': spans,
+            'up_seconds': round(sum(b - a for a, b in spans)),
+            'state': (None if events else ('always_up' if up else 'never_up')),
+        }
+        e = sky.earth.at(t_now)
+        app = e.observe(body).apparent()
+        d['dist_au'] = float(app.distance().au)
+        try:
+            d['constellation'] = self._constellation(app)
+        except Exception:
+            d['constellation'] = None
+        if key != 'sun':
+            sun_app = e.observe(sky.sun).apparent()
+            elong = app.separation_from(sun_app).degrees
+            _, lon_b, _ = app.frame_latlon(skyfield.framelib.ecliptic_frame)
+            _, lon_s, _ = sun_app.frame_latlon(skyfield.framelib.ecliptic_frame)
+            east = ((lon_b.degrees - lon_s.degrees) % 360.0) < 180.0
+            d['elong'] = round(elong, 2)
+            d['elong_dir'] = 'E' if east else 'W'
+        d['mag'] = self._magnitude(key, body, e, app, t_now, comet)
+        if key == 'jupiter':
+            d.update({k: round(v, 1) for k, v in _jupiter_cml(e, body, t_now).items()})
+        elif key == 'saturn':
+            d['ring_tilt'] = round(_saturn_ring_tilt(e, body, t_now), 2)
+        elif key == 'moon':
+            d['illumination'] = round(100.0 * app.fraction_illuminated(sky.sun), 1)
+        return d
+
+    def _magnitude(self, key, body, e, app, t_now, comet):
+        if key == 'sun':
+            return _SUN_MAG
+        if key == 'moon':
+            # Allen's phase-angle formula (Astrophysical Quantities), scaled
+            # to the Moon's actual distance from the station.
+            topo = self.observer.at(t_now).observe(self.sky.moon).apparent()
+            phase = abs(topo.phase_angle(self.sky.sun).degrees)
+            return round(-12.73 + 0.026 * phase + 4e-9 * phase ** 4
+                         + 5.0 * math.log10(topo.distance().km / 385000.0), 2)
+        if comet is not None:
+            if comet.get('g') is None or comet.get('k') is None:
+                return None
+            r = float(comet['orbit'].at(t_now).distance().au)
+            return round(comet['g'] + 5.0 * math.log10(app.distance().au) + 2.5 * comet['k'] * math.log10(r), 2)
+        try:
+            import skyfield.magnitudelib       # Skyfield 1.40+; a dash on older versions
+            return round(float(skyfield.magnitudelib.planetary_magnitude(e.observe(body))), 2)
+        except Exception:
+            return None
+
+    _cmap = None
+    _cnames = None
+
+    def _constellation(self, position) -> Optional[str]:
+        if _SkyAtlas._cmap is None:
+            _SkyAtlas._cmap = skyfield.api.load_constellation_map()
+            _SkyAtlas._cnames = dict(skyfield.api.load_constellation_names())
+        abbr = str(_SkyAtlas._cmap(position))
+        return _SkyAtlas._cnames.get(abbr, abbr)
+
+    def _paths(self, day0, day1):
+        """The Sun's and Moon's altitude and azimuth across today:
+        [[unix, alt, az], ...] every _ATLAS_PATH_STEP_S."""
+        n = int((day1 - day0) // _ATLAS_PATH_STEP_S) + 1
+        stamps = [day0 + i * _ATLAS_PATH_STEP_S for i in range(n)]
+        if stamps[-1] < day1:
+            stamps.append(day1)
+        t = self._ts_many(stamps)
+        out = {}
+        for key in ('sun', 'moon'):
+            alt, az, _ = self.observer.at(t).observe(getattr(self.sky, key)).apparent().altaz()
+            out[key] = [[round(s), round(float(a), 2), round(float(z), 2)] for s, a, z in zip(stamps, alt.degrees, az.degrees)]
+        return out
+
+    # -- orrery ------------------------------------------------------------
+
+    def _orrery(self, t_now, comets):
+        out = []
+        sun = self.sky.sun
+        for key, body in [('earth', self.sky.earth)] + [(k, self.sky.orbs[k]) for k, _ in _ATLAS_BODIES[2:]]:
+            v = (body - sun).at(t_now)
+            lat, lon, dist = v.frame_latlon(skyfield.framelib.ecliptic_frame)
+            out.append({'key': key, 'hlon': round(lon.degrees, 2), 'r_au': round(float(dist.au), 4)})
+        for tag, c in comets.items():
+            v = c['orbit'].at(t_now)
+            lat, lon, dist = v.frame_latlon(skyfield.framelib.ecliptic_frame)
+            out.append({'key': tag, 'name': c['label'], 'comet': True,
+                        'hlon': round(lon.degrees, 2), 'r_au': round(float(dist.au), 4)})
+        return out
+
+    # -- lunation ------------------------------------------------------------
+
+    def _lunation(self, now):
+        sky, ts = self.sky, self.sky.ts
+        f = skyfield.almanac.moon_phases(sky.planets)
+        times, phases = skyfield.almanac.find_discrete(self._ts(now - 32 * 86400), self._ts(now + 32 * 86400), f)
+        ev = [(self._unix(t), int(p)) for t, p in zip(times, phases)]
+        news = [u for u, p in ev if p == 0]
+        prev_new = max((u for u in news if u <= now), default=None)
+        next_new = min((u for u in news if u > now), default=None)
+        out: Dict[str, Any] = {'prev_new': prev_new, 'next_new': next_new, 'phases': []}
+        if prev_new is None or next_new is None:
+            return out
+        out['phases'] = [[round(u, 1), p] for u, p in ev if prev_new <= u <= next_new]
+        n = 30
+        stamps = [prev_new + (next_new - prev_new) * (i + 0.5) / n for i in range(n)]
+        t = self._ts_many(stamps)
+        app = sky.earth.at(t).observe(sky.moon).apparent()
+        frac = app.fraction_illuminated(sky.sun)
+        full = next((u for u, p in ev if p == 2 and prev_new <= u <= next_new), None)
+        out['discs'] = [[round(s), round(float(k), 4), 1 if (full is not None and s < full) else 0]
+                        for s, k in zip(stamps, frac)]
+        # The Moon's next perigee and apogee.
+        def moon_km(tt):
+            return (sky.moon - sky.earth).at(tt).distance().km
+        moon_km.step_days = 1.0
+        t0, t1 = self._ts(now), self._ts(now + 29 * 86400)
+        tmin, vmin = skyfield.searchlib.find_minima(t0, t1, moon_km)
+        tmax, vmax = skyfield.searchlib.find_maxima(t0, t1, moon_km)
+        if len(tmin):
+            out['perigee'], out['perigee_km'] = round(self._unix(tmin[0]), 1), round(float(vmin[0]))
+        if len(tmax):
+            out['apogee'], out['apogee_km'] = round(self._unix(tmax[0]), 1), round(float(vmax[0]))
+        nf = min((u for u, p in ev if p == 2 and u > now), default=None)
+        if nf is not None:
+            km = float(moon_km(self._ts(nf)))
+            out['next_full'], out['next_full_km'] = round(nf, 1), round(km)
+            out['supermoon'] = km < self.supermoon_km
+        return out
+
+    # -- the year ------------------------------------------------------------
+
+    @staticmethod
+    def _standard_noon(ts):
+        """Local STANDARD-time (not daylight-saving) noon on ts's date."""
+        import calendar
+        lt = time.localtime(ts)
+        return calendar.timegm((lt.tm_year, lt.tm_mon, lt.tm_mday, 12, 0, 0)) + time.timezone
+
+    def _noon_sun(self, stamps):
+        t = self._ts_many(stamps)
+        alt, az, _ = self.observer.at(t).observe(self.sky.sun).apparent().altaz()
+        return [[round(s), round(float(a), 3), round(float(z), 3)] for s, a, z in zip(stamps, alt.degrees, az.degrees)]
+
+    def _year(self, year):
+        import calendar
+        sky, ts = self.sky, self.sky.ts
+        y0 = time.mktime((year, 1, 1, 0, 0, 0, 0, 0, -1))
+        y1 = time.mktime((year + 1, 1, 1, 0, 0, 0, 0, 0, -1))
+        ndays = int(round((y1 - y0) / 86400.0))
+        # Every twilight boundary of the year, in one search -- sampled every
+        # 15 minutes rather than Skyfield's default hour, so the last short
+        # nights before high-latitude summer's twilight-all-night aren't stepped over.
+        f = skyfield.almanac.dark_twilight_day(sky.planets, self.geo)
+        f.step_days = 1.0 / 96.0
+        times, states = skyfield.almanac.find_discrete(self._ts(y0 - 3600), self._ts(y1 + 3600), f)
+        prev = int(f(self._ts(y0 - 3600)))
+        days = [[None] * 12 for _ in range(ndays)]
+        # columns: 0 sunrise, 1 sunset, 2 solar noon, 3 civil dawn, 4 civil dusk,
+        #          5 nautical dawn, 6 nautical dusk, 7 astronomical dawn, 8 astronomical dusk
+        #          (all minutes of local clock time), 9 the day's brightest and
+        #          10 darkest state (0 night .. 4 day, at solar noon and midnight),
+        #          11 minutes from sunrise to sunset (correct across clock changes)
+        rise_unix: Dict[int, float] = {}
+        set_unix: Dict[int, float] = {}
+        rising = {1: 7, 2: 5, 3: 3, 4: 0}     # entering state s from below
+        setting = {3: 1, 2: 4, 1: 6, 0: 8}    # entering state s from above
+        for t, s in zip(times, states):
+            u, s = self._unix(t), int(s)
+            lt = time.localtime(u)
+            if lt.tm_year != year:
+                prev = s
+                continue
+            col = rising.get(s) if s > prev else setting.get(s)
+            if col is not None:
+                days[lt.tm_yday - 1][col] = _minutes_of_day(u)
+                if col == 0:
+                    rise_unix[lt.tm_yday - 1] = u
+                elif col == 1:
+                    set_unix[lt.tm_yday - 1] = u
+            prev = s
+        transits = skyfield.almanac.find_transits(self.observer, sky.sun, self._ts(y0), self._ts(y1))
+        transit_unix = []
+        for t in transits:
+            u = self._unix(t)
+            lt = time.localtime(u)
+            if lt.tm_year == year:
+                days[lt.tm_yday - 1][2] = _minutes_of_day(u)
+                transit_unix.append((lt.tm_yday - 1, u))
+        if transit_unix:
+            noons = self._ts_many([u for _, u in transit_unix])
+            nights = self._ts_many([u - 43080.0 for _, u in transit_unix])   # ~ solar midnight
+            for (i, _), hi, lo in zip(transit_unix, f(noons), f(nights)):
+                days[i][9], days[i][10] = int(hi), int(lo)
+        for i in range(ndays):
+            r, s_ = rise_unix.get(i), set_unix.get(i)
+            if r is not None and s_ is not None and s_ > r:
+                days[i][11] = round((s_ - r) / 60.0)
+            elif days[i][10] == 4:
+                days[i][11] = 1440
+            elif days[i][9] is not None and days[i][9] < 4:
+                days[i][11] = 0
+        # Equation of time at local standard noon, every day: apparent minus
+        # mean solar time (positive = the sundial is ahead of the clock).
+        noon0 = calendar.timegm((year, 1, 1, 12, 0, 0)) + time.timezone
+        stamps = [noon0 + i * 86400 for i in range(ndays)]
+        t = self._ts_many(stamps)
+        ha, _, _ = self.observer.at(t).observe(sky.sun).apparent().hadec()
+        eot = []
+        for s, h in zip(stamps, ha.hours):
+            apparent = (float(h) + 12.0) % 24.0
+            mean = ((s % 86400) / 3600.0 + self.lon / 15.0) % 24.0
+            eot.append(round(((apparent - mean + 12.0) % 24.0 - 12.0) * 60.0, 3))
+        return {
+            'year': year, 'start': y0, 'days': days,
+            'eot_noon0': noon0, 'eot': eot,
+            'analemma': self._noon_sun([noon0 + w * 7 * 86400 for w in range(53)]),
+        }
 
 
 class SkyfieldLoopData(StdService):
@@ -4174,6 +5264,25 @@ class SkyfieldLoopData(StdService):
         self._last_slow_refresh_ts = 0.0
         self._slow_cache: Dict[str, Any] = {}
         self._warned_missing_stars = False
+        try:
+            self.supermoon_km = float(svc_dict.get('supermoon_km', _SUPERMOON_KM))
+        except (TypeError, ValueError):
+            self.supermoon_km = _SUPERMOON_KM
+        # Satellites and comets (Celestial page) -- started once the
+        # ephemeris is loaded; see _CelestialOrbits.
+        # weewx-skyfield keeps its own TLE copies beside the station
+        # database; if it is installed too, those are reused rather than
+        # downloading the same satellites twice.
+        sqlite_root = None
+        try:
+            sqlite_root = config_dict.get('DatabaseTypes', {}).get('SQLite', {}).get('SQLITE_ROOT')
+            if sqlite_root and not os.path.isabs(sqlite_root):
+                sqlite_root = os.path.join(config_dict.get('WEEWX_ROOT', ''), sqlite_root)
+        except Exception:
+            sqlite_root = None
+        self._orbits = _CelestialOrbits(svc_dict, self.ephemeris_dir, [sqlite_root])
+        # The Skyfield page's slow data (jsondata/sky.json) -- see _SkyAtlas.
+        self._atlas = _SkyAtlas(svc_dict, self.target_path)
 
         log.info("SkyfieldLoopData: version %s, writing to %s every %.0fs "
                  "(slow fields every %.0fs)"
@@ -4240,7 +5349,14 @@ class SkyfieldLoopData(StdService):
         bodies = {name: self._lookup_body(kernel, candidates)
                   for name, candidates in _BODY_NAME_CANDIDATES.items()}
 
-        return _Sky(ts, kernel, bodies)
+        sky = _Sky(ts, kernel, bodies)
+        # One hand-entered star (see _PROXIMA_CENTAURI) so the
+        # almanac.proxima_centauri.* dotted fields are real values rather
+        # than null. Same (Star, parallax_mas) tuple shape
+        # _compute_dotted_fields() expects from a catalogue.
+        star = skyfield.api.Star(**_PROXIMA_CENTAURI)
+        sky.stars = {'proxima_centauri': (star, _PROXIMA_CENTAURI['parallax_mas'])}
+        return sky
 
     def new_loop_packet(self, event):
         if not self.enabled:
@@ -4288,6 +5404,9 @@ class SkyfieldLoopData(StdService):
             self._observer = self.sky.earth + geographic
             log.info("SkyfieldLoopData: ephemeris kernel loaded -- "
                      "writing %s from here on." % self.target_path)
+            self._orbits.start(self.sky, geographic, self._observer)
+            self._atlas.start(self.sky, geographic, self._observer, self.lat, self.lon,
+                              self.altitude_m, self._orbits, self.supermoon_km)
 
         self._last_write_ts = now
         try:
@@ -4296,6 +5415,12 @@ class SkyfieldLoopData(StdService):
             log.error("SkyfieldLoopData: failed to compute/write %s: %s"
                       % (self.target_path, e))
             log_traceback(log.error, "SkyfieldLoopData: ")
+
+    def shutDown(self):
+        for name in ('_orbits', '_atlas'):
+            worker = getattr(self, name, None)
+            if worker is not None:
+                worker.stop()
 
     # ------------------------------------------------------------------
     # Computation
@@ -4311,6 +5436,14 @@ class SkyfieldLoopData(StdService):
         if (now_ts - self._last_slow_refresh_ts >= self.slow_refresh_interval
                 or not self._slow_cache):
             self._slow_cache = self._compute_slow(now_ts, t)
+            # Celestial page events (countdown row) -- kept separate and
+            # guarded so a failure here can never cost the dashboard the
+            # slow fields above.
+            try:
+                self._slow_cache.update(self._compute_celestial_events(now_ts, t))
+            except Exception as e:
+                log.error("SkyfieldLoopData: celestial events failed: %s" % e)
+                log_traceback(log.error, "SkyfieldLoopData: ")
             self._last_slow_refresh_ts = now_ts
         data.update(self._slow_cache)
 
@@ -4325,6 +5458,15 @@ class SkyfieldLoopData(StdService):
         data['moonPhase'] = self._moon_phase_bucket_text(data.get('luminance'), data.get('moon_age'))
         data['moonphase'] = self._moon_phase_index_text(data.get('moon_ecliptic_angle'))
         data['almanac.moon.phase_name'] = data['moonphase']
+
+        # Satellites and comets: guarded so a problem there can never cost
+        # the dashboard its almanac.
+        if self._orbits.enabled:
+            try:
+                data.update(self._orbits.fields(t, now_ts))
+            except Exception as e:
+                log.error("SkyfieldLoopData: satellite/comet fields failed: %s" % e)
+                log_traceback(log.error, "SkyfieldLoopData: ")
 
         tmp_path = self.target_path + '.tmp'
         with open(tmp_path, 'w', encoding='utf-8') as f:
@@ -4694,6 +5836,111 @@ class SkyfieldLoopData(StdService):
             'almanac(horizon=-18).sun.next_setting.unix_epoch.raw': astro_set_ts,
             'almanac.moon.age_days': moon_age,
         }
+
+    # ------------------------------------------------------------------
+    # Celestial page events (countdown row)
+    # ------------------------------------------------------------------
+
+    def _compute_celestial_events(self, now_ts: float, t: skyfield.timelib.Time) -> Dict[str, Any]:
+        """Forward-looking events for the Celestial page's countdown row.
+
+        Unlike the rise/set fields in _compute_slow() (which are TODAY's
+        events and may already be in the past), everything here is
+        strictly after now. Sun events are lists covering the next
+        _CELESTIAL_SUN_EVENT_DAYS days so the page can roll a chip on to
+        the following event itself between hourly refreshes.
+
+        Field names follow weewx-loopdata's flattened-tag style where
+        weewx-celestial already uses one (almanac.next_perihelion...,
+        almanac.next_meteor_shower...), and a celestial.* prefix for the
+        list-valued fields that have no report-tag equivalent."""
+        sky = self.sky
+        observer = self._observer
+        ts = sky.ts
+        out: Dict[str, Any] = {
+            'celestial.events_computed': now_ts,
+            # Station position, for the page's own geometry (which side of
+            # the Moon is lit, and the sky dome's projection in phase 2).
+            'celestial.station.latitude': self.lat,
+            'celestial.station.longitude': self.lon,
+        }
+
+        def stamps(times, ok=None):
+            if ok is not None:
+                times = times[ok]
+            return [x.utc_datetime().timestamp() for x in times]
+
+        # --- Sunrise/sunset and astronomical darkness, next few days ---
+        t_end = ts.tt_jd(t.tt + _CELESTIAL_SUN_EVENT_DAYS)
+        rise, rise_ok = skyfield.almanac.find_risings(observer, sky.sun, t, t_end)
+        sett, sett_ok = skyfield.almanac.find_settings(observer, sky.sun, t, t_end)
+        out['celestial.sun.risings'] = stamps(rise, rise_ok)
+        out['celestial.sun.settings'] = stamps(sett, sett_ok)
+        # Astronomical darkness begins when the Sun sets past -18 deg and
+        # ends when it rises back through it. Empty lists = no true
+        # darkness in the window (e.g. UK summer) -- the page says so.
+        drise, drise_ok = skyfield.almanac.find_risings(
+            observer, sky.sun, t, t_end, horizon_degrees=-18.0)
+        dset, dset_ok = skyfield.almanac.find_settings(
+            observer, sky.sun, t, t_end, horizon_degrees=-18.0)
+        out['celestial.astro_dark.starts'] = stamps(dset, dset_ok)
+        out['celestial.astro_dark.ends'] = stamps(drise, drise_ok)
+        sun_alt = observer.at(t).observe(sky.sun).apparent().altaz()[0].degrees
+        out['celestial.astro_dark.now'] = bool(sun_alt < -18.0)
+
+        # --- Earth perihelion / aphelion ---
+        t_year = ts.tt_jd(t.tt + _EVENT_SEARCH_DAYS)
+
+        def earth_sun_au(tt):
+            return (sky.sun - sky.earth).at(tt).distance().au
+        earth_sun_au.step_days = 30
+        tmin, _ = skyfield.searchlib.find_minima(t, t_year, earth_sun_au)
+        tmax, _ = skyfield.searchlib.find_maxima(t, t_year, earth_sun_au)
+        out['almanac.next_perihelion.unix_epoch.raw'] = stamps(tmin)[0] if len(tmin) else None
+        out['almanac.next_aphelion.unix_epoch.raw'] = stamps(tmax)[0] if len(tmax) else None
+
+        # --- Next supermoon: first full moon closer than supermoon_km ---
+        times, codes = skyfield.almanac.find_discrete(
+            t, t_year, skyfield.almanac.moon_phases(sky.planets))
+        supermoon_ts = supermoon_km = None
+        for time_, code in zip(times, codes):
+            if int(code) != 2:
+                continue
+            km = sky.earth.at(time_).observe(sky.moon).distance().km
+            if km < self.supermoon_km:
+                supermoon_ts, supermoon_km = time_.utc_datetime().timestamp(), km
+                break
+        out['almanac.next_supermoon.unix_epoch.raw'] = supermoon_ts
+        out['celestial.supermoon.distance_km'] = supermoon_km
+
+        # --- Meteor shower peaks ---
+        # Solve sun's J2000 ecliptic longitude == peak longitude: a linear
+        # first guess at the mean solar rate, then two Newton steps.
+        def sun_lon(tt):
+            return sky.earth.at(tt).observe(sky.sun).apparent().ecliptic_latlon()[1].degrees
+
+        lon_now = sun_lon(t)
+        rate = 360.0 / 365.2422
+        showers = []
+        for code, name, lam, zhr, ra, dec in _METEOR_SHOWERS:
+            jd = t.tt + ((lam - lon_now) % 360.0) / rate
+            for _ in range(2):
+                diff = ((lam - sun_lon(ts.tt_jd(jd)) + 180.0) % 360.0) - 180.0
+                jd += diff / rate
+            peak = ts.tt_jd(jd)
+            moon_app = sky.earth.at(peak).observe(sky.moon).apparent()
+            showers.append({
+                'code': code, 'name': name, 'zhr': zhr,
+                'radiant_ra': ra, 'radiant_dec': dec,
+                'peak': peak.utc_datetime().timestamp(),
+                'moon_illumination': round(100.0 * moon_app.fraction_illuminated(sky.sun), 1),
+            })
+        showers.sort(key=lambda s: s['peak'])
+        out['celestial.meteor_showers'] = showers
+        nxt = showers[0] if showers else None
+        out['almanac.next_meteor_shower.peak.unix_epoch.raw'] = nxt['peak'] if nxt else None
+        out['almanac.next_meteor_shower.label'] = nxt['name'] if nxt else None
+        return out
 
     @staticmethod
     def _fmt_local(ts: Optional[float], fmt: str) -> Optional[str]:

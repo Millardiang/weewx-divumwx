@@ -1,6 +1,6 @@
 /*
 ##############################################################################################
-# siteHeader.js version 1.0.2
+# siteHeader.js version 1.0.3
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -197,6 +197,10 @@ function populateLanguageSelector() {
 var _navbarTranslated = false;
 function translateNavbar() {
   if (_navbarTranslated || typeof DivumWXI18N === 'undefined') return;
+  // The strings can finish loading (firing i18nready) before the navbar
+  // has been included; translating then would find nothing and latch, so
+  // wait for initSharedHeader() to call this again once it's there.
+  if (!document.getElementById('navbar')) return;
   _navbarTranslated = true;
   document.querySelectorAll('[data-i18n]').forEach(function(el){
     DivumWXI18N.applyLabel(el, el.getAttribute('data-i18n'));

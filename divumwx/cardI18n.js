@@ -1,7 +1,7 @@
 try {
 /*
 ##############################################################################################
-# cardI18n.js version 1.0.0
+# cardI18n.js version 1.0.1
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -10,7 +10,14 @@ try {
 // ===================== cardI18n.js =====================
 
 (function(){
-  var STRINGS_JSON_URL = './jsondata/strings.json';
+  // Strings and flags live beside this script, so resolve them from the
+  // script's own address rather than the page's -- identical for pages at
+  // the site root, and right for pages a directory down (celestial/).
+  var BASE = './';
+  try {
+    if (document.currentScript && document.currentScript.src) BASE = new URL('.', document.currentScript.src).href;
+  } catch (e) {}
+  var STRINGS_JSON_URL = BASE + 'jsondata/strings.json';
   var LANG_STORAGE_KEY = 'dashboardLanguage';
   var payload = null;
   var activeLang = null;
@@ -89,7 +96,7 @@ try {
   }
   function getLanguageFlagUrl(code){
     var cc = LANGUAGE_FLAG_COUNTRY[code];
-    return cc ? ('./img/flags/' + cc + '.svg') : '';
+    return cc ? (BASE + 'img/flags/' + cc + '.svg') : '';
   }
 
   function getAvailableLanguages(){

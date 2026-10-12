@@ -1,0 +1,254 @@
+/*
+##############################################################################################
+# skyfield.css version 1.0.1
+#  The Skyfield page's own styles.
+#
+#  Loaded after ../celestial/celestial.css, which this page shares with the
+#  Celestial page and which provides:
+#    - the colour tokens: --cel-body, --cel-card, --cel-ink/-2/-3, --cel-line,
+#      --cel-line-soft, --cel-accent, --cel-good, --cel-shadow, --cel-radius,
+#      the body colours --b-<body>, and --moon-dark / --moon-lit
+#    - the page frame (.container, .cel-head, .cel-live), panels
+#      (.cel-panel, .cel-panel-title, .cel-panel-sub), the two-column
+#      .cel-sky-body, the sky dome (.cel-dome), tooltips (.cel-tip), notes
+#      (.cel-note), the roster table (.cel-roster) and the credit line.
+#  This file adds only what the Skyfield page has that the Celestial page
+#  doesn't. Theme follows body.light / body.dark, as on every DivumWX page.
+#
+#  Contents
+#    1. Tokens
+#    2. Page layout
+#    3. The Moon and the coming-up chips
+#    4. Bodies today (beside the dome)
+#    5. Charts: shared marks
+#    6. Charts: one block per chart
+#    7. The almanac table
+#
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  GPLv3
+##############################################################################################
+*/
+
+/* ===== 1. Tokens ======================================================= */
+
+:root{
+  /* Type scale (HTML and chart text alike) */
+  --sky-fs-xs:10.5px;     /* chart axes, chip labels */
+  --sky-fs-s:11.5px;      /* chart labels, secondary lines */
+  --sky-fs-m:13px;        /* body text, list lines */
+  --sky-fs-l:15px;        /* names and headline values */
+  --sky-fs-xl:17px;       /* the Moon's phase, chip dates */
+
+  /* Daylight and twilight, brightest to darkest: day, civil, nautical,
+     astronomical, night. On paper the steps stay pale, so the curves and
+     labels on top of them keep their contrast. */
+  --tw-4:#F3F5F8;
+  --tw-3:#E1E8F1;
+  --tw-2:#CCD7E6;
+  --tw-1:#B3C2D8;
+  --tw-0:#97A8C3;
+
+  --sky-grid:rgba(29,44,78,.10);
+  --sky-moon-shadow:#A9AFBA;     /* the unlit part of the lunar-month discs */
+}
+body.dark{
+  --tw-4:#2C3F6E;
+  --tw-3:#223259;
+  --tw-2:#1A2647;
+  --tw-1:#131C37;
+  --tw-0:#0B1126;
+
+  --sky-grid:rgba(233,228,212,.08);
+  --sky-moon-shadow:var(--moon-dark);
+}
+/* Aliases of the shared colours. Declared on body, where celestial.css sets
+   the theme's --cel-* values: declared on :root they would resolve once,
+   to the light theme's, and never follow the dark one. */
+body{
+  --sky-axis:var(--cel-ink-3);
+  --sky-curve:var(--cel-ink);
+  --sky-now:var(--cel-accent);
+  --sky-orbit:var(--cel-line);
+}
+
+/* ===== 2. Page layout ================================================== */
+
+.sky-wait{ margin:0 0 18px; }
+
+/* Two panels side by side, one column below 900px. */
+.sky-pair{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  column-gap:18px;
+}
+@media (max-width: 900px){
+  .sky-pair{ grid-template-columns:minmax(0, 1fr); }
+}
+
+/* ===== 3. The Moon and the coming-up chips ============================== */
+
+.sky-top{
+  display:grid;
+  grid-template-columns:minmax(280px, 360px) minmax(0, 1fr);
+  gap:14px;
+  margin-bottom:18px;
+}
+@media (max-width: 760px){
+  .sky-top{ grid-template-columns:minmax(0, 1fr); }
+}
+
+.sky-top .sky-moon{ margin-bottom:0; display:flex; align-items:center; gap:16px; }
+.sky-moon-disc{ width:92px; height:92px; flex-shrink:0; }
+.sky-moon-text{ min-width:0; }
+.sky-moon-text .phase{ font-size:var(--sky-fs-xl); font-weight:600; margin-bottom:2px; }
+.sky-moon-text .line{ font-size:var(--sky-fs-m); color:var(--cel-ink-2); font-variant-numeric:tabular-nums; }
+
+/* Three chips to a row beside the Moon (two rows usually match its height),
+   two to a row on a phone. */
+.sky-chips{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0, 1fr));
+  gap:10px;
+}
+@media (max-width: 1100px) and (min-width: 761px){
+  .sky-chips{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px){
+  .sky-chips{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
+}
+
+/* Same card as the Celestial page's countdown chips, in a smaller size. */
+.sky-chip{
+  background:var(--cel-card);
+  border-radius:var(--cel-radius);
+  box-shadow:var(--cel-shadow);
+  border-top:3px solid var(--chip-accent, var(--cel-accent));
+  padding:9px 12px 9px;
+  min-width:0;
+}
+.sky-chip .k{
+  font-size:var(--sky-fs-xs); font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+  color:var(--cel-ink-2);
+}
+.sky-chip .v{ font-size:var(--sky-fs-xl); font-weight:600; font-variant-numeric:tabular-nums; line-height:1.3; }
+.sky-chip .s{ font-size:var(--sky-fs-s); color:var(--cel-ink-3); }
+.sky-chip.soon .s{ color:var(--cel-accent); font-weight:600; }
+.sky-chip[data-kind="moon"]{ --chip-accent:var(--b-moon); }
+.sky-chip[data-kind="season"]{ --chip-accent:var(--cel-good); }
+.sky-chip[data-kind="eclipse"]{ --chip-accent:var(--b-mars); }
+.sky-chip[data-kind="meteor"]{ --chip-accent:var(--b-uranus); }
+.sky-chip[data-kind="comet"]{ --chip-accent:var(--b-comet); }
+
+@media (max-width: 520px){
+  .sky-moon-disc{ width:76px; height:76px; }
+}
+
+/* ===== 4. Bodies today (beside the dome) ================================ */
+
+.sky-today{ min-width:0; }
+.sky-today ul{ list-style:none; margin:0; padding:0; }
+.sky-today li{
+  display:grid;
+  grid-template-columns:12px minmax(0, 1fr);
+  column-gap:9px;
+  padding:8px 0;
+  border-bottom:1px solid var(--cel-line-soft);
+}
+.sky-today li:last-child{ border-bottom:0; }
+.sky-today .sw{ width:9px; height:9px; border-radius:50%; background:var(--sw); margin-top:6px; }
+.sky-today .sw.comet{ border-radius:1px; transform:rotate(45deg) scale(.85); }
+.sky-today .nm{ font-size:var(--sky-fs-m); font-weight:600; }
+.sky-today .main{ display:block; font-size:var(--sky-fs-m); font-variant-numeric:tabular-nums; }
+.sky-today .main.up{ color:var(--cel-good); font-weight:600; }
+.sky-today .sub{ grid-column:2; font-size:var(--sky-fs-s); color:var(--cel-ink-3); font-variant-numeric:tabular-nums; }
+.sky-today .sat-link{ font-size:var(--sky-fs-s); color:var(--cel-ink-2); margin:12px 0 0; }
+
+/* ===== 5. Charts: shared marks ========================================= */
+
+.sky-chart{ position:relative; width:100%; }
+.sky-chart svg{ display:block; width:100%; height:auto; overflow:visible; }
+.sky-chart text{
+  font-family:'Lexend','Helvetica Neue',Helvetica,Arial,sans-serif;
+  font-size:var(--sky-fs-s);
+  fill:var(--cel-ink);
+  font-variant-numeric:tabular-nums;
+}
+
+/* Twilight bands: class tw-<state>, 0 night .. 4 day */
+.sky-chart .tw-4{ fill:var(--tw-4); }
+.sky-chart .tw-3{ fill:var(--tw-3); }
+.sky-chart .tw-2{ fill:var(--tw-2); }
+.sky-chart .tw-1{ fill:var(--tw-1); }
+.sky-chart .tw-0{ fill:var(--tw-0); }
+
+/* Axes and grid */
+.sky-chart .grid line{ stroke:var(--sky-grid); stroke-width:1; }
+.sky-chart .axis text{ fill:var(--sky-axis); font-size:var(--sky-fs-xs); }
+.sky-chart .axis-title{ fill:var(--sky-axis); font-size:var(--sky-fs-xs); letter-spacing:.05em; text-transform:uppercase; }
+.sky-chart .band-lbl{ fill:var(--cel-ink-2); font-size:var(--sky-fs-xs); }
+.sky-chart .lbl{ fill:var(--cel-ink-2); font-size:var(--sky-fs-xs); }
+.sky-chart .zero,
+.sky-chart .horizon-line{ stroke:var(--sky-axis); stroke-width:1.2; }
+
+/* Data lines */
+.sky-chart .curve{ fill:none; stroke:var(--sky-curve); stroke-width:2; stroke-linejoin:round; stroke-linecap:round; }
+.sky-chart .curve.dashed{ stroke-width:1.5; stroke-dasharray:5 4; }
+
+/* Now and today */
+.sky-chart .now-line,
+.sky-chart .today-line{ stroke:var(--sky-now); stroke-width:1.5; }
+.sky-chart .now-lbl{ fill:var(--sky-now); font-size:var(--sky-fs-xs); font-weight:600; }
+.sky-chart .today-dot{ fill:var(--sky-now); stroke:var(--cel-card); stroke-width:2; }
+.sky-chart .val-lbl{ fill:var(--sky-now); font-size:var(--sky-fs-m); font-weight:600; }
+
+/* Hover */
+.sky-chart .hit{ fill:transparent; }
+.sky-chart .hover-line{ stroke:var(--sky-axis); stroke-width:1; stroke-dasharray:3 3; pointer-events:none; }
+.sky-chart .hover-dot{ fill:var(--cel-card); stroke:var(--sky-curve); stroke-width:1.5; pointer-events:none; }
+
+/* ===== 6. Charts: one block per chart ================================== */
+
+/* Rise & set ribbons */
+.sky-chart .rib-name{ font-size:var(--sky-fs-m); font-weight:500; }
+.sky-chart .rib-times{ fill:var(--cel-ink-2); }
+.sky-chart .rib-transit{ stroke:var(--cel-card); stroke-width:2; }
+
+/* The Sun's path */
+.sky-chart .sun-curve{ fill:none; stroke:var(--b-sun); stroke-width:2.4; stroke-linejoin:round; }
+.sky-chart .moon-curve{ fill:none; stroke:var(--b-moon); stroke-width:1.6; stroke-dasharray:5 4; }
+.sky-chart .hour-dot{ fill:var(--b-sun); stroke:var(--cel-card); stroke-width:1; }
+.sky-chart .hour-lbl{ fill:var(--cel-ink-2); font-size:var(--sky-fs-xs); }
+.sky-chart .now-mark{ stroke:var(--cel-card); stroke-width:2; }
+.sky-chart .now-ring{ fill:none; stroke:var(--sky-now); stroke-width:1.5; }
+
+/* The orrery */
+.sky-chart .orbit{ fill:none; stroke:var(--sky-orbit); stroke-width:1; }
+.sky-chart .orbit.comet{ stroke-dasharray:2 4; }
+.sky-chart .equinox-ray{ stroke:var(--sky-axis); stroke-width:1; stroke-dasharray:4 4; }
+.sky-chart .sun-mark{ fill:var(--b-sun); }
+.sky-chart .body-dot{ stroke:var(--cel-card); stroke-width:1.5; }
+.sky-chart .planet-lbl{
+  font-weight:500;
+  paint-order:stroke; stroke:var(--cel-card); stroke-width:3px; stroke-linejoin:round;
+}
+
+/* The lunar month */
+.sky-chart .lun-dark{ fill:var(--sky-moon-shadow); }
+.sky-chart .lun-lit{ fill:var(--moon-lit); }
+.sky-chart .lun-edge{ fill:none; stroke:var(--cel-line); stroke-width:1; }
+.sky-chart .lun-today{ fill:none; stroke:var(--sky-now); stroke-width:2; }
+.sky-chart .lun-tick{ stroke:var(--sky-axis); stroke-width:1; }
+.sky-chart .lun-phase{ font-size:var(--sky-fs-xs); font-weight:700; letter-spacing:.05em; text-transform:uppercase; }
+.sky-chart .lun-date{ fill:var(--cel-ink-2); font-size:var(--sky-fs-xs); }
+.sky-lunation-note{
+  margin:10px 2px 0;
+  font-size:var(--sky-fs-m); color:var(--cel-ink-2); font-variant-numeric:tabular-nums;
+}
+.sky-lunation-note .super{ color:var(--cel-accent); font-weight:600; }
+
+/* ===== 7. The almanac table ============================================ */
+
+/* Scrolls sideways inside its panel on a phone rather than squeezing. */
+.sky-table-wrap{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+.sky-table{ min-width:660px; }
+.sky-table td{ white-space:nowrap; font-variant-numeric:tabular-nums; }

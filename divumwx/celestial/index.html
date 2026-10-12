@@ -1,1 +1,231 @@
+<!DOCTYPE html>
+<!--
+##############################################################################################
+# celestial/index.html version 1.0.1
+#  The live Celestial page: countdown row and Geocentric dial, drawn with D3
+#  from DivumWX's own SkyfieldLoopData feed (jsondata/almanac.json).
+#  Inspired by John A Kline's weewx-celestial (GPLv3); no code or data
+#  dependency on it, weewx-skyfield or weewx-loopdata.
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  weewx-celestial Copyright (C)2022-2026 by John A Kline (john@johnkline.com)
+#  GPLv3
+##############################################################################################
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Celestial — DivumWX</title>
+<link rel="stylesheet" href="../header.css?v=s3n2026k">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="celestial.css?v=1.0.1">
+</head>
+<body class="light">
+<script src="../cardI18n.js?v=s3n2026b"></script>
+<script src="../siteHeader.js"></script>
+<script>
+// ==== THEME HANDLING ====
+// The same dark / light / auto handling as the rest of the astronomy
+// section (see constellations.html); auto follows the station's own
+// isDay from loop.json, falling back to computed sunrise/sunset.
 
+const STATION_LAT = 51.94;
+const STATION_LON = -0.987;
+const THEME_KEY = 'dashboardThemeMode';
+const THEME_ICONS = { auto: '\u{1F313}', light: '☀️', dark: '\u{1F319}' };
+const THEME_ORDER = ['dark', 'light', 'auto'];
+let lastIsDay = null;
+const LOOP_JSON_URL_FOR_THEME = '../jsondata/loop.json';
+const THEME_ISDAY_POLL_MS = 60 * 1000;
+
+function getSunTimes(date, lat, lon) {
+  const rad = Math.PI / 180;
+  const msPerDay = 86400000;
+  const J1970 = 2440588, J2000 = 2451545;
+  const toJulian = d => d.valueOf() / msPerDay - 0.5 + J1970;
+  const fromJulian = j => new Date((j + 0.5 - J1970) * msPerDay);
+  const toDays = d => toJulian(d) - J2000;
+  const obliquity = rad * 23.4397;
+  const meanAnomaly = d => rad * (357.5291 + 0.98560028 * d);
+  const eclipticLon = M => {
+    const C = rad * (1.9148 * Math.sin(M) + 0.02 * Math.sin(2 * M) + 0.0003 * Math.sin(3 * M));
+    const perihelion = rad * 102.9372;
+    return M + C + perihelion + Math.PI;
+  };
+  const declination = L => Math.asin(Math.sin(L) * Math.sin(obliquity));
+  const julianCycle = (d, lw) => Math.round(d - 0.0009 - lw / (2 * Math.PI));
+  const approxTransit = (Ht, lw, n) => 0.0009 + (Ht + lw) / (2 * Math.PI) + n;
+  const solarTransitJ = (ds, M, L) => J2000 + ds + 0.0053 * Math.sin(M) - 0.0069 * Math.sin(2 * L);
+  const hourAngle = (h, phi, dec) => Math.acos((Math.sin(h) - Math.sin(phi) * Math.sin(dec)) / (Math.cos(phi) * Math.cos(dec)));
+  const lw = rad * -lon, phi = rad * lat;
+  const d = toDays(date);
+  const n = julianCycle(d, lw);
+  const ds = approxTransit(0, lw, n);
+  const M = meanAnomaly(ds);
+  const L = eclipticLon(M);
+  const dec = declination(L);
+  const Jnoon = solarTransitJ(ds, M, L);
+  const h0 = -0.833 * rad;
+  const H = hourAngle(h0, phi, dec);
+  if (isNaN(H)) return null;
+  const Jset = solarTransitJ(approxTransit(H, lw, n), M, L);
+  const Jrise = Jnoon - (Jset - Jnoon);
+  return { sunrise: fromJulian(Jrise), sunset: fromJulian(Jset) };
+}
+function getThemeMode() {
+  const stored = localStorage.getItem(THEME_KEY);
+  return THEME_ORDER.includes(stored) ? stored : 'auto';
+}
+function effectiveTheme(mode) {
+  if (mode === 'light' || mode === 'dark') return mode;
+  if (lastIsDay != null) return lastIsDay ? 'light' : 'dark';
+  const now = new Date();
+  const sun = getSunTimes(now, STATION_LAT, STATION_LON);
+  if (!sun) return 'light';
+  return (now >= sun.sunrise && now < sun.sunset) ? 'light' : 'dark';
+}
+function applyDashboardTheme() {
+  const mode = getThemeMode();
+  const resolved = effectiveTheme(mode);
+  document.body.classList.remove('light', 'dark');
+  document.body.classList.add(resolved);
+  const btn = document.getElementById('themeToggle');
+  if (!btn) return;
+  btn.textContent = THEME_ICONS[mode];
+  btn.title = mode === 'auto' ? ('Auto (currently ' + resolved + ')') : mode.charAt(0).toUpperCase() + mode.slice(1);
+}
+function pollIsDayForTheme() {
+  fetch(LOOP_JSON_URL_FOR_THEME + '?_=' + Date.now(), { cache: 'no-store' })
+    .then(res => { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
+    .then(j => {
+      const o = (j && j.observations) || {};
+      if (o.isDay != null) {
+        lastIsDay = o.isDay;
+        if (getThemeMode() === 'auto') applyDashboardTheme();
+      }
+    })
+    .catch(e => console.warn('celestial: loop.json poll (theme) failed —', e.message));
+}
+
+applyDashboardTheme();
+pollIsDayForTheme();
+setInterval(pollIsDayForTheme, THEME_ISDAY_POLL_MS);
+setInterval(() => { if (getThemeMode() === 'auto') applyDashboardTheme(); }, 60 * 1000);
+</script>
+
+<div class="container">
+  <div class="site-header-include" w3-include-html="../astronomyNavbar.html"></div>
+
+  <div class="cel-head">
+    <div>
+      <h1 class="cel-title">Celestial</h1>
+      <p class="cel-sub">The sky over <span id="celStation">the station</span>, as it stands this second.</p>
+    </div>
+    <div class="cel-live" id="celLive" data-state="wait" role="status" aria-live="polite">
+      <span class="cel-live-dot" aria-hidden="true"></span>
+      <span class="cel-live-label" id="celLiveLabel">Connecting</span>
+      <span class="cel-live-age" id="celLiveAge"></span>
+    </div>
+  </div>
+
+  <section class="cel-countdowns" id="celCountdowns" aria-label="Countdowns">
+    <!-- chips are built by celestial.js -->
+  </section>
+
+  <section class="cel-panel cel-geo" aria-labelledby="celGeoTitle">
+    <div class="cel-panel-head">
+      <h2 class="cel-panel-title" id="celGeoTitle">The Geocentric</h2>
+      <p class="cel-panel-sub">Earth at the centre. Each body sits at its compass bearing from the station and its distance from Earth, on a log scale. Dimmed and dashed when below the horizon; the tail behind each dot is its last hour.</p>
+    </div>
+    <div class="cel-geo-body">
+      <div class="cel-dial-wrap" id="celDialWrap">
+        <svg class="cel-dial" id="celDial" role="img" aria-labelledby="celGeoTitle"></svg>
+        <div class="cel-tip" id="celTip" hidden></div>
+      </div>
+      <div class="cel-roster-wrap">
+        <table class="cel-roster" id="celRoster">
+          <caption class="cel-visually-hidden">Bearing, altitude and distance of each body</caption>
+          <thead>
+            <tr><th scope="col">Body</th><th scope="col" class="num">Bearing</th><th scope="col" class="num">Altitude</th><th scope="col" class="num">Distance</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <p class="cel-note" id="celUpdated"></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="cel-panel cel-sky" aria-labelledby="celSkyTitle">
+    <div class="cel-panel-head">
+      <h2 class="cel-panel-title" id="celSkyTitle">The Sky Overhead</h2>
+      <p class="cel-panel-sub">Looking up from the station: the zenith at the centre, the horizon at the rim, north at the top and east to the left. Stars to magnitude 5.5 with the constellation figures; the dashed line is the ecliptic, the Sun's path.</p>
+    </div>
+    <div class="cel-sky-body">
+      <div class="cel-dome-wrap" id="celDomeWrap">
+        <svg class="cel-dome" id="celDome" role="img" aria-labelledby="celSkyTitle"></svg>
+        <div class="cel-tip" id="celDomeTip" hidden></div>
+      </div>
+      <div class="cel-upnow" id="celUpNow" aria-live="off">
+        <!-- filled by dome.js -->
+      </div>
+    </div>
+  </section>
+
+  <section class="cel-panel cel-pass" aria-labelledby="celPassTitle">
+    <div class="cel-panel-head">
+      <h2 class="cel-panel-title" id="celPassTitle">The Next Visible Pass</h2>
+      <p class="cel-panel-sub">The sky as it will stand at the highest point of the soonest satellite pass you can see. The bold stretch of the arc is where it will be visible; the faint ends are too low, in daylight, or in Earth's shadow. During the pass the satellite moves along the arc live, hollow once it enters the shadow.</p>
+    </div>
+    <div class="cel-sky-body">
+      <div class="cel-dome-wrap" id="celPassWrap">
+        <svg class="cel-dome cel-passchart" id="celPass" role="img" aria-labelledby="celPassTitle"></svg>
+        <div class="cel-tip" id="celPassTip" hidden></div>
+      </div>
+      <div class="cel-passinfo">
+        <div id="celPassInfo"></div>
+        <div id="celSatTable"></div>
+      </div>
+    </div>
+  </section>
+
+  <p class="cel-credit">Positions computed on the station with <a href="https://rhodesmill.org/skyfield/" target="_blank" rel="noopener">Skyfield</a> and the JPL DE421 ephemeris. Meteor shower peaks from the <a href="https://www.imo.net/resources/calendar/" target="_blank" rel="noopener">IMO calendar</a>. Satellite orbits from <a href="https://celestrak.org/" target="_blank" rel="noopener">CelesTrak</a>, <a href="https://db.satnogs.org/" target="_blank" rel="noopener">SatNOGS</a> or the <a href="https://tle.ivanstanojevic.me/" target="_blank" rel="noopener">TLE API</a>; comet orbits from the <a href="https://www.minorplanetcenter.net/" target="_blank" rel="noopener">Minor Planet Center</a>. Star catalogue and constellation figures from Olaf Frohn's <a href="https://github.com/ofrohn/d3-celestial" target="_blank" rel="noopener">d3-celestial</a> (BSD licence). Page design after John A Kline's <a href="https://github.com/chaunceygardiner/weewx-celestial" target="_blank" rel="noopener">weewx-celestial</a>.<br>
+  weewx-celestial Copyright (C)2022-2026 by John A Kline (<a href="mailto:john@johnkline.com">john@johnkline.com</a>)</p>
+</div>
+
+<script>
+const ARCHIVE_JSON_URL = '../jsondata/archive.json';
+function setStationTitle() {
+  fetch(ARCHIVE_JSON_URL + '?_=' + Date.now(), { cache: 'no-store' })
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(data => {
+      const loc = data && data.meta && data.meta.station_location;
+      const el = document.querySelector('.brand-text');
+      if (loc && el) el.textContent = loc;
+    })
+    .catch(e => console.warn('celestial: station_location fetch failed —', e.message));
+}
+
+window.addEventListener('storage', e => {
+  if (e.key === THEME_KEY) applyDashboardTheme();
+});
+
+includeHTML(() => {
+  initSharedHeader();
+  document.getElementById('menuBtn').onclick = () => { document.body.classList.toggle('menu-open'); };
+  document.getElementById('themeToggle').onclick = () => {
+    const next = THEME_ORDER[(THEME_ORDER.indexOf(getThemeMode()) + 1) % THEME_ORDER.length];
+    localStorage.setItem(THEME_KEY, next);
+    applyDashboardTheme();
+  };
+  applyDashboardTheme();
+  setStationTitle();
+});
+</script>
+
+<script src="../js/d3.7.9.0.min.js"></script>
+<script src="celestial.js?v=1.0.0"></script>
+<script src="dome.js?v=1.0.0"></script>
+</body>
+</html>

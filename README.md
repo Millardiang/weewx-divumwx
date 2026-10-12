@@ -1,4 +1,4 @@
-# Welcome to the DivumWX skin for WeeWX Version 1.6.0
+# Welcome to the DivumWX skin for WeeWX Version 1.7.0
 Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LICENSE Version 3](https://github.com/Millardiang/weewx-divumwx/blob/main/license.txt)
  
 # Features
@@ -9,6 +9,7 @@ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LIC
 * Live (realtime) loop json data.
 * Live (realtime) almanac json data from Skyfield.
 * Astronomy section including Sean Balfour's visualisations, and an Equal Earth map that wraps onto a rotating globe, with live day and night, twilight bands, the Sun and Moon with their ground tracks and the station marked.
+* Live Celestial and Skyfield pages drawn with D3: a live sky dome, the Geocentric dial, satellite passes (ISS, Tiangong, Terra and NOAA-21 by default) and comets, rise and set ribbons, the Sun's path, the solar year, the equation of time, the analemma, the lunar month, an orrery and an almanac table — all computed on the station by Skyfield, with no weewx-skyfield, weewx-celestial or weewx-loopdata needed.
 * Direct data injection of external weather data into WeeWX database (a kind of souped-up weewx-FilePile).
 * Unlike previous beta versions PHP code has been removed. HTML/JS Libraries/CSS only.
 * Ability to reorder dashboard cards locally in browser by drag and drop.
@@ -93,6 +94,7 @@ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LIC
 * Sean Balfour, a long time collaborator who created by far the greater majority of the images/visualisations used in the cards and modals rendered using D3.
 * The late David Marshall, my very first collaborator, for his ingenious method of estimating cloud cover by counting pixels on radar images.
 * Mike Isacson for providing test server resources and being brave enough to test early developments.
+* John A Kline for his superb weewx-celestial and weewx-skyfield extensions on which the Celestial and Skyfield page designs are based.
 * Vince Skahan constantly giving me food for thought.
 * Early adopters, in particular Kjell, Gert, Jon, Gary, Alex and many others for helping me squash some bugs, helpful suggestions and excellent feedback.
 * Open-Meteo for weather forecasts, pollen data, greenhouse gas data.
