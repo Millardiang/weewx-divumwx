@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# modalDaylightMap.html version 1.0.0
+# modalDaylightMap.html version 2.0.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -10,186 +10,164 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>World daylight map</title>
-
+<title>World Daylight Map</title>
+<link rel="stylesheet" href="css/equalEarthMap.css?v=1.0.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bs-body-bg: #FFFFFF;
+:root {
+  --light-body: #EFECE2;
+  --dark-body: #0A0F22;
+  --light-text: #1D2C4E;
+  --dark-bg: #FFFFFF;
+  --dark-card: #111834;
+  --dark-text: #E9E4D4;
+
+  --bs-body-color: var(--light-text);
+  --bs-secondary-color: #5C6672;
+  --bs-card-bg: var(--dark-bg);
+  --bs-border-color: #C9CFD8;
+  --bw-accent: #B45309;
+  --bw-good: #39a239;
+  --bw-radius-sm: 10px;
 }
-[data-theme="dark"]{
-  --bs-body-bg: #111834;
+body.dark {
+  --bs-body-color: var(--dark-text);
+  --bs-secondary-color: #8B93B8;
+  --bw-accent: #D3A94C;
+  --bs-border-color: #2A3358;
+  --dark-bg: var(--dark-card);
+  --bs-card-bg: var(--dark-card);
 }
+body.dark.season-winter { --dark-card: #24312a; }
+body.dark.season-spring { --dark-card: #26301f; }
+body.dark.season-summer { --dark-card: #332c16; }
+body.dark.season-autumn { --dark-card: #2c2118; }
 html, body { margin: 0; }
 body {
-  background: var(--bs-body-bg);
-  transition: background-color .2s;
+  background: var(--bs-card-bg);
+  color: var(--bs-body-color);
+  font-family: 'Lexend', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
-</style>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
-<link rel="stylesheet" href="css/daylightmap.css">
-<style>
-
-#daylight-map {
-  display: block;
-  width: 100%;
-  height: auto;
-  max-width: 100%;
-}
-.container {
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-</style>
-<style>
-
-[data-season="winter"] {
-  --card-bg: #e9f2ec; --card-bg-dark: #e9f2ec; --card-bg-light: #e9f2ec;
-  --bg-color: #e9f2ec; --bg-color-dark: #e9f2ec; --bg-color-light: #e9f2ec;
-  --bs-body-bg: #e9f2ec; --bs-card-bg: #e9f2ec; --bg: #e9f2ec;
-}
-[data-season="spring"] {
-  --card-bg: #eef7e3; --card-bg-dark: #eef7e3; --card-bg-light: #eef7e3;
-  --bg-color: #eef7e3; --bg-color-dark: #eef7e3; --bg-color-light: #eef7e3;
-  --bs-body-bg: #eef7e3; --bs-card-bg: #eef7e3; --bg: #eef7e3;
-}
-[data-season="summer"] {
-  --card-bg: #fff6d9; --card-bg-dark: #fff6d9; --card-bg-light: #fff6d9;
-  --bg-color: #fff6d9; --bg-color-dark: #fff6d9; --bg-color-light: #fff6d9;
-  --bs-body-bg: #fff6d9; --bs-card-bg: #fff6d9; --bg: #fff6d9;
-}
-[data-season="autumn"] {
-  --card-bg: #f2e6d8; --card-bg-dark: #f2e6d8; --card-bg-light: #f2e6d8;
-  --bg-color: #f2e6d8; --bg-color-dark: #f2e6d8; --bg-color-light: #f2e6d8;
-  --bs-body-bg: #f2e6d8; --bs-card-bg: #f2e6d8; --bg: #f2e6d8;
-}
-html[data-season="winter"] body, html[data-season="spring"] body,
-html[data-season="summer"] body, html[data-season="autumn"] body {
-  background-color: var(--bg-color, var(--card-bg));
-}
+/* Inside the dashboard's modal the card is the whole page */
+.ee-card { box-shadow: none; border-radius: 0; padding: 12px 16px 16px; }
 </style>
 </head>
-<body>
-
-<div class="container" style="top: 80px;">
-  <svg id="daylight-map"></svg>
-  <div class="controls"></div>
-</div>
-
+<body class="light">
 <script>
-(function(){
-  function fromParentTheme(){
-    try {
-      var b = window.parent && window.parent.document && window.parent.document.body;
-      if (b && (b.classList.contains('dark') || b.classList.contains('light'))) {
-        return b.classList.contains('dark') ? 'dark' : 'light';
-      }
-    } catch (e) {}
-    return null;
+// Follow the dashboard's theme (and seasonal card colour) when shown in its modal;
+// on its own, fall back to the saved theme choice or the system setting.
+(function () {
+  function parentBody() {
+    try { return window.parent !== window && window.parent.document && window.parent.document.body; } catch (e) { return null; }
   }
-  function applyTheme(){
-    var resolved = fromParentTheme();
-    if (!resolved) {
-      const mode = localStorage.getItem('dashboardThemeMode') || 'auto';
-      resolved = mode === 'light' ? 'light' : mode === 'dark' ? 'dark'
+  function apply() {
+    const pb = parentBody();
+    let theme = null, season = null;
+    if (pb) {
+      if (pb.classList.contains('dark')) theme = 'dark'; else if (pb.classList.contains('light')) theme = 'light';
+      const m = /season-(winter|spring|summer|autumn)/.exec(pb.className);
+      if (m) season = m[1];
+    }
+    if (!theme) {
+      let mode = 'auto';
+      try { mode = localStorage.getItem('dashboardThemeMode') || 'auto'; } catch (e) {}
+      theme = mode === 'light' || mode === 'dark' ? mode
         : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     }
-    document.documentElement.setAttribute('data-theme', resolved);
-  }
-  applyTheme();
-  window.addEventListener('storage', function(e){ if (e.key === 'dashboardThemeMode') applyTheme(); });
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
-  try {
-    var __pb = window.parent && window.parent.document && window.parent.document.body;
-    if (__pb) new MutationObserver(applyTheme).observe(__pb, { attributes: true, attributeFilter: ['class'] });
-  } catch (e) {}
-
-  // ---- Make the map itself responsive ----
-
-  function makeMapResponsive(){
-    var svg = document.getElementById('daylight-map');
-    if (!svg || svg.hasAttribute('viewBox')) return false;
-    var w = parseFloat(svg.getAttribute('width'));
-    var h = parseFloat(svg.getAttribute('height'));
-    if (!w || !h) return false;
-    svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
-    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-    svg.removeAttribute('width');
-    svg.removeAttribute('height');
-    return true;
-  }
-  var daylightMapEl = document.getElementById('daylight-map');
-  if (daylightMapEl) {
-    var mapObserver = new MutationObserver(function(){
-      if (makeMapResponsive()) mapObserver.disconnect();
-    });
-    mapObserver.observe(daylightMapEl, { attributes: true, attributeFilter: ['width', 'height'] });
-  }
-  if (!makeMapResponsive()) {
-    [100, 300, 800, 1500, 3000].forEach(function(delay){ setTimeout(makeMapResponsive, delay); });
-  }
-
-  function measureContent(){
-    var svgEl = document.getElementById('daylight-map');
-    var controlsEl = document.querySelector('.controls');
-    var maxRight = 0, maxBottom = 0;
-    [svgEl, controlsEl].forEach(function(el){
-      if (!el) return;
-      var r = el.getBoundingClientRect();
-      if (r.width === 0 && r.height === 0) return;
-      maxRight = Math.max(maxRight, r.right);
-      maxBottom = Math.max(maxBottom, r.bottom);
-    });
-    if (maxRight === 0 || maxBottom === 0) {
-
-      return { width: document.body.scrollWidth, height: document.body.scrollHeight };
-    }
-    return { width: Math.ceil(maxRight), height: Math.ceil(maxBottom) };
-  }
-  function reportSize(){
-    if (window.parent === window) return;
-    var size = measureContent();
-    window.parent.postMessage({
-      type: 'chartModalContentHeight',
-      height: size.height,
-      width: size.width
-    }, '*');
-  }
-  if (window.parent !== window) {
-    new ResizeObserver(reportSize).observe(document.body);
-    window.addEventListener('load', reportSize);
-
-    setTimeout(reportSize, 500);
-    setTimeout(reportSize, 1500);
-  }
-})();
-</script>
-
-<script src='https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js'></script>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.20/topojson.min.js'></script>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/d3-geo-projection/0.2.16/d3.geo.projection.min.js'></script>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.12.0/moment.min.js'></script>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.1/moment-timezone.min.js'></script>
-<script src='https://s3-us-west-2.amazonaws.com/s.cdpn.io/215059/suncalc.js'></script>
-<script src="js/daylightMap.js"></script>
-
-<script>
-(function applySeasonFromParent(){
-  function apply(){
-    try {
-      var b = window.parent && window.parent.document && window.parent.document.body;
-      var m = b && /season-(winter|spring|summer|autumn)/.exec(b.className);
-      if (m) document.documentElement.setAttribute('data-season', m[1]);
-      else document.documentElement.removeAttribute('data-season');
-    } catch (e) {}
+    const b = document.body;
+    b.classList.remove('light', 'dark', 'season-winter', 'season-spring', 'season-summer', 'season-autumn');
+    b.classList.add(theme);
+    if (season) b.classList.add('season-' + season);
   }
   apply();
-  try {
-    var pb = window.parent && window.parent.document && window.parent.document.body;
-    if (pb) new MutationObserver(apply).observe(pb, { attributes: true, attributeFilter: ['class'] });
-  } catch (e) {}
+  const pb = parentBody();
+  if (pb) new MutationObserver(apply).observe(pb, { attributes: true, attributeFilter: ['class'] });
+  window.addEventListener('storage', e => { if (e.key === 'dashboardThemeMode') apply(); });
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', apply);
 })();
 </script>
+
+  <div class="ee-card">
+    <div class="ee-toolbar">
+      <div class="ee-group" role="group" aria-label="View" id="eeViewGroup">
+        <span class="ee-group-label">View</span>
+        <button type="button" class="ee-btn" id="eeFlat" aria-pressed="false">Flat map</button>
+        <button type="button" class="ee-btn" id="eeGlobe" aria-pressed="true">Globe</button>
+      </div>
+      <div class="ee-group" role="group" aria-label="Motion">
+        <span class="ee-group-label">Motion</span>
+        <button type="button" class="ee-btn" id="eeAuto" aria-pressed="true">Auto view</button>
+        <button type="button" class="ee-btn" id="eeSpin" aria-pressed="false">Spin</button>
+        <button type="button" class="ee-btn" id="eeFaceStation">Face station</button>
+        <button type="button" class="ee-btn" id="eeFaceSun">Face Sun</button>
+        <button type="button" class="ee-btn" id="eeFaceMoon">Face Moon</button>
+      </div>
+      <div class="ee-group" role="group" aria-label="Flat map projection" id="eeFlatTools" hidden>
+        <span class="ee-group-label">Flat map</span>
+        <button type="button" class="ee-btn" id="eeProjEE" aria-pressed="true">Equal Earth</button>
+        <button type="button" class="ee-btn" id="eeProjMerc" aria-pressed="false">Mercator</button>
+        <button type="button" class="ee-btn" id="eeTissotBtn" aria-pressed="false">Tissot circles</button>
+      </div>
+      <div class="ee-group" role="group" aria-label="Overlays">
+        <span class="ee-group-label">Overlay</span>
+        <button type="button" class="ee-btn" id="eeNightBtn" aria-pressed="true">Day &amp; night</button>
+        <button type="button" class="ee-btn" id="eeSunTrackBtn" aria-pressed="true">Sun track</button>
+        <button type="button" class="ee-btn" id="eeMoonBtn" aria-pressed="true">Moon &amp; track</button>
+      </div>
+      <label class="ee-slider" for="eeWrap" id="eeWrapCtl">
+        <span class="ee-group-label">Wrap</span>
+        <input type="range" id="eeWrap" min="0" max="100" value="100" step="1">
+        <output id="eeWrapOut" for="eeWrap">100%</output>
+      </label>
+    </div>
+
+    <div class="ee-stage" id="eeStage">
+      <canvas id="eeCanvas" tabindex="0" aria-label="Globe. Drag to rotate, arrow keys to turn, or use the controls above. On the flat map, click a country to measure it."></canvas>
+      <div class="ee-tip" id="eeTip" hidden></div>
+    </div>
+
+    <div class="ee-timebar">
+      <label class="ee-slider" for="eeTime">
+        <span class="ee-group-label">Time</span>
+        <input type="range" id="eeTime" min="-720" max="720" value="0" step="10">
+        <output id="eeTimeOut" for="eeTime">Now</output>
+      </label>
+      <button type="button" class="ee-btn" id="eeNow">Back to now</button>
+    </div>
+
+    <dl class="ee-readout">
+      <div><dt>Shown time (UTC)</dt><dd id="eeShown">&mdash;</dd></div>
+      <div><dt>Subsolar point</dt><dd id="eeSubsolar">&mdash;</dd></div>
+      <div><dt>Sun at station</dt><dd id="eeSunAlt">&mdash;</dd></div>
+      <div><dt>Sublunar point</dt><dd id="eeSublunar">&mdash;</dd></div>
+      <div><dt>Moon at station</dt><dd id="eeMoonAlt">&mdash;</dd></div>
+      <div><dt>Moon phase</dt><dd id="eePhase">&mdash;</dd></div>
+      <div><dt>View centre</dt><dd id="eeCentre">&mdash;</dd></div>
+    </dl>
+
+    <dl class="ee-readout" id="eeFlatReadout" hidden>
+      <div><dt>Selected country</dt><dd id="eeCountry">&mdash;</dd></div>
+      <div><dt>True area</dt><dd id="eeArea">&mdash;</dd></div>
+      <div><dt>Map size vs equator</dt><dd id="eeDist">&mdash;</dd></div>
+      <div><dt>Cursor</dt><dd id="eeCursor">&mdash;</dd></div>
+    </dl>
+
+    <p class="ee-note">The Equal Earth projection (&Scaron;avri&ccaron;, Jenny &amp; Patterson, 2018) shows every country at
+      its true relative size. Shading marks night and the civil, nautical and astronomical twilight bands; the Sun and Moon
+      tracks trace the points they pass directly over for one full trip round the Earth, with a dot for each hour. Click a
+      country for its true area and its size on the map compared with the same area at the equator: &times;1.00 everywhere
+      on Equal Earth, while Mercator inflates high latitudes (Greenland about &times;16). Tissot circles are all
+      500&nbsp;km in radius on the ground. Drag sideways or use the arrow keys to move the central meridian; Auto view keeps
+      the station, and the Sun and Moon when they are up there, near the middle. The time slider moves the Sun and Moon up
+      to 12 hours either side of now; everything updates every 5 seconds. For the globe, open Astronomy &rarr; Equal Earth
+      Map. Boundaries: Natural Earth 1:110m.</p>
+  </div>
+
+<script>window.EE_MAP_OPTIONS = { flatOnly: true };</script>
+<script src="js/d3.7.9.0.min.js"></script>
+<script src="js/topojson.3.0.2.min.js"></script>
+<script src="js/equalEarthMap.js?v=1.0.0"></script>
 </body>
 </html>

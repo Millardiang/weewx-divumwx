@@ -1,0 +1,107 @@
+/*
+##############################################################################################
+# equalEarthMap.css version 1.0.0
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  GPLv3
+##############################################################################################
+*/
+
+/* Shared by equalEarthMap.html (globe and flat map) and modalDaylightMap.html (flat map only).
+   Expects the page to define the DivumWX card tokens (--bs-card-bg, --bw-accent, --bs-border-color, ...)
+   and to set body.light / body.dark. */
+
+/* ---- Equal Earth globe ---- */
+:root {
+  --map-ocean: #D5E2EA;
+  --map-land: #B7C4A3;
+  --map-coast: #FFFFFF;
+  --map-grid: #A9BCC8;
+  --map-rim: #1D2C4E;
+  --map-night: 10, 15, 34;
+  --map-night-alpha: .13;
+  --map-halo: 74, 144, 217;
+  --map-sun: #E8A317;
+  --map-station: #B45309;
+  --map-moon-lit: #FBF8EE;
+  --map-moon-dark: #6B7488;
+  --map-moon-track: #4F5F82;
+  --map-select: #B45309;
+  --map-tissot: 180, 65, 58;
+  --map-bad: #B4413A;
+}
+body.dark {
+  --map-ocean: #16203F;
+  --map-land: #3E4F48;
+  --map-coast: #111834;
+  --map-grid: #2A3358;
+  --map-rim: #8B93B8;
+  --map-night: 0, 0, 0;
+  --map-night-alpha: .22;
+  --map-halo: 120, 170, 255;
+  --map-sun: #F5C542;
+  --map-station: #D3A94C;
+  --map-moon-lit: #EDE8D8;
+  --map-moon-dark: #2A3358;
+  --map-moon-track: #AEB8D8;
+  --map-select: #D3A94C;
+  --map-tissot: 239, 122, 110;
+  --map-bad: #EF7A6E;
+}
+.ee-card{
+  background:var(--bs-card-bg);
+  border-radius:var(--bw-radius-sm);
+  box-shadow:var(--bw-shadow);
+  padding:16px;
+  display:grid; gap:14px;
+}
+.ee-toolbar{ display:flex; flex-wrap:wrap; gap:10px 22px; align-items:center; }
+.ee-group{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+.ee-group-label{
+  font-size:11px; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
+  color:var(--bs-secondary-color); margin-right:2px;
+}
+.ee-btn{
+  font:500 12px 'Lexend', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color:inherit; background:transparent;
+  border:1px solid var(--bs-border-color); border-radius:6px;
+  padding:6px 10px; cursor:pointer;
+}
+.ee-btn:hover{ border-color:var(--bw-accent); }
+.ee-btn[aria-pressed="true"]{ background:var(--bw-accent); border-color:var(--bw-accent); color:#FFFFFF; }
+body.dark .ee-btn[aria-pressed="true"]{ color:#0A0F22; }
+.ee-btn:focus-visible, .ee-slider input:focus-visible, #eeCanvas:focus-visible{ outline:2px solid var(--bw-accent); outline-offset:2px; }
+.ee-slider{ display:flex; align-items:center; gap:10px; flex:1 1 220px; min-width:0; }
+.ee-slider input{ flex:1; min-width:0; accent-color:var(--bw-accent); }
+.ee-slider output{ font-size:12px; font-variant-numeric:tabular-nums; min-width:6.5ch; text-align:right; }
+.ee-timebar{ display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center; }
+
+#eeCanvas{ display:block; width:100%; height:auto; aspect-ratio:960 / 540; max-width:100%; cursor:grab; touch-action:pan-y; }
+#eeCanvas.dragging{ cursor:grabbing; }
+.ee-stage{ position:relative; width:100%; min-width:0; }
+.ee-tip{
+  position:absolute; pointer-events:none; white-space:nowrap; z-index:2;
+  background:var(--light-text); color:#FFFFFF; font-size:12px; padding:4px 8px; border-radius:6px;
+  transform:translate(-50%, calc(-100% - 10px));
+}
+body.dark .ee-tip{ background:var(--dark-text); color:var(--dark-body); }
+.ee-pill.ok{ color:var(--bw-good); }
+.ee-pill.bad{ color:var(--map-bad); }
+.ee-group[hidden], .ee-readout[hidden], .ee-slider[hidden], .ee-btn[hidden]{ display:none; }
+
+.ee-readout{
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));
+  gap:14px; margin:0;
+}
+.ee-readout div{ min-width:0; }
+.ee-readout dt{
+  font-size:11px; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
+  color:var(--bs-secondary-color);
+}
+.ee-readout dd{ margin:3px 0 0; font-size:15px; font-weight:600; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+.ee-pill{
+  display:inline-block; font-size:10.5px; font-weight:600; padding:1px 6px; border-radius:4px;
+  margin-left:6px; vertical-align:2px; border:1px solid currentColor; color:var(--bs-secondary-color);
+}
+.ee-pill.day{ color:var(--map-sun); }
+.ee-pill.civil{ color:var(--bw-accent); }
+.ee-note{ font-size:11px; color:var(--bs-secondary-color); margin:0; line-height:1.55; width:100%; min-width:0; overflow-wrap:break-word; }

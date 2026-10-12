@@ -1,5 +1,40 @@
 # DivumWX Changelog
 
+## 1.6.0 — World Daylight Map
+
+The World Daylight Map that opens from the dashboard's daylight card is
+replaced by the flat Equal Earth map from the Astronomy section.
+
+### World Daylight Map
+- Live day and night with civil, nautical and astronomical twilight bands,
+  the Sun and Moon with their ground tracks and the Moon's phase, and the
+  station marked from weewx.conf.
+- The flat-map tools: Equal Earth / Mercator, Tissot circles, click a
+  country for its true area and map-size ratio, hover for its name.
+- Auto view, Face station / Sun / Moon, the time slider and the readouts
+  work as on the Equal Earth Map page. The globe stays on that page.
+- Follows the dashboard's theme, including the seasonal card colours, and
+  switches with it while open.
+- No longer loads anything from outside the site. The old map fetched D3 3,
+  jQuery, moment, SunCalc, its world map and its city list from public CDNs
+  and a CodePen storage bucket, and linked a `css/daylightmap.css` that was
+  never shipped. The city-lights layer, which depended on that city list,
+  is gone.
+
+### Code
+- The map's script and styles move out of `equalEarthMap.html` into
+  `js/equalEarthMap.js` and `css/equalEarthMap.css`, shared by both pages.
+  A page sets `window.EE_MAP_OPTIONS = { flatOnly: true }` to get the flat
+  map without the globe.
+
+### Pages and files
+- New: `js/equalEarthMap.js` 1.0.0, `css/equalEarthMap.css` 1.0.0.
+  Changed: `modalDaylightMap.html` 2.0.0, `equalEarthMap.html` 1.3.0,
+  `index.html` 1.6.0, `divumwf.html`, `bin/user/divumwx_version.py`,
+  `README.md`, `INSTALLATION_GUIDE.md`.
+- Removed: `js/daylightMap.js` (only the old modal used it). Upgrades
+  remove it automatically.
+
 ## 1.5.0 — Flat map tools
 
 The measuring tools from the original Equal Earth map are back, shown

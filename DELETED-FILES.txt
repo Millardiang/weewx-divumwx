@@ -1,0 +1,2 @@
+Delete from your site and repo (no longer used):
+  divumwx/js/daylightMap.js
