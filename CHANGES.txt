@@ -1,50 +1,36 @@
-DivumWX - Windy Radar card: confirmed link + station dot (for 2.0.0)
-====================================================================
+DivumWX - Windy Radar card: amber station pin (for 2.0.0)
+=========================================================
 
-Goes on top of version-2.0-beta at 3d4bf5a (your v5 "beta2" commit).
+Goes on top of version-2.0-beta at ecec5cd (your v6 "Windy" commit).
 
 What changed
-  - The card and the larger map now send Windy exactly the link you
-    confirmed centres on the station. v5 also sent unit settings
-    (metricRain/metricTemp/metricWind), the only difference from your
-    working link, so those are gone and Windy picks its own units.
-    The card now asks for:
-      https://embed.windy.com/embed.html?type=map&location=coordinates
-        &zoom=7&overlay=radar&level=surface&lat=51.937&lon=-0.982
-        &message=true&play=true
-    and the still map after one play is the same without &play=true.
-  - Station dot: a red dot drawn by DivumWX at the centre of the card
-    and the larger map, where the station is when the map loads. It
-    hides when a visitor clicks into the map (it would no longer be on
-    the station) and comes back with the next load.
-  - Play once, then stop: unchanged from v5 (PLAY_ONCE_SECONDS = 15).
-    Windy's playback speed still can't be set from the dashboard.
-
-If anything is still off-centre: windy-test.html
-  Copy windy-test.html into your site's divumwx folder (next to
-  index.html) and open it in your browser. It shows four Windy maps of
-  your station side by side, each one change away from your working
-  link:
-    A  the link you confirmed
-    B  A without play=true      (what the still map uses)
-    C  A plus the unit settings (what v5 sent)
-    D  A plus marker=true and detailLat/detailLon
-  Each has a red dot where the station should be. Tell me which maps are
-  off-centre and where any Windy marker appears. Delete the file after.
+  - The station marker is now an amber map pin, with its tip exactly at
+    the centre of the card and of the larger map, where Windy centres on
+    the station's coordinates. It replaces v6's red dot: red is also a
+    heavy-rain colour on the radar, and a pin shape can't be mistaken
+    for rain or for Windy's own pulsing blue dot.
+  - Windy's blue dot is NOT the station: it's each viewer's location as
+    Windy guesses it from their internet address. It can't be moved or
+    hidden from the dashboard, so it will keep appearing wherever Windy
+    guesses (for visitors elsewhere, over them).
+  - The title tooltip and the larger map's footer now say "The amber pin
+    marks the weather station."
+  - As before, the pin hides once a visitor clicks into the map (it would
+    no longer be on the station) and comes back with the next load.
 
 Files are laid out at their repo paths. These 6 are the only ones that
 differ from your branch; copy each over the version in your repo:
-  divumwx/cardsBundleNew.js        confirmed link, station dot
-  divumwx/modalWindyRadar.html     confirmed link, station dot
-  divumwx/index.html               bundle ?v=238da6db
-  divumwx/hyperIndex.html          bundle ?v=238da6db
-  divumwx/lexendIndex.html         bundle ?v=238da6db
+  divumwx/cardsBundleNew.js        amber station pin, tooltip
+  divumwx/modalWindyRadar.html     amber station pin, footer note
+  divumwx/index.html               bundle ?v=612e8cbf
+  divumwx/hyperIndex.html          bundle ?v=612e8cbf
+  divumwx/lexendIndex.html         bundle ?v=612e8cbf
   CHANGELOG.md                     entry updated
-windy-test.html is only for testing; it isn't part of DivumWX.
 
-Using git instead, on version-2.0-beta (3d4bf5a):
+Using git instead, on version-2.0-beta (ecec5cd):
   git apply windy-radar-card.patch
 
-Reminder: the repo root has CHANGES.txt and windy-radar-card.patch from
-earlier packages. The installer copies every file in the repo root into
-users' WeeWX folder, so you'll probably want to delete both.
+Clean-up: the repo root now has CHANGES.txt, windy-radar-card.patch and
+windy-test.html from earlier packages. The installer copies every file in
+the repo root into users' WeeWX folder, so you'll probably want to delete
+all three from the repo.

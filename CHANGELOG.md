@@ -25,9 +25,12 @@
   modal still fits.
 - The map is centred on the station's latitude and longitude (weewx.conf
   `[Station]`, via archive.json), shown in the larger map's footer, with
-  a red station dot drawn by DivumWX at the centre. The dot hides once a
-  visitor clicks into the map (it would no longer be on the station) and
-  returns with the next map load. Windy's map only loads once it's on
+  an amber station pin drawn by DivumWX, its tip at the centre. It's a
+  pin, not a dot, so it isn't mistaken for Windy's own pulsing blue
+  "your location" dot (each viewer's location as Windy guesses it from
+  their IP address, which can't be moved or hidden) or for rain. The pin
+  hides once a visitor clicks into the map (it would no longer be on the
+  station) and returns with the next map load. Windy's map only loads once it's on
   screen and laid out, because Windy can centre in the wrong place if it
   loads hidden.
 - The Windy link is kept to the parameters confirmed to centre on the

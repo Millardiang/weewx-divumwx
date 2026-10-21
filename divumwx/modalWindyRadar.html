@@ -87,14 +87,17 @@ body{
 @media (max-width:900px){ .wr-stage{ height:500px; } }
 @media (max-width:600px){ .wr-stage{ height:400px; } }
 .wr-frame{ position:absolute; inset:0; width:100%; height:100%; border:0; }
-/* Station dot: Windy centres the map on the station, so it sits mid-frame
-   until a visitor moves the map (then it's hidden until the next load). */
+/* Station pin: Windy centres the map on the station, so the pin's tip sits
+   mid-frame until a visitor moves the map (then it's hidden until the next
+   load). A pin, in amber, so it can't be mistaken for Windy's pulsing blue
+   "your location" dot (the viewer's guessed location) or for rain. */
 .wr-station{
   position:absolute; left:50%; top:50%; z-index:1;
-  width:12px; height:12px; margin:-6px 0 0 -6px; border-radius:50%;
-  background:#e74c3c; box-shadow:0 0 0 2px #fff, 0 0 6px rgba(0,0,0,.6);
+  width:24px; height:34px; margin:-33px 0 0 -12px; line-height:0;
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.7));
   pointer-events:none; display:none;
 }
+.wr-station svg{ width:24px; height:34px; }
 
 .wr-status{
   position:absolute; right:12px; top:12px; z-index:2;
@@ -146,7 +149,7 @@ body{
   </div>
 
   <div class="wr-stage" id="wrStage">
-    <div class="wr-station" id="wrStation" title="Weather station"></div>
+    <div class="wr-station" id="wrStation" title="Weather station"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="28" viewBox="0 0 20 28" aria-hidden="true"><path d="M10 27C10 27 1.5 16.6 1.5 10.2A8.5 8.5 0 0 1 18.5 10.2C18.5 16.6 10 27 10 27Z" fill="#F59E0B" stroke="#fff" stroke-width="2" stroke-linejoin="round"/><circle cx="10" cy="10" r="3.2" fill="#fff"/></svg></div>
     <div class="wr-empty" id="wrEmpty">
       <div class="wr-empty-title" id="wrEmptyTitle">Loading the map&hellip;</div>
       <div class="wr-empty-sub" id="wrEmptySub">&nbsp;</div>
@@ -158,7 +161,7 @@ body{
   </div>
 
   <div class="wr-footer">
-    <span><span id="wrCoords"></span>Drag to pan, scroll or pinch to zoom. The map plays once when it loads; press &#9654; at the bottom of the map to play it again. Map data &copy; Windy.com.</span>
+    <span><span id="wrCoords"></span>Drag to pan, scroll or pinch to zoom. The map plays once when it loads; press &#9654; at the bottom of the map to play it again. The amber pin marks the weather station. Map data &copy; Windy.com.</span>
     <a class="wr-open" id="wrOpen" href="https://www.windy.com/" target="_blank" rel="noopener">Open in Windy.com &#8599;</a>
   </div>
 

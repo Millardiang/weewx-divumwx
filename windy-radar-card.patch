@@ -1,316 +1,149 @@
 diff --git a/CHANGELOG.md b/CHANGELOG.md
-index 6eb46f4..d38dcd4 100644
+index d38dcd4..d0b3527 100644
 --- a/CHANGELOG.md
 +++ b/CHANGELOG.md
-@@ -7,8 +7,8 @@
-   the station, laid out like the Webcam card: title bar, status dot and
-   time, and a 175px map.
- - The radar plays through once whenever the card or the larger map
--  loads (on page load, every 15 minutes, on a unit change, and on each
--  tab in the larger map), then stops on a still map. Windy's frame can't
-+  loads (on page load, every 15 minutes, and on each tab in the larger
-+  map), then stops on a still map. Windy's frame can't
-   be paused from the dashboard, so it's loaded with `play=true` and,
-   after `PLAY_ONCE_SECONDS` (15, set at the top of the card module and of
-   modalWindyRadar.html), swapped for the same map without it, loaded
-@@ -24,15 +24,18 @@
-   seasonal colours. On a shorter window the map shrinks so the whole
+@@ -25,9 +25,12 @@
    modal still fits.
  - The map is centred on the station's latitude and longitude (weewx.conf
--  `[Station]`, via archive.json), shown in the larger map's footer, and
--  follows the dashboard's unit system for wind, temperature and rain
--  (Windy may not honour every unit on every layer). Windy's map only
--  loads once it's on screen and laid out, because Windy can centre in
--  the wrong place if it loads hidden. The Windy link carries no
--  `product` for radar or satellite (they're imagery, not forecast
--  models), no `marker` (it marks the viewer's location, not the
--  station) and no `detailLat`/`detailLon` (only used by Windy's
--  forecast panel, which isn't shown).
-+  `[Station]`, via archive.json), shown in the larger map's footer, with
-+  a red station dot drawn by DivumWX at the centre. The dot hides once a
-+  visitor clicks into the map (it would no longer be on the station) and
-+  returns with the next map load. Windy's map only loads once it's on
-+  screen and laid out, because Windy can centre in the wrong place if it
-+  loads hidden.
-+- The Windy link is kept to the parameters confirmed to centre on the
-+  station: no `product` for radar or satellite (with `product=radar`
-+  Windy centred on the viewer's IP location instead), no unit settings
-+  (`metricRain`/`metricTemp`/`metricWind`; the map went back off-centre
-+  with them, so Windy picks its own units), no `marker` (it marks the
-+  viewer's location, not the station) and no `detailLat`/`detailLon`.
- - Optional card: new installs are asked about it after the Station Image
-   card. **Existing installs** don't get it automatically — add
-   `cardWindyRadar` to `enabled_cards` under `[DivumWXCards]` in weewx.conf
+   `[Station]`, via archive.json), shown in the larger map's footer, with
+-  a red station dot drawn by DivumWX at the centre. The dot hides once a
+-  visitor clicks into the map (it would no longer be on the station) and
+-  returns with the next map load. Windy's map only loads once it's on
++  an amber station pin drawn by DivumWX, its tip at the centre. It's a
++  pin, not a dot, so it isn't mistaken for Windy's own pulsing blue
++  "your location" dot (each viewer's location as Windy guesses it from
++  their IP address, which can't be moved or hidden) or for rain. The pin
++  hides once a visitor clicks into the map (it would no longer be on the
++  station) and returns with the next map load. Windy's map only loads once it's on
+   screen and laid out, because Windy can centre in the wrong place if it
+   loads hidden.
+ - The Windy link is kept to the parameters confirmed to centre on the
 diff --git a/divumwx/cardsBundleNew.js b/divumwx/cardsBundleNew.js
-index e8e1ed9..1470988 100644
+index 1470988..4cf1ee3 100644
 --- a/divumwx/cardsBundleNew.js
 +++ b/divumwx/cardsBundleNew.js
-@@ -10372,40 +10372,26 @@ try {
-     return new Date(Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second));
-   }
- 
--  // DivumWX unit system -> Windy embed unit parameters.
--  var WINDY_WIND = { mph: 'mph', kmh: 'km/h', ms: 'm/s', kt: 'kt', bf: 'bft' };
--  var WINDY_TEMP = { C: '°C', F: '°F' };
--  var WINDY_RAIN = { mm: 'mm', in: 'in' };
--  function currentUnits(){
--    try {
--      var key = localStorage.getItem('dashboardUnitSystem') || 'uk';
--      if (typeof SYSTEMS !== 'undefined' && SYSTEMS[key]) return SYSTEMS[key];
--    } catch (e) {}
--    return { temp: 'C', wind: 'mph', rain: 'mm' };
--  }
--
-+  // The Windy link is kept to exactly the parameters confirmed to centre
-+  // on the station. Left out on purpose:
-+  //  - product: radar is imagery, not a forecast model; with product=radar
-+  //    Windy ignored lat/lon and centred on the viewer's IP location;
-+  //  - metricRain/metricTemp/metricWind: the map went back off-centre
-+  //    when these were sent, so Windy picks its own units;
-+  //  - marker=true marks the *viewer's* own location (from their IP
-+  //    address), not the station; the card draws its own station dot;
-+  //  - detailLat/detailLon only matter for Windy's forecast panel.
-+  // play=true starts Windy's radar animation by itself. Windy then loops
-+  // it, so the card stops it by swapping in the same map without play.
-   function windyUrl(play){
--    var u = currentUnits();
-     var q = [
-       'type=map', 'location=coordinates',
--      'metricRain=' + encodeURIComponent(WINDY_RAIN[u.rain] || 'default'),
--      'metricTemp=' + encodeURIComponent(WINDY_TEMP[u.temp] || 'default'),
--      'metricWind=' + encodeURIComponent(WINDY_WIND[u.wind] || 'default'),
-       'zoom=' + CARD_ZOOM,
-       'overlay=radar', 'level=surface',
-       'lat=' + lat, 'lon=' + lon,
-       'message=true'
-     ];
-     if (play) q.push('play=true');
--    // Left out on purpose:
--    //  - product: radar is imagery, not a forecast model, and Windy takes
--    //    no product for it;
--    //  - marker=true marks the *viewer's* own location (from their IP
--    //    address), not these coordinates;
--    //  - detailLat/detailLon only matter for Windy's forecast panel,
--    //    which isn't shown.
--    // play=true starts Windy's radar animation by itself. Windy then loops
--    // it, so the card stops it by swapping in the same map without play.
-     return 'https://embed.windy.com/embed.html?' + q.join('&');
-   }
- 
-@@ -10559,6 +10545,33 @@ try {
+@@ -10468,7 +10468,7 @@ try {
+   // ---- Title tooltip ----
+   // Uses the dashboard's own #cardHoverTip when the page has one, so it
+   // looks like every other card tooltip; otherwise the browser's own.
+-  var TITLE_TIP = 'Click the title to open the larger Windy map.<br>The radar plays once when it loads; press ▶ on the map to play it again.';
++  var TITLE_TIP = 'Click the title to open the larger Windy map.<br>The radar plays once when it loads; press ▶ on the map to play it again.<br>The amber pin marks the weather station.';
+   var tipTimer = null;
+   function hoverTip(){ return document.getElementById('cardHoverTip'); }
+   if (!hoverTip()) titleLabel.title = TITLE_TIP.replace('<br>', '\n');
+@@ -10545,21 +10545,25 @@ try {
    message.textContent = '…';
    body.appendChild(message);
  
-+  // Station dot. Windy centres the map on the station's coordinates, so
-+  // the station is at the middle of the frame until a visitor moves the
-+  // map. Once they click into it the dot is hidden, since it would no
-+  // longer be on the station; it comes back with the next map load.
-+  var stationDot = document.createElement('div');
-+  stationDot.title = 'Weather station';
-+  stationDot.style.position = 'absolute';
-+  stationDot.style.left = '50%';
-+  stationDot.style.top = '50%';
-+  stationDot.style.width = '10px';
-+  stationDot.style.height = '10px';
-+  stationDot.style.margin = '-5px 0 0 -5px';
-+  stationDot.style.borderRadius = '50%';
-+  stationDot.style.background = '#e74c3c';
-+  stationDot.style.boxShadow = '0 0 0 2px #fff, 0 0 6px rgba(0,0,0,.6)';
-+  stationDot.style.zIndex = '2';
-+  stationDot.style.pointerEvents = 'none';
-+  stationDot.style.display = 'none';
-+  body.appendChild(stationDot);
-+  // Clicking into a cross-origin frame blurs this window and makes the
-+  // frame the active element; that's the only signal the page gets.
-+  window.addEventListener('blur', function(){
-+    setTimeout(function(){
-+      if (frame && document.activeElement === frame) stationDot.style.display = 'none';
-+    }, 0);
-+  });
-+
-   function modalTitle(){
-     var base = DivumWXI18N.t('Windy Radar');
-     return stationName ? base + ' - ' + stationName : base;
-@@ -10602,6 +10615,7 @@ try {
-       if (frame && frame !== f) frame.remove();
-       frame = f;
-       message.style.display = 'none';
-+      stationDot.style.display = 'block';
-       setStatus(true);
-       if (playing) stopTimer = setTimeout(function(){ stopPlaying(gen); }, PLAY_ONCE_SECONDS * 1000);
-     };
-@@ -10652,7 +10666,6 @@ try {
-     setInterval(load, RELOAD_MS);
-   });
- 
--  window.addEventListener('unitsystemchange', function(){ load(); });
-   window.addEventListener('i18nready', function(){
-     titleLabel.textContent = DivumWXI18N.t('Windy Radar');
-     titleLabel.setAttribute('data-title', modalTitle());
+-  // Station dot. Windy centres the map on the station's coordinates, so
++  // Station pin. Windy centres the map on the station's coordinates, so
+   // the station is at the middle of the frame until a visitor moves the
+-  // map. Once they click into it the dot is hidden, since it would no
++  // map. Once they click into it the pin is hidden, since it would no
+   // longer be on the station; it comes back with the next map load.
++  // Drawn as an amber pin, not a dot: Windy's own pulsing blue dot marks
++  // the *viewer's* guessed location, and red/orange blobs are rain on
++  // the radar, so a pin shape can't be mistaken for either. The pin's
++  // tip sits exactly on the station (the middle of the map).
+   var stationDot = document.createElement('div');
+   stationDot.title = 'Weather station';
++  stationDot.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="28" viewBox="0 0 20 28" aria-hidden="true"><path d="M10 27C10 27 1.5 16.6 1.5 10.2A8.5 8.5 0 0 1 18.5 10.2C18.5 16.6 10 27 10 27Z" fill="#F59E0B" stroke="#fff" stroke-width="2" stroke-linejoin="round"/><circle cx="10" cy="10" r="3.2" fill="#fff"/></svg>';
+   stationDot.style.position = 'absolute';
+   stationDot.style.left = '50%';
+   stationDot.style.top = '50%';
+-  stationDot.style.width = '10px';
+-  stationDot.style.height = '10px';
+-  stationDot.style.margin = '-5px 0 0 -5px';
+-  stationDot.style.borderRadius = '50%';
+-  stationDot.style.background = '#e74c3c';
+-  stationDot.style.boxShadow = '0 0 0 2px #fff, 0 0 6px rgba(0,0,0,.6)';
++  stationDot.style.width = '20px';
++  stationDot.style.height = '28px';
++  stationDot.style.margin = '-27px 0 0 -10px';
++  stationDot.style.lineHeight = '0';
++  stationDot.style.filter = 'drop-shadow(0 1px 2px rgba(0,0,0,.7))';
+   stationDot.style.zIndex = '2';
+   stationDot.style.pointerEvents = 'none';
+   stationDot.style.display = 'none';
 diff --git a/divumwx/hyperIndex.html b/divumwx/hyperIndex.html
-index 82a3152..0638ab8 100644
+index 0638ab8..cb76675 100644
 --- a/divumwx/hyperIndex.html
 +++ b/divumwx/hyperIndex.html
 @@ -538,6 +538,6 @@ window.addEventListener('load', updateFooterVisibility);
  <script src="js/d3.7.9.0.min.js"></script>
  <script src="js/d3-geo-projection.4.0.0.min.js"></script>
  <script src="js/topojson.3.0.2.min.js"></script>
--<script src="cardsBundleNew.js?v=780323d9"></script>
-+<script src="cardsBundleNew.js?v=238da6db"></script>
+-<script src="cardsBundleNew.js?v=238da6db"></script>
++<script src="cardsBundleNew.js?v=612e8cbf"></script>
  </body>
  </html>
 \ No newline at end of file
 diff --git a/divumwx/index.html b/divumwx/index.html
-index f2cacff..2802911 100644
+index 2802911..d2f00dd 100644
 --- a/divumwx/index.html
 +++ b/divumwx/index.html
 @@ -908,6 +908,6 @@ window.addEventListener('load', updateFooterVisibility);
  <script src="js/d3.7.9.0.min.js"></script>
  <script src="js/d3-geo-projection.4.0.0.min.js"></script>
  <script src="js/topojson.3.0.2.min.js"></script>
--<script src="cardsBundleNew.js?v=780323d9"></script>
-+<script src="cardsBundleNew.js?v=238da6db"></script>
+-<script src="cardsBundleNew.js?v=238da6db"></script>
++<script src="cardsBundleNew.js?v=612e8cbf"></script>
  </body>
  </html>
 diff --git a/divumwx/lexendIndex.html b/divumwx/lexendIndex.html
-index 926a07d..0a2927d 100644
+index 0a2927d..4323702 100644
 --- a/divumwx/lexendIndex.html
 +++ b/divumwx/lexendIndex.html
 @@ -538,6 +538,6 @@ window.addEventListener('load', updateFooterVisibility);
  <script src="js/d3.7.9.0.min.js"></script>
  <script src="js/d3-geo-projection.4.0.0.min.js"></script>
  <script src="js/topojson.3.0.2.min.js"></script>
--<script src="cardsBundleNew.js?v=780323d9"></script>
-+<script src="cardsBundleNew.js?v=238da6db"></script>
+-<script src="cardsBundleNew.js?v=238da6db"></script>
++<script src="cardsBundleNew.js?v=612e8cbf"></script>
  </body>
  </html>
 \ No newline at end of file
 diff --git a/divumwx/modalWindyRadar.html b/divumwx/modalWindyRadar.html
-index 62209be..ee5f74f 100644
+index ee5f74f..819ab44 100644
 --- a/divumwx/modalWindyRadar.html
 +++ b/divumwx/modalWindyRadar.html
-@@ -87,6 +87,14 @@ body{
+@@ -87,14 +87,17 @@ body{
  @media (max-width:900px){ .wr-stage{ height:500px; } }
  @media (max-width:600px){ .wr-stage{ height:400px; } }
  .wr-frame{ position:absolute; inset:0; width:100%; height:100%; border:0; }
-+/* Station dot: Windy centres the map on the station, so it sits mid-frame
-+   until a visitor moves the map (then it's hidden until the next load). */
-+.wr-station{
-+  position:absolute; left:50%; top:50%; z-index:1;
-+  width:12px; height:12px; margin:-6px 0 0 -6px; border-radius:50%;
-+  background:#e74c3c; box-shadow:0 0 0 2px #fff, 0 0 6px rgba(0,0,0,.6);
-+  pointer-events:none; display:none;
-+}
+-/* Station dot: Windy centres the map on the station, so it sits mid-frame
+-   until a visitor moves the map (then it's hidden until the next load). */
++/* Station pin: Windy centres the map on the station, so the pin's tip sits
++   mid-frame until a visitor moves the map (then it's hidden until the next
++   load). A pin, in amber, so it can't be mistaken for Windy's pulsing blue
++   "your location" dot (the viewer's guessed location) or for rain. */
+ .wr-station{
+   position:absolute; left:50%; top:50%; z-index:1;
+-  width:12px; height:12px; margin:-6px 0 0 -6px; border-radius:50%;
+-  background:#e74c3c; box-shadow:0 0 0 2px #fff, 0 0 6px rgba(0,0,0,.6);
++  width:24px; height:34px; margin:-33px 0 0 -12px; line-height:0;
++  filter:drop-shadow(0 1px 2px rgba(0,0,0,.7));
+   pointer-events:none; display:none;
+ }
++.wr-station svg{ width:24px; height:34px; }
  
  .wr-status{
    position:absolute; right:12px; top:12px; z-index:2;
-@@ -138,6 +146,7 @@ body{
+@@ -146,7 +149,7 @@ body{
    </div>
  
    <div class="wr-stage" id="wrStage">
-+    <div class="wr-station" id="wrStation" title="Weather station"></div>
+-    <div class="wr-station" id="wrStation" title="Weather station"></div>
++    <div class="wr-station" id="wrStation" title="Weather station"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="28" viewBox="0 0 20 28" aria-hidden="true"><path d="M10 27C10 27 1.5 16.6 1.5 10.2A8.5 8.5 0 0 1 18.5 10.2C18.5 16.6 10 27 10 27Z" fill="#F59E0B" stroke="#fff" stroke-width="2" stroke-linejoin="round"/><circle cx="10" cy="10" r="3.2" fill="#fff"/></svg></div>
      <div class="wr-empty" id="wrEmpty">
        <div class="wr-empty-title" id="wrEmptyTitle">Loading the map&hellip;</div>
        <div class="wr-empty-sub" id="wrEmptySub">&nbsp;</div>
-@@ -155,7 +164,6 @@ body{
+@@ -158,7 +161,7 @@ body{
+   </div>
  
- </div>
+   <div class="wr-footer">
+-    <span><span id="wrCoords"></span>Drag to pan, scroll or pinch to zoom. The map plays once when it loads; press &#9654; at the bottom of the map to play it again. Map data &copy; Windy.com.</span>
++    <span><span id="wrCoords"></span>Drag to pan, scroll or pinch to zoom. The map plays once when it loads; press &#9654; at the bottom of the map to play it again. The amber pin marks the weather station. Map data &copy; Windy.com.</span>
+     <a class="wr-open" id="wrOpen" href="https://www.windy.com/" target="_blank" rel="noopener">Open in Windy.com &#8599;</a>
+   </div>
  
--<script src="units.js"></script>
- <script>
- (function(){
- 
-@@ -195,18 +203,6 @@ body{
-   // the dashboard, so time one run of the loop on your site and adjust.
-   var PLAY_ONCE_SECONDS = 15;
- 
--  // DivumWX unit system -> Windy embed unit parameters.
--  var WINDY_WIND = { mph: 'mph', kmh: 'km/h', ms: 'm/s', kt: 'kt', bf: 'bft' };
--  var WINDY_TEMP = { C: '°C', F: '°F' };
--  var WINDY_RAIN = { mm: 'mm', in: 'in' };
--  function currentUnits(){
--    try {
--      var key = localStorage.getItem('dashboardUnitSystem') || 'uk';
--      if (typeof SYSTEMS !== 'undefined' && SYSTEMS[key]) return SYSTEMS[key];
--    } catch (e) {}
--    return { temp: 'C', wind: 'mph', rain: 'mm' };
--  }
--
-   var frame = null;   // the map currently shown; frames are made per load
-   var emptyEl = document.getElementById('wrEmpty');
-   var emptyTitle = document.getElementById('wrEmptyTitle');
-@@ -218,6 +214,15 @@ body{
-   var openLink = document.getElementById('wrOpen');
-   var stageEl = document.getElementById('wrStage');
-   var coordsEl = document.getElementById('wrCoords');
-+  var stationEl = document.getElementById('wrStation');
-+  // Clicking into a cross-origin frame blurs this window and makes the
-+  // frame the active element; that's the only signal the page gets that
-+  // the visitor is moving the map, so the dot is hidden then.
-+  window.addEventListener('blur', function(){
-+    setTimeout(function(){
-+      if (frame && document.activeElement === frame) stationEl.style.display = 'none';
-+    }, 0);
-+  });
- 
-   var lat = null, lon = null;
-   var overlay = 'radar';
-@@ -232,13 +237,21 @@ body{
-     if (cls === 'live') hideTimer = setTimeout(function(){ statusEl.classList.add('hide'); }, 3000);
-   }
- 
-+  // The Windy link is kept to exactly the parameters confirmed to centre
-+  // on the station. Left out on purpose:
-+  //  - product for radar/satellite: they're imagery, not forecast models;
-+  //    with product=radar Windy ignored lat/lon and centred on the
-+  //    viewer's IP location (forecast layers still get product=ecmwf);
-+  //  - metricRain/metricTemp/metricWind: the map went back off-centre
-+  //    when these were sent, so Windy picks its own units;
-+  //  - marker=true marks the *viewer's* own location (from their IP
-+  //    address), not the station; this page draws its own station dot;
-+  //  - detailLat/detailLon only matter for Windy's forecast panel.
-+  // play=true starts Windy's animation by itself. Windy then loops it,
-+  // so the page stops it by swapping in the same map without play.
-   function windyUrl(play){
--    var u = currentUnits();
-     var q = [
-       'type=map', 'location=coordinates',
--      'metricRain=' + encodeURIComponent(WINDY_RAIN[u.rain] || 'default'),
--      'metricTemp=' + encodeURIComponent(WINDY_TEMP[u.temp] || 'default'),
--      'metricWind=' + encodeURIComponent(WINDY_WIND[u.wind] || 'default'),
-       'zoom=' + MODAL_ZOOM,
-       'overlay=' + overlay,
-       'level=surface',
-@@ -246,16 +259,7 @@ body{
-       'message=true'
-     ];
-     if (play) q.push('play=true');
--    // Radar and satellite are imagery, not forecast models: Windy takes no
--    // product for them, so only the forecast layers get one.
-     if (overlay !== 'radar' && overlay !== 'satellite') q.push('product=ecmwf');
--    // Left out on purpose:
--    //  - marker=true marks the *viewer's* own location (from their IP
--    //    address), not these coordinates;
--    //  - detailLat/detailLon only matter for Windy's forecast panel,
--    //    which isn't shown.
--    // play=true starts Windy's animation by itself. Windy then loops it,
--    // so the page stops it by swapping in the same map without play.
-     return 'https://embed.windy.com/embed.html?' + q.join('&');
-   }
- 
-@@ -289,6 +293,7 @@ body{
-       if (frame && frame !== f) frame.remove();
-       frame = f;
-       emptyEl.style.display = 'none';
-+      stationEl.style.display = 'block';
-       if (playing) {
-         setStatus('live', 'Live');
-         stopTimer = setTimeout(function(){ stopPlaying(gen); }, PLAY_ONCE_SECONDS * 1000);
-@@ -335,7 +340,6 @@ body{
-     load();
-   });
- 
--  window.addEventListener('storage', function(e){ if (e.key === 'dashboardUnitSystem') load(); });
- 
-   fetch(ARCHIVE_JSON_URL + '?_=' + Date.now(), { cache: 'no-store' })
-     .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })

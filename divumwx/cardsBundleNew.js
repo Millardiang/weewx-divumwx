@@ -10468,7 +10468,7 @@ try {
   // ---- Title tooltip ----
   // Uses the dashboard's own #cardHoverTip when the page has one, so it
   // looks like every other card tooltip; otherwise the browser's own.
-  var TITLE_TIP = 'Click the title to open the larger Windy map.<br>The radar plays once when it loads; press ▶ on the map to play it again.';
+  var TITLE_TIP = 'Click the title to open the larger Windy map.<br>The radar plays once when it loads; press ▶ on the map to play it again.<br>The amber pin marks the weather station.';
   var tipTimer = null;
   function hoverTip(){ return document.getElementById('cardHoverTip'); }
   if (!hoverTip()) titleLabel.title = TITLE_TIP.replace('<br>', '\n');
@@ -10545,21 +10545,25 @@ try {
   message.textContent = '…';
   body.appendChild(message);
 
-  // Station dot. Windy centres the map on the station's coordinates, so
+  // Station pin. Windy centres the map on the station's coordinates, so
   // the station is at the middle of the frame until a visitor moves the
-  // map. Once they click into it the dot is hidden, since it would no
+  // map. Once they click into it the pin is hidden, since it would no
   // longer be on the station; it comes back with the next map load.
+  // Drawn as an amber pin, not a dot: Windy's own pulsing blue dot marks
+  // the *viewer's* guessed location, and red/orange blobs are rain on
+  // the radar, so a pin shape can't be mistaken for either. The pin's
+  // tip sits exactly on the station (the middle of the map).
   var stationDot = document.createElement('div');
   stationDot.title = 'Weather station';
+  stationDot.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="28" viewBox="0 0 20 28" aria-hidden="true"><path d="M10 27C10 27 1.5 16.6 1.5 10.2A8.5 8.5 0 0 1 18.5 10.2C18.5 16.6 10 27 10 27Z" fill="#F59E0B" stroke="#fff" stroke-width="2" stroke-linejoin="round"/><circle cx="10" cy="10" r="3.2" fill="#fff"/></svg>';
   stationDot.style.position = 'absolute';
   stationDot.style.left = '50%';
   stationDot.style.top = '50%';
-  stationDot.style.width = '10px';
-  stationDot.style.height = '10px';
-  stationDot.style.margin = '-5px 0 0 -5px';
-  stationDot.style.borderRadius = '50%';
-  stationDot.style.background = '#e74c3c';
-  stationDot.style.boxShadow = '0 0 0 2px #fff, 0 0 6px rgba(0,0,0,.6)';
+  stationDot.style.width = '20px';
+  stationDot.style.height = '28px';
+  stationDot.style.margin = '-27px 0 0 -10px';
+  stationDot.style.lineHeight = '0';
+  stationDot.style.filter = 'drop-shadow(0 1px 2px rgba(0,0,0,.7))';
   stationDot.style.zIndex = '2';
   stationDot.style.pointerEvents = 'none';
   stationDot.style.display = 'none';
