@@ -1,28 +1,45 @@
-DivumWX - Windy Radar card: centring fix (for 2.0.0)
+DivumWX - Windy Radar card: location fix (for 2.0.0)
 ====================================================
 
 Goes on top of version-2.0-beta at 7b18276 (the v2 Windy package).
+Includes everything from v3, so you can skip v3.
 
-What changed
-  - Removed Windy's "marker=true" option from the card and the larger
-    map. In Windy's embed it marks the viewer's own location (worked out
-    from their IP address), not the station.
-  - Windy's map now loads only once it's on screen and laid out, on both
-    the card and the larger map. Windy can centre in the wrong place if
-    it loads while hidden or before it has its final size. The card's
-    15-minute refresh and unit-change reloads wait the same way.
-  - The larger map's footer now says what it's centred on, e.g.
+Why the map sat in the English Channel
+  The Windy link asked for "product=radar". Radar is imagery, not a
+  forecast model, so Windy takes no product for it. The likeliest
+  explanation is that Windy then ignored our coordinates and centred
+  on the viewer's own location as guessed from their internet address,
+  which is often tens of km off and can land anywhere, the sea included.
+  The dot in the middle of the map was Windy's "your location" dot, not
+  the station.
+
+What changed (card and larger map)
+  - No "product" for radar or satellite. Wind, rain and temperature
+    still use product=ecmwf.
+  - No "marker=true". It marks the viewer, not the station.
+  - No detailLat/detailLon. They're only for Windy's forecast panel,
+    which isn't shown.
+  - Added "play=true", which asks Windy to start the animation by
+    itself. A maintained Home Assistant Windy card uses it for autoplay;
+    it may not apply to the radar layer.
+  - Windy's map loads only once it's on screen and laid out (Windy can
+    centre wrongly if it loads hidden).
+  - The larger map's footer shows the coordinates it was given, e.g.
     "Centred on 51.937, -0.982 (weewx.conf [Station] latitude/longitude)."
-    If the map is ever off again, this shows whether the coordinates or
-    Windy are at fault.
+
+The card now asks Windy for exactly:
+  https://embed.windy.com/embed.html?type=map&location=coordinates
+    &metricRain=mm&metricTemp=%C2%B0C&metricWind=mph&zoom=7
+    &overlay=radar&level=surface&lat=51.937&lon=-0.982
+    &message=true&play=true
 
 Files are laid out at their repo paths. These 6 are the only ones that
 differ from your branch; copy each over the version in your repo:
-  divumwx/cardsBundleNew.js        cardWindyRadar: no marker, deferred load
-  divumwx/modalWindyRadar.html     no marker, deferred load, coords shown
-  divumwx/index.html               bundle ?v=5baef93b
-  divumwx/hyperIndex.html          bundle ?v=5baef93b
-  divumwx/lexendIndex.html         bundle ?v=5baef93b
+  divumwx/cardsBundleNew.js        cardWindyRadar: new Windy link, deferred load
+  divumwx/modalWindyRadar.html     new Windy link, deferred load, coords shown
+  divumwx/index.html               bundle ?v=8c31545e
+  divumwx/hyperIndex.html          bundle ?v=8c31545e
+  divumwx/lexendIndex.html         bundle ?v=8c31545e
   CHANGELOG.md                     entry updated
 
 Using git instead, on version-2.0-beta (7b18276):

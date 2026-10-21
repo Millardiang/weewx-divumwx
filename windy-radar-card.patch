@@ -1,8 +1,8 @@
 diff --git a/CHANGELOG.md b/CHANGELOG.md
-index 40e27c3..7db67be 100644
+index 40e27c3..7320e6c 100644
 --- a/CHANGELOG.md
 +++ b/CHANGELOG.md
-@@ -17,9 +17,13 @@
+@@ -17,9 +17,17 @@
    an "Open in Windy.com" link, and the dashboard's light/dark theme and
    seasonal colours. On a shorter window the map shrinks so the whole
    modal still fits.
@@ -14,28 +14,42 @@ index 40e27c3..7db67be 100644
 +  follows the dashboard's unit system for wind, temperature and rain
 +  (Windy may not honour every unit on every layer). Windy's map only
 +  loads once it's on screen and laid out, because Windy can centre in
-+  the wrong place if it loads hidden. Windy's own `marker` option isn't
-+  used: it marks the viewer's location, not the station.
++  the wrong place if it loads hidden. The Windy link carries no
++  `product` for radar or satellite (they're imagery, not forecast
++  models), no `marker` (it marks the viewer's location, not the
++  station) and no `detailLat`/`detailLon` (only used by Windy's
++  forecast panel, which isn't shown). It asks Windy to start the
++  animation by itself (`play=true`) where Windy supports it.
  - Optional card: new installs are asked about it after the Station Image
    card. **Existing installs** don't get it automatically — add
    `cardWindyRadar` to `enabled_cards` under `[DivumWXCards]` in weewx.conf
 diff --git a/divumwx/cardsBundleNew.js b/divumwx/cardsBundleNew.js
-index 63a0ace..48f6573 100644
+index 63a0ace..74b71fa 100644
 --- a/divumwx/cardsBundleNew.js
 +++ b/divumwx/cardsBundleNew.js
-@@ -10391,8 +10391,10 @@ try {
-       'overlay=radar', 'product=radar', 'level=surface',
+@@ -10388,11 +10388,18 @@ try {
+       'metricTemp=' + encodeURIComponent(WINDY_TEMP[u.temp] || 'default'),
+       'metricWind=' + encodeURIComponent(WINDY_WIND[u.wind] || 'default'),
+       'zoom=' + CARD_ZOOM,
+-      'overlay=radar', 'product=radar', 'level=surface',
++      'overlay=radar', 'level=surface',
        'lat=' + lat, 'lon=' + lon,
-       'detailLat=' + lat, 'detailLon=' + lon,
+-      'detailLat=' + lat, 'detailLon=' + lon,
 -      'marker=true', 'message=true'
-+      'message=true'
++      'message=true', 'play=true'
      ];
-+    // No marker=true: in Windy's embed that marks the *viewer's* own
-+    // location (from their IP address), not these coordinates.
++    // Left out on purpose:
++    //  - product: radar is imagery, not a forecast model, and Windy takes
++    //    no product for it;
++    //  - marker=true marks the *viewer's* own location (from their IP
++    //    address), not these coordinates;
++    //  - detailLat/detailLon only matter for Windy's forecast panel,
++    //    which isn't shown.
++    // play=true starts the radar animation by itself where Windy supports it.
      return 'https://embed.windy.com/embed.html?' + q.join('&');
    }
  
-@@ -10520,7 +10522,6 @@ try {
+@@ -10520,7 +10527,6 @@ try {
    // The live map: Windy's own controls work, including its play arrow.
    var frame = document.createElement('iframe');
    frame.title = 'Windy weather radar';
@@ -43,7 +57,7 @@ index 63a0ace..48f6573 100644
    frame.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
    frame.style.position = 'absolute';
    frame.style.inset = '0';
-@@ -10548,9 +10549,32 @@ try {
+@@ -10548,9 +10554,32 @@ try {
      return stationName ? base + ' - ' + stationName : base;
    }
  
@@ -78,7 +92,7 @@ index 63a0ace..48f6573 100644
      // Windy gives no error event for a blocked or failed embed, so treat
      // "no load event within 20 s" as a failure for the status dot.
 diff --git a/divumwx/hyperIndex.html b/divumwx/hyperIndex.html
-index 425089c..9b12ecd 100644
+index 425089c..8d37a2e 100644
 --- a/divumwx/hyperIndex.html
 +++ b/divumwx/hyperIndex.html
 @@ -538,6 +538,6 @@ window.addEventListener('load', updateFooterVisibility);
@@ -86,12 +100,12 @@ index 425089c..9b12ecd 100644
  <script src="js/d3-geo-projection.4.0.0.min.js"></script>
  <script src="js/topojson.3.0.2.min.js"></script>
 -<script src="cardsBundleNew.js?v=1742a3e8"></script>
-+<script src="cardsBundleNew.js?v=5baef93b"></script>
++<script src="cardsBundleNew.js?v=8c31545e"></script>
  </body>
  </html>
 \ No newline at end of file
 diff --git a/divumwx/index.html b/divumwx/index.html
-index 3cbaab5..c1bea6f 100644
+index 3cbaab5..cfc9a48 100644
 --- a/divumwx/index.html
 +++ b/divumwx/index.html
 @@ -908,6 +908,6 @@ window.addEventListener('load', updateFooterVisibility);
@@ -99,11 +113,11 @@ index 3cbaab5..c1bea6f 100644
  <script src="js/d3-geo-projection.4.0.0.min.js"></script>
  <script src="js/topojson.3.0.2.min.js"></script>
 -<script src="cardsBundleNew.js?v=1742a3e8"></script>
-+<script src="cardsBundleNew.js?v=5baef93b"></script>
++<script src="cardsBundleNew.js?v=8c31545e"></script>
  </body>
  </html>
 diff --git a/divumwx/lexendIndex.html b/divumwx/lexendIndex.html
-index 9e1f6f2..6729b21 100644
+index 9e1f6f2..cbf93a7 100644
 --- a/divumwx/lexendIndex.html
 +++ b/divumwx/lexendIndex.html
 @@ -538,6 +538,6 @@ window.addEventListener('load', updateFooterVisibility);
@@ -111,12 +125,12 @@ index 9e1f6f2..6729b21 100644
  <script src="js/d3-geo-projection.4.0.0.min.js"></script>
  <script src="js/topojson.3.0.2.min.js"></script>
 -<script src="cardsBundleNew.js?v=1742a3e8"></script>
-+<script src="cardsBundleNew.js?v=5baef93b"></script>
++<script src="cardsBundleNew.js?v=8c31545e"></script>
  </body>
  </html>
 \ No newline at end of file
 diff --git a/divumwx/modalWindyRadar.html b/divumwx/modalWindyRadar.html
-index 646f3b6..266416b 100644
+index 646f3b6..648f355 100644
 --- a/divumwx/modalWindyRadar.html
 +++ b/divumwx/modalWindyRadar.html
 @@ -150,7 +150,7 @@ body{
@@ -137,15 +151,26 @@ index 646f3b6..266416b 100644
  
    var lat = null, lon = null;
    var overlay = 'radar';
-@@ -240,13 +242,24 @@ body{
+@@ -236,17 +238,33 @@ body{
+       'metricWind=' + encodeURIComponent(WINDY_WIND[u.wind] || 'default'),
+       'zoom=' + MODAL_ZOOM,
+       'overlay=' + overlay,
+-      'product=' + (overlay === 'radar' || overlay === 'satellite' ? overlay : 'ecmwf'),
        'level=surface',
        'lat=' + lat, 'lon=' + lon,
-       'detailLat=' + lat, 'detailLon=' + lon,
+-      'detailLat=' + lat, 'detailLon=' + lon,
 -      'marker=true', 'message=true'
-+      'message=true'
++      'message=true', 'play=true'
      ];
-+    // No marker=true: in Windy's embed that marks the *viewer's* own
-+    // location (from their IP address), not these coordinates.
++    // Radar and satellite are imagery, not forecast models: Windy takes no
++    // product for them, so only the forecast layers get one.
++    if (overlay !== 'radar' && overlay !== 'satellite') q.push('product=ecmwf');
++    // Left out on purpose:
++    //  - marker=true marks the *viewer's* own location (from their IP
++    //    address), not these coordinates;
++    //  - detailLat/detailLon only matter for Windy's forecast panel,
++    //    which isn't shown.
++    // play=true starts the animation by itself where Windy supports it.
      return 'https://embed.windy.com/embed.html?' + q.join('&');
    }
  
@@ -163,7 +188,7 @@ index 646f3b6..266416b 100644
      emptyEl.style.display = 'flex';
      emptyTitle.innerHTML = 'Loading the map&hellip;';
      emptySub.innerHTML = '&nbsp;';
-@@ -288,6 +301,7 @@ body{
+@@ -288,6 +306,7 @@ body{
        var la = parseFloat(m.latitude), lo = parseFloat(m.longitude);
        if (!isFinite(la) || !isFinite(lo)) throw new Error('no station latitude/longitude in archive.json');
        lat = la.toFixed(3); lon = lo.toFixed(3);

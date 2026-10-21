@@ -22,8 +22,12 @@
   follows the dashboard's unit system for wind, temperature and rain
   (Windy may not honour every unit on every layer). Windy's map only
   loads once it's on screen and laid out, because Windy can centre in
-  the wrong place if it loads hidden. Windy's own `marker` option isn't
-  used: it marks the viewer's location, not the station.
+  the wrong place if it loads hidden. The Windy link carries no
+  `product` for radar or satellite (they're imagery, not forecast
+  models), no `marker` (it marks the viewer's location, not the
+  station) and no `detailLat`/`detailLon` (only used by Windy's
+  forecast panel, which isn't shown). It asks Windy to start the
+  animation by itself (`play=true`) where Windy supports it.
 - Optional card: new installs are asked about it after the Station Image
   card. **Existing installs** don't get it automatically — add
   `cardWindyRadar` to `enabled_cards` under `[DivumWXCards]` in weewx.conf

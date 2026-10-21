@@ -238,14 +238,19 @@ body{
       'metricWind=' + encodeURIComponent(WINDY_WIND[u.wind] || 'default'),
       'zoom=' + MODAL_ZOOM,
       'overlay=' + overlay,
-      'product=' + (overlay === 'radar' || overlay === 'satellite' ? overlay : 'ecmwf'),
       'level=surface',
       'lat=' + lat, 'lon=' + lon,
-      'detailLat=' + lat, 'detailLon=' + lon,
-      'message=true'
+      'message=true', 'play=true'
     ];
-    // No marker=true: in Windy's embed that marks the *viewer's* own
-    // location (from their IP address), not these coordinates.
+    // Radar and satellite are imagery, not forecast models: Windy takes no
+    // product for them, so only the forecast layers get one.
+    if (overlay !== 'radar' && overlay !== 'satellite') q.push('product=ecmwf');
+    // Left out on purpose:
+    //  - marker=true marks the *viewer's* own location (from their IP
+    //    address), not these coordinates;
+    //  - detailLat/detailLon only matter for Windy's forecast panel,
+    //    which isn't shown.
+    // play=true starts the animation by itself where Windy supports it.
     return 'https://embed.windy.com/embed.html?' + q.join('&');
   }
 

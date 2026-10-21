@@ -10388,13 +10388,18 @@ try {
       'metricTemp=' + encodeURIComponent(WINDY_TEMP[u.temp] || 'default'),
       'metricWind=' + encodeURIComponent(WINDY_WIND[u.wind] || 'default'),
       'zoom=' + CARD_ZOOM,
-      'overlay=radar', 'product=radar', 'level=surface',
+      'overlay=radar', 'level=surface',
       'lat=' + lat, 'lon=' + lon,
-      'detailLat=' + lat, 'detailLon=' + lon,
-      'message=true'
+      'message=true', 'play=true'
     ];
-    // No marker=true: in Windy's embed that marks the *viewer's* own
-    // location (from their IP address), not these coordinates.
+    // Left out on purpose:
+    //  - product: radar is imagery, not a forecast model, and Windy takes
+    //    no product for it;
+    //  - marker=true marks the *viewer's* own location (from their IP
+    //    address), not these coordinates;
+    //  - detailLat/detailLon only matter for Windy's forecast panel,
+    //    which isn't shown.
+    // play=true starts the radar animation by itself where Windy supports it.
     return 'https://embed.windy.com/embed.html?' + q.join('&');
   }
 
