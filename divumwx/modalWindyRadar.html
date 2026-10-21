@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<!--
+##############################################################################################
+# modalWindyRadar.html version 1.0.0
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  GPLv3
+##############################################################################################
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Windy Radar</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root, [data-theme="light"]{
+  --bw-accent:#B45309;
+  --bw-good:#5BBB8A;
+  --bw-danger:#E36B57;
+  --bw-amber:#D97706;
+  --bw-radius:14px;
+  --bw-radius-sm:10px;
+  --bw-shadow:0 1px 2px rgba(0,0,0,0.12), 0 8px 20px -8px rgba(0,0,0,0.25);
+  --bs-body-bg:#EFECE2;
+  --bs-body-color:#1D2C4E;
+  --bs-secondary-color:#5C6672;
+  --bs-card-bg:#FFFFFF;
+  --bs-tertiary-bg:#F4F1E9;
+  --bs-border-color:#C9CFD8;
+}
+[data-theme="dark"]{
+  --bw-accent:#D3A94C;
+  --bw-good:#5BBB8A;
+  --bw-danger:#E36B57;
+  --bw-amber:#D97706;
+  --bw-shadow:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.5);
+  --bs-body-bg:#0A0F22;
+  --bs-body-color:#E9E4D4;
+  --bs-secondary-color:#8B93B8;
+  --bs-card-bg:#111834;
+  --bs-tertiary-bg:#161F3C;
+  --bs-border-color:#2A3358;
+}
+
+:root[data-season="winter"]{ --bs-body-bg:#e9f2ec; --bs-card-bg:#f4f9f6; }
+:root[data-season="spring"]{ --bs-body-bg:#eef7e3; --bs-card-bg:#f5faef; }
+:root[data-season="summer"]{ --bs-body-bg:#fff6d9; --bs-card-bg:#fffbef; }
+:root[data-season="autumn"]{ --bs-body-bg:#f2e6d8; --bs-card-bg:#f8f0e7; }
+
+*{ box-sizing:border-box; }
+html, body{ margin:0; padding:0; }
+body{
+  background:var(--bs-body-bg);
+  color:var(--bs-body-color);
+  font-family:'Lexend', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size:13.5px;
+  line-height:1.5;
+  transition:background-color .2s, color .2s;
+}
+
+.wr-page{ padding:12px 14px 14px; max-width:900px; margin:0 auto; }
+
+.wr-tabs{ display:flex; gap:6px; margin-bottom:8px; flex-wrap:wrap; }
+.wr-tab{
+  font-family:inherit;
+  font-size:11px; font-weight:700; padding:5px 12px; border-radius:999px;
+  border:1px solid var(--bs-border-color); background:var(--bs-tertiary-bg);
+  color:var(--bs-secondary-color); cursor:pointer;
+}
+.wr-tab:hover:not(.active){ border-color:var(--bw-accent); color:var(--bw-accent); }
+.wr-tab.active{ background:var(--bw-accent); border-color:var(--bw-accent); color:#fff; }
+
+.wr-stage{
+  position:relative;
+  width:100%;
+  /* Fixed height: the parent sizes the modal from this page's reported
+     height (and caps it at 92% of its window), so a vh-based height here
+     would shrink to fit the iframe's initial size instead. */
+  height:500px;
+  background:var(--bs-tertiary-bg);
+  border-radius:var(--bw-radius);
+  overflow:hidden;
+  box-shadow:var(--bw-shadow);
+}
+@media (max-width:600px){ .wr-stage{ height:400px; } }
+.wr-frame{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+
+.wr-status{
+  position:absolute; right:12px; top:12px; z-index:2;
+  display:flex; align-items:center; gap:6px;
+  padding:3px 9px; border-radius:999px;
+  background:rgba(0,0,0,.55); color:#fff;
+  font-size:11px; white-space:nowrap;
+  pointer-events:none;
+  transition:opacity .4s;
+}
+.wr-status.hide{ opacity:0; }
+.wr-status-dot{ width:7px; height:7px; border-radius:50%; background:#999; flex-shrink:0; }
+.wr-status-dot.live{ background:var(--bw-good); }
+.wr-status-dot.error{ background:var(--bw-danger); }
+
+.wr-empty{
+  position:absolute; inset:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:8px; color:var(--bs-secondary-color); text-align:center; padding:20px;
+}
+.wr-empty-title{ font-weight:700; color:var(--bs-body-color); font-size:14px; }
+.wr-empty-sub{ font-size:12px; max-width:380px; }
+
+.wr-footer{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  margin-top:8px; flex-wrap:wrap;
+  font-size:10.5px; color:var(--bs-secondary-color);
+}
+.wr-open{
+  display:inline-flex; align-items:center; gap:5px;
+  font-size:11px; font-weight:700; text-decoration:none;
+  padding:5px 10px; border-radius:8px;
+  border:1px solid var(--bs-border-color); background:var(--bs-tertiary-bg);
+  color:var(--bs-body-color); white-space:nowrap;
+}
+.wr-open:hover{ border-color:var(--bw-accent); color:var(--bw-accent); }
+</style>
+</head>
+<body>
+
+<div class="wr-page">
+
+  <div class="wr-tabs" id="wrTabs" role="tablist">
+    <button class="wr-tab active" data-overlay="radar" role="tab">Radar</button>
+    <button class="wr-tab" data-overlay="satellite" role="tab">Satellite</button>
+    <button class="wr-tab" data-overlay="rain" role="tab">Rain &amp; thunder</button>
+    <button class="wr-tab" data-overlay="wind" role="tab">Wind</button>
+    <button class="wr-tab" data-overlay="temp" role="tab">Temperature</button>
+  </div>
+
+  <div class="wr-stage" id="wrStage">
+    <iframe class="wr-frame" id="wrFrame" title="Windy weather map" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+    <div class="wr-empty" id="wrEmpty">
+      <div class="wr-empty-title" id="wrEmptyTitle">Loading the map&hellip;</div>
+      <div class="wr-empty-sub" id="wrEmptySub">&nbsp;</div>
+    </div>
+    <div class="wr-status" id="wrStatus">
+      <span class="wr-status-dot" id="wrStatusDot"></span>
+      <span id="wrStatusText">Loading&hellip;</span>
+    </div>
+  </div>
+
+  <div class="wr-footer">
+    <span>Drag to pan, scroll or pinch to zoom. Use the play control at the bottom of the map to animate the last few hours. Map data &copy; Windy.com.</span>
+    <a class="wr-open" id="wrOpen" href="https://www.windy.com/" target="_blank" rel="noopener">Open in Windy.com &#8599;</a>
+  </div>
+
+</div>
+
+<script src="units.js"></script>
+<script>
+(function(){
+
+  // ---- Theme (matches the parent dashboard, or falls back to stored/OS preference) ----
+  function fromParentTheme(){
+    try {
+      var b = window.parent && window.parent.document && window.parent.document.body;
+      if (b && (b.classList.contains('dark') || b.classList.contains('light'))) {
+        return b.classList.contains('dark') ? 'dark' : 'light';
+      }
+    } catch (e) {}
+    return null;
+  }
+  function applyTheme(){
+    var resolved = fromParentTheme();
+    if (!resolved) {
+      var mode = 'auto';
+      try { mode = localStorage.getItem('dashboardThemeMode') || 'auto'; } catch (e) {}
+      resolved = mode === 'light' ? 'light' : mode === 'dark' ? 'dark'
+        : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    }
+    document.documentElement.setAttribute('data-theme', resolved);
+  }
+  applyTheme();
+  window.addEventListener('storage', function(e){ if (e.key === 'dashboardThemeMode') applyTheme(); });
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+  try {
+    var __pb = window.parent && window.parent.document && window.parent.document.body;
+    if (__pb) new MutationObserver(applyTheme).observe(__pb, { attributes: true, attributeFilter: ['class'] });
+  } catch (e) {}
+
+  // ---- Config ----
+  var ARCHIVE_JSON_URL = './jsondata/archive.json';
+  var MODAL_ZOOM = 8;
+
+  // DivumWX unit system -> Windy embed unit parameters.
+  var WINDY_WIND = { mph: 'mph', kmh: 'km/h', ms: 'm/s', kt: 'kt', bf: 'bft' };
+  var WINDY_TEMP = { C: '°C', F: '°F' };
+  var WINDY_RAIN = { mm: 'mm', in: 'in' };
+  function currentUnits(){
+    try {
+      var key = localStorage.getItem('dashboardUnitSystem') || 'uk';
+      if (typeof SYSTEMS !== 'undefined' && SYSTEMS[key]) return SYSTEMS[key];
+    } catch (e) {}
+    return { temp: 'C', wind: 'mph', rain: 'mm' };
+  }
+
+  var frame = document.getElementById('wrFrame');
+  var emptyEl = document.getElementById('wrEmpty');
+  var emptyTitle = document.getElementById('wrEmptyTitle');
+  var emptySub = document.getElementById('wrEmptySub');
+  var statusEl = document.getElementById('wrStatus');
+  var statusDot = document.getElementById('wrStatusDot');
+  var statusText = document.getElementById('wrStatusText');
+  var tabsEl = document.getElementById('wrTabs');
+  var openLink = document.getElementById('wrOpen');
+
+  var lat = null, lon = null;
+  var overlay = 'radar';
+  var loadTimer = null, hideTimer = null;
+
+  function setStatus(cls, text){
+    statusDot.className = 'wr-status-dot' + (cls ? ' ' + cls : '');
+    statusText.textContent = text;
+    statusEl.classList.remove('hide');
+    clearTimeout(hideTimer);
+    // Once live, get the pill out of the way of Windy's own controls.
+    if (cls === 'live') hideTimer = setTimeout(function(){ statusEl.classList.add('hide'); }, 3000);
+  }
+
+  function windyUrl(){
+    var u = currentUnits();
+    var q = [
+      'type=map', 'location=coordinates',
+      'metricRain=' + encodeURIComponent(WINDY_RAIN[u.rain] || 'default'),
+      'metricTemp=' + encodeURIComponent(WINDY_TEMP[u.temp] || 'default'),
+      'metricWind=' + encodeURIComponent(WINDY_WIND[u.wind] || 'default'),
+      'zoom=' + MODAL_ZOOM,
+      'overlay=' + overlay,
+      'product=' + (overlay === 'radar' || overlay === 'satellite' ? overlay : 'ecmwf'),
+      'level=surface',
+      'lat=' + lat, 'lon=' + lon,
+      'detailLat=' + lat, 'detailLon=' + lon,
+      'marker=true', 'message=true'
+    ];
+    return 'https://embed.windy.com/embed.html?' + q.join('&');
+  }
+
+  function load(){
+    if (lat === null) return;
+    emptyEl.style.display = 'flex';
+    emptyTitle.innerHTML = 'Loading the map&hellip;';
+    emptySub.innerHTML = '&nbsp;';
+    setStatus('', 'Loading…');
+    clearTimeout(loadTimer);
+    // Windy gives no error event for a blocked or failed embed.
+    loadTimer = setTimeout(function(){
+      setStatus('error', 'Windy isn’t responding');
+      emptyTitle.textContent = 'The Windy map didn’t load';
+      emptySub.textContent = 'Check your connection, or that a browser extension isn’t blocking embed.windy.com.';
+    }, 20000);
+    frame.onload = function(){
+      clearTimeout(loadTimer);
+      emptyEl.style.display = 'none';
+      setStatus('live', 'Live');
+    };
+    frame.src = windyUrl();
+    openLink.href = 'https://www.windy.com/-' + overlay + '?' + overlay + ',' + lat + ',' + lon + ',' + MODAL_ZOOM;
+  }
+
+  tabsEl.addEventListener('click', function(e){
+    var btn = e.target.closest('.wr-tab');
+    if (!btn || btn.getAttribute('data-overlay') === overlay) return;
+    overlay = btn.getAttribute('data-overlay');
+    Array.prototype.forEach.call(tabsEl.querySelectorAll('.wr-tab'), function(b){
+      var on = b === btn;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    load();
+  });
+
+  window.addEventListener('storage', function(e){ if (e.key === 'dashboardUnitSystem') load(); });
+
+  fetch(ARCHIVE_JSON_URL + '?_=' + Date.now(), { cache: 'no-store' })
+    .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function(data){
+      var m = (data && data.meta) || {};
+      var la = parseFloat(m.latitude), lo = parseFloat(m.longitude);
+      if (!isFinite(la) || !isFinite(lo)) throw new Error('no station latitude/longitude in archive.json');
+      lat = la.toFixed(3); lon = lo.toFixed(3);
+      load();
+    })
+    .catch(function(e){
+      console.warn('modalWindyRadar: config fetch failed —', e.message);
+      setStatus('error', 'No station location');
+      emptyTitle.textContent = 'Station location unavailable';
+      emptySub.textContent = 'The map is centred on the latitude and longitude in jsondata/archive.json, which couldn’t be read.';
+    });
+
+  // ---- Size reporting to the parent dashboard's modal box ----
+  function reportSize(){
+    if (window.parent === window) return;
+    window.parent.postMessage({
+      type: 'chartModalContentHeight',
+      height: document.body.scrollHeight
+    }, '*');
+  }
+  if (window.parent !== window) {
+    new ResizeObserver(reportSize).observe(document.body);
+    window.addEventListener('load', reportSize);
+    setTimeout(reportSize, 500);
+  }
+})();
+</script>
+<script>
+(function applySeasonFromParent(){
+  function apply(){
+    try {
+      var b = window.parent && window.parent.document && window.parent.document.body;
+      var m = b && /season-(winter|spring|summer|autumn)/.exec(b.className);
+      if (m) document.documentElement.setAttribute('data-season', m[1]);
+      else document.documentElement.removeAttribute('data-season');
+    } catch (e) {}
+  }
+  apply();
+  try {
+    var pb = window.parent && window.parent.document && window.parent.document.body;
+    if (pb) new MutationObserver(apply).observe(pb, { attributes: true, attributeFilter: ['class'] });
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>

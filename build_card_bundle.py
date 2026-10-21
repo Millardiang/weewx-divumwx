@@ -73,6 +73,7 @@ CARD_FILES = [
     'cardEarthquake.js',
     'cardWebcam.js',
     'cardStationImage.js',
+    'cardWindyRadar.js',
 ]
 
 
