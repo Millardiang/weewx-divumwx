@@ -1,37 +1,5 @@
 # DivumWX Changelog
 
-## Unreleased — for 2.0.0
-
-### Weather Radar card (new, optional)
-- A new dashboard card laid out like the Webcam card (title bar, status
-  dot and time, 175px map) that plays the last two hours of radar on a
-  loop by itself: RainViewer frames every 10 minutes over a CARTO base map
-  that follows the light/dark theme, centred on the station's latitude
-  and longitude from archive.json, with the frame time, a progress bar
-  and the station marked. It holds on the latest frame before looping,
-  fetches new frames every 10 minutes, and pauses while the card is off
-  screen or the tab is hidden.
-- Windy's embedded map can't be made to play by itself and Windy's API
-  doesn't offer radar, which is why the card uses RainViewer. RainViewer's
-  free API is for personal and educational use, zoom 7 at most, its
-  Universal Blue colours only, and 100 requests a minute per visitor (one
-  loop of the card is about 52 tile requests).
-- Clicking the card opens **modalWindyRadar.html**, the full interactive
-  Windy map at 900 × 650 with tabs for Radar, Satellite, Rain & thunder,
-  Wind and Temperature, an "Open in Windy.com" link, and the dashboard's
-  theme, seasonal colours and unit system (Windy may not honour every
-  unit on every layer).
-- Optional card: new installs are asked about it after the Station Image
-  card. **Existing installs** don't get it automatically — add
-  `cardWindyRadar` to `enabled_cards` under `[DivumWXCards]` in weewx.conf
-  and restart WeeWX.
-- Card hover tooltips can now carry their own text (`data-hover`).
-- Changed: `cardsBundleNew.js` 1.1.0, `hyperIndex.html` 1.1.0,
-  `lexendIndex.html` 1.1.0, `index.html` (card mount, tooltip, bundle
-  hash), `install.py`, `build_card_bundle.py`, `lang/en.conf`,
-  `lang/en_US.conf` ("Weather Radar", "Windy Radar"). New:
-  `modalWindyRadar.html` 1.0.0.
-
 ## 1.7.0 — Celestial and Skyfield pages
 
 Two live astronomy pages, linked from the Astronomy navbar and hub, drawn

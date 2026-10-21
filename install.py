@@ -1830,10 +1830,9 @@ DIVUMWX_RAIN_CARD_CHOICES = {
 DIVUMWX_OPTIONAL_CARDS_ORDER = [
     'cardSolarRadiation', 'cardUvIndex', 'cardLightning', 'cardAirquality',
     'cardVapourPressureDeficit', 'cardEvapoTranspiration', 'cardWebcam', 'cardStationImage',
-    'cardWindyRadar',
 ]
 
-DIVUMWX_CARD_TARGET_TOTAL = 26  # theoretical max (8 mandatory + 7 automatic + 2 rain "both" + 9 optional) -- every optional card now always gets asked about
+DIVUMWX_CARD_TARGET_TOTAL = 25  # theoretical max (8 mandatory + 7 automatic + 2 rain "both" + 8 optional) -- every optional card now always gets asked about
 
 DIVUMWX_WEBCAM_DEFAULT_TITLE = 'Webcam'
 DIVUMWX_WEBCAM_DEFAULT_IMAGE = 'img/picam.jpg'
