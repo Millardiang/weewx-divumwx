@@ -771,9 +771,8 @@ document.querySelectorAll('.card').forEach(card => {
     const lines = [];
     if (link) {
       const chartType = link.getAttribute('data-modal') || 'chart';
-      const hoverText = link.getAttribute('data-hover');
-      lines.push(hoverText ? hoverText
-        : chartType === 'Timelapse' ? 'Click to view timelapse'
+      lines.push(chartType === 'Timelapse'
+        ? 'Click to view timelapse'
         : 'Click and release to open ' + chartType + ' charts');
     }
     if (card.getAttribute('draggable') === 'true') {
@@ -909,6 +908,6 @@ window.addEventListener('load', updateFooterVisibility);
 <script src="js/d3.7.9.0.min.js"></script>
 <script src="js/d3-geo-projection.4.0.0.min.js"></script>
 <script src="js/topojson.3.0.2.min.js"></script>
-<script src="cardsBundleNew.js?v=30ab4e7b"></script>
+<script src="cardsBundleNew.js?v=1742a3e8"></script>
 </body>
 </html>

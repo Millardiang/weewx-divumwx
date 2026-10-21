@@ -1,36 +1,40 @@
-DivumWX - Weather Radar card (for 2.0.0)
-========================================
+DivumWX - Windy Radar card, title-link version (for 2.0.0)
+==========================================================
 
-This replaces the earlier windy-radar-card package. The card now plays
-the last two hours of radar on a loop by itself (RainViewer frames over a
-CARTO base map); clicking it still opens the interactive Windy map.
+This replaces the RainViewer "Weather Radar" version now on
+version-2.0-beta (edeb26f). No RainViewer, no CARTO, nothing to sign up
+for: the card and the larger map use only Windy's embed.
 
-Files are laid out at their repo paths. Copy each over the version in your
-repo. All are based on the 1.7.0 release, so they also replace anything
-copied in from the earlier package.
+What changed
+  - The card's map is live, so visitors press Windy's own play arrow on
+    the card to animate the radar, and can pan and zoom it.
+  - Only the card's title opens the larger map. Hovering over the title
+    shows: "Click the title to open the larger Windy map. Press [play] on
+    the map to animate the radar."
+  - The larger map is 50% bigger: 1350 x 900 (was 900 x 600). On shorter
+    windows the map shrinks so the whole modal still fits.
+  - The card can still be dragged by its title bar; the map itself takes
+    the mouse, so dragging from the map pans the map instead.
 
-New
-  divumwx/modalWindyRadar.html     the interactive Windy map modal (v1.0.0,
-                                   unchanged from the earlier package)
+Files are laid out at their repo paths. These 8 are the only ones that
+differ from your branch; copy each over the version in your repo:
+  divumwx/cardsBundleNew.js        Windy card with title link, bundle 1.1.0
+  divumwx/modalWindyRadar.html     1350 x 900, fits shorter windows
+  divumwx/index.html               bundle ?v=1742a3e8, original card tooltip
+  divumwx/hyperIndex.html          bundle ?v=1742a3e8, original card tooltip
+  divumwx/lexendIndex.html         bundle ?v=1742a3e8, original card tooltip
+  skins/DivumWX/lang/en.conf       "Weather Radar" string removed
+  skins/DivumWX/lang/en_US.conf    "Weather Radar" string removed
+  CHANGELOG.md                     entry describes this version
+install.py and build_card_bundle.py on your branch are already right.
 
-Changed
-  divumwx/cardsBundleNew.js        cardWindyRadar module v1.1.0, now an
-                                   animated RainViewer radar; bundle v1.1.0
-  divumwx/index.html               card mount windyRadarCard26, data-hover
-  divumwx/hyperIndex.html            tooltip text, bundle ?v=30ab4e7b
-  divumwx/lexendIndex.html           (hyper/lexend banners 1.1.0)
-  install.py                       cardWindyRadar optional card, total 26
-  build_card_bundle.py             cardWindyRadar.js in CARD_FILES
-  skins/DivumWX/lang/en.conf       "Weather Radar" and "Windy Radar"
-  skins/DivumWX/lang/en_US.conf    "Weather Radar" and "Windy Radar"
-  CHANGELOG.md                     "Unreleased - for 2.0.0" section
+Using git instead, on version-2.0-beta (edeb26f):
+  git apply windy-radar-card.patch
 
-weather-radar-card.patch applies the same changes to a clean 1.7.0 with
-git instead:  git apply weather-radar-card.patch
+Note: your repo root now has a CHANGES.txt from the last package. The
+installer copies every file in the repo root into users' WeeWX folder,
+so you'll probably want to delete it from the repo rather than replace
+it with this one.
 
 To see the card on an existing install, add cardWindyRadar to
 enabled_cards under [DivumWXCards] in weewx.conf and restart WeeWX.
-
-The card needs api.rainviewer.com, tilecache.rainviewer.com and
-*.basemaps.cartocdn.com to be reachable from visitors' browsers.
-RainViewer's free API is for personal/educational use.

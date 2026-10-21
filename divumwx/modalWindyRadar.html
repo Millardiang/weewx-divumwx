@@ -60,7 +60,7 @@ body{
   transition:background-color .2s, color .2s;
 }
 
-.wr-page{ padding:12px 14px 14px; max-width:900px; margin:0 auto; }
+.wr-page{ padding:12px 14px 14px; max-width:1350px; margin:0 auto; }
 
 .wr-tabs{ display:flex; gap:6px; margin-bottom:8px; flex-wrap:wrap; }
 .wr-tab{
@@ -78,12 +78,13 @@ body{
   /* Fixed height: the parent sizes the modal from this page's reported
      height (and caps it at 92% of its window), so a vh-based height here
      would shrink to fit the iframe's initial size instead. */
-  height:500px;
+  height:750px;
   background:var(--bs-tertiary-bg);
   border-radius:var(--bw-radius);
   overflow:hidden;
   box-shadow:var(--bw-shadow);
 }
+@media (max-width:900px){ .wr-stage{ height:500px; } }
 @media (max-width:600px){ .wr-stage{ height:400px; } }
 .wr-frame{ position:absolute; inset:0; width:100%; height:100%; border:0; }
 
@@ -295,6 +296,33 @@ body{
       emptyTitle.textContent = 'Station location unavailable';
       emptySub.textContent = 'The map is centred on the latitude and longitude in jsondata/archive.json, which couldn’t be read.';
     });
+
+  // ---- Fit the map to the dashboard window ----
+  // The parent caps the modal at 92% of its window height. On a shorter
+  // window, shrink the map so the tabs, map and footer all stay visible
+  // instead of scrolling inside the modal.
+  var stage = document.getElementById('wrStage');
+  function fitStage(){
+    try {
+      if (window.parent === window) return;
+      var pw = window.parent;
+      var header = pw.document.querySelector('.chart-modal-header');
+      var headerH = header ? header.offsetHeight : 50;
+      var nonMap = document.body.scrollHeight - stage.offsetHeight;
+      var room = Math.floor(pw.innerHeight * 0.92) - headerH - nonMap;
+      stage.style.height = room < 750 ? Math.max(260, room) + 'px' : '';
+    } catch (e) {}
+  }
+  fitStage();
+  try {
+    if (window.parent !== window) {
+      window.parent.addEventListener('resize', fitStage);
+      // The dashboard reuses one modal frame; don't leave this listener behind.
+      window.addEventListener('pagehide', function(){
+        try { window.parent.removeEventListener('resize', fitStage); } catch (e) {}
+      });
+    }
+  } catch (e) {}
 
   // ---- Size reporting to the parent dashboard's modal box ----
   function reportSize(){
