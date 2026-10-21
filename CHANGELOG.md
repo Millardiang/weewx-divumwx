@@ -17,9 +17,13 @@
   an "Open in Windy.com" link, and the dashboard's light/dark theme and
   seasonal colours. On a shorter window the map shrinks so the whole
   modal still fits.
-- The map is centred on the station's latitude and longitude from
-  archive.json, and follows the dashboard's unit system for wind,
-  temperature and rain (Windy may not honour every unit on every layer).
+- The map is centred on the station's latitude and longitude (weewx.conf
+  `[Station]`, via archive.json), shown in the larger map's footer, and
+  follows the dashboard's unit system for wind, temperature and rain
+  (Windy may not honour every unit on every layer). Windy's map only
+  loads once it's on screen and laid out, because Windy can centre in
+  the wrong place if it loads hidden. Windy's own `marker` option isn't
+  used: it marks the viewer's location, not the station.
 - Optional card: new installs are asked about it after the Station Image
   card. **Existing installs** don't get it automatically — add
   `cardWindyRadar` to `enabled_cards` under `[DivumWXCards]` in weewx.conf

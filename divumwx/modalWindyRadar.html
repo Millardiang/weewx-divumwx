@@ -150,7 +150,7 @@ body{
   </div>
 
   <div class="wr-footer">
-    <span>Drag to pan, scroll or pinch to zoom. Use the play control at the bottom of the map to animate the last few hours. Map data &copy; Windy.com.</span>
+    <span><span id="wrCoords"></span>Drag to pan, scroll or pinch to zoom. Use the play control at the bottom of the map to animate the last few hours. Map data &copy; Windy.com.</span>
     <a class="wr-open" id="wrOpen" href="https://www.windy.com/" target="_blank" rel="noopener">Open in Windy.com &#8599;</a>
   </div>
 
@@ -213,6 +213,8 @@ body{
   var statusText = document.getElementById('wrStatusText');
   var tabsEl = document.getElementById('wrTabs');
   var openLink = document.getElementById('wrOpen');
+  var stageEl = document.getElementById('wrStage');
+  var coordsEl = document.getElementById('wrCoords');
 
   var lat = null, lon = null;
   var overlay = 'radar';
@@ -240,13 +242,24 @@ body{
       'level=surface',
       'lat=' + lat, 'lon=' + lon,
       'detailLat=' + lat, 'detailLon=' + lon,
-      'marker=true', 'message=true'
+      'message=true'
     ];
+    // No marker=true: in Windy's embed that marks the *viewer's* own
+    // location (from their IP address), not these coordinates.
     return 'https://embed.windy.com/embed.html?' + q.join('&');
   }
 
+  // Windy centres its map in the wrong place if it loads before its frame
+  // is visible and laid out, so wait for a sized stage in a visible tab.
   function load(){
     if (lat === null) return;
+    if (document.hidden || stageEl.clientWidth === 0 || stageEl.clientHeight === 0) {
+      setTimeout(load, 200);
+      return;
+    }
+    requestAnimationFrame(function(){ requestAnimationFrame(loadNow); });
+  }
+  function loadNow(){
     emptyEl.style.display = 'flex';
     emptyTitle.innerHTML = 'Loading the map&hellip;';
     emptySub.innerHTML = '&nbsp;';
@@ -288,6 +301,7 @@ body{
       var la = parseFloat(m.latitude), lo = parseFloat(m.longitude);
       if (!isFinite(la) || !isFinite(lo)) throw new Error('no station latitude/longitude in archive.json');
       lat = la.toFixed(3); lon = lo.toFixed(3);
+      coordsEl.textContent = 'Centred on ' + lat + ', ' + lon + ' (weewx.conf [Station] latitude/longitude). ';
       load();
     })
     .catch(function(e){

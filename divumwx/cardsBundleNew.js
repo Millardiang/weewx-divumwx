@@ -10391,8 +10391,10 @@ try {
       'overlay=radar', 'product=radar', 'level=surface',
       'lat=' + lat, 'lon=' + lon,
       'detailLat=' + lat, 'detailLon=' + lon,
-      'marker=true', 'message=true'
+      'message=true'
     ];
+    // No marker=true: in Windy's embed that marks the *viewer's* own
+    // location (from their IP address), not these coordinates.
     return 'https://embed.windy.com/embed.html?' + q.join('&');
   }
 
@@ -10520,7 +10522,6 @@ try {
   // The live map: Windy's own controls work, including its play arrow.
   var frame = document.createElement('iframe');
   frame.title = 'Windy weather radar';
-  frame.setAttribute('loading', 'lazy');
   frame.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
   frame.style.position = 'absolute';
   frame.style.inset = '0';
@@ -10548,9 +10549,32 @@ try {
     return stationName ? base + ' - ' + stationName : base;
   }
 
-  var loadTimer = null;
+  // Windy centres its map in the wrong place if it loads while its frame
+  // is off screen or not yet laid out, so only (re)load once the card is
+  // visible, sized, and the tab is in the foreground.
+  var onScreen = false, pendingLoad = false;
+  function ready(){
+    return onScreen && !document.hidden && body.clientWidth > 0 && body.clientHeight > 0;
+  }
   function load(){
     if (lat === null || lon === null) return;
+    if (!ready()) { pendingLoad = true; return; }
+    pendingLoad = false;
+    requestAnimationFrame(function(){ requestAnimationFrame(loadNow); });
+  }
+  function flushPending(){ if (pendingLoad && ready()) load(); }
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function(entries){
+      onScreen = entries[entries.length - 1].isIntersecting;
+      flushPending();
+    }).observe(body);
+  } else {
+    onScreen = true;
+  }
+  document.addEventListener('visibilitychange', flushPending);
+
+  var loadTimer = null;
+  function loadNow(){
     clearTimeout(loadTimer);
     // Windy gives no error event for a blocked or failed embed, so treat
     // "no load event within 20 s" as a failure for the status dot.

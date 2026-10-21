@@ -1,40 +1,33 @@
-DivumWX - Windy Radar card, title-link version (for 2.0.0)
-==========================================================
+DivumWX - Windy Radar card: centring fix (for 2.0.0)
+====================================================
 
-This replaces the RainViewer "Weather Radar" version now on
-version-2.0-beta (edeb26f). No RainViewer, no CARTO, nothing to sign up
-for: the card and the larger map use only Windy's embed.
+Goes on top of version-2.0-beta at 7b18276 (the v2 Windy package).
 
 What changed
-  - The card's map is live, so visitors press Windy's own play arrow on
-    the card to animate the radar, and can pan and zoom it.
-  - Only the card's title opens the larger map. Hovering over the title
-    shows: "Click the title to open the larger Windy map. Press [play] on
-    the map to animate the radar."
-  - The larger map is 50% bigger: 1350 x 900 (was 900 x 600). On shorter
-    windows the map shrinks so the whole modal still fits.
-  - The card can still be dragged by its title bar; the map itself takes
-    the mouse, so dragging from the map pans the map instead.
+  - Removed Windy's "marker=true" option from the card and the larger
+    map. In Windy's embed it marks the viewer's own location (worked out
+    from their IP address), not the station.
+  - Windy's map now loads only once it's on screen and laid out, on both
+    the card and the larger map. Windy can centre in the wrong place if
+    it loads while hidden or before it has its final size. The card's
+    15-minute refresh and unit-change reloads wait the same way.
+  - The larger map's footer now says what it's centred on, e.g.
+    "Centred on 51.937, -0.982 (weewx.conf [Station] latitude/longitude)."
+    If the map is ever off again, this shows whether the coordinates or
+    Windy are at fault.
 
-Files are laid out at their repo paths. These 8 are the only ones that
+Files are laid out at their repo paths. These 6 are the only ones that
 differ from your branch; copy each over the version in your repo:
-  divumwx/cardsBundleNew.js        Windy card with title link, bundle 1.1.0
-  divumwx/modalWindyRadar.html     1350 x 900, fits shorter windows
-  divumwx/index.html               bundle ?v=1742a3e8, original card tooltip
-  divumwx/hyperIndex.html          bundle ?v=1742a3e8, original card tooltip
-  divumwx/lexendIndex.html         bundle ?v=1742a3e8, original card tooltip
-  skins/DivumWX/lang/en.conf       "Weather Radar" string removed
-  skins/DivumWX/lang/en_US.conf    "Weather Radar" string removed
-  CHANGELOG.md                     entry describes this version
-install.py and build_card_bundle.py on your branch are already right.
+  divumwx/cardsBundleNew.js        cardWindyRadar: no marker, deferred load
+  divumwx/modalWindyRadar.html     no marker, deferred load, coords shown
+  divumwx/index.html               bundle ?v=5baef93b
+  divumwx/hyperIndex.html          bundle ?v=5baef93b
+  divumwx/lexendIndex.html         bundle ?v=5baef93b
+  CHANGELOG.md                     entry updated
 
-Using git instead, on version-2.0-beta (edeb26f):
+Using git instead, on version-2.0-beta (7b18276):
   git apply windy-radar-card.patch
 
-Note: your repo root now has a CHANGES.txt from the last package. The
-installer copies every file in the repo root into users' WeeWX folder,
-so you'll probably want to delete it from the repo rather than replace
-it with this one.
-
-To see the card on an existing install, add cardWindyRadar to
-enabled_cards under [DivumWXCards] in weewx.conf and restart WeeWX.
+Reminder: the repo root still has a CHANGES.txt from an earlier package.
+The installer copies every file in the repo root into users' WeeWX
+folder, so you'll probably want to delete it from the repo.
