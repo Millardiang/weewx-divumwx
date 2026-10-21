@@ -10349,7 +10349,11 @@ try {
   var ARCHIVE_JSON_URL = './jsondata/archive.json';
   var MODAL_URL = 'modalWindyRadar.html';
   var CARD_ZOOM = 7;
-  var RELOAD_MS = 15 * 60 * 1000;   // keep a long-open tab fresh
+  var RELOAD_MS = 15 * 60 * 1000;   // refresh (and play once again) every 15 minutes
+  // How long the radar plays before the card swaps to a still map, counted
+  // from the moment Windy's page loads. Windy's speed can't be set from
+  // the dashboard, so time one run of the loop on your site and adjust.
+  var PLAY_ONCE_SECONDS = 15;
 
   var lat = null, lon = null, stationName = '';
 
@@ -10380,7 +10384,7 @@ try {
     return { temp: 'C', wind: 'mph', rain: 'mm' };
   }
 
-  function windyUrl(){
+  function windyUrl(play){
     var u = currentUnits();
     var q = [
       'type=map', 'location=coordinates',
@@ -10390,8 +10394,9 @@ try {
       'zoom=' + CARD_ZOOM,
       'overlay=radar', 'level=surface',
       'lat=' + lat, 'lon=' + lon,
-      'message=true', 'play=true'
+      'message=true'
     ];
+    if (play) q.push('play=true');
     // Left out on purpose:
     //  - product: radar is imagery, not a forecast model, and Windy takes
     //    no product for it;
@@ -10399,7 +10404,8 @@ try {
     //    address), not these coordinates;
     //  - detailLat/detailLon only matter for Windy's forecast panel,
     //    which isn't shown.
-    // play=true starts the radar animation by itself where Windy supports it.
+    // play=true starts Windy's radar animation by itself. Windy then loops
+    // it, so the card stops it by swapping in the same map without play.
     return 'https://embed.windy.com/embed.html?' + q.join('&');
   }
 
@@ -10476,7 +10482,7 @@ try {
   // ---- Title tooltip ----
   // Uses the dashboard's own #cardHoverTip when the page has one, so it
   // looks like every other card tooltip; otherwise the browser's own.
-  var TITLE_TIP = 'Click the title to open the larger Windy map.<br>Press ▶ on the map to animate the radar.';
+  var TITLE_TIP = 'Click the title to open the larger Windy map.<br>The radar plays once when it loads; press ▶ on the map to play it again.';
   var tipTimer = null;
   function hoverTip(){ return document.getElementById('cardHoverTip'); }
   if (!hoverTip()) titleLabel.title = TITLE_TIP.replace('<br>', '\n');
@@ -10525,15 +10531,19 @@ try {
   mount.appendChild(body);
 
   // The live map: Windy's own controls work, including its play arrow.
-  var frame = document.createElement('iframe');
-  frame.title = 'Windy weather radar';
-  frame.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
-  frame.style.position = 'absolute';
-  frame.style.inset = '0';
-  frame.style.width = '100%';
-  frame.style.height = '100%';
-  frame.style.border = '0';
-  body.appendChild(frame);
+  // Frames are created per load (see loadNow), so this starts empty.
+  var frame = null;
+  function newFrame(){
+    var f = document.createElement('iframe');
+    f.title = 'Windy weather radar';
+    f.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
+    f.style.position = 'absolute';
+    f.style.inset = '0';
+    f.style.width = '100%';
+    f.style.height = '100%';
+    f.style.border = '0';
+    return f;
+  }
 
   var message = document.createElement('div');
   message.style.position = 'absolute';
@@ -10578,18 +10588,43 @@ try {
   }
   document.addEventListener('visibilitychange', flushPending);
 
-  var loadTimer = null;
+  // Play once, then stop. Windy's frame comes from another site, so the
+  // dashboard can't pause it. Instead it loads the map with play=true,
+  // and after PLAY_ONCE_SECONDS loads the same map without it underneath
+  // the playing one, removing the playing one once the still map is
+  // ready, so there's no flash. Each new frame loads behind the current
+  // one, on screen and full size, which keeps Windy's centring right.
+  var loadTimer = null, stopTimer = null, generation = 0;
+  function showFrame(f, playing, gen){
+    f.onload = function(){
+      if (gen !== generation) { f.remove(); return; }
+      clearTimeout(loadTimer);
+      if (frame && frame !== f) frame.remove();
+      frame = f;
+      message.style.display = 'none';
+      setStatus(true);
+      if (playing) stopTimer = setTimeout(function(){ stopPlaying(gen); }, PLAY_ONCE_SECONDS * 1000);
+    };
+    f.src = windyUrl(playing);
+    body.insertBefore(f, body.firstChild);
+  }
   function loadNow(){
+    var gen = ++generation;
     clearTimeout(loadTimer);
+    clearTimeout(stopTimer);
+    // Drop any half-loaded frame from an earlier load.
+    Array.prototype.forEach.call(body.querySelectorAll('iframe'), function(f){ if (f !== frame) f.remove(); });
     // Windy gives no error event for a blocked or failed embed, so treat
     // "no load event within 20 s" as a failure for the status dot.
     loadTimer = setTimeout(function(){ setStatus(false); }, 20000);
-    frame.onload = function(){
-      clearTimeout(loadTimer);
-      message.style.display = 'none';
-      setStatus(true);
-    };
-    frame.src = windyUrl();
+    showFrame(newFrame(), true, gen);
+  }
+  function stopPlaying(gen){
+    if (gen !== generation || !frame) return;
+    // A visitor who has clicked into the map is using it: leave it alone.
+    if (document.activeElement === frame) return;
+    if (!ready()) { setTimeout(function(){ stopPlaying(gen); }, 1000); return; }
+    showFrame(newFrame(), false, gen);
   }
 
   function fetchConfig(){

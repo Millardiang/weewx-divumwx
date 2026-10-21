@@ -6,12 +6,18 @@
 - A new dashboard card showing Windy.com's live weather radar centred on
   the station, laid out like the Webcam card: title bar, status dot and
   time, and a 175px map.
-- Unlike other cards, the map is live: visitors press Windy's own ▶ to
-  animate the radar, and can pan and zoom. (Windy's embed has no autoplay
-  option and can't be started from the dashboard.) Because the map takes
-  the clicks, only the card's **title** opens the larger map; hovering
-  over the title says so and tells visitors to press ▶. The card can be
-  dragged by its title bar.
+- The radar plays through once whenever the card or the larger map
+  loads (on page load, every 15 minutes, on a unit change, and on each
+  tab in the larger map), then stops on a still map. Windy's frame can't
+  be paused from the dashboard, so it's loaded with `play=true` and,
+  after `PLAY_ONCE_SECONDS` (15, set at the top of the card module and of
+  modalWindyRadar.html), swapped for the same map without it, loaded
+  underneath so there's no flash. If a visitor has clicked into the map
+  while it plays, it's left alone. Windy's playback speed can't be set.
+- Unlike other cards, the map is live: visitors can press Windy's own ▶
+  to play it again, and pan and zoom. Because the map takes the clicks,
+  only the card's **title** opens the larger map; hovering over the title
+  says so. The card can be dragged by its title bar.
 - The title opens **modalWindyRadar.html**, the same map at 1350 × 900
   with tabs for Radar, Satellite, Rain & thunder, Wind and Temperature,
   an "Open in Windy.com" link, and the dashboard's light/dark theme and
@@ -26,8 +32,7 @@
   `product` for radar or satellite (they're imagery, not forecast
   models), no `marker` (it marks the viewer's location, not the
   station) and no `detailLat`/`detailLon` (only used by Windy's
-  forecast panel, which isn't shown). It asks Windy to start the
-  animation by itself (`play=true`) where Windy supports it.
+  forecast panel, which isn't shown).
 - Optional card: new installs are asked about it after the Station Image
   card. **Existing installs** don't get it automatically — add
   `cardWindyRadar` to `enabled_cards` under `[DivumWXCards]` in weewx.conf

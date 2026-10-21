@@ -1,50 +1,49 @@
-DivumWX - Windy Radar card: location fix (for 2.0.0)
-====================================================
+DivumWX - Windy Radar card: play once, then stop (for 2.0.0)
+===========================================================
 
-Goes on top of version-2.0-beta at 7b18276 (the v2 Windy package).
-Includes everything from v3, so you can skip v3.
+Goes on top of version-2.0-beta at 60c2613 (your "beta2" commit, which
+is the v4 location fix).
 
-Why the map sat in the English Channel
-  The Windy link asked for "product=radar". Radar is imagery, not a
-  forecast model, so Windy takes no product for it. The likeliest
-  explanation is that Windy then ignored our coordinates and centred
-  on the viewer's own location as guessed from their internet address,
-  which is often tens of km off and can land anywhere, the sea included.
-  The dot in the middle of the map was Windy's "your location" dot, not
-  the station.
+What changed
+  - The radar plays through once whenever the card or the larger map
+    loads, then stops on a still map:
+      card:       on page load, every 15 minutes, and on a unit change
+      larger map: when it opens, and on each tab (Radar, Satellite, ...)
+    Windy's map can't be paused from the dashboard, so it's loaded with
+    play=true and, after PLAY_ONCE_SECONDS, swapped for the same map
+    without play. The still map loads underneath the playing one and
+    takes over once it's ready, so there's no flash.
+  - If a visitor clicks into the map while it plays, it's left playing
+    for them.
+  - Title tooltip: "The radar plays once when it loads; press [play] on
+    the map to play it again." The larger map's footer says the same.
+  - The v4 location fix is unchanged.
 
-What changed (card and larger map)
-  - No "product" for radar or satellite. Wind, rain and temperature
-    still use product=ecmwf.
-  - No "marker=true". It marks the viewer, not the station.
-  - No detailLat/detailLon. They're only for Windy's forecast panel,
-    which isn't shown.
-  - Added "play=true", which asks Windy to start the animation by
-    itself. A maintained Home Assistant Windy card uses it for autoplay;
-    it may not apply to the radar layer.
-  - Windy's map loads only once it's on screen and laid out (Windy can
-    centre wrongly if it loads hidden).
-  - The larger map's footer shows the coordinates it was given, e.g.
-    "Centred on 51.937, -0.982 (weewx.conf [Station] latitude/longitude)."
-
-The card now asks Windy for exactly:
-  https://embed.windy.com/embed.html?type=map&location=coordinates
-    &metricRain=mm&metricTemp=%C2%B0C&metricWind=mph&zoom=7
-    &overlay=radar&level=surface&lat=51.937&lon=-0.982
-    &message=true&play=true
+Setting the play time
+  Windy's playback speed can't be set from the dashboard, so the stop is
+  timed. PLAY_ONCE_SECONDS = 15 is set in two places:
+    divumwx/cardsBundleNew.js     near the top of the cardWindyRadar module
+    divumwx/modalWindyRadar.html  near "var MODAL_ZOOM = 8;"
+  It counts from the moment Windy's page loads, so include the second or
+  two Windy takes to fetch the radar. Time one run of the loop on your
+  site and change both. Editing cardsBundleNew.js changes its contents,
+  so also update the ?v= on its <script> tag in index.html,
+  hyperIndex.html and lexendIndex.html (any new value works), or browsers
+  may keep the old copy.
 
 Files are laid out at their repo paths. These 6 are the only ones that
 differ from your branch; copy each over the version in your repo:
-  divumwx/cardsBundleNew.js        cardWindyRadar: new Windy link, deferred load
-  divumwx/modalWindyRadar.html     new Windy link, deferred load, coords shown
-  divumwx/index.html               bundle ?v=8c31545e
-  divumwx/hyperIndex.html          bundle ?v=8c31545e
-  divumwx/lexendIndex.html         bundle ?v=8c31545e
+  divumwx/cardsBundleNew.js        cardWindyRadar: play once, location fix
+  divumwx/modalWindyRadar.html     play once, location fix, coords shown
+  divumwx/index.html               bundle ?v=780323d9
+  divumwx/hyperIndex.html          bundle ?v=780323d9
+  divumwx/lexendIndex.html         bundle ?v=780323d9
   CHANGELOG.md                     entry updated
 
-Using git instead, on version-2.0-beta (7b18276):
+Using git instead, on version-2.0-beta (60c2613):
   git apply windy-radar-card.patch
 
-Reminder: the repo root still has a CHANGES.txt from an earlier package.
-The installer copies every file in the repo root into users' WeeWX
-folder, so you'll probably want to delete it from the repo.
+Reminder: the repo root now has CHANGES.txt and windy-radar-card.patch
+from earlier packages. The installer copies every file in the repo root
+into users' WeeWX folder, so you'll probably want to delete both from
+the repo rather than replace them.

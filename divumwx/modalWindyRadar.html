@@ -138,7 +138,6 @@ body{
   </div>
 
   <div class="wr-stage" id="wrStage">
-    <iframe class="wr-frame" id="wrFrame" title="Windy weather map" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
     <div class="wr-empty" id="wrEmpty">
       <div class="wr-empty-title" id="wrEmptyTitle">Loading the map&hellip;</div>
       <div class="wr-empty-sub" id="wrEmptySub">&nbsp;</div>
@@ -150,7 +149,7 @@ body{
   </div>
 
   <div class="wr-footer">
-    <span><span id="wrCoords"></span>Drag to pan, scroll or pinch to zoom. Use the play control at the bottom of the map to animate the last few hours. Map data &copy; Windy.com.</span>
+    <span><span id="wrCoords"></span>Drag to pan, scroll or pinch to zoom. The map plays once when it loads; press &#9654; at the bottom of the map to play it again. Map data &copy; Windy.com.</span>
     <a class="wr-open" id="wrOpen" href="https://www.windy.com/" target="_blank" rel="noopener">Open in Windy.com &#8599;</a>
   </div>
 
@@ -191,6 +190,10 @@ body{
   // ---- Config ----
   var ARCHIVE_JSON_URL = './jsondata/archive.json';
   var MODAL_ZOOM = 8;
+  // How long the map plays before it's swapped for a still one, counted
+  // from the moment Windy's page loads. Windy's speed can't be set from
+  // the dashboard, so time one run of the loop on your site and adjust.
+  var PLAY_ONCE_SECONDS = 15;
 
   // DivumWX unit system -> Windy embed unit parameters.
   var WINDY_WIND = { mph: 'mph', kmh: 'km/h', ms: 'm/s', kt: 'kt', bf: 'bft' };
@@ -204,7 +207,7 @@ body{
     return { temp: 'C', wind: 'mph', rain: 'mm' };
   }
 
-  var frame = document.getElementById('wrFrame');
+  var frame = null;   // the map currently shown; frames are made per load
   var emptyEl = document.getElementById('wrEmpty');
   var emptyTitle = document.getElementById('wrEmptyTitle');
   var emptySub = document.getElementById('wrEmptySub');
@@ -218,7 +221,7 @@ body{
 
   var lat = null, lon = null;
   var overlay = 'radar';
-  var loadTimer = null, hideTimer = null;
+  var loadTimer = null, hideTimer = null, stopTimer = null, generation = 0;
 
   function setStatus(cls, text){
     statusDot.className = 'wr-status-dot' + (cls ? ' ' + cls : '');
@@ -229,7 +232,7 @@ body{
     if (cls === 'live') hideTimer = setTimeout(function(){ statusEl.classList.add('hide'); }, 3000);
   }
 
-  function windyUrl(){
+  function windyUrl(play){
     var u = currentUnits();
     var q = [
       'type=map', 'location=coordinates',
@@ -240,8 +243,9 @@ body{
       'overlay=' + overlay,
       'level=surface',
       'lat=' + lat, 'lon=' + lon,
-      'message=true', 'play=true'
+      'message=true'
     ];
+    if (play) q.push('play=true');
     // Radar and satellite are imagery, not forecast models: Windy takes no
     // product for them, so only the forecast layers get one.
     if (overlay !== 'radar' && overlay !== 'satellite') q.push('product=ecmwf');
@@ -250,7 +254,8 @@ body{
     //    address), not these coordinates;
     //  - detailLat/detailLon only matter for Windy's forecast panel,
     //    which isn't shown.
-    // play=true starts the animation by itself where Windy supports it.
+    // play=true starts Windy's animation by itself. Windy then loops it,
+    // so the page stops it by swapping in the same map without play.
     return 'https://embed.windy.com/embed.html?' + q.join('&');
   }
 
@@ -264,7 +269,45 @@ body{
     }
     requestAnimationFrame(function(){ requestAnimationFrame(loadNow); });
   }
+  // Play once, then stop. Windy's frame comes from another site, so this
+  // page can't pause it. Instead it loads the map with play=true, and
+  // after PLAY_ONCE_SECONDS loads the same map without it underneath the
+  // playing one, removing the playing one once the still map is ready.
+  function newFrame(){
+    var f = document.createElement('iframe');
+    f.className = 'wr-frame';
+    f.title = 'Windy weather map';
+    f.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
+    f.setAttribute('allowfullscreen', '');
+    return f;
+  }
+  function showFrame(playing, gen){
+    var f = newFrame();
+    f.onload = function(){
+      if (gen !== generation) { f.remove(); return; }
+      clearTimeout(loadTimer);
+      if (frame && frame !== f) frame.remove();
+      frame = f;
+      emptyEl.style.display = 'none';
+      if (playing) {
+        setStatus('live', 'Live');
+        stopTimer = setTimeout(function(){ stopPlaying(gen); }, PLAY_ONCE_SECONDS * 1000);
+      }
+    };
+    f.src = windyUrl(playing);
+    stageEl.insertBefore(f, stageEl.firstChild);
+  }
+  function stopPlaying(gen){
+    if (gen !== generation || !frame) return;
+    // A visitor who has clicked into the map is using it: leave it alone.
+    if (document.activeElement === frame) return;
+    if (document.hidden) { setTimeout(function(){ stopPlaying(gen); }, 1000); return; }
+    showFrame(false, gen);
+  }
   function loadNow(){
+    var gen = ++generation;
+    clearTimeout(stopTimer);
+    Array.prototype.forEach.call(stageEl.querySelectorAll('iframe'), function(f){ if (f !== frame) f.remove(); });
     emptyEl.style.display = 'flex';
     emptyTitle.innerHTML = 'Loading the map&hellip;';
     emptySub.innerHTML = '&nbsp;';
@@ -276,12 +319,7 @@ body{
       emptyTitle.textContent = 'The Windy map didn’t load';
       emptySub.textContent = 'Check your connection, or that a browser extension isn’t blocking embed.windy.com.';
     }, 20000);
-    frame.onload = function(){
-      clearTimeout(loadTimer);
-      emptyEl.style.display = 'none';
-      setStatus('live', 'Live');
-    };
-    frame.src = windyUrl();
+    showFrame(true, gen);
     openLink.href = 'https://www.windy.com/-' + overlay + '?' + overlay + ',' + lat + ',' + lon + ',' + MODAL_ZOOM;
   }
 
