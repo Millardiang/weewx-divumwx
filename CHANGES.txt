@@ -1,25 +1,36 @@
-DivumWX - Windy Radar card (for 2.0.0)
-======================================
+DivumWX - Weather Radar card (for 2.0.0)
+========================================
+
+This replaces the earlier windy-radar-card package. The card now plays
+the last two hours of radar on a loop by itself (RainViewer frames over a
+CARTO base map); clicking it still opens the interactive Windy map.
 
 Files are laid out at their repo paths. Copy each over the version in your
-repo (all are based on the 1.7.0 release):
+repo. All are based on the 1.7.0 release, so they also replace anything
+copied in from the earlier package.
 
 New
-  divumwx/modalWindyRadar.html     the large modal map (v1.0.0)
+  divumwx/modalWindyRadar.html     the interactive Windy map modal (v1.0.0,
+                                   unchanged from the earlier package)
 
 Changed
-  divumwx/cardsBundleNew.js        new cardWindyRadar module; bundle v1.1.0
+  divumwx/cardsBundleNew.js        cardWindyRadar module v1.1.0, now an
+                                   animated RainViewer radar; bundle v1.1.0
   divumwx/index.html               card mount windyRadarCard26, data-hover
-  divumwx/hyperIndex.html            tooltip text, bundle ?v=b2ec6210
+  divumwx/hyperIndex.html            tooltip text, bundle ?v=30ab4e7b
   divumwx/lexendIndex.html           (hyper/lexend banners 1.1.0)
   install.py                       cardWindyRadar optional card, total 26
   build_card_bundle.py             cardWindyRadar.js in CARD_FILES
-  skins/DivumWX/lang/en.conf       "Windy Radar" string
-  skins/DivumWX/lang/en_US.conf    "Windy Radar" string
+  skins/DivumWX/lang/en.conf       "Weather Radar" and "Windy Radar"
+  skins/DivumWX/lang/en_US.conf    "Weather Radar" and "Windy Radar"
   CHANGELOG.md                     "Unreleased - for 2.0.0" section
 
-windy-radar-card.patch applies the same changes with git instead:
-  git apply windy-radar-card.patch
+weather-radar-card.patch applies the same changes to a clean 1.7.0 with
+git instead:  git apply weather-radar-card.patch
 
 To see the card on an existing install, add cardWindyRadar to
 enabled_cards under [DivumWXCards] in weewx.conf and restart WeeWX.
+
+The card needs api.rainviewer.com, tilecache.rainviewer.com and
+*.basemaps.cartocdn.com to be reachable from visitors' browsers.
+RainViewer's free API is for personal/educational use.
