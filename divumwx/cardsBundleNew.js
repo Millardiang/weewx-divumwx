@@ -1,6 +1,6 @@
 /*
 ##############################################################################################
-# cardsBundleNew.js version 1.0.3
+# cardsBundleNew.js version 1.1.0
 ##############################################################################################
 */
 
@@ -10326,6 +10326,244 @@ try {
 } catch (e) {
   console.error("cardsBundle: cardStationImage.js failed:", e);
 }
+/* ===== cardWindyRadar.js ===== */
+try {
+/*
+##############################################################################################
+# cardWindyRadar.js version 1.0.0
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  GPLv3
+##############################################################################################
+*/
+
+// ===================== cardWindyRadar.js =====================
+// Live Windy.com weather radar centred on the station, laid out like the
+// webcam card. The map is a non-interactive preview; clicking anywhere on
+// the card opens modalWindyRadar.html, the same map at a larger size with
+// layer tabs. Station latitude/longitude come from archive.json meta.
+(function(){
+  var ARCHIVE_JSON_URL = './jsondata/archive.json';
+  var MODAL_URL = 'modalWindyRadar.html';
+  var CARD_ZOOM = 7;
+  var RELOAD_MS = 15 * 60 * 1000;   // Windy animates itself; reload only to keep a long-open tab fresh
+
+  var lat = null, lon = null, stationName = '';
+
+  function pad2(n){ return n < 10 ? '0' + n : String(n); }
+  function stationParts(date){
+    var parts = {};
+    new Intl.DateTimeFormat('en-GB', {
+      timeZone: StationTime.getTZ(), hourCycle: 'h23',
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    }).formatToParts(date).forEach(function(p){ parts[p.type] = p.value; });
+    return parts;
+  }
+  function stationNow(){
+    var p = stationParts(new Date());
+    return new Date(Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second));
+  }
+
+  // DivumWX unit system -> Windy embed unit parameters.
+  var WINDY_WIND = { mph: 'mph', kmh: 'km/h', ms: 'm/s', kt: 'kt', bf: 'bft' };
+  var WINDY_TEMP = { C: '°C', F: '°F' };
+  var WINDY_RAIN = { mm: 'mm', in: 'in' };
+  function currentUnits(){
+    try {
+      var key = localStorage.getItem('dashboardUnitSystem') || 'uk';
+      if (typeof SYSTEMS !== 'undefined' && SYSTEMS[key]) return SYSTEMS[key];
+    } catch (e) {}
+    return { temp: 'C', wind: 'mph', rain: 'mm' };
+  }
+
+  function windyUrl(){
+    var u = currentUnits();
+    var q = [
+      'type=map', 'location=coordinates',
+      'metricRain=' + encodeURIComponent(WINDY_RAIN[u.rain] || 'default'),
+      'metricTemp=' + encodeURIComponent(WINDY_TEMP[u.temp] || 'default'),
+      'metricWind=' + encodeURIComponent(WINDY_WIND[u.wind] || 'default'),
+      'zoom=' + CARD_ZOOM,
+      'overlay=radar', 'product=radar', 'level=surface',
+      'lat=' + lat, 'lon=' + lon,
+      'detailLat=' + lat, 'detailLon=' + lon,
+      'marker=true', 'message=true'
+    ];
+    return 'https://embed.windy.com/embed.html?' + q.join('&');
+  }
+
+  var mount = document.getElementById('windyRadarCard26');
+  if (!mount) return;
+  mount.innerHTML = '';
+  mount.style.position = 'relative';
+  mount.style.display = 'flex';
+  mount.style.flexDirection = 'column';
+
+  mount.style.borderBottom = '0';
+
+  var overlayTextColor = 'var(--bs-body-color)';
+
+  var titleBar = document.createElement('div');
+  titleBar.style.position = 'absolute';
+  titleBar.style.top = '-20px';
+  titleBar.style.left = '0';
+  titleBar.style.right = '0';
+  titleBar.style.height = '20px';
+  titleBar.style.boxSizing = 'border-box';
+  titleBar.style.display = 'flex';
+  titleBar.style.alignItems = 'center';
+  titleBar.style.justifyContent = 'space-between';
+  titleBar.style.gap = '8px';
+  titleBar.style.padding = '0 14px';
+  titleBar.style.fontSize = '9px';
+  titleBar.style.color = overlayTextColor;
+  titleBar.style.background = 'transparent';
+
+  var titleLabel = document.createElement('span');
+  titleLabel.textContent = DivumWXI18N.t('Windy Radar');
+  titleLabel.style.fontWeight = '600';
+  titleLabel.style.whiteSpace = 'nowrap';
+  titleLabel.style.overflow = 'hidden';
+  titleLabel.style.textOverflow = 'ellipsis';
+
+  var statusWrap = document.createElement('span');
+  statusWrap.style.display = 'flex';
+  statusWrap.style.alignItems = 'center';
+  statusWrap.style.gap = '4px';
+  statusWrap.style.flexShrink = '0';
+  statusWrap.style.opacity = '0.85';
+
+  var statusDot = document.createElement('span');
+  statusDot.style.width = '6px';
+  statusDot.style.height = '6px';
+  statusDot.style.borderRadius = '50%';
+  statusDot.style.background = '#999';
+  statusDot.style.flexShrink = '0';
+
+  var statusTime = document.createElement('span');
+
+  statusWrap.appendChild(statusDot);
+  statusWrap.appendChild(statusTime);
+  titleBar.appendChild(titleLabel);
+  titleBar.appendChild(statusWrap);
+  mount.appendChild(titleBar);
+
+  function setStatus(ok){
+    statusDot.style.background = ok ? '#2ecc71' : '#e74c3c';
+    var t = stationNow();
+    statusTime.textContent = pad2(t.getUTCHours()) + ':' + pad2(t.getUTCMinutes()) + ':' + pad2(t.getUTCSeconds());
+  }
+
+  var body = document.createElement('div');
+  body.style.position = 'relative';
+  body.style.height = '175px';
+  body.style.width = '100%';
+  body.style.boxSizing = 'border-box';
+  body.style.borderRadius = '5px';
+  body.style.overflow = 'hidden';
+  body.style.background = 'var(--bs-tertiary-bg)';
+  mount.appendChild(body);
+
+  // The preview map. pointer-events:none so a click (or a drag of the card)
+  // reaches the card instead of panning the map inside the iframe.
+  var frame = document.createElement('iframe');
+  frame.title = 'Windy weather radar';
+  frame.setAttribute('loading', 'lazy');
+  frame.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
+  frame.setAttribute('tabindex', '-1');
+  frame.style.position = 'absolute';
+  frame.style.inset = '0';
+  frame.style.width = '100%';
+  frame.style.height = '100%';
+  frame.style.border = '0';
+  frame.style.pointerEvents = 'none';
+  body.appendChild(frame);
+
+  var message = document.createElement('div');
+  message.style.position = 'absolute';
+  message.style.inset = '0';
+  message.style.display = 'flex';
+  message.style.alignItems = 'center';
+  message.style.justifyContent = 'center';
+  message.style.padding = '12px';
+  message.style.textAlign = 'center';
+  message.style.fontSize = '11px';
+  message.style.color = 'var(--bs-secondary-color, var(--bs-body-color))';
+  message.textContent = '…';
+  body.appendChild(message);
+
+  // Whole-card link, above the map, that opens the large modal.
+  var cardLink = document.createElement('a');
+  cardLink.className = 'card-whole-link';
+  cardLink.href = MODAL_URL;
+  cardLink.setAttribute('data-modal', 'Windy Radar');
+  cardLink.setAttribute('data-hover', 'Click to open the larger radar map');
+  cardLink.setAttribute('data-type', 'iframe');
+  cardLink.setAttribute('data-modal-width', '900px');
+  cardLink.setAttribute('data-modal-height', '600px');
+  cardLink.setAttribute('data-url', MODAL_URL);
+  cardLink.setAttribute('aria-label', 'Open the larger Windy radar map');
+  cardLink.style.position = 'absolute';
+  cardLink.style.inset = '0';
+  cardLink.style.display = 'block';
+  cardLink.style.zIndex = '2';
+  body.appendChild(cardLink);
+
+  function modalTitle(){
+    var base = DivumWXI18N.t('Windy Radar');
+    return stationName ? base + ' - ' + stationName : base;
+  }
+
+  var loadTimer = null;
+  function load(){
+    if (lat === null || lon === null) return;
+    clearTimeout(loadTimer);
+    // Windy gives no error event for a blocked or failed embed, so treat
+    // "no load event within 20 s" as a failure for the status dot.
+    loadTimer = setTimeout(function(){ setStatus(false); }, 20000);
+    frame.onload = function(){
+      clearTimeout(loadTimer);
+      message.style.display = 'none';
+      setStatus(true);
+    };
+    frame.src = windyUrl();
+  }
+
+  function fetchConfig(){
+    return fetch(ARCHIVE_JSON_URL + '?_=' + Date.now(), { cache: 'no-store' })
+      .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function(data){
+        var m = (data && data.meta) || {};
+        var la = parseFloat(m.latitude), lo = parseFloat(m.longitude);
+        if (isFinite(la) && isFinite(lo)) { lat = la.toFixed(3); lon = lo.toFixed(3); }
+        if (m.station_location) stationName = String(m.station_location);
+      })
+      .catch(function(e){
+        console.warn('cardWindyRadar: config fetch failed --', e.message);
+      });
+  }
+
+  fetchConfig().then(function(){
+    cardLink.setAttribute('data-title', modalTitle());
+    if (lat === null) {
+      message.textContent = 'Station location unavailable';
+      setStatus(false);
+      return;
+    }
+    load();
+    setInterval(load, RELOAD_MS);
+  });
+
+  window.addEventListener('unitsystemchange', function(){ load(); });
+  window.addEventListener('i18nready', function(){
+    titleLabel.textContent = DivumWXI18N.t('Windy Radar');
+    cardLink.setAttribute('data-title', modalTitle());
+  });
+})();
+} catch (e) {
+  console.error("cardsBundle: cardWindyRadar.js failed:", e);
+}
+
 /* ===== cardSolarEnergy.js ===== */
 try {
 /*

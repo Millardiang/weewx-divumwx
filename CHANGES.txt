@@ -1,0 +1,25 @@
+DivumWX - Windy Radar card (for 2.0.0)
+======================================
+
+Files are laid out at their repo paths. Copy each over the version in your
+repo (all are based on the 1.7.0 release):
+
+New
+  divumwx/modalWindyRadar.html     the large modal map (v1.0.0)
+
+Changed
+  divumwx/cardsBundleNew.js        new cardWindyRadar module; bundle v1.1.0
+  divumwx/index.html               card mount windyRadarCard26, data-hover
+  divumwx/hyperIndex.html            tooltip text, bundle ?v=b2ec6210
+  divumwx/lexendIndex.html           (hyper/lexend banners 1.1.0)
+  install.py                       cardWindyRadar optional card, total 26
+  build_card_bundle.py             cardWindyRadar.js in CARD_FILES
+  skins/DivumWX/lang/en.conf       "Windy Radar" string
+  skins/DivumWX/lang/en_US.conf    "Windy Radar" string
+  CHANGELOG.md                     "Unreleased - for 2.0.0" section
+
+windy-radar-card.patch applies the same changes with git instead:
+  git apply windy-radar-card.patch
+
+To see the card on an existing install, add cardWindyRadar to
+enabled_cards under [DivumWXCards] in weewx.conf and restart WeeWX.

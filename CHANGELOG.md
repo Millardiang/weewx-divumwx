@@ -1,5 +1,29 @@
 # DivumWX Changelog
 
+## Unreleased — for 2.0.0
+
+### Windy Radar card (new, optional)
+- A new dashboard card showing Windy.com's live weather radar centred on
+  the station, laid out like the Webcam card: title bar, status dot and
+  time, and a 175px preview map. The preview is look-only, so clicking or
+  dragging the card behaves like every other card.
+- Clicking the card opens **modalWindyRadar.html**, the same map at
+  900 × 600 with tabs for Radar, Satellite, Rain & thunder, Wind and
+  Temperature, an "Open in Windy.com" link, and the dashboard's light/dark
+  theme and seasonal colours.
+- The map is centred on the station's latitude and longitude from
+  archive.json, and follows the dashboard's unit system for wind,
+  temperature and rain (Windy may not honour every unit on every layer).
+- Optional card: new installs are asked about it after the Station Image
+  card. **Existing installs** don't get it automatically — add
+  `cardWindyRadar` to `enabled_cards` under `[DivumWXCards]` in weewx.conf
+  and restart WeeWX.
+- Card hover tooltips can now carry their own text (`data-hover`).
+- Changed: `cardsBundleNew.js` 1.1.0, `hyperIndex.html` 1.1.0,
+  `lexendIndex.html` 1.1.0, `index.html` (card mount, tooltip, bundle
+  hash), `install.py`, `build_card_bundle.py`, `lang/en.conf`,
+  `lang/en_US.conf`. New: `modalWindyRadar.html` 1.0.0.
+
 ## 1.7.0 — Celestial and Skyfield pages
 
 Two live astronomy pages, linked from the Astronomy navbar and hub, drawn

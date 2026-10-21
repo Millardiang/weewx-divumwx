@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# hyperIndex.html version 1.0.0
+# hyperIndex.html version 1.1.0
 #  Alternative home page for users with frail/low vision -- identical to index.html, with
 #  Atkinson Hyperlegible replacing every other typeface (Inter, IBM Plex Mono, Georgia).
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
@@ -193,6 +193,7 @@ setInterval(() => {
   <div id="etCard22" data-card-id="cardEvapoTranspiration" class="card" draggable="true"></div>
   <div id="earthquakeCard23" data-card-id="cardEarthquake" class="card" draggable="true"></div>
   <div id="webcamCard24" data-card-id="cardWebcam" class="card" draggable="true"></div>
+  <div id="windyRadarCard26" data-card-id="cardWindyRadar" class="card" draggable="true"></div>
 
   <footer>
     <div class="footer-left">
@@ -402,8 +403,9 @@ document.querySelectorAll('.card').forEach(card => {
     const lines = [];
     if (link) {
       const chartType = link.getAttribute('data-modal') || 'chart';
-      lines.push(chartType === 'Timelapse'
-        ? 'Click to view timelapse'
+      const hoverText = link.getAttribute('data-hover');
+      lines.push(hoverText ? hoverText
+        : chartType === 'Timelapse' ? 'Click to view timelapse'
         : 'Click and release to open ' + chartType + ' charts');
     }
     if (card.getAttribute('draggable') === 'true') {
@@ -537,6 +539,6 @@ window.addEventListener('load', updateFooterVisibility);
 <script src="js/d3.7.9.0.min.js"></script>
 <script src="js/d3-geo-projection.4.0.0.min.js"></script>
 <script src="js/topojson.3.0.2.min.js"></script>
-<script src="cardsBundleNew.js?v=c99e7d44-4"></script>
+<script src="cardsBundleNew.js?v=b2ec6210"></script>
 </body>
 </html>
