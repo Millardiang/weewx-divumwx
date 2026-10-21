@@ -1,49 +1,50 @@
-DivumWX - Windy Radar card: play once, then stop (for 2.0.0)
-===========================================================
+DivumWX - Windy Radar card: confirmed link + station dot (for 2.0.0)
+====================================================================
 
-Goes on top of version-2.0-beta at 60c2613 (your "beta2" commit, which
-is the v4 location fix).
+Goes on top of version-2.0-beta at 3d4bf5a (your v5 "beta2" commit).
 
 What changed
-  - The radar plays through once whenever the card or the larger map
-    loads, then stops on a still map:
-      card:       on page load, every 15 minutes, and on a unit change
-      larger map: when it opens, and on each tab (Radar, Satellite, ...)
-    Windy's map can't be paused from the dashboard, so it's loaded with
-    play=true and, after PLAY_ONCE_SECONDS, swapped for the same map
-    without play. The still map loads underneath the playing one and
-    takes over once it's ready, so there's no flash.
-  - If a visitor clicks into the map while it plays, it's left playing
-    for them.
-  - Title tooltip: "The radar plays once when it loads; press [play] on
-    the map to play it again." The larger map's footer says the same.
-  - The v4 location fix is unchanged.
+  - The card and the larger map now send Windy exactly the link you
+    confirmed centres on the station. v5 also sent unit settings
+    (metricRain/metricTemp/metricWind), the only difference from your
+    working link, so those are gone and Windy picks its own units.
+    The card now asks for:
+      https://embed.windy.com/embed.html?type=map&location=coordinates
+        &zoom=7&overlay=radar&level=surface&lat=51.937&lon=-0.982
+        &message=true&play=true
+    and the still map after one play is the same without &play=true.
+  - Station dot: a red dot drawn by DivumWX at the centre of the card
+    and the larger map, where the station is when the map loads. It
+    hides when a visitor clicks into the map (it would no longer be on
+    the station) and comes back with the next load.
+  - Play once, then stop: unchanged from v5 (PLAY_ONCE_SECONDS = 15).
+    Windy's playback speed still can't be set from the dashboard.
 
-Setting the play time
-  Windy's playback speed can't be set from the dashboard, so the stop is
-  timed. PLAY_ONCE_SECONDS = 15 is set in two places:
-    divumwx/cardsBundleNew.js     near the top of the cardWindyRadar module
-    divumwx/modalWindyRadar.html  near "var MODAL_ZOOM = 8;"
-  It counts from the moment Windy's page loads, so include the second or
-  two Windy takes to fetch the radar. Time one run of the loop on your
-  site and change both. Editing cardsBundleNew.js changes its contents,
-  so also update the ?v= on its <script> tag in index.html,
-  hyperIndex.html and lexendIndex.html (any new value works), or browsers
-  may keep the old copy.
+If anything is still off-centre: windy-test.html
+  Copy windy-test.html into your site's divumwx folder (next to
+  index.html) and open it in your browser. It shows four Windy maps of
+  your station side by side, each one change away from your working
+  link:
+    A  the link you confirmed
+    B  A without play=true      (what the still map uses)
+    C  A plus the unit settings (what v5 sent)
+    D  A plus marker=true and detailLat/detailLon
+  Each has a red dot where the station should be. Tell me which maps are
+  off-centre and where any Windy marker appears. Delete the file after.
 
 Files are laid out at their repo paths. These 6 are the only ones that
 differ from your branch; copy each over the version in your repo:
-  divumwx/cardsBundleNew.js        cardWindyRadar: play once, location fix
-  divumwx/modalWindyRadar.html     play once, location fix, coords shown
-  divumwx/index.html               bundle ?v=780323d9
-  divumwx/hyperIndex.html          bundle ?v=780323d9
-  divumwx/lexendIndex.html         bundle ?v=780323d9
+  divumwx/cardsBundleNew.js        confirmed link, station dot
+  divumwx/modalWindyRadar.html     confirmed link, station dot
+  divumwx/index.html               bundle ?v=238da6db
+  divumwx/hyperIndex.html          bundle ?v=238da6db
+  divumwx/lexendIndex.html         bundle ?v=238da6db
   CHANGELOG.md                     entry updated
+windy-test.html is only for testing; it isn't part of DivumWX.
 
-Using git instead, on version-2.0-beta (60c2613):
+Using git instead, on version-2.0-beta (3d4bf5a):
   git apply windy-radar-card.patch
 
-Reminder: the repo root now has CHANGES.txt and windy-radar-card.patch
-from earlier packages. The installer copies every file in the repo root
-into users' WeeWX folder, so you'll probably want to delete both from
-the repo rather than replace them.
+Reminder: the repo root has CHANGES.txt and windy-radar-card.patch from
+earlier packages. The installer copies every file in the repo root into
+users' WeeWX folder, so you'll probably want to delete both.

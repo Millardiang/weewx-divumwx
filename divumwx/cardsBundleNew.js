@@ -10372,40 +10372,26 @@ try {
     return new Date(Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second));
   }
 
-  // DivumWX unit system -> Windy embed unit parameters.
-  var WINDY_WIND = { mph: 'mph', kmh: 'km/h', ms: 'm/s', kt: 'kt', bf: 'bft' };
-  var WINDY_TEMP = { C: '°C', F: '°F' };
-  var WINDY_RAIN = { mm: 'mm', in: 'in' };
-  function currentUnits(){
-    try {
-      var key = localStorage.getItem('dashboardUnitSystem') || 'uk';
-      if (typeof SYSTEMS !== 'undefined' && SYSTEMS[key]) return SYSTEMS[key];
-    } catch (e) {}
-    return { temp: 'C', wind: 'mph', rain: 'mm' };
-  }
-
+  // The Windy link is kept to exactly the parameters confirmed to centre
+  // on the station. Left out on purpose:
+  //  - product: radar is imagery, not a forecast model; with product=radar
+  //    Windy ignored lat/lon and centred on the viewer's IP location;
+  //  - metricRain/metricTemp/metricWind: the map went back off-centre
+  //    when these were sent, so Windy picks its own units;
+  //  - marker=true marks the *viewer's* own location (from their IP
+  //    address), not the station; the card draws its own station dot;
+  //  - detailLat/detailLon only matter for Windy's forecast panel.
+  // play=true starts Windy's radar animation by itself. Windy then loops
+  // it, so the card stops it by swapping in the same map without play.
   function windyUrl(play){
-    var u = currentUnits();
     var q = [
       'type=map', 'location=coordinates',
-      'metricRain=' + encodeURIComponent(WINDY_RAIN[u.rain] || 'default'),
-      'metricTemp=' + encodeURIComponent(WINDY_TEMP[u.temp] || 'default'),
-      'metricWind=' + encodeURIComponent(WINDY_WIND[u.wind] || 'default'),
       'zoom=' + CARD_ZOOM,
       'overlay=radar', 'level=surface',
       'lat=' + lat, 'lon=' + lon,
       'message=true'
     ];
     if (play) q.push('play=true');
-    // Left out on purpose:
-    //  - product: radar is imagery, not a forecast model, and Windy takes
-    //    no product for it;
-    //  - marker=true marks the *viewer's* own location (from their IP
-    //    address), not these coordinates;
-    //  - detailLat/detailLon only matter for Windy's forecast panel,
-    //    which isn't shown.
-    // play=true starts Windy's radar animation by itself. Windy then loops
-    // it, so the card stops it by swapping in the same map without play.
     return 'https://embed.windy.com/embed.html?' + q.join('&');
   }
 
@@ -10559,6 +10545,33 @@ try {
   message.textContent = '…';
   body.appendChild(message);
 
+  // Station dot. Windy centres the map on the station's coordinates, so
+  // the station is at the middle of the frame until a visitor moves the
+  // map. Once they click into it the dot is hidden, since it would no
+  // longer be on the station; it comes back with the next map load.
+  var stationDot = document.createElement('div');
+  stationDot.title = 'Weather station';
+  stationDot.style.position = 'absolute';
+  stationDot.style.left = '50%';
+  stationDot.style.top = '50%';
+  stationDot.style.width = '10px';
+  stationDot.style.height = '10px';
+  stationDot.style.margin = '-5px 0 0 -5px';
+  stationDot.style.borderRadius = '50%';
+  stationDot.style.background = '#e74c3c';
+  stationDot.style.boxShadow = '0 0 0 2px #fff, 0 0 6px rgba(0,0,0,.6)';
+  stationDot.style.zIndex = '2';
+  stationDot.style.pointerEvents = 'none';
+  stationDot.style.display = 'none';
+  body.appendChild(stationDot);
+  // Clicking into a cross-origin frame blurs this window and makes the
+  // frame the active element; that's the only signal the page gets.
+  window.addEventListener('blur', function(){
+    setTimeout(function(){
+      if (frame && document.activeElement === frame) stationDot.style.display = 'none';
+    }, 0);
+  });
+
   function modalTitle(){
     var base = DivumWXI18N.t('Windy Radar');
     return stationName ? base + ' - ' + stationName : base;
@@ -10602,6 +10615,7 @@ try {
       if (frame && frame !== f) frame.remove();
       frame = f;
       message.style.display = 'none';
+      stationDot.style.display = 'block';
       setStatus(true);
       if (playing) stopTimer = setTimeout(function(){ stopPlaying(gen); }, PLAY_ONCE_SECONDS * 1000);
     };
@@ -10652,7 +10666,6 @@ try {
     setInterval(load, RELOAD_MS);
   });
 
-  window.addEventListener('unitsystemchange', function(){ load(); });
   window.addEventListener('i18nready', function(){
     titleLabel.textContent = DivumWXI18N.t('Windy Radar');
     titleLabel.setAttribute('data-title', modalTitle());

@@ -87,6 +87,14 @@ body{
 @media (max-width:900px){ .wr-stage{ height:500px; } }
 @media (max-width:600px){ .wr-stage{ height:400px; } }
 .wr-frame{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+/* Station dot: Windy centres the map on the station, so it sits mid-frame
+   until a visitor moves the map (then it's hidden until the next load). */
+.wr-station{
+  position:absolute; left:50%; top:50%; z-index:1;
+  width:12px; height:12px; margin:-6px 0 0 -6px; border-radius:50%;
+  background:#e74c3c; box-shadow:0 0 0 2px #fff, 0 0 6px rgba(0,0,0,.6);
+  pointer-events:none; display:none;
+}
 
 .wr-status{
   position:absolute; right:12px; top:12px; z-index:2;
@@ -138,6 +146,7 @@ body{
   </div>
 
   <div class="wr-stage" id="wrStage">
+    <div class="wr-station" id="wrStation" title="Weather station"></div>
     <div class="wr-empty" id="wrEmpty">
       <div class="wr-empty-title" id="wrEmptyTitle">Loading the map&hellip;</div>
       <div class="wr-empty-sub" id="wrEmptySub">&nbsp;</div>
@@ -155,7 +164,6 @@ body{
 
 </div>
 
-<script src="units.js"></script>
 <script>
 (function(){
 
@@ -195,18 +203,6 @@ body{
   // the dashboard, so time one run of the loop on your site and adjust.
   var PLAY_ONCE_SECONDS = 15;
 
-  // DivumWX unit system -> Windy embed unit parameters.
-  var WINDY_WIND = { mph: 'mph', kmh: 'km/h', ms: 'm/s', kt: 'kt', bf: 'bft' };
-  var WINDY_TEMP = { C: '°C', F: '°F' };
-  var WINDY_RAIN = { mm: 'mm', in: 'in' };
-  function currentUnits(){
-    try {
-      var key = localStorage.getItem('dashboardUnitSystem') || 'uk';
-      if (typeof SYSTEMS !== 'undefined' && SYSTEMS[key]) return SYSTEMS[key];
-    } catch (e) {}
-    return { temp: 'C', wind: 'mph', rain: 'mm' };
-  }
-
   var frame = null;   // the map currently shown; frames are made per load
   var emptyEl = document.getElementById('wrEmpty');
   var emptyTitle = document.getElementById('wrEmptyTitle');
@@ -218,6 +214,15 @@ body{
   var openLink = document.getElementById('wrOpen');
   var stageEl = document.getElementById('wrStage');
   var coordsEl = document.getElementById('wrCoords');
+  var stationEl = document.getElementById('wrStation');
+  // Clicking into a cross-origin frame blurs this window and makes the
+  // frame the active element; that's the only signal the page gets that
+  // the visitor is moving the map, so the dot is hidden then.
+  window.addEventListener('blur', function(){
+    setTimeout(function(){
+      if (frame && document.activeElement === frame) stationEl.style.display = 'none';
+    }, 0);
+  });
 
   var lat = null, lon = null;
   var overlay = 'radar';
@@ -232,13 +237,21 @@ body{
     if (cls === 'live') hideTimer = setTimeout(function(){ statusEl.classList.add('hide'); }, 3000);
   }
 
+  // The Windy link is kept to exactly the parameters confirmed to centre
+  // on the station. Left out on purpose:
+  //  - product for radar/satellite: they're imagery, not forecast models;
+  //    with product=radar Windy ignored lat/lon and centred on the
+  //    viewer's IP location (forecast layers still get product=ecmwf);
+  //  - metricRain/metricTemp/metricWind: the map went back off-centre
+  //    when these were sent, so Windy picks its own units;
+  //  - marker=true marks the *viewer's* own location (from their IP
+  //    address), not the station; this page draws its own station dot;
+  //  - detailLat/detailLon only matter for Windy's forecast panel.
+  // play=true starts Windy's animation by itself. Windy then loops it,
+  // so the page stops it by swapping in the same map without play.
   function windyUrl(play){
-    var u = currentUnits();
     var q = [
       'type=map', 'location=coordinates',
-      'metricRain=' + encodeURIComponent(WINDY_RAIN[u.rain] || 'default'),
-      'metricTemp=' + encodeURIComponent(WINDY_TEMP[u.temp] || 'default'),
-      'metricWind=' + encodeURIComponent(WINDY_WIND[u.wind] || 'default'),
       'zoom=' + MODAL_ZOOM,
       'overlay=' + overlay,
       'level=surface',
@@ -246,16 +259,7 @@ body{
       'message=true'
     ];
     if (play) q.push('play=true');
-    // Radar and satellite are imagery, not forecast models: Windy takes no
-    // product for them, so only the forecast layers get one.
     if (overlay !== 'radar' && overlay !== 'satellite') q.push('product=ecmwf');
-    // Left out on purpose:
-    //  - marker=true marks the *viewer's* own location (from their IP
-    //    address), not these coordinates;
-    //  - detailLat/detailLon only matter for Windy's forecast panel,
-    //    which isn't shown.
-    // play=true starts Windy's animation by itself. Windy then loops it,
-    // so the page stops it by swapping in the same map without play.
     return 'https://embed.windy.com/embed.html?' + q.join('&');
   }
 
@@ -289,6 +293,7 @@ body{
       if (frame && frame !== f) frame.remove();
       frame = f;
       emptyEl.style.display = 'none';
+      stationEl.style.display = 'block';
       if (playing) {
         setStatus('live', 'Live');
         stopTimer = setTimeout(function(){ stopPlaying(gen); }, PLAY_ONCE_SECONDS * 1000);
@@ -335,7 +340,6 @@ body{
     load();
   });
 
-  window.addEventListener('storage', function(e){ if (e.key === 'dashboardUnitSystem') load(); });
 
   fetch(ARCHIVE_JSON_URL + '?_=' + Date.now(), { cache: 'no-store' })
     .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })

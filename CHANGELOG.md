@@ -7,8 +7,8 @@
   the station, laid out like the Webcam card: title bar, status dot and
   time, and a 175px map.
 - The radar plays through once whenever the card or the larger map
-  loads (on page load, every 15 minutes, on a unit change, and on each
-  tab in the larger map), then stops on a still map. Windy's frame can't
+  loads (on page load, every 15 minutes, and on each tab in the larger
+  map), then stops on a still map. Windy's frame can't
   be paused from the dashboard, so it's loaded with `play=true` and,
   after `PLAY_ONCE_SECONDS` (15, set at the top of the card module and of
   modalWindyRadar.html), swapped for the same map without it, loaded
@@ -24,15 +24,18 @@
   seasonal colours. On a shorter window the map shrinks so the whole
   modal still fits.
 - The map is centred on the station's latitude and longitude (weewx.conf
-  `[Station]`, via archive.json), shown in the larger map's footer, and
-  follows the dashboard's unit system for wind, temperature and rain
-  (Windy may not honour every unit on every layer). Windy's map only
-  loads once it's on screen and laid out, because Windy can centre in
-  the wrong place if it loads hidden. The Windy link carries no
-  `product` for radar or satellite (they're imagery, not forecast
-  models), no `marker` (it marks the viewer's location, not the
-  station) and no `detailLat`/`detailLon` (only used by Windy's
-  forecast panel, which isn't shown).
+  `[Station]`, via archive.json), shown in the larger map's footer, with
+  a red station dot drawn by DivumWX at the centre. The dot hides once a
+  visitor clicks into the map (it would no longer be on the station) and
+  returns with the next map load. Windy's map only loads once it's on
+  screen and laid out, because Windy can centre in the wrong place if it
+  loads hidden.
+- The Windy link is kept to the parameters confirmed to centre on the
+  station: no `product` for radar or satellite (with `product=radar`
+  Windy centred on the viewer's IP location instead), no unit settings
+  (`metricRain`/`metricTemp`/`metricWind`; the map went back off-centre
+  with them, so Windy picks its own units), no `marker` (it marks the
+  viewer's location, not the station) and no `detailLat`/`detailLon`.
 - Optional card: new installs are asked about it after the Station Image
   card. **Existing installs** don't get it automatically — add
   `cardWindyRadar` to `enabled_cards` under `[DivumWXCards]` in weewx.conf
