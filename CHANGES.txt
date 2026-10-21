@@ -1,36 +1,33 @@
-DivumWX - Windy Radar card: amber station pin (for 2.0.0)
-=========================================================
+DivumWX - Windy Radar card: whole card opens the larger map (for 2.0.0)
+=======================================================================
 
-Goes on top of version-2.0-beta at ecec5cd (your v6 "Windy" commit).
+Goes on top of version-2.0-beta at da661b7 (your v7 "Windy" commit).
 
-What changed
-  - The station marker is now an amber map pin, with its tip exactly at
-    the centre of the card and of the larger map, where Windy centres on
-    the station's coordinates. It replaces v6's red dot: red is also a
-    heavy-rain colour on the radar, and a pin shape can't be mistaken
-    for rain or for Windy's own pulsing blue dot.
-  - Windy's blue dot is NOT the station: it's each viewer's location as
-    Windy guesses it from their internet address. It can't be moved or
-    hidden from the dashboard, so it will keep appearing wherever Windy
-    guesses (for visitors elsewhere, over them).
-  - The title tooltip and the larger map's footer now say "The amber pin
-    marks the weather station."
-  - As before, the pin hides once a visitor clicks into the map (it would
-    no longer be on the station) and comes back with the next load.
+What changed (card only; the larger map is unchanged)
+  - The title is plain text again, not a link.
+  - Clicking anywhere on the card opens the larger Windy map, like the
+    other cards. The card's map is look-only again, so clicks and drags
+    act on the card.
+  - Hovering over the card shows:
+      Click to open the larger Windy map.
+      The amber pin marks the weather station.
+      Click and hold to drag and drop cards into preferred position
+  - Unchanged: the radar plays once on each load then stops, the amber
+    pin marks the station at the centre, and the larger map is still
+    interactive (pan, zoom, press play again).
 
-Files are laid out at their repo paths. These 6 are the only ones that
+Files are laid out at their repo paths. These 5 are the only ones that
 differ from your branch; copy each over the version in your repo:
-  divumwx/cardsBundleNew.js        amber station pin, tooltip
-  divumwx/modalWindyRadar.html     amber station pin, footer note
-  divumwx/index.html               bundle ?v=612e8cbf
-  divumwx/hyperIndex.html          bundle ?v=612e8cbf
-  divumwx/lexendIndex.html         bundle ?v=612e8cbf
+  divumwx/cardsBundleNew.js        cardWindyRadar: whole-card link, tooltip
+  divumwx/index.html               bundle ?v=f3207917
+  divumwx/hyperIndex.html          bundle ?v=f3207917
+  divumwx/lexendIndex.html         bundle ?v=f3207917
   CHANGELOG.md                     entry updated
 
-Using git instead, on version-2.0-beta (ecec5cd):
+Using git instead, on version-2.0-beta (da661b7):
   git apply windy-radar-card.patch
 
-Clean-up: the repo root now has CHANGES.txt, windy-radar-card.patch and
+Clean-up: the repo root has CHANGES.txt, windy-radar-card.patch and
 windy-test.html from earlier packages. The installer copies every file in
 the repo root into users' WeeWX folder, so you'll probably want to delete
 all three from the repo.

@@ -12,13 +12,13 @@
   be paused from the dashboard, so it's loaded with `play=true` and,
   after `PLAY_ONCE_SECONDS` (15, set at the top of the card module and of
   modalWindyRadar.html), swapped for the same map without it, loaded
-  underneath so there's no flash. If a visitor has clicked into the map
-  while it plays, it's left alone. Windy's playback speed can't be set.
-- Unlike other cards, the map is live: visitors can press Windy's own ▶
-  to play it again, and pan and zoom. Because the map takes the clicks,
-  only the card's **title** opens the larger map; hovering over the title
-  says so. The card can be dragged by its title bar.
-- The title opens **modalWindyRadar.html**, the same map at 1350 × 900
+  underneath so there's no flash. In the larger map, if a visitor has
+  clicked into the map while it plays, it's left alone. Windy's playback
+  speed can't be set.
+- Like other cards, clicking anywhere on the card opens the larger map,
+  and hovering shows a tooltip saying so (plus what the amber pin is and
+  the usual drag hint). The card's map is look-only.
+- The card opens **modalWindyRadar.html**, the same map at 1350 × 900
   with tabs for Radar, Satellite, Rain & thunder, Wind and Temperature,
   an "Open in Windy.com" link, and the dashboard's light/dark theme and
   seasonal colours. On a shorter window the map shrinks so the whole
@@ -28,9 +28,10 @@
   an amber station pin drawn by DivumWX, its tip at the centre. It's a
   pin, not a dot, so it isn't mistaken for Windy's own pulsing blue
   "your location" dot (each viewer's location as Windy guesses it from
-  their IP address, which can't be moved or hidden) or for rain. The pin
-  hides once a visitor clicks into the map (it would no longer be on the
-  station) and returns with the next map load. Windy's map only loads once it's on
+  their IP address, which can't be moved or hidden) or for rain. In the
+  larger map the pin hides once a visitor clicks into the map (it would
+  no longer be on the station) and returns with the next map load.
+  Windy's map only loads once it's on
   screen and laid out, because Windy can centre in the wrong place if it
   loads hidden.
 - The Windy link is kept to the parameters confirmed to centre on the

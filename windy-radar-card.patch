@@ -1,149 +1,300 @@
 diff --git a/CHANGELOG.md b/CHANGELOG.md
-index d38dcd4..d0b3527 100644
+index d0b3527..54dc7df 100644
 --- a/CHANGELOG.md
 +++ b/CHANGELOG.md
-@@ -25,9 +25,12 @@
-   modal still fits.
- - The map is centred on the station's latitude and longitude (weewx.conf
-   `[Station]`, via archive.json), shown in the larger map's footer, with
--  a red station dot drawn by DivumWX at the centre. The dot hides once a
--  visitor clicks into the map (it would no longer be on the station) and
--  returns with the next map load. Windy's map only loads once it's on
-+  an amber station pin drawn by DivumWX, its tip at the centre. It's a
-+  pin, not a dot, so it isn't mistaken for Windy's own pulsing blue
-+  "your location" dot (each viewer's location as Windy guesses it from
-+  their IP address, which can't be moved or hidden) or for rain. The pin
-+  hides once a visitor clicks into the map (it would no longer be on the
-+  station) and returns with the next map load. Windy's map only loads once it's on
+@@ -12,13 +12,13 @@
+   be paused from the dashboard, so it's loaded with `play=true` and,
+   after `PLAY_ONCE_SECONDS` (15, set at the top of the card module and of
+   modalWindyRadar.html), swapped for the same map without it, loaded
+-  underneath so there's no flash. If a visitor has clicked into the map
+-  while it plays, it's left alone. Windy's playback speed can't be set.
+-- Unlike other cards, the map is live: visitors can press Windy's own ▶
+-  to play it again, and pan and zoom. Because the map takes the clicks,
+-  only the card's **title** opens the larger map; hovering over the title
+-  says so. The card can be dragged by its title bar.
+-- The title opens **modalWindyRadar.html**, the same map at 1350 × 900
++  underneath so there's no flash. In the larger map, if a visitor has
++  clicked into the map while it plays, it's left alone. Windy's playback
++  speed can't be set.
++- Like other cards, clicking anywhere on the card opens the larger map,
++  and hovering shows a tooltip saying so (plus what the amber pin is and
++  the usual drag hint). The card's map is look-only.
++- The card opens **modalWindyRadar.html**, the same map at 1350 × 900
+   with tabs for Radar, Satellite, Rain & thunder, Wind and Temperature,
+   an "Open in Windy.com" link, and the dashboard's light/dark theme and
+   seasonal colours. On a shorter window the map shrinks so the whole
+@@ -28,9 +28,10 @@
+   an amber station pin drawn by DivumWX, its tip at the centre. It's a
+   pin, not a dot, so it isn't mistaken for Windy's own pulsing blue
+   "your location" dot (each viewer's location as Windy guesses it from
+-  their IP address, which can't be moved or hidden) or for rain. The pin
+-  hides once a visitor clicks into the map (it would no longer be on the
+-  station) and returns with the next map load. Windy's map only loads once it's on
++  their IP address, which can't be moved or hidden) or for rain. In the
++  larger map the pin hides once a visitor clicks into the map (it would
++  no longer be on the station) and returns with the next map load.
++  Windy's map only loads once it's on
    screen and laid out, because Windy can centre in the wrong place if it
    loads hidden.
  - The Windy link is kept to the parameters confirmed to centre on the
 diff --git a/divumwx/cardsBundleNew.js b/divumwx/cardsBundleNew.js
-index 1470988..4cf1ee3 100644
+index 4cf1ee3..208f991 100644
 --- a/divumwx/cardsBundleNew.js
 +++ b/divumwx/cardsBundleNew.js
-@@ -10468,7 +10468,7 @@ try {
-   // ---- Title tooltip ----
-   // Uses the dashboard's own #cardHoverTip when the page has one, so it
-   // looks like every other card tooltip; otherwise the browser's own.
--  var TITLE_TIP = 'Click the title to open the larger Windy map.<br>The radar plays once when it loads; press ▶ on the map to play it again.';
-+  var TITLE_TIP = 'Click the title to open the larger Windy map.<br>The radar plays once when it loads; press ▶ on the map to play it again.<br>The amber pin marks the weather station.';
-   var tipTimer = null;
-   function hoverTip(){ return document.getElementById('cardHoverTip'); }
-   if (!hoverTip()) titleLabel.title = TITLE_TIP.replace('<br>', '\n');
-@@ -10545,21 +10545,25 @@ try {
+@@ -10338,13 +10338,11 @@ try {
+ 
+ // ===================== cardWindyRadar.js =====================
+ // Live Windy.com weather radar centred on the station, laid out like the
+-// webcam card. Unlike other cards, the map is live: visitors can press
+-// Windy's own play arrow to animate the radar, and pan or zoom it. Windy's
+-// embed has no autoplay option and its cross-origin frame can't be
+-// scripted, so the play arrow has to be pressed by hand. Because the map
+-// takes the clicks, only the card's title opens the larger map
+-// (modalWindyRadar.html); hovering over the title says so. Station
+-// latitude/longitude come from archive.json meta.
++// webcam card. The radar plays through once on each load, then stops on a
++// still map. The map here is look-only: like other cards, clicking
++// anywhere on the card opens the larger, interactive map
++// (modalWindyRadar.html), and hovering says so. Station latitude/longitude
++// come from archive.json meta.
+ (function(){
+   var ARCHIVE_JSON_URL = './jsondata/archive.json';
+   var MODAL_URL = 'modalWindyRadar.html';
+@@ -10422,26 +10420,12 @@ try {
+   titleBar.style.color = overlayTextColor;
+   titleBar.style.background = 'transparent';
+ 
+-  // The title is the card's only link to the larger map. It's an <a> with
+-  // data-type="iframe", so the dashboard's own modal handler opens it.
+-  var titleLabel = document.createElement('a');
+-  titleLabel.href = MODAL_URL;
+-  titleLabel.setAttribute('data-modal', 'Windy Radar');
+-  titleLabel.setAttribute('data-type', 'iframe');
+-  titleLabel.setAttribute('data-modal-width', '1350px');
+-  titleLabel.setAttribute('data-modal-height', '900px');
+-  titleLabel.setAttribute('data-url', MODAL_URL);
+-  titleLabel.setAttribute('draggable', 'false');
++  var titleLabel = document.createElement('span');
+   titleLabel.textContent = DivumWXI18N.t('Windy Radar');
+   titleLabel.style.fontWeight = '600';
+   titleLabel.style.whiteSpace = 'nowrap';
+   titleLabel.style.overflow = 'hidden';
+   titleLabel.style.textOverflow = 'ellipsis';
+-  titleLabel.style.color = 'inherit';
+-  titleLabel.style.textDecoration = 'none';
+-  titleLabel.style.cursor = 'pointer';
+-  titleLabel.addEventListener('mouseenter', function(){ titleLabel.style.textDecoration = 'underline'; });
+-  titleLabel.addEventListener('mouseleave', function(){ titleLabel.style.textDecoration = 'none'; });
+ 
+   var statusWrap = document.createElement('span');
+   statusWrap.style.display = 'flex';
+@@ -10465,41 +10449,6 @@ try {
+   titleBar.appendChild(statusWrap);
+   mount.appendChild(titleBar);
+ 
+-  // ---- Title tooltip ----
+-  // Uses the dashboard's own #cardHoverTip when the page has one, so it
+-  // looks like every other card tooltip; otherwise the browser's own.
+-  var TITLE_TIP = 'Click the title to open the larger Windy map.<br>The radar plays once when it loads; press ▶ on the map to play it again.<br>The amber pin marks the weather station.';
+-  var tipTimer = null;
+-  function hoverTip(){ return document.getElementById('cardHoverTip'); }
+-  if (!hoverTip()) titleLabel.title = TITLE_TIP.replace('<br>', '\n');
+-  function placeTip(tip, e){
+-    tip.style.left = (e.clientX + 14) + 'px';
+-    tip.style.top = (e.clientY + 14) + 'px';
+-  }
+-  function showTitleTip(e){
+-    var tip = hoverTip();
+-    if (!tip) return;
+-    // Defer a tick so this wins over the card's own tooltip, which the
+-    // dashboard sets when the pointer first enters the card.
+-    setTimeout(function(){
+-      tip.innerHTML = TITLE_TIP;
+-      placeTip(tip, e);
+-      tip.classList.add('visible');
+-      clearTimeout(tipTimer);
+-      tipTimer = setTimeout(function(){ tip.classList.remove('visible'); }, 10000);
+-    }, 0);
+-  }
+-  titleLabel.addEventListener('mouseenter', showTitleTip);
+-  titleLabel.addEventListener('mousemove', function(e){ var tip = hoverTip(); if (tip) placeTip(tip, e); });
+-  function hideTitleTip(){
+-    var tip = hoverTip();
+-    clearTimeout(tipTimer);
+-    if (tip) tip.classList.remove('visible');
+-  }
+-  titleLabel.addEventListener('mouseleave', hideTitleTip);
+-  // The modal covers the title, so mouseleave won't fire once it opens.
+-  titleLabel.addEventListener('click', function(){ setTimeout(hideTitleTip, 0); });
+-
+   function setStatus(ok){
+     statusDot.style.background = ok ? '#2ecc71' : '#e74c3c';
+     var t = stationNow();
+@@ -10516,8 +10465,9 @@ try {
+   body.style.background = 'var(--bs-tertiary-bg)';
+   mount.appendChild(body);
+ 
+-  // The live map: Windy's own controls work, including its play arrow.
+-  // Frames are created per load (see loadNow), so this starts empty.
++  // The map. Look-only on the card (the whole-card link below sits over
++  // it); the larger map is the interactive one. Frames are created per
++  // load (see loadNow), so this starts empty.
+   var frame = null;
+   function newFrame(){
+     var f = document.createElement('iframe');
+@@ -10528,6 +10478,8 @@ try {
+     f.style.width = '100%';
+     f.style.height = '100%';
+     f.style.border = '0';
++    f.style.pointerEvents = 'none';
++    f.setAttribute('tabindex', '-1');
+     return f;
+   }
+ 
+@@ -10545,10 +10497,8 @@ try {
    message.textContent = '…';
    body.appendChild(message);
  
--  // Station dot. Windy centres the map on the station's coordinates, so
-+  // Station pin. Windy centres the map on the station's coordinates, so
-   // the station is at the middle of the frame until a visitor moves the
--  // map. Once they click into it the dot is hidden, since it would no
-+  // map. Once they click into it the pin is hidden, since it would no
-   // longer be on the station; it comes back with the next map load.
-+  // Drawn as an amber pin, not a dot: Windy's own pulsing blue dot marks
-+  // the *viewer's* guessed location, and red/orange blobs are rain on
-+  // the radar, so a pin shape can't be mistaken for either. The pin's
-+  // tip sits exactly on the station (the middle of the map).
-   var stationDot = document.createElement('div');
-   stationDot.title = 'Weather station';
-+  stationDot.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="28" viewBox="0 0 20 28" aria-hidden="true"><path d="M10 27C10 27 1.5 16.6 1.5 10.2A8.5 8.5 0 0 1 18.5 10.2C18.5 16.6 10 27 10 27Z" fill="#F59E0B" stroke="#fff" stroke-width="2" stroke-linejoin="round"/><circle cx="10" cy="10" r="3.2" fill="#fff"/></svg>';
-   stationDot.style.position = 'absolute';
-   stationDot.style.left = '50%';
-   stationDot.style.top = '50%';
--  stationDot.style.width = '10px';
--  stationDot.style.height = '10px';
--  stationDot.style.margin = '-5px 0 0 -5px';
--  stationDot.style.borderRadius = '50%';
--  stationDot.style.background = '#e74c3c';
--  stationDot.style.boxShadow = '0 0 0 2px #fff, 0 0 6px rgba(0,0,0,.6)';
-+  stationDot.style.width = '20px';
-+  stationDot.style.height = '28px';
-+  stationDot.style.margin = '-27px 0 0 -10px';
-+  stationDot.style.lineHeight = '0';
-+  stationDot.style.filter = 'drop-shadow(0 1px 2px rgba(0,0,0,.7))';
-   stationDot.style.zIndex = '2';
+-  // Station pin. Windy centres the map on the station's coordinates, so
+-  // the station is at the middle of the frame until a visitor moves the
+-  // map. Once they click into it the pin is hidden, since it would no
+-  // longer be on the station; it comes back with the next map load.
++  // Station pin. Windy centres the map on the station's coordinates, and
++  // the card's map can't be moved, so the station is always at the middle.
+   // Drawn as an amber pin, not a dot: Windy's own pulsing blue dot marks
+   // the *viewer's* guessed location, and red/orange blobs are rain on
+   // the radar, so a pin shape can't be mistaken for either. The pin's
+@@ -10568,13 +10518,64 @@ try {
    stationDot.style.pointerEvents = 'none';
    stationDot.style.display = 'none';
+   body.appendChild(stationDot);
+-  // Clicking into a cross-origin frame blurs this window and makes the
+-  // frame the active element; that's the only signal the page gets.
+-  window.addEventListener('blur', function(){
++
++  // Whole-card link to the larger map, over the title bar and the map,
++  // like other cards. data-type="iframe" makes the dashboard's own modal
++  // handler open it.
++  var cardLink = document.createElement('a');
++  cardLink.className = 'card-whole-link';
++  cardLink.href = MODAL_URL;
++  cardLink.setAttribute('data-modal', 'Windy Radar');
++  cardLink.setAttribute('data-type', 'iframe');
++  cardLink.setAttribute('data-modal-width', '1350px');
++  cardLink.setAttribute('data-modal-height', '900px');
++  cardLink.setAttribute('data-url', MODAL_URL);
++  cardLink.setAttribute('aria-label', 'Open the larger Windy map');
++  cardLink.style.position = 'absolute';
++  cardLink.style.top = '-20px';
++  cardLink.style.left = '0';
++  cardLink.style.right = '0';
++  cardLink.style.bottom = '0';
++  cardLink.style.display = 'block';
++  cardLink.style.zIndex = '3';
++  mount.appendChild(cardLink);
++
++  // ---- Tooltip ----
++  // The dashboard's generic card tooltip would say "open Windy Radar
++  // charts", so this card sets its own text in the same #cardHoverTip,
++  // keeping the dashboard's drag hint. Falls back to the browser's own
++  // tooltip on pages without #cardHoverTip.
++  var CARD_TIP = 'Click to open the larger Windy map.<br>' +
++    'The amber pin marks the weather station.<br>' +
++    'Click and hold to drag and drop cards into preferred position';
++  var tipTimer = null;
++  function hoverTip(){ return document.getElementById('cardHoverTip'); }
++  if (!hoverTip()) cardLink.title = CARD_TIP.replace(/<br>/g, '\n');
++  function placeTip(tip, e){
++    tip.style.left = (e.clientX + 14) + 'px';
++    tip.style.top = (e.clientY + 14) + 'px';
++  }
++  cardLink.addEventListener('mouseenter', function(e){
++    var tip = hoverTip();
++    if (!tip) return;
++    // Defer a tick so this wins over the dashboard's own card tooltip,
++    // which it sets on the same mouseenter.
+     setTimeout(function(){
+-      if (frame && document.activeElement === frame) stationDot.style.display = 'none';
++      tip.innerHTML = CARD_TIP;
++      placeTip(tip, e);
++      tip.classList.add('visible');
++      clearTimeout(tipTimer);
++      tipTimer = setTimeout(function(){ tip.classList.remove('visible'); }, 10000);
+     }, 0);
+   });
++  function hideTip(){
++    var tip = hoverTip();
++    clearTimeout(tipTimer);
++    if (tip) tip.classList.remove('visible');
++  }
++  cardLink.addEventListener('mouseleave', hideTip);
++  // The modal covers the card, so mouseleave won't fire once it opens.
++  cardLink.addEventListener('click', function(){ setTimeout(hideTip, 0); });
+ 
+   function modalTitle(){
+     var base = DivumWXI18N.t('Windy Radar');
+@@ -10639,8 +10640,6 @@ try {
+   }
+   function stopPlaying(gen){
+     if (gen !== generation || !frame) return;
+-    // A visitor who has clicked into the map is using it: leave it alone.
+-    if (document.activeElement === frame) return;
+     if (!ready()) { setTimeout(function(){ stopPlaying(gen); }, 1000); return; }
+     showFrame(newFrame(), false, gen);
+   }
+@@ -10660,7 +10659,7 @@ try {
+   }
+ 
+   fetchConfig().then(function(){
+-    titleLabel.setAttribute('data-title', modalTitle());
++    cardLink.setAttribute('data-title', modalTitle());
+     if (lat === null) {
+       message.textContent = 'Station location unavailable';
+       setStatus(false);
+@@ -10672,7 +10671,7 @@ try {
+ 
+   window.addEventListener('i18nready', function(){
+     titleLabel.textContent = DivumWXI18N.t('Windy Radar');
+-    titleLabel.setAttribute('data-title', modalTitle());
++    cardLink.setAttribute('data-title', modalTitle());
+   });
+ })();
+ } catch (e) {
 diff --git a/divumwx/hyperIndex.html b/divumwx/hyperIndex.html
-index 0638ab8..cb76675 100644
+index cb76675..994c891 100644
 --- a/divumwx/hyperIndex.html
 +++ b/divumwx/hyperIndex.html
 @@ -538,6 +538,6 @@ window.addEventListener('load', updateFooterVisibility);
  <script src="js/d3.7.9.0.min.js"></script>
  <script src="js/d3-geo-projection.4.0.0.min.js"></script>
  <script src="js/topojson.3.0.2.min.js"></script>
--<script src="cardsBundleNew.js?v=238da6db"></script>
-+<script src="cardsBundleNew.js?v=612e8cbf"></script>
+-<script src="cardsBundleNew.js?v=612e8cbf"></script>
++<script src="cardsBundleNew.js?v=f3207917"></script>
  </body>
  </html>
 \ No newline at end of file
 diff --git a/divumwx/index.html b/divumwx/index.html
-index 2802911..d2f00dd 100644
+index d2f00dd..6e0e9ed 100644
 --- a/divumwx/index.html
 +++ b/divumwx/index.html
 @@ -908,6 +908,6 @@ window.addEventListener('load', updateFooterVisibility);
  <script src="js/d3.7.9.0.min.js"></script>
  <script src="js/d3-geo-projection.4.0.0.min.js"></script>
  <script src="js/topojson.3.0.2.min.js"></script>
--<script src="cardsBundleNew.js?v=238da6db"></script>
-+<script src="cardsBundleNew.js?v=612e8cbf"></script>
+-<script src="cardsBundleNew.js?v=612e8cbf"></script>
++<script src="cardsBundleNew.js?v=f3207917"></script>
  </body>
  </html>
 diff --git a/divumwx/lexendIndex.html b/divumwx/lexendIndex.html
-index 0a2927d..4323702 100644
+index 4323702..d05be32 100644
 --- a/divumwx/lexendIndex.html
 +++ b/divumwx/lexendIndex.html
 @@ -538,6 +538,6 @@ window.addEventListener('load', updateFooterVisibility);
  <script src="js/d3.7.9.0.min.js"></script>
  <script src="js/d3-geo-projection.4.0.0.min.js"></script>
  <script src="js/topojson.3.0.2.min.js"></script>
--<script src="cardsBundleNew.js?v=238da6db"></script>
-+<script src="cardsBundleNew.js?v=612e8cbf"></script>
+-<script src="cardsBundleNew.js?v=612e8cbf"></script>
++<script src="cardsBundleNew.js?v=f3207917"></script>
  </body>
  </html>
 \ No newline at end of file
-diff --git a/divumwx/modalWindyRadar.html b/divumwx/modalWindyRadar.html
-index ee5f74f..819ab44 100644
---- a/divumwx/modalWindyRadar.html
-+++ b/divumwx/modalWindyRadar.html
-@@ -87,14 +87,17 @@ body{
- @media (max-width:900px){ .wr-stage{ height:500px; } }
- @media (max-width:600px){ .wr-stage{ height:400px; } }
- .wr-frame{ position:absolute; inset:0; width:100%; height:100%; border:0; }
--/* Station dot: Windy centres the map on the station, so it sits mid-frame
--   until a visitor moves the map (then it's hidden until the next load). */
-+/* Station pin: Windy centres the map on the station, so the pin's tip sits
-+   mid-frame until a visitor moves the map (then it's hidden until the next
-+   load). A pin, in amber, so it can't be mistaken for Windy's pulsing blue
-+   "your location" dot (the viewer's guessed location) or for rain. */
- .wr-station{
-   position:absolute; left:50%; top:50%; z-index:1;
--  width:12px; height:12px; margin:-6px 0 0 -6px; border-radius:50%;
--  background:#e74c3c; box-shadow:0 0 0 2px #fff, 0 0 6px rgba(0,0,0,.6);
-+  width:24px; height:34px; margin:-33px 0 0 -12px; line-height:0;
-+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.7));
-   pointer-events:none; display:none;
- }
-+.wr-station svg{ width:24px; height:34px; }
- 
- .wr-status{
-   position:absolute; right:12px; top:12px; z-index:2;
-@@ -146,7 +149,7 @@ body{
-   </div>
- 
-   <div class="wr-stage" id="wrStage">
--    <div class="wr-station" id="wrStation" title="Weather station"></div>
-+    <div class="wr-station" id="wrStation" title="Weather station"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="28" viewBox="0 0 20 28" aria-hidden="true"><path d="M10 27C10 27 1.5 16.6 1.5 10.2A8.5 8.5 0 0 1 18.5 10.2C18.5 16.6 10 27 10 27Z" fill="#F59E0B" stroke="#fff" stroke-width="2" stroke-linejoin="round"/><circle cx="10" cy="10" r="3.2" fill="#fff"/></svg></div>
-     <div class="wr-empty" id="wrEmpty">
-       <div class="wr-empty-title" id="wrEmptyTitle">Loading the map&hellip;</div>
-       <div class="wr-empty-sub" id="wrEmptySub">&nbsp;</div>
-@@ -158,7 +161,7 @@ body{
-   </div>
- 
-   <div class="wr-footer">
--    <span><span id="wrCoords"></span>Drag to pan, scroll or pinch to zoom. The map plays once when it loads; press &#9654; at the bottom of the map to play it again. Map data &copy; Windy.com.</span>
-+    <span><span id="wrCoords"></span>Drag to pan, scroll or pinch to zoom. The map plays once when it loads; press &#9654; at the bottom of the map to play it again. The amber pin marks the weather station. Map data &copy; Windy.com.</span>
-     <a class="wr-open" id="wrOpen" href="https://www.windy.com/" target="_blank" rel="noopener">Open in Windy.com &#8599;</a>
-   </div>
- 

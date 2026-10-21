@@ -10338,13 +10338,11 @@ try {
 
 // ===================== cardWindyRadar.js =====================
 // Live Windy.com weather radar centred on the station, laid out like the
-// webcam card. Unlike other cards, the map is live: visitors can press
-// Windy's own play arrow to animate the radar, and pan or zoom it. Windy's
-// embed has no autoplay option and its cross-origin frame can't be
-// scripted, so the play arrow has to be pressed by hand. Because the map
-// takes the clicks, only the card's title opens the larger map
-// (modalWindyRadar.html); hovering over the title says so. Station
-// latitude/longitude come from archive.json meta.
+// webcam card. The radar plays through once on each load, then stops on a
+// still map. The map here is look-only: like other cards, clicking
+// anywhere on the card opens the larger, interactive map
+// (modalWindyRadar.html), and hovering says so. Station latitude/longitude
+// come from archive.json meta.
 (function(){
   var ARCHIVE_JSON_URL = './jsondata/archive.json';
   var MODAL_URL = 'modalWindyRadar.html';
@@ -10422,26 +10420,12 @@ try {
   titleBar.style.color = overlayTextColor;
   titleBar.style.background = 'transparent';
 
-  // The title is the card's only link to the larger map. It's an <a> with
-  // data-type="iframe", so the dashboard's own modal handler opens it.
-  var titleLabel = document.createElement('a');
-  titleLabel.href = MODAL_URL;
-  titleLabel.setAttribute('data-modal', 'Windy Radar');
-  titleLabel.setAttribute('data-type', 'iframe');
-  titleLabel.setAttribute('data-modal-width', '1350px');
-  titleLabel.setAttribute('data-modal-height', '900px');
-  titleLabel.setAttribute('data-url', MODAL_URL);
-  titleLabel.setAttribute('draggable', 'false');
+  var titleLabel = document.createElement('span');
   titleLabel.textContent = DivumWXI18N.t('Windy Radar');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
   titleLabel.style.textOverflow = 'ellipsis';
-  titleLabel.style.color = 'inherit';
-  titleLabel.style.textDecoration = 'none';
-  titleLabel.style.cursor = 'pointer';
-  titleLabel.addEventListener('mouseenter', function(){ titleLabel.style.textDecoration = 'underline'; });
-  titleLabel.addEventListener('mouseleave', function(){ titleLabel.style.textDecoration = 'none'; });
 
   var statusWrap = document.createElement('span');
   statusWrap.style.display = 'flex';
@@ -10465,41 +10449,6 @@ try {
   titleBar.appendChild(statusWrap);
   mount.appendChild(titleBar);
 
-  // ---- Title tooltip ----
-  // Uses the dashboard's own #cardHoverTip when the page has one, so it
-  // looks like every other card tooltip; otherwise the browser's own.
-  var TITLE_TIP = 'Click the title to open the larger Windy map.<br>The radar plays once when it loads; press ▶ on the map to play it again.<br>The amber pin marks the weather station.';
-  var tipTimer = null;
-  function hoverTip(){ return document.getElementById('cardHoverTip'); }
-  if (!hoverTip()) titleLabel.title = TITLE_TIP.replace('<br>', '\n');
-  function placeTip(tip, e){
-    tip.style.left = (e.clientX + 14) + 'px';
-    tip.style.top = (e.clientY + 14) + 'px';
-  }
-  function showTitleTip(e){
-    var tip = hoverTip();
-    if (!tip) return;
-    // Defer a tick so this wins over the card's own tooltip, which the
-    // dashboard sets when the pointer first enters the card.
-    setTimeout(function(){
-      tip.innerHTML = TITLE_TIP;
-      placeTip(tip, e);
-      tip.classList.add('visible');
-      clearTimeout(tipTimer);
-      tipTimer = setTimeout(function(){ tip.classList.remove('visible'); }, 10000);
-    }, 0);
-  }
-  titleLabel.addEventListener('mouseenter', showTitleTip);
-  titleLabel.addEventListener('mousemove', function(e){ var tip = hoverTip(); if (tip) placeTip(tip, e); });
-  function hideTitleTip(){
-    var tip = hoverTip();
-    clearTimeout(tipTimer);
-    if (tip) tip.classList.remove('visible');
-  }
-  titleLabel.addEventListener('mouseleave', hideTitleTip);
-  // The modal covers the title, so mouseleave won't fire once it opens.
-  titleLabel.addEventListener('click', function(){ setTimeout(hideTitleTip, 0); });
-
   function setStatus(ok){
     statusDot.style.background = ok ? '#2ecc71' : '#e74c3c';
     var t = stationNow();
@@ -10516,8 +10465,9 @@ try {
   body.style.background = 'var(--bs-tertiary-bg)';
   mount.appendChild(body);
 
-  // The live map: Windy's own controls work, including its play arrow.
-  // Frames are created per load (see loadNow), so this starts empty.
+  // The map. Look-only on the card (the whole-card link below sits over
+  // it); the larger map is the interactive one. Frames are created per
+  // load (see loadNow), so this starts empty.
   var frame = null;
   function newFrame(){
     var f = document.createElement('iframe');
@@ -10528,6 +10478,8 @@ try {
     f.style.width = '100%';
     f.style.height = '100%';
     f.style.border = '0';
+    f.style.pointerEvents = 'none';
+    f.setAttribute('tabindex', '-1');
     return f;
   }
 
@@ -10545,10 +10497,8 @@ try {
   message.textContent = '…';
   body.appendChild(message);
 
-  // Station pin. Windy centres the map on the station's coordinates, so
-  // the station is at the middle of the frame until a visitor moves the
-  // map. Once they click into it the pin is hidden, since it would no
-  // longer be on the station; it comes back with the next map load.
+  // Station pin. Windy centres the map on the station's coordinates, and
+  // the card's map can't be moved, so the station is always at the middle.
   // Drawn as an amber pin, not a dot: Windy's own pulsing blue dot marks
   // the *viewer's* guessed location, and red/orange blobs are rain on
   // the radar, so a pin shape can't be mistaken for either. The pin's
@@ -10568,13 +10518,64 @@ try {
   stationDot.style.pointerEvents = 'none';
   stationDot.style.display = 'none';
   body.appendChild(stationDot);
-  // Clicking into a cross-origin frame blurs this window and makes the
-  // frame the active element; that's the only signal the page gets.
-  window.addEventListener('blur', function(){
+
+  // Whole-card link to the larger map, over the title bar and the map,
+  // like other cards. data-type="iframe" makes the dashboard's own modal
+  // handler open it.
+  var cardLink = document.createElement('a');
+  cardLink.className = 'card-whole-link';
+  cardLink.href = MODAL_URL;
+  cardLink.setAttribute('data-modal', 'Windy Radar');
+  cardLink.setAttribute('data-type', 'iframe');
+  cardLink.setAttribute('data-modal-width', '1350px');
+  cardLink.setAttribute('data-modal-height', '900px');
+  cardLink.setAttribute('data-url', MODAL_URL);
+  cardLink.setAttribute('aria-label', 'Open the larger Windy map');
+  cardLink.style.position = 'absolute';
+  cardLink.style.top = '-20px';
+  cardLink.style.left = '0';
+  cardLink.style.right = '0';
+  cardLink.style.bottom = '0';
+  cardLink.style.display = 'block';
+  cardLink.style.zIndex = '3';
+  mount.appendChild(cardLink);
+
+  // ---- Tooltip ----
+  // The dashboard's generic card tooltip would say "open Windy Radar
+  // charts", so this card sets its own text in the same #cardHoverTip,
+  // keeping the dashboard's drag hint. Falls back to the browser's own
+  // tooltip on pages without #cardHoverTip.
+  var CARD_TIP = 'Click to open the larger Windy map.<br>' +
+    'The amber pin marks the weather station.<br>' +
+    'Click and hold to drag and drop cards into preferred position';
+  var tipTimer = null;
+  function hoverTip(){ return document.getElementById('cardHoverTip'); }
+  if (!hoverTip()) cardLink.title = CARD_TIP.replace(/<br>/g, '\n');
+  function placeTip(tip, e){
+    tip.style.left = (e.clientX + 14) + 'px';
+    tip.style.top = (e.clientY + 14) + 'px';
+  }
+  cardLink.addEventListener('mouseenter', function(e){
+    var tip = hoverTip();
+    if (!tip) return;
+    // Defer a tick so this wins over the dashboard's own card tooltip,
+    // which it sets on the same mouseenter.
     setTimeout(function(){
-      if (frame && document.activeElement === frame) stationDot.style.display = 'none';
+      tip.innerHTML = CARD_TIP;
+      placeTip(tip, e);
+      tip.classList.add('visible');
+      clearTimeout(tipTimer);
+      tipTimer = setTimeout(function(){ tip.classList.remove('visible'); }, 10000);
     }, 0);
   });
+  function hideTip(){
+    var tip = hoverTip();
+    clearTimeout(tipTimer);
+    if (tip) tip.classList.remove('visible');
+  }
+  cardLink.addEventListener('mouseleave', hideTip);
+  // The modal covers the card, so mouseleave won't fire once it opens.
+  cardLink.addEventListener('click', function(){ setTimeout(hideTip, 0); });
 
   function modalTitle(){
     var base = DivumWXI18N.t('Windy Radar');
@@ -10639,8 +10640,6 @@ try {
   }
   function stopPlaying(gen){
     if (gen !== generation || !frame) return;
-    // A visitor who has clicked into the map is using it: leave it alone.
-    if (document.activeElement === frame) return;
     if (!ready()) { setTimeout(function(){ stopPlaying(gen); }, 1000); return; }
     showFrame(newFrame(), false, gen);
   }
@@ -10660,7 +10659,7 @@ try {
   }
 
   fetchConfig().then(function(){
-    titleLabel.setAttribute('data-title', modalTitle());
+    cardLink.setAttribute('data-title', modalTitle());
     if (lat === null) {
       message.textContent = 'Station location unavailable';
       setStatus(false);
@@ -10672,7 +10671,7 @@ try {
 
   window.addEventListener('i18nready', function(){
     titleLabel.textContent = DivumWXI18N.t('Windy Radar');
-    titleLabel.setAttribute('data-title', modalTitle());
+    cardLink.setAttribute('data-title', modalTitle());
   });
 })();
 } catch (e) {
