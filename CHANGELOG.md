@@ -2,6 +2,23 @@
 
 ## Unreleased — for 2.0.0
 
+### Earthquake map in the Equal Earth projection
+- The world map in **modalEarthquakeMap.html** (opened from the Earthquake
+  card) is now drawn in the Equal Earth projection instead of Mercator, so
+  countries keep their true relative size and the whole world fits the
+  width. It looks the same as DivumWX's Equal Earth map: it loads that
+  map's own `css/equalEarthMap.css` for its colours (so the two can't drift
+  apart), draws the same `countries-110m.json` coastlines, shades the night
+  side in the same twilight steps, sits on the card background, and
+  follows the light/dark theme.
+- Unchanged behaviour: the last 24 hours of USGS earthquakes replay along
+  the timeline at the top, pulsing as they appear and sized by magnitude.
+  The station is now marked in amber, the timeline shows station time,
+  and the hover text gives the time and fixes the "Magnitue" typo.
+- The page now uses DivumWX's D3 7.9 and TopoJSON 3 copies. No page uses
+  `js/d3.4.2.2.min.js` or `js/topojson.min.js` any more.
+- Changed: `modalEarthquakeMap.html` 1.1.1.
+
 ### Boltek Lightning card (new, optional)
 - Installer: after "Include cardLightning?" (yes), it asks "Is your
   lightning detector a Boltek (NexStorm)?". Yes puts the Boltek Lightning

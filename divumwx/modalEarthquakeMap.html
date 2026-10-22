@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# modalEarthquake.html version 1.0.0
+# modalEarthquakeMap.html version 1.1.1
 #  Combines the former modalEarthquake.html (recent-earthquakes card grid) and
 #  modalEarthquakeMap.html (live D3 world map) into one modal, map at top.
+#  1.1.0: the map is drawn in the Equal Earth projection (was Mercator), in
+#  the colours of DivumWX's Equal Earth map, with the station marked.
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -16,6 +18,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
 <title>Recent Worldwide Earthquakes</title>
 <link rel="stylesheet" href="css/reset.min.css">
+<link rel="stylesheet" href="css/equalEarthMap.css">
 <meta name="viewport" content="width = device-width, initial-scale = 1, shrink-to-fit = yes">
 <script src="stationTime.js"></script>
 <style>
@@ -59,47 +62,45 @@ body {
   padding: 10px;
 }
 
-/* ---- Map (was modalEarthquakeMap.html's own page) ---- */
+/* ---- Map: Equal Earth projection ---- */
+/* Colours come straight from css/equalEarthMap.css (--map-*), the same file the
+   Equal Earth map uses, so the two always match. That file keys off body.dark /
+   body.light, which the theme script below sets. */
+:root { --eq-quake: #E74C3C; --eq-pulse: #FFFFFF; }
+[data-theme="light"] { --eq-quake: #D62C1A; --eq-pulse: #D62C1A; }
 .map-wrap {
+  background: var(--card-bg);
+  border-radius: 10px;
+  padding: 8px 8px 4px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
 .map {
   position: relative;
-  margin: 16px auto 0;
-  width: 780px;
+  margin: 8px auto 0;
+  width: 860px;
   max-width: 100%;
 }
 .map svg {
   margin: 0 auto;
   display: block;
+  width: 100%;
+  height: auto;
 }
-.sphere {
-  fill: #bbb;
-}
-.land {
-  fill: #2e8b57;
-}
-.boundry {
-  fill: none;
-  stroke: #292E35;
-  stroke-linejoin: round;
-  stroke-linecap: round;
-  stroke-width: 0.5px;
-}
-.overlay {
-  fill: none;
-  pointer-events: all;
-}
-.axisSilver line{
-  stroke: #2e8b57;
-}
-.axisSilver path{
-  stroke: #2e8b57;
-}
-.axisSilver text{
-  fill: #2e8b57;
-}
+.eq-ocean { fill: var(--map-ocean); }
+.eq-grid { fill: none; stroke: var(--map-grid); stroke-width: 0.5px; }
+.eq-land { fill: var(--map-land); }
+.eq-borders { fill: none; stroke: var(--map-coast); stroke-width: 0.5px; stroke-linejoin: round; }
+.eq-night { fill: rgba(var(--map-night), var(--map-night-alpha)); }
+.eq-rim { fill: none; stroke: var(--map-rim); stroke-width: 1.2px; }
+.quake-circle { fill: var(--eq-quake); opacity: 0.75; stroke: rgba(0,0,0,0.35); stroke-width: 0.5px; }
+.pulse-circle { fill: none; stroke: var(--eq-pulse); stroke-width: 1.5px; }
+.eq-station { fill: var(--map-station); stroke: var(--card-bg); stroke-width: 1.5px; }
+.eq-station-label { fill: var(--map-station); paint-order: stroke; stroke: var(--card-bg); stroke-width: 3px; stroke-linejoin: round; font-size: 11px; font-weight: 600; font-family: 'Lexend', sans-serif; }
+.eq-axis line, .eq-axis path { stroke: var(--muted-text); }
+.eq-axis text { fill: var(--muted-text); font-size: 10px; font-family: 'Lexend', sans-serif; }
+.eq-now { fill: var(--eq-quake); }
+.eq-credit { fill: var(--muted-text); font-size: 10.5px; font-family: 'Lexend', sans-serif; }
 .mapLoadError {
   color: #e74c3c;
   text-align: center;
@@ -342,7 +343,10 @@ html[data-season="summer"] body, html[data-season="autumn"] body {
       : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
   }
   function apply(){
-    document.documentElement.setAttribute('data-theme', fromParent() || fromLocal());
+    var t = fromParent() || fromLocal();
+    document.documentElement.setAttribute('data-theme', t);
+    document.body.classList.toggle('dark', t === 'dark');
+    document.body.classList.toggle('light', t !== 'dark');
   }
   apply();
 
@@ -358,182 +362,138 @@ html[data-season="summer"] body, html[data-season="autumn"] body {
   <div class="earthquake-grid" id="earthquakeGrid"></div>
 </div>
 
-<script src='js/d3.4.2.2.min.js'></script>
-<script src="js/topojson.min.js"></script>
+<script src="js/d3.7.9.0.min.js"></script>
+<script src="js/topojson.3.0.2.min.js"></script>
 
 <script>
-// ==== Live world map (was modalEarthquakeMap.html) ====
-var margin = {top: 20, right: 20, bottom: 20, left: 20},
-    width = 780 - margin.left - margin.right,
-    height = 550 - margin.top - margin.bottom;
+// ==== Live world map: Equal Earth projection ====
+// The last 24 hours of USGS earthquakes replay in time order along the
+// timeline at the top (about 17 seconds for the day), each one pulsing as
+// it appears and sized by magnitude. Map colours come from CSS variables,
+// so it follows the dashboard's light/dark theme without redrawing.
+(function(){
+  var W = 860, AXIS_H = 34, PAD = 6;
+  var MAP_W = W - 2 * PAD;
+  var sphere = { type: 'Sphere' };
+  // Equal Earth is about 2.05 : 1; fit the whole world to the width.
+  var projection = d3.geoEqualEarth().fitWidth(MAP_W, sphere);
+  var mapH = Math.ceil(d3.geoPath(projection).bounds(sphere)[1][1]);
+  var H = AXIS_H + mapH + PAD + 18;
+  projection.translate([projection.translate()[0] + PAD, projection.translate()[1] + AXIS_H]);
+  var path = d3.geoPath(projection);
 
-var projection = d3.geoMercator().translate([width / 2, height / 1.5]).scale((width - 1) / 2 / Math.PI);
+  var svg = d3.select('.map').append('svg')
+      .attr('viewBox', '0 0 ' + W + ' ' + H)
+      .attr('role', 'img')
+      .attr('aria-label', 'World map of the last 24 hours of earthquakes, Equal Earth projection');
 
-var path = d3.geoPath().projection(projection);
+  var gMap = svg.append('g').attr('id', 'world-map');
+  gMap.append('path').datum(sphere).attr('class', 'eq-ocean').attr('d', path);
+  gMap.append('path').datum(d3.geoGraticule10()).attr('class', 'eq-grid').attr('d', path);
+  var gLand = gMap.append('g');
+  var gNight = gMap.append('g');
+  gMap.append('path').datum(sphere).attr('class', 'eq-rim').attr('d', path);
+  var gStation = svg.append('g');
+  var gQuakes = svg.append('g').attr('id', 'all-quakes');
 
-var svg = d3.select(".map")
-    .append("svg")
-    .attr("width", width)
-    .attr("height", height);
+  svg.append('text').attr('class', 'eq-credit')
+     .attr('x', W / 2).attr('y', H - 4).attr('text-anchor', 'middle')
+     .text('Equal Earth projection \u00b7 rendered using D3.js \u00b7 data: USGS');
 
-var g = svg.append('g').attr('id', 'world-map');
+  // Timeline: the last 24 hours
+  var end = new Date(), start = new Date(end.getTime() - 86400000);
+  var x = d3.scaleTime().domain([start, end]).range([PAD + 14, W - PAD - 14]);
+  var tz = (window.StationTime ? StationTime.getTZ() : undefined);
+  var hhmm = function(d){ return new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(d); };
+  var xAxis = svg.append('g').attr('class', 'eq-axis').attr('transform', 'translate(0,' + (AXIS_H - 10) + ')')
+      .call(d3.axisTop(x).ticks(d3.timeHour.every(3)).tickFormat(hhmm));
 
-g.append('clipPath')
- .attr('id', 'clip-path')
- .append('rect')
- .attr('x', 0)
- .attr('y', 30)
- .attr('width', width)
- .attr('height', height - 30)
+  function xy(lon, lat){ return projection([lon, lat]); }
 
-var gQuakes = svg.append('g').attr('id', 'all-quakes');
-
-  d3.json('./jsondata/worldmap.json', function(error, world) {
-  if (error) {
-    console.warn('modalEarthquake (map): worldmap.json fetch failed \u2014', error.message || error);
-    d3.select('.map').append('div').attr('class', 'mapLoadError').text('Map data failed to load.');
-    return;
+  function drawLand(world){
+    gLand.append('path')
+       .datum(topojson.feature(world, world.objects.countries))
+       .attr('class', 'eq-land').attr('d', path);
+    gLand.append('path')
+       .datum(topojson.mesh(world, world.objects.countries, function(a, b){ return a !== b; }))
+       .attr('class', 'eq-borders').attr('d', path);
   }
 
-  var worldMap = g.append('path')
-   .attr('clip-path', 'url(#clip-path)')
-   .datum(topojson.merge(world, world.objects.countries.geometries))
-   .attr('class', 'land')
-   .attr('d', path)
+  function drawStation(meta){
+    var lat = parseFloat(meta && meta.latitude), lon = parseFloat(meta && meta.longitude);
+    if (!isFinite(lat) || !isFinite(lon)) return;
+    var p = xy(lon, lat);
+    gStation.append('circle').attr('class', 'eq-station').attr('cx', p[0]).attr('cy', p[1]).attr('r', 4.5)
+      .append('title').text((meta.station_location || 'Weather station') + ' (' + lat.toFixed(2) + ', ' + lon.toFixed(2) + ')');
+    gStation.append('text').attr('class', 'eq-station-label')
+      .attr('x', p[0] + (p[0] > W - 140 ? -8 : 8)).attr('y', p[1] - 6)
+      .attr('text-anchor', p[0] > W - 140 ? 'end' : 'start')
+      .text(meta.station_location || 'Station');
+  }
 
-  g.append('path')
-   .datum(topojson.mesh(world, world.objects.countries, function(a, b) { return a !== b; }))
-   .attr('class', 'boundry')
-   .attr('d', path);
+  function drawQuakes(data){
+    var quake = (data.features || []).filter(function(f){
+      return f.geometry && f.geometry.coordinates && isFinite(f.geometry.coordinates[0]);
+    }).sort(function(a, b){ return a.properties.time - b.properties.time; });
+    if (!quake.length) return;
+    quake.forEach(function(q){ q.delay = Math.max(0, (q.properties.time - start.getTime()) / 5000); });
+    var radius = function(d){ return Math.max(0.6, d.properties.mag || 0) * 1.1; };
 
-  var dateObj = new Date();
-  dateObj.setDate(dateObj.getDate() - 1);
+    var groups = gQuakes.selectAll('g').data(quake).enter().append('g')
+       .attr('id', function(d){ return d.id; }).attr('class', 'quake-group')
+       .attr('transform', function(d){ var p = xy(d.geometry.coordinates[0], d.geometry.coordinates[1]); return 'translate(' + p[0] + ',' + p[1] + ')'; });
 
-  var x = d3.scaleTime()
-      .domain([dateObj, new Date()])
-      .range([0, width - margin.right - margin.left]);
+    groups.append('circle').attr('class', 'pulse-circle').attr('r', 0).style('opacity', 0.9)
+      .transition().delay(function(d){ return d.delay; }).duration(2000)
+      .attr('r', function(d){ return radius(d) * 7; }).style('opacity', 0).remove();
 
-  var formatTime = d3.timeFormat("%H:%M");
+    groups.append('circle').attr('class', 'quake-circle').attr('r', 0)
+      .call(function(c){
+        c.append('title').text(function(d){
+          return 'Magnitude ' + d.properties.mag + ' \u2014 ' + d.properties.place + ' \u2014 ' + hhmm(new Date(d.properties.time));
+        });
+      })
+      .transition().delay(function(d){ return d.delay; }).duration(1000)
+      .attr('r', radius);
 
-  var xAxis = svg.append('g')
-      .attr('id', 'xAxis')
-      .attr("class", "axisSilver")
-      .attr('transform', 'translate(20, 20)')
-      .call(d3.axisTop(x).tickFormat(formatTime));
+    var last = quake[quake.length - 1].delay;
+    xAxis.append('circle').attr('class', 'eq-now').attr('cx', x.range()[0]).attr('cy', 0).attr('r', 3.5)
+      .transition().ease(d3.easeLinear).duration(last + 1000).attr('cx', x(new Date(quake[quake.length - 1].properties.time)));
+  }
 
-  d3.json('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson', function(error, data) {
-    if (error) {
-      console.warn('modalEarthquake (map): USGS feed fetch failed \u2014', error.message || error);
-      d3.select('.map').append('div').attr('class', 'mapLoadError').text('Live earthquake feed unavailable.');
-      return;
-    }
-    var quake = data.features.reverse();
+  function fail(msg, e){
+    console.warn('modalEarthquake (map): ' + msg + ' \u2014', e && (e.message || e));
+    d3.select('.map').append('div').attr('class', 'mapLoadError').text(msg);
+  }
 
-    var earthquakeGroups = gQuakes.selectAll('g')
-       .data(quake)
-       .enter().append('g')
-       .attr('id', function(d) {
-           return d.id;
-       })
-       .attr('class', 'quake-group');
+  // Night side, shaded exactly as the Equal Earth map does: four nested
+  // circles round the antisolar point (sun 0, 6, 12 and 18 degrees below
+  // the horizon), each one a light wash, so twilight darkens in steps.
+  function drawNight(){
+    var RAD = Math.PI / 180, now = new Date();
+    var n = now.valueOf() / 864e5 + 2440587.5 - 2451545.0;
+    var L = (280.460 + 0.9856474 * n) % 360, g = ((357.528 + 0.9856003 * n) % 360) * RAD;
+    var lam = (L + 1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g)) * RAD;
+    var eps = (23.439 - 0.0000004 * n) * RAD;
+    var ra = Math.atan2(Math.cos(eps) * Math.sin(lam), Math.cos(lam)) / RAD;
+    var dec = Math.asin(Math.sin(eps) * Math.sin(lam)) / RAD;
+    var gmst = (280.46061837 + 360.98564736629 * n) % 360;
+    var sunLon = ((ra - gmst) % 360 + 540) % 360 - 180;
+    var anti = [sunLon + 180, -dec];
+    [90, 96, 102, 108].forEach(function(z){
+      gNight.append('path').datum(d3.geoCircle().center(anti).radius(180 - z)())
+        .attr('class', 'eq-night').attr('d', path);
+    });
+  }
+  drawNight();
 
-    gQuakes.selectAll('.quake-group')
-       .append('circle')
-       .attr('class', 'circle pulse-circle')
-       .attr('cx', function(d) {
-           return projection([d.geometry.coordinates[0], d.geometry.coordinates[1]])[0];
-       })
-       .attr('cy', function(d) {
-           return projection([d.geometry.coordinates[0], d.geometry.coordinates[1]])[1];
-       })
-       .attr('r', function(d) {
-           return 0;
-       })
-       .attr('fill', '#fff');
-
-    gQuakes.selectAll('.quake-group')
-      .append('circle')
-      .attr('cx', function(d) {
-           return projection([d.geometry.coordinates[0], d.geometry.coordinates[1]])[0];
-       })
-      .attr('cy', function(d) {
-           return projection([d.geometry.coordinates[0], d.geometry.coordinates[1]])[1];
-       })
-      .attr('r', 0 )
-      .attr('class', 'circle quake-circle')
-      .style('fill', 'red')
-      .style('opacity', 0.75)
-      .append('title')
-      .text(function(d) {
-        return 'Magnitue ' + d.properties.mag + ' ' + d.properties.place;
-      });
-
-    var setQuakeDelay = function() {
-      for(var i = 0, max = quake.length; i < max; i++){
-        var timeDiff = quake[i].properties.time - dateObj;
-        var timeDiffObj = new Date(timeDiff);
-        quake[i].delay = Date.parse(timeDiffObj) / 5000;
-      }
-    }
-    setQuakeDelay();
-
-    var longestDelay = quake[quake.length - 1].delay;
-
-    var quakeCircles = svg.selectAll('.quake-circle')
-       .data(quake)
-       .transition()
-       .delay(function(d) {
-         return d.delay;
-       })
-       .duration(1000)
-       .attr('r', function(d) {
-         if(d.properties.mag < 0) {
-           return 0.1;
-         } else {
-           return d.properties.mag
-         }
-       });
-
-    var pulseCircles = svg.selectAll('.pulse-circle')
-       .data(quake)
-       .transition()
-       .delay(function(d) {
-         return d.delay;
-       })
-       .duration(2000)
-       .attr('r', function(d) {
-         if(d.properties.mag < 0) {
-           return 0.1 * 8;
-         } else {
-           return d.properties.mag * 8;
-         }
-       })
-       .style('opacity', 0)
-       .remove()
-
-    var timeline = xAxis.append('circle')
-         .attr('class', 'transition-circle')
-         .attr('cx', 0)
-         .attr('cy', 0)
-         .attr('r', 3)
-         .style('fill', 'red')
-         .transition()
-         .ease(d3.easeLinear)
-         .duration(longestDelay + 1000)
-         .attr('cx', 701)
-  })
-})
-
-svg.append("text")
-    .attr("x", 390)
-    .attr("y", 480)
-    .attr("text-anchor", "middle")
-    .style("font-size", "12px")
-    .style("font-family", "'Lexend', system-ui, sans-serif")
-    .style("font-weight", "normal")
-    .style("fill", "#2E8B57")
-    .text("Rendered using D3.js");
-
+  d3.json('./jsondata/countries-110m.json').then(drawLand).catch(function(e){ fail('Map data failed to load.', e); });
+  fetch('./jsondata/archive.json?_=' + Date.now(), { cache: 'no-store' })
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(a){ if (a) drawStation(a.meta); }).catch(function(){});
+  d3.json('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson')
+    .then(drawQuakes).catch(function(e){ fail('Live earthquake feed unavailable.', e); });
+})();
 </script>
 
 <script>
