@@ -1,30 +1,36 @@
-DivumWX - Windy Radar card: whole card opens the larger map (for 2.0.0)
-=======================================================================
+DivumWX - Windy Radar card on by default (for 2.0.0)
+====================================================
 
-Goes on top of version-2.0-beta at da661b7 (your v7 "Windy" commit).
+Goes on top of version-2.0-beta at 7f7efe4 (your v8 "Windy" commit).
 
-What changed (card only; the larger map is unchanged)
-  - The title is plain text again, not a link.
-  - Clicking anywhere on the card opens the larger Windy map, like the
-    other cards. The card's map is look-only again, so clicks and drags
-    act on the card.
-  - Hovering over the card shows:
-      Click to open the larger Windy map.
-      The amber pin marks the weather station.
-      Click and hold to drag and drop cards into preferred position
-  - Unchanged: the radar plays once on each load then stops, the amber
-    pin marks the station at the centre, and the larger map is still
-    interactive (pan, zoom, press play again).
+What changed
+  - install.py: cardWindyRadar is now one of the automatic cards that
+    need no sensor (with Moon Phase, Earthquake and so on), so every new
+    install gets it; it's no longer asked about with the optional cards.
+    The installer now says "8 more cards ... are included automatically".
+    The card limit stays 26 (8 mandatory + 8 automatic + 2 rain + 8
+    optional).
+  - Upgrades: an existing install keeps its saved card list, so the
+    installer adds cardWindyRadar to [DivumWXCards] enabled_cards once and
+    notes it in a new key, default_cards_added. If you later remove the
+    card from enabled_cards, it stays removed on future upgrades. The
+    installer prints "Added the new default card cardWindyRadar ..." when
+    it does this.
+  - index.html, hyperIndex.html, lexendIndex.html: the card now sits
+    straight after the Earthquake card, with the other automatic cards,
+    instead of after the Webcam card.
+  - CHANGELOG.md: entry updated.
 
 Files are laid out at their repo paths. These 5 are the only ones that
 differ from your branch; copy each over the version in your repo:
-  divumwx/cardsBundleNew.js        cardWindyRadar: whole-card link, tooltip
-  divumwx/index.html               bundle ?v=f3207917
-  divumwx/hyperIndex.html          bundle ?v=f3207917
-  divumwx/lexendIndex.html         bundle ?v=f3207917
-  CHANGELOG.md                     entry updated
+  install.py
+  divumwx/index.html
+  divumwx/hyperIndex.html
+  divumwx/lexendIndex.html
+  CHANGELOG.md
+cardsBundleNew.js is unchanged, so the bundle ?v= stays the same.
 
-Using git instead, on version-2.0-beta (da661b7):
+Using git instead, on version-2.0-beta (7f7efe4):
   git apply windy-radar-card.patch
 
 Clean-up: the repo root has CHANGES.txt, windy-radar-card.patch and

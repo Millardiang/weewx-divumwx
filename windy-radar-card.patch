@@ -1,300 +1,165 @@
 diff --git a/CHANGELOG.md b/CHANGELOG.md
-index d0b3527..54dc7df 100644
+index 54dc7df..7ad9b6a 100644
 --- a/CHANGELOG.md
 +++ b/CHANGELOG.md
-@@ -12,13 +12,13 @@
-   be paused from the dashboard, so it's loaded with `play=true` and,
-   after `PLAY_ONCE_SECONDS` (15, set at the top of the card module and of
-   modalWindyRadar.html), swapped for the same map without it, loaded
--  underneath so there's no flash. If a visitor has clicked into the map
--  while it plays, it's left alone. Windy's playback speed can't be set.
--- Unlike other cards, the map is live: visitors can press Windy's own ▶
--  to play it again, and pan and zoom. Because the map takes the clicks,
--  only the card's **title** opens the larger map; hovering over the title
--  says so. The card can be dragged by its title bar.
--- The title opens **modalWindyRadar.html**, the same map at 1350 × 900
-+  underneath so there's no flash. In the larger map, if a visitor has
-+  clicked into the map while it plays, it's left alone. Windy's playback
-+  speed can't be set.
-+- Like other cards, clicking anywhere on the card opens the larger map,
-+  and hovering shows a tooltip saying so (plus what the amber pin is and
-+  the usual drag hint). The card's map is look-only.
-+- The card opens **modalWindyRadar.html**, the same map at 1350 × 900
-   with tabs for Radar, Satellite, Rain & thunder, Wind and Temperature,
-   an "Open in Windy.com" link, and the dashboard's light/dark theme and
-   seasonal colours. On a shorter window the map shrinks so the whole
-@@ -28,9 +28,10 @@
-   an amber station pin drawn by DivumWX, its tip at the centre. It's a
-   pin, not a dot, so it isn't mistaken for Windy's own pulsing blue
-   "your location" dot (each viewer's location as Windy guesses it from
--  their IP address, which can't be moved or hidden) or for rain. The pin
--  hides once a visitor clicks into the map (it would no longer be on the
--  station) and returns with the next map load. Windy's map only loads once it's on
-+  their IP address, which can't be moved or hidden) or for rain. In the
-+  larger map the pin hides once a visitor clicks into the map (it would
-+  no longer be on the station) and returns with the next map load.
-+  Windy's map only loads once it's on
-   screen and laid out, because Windy can centre in the wrong place if it
-   loads hidden.
- - The Windy link is kept to the parameters confirmed to centre on the
-diff --git a/divumwx/cardsBundleNew.js b/divumwx/cardsBundleNew.js
-index 4cf1ee3..208f991 100644
---- a/divumwx/cardsBundleNew.js
-+++ b/divumwx/cardsBundleNew.js
-@@ -10338,13 +10338,11 @@ try {
+@@ -2,7 +2,7 @@
  
- // ===================== cardWindyRadar.js =====================
- // Live Windy.com weather radar centred on the station, laid out like the
--// webcam card. Unlike other cards, the map is live: visitors can press
--// Windy's own play arrow to animate the radar, and pan or zoom it. Windy's
--// embed has no autoplay option and its cross-origin frame can't be
--// scripted, so the play arrow has to be pressed by hand. Because the map
--// takes the clicks, only the card's title opens the larger map
--// (modalWindyRadar.html); hovering over the title says so. Station
--// latitude/longitude come from archive.json meta.
-+// webcam card. The radar plays through once on each load, then stops on a
-+// still map. The map here is look-only: like other cards, clicking
-+// anywhere on the card opens the larger, interactive map
-+// (modalWindyRadar.html), and hovering says so. Station latitude/longitude
-+// come from archive.json meta.
- (function(){
-   var ARCHIVE_JSON_URL = './jsondata/archive.json';
-   var MODAL_URL = 'modalWindyRadar.html';
-@@ -10422,26 +10420,12 @@ try {
-   titleBar.style.color = overlayTextColor;
-   titleBar.style.background = 'transparent';
+ ## Unreleased — for 2.0.0
  
--  // The title is the card's only link to the larger map. It's an <a> with
--  // data-type="iframe", so the dashboard's own modal handler opens it.
--  var titleLabel = document.createElement('a');
--  titleLabel.href = MODAL_URL;
--  titleLabel.setAttribute('data-modal', 'Windy Radar');
--  titleLabel.setAttribute('data-type', 'iframe');
--  titleLabel.setAttribute('data-modal-width', '1350px');
--  titleLabel.setAttribute('data-modal-height', '900px');
--  titleLabel.setAttribute('data-url', MODAL_URL);
--  titleLabel.setAttribute('draggable', 'false');
-+  var titleLabel = document.createElement('span');
-   titleLabel.textContent = DivumWXI18N.t('Windy Radar');
-   titleLabel.style.fontWeight = '600';
-   titleLabel.style.whiteSpace = 'nowrap';
-   titleLabel.style.overflow = 'hidden';
-   titleLabel.style.textOverflow = 'ellipsis';
--  titleLabel.style.color = 'inherit';
--  titleLabel.style.textDecoration = 'none';
--  titleLabel.style.cursor = 'pointer';
--  titleLabel.addEventListener('mouseenter', function(){ titleLabel.style.textDecoration = 'underline'; });
--  titleLabel.addEventListener('mouseleave', function(){ titleLabel.style.textDecoration = 'none'; });
- 
-   var statusWrap = document.createElement('span');
-   statusWrap.style.display = 'flex';
-@@ -10465,41 +10449,6 @@ try {
-   titleBar.appendChild(statusWrap);
-   mount.appendChild(titleBar);
- 
--  // ---- Title tooltip ----
--  // Uses the dashboard's own #cardHoverTip when the page has one, so it
--  // looks like every other card tooltip; otherwise the browser's own.
--  var TITLE_TIP = 'Click the title to open the larger Windy map.<br>The radar plays once when it loads; press ▶ on the map to play it again.<br>The amber pin marks the weather station.';
--  var tipTimer = null;
--  function hoverTip(){ return document.getElementById('cardHoverTip'); }
--  if (!hoverTip()) titleLabel.title = TITLE_TIP.replace('<br>', '\n');
--  function placeTip(tip, e){
--    tip.style.left = (e.clientX + 14) + 'px';
--    tip.style.top = (e.clientY + 14) + 'px';
--  }
--  function showTitleTip(e){
--    var tip = hoverTip();
--    if (!tip) return;
--    // Defer a tick so this wins over the card's own tooltip, which the
--    // dashboard sets when the pointer first enters the card.
--    setTimeout(function(){
--      tip.innerHTML = TITLE_TIP;
--      placeTip(tip, e);
--      tip.classList.add('visible');
--      clearTimeout(tipTimer);
--      tipTimer = setTimeout(function(){ tip.classList.remove('visible'); }, 10000);
--    }, 0);
--  }
--  titleLabel.addEventListener('mouseenter', showTitleTip);
--  titleLabel.addEventListener('mousemove', function(e){ var tip = hoverTip(); if (tip) placeTip(tip, e); });
--  function hideTitleTip(){
--    var tip = hoverTip();
--    clearTimeout(tipTimer);
--    if (tip) tip.classList.remove('visible');
--  }
--  titleLabel.addEventListener('mouseleave', hideTitleTip);
--  // The modal covers the title, so mouseleave won't fire once it opens.
--  titleLabel.addEventListener('click', function(){ setTimeout(hideTitleTip, 0); });
--
-   function setStatus(ok){
-     statusDot.style.background = ok ? '#2ecc71' : '#e74c3c';
-     var t = stationNow();
-@@ -10516,8 +10465,9 @@ try {
-   body.style.background = 'var(--bs-tertiary-bg)';
-   mount.appendChild(body);
- 
--  // The live map: Windy's own controls work, including its play arrow.
--  // Frames are created per load (see loadNow), so this starts empty.
-+  // The map. Look-only on the card (the whole-card link below sits over
-+  // it); the larger map is the interactive one. Frames are created per
-+  // load (see loadNow), so this starts empty.
-   var frame = null;
-   function newFrame(){
-     var f = document.createElement('iframe');
-@@ -10528,6 +10478,8 @@ try {
-     f.style.width = '100%';
-     f.style.height = '100%';
-     f.style.border = '0';
-+    f.style.pointerEvents = 'none';
-+    f.setAttribute('tabindex', '-1');
-     return f;
-   }
- 
-@@ -10545,10 +10497,8 @@ try {
-   message.textContent = '…';
-   body.appendChild(message);
- 
--  // Station pin. Windy centres the map on the station's coordinates, so
--  // the station is at the middle of the frame until a visitor moves the
--  // map. Once they click into it the pin is hidden, since it would no
--  // longer be on the station; it comes back with the next map load.
-+  // Station pin. Windy centres the map on the station's coordinates, and
-+  // the card's map can't be moved, so the station is always at the middle.
-   // Drawn as an amber pin, not a dot: Windy's own pulsing blue dot marks
-   // the *viewer's* guessed location, and red/orange blobs are rain on
-   // the radar, so a pin shape can't be mistaken for either. The pin's
-@@ -10568,13 +10518,64 @@ try {
-   stationDot.style.pointerEvents = 'none';
-   stationDot.style.display = 'none';
-   body.appendChild(stationDot);
--  // Clicking into a cross-origin frame blurs this window and makes the
--  // frame the active element; that's the only signal the page gets.
--  window.addEventListener('blur', function(){
-+
-+  // Whole-card link to the larger map, over the title bar and the map,
-+  // like other cards. data-type="iframe" makes the dashboard's own modal
-+  // handler open it.
-+  var cardLink = document.createElement('a');
-+  cardLink.className = 'card-whole-link';
-+  cardLink.href = MODAL_URL;
-+  cardLink.setAttribute('data-modal', 'Windy Radar');
-+  cardLink.setAttribute('data-type', 'iframe');
-+  cardLink.setAttribute('data-modal-width', '1350px');
-+  cardLink.setAttribute('data-modal-height', '900px');
-+  cardLink.setAttribute('data-url', MODAL_URL);
-+  cardLink.setAttribute('aria-label', 'Open the larger Windy map');
-+  cardLink.style.position = 'absolute';
-+  cardLink.style.top = '-20px';
-+  cardLink.style.left = '0';
-+  cardLink.style.right = '0';
-+  cardLink.style.bottom = '0';
-+  cardLink.style.display = 'block';
-+  cardLink.style.zIndex = '3';
-+  mount.appendChild(cardLink);
-+
-+  // ---- Tooltip ----
-+  // The dashboard's generic card tooltip would say "open Windy Radar
-+  // charts", so this card sets its own text in the same #cardHoverTip,
-+  // keeping the dashboard's drag hint. Falls back to the browser's own
-+  // tooltip on pages without #cardHoverTip.
-+  var CARD_TIP = 'Click to open the larger Windy map.<br>' +
-+    'The amber pin marks the weather station.<br>' +
-+    'Click and hold to drag and drop cards into preferred position';
-+  var tipTimer = null;
-+  function hoverTip(){ return document.getElementById('cardHoverTip'); }
-+  if (!hoverTip()) cardLink.title = CARD_TIP.replace(/<br>/g, '\n');
-+  function placeTip(tip, e){
-+    tip.style.left = (e.clientX + 14) + 'px';
-+    tip.style.top = (e.clientY + 14) + 'px';
-+  }
-+  cardLink.addEventListener('mouseenter', function(e){
-+    var tip = hoverTip();
-+    if (!tip) return;
-+    // Defer a tick so this wins over the dashboard's own card tooltip,
-+    // which it sets on the same mouseenter.
-     setTimeout(function(){
--      if (frame && document.activeElement === frame) stationDot.style.display = 'none';
-+      tip.innerHTML = CARD_TIP;
-+      placeTip(tip, e);
-+      tip.classList.add('visible');
-+      clearTimeout(tipTimer);
-+      tipTimer = setTimeout(function(){ tip.classList.remove('visible'); }, 10000);
-     }, 0);
-   });
-+  function hideTip(){
-+    var tip = hoverTip();
-+    clearTimeout(tipTimer);
-+    if (tip) tip.classList.remove('visible');
-+  }
-+  cardLink.addEventListener('mouseleave', hideTip);
-+  // The modal covers the card, so mouseleave won't fire once it opens.
-+  cardLink.addEventListener('click', function(){ setTimeout(hideTip, 0); });
- 
-   function modalTitle(){
-     var base = DivumWXI18N.t('Windy Radar');
-@@ -10639,8 +10640,6 @@ try {
-   }
-   function stopPlaying(gen){
-     if (gen !== generation || !frame) return;
--    // A visitor who has clicked into the map is using it: leave it alone.
--    if (document.activeElement === frame) return;
-     if (!ready()) { setTimeout(function(){ stopPlaying(gen); }, 1000); return; }
-     showFrame(newFrame(), false, gen);
-   }
-@@ -10660,7 +10659,7 @@ try {
-   }
- 
-   fetchConfig().then(function(){
--    titleLabel.setAttribute('data-title', modalTitle());
-+    cardLink.setAttribute('data-title', modalTitle());
-     if (lat === null) {
-       message.textContent = 'Station location unavailable';
-       setStatus(false);
-@@ -10672,7 +10671,7 @@ try {
- 
-   window.addEventListener('i18nready', function(){
-     titleLabel.textContent = DivumWXI18N.t('Windy Radar');
--    titleLabel.setAttribute('data-title', modalTitle());
-+    cardLink.setAttribute('data-title', modalTitle());
-   });
- })();
- } catch (e) {
+-### Windy Radar card (new, optional)
++### Windy Radar card (new, on by default)
+ - A new dashboard card showing Windy.com's live weather radar centred on
+   the station, laid out like the Webcam card: title bar, status dot and
+   time, and a 175px map.
+@@ -40,10 +40,15 @@
+   (`metricRain`/`metricTemp`/`metricWind`; the map went back off-centre
+   with them, so Windy picks its own units), no `marker` (it marks the
+   viewer's location, not the station) and no `detailLat`/`detailLon`.
+-- Optional card: new installs are asked about it after the Station Image
+-  card. **Existing installs** don't get it automatically — add
+-  `cardWindyRadar` to `enabled_cards` under `[DivumWXCards]` in weewx.conf
+-  and restart WeeWX.
++- A default card: it needs no sensor, so like Moon Phase or Earthquake
++  it's included automatically (now 8 automatic cards) and sits after the
++  Earthquake card on index.html, hyperIndex.html and lexendIndex.html.
++- **Existing installs** get it when upgraded: the installer adds
++  `cardWindyRadar` to `[DivumWXCards]` `enabled_cards` once, and records
++  that in a new `default_cards_added` key, so if you later remove it from
++  `enabled_cards` it stays removed on future upgrades. To turn it on
++  without upgrading, add `cardWindyRadar` to `enabled_cards` yourself and
++  restart WeeWX.
+ - Changed: `cardsBundleNew.js` 1.1.0, `hyperIndex.html` 1.1.0,
+   `lexendIndex.html` 1.1.0, `index.html` (card mount, bundle hash),
+   `install.py`, `build_card_bundle.py`, `lang/en.conf`,
 diff --git a/divumwx/hyperIndex.html b/divumwx/hyperIndex.html
-index cb76675..994c891 100644
+index 994c891..d576675 100644
 --- a/divumwx/hyperIndex.html
 +++ b/divumwx/hyperIndex.html
-@@ -538,6 +538,6 @@ window.addEventListener('load', updateFooterVisibility);
- <script src="js/d3.7.9.0.min.js"></script>
- <script src="js/d3-geo-projection.4.0.0.min.js"></script>
- <script src="js/topojson.3.0.2.min.js"></script>
--<script src="cardsBundleNew.js?v=612e8cbf"></script>
-+<script src="cardsBundleNew.js?v=f3207917"></script>
- </body>
- </html>
-\ No newline at end of file
+@@ -192,8 +192,8 @@ setInterval(() => {
+   <div id="vpdCard21" data-card-id="cardVapourPressureDeficit" class="card" draggable="true"></div>
+   <div id="etCard22" data-card-id="cardEvapoTranspiration" class="card" draggable="true"></div>
+   <div id="earthquakeCard23" data-card-id="cardEarthquake" class="card" draggable="true"></div>
+-  <div id="webcamCard24" data-card-id="cardWebcam" class="card" draggable="true"></div>
+   <div id="windyRadarCard26" data-card-id="cardWindyRadar" class="card" draggable="true"></div>
++  <div id="webcamCard24" data-card-id="cardWebcam" class="card" draggable="true"></div>
+ 
+   <footer>
+     <div class="footer-left">
 diff --git a/divumwx/index.html b/divumwx/index.html
-index d2f00dd..6e0e9ed 100644
+index 6e0e9ed..1edf28f 100644
 --- a/divumwx/index.html
 +++ b/divumwx/index.html
-@@ -908,6 +908,6 @@ window.addEventListener('load', updateFooterVisibility);
- <script src="js/d3.7.9.0.min.js"></script>
- <script src="js/d3-geo-projection.4.0.0.min.js"></script>
- <script src="js/topojson.3.0.2.min.js"></script>
--<script src="cardsBundleNew.js?v=612e8cbf"></script>
-+<script src="cardsBundleNew.js?v=f3207917"></script>
- </body>
- </html>
+@@ -560,8 +560,8 @@ setInterval(() => {
+   <div id="vpdCard21" data-card-id="cardVapourPressureDeficit" class="card" draggable="true"></div>
+   <div id="etCard22" data-card-id="cardEvapoTranspiration" class="card" draggable="true"></div>
+   <div id="earthquakeCard23" data-card-id="cardEarthquake" class="card" draggable="true"></div>
+-  <div id="webcamCard24" data-card-id="cardWebcam" class="card" draggable="true"></div>
+   <div id="windyRadarCard26" data-card-id="cardWindyRadar" class="card" draggable="true"></div>
++  <div id="webcamCard24" data-card-id="cardWebcam" class="card" draggable="true"></div>
+   <div id="stationImageCard25" data-card-id="cardStationImage" class="card fixed" draggable="false"></div>
+   <footer>
+     <div class="footer-left">
 diff --git a/divumwx/lexendIndex.html b/divumwx/lexendIndex.html
-index 4323702..d05be32 100644
+index d05be32..ac1623c 100644
 --- a/divumwx/lexendIndex.html
 +++ b/divumwx/lexendIndex.html
-@@ -538,6 +538,6 @@ window.addEventListener('load', updateFooterVisibility);
- <script src="js/d3.7.9.0.min.js"></script>
- <script src="js/d3-geo-projection.4.0.0.min.js"></script>
- <script src="js/topojson.3.0.2.min.js"></script>
--<script src="cardsBundleNew.js?v=612e8cbf"></script>
-+<script src="cardsBundleNew.js?v=f3207917"></script>
- </body>
- </html>
-\ No newline at end of file
+@@ -192,8 +192,8 @@ setInterval(() => {
+   <div id="vpdCard21" data-card-id="cardVapourPressureDeficit" class="card" draggable="true"></div>
+   <div id="etCard22" data-card-id="cardEvapoTranspiration" class="card" draggable="true"></div>
+   <div id="earthquakeCard23" data-card-id="cardEarthquake" class="card" draggable="true"></div>
+-  <div id="webcamCard24" data-card-id="cardWebcam" class="card" draggable="true"></div>
+   <div id="windyRadarCard26" data-card-id="cardWindyRadar" class="card" draggable="true"></div>
++  <div id="webcamCard24" data-card-id="cardWebcam" class="card" draggable="true"></div>
+ 
+   <footer>
+     <div class="footer-left">
+diff --git a/install.py b/install.py
+index 84dd72f..7f806b9 100644
+--- a/install.py
++++ b/install.py
+@@ -1802,7 +1802,17 @@ DIVUMWX_MANDATORY_CARDS = [
+ 
+ DIVUMWX_NO_SENSOR_OPTIONAL_CARDS = [
+     'cardEarthDaylight', 'cardSolarDial', 'cardGeocentric', 'cardMoonPhase',
+-    'cardPollen', 'cardGreenhouseGas', 'cardEarthquake',
++    'cardPollen', 'cardGreenhouseGas', 'cardEarthquake', 'cardWindyRadar',
++]
++
++# Automatic cards added in a release after an install's card list was first
++# written. A fresh install gets them via DIVUMWX_NO_SENSOR_OPTIONAL_CARDS, but
++# an upgrade keeps its saved [DivumWXCards] enabled_cards, so
++# apply_new_default_cards() adds each of these once and records it in
++# [DivumWXCards] default_cards_added. A card someone later removes from
++# enabled_cards by hand therefore stays removed on future upgrades.
++DIVUMWX_NEW_DEFAULT_CARDS = [
++    'cardWindyRadar',   # 2.0.0
+ ]
+ 
+ DIVUMWX_RAIN_CARD_CHOICES = {
+@@ -1830,10 +1840,9 @@ DIVUMWX_RAIN_CARD_CHOICES = {
+ DIVUMWX_OPTIONAL_CARDS_ORDER = [
+     'cardSolarRadiation', 'cardUvIndex', 'cardLightning', 'cardAirquality',
+     'cardVapourPressureDeficit', 'cardEvapoTranspiration', 'cardWebcam', 'cardStationImage',
+-    'cardWindyRadar',
+ ]
+ 
+-DIVUMWX_CARD_TARGET_TOTAL = 26  # theoretical max (8 mandatory + 7 automatic + 2 rain "both" + 9 optional) -- every optional card now always gets asked about
++DIVUMWX_CARD_TARGET_TOTAL = 26  # theoretical max (8 mandatory + 8 automatic + 2 rain "both" + 8 optional) -- every optional card now always gets asked about
+ 
+ DIVUMWX_WEBCAM_DEFAULT_TITLE = 'Webcam'
+ DIVUMWX_WEBCAM_DEFAULT_IMAGE = 'img/picam.jpg'
+@@ -1862,6 +1871,31 @@ def compute_enabled_cards(rain_choice, optional_selected):
+     return cards, len(cards)
+ 
+ 
++def apply_new_default_cards(cfg):
++    """Add DIVUMWX_NEW_DEFAULT_CARDS to an existing [DivumWXCards]
++    enabled_cards, each at most once per install (tracked in
++    default_cards_added). Safe to call every run. Returns the cards added."""
++    dc = cfg.get('DivumWXCards')
++    if not dc or not dc.get('enabled_cards'):
++        return []
++    # configobj returns a plain string for a one-item comma list.
++    cards = dc['enabled_cards']
++    cards = [cards] if isinstance(cards, str) else list(cards)
++    offered = dc.get('default_cards_added', [])
++    offered = ([offered] if offered else []) if isinstance(offered, str) else list(offered)
++    added = []
++    for card in DIVUMWX_NEW_DEFAULT_CARDS:
++        if card in offered:
++            continue
++        offered.append(card)
++        if card not in cards:
++            cards.append(card)
++            added.append(card)
++    dc['enabled_cards'] = cards
++    dc['default_cards_added'] = offered
++    return added
++
++
+ def apply_divumwx_cards_merge(cfg, rain_choice=None, optional_selected=None,
+                                webcam_title=None, webcam_image=None,
+                                station_image_title=None, station_image_path=None):
+@@ -3136,7 +3170,7 @@ class DivumwxInstaller(ExtensionInstaller):
+         if 'enabled_cards' not in cfg.get('DivumWXCards', {}):
+             printer.out("8 mandatory cards will always be included: "
+                         + ", ".join(DIVUMWX_MANDATORY_CARDS), level=1)
+-            printer.out("7 more cards don't need any hardware sensor and are "
++            printer.out(f"{len(DIVUMWX_NO_SENSOR_OPTIONAL_CARDS)} more cards don't need any hardware sensor and are "
+                         "included automatically: "
+                         + ", ".join(DIVUMWX_NO_SENSOR_OPTIONAL_CARDS), level=1)
+ 
+@@ -3214,6 +3248,13 @@ class DivumwxInstaller(ExtensionInstaller):
+                 webcam_title=webcam_title, webcam_image=webcam_image,
+                 station_image_title=station_image_title, station_image_path=station_image_path)
+ 
++        # Every run, outside the gate above: on an upgrade, turn on any
++        # automatic card added since this install's card list was written
++        # (once only; see DIVUMWX_NEW_DEFAULT_CARDS). On a fresh install it
++        # only records that the new cards were already included.
++        for card in apply_new_default_cards(cfg):
++            printer.out(f"Added the new default card {card} to [DivumWXCards] enabled_cards.", level=1)
++
+         # --- [Timelapse] ---
+         # Deliberately OUTSIDE the "if 'enabled_cards' not in ..." gate above:
+         # TimelapseService is always registered (see DIVUMWX_DATA_SERVICES)

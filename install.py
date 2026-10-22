@@ -1802,7 +1802,17 @@ DIVUMWX_MANDATORY_CARDS = [
 
 DIVUMWX_NO_SENSOR_OPTIONAL_CARDS = [
     'cardEarthDaylight', 'cardSolarDial', 'cardGeocentric', 'cardMoonPhase',
-    'cardPollen', 'cardGreenhouseGas', 'cardEarthquake',
+    'cardPollen', 'cardGreenhouseGas', 'cardEarthquake', 'cardWindyRadar',
+]
+
+# Automatic cards added in a release after an install's card list was first
+# written. A fresh install gets them via DIVUMWX_NO_SENSOR_OPTIONAL_CARDS, but
+# an upgrade keeps its saved [DivumWXCards] enabled_cards, so
+# apply_new_default_cards() adds each of these once and records it in
+# [DivumWXCards] default_cards_added. A card someone later removes from
+# enabled_cards by hand therefore stays removed on future upgrades.
+DIVUMWX_NEW_DEFAULT_CARDS = [
+    'cardWindyRadar',   # 2.0.0
 ]
 
 DIVUMWX_RAIN_CARD_CHOICES = {
@@ -1830,10 +1840,9 @@ DIVUMWX_RAIN_CARD_CHOICES = {
 DIVUMWX_OPTIONAL_CARDS_ORDER = [
     'cardSolarRadiation', 'cardUvIndex', 'cardLightning', 'cardAirquality',
     'cardVapourPressureDeficit', 'cardEvapoTranspiration', 'cardWebcam', 'cardStationImage',
-    'cardWindyRadar',
 ]
 
-DIVUMWX_CARD_TARGET_TOTAL = 26  # theoretical max (8 mandatory + 7 automatic + 2 rain "both" + 9 optional) -- every optional card now always gets asked about
+DIVUMWX_CARD_TARGET_TOTAL = 26  # theoretical max (8 mandatory + 8 automatic + 2 rain "both" + 8 optional) -- every optional card now always gets asked about
 
 DIVUMWX_WEBCAM_DEFAULT_TITLE = 'Webcam'
 DIVUMWX_WEBCAM_DEFAULT_IMAGE = 'img/picam.jpg'
@@ -1860,6 +1869,31 @@ def compute_enabled_cards(rain_choice, optional_selected):
     selected_set = set(optional_selected or [])
     cards += [c for c in DIVUMWX_OPTIONAL_CARDS_ORDER if c in selected_set]
     return cards, len(cards)
+
+
+def apply_new_default_cards(cfg):
+    """Add DIVUMWX_NEW_DEFAULT_CARDS to an existing [DivumWXCards]
+    enabled_cards, each at most once per install (tracked in
+    default_cards_added). Safe to call every run. Returns the cards added."""
+    dc = cfg.get('DivumWXCards')
+    if not dc or not dc.get('enabled_cards'):
+        return []
+    # configobj returns a plain string for a one-item comma list.
+    cards = dc['enabled_cards']
+    cards = [cards] if isinstance(cards, str) else list(cards)
+    offered = dc.get('default_cards_added', [])
+    offered = ([offered] if offered else []) if isinstance(offered, str) else list(offered)
+    added = []
+    for card in DIVUMWX_NEW_DEFAULT_CARDS:
+        if card in offered:
+            continue
+        offered.append(card)
+        if card not in cards:
+            cards.append(card)
+            added.append(card)
+    dc['enabled_cards'] = cards
+    dc['default_cards_added'] = offered
+    return added
 
 
 def apply_divumwx_cards_merge(cfg, rain_choice=None, optional_selected=None,
@@ -3136,7 +3170,7 @@ class DivumwxInstaller(ExtensionInstaller):
         if 'enabled_cards' not in cfg.get('DivumWXCards', {}):
             printer.out("8 mandatory cards will always be included: "
                         + ", ".join(DIVUMWX_MANDATORY_CARDS), level=1)
-            printer.out("7 more cards don't need any hardware sensor and are "
+            printer.out(f"{len(DIVUMWX_NO_SENSOR_OPTIONAL_CARDS)} more cards don't need any hardware sensor and are "
                         "included automatically: "
                         + ", ".join(DIVUMWX_NO_SENSOR_OPTIONAL_CARDS), level=1)
 
@@ -3213,6 +3247,13 @@ class DivumwxInstaller(ExtensionInstaller):
                 cfg, rain_choice=rain_choice, optional_selected=optional_selected,
                 webcam_title=webcam_title, webcam_image=webcam_image,
                 station_image_title=station_image_title, station_image_path=station_image_path)
+
+        # Every run, outside the gate above: on an upgrade, turn on any
+        # automatic card added since this install's card list was written
+        # (once only; see DIVUMWX_NEW_DEFAULT_CARDS). On a fresh install it
+        # only records that the new cards were already included.
+        for card in apply_new_default_cards(cfg):
+            printer.out(f"Added the new default card {card} to [DivumWXCards] enabled_cards.", level=1)
 
         # --- [Timelapse] ---
         # Deliberately OUTSIDE the "if 'enabled_cards' not in ..." gate above:

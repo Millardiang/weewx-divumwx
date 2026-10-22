@@ -2,7 +2,7 @@
 
 ## Unreleased — for 2.0.0
 
-### Windy Radar card (new, optional)
+### Windy Radar card (new, on by default)
 - A new dashboard card showing Windy.com's live weather radar centred on
   the station, laid out like the Webcam card: title bar, status dot and
   time, and a 175px map.
@@ -40,10 +40,15 @@
   (`metricRain`/`metricTemp`/`metricWind`; the map went back off-centre
   with them, so Windy picks its own units), no `marker` (it marks the
   viewer's location, not the station) and no `detailLat`/`detailLon`.
-- Optional card: new installs are asked about it after the Station Image
-  card. **Existing installs** don't get it automatically — add
-  `cardWindyRadar` to `enabled_cards` under `[DivumWXCards]` in weewx.conf
-  and restart WeeWX.
+- A default card: it needs no sensor, so like Moon Phase or Earthquake
+  it's included automatically (now 8 automatic cards) and sits after the
+  Earthquake card on index.html, hyperIndex.html and lexendIndex.html.
+- **Existing installs** get it when upgraded: the installer adds
+  `cardWindyRadar` to `[DivumWXCards]` `enabled_cards` once, and records
+  that in a new `default_cards_added` key, so if you later remove it from
+  `enabled_cards` it stays removed on future upgrades. To turn it on
+  without upgrading, add `cardWindyRadar` to `enabled_cards` yourself and
+  restart WeeWX.
 - Changed: `cardsBundleNew.js` 1.1.0, `hyperIndex.html` 1.1.0,
   `lexendIndex.html` 1.1.0, `index.html` (card mount, bundle hash),
   `install.py`, `build_card_bundle.py`, `lang/en.conf`,
