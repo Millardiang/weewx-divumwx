@@ -8,7 +8,8 @@
 Boltek lightning detector support for DivumWX.
 
 Boltek's NexStorm software writes its live readings to NSDRealtime.txt
-(one line of 22 values, see FIELDS below). BoltekLightningService:
+(one line of 23 comma-separated values, see NEXSTORM_FIELDS below; an
+older 22-value layout, FIELDS, is also accepted). BoltekLightningService:
 
   * reads that file every poll_interval seconds;
   * keeps strike totals in DivumWX's own Boltek database (a separate
@@ -28,7 +29,8 @@ weewx.conf (written by install.py on first install; every key optional):
         # Where NexStorm puts NSDRealtime.txt. Relative paths are taken
         # from the DivumWX site folder; absolute paths are used as-is.
         realtime_file = NSDRealtime.txt
-        # Units NexStorm uses for distances in the file: km or mi.
+        # Distance unit, only used if the file doesn't say (NexStorm's own
+        # layout does, in its 21st value): km or mi.
         distance_unit = km
         # Seconds between reads of the file.
         poll_interval = 10
@@ -105,7 +107,40 @@ schema = [
     ('session_noise', 'INTEGER'),
 ]
 
-# The 22 values on NSDRealtime.txt's line, in order.
+# NexStorm's NSDRealtime.txt: one line of 23 comma-separated values,
+# e.g. (worked out from a real file; the four counts by type add up to the
+# day's total):
+#   1792706279,0,0,1792701774,181,455,cc-,0,207,17661,168921,5,02:06,5,02:06,
+#   62,65,23,57,0 days 4 hours 17 min,km,60,5000
+NEXSTORM_FIELDS = [
+    'file_time',            # 1  time of the reading (Unix time)
+    'strikes_per_minute',   # 2  strike rate now
+    'close_per_minute',     # 3  close-strike rate now
+    'last_strike_time',     # 4  last strike (Unix time)
+    'last_bearing',         # 5  degrees
+    'last_distance',        # 6  in the unit of field 21
+    'last_type',            # 7  cg+, cg-, cc+ or cc-
+    'close_count',          # 8  close strikes today
+    'total_strikes',        # 9  strikes today (NexStorm resets it at midnight)
+    'unknown_10',           # 10 not identified yet
+    'unknown_11',           # 11 not identified yet
+    'peak_rate',            # 12 highest strikes/minute today
+    'peak_rate_time',       # 13 HH:MM
+    'peak_burst',           # 14 highest strikes/second today
+    'peak_burst_time',      # 15 HH:MM
+    'cg_plus',              # 16 today's +CG strikes
+    'cg_minus',             # 17 today's -CG strikes
+    'cc_plus',              # 18 today's +CC (in-cloud) strikes
+    'cc_minus',             # 19 today's -CC (in-cloud) strikes
+    'uptime',               # 20 NexStorm's uptime, e.g. "0 days 4 hours 17 min"
+    'distance_unit',        # 21 km or mi
+    'unknown_22',           # 22 not identified yet
+    'unknown_23',           # 23 not identified yet
+]
+NEXSTORM_TYPES = {'cg-': (1, 'CG-'), 'cg+': (2, 'CG+'), 'cc-': (3, 'CC-'), 'cc+': (3, 'CC+')}
+
+# Older layout from the first spec (22 values starting DD/MM/YYYY, HH:MM:SS).
+# Still accepted if a line looks like it.
 FIELDS = [
     'date', 'time', 'total_strikes', 'strikes_per_minute',
     'last_distance', 'last_bearing', 'last_type', 'last_strike_time',
@@ -182,6 +217,65 @@ def parse_event_time(value, file_ts):
     return ts
 
 
+_EPOCH_RE = re.compile(r'^\d{9,11}$')
+
+
+def _num(v, cast=float):
+    try:
+        return cast(float(v))
+    except (TypeError, ValueError):
+        return None
+
+
+def parse_nexstorm(values, distance_unit='km'):
+    """NexStorm's 23-value NSDRealtime.txt line -> readings (km)."""
+    if len(values) < 21:
+        raise ValueError('expected 23 values, found %d' % len(values))
+    raw = dict(zip(NEXSTORM_FIELDS, values))
+    file_ts = _num(raw['file_time'], int)
+    unit = (raw.get('distance_unit') or distance_unit or 'km').strip().lower()
+    to_km = KM_PER_MILE if unit.startswith('mi') else 1.852 if unit in ('nm', 'nmi') else 1.0
+
+    def km(key):
+        v = _num(raw.get(key))
+        return None if v is None else round(v * to_km, 2)
+
+    type_code, type_label = NEXSTORM_TYPES.get((raw['last_type'] or '').strip().lower(), (None, None))
+    if type_label is None and raw['last_type'].strip():
+        type_label = raw['last_type'].strip().upper()
+    parts = [_num(raw.get(k), int) for k in ('cg_plus', 'cg_minus', 'cc_plus', 'cc_minus')]
+    cg = None if parts[0] is None and parts[1] is None else (parts[0] or 0) + (parts[1] or 0)
+    ic = None if parts[2] is None and parts[3] is None else (parts[2] or 0) + (parts[3] or 0)
+    last = _num(raw['last_strike_time'], int)
+    return {
+        'format': 'nexstorm',
+        'file_time': file_ts,
+        'total_strikes': _num(raw['total_strikes'], int),
+        'strikes_per_minute': _num(raw['strikes_per_minute']),
+        'close_per_minute': _num(raw['close_per_minute']),
+        'last_distance_km': km('last_distance'),
+        'last_bearing': _num(raw['last_bearing']),
+        'last_type': type_code,
+        'last_type_label': type_label,
+        'last_strike_time': last if last else None,
+        'cg_total': cg,
+        'ic_total': ic,
+        'cg_plus': parts[0], 'cg_minus': parts[1], 'cc_plus': parts[2], 'cc_minus': parts[3],
+        'close_count': _num(raw['close_count'], int),
+        'peak_rate': _num(raw['peak_rate']),
+        'peak_rate_time': parse_event_time(raw['peak_rate_time'], file_ts),
+        'peak_burst': _num(raw['peak_burst']),
+        'peak_burst_time': parse_event_time(raw['peak_burst_time'], file_ts),
+        'uptime': raw.get('uptime') or None,
+        'distance_unit': unit,
+        # Not in this format:
+        'tendency': None, 'alarm': None, 'alarm_label': None, 'avg_distance_km': None,
+        'hardware_status': None, 'noise_count': None,
+        'strikes_5min': None, 'strikes_15min': None, 'strikes_30min': None, 'strikes_60min': None,
+        'unidentified': [raw.get(k) for k in ('unknown_10', 'unknown_11', 'unknown_22', 'unknown_23')],
+    }
+
+
 def parse_realtime(text, distance_unit='km'):
     """Parse NSDRealtime.txt's contents into a dict of readings, distances in
     km. Raises ValueError if the line can't be read."""
@@ -189,8 +283,12 @@ def parse_realtime(text, distance_unit='km'):
     if not lines:
         raise ValueError('file is empty')
     values = split_line(lines[-1])
+    # NexStorm's own layout starts with a Unix time.
+    if values and _EPOCH_RE.match(values[0]):
+        return parse_nexstorm(values, distance_unit)
     if len(values) < len(FIELDS):
-        raise ValueError('expected %d values, found %d' % (len(FIELDS), len(values)))
+        raise ValueError("not NexStorm's layout (23 comma-separated values starting with a "
+                         "Unix time); found %d value(s) starting %r" % (len(values), (values or [''])[0][:20]))
     raw = dict(zip(FIELDS, values[:len(FIELDS)]))
 
     file_ts = parse_datetime(raw['date'], raw['time'])
@@ -217,6 +315,7 @@ def parse_realtime(text, distance_unit='km'):
     last_type = i('last_type')
     alarm = i('alarm')
     return {
+        'format': 'spec22',
         'file_time': file_ts,
         'total_strikes': i('total_strikes'),
         'strikes_per_minute': f('strikes_per_minute'),
@@ -329,6 +428,8 @@ class BoltekRecorder(object):
         self.last_mtime = None
         self.missing_logged = False
         self.error_logged = None
+        self.read_error = None      # why the last read failed, for boltek.json
+        self.db_was_empty = False   # never read NexStorm before: count today's strikes too
         self.totals = {'today': 0, 'year': 0, 'alltime': 0}
         self.totals_day = None
         self.interval_start = self._interval_floor(self.clock())
@@ -357,6 +458,10 @@ class BoltekRecorder(object):
             for (src, _col, sess), val in zip(self.COUNTERS, row):
                 if val is not None:
                     self.last_counts[src] = val
+        if not row or all(v is None for v in row):
+            # Nothing ever read from NexStorm yet (a brand-new database, or
+            # only empty records written while the file couldn't be read).
+            self.db_was_empty = True
         self.pending = dict((col, 0) for _src, col, _sess in self.COUNTERS)
 
     def run(self, stop):
@@ -376,6 +481,8 @@ class BoltekRecorder(object):
             self._write_record(now)
         reading = self._read()
         if reading is not None:
+            if self.db_was_empty and not self.last_counts:
+                self._seed_from_today(reading, now)
             new_strikes = 0
             for src, col, _sess in self.COUNTERS:
                 new = reading.get(src)
@@ -394,11 +501,44 @@ class BoltekRecorder(object):
             self.last_reading = reading
         self._publish(now)
 
+    def _seed_from_today(self, reading, now):
+        """First reading ever (new database, or one with only empty
+        records). NexStorm's counts are today's so far (it resets them at
+        midnight). Those strikes happened at unknown times earlier today, so
+        they're saved as one record at the very start of the day (00:00):
+        they count towards today, the year and all time, but not towards the
+        last hour or the hour they're read in. Older-layout session counts
+        aren't day-based, so they're only used as the starting point."""
+        self.db_was_empty = False
+        ft = reading.get('file_time')
+        if reading.get('format') != 'nexstorm' or ft is None:
+            return
+        if time.localtime(ft)[:3] != time.localtime(now)[:3]:
+            return
+        lt = time.localtime(now)
+        midnight = int(time.mktime((lt.tm_year, lt.tm_mon, lt.tm_mday, 0, 0, 0, 0, 0, -1)))
+        rec = {'dateTime': midnight + 1, 'usUnits': weewx.METRIC, 'interval': 0}
+        for src, col, sess in self.COUNTERS:
+            val = reading.get(src)
+            rec[col] = val or 0
+            rec[sess] = val
+            if val is not None:
+                self.last_counts[src] = val     # count from here on
+        if not rec['strikes']:
+            return
+        try:
+            self.dbm.addRecord(rec)
+            log.info("Boltek lightning: saved NexStorm's %d strikes from earlier today" % rec['strikes'])
+        except Exception as e:
+            log.error("Boltek lightning: couldn't save today's earlier strikes: %s" % e)
+        self._refresh_totals()
+
     def _read(self):
         path = self.cfg.realtime_file
         try:
             st = os.stat(path)
-        except OSError:
+        except OSError as e:
+            self.read_error = "can't open %s (%s)" % (path, e.strerror or e)
             if not self.missing_logged:
                 log.info("Boltek lightning: waiting for %s (NexStorm's realtime file)" % path)
                 self.missing_logged = True
@@ -413,11 +553,13 @@ class BoltekRecorder(object):
                 reading = parse_realtime(fh.read(), self.cfg.distance_unit)
         except (OSError, ValueError) as e:
             msg = str(e)
+            self.read_error = "can't read %s: %s" % (os.path.basename(path), msg)
             if msg != self.error_logged:
                 log.error("Boltek lightning: can't read %s: %s" % (path, msg))
                 self.error_logged = msg
             return None
         self.error_logged = None
+        self.read_error = None
         self.last_mtime = st.st_mtime
         return reading
 
@@ -431,7 +573,7 @@ class BoltekRecorder(object):
         rec = {
             'dateTime': end,
             'usUnits': weewx.METRIC,
-            'interval': (end - self.interval_start) // 60,
+            'interval': max(1, (end - self.interval_start) // 60),   # 0 is reserved for the 'earlier today' record
             'strike_rate': r.get('strikes_per_minute'),
             'max_rate': self.max_rate,
             'min_distance': self.min_distance,
@@ -457,6 +599,14 @@ class BoltekRecorder(object):
         self.interval_start = end
         self._refresh_totals()
         self._write_history()
+
+    def _recent(self, now, seconds):
+        try:
+            row = self.dbm.getSql("SELECT SUM(strikes) FROM archive WHERE dateTime > ? AND interval > 0",
+                                  (int(now - seconds),))
+        except Exception:
+            return 0
+        return int(row[0] or 0) if row else 0
 
     def _refresh_totals(self):
         now = self.clock()
@@ -485,18 +635,30 @@ class BoltekRecorder(object):
         # here (or NexStorm's own timestamp): the NexStorm PC's clock may
         # not match this one.
         newest = max([t for t in (file_time, self.last_mtime) if t] or [0])
+        stale = r is None or now - newest > self.cfg.stale_after
+        error = self.read_error
+        if error is None and stale and r is not None:
+            error = "%s hasn't changed for %d minutes" % (
+                os.path.basename(self.cfg.realtime_file), (now - newest) // 60)
         data = {
             'version': BOLTEK_VERSION,
             'generated': int(now),
             'source_file': os.path.basename(self.cfg.realtime_file),
             'file_found': os.path.exists(self.cfg.realtime_file),
             'file_time': file_time,
-            'stale': r is None or now - newest > self.cfg.stale_after,
+            'stale': stale,
+            'error': error,
             'realtime': r,
             'totals': {
                 'today': self.totals['today'] + pending,
                 'year': self.totals['year'] + pending,
                 'alltime': self.totals['alltime'] + pending,
+                # From the database (5-minute records) plus what's been
+                # counted since the last one. NexStorm's own layout doesn't
+                # include these counts.
+                'last_15min': self._recent(now, 900) + pending,
+                'last_30min': self._recent(now, 1800) + pending,
+                'last_hour': self._recent(now, 3600) + pending,
             },
         }
         path = self.cfg.json_file
@@ -526,7 +688,10 @@ class BoltekRecorder(object):
         sql = ("SELECT strftime('%s', dateTime - 1, 'unixepoch', 'localtime') AS k, "
                "SUM(strikes), SUM(cg), SUM(ic), "
                "MIN(CASE WHEN strikes > 0 THEN min_distance END), MAX(max_rate) "
-               "FROM archive WHERE dateTime > ? GROUP BY k ORDER BY k" % fmt)
+               "FROM archive WHERE dateTime > ?%s GROUP BY k ORDER BY k"
+               # Hourly: leave out the 'earlier today' record (interval 0,
+               # see _seed_from_today) -- its strikes have no real hour.
+               % (fmt, ' AND interval > 0' if '%H' in fmt else ''))
         py_fmt = '%Y-%m-%d %H' if '%H' in fmt else '%Y-%m-%d'
         rows = []
         for k, strikes, cg, ic, closest, rate in self.dbm.genSql(sql, (since,)):

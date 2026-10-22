@@ -8096,6 +8096,10 @@ try {
   statusWrap.style.gap = '4px';
   statusWrap.style.flexShrink = '0';
   statusWrap.style.opacity = '0.85';
+  // Above the whole-card link, so hovering the dot shows why it's red.
+  statusWrap.style.position = 'relative';
+  statusWrap.style.zIndex = '2';
+  statusWrap.style.cursor = 'help';
 
   var statusDot = document.createElement('span');
   statusDot.style.width = '6px';
@@ -8314,7 +8318,9 @@ try {
         lastData = {
           current: num(rt.strikes_per_minute),     // NexStorm's strikes per minute
           dayStrikes: count(t.today),
-          hourStrikes: num(rt.strikes_60min),      // NexStorm's own last-60-minutes count
+          // NexStorm's own last-60-minutes count if the file has one,
+          // else the Boltek database's
+          hourStrikes: num(rt.strikes_60min) !== null ? num(rt.strikes_60min) : num(t.last_hour),
           yearStrikes: count(t.year),
           alltimeStrikes: count(t.alltime),
           lastDetected: dateLabelFor(num(rt.last_strike_time) ? rt.last_strike_time * 1000 : 0),
@@ -8326,9 +8332,11 @@ try {
         // Green only while NexStorm's file is arriving; red when it's missing
         // or hasn't changed for a while (see stale_after in [BoltekLightning]).
         setStatus(!b.stale);
+        statusWrap.title = b.error || (b.stale ? 'No recent data from NexStorm' : 'Receiving NexStorm data');
       }).catch(function(e){
         console.warn('cardBoltekLightning: refresh failed --', e.message);
         setStatus(false);
+        statusWrap.title = "Can't load jsondata/boltek.json (" + e.message + ')';
       });
   }
   refresh();

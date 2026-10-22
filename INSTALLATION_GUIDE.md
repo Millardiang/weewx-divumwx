@@ -140,10 +140,13 @@ ignore all of this; the service just waits for a file that never arrives.
 1. In NexStorm, have it write or upload `NSDRealtime.txt` to the DivumWX web
    folder (next to `index.html`). If it goes somewhere else, set
    `realtime_file` under `[BoltekLightning]` to its full path.
-2. If NexStorm is set to miles, set `distance_unit = mi`. The card always
-   shows kilometres.
-3. Restart WeeWX. The card turns green once the file is arriving, and the
-   strike totals for today, the year and all time build up from then on.
+2. Distances are read in whatever unit NexStorm writes in the file (km or
+   miles). The card shows kilometres; the chart page follows the
+   dashboard's unit setting.
+3. Restart WeeWX. The card turns green once the file is arriving. Today's
+   strikes so far are picked up from NexStorm the first time; the totals
+   for the year and all time build up from then on. If the dot stays red,
+   hover over it to see why.
    Click the card for its chart & records, built from the same database.
 
 ## Troubleshooting

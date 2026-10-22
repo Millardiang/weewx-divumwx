@@ -326,23 +326,43 @@ select.bk-tf{ padding-right:8px; }
   function renderLive(){
     var el = document.getElementById('bkLive');
     var r = (live && live.realtime) || {};
-    var alarmClass = { 0: 'clear', 1: 'caution', 2: 'high' }[r.alarm];
-    var tendency = r.tendency == null ? '—' : (TENDENCY[r.tendency] || 'Code ' + r.tendency);
+    var t = (live && live.totals) || {};
+    var has = function(v){ return v !== null && v !== undefined && v !== ''; };
     var status = !live ? 'No data' : live.stale ? 'Not updating' : 'Live';
-    el.innerHTML = [
-      chip('Status', status, live && live.file_time ? fmtHour(live.file_time * 1000) : '', !live ? '' : live.stale ? 'high' : 'clear'),
-      chip('Alarm', r.alarm_label || '—', '', alarmClass),
-      chip('Storm', tendency),
-      chip('Rate', r.strikes_per_minute == null ? '—' : r.strikes_per_minute, '/min'),
-      chip('Last 5/15 min', n(r.strikes_5min) + ' / ' + n(r.strikes_15min)),
-      chip('Last 30/60 min', n(r.strikes_30min) + ' / ' + n(r.strikes_60min)),
-      chip('Avg Distance', fmtDist(r.avg_distance_km)),
-      chip('Peak Rate', r.peak_rate == null ? '—' : r.peak_rate + '/min', r.peak_rate_time ? fmtHour(r.peak_rate_time * 1000) : ''),
-      chip('Session CG / IC', n(r.cg_total) + ' / ' + n(r.ic_total)),
-      chip('Close Strikes', n(r.close_count)),
-      chip('Noise', n(r.noise_count)),
-      chip('Sensor', r.hardware_status || '—')
-    ].join('');
+    var chips = [];
+    function add(cond, label, value, sub, dot){ if (cond) chips.push(chip(label, value, sub, dot)); }
+    add(true, 'Status', status, live && live.file_time ? fmtHour(live.file_time * 1000) : '',
+        !live ? '' : live.stale ? 'high' : 'clear');
+    // Only what the file provides: NexStorm's own layout has no alarm,
+    // tendency, noise or average distance, so those chips are left out.
+    add(has(r.alarm), 'Alarm', r.alarm_label || String(r.alarm), '', { 0: 'clear', 1: 'caution', 2: 'high' }[r.alarm]);
+    add(has(r.tendency), 'Storm', TENDENCY[r.tendency] || 'Code ' + r.tendency);
+    add(true, 'Rate', has(r.strikes_per_minute) ? r.strikes_per_minute : '\u2014', '/min');
+    add(has(r.close_per_minute), 'Close Rate', r.close_per_minute, '/min');
+    // Recent counts: NexStorm's own if the file has them, else the database's.
+    var c15 = has(r.strikes_15min) ? r.strikes_15min : t.last_15min;
+    var c30 = has(r.strikes_30min) ? r.strikes_30min : t.last_30min;
+    var c60 = has(r.strikes_60min) ? r.strikes_60min : t.last_hour;
+    add(has(r.strikes_5min), 'Last 5 min', n(r.strikes_5min));
+    add(true, 'Last 15/30 min', n(c15) + ' / ' + n(c30));
+    add(true, 'Last Hour', n(c60));
+    add(has(r.last_type_label), 'Last Strike', r.last_type_label || '\u2014',
+        r.last_strike_time ? fmtHour(r.last_strike_time * 1000) : '');
+    add(has(r.peak_rate), 'Peak Rate', r.peak_rate + '/min', r.peak_rate_time ? fmtHour(r.peak_rate_time * 1000) : '');
+    add(has(r.peak_burst), 'Peak Burst', r.peak_burst + '/sec', r.peak_burst_time ? fmtHour(r.peak_burst_time * 1000) : '');
+    if (has(r.cg_plus) || has(r.cg_minus)) {
+      add(true, 'Today CG+ / CG\u2212', n(r.cg_plus) + ' / ' + n(r.cg_minus));
+      add(true, 'Today CC+ / CC\u2212', n(r.cc_plus) + ' / ' + n(r.cc_minus));
+    } else {
+      add(has(r.cg_total) || has(r.ic_total), 'Session CG / IC', n(r.cg_total) + ' / ' + n(r.ic_total));
+    }
+    add(has(r.close_count), 'Close Today', n(r.close_count));
+    add(has(r.avg_distance_km), 'Avg Distance', fmtDist(r.avg_distance_km));
+    add(has(r.noise_count), 'Noise', n(r.noise_count));
+    add(has(r.hardware_status), 'Sensor', r.hardware_status);
+    add(has(r.uptime), 'NexStorm Up', String(r.uptime).replace(/^0 days /, ''));
+    el.innerHTML = chips.join('');
+    if (live && live.error) el.firstChild.title = live.error;
   }
 
   // ---- Chart ----

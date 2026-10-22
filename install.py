@@ -2063,7 +2063,8 @@ def apply_boltek_merge(cfg, site_root=None):
             "# Where Boltek's NexStorm puts NSDRealtime.txt: relative to the",
             "# DivumWX site folder, or an absolute path.",
         ]
-        bl.comments['distance_unit'] = ["# Distance units NexStorm writes in that file: km or mi."]
+        bl.comments['distance_unit'] = ["# Distance unit (km or mi), only used if the file doesn't say;",
+                                        "# NexStorm's own layout includes it."]
 
     cfg.setdefault('DataBindings', {})
     if DIVUMWX_BOLTEK_BINDING not in cfg['DataBindings']:
