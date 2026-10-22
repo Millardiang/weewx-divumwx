@@ -1842,6 +1842,13 @@ DIVUMWX_OPTIONAL_CARDS_ORDER = [
     'cardVapourPressureDeficit', 'cardEvapoTranspiration', 'cardWebcam', 'cardStationImage',
 ]
 
+# The lightning slot holds one card, depending on the detector: anyone who
+# includes cardLightning is then asked whether it's a Boltek (NexStorm), and
+# if so gets cardBoltekLightning in its place. The answer is kept as
+# [DivumWXCards] lightning_detector = boltek | other.
+DIVUMWX_LIGHTNING_CARDS = {'other': 'cardLightning', 'boltek': 'cardBoltekLightning'}
+DIVUMWX_BOLTEK_QUESTION = "Is your lightning detector a Boltek (NexStorm)? (y/n) "
+
 DIVUMWX_CARD_TARGET_TOTAL = 26  # theoretical max (8 mandatory + 8 automatic + 2 rain "both" + 8 optional) -- every optional card now always gets asked about
 
 DIVUMWX_WEBCAM_DEFAULT_TITLE = 'Webcam'
@@ -1867,8 +1874,51 @@ def compute_enabled_cards(rain_choice, optional_selected):
     cards += DIVUMWX_NO_SENSOR_OPTIONAL_CARDS
     cards += DIVUMWX_RAIN_CARD_CHOICES.get(rain_choice, [])
     selected_set = set(optional_selected or [])
-    cards += [c for c in DIVUMWX_OPTIONAL_CARDS_ORDER if c in selected_set]
+    for c in DIVUMWX_OPTIONAL_CARDS_ORDER:
+        if c == DIVUMWX_LIGHTNING_CARDS['other'] and DIVUMWX_LIGHTNING_CARDS['boltek'] in selected_set:
+            cards.append(DIVUMWX_LIGHTNING_CARDS['boltek'])   # Boltek card in the lightning slot
+        elif c in selected_set:
+            cards.append(c)
     return cards, len(cards)
+
+
+def set_lightning_detector(cfg, detector):
+    """Put the card for `detector` ('boltek' or 'other') in the lightning
+    slot of [DivumWXCards] enabled_cards, in place of the other one, and
+    record the answer. Returns True if enabled_cards changed."""
+    dc = cfg.setdefault('DivumWXCards', {})
+    dc['lightning_detector'] = detector
+    cards = dc.get('enabled_cards')
+    if not cards:
+        return False
+    cards = [cards] if isinstance(cards, str) else list(cards)
+    want = DIVUMWX_LIGHTNING_CARDS[detector]
+    other = [c for c in DIVUMWX_LIGHTNING_CARDS.values() if c != want]
+    new = []
+    for c in cards:
+        c = want if c in other else c
+        if c not in new:
+            new.append(c)
+    dc['enabled_cards'] = new
+    return new != cards
+
+
+def ask_lightning_detector_once(cfg, ask):
+    """Upgrades: card questions are only asked on a first install, so an
+    install from before the Boltek card existed is asked about its
+    detector once -- only if it shows a lightning card and hasn't answered
+    before. `ask` returns True for yes. Returns the detector chosen, or None
+    if nothing was asked."""
+    dc = cfg.get('DivumWXCards', {})
+    if dc.get('lightning_detector'):
+        return None
+    cards = dc.get('enabled_cards') or []
+    cards = [cards] if isinstance(cards, str) else list(cards)
+    if not any(c in cards for c in DIVUMWX_LIGHTNING_CARDS.values()):
+        return None
+    detector = 'boltek' if ask() else 'other'
+    set_lightning_detector(cfg, detector)
+    return detector
 
 
 def apply_new_default_cards(cfg):
@@ -1936,8 +1986,9 @@ def apply_divumwx_cards_merge(cfg, rain_choice=None, optional_selected=None,
         effective_rain_choice = dc.get('rain_sensor')
         if effective_rain_choice:
             optional_selected = optional_selected or []
-            invalid = [c for c in optional_selected if c not in DIVUMWX_OPTIONAL_CARDS_ORDER]
-            valid_selected = [c for c in optional_selected if c in DIVUMWX_OPTIONAL_CARDS_ORDER]
+            known = DIVUMWX_OPTIONAL_CARDS_ORDER + [DIVUMWX_LIGHTNING_CARDS['boltek']]
+            invalid = [c for c in optional_selected if c not in known]
+            valid_selected = [c for c in optional_selected if c in known]
             report['invalid_optional_cards'] = invalid
 
             cards, count = compute_enabled_cards(effective_rain_choice, valid_selected)
@@ -1965,6 +2016,74 @@ def apply_divumwx_cards_merge(cfg, rain_choice=None, optional_selected=None,
 
 
 DIVUMWX_TIMELAPSE_DEFAULT_OUTPUT_DIR = 'webcam-timelapse'
+
+# Boltek lightning (user.divumwx_boltek.BoltekLightningService): its own
+# SQLite database, set up silently on every install/upgrade.
+DIVUMWX_BOLTEK_BINDING = 'boltek_binding'
+DIVUMWX_BOLTEK_DATABASE = 'boltek_sqlite'
+DIVUMWX_BOLTEK_DATABASE_FILE = 'divumwx_boltek.sdb'
+
+
+def apply_boltek_merge(cfg, site_root=None):
+    """
+    Mutates cfg in place. Set-once, no prompts.
+
+    BoltekLightningService is always registered (see DIVUMWX_DATA_SERVICES)
+    and needs [BoltekLightning] plus its own data binding and database.
+    WeeWX itself creates the database file and its table the first time
+    the service opens the binding, so nothing else is needed on disk. On a
+    station without a Boltek the service just waits for NSDRealtime.txt.
+
+    site_root follows apply_timelapse_merge(): '' when HTML_ROOT already
+    ends in DIVUMWX_ROOT_SUBDIR, so the paths don't double-nest.
+    """
+    report = {'boltek_section_created': False, 'binding_created': False,
+              'database_created': False}
+
+    if 'BoltekLightning' not in cfg:
+        cfg['BoltekLightning'] = {}
+        report['boltek_section_created'] = True
+    bl = cfg['BoltekLightning']
+    defaults = [
+        ('realtime_file', 'NSDRealtime.txt'),
+        ('distance_unit', 'km'),
+        ('poll_interval', '10'),
+        ('archive_interval', '300'),
+        ('stale_after', '600'),
+        ('site_root', DIVUMWX_ROOT_SUBDIR if site_root is None else site_root),
+        ('json_file', 'jsondata/boltek.json'),
+        ('history_file', 'jsondata/boltek_history.json'),
+        ('binding', DIVUMWX_BOLTEK_BINDING),
+    ]
+    for key, value in defaults:
+        if key not in bl:
+            bl[key] = value
+    if hasattr(bl, 'comments') and not bl.comments.get('realtime_file'):
+        bl.comments['realtime_file'] = [
+            "# Where Boltek's NexStorm puts NSDRealtime.txt: relative to the",
+            "# DivumWX site folder, or an absolute path.",
+        ]
+        bl.comments['distance_unit'] = ["# Distance units NexStorm writes in that file: km or mi."]
+
+    cfg.setdefault('DataBindings', {})
+    if DIVUMWX_BOLTEK_BINDING not in cfg['DataBindings']:
+        cfg['DataBindings'][DIVUMWX_BOLTEK_BINDING] = {
+            'database': DIVUMWX_BOLTEK_DATABASE,
+            'table_name': 'archive',
+            'manager': 'weewx.manager.Manager',
+            'schema': 'user.divumwx_boltek.schema',
+        }
+        report['binding_created'] = True
+
+    cfg.setdefault('Databases', {})
+    if DIVUMWX_BOLTEK_DATABASE not in cfg['Databases']:
+        cfg['Databases'][DIVUMWX_BOLTEK_DATABASE] = {
+            'database_name': DIVUMWX_BOLTEK_DATABASE_FILE,
+            'database_type': 'SQLite',
+        }
+        report['database_created'] = True
+
+    return report
 
 
 def apply_timelapse_merge(cfg, site_root=None, source_image=None, output_dir=None,
@@ -2555,7 +2674,8 @@ DIVUMWX_PREP_SERVICES = []
 DIVUMWX_DATA_SERVICES = ['user.divumwx.SkyfieldLoopData', 'user.divumwx.DataInjectService',
                          'user.divumwx.CloudCoverageOverrideService',
                          'user.divumwx.LiveDataService', 'user.divumwx.WeatherAPIService',
-                         'user.divumwx.TimelapseService']
+                         'user.divumwx.TimelapseService',
+                         'user.divumwx_boltek.BoltekLightningService']
 DIVUMWX_XTYPE_SERVICES = ['user.divumwx.AirDensityService', 'user.divumwx.vpdService',
                           'user.divumwx.LastNonZeroService']
 DIVUMWX_ARCHIVE_SERVICES = ['user.divumwx.SunshineDuration', 'user.divumwx.DivumwxExtrasService']
@@ -2810,6 +2930,7 @@ class DivumwxInstaller(ExtensionInstaller):
                 ('bin/user', [
                     'bin/user/divumwx.py',
                     'bin/user/divumwx_cards.py',
+                    'bin/user/divumwx_boltek.py',
                     'bin/user/divumwx_version.py',
                     'bin/user/lastrain.py',
                     'bin/user/stats.py',
@@ -3179,6 +3300,7 @@ class DivumwxInstaller(ExtensionInstaller):
                 default='tipping', options=['tipping', 'piezo', 'both'])
 
             optional_selected = []
+            lightning_detector = None
             _, mandatory_and_rain_count = compute_enabled_cards(rain_choice, [])
             running_total = mandatory_and_rain_count
             # Told up front, not discovered mid-loop: the mandatory + automatic
@@ -3216,6 +3338,10 @@ class DivumwxInstaller(ExtensionInstaller):
                     break
                 include = y_or_n(f"Include {card_name}? ({running_total}/"
                                   f"{DIVUMWX_CARD_TARGET_TOTAL} so far) (y/n) ") == 'y'
+                if include and card_name == DIVUMWX_LIGHTNING_CARDS['other']:
+                    # One lightning slot: a Boltek gets its own card instead.
+                    lightning_detector = 'boltek' if y_or_n(DIVUMWX_BOLTEK_QUESTION) == 'y' else 'other'
+                    card_name = DIVUMWX_LIGHTNING_CARDS[lightning_detector]
                 if include:
                     optional_selected.append(card_name)
                     running_total += 1
@@ -3247,6 +3373,8 @@ class DivumwxInstaller(ExtensionInstaller):
                 cfg, rain_choice=rain_choice, optional_selected=optional_selected,
                 webcam_title=webcam_title, webcam_image=webcam_image,
                 station_image_title=station_image_title, station_image_path=station_image_path)
+            if lightning_detector:
+                cfg['DivumWXCards']['lightning_detector'] = lightning_detector
 
         # Every run, outside the gate above: on an upgrade, turn on any
         # automatic card added since this install's card list was written
@@ -3254,6 +3382,15 @@ class DivumwxInstaller(ExtensionInstaller):
         # only records that the new cards were already included.
         for card in apply_new_default_cards(cfg):
             printer.out(f"Added the new default card {card} to [DivumWXCards] enabled_cards.", level=1)
+
+        # Upgrades from before the Boltek card: ask about the detector once
+        # (only when a lightning card is shown) and swap cards if it's a Boltek.
+        detector = ask_lightning_detector_once(
+            cfg, lambda: y_or_n(DIVUMWX_BOLTEK_QUESTION) == 'y')
+        if detector == 'boltek':
+            printer.out("Using the Boltek Lightning card (cardBoltekLightning) in place of "
+                        "cardLightning. Point [BoltekLightning] realtime_file at NexStorm's "
+                        "NSDRealtime.txt if it isn't in the DivumWX web folder.", level=1)
 
         # --- [Timelapse] ---
         # Deliberately OUTSIDE the "if 'enabled_cards' not in ..." gate above:
@@ -3281,6 +3418,12 @@ class DivumwxInstaller(ExtensionInstaller):
             ffmpeg_available=ffmpeg_available)
         create_timelapse_output_dir(
             html_root, cfg['Timelapse']['output_dir'], printer)
+
+        # --- [BoltekLightning] + its database: silent, set-once, every run ---
+        boltek_report = apply_boltek_merge(cfg, site_root=timelapse_site_root)
+        if boltek_report['database_created']:
+            printer.out(f"Boltek lightning database {DIVUMWX_BOLTEK_DATABASE_FILE} "
+                        f"will be created when WeeWX next starts.", level=2)
 
         # Last filesystem step, so it covers everything created above
         # (frontend, jsondata, timelapse output). Without this a

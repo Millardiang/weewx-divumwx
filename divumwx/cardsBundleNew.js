@@ -8002,6 +8002,341 @@ try {
 } catch (e) {
   console.error("cardsBundle: cardLightning.js failed:", e);
 }
+/* ===== cardBoltekLightning.js ===== */
+try {
+/*
+##############################################################################################
+# cardBoltekLightning.js version 1.0.0
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  GPLv3
+##############################################################################################
+*/
+
+// ===================== cardBoltekLightning.js =====================
+// Boltek lightning detector card: the same readouts as the Lightning card,
+// plus the bearing of the last strike, from jsondata/boltek.json. That file
+// is written by user.divumwx_boltek.BoltekLightningService from NexStorm's
+// NSDRealtime.txt and the Boltek database it keeps. Distances arrive in km.
+// Clicking the card opens modalBoltekLightning.html (chart & records from
+// the Boltek database).
+(function(){
+  var BOLTEK_JSON_URL = './jsondata/boltek.json';
+  var POLL_MS = 15 * 1000;
+
+  function stationParts(date){
+    var parts = {};
+    new Intl.DateTimeFormat('en-GB', {
+      timeZone: StationTime.getTZ(), hourCycle: 'h23',
+      year: 'numeric', month: 'short', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    }).formatToParts(date).forEach(function(p){ parts[p.type] = p.value; });
+    return parts;
+  }
+  function stationNow(){
+    var p = stationParts(new Date());
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return new Date(Date.UTC(+p.year, months.indexOf(p.month), +p.day, +p.hour, +p.minute, +p.second));
+  }
+  function pad2(n){ return n < 10 ? '0' + n : String(n); }
+  function ordinalSuffix(day){
+    if (day % 10 === 1 && day !== 11) return 'st';
+    if (day % 10 === 2 && day !== 12) return 'nd';
+    if (day % 10 === 3 && day !== 13) return 'rd';
+    return 'th';
+  }
+  var COMPASS = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+  function bearingLabel(deg){
+    if (typeof deg !== 'number' || isNaN(deg)) return '\u2014';
+    var d = ((deg % 360) + 360) % 360;
+    return Math.round(d) + '\u00b0 ' + COMPASS[Math.round(d / 22.5) % 16];
+  }
+  function dateLabelFor(epochMs){
+    if (!epochMs) return '\u2014';
+    var p = stationParts(new Date(epochMs));
+    return (+p.day) + ordinalSuffix(+p.day) + ' ' + p.month + ' ' + p.hour + ':' + p.minute;
+  }
+
+  var mount = document.getElementById('boltekLightningCard27');
+  if (!mount || !window.d3) return;
+  mount.innerHTML = '';
+  mount.style.position = 'relative';
+  mount.style.display = 'flex';
+  mount.style.flexDirection = 'column';
+
+  mount.style.borderBottom = '0';
+
+  var overlayTextColor = 'var(--bs-body-color)';
+
+  var titleBar = document.createElement('div');
+  titleBar.style.position = 'absolute';
+  titleBar.style.top = '-20px';
+  titleBar.style.left = '0';
+  titleBar.style.right = '0';
+  titleBar.style.height = '20px';
+  titleBar.style.boxSizing = 'border-box';
+  titleBar.style.display = 'flex';
+  titleBar.style.alignItems = 'center';
+  titleBar.style.justifyContent = 'space-between';
+  titleBar.style.gap = '8px';
+  titleBar.style.padding = '0 14px';
+  titleBar.style.fontSize = '9px';
+  titleBar.style.color = overlayTextColor;
+  titleBar.style.background = 'transparent';
+
+  var titleLabel = document.createElement('span');
+  DivumWXI18N.applyLabel(titleLabel, 'Boltek Lightning');
+  titleLabel.style.fontWeight = '600';
+  titleLabel.style.whiteSpace = 'nowrap';
+  titleLabel.style.overflow = 'hidden';
+  titleLabel.style.textOverflow = 'ellipsis';
+
+  var statusWrap = document.createElement('span');
+  statusWrap.style.display = 'flex';
+  statusWrap.style.alignItems = 'center';
+  statusWrap.style.gap = '4px';
+  statusWrap.style.flexShrink = '0';
+  statusWrap.style.opacity = '0.85';
+
+  var statusDot = document.createElement('span');
+  statusDot.style.width = '6px';
+  statusDot.style.height = '6px';
+  statusDot.style.borderRadius = '50%';
+  statusDot.style.background = '#999';
+  statusDot.style.flexShrink = '0';
+
+  var statusTime = document.createElement('span');
+
+  statusWrap.appendChild(statusDot);
+  statusWrap.appendChild(statusTime);
+  titleBar.appendChild(titleLabel);
+  titleBar.appendChild(statusWrap);
+  mount.appendChild(titleBar);
+
+  function setStatus(ok){
+    statusDot.style.background = ok ? '#2ecc71' : '#e74c3c';
+    var t = stationNow();
+    statusTime.textContent = pad2(t.getUTCHours()) + ':' + pad2(t.getUTCMinutes()) + ':' + pad2(t.getUTCSeconds());
+  }
+
+  // ---- 60:40 content split (left: bolt graphic, right: readouts) ----
+  var contentWrap = document.createElement('div');
+  contentWrap.style.height = '175px';
+  contentWrap.style.width = '100%';
+  contentWrap.style.boxSizing = 'border-box';
+  contentWrap.style.overflow = 'hidden';
+  contentWrap.style.display = 'flex';
+  contentWrap.style.alignItems = 'stretch';
+  mount.appendChild(contentWrap);
+
+  var divider = document.createElement('div');
+  divider.style.position = 'absolute';
+  divider.style.left = '60%';
+  divider.style.top = '6px';
+  divider.style.bottom = '6px';
+  divider.style.width = '1px';
+  divider.style.background = 'var(--bs-border-color)';
+  divider.style.pointerEvents = 'none';
+  mount.appendChild(divider);
+
+  var leftPane = document.createElement('div');
+  leftPane.style.flex = '0 0 60%';
+  leftPane.style.width = '60%';
+  leftPane.style.height = '175px';
+  leftPane.style.boxSizing = 'border-box';
+  leftPane.style.overflow = 'hidden';
+  leftPane.style.display = 'flex';
+  leftPane.style.alignItems = 'center';
+  leftPane.style.justifyContent = 'center';
+  contentWrap.appendChild(leftPane);
+
+  var rightPane = document.createElement('div');
+  rightPane.style.flex = '0 0 40%';
+  rightPane.style.width = '40%';
+  rightPane.style.boxSizing = 'border-box';
+  rightPane.style.display = 'flex';
+  rightPane.style.flexDirection = 'column';
+  rightPane.style.justifyContent = 'center';
+  rightPane.style.padding = '0 10px 0 14px';
+  contentWrap.appendChild(rightPane);
+
+  function addChipRow(label, opts){
+    var wrap = opts && opts.wrap;
+    var row = document.createElement('div');
+    row.style.display = 'flex';
+    row.style.flexDirection = 'column';
+    row.style.justifyContent = 'center';
+    row.style.boxSizing = 'border-box';
+    row.style.borderBottom = '1px solid var(--bs-border-color)';
+    if (wrap) {
+      row.style.minHeight = '20px';
+      row.style.padding = '2px 0';
+    } else {
+      row.style.height = '20px';
+      row.style.overflow = 'hidden';
+    }
+
+    var labelEl = document.createElement('span');
+    DivumWXI18N.applyLabel(labelEl, label);
+    labelEl.style.fontSize = '7px';
+    labelEl.style.fontVariantCaps = 'small-caps';
+    labelEl.style.letterSpacing = '.06em';
+    labelEl.style.color = 'var(--bs-body-color)';
+    labelEl.style.opacity = '0.85';
+    row.appendChild(labelEl);
+
+    var valueEl = document.createElement('span');
+    valueEl.style.fontSize = '9.5px';
+    valueEl.style.fontFamily = '"IBM Plex Mono", ui-monospace, monospace';
+    valueEl.style.color = 'var(--bw-accent)';
+    if (wrap) {
+      valueEl.style.whiteSpace = 'normal';
+      valueEl.style.wordBreak = 'break-word';
+      valueEl.style.lineHeight = '1.25';
+    } else {
+      valueEl.style.whiteSpace = 'nowrap';
+      valueEl.style.overflow = 'hidden';
+      valueEl.style.textOverflow = 'ellipsis';
+    }
+    row.appendChild(valueEl);
+
+    rightPane.appendChild(row);
+    return valueEl;
+  }
+
+  var currentText   = addChipRow('Current');
+  var todayText      = addChipRow('Today');
+  var hourText        = addChipRow('Last Hour');
+  var yearText          = addChipRow(String(stationNow().getUTCFullYear()) + ' Total');
+  var alltimeText        = addChipRow('All-Time Total');
+  var lastDetectedText     = addChipRow('Last Detected', { wrap: true });
+  var lastDistanceText      = addChipRow('Last Distance');
+  var bearingText            = addChipRow('Bearing');
+  bearingText.parentElement.style.borderBottom = 'none';
+
+  var cardLink = document.createElement('a');
+  cardLink.className = 'card-whole-link';
+  cardLink.href = 'modalBoltekLightning.html';
+  cardLink.setAttribute('data-modal', 'Boltek Lightning');
+  DivumWXI18N.applyAttr(cardLink, 'data-title', 'Boltek Lightning Chart & Records');
+  cardLink.setAttribute('data-type', 'iframe');
+  cardLink.setAttribute('data-modal-width', '1400px');
+  cardLink.setAttribute('data-modal-height', '820px');
+  cardLink.setAttribute('data-url', 'modalBoltekLightning.html');
+  cardLink.style.position = 'absolute';
+  cardLink.style.top = '-20px';
+  cardLink.style.left = '0';
+  cardLink.style.right = '0';
+  cardLink.style.bottom = '0';
+  cardLink.style.display = 'block';
+  mount.appendChild(cardLink);
+
+  var W = 180, H = 175;
+
+  function midpointPath(startX, startY, endX, endY, displace){
+    if (displace < 2) return [[startX, startY], [endX, endY]];
+    var midX = (startX + endX) / 2 + (Math.random() - 0.5) * displace;
+    var midY = (startY + endY) / 2 + (Math.random() - 0.5) * displace;
+    return midpointPath(startX, startY, midX, midY, displace / 2)
+      .concat(midpointPath(midX, midY, endX, endY, displace / 2));
+  }
+
+  function drawBranch(svg, lineGen, startX, startY, width){
+    var branchEndX = startX + (Math.random() - 0.5) * 36;
+    var branchEndY = startY + Math.random() * 24;
+    var points = midpointPath(startX, startY, branchEndX, branchEndY, 9);
+    svg.append('path').datum(points).attr('d', lineGen)
+      .attr('fill', 'none').attr('stroke', '#6ca6cd').attr('stroke-width', width)
+      .style('opacity', 0.8);
+  }
+
+  function drawStrike(svg, trunkX, trunkTopY, trunkBottomY){
+    var lineGen = d3.line().x(function(d){ return d[0]; }).y(function(d){ return d[1]; });
+    var points = midpointPath(trunkX, trunkTopY, trunkX, trunkBottomY, 18);
+
+    svg.append('path').datum(points).attr('d', lineGen)
+      .attr('fill', 'none').attr('stroke', 'var(--bs-body-color)').attr('stroke-width', 1)
+      .style('filter', 'drop-shadow(0 0 3px #6ca6cd)');
+
+    points.forEach(function(pt, i){
+      if (Math.random() < 0.55 && i > 3 && i < points.length - 3){
+        drawBranch(svg, lineGen, pt[0], pt[1], 0.8);
+      }
+    });
+  }
+
+  function drawGroundGlow(svg, gx, gy){
+    var rings = [
+      { rx: 34, ry: 10, color: '#3b9cac', opacity: 0.35 },
+      { rx: 24, ry: 7,  color: '#2e8b57', opacity: 0.55 },
+      { rx: 13, ry: 4,  color: '#6ca6cd', opacity: 0.85 }
+    ];
+    rings.forEach(function(r){
+      svg.append('ellipse').attr('cx', gx).attr('cy', gy).attr('rx', r.rx).attr('ry', r.ry)
+        .style('fill', 'none').style('stroke', r.color).style('stroke-width', 2).style('opacity', r.opacity);
+    });
+  }
+
+  function renderCard(v){
+    var svgSel = d3.select(leftPane);
+    var svg = svgSel.select('svg');
+    svg.remove();
+    svg = svgSel.append('svg').attr('viewBox', '0 0 ' + W + ' ' + H).attr('width', '100%').attr('height', '100%');
+
+    var trunkX = 90, trunkTopY = 20, trunkBottomY = 130;
+    svg.append('line').attr('x1', trunkX).attr('x2', trunkX).attr('y1', trunkBottomY).attr('y2', trunkBottomY + 18)
+      .style('stroke', '#2e8b57').style('stroke-width', 3).style('stroke-linecap', 'round');
+    drawGroundGlow(svg, trunkX, trunkBottomY + 18);
+    drawStrike(svg, trunkX, trunkTopY, trunkBottomY);
+
+    // ---- Right pane: 8 readouts as label/value chip rows ----
+    currentText.textContent = v.current === null ? '\u2014' : v.current.toLocaleString() + ' /min';
+    todayText.textContent = v.dayStrikes.toLocaleString();
+    hourText.textContent = v.hourStrikes === null ? '\u2014' : v.hourStrikes.toLocaleString();
+    yearText.textContent = v.yearStrikes.toLocaleString();
+    alltimeText.textContent = v.alltimeStrikes.toLocaleString();
+    lastDetectedText.textContent = v.lastDetected;
+    lastDistanceText.textContent = v.lastDistance === null ? '\u2014' : v.lastDistance.toFixed(1) + ' km';
+    bearingText.textContent = bearingLabel(v.bearing);
+  }
+
+  var lastData = null;
+  window.addEventListener('i18nready', function(){
+    if (lastData) renderCard(lastData);
+  });
+  function refresh(){
+    fetch(BOLTEK_JSON_URL + '?_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+      .then(function(b){
+        var rt = b.realtime || {};
+        var t = b.totals || {};
+        function num(x){ return (typeof x === 'number' && !isNaN(x)) ? x : null; }
+        function count(x){ var n = num(x); return n === null ? 0 : n; }
+
+        lastData = {
+          current: num(rt.strikes_per_minute),     // NexStorm's strikes per minute
+          dayStrikes: count(t.today),
+          hourStrikes: num(rt.strikes_60min),      // NexStorm's own last-60-minutes count
+          yearStrikes: count(t.year),
+          alltimeStrikes: count(t.alltime),
+          lastDetected: dateLabelFor(num(rt.last_strike_time) ? rt.last_strike_time * 1000 : 0),
+          lastDistance: num(rt.last_distance_km),
+          bearing: num(rt.last_bearing),
+          year: stationNow().getUTCFullYear()
+        };
+        renderCard(lastData);
+        // Green only while NexStorm's file is arriving; red when it's missing
+        // or hasn't changed for a while (see stale_after in [BoltekLightning]).
+        setStatus(!b.stale);
+      }).catch(function(e){
+        console.warn('cardBoltekLightning: refresh failed --', e.message);
+        setStatus(false);
+      });
+  }
+  refresh();
+  setInterval(refresh, POLL_MS);
+})();
+} catch (e) {
+  console.error("cardsBundle: cardBoltekLightning.js failed:", e);
+}
 
 /* ===== cardPollen.js ===== */
 try {

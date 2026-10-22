@@ -125,6 +125,27 @@ sudo systemctl restart weewx
    alone. The list of files removed is printed during the install.
 5. Restart WeeWX.
 
+## Boltek lightning detectors
+
+DivumWX can show a Boltek detector's readings on its own **Boltek Lightning**
+card. When the installer asks about the Lightning card and you answer yes,
+it then asks whether your detector is a Boltek (NexStorm); answer yes and
+you get the Boltek Lightning card in its place. Upgrades from an earlier
+DivumWX that show the Lightning card are asked this once. Everything else is
+set up automatically: a `[BoltekLightning]` section in `weewx.conf` and a
+separate Boltek database, `divumwx_boltek.sdb`, which WeeWX creates next to
+its own database the first time it starts. Stations without a Boltek can
+ignore all of this; the service just waits for a file that never arrives.
+
+1. In NexStorm, have it write or upload `NSDRealtime.txt` to the DivumWX web
+   folder (next to `index.html`). If it goes somewhere else, set
+   `realtime_file` under `[BoltekLightning]` to its full path.
+2. If NexStorm is set to miles, set `distance_unit = mi`. The card always
+   shows kilometres.
+3. Restart WeeWX. The card turns green once the file is arriving, and the
+   strike totals for today, the year and all time build up from then on.
+   Click the card for its chart & records, built from the same database.
+
 ## Troubleshooting
 
 See [TROUBLESHOOTING.md](TROUBLESHOOTING.md).

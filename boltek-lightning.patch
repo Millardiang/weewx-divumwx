@@ -1,0 +1,1970 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index 7ad9b6a..8336e50 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -2,6 +2,62 @@
+ 
+ ## Unreleased — for 2.0.0
+ 
++### Boltek Lightning card (new, optional)
++- Installer: after "Include cardLightning?" (yes), it asks "Is your
++  lightning detector a Boltek (NexStorm)?". Yes puts the Boltek Lightning
++  card in the lightning slot *instead of* the Lightning card; the answer
++  is kept as `[DivumWXCards]` `lightning_detector = boltek | other`. An
++  upgrade from before this release that shows a lightning card is asked
++  once and the cards are swapped if it's a Boltek.
++- A card for Boltek lightning detectors, in the Lightning card's place. It
++  shows the same readouts (Current, Today, Last Hour, the year's total,
++  All-Time Total, Last Detected, Last Distance) plus **Bearing** of the
++  last strike (degrees and compass point). Current is NexStorm's strikes
++  per minute and Last Hour its own last-60-minutes count. The status dot
++  is red when NexStorm's file is missing or hasn't changed for 10 minutes.
++- Data comes from NexStorm's `NSDRealtime.txt` (22 values: date, time,
++  session totals, rate, last strike distance/bearing/type/time, CG/IC/
++  close counts, tendency, alarm, average distance, peak rate, hardware
++  status, noise, and 5/15/30/60-minute counts), read every 10 seconds by
++  the new `user.divumwx_boltek.BoltekLightningService`. Commas,
++  semicolons, tabs or spaces between values all work; distances can be
++  km or miles (`distance_unit`). The service writes
++  `jsondata/boltek.json` for the card.
++- Strikes are kept in DivumWX's own Boltek database,
++  `divumwx_boltek.sdb` (SQLite, one record every 5 minutes), separate
++  from the WeeWX archive. The installer adds `[BoltekLightning]`,
++  `[DataBindings]` `[[boltek_binding]]` and `[Databases]`
++  `[[boltek_sqlite]]` silently on every install or upgrade (set-once, hand
++  edits kept), and WeeWX creates the database the first time it starts.
++  Totals survive restarts and NexStorm session resets. On stations
++  without a Boltek the service just waits for the file.
++- Clicking the Boltek card opens **modalBoltekLightning.html**, its own
++  chart & records page in the same style as the Lightning one:
++  - a live strip from NexStorm: status, alarm, storm tendency, rate, the
++    5/15/30/60-minute counts, average distance, session peak rate, session
++    CG/IC, close strikes, noise and sensor status;
++  - a chart for 24hr (hourly), Week, Month, Year or any past year (daily):
++    bars split into cloud-to-ground (CG) and in-cloud (IC) strikes, the
++    closest strike as a line on the right axis over the distance bands,
++    a tooltip per hour/day, and series that can be hidden from the legend;
++  - Records for 24hr, Week, Month, Year and All-time: total strikes (with
++    the CG/IC split), busiest hour/day, closest strike and highest rate,
++    each with its date.
++  Distances follow the dashboard's unit system; times are station time.
++- For that, the service also writes `jsondata/boltek_history.json` (hourly
++  totals for 48 hours and daily totals for all time, from the Boltek
++  database) every 5 minutes, and the database records the closest strike
++  and highest strikes-per-minute rate in each 5-minute interval
++  (`min_distance`, `max_rate`).
++- `divumwx_uninstall_helper.py` removes those three entries; the database
++  file is left in place so strike history isn't lost.
++- New: `bin/user/divumwx_boltek.py` 1.0.0, `modalBoltekLightning.html`
++  1.0.0. Changed: `cardsBundleNew.js`
++  (new `cardBoltekLightning` module), `index.html`, `hyperIndex.html`,
++  `lexendIndex.html` (card mount), `install.py`, `build_card_bundle.py`,
++  `divumwx_uninstall_helper.py`, `lang/en.conf`, `lang/en_US.conf`,
++  `INSTALLATION_GUIDE.md`.
++
+ ### Windy Radar card (new, on by default)
+ - A new dashboard card showing Windy.com's live weather radar centred on
+   the station, laid out like the Webcam card: title bar, status dot and
+diff --git a/INSTALLATION_GUIDE.md b/INSTALLATION_GUIDE.md
+index c67d38c..bbb7da0 100644
+--- a/INSTALLATION_GUIDE.md
++++ b/INSTALLATION_GUIDE.md
+@@ -125,6 +125,27 @@ sudo systemctl restart weewx
+    alone. The list of files removed is printed during the install.
+ 5. Restart WeeWX.
+ 
++## Boltek lightning detectors
++
++DivumWX can show a Boltek detector's readings on its own **Boltek Lightning**
++card. When the installer asks about the Lightning card and you answer yes,
++it then asks whether your detector is a Boltek (NexStorm); answer yes and
++you get the Boltek Lightning card in its place. Upgrades from an earlier
++DivumWX that show the Lightning card are asked this once. Everything else is
++set up automatically: a `[BoltekLightning]` section in `weewx.conf` and a
++separate Boltek database, `divumwx_boltek.sdb`, which WeeWX creates next to
++its own database the first time it starts. Stations without a Boltek can
++ignore all of this; the service just waits for a file that never arrives.
++
++1. In NexStorm, have it write or upload `NSDRealtime.txt` to the DivumWX web
++   folder (next to `index.html`). If it goes somewhere else, set
++   `realtime_file` under `[BoltekLightning]` to its full path.
++2. If NexStorm is set to miles, set `distance_unit = mi`. The card always
++   shows kilometres.
++3. Restart WeeWX. The card turns green once the file is arriving, and the
++   strike totals for today, the year and all time build up from then on.
++   Click the card for its chart & records, built from the same database.
++
+ ## Troubleshooting
+ 
+ See [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
+diff --git a/bin/user/divumwx_boltek.py b/bin/user/divumwx_boltek.py
+new file mode 100644
+index 0000000..2609531
+--- /dev/null
++++ b/bin/user/divumwx_boltek.py
+@@ -0,0 +1,562 @@
++"""
++##############################################################################################
++# divumwx_boltek.py version 1.0.0
++#  Copyright (C) 2026 Ian Millard, Sean Balfour
++#  GPLv3
++##############################################################################################
++
++Boltek lightning detector support for DivumWX.
++
++Boltek's NexStorm software writes its live readings to NSDRealtime.txt
++(one line of 22 values, see FIELDS below). BoltekLightningService:
++
++  * reads that file every poll_interval seconds;
++  * keeps strike totals in DivumWX's own Boltek database (a separate
++    SQLite file, divumwx_boltek.sdb, created automatically the first time
++    the service runs -- nothing to set up by hand);
++  * writes jsondata/boltek.json for the dashboard's Boltek Lightning card,
++    and jsondata/boltek_history.json (hourly and daily strike history) for
++    its chart & records modal, modalBoltekLightning.html.
++
++It runs on its own background thread, so a slow or missing file never
++holds up WeeWX's loop. If NSDRealtime.txt isn't there yet the service just
++waits quietly (one log line), so it's safe on stations without a Boltek.
++
++weewx.conf (written by install.py on first install; every key optional):
++
++    [BoltekLightning]
++        # Where NexStorm puts NSDRealtime.txt. Relative paths are taken
++        # from the DivumWX site folder; absolute paths are used as-is.
++        realtime_file = NSDRealtime.txt
++        # Units NexStorm uses for distances in the file: km or mi.
++        distance_unit = km
++        # Seconds between reads of the file.
++        poll_interval = 10
++        # Seconds of strikes gathered into each database record.
++        archive_interval = 300
++        # A file older than this many seconds counts as stale.
++        stale_after = 600
++        # DivumWX site folder below HTML_ROOT ('' if HTML_ROOT is it).
++        site_root = divumwx
++        # Output for the card, relative to the site folder.
++        json_file = jsondata/boltek.json
++        history_file = jsondata/boltek_history.json
++        binding = boltek_binding
++
++    [DataBindings]
++        [[boltek_binding]]
++            database = boltek_sqlite
++            table_name = archive
++            manager = weewx.manager.Manager
++            schema = user.divumwx_boltek.schema
++
++    [Databases]
++        [[boltek_sqlite]]
++            database_name = divumwx_boltek.sdb
++            database_type = SQLite
++"""
++
++import json
++import logging
++import os
++import re
++import threading
++import time
++
++import weewx
++import weewx.manager
++from weewx.engine import StdService
++from weeutil.weeutil import to_int
++
++log = logging.getLogger(__name__)
++
++BOLTEK_VERSION = '1.0.0'
++
++# One record per archive_interval. 'strikes', 'cg', 'ic', 'close' and 'noise'
++# are counts *during* that interval (worked out from NexStorm's running
++# session totals). 'max_rate' is the highest strikes-per-minute seen in the
++# interval and 'min_distance' the closest last-strike distance seen while
++# strikes were arriving. The rest are the readings at the end of the
++# interval. session_total lets a restart carry on from where it left off.
++schema = [
++    ('dateTime', 'INTEGER NOT NULL UNIQUE PRIMARY KEY'),
++    ('usUnits', 'INTEGER NOT NULL'),
++    ('interval', 'INTEGER NOT NULL'),
++    ('strikes', 'INTEGER'),
++    ('cg', 'INTEGER'),
++    ('ic', 'INTEGER'),
++    ('close', 'INTEGER'),
++    ('noise', 'INTEGER'),
++    ('strike_rate', 'REAL'),
++    ('max_rate', 'REAL'),
++    ('min_distance', 'REAL'),
++    ('peak_rate', 'REAL'),
++    ('last_distance', 'REAL'),
++    ('last_bearing', 'REAL'),
++    ('last_type', 'INTEGER'),
++    ('last_strike', 'INTEGER'),
++    ('avg_distance', 'REAL'),
++    ('tendency', 'INTEGER'),
++    ('alarm', 'INTEGER'),
++    ('session_total', 'INTEGER'),
++    ('session_cg', 'INTEGER'),
++    ('session_ic', 'INTEGER'),
++    ('session_close', 'INTEGER'),
++    ('session_noise', 'INTEGER'),
++]
++
++# The 22 values on NSDRealtime.txt's line, in order.
++FIELDS = [
++    'date', 'time', 'total_strikes', 'strikes_per_minute',
++    'last_distance', 'last_bearing', 'last_type', 'last_strike_time',
++    'cg_total', 'ic_total', 'close_count', 'tendency', 'alarm',
++    'avg_distance', 'peak_rate', 'peak_rate_time', 'hardware_status',
++    'noise_count', 'strikes_5min', 'strikes_15min', 'strikes_30min',
++    'strikes_60min',
++]
++
++STRIKE_TYPES = {0: 'Noise', 1: '-CG', 2: '+CG', 3: 'IC'}
++ALARMS = {0: 'Clear', 1: 'Caution', 2: 'High alarm'}
++KM_PER_MILE = 1.609344
++
++_DATE_RE = re.compile(r'^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$')
++_TIME_RE = re.compile(r'^(\d{1,2}):(\d{2})(?::(\d{2}))?$')
++
++
++def split_line(line):
++    """Split one NSDRealtime.txt line into its values, whatever separates
++    them (comma, semicolon, tab or spaces)."""
++    line = line.strip().lstrip('﻿')
++    for sep in (',', ';', '\t'):
++        if sep in line:
++            return [v.strip() for v in line.split(sep)]
++    parts = line.split()
++    # With spaces as the separator, a full "date time" in a time field
++    # arrives as two values: join them back up.
++    out = []
++    i = 0
++    while i < len(parts):
++        if (len(out) >= 2 and i + 1 < len(parts) and _DATE_RE.match(parts[i])
++                and _TIME_RE.match(parts[i + 1]) and len(parts) > len(FIELDS)):
++            out.append(parts[i] + ' ' + parts[i + 1])
++            i += 2
++        else:
++            out.append(parts[i])
++            i += 1
++    return out
++
++
++def _local_ts(day, month, year, hh, mm, ss):
++    return int(time.mktime((year, month, day, hh, mm, ss, 0, 0, -1)))
++
++
++def parse_datetime(date_str, time_str):
++    """'DD/MM/YYYY', 'HH:MM:SS' (station local time) -> epoch seconds."""
++    d = _DATE_RE.match(date_str or '')
++    t = _TIME_RE.match(time_str or '')
++    if not d or not t:
++        return None
++    return _local_ts(int(d.group(1)), int(d.group(2)), int(d.group(3)),
++                     int(t.group(1)), int(t.group(2)), int(t.group(3) or 0))
++
++
++def parse_event_time(value, file_ts):
++    """A strike/peak time: either 'HH:MM:SS' (on the file's date, or the day
++    before if that would be in the future) or a full 'DD/MM/YYYY HH:MM:SS'."""
++    value = (value or '').strip()
++    if not value or file_ts is None:
++        return None
++    parts = value.split()
++    if len(parts) == 2:
++        return parse_datetime(parts[0], parts[1])
++    t = _TIME_RE.match(value)
++    if not t:
++        return None
++    lt = time.localtime(file_ts)
++    ts = _local_ts(lt.tm_mday, lt.tm_mon, lt.tm_year,
++                   int(t.group(1)), int(t.group(2)), int(t.group(3) or 0))
++    if ts > file_ts + 60:
++        prev = time.localtime(file_ts - 86400)
++        ts = _local_ts(prev.tm_mday, prev.tm_mon, prev.tm_year,
++                       int(t.group(1)), int(t.group(2)), int(t.group(3) or 0))
++    return ts
++
++
++def parse_realtime(text, distance_unit='km'):
++    """Parse NSDRealtime.txt's contents into a dict of readings, distances in
++    km. Raises ValueError if the line can't be read."""
++    lines = [ln for ln in text.splitlines() if ln.strip()]
++    if not lines:
++        raise ValueError('file is empty')
++    values = split_line(lines[-1])
++    if len(values) < len(FIELDS):
++        raise ValueError('expected %d values, found %d' % (len(FIELDS), len(values)))
++    raw = dict(zip(FIELDS, values[:len(FIELDS)]))
++
++    file_ts = parse_datetime(raw['date'], raw['time'])
++    if file_ts is None:
++        raise ValueError("can't read date/time %r %r" % (raw['date'], raw['time']))
++    to_km = KM_PER_MILE if str(distance_unit).lower().startswith('mi') else 1.0
++
++    def i(key):
++        try:
++            return int(float(raw[key]))
++        except (TypeError, ValueError):
++            return None
++
++    def f(key):
++        try:
++            return float(raw[key])
++        except (TypeError, ValueError):
++            return None
++
++    def km(key):
++        v = f(key)
++        return None if v is None else round(v * to_km, 2)
++
++    last_type = i('last_type')
++    alarm = i('alarm')
++    return {
++        'file_time': file_ts,
++        'total_strikes': i('total_strikes'),
++        'strikes_per_minute': f('strikes_per_minute'),
++        'last_distance_km': km('last_distance'),
++        'last_bearing': f('last_bearing'),
++        'last_type': last_type,
++        'last_type_label': STRIKE_TYPES.get(last_type),
++        'last_strike_time': parse_event_time(raw['last_strike_time'], file_ts),
++        'cg_total': i('cg_total'),
++        'ic_total': i('ic_total'),
++        'close_count': i('close_count'),
++        'tendency': i('tendency'),
++        'alarm': alarm,
++        'alarm_label': ALARMS.get(alarm),
++        'avg_distance_km': km('avg_distance'),
++        'peak_rate': f('peak_rate'),
++        'peak_rate_time': parse_event_time(raw['peak_rate_time'], file_ts),
++        'hardware_status': raw['hardware_status'],
++        'noise_count': i('noise_count'),
++        'strikes_5min': i('strikes_5min'),
++        'strikes_15min': i('strikes_15min'),
++        'strikes_30min': i('strikes_30min'),
++        'strikes_60min': i('strikes_60min'),
++    }
++
++
++def counter_delta(new, old):
++    """Strikes added since the last reading of a running total. A total that
++    went down means NexStorm started a new session, so everything in the
++    new total is new."""
++    if new is None:
++        return 0
++    if old is None:
++        return 0
++    return new - old if new >= old else new
++
++
++class BoltekLightningService(StdService):
++
++    def __init__(self, engine, config_dict):
++        super(BoltekLightningService, self).__init__(engine, config_dict)
++        bc = config_dict.get('BoltekLightning', {})
++
++        html_root = config_dict.get('StdReport', {}).get('HTML_ROOT', 'public_html')
++        weewx_root = config_dict.get('WEEWX_ROOT', '.')
++        if not os.path.isabs(html_root):
++            html_root = os.path.join(weewx_root, html_root)
++        site_root = str(bc.get('site_root', 'divumwx')).strip()
++        site = os.path.join(html_root, site_root) if site_root else html_root
++
++        self.realtime_file = os.path.join(site, bc.get('realtime_file', 'NSDRealtime.txt'))
++        self.json_file = os.path.join(site, bc.get('json_file', 'jsondata/boltek.json'))
++        self.history_file = os.path.join(site, bc.get('history_file', 'jsondata/boltek_history.json'))
++        self.distance_unit = bc.get('distance_unit', 'km')
++        self.poll_interval = max(2, to_int(bc.get('poll_interval', 10)))
++        self.archive_interval = max(60, to_int(bc.get('archive_interval', 300)))
++        self.stale_after = max(60, to_int(bc.get('stale_after', 600)))
++        self.binding = bc.get('binding', 'boltek_binding')
++        self.config_dict = config_dict
++
++        self._stop = threading.Event()
++        self._thread = threading.Thread(target=self._run, name='BoltekLightning', daemon=True)
++        self._thread.start()
++        log.info("Boltek lightning %s: reading %s every %ss, writing %s, database binding %s"
++                 % (BOLTEK_VERSION, self.realtime_file, self.poll_interval, self.json_file, self.binding))
++
++    def shutDown(self):
++        self._stop.set()
++        if self._thread.is_alive():
++            self._thread.join(timeout=10)
++
++    # ---- background thread ----
++
++    def _run(self):
++        try:
++            # Opening with initialize=True creates the database and its table
++            # the first time -- this is what sets up the Boltek database.
++            dbm = weewx.manager.open_manager_with_config(self.config_dict, self.binding, initialize=True)
++        except Exception as e:
++            log.error("Boltek lightning: can't open database binding %s: %s" % (self.binding, e))
++            return
++        try:
++            BoltekRecorder(self, dbm).run(self._stop)
++        except Exception as e:  # never take WeeWX down with us
++            log.exception("Boltek lightning stopped: %s" % e)
++        finally:
++            try:
++                dbm.close()
++            except Exception:
++                pass
++
++
++class BoltekRecorder(object):
++    """Does the reading, recording and publishing. Kept apart from the
++    service so it can be driven directly in tests."""
++
++    COUNTERS = (('total_strikes', 'strikes', 'session_total'),
++                ('cg_total', 'cg', 'session_cg'),
++                ('ic_total', 'ic', 'session_ic'),
++                ('close_count', 'close', 'session_close'),
++                ('noise_count', 'noise', 'session_noise'))
++
++    def __init__(self, cfg, dbm, clock=time.time):
++        self.cfg = cfg
++        self.dbm = dbm
++        self.clock = clock
++        self.last_counts = {}       # running totals at the last reading
++        self.pending = {}           # counts gathered since the last record
++        self.last_reading = None
++        self.last_mtime = None
++        self.missing_logged = False
++        self.error_logged = None
++        self.totals = {'today': 0, 'year': 0, 'alltime': 0}
++        self.totals_day = None
++        self.interval_start = self._interval_floor(self.clock())
++        self._reset_interval_extremes()
++        self._resume()
++        self._refresh_totals()
++        self._write_history()
++
++    def _reset_interval_extremes(self):
++        self.max_rate = None
++        self.min_distance = None
++
++    def _interval_floor(self, ts):
++        return int(ts // self.cfg.archive_interval * self.cfg.archive_interval)
++
++    def _resume(self):
++        """Pick up the running totals from the last record, so strikes
++        between a restart and the first reading aren't lost or double
++        counted."""
++        try:
++            row = self.dbm.getSql("SELECT session_total, session_cg, session_ic, session_close, "
++                                  "session_noise FROM archive ORDER BY dateTime DESC LIMIT 1")
++        except Exception:
++            row = None
++        if row:
++            for (src, _col, sess), val in zip(self.COUNTERS, row):
++                if val is not None:
++                    self.last_counts[src] = val
++        self.pending = dict((col, 0) for _src, col, _sess in self.COUNTERS)
++
++    def run(self, stop):
++        while not stop.is_set():
++            self.tick()
++            stop.wait(self.cfg.poll_interval)
++        # Shutting down: save what's been counted so far, so a restart
++        # doesn't lose up to an archive_interval of strikes.
++        self._write_record(self.clock(), exact=True)
++
++    def tick(self):
++        now = self.clock()
++        # Close the finished interval before counting this reading, so
++        # strikes read after a boundary (midnight included) land in the new
++        # interval and the right day.
++        if now >= self.interval_start + self.cfg.archive_interval:
++            self._write_record(now)
++        reading = self._read()
++        if reading is not None:
++            new_strikes = 0
++            for src, col, _sess in self.COUNTERS:
++                new = reading.get(src)
++                delta = counter_delta(new, self.last_counts.get(src))
++                self.pending[col] += delta
++                if col == 'strikes':
++                    new_strikes = delta
++                if new is not None:
++                    self.last_counts[src] = new
++            rate = reading.get('strikes_per_minute')
++            if rate is not None and (self.max_rate is None or rate > self.max_rate):
++                self.max_rate = rate
++            dist = reading.get('last_distance_km')
++            if new_strikes > 0 and dist is not None and (self.min_distance is None or dist < self.min_distance):
++                self.min_distance = dist
++            self.last_reading = reading
++        self._publish(now)
++
++    def _read(self):
++        path = self.cfg.realtime_file
++        try:
++            st = os.stat(path)
++        except OSError:
++            if not self.missing_logged:
++                log.info("Boltek lightning: waiting for %s (NexStorm's realtime file)" % path)
++                self.missing_logged = True
++            return None
++        if self.missing_logged:
++            log.info("Boltek lightning: found %s" % path)
++            self.missing_logged = False
++        if st.st_mtime == self.last_mtime:
++            return None
++        try:
++            with open(path, 'r', encoding='utf-8', errors='replace') as fh:
++                reading = parse_realtime(fh.read(), self.cfg.distance_unit)
++        except (OSError, ValueError) as e:
++            msg = str(e)
++            if msg != self.error_logged:
++                log.error("Boltek lightning: can't read %s: %s" % (path, msg))
++                self.error_logged = msg
++            return None
++        self.error_logged = None
++        self.last_mtime = st.st_mtime
++        return reading
++
++    def _write_record(self, now, exact=False):
++        end = int(now) if exact else self._interval_floor(now)
++        if end <= self.interval_start:
++            return
++        if exact and not any(self.pending.values()):
++            return
++        r = self.last_reading or {}
++        rec = {
++            'dateTime': end,
++            'usUnits': weewx.METRIC,
++            'interval': (end - self.interval_start) // 60,
++            'strike_rate': r.get('strikes_per_minute'),
++            'max_rate': self.max_rate,
++            'min_distance': self.min_distance,
++            'peak_rate': r.get('peak_rate'),
++            'last_distance': r.get('last_distance_km'),
++            'last_bearing': r.get('last_bearing'),
++            'last_type': r.get('last_type'),
++            'last_strike': r.get('last_strike_time'),
++            'avg_distance': r.get('avg_distance_km'),
++            'tendency': r.get('tendency'),
++            'alarm': r.get('alarm'),
++        }
++        for src, col, sess in self.COUNTERS:
++            rec[col] = self.pending.get(col, 0)
++            rec[sess] = self.last_counts.get(src)
++        try:
++            self.dbm.addRecord(rec)
++        except Exception as e:
++            log.error("Boltek lightning: couldn't save record: %s" % e)
++            return
++        self.pending = dict((col, 0) for _src, col, _sess in self.COUNTERS)
++        self._reset_interval_extremes()
++        self.interval_start = end
++        self._refresh_totals()
++        self._write_history()
++
++    def _refresh_totals(self):
++        now = self.clock()
++        lt = time.localtime(now)
++        midnight = int(time.mktime((lt.tm_year, lt.tm_mon, lt.tm_mday, 0, 0, 0, 0, 0, -1)))
++        new_year = int(time.mktime((lt.tm_year, 1, 1, 0, 0, 0, 0, 0, -1)))
++
++        def total(since):
++            try:
++                row = self.dbm.getSql("SELECT SUM(strikes) FROM archive WHERE dateTime > ?", (since,))
++            except Exception:
++                return 0
++            return int(row[0] or 0) if row else 0
++
++        self.totals = {'today': total(midnight), 'year': total(new_year), 'alltime': total(0)}
++        self.totals_day = (lt.tm_year, lt.tm_yday)
++
++    def _publish(self, now):
++        lt = time.localtime(now)
++        if self.totals_day != (lt.tm_year, lt.tm_yday):
++            self._refresh_totals()   # new day (or year): restart the counts
++        r = self.last_reading
++        pending = self.pending.get('strikes', 0)
++        file_time = r.get('file_time') if r else None
++        # Fresh if the file changed recently, going by when it last changed
++        # here (or NexStorm's own timestamp): the NexStorm PC's clock may
++        # not match this one.
++        newest = max([t for t in (file_time, self.last_mtime) if t] or [0])
++        data = {
++            'version': BOLTEK_VERSION,
++            'generated': int(now),
++            'source_file': os.path.basename(self.cfg.realtime_file),
++            'file_found': os.path.exists(self.cfg.realtime_file),
++            'file_time': file_time,
++            'stale': r is None or now - newest > self.cfg.stale_after,
++            'realtime': r,
++            'totals': {
++                'today': self.totals['today'] + pending,
++                'year': self.totals['year'] + pending,
++                'alltime': self.totals['alltime'] + pending,
++            },
++        }
++        path = self.cfg.json_file
++        try:
++            os.makedirs(os.path.dirname(path), exist_ok=True)
++            tmp = path + '.tmp'
++            with open(tmp, 'w') as fh:
++                json.dump(data, fh)
++            os.replace(tmp, path)
++        except OSError as e:
++            if str(e) != self.error_logged:
++                log.error("Boltek lightning: can't write %s: %s" % (path, e))
++                self.error_logged = str(e)
++
++    # ---- history for the chart & records modal ----
++
++    @staticmethod
++    def _local_ms(key, fmt):
++        """'YYYY-MM-DD' or 'YYYY-MM-DD HH' (local time) -> epoch milliseconds."""
++        tm = time.strptime(key, fmt)
++        return int(time.mktime((tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour, 0, 0, 0, 0, -1))) * 1000
++
++    def _history_rows(self, fmt, since):
++        """Sum the records into local hours or days. dateTime is the END of
++        each record's interval, so dateTime - 1 puts it in the right bucket.
++        Each row: [start ms, strikes, cg, ic, closest km, highest rate/min]."""
++        sql = ("SELECT strftime('%s', dateTime - 1, 'unixepoch', 'localtime') AS k, "
++               "SUM(strikes), SUM(cg), SUM(ic), "
++               "MIN(CASE WHEN strikes > 0 THEN min_distance END), MAX(max_rate) "
++               "FROM archive WHERE dateTime > ? GROUP BY k ORDER BY k" % fmt)
++        py_fmt = '%Y-%m-%d %H' if '%H' in fmt else '%Y-%m-%d'
++        rows = []
++        for k, strikes, cg, ic, closest, rate in self.dbm.genSql(sql, (since,)):
++            rows.append([self._local_ms(k, py_fmt), int(strikes or 0), int(cg or 0), int(ic or 0),
++                         None if closest is None else round(closest, 1),
++                         None if rate is None else round(rate, 1)])
++        return rows
++
++    def _write_history(self):
++        now = self.clock()
++        lt = time.localtime(now)
++        this_hour = int(time.mktime((lt.tm_year, lt.tm_mon, lt.tm_mday, lt.tm_hour, 0, 0, 0, 0, -1)))
++        try:
++            data = {
++                'version': BOLTEK_VERSION,
++                'generated': int(now),
++                'columns': ['start', 'strikes', 'cg', 'ic', 'closest_km', 'max_rate'],
++                # The last 48 hours, so the modal can show any 24 of them.
++                'hourly': self._history_rows('%Y-%m-%d %H', this_hour - 47 * 3600),
++                'daily': self._history_rows('%Y-%m-%d', 0),
++            }
++        except Exception as e:
++            log.error("Boltek lightning: couldn't read history: %s" % e)
++            return
++        path = self.cfg.history_file
++        try:
++            os.makedirs(os.path.dirname(path), exist_ok=True)
++            tmp = path + '.tmp'
++            with open(tmp, 'w') as fh:
++                json.dump(data, fh, separators=(',', ':'))
++            os.replace(tmp, path)
++        except OSError as e:
++            log.error("Boltek lightning: can't write %s: %s" % (path, e))
+diff --git a/build_card_bundle.py b/build_card_bundle.py
+index f532fe5..e406864 100644
+--- a/build_card_bundle.py
++++ b/build_card_bundle.py
+@@ -65,6 +65,7 @@ CARD_FILES = [
+     'cardGeocentric.js',
+     'cardMoonPhase.js',
+     'cardLightning.js',
++    'cardBoltekLightning.js',
+     'cardPollen.js',
+     'cardGreenhouseGas.js',
+     'cardAirquality.js',
+diff --git a/divumwx/cardsBundleNew.js b/divumwx/cardsBundleNew.js
+index 208f991..8a57c3c 100644
+--- a/divumwx/cardsBundleNew.js
++++ b/divumwx/cardsBundleNew.js
+@@ -8002,6 +8002,341 @@ try {
+ } catch (e) {
+   console.error("cardsBundle: cardLightning.js failed:", e);
+ }
++/* ===== cardBoltekLightning.js ===== */
++try {
++/*
++##############################################################################################
++# cardBoltekLightning.js version 1.0.0
++#  Copyright (C) 2026 Ian Millard, Sean Balfour
++#  GPLv3
++##############################################################################################
++*/
++
++// ===================== cardBoltekLightning.js =====================
++// Boltek lightning detector card: the same readouts as the Lightning card,
++// plus the bearing of the last strike, from jsondata/boltek.json. That file
++// is written by user.divumwx_boltek.BoltekLightningService from NexStorm's
++// NSDRealtime.txt and the Boltek database it keeps. Distances arrive in km.
++// Clicking the card opens modalBoltekLightning.html (chart & records from
++// the Boltek database).
++(function(){
++  var BOLTEK_JSON_URL = './jsondata/boltek.json';
++  var POLL_MS = 15 * 1000;
++
++  function stationParts(date){
++    var parts = {};
++    new Intl.DateTimeFormat('en-GB', {
++      timeZone: StationTime.getTZ(), hourCycle: 'h23',
++      year: 'numeric', month: 'short', day: '2-digit',
++      hour: '2-digit', minute: '2-digit', second: '2-digit'
++    }).formatToParts(date).forEach(function(p){ parts[p.type] = p.value; });
++    return parts;
++  }
++  function stationNow(){
++    var p = stationParts(new Date());
++    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
++    return new Date(Date.UTC(+p.year, months.indexOf(p.month), +p.day, +p.hour, +p.minute, +p.second));
++  }
++  function pad2(n){ return n < 10 ? '0' + n : String(n); }
++  function ordinalSuffix(day){
++    if (day % 10 === 1 && day !== 11) return 'st';
++    if (day % 10 === 2 && day !== 12) return 'nd';
++    if (day % 10 === 3 && day !== 13) return 'rd';
++    return 'th';
++  }
++  var COMPASS = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
++  function bearingLabel(deg){
++    if (typeof deg !== 'number' || isNaN(deg)) return '\u2014';
++    var d = ((deg % 360) + 360) % 360;
++    return Math.round(d) + '\u00b0 ' + COMPASS[Math.round(d / 22.5) % 16];
++  }
++  function dateLabelFor(epochMs){
++    if (!epochMs) return '\u2014';
++    var p = stationParts(new Date(epochMs));
++    return (+p.day) + ordinalSuffix(+p.day) + ' ' + p.month + ' ' + p.hour + ':' + p.minute;
++  }
++
++  var mount = document.getElementById('boltekLightningCard27');
++  if (!mount || !window.d3) return;
++  mount.innerHTML = '';
++  mount.style.position = 'relative';
++  mount.style.display = 'flex';
++  mount.style.flexDirection = 'column';
++
++  mount.style.borderBottom = '0';
++
++  var overlayTextColor = 'var(--bs-body-color)';
++
++  var titleBar = document.createElement('div');
++  titleBar.style.position = 'absolute';
++  titleBar.style.top = '-20px';
++  titleBar.style.left = '0';
++  titleBar.style.right = '0';
++  titleBar.style.height = '20px';
++  titleBar.style.boxSizing = 'border-box';
++  titleBar.style.display = 'flex';
++  titleBar.style.alignItems = 'center';
++  titleBar.style.justifyContent = 'space-between';
++  titleBar.style.gap = '8px';
++  titleBar.style.padding = '0 14px';
++  titleBar.style.fontSize = '9px';
++  titleBar.style.color = overlayTextColor;
++  titleBar.style.background = 'transparent';
++
++  var titleLabel = document.createElement('span');
++  DivumWXI18N.applyLabel(titleLabel, 'Boltek Lightning');
++  titleLabel.style.fontWeight = '600';
++  titleLabel.style.whiteSpace = 'nowrap';
++  titleLabel.style.overflow = 'hidden';
++  titleLabel.style.textOverflow = 'ellipsis';
++
++  var statusWrap = document.createElement('span');
++  statusWrap.style.display = 'flex';
++  statusWrap.style.alignItems = 'center';
++  statusWrap.style.gap = '4px';
++  statusWrap.style.flexShrink = '0';
++  statusWrap.style.opacity = '0.85';
++
++  var statusDot = document.createElement('span');
++  statusDot.style.width = '6px';
++  statusDot.style.height = '6px';
++  statusDot.style.borderRadius = '50%';
++  statusDot.style.background = '#999';
++  statusDot.style.flexShrink = '0';
++
++  var statusTime = document.createElement('span');
++
++  statusWrap.appendChild(statusDot);
++  statusWrap.appendChild(statusTime);
++  titleBar.appendChild(titleLabel);
++  titleBar.appendChild(statusWrap);
++  mount.appendChild(titleBar);
++
++  function setStatus(ok){
++    statusDot.style.background = ok ? '#2ecc71' : '#e74c3c';
++    var t = stationNow();
++    statusTime.textContent = pad2(t.getUTCHours()) + ':' + pad2(t.getUTCMinutes()) + ':' + pad2(t.getUTCSeconds());
++  }
++
++  // ---- 60:40 content split (left: bolt graphic, right: readouts) ----
++  var contentWrap = document.createElement('div');
++  contentWrap.style.height = '175px';
++  contentWrap.style.width = '100%';
++  contentWrap.style.boxSizing = 'border-box';
++  contentWrap.style.overflow = 'hidden';
++  contentWrap.style.display = 'flex';
++  contentWrap.style.alignItems = 'stretch';
++  mount.appendChild(contentWrap);
++
++  var divider = document.createElement('div');
++  divider.style.position = 'absolute';
++  divider.style.left = '60%';
++  divider.style.top = '6px';
++  divider.style.bottom = '6px';
++  divider.style.width = '1px';
++  divider.style.background = 'var(--bs-border-color)';
++  divider.style.pointerEvents = 'none';
++  mount.appendChild(divider);
++
++  var leftPane = document.createElement('div');
++  leftPane.style.flex = '0 0 60%';
++  leftPane.style.width = '60%';
++  leftPane.style.height = '175px';
++  leftPane.style.boxSizing = 'border-box';
++  leftPane.style.overflow = 'hidden';
++  leftPane.style.display = 'flex';
++  leftPane.style.alignItems = 'center';
++  leftPane.style.justifyContent = 'center';
++  contentWrap.appendChild(leftPane);
++
++  var rightPane = document.createElement('div');
++  rightPane.style.flex = '0 0 40%';
++  rightPane.style.width = '40%';
++  rightPane.style.boxSizing = 'border-box';
++  rightPane.style.display = 'flex';
++  rightPane.style.flexDirection = 'column';
++  rightPane.style.justifyContent = 'center';
++  rightPane.style.padding = '0 10px 0 14px';
++  contentWrap.appendChild(rightPane);
++
++  function addChipRow(label, opts){
++    var wrap = opts && opts.wrap;
++    var row = document.createElement('div');
++    row.style.display = 'flex';
++    row.style.flexDirection = 'column';
++    row.style.justifyContent = 'center';
++    row.style.boxSizing = 'border-box';
++    row.style.borderBottom = '1px solid var(--bs-border-color)';
++    if (wrap) {
++      row.style.minHeight = '20px';
++      row.style.padding = '2px 0';
++    } else {
++      row.style.height = '20px';
++      row.style.overflow = 'hidden';
++    }
++
++    var labelEl = document.createElement('span');
++    DivumWXI18N.applyLabel(labelEl, label);
++    labelEl.style.fontSize = '7px';
++    labelEl.style.fontVariantCaps = 'small-caps';
++    labelEl.style.letterSpacing = '.06em';
++    labelEl.style.color = 'var(--bs-body-color)';
++    labelEl.style.opacity = '0.85';
++    row.appendChild(labelEl);
++
++    var valueEl = document.createElement('span');
++    valueEl.style.fontSize = '9.5px';
++    valueEl.style.fontFamily = '"IBM Plex Mono", ui-monospace, monospace';
++    valueEl.style.color = 'var(--bw-accent)';
++    if (wrap) {
++      valueEl.style.whiteSpace = 'normal';
++      valueEl.style.wordBreak = 'break-word';
++      valueEl.style.lineHeight = '1.25';
++    } else {
++      valueEl.style.whiteSpace = 'nowrap';
++      valueEl.style.overflow = 'hidden';
++      valueEl.style.textOverflow = 'ellipsis';
++    }
++    row.appendChild(valueEl);
++
++    rightPane.appendChild(row);
++    return valueEl;
++  }
++
++  var currentText   = addChipRow('Current');
++  var todayText      = addChipRow('Today');
++  var hourText        = addChipRow('Last Hour');
++  var yearText          = addChipRow(String(stationNow().getUTCFullYear()) + ' Total');
++  var alltimeText        = addChipRow('All-Time Total');
++  var lastDetectedText     = addChipRow('Last Detected', { wrap: true });
++  var lastDistanceText      = addChipRow('Last Distance');
++  var bearingText            = addChipRow('Bearing');
++  bearingText.parentElement.style.borderBottom = 'none';
++
++  var cardLink = document.createElement('a');
++  cardLink.className = 'card-whole-link';
++  cardLink.href = 'modalBoltekLightning.html';
++  cardLink.setAttribute('data-modal', 'Boltek Lightning');
++  DivumWXI18N.applyAttr(cardLink, 'data-title', 'Boltek Lightning Chart & Records');
++  cardLink.setAttribute('data-type', 'iframe');
++  cardLink.setAttribute('data-modal-width', '1400px');
++  cardLink.setAttribute('data-modal-height', '820px');
++  cardLink.setAttribute('data-url', 'modalBoltekLightning.html');
++  cardLink.style.position = 'absolute';
++  cardLink.style.top = '-20px';
++  cardLink.style.left = '0';
++  cardLink.style.right = '0';
++  cardLink.style.bottom = '0';
++  cardLink.style.display = 'block';
++  mount.appendChild(cardLink);
++
++  var W = 180, H = 175;
++
++  function midpointPath(startX, startY, endX, endY, displace){
++    if (displace < 2) return [[startX, startY], [endX, endY]];
++    var midX = (startX + endX) / 2 + (Math.random() - 0.5) * displace;
++    var midY = (startY + endY) / 2 + (Math.random() - 0.5) * displace;
++    return midpointPath(startX, startY, midX, midY, displace / 2)
++      .concat(midpointPath(midX, midY, endX, endY, displace / 2));
++  }
++
++  function drawBranch(svg, lineGen, startX, startY, width){
++    var branchEndX = startX + (Math.random() - 0.5) * 36;
++    var branchEndY = startY + Math.random() * 24;
++    var points = midpointPath(startX, startY, branchEndX, branchEndY, 9);
++    svg.append('path').datum(points).attr('d', lineGen)
++      .attr('fill', 'none').attr('stroke', '#6ca6cd').attr('stroke-width', width)
++      .style('opacity', 0.8);
++  }
++
++  function drawStrike(svg, trunkX, trunkTopY, trunkBottomY){
++    var lineGen = d3.line().x(function(d){ return d[0]; }).y(function(d){ return d[1]; });
++    var points = midpointPath(trunkX, trunkTopY, trunkX, trunkBottomY, 18);
++
++    svg.append('path').datum(points).attr('d', lineGen)
++      .attr('fill', 'none').attr('stroke', 'var(--bs-body-color)').attr('stroke-width', 1)
++      .style('filter', 'drop-shadow(0 0 3px #6ca6cd)');
++
++    points.forEach(function(pt, i){
++      if (Math.random() < 0.55 && i > 3 && i < points.length - 3){
++        drawBranch(svg, lineGen, pt[0], pt[1], 0.8);
++      }
++    });
++  }
++
++  function drawGroundGlow(svg, gx, gy){
++    var rings = [
++      { rx: 34, ry: 10, color: '#3b9cac', opacity: 0.35 },
++      { rx: 24, ry: 7,  color: '#2e8b57', opacity: 0.55 },
++      { rx: 13, ry: 4,  color: '#6ca6cd', opacity: 0.85 }
++    ];
++    rings.forEach(function(r){
++      svg.append('ellipse').attr('cx', gx).attr('cy', gy).attr('rx', r.rx).attr('ry', r.ry)
++        .style('fill', 'none').style('stroke', r.color).style('stroke-width', 2).style('opacity', r.opacity);
++    });
++  }
++
++  function renderCard(v){
++    var svgSel = d3.select(leftPane);
++    var svg = svgSel.select('svg');
++    svg.remove();
++    svg = svgSel.append('svg').attr('viewBox', '0 0 ' + W + ' ' + H).attr('width', '100%').attr('height', '100%');
++
++    var trunkX = 90, trunkTopY = 20, trunkBottomY = 130;
++    svg.append('line').attr('x1', trunkX).attr('x2', trunkX).attr('y1', trunkBottomY).attr('y2', trunkBottomY + 18)
++      .style('stroke', '#2e8b57').style('stroke-width', 3).style('stroke-linecap', 'round');
++    drawGroundGlow(svg, trunkX, trunkBottomY + 18);
++    drawStrike(svg, trunkX, trunkTopY, trunkBottomY);
++
++    // ---- Right pane: 8 readouts as label/value chip rows ----
++    currentText.textContent = v.current === null ? '\u2014' : v.current.toLocaleString() + ' /min';
++    todayText.textContent = v.dayStrikes.toLocaleString();
++    hourText.textContent = v.hourStrikes === null ? '\u2014' : v.hourStrikes.toLocaleString();
++    yearText.textContent = v.yearStrikes.toLocaleString();
++    alltimeText.textContent = v.alltimeStrikes.toLocaleString();
++    lastDetectedText.textContent = v.lastDetected;
++    lastDistanceText.textContent = v.lastDistance === null ? '\u2014' : v.lastDistance.toFixed(1) + ' km';
++    bearingText.textContent = bearingLabel(v.bearing);
++  }
++
++  var lastData = null;
++  window.addEventListener('i18nready', function(){
++    if (lastData) renderCard(lastData);
++  });
++  function refresh(){
++    fetch(BOLTEK_JSON_URL + '?_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
++      .then(function(b){
++        var rt = b.realtime || {};
++        var t = b.totals || {};
++        function num(x){ return (typeof x === 'number' && !isNaN(x)) ? x : null; }
++        function count(x){ var n = num(x); return n === null ? 0 : n; }
++
++        lastData = {
++          current: num(rt.strikes_per_minute),     // NexStorm's strikes per minute
++          dayStrikes: count(t.today),
++          hourStrikes: num(rt.strikes_60min),      // NexStorm's own last-60-minutes count
++          yearStrikes: count(t.year),
++          alltimeStrikes: count(t.alltime),
++          lastDetected: dateLabelFor(num(rt.last_strike_time) ? rt.last_strike_time * 1000 : 0),
++          lastDistance: num(rt.last_distance_km),
++          bearing: num(rt.last_bearing),
++          year: stationNow().getUTCFullYear()
++        };
++        renderCard(lastData);
++        // Green only while NexStorm's file is arriving; red when it's missing
++        // or hasn't changed for a while (see stale_after in [BoltekLightning]).
++        setStatus(!b.stale);
++      }).catch(function(e){
++        console.warn('cardBoltekLightning: refresh failed --', e.message);
++        setStatus(false);
++      });
++  }
++  refresh();
++  setInterval(refresh, POLL_MS);
++})();
++} catch (e) {
++  console.error("cardsBundle: cardBoltekLightning.js failed:", e);
++}
+ 
+ /* ===== cardPollen.js ===== */
+ try {
+diff --git a/divumwx/hyperIndex.html b/divumwx/hyperIndex.html
+index d576675..8ca8999 100644
+--- a/divumwx/hyperIndex.html
++++ b/divumwx/hyperIndex.html
+@@ -186,6 +186,7 @@ setInterval(() => {
+   <div id="geocentricCard15" data-card-id="cardGeocentric" class="card" draggable="true"></div>
+   <div id="moonPhaseCard16" data-card-id="cardMoonPhase" class="card" draggable="true"></div>
+   <div id="lightningCard17" data-card-id="cardLightning" class="card" draggable="true"></div>
++  <div id="boltekLightningCard27" data-card-id="cardBoltekLightning" class="card" draggable="true"></div>
+   <div id="pollenCard18" data-card-id="cardPollen" class="card" draggable="true"></div>
+   <div id="greenhouseGasCard19" data-card-id="cardGreenhouseGas" class="card" draggable="true"></div>
+   <div id="airqualityCard20" data-card-id="cardAirquality" class="card" draggable="true"></div>
+@@ -538,6 +539,6 @@ window.addEventListener('load', updateFooterVisibility);
+ <script src="js/d3.7.9.0.min.js"></script>
+ <script src="js/d3-geo-projection.4.0.0.min.js"></script>
+ <script src="js/topojson.3.0.2.min.js"></script>
+-<script src="cardsBundleNew.js?v=f3207917"></script>
++<script src="cardsBundleNew.js?v=703f131b"></script>
+ </body>
+ </html>
+\ No newline at end of file
+diff --git a/divumwx/index.html b/divumwx/index.html
+index 1edf28f..66c3a9b 100644
+--- a/divumwx/index.html
++++ b/divumwx/index.html
+@@ -554,6 +554,7 @@ setInterval(() => {
+   <div id="geocentricCard15" data-card-id="cardGeocentric" class="card" draggable="true"></div>
+   <div id="moonPhaseCard16" data-card-id="cardMoonPhase" class="card" draggable="true"></div>
+   <div id="lightningCard17" data-card-id="cardLightning" class="card" draggable="true"></div>
++  <div id="boltekLightningCard27" data-card-id="cardBoltekLightning" class="card" draggable="true"></div>
+   <div id="pollenCard18" data-card-id="cardPollen" class="card" draggable="true"></div>
+   <div id="greenhouseGasCard19" data-card-id="cardGreenhouseGas" class="card" draggable="true"></div>
+   <div id="airqualityCard20" data-card-id="cardAirquality" class="card" draggable="true"></div>
+@@ -908,6 +909,6 @@ window.addEventListener('load', updateFooterVisibility);
+ <script src="js/d3.7.9.0.min.js"></script>
+ <script src="js/d3-geo-projection.4.0.0.min.js"></script>
+ <script src="js/topojson.3.0.2.min.js"></script>
+-<script src="cardsBundleNew.js?v=f3207917"></script>
++<script src="cardsBundleNew.js?v=703f131b"></script>
+ </body>
+ </html>
+diff --git a/divumwx/lexendIndex.html b/divumwx/lexendIndex.html
+index ac1623c..083b702 100644
+--- a/divumwx/lexendIndex.html
++++ b/divumwx/lexendIndex.html
+@@ -186,6 +186,7 @@ setInterval(() => {
+   <div id="geocentricCard15" data-card-id="cardGeocentric" class="card" draggable="true"></div>
+   <div id="moonPhaseCard16" data-card-id="cardMoonPhase" class="card" draggable="true"></div>
+   <div id="lightningCard17" data-card-id="cardLightning" class="card" draggable="true"></div>
++  <div id="boltekLightningCard27" data-card-id="cardBoltekLightning" class="card" draggable="true"></div>
+   <div id="pollenCard18" data-card-id="cardPollen" class="card" draggable="true"></div>
+   <div id="greenhouseGasCard19" data-card-id="cardGreenhouseGas" class="card" draggable="true"></div>
+   <div id="airqualityCard20" data-card-id="cardAirquality" class="card" draggable="true"></div>
+@@ -538,6 +539,6 @@ window.addEventListener('load', updateFooterVisibility);
+ <script src="js/d3.7.9.0.min.js"></script>
+ <script src="js/d3-geo-projection.4.0.0.min.js"></script>
+ <script src="js/topojson.3.0.2.min.js"></script>
+-<script src="cardsBundleNew.js?v=f3207917"></script>
++<script src="cardsBundleNew.js?v=703f131b"></script>
+ </body>
+ </html>
+\ No newline at end of file
+diff --git a/divumwx/modalBoltekLightning.html b/divumwx/modalBoltekLightning.html
+new file mode 100644
+index 0000000..4229bfe
+--- /dev/null
++++ b/divumwx/modalBoltekLightning.html
+@@ -0,0 +1,573 @@
++<!DOCTYPE html>
++<!--
++##############################################################################################
++# modalBoltekLightning.html version 1.0.0
++#  Copyright (C) 2026 Ian Millard, Sean Balfour
++#  GPLv3
++##############################################################################################
++  Chart & records for a Boltek lightning detector, opened from the Boltek
++  Lightning card. Reads jsondata/boltek_history.json (hourly and daily totals
++  from the Boltek database) and jsondata/boltek.json (NexStorm's live
++  readings), both written by user.divumwx_boltek.BoltekLightningService.
++-->
++<html lang="en">
++<head>
++<meta charset="UTF-8">
++<link rel="preconnect" href="https://fonts.googleapis.com">
++<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
++<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
++<title>Boltek Lightning</title>
++<meta name="viewport" content="width=device-width, initial-scale=1.0">
++<style>
++:root, [data-theme="light"]{
++  --bw-accent:#B45309;
++  --bw-good:#5BBB8A;
++  --bw-danger:#E36B57;
++  --bw-amber:#D97706;
++  --bw-radius:14px;
++  --bw-radius-sm:10px;
++  --bw-shadow:0 1px 2px rgba(0,0,0,0.12), 0 8px 20px -8px rgba(0,0,0,0.25);
++  --bs-body-bg:#EFECE2;
++  --bs-body-color:#1D2C4E;
++  --bs-secondary-color:#5C6672;
++  --bs-card-bg:#FFFFFF;
++  --bs-tertiary-bg:#F4F1E9;
++  --bs-border-color:#C9CFD8;
++  --grid:rgba(29,44,78,0.10);
++  --cg:#E0B400;
++  --ic:#3D8FC4;
++  --other:#9AA3AE;
++  --dist:#E36B57;
++}
++[data-theme="dark"]{
++  --bw-accent:#D3A94C;
++  --bw-good:#5BBB8A;
++  --bw-danger:#E36B57;
++  --bw-amber:#D97706;
++  --bw-shadow:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.5);
++  --bs-body-bg:#0A0F22;
++  --bs-body-color:#E9E4D4;
++  --bs-secondary-color:#8B93B8;
++  --bs-card-bg:#111834;
++  --bs-tertiary-bg:#161F3C;
++  --bs-border-color:#2A3358;
++  --grid:rgba(233,228,212,0.08);
++  --cg:#F7E400;
++  --ic:#6FB6DD;
++  --other:#6B7390;
++  --dist:#E36B57;
++}
++:root[data-season="winter"]{ --bs-body-bg:#e9f2ec; --bs-card-bg:#f4f9f6; }
++:root[data-season="spring"]{ --bs-body-bg:#eef7e3; --bs-card-bg:#f5faef; }
++:root[data-season="summer"]{ --bs-body-bg:#fff6d9; --bs-card-bg:#fffbef; }
++:root[data-season="autumn"]{ --bs-body-bg:#f2e6d8; --bs-card-bg:#f8f0e7; }
++
++*{ box-sizing:border-box; }
++html, body{ margin:0; padding:0; }
++body{
++  background:var(--bs-body-bg);
++  color:var(--bs-body-color);
++  font-family:'Lexend', 'Helvetica Neue', Helvetica, Arial, sans-serif;
++  font-size:13.5px;
++  line-height:1.5;
++}
++.bk-page{ padding:12px 16px 16px; max-width:1400px; margin:0 auto; }
++
++/* ---- Live strip ---- */
++.bk-live{
++  display:grid; grid-template-columns:repeat(auto-fit, minmax(104px, 1fr)); gap:8px;
++  margin-bottom:12px;
++}
++.bk-chip{
++  background:var(--bs-card-bg); border:1px solid var(--bs-border-color);
++  border-radius:var(--bw-radius-sm); padding:6px 10px; min-width:0;
++}
++.bk-chip-label{
++  font-size:10px; font-variant-caps:small-caps; letter-spacing:.05em;
++  color:var(--bs-secondary-color); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
++}
++.bk-chip-value{
++  font-size:14px; font-weight:600; color:var(--bw-accent); white-space:nowrap;
++  overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center; gap:6px;
++}
++.bk-chip-sub{ font-size:10px; color:var(--bs-secondary-color); font-weight:400; }
++.bk-dot{ width:8px; height:8px; border-radius:50%; flex-shrink:0; background:#999; }
++.bk-dot.clear{ background:var(--bw-good); }
++.bk-dot.caution{ background:var(--bw-amber); }
++.bk-dot.high{ background:var(--bw-danger); animation:bkPulse 1.2s ease-in-out infinite; }
++@keyframes bkPulse{ 0%,100%{ opacity:1; } 50%{ opacity:.35; } }
++
++/* ---- Chart card ---- */
++.bk-card{
++  background:var(--bs-card-bg); border:1px solid var(--bs-border-color);
++  border-radius:var(--bw-radius); box-shadow:var(--bw-shadow); padding:14px 16px;
++}
++.bk-toolbar{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:6px; }
++.bk-tfs{ display:flex; gap:6px; flex-wrap:wrap; }
++.bk-tf{
++  font-family:inherit; font-size:12px; font-weight:700; padding:6px 14px; border-radius:999px;
++  border:1px solid var(--bs-border-color); background:var(--bs-tertiary-bg);
++  color:var(--bs-body-color); cursor:pointer;
++}
++.bk-tf:hover:not(.active){ border-color:var(--bw-accent); color:var(--bw-accent); }
++.bk-tf.active{ background:var(--bw-accent); border-color:var(--bw-accent); color:#fff; }
++select.bk-tf{ padding-right:8px; }
++.bk-info{ font-size:11px; color:var(--bs-secondary-color); font-style:italic; }
++.bk-legend{ display:flex; gap:14px; flex-wrap:wrap; font-size:12px; margin:6px 0 2px; }
++.bk-leg{ display:flex; align-items:center; gap:5px; cursor:pointer; user-select:none; }
++.bk-leg.off{ opacity:.35; }
++.bk-sw{ width:11px; height:11px; border-radius:2px; }
++.bk-chart{ position:relative; width:100%; height:340px; }
++.bk-chart svg{ display:block; width:100%; height:100%; }
++.bk-chart .axis text{ fill:var(--bs-secondary-color); font-size:10.5px; font-family:inherit; }
++.bk-chart .axis path, .bk-chart .axis line{ stroke:var(--bs-border-color); }
++.bk-chart .grid line{ stroke:var(--grid); }
++.bk-chart .grid path{ display:none; }
++.bk-empty{
++  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
++  color:var(--bs-secondary-color); text-align:center; padding:20px; pointer-events:none;
++}
++.bk-tip{
++  position:absolute; pointer-events:none; z-index:5; display:none;
++  background:var(--bs-tertiary-bg); color:var(--bs-body-color); border:1px solid var(--bs-border-color);
++  border-radius:8px; padding:7px 10px; font-size:11.5px; line-height:1.45; box-shadow:var(--bw-shadow);
++  white-space:nowrap;
++}
++.bk-tip b{ font-weight:600; }
++.bk-note{ font-size:11.5px; font-style:italic; color:var(--bs-secondary-color); margin-top:8px; }
++
++/* ---- Records ---- */
++.bk-records-title{ font-size:18px; font-weight:700; margin:20px 0 10px; }
++.bk-records{ display:grid; grid-template-columns:repeat(5, 1fr); gap:12px; }
++.bk-period{
++  background:var(--bs-card-bg); border:1px solid var(--bs-border-color);
++  border-radius:12px; padding:14px 10px; text-align:center;
++}
++.bk-period-label{
++  font-size:12px; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
++  color:var(--bs-secondary-color); margin-bottom:10px; padding-bottom:8px;
++  border-bottom:1px solid var(--bs-border-color);
++}
++.bk-tiles{ display:flex; flex-direction:column; gap:12px; }
++.bk-tile-label{ font-size:12px; color:var(--bs-secondary-color); margin-bottom:2px; }
++.bk-tile-value{ font-size:19px; font-weight:600; line-height:1.15; }
++.bk-tile-sub{ font-size:11px; color:var(--bs-secondary-color); margin-top:2px; }
++.bk-tile-sub .cg{ color:var(--cg); font-weight:600; }
++.bk-tile-sub .ic{ color:var(--ic); font-weight:600; }
++@media (max-width:900px){ .bk-records{ grid-template-columns:repeat(3, 1fr); } }
++@media (max-width:600px){ .bk-records{ grid-template-columns:repeat(2, 1fr); } .bk-chart{ height:280px; } }
++</style>
++</head>
++<body>
++<div class="bk-page">
++
++  <div class="bk-live" id="bkLive"></div>
++
++  <div class="bk-card">
++    <div class="bk-toolbar">
++      <div class="bk-tfs" id="bkTfs">
++        <button class="bk-tf active" data-tf="day">24hr</button>
++        <button class="bk-tf" data-tf="week">Week</button>
++        <button class="bk-tf" data-tf="month">Month</button>
++        <button class="bk-tf" data-tf="year">Year</button>
++        <select class="bk-tf" id="bkYear" title="Historical year"></select>
++      </div>
++      <span class="bk-info" id="bkInfo">Loading&hellip;</span>
++    </div>
++    <div class="bk-legend" id="bkLegend"></div>
++    <div class="bk-chart" id="bkChart">
++      <div class="bk-empty" id="bkEmpty"></div>
++      <div class="bk-tip" id="bkTip"></div>
++    </div>
++    <div class="bk-note" id="bkNote">Boltek strikes split into cloud-to-ground (CG) and in-cloud (IC) (bars), with the closest strike (line, right axis). Distance bands: &lt;5km very close (&#9889; danger), 5&ndash;10km close, 10&ndash;20km moderate, &gt;20km far.</div>
++  </div>
++
++  <div class="bk-records-title">Records</div>
++  <div class="bk-records" id="bkRecords"></div>
++
++</div>
++
++<script src="js/d3.7.9.0.min.js"></script>
++<script src="units.js"></script>
++<script src="stationTime.js"></script>
++<script>
++(function(){
++  var started = false;   // set once everything below is ready
++
++  // ---- Theme (follows the dashboard, else the stored/OS preference) ----
++  function fromParentTheme(){
++    try {
++      var b = window.parent && window.parent.document && window.parent.document.body;
++      if (b && (b.classList.contains('dark') || b.classList.contains('light'))) {
++        return b.classList.contains('dark') ? 'dark' : 'light';
++      }
++    } catch (e) {}
++    return null;
++  }
++  function applyTheme(){
++    var resolved = fromParentTheme();
++    if (!resolved) {
++      var mode = 'auto';
++      try { mode = localStorage.getItem('dashboardThemeMode') || 'auto'; } catch (e) {}
++      resolved = mode === 'light' ? 'light' : mode === 'dark' ? 'dark'
++        : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
++    }
++    if (document.documentElement.getAttribute('data-theme') !== resolved) {
++      document.documentElement.setAttribute('data-theme', resolved);
++      if (started) render();   // colours come from CSS variables, so redraw
++    }
++  }
++  function applySeason(){
++    try {
++      var b = window.parent && window.parent.document && window.parent.document.body;
++      var m = b && /season-(winter|spring|summer|autumn)/.exec(b.className);
++      if (m) document.documentElement.setAttribute('data-season', m[1]);
++      else document.documentElement.removeAttribute('data-season');
++    } catch (e) {}
++  }
++  applyTheme(); applySeason();
++  window.addEventListener('storage', function(e){ if (e.key === 'dashboardThemeMode') applyTheme(); });
++  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
++  try {
++    var pb = window.parent && window.parent.document && window.parent.document.body;
++    if (pb) new MutationObserver(function(){ applyTheme(); applySeason(); })
++      .observe(pb, { attributes: true, attributeFilter: ['class'] });
++  } catch (e) {}
++
++  // ---- Config ----
++  var HISTORY_URL = './jsondata/boltek_history.json';
++  var LIVE_URL = './jsondata/boltek.json';
++  var HISTORY_POLL_MS = 5 * 60 * 1000;
++  var LIVE_POLL_MS = 15 * 1000;
++  var COL = { start: 0, strikes: 1, cg: 2, ic: 3, closest: 4, rate: 5 };
++  var DIST_BANDS = [[0, 5, '#D8001D'], [5, 10, '#E36B57'], [10, 20, '#D6BE4E'], [20, 9999, '#5BBB8A']];
++  // Storm tendency codes aren't documented in the file; these are the usual
++  // NexStorm meanings. Unknown codes are shown as the number.
++  var TENDENCY = { 0: 'Steady', 1: 'Approaching', 2: 'Receding' };
++
++  var history = null, live = null, tf = 'day', year = null;
++  var hidden = {};
++
++  // ---- Units: distances follow the dashboard's unit system ----
++  function distUnit(){
++    try {
++      var key = localStorage.getItem('dashboardUnitSystem') || 'uk';
++      if (typeof SYSTEMS !== 'undefined' && SYSTEMS[key]) return SYSTEMS[key].dist;
++    } catch (e) {}
++    return 'km';
++  }
++  function kmTo(v, u){ return u === 'mi' ? v * 0.621371 : u === 'nm' ? v * 0.539957 : v; }
++  function fmtDist(km){
++    if (km == null) return '—';
++    var u = distUnit();
++    return kmTo(km, u).toFixed(1) + ' ' + u;
++  }
++  window.addEventListener('storage', function(e){ if (e.key === 'dashboardUnitSystem') { render(); renderLive(); } });
++
++  // ---- Station-time formatting ----
++  function tz(){ try { return StationTime.getTZ(); } catch (e) { return undefined; } }
++  function fmt(ms, opts){ return new Intl.DateTimeFormat('en-GB', Object.assign({ timeZone: tz() }, opts)).format(new Date(ms)); }
++  function fmtHour(ms){ return fmt(ms, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }); }
++  function fmtDay(ms){ return fmt(ms, { day: 'numeric', month: 'short', year: 'numeric' }); }
++  function fmtDayShort(ms){ return fmt(ms, { day: 'numeric', month: 'short' }); }
++  function fmtTime(sec){ return sec ? fmt(sec * 1000, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }) : '—'; }
++  function n(v){ return v == null ? '—' : Number(v).toLocaleString(); }
++
++  // ---- Buckets for the chosen period (gaps filled with zeros) ----
++  // History rows start at the station's local hours/days. They're matched
++  // by station-local date (and hour), not raw times, so this works for a
++  // visitor whose browser is in another time zone.
++  function dayKey(ms){ return fmt(ms, { year: 'numeric', month: '2-digit', day: '2-digit' }); }
++  function hourKey(ms){ return dayKey(ms) + ' ' + fmt(ms, { hour: '2-digit', hourCycle: 'h23' }); }
++  function stationYear(ms){ return +fmt(ms, { year: 'numeric' }); }
++  function fill(rows, times, keyOf){
++    var byKey = {};
++    (rows || []).forEach(function(r){ byKey[keyOf(r[COL.start])] = r; });
++    var seen = {}, out = [];
++    times.forEach(function(t){
++      var k = keyOf(t);
++      if (seen[k]) return;
++      seen[k] = 1;
++      out.push(byKey[k] || [t, 0, 0, 0, null, null]);
++    });
++    return out;
++  }
++  function hourlyLast(hours){
++    var hourStart = Math.floor(Date.now() / 3600000) * 3600000, times = [];
++    for (var i = hours - 1; i >= 0; i--) times.push(hourStart - i * 3600000);
++    return fill(history && history.hourly, times, hourKey);
++  }
++  function dailyLast(days){
++    var now = Date.now(), times = [];
++    for (var i = days - 1; i >= 0; i--) times.push(now - i * 86400000);
++    return fill(history && history.daily, times, dayKey);
++  }
++  function dailyYear(y){
++    // Midday UTC lands on the same calendar date in almost every time zone.
++    var times = [], t = Date.UTC(y, 0, 1, 12), stop = Math.min(Date.UTC(y + 1, 0, 1, 12), Date.now());
++    for (; t < stop; t += 86400000) times.push(t);
++    return fill(history && history.daily, times, dayKey);
++  }
++  function rowsFor(key){
++    if (key === 'day') return hourlyLast(24);
++    if (key === 'week') return dailyLast(7);
++    if (key === 'month') return dailyLast(30);
++    if (key === 'year') return year ? dailyYear(year) : dailyLast(365);
++    if (key === 'alltime') return (history && history.daily) || [];
++    return [];
++  }
++
++  // ---- Live strip ----
++  function chip(label, value, sub, dotClass){
++    return '<div class="bk-chip"><div class="bk-chip-label">' + label + '</div><div class="bk-chip-value">' +
++      (dotClass ? '<span class="bk-dot ' + dotClass + '"></span>' : '') + value +
++      (sub ? ' <span class="bk-chip-sub">' + sub + '</span>' : '') + '</div></div>';
++  }
++  function renderLive(){
++    var el = document.getElementById('bkLive');
++    var r = (live && live.realtime) || {};
++    var alarmClass = { 0: 'clear', 1: 'caution', 2: 'high' }[r.alarm];
++    var tendency = r.tendency == null ? '—' : (TENDENCY[r.tendency] || 'Code ' + r.tendency);
++    var status = !live ? 'No data' : live.stale ? 'Not updating' : 'Live';
++    el.innerHTML = [
++      chip('Status', status, live && live.file_time ? fmtHour(live.file_time * 1000) : '', !live ? '' : live.stale ? 'high' : 'clear'),
++      chip('Alarm', r.alarm_label || '—', '', alarmClass),
++      chip('Storm', tendency),
++      chip('Rate', r.strikes_per_minute == null ? '—' : r.strikes_per_minute, '/min'),
++      chip('Last 5/15 min', n(r.strikes_5min) + ' / ' + n(r.strikes_15min)),
++      chip('Last 30/60 min', n(r.strikes_30min) + ' / ' + n(r.strikes_60min)),
++      chip('Avg Distance', fmtDist(r.avg_distance_km)),
++      chip('Peak Rate', r.peak_rate == null ? '—' : r.peak_rate + '/min', r.peak_rate_time ? fmtHour(r.peak_rate_time * 1000) : ''),
++      chip('Session CG / IC', n(r.cg_total) + ' / ' + n(r.ic_total)),
++      chip('Close Strikes', n(r.close_count)),
++      chip('Noise', n(r.noise_count)),
++      chip('Sensor', r.hardware_status || '—')
++    ].join('');
++  }
++
++  // ---- Chart ----
++  var chartEl = document.getElementById('bkChart');
++  var tipEl = document.getElementById('bkTip');
++  var emptyEl = document.getElementById('bkEmpty');
++  function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
++
++  function renderLegend(rows){
++    var hasOther = rows.some(function(r){ return r[COL.strikes] - r[COL.cg] - r[COL.ic] > 0; });
++    var items = [['cg', 'CG (cloud-to-ground)', '--cg'], ['ic', 'IC (in-cloud)', '--ic']];
++    if (hasOther) items.push(['other', 'Other', '--other']);
++    items.push(['dist', 'Closest strike', '--dist']);
++    var el = document.getElementById('bkLegend');
++    el.innerHTML = items.map(function(it){
++      return '<span class="bk-leg' + (hidden[it[0]] ? ' off' : '') + '" data-key="' + it[0] + '"><span class="bk-sw" style="background:' +
++        cssVar(it[2]) + '"></span>' + it[1] + '</span>';
++    }).join('');
++  }
++  document.getElementById('bkLegend').addEventListener('click', function(e){
++    var it = e.target.closest('.bk-leg'); if (!it) return;
++    var k = it.getAttribute('data-key'); hidden[k] = !hidden[k]; render();
++  });
++
++  function render(){
++    if (!window.d3) return;
++    var rows = rowsFor(tf);
++    renderLegend(rows);
++    renderRecords();
++    d3.select(chartEl).select('svg').remove();
++    var anyStrikes = rows.some(function(r){ return r[COL.strikes] > 0; });
++    emptyEl.textContent = !history ? 'Waiting for the Boltek history…'
++      : anyStrikes ? '' : 'No strikes recorded in this period.';
++    emptyEl.style.display = emptyEl.textContent ? 'flex' : 'none';
++
++    var W = chartEl.clientWidth || 900, H = chartEl.clientHeight || 340;
++    var M = { top: 18, right: 46, bottom: 26, left: 42 };
++    var iw = W - M.left - M.right, ih = H - M.top - M.bottom;
++    var svg = d3.select(chartEl).insert('svg', ':first-child').attr('viewBox', '0 0 ' + W + ' ' + H);
++    var g = svg.append('g').attr('transform', 'translate(' + M.left + ',' + M.top + ')');
++    var u = distUnit();
++
++    var x = d3.scaleBand().domain(rows.map(function(r){ return r[COL.start]; })).range([0, iw]).paddingInner(rows.length > 60 ? 0.05 : 0.2);
++    var stackKeys = ['cg', 'ic', 'other'].filter(function(k){ return !hidden[k]; });
++    function part(r, k){ return k === 'cg' ? r[COL.cg] : k === 'ic' ? r[COL.ic] : Math.max(0, r[COL.strikes] - r[COL.cg] - r[COL.ic]); }
++    var maxCount = d3.max(rows, function(r){ return d3.sum(stackKeys, function(k){ return part(r, k); }); }) || 0;
++    var y = d3.scaleLinear().domain([0, Math.max(5, maxCount)]).nice().range([ih, 0]);
++    var dists = rows.map(function(r){ return r[COL.closest] == null ? null : kmTo(r[COL.closest], u); });
++    var maxDist = d3.max(dists) || 0;
++    var y2 = d3.scaleLinear().domain([0, Math.max(kmTo(30, u), maxDist * 1.1)]).nice().range([ih, 0]);
++
++    // Distance bands behind everything (right-axis scale)
++    if (!hidden.dist) {
++      DIST_BANDS.forEach(function(b){
++        var lo = kmTo(b[0], u), hi = Math.min(kmTo(b[1], u), y2.domain()[1]);
++        if (lo >= y2.domain()[1]) return;
++        g.append('rect').attr('x', 0).attr('width', iw).attr('y', y2(hi)).attr('height', y2(lo) - y2(hi))
++          .attr('fill', b[2]).attr('opacity', 0.07);
++      });
++    }
++    g.append('g').attr('class', 'grid').call(d3.axisLeft(y).ticks(6).tickSize(-iw).tickFormat(''));
++
++    // Axes
++    var every = tf === 'day' ? 3 : tf === 'week' ? 1 : tf === 'month' ? 5 : 30;
++    var domain = x.domain();
++    var tickVals = tf === 'year' || tf === 'alltime'
++      ? domain.filter(function(s){ return fmt(s, { day: 'numeric' }) === '1'; })
++      : domain.filter(function(s, i){ return (domain.length - 1 - i) % every === 0; });
++    var tickFmt = tf === 'day' ? fmtHour
++      : (tf === 'year' || tf === 'alltime') ? function(s){ return fmt(s, { month: 'short' }); }
++      : tf === 'week' ? function(s){ return fmt(s, { weekday: 'short', day: 'numeric' }); } : fmtDayShort;
++    g.append('g').attr('class', 'axis').attr('transform', 'translate(0,' + ih + ')')
++      .call(d3.axisBottom(x).tickValues(tickVals).tickFormat(tickFmt).tickSizeOuter(0));
++    g.append('g').attr('class', 'axis').call(d3.axisLeft(y).ticks(6).tickFormat(d3.format('~s')));
++    var yr = g.append('g').attr('class', 'axis').attr('transform', 'translate(' + iw + ',0)').call(d3.axisRight(y2).ticks(6));
++    g.append('text').attr('x', -M.left + 4).attr('y', -6).attr('fill', cssVar('--bs-secondary-color')).attr('font-size', 10.5).text('(strikes)');
++    g.append('text').attr('x', iw + M.right - 4).attr('y', -6).attr('text-anchor', 'end').attr('fill', cssVar('--bs-secondary-color')).attr('font-size', 10.5).text('(' + u + ')');
++    if (hidden.dist) yr.style('opacity', 0.3);
++
++    // Stacked bars
++    var colors = { cg: cssVar('--cg'), ic: cssVar('--ic'), other: cssVar('--other') };
++    var stack = d3.stack().keys(stackKeys).value(function(r, k){ return part(r, k); })(rows);
++    g.append('g').selectAll('g').data(stack).join('g').attr('class', function(s){ return 'bk-stack bk-stack-' + s.key; })
++      .attr('fill', function(s){ return colors[s.key]; })
++      .selectAll('rect').data(function(s){ return s; }).join('rect')
++      .attr('x', function(d){ return x(d.data[COL.start]); }).attr('width', x.bandwidth())
++      .attr('y', function(d){ return y(d[1]); }).attr('height', function(d){ return Math.max(0, y(d[0]) - y(d[1])); })
++      .attr('rx', x.bandwidth() > 6 ? 2 : 0);
++
++    // Closest-strike line + area (only where strikes happened)
++    if (!hidden.dist) {
++      var pts = rows.map(function(r, i){ return { x: x(r[COL.start]) + x.bandwidth() / 2, v: dists[i] }; });
++      var defined = function(p){ return p.v != null; };
++      var distColor = cssVar('--dist');
++      g.append('path').datum(pts).attr('fill', distColor).attr('opacity', 0.12)
++        .attr('d', d3.area().defined(defined).x(function(p){ return p.x; }).y0(ih).y1(function(p){ return y2(p.v); }).curve(d3.curveMonotoneX));
++      g.append('path').datum(pts).attr('fill', 'none').attr('stroke', distColor).attr('stroke-width', 2)
++        .attr('d', d3.line().defined(defined).x(function(p){ return p.x; }).y(function(p){ return y2(p.v); }).curve(d3.curveMonotoneX));
++      g.append('g').selectAll('circle').data(pts.filter(defined)).join('circle')
++        .attr('cx', function(p){ return p.x; }).attr('cy', function(p){ return y2(p.v); })
++        .attr('r', rows.length > 60 ? 1.5 : 3).attr('fill', distColor);
++    }
++
++    // Hover
++    var hover = g.append('rect').attr('fill', cssVar('--bs-body-color')).attr('opacity', 0).attr('y', 0).attr('height', ih).attr('width', x.bandwidth());
++    g.append('rect').attr('width', iw).attr('height', ih).attr('fill', 'transparent')
++      .on('mousemove', function(ev){
++        var mx = d3.pointer(ev)[0];
++        var i = Math.max(0, Math.min(rows.length - 1, Math.floor(mx / (iw / rows.length))));
++        var r = rows[i];
++        hover.attr('x', x(r[COL.start])).attr('opacity', 0.06);
++        var when = tf === 'day' ? fmt(r[COL.start], { weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }) : fmtDay(r[COL.start]);
++        tipEl.innerHTML = '<b>' + when + '</b><br>' +
++          '<span style="color:' + colors.cg + '">&#9632;</span> CG: <b>' + n(r[COL.cg]) + '</b> &nbsp; ' +
++          '<span style="color:' + colors.ic + '">&#9632;</span> IC: <b>' + n(r[COL.ic]) + '</b><br>' +
++          'Total: <b>' + n(r[COL.strikes]) + '</b><br>' +
++          'Closest: <b>' + fmtDist(r[COL.closest]) + '</b><br>' +
++          'Highest rate: <b>' + (r[COL.rate] == null ? '—' : r[COL.rate] + '/min') + '</b>';
++        tipEl.style.display = 'block';
++        var px = M.left + x(r[COL.start]) + x.bandwidth() / 2, tw = tipEl.offsetWidth;
++        tipEl.style.left = Math.max(4, Math.min(W - tw - 4, px + 12)) + 'px';
++        tipEl.style.top = (M.top + 8) + 'px';
++      })
++      .on('mouseleave', function(){ hover.attr('opacity', 0); tipEl.style.display = 'none'; });
++  }
++
++  // ---- Records ----
++  function best(rows, col, cmp){
++    var b = null;
++    rows.forEach(function(r){ if (r[col] != null && (col !== COL.strikes || r[col] > 0) && (b === null || cmp(r[col], b[col]))) b = r; });
++    return b;
++  }
++  function renderRecords(){
++    var periods = [['day', '24hr'], ['week', 'Week'], ['month', 'Month'], ['year', 'Year'], ['alltime', 'All-time']];
++    var el = document.getElementById('bkRecords');
++    el.innerHTML = periods.map(function(p){
++      var rows = p[0] === 'year' ? dailyLast(365) : rowsFor(p[0]);
++      var hourly = p[0] === 'day';
++      var total = d3.sum(rows, function(r){ return r[COL.strikes]; });
++      var cg = d3.sum(rows, function(r){ return r[COL.cg]; }), ic = d3.sum(rows, function(r){ return r[COL.ic]; });
++      var busiest = best(rows, COL.strikes, function(a, b){ return a > b; });
++      var closest = best(rows, COL.closest, function(a, b){ return a < b; });
++      var rate = best(rows, COL.rate, function(a, b){ return a > b; });
++      var when = function(r){ return r ? (hourly ? fmt(r[COL.start], { weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }) : fmtDay(r[COL.start])) : ''; };
++      function tile(label, value, sub){
++        return '<div><div class="bk-tile-label">' + label + '</div><div class="bk-tile-value">' + value + '</div>' +
++          (sub ? '<div class="bk-tile-sub">' + sub + '</div>' : '') + '</div>';
++      }
++      return '<div class="bk-period"><div class="bk-period-label">' + p[1] + '</div><div class="bk-tiles">' +
++        tile('Total Strikes', history ? n(total) : '--', history ? '<span class="cg">CG ' + n(cg) + '</span> &middot; <span class="ic">IC ' + n(ic) + '</span>' : '') +
++        tile(hourly ? 'Busiest Hour' : 'Busiest Day', busiest ? n(busiest[COL.strikes]) : '--', when(busiest)) +
++        tile('Closest Strike', closest ? fmtDist(closest[COL.closest]) : '--', when(closest)) +
++        tile('Highest Rate', rate ? rate[COL.rate] + '/min' : '--', when(rate)) +
++        '</div></div>';
++    }).join('');
++    reportSize();
++  }
++
++  // ---- Toolbar ----
++  var tfsEl = document.getElementById('bkTfs');
++  var yearEl = document.getElementById('bkYear');
++  function populateYears(){
++    var years = {};
++    ((history && history.daily) || []).forEach(function(r){ years[stationYear(r[COL.start])] = 1; });
++    var list = Object.keys(years).map(Number).sort(function(a, b){ return b - a; });
++    if (!list.length) list = [stationYear(Date.now())];
++    var keep = year;
++    yearEl.innerHTML = '<option value="">Year&hellip;</option>' + list.map(function(y){ return '<option value="' + y + '">' + y + '</option>'; }).join('');
++    yearEl.value = keep ? String(keep) : '';
++  }
++  tfsEl.addEventListener('click', function(e){
++    var b = e.target.closest('button.bk-tf'); if (!b) return;
++    tf = b.getAttribute('data-tf'); year = null; yearEl.value = '';
++    Array.prototype.forEach.call(tfsEl.querySelectorAll('button.bk-tf'), function(x){ x.classList.toggle('active', x === b); });
++    yearEl.classList.remove('active');
++    render();
++  });
++  yearEl.addEventListener('change', function(){
++    if (!yearEl.value) return;
++    year = +yearEl.value; tf = 'year';
++    Array.prototype.forEach.call(tfsEl.querySelectorAll('button.bk-tf'), function(x){ x.classList.remove('active'); });
++    yearEl.classList.add('active');
++    render();
++  });
++
++  // ---- Data ----
++  function getJson(url){
++    return fetch(url + '?_=' + Date.now(), { cache: 'no-store' }).then(function(r){
++      if (!r.ok) throw new Error('HTTP ' + r.status); return r.json();
++    });
++  }
++  function loadHistory(){
++    getJson(HISTORY_URL).then(function(h){
++      history = h;
++      document.getElementById('bkInfo').textContent = 'Boltek database — updated ' + fmtHour(h.generated * 1000);
++      populateYears(); render();
++    }).catch(function(e){
++      console.warn('modalBoltekLightning: history fetch failed —', e.message);
++      document.getElementById('bkInfo').textContent = 'Boltek history unavailable';
++      render();
++    });
++  }
++  function loadLive(){
++    getJson(LIVE_URL).then(function(j){ live = j; renderLive(); })
++      .catch(function(){ live = null; renderLive(); });
++  }
++  started = true;
++  renderLive();
++  loadHistory(); loadLive();
++  setInterval(loadHistory, HISTORY_POLL_MS);
++  setInterval(loadLive, LIVE_POLL_MS);
++  window.addEventListener('stationtimeready', function(){ render(); renderLive(); });
++  var resizeTimer = null;
++  window.addEventListener('resize', function(){ clearTimeout(resizeTimer); resizeTimer = setTimeout(render, 150); });
++
++  // ---- Size reporting to the dashboard's modal box ----
++  function reportSize(){
++    if (window.parent === window) return;
++    window.parent.postMessage({ type: 'chartModalContentHeight', height: document.body.scrollHeight }, '*');
++  }
++  if (window.parent !== window) {
++    new ResizeObserver(reportSize).observe(document.body);
++    window.addEventListener('load', reportSize);
++  }
++})();
++</script>
++</body>
++</html>
+diff --git a/divumwx_uninstall_helper.py b/divumwx_uninstall_helper.py
+index 5f6dfb8..b34db34 100644
+--- a/divumwx_uninstall_helper.py
++++ b/divumwx_uninstall_helper.py
+@@ -158,6 +158,16 @@ DIVUMWX_OWNED_TOP_LEVEL_SECTIONS = [
+     'WeatherAPI',
+     'Timelapse',
+     'SkyfieldLoopData',
++    'BoltekLightning',
++]
++
++# Named subsections DivumWX's install.py adds under shared WeeWX sections.
++# Only these exact entries are removed; the sections themselves stay. The
++# Boltek database file (divumwx_boltek.sdb) is left on disk -- it holds
++# your strike history; delete it by hand if you don't want it.
++DIVUMWX_OWNED_SUBSECTIONS = [
++    ('DataBindings', 'boltek_binding'),
++    ('Databases', 'boltek_sqlite'),
+ ]
+ 
+ # [StdReport][[...]] subsections written entirely by DivumWX.
+@@ -276,6 +286,11 @@ def strip_owned_sections(cfg, dry_run):
+             removed.append(f'StdReport.{name}')
+             if not dry_run:
+                 del cfg['StdReport'][name]
++    for parent, name in DIVUMWX_OWNED_SUBSECTIONS:
++        if name in cfg.get(parent, {}):
++            removed.append(f'{parent}.{name}')
++            if not dry_run:
++                del cfg[parent][name]
+ 
+     if removed:
+         prefix = '[dry-run] Would remove' if dry_run else 'Removed'
+diff --git a/install.py b/install.py
+index 7f806b9..c588dd4 100644
+--- a/install.py
++++ b/install.py
+@@ -1842,6 +1842,13 @@ DIVUMWX_OPTIONAL_CARDS_ORDER = [
+     'cardVapourPressureDeficit', 'cardEvapoTranspiration', 'cardWebcam', 'cardStationImage',
+ ]
+ 
++# The lightning slot holds one card, depending on the detector: anyone who
++# includes cardLightning is then asked whether it's a Boltek (NexStorm), and
++# if so gets cardBoltekLightning in its place. The answer is kept as
++# [DivumWXCards] lightning_detector = boltek | other.
++DIVUMWX_LIGHTNING_CARDS = {'other': 'cardLightning', 'boltek': 'cardBoltekLightning'}
++DIVUMWX_BOLTEK_QUESTION = "Is your lightning detector a Boltek (NexStorm)? (y/n) "
++
+ DIVUMWX_CARD_TARGET_TOTAL = 26  # theoretical max (8 mandatory + 8 automatic + 2 rain "both" + 8 optional) -- every optional card now always gets asked about
+ 
+ DIVUMWX_WEBCAM_DEFAULT_TITLE = 'Webcam'
+@@ -1867,10 +1874,53 @@ def compute_enabled_cards(rain_choice, optional_selected):
+     cards += DIVUMWX_NO_SENSOR_OPTIONAL_CARDS
+     cards += DIVUMWX_RAIN_CARD_CHOICES.get(rain_choice, [])
+     selected_set = set(optional_selected or [])
+-    cards += [c for c in DIVUMWX_OPTIONAL_CARDS_ORDER if c in selected_set]
++    for c in DIVUMWX_OPTIONAL_CARDS_ORDER:
++        if c == DIVUMWX_LIGHTNING_CARDS['other'] and DIVUMWX_LIGHTNING_CARDS['boltek'] in selected_set:
++            cards.append(DIVUMWX_LIGHTNING_CARDS['boltek'])   # Boltek card in the lightning slot
++        elif c in selected_set:
++            cards.append(c)
+     return cards, len(cards)
+ 
+ 
++def set_lightning_detector(cfg, detector):
++    """Put the card for `detector` ('boltek' or 'other') in the lightning
++    slot of [DivumWXCards] enabled_cards, in place of the other one, and
++    record the answer. Returns True if enabled_cards changed."""
++    dc = cfg.setdefault('DivumWXCards', {})
++    dc['lightning_detector'] = detector
++    cards = dc.get('enabled_cards')
++    if not cards:
++        return False
++    cards = [cards] if isinstance(cards, str) else list(cards)
++    want = DIVUMWX_LIGHTNING_CARDS[detector]
++    other = [c for c in DIVUMWX_LIGHTNING_CARDS.values() if c != want]
++    new = []
++    for c in cards:
++        c = want if c in other else c
++        if c not in new:
++            new.append(c)
++    dc['enabled_cards'] = new
++    return new != cards
++
++
++def ask_lightning_detector_once(cfg, ask):
++    """Upgrades: card questions are only asked on a first install, so an
++    install from before the Boltek card existed is asked about its
++    detector once -- only if it shows a lightning card and hasn't answered
++    before. `ask` returns True for yes. Returns the detector chosen, or None
++    if nothing was asked."""
++    dc = cfg.get('DivumWXCards', {})
++    if dc.get('lightning_detector'):
++        return None
++    cards = dc.get('enabled_cards') or []
++    cards = [cards] if isinstance(cards, str) else list(cards)
++    if not any(c in cards for c in DIVUMWX_LIGHTNING_CARDS.values()):
++        return None
++    detector = 'boltek' if ask() else 'other'
++    set_lightning_detector(cfg, detector)
++    return detector
++
++
+ def apply_new_default_cards(cfg):
+     """Add DIVUMWX_NEW_DEFAULT_CARDS to an existing [DivumWXCards]
+     enabled_cards, each at most once per install (tracked in
+@@ -1936,8 +1986,9 @@ def apply_divumwx_cards_merge(cfg, rain_choice=None, optional_selected=None,
+         effective_rain_choice = dc.get('rain_sensor')
+         if effective_rain_choice:
+             optional_selected = optional_selected or []
+-            invalid = [c for c in optional_selected if c not in DIVUMWX_OPTIONAL_CARDS_ORDER]
+-            valid_selected = [c for c in optional_selected if c in DIVUMWX_OPTIONAL_CARDS_ORDER]
++            known = DIVUMWX_OPTIONAL_CARDS_ORDER + [DIVUMWX_LIGHTNING_CARDS['boltek']]
++            invalid = [c for c in optional_selected if c not in known]
++            valid_selected = [c for c in optional_selected if c in known]
+             report['invalid_optional_cards'] = invalid
+ 
+             cards, count = compute_enabled_cards(effective_rain_choice, valid_selected)
+@@ -1966,6 +2017,74 @@ def apply_divumwx_cards_merge(cfg, rain_choice=None, optional_selected=None,
+ 
+ DIVUMWX_TIMELAPSE_DEFAULT_OUTPUT_DIR = 'webcam-timelapse'
+ 
++# Boltek lightning (user.divumwx_boltek.BoltekLightningService): its own
++# SQLite database, set up silently on every install/upgrade.
++DIVUMWX_BOLTEK_BINDING = 'boltek_binding'
++DIVUMWX_BOLTEK_DATABASE = 'boltek_sqlite'
++DIVUMWX_BOLTEK_DATABASE_FILE = 'divumwx_boltek.sdb'
++
++
++def apply_boltek_merge(cfg, site_root=None):
++    """
++    Mutates cfg in place. Set-once, no prompts.
++
++    BoltekLightningService is always registered (see DIVUMWX_DATA_SERVICES)
++    and needs [BoltekLightning] plus its own data binding and database.
++    WeeWX itself creates the database file and its table the first time
++    the service opens the binding, so nothing else is needed on disk. On a
++    station without a Boltek the service just waits for NSDRealtime.txt.
++
++    site_root follows apply_timelapse_merge(): '' when HTML_ROOT already
++    ends in DIVUMWX_ROOT_SUBDIR, so the paths don't double-nest.
++    """
++    report = {'boltek_section_created': False, 'binding_created': False,
++              'database_created': False}
++
++    if 'BoltekLightning' not in cfg:
++        cfg['BoltekLightning'] = {}
++        report['boltek_section_created'] = True
++    bl = cfg['BoltekLightning']
++    defaults = [
++        ('realtime_file', 'NSDRealtime.txt'),
++        ('distance_unit', 'km'),
++        ('poll_interval', '10'),
++        ('archive_interval', '300'),
++        ('stale_after', '600'),
++        ('site_root', DIVUMWX_ROOT_SUBDIR if site_root is None else site_root),
++        ('json_file', 'jsondata/boltek.json'),
++        ('history_file', 'jsondata/boltek_history.json'),
++        ('binding', DIVUMWX_BOLTEK_BINDING),
++    ]
++    for key, value in defaults:
++        if key not in bl:
++            bl[key] = value
++    if hasattr(bl, 'comments') and not bl.comments.get('realtime_file'):
++        bl.comments['realtime_file'] = [
++            "# Where Boltek's NexStorm puts NSDRealtime.txt: relative to the",
++            "# DivumWX site folder, or an absolute path.",
++        ]
++        bl.comments['distance_unit'] = ["# Distance units NexStorm writes in that file: km or mi."]
++
++    cfg.setdefault('DataBindings', {})
++    if DIVUMWX_BOLTEK_BINDING not in cfg['DataBindings']:
++        cfg['DataBindings'][DIVUMWX_BOLTEK_BINDING] = {
++            'database': DIVUMWX_BOLTEK_DATABASE,
++            'table_name': 'archive',
++            'manager': 'weewx.manager.Manager',
++            'schema': 'user.divumwx_boltek.schema',
++        }
++        report['binding_created'] = True
++
++    cfg.setdefault('Databases', {})
++    if DIVUMWX_BOLTEK_DATABASE not in cfg['Databases']:
++        cfg['Databases'][DIVUMWX_BOLTEK_DATABASE] = {
++            'database_name': DIVUMWX_BOLTEK_DATABASE_FILE,
++            'database_type': 'SQLite',
++        }
++        report['database_created'] = True
++
++    return report
++
+ 
+ def apply_timelapse_merge(cfg, site_root=None, source_image=None, output_dir=None,
+                            ffmpeg_available=None):
+@@ -2555,7 +2674,8 @@ DIVUMWX_PREP_SERVICES = []
+ DIVUMWX_DATA_SERVICES = ['user.divumwx.SkyfieldLoopData', 'user.divumwx.DataInjectService',
+                          'user.divumwx.CloudCoverageOverrideService',
+                          'user.divumwx.LiveDataService', 'user.divumwx.WeatherAPIService',
+-                         'user.divumwx.TimelapseService']
++                         'user.divumwx.TimelapseService',
++                         'user.divumwx_boltek.BoltekLightningService']
+ DIVUMWX_XTYPE_SERVICES = ['user.divumwx.AirDensityService', 'user.divumwx.vpdService',
+                           'user.divumwx.LastNonZeroService']
+ DIVUMWX_ARCHIVE_SERVICES = ['user.divumwx.SunshineDuration', 'user.divumwx.DivumwxExtrasService']
+@@ -2810,6 +2930,7 @@ class DivumwxInstaller(ExtensionInstaller):
+                 ('bin/user', [
+                     'bin/user/divumwx.py',
+                     'bin/user/divumwx_cards.py',
++                    'bin/user/divumwx_boltek.py',
+                     'bin/user/divumwx_version.py',
+                     'bin/user/lastrain.py',
+                     'bin/user/stats.py',
+@@ -3179,6 +3300,7 @@ class DivumwxInstaller(ExtensionInstaller):
+                 default='tipping', options=['tipping', 'piezo', 'both'])
+ 
+             optional_selected = []
++            lightning_detector = None
+             _, mandatory_and_rain_count = compute_enabled_cards(rain_choice, [])
+             running_total = mandatory_and_rain_count
+             # Told up front, not discovered mid-loop: the mandatory + automatic
+@@ -3216,6 +3338,10 @@ class DivumwxInstaller(ExtensionInstaller):
+                     break
+                 include = y_or_n(f"Include {card_name}? ({running_total}/"
+                                   f"{DIVUMWX_CARD_TARGET_TOTAL} so far) (y/n) ") == 'y'
++                if include and card_name == DIVUMWX_LIGHTNING_CARDS['other']:
++                    # One lightning slot: a Boltek gets its own card instead.
++                    lightning_detector = 'boltek' if y_or_n(DIVUMWX_BOLTEK_QUESTION) == 'y' else 'other'
++                    card_name = DIVUMWX_LIGHTNING_CARDS[lightning_detector]
+                 if include:
+                     optional_selected.append(card_name)
+                     running_total += 1
+@@ -3247,6 +3373,8 @@ class DivumwxInstaller(ExtensionInstaller):
+                 cfg, rain_choice=rain_choice, optional_selected=optional_selected,
+                 webcam_title=webcam_title, webcam_image=webcam_image,
+                 station_image_title=station_image_title, station_image_path=station_image_path)
++            if lightning_detector:
++                cfg['DivumWXCards']['lightning_detector'] = lightning_detector
+ 
+         # Every run, outside the gate above: on an upgrade, turn on any
+         # automatic card added since this install's card list was written
+@@ -3255,6 +3383,15 @@ class DivumwxInstaller(ExtensionInstaller):
+         for card in apply_new_default_cards(cfg):
+             printer.out(f"Added the new default card {card} to [DivumWXCards] enabled_cards.", level=1)
+ 
++        # Upgrades from before the Boltek card: ask about the detector once
++        # (only when a lightning card is shown) and swap cards if it's a Boltek.
++        detector = ask_lightning_detector_once(
++            cfg, lambda: y_or_n(DIVUMWX_BOLTEK_QUESTION) == 'y')
++        if detector == 'boltek':
++            printer.out("Using the Boltek Lightning card (cardBoltekLightning) in place of "
++                        "cardLightning. Point [BoltekLightning] realtime_file at NexStorm's "
++                        "NSDRealtime.txt if it isn't in the DivumWX web folder.", level=1)
++
+         # --- [Timelapse] ---
+         # Deliberately OUTSIDE the "if 'enabled_cards' not in ..." gate above:
+         # TimelapseService is always registered (see DIVUMWX_DATA_SERVICES)
+@@ -3282,6 +3419,12 @@ class DivumwxInstaller(ExtensionInstaller):
+         create_timelapse_output_dir(
+             html_root, cfg['Timelapse']['output_dir'], printer)
+ 
++        # --- [BoltekLightning] + its database: silent, set-once, every run ---
++        boltek_report = apply_boltek_merge(cfg, site_root=timelapse_site_root)
++        if boltek_report['database_created']:
++            printer.out(f"Boltek lightning database {DIVUMWX_BOLTEK_DATABASE_FILE} "
++                        f"will be created when WeeWX next starts.", level=2)
++
+         # Last filesystem step, so it covers everything created above
+         # (frontend, jsondata, timelapse output). Without this a
+         # `sudo weectl extension install` left the web root owned by root
+diff --git a/skins/DivumWX/lang/en.conf b/skins/DivumWX/lang/en.conf
+index 3bd88e8..516a002 100644
+--- a/skins/DivumWX/lang/en.conf
++++ b/skins/DivumWX/lang/en.conf
+@@ -332,6 +332,13 @@
+     Last Distance = Last Distance
+     Lightning Chart & Records = Lightning Chart & Records
+     
++    ###########################################################################
++    # cardBoltekLightning.js -- other labels reuse cardLightning.js's keys
++    # above, plus Bearing.
++    ###########################################################################
++    Boltek Lightning = Boltek Lightning
++    Boltek Lightning Chart & Records = Boltek Lightning Chart & Records
++    
+     ###########################################################################
+     # cardPollen.js -- Low/Moderate/High/Very High/Risk reuse
+     # cardUvIndex.js's keys above.
+diff --git a/skins/DivumWX/lang/en_US.conf b/skins/DivumWX/lang/en_US.conf
+index 5763356..dd11100 100644
+--- a/skins/DivumWX/lang/en_US.conf
++++ b/skins/DivumWX/lang/en_US.conf
+@@ -307,6 +307,13 @@
+     Last Distance = Last Distance
+     Lightning Chart & Records = Lightning Chart & Records
+     
++    ###########################################################################
++    # cardBoltekLightning.js -- other labels reuse cardLightning.js's keys
++    # above, plus Bearing.
++    ###########################################################################
++    Boltek Lightning = Boltek Lightning
++    Boltek Lightning Chart & Records = Boltek Lightning Chart & Records
++    
+     ###########################################################################
+     # cardPollen.js -- Low/Moderate/High/Very High/Risk reuse
+     # cardUvIndex.js's keys above.

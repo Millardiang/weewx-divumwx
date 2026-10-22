@@ -158,6 +158,16 @@ DIVUMWX_OWNED_TOP_LEVEL_SECTIONS = [
     'WeatherAPI',
     'Timelapse',
     'SkyfieldLoopData',
+    'BoltekLightning',
+]
+
+# Named subsections DivumWX's install.py adds under shared WeeWX sections.
+# Only these exact entries are removed; the sections themselves stay. The
+# Boltek database file (divumwx_boltek.sdb) is left on disk -- it holds
+# your strike history; delete it by hand if you don't want it.
+DIVUMWX_OWNED_SUBSECTIONS = [
+    ('DataBindings', 'boltek_binding'),
+    ('Databases', 'boltek_sqlite'),
 ]
 
 # [StdReport][[...]] subsections written entirely by DivumWX.
@@ -276,6 +286,11 @@ def strip_owned_sections(cfg, dry_run):
             removed.append(f'StdReport.{name}')
             if not dry_run:
                 del cfg['StdReport'][name]
+    for parent, name in DIVUMWX_OWNED_SUBSECTIONS:
+        if name in cfg.get(parent, {}):
+            removed.append(f'{parent}.{name}')
+            if not dry_run:
+                del cfg[parent][name]
 
     if removed:
         prefix = '[dry-run] Would remove' if dry_run else 'Removed'

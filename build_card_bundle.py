@@ -65,6 +65,7 @@ CARD_FILES = [
     'cardGeocentric.js',
     'cardMoonPhase.js',
     'cardLightning.js',
+    'cardBoltekLightning.js',
     'cardPollen.js',
     'cardGreenhouseGas.js',
     'cardAirquality.js',

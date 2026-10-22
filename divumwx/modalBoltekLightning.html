@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<!--
+##############################################################################################
+# modalBoltekLightning.html version 1.0.0
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  GPLv3
+##############################################################################################
+  Chart & records for a Boltek lightning detector, opened from the Boltek
+  Lightning card. Reads jsondata/boltek_history.json (hourly and daily totals
+  from the Boltek database) and jsondata/boltek.json (NexStorm's live
+  readings), both written by user.divumwx_boltek.BoltekLightningService.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Boltek Lightning</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root, [data-theme="light"]{
+  --bw-accent:#B45309;
+  --bw-good:#5BBB8A;
+  --bw-danger:#E36B57;
+  --bw-amber:#D97706;
+  --bw-radius:14px;
+  --bw-radius-sm:10px;
+  --bw-shadow:0 1px 2px rgba(0,0,0,0.12), 0 8px 20px -8px rgba(0,0,0,0.25);
+  --bs-body-bg:#EFECE2;
+  --bs-body-color:#1D2C4E;
+  --bs-secondary-color:#5C6672;
+  --bs-card-bg:#FFFFFF;
+  --bs-tertiary-bg:#F4F1E9;
+  --bs-border-color:#C9CFD8;
+  --grid:rgba(29,44,78,0.10);
+  --cg:#E0B400;
+  --ic:#3D8FC4;
+  --other:#9AA3AE;
+  --dist:#E36B57;
+}
+[data-theme="dark"]{
+  --bw-accent:#D3A94C;
+  --bw-good:#5BBB8A;
+  --bw-danger:#E36B57;
+  --bw-amber:#D97706;
+  --bw-shadow:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.5);
+  --bs-body-bg:#0A0F22;
+  --bs-body-color:#E9E4D4;
+  --bs-secondary-color:#8B93B8;
+  --bs-card-bg:#111834;
+  --bs-tertiary-bg:#161F3C;
+  --bs-border-color:#2A3358;
+  --grid:rgba(233,228,212,0.08);
+  --cg:#F7E400;
+  --ic:#6FB6DD;
+  --other:#6B7390;
+  --dist:#E36B57;
+}
+:root[data-season="winter"]{ --bs-body-bg:#e9f2ec; --bs-card-bg:#f4f9f6; }
+:root[data-season="spring"]{ --bs-body-bg:#eef7e3; --bs-card-bg:#f5faef; }
+:root[data-season="summer"]{ --bs-body-bg:#fff6d9; --bs-card-bg:#fffbef; }
+:root[data-season="autumn"]{ --bs-body-bg:#f2e6d8; --bs-card-bg:#f8f0e7; }
+
+*{ box-sizing:border-box; }
+html, body{ margin:0; padding:0; }
+body{
+  background:var(--bs-body-bg);
+  color:var(--bs-body-color);
+  font-family:'Lexend', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size:13.5px;
+  line-height:1.5;
+}
+.bk-page{ padding:12px 16px 16px; max-width:1400px; margin:0 auto; }
+
+/* ---- Live strip ---- */
+.bk-live{
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(104px, 1fr)); gap:8px;
+  margin-bottom:12px;
+}
+.bk-chip{
+  background:var(--bs-card-bg); border:1px solid var(--bs-border-color);
+  border-radius:var(--bw-radius-sm); padding:6px 10px; min-width:0;
+}
+.bk-chip-label{
+  font-size:10px; font-variant-caps:small-caps; letter-spacing:.05em;
+  color:var(--bs-secondary-color); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.bk-chip-value{
+  font-size:14px; font-weight:600; color:var(--bw-accent); white-space:nowrap;
+  overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center; gap:6px;
+}
+.bk-chip-sub{ font-size:10px; color:var(--bs-secondary-color); font-weight:400; }
+.bk-dot{ width:8px; height:8px; border-radius:50%; flex-shrink:0; background:#999; }
+.bk-dot.clear{ background:var(--bw-good); }
+.bk-dot.caution{ background:var(--bw-amber); }
+.bk-dot.high{ background:var(--bw-danger); animation:bkPulse 1.2s ease-in-out infinite; }
+@keyframes bkPulse{ 0%,100%{ opacity:1; } 50%{ opacity:.35; } }
+
+/* ---- Chart card ---- */
+.bk-card{
+  background:var(--bs-card-bg); border:1px solid var(--bs-border-color);
+  border-radius:var(--bw-radius); box-shadow:var(--bw-shadow); padding:14px 16px;
+}
+.bk-toolbar{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:6px; }
+.bk-tfs{ display:flex; gap:6px; flex-wrap:wrap; }
+.bk-tf{
+  font-family:inherit; font-size:12px; font-weight:700; padding:6px 14px; border-radius:999px;
+  border:1px solid var(--bs-border-color); background:var(--bs-tertiary-bg);
+  color:var(--bs-body-color); cursor:pointer;
+}
+.bk-tf:hover:not(.active){ border-color:var(--bw-accent); color:var(--bw-accent); }
+.bk-tf.active{ background:var(--bw-accent); border-color:var(--bw-accent); color:#fff; }
+select.bk-tf{ padding-right:8px; }
+.bk-info{ font-size:11px; color:var(--bs-secondary-color); font-style:italic; }
+.bk-legend{ display:flex; gap:14px; flex-wrap:wrap; font-size:12px; margin:6px 0 2px; }
+.bk-leg{ display:flex; align-items:center; gap:5px; cursor:pointer; user-select:none; }
+.bk-leg.off{ opacity:.35; }
+.bk-sw{ width:11px; height:11px; border-radius:2px; }
+.bk-chart{ position:relative; width:100%; height:340px; }
+.bk-chart svg{ display:block; width:100%; height:100%; }
+.bk-chart .axis text{ fill:var(--bs-secondary-color); font-size:10.5px; font-family:inherit; }
+.bk-chart .axis path, .bk-chart .axis line{ stroke:var(--bs-border-color); }
+.bk-chart .grid line{ stroke:var(--grid); }
+.bk-chart .grid path{ display:none; }
+.bk-empty{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  color:var(--bs-secondary-color); text-align:center; padding:20px; pointer-events:none;
+}
+.bk-tip{
+  position:absolute; pointer-events:none; z-index:5; display:none;
+  background:var(--bs-tertiary-bg); color:var(--bs-body-color); border:1px solid var(--bs-border-color);
+  border-radius:8px; padding:7px 10px; font-size:11.5px; line-height:1.45; box-shadow:var(--bw-shadow);
+  white-space:nowrap;
+}
+.bk-tip b{ font-weight:600; }
+.bk-note{ font-size:11.5px; font-style:italic; color:var(--bs-secondary-color); margin-top:8px; }
+
+/* ---- Records ---- */
+.bk-records-title{ font-size:18px; font-weight:700; margin:20px 0 10px; }
+.bk-records{ display:grid; grid-template-columns:repeat(5, 1fr); gap:12px; }
+.bk-period{
+  background:var(--bs-card-bg); border:1px solid var(--bs-border-color);
+  border-radius:12px; padding:14px 10px; text-align:center;
+}
+.bk-period-label{
+  font-size:12px; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+  color:var(--bs-secondary-color); margin-bottom:10px; padding-bottom:8px;
+  border-bottom:1px solid var(--bs-border-color);
+}
+.bk-tiles{ display:flex; flex-direction:column; gap:12px; }
+.bk-tile-label{ font-size:12px; color:var(--bs-secondary-color); margin-bottom:2px; }
+.bk-tile-value{ font-size:19px; font-weight:600; line-height:1.15; }
+.bk-tile-sub{ font-size:11px; color:var(--bs-secondary-color); margin-top:2px; }
+.bk-tile-sub .cg{ color:var(--cg); font-weight:600; }
+.bk-tile-sub .ic{ color:var(--ic); font-weight:600; }
+@media (max-width:900px){ .bk-records{ grid-template-columns:repeat(3, 1fr); } }
+@media (max-width:600px){ .bk-records{ grid-template-columns:repeat(2, 1fr); } .bk-chart{ height:280px; } }
+</style>
+</head>
+<body>
+<div class="bk-page">
+
+  <div class="bk-live" id="bkLive"></div>
+
+  <div class="bk-card">
+    <div class="bk-toolbar">
+      <div class="bk-tfs" id="bkTfs">
+        <button class="bk-tf active" data-tf="day">24hr</button>
+        <button class="bk-tf" data-tf="week">Week</button>
+        <button class="bk-tf" data-tf="month">Month</button>
+        <button class="bk-tf" data-tf="year">Year</button>
+        <select class="bk-tf" id="bkYear" title="Historical year"></select>
+      </div>
+      <span class="bk-info" id="bkInfo">Loading&hellip;</span>
+    </div>
+    <div class="bk-legend" id="bkLegend"></div>
+    <div class="bk-chart" id="bkChart">
+      <div class="bk-empty" id="bkEmpty"></div>
+      <div class="bk-tip" id="bkTip"></div>
+    </div>
+    <div class="bk-note" id="bkNote">Boltek strikes split into cloud-to-ground (CG) and in-cloud (IC) (bars), with the closest strike (line, right axis). Distance bands: &lt;5km very close (&#9889; danger), 5&ndash;10km close, 10&ndash;20km moderate, &gt;20km far.</div>
+  </div>
+
+  <div class="bk-records-title">Records</div>
+  <div class="bk-records" id="bkRecords"></div>
+
+</div>
+
+<script src="js/d3.7.9.0.min.js"></script>
+<script src="units.js"></script>
+<script src="stationTime.js"></script>
+<script>
+(function(){
+  var started = false;   // set once everything below is ready
+
+  // ---- Theme (follows the dashboard, else the stored/OS preference) ----
+  function fromParentTheme(){
+    try {
+      var b = window.parent && window.parent.document && window.parent.document.body;
+      if (b && (b.classList.contains('dark') || b.classList.contains('light'))) {
+        return b.classList.contains('dark') ? 'dark' : 'light';
+      }
+    } catch (e) {}
+    return null;
+  }
+  function applyTheme(){
+    var resolved = fromParentTheme();
+    if (!resolved) {
+      var mode = 'auto';
+      try { mode = localStorage.getItem('dashboardThemeMode') || 'auto'; } catch (e) {}
+      resolved = mode === 'light' ? 'light' : mode === 'dark' ? 'dark'
+        : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    }
+    if (document.documentElement.getAttribute('data-theme') !== resolved) {
+      document.documentElement.setAttribute('data-theme', resolved);
+      if (started) render();   // colours come from CSS variables, so redraw
+    }
+  }
+  function applySeason(){
+    try {
+      var b = window.parent && window.parent.document && window.parent.document.body;
+      var m = b && /season-(winter|spring|summer|autumn)/.exec(b.className);
+      if (m) document.documentElement.setAttribute('data-season', m[1]);
+      else document.documentElement.removeAttribute('data-season');
+    } catch (e) {}
+  }
+  applyTheme(); applySeason();
+  window.addEventListener('storage', function(e){ if (e.key === 'dashboardThemeMode') applyTheme(); });
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+  try {
+    var pb = window.parent && window.parent.document && window.parent.document.body;
+    if (pb) new MutationObserver(function(){ applyTheme(); applySeason(); })
+      .observe(pb, { attributes: true, attributeFilter: ['class'] });
+  } catch (e) {}
+
+  // ---- Config ----
+  var HISTORY_URL = './jsondata/boltek_history.json';
+  var LIVE_URL = './jsondata/boltek.json';
+  var HISTORY_POLL_MS = 5 * 60 * 1000;
+  var LIVE_POLL_MS = 15 * 1000;
+  var COL = { start: 0, strikes: 1, cg: 2, ic: 3, closest: 4, rate: 5 };
+  var DIST_BANDS = [[0, 5, '#D8001D'], [5, 10, '#E36B57'], [10, 20, '#D6BE4E'], [20, 9999, '#5BBB8A']];
+  // Storm tendency codes aren't documented in the file; these are the usual
+  // NexStorm meanings. Unknown codes are shown as the number.
+  var TENDENCY = { 0: 'Steady', 1: 'Approaching', 2: 'Receding' };
+
+  var history = null, live = null, tf = 'day', year = null;
+  var hidden = {};
+
+  // ---- Units: distances follow the dashboard's unit system ----
+  function distUnit(){
+    try {
+      var key = localStorage.getItem('dashboardUnitSystem') || 'uk';
+      if (typeof SYSTEMS !== 'undefined' && SYSTEMS[key]) return SYSTEMS[key].dist;
+    } catch (e) {}
+    return 'km';
+  }
+  function kmTo(v, u){ return u === 'mi' ? v * 0.621371 : u === 'nm' ? v * 0.539957 : v; }
+  function fmtDist(km){
+    if (km == null) return '—';
+    var u = distUnit();
+    return kmTo(km, u).toFixed(1) + ' ' + u;
+  }
+  window.addEventListener('storage', function(e){ if (e.key === 'dashboardUnitSystem') { render(); renderLive(); } });
+
+  // ---- Station-time formatting ----
+  function tz(){ try { return StationTime.getTZ(); } catch (e) { return undefined; } }
+  function fmt(ms, opts){ return new Intl.DateTimeFormat('en-GB', Object.assign({ timeZone: tz() }, opts)).format(new Date(ms)); }
+  function fmtHour(ms){ return fmt(ms, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }); }
+  function fmtDay(ms){ return fmt(ms, { day: 'numeric', month: 'short', year: 'numeric' }); }
+  function fmtDayShort(ms){ return fmt(ms, { day: 'numeric', month: 'short' }); }
+  function fmtTime(sec){ return sec ? fmt(sec * 1000, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }) : '—'; }
+  function n(v){ return v == null ? '—' : Number(v).toLocaleString(); }
+
+  // ---- Buckets for the chosen period (gaps filled with zeros) ----
+  // History rows start at the station's local hours/days. They're matched
+  // by station-local date (and hour), not raw times, so this works for a
+  // visitor whose browser is in another time zone.
+  function dayKey(ms){ return fmt(ms, { year: 'numeric', month: '2-digit', day: '2-digit' }); }
+  function hourKey(ms){ return dayKey(ms) + ' ' + fmt(ms, { hour: '2-digit', hourCycle: 'h23' }); }
+  function stationYear(ms){ return +fmt(ms, { year: 'numeric' }); }
+  function fill(rows, times, keyOf){
+    var byKey = {};
+    (rows || []).forEach(function(r){ byKey[keyOf(r[COL.start])] = r; });
+    var seen = {}, out = [];
+    times.forEach(function(t){
+      var k = keyOf(t);
+      if (seen[k]) return;
+      seen[k] = 1;
+      out.push(byKey[k] || [t, 0, 0, 0, null, null]);
+    });
+    return out;
+  }
+  function hourlyLast(hours){
+    var hourStart = Math.floor(Date.now() / 3600000) * 3600000, times = [];
+    for (var i = hours - 1; i >= 0; i--) times.push(hourStart - i * 3600000);
+    return fill(history && history.hourly, times, hourKey);
+  }
+  function dailyLast(days){
+    var now = Date.now(), times = [];
+    for (var i = days - 1; i >= 0; i--) times.push(now - i * 86400000);
+    return fill(history && history.daily, times, dayKey);
+  }
+  function dailyYear(y){
+    // Midday UTC lands on the same calendar date in almost every time zone.
+    var times = [], t = Date.UTC(y, 0, 1, 12), stop = Math.min(Date.UTC(y + 1, 0, 1, 12), Date.now());
+    for (; t < stop; t += 86400000) times.push(t);
+    return fill(history && history.daily, times, dayKey);
+  }
+  function rowsFor(key){
+    if (key === 'day') return hourlyLast(24);
+    if (key === 'week') return dailyLast(7);
+    if (key === 'month') return dailyLast(30);
+    if (key === 'year') return year ? dailyYear(year) : dailyLast(365);
+    if (key === 'alltime') return (history && history.daily) || [];
+    return [];
+  }
+
+  // ---- Live strip ----
+  function chip(label, value, sub, dotClass){
+    return '<div class="bk-chip"><div class="bk-chip-label">' + label + '</div><div class="bk-chip-value">' +
+      (dotClass ? '<span class="bk-dot ' + dotClass + '"></span>' : '') + value +
+      (sub ? ' <span class="bk-chip-sub">' + sub + '</span>' : '') + '</div></div>';
+  }
+  function renderLive(){
+    var el = document.getElementById('bkLive');
+    var r = (live && live.realtime) || {};
+    var alarmClass = { 0: 'clear', 1: 'caution', 2: 'high' }[r.alarm];
+    var tendency = r.tendency == null ? '—' : (TENDENCY[r.tendency] || 'Code ' + r.tendency);
+    var status = !live ? 'No data' : live.stale ? 'Not updating' : 'Live';
+    el.innerHTML = [
+      chip('Status', status, live && live.file_time ? fmtHour(live.file_time * 1000) : '', !live ? '' : live.stale ? 'high' : 'clear'),
+      chip('Alarm', r.alarm_label || '—', '', alarmClass),
+      chip('Storm', tendency),
+      chip('Rate', r.strikes_per_minute == null ? '—' : r.strikes_per_minute, '/min'),
+      chip('Last 5/15 min', n(r.strikes_5min) + ' / ' + n(r.strikes_15min)),
+      chip('Last 30/60 min', n(r.strikes_30min) + ' / ' + n(r.strikes_60min)),
+      chip('Avg Distance', fmtDist(r.avg_distance_km)),
+      chip('Peak Rate', r.peak_rate == null ? '—' : r.peak_rate + '/min', r.peak_rate_time ? fmtHour(r.peak_rate_time * 1000) : ''),
+      chip('Session CG / IC', n(r.cg_total) + ' / ' + n(r.ic_total)),
+      chip('Close Strikes', n(r.close_count)),
+      chip('Noise', n(r.noise_count)),
+      chip('Sensor', r.hardware_status || '—')
+    ].join('');
+  }
+
+  // ---- Chart ----
+  var chartEl = document.getElementById('bkChart');
+  var tipEl = document.getElementById('bkTip');
+  var emptyEl = document.getElementById('bkEmpty');
+  function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+  function renderLegend(rows){
+    var hasOther = rows.some(function(r){ return r[COL.strikes] - r[COL.cg] - r[COL.ic] > 0; });
+    var items = [['cg', 'CG (cloud-to-ground)', '--cg'], ['ic', 'IC (in-cloud)', '--ic']];
+    if (hasOther) items.push(['other', 'Other', '--other']);
+    items.push(['dist', 'Closest strike', '--dist']);
+    var el = document.getElementById('bkLegend');
+    el.innerHTML = items.map(function(it){
+      return '<span class="bk-leg' + (hidden[it[0]] ? ' off' : '') + '" data-key="' + it[0] + '"><span class="bk-sw" style="background:' +
+        cssVar(it[2]) + '"></span>' + it[1] + '</span>';
+    }).join('');
+  }
+  document.getElementById('bkLegend').addEventListener('click', function(e){
+    var it = e.target.closest('.bk-leg'); if (!it) return;
+    var k = it.getAttribute('data-key'); hidden[k] = !hidden[k]; render();
+  });
+
+  function render(){
+    if (!window.d3) return;
+    var rows = rowsFor(tf);
+    renderLegend(rows);
+    renderRecords();
+    d3.select(chartEl).select('svg').remove();
+    var anyStrikes = rows.some(function(r){ return r[COL.strikes] > 0; });
+    emptyEl.textContent = !history ? 'Waiting for the Boltek history…'
+      : anyStrikes ? '' : 'No strikes recorded in this period.';
+    emptyEl.style.display = emptyEl.textContent ? 'flex' : 'none';
+
+    var W = chartEl.clientWidth || 900, H = chartEl.clientHeight || 340;
+    var M = { top: 18, right: 46, bottom: 26, left: 42 };
+    var iw = W - M.left - M.right, ih = H - M.top - M.bottom;
+    var svg = d3.select(chartEl).insert('svg', ':first-child').attr('viewBox', '0 0 ' + W + ' ' + H);
+    var g = svg.append('g').attr('transform', 'translate(' + M.left + ',' + M.top + ')');
+    var u = distUnit();
+
+    var x = d3.scaleBand().domain(rows.map(function(r){ return r[COL.start]; })).range([0, iw]).paddingInner(rows.length > 60 ? 0.05 : 0.2);
+    var stackKeys = ['cg', 'ic', 'other'].filter(function(k){ return !hidden[k]; });
+    function part(r, k){ return k === 'cg' ? r[COL.cg] : k === 'ic' ? r[COL.ic] : Math.max(0, r[COL.strikes] - r[COL.cg] - r[COL.ic]); }
+    var maxCount = d3.max(rows, function(r){ return d3.sum(stackKeys, function(k){ return part(r, k); }); }) || 0;
+    var y = d3.scaleLinear().domain([0, Math.max(5, maxCount)]).nice().range([ih, 0]);
+    var dists = rows.map(function(r){ return r[COL.closest] == null ? null : kmTo(r[COL.closest], u); });
+    var maxDist = d3.max(dists) || 0;
+    var y2 = d3.scaleLinear().domain([0, Math.max(kmTo(30, u), maxDist * 1.1)]).nice().range([ih, 0]);
+
+    // Distance bands behind everything (right-axis scale)
+    if (!hidden.dist) {
+      DIST_BANDS.forEach(function(b){
+        var lo = kmTo(b[0], u), hi = Math.min(kmTo(b[1], u), y2.domain()[1]);
+        if (lo >= y2.domain()[1]) return;
+        g.append('rect').attr('x', 0).attr('width', iw).attr('y', y2(hi)).attr('height', y2(lo) - y2(hi))
+          .attr('fill', b[2]).attr('opacity', 0.07);
+      });
+    }
+    g.append('g').attr('class', 'grid').call(d3.axisLeft(y).ticks(6).tickSize(-iw).tickFormat(''));
+
+    // Axes
+    var every = tf === 'day' ? 3 : tf === 'week' ? 1 : tf === 'month' ? 5 : 30;
+    var domain = x.domain();
+    var tickVals = tf === 'year' || tf === 'alltime'
+      ? domain.filter(function(s){ return fmt(s, { day: 'numeric' }) === '1'; })
+      : domain.filter(function(s, i){ return (domain.length - 1 - i) % every === 0; });
+    var tickFmt = tf === 'day' ? fmtHour
+      : (tf === 'year' || tf === 'alltime') ? function(s){ return fmt(s, { month: 'short' }); }
+      : tf === 'week' ? function(s){ return fmt(s, { weekday: 'short', day: 'numeric' }); } : fmtDayShort;
+    g.append('g').attr('class', 'axis').attr('transform', 'translate(0,' + ih + ')')
+      .call(d3.axisBottom(x).tickValues(tickVals).tickFormat(tickFmt).tickSizeOuter(0));
+    g.append('g').attr('class', 'axis').call(d3.axisLeft(y).ticks(6).tickFormat(d3.format('~s')));
+    var yr = g.append('g').attr('class', 'axis').attr('transform', 'translate(' + iw + ',0)').call(d3.axisRight(y2).ticks(6));
+    g.append('text').attr('x', -M.left + 4).attr('y', -6).attr('fill', cssVar('--bs-secondary-color')).attr('font-size', 10.5).text('(strikes)');
+    g.append('text').attr('x', iw + M.right - 4).attr('y', -6).attr('text-anchor', 'end').attr('fill', cssVar('--bs-secondary-color')).attr('font-size', 10.5).text('(' + u + ')');
+    if (hidden.dist) yr.style('opacity', 0.3);
+
+    // Stacked bars
+    var colors = { cg: cssVar('--cg'), ic: cssVar('--ic'), other: cssVar('--other') };
+    var stack = d3.stack().keys(stackKeys).value(function(r, k){ return part(r, k); })(rows);
+    g.append('g').selectAll('g').data(stack).join('g').attr('class', function(s){ return 'bk-stack bk-stack-' + s.key; })
+      .attr('fill', function(s){ return colors[s.key]; })
+      .selectAll('rect').data(function(s){ return s; }).join('rect')
+      .attr('x', function(d){ return x(d.data[COL.start]); }).attr('width', x.bandwidth())
+      .attr('y', function(d){ return y(d[1]); }).attr('height', function(d){ return Math.max(0, y(d[0]) - y(d[1])); })
+      .attr('rx', x.bandwidth() > 6 ? 2 : 0);
+
+    // Closest-strike line + area (only where strikes happened)
+    if (!hidden.dist) {
+      var pts = rows.map(function(r, i){ return { x: x(r[COL.start]) + x.bandwidth() / 2, v: dists[i] }; });
+      var defined = function(p){ return p.v != null; };
+      var distColor = cssVar('--dist');
+      g.append('path').datum(pts).attr('fill', distColor).attr('opacity', 0.12)
+        .attr('d', d3.area().defined(defined).x(function(p){ return p.x; }).y0(ih).y1(function(p){ return y2(p.v); }).curve(d3.curveMonotoneX));
+      g.append('path').datum(pts).attr('fill', 'none').attr('stroke', distColor).attr('stroke-width', 2)
+        .attr('d', d3.line().defined(defined).x(function(p){ return p.x; }).y(function(p){ return y2(p.v); }).curve(d3.curveMonotoneX));
+      g.append('g').selectAll('circle').data(pts.filter(defined)).join('circle')
+        .attr('cx', function(p){ return p.x; }).attr('cy', function(p){ return y2(p.v); })
+        .attr('r', rows.length > 60 ? 1.5 : 3).attr('fill', distColor);
+    }
+
+    // Hover
+    var hover = g.append('rect').attr('fill', cssVar('--bs-body-color')).attr('opacity', 0).attr('y', 0).attr('height', ih).attr('width', x.bandwidth());
+    g.append('rect').attr('width', iw).attr('height', ih).attr('fill', 'transparent')
+      .on('mousemove', function(ev){
+        var mx = d3.pointer(ev)[0];
+        var i = Math.max(0, Math.min(rows.length - 1, Math.floor(mx / (iw / rows.length))));
+        var r = rows[i];
+        hover.attr('x', x(r[COL.start])).attr('opacity', 0.06);
+        var when = tf === 'day' ? fmt(r[COL.start], { weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }) : fmtDay(r[COL.start]);
+        tipEl.innerHTML = '<b>' + when + '</b><br>' +
+          '<span style="color:' + colors.cg + '">&#9632;</span> CG: <b>' + n(r[COL.cg]) + '</b> &nbsp; ' +
+          '<span style="color:' + colors.ic + '">&#9632;</span> IC: <b>' + n(r[COL.ic]) + '</b><br>' +
+          'Total: <b>' + n(r[COL.strikes]) + '</b><br>' +
+          'Closest: <b>' + fmtDist(r[COL.closest]) + '</b><br>' +
+          'Highest rate: <b>' + (r[COL.rate] == null ? '—' : r[COL.rate] + '/min') + '</b>';
+        tipEl.style.display = 'block';
+        var px = M.left + x(r[COL.start]) + x.bandwidth() / 2, tw = tipEl.offsetWidth;
+        tipEl.style.left = Math.max(4, Math.min(W - tw - 4, px + 12)) + 'px';
+        tipEl.style.top = (M.top + 8) + 'px';
+      })
+      .on('mouseleave', function(){ hover.attr('opacity', 0); tipEl.style.display = 'none'; });
+  }
+
+  // ---- Records ----
+  function best(rows, col, cmp){
+    var b = null;
+    rows.forEach(function(r){ if (r[col] != null && (col !== COL.strikes || r[col] > 0) && (b === null || cmp(r[col], b[col]))) b = r; });
+    return b;
+  }
+  function renderRecords(){
+    var periods = [['day', '24hr'], ['week', 'Week'], ['month', 'Month'], ['year', 'Year'], ['alltime', 'All-time']];
+    var el = document.getElementById('bkRecords');
+    el.innerHTML = periods.map(function(p){
+      var rows = p[0] === 'year' ? dailyLast(365) : rowsFor(p[0]);
+      var hourly = p[0] === 'day';
+      var total = d3.sum(rows, function(r){ return r[COL.strikes]; });
+      var cg = d3.sum(rows, function(r){ return r[COL.cg]; }), ic = d3.sum(rows, function(r){ return r[COL.ic]; });
+      var busiest = best(rows, COL.strikes, function(a, b){ return a > b; });
+      var closest = best(rows, COL.closest, function(a, b){ return a < b; });
+      var rate = best(rows, COL.rate, function(a, b){ return a > b; });
+      var when = function(r){ return r ? (hourly ? fmt(r[COL.start], { weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }) : fmtDay(r[COL.start])) : ''; };
+      function tile(label, value, sub){
+        return '<div><div class="bk-tile-label">' + label + '</div><div class="bk-tile-value">' + value + '</div>' +
+          (sub ? '<div class="bk-tile-sub">' + sub + '</div>' : '') + '</div>';
+      }
+      return '<div class="bk-period"><div class="bk-period-label">' + p[1] + '</div><div class="bk-tiles">' +
+        tile('Total Strikes', history ? n(total) : '--', history ? '<span class="cg">CG ' + n(cg) + '</span> &middot; <span class="ic">IC ' + n(ic) + '</span>' : '') +
+        tile(hourly ? 'Busiest Hour' : 'Busiest Day', busiest ? n(busiest[COL.strikes]) : '--', when(busiest)) +
+        tile('Closest Strike', closest ? fmtDist(closest[COL.closest]) : '--', when(closest)) +
+        tile('Highest Rate', rate ? rate[COL.rate] + '/min' : '--', when(rate)) +
+        '</div></div>';
+    }).join('');
+    reportSize();
+  }
+
+  // ---- Toolbar ----
+  var tfsEl = document.getElementById('bkTfs');
+  var yearEl = document.getElementById('bkYear');
+  function populateYears(){
+    var years = {};
+    ((history && history.daily) || []).forEach(function(r){ years[stationYear(r[COL.start])] = 1; });
+    var list = Object.keys(years).map(Number).sort(function(a, b){ return b - a; });
+    if (!list.length) list = [stationYear(Date.now())];
+    var keep = year;
+    yearEl.innerHTML = '<option value="">Year&hellip;</option>' + list.map(function(y){ return '<option value="' + y + '">' + y + '</option>'; }).join('');
+    yearEl.value = keep ? String(keep) : '';
+  }
+  tfsEl.addEventListener('click', function(e){
+    var b = e.target.closest('button.bk-tf'); if (!b) return;
+    tf = b.getAttribute('data-tf'); year = null; yearEl.value = '';
+    Array.prototype.forEach.call(tfsEl.querySelectorAll('button.bk-tf'), function(x){ x.classList.toggle('active', x === b); });
+    yearEl.classList.remove('active');
+    render();
+  });
+  yearEl.addEventListener('change', function(){
+    if (!yearEl.value) return;
+    year = +yearEl.value; tf = 'year';
+    Array.prototype.forEach.call(tfsEl.querySelectorAll('button.bk-tf'), function(x){ x.classList.remove('active'); });
+    yearEl.classList.add('active');
+    render();
+  });
+
+  // ---- Data ----
+  function getJson(url){
+    return fetch(url + '?_=' + Date.now(), { cache: 'no-store' }).then(function(r){
+      if (!r.ok) throw new Error('HTTP ' + r.status); return r.json();
+    });
+  }
+  function loadHistory(){
+    getJson(HISTORY_URL).then(function(h){
+      history = h;
+      document.getElementById('bkInfo').textContent = 'Boltek database — updated ' + fmtHour(h.generated * 1000);
+      populateYears(); render();
+    }).catch(function(e){
+      console.warn('modalBoltekLightning: history fetch failed —', e.message);
+      document.getElementById('bkInfo').textContent = 'Boltek history unavailable';
+      render();
+    });
+  }
+  function loadLive(){
+    getJson(LIVE_URL).then(function(j){ live = j; renderLive(); })
+      .catch(function(){ live = null; renderLive(); });
+  }
+  started = true;
+  renderLive();
+  loadHistory(); loadLive();
+  setInterval(loadHistory, HISTORY_POLL_MS);
+  setInterval(loadLive, LIVE_POLL_MS);
+  window.addEventListener('stationtimeready', function(){ render(); renderLive(); });
+  var resizeTimer = null;
+  window.addEventListener('resize', function(){ clearTimeout(resizeTimer); resizeTimer = setTimeout(render, 150); });
+
+  // ---- Size reporting to the dashboard's modal box ----
+  function reportSize(){
+    if (window.parent === window) return;
+    window.parent.postMessage({ type: 'chartModalContentHeight', height: document.body.scrollHeight }, '*');
+  }
+  if (window.parent !== window) {
+    new ResizeObserver(reportSize).observe(document.body);
+    window.addEventListener('load', reportSize);
+  }
+})();
+</script>
+</body>
+</html>

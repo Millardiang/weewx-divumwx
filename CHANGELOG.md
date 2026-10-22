@@ -2,6 +2,62 @@
 
 ## Unreleased — for 2.0.0
 
+### Boltek Lightning card (new, optional)
+- Installer: after "Include cardLightning?" (yes), it asks "Is your
+  lightning detector a Boltek (NexStorm)?". Yes puts the Boltek Lightning
+  card in the lightning slot *instead of* the Lightning card; the answer
+  is kept as `[DivumWXCards]` `lightning_detector = boltek | other`. An
+  upgrade from before this release that shows a lightning card is asked
+  once and the cards are swapped if it's a Boltek.
+- A card for Boltek lightning detectors, in the Lightning card's place. It
+  shows the same readouts (Current, Today, Last Hour, the year's total,
+  All-Time Total, Last Detected, Last Distance) plus **Bearing** of the
+  last strike (degrees and compass point). Current is NexStorm's strikes
+  per minute and Last Hour its own last-60-minutes count. The status dot
+  is red when NexStorm's file is missing or hasn't changed for 10 minutes.
+- Data comes from NexStorm's `NSDRealtime.txt` (22 values: date, time,
+  session totals, rate, last strike distance/bearing/type/time, CG/IC/
+  close counts, tendency, alarm, average distance, peak rate, hardware
+  status, noise, and 5/15/30/60-minute counts), read every 10 seconds by
+  the new `user.divumwx_boltek.BoltekLightningService`. Commas,
+  semicolons, tabs or spaces between values all work; distances can be
+  km or miles (`distance_unit`). The service writes
+  `jsondata/boltek.json` for the card.
+- Strikes are kept in DivumWX's own Boltek database,
+  `divumwx_boltek.sdb` (SQLite, one record every 5 minutes), separate
+  from the WeeWX archive. The installer adds `[BoltekLightning]`,
+  `[DataBindings]` `[[boltek_binding]]` and `[Databases]`
+  `[[boltek_sqlite]]` silently on every install or upgrade (set-once, hand
+  edits kept), and WeeWX creates the database the first time it starts.
+  Totals survive restarts and NexStorm session resets. On stations
+  without a Boltek the service just waits for the file.
+- Clicking the Boltek card opens **modalBoltekLightning.html**, its own
+  chart & records page in the same style as the Lightning one:
+  - a live strip from NexStorm: status, alarm, storm tendency, rate, the
+    5/15/30/60-minute counts, average distance, session peak rate, session
+    CG/IC, close strikes, noise and sensor status;
+  - a chart for 24hr (hourly), Week, Month, Year or any past year (daily):
+    bars split into cloud-to-ground (CG) and in-cloud (IC) strikes, the
+    closest strike as a line on the right axis over the distance bands,
+    a tooltip per hour/day, and series that can be hidden from the legend;
+  - Records for 24hr, Week, Month, Year and All-time: total strikes (with
+    the CG/IC split), busiest hour/day, closest strike and highest rate,
+    each with its date.
+  Distances follow the dashboard's unit system; times are station time.
+- For that, the service also writes `jsondata/boltek_history.json` (hourly
+  totals for 48 hours and daily totals for all time, from the Boltek
+  database) every 5 minutes, and the database records the closest strike
+  and highest strikes-per-minute rate in each 5-minute interval
+  (`min_distance`, `max_rate`).
+- `divumwx_uninstall_helper.py` removes those three entries; the database
+  file is left in place so strike history isn't lost.
+- New: `bin/user/divumwx_boltek.py` 1.0.0, `modalBoltekLightning.html`
+  1.0.0. Changed: `cardsBundleNew.js`
+  (new `cardBoltekLightning` module), `index.html`, `hyperIndex.html`,
+  `lexendIndex.html` (card mount), `install.py`, `build_card_bundle.py`,
+  `divumwx_uninstall_helper.py`, `lang/en.conf`, `lang/en_US.conf`,
+  `INSTALLATION_GUIDE.md`.
+
 ### Windy Radar card (new, on by default)
 - A new dashboard card showing Windy.com's live weather radar centred on
   the station, laid out like the Webcam card: title bar, status dot and
