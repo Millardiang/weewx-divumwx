@@ -2,6 +2,18 @@
 
 ## Unreleased — for 2.0.0
 
+### Climate report: colour-coded temperatures
+- On **climate.html**, every temperature (mean, high and low, on the
+  Monthly and Yearly tabs, including the summary and annual rows) is now
+  colour-coded on the same scale as the forecast pages: blue at -10°C or
+  below, through teal, green, yellow and orange, to deep red at 42°C or
+  above. Each cell is tinted with its temperature's colour, so the figures
+  stay readable in light and dark themes, and the colour goes by the value
+  whatever unit is shown.
+- A colour key under each table's title shows the scale, ticked in °C or
+  °F to match the units selected.
+- Changed: `climate.html` 1.1.0.
+
 ### Up to four webcams, each 24-hour or daylight
 - Up to four webcam cards: `cardWebcam` (webcam 1, as before) and the new
   `cardWebcam2`, `cardWebcam3` and `cardWebcam4`. Each has its own title,

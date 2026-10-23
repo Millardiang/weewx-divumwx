@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# climate.html version 1.0.1
+# climate.html version 1.1.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -138,6 +138,17 @@ body.season-winter, body.season-spring, body.season-summer, body.season-autumn {
 .noaa-table td.temp{background:var(--noaa-temp);} .noaa-table td.rain{background:var(--noaa-rain);}
 .noaa-table td.wind{background:var(--noaa-wind);} .noaa-table td.wdir{background:var(--noaa-wdir);}
 .noaa-table td.hdd{background:var(--noaa-hdd);}
+/* Temperatures colour-coded on the forecast pages' scale (TEMP_COLOR_STOPS):
+   the cell is tinted with the temperature's colour, so the figure stays
+   readable in both themes. */
+[data-bs-theme="light"]{ --noaa-tc-mix:42%; }
+[data-bs-theme="dark"]{ --noaa-tc-mix:55%; }
+.noaa-table td.tc{font-weight:600;}
+.noaa-tc-legend{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 0 8px;font-size:10px;opacity:.85;}
+.noaa-tc-wrap{width:min(340px,60vw);}
+.noaa-tc-bar{width:100%;height:9px;border-radius:5px;border:1px solid var(--noaa-bdr);}
+.noaa-tc-ticks{position:relative;width:100%;height:13px;margin-top:1px;}
+.noaa-tc-ticks span{position:absolute;transform:translateX(-50%);white-space:nowrap;}
 .noaa-table tr:hover td{filter:brightness(.96);}
 .noaa-table tr.sr td{background:var(--noaa-summ) !important;font-weight:bold;border-top:2px solid var(--noaa-text-accent);}
 .noaa-table tr.am td{background:var(--noaa-am) !important;font-weight:bold;}
@@ -189,6 +200,7 @@ footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Lexend', syst
       <div id="tab-mo" class="noaa-tab-panel active">
         <div class="noaa-sec-title" id="moTitle"></div>
         <div class="noaa-sec-sub" id="moSub"></div>
+        <div class="noaa-tc-legend" id="moTcLegend"></div>
         <div class="noaa-table-wrap"><table class="noaa-table">
           <thead>
             <tr>
@@ -216,6 +228,7 @@ footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Lexend', syst
           <span id="yrSubNote1">Click any row to view that month's daily detail</span> &nbsp;|&nbsp;
           <span id="yrSubNote2">Green: currently selected month</span>
         </div>
+        <div class="noaa-tc-legend" id="yrTcLegend"></div>
         <div class="noaa-table-wrap"><table class="noaa-table">
           <thead>
             <tr>
@@ -308,6 +321,47 @@ function fmtN(v, dec=1){ return v!=null ? v.toFixed(dec) : '—'; }
 function fmtT(v, sys){ return v!=null ? fmtN(convTemp(v, sys.temp)) : '—'; }
 function fmtR(v, sys){ return v!=null ? fmtN(convRain(v, sys.rain)) : '—'; }
 function fmtW(v, sys){ return v!=null ? fmtN(convWind(v, sys.wind)) : '—'; }
+
+// ---- Temperature colour coding ----
+// Same scale as the forecast pages (divumwf.js TEMP_COLOR_STOPS), on the
+// value in degC whatever unit is shown.
+const TEMP_COLOR_STOPS = [
+  [-10, [91,127,227]], [0,[79,168,208]], [10,[79,184,155]], [18,[111,184,90]],
+  [24,[201,178,62]], [30,[224,138,61]], [36,[216,90,61]], [42,[184,48,42]],
+];
+function tempColor(c){
+  if(c==null || isNaN(c)) return null;
+  const st = TEMP_COLOR_STOPS;
+  if(c <= st[0][0]) return `rgb(${st[0][1].join(',')})`;
+  if(c >= st[st.length-1][0]) return `rgb(${st[st.length-1][1].join(',')})`;
+  for(let i=0;i<st.length-1;i++){
+    const [t0,c0] = st[i], [t1,c1] = st[i+1];
+    if(c>=t0 && c<=t1){
+      const f = (c-t0)/(t1-t0);
+      return `rgb(${c0.map((v,k)=>Math.round(v+(c1[k]-v)*f)).join(',')})`;
+    }
+  }
+  return null;
+}
+// A temperature cell: tinted with its colour (!important so it also shows
+// on the summary and selected-month rows), title = the value.
+function tempCell(v, sys){
+  const col = tempColor(v);
+  const style = col ? ` style="background:color-mix(in srgb, ${col} var(--noaa-tc-mix), var(--noaa-bg)) !important;"` : '';
+  return `<td class="temp${col ? ' tc' : ''}"${style}>${fmtT(v,sys)}</td>`;
+}
+// Key under each table: the scale from -10 to 42 degC, ticked in the unit shown.
+function renderTempLegend(id, sys){
+  const el = document.getElementById(id);
+  if(!el) return;
+  const lo = TEMP_COLOR_STOPS[0][0], hi = TEMP_COLOR_STOPS[TEMP_COLOR_STOPS.length-1][0];
+  const pos = c => ((c - lo) / (hi - lo) * 100).toFixed(2) + '%';
+  const grad = TEMP_COLOR_STOPS.map(s => `rgb(${s[1].join(',')}) ${pos(s[0])}`).join(', ');
+  const ticks = (sys.temp === 'F' ? [14, 32, 50, 68, 86, 104] : [-10, 0, 10, 20, 30, 40])
+    .map(t => { const c = sys.temp === 'F' ? (t - 32) * 5 / 9 : t; return `<span style="left:${pos(c)}">${t}°</span>`; }).join('');
+  el.innerHTML = `<div class="noaa-tc-wrap"><div class="noaa-tc-bar" style="background:linear-gradient(90deg, ${grad})"></div>` +
+    `<div class="noaa-tc-ticks">${ticks}</div></div><span>${tempUnitLabel(sys)}</span>`;
+}
 function compass(deg){
   if(deg==null) return '—';
   const dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
@@ -491,9 +545,9 @@ function renderMonthly(){
     if(r.cdd!=null) sCdd+=r.cdd;
     return `<tr>
       <td class="dc">${String(r.dn).padStart(2,'0')}</td>
-      <td class="temp">${fmtT(r.mean,sys)}</td>
-      <td class="temp">${fmtT(r.high,sys)}</td>
-      <td class="temp">${fmtT(r.low,sys)}</td>
+      ${tempCell(r.mean,sys)}
+      ${tempCell(r.high,sys)}
+      ${tempCell(r.low,sys)}
       <td class="hdd">${fmtN(r.hdd)}</td>
       <td class="hdd">${fmtN(r.cdd)}</td>
       <td class="rain">${fmtR(r.rain,sys)}</td>
@@ -506,9 +560,9 @@ function renderMonthly(){
 
   const summaryRow = `<tr class="sr">
     <td class="dc">&Sigma;/AVG</td>
-    <td class="temp">${nMn>0 ? fmtT(sMn/nMn,sys) : '—'}</td>
-    <td class="temp">${fmtT(hiH,sys)}</td>
-    <td class="temp">${fmtT(loL,sys)}</td>
+    ${tempCell(nMn>0 ? sMn/nMn : null,sys)}
+    ${tempCell(hiH,sys)}
+    ${tempCell(loL,sys)}
     <td class="hdd">${sHdd.toFixed(1)}</td>
     <td class="hdd">${sCdd.toFixed(1)}</td>
     <td class="rain">${fmtR(sRn,sys)}</td>
@@ -519,6 +573,7 @@ function renderMonthly(){
   </tr>`;
 
   document.getElementById('moBody').innerHTML = rows + summaryRow;
+  renderTempLegend('moTcLegend', sys);
 }
 
 function renderYearly(){
@@ -543,9 +598,9 @@ function renderYearly(){
     if(mr.wsMax!=null && (yhiW===null||mr.wsMax>yhiW)) yhiW=mr.wsMax;
     return `<tr class="cl${act?' am':''}" data-month="${mr.month}">
       <td class="dc">${monthShortFor(mr.month-1)}</td>
-      <td class="temp">${fmtT(mr.meanTemp,sys)}</td>
-      <td class="temp">${fmtT(mr.maxTemp,sys)}</td>
-      <td class="temp">${fmtT(mr.minTemp,sys)}</td>
+      ${tempCell(mr.meanTemp,sys)}
+      ${tempCell(mr.maxTemp,sys)}
+      ${tempCell(mr.minTemp,sys)}
       <td class="hdd">${fmtN(mr.hdd)}</td>
       <td class="hdd">${fmtN(mr.cdd)}</td>
       <td class="rain">${fmtR(mr.totalRain,sys)}</td>
@@ -557,9 +612,9 @@ function renderYearly(){
 
   const summaryRow = `<tr class="sr">
     <td class="dc">${DivumWXI18N.t('ANNUAL')}</td>
-    <td class="temp">${ynMn>0 ? fmtT(ysMn/ynMn,sys) : '—'}</td>
-    <td class="temp">${fmtT(yhiH,sys)}</td>
-    <td class="temp">${fmtT(yloL,sys)}</td>
+    ${tempCell(ynMn>0 ? ysMn/ynMn : null,sys)}
+    ${tempCell(yhiH,sys)}
+    ${tempCell(yloL,sys)}
     <td class="hdd">${ysHdd.toFixed(1)}</td>
     <td class="hdd">${ysCdd.toFixed(1)}</td>
     <td class="rain">${fmtR(ysRn,sys)}</td>
@@ -569,6 +624,7 @@ function renderYearly(){
   </tr>`;
 
   document.getElementById('yrBody').innerHTML = rows + summaryRow;
+  renderTempLegend('yrTcLegend', sys);
   document.querySelectorAll('#yrBody tr.cl').forEach(tr=>{
     tr.addEventListener('click', ()=>{
       selMonth = parseInt(tr.dataset.month, 10);
