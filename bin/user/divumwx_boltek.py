@@ -1,6 +1,6 @@
 """
 ##############################################################################################
-# divumwx_boltek.py version 1.1.0
+# divumwx_boltek.py version 1.1.1
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -14,9 +14,10 @@ strikes, and keeps rewriting it while it runs:
      "StationLat": 51.00, "StationLon": -3.11,
      "SoftwareVersion": "1.9.6.8317", "DetectorModel": "LD-350",
      "AntennaAlignment": 0,
-     "StrikeCount": 4623,                       NexStorm's running total
+     "StrikeCount": 4623,                       a NexStorm total, NOT used (see below)
      "StormCount": 0,
-     "StrikeData": [                            one entry per strike
+     "StrikeData": [                            one entry per strike, recent ones
+                                                (a rolling window, ~2 hours)
         {"time": 35105,                         seconds after local midnight
          "millis": 1792745105000,               strike time (Unix ms)
          "dist": 617,                           km
@@ -38,9 +39,9 @@ BoltekLightningService reads it every poll_interval seconds and:
     strike read just after an interval closed, the first run, or after
     WeeWX was stopped) are added to that interval's record, so the hourly
     chart shows them when they happened;
-  * if StrikeCount rises by more than the number of new listed strikes,
-    counts the extra too (at the time it was seen), since it isn't known
-    whether StrikeData lists every strike;
+  * ignores StrikeCount: it doesn't follow the listed strikes (it stayed
+    the same while strikes came and went from the list), so it can't be
+    used to count them. It's passed on in boltek.json for information only;
   * works out the strike rate, average distance over the last hour,
     approaching/receding and today's peak rate from the strikes' times and
     distances;
@@ -99,13 +100,13 @@ from weeutil.weeutil import to_int
 
 log = logging.getLogger(__name__)
 
-BOLTEK_VERSION = '1.1.0'
+BOLTEK_VERSION = '1.1.1'
 
 # One record per archive_interval (dateTime is the END of the interval).
 # 'strikes', 'cg', 'ic', 'close' and 'noise' are counts during the interval;
 # 'max_rate' is the highest strikes-per-minute seen and 'min_distance' the
 # closest strike. The rest are the readings at the end of the interval.
-# session_total is NexStorm's StrikeCount, so a restart carries on from it.
+# session_total keeps NexStorm's StrikeCount for reference only.
 # (Same layout as 1.0.0, so existing databases carry on as they are.)
 schema = [
     ('dateTime', 'INTEGER NOT NULL UNIQUE PRIMARY KEY'),
@@ -206,14 +207,6 @@ def parse_ngxarchive(text):
     }
 
 
-def counter_delta(new, old):
-    """Increase in a running total since the last reading. A total that
-    went down means NexStorm restarted, so all of the new total is new."""
-    if new is None or old is None:
-        return 0
-    return new - old if new >= old else new
-
-
 class BoltekLightningService(StdService):
 
     def __init__(self, engine, config_dict):
@@ -281,13 +274,12 @@ class BoltekRecorder(object):
         self.missing_logged = False
         self.error_logged = None
         self.read_error = None      # why the last read failed, for boltek.json
-        self.strike_count = None    # NexStorm's StrikeCount at the last reading
+        self.strike_count = None    # NexStorm's StrikeCount (for reference only)
         self.baseline_s = 0         # strikes at or before this were saved by an earlier run
         self.counted = {}           # key -> time, of strikes counted this run
         self.recent = {}            # key -> (time, km), last hour, for rate/average/tendency
-        self.extra_seq = 0
         self.last_strike = {}       # newest listed strike
-        self.session = {'listed': 0, 'undated': 0}
+        self.session = {'listed': 0}
         self.peak = {'day': None, 'rate': None, 'time': None}
         self.totals = {'today': 0, 'year': 0, 'alltime': 0}
         self.totals_day = None
@@ -315,15 +307,11 @@ class BoltekRecorder(object):
         self.pending_max_rate = None
 
     def _resume(self):
-        """Carry on from the database: NexStorm's last StrikeCount, and the
-        newest strike already saved (so strikes still listed in the file
-        aren't counted twice)."""
+        """Carry on from the database: the newest strike already saved, so
+        strikes still listed in the file aren't counted twice."""
         try:
-            row = self.dbm.getSql("SELECT session_total FROM archive WHERE session_total IS NOT NULL "
-                                  "ORDER BY dateTime DESC LIMIT 1")
-            if row:
-                self.strike_count = row[0]
-            row = self.dbm.getSql("SELECT MAX(last_strike) FROM archive")
+            row = self.dbm.getSql("SELECT MAX(last_strike) FROM archive WHERE last_strike <= ?",
+                                  (int(self.clock()) + 300,))
             if row and row[0]:
                 self.baseline_s = int(row[0])
             row = self.dbm.getSql("SELECT last_strike, last_distance, last_bearing, last_type FROM archive "
@@ -356,16 +344,14 @@ class BoltekRecorder(object):
         self._publish(now)
 
     def _count(self, reading, now):
+        # New = not counted yet, newer than what's saved, and not in the
+        # future (a strike time ahead of this clock by more than 5 minutes
+        # means a clock is wrong: it would block later strikes).
         new = [s for s in reading['strikes']
-               if s['key'] not in self.counted and s['t'] > self.baseline_s]
+               if s['key'] not in self.counted and self.baseline_s < s['t'] <= now + 300]
         for s in new:
             self.counted[s['key']] = s['t']
-        # Extra rise in StrikeCount beyond the listed strikes: count it too,
-        # now, as it isn't known whether StrikeData lists every strike.
-        rise = counter_delta(reading['strike_count'], self.strike_count)
-        extra = max(0, rise - len(new)) if self.strike_count is not None else 0
-        if reading['strike_count'] is not None:
-            self.strike_count = reading['strike_count']
+        self.strike_count = reading['strike_count']
 
         past = {}
         current_end = self.interval_start + self.cfg.archive_interval
@@ -389,15 +375,11 @@ class BoltekRecorder(object):
                 self.recent[s['key']] = (s['t'], s['km'])
         if past:
             self._add_to_saved(past)
-        self.pending['strikes'] += extra
-        for i in range(extra):
-            self.extra_seq += 1
-            self.recent['x%d' % self.extra_seq] = (now, None)
         self.session['listed'] += len(new)
-        self.session['undated'] += extra
 
-        if reading['strikes']:
-            newest = reading['strikes'][-1]
+        listed = [s for s in reading['strikes'] if s['t'] <= now + 300]
+        if listed:
+            newest = listed[-1]
             if not self.last_strike or newest['t'] >= (self.last_strike.get('t') or 0):
                 self.last_strike = newest
         # Forget what can no longer matter.
@@ -413,8 +395,8 @@ class BoltekRecorder(object):
             self.peak = {'day': day, 'rate': None, 'time': None}
         if rate and (self.peak['rate'] is None or rate > self.peak['rate']):
             self.peak.update(rate=rate, time=int(now))
-        if new or extra:
-            log.debug("Boltek lightning: %d new strike(s), %d more from StrikeCount" % (len(new), extra))
+        if new:
+            log.debug("Boltek lightning: %d new strike(s)" % len(new))
 
     def _add_to_saved(self, past):
         """Add strikes whose interval has already been saved (or was never
@@ -627,10 +609,8 @@ class BoltekRecorder(object):
                 'station_lat': r['station_lat'],
                 'station_lon': r['station_lon'],
                 'strikes_listed': len(r['strikes']),
-                # Since the service started: strikes counted from StrikeData,
-                # and extra ones from StrikeCount's rise.
-                'counted_listed': self.session['listed'],
-                'counted_undated': self.session['undated'],
+                # Strikes counted since the service started.
+                'counted': self.session['listed'],
                 'storms': r['storms'],
                 # Newest first: [time, km, bearing, lat, lon, label]
                 'recent_strikes': [[s['t'], s['km'], s['bearing'], s['lat'], s['lon'], s['label']]
