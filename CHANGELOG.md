@@ -33,11 +33,12 @@
   last minute; Last Hour comes from the Boltek database. The status dot
   is red when NexStorm's file is missing, unreadable or hasn't changed for
   10 minutes; hovering it says which.
-- Data comes from NexStorm's native **`ngxarchive.json`**, which lists each
-  strike with its time (`millis`), distance in km (`dist`), bearing
-  (`bng`), position (`lat`/`lon`), type and polarity, plus NexStorm's
-  running `StrikeCount`, `StormCount`, the detector model and NexStorm
-  version. It's read every 10 seconds by the new
+- Data comes from NexStorm's native **`ngxarchive.json`**, which lists the
+  recent strikes (a rolling window of about two hours), each with its time
+  (`millis`), distance in km (`dist`), bearing (`bng`), position
+  (`lat`/`lon`), type and polarity, plus `StormCount`, the detector model
+  and NexStorm version. Its `StrikeCount` isn't used: it doesn't follow
+  the listed strikes. It's read every 10 seconds by the new
   `user.divumwx_boltek.BoltekLightningService` (`[BoltekLightning]`
   `ngxarchive_file`), which writes `jsondata/boltek.json` for the card,
   including the reason whenever the file can't be read (shown when
@@ -47,11 +48,12 @@
   its 5-minute interval was saved, or listed while WeeWX was stopped, or
   already in the file the first time it's read, is added to the record
   for when it happened, so the hourly chart and records show it there.
-  If `StrikeCount` rises by more than the new strikes listed, the extra is
-  counted too, at the time it's seen. From the strikes' times and
-  distances it works out strikes per minute, the average distance over
-  the last hour, approaching/receding (the last 15 minutes against the 15
-  before) and today's peak rate. Type 1 is read as cloud-to-ground (+CG /
+  Strikes dated more than 5 minutes ahead of the WeeWX computer's clock
+  are ignored. If WeeWX is stopped for longer than the file's window,
+  strikes that left the list meanwhile can't be recovered. From the
+  strikes' times and distances it works out strikes per minute, the
+  average distance over the last hour, approaching/receding (the last 15
+  minutes against the 15 before) and today's peak rate. Type 1 is read as cloud-to-ground (+CG /
   -CG by polarity); `compoundType`, `correlated` and `NMEAChecksum` aren't
   identified yet and aren't used. Last hour, 15 and 30 minutes come from
   the database.
@@ -84,7 +86,7 @@
   (`min_distance`, `max_rate`).
 - `divumwx_uninstall_helper.py` removes those three entries; the database
   file is left in place so strike history isn't lost.
-- New: `bin/user/divumwx_boltek.py` 1.1.0, `modalBoltekLightning.html`
+- New: `bin/user/divumwx_boltek.py` 1.1.1, `modalBoltekLightning.html`
   1.1.0. Changed: `cardsBundleNew.js`
   (new `cardBoltekLightning` module 1.1.0), `index.html`, `hyperIndex.html`,
   `lexendIndex.html` (card mount), `install.py`, `build_card_bundle.py`,
