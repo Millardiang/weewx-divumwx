@@ -125,6 +125,27 @@ sudo systemctl restart weewx
    alone. The list of files removed is printed during the install.
 5. Restart WeeWX.
 
+## Webcams
+
+When you include the webcam card, the installer asks how many webcams you
+have (up to four) and, for each one, its title, the path of its image
+(relative to the DivumWX web folder, e.g. `img/picam.jpg`) and how it's
+shown:
+
+- `daylight`: the live image from sunrise to sunset, and the night-time
+  page (`img/nightTime.svg`, which you can replace with your own) after
+  dark. This is how the webcam card has always worked.
+- `24hr`: the live image all day and night, for a camera that sees in the
+  dark.
+
+Webcam 1's card opens the timelapse, which is made from its image; the
+other webcams open a larger live view. An upgrade that already shows the
+webcam card is asked these questions once, with its current title and
+image offered as the defaults. To change them later, edit `webcam_title`,
+`webcam_image` and `webcam_mode` (webcam 1) or `webcam2_*` to `webcam4_*`
+under `[DivumWXCards]` in `weewx.conf`, and add or remove `cardWebcam2` to
+`cardWebcam4` in its `enabled_cards`.
+
 ## Boltek lightning detectors
 
 DivumWX can show a Boltek detector's readings on its own **Boltek Lightning**

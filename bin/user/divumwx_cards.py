@@ -51,6 +51,18 @@ Provides three tags:
                                both null despite both being set correctly
                                in weewx.conf.
 
+    $divumwx_webcams         — JSON array of the (up to four) webcams, one
+                               object each: {"n", "card", "title",
+                               "image", "mode"}, in order (webcam 1 =
+                               cardWebcam from webcam_title/webcam_image/
+                               webcam_mode; 2-4 = cardWebcam2..4 from
+                               webcam2_* .. webcam4_*). Only webcams with
+                               an image set are listed. mode is 'daylight'
+                               (live from sunrise to sunset, night-time
+                               page after dark; the default) or '24hr'.
+
+                                 "webcams": $divumwx_webcams,
+
     $divumwx_station_image_title,
     $divumwx_station_image_path  — same pre-formatted-JSON-literal pattern
                                as webcam_title/webcam_image above, reading
@@ -181,6 +193,20 @@ class DivumwxCards(SearchList):
         # unset -- both become JSON null, not an empty-string title/image.
         webcam_title = cards_section.get('webcam_title', '') or None
         webcam_image = cards_section.get('webcam_image', '') or None
+        webcams = []
+        for n in range(1, 5):
+            prefix = 'webcam' if n == 1 else 'webcam%d' % n
+            image = cards_section.get(prefix + '_image', '') or None
+            if not image:
+                continue
+            mode = str(cards_section.get(prefix + '_mode', '') or '').strip().lower()
+            webcams.append({
+                'n': n,
+                'card': 'cardWebcam' if n == 1 else 'cardWebcam%d' % n,
+                'title': cards_section.get(prefix + '_title', '') or None,
+                'image': image,
+                'mode': mode if mode in ('daylight', '24hr') else 'daylight',
+            })
         station_image_title = cards_section.get('station_image_title', '') or None
         station_image_path = cards_section.get('station_image_path', '') or None
 
@@ -223,6 +249,7 @@ class DivumwxCards(SearchList):
             'divumwx_enabled_cards': json.dumps(list(enabled_cards)),
             'divumwx_webcam_title': json.dumps(webcam_title),
             'divumwx_webcam_image': json.dumps(webcam_image),
+            'divumwx_webcams': json.dumps(webcams),
             'divumwx_station_image_title': json.dumps(station_image_title),
             'divumwx_station_image_path': json.dumps(station_image_path),
             'divumwx_in_uk': json.dumps(in_uk),

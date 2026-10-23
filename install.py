@@ -1854,6 +1854,21 @@ DIVUMWX_CARD_TARGET_TOTAL = 26  # theoretical max (8 mandatory + 8 automatic + 2
 DIVUMWX_WEBCAM_DEFAULT_TITLE = 'Webcam'
 DIVUMWX_WEBCAM_DEFAULT_IMAGE = 'img/picam.jpg'
 
+# Up to four webcams. Webcam 1 is cardWebcam (its click opens the timelapse,
+# which is made from its image); webcams 2-4 are extra cards that open
+# modalWebcam.html. They don't count towards DIVUMWX_CARD_TARGET_TOTAL: they
+# are asked about after the optional-card loop, once cardWebcam is chosen.
+# Settings in [DivumWXCards]: webcam_title / webcam_image / webcam_mode for
+# webcam 1 (the keys it always had), webcam2_* .. webcam4_* for the others,
+# and webcam_count (also marks that the questions have been answered).
+# Each webcam's mode: 'daylight' shows the live image from sunrise to sunset
+# and the night-time page after dark (how the webcam card always worked);
+# '24hr' shows the live image all the time.
+DIVUMWX_WEBCAM_MAX = 4
+DIVUMWX_WEBCAM_CARDS = ['cardWebcam', 'cardWebcam2', 'cardWebcam3', 'cardWebcam4']
+DIVUMWX_WEBCAM_MODES = ['daylight', '24hr']
+DIVUMWX_WEBCAM_DEFAULT_MODE = 'daylight'
+
 # Page body background, stored as [DivumWXCards] page_background and published
 # in archive.json for seasonalBackground.js. 'seasonal' shows a photo that
 # changes with the meteorological season at the station (swapped for the
@@ -1919,6 +1934,86 @@ def ask_lightning_detector_once(cfg, ask):
     detector = 'boltek' if ask() else 'other'
     set_lightning_detector(cfg, detector)
     return detector
+
+
+def webcam_keys(n):
+    """[DivumWXCards] keys (title, image, mode) for webcam n (1-4)."""
+    prefix = 'webcam' if n == 1 else 'webcam%d' % n
+    return prefix + '_title', prefix + '_image', prefix + '_mode'
+
+
+def webcam_default_image(n):
+    return DIVUMWX_WEBCAM_DEFAULT_IMAGE if n == 1 else 'img/webcam%d.jpg' % n
+
+
+def apply_webcam_answers(cfg, cams):
+    """Record the webcams in [DivumWXCards]. `cams` is a list (1-4 items) of
+    dicts with 'title', 'image' and 'mode', webcam 1 first. Puts cardWebcam2..N
+    in enabled_cards straight after cardWebcam (removing any beyond N), and
+    sets webcam_count. Settings of webcams beyond N are kept, so turning one
+    back on later finds them. Returns True if enabled_cards changed."""
+    dc = cfg.setdefault('DivumWXCards', {})
+    count = max(1, min(DIVUMWX_WEBCAM_MAX, len(cams)))
+    for n, cam in enumerate(cams[:count], start=1):
+        tk, ik, mk = webcam_keys(n)
+        dc[tk] = cam.get('title') or (DIVUMWX_WEBCAM_DEFAULT_TITLE if n == 1 else 'Webcam %d' % n)
+        dc[ik] = cam.get('image') or webcam_default_image(n)
+        mode = cam.get('mode') if cam.get('mode') in DIVUMWX_WEBCAM_MODES else DIVUMWX_WEBCAM_DEFAULT_MODE
+        dc[mk] = mode
+    dc['webcam_count'] = str(count)
+    cards = dc.get('enabled_cards') or []
+    cards = [cards] if isinstance(cards, str) else list(cards)
+    before = list(cards)
+    cards = [c for c in cards if c not in DIVUMWX_WEBCAM_CARDS[1:]]
+    if 'cardWebcam' not in cards:
+        cards.append('cardWebcam')
+    at = cards.index('cardWebcam') + 1
+    cards[at:at] = DIVUMWX_WEBCAM_CARDS[1:count]
+    dc['enabled_cards'] = cards
+    return cards != before
+
+
+def ask_webcams_once(cfg, prompt, printer=None):
+    """Webcam questions, asked when cardWebcam is shown and they haven't been
+    answered yet (a first install that chose cardWebcam, or an upgrade from
+    before multiple webcams). `prompt(question, default, options)` returns
+    the answer (weecfg.prompt_with_options in the installer). The current
+    settings are offered as the defaults. Returns the number of webcams, or
+    None if nothing was asked."""
+    dc = cfg.get('DivumWXCards', {})
+    cards = dc.get('enabled_cards') or []
+    cards = [cards] if isinstance(cards, str) else list(cards)
+    if 'cardWebcam' not in cards or dc.get('webcam_count'):
+        return None
+    if printer:
+        printer.out("Webcams: up to %d webcam cards. Each one can show its live image all "
+                    "day and night ('24hr'), or from sunrise to sunset with the night-time "
+                    "page after dark ('daylight', as the webcam card always has). Webcam 1's "
+                    "card opens the timelapse; the others open a larger live view."
+                    % DIVUMWX_WEBCAM_MAX, level=1)
+    answer = prompt("How many webcams? (1-%d)" % DIVUMWX_WEBCAM_MAX, '1',
+                    [str(i) for i in range(1, DIVUMWX_WEBCAM_MAX + 1)])
+    try:
+        count = max(1, min(DIVUMWX_WEBCAM_MAX, int(str(answer).strip())))
+    except ValueError:
+        count = 1
+    cams = []
+    for n in range(1, count + 1):
+        tk, ik, mk = webcam_keys(n)
+        label = 'Webcam %d' % n
+        title = prompt("%s title/description, shown on its card and modal%s" % (
+                           label, " (e.g. 'Looking Towards North West of Steeple Claydon, UK')" if n == 1 else ''),
+                       dc.get(tk) or (DIVUMWX_WEBCAM_DEFAULT_TITLE if n == 1 else label), None)
+        image = prompt("%s image path, relative to the DivumWX html root (e.g. '%s')"
+                       % (label, webcam_default_image(n)),
+                       dc.get(ik) or webcam_default_image(n), None)
+        mode = prompt("%s display: '24hr' (live all day and night) or 'daylight' (live from "
+                      "sunrise to sunset, night-time page after dark)?" % label,
+                      dc.get(mk) if dc.get(mk) in DIVUMWX_WEBCAM_MODES else DIVUMWX_WEBCAM_DEFAULT_MODE,
+                      DIVUMWX_WEBCAM_MODES)
+        cams.append({'title': title, 'image': image, 'mode': mode})
+    apply_webcam_answers(cfg, cams)
+    return count
 
 
 def apply_new_default_cards(cfg):
@@ -3353,17 +3448,9 @@ class DivumwxInstaller(ExtensionInstaller):
                     optional_selected.append(card_name)
                     running_total += 1
 
-            webcam_title = None
-            webcam_image = None
-            if 'cardWebcam' in optional_selected:
-                webcam_title = weecfg.prompt_with_options(
-                    "Webcam title/description, shown on the webcam card and its modal "
-                    "(e.g. 'Looking Towards North West of Steeple Claydon, UK')",
-                    default=DIVUMWX_WEBCAM_DEFAULT_TITLE)
-                webcam_image = weecfg.prompt_with_options(
-                    "Webcam image path, relative to the DivumWX html root "
-                    "(e.g. 'img/picam.jpg')",
-                    default=DIVUMWX_WEBCAM_DEFAULT_IMAGE)
+            # Webcam questions (how many, and each one's title, image and
+            # display) are asked by ask_webcams_once() below, which also
+            # covers upgrades.
 
             station_image_title = None
             station_image_path = None
@@ -3378,7 +3465,6 @@ class DivumwxInstaller(ExtensionInstaller):
 
             apply_divumwx_cards_merge(
                 cfg, rain_choice=rain_choice, optional_selected=optional_selected,
-                webcam_title=webcam_title, webcam_image=webcam_image,
                 station_image_title=station_image_title, station_image_path=station_image_path)
             if lightning_detector:
                 cfg['DivumWXCards']['lightning_detector'] = lightning_detector
@@ -3394,6 +3480,14 @@ class DivumwxInstaller(ExtensionInstaller):
         # (only when a lightning card is shown) and swap cards if it's a Boltek.
         detector = ask_lightning_detector_once(
             cfg, lambda: y_or_n(DIVUMWX_BOLTEK_QUESTION) == 'y')
+        # Webcams (1-4, each 24hr or daylight): a first install that chose
+        # cardWebcam, or an upgrade from before multiple webcams, once.
+        # Before [Timelapse] below, which takes webcam 1's image.
+        webcam_count = ask_webcams_once(
+            cfg, lambda q, d, o: weecfg.prompt_with_options(q, default=d, options=o), printer)
+        if webcam_count:
+            printer.out("Webcams: %d (cards %s)." % (webcam_count, ', '.join(DIVUMWX_WEBCAM_CARDS[:webcam_count])),
+                        level=1)
         if detector == 'boltek':
             printer.out("Using the Boltek Lightning card (cardBoltekLightning) in place of "
                         "cardLightning. Point [BoltekLightning] ngxarchive_file at NexStorm's "

@@ -2,6 +2,40 @@
 
 ## Unreleased — for 2.0.0
 
+### Up to four webcams, each 24-hour or daylight
+- Up to four webcam cards: `cardWebcam` (webcam 1, as before) and the new
+  `cardWebcam2`, `cardWebcam3` and `cardWebcam4`. Each has its own title,
+  image and display:
+  - **daylight**: the live image from sunrise to sunset and the night-time
+    page after dark (the webcam card's behaviour until now, and the
+    default);
+  - **24hr**: the live image all the time.
+- Installer: after "Include cardWebcam?" (yes) it asks how many webcams
+  (1-4), then each one's title, image path and display (`24hr` or
+  `daylight`). Upgrades that already show the webcam card are asked once,
+  with the current title and image as the defaults. Settings are in
+  `[DivumWXCards]`: `webcam_title` / `webcam_image` / `webcam_mode` for
+  webcam 1 (its existing keys), `webcam2_*` to `webcam4_*` for the others,
+  and `webcam_count`. Webcams 2-4 go in `enabled_cards` straight after
+  `cardWebcam`. They don't use up the optional-card slots.
+- `archive.json` `meta.webcams` lists each webcam (`n`, `card`, `title`,
+  `image`, `mode`); `webcam_title` / `webcam_image` are still published.
+- Webcam 1's card still opens the timelapse, which is made from its image
+  (daytime only, unless `[Timelapse]` `capture_at_night = true`). Webcams
+  2-4 open the new **modalWebcam.html**: a larger live view refreshed every
+  30 seconds, with the camera's title, its display mode and when the image
+  last changed (station time); a daylight camera shows the night-time page
+  there after dark too.
+- Status dot: green while the image loads and has changed in the last 10
+  minutes (webcam 1 in daylight mode still goes by its timelapse, as
+  before); red at night for daylight cameras, as before.
+- Webcam cards 2-4 only run once they're set up, hidden cards don't poll,
+  and the cards share one day/night check.
+- Changed: `cardWebcam.js` 1.1.0 (in `cardsBundleNew.js`), `index.html`,
+  `hyperIndex.html`, `lexendIndex.html` (three new card mounts),
+  `install.py`, `bin/user/divumwx_cards.py`, `jsondata/archive.json.tmpl`,
+  `INSTALLATION_GUIDE.md`. New: `modalWebcam.html` 1.0.0.
+
 ### Boltek Lightning: live strike map
 - **modalBoltekLightning.html** opens on a new **Strike Map** tab (the
   chart and records are on the **Chart & Records** tab; the choice is

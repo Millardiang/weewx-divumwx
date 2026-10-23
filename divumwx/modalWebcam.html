@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<!--
+##############################################################################################
+# modalWebcam.html version 1.0.0
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  GPLv3
+##############################################################################################
+  Larger live view of one webcam, opened from webcam cards 2-4
+  (modalWebcam.html?cam=N; webcam 1's card opens the timelapse). Title, image
+  and display mode come from archive.json meta.webcams. A 'daylight' webcam
+  shows the night-time page after dark, as its card does; a '24hr' one is
+  always live. The image refreshes every 30 seconds.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Webcam</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root, [data-theme="light"]{
+  --bw-accent:#B45309; --bw-good:#5BBB8A; --bw-danger:#E36B57;
+  --bs-body-bg:#EFECE2; --bs-body-color:#1D2C4E; --bs-secondary-color:#5C6672;
+  --bs-card-bg:#FFFFFF; --bs-border-color:#C9CFD8;
+}
+[data-theme="dark"]{
+  --bw-accent:#D3A94C; --bw-good:#5BBB8A; --bw-danger:#E36B57;
+  --bs-body-bg:#0A0F22; --bs-body-color:#E9E4D4; --bs-secondary-color:#8B93B8;
+  --bs-card-bg:#111834; --bs-border-color:#2A3358;
+}
+:root[data-season="winter"]{ --bs-body-bg:#e9f2ec; --bs-card-bg:#f4f9f6; }
+:root[data-season="spring"]{ --bs-body-bg:#eef7e3; --bs-card-bg:#f5faef; }
+:root[data-season="summer"]{ --bs-body-bg:#fff6d9; --bs-card-bg:#fffbef; }
+:root[data-season="autumn"]{ --bs-body-bg:#f2e6d8; --bs-card-bg:#f8f0e7; }
+*{ box-sizing:border-box; }
+html, body{ margin:0; padding:0; }
+body{ background:var(--bs-body-bg); color:var(--bs-body-color); font-family:'Lexend', 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size:13.5px; line-height:1.5; }
+.wc-page{ padding:12px 16px 16px; max-width:1200px; margin:0 auto; }
+.wc-card{ background:var(--bs-card-bg); border:1px solid var(--bs-border-color); border-radius:14px; padding:12px; }
+.wc-bar{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin:0 2px 10px; }
+.wc-title{ font-weight:600; font-size:15px; min-width:0; }
+.wc-meta{ display:flex; align-items:center; gap:10px; font-size:12px; color:var(--bs-secondary-color); }
+.wc-badge{ border:1px solid var(--bs-border-color); border-radius:999px; padding:2px 10px; font-weight:600; color:var(--bw-accent); }
+.wc-dot{ display:inline-block; width:8px; height:8px; border-radius:50%; background:#999; margin-right:5px; vertical-align:0; }
+.wc-dot.ok{ background:var(--bw-good); } .wc-dot.bad{ background:var(--bw-danger); }
+.wc-frame{ position:relative; width:100%; border-radius:10px; overflow:hidden; background:#000; display:flex; align-items:center; justify-content:center; min-height:200px; }
+.wc-frame img{ display:block; width:100%; height:auto; max-height:72vh; object-fit:contain; }
+.wc-msg{ position:absolute; left:50%; bottom:12px; transform:translateX(-50%); background:rgba(10,15,34,.78); color:#E9E4D4;
+  border-radius:999px; padding:6px 14px; font-size:12px; white-space:nowrap; }
+[hidden]{ display:none !important; }
+</style>
+</head>
+<body>
+<div class="wc-page">
+  <div class="wc-card">
+    <div class="wc-bar">
+      <div class="wc-title" id="wcTitle">Webcam</div>
+      <div class="wc-meta">
+        <span class="wc-badge" id="wcMode"></span>
+        <span><span class="wc-dot" id="wcDot"></span><span id="wcUpdated">&hellip;</span></span>
+      </div>
+    </div>
+    <div class="wc-frame">
+      <img id="wcImg" alt="Webcam">
+      <div class="wc-msg" id="wcMsg" hidden></div>
+    </div>
+  </div>
+</div>
+<script src="stationTime.js"></script>
+<script>
+(function(){
+  var POLL_MS = 30 * 1000, STALE_S = 600;
+  var n = Math.max(1, Math.min(4, parseInt((/[?&]cam=(\d)/.exec(location.search) || [])[1] || '2', 10)));
+  var cam = { title: 'Webcam ' + n, image: n === 1 ? 'img/picam.jpg' : 'img/webcam' + n + '.jpg', mode: 'daylight' };
+
+  // ---- Theme and season follow the dashboard ----
+  function applyTheme(){
+    var t = null;
+    try {
+      var b = window.parent && window.parent.document && window.parent.document.body;
+      if (b && (b.classList.contains('dark') || b.classList.contains('light'))) t = b.classList.contains('dark') ? 'dark' : 'light';
+      var m = b && /season-(winter|spring|summer|autumn)/.exec(b.className);
+      if (m) document.documentElement.setAttribute('data-season', m[1]); else document.documentElement.removeAttribute('data-season');
+    } catch (e) {}
+    if (!t) {
+      var mode = 'auto';
+      try { mode = localStorage.getItem('dashboardThemeMode') || 'auto'; } catch (e) {}
+      t = mode === 'light' ? 'light' : mode === 'dark' ? 'dark'
+        : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    }
+    document.documentElement.setAttribute('data-theme', t);
+  }
+  applyTheme();
+  try {
+    var pb = window.parent && window.parent.document && window.parent.document.body;
+    if (pb) new MutationObserver(applyTheme).observe(pb, { attributes: true, attributeFilter: ['class'] });
+  } catch (e) {}
+
+  var imgEl = document.getElementById('wcImg'), msgEl = document.getElementById('wcMsg');
+  var dotEl = document.getElementById('wcDot'), updEl = document.getElementById('wcUpdated');
+
+  function tz(){ try { return StationTime.getTZ(); } catch (e) { return undefined; } }
+  function hhmm(d){ return new Intl.DateTimeFormat('en-GB', { timeZone: tz(), hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(d); }
+  function getJson(url){
+    return fetch(url + '?_=' + Date.now(), { cache: 'no-store' }).then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+  }
+  function isDay(){
+    return Promise.allSettled([getJson('./jsondata/almanac.json'), getJson('./jsondata/loop.json')]).then(function(res){
+      var alt = res[0].status === 'fulfilled' ? res[0].value['almanac.sun.alt'] : null;
+      if (typeof alt === 'number' && !isNaN(alt)) return alt > 0;
+      var o = res[1].status === 'fulfilled' ? (res[1].value.observations || {}) : {};
+      return (o.isDay === 0 || o.isDay === 1) ? o.isDay === 1 : null;
+    });
+  }
+  function setStatus(ok, text){ dotEl.className = 'wc-dot ' + (ok ? 'ok' : 'bad'); updEl.textContent = text; }
+
+  function refresh(){
+    isDay().then(function(day){
+      if (cam.mode !== '24hr' && day === false) {
+        imgEl.src = 'img/nightTime.svg';
+        msgEl.textContent = 'Live view from sunrise to sunset'; msgEl.hidden = false;
+        setStatus(false, 'Night');
+        return;
+      }
+      msgEl.hidden = true;
+      var url = cam.image + '?v=' + Date.now();
+      imgEl.onerror = function(){ setStatus(false, 'Image unavailable'); msgEl.textContent = 'Can’t load ' + cam.image; msgEl.hidden = false; };
+      imgEl.onload = function(){
+        fetch(url, { method: 'HEAD', cache: 'no-store' }).then(function(r){
+          var lm = r.headers.get('Last-Modified'), t = lm ? new Date(lm) : null;
+          if (!t || isNaN(t)) { setStatus(true, 'Live'); return; }
+          var fresh = (Date.now() - t.getTime()) / 1000 <= STALE_S;
+          setStatus(fresh, (fresh ? 'Updated ' : 'Last updated ') + hhmm(t));
+        }).catch(function(){ setStatus(true, 'Live'); });
+      };
+      imgEl.src = url;
+    });
+  }
+
+  getJson('./jsondata/archive.json').then(function(a){
+    var m = (a && a.meta) || {};
+    var c = (Array.isArray(m.webcams) ? m.webcams : []).filter(function(w){ return w && w.n === n; })[0];
+    if (c) { cam.title = c.title || cam.title; cam.image = c.image || cam.image; cam.mode = c.mode === '24hr' ? '24hr' : 'daylight'; }
+  }).catch(function(){}).then(function(){
+    document.getElementById('wcTitle').textContent = cam.title;
+    document.title = cam.title;
+    imgEl.alt = cam.title;
+    document.getElementById('wcMode').textContent = cam.mode === '24hr' ? '24 hours' : 'Sunrise – sunset';
+    refresh();
+    setInterval(refresh, POLL_MS);
+  });
+
+  // ---- Size reporting to the dashboard's modal box ----
+  function reportSize(){
+    if (window.parent === window) return;
+    window.parent.postMessage({ type: 'chartModalContentHeight', height: document.body.scrollHeight }, '*');
+  }
+  if (window.parent !== window) {
+    new ResizeObserver(reportSize).observe(document.body);
+    imgEl.addEventListener('load', reportSize);
+  }
+})();
+</script>
+</body>
+</html>

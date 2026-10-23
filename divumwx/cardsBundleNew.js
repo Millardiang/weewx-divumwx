@@ -10303,21 +10303,30 @@ try {
 try {
 /*
 ##############################################################################################
-# cardWebcam.js version 1.0.0
+# cardWebcam.js version 1.1.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
 */
 
 // ===================== cardWebcam.js =====================
+// Up to four webcam cards: cardWebcam (webcam 1, #webcamCard24) and
+// cardWebcam2..4 (#webcam2Card28, #webcam3Card29, #webcam4Card30). Each
+// one's title, image and display come from archive.json meta.webcams
+// (written from [DivumWXCards] by the installer; webcam 1 also falls back to
+// meta.webcam_title / meta.webcam_image):
+//   'daylight' - the live image from sunrise to sunset, and the night-time
+//                page after dark (how the webcam card always worked);
+//   '24hr'     - the live image all the time.
+// Webcam 1's card opens the timelapse (made from its image); the others open
+// modalWebcam.html?cam=N, a larger live view.
 (function(){
   var LOOP_JSON_URL = './jsondata/loop.json';
   var ARCHIVE_JSON_URL = './jsondata/archive.json';
   var ASTRO_JSON_URL = './jsondata/almanac.json';
   var POLL_MS = 30 * 1000;
-
-  var MODAL_TITLE = 'Looking Towards North West of Steeple Claydon, UK';
-  var WEBCAM_IMAGE_PATH = 'img/picam.jpg';
+  var IMAGE_STALE_S = 600;   // a live image older than this turns the dot red
+  var MOUNTS = { 1: 'webcamCard24', 2: 'webcam2Card28', 3: 'webcam3Card29', 4: 'webcam4Card30' };
 
   function pad2(n){ return n < 10 ? '0' + n : String(n); }
   function stationParts(date){
@@ -10337,191 +10346,183 @@ try {
     var p = stationParts(new Date());
     return p.year + p.month + p.day + p.hour + p.minute + p.second;
   }
-
-  var mount = document.getElementById('webcamCard24');
-  if (!mount) return;
-  mount.innerHTML = '';
-  mount.style.position = 'relative';
-  mount.style.display = 'flex';
-  mount.style.flexDirection = 'column';
-
-  mount.style.borderBottom = '0';
-
-  var overlayTextColor = 'var(--bs-body-color)';
-
-  var titleBar = document.createElement('div');
-  titleBar.style.position = 'absolute';
-  titleBar.style.top = '-20px';
-  titleBar.style.left = '0';
-  titleBar.style.right = '0';
-  titleBar.style.height = '20px';
-  titleBar.style.boxSizing = 'border-box';
-  titleBar.style.display = 'flex';
-  titleBar.style.alignItems = 'center';
-  titleBar.style.justifyContent = 'space-between';
-  titleBar.style.gap = '8px';
-  titleBar.style.padding = '0 14px';
-  titleBar.style.fontSize = '9px';
-  titleBar.style.color = overlayTextColor;
-  titleBar.style.background = 'transparent';
-
-  var titleLabel = document.createElement('span');
-  titleLabel.textContent = DivumWXI18N.t('Webcam');
-  titleLabel.style.fontWeight = '600';
-  titleLabel.style.whiteSpace = 'nowrap';
-  titleLabel.style.overflow = 'hidden';
-  titleLabel.style.textOverflow = 'ellipsis';
-
-  var statusWrap = document.createElement('span');
-  statusWrap.style.display = 'flex';
-  statusWrap.style.alignItems = 'center';
-  statusWrap.style.gap = '4px';
-  statusWrap.style.flexShrink = '0';
-  statusWrap.style.opacity = '0.85';
-
-  var statusDot = document.createElement('span');
-  statusDot.style.width = '6px';
-  statusDot.style.height = '6px';
-  statusDot.style.borderRadius = '50%';
-  statusDot.style.background = '#999';
-  statusDot.style.flexShrink = '0';
-
-  var statusTime = document.createElement('span');
-
-  statusWrap.appendChild(statusDot);
-  statusWrap.appendChild(statusTime);
-  titleBar.appendChild(titleLabel);
-  titleBar.appendChild(statusWrap);
-  mount.appendChild(titleBar);
-
-  function setStatus(ok){
-    statusDot.style.background = ok ? '#2ecc71' : '#e74c3c';
-    var t = stationNow();
-    statusTime.textContent = pad2(t.getUTCHours()) + ':' + pad2(t.getUTCMinutes()) + ':' + pad2(t.getUTCSeconds());
+  function getJson(url){
+    return fetch(url + (url.indexOf('?') > -1 ? '&' : '?') + '_=' + Date.now(), { cache: 'no-store' })
+      .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
   }
-
-  var body = document.createElement('div');
-  body.style.height = '175px';
-  body.style.width = '100%';
-  body.style.boxSizing = 'border-box';
-  body.style.display = 'flex';
-  body.style.alignItems = 'center';
-  body.style.justifyContent = 'center';
-  mount.appendChild(body);
-
-  var imgLink = document.createElement('a');
-
-  imgLink.className = 'card-whole-link';
-  imgLink.href = 'modalTimelapse.html';
-  imgLink.setAttribute('data-modal', 'Timelapse');
-  imgLink.setAttribute('data-title', DivumWXI18N.t('Timelapse') + ' - ' + MODAL_TITLE);
-  imgLink.setAttribute('data-type', 'iframe');
-  imgLink.setAttribute('data-modal-width', '760px');
-  imgLink.setAttribute('data-modal-height', '460px');
-  imgLink.setAttribute('data-url', 'modalTimelapse.html');
-  imgLink.style.display = 'block';
-  imgLink.style.width = '100%';
-  imgLink.style.height = '100%';
-  body.appendChild(imgLink);
-
-  var img = document.createElement('img');
-  img.alt = 'weathercam';
-  img.style.display = 'block';
-  img.style.width = '100%';
-  img.style.height = '100%';
-  img.style.objectFit = 'cover';
-  img.style.borderRadius = '5px';
-  imgLink.appendChild(img);
-
-  var DAY_TIMELAPSE_PATH = './webcam-timelapse/day.mp4';
-
-  function checkStaleness(url){
+  // Fresh if the file changed within maxAge seconds (or the server doesn't say).
+  function checkFresh(url, maxAge){
     return fetch(url, { method: 'HEAD', cache: 'no-store' }).then(function(r){
-      var lastModifiedHeader = r.headers.get('Last-Modified');
-      if (!lastModifiedHeader) return true;
-      var ageSeconds = (Date.now() - new Date(lastModifiedHeader).getTime()) / 1000;
-
-      if (isNaN(ageSeconds)) return true;
-      return ageSeconds <= 300;
+      var lm = r.headers.get('Last-Modified');
+      if (!lm) return true;
+      var age = (Date.now() - new Date(lm).getTime()) / 1000;
+      return isNaN(age) ? true : age <= maxAge;
     }).catch(function(){ return true; });
   }
 
-  var lastIsDay = null;
-  function refresh(){
-    Promise.allSettled([
-      fetch(LOOP_JSON_URL + ((LOOP_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
-      fetch(ASTRO_JSON_URL + ((ASTRO_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
-    ]).then(function(results){
-        var loopResult = results[0], astroResult = results[1];
-        if (loopResult.status === 'rejected') { console.warn('cardWebcam: loop.json fetch failed --', loopResult.reason.message); setStatus(false); return; }
-        if (astroResult.status === 'rejected') console.warn('cardWebcam: almanac.json fetch failed --', astroResult.reason.message);
+  // Day or night at the station, shared by all the webcam cards each poll.
+  var dayPromise = null, dayAt = 0;
+  function isDayNow(){
+    if (dayPromise && Date.now() - dayAt < POLL_MS / 2) return dayPromise;
+    dayAt = Date.now();
+    dayPromise = Promise.allSettled([getJson(LOOP_JSON_URL), getJson(ASTRO_JSON_URL)]).then(function(res){
+      var o = res[0].status === 'fulfilled' ? (res[0].value.observations || {}) : {};
+      var alm = res[1].status === 'fulfilled' ? res[1].value : {};
+      if (res[0].status === 'rejected') console.warn('cardWebcam: loop.json fetch failed --', res[0].reason.message);
+      if (res[1].status === 'rejected') console.warn('cardWebcam: almanac.json fetch failed --', res[1].reason.message);
+      var alt = alm['almanac.sun.alt'];
+      if (typeof alt === 'number' && !isNaN(alt)) return alt > 0;
+      if (o.isDay === 0 || o.isDay === 1) return o.isDay === 1;
+      return null;   // unknown
+    });
+    return dayPromise;
+  }
 
-        var o = loopResult.value.observations || {};
-        var alm = astroResult.status === 'fulfilled' ? astroResult.value : {};
+  function makeCard(n, mount){
+    var cam = { title: n === 1 ? 'Looking Towards North West of Steeple Claydon, UK' : 'Webcam ' + n,
+                image: n === 1 ? 'img/picam.jpg' : 'img/webcam' + n + '.jpg', mode: 'daylight' };
+    var dayLabel = function(){ return DivumWXI18N.t('Webcam') + (n > 1 ? ' ' + n : ''); };
 
-        var sunAltRaw = alm['almanac.sun.alt'];
-        var sunAlt = (typeof sunAltRaw === 'number' && !isNaN(sunAltRaw)) ? sunAltRaw : null;
-        var isDay = (sunAlt !== null) ? (sunAlt > 0) : (o.isDay === 1);
-        lastIsDay = isDay;
+    mount.innerHTML = '';
+    mount.style.position = 'relative';
+    mount.style.display = 'flex';
+    mount.style.flexDirection = 'column';
+    mount.style.borderBottom = '0';
 
-        if (!isDay){
-          titleLabel.textContent = DivumWXI18N.t('Timelapse');
+    var titleBar = document.createElement('div');
+    titleBar.style.cssText = 'position:absolute;top:-20px;left:0;right:0;height:20px;box-sizing:border-box;display:flex;' +
+      'align-items:center;justify-content:space-between;gap:8px;padding:0 14px;font-size:9px;background:transparent;';
+    titleBar.style.color = 'var(--bs-body-color)';
+    var titleLabel = document.createElement('span');
+    titleLabel.textContent = dayLabel();
+    titleLabel.style.cssText = 'font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+    var statusWrap = document.createElement('span');
+    statusWrap.style.cssText = 'display:flex;align-items:center;gap:4px;flex-shrink:0;opacity:.85;';
+    var statusDot = document.createElement('span');
+    statusDot.style.cssText = 'width:6px;height:6px;border-radius:50%;background:#999;flex-shrink:0;';
+    var statusTime = document.createElement('span');
+    statusWrap.appendChild(statusDot); statusWrap.appendChild(statusTime);
+    titleBar.appendChild(titleLabel); titleBar.appendChild(statusWrap);
+    mount.appendChild(titleBar);
+
+    function setStatus(ok){
+      statusDot.style.background = ok ? '#2ecc71' : '#e74c3c';
+      var t = stationNow();
+      statusTime.textContent = pad2(t.getUTCHours()) + ':' + pad2(t.getUTCMinutes()) + ':' + pad2(t.getUTCSeconds());
+    }
+
+    var body = document.createElement('div');
+    body.style.cssText = 'height:175px;width:100%;box-sizing:border-box;display:flex;align-items:center;justify-content:center;';
+    mount.appendChild(body);
+
+    var imgLink = document.createElement('a');
+    imgLink.className = 'card-whole-link';
+    imgLink.setAttribute('data-type', 'iframe');
+    imgLink.style.cssText = 'display:block;width:100%;height:100%;';
+    body.appendChild(imgLink);
+    function setLink(){
+      if (n === 1) {
+        imgLink.href = 'modalTimelapse.html';
+        imgLink.setAttribute('data-modal', 'Timelapse');
+        imgLink.setAttribute('data-title', DivumWXI18N.t('Timelapse') + ' - ' + cam.title);
+        imgLink.setAttribute('data-modal-width', '760px');
+        imgLink.setAttribute('data-modal-height', '460px');
+        imgLink.setAttribute('data-url', 'modalTimelapse.html');
+      } else {
+        var url = 'modalWebcam.html?cam=' + n;
+        imgLink.href = url;
+        imgLink.setAttribute('data-modal', 'Webcam');
+        imgLink.setAttribute('data-title', dayLabel() + ' - ' + cam.title);
+        imgLink.setAttribute('data-modal-width', '1000px');
+        imgLink.setAttribute('data-modal-height', '680px');
+        imgLink.setAttribute('data-url', url);
+      }
+      titleBar.title = cam.title;
+    }
+    setLink();
+
+    var img = document.createElement('img');
+    img.alt = 'weathercam';
+    img.style.cssText = 'display:block;width:100%;height:100%;object-fit:cover;border-radius:5px;';
+    imgLink.appendChild(img);
+
+    var lastIsDay = null;
+    function refresh(){
+      isDayNow().then(function(day){
+        lastIsDay = day;
+        // Daylight webcams show the night-time page after dark. (If day or
+        // night can't be told, show the live image.)
+        if (cam.mode !== '24hr' && day === false){
+          titleLabel.textContent = n === 1 ? DivumWXI18N.t('Timelapse') : dayLabel();
           img.src = 'img/nightTime.svg';
           setStatus(false);
           return;
         }
-
-        titleLabel.textContent = DivumWXI18N.t('Webcam');
-        var url = WEBCAM_IMAGE_PATH + '?v=' + cacheBustToken();
-
-        var imageOk = null, timelapseFresh = null;
-        function maybeSetStatus(){
-          if (imageOk === null || timelapseFresh === null) return;
-          setStatus(imageOk && timelapseFresh);
-        }
-        img.onload = function(){ imageOk = true; maybeSetStatus(); };
-        img.onerror = function(){ imageOk = false; maybeSetStatus(); };
-        img.src = url;
-
-        checkStaleness(DAY_TIMELAPSE_PATH + '?v=' + cacheBustToken()).then(function(fresh){
-          timelapseFresh = fresh;
-          maybeSetStatus();
-        });
+        titleLabel.textContent = dayLabel();
+        var imageOk = null, fresh = null;
+        function done(){ if (imageOk !== null && fresh !== null) setStatus(imageOk && fresh); }
+        img.onload = function(){ imageOk = true; done(); };
+        img.onerror = function(){ imageOk = false; done(); };
+        img.src = cam.image + '?v=' + cacheBustToken();
+        // Webcam 1 in daylight is judged by its timelapse, as before;
+        // otherwise by how recently the image itself changed.
+        var check = (n === 1 && cam.mode !== '24hr')
+          ? checkFresh('./webcam-timelapse/day.mp4?v=' + cacheBustToken(), 300)
+          : checkFresh(cam.image + '?v=' + cacheBustToken(), IMAGE_STALE_S);
+        check.then(function(f){ fresh = f; done(); });
       }).catch(function(e){
-        console.warn('cardWebcam: refresh failed --', e.message);
+        console.warn('cardWebcam ' + n + ': refresh failed --', e.message);
         setStatus(false);
       });
+    }
+    var configured = n === 1;
+    function configure(meta){
+      var list = (meta && Array.isArray(meta.webcams)) ? meta.webcams : [];
+      var c = list.filter(function(w){ return w && w.n === n; })[0];
+      if (c) configured = true;
+      if (c) {
+        if (c.title) cam.title = c.title;
+        if (c.image) cam.image = c.image;
+        if (c.mode === '24hr' || c.mode === 'daylight') cam.mode = c.mode;
+      } else if (n === 1 && meta) {   // before meta.webcams existed
+        if (meta.webcam_title) cam.title = meta.webcam_title;
+        if (meta.webcam_image) cam.image = meta.webcam_image;
+      }
+      setLink();
+      // A webcam 2-4 card with no settings stays hidden, even on a page
+      // that shows every card (no enabled_cards list).
+      if (!configured && !mount.classList.contains('card-not-enabled')) {
+        mount.classList.add('card-not-enabled');
+        if (typeof window.hideIncompleteRow === 'function') window.hideIncompleteRow();
+      }
+    }
+    window.addEventListener('i18nready', function(){
+      setLink();
+      if (lastIsDay !== null) refresh();
+    });
+    return {
+      configure: configure,
+      // Webcams 2-4 only run once set up, and no hidden card polls.
+      refresh: function(){ if (configured && !mount.classList.contains('card-not-enabled')) refresh(); }
+    };
   }
-  function fetchWebcamConfig(){
-    return fetch(ARCHIVE_JSON_URL + ((ARCHIVE_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), { cache: 'no-store' })
-      .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-      .then(function(data){
-        var m = data && data.meta;
-        if (m && m.webcam_title) MODAL_TITLE = m.webcam_title;
-        if (m && m.webcam_image) WEBCAM_IMAGE_PATH = m.webcam_image;
 
-        imgLink.setAttribute('data-title', DivumWXI18N.t('Timelapse') + ' - ' + MODAL_TITLE);
-      })
-      .catch(function(e){
-        console.warn('cardWebcam: config fetch failed --', e.message);
-      });
-  }
-
-  fetchWebcamConfig().then(function(){
-    refresh();
-    setInterval(refresh, POLL_MS);
+  var cards = [];
+  Object.keys(MOUNTS).forEach(function(k){
+    var el = document.getElementById(MOUNTS[k]);
+    if (el) cards.push(makeCard(+k, el));
   });
-  window.addEventListener('i18nready', function(){
-
-    if (lastIsDay !== null) refresh();
-
-    imgLink.setAttribute('data-title', DivumWXI18N.t('Timelapse') + ' - ' + MODAL_TITLE);
-  });
+  if (!cards.length) return;
+  getJson(ARCHIVE_JSON_URL).then(function(data){ return data && data.meta; })
+    .catch(function(e){ console.warn('cardWebcam: config fetch failed --', e.message); return null; })
+    .then(function(meta){
+      cards.forEach(function(c){ c.configure(meta); c.refresh(); });
+      setInterval(function(){ cards.forEach(function(c){ c.refresh(); }); }, POLL_MS);
+    });
 })();
 } catch (e) {
   console.error("cardsBundle: cardWebcam.js failed:", e);
 }
-
 /* ===== cardStationImage.js ===== */
 try {
 /*
