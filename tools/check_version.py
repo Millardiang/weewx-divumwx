@@ -8,6 +8,12 @@ Run from the repository root before tagging a release:
     python3 tools/check_version.py
 
 Exits non-zero, listing each mismatch, if anything is out of step.
+
+Versions are X.Y.Z, or X.Y.Z-<pre-release> for a release candidate, e.g.
+2.0.0-RC1 (tagged ver.2.0.0-RC1). For a pre-release the README title and the
+latest changelog entry may give the version it leads up to (2.0.0), and the
+changelog's top entry may still be "## Unreleased — for 2.0.0"; every other
+label must show the full version.
 """
 
 import importlib.util
@@ -26,22 +32,35 @@ def authoritative_version():
     return module.DIVUMWX_VERSION
 
 
-# (file, regex whose group 1 must equal the release version, description)
+# X.Y.Z with an optional pre-release suffix (2.0.0-RC1)
+VERSION_RE = r'\d+\.\d+\.\d+(?:-[0-9A-Za-z.]+)?'
+
+# (file, regex whose group 1 must equal the release version, description,
+#  whether a pre-release may give its base version X.Y.Z here instead)
 CHECKS = [
-    ('divumwx/index.html', r'# index\.html version (\S+)', 'collection version banner'),
-    ('divumwx/index.html', r'id="footerDivumwxVer">([^<]+)<', 'footer fallback label'),
-    ('divumwx/divumwf.html', r'id="wfBrandVersion">v([^<]+)<', 'brand badge'),
-    ('INSTALLATION_GUIDE.md', r'covers DivumWX \*\*([^*]+)\*\*', 'guide version'),
-    ('README.md', r'WeeWX Version (\d+\.\d+\.\d+)', 'README title'),
-    ('CHANGELOG.md', r'^## (\d+\.\d+\.\d+)', 'latest changelog entry'),
+    ('divumwx/index.html', r'# index\.html version (\S+)', 'collection version banner', False),
+    ('divumwx/index.html', r'id="footerDivumwxVer">([^<]+)<', 'footer fallback label', False),
+    ('divumwx/divumwf.html', r'id="wfBrandVersion">v([^<]+)<', 'brand badge', False),
+    ('INSTALLATION_GUIDE.md', r'covers DivumWX \*\*([^*]+)\*\*', 'guide version', False),
+    ('README.md', r'WeeWX Version (' + VERSION_RE + ')', 'README title', True),
+    # the top entry: a released "## X.Y.Z[-pre]", or "## Unreleased — for X.Y.Z"
+    ('CHANGELOG.md', r'^## (?:Unreleased\s+\S+\s+for\s+)?(' + VERSION_RE + ')', 'latest changelog entry', True),
 ]
+
+
+def base_version(version):
+    """2.0.0-RC1 -> 2.0.0; 2.0.0 -> 2.0.0."""
+    return version.split('-', 1)[0]
 
 
 def main():
     version = authoritative_version()
     problems = []
+    if not re.fullmatch(VERSION_RE, version):
+        problems.append(f"bin/user/divumwx_version.py: {version!r} isn't X.Y.Z or X.Y.Z-<pre-release>")
+    prerelease = version != base_version(version)
 
-    for rel, pattern, what in CHECKS:
+    for rel, pattern, what, base_ok in CHECKS:
         path = os.path.join(ROOT, rel)
         try:
             text = open(path, encoding='utf-8').read()
@@ -49,10 +68,15 @@ def main():
             problems.append(f"{rel}: cannot read ({e})")
             continue
         match = re.search(pattern, text, re.MULTILINE)
+        if rel == 'CHANGELOG.md':
+            # only the first "## " heading counts as the latest entry
+            first = re.search(r'^## .*$', text, re.MULTILINE)
+            match = re.match(pattern, first.group(0)) if first else None
+        allowed = {version} | ({base_version(version)} if prerelease and base_ok else set())
         if not match:
             problems.append(f"{rel}: {what} not found")
-        elif match.group(1) != version:
-            problems.append(f"{rel}: {what} is {match.group(1)}, expected {version}")
+        elif match.group(1) not in allowed:
+            problems.append(f"{rel}: {what} is {match.group(1)}, expected {' or '.join(sorted(allowed))}")
 
     guide = open(os.path.join(ROOT, 'INSTALLATION_GUIDE.md'), encoding='utf-8').read()
     for url_tag in re.findall(r'archive/refs/tags/([^/\s]+)\.zip', guide):
