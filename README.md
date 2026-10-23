@@ -1,6 +1,18 @@
-# Welcome to the DivumWX skin for WeeWX Version 1.7.0
+# Welcome to the DivumWX skin for WeeWX Version 2.0.0
 Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LICENSE Version 3](https://github.com/Millardiang/weewx-divumwx/blob/main/license.txt)
  
+# What's new in 2.0.0
+* **MeteoAlarm weather warnings for Europe** - the official warnings of the European national weather services (the EUMETNET countries, the UK included) in the dashboard's alert bar, with no API key needed. Choose your warning areas on the [weewx-meteoalarm](https://github.com/Millardiang/weewx-meteoalarm) area map during installation; warnings are shown in the dashboard's language where the national service publishes it. OpenWeatherMap alerts remain available as the alternative.
+* **Boltek lightning detectors** - a Boltek Lightning card fed by NexStorm's native ngxarchive.json, with its own strike database, and a modal with a **live strike map** (Equal Earth, centred on your station): strikes coloured by age, and each new strike flashes and sends a tracer streaking to the station. Charts and records for 24 hours to all time on a second tab.
+* **Windy Radar card** - live precipitation radar centred on your station, with a full-size modal.
+* **Up to four webcams** - each card can show its live image around the clock, or from sunrise to sunset with a night-time page after dark. Webcam 1 opens the timelapse; the others open a larger live view.
+* **Earthquake map in the Equal Earth projection** - the last 24 hours of USGS earthquakes replayed on a map matching DivumWX's Equal Earth map, with live day and night shading.
+* **Colour-coded climate reports** - every temperature in the monthly and yearly climate summaries is tinted on the same scale as the forecast pages, with a colour key in your chosen units.
+* The installer asks about each of these; on an upgrade your current settings are offered as the defaults. See [CHANGELOG.md](CHANGELOG.md) for the details.
+
+# Installation
+* See [INSTALLATION_GUIDE.md](INSTALLATION_GUIDE.md) for installing, upgrading and uninstalling (pip and Debian package installs), and for setting up Boltek detectors, MeteoAlarm warnings and webcams.
+
 # Features
 * Compatible with WeeWX version 5.5.0 onwards and Python version 3.13.5 onwards. (Not tested with earlier versions).
 * Tested with Pip and Deb installs.
@@ -14,12 +26,17 @@ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LIC
 * Unlike previous beta versions PHP code has been removed. HTML/JS Libraries/CSS only.
 * Ability to reorder dashboard cards locally in browser by drag and drop.
 * Switch between seven unit groups in real time (UK, US, Metric, Canadian, Scandinavian, ICAO, Beaufort).
-* 24/7 Statiion forecast.
+* 24/7 Station forecast.
 * 24/7 Alternative Locations forecasts.
 * Animated graphics.
 * Charts, heatmaps, gauges, card images all rendered using D3.
 * weewx.conf configurable weather APIs.
+* Weather warnings from MeteoAlarm (Europe) or OpenWeatherMap, plus UK heat and cold health alerts, flood alerts, Met Office warnings and aurora alerts.
+* Lightning: a standard lightning card, or a Boltek (NexStorm) card with its own database, a live strike map and chart and records.
+* Windy precipitation radar and a live Equal Earth earthquake map.
+* Monthly and yearly climate reports with colour-coded temperatures.
 * Toggle between themes - Auto (day and night - default), Light or Dark. The dark and light themes are inspired by John Kline's styling of his Celestial Live and Skyfield extensions.
+* Up to four webcam cards, each live 24 hours or from sunrise to sunset.
 * Automatic timelapse video generation from webcam images.
 * Kiosk mode, 3 x 3 grid for displaying on tablet sized screens.
 * Instant language selection for homepage dashboard from drop down menu
@@ -90,7 +107,7 @@ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LIC
 * Save ..../divumwf.html to your mobile phone desktop as an app.
 
 # Credits
-* Tom Keffer, Matthew Wall and colleagues for their unstinting development, support and maintainence of WeeWX.
+* Tom Keffer, Matthew Wall and colleagues for their unstinting development, support and maintenance of WeeWX.
 * Sean Balfour, a long time collaborator who created by far the greater majority of the images/visualisations used in the cards and modals rendered using D3.
 * The late David Marshall, my very first collaborator, for his ingenious method of estimating cloud cover by counting pixels on radar images.
 * Mike Isacson for providing test server resources and being brave enough to test early developments.
@@ -99,6 +116,11 @@ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LIC
 * Early adopters, in particular Kjell, Gert, Jon, Gary, Alex and many others for helping me squash some bugs, helpful suggestions and excellent feedback.
 * Open-Meteo for weather forecasts, pollen data, greenhouse gas data.
 * OpenWeather for global weather alerts.
+* MeteoAlarm and EUMETNET, and the national weather services that contribute to them, for European weather warnings. The MeteoAlarm integration is built from weewx-meteoalarm, which was inspired by Ken True's get-meteoalarm-warning-inc.php (saratoga-weather.org) and adapted with permission from Wim van der Kuil's wrnWarningEU-CAP.php (pwsdashboard.com).
+* Windy for the precipitation radar.
+* USGS for the earthquake feed.
+* Boltek and Astrogenic (NexStorm) for lightning detection data.
+* Natural Earth and world-atlas (Mike Bostock) for the country outlines used by the maps.
 * Aviation Weather for METAR data.
 * UK MetOffice for UK weather alerts and warnings.
 * UK Health Security Agency for heat and cold weather alerts.
