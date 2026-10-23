@@ -2,6 +2,35 @@
 
 ## Unreleased — for 2.0.0
 
+### Boltek Lightning: live strike map
+- **modalBoltekLightning.html** opens on a new **Strike Map** tab (the
+  chart and records are on the **Chart & Records** tab; the choice is
+  remembered). The map is drawn in the Equal Earth projection, centred on
+  the station so its range rings are round and north is up, in the Equal
+  Earth map's colours (`css/equalEarthMap.css`), with the night side shaded
+  the same way and light/dark theme followed.
+- It shows the strikes NexStorm lists (the last two hours, from
+  `boltek.json`), coloured by age like Blitzortung: white under 5 minutes,
+  then yellow, amber, orange, red and dark red by 2 hours. Hovering a
+  strike gives its type, time, age, distance and bearing.
+- **Each new strike flashes, and a tracer streaks along the great circle
+  from the strike to the station**, which pulses when it arrives. Several
+  new strikes play in time order. **Replay** plays the strikes on the map
+  again in order.
+- Range rings with distance labels (300 / 600 / 1000 km, or 200 / 400 /
+  600 mi with the dashboard's mile units; picked to fit the strikes and
+  changeable), N/E/S/W, and the station named from `archive.json`. A panel
+  gives strikes in the last 10 minutes, hour and 2 hours, the nearest in
+  the last hour and the latest; a note says when there are no strikes or
+  NexStorm's data isn't updating.
+- The live strip and map refresh every 10 seconds (boltek.json's rate).
+  The map fills the width on a desktop and turns nearly square on a phone.
+- Add `?demo=1` to the page's address to try it with a made-up storm.
+- Coastlines come from the new `jsondata/countries-50m.json` (world-atlas
+  2.0.2, the same source as `countries-110m.json`, which is used if it's
+  missing), since 110m is too coarse at this scale.
+- Changed: `modalBoltekLightning.html` 1.2.0. New: `jsondata/countries-50m.json`.
+
 ### Earthquake map in the Equal Earth projection
 - The world map in **modalEarthquakeMap.html** (opened from the Earthquake
   card) is now drawn in the Equal Earth projection instead of Mercator, so

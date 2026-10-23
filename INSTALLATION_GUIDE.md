@@ -147,7 +147,9 @@ ignore all of this; the service just waits for a file that never arrives.
    strikes already listed in the file are picked up the first time, at the
    times they happened; the totals for the year and all time build up from
    then on. If the dot stays red, hover over it to see why.
-   Click the card for its chart & records, built from the same database.
+   Click the card for its live strike map (each new strike flashes and
+   traces to the station) and its chart & records, built from the same
+   database.
 
 ## Troubleshooting
 

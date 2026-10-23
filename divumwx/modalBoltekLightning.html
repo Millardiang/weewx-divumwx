@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# modalBoltekLightning.html version 1.1.0
+# modalBoltekLightning.html version 1.2.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
-  Chart & records for a Boltek lightning detector, opened from the Boltek
-  Lightning card. Reads jsondata/boltek_history.json (hourly and daily totals
+  Live strike map, chart & records for a Boltek lightning detector, opened
+  from the Boltek Lightning card. The map (Equal Earth, centred on the
+  station, in the Equal Earth map's colours) shows the last two hours of
+  strikes coloured by age; each new strike flashes and sends a tracer to
+  the station. Add ?demo=1 to the URL to see it with made-up strikes. Reads jsondata/boltek_history.json (hourly and daily totals
   from the Boltek database) and jsondata/boltek.json (live readings from
   NexStorm's ngxarchive.json), both written by
   user.divumwx_boltek.BoltekLightningService.
@@ -18,6 +21,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
 <title>Boltek Lightning</title>
+<link rel="stylesheet" href="css/equalEarthMap.css">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 :root, [data-theme="light"]{
@@ -155,7 +159,57 @@ select.bk-tf{ padding-right:8px; }
 .bk-tile-sub{ font-size:11px; color:var(--bs-secondary-color); margin-top:2px; }
 .bk-tile-sub .cg{ color:var(--cg); font-weight:600; }
 .bk-tile-sub .ic{ color:var(--ic); font-weight:600; }
+/* ---- Tabs ---- */
+.bk-tabs{ display:flex; gap:6px; margin-bottom:10px; }
+.bk-tab{
+  font-family:inherit; font-size:13px; font-weight:700; padding:7px 16px; border-radius:999px;
+  border:1px solid var(--bs-border-color); background:var(--bs-card-bg); color:var(--bs-body-color); cursor:pointer;
+}
+.bk-tab:hover:not(.active){ border-color:var(--bw-accent); color:var(--bw-accent); }
+.bk-tab.active{ background:var(--bw-accent); border-color:var(--bw-accent); color:#fff; }
+[data-theme="dark"] .bk-tab.active{ color:#0A0F22; }
+[hidden]{ display:none !important; }
+
+/* ---- Strike map (colours: css/equalEarthMap.css --map-*, keyed off body.dark/light) ---- */
+:root, [data-theme="light"]{ --bk-flash:#FFFFFF; --bk-trail:#F59E0B; --bk-comet:#FFF7C2; --bk-dot-edge:rgba(29,44,78,.75); --bk-ring:rgba(29,44,78,.28); --bk-ring-text:#3B4A6B; }
+[data-theme="dark"]{ --bk-flash:#FFFFFF; --bk-trail:#FFD54A; --bk-comet:#FFFDF0; --bk-dot-edge:rgba(0,0,0,.7); --bk-ring:rgba(233,228,212,.22); --bk-ring-text:#AEB8D8; }
+.bk-map{ position:relative; width:100%; border-radius:10px; overflow:hidden; background:var(--map-ocean); }
+.bk-map svg{ display:block; width:100%; height:auto; }
+.bk-map .m-ocean{ fill:var(--map-ocean); }
+.bk-map .m-grid{ fill:none; stroke:var(--map-grid); stroke-width:.5px; }
+.bk-map .m-land{ fill:var(--map-land); }
+.bk-map .m-borders{ fill:none; stroke:var(--map-coast); stroke-width:.7px; stroke-linejoin:round; }
+.bk-map .m-night{ fill:rgba(var(--map-night), var(--map-night-alpha)); pointer-events:none; }
+.bk-map .m-ring{ fill:none; stroke:var(--bk-ring); stroke-width:1px; stroke-dasharray:4 4; }
+.bk-map .m-ring-label, .bk-map .m-compass{ fill:var(--bk-ring-text); font-size:11px; font-family:'Lexend', sans-serif; paint-order:stroke; stroke:var(--map-ocean); stroke-width:3px; stroke-linejoin:round; }
+.bk-map .m-compass{ font-weight:700; font-size:12px; }
+.bk-map .m-station{ fill:var(--map-station); stroke:var(--bs-card-bg); stroke-width:2px; }
+.bk-map .m-station-halo{ fill:none; stroke:var(--map-station); stroke-width:2px; }
+.bk-map .m-station-label{ fill:var(--map-station); font-size:12px; font-weight:600; font-family:'Lexend', sans-serif; paint-order:stroke; stroke:var(--bs-card-bg); stroke-width:3px; stroke-linejoin:round; }
+.bk-map .m-strike{ stroke:var(--bk-dot-edge); stroke-width:.8px; cursor:pointer; }
+.bk-map .fx-core{ fill:var(--bk-flash); }
+.bk-map .fx-ring{ fill:none; stroke:var(--bk-flash); stroke-width:2px; }
+.bk-map .fx-trail{ fill:none; stroke:var(--bk-trail); stroke-width:1.6px; stroke-linecap:round; }
+.bk-map .fx-comet{ fill:none; stroke:var(--bk-comet); stroke-width:3px; stroke-linecap:round; }
+.bk-map-overlay{
+  position:absolute; top:10px; left:10px; max-width:46%;
+  background:color-mix(in srgb, var(--bs-card-bg) 86%, transparent); border:1px solid var(--bs-border-color);
+  border-radius:10px; padding:8px 11px; font-size:12px; line-height:1.5; pointer-events:none;
+}
+.bk-map-overlay b{ color:var(--bw-accent); font-weight:600; }
+.bk-map-empty{
+  position:absolute; left:50%; bottom:16px; transform:translateX(-50%);
+  background:color-mix(in srgb, var(--bs-card-bg) 86%, transparent); border:1px solid var(--bs-border-color);
+  border-radius:999px; padding:6px 14px; font-size:12px; color:var(--bs-secondary-color); white-space:nowrap; pointer-events:none;
+}
+.bk-map-badge{ position:absolute; top:10px; right:10px; background:var(--bw-danger); color:#fff; font-weight:700; font-size:11px; padding:3px 9px; border-radius:999px; letter-spacing:.06em; }
+.bk-age{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; font-size:11.5px; color:var(--bs-secondary-color); }
+.bk-age i{ display:inline-block; width:10px; height:10px; border-radius:50%; border:1px solid var(--bk-dot-edge); margin-right:4px; vertical-align:-1px; }
 @media (max-width:900px){ .bk-records{ grid-template-columns:repeat(3, 1fr); } }
+@media (max-width:700px){
+  .bk-map-overlay{ position:static; max-width:none; border:0; border-top:1px solid var(--bs-border-color); border-radius:0; font-size:11.5px; }
+  .bk-map-empty{ white-space:normal; width:88%; text-align:center; border-radius:10px; bottom:auto; top:10px; }
+}
 @media (max-width:600px){ .bk-records{ grid-template-columns:repeat(2, 1fr); } .bk-chart{ height:280px; } }
 </style>
 </head>
@@ -164,6 +218,32 @@ select.bk-tf{ padding-right:8px; }
 
   <div class="bk-live" id="bkLive"></div>
 
+  <div class="bk-tabs" id="bkTabs" role="tablist">
+    <button class="bk-tab active" data-view="map" role="tab">Strike Map</button>
+    <button class="bk-tab" data-view="chart" role="tab">Chart &amp; Records</button>
+  </div>
+
+  <div id="bkViewMap">
+  <div class="bk-card">
+    <div class="bk-toolbar">
+      <div class="bk-tfs" id="bkRanges"></div>
+      <div class="bk-tfs">
+        <button class="bk-tf" id="bkReplay" title="Replay the strikes on the map in time order">Replay</button>
+      </div>
+    </div>
+    <div class="bk-map" id="bkMap">
+      <div class="bk-map-overlay" id="bkMapInfo">Loading&hellip;</div>
+      <div class="bk-map-empty" id="bkMapEmpty" hidden></div>
+      <div class="bk-tip" id="bkMapTip"></div>
+    </div>
+    <div class="bk-toolbar" style="margin:8px 0 0">
+      <div class="bk-age" id="bkAgeLegend"></div>
+      <span class="bk-info" id="bkMapNote">Equal Earth projection centred on the station &middot; last 2 hours &middot; data: NexStorm</span>
+    </div>
+  </div>
+  </div>
+
+  <div id="bkViewChart" hidden>
   <div class="bk-card">
     <div class="bk-toolbar">
       <div class="bk-tfs" id="bkTfs">
@@ -185,10 +265,12 @@ select.bk-tf{ padding-right:8px; }
 
   <div class="bk-records-title">Records</div>
   <div class="bk-records" id="bkRecords"></div>
+  </div>
 
 </div>
 
 <script src="js/d3.7.9.0.min.js"></script>
+<script src="js/topojson.3.0.2.min.js"></script>
 <script src="units.js"></script>
 <script src="stationTime.js"></script>
 <script>
@@ -213,6 +295,8 @@ select.bk-tf{ padding-right:8px; }
       resolved = mode === 'light' ? 'light' : mode === 'dark' ? 'dark'
         : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     }
+    document.body.classList.toggle('dark', resolved === 'dark');
+    document.body.classList.toggle('light', resolved !== 'dark');
     if (document.documentElement.getAttribute('data-theme') !== resolved) {
       document.documentElement.setAttribute('data-theme', resolved);
       if (started) render();   // colours come from CSS variables, so redraw
@@ -239,7 +323,7 @@ select.bk-tf{ padding-right:8px; }
   var HISTORY_URL = './jsondata/boltek_history.json';
   var LIVE_URL = './jsondata/boltek.json';
   var HISTORY_POLL_MS = 5 * 60 * 1000;
-  var LIVE_POLL_MS = 15 * 1000;
+  var LIVE_POLL_MS = 10 * 1000;   // boltek.json is rewritten every 10 s
   var COL = { start: 0, strikes: 1, cg: 2, ic: 3, closest: 4, rate: 5 };
   var DIST_BANDS = [[0, 5, '#D8001D'], [5, 10, '#E36B57'], [10, 20, '#D6BE4E'], [20, 9999, '#5BBB8A']];
   // Storm tendency codes aren't documented in the file; these are the usual
@@ -554,6 +638,368 @@ select.bk-tf{ padding-right:8px; }
     render();
   });
 
+  // ---- Strike map ----
+  // Equal Earth projection centred on the station (rotated so the station
+  // sits at the projection's centre, where it's least distorted: range
+  // rings come out round and north is up). Strikes from boltek.json's
+  // realtime.recent_strikes ([time, km, bearing, lat, lon, type], newest
+  // first; NexStorm lists about the last two hours) are coloured by age.
+  // A strike that wasn't there at the last poll flashes, and a tracer runs
+  // along the great circle from it to the station.
+  var DEMO = /[?&]demo=1\b/.test(location.search);
+  var strikeMap = (function(){
+    // Sized to its box (true pixels, so text stays readable): wide on a
+    // desktop, nearly square on a phone. Redrawn when the box changes size.
+    var W = 1200, H = 500;
+    function measure(){
+      var w = Math.round(document.getElementById('bkMap').clientWidth);
+      if (!w) return false;
+      var h = Math.round(w < 700 ? w * 0.95 : Math.min(560, w * 0.4));
+      if (w === W && h === H) return false;
+      W = w; H = h;
+      svg.attr('viewBox', '0 0 ' + W + ' ' + H);
+      svg.select('rect.m-ocean').attr('width', W).attr('height', H);
+      return true;
+    }
+    var WINDOW_S = 2 * 3600;
+    // [age limit (minutes), colour, legend]
+    var AGES = [[5, '#FFFFFF', '< 5 min'], [15, '#FFF200', '5–15'], [30, '#FFB300', '15–30'],
+                [60, '#FF6A00', '30–60'], [90, '#E0301E', '60–90'], [120, '#8E1730', '90–120 min']];
+    var RANGES = { km: [[300, 100], [600, 200], [1000, 250]], mi: [[200, 50], [400, 100], [600, 200]] };
+    var COMPASS = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+    var KM_PER_DEG = 111.195;
+
+    var mapEl = document.getElementById('bkMap');
+    var infoEl = document.getElementById('bkMapInfo');
+    var emptyEl = document.getElementById('bkMapEmpty');
+    var tipEl = document.getElementById('bkMapTip');
+    var rangesEl = document.getElementById('bkRanges');
+
+    var svg = d3.select(mapEl).insert('svg', ':first-child').attr('viewBox', '0 0 ' + W + ' ' + H)
+      .attr('role', 'img').attr('aria-label', 'Map of recent lightning strikes around the station');
+    var defs = svg.append('defs');
+    var glow = defs.append('filter').attr('id', 'bkGlow').attr('x', '-50%').attr('y', '-50%').attr('width', '200%').attr('height', '200%');
+    glow.append('feGaussianBlur').attr('stdDeviation', 3).attr('result', 'b');
+    var merge = glow.append('feMerge'); merge.append('feMergeNode').attr('in', 'b'); merge.append('feMergeNode').attr('in', 'SourceGraphic');
+    svg.append('rect').attr('class', 'm-ocean').attr('width', W).attr('height', H);
+    var gGrid = svg.append('g'), gLand = svg.append('g'), gNight = svg.append('g'), gRings = svg.append('g');
+    var gTrails = svg.append('g'), gStrikes = svg.append('g'), gStation = svg.append('g'), gFx = svg.append('g');
+
+    var projection = null, path = null, world = null;
+    var center = null, stationName = 'Station';
+    var unit = null, rangeIdx = null, userRange = false;
+    var strikes = [], seen = {}, firstUpdate = true, lastLive = null;
+
+    function units(){ var u = distUnit(); return u === 'mi' ? 'mi' : 'km'; }
+    function toKm(v, u){ return u === 'mi' ? v * 1.609344 : v; }
+    function compass(deg){ return COMPASS[Math.round((((deg % 360) + 360) % 360) / 22.5) % 16]; }
+    function ageColor(ageS){
+      var m = ageS / 60;
+      for (var i = 0; i < AGES.length; i++) if (m < AGES[i][0]) return AGES[i][1];
+      return AGES[AGES.length - 1][1];
+    }
+    function nowS(){ return Date.now() / 1000; }
+    function ago(s){
+      var m = Math.max(0, Math.round((nowS() - s) / 60));
+      return m < 1 ? 'just now' : m < 60 ? m + ' min ago' : Math.floor(m / 60) + ' h ' + (m % 60) + ' min ago';
+    }
+    function fmtSec(s){ return fmt(s * 1000, { hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }); }
+    // Point at a distance and bearing from the station (when a strike has no lat/lon).
+    function destination(km, bng){
+      var R = Math.PI / 180, d = km / 6371.0088, b = bng * R, la = center[1] * R, lo = center[0] * R;
+      var la2 = Math.asin(Math.sin(la) * Math.cos(d) + Math.cos(la) * Math.sin(d) * Math.cos(b));
+      var lo2 = lo + Math.atan2(Math.sin(b) * Math.sin(d) * Math.cos(la), Math.cos(d) - Math.sin(la) * Math.sin(la2));
+      return [lo2 / R, la2 / R];
+    }
+
+    // ---- range buttons ----
+    function rangeList(){ return RANGES[units()]; }
+    function rangeKm(){ var r = rangeList()[rangeIdx]; return toKm(r[0], units()); }
+    function drawRangeButtons(){
+      var u = units();
+      rangesEl.innerHTML = '<span class="bk-info" style="font-style:normal;margin-right:2px">Range</span>' +
+        rangeList().map(function(r, i){
+          return '<button class="bk-tf' + (i === rangeIdx ? ' active' : '') + '" data-i="' + i + '">' + r[0] + ' ' + u + '</button>';
+        }).join('');
+    }
+    rangesEl.addEventListener('click', function(e){
+      var b = e.target.closest('button.bk-tf'); if (!b) return;
+      rangeIdx = +b.getAttribute('data-i'); userRange = true; build();
+    });
+    function autoRange(){
+      var far = d3.max(strikes, function(s){ return s.km; }) || 0, list = rangeList();
+      for (var i = 0; i < list.length; i++) if (toKm(list[i][0], units()) >= far * 1.05) return i;
+      return list.length - 1;
+    }
+
+    // ---- base map ----
+    function build(){
+      if (!center) return;
+      measure();
+      if (unit !== units()) { unit = units(); if (!userRange || rangeIdx == null) rangeIdx = strikes.length ? autoRange() : 1; }
+      drawRangeButtons();
+      var R = rangeKm();
+      projection = d3.geoEqualEarth().rotate([-center[0], -center[1]]).precision(0.2)
+        .fitExtent([[8, 8], [W - 8, H - 8]], d3.geoCircle().center(center).radius(R * 1.06 / KM_PER_DEG)())
+        .clipExtent([[0, 0], [W, H]]);
+      path = d3.geoPath(projection);
+      gGrid.selectAll('*').remove();
+      gGrid.append('path').datum(d3.geoGraticule().step([5, 5])()).attr('class', 'm-grid').attr('d', path);
+      drawLand(); drawNight(); drawRings(); drawStation(); drawStrikes(true);
+    }
+    function drawLand(){
+      gLand.selectAll('*').remove();
+      if (!world || !path) return;
+      gLand.append('path').datum(topojson.feature(world, world.objects.countries)).attr('class', 'm-land').attr('d', path);
+      gLand.append('path').datum(topojson.mesh(world, world.objects.countries, function(a, b){ return a !== b; }))
+        .attr('class', 'm-borders').attr('d', path);
+    }
+    // Night side, as the Equal Earth map draws it: four washes round the
+    // antisolar point (sun 0, 6, 12 and 18 degrees below the horizon).
+    function drawNight(){
+      gNight.selectAll('*').remove();
+      if (!path) return;
+      var RAD = Math.PI / 180, n = Date.now() / 864e5 + 2440587.5 - 2451545.0;
+      var L = (280.460 + 0.9856474 * n) % 360, g = ((357.528 + 0.9856003 * n) % 360) * RAD;
+      var lam = (L + 1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g)) * RAD, eps = (23.439 - 0.0000004 * n) * RAD;
+      var ra = Math.atan2(Math.cos(eps) * Math.sin(lam), Math.cos(lam)) / RAD, dec = Math.asin(Math.sin(eps) * Math.sin(lam)) / RAD;
+      var sunLon = ((ra - (280.46061837 + 360.98564736629 * n) % 360) % 360 + 540) % 360 - 180;
+      [90, 96, 102, 108].forEach(function(z){
+        gNight.append('path').datum(d3.geoCircle().center([sunLon + 180, -dec]).radius(180 - z)()).attr('class', 'm-night').attr('d', path);
+      });
+    }
+    function drawRings(){
+      gRings.selectAll('*').remove();
+      var u = units(), r = rangeList()[rangeIdx];
+      for (var v = r[1]; v <= r[0] + 0.001; v += r[1]) {
+        var km = toKm(v, u);
+        gRings.append('path').datum(d3.geoCircle().center(center).radius(km / KM_PER_DEG).precision(2)()).attr('class', 'm-ring').attr('d', path);
+        var p = projection(destination(km, 35));   // labelled to the NNE, clear of the compass letters
+        if (p) gRings.append('text').attr('class', 'm-ring-label').attr('x', p[0] + 3).attr('y', p[1] - 3).text(v + ' ' + u);
+      }
+      var outer = toKm(r[0], u) * 1.045;
+      [['N', 0], ['E', 90], ['S', 180], ['W', 270]].forEach(function(c){
+        var p = projection(destination(outer, c[1]));
+        if (p) gRings.append('text').attr('class', 'm-compass').attr('x', p[0]).attr('y', p[1] + 4).attr('text-anchor', 'middle').text(c[0]);
+      });
+    }
+    function drawStation(){
+      gStation.selectAll('*').remove();
+      var p = projection(center);
+      gStation.append('circle').attr('class', 'm-station-halo').attr('cx', p[0]).attr('cy', p[1]).attr('r', 9).attr('opacity', 0.35);
+      gStation.append('circle').attr('class', 'm-station').attr('cx', p[0]).attr('cy', p[1]).attr('r', 5.5)
+        .append('title').text(stationName);
+      gStation.append('text').attr('class', 'm-station-label').attr('x', p[0] + 10).attr('y', p[1] + 4).text(stationName);
+    }
+
+    // ---- strikes ----
+    function xy(s){ return projection([s.lon, s.lat]); }
+    function drawStrikes(instant){
+      if (!projection) return;
+      var t = nowS();
+      var shown = strikes.filter(function(s){ return t - s.t <= WINDOW_S && !s.pending; });
+      var sel = gStrikes.selectAll('circle.m-strike').data(shown, function(s){ return s.key; });
+      sel.exit().transition().duration(instant ? 0 : 600).attr('r', 0).remove();
+      sel.enter().append('circle').attr('class', 'm-strike').attr('r', 0)
+        .on('mousemove', showTip).on('mouseleave', function(){ tipEl.style.display = 'none'; })
+        .merge(sel)
+        .attr('cx', function(s){ var p = xy(s); return p ? p[0] : -99; })
+        .attr('cy', function(s){ var p = xy(s); return p ? p[1] : -99; })
+        .attr('fill', function(s){ return ageColor(t - s.t); })
+        .sort(function(a, b){ return a.t - b.t; })   // newest on top
+        .transition().duration(instant ? 0 : 400)
+        .attr('r', function(s){ var a = (t - s.t) / 60; return a < 5 ? 5.5 : a < 30 ? 4.5 : 3.5; });
+      renderInfo();
+    }
+    function showTip(ev, s){
+      var box = mapEl.getBoundingClientRect(), mx = ev.clientX - box.left, my = ev.clientY - box.top;
+      tipEl.innerHTML = '<b>' + (s.label || 'Strike') + '</b> &nbsp;' + fmtSec(s.t) + ' <span style="opacity:.7">(' + ago(s.t) + ')</span><br>' +
+        fmtDist(s.km) + ' &middot; ' + Math.round(s.bng) + '° ' + compass(s.bng);
+      tipEl.style.display = 'block';
+      var tw = tipEl.offsetWidth;
+      tipEl.style.left = Math.max(4, Math.min(box.width - tw - 4, mx + 14)) + 'px';
+      tipEl.style.top = Math.max(4, my - 44) + 'px';
+    }
+    function renderInfo(){
+      var t = nowS();
+      var inWin = strikes.filter(function(s){ return t - s.t <= WINDOW_S; });
+      var c10 = inWin.filter(function(s){ return t - s.t <= 600; }).length;
+      var c60 = inWin.filter(function(s){ return t - s.t <= 3600; }).length;
+      var near = null;
+      inWin.forEach(function(s){ if (t - s.t <= 3600 && s.km != null && (!near || s.km < near.km)) near = s; });
+      var last = inWin.length ? inWin.reduce(function(a, b){ return b.t > a.t ? b : a; }) : null;
+      if (!center) { infoEl.innerHTML = 'Waiting for the station position&hellip;'; return; }
+      infoEl.innerHTML =
+        'Strikes &nbsp;10 min <b>' + c10 + '</b> &nbsp;&middot;&nbsp; 1 h <b>' + c60 + '</b> &nbsp;&middot;&nbsp; 2 h <b>' + inWin.length + '</b>' +
+        (near ? '<br>Nearest (1 h) <b>' + fmtDist(near.km) + '</b> ' + compass(near.bng) : '') +
+        (last ? '<br>Latest <b>' + (last.label || 'strike') + '</b> ' + fmtDist(last.km) + ' ' + compass(last.bng) + ' &middot; ' + fmtSec(last.t) : '');
+      var msg = !lastLive ? 'No live data yet'
+        : lastLive.stale ? 'NexStorm data isn’t updating' + (lastLive.error ? ': ' + lastLive.error : '')
+        : !inWin.length ? 'No strikes in the last 2 hours — each new strike will flash and trace to the station' : '';
+      emptyEl.textContent = msg; emptyEl.hidden = !msg;
+    }
+
+    // ---- the flash and tracer ----
+    function animate(s, done){
+      var p = xy(s), st = projection(center);
+      s.pending = false;
+      if (!p) { if (done) done(); return; }
+      var dist = Math.hypot(p[0] - st[0], p[1] - st[1]);
+      var dur = 450 + 900 * Math.min(1, dist / 450);
+      var interp = d3.geoInterpolate([s.lon, s.lat], center);
+      var d = d3.line()(d3.range(0, 1.0001, 1 / 48).map(function(f){ return projection(interp(f)); }));
+      // flash
+      gFx.append('circle').attr('class', 'fx-ring').attr('cx', p[0]).attr('cy', p[1]).attr('r', 3).attr('opacity', 1)
+        .transition().duration(1100).ease(d3.easeCubicOut).attr('r', 34).attr('opacity', 0).remove();
+      gFx.append('circle').attr('class', 'fx-core').attr('cx', p[0]).attr('cy', p[1]).attr('r', 3).attr('filter', 'url(#bkGlow)')
+        .transition().duration(120).attr('r', 13)
+        .transition().duration(700).attr('r', 4).attr('opacity', 0).remove();
+      // trail: drawn from the strike to the station, then fades
+      var trail = gTrails.append('path').attr('class', 'fx-trail').attr('d', d).attr('opacity', 0.9);
+      var L = trail.node().getTotalLength() || 1;
+      trail.attr('stroke-dasharray', L + ' ' + L).attr('stroke-dashoffset', L)
+        .transition().duration(dur).ease(d3.easeQuadIn).attr('stroke-dashoffset', 0)
+        .transition().delay(300).duration(1800).attr('opacity', 0).remove();
+      // comet: a short bright head running along the trail
+      var seg = Math.max(14, Math.min(70, L * 0.22));
+      gFx.append('path').attr('class', 'fx-comet').attr('d', d).attr('filter', 'url(#bkGlow)')
+        .attr('stroke-dasharray', seg + ' ' + (L + seg)).attr('stroke-dashoffset', seg)
+        .transition().duration(dur).ease(d3.easeQuadIn).attr('stroke-dashoffset', -L).remove();
+      // arrival: the station pulses
+      setTimeout(function(){
+        gFx.append('circle').attr('class', 'm-station-halo').attr('cx', st[0]).attr('cy', st[1]).attr('r', 6).attr('opacity', 0.9)
+          .transition().duration(900).ease(d3.easeCubicOut).attr('r', 28).attr('opacity', 0).remove();
+        if (done) done();
+      }, dur);
+      drawStrikes(false);
+    }
+    // Several new strikes: play them in time order, a little apart.
+    function play(list, gap){
+      list.sort(function(a, b){ return a.t - b.t; });
+      list.forEach(function(s){ s.pending = true; });
+      drawStrikes(true);
+      list.forEach(function(s, i){ setTimeout(function(){ animate(s); }, i * gap); });
+    }
+    document.getElementById('bkReplay').addEventListener('click', function(){
+      var t = nowS();
+      var list = strikes.filter(function(s){ return t - s.t <= WINDOW_S; });
+      if (!list.length) return;
+      play(list, Math.max(120, Math.min(700, 12000 / list.length)));
+    });
+
+    // ---- data ----
+    function update(j){
+      lastLive = j;
+      var rt = (j && j.realtime) || {};
+      if (rt.station_lat != null && rt.station_lon != null) setCenter([+rt.station_lon, +rt.station_lat]);
+      var list = (rt.recent_strikes || []).map(function(a){
+        var s = { t: a[0], km: a[1], bng: a[2], lat: a[3], lon: a[4], label: a[5] };
+        if ((s.lat == null || s.lon == null) && center && s.km != null && s.bng != null) {
+          var q = destination(s.km, s.bng); s.lon = q[0]; s.lat = q[1];
+        }
+        s.key = s.t + '/' + s.lat + '/' + s.lon;
+        return s;
+      }).filter(function(s){ return s.t && s.lat != null && s.lon != null; });
+      // Keep strikes already animating; add the new ones.
+      var fresh = firstUpdate
+        ? list.filter(function(s){ return nowS() - s.t < 120; }).slice(0, 1)   // just-arrived one, on opening
+        : list.filter(function(s){ return !seen[s.key]; });
+      list.forEach(function(s){ seen[s.key] = 1; });
+      var byKey = {};
+      strikes.forEach(function(s){ byKey[s.key] = s; });
+      strikes = list.map(function(s){ return byKey[s.key] || s; });
+      if (firstUpdate && center) { firstUpdate = false; if (!userRange) { rangeIdx = strikes.length ? autoRange() : 1; } build(); }
+      if (!projection) { renderInfo(); return; }
+      if (fresh.length) play(fresh.map(function(s){ return byKey[s.key] || strikes.find(function(x){ return x.key === s.key; }); }), 450);
+      else drawStrikes(false);
+    }
+    function setCenter(c){
+      if (center && Math.abs(center[0] - c[0]) < 1e-6 && Math.abs(center[1] - c[1]) < 1e-6) return;
+      center = c;
+      if (!firstUpdate) build();
+    }
+    function setStationName(n){ if (n) { stationName = n; if (projection) drawStation(); } }
+
+    // legend
+    document.getElementById('bkAgeLegend').innerHTML = 'Age ' + AGES.map(function(a){
+      return '<span><i style="background:' + a[1] + '"></i>' + a[2] + '</span>';
+    }).join('');
+
+    // coastlines: 50m for this regional view (110m as a fallback)
+    d3.json('./jsondata/countries-50m.json')
+      .catch(function(){ return d3.json('./jsondata/countries-110m.json'); })
+      .then(function(w){ world = w; drawLand(); })
+      .catch(function(e){ console.warn('modalBoltekLightning: map data failed to load —', e && e.message); });
+    // the station's name (and position until NexStorm's arrives) from WeeWX
+    getJson('./jsondata/archive.json').then(function(a){
+      var m = (a && a.meta) || {};
+      setStationName(m.station_location);
+      var lat = parseFloat(m.latitude), lon = parseFloat(m.longitude);
+      if (!center && isFinite(lat) && isFinite(lon)) { center = [lon, lat]; if (lastLive) update(lastLive); }
+    }).catch(function(){});
+
+    setInterval(function(){ drawStrikes(false); }, 30 * 1000);   // ages move on
+    setInterval(drawNight, 5 * 60 * 1000);
+    window.addEventListener('storage', function(e){ if (e.key === 'dashboardUnitSystem' && center) { unit = null; build(); } });
+
+    // ---- demo: made-up storm, for trying the map out (?demo=1) ----
+    if (DEMO) {
+      var badge = document.createElement('div'); badge.className = 'bk-map-badge'; badge.textContent = 'DEMO';
+      mapEl.appendChild(badge);
+      var demo = [], cell = { bng: 150, km: 420 };
+      function demoLive(){
+        var c = center || [-3.11, 51.0];
+        return { stale: false, realtime: { station_lat: c[1], station_lon: c[0], recent_strikes: demo.slice().reverse() } };
+      }
+      var startT = nowS();
+      for (var i = 0; i < 40; i++) {           // an hour and a half of history
+        var tt = startT - 5400 + i * 130, kmh = cell.km + 160 - i * 4, b = cell.bng + (Math.random() - 0.5) * 14;
+        var q0 = destination0([-3.11, 51.0], kmh + (Math.random() - 0.5) * 40, b);
+        demo.push([Math.round(tt), Math.round(kmh), Math.round(b * 10) / 10, q0[1], q0[0], Math.random() < 0.8 ? '-CG' : '+CG']);
+      }
+      setTimeout(function tickDemo(){
+        var c = center || [-3.11, 51.0];
+        cell.km = Math.max(40, cell.km - 1.5);
+        var km = cell.km + (Math.random() - 0.5) * 50, b = cell.bng + (Math.random() - 0.5) * 12;
+        var q = destination0(c, km, b);
+        demo.push([Math.round(nowS()), Math.round(km), Math.round(b * 10) / 10, q[1], q[0], Math.random() < 0.8 ? '-CG' : '+CG']);
+        demo = demo.slice(-100);
+        update(demoLive());
+        setTimeout(tickDemo, 1500 + Math.random() * 3500);
+      }, 1500);
+      setTimeout(function(){ update(demoLive()); }, 300);
+    }
+    function destination0(c, km, bng){
+      var saved = center; center = c; var q = destination(km, bng); center = saved; return q;
+    }
+
+    var resizeT = null;
+    window.addEventListener('resize', function(){
+      clearTimeout(resizeT);
+      resizeT = setTimeout(function(){ if (center && measure()) build(); }, 150);
+    });
+    return { update: update, refit: function(){ if (center && measure()) build(); } };
+  })();
+
+  // ---- Tabs: Strike Map / Chart & Records (the choice is remembered) ----
+  var tabsEl = document.getElementById('bkTabs');
+  function showView(v){
+    document.getElementById('bkViewMap').hidden = v !== 'map';
+    document.getElementById('bkViewChart').hidden = v !== 'chart';
+    Array.prototype.forEach.call(tabsEl.querySelectorAll('.bk-tab'), function(b){
+      var on = b.getAttribute('data-view') === v;
+      b.classList.toggle('active', on); b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    try { localStorage.setItem('boltekModalView', v); } catch (e) {}
+    if (v === 'chart' && started) render();
+    if (v === 'map' && typeof strikeMap !== 'undefined') strikeMap.refit();
+    reportSize();
+  }
+  tabsEl.addEventListener('click', function(e){
+    var b = e.target.closest('.bk-tab'); if (b) showView(b.getAttribute('data-view'));
+  });
+  (function(){ var v = 'map'; try { v = localStorage.getItem('boltekModalView') || 'map'; } catch (e) {} showView(v === 'chart' ? 'chart' : 'map'); })();
+
   // ---- Data ----
   function getJson(url){
     return fetch(url + '?_=' + Date.now(), { cache: 'no-store' }).then(function(r){
@@ -572,7 +1018,7 @@ select.bk-tf{ padding-right:8px; }
     });
   }
   function loadLive(){
-    getJson(LIVE_URL).then(function(j){ live = j; renderLive(); })
+    getJson(LIVE_URL).then(function(j){ live = j; renderLive(); if (!DEMO) strikeMap.update(j); })
       .catch(function(){ live = null; renderLive(); });
   }
   started = true;
