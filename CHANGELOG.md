@@ -29,26 +29,32 @@
 - A card for Boltek lightning detectors, in the Lightning card's place. It
   shows the same readouts (Current, Today, Last Hour, the year's total,
   All-Time Total, Last Detected, Last Distance) plus **Bearing** of the
-  last strike (degrees and compass point). Current is NexStorm's strikes
-  per minute; Last Hour comes from the Boltek database. The status dot
+  last strike (degrees and compass point). Current is the strikes in the
+  last minute; Last Hour comes from the Boltek database. The status dot
   is red when NexStorm's file is missing, unreadable or hasn't changed for
   10 minutes; hovering it says which.
-- Data comes from NexStorm's `NSDRealtime.txt`: one line of 23
-  comma-separated values (time of the reading and of the last strike as
-  Unix times, strikes and close strikes per minute, last strike bearing/
-  distance/type `cg+ cg- cc+ cc-`, close and total strikes today, peak
-  rate and peak burst with their times, today's CG+/CG-/CC+/CC- counts,
-  NexStorm's uptime and the distance unit; four values aren't identified
-  yet and are kept but not shown). It's read every 10 seconds by the new
-  `user.divumwx_boltek.BoltekLightningService`, which writes
-  `jsondata/boltek.json` for the card, including the reason whenever the
-  file can't be read (shown when hovering the card's status dot). An
-  older 22-value layout starting with a DD/MM/YYYY date is also accepted.
-- The first time it reads NexStorm, the strikes NexStorm has already
-  counted today are saved as one "earlier today" record at 00:00, so
-  today, the year and all-time include them; they're left out of hourly
-  figures (last hour, the 24hr chart and hourly records) since their real
-  times aren't known. Last hour, 15 and 30 minutes come from the database.
+- Data comes from NexStorm's native **`ngxarchive.json`**, which lists each
+  strike with its time (`millis`), distance in km (`dist`), bearing
+  (`bng`), position (`lat`/`lon`), type and polarity, plus NexStorm's
+  running `StrikeCount`, `StormCount`, the detector model and NexStorm
+  version. It's read every 10 seconds by the new
+  `user.divumwx_boltek.BoltekLightningService` (`[BoltekLightning]`
+  `ngxarchive_file`), which writes `jsondata/boltek.json` for the card,
+  including the reason whenever the file can't be read (shown when
+  hovering the card's status dot) and the latest 100 strikes with their
+  positions.
+- Each listed strike is counted once, at its own time: a strike read after
+  its 5-minute interval was saved, or listed while WeeWX was stopped, or
+  already in the file the first time it's read, is added to the record
+  for when it happened, so the hourly chart and records show it there.
+  If `StrikeCount` rises by more than the new strikes listed, the extra is
+  counted too, at the time it's seen. From the strikes' times and
+  distances it works out strikes per minute, the average distance over
+  the last hour, approaching/receding (the last 15 minutes against the 15
+  before) and today's peak rate. Type 1 is read as cloud-to-ground (+CG /
+  -CG by polarity); `compoundType`, `correlated` and `NMEAChecksum` aren't
+  identified yet and aren't used. Last hour, 15 and 30 minutes come from
+  the database.
 - Strikes are kept in DivumWX's own Boltek database,
   `divumwx_boltek.sdb` (SQLite, one record every 5 minutes), separate
   from the WeeWX archive. The installer adds `[BoltekLightning]`,
@@ -59,10 +65,10 @@
   without a Boltek the service just waits for the file.
 - Clicking the Boltek card opens **modalBoltekLightning.html**, its own
   chart & records page in the same style as the Lightning one:
-  - a live strip from NexStorm: status, strike and close-strike rates,
-    last 15/30 minutes and last hour, last strike type and time, peak rate
-    and peak burst with their times, today's CG+/CG-/CC+/CC- and close
-    strikes, and NexStorm's uptime (only what the file provides is shown);
+  - a live strip: status, strike rate, approaching/receding, last 15/30
+    minutes and last hour, last strike type and time, its bearing and
+    distance, today's peak rate and its time, average distance, active
+    storms, and the detector model and NexStorm version;
   - a chart for 24hr (hourly), Week, Month, Year or any past year (daily):
     bars split into cloud-to-ground (CG) and in-cloud (IC) strikes, the
     closest strike as a line on the right axis over the distance bands,
@@ -78,9 +84,9 @@
   (`min_distance`, `max_rate`).
 - `divumwx_uninstall_helper.py` removes those three entries; the database
   file is left in place so strike history isn't lost.
-- New: `bin/user/divumwx_boltek.py` 1.0.0, `modalBoltekLightning.html`
-  1.0.0. Changed: `cardsBundleNew.js`
-  (new `cardBoltekLightning` module), `index.html`, `hyperIndex.html`,
+- New: `bin/user/divumwx_boltek.py` 1.1.0, `modalBoltekLightning.html`
+  1.1.0. Changed: `cardsBundleNew.js`
+  (new `cardBoltekLightning` module 1.1.0), `index.html`, `hyperIndex.html`,
   `lexendIndex.html` (card mount), `install.py`, `build_card_bundle.py`,
   `divumwx_uninstall_helper.py`, `lang/en.conf`, `lang/en_US.conf`,
   `INSTALLATION_GUIDE.md`.

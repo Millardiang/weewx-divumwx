@@ -8006,7 +8006,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardBoltekLightning.js version 1.0.0
+# cardBoltekLightning.js version 1.1.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -8016,7 +8016,8 @@ try {
 // Boltek lightning detector card: the same readouts as the Lightning card,
 // plus the bearing of the last strike, from jsondata/boltek.json. That file
 // is written by user.divumwx_boltek.BoltekLightningService from NexStorm's
-// NSDRealtime.txt and the Boltek database it keeps. Distances arrive in km.
+// native ngxarchive.json (every strike with its time, distance and bearing)
+// and the Boltek database it keeps. Distances arrive in km.
 // Clicking the card opens modalBoltekLightning.html (chart & records from
 // the Boltek database).
 (function(){
@@ -8316,7 +8317,7 @@ try {
         function count(x){ var n = num(x); return n === null ? 0 : n; }
 
         lastData = {
-          current: num(rt.strikes_per_minute),     // NexStorm's strikes per minute
+          current: num(rt.strikes_per_minute),     // strikes in the last minute
           dayStrikes: count(t.today),
           // NexStorm's own last-60-minutes count if the file has one,
           // else the Boltek database's
@@ -8329,7 +8330,7 @@ try {
           year: stationNow().getUTCFullYear()
         };
         renderCard(lastData);
-        // Green only while NexStorm's file is arriving; red when it's missing
+        // Green only while ngxarchive.json is updating; red when it's missing
         // or hasn't changed for a while (see stale_after in [BoltekLightning]).
         setStatus(!b.stale);
         statusWrap.title = b.error || (b.stale ? 'No recent data from NexStorm' : 'Receiving NexStorm data');

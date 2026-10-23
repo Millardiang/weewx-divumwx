@@ -2032,7 +2032,10 @@ def apply_boltek_merge(cfg, site_root=None):
     and needs [BoltekLightning] plus its own data binding and database.
     WeeWX itself creates the database file and its table the first time
     the service opens the binding, so nothing else is needed on disk. On a
-    station without a Boltek the service just waits for NSDRealtime.txt.
+    station without a Boltek the service just waits for ngxarchive.json.
+
+    1.0.0 read NSDRealtime.txt; its realtime_file and distance_unit keys are
+    removed when they still have their defaults (they're no longer used).
 
     site_root follows apply_timelapse_merge(): '' when HTML_ROOT already
     ends in DIVUMWX_ROOT_SUBDIR, so the paths don't double-nest.
@@ -2045,8 +2048,8 @@ def apply_boltek_merge(cfg, site_root=None):
         report['boltek_section_created'] = True
     bl = cfg['BoltekLightning']
     defaults = [
-        ('realtime_file', 'NSDRealtime.txt'),
-        ('distance_unit', 'km'),
+        ('ngxarchive_file', 'ngxarchive.json'),
+        ('close_distance', '16'),
         ('poll_interval', '10'),
         ('archive_interval', '300'),
         ('stale_after', '600'),
@@ -2055,16 +2058,19 @@ def apply_boltek_merge(cfg, site_root=None):
         ('history_file', 'jsondata/boltek_history.json'),
         ('binding', DIVUMWX_BOLTEK_BINDING),
     ]
+    for key, old in (('realtime_file', 'NSDRealtime.txt'), ('distance_unit', 'km')):
+        if bl.get(key) == old:
+            del bl[key]
+            report['removed_' + key] = True
     for key, value in defaults:
         if key not in bl:
             bl[key] = value
-    if hasattr(bl, 'comments') and not bl.comments.get('realtime_file'):
-        bl.comments['realtime_file'] = [
-            "# Where Boltek's NexStorm puts NSDRealtime.txt: relative to the",
+    if hasattr(bl, 'comments') and not bl.comments.get('ngxarchive_file'):
+        bl.comments['ngxarchive_file'] = [
+            "# Where Boltek's NexStorm puts ngxarchive.json: relative to the",
             "# DivumWX site folder, or an absolute path.",
         ]
-        bl.comments['distance_unit'] = ["# Distance unit (km or mi), only used if the file doesn't say;",
-                                        "# NexStorm's own layout includes it."]
+        bl.comments['close_distance'] = ["# Strikes this close (km) count as close strikes."]
 
     cfg.setdefault('DataBindings', {})
     if DIVUMWX_BOLTEK_BINDING not in cfg['DataBindings']:
@@ -3390,8 +3396,8 @@ class DivumwxInstaller(ExtensionInstaller):
             cfg, lambda: y_or_n(DIVUMWX_BOLTEK_QUESTION) == 'y')
         if detector == 'boltek':
             printer.out("Using the Boltek Lightning card (cardBoltekLightning) in place of "
-                        "cardLightning. Point [BoltekLightning] realtime_file at NexStorm's "
-                        "NSDRealtime.txt if it isn't in the DivumWX web folder.", level=1)
+                        "cardLightning. Point [BoltekLightning] ngxarchive_file at NexStorm's "
+                        "ngxarchive.json if it isn't in the DivumWX web folder.", level=1)
 
         # --- [Timelapse] ---
         # Deliberately OUTSIDE the "if 'enabled_cards' not in ..." gate above:

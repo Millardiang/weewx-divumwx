@@ -137,16 +137,16 @@ separate Boltek database, `divumwx_boltek.sdb`, which WeeWX creates next to
 its own database the first time it starts. Stations without a Boltek can
 ignore all of this; the service just waits for a file that never arrives.
 
-1. In NexStorm, have it write or upload `NSDRealtime.txt` to the DivumWX web
-   folder (next to `index.html`). If it goes somewhere else, set
-   `realtime_file` under `[BoltekLightning]` to its full path.
-2. Distances are read in whatever unit NexStorm writes in the file (km or
-   miles). The card shows kilometres; the chart page follows the
-   dashboard's unit setting.
-3. Restart WeeWX. The card turns green once the file is arriving. Today's
-   strikes so far are picked up from NexStorm the first time; the totals
-   for the year and all time build up from then on. If the dot stays red,
-   hover over it to see why.
+1. In NexStorm, have it write or upload its `ngxarchive.json` to the
+   DivumWX web folder (next to `index.html`). If it goes somewhere else,
+   set `ngxarchive_file` under `[BoltekLightning]` to its full path.
+2. Distances come from the file in kilometres. The card shows kilometres;
+   the chart page follows the dashboard's unit setting. Strikes within
+   `close_distance` (default 16 km) count as close strikes.
+3. Restart WeeWX. The card turns green once the file is updating. The
+   strikes already listed in the file are picked up the first time, at the
+   times they happened; the totals for the year and all time build up from
+   then on. If the dot stays red, hover over it to see why.
    Click the card for its chart & records, built from the same database.
 
 ## Troubleshooting

@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# modalBoltekLightning.html version 1.0.0
+# modalBoltekLightning.html version 1.1.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
   Chart & records for a Boltek lightning detector, opened from the Boltek
   Lightning card. Reads jsondata/boltek_history.json (hourly and daily totals
-  from the Boltek database) and jsondata/boltek.json (NexStorm's live
-  readings), both written by user.divumwx_boltek.BoltekLightningService.
+  from the Boltek database) and jsondata/boltek.json (live readings from
+  NexStorm's ngxarchive.json), both written by
+  user.divumwx_boltek.BoltekLightningService.
 -->
 <html lang="en">
 <head>
@@ -333,8 +334,8 @@ select.bk-tf{ padding-right:8px; }
     function add(cond, label, value, sub, dot){ if (cond) chips.push(chip(label, value, sub, dot)); }
     add(true, 'Status', status, live && live.file_time ? fmtHour(live.file_time * 1000) : '',
         !live ? '' : live.stale ? 'high' : 'clear');
-    // Only what the file provides: NexStorm's own layout has no alarm,
-    // tendency, noise or average distance, so those chips are left out.
+    // Only what the readings include: ngxarchive.json has no alarm or
+    // noise, so those chips are left out.
     add(has(r.alarm), 'Alarm', r.alarm_label || String(r.alarm), '', { 0: 'clear', 1: 'caution', 2: 'high' }[r.alarm]);
     add(has(r.tendency), 'Storm', TENDENCY[r.tendency] || 'Code ' + r.tendency);
     add(true, 'Rate', has(r.strikes_per_minute) ? r.strikes_per_minute : '\u2014', '/min');
@@ -346,8 +347,11 @@ select.bk-tf{ padding-right:8px; }
     add(has(r.strikes_5min), 'Last 5 min', n(r.strikes_5min));
     add(true, 'Last 15/30 min', n(c15) + ' / ' + n(c30));
     add(true, 'Last Hour', n(c60));
-    add(has(r.last_type_label), 'Last Strike', r.last_type_label || '\u2014',
-        r.last_strike_time ? fmtHour(r.last_strike_time * 1000) : '');
+    add(has(r.last_type_label) || has(r.last_strike_time), 'Last Strike', r.last_type_label ||
+        (r.last_strike_time ? fmtHour(r.last_strike_time * 1000) : '\u2014'),
+        r.last_type_label && r.last_strike_time ? fmtHour(r.last_strike_time * 1000) : '');
+    add(has(r.last_bearing), 'Bearing', Math.round(r.last_bearing) + '\u00b0',
+        has(r.last_distance_km) ? fmtDist(r.last_distance_km) : '');
     add(has(r.peak_rate), 'Peak Rate', r.peak_rate + '/min', r.peak_rate_time ? fmtHour(r.peak_rate_time * 1000) : '');
     add(has(r.peak_burst), 'Peak Burst', r.peak_burst + '/sec', r.peak_burst_time ? fmtHour(r.peak_burst_time * 1000) : '');
     if (has(r.cg_plus) || has(r.cg_minus)) {
@@ -361,6 +365,8 @@ select.bk-tf{ padding-right:8px; }
     add(has(r.noise_count), 'Noise', n(r.noise_count));
     add(has(r.hardware_status), 'Sensor', r.hardware_status);
     add(has(r.uptime), 'NexStorm Up', String(r.uptime).replace(/^0 days /, ''));
+    add(has(r.storm_count), 'Storms', n(r.storm_count));
+    add(has(r.detector_model), 'Detector', r.detector_model, r.software_version ? 'NexStorm ' + r.software_version : '');
     el.innerHTML = chips.join('');
     if (live && live.error) el.firstChild.title = live.error;
   }
