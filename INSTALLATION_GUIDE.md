@@ -125,6 +125,40 @@ sudo systemctl restart weewx
    alone. The list of files removed is printed during the install.
 5. Restart WeeWX.
 
+## Weather warnings (MeteoAlarm)
+
+The installer asks where the alert bar's weather warnings come from:
+
+- `meteoalarm`: [MeteoAlarm](https://www.meteoalarm.org/), the official
+  warnings of Europe's national weather services (the EUMETNET countries,
+  the UK included). No key is needed. This is the default for stations in
+  Europe.
+- `openweather`: OpenWeatherMap's alerts, which need an OpenWeatherMap
+  app_id (with the Met Office RSS as a fallback in the UK).
+
+For MeteoAlarm you choose your warning areas on the area map from
+[weewx-meteoalarm](https://github.com/Millardiang/weewx-meteoalarm): the
+installer prints a link that opens the map at your station (your position
+stays in the part of the link after `#`, which the browser doesn't send).
+Pick your areas or draw a polygon, press **Copy setup code** and paste the
+code (it looks like `MA1:UK258,UK259:2:`) into the installer. The areas go
+in `[Meteoalarm]` in `weewx.conf`, the same section weewx-meteoalarm uses,
+so if you already have weewx-meteoalarm its areas are used and you aren't
+asked again. To choose again later:
+
+```
+# WeeWX installed with pip:
+~/weewx-venv/bin/python3 ~/weewx-data/bin/user/divumwx_meteoalarm.py --setup
+# WeeWX installed from a Debian/RPM package:
+sudo python3 /etc/weewx/bin/user/divumwx_meteoalarm.py --setup
+```
+
+then restart WeeWX. `[Meteoalarm]` `min_level` (1 green, 2 yellow, 3 orange,
+4 red; default 2) sets the lowest level shown. Warnings are fetched every 10
+minutes (`[DivumWXMeteoalarm]` `poll_interval`) and shown in the
+dashboard's language when the national service publishes one, otherwise in
+English.
+
 ## Webcams
 
 When you include the webcam card, the installer asks how many webcams you

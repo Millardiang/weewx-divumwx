@@ -1277,7 +1277,10 @@ DIVUMWX_WEATHERAPI_ALERTS_PATH_SUFFIX = 'jsondata/openweathermap.txt'
 
 
 def apply_weatherapi_alerts_merge(cfg, html_root=None, app_id=None, poll_interval=None):
-    """Mutates cfg['WeatherAPI']['Alerts'] in place. Returns a report dict."""
+    """Mutates cfg['WeatherAPI']['Alerts'] in place. Returns a report dict.
+    OpenWeatherMap alerts stay disabled while MeteoAlarm is the warnings
+    source ([DivumWXCards] warnings_source = meteoalarm), so the alert bar
+    doesn't show the same warnings twice."""
     if 'WeatherAPI' not in cfg:
         cfg['WeatherAPI'] = {}
     if 'Alerts' not in cfg['WeatherAPI']:
@@ -1313,7 +1316,13 @@ def apply_weatherapi_alerts_merge(cfg, html_root=None, app_id=None, poll_interva
     # still enabled Alerts, producing continuous HTTP 401s until fixed
     # manually (see beta report, Kjell, Norway).
     have_app_id = bool(alerts.get('app_id'))
-    if not have_app_id:
+    use_meteoalarm = str(cfg.get('DivumWXCards', {}).get('warnings_source', '')).lower() == 'meteoalarm'
+    report['disabled_for_meteoalarm'] = False
+    if use_meteoalarm:
+        if alerts.get('enabled') != 'False':
+            alerts['enabled'] = 'False'
+        report['disabled_for_meteoalarm'] = True
+    elif not have_app_id:
         if alerts.get('enabled') != 'False':
             alerts['enabled'] = 'False'
             report['enabled_disabled_no_app_id'] = True
@@ -1739,6 +1748,85 @@ DIVUMWX_METOFFICE_REGIONS = {
 }
 
 DIVUMWX_WEATHERAPI_METOFFICERSS_PATH_SUFFIX = 'jsondata/metofficerss.txt'
+
+
+# Weather warnings for the alert bar: OpenWeatherMap alerts, or MeteoAlarm
+# (www.meteoalarm.org: the national warning services of the EUMETNET
+# countries, the UK included; no key needed), via user.divumwx_meteoalarm,
+# which is built from weewx-meteoalarm and shares its [Meteoalarm] areas.
+# Kept as [DivumWXCards] warnings_source and published in archive.json.
+DIVUMWX_WARNINGS_SOURCES = ['meteoalarm', 'openweather']
+# Rough box round the MeteoAlarm countries (lon -32..45, lat 27..72): the
+# default answer is meteoalarm inside it, openweather elsewhere.
+DIVUMWX_METEOALARM_BOX = (-32.0, 27.0, 45.0, 72.0)
+
+
+def in_meteoalarm_region(cfg):
+    try:
+        lat = float(cfg['Station']['latitude'])
+        lon = float(cfg['Station']['longitude'])
+    except (KeyError, TypeError, ValueError):
+        return False
+    w, s, e, n = DIVUMWX_METEOALARM_BOX
+    return w <= lon <= e and s <= lat <= n
+
+
+def default_warnings_source(cfg):
+    current = str(cfg.get('DivumWXCards', {}).get('warnings_source', '')).strip().lower()
+    if current in DIVUMWX_WARNINGS_SOURCES:
+        return current
+    return 'meteoalarm' if in_meteoalarm_region(cfg) else 'openweather'
+
+
+def load_divumwx_meteoalarm(source_dir=None):
+    """Import this package's bin/user/divumwx_meteoalarm.py (for its area-map
+    setup), or None if it can't be loaded."""
+    import importlib.util
+    source_dir = source_dir or os.path.dirname(os.path.abspath(__file__))
+    path = os.path.join(source_dir, 'bin', 'user', 'divumwx_meteoalarm.py')
+    try:
+        spec = importlib.util.spec_from_file_location('divumwx_meteoalarm_setup', path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+    except Exception:
+        return None
+
+
+def meteoalarm_areas_set(cfg):
+    ma = cfg.get('Meteoalarm', {})
+    poly = ma.get('polygon')
+    if isinstance(poly, (list, tuple)):
+        poly = ','.join(poly)
+    return bool(str(ma.get('emma_ids', '') or '').strip() or str(poly or '').strip())
+
+
+def configure_meteoalarm_areas(cfg, printer, choose_again, ask=input, source_dir=None):
+    """Areas for MeteoAlarm warnings, chosen on weewx-meteoalarm's area map:
+    prints the link (the station's position stays in the part after '#') and
+    reads the setup code back. Areas already in [Meteoalarm] (from an earlier
+    run, or from weewx-meteoalarm) are kept unless choose_again() says yes.
+    Returns 'kept', 'set' or 'skipped'."""
+    source_dir = source_dir or os.path.dirname(os.path.abspath(__file__))
+    ma_mod = load_divumwx_meteoalarm(source_dir)
+    if meteoalarm_areas_set(cfg):
+        ma = cfg['Meteoalarm']
+        printer.out("MeteoAlarm areas already set: %s (warnings from level %s)."
+                    % (ma.get('emma_ids') or 'a polygon', ma.get('min_level', 2)), level=1)
+        if not choose_again():
+            return 'kept'
+    if ma_mod is None:
+        printer.out("Couldn't load divumwx_meteoalarm.py to choose areas; run "
+                    "bin/user/divumwx_meteoalarm.py --setup after installing.", level=1)
+        return 'skipped'
+    sel = ma_mod.interactive_setup(cfg, None, os.path.join(source_dir, 'skins', 'DivumWX', 'meteoalarm'),
+                                   out=lambda m: printer.out(m, level=1), ask=ask)
+    if not sel:
+        printer.out("No MeteoAlarm areas chosen. Choose them later with "
+                    "bin/user/divumwx_meteoalarm.py --setup, then restart WeeWX.", level=1)
+        return 'skipped'
+    ma_mod.apply_selection(cfg, sel)
+    return 'set'
 
 
 def apply_weatherapi_metofficerss_merge(cfg, html_root=None, in_uk=None, region_code=None):
@@ -2777,7 +2865,8 @@ DIVUMWX_DATA_SERVICES = ['user.divumwx.SkyfieldLoopData', 'user.divumwx.DataInje
                          'user.divumwx.CloudCoverageOverrideService',
                          'user.divumwx.LiveDataService', 'user.divumwx.WeatherAPIService',
                          'user.divumwx.TimelapseService',
-                         'user.divumwx_boltek.BoltekLightningService']
+                         'user.divumwx_boltek.BoltekLightningService',
+                         'user.divumwx_meteoalarm.MeteoalarmService']
 DIVUMWX_XTYPE_SERVICES = ['user.divumwx.AirDensityService', 'user.divumwx.vpdService',
                           'user.divumwx.LastNonZeroService']
 DIVUMWX_ARCHIVE_SERVICES = ['user.divumwx.SunshineDuration', 'user.divumwx.DivumwxExtrasService']
@@ -3033,6 +3122,7 @@ class DivumwxInstaller(ExtensionInstaller):
                     'bin/user/divumwx.py',
                     'bin/user/divumwx_cards.py',
                     'bin/user/divumwx_boltek.py',
+                    'bin/user/divumwx_meteoalarm.py',
                     'bin/user/divumwx_version.py',
                     'bin/user/lastrain.py',
                     'bin/user/stats.py',
@@ -3095,6 +3185,51 @@ class DivumwxInstaller(ExtensionInstaller):
                     'skins/DivumWX/lang/tr.conf',
                     'skins/DivumWX/lang/uk.conf',
                     'skins/DivumWX/lang/ur.conf',
+                ]),
+                # MeteoAlarm area names, outlines and geocode aliases (from
+                # weewx-meteoalarm), used by user.divumwx_meteoalarm to match
+                # warnings to the chosen areas. Not part of the web site.
+                ('skins/DivumWX/meteoalarm/areas', [
+                    'skins/DivumWX/meteoalarm/areas/AT.geojson',
+                    'skins/DivumWX/meteoalarm/areas/BA.geojson',
+                    'skins/DivumWX/meteoalarm/areas/BE.geojson',
+                    'skins/DivumWX/meteoalarm/areas/BG.geojson',
+                    'skins/DivumWX/meteoalarm/areas/CY.geojson',
+                    'skins/DivumWX/meteoalarm/areas/CZ.geojson',
+                    'skins/DivumWX/meteoalarm/areas/DE.geojson',
+                    'skins/DivumWX/meteoalarm/areas/DK.geojson',
+                    'skins/DivumWX/meteoalarm/areas/EE.geojson',
+                    'skins/DivumWX/meteoalarm/areas/EI.geojson',
+                    'skins/DivumWX/meteoalarm/areas/ES.geojson',
+                    'skins/DivumWX/meteoalarm/areas/FI.geojson',
+                    'skins/DivumWX/meteoalarm/areas/FR.geojson',
+                    'skins/DivumWX/meteoalarm/areas/GR.geojson',
+                    'skins/DivumWX/meteoalarm/areas/HR.geojson',
+                    'skins/DivumWX/meteoalarm/areas/HU.geojson',
+                    'skins/DivumWX/meteoalarm/areas/IE.geojson',
+                    'skins/DivumWX/meteoalarm/areas/IL.geojson',
+                    'skins/DivumWX/meteoalarm/areas/IS.geojson',
+                    'skins/DivumWX/meteoalarm/areas/IT.geojson',
+                    'skins/DivumWX/meteoalarm/areas/LT.geojson',
+                    'skins/DivumWX/meteoalarm/areas/LU.geojson',
+                    'skins/DivumWX/meteoalarm/areas/LV.geojson',
+                    'skins/DivumWX/meteoalarm/areas/MD.geojson',
+                    'skins/DivumWX/meteoalarm/areas/ME.geojson',
+                    'skins/DivumWX/meteoalarm/areas/MK.geojson',
+                    'skins/DivumWX/meteoalarm/areas/MT.geojson',
+                    'skins/DivumWX/meteoalarm/areas/NL.geojson',
+                    'skins/DivumWX/meteoalarm/areas/NO.geojson',
+                    'skins/DivumWX/meteoalarm/areas/PL.geojson',
+                    'skins/DivumWX/meteoalarm/areas/PT.geojson',
+                    'skins/DivumWX/meteoalarm/areas/RO.geojson',
+                    'skins/DivumWX/meteoalarm/areas/RS.geojson',
+                    'skins/DivumWX/meteoalarm/areas/SE.geojson',
+                    'skins/DivumWX/meteoalarm/areas/SI.geojson',
+                    'skins/DivumWX/meteoalarm/areas/SK.geojson',
+                    'skins/DivumWX/meteoalarm/areas/SOURCES.txt',
+                    'skins/DivumWX/meteoalarm/areas/UK.geojson',
+                    'skins/DivumWX/meteoalarm/areas/aliases.json',
+                    'skins/DivumWX/meteoalarm/areas/index.json',
                 ]),
                 # skins/DivumWXSkyfield and skins/DivumWXCelestial are
                 # deliberately NOT listed here -- see check_all_dependencies()'s
@@ -3244,9 +3379,27 @@ class DivumwxInstaller(ExtensionInstaller):
 
         apply_cloudcoverageoverride_merge(cfg, html_root=html_root)
 
+        # --- Weather warnings: MeteoAlarm or OpenWeatherMap ---
+        printer.out("Weather warnings for the alert bar: 'meteoalarm' is MeteoAlarm "
+                    "(www.meteoalarm.org), the official warnings of the European national "
+                    "weather services, the UK included, with no key needed; 'openweather' is "
+                    "OpenWeatherMap's alerts, which need an OpenWeatherMap app_id.", level=1)
+        warnings_source = weecfg.prompt_with_options(
+            "Weather warnings source: meteoalarm or openweather?",
+            default=default_warnings_source(cfg), options=DIVUMWX_WARNINGS_SOURCES)
+        cfg.setdefault('DivumWXCards', {})['warnings_source'] = warnings_source
+        if warnings_source == 'meteoalarm':
+            configure_meteoalarm_areas(
+                cfg, printer,
+                lambda: y_or_n("Choose your MeteoAlarm areas again on the map? (y/n) ", default='n') == 'y')
+
         # --- [WeatherAPI] ---
 
-        if existing['app_id']:
+        if warnings_source == 'meteoalarm':
+            # OpenWeatherMap's app_id is only used for alerts: not needed.
+            app_id = None
+            alerts_poll_interval = existing['alerts_poll_interval'] or DIVUMWX_WEATHERAPI_ALERTS_DEFAULT_POLL_INTERVAL
+        elif existing['app_id']:
             # Never echo the stored key back as a [default].
             app_id = weecfg.prompt_with_options(
                 "OpenWeatherMap app_id (an app_id is already configured -- "
@@ -3254,13 +3407,16 @@ class DivumwxInstaller(ExtensionInstaller):
         else:
             app_id = weecfg.prompt_with_options(
                 "OpenWeatherMap app_id (for weather alerts, leave blank to configure later)", default='')
-        alerts_poll_interval = weecfg.prompt_with_limits(
-            "Alerts poll interval, in seconds",
-            default=existing['alerts_poll_interval'] or DIVUMWX_WEATHERAPI_ALERTS_DEFAULT_POLL_INTERVAL,
-            low_limit=60, high_limit=86400)
+        if warnings_source != 'meteoalarm':
+            alerts_poll_interval = weecfg.prompt_with_limits(
+                "Alerts poll interval, in seconds",
+                default=existing['alerts_poll_interval'] or DIVUMWX_WEATHERAPI_ALERTS_DEFAULT_POLL_INTERVAL,
+                low_limit=60, high_limit=86400)
         alerts_report = apply_weatherapi_alerts_merge(
             cfg, html_root=html_root, app_id=app_id, poll_interval=alerts_poll_interval)
-        if alerts_report['enabled_disabled_no_app_id']:
+        if alerts_report['disabled_for_meteoalarm']:
+            printer.out("OpenWeatherMap alerts are off while MeteoAlarm provides the warnings.", level=2)
+        elif alerts_report.get('enabled_disabled_no_app_id'):
             printer.out(
                 "No OpenWeatherMap app_id given -- Alerts left disabled "
                 "(enabled = False) to avoid unauthenticated polling. Add an "

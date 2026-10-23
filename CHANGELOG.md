@@ -2,6 +2,48 @@
 
 ## Unreleased — for 2.0.0
 
+### MeteoAlarm weather warnings (Europe)
+- New warnings source for the alert bar: **MeteoAlarm**
+  (www.meteoalarm.org), the official warnings of the European national
+  weather services (the EUMETNET countries, the UK included), with no key
+  needed. Until now stations outside the UK had no weather warnings unless
+  they had an OpenWeatherMap app_id.
+- New service `user.divumwx_meteoalarm.MeteoalarmService`, built from
+  Ian Millard's [weewx-meteoalarm](https://github.com/Millardiang/weewx-meteoalarm)
+  1.0.0: its feed download, area matching (EMMA codes, geocode aliases and
+  polygons, including warnings drawn as their own outline, as the Met
+  Office does), caching, warning model and area-map setup code are used
+  as they are. Every 10 minutes it writes `jsondata/meteoalarm.json`. It
+  only runs when MeteoAlarm is the chosen source.
+- Alert bar (`alertBar.js` 1.1.0): with MeteoAlarm chosen, its warnings
+  replace OpenWeatherMap's (and the Met Office RSS fallback): one bar per
+  warning in its level colour (yellow, orange, red), with weewx-meteoalarm's
+  icon for the type, the areas and times (station time); **More** shows the
+  official headline, description and instructions in the dashboard's
+  language when the service publishes it (else English, else the first
+  given), MeteoAlarm's advice for the level, the issuing service and links.
+  Warnings that have ended since the file was written are left out. For
+  UK locations (a station in the UK, or a warning for UK areas) level 3 is
+  labelled **Amber**, the Met Office's name, instead of Orange. The UK
+  heat/cold health, flood and aurora bars are unchanged.
+- Installer: asks "Weather warnings source: meteoalarm or openweather?"
+  (default meteoalarm for stations in Europe, else openweather; kept as
+  `[DivumWXCards]` `warnings_source`, published in `archive.json`). For
+  MeteoAlarm it prints the link to weewx-meteoalarm's area map, opening at
+  the station, and reads the setup code back into `[Meteoalarm]` (shared
+  with weewx-meteoalarm, whose areas are kept if already set). The
+  OpenWeatherMap app_id questions are skipped and its alerts stay off while
+  MeteoAlarm is used. Areas can be chosen again later with
+  `divumwx_meteoalarm.py --setup`.
+- New: `bin/user/divumwx_meteoalarm.py` 1.0.0,
+  `skins/DivumWX/meteoalarm/areas/` (area names, outlines and geocode
+  aliases, 2.7 MB, from weewx-meteoalarm), `img/meteoalarm/` (warning type
+  icons). Changed: `cardsBundleNew.js`, `install.py`,
+  `bin/user/divumwx_cards.py`, `jsondata/archive.json.tmpl`, `lang/en.conf`,
+  `lang/en_US.conf`, `INSTALLATION_GUIDE.md`; the bundle's `?v=` in
+  `index.html`, `hyperIndex.html`, `lexendIndex.html` and `kiosk.html`
+  (kiosk's had been left on an older bundle).
+
 ### Climate report: colour-coded temperatures
 - On **climate.html**, every temperature (mean, high and low, on the
   Monthly and Yearly tabs, including the summary and annual rows) is now

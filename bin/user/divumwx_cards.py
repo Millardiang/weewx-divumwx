@@ -229,6 +229,13 @@ class DivumwxCards(SearchList):
         # ([DivumWXCards] page_background). Anything unset or unrecognised
         # is published as 'seasonal', the installer's default, so
         # seasonalBackground.js always gets a known value.
+        # warnings_source: where the alert bar's weather warnings come from
+        # ([DivumWXCards] warnings_source, set by the installer):
+        # 'openweather' (OpenWeatherMap alerts, Met Office RSS fallback; the
+        # default) or 'meteoalarm' (user.divumwx_meteoalarm).
+        warnings_source = str(cards_section.get('warnings_source', '') or '').strip().lower()
+        if warnings_source not in ('openweather', 'meteoalarm'):
+            warnings_source = 'openweather'
         page_background = str(cards_section.get('page_background', '') or '').strip().lower()
         if page_background not in ('seasonal', 'solid'):
             page_background = 'seasonal'
@@ -254,6 +261,7 @@ class DivumwxCards(SearchList):
             'divumwx_station_image_path': json.dumps(station_image_path),
             'divumwx_in_uk': json.dumps(in_uk),
             'divumwx_page_background': json.dumps(page_background),
+            'divumwx_warnings_source': json.dumps(warnings_source),
             'divumwx_lang': json.dumps(lang),
             'divumwx_strings_payload': json.dumps(strings_payload),
             # Release version for the dashboard footer (archive.json meta).

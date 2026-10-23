@@ -698,13 +698,18 @@ try {
 try {
 /*
 ##############################################################################################
-# alertBar.js version 1.0.0
+# alertBar.js version 1.1.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
 */
 
 // ===================== alertBar.js =====================
+// Weather warnings come from OpenWeatherMap (with the Met Office RSS as a
+// fallback) or, when the installer chose it ([DivumWXCards] warnings_source =
+// meteoalarm, archive.json meta.warnings_source), from MeteoAlarm: Europe's
+// national warnings, written to jsondata/meteoalarm.json by
+// user.divumwx_meteoalarm.MeteoalarmService.
 
 (function(){
   var ADVISORY_ZONE = 'unitedkingdom';
@@ -900,6 +905,7 @@ try {
     var text = opts.text || 'black';
     var border = opts.border;
     var icon = opts.icon;
+    var iconBg = opts.iconBg;
     var headlineHtml = opts.headlineHtml || '';
     var descriptionHtml = opts.descriptionHtml || '';
 
@@ -923,6 +929,12 @@ try {
       img.className = 'alert-icon';
       img.src = icon;
       img.alt = '';
+      if (iconBg) {   // MeteoAlarm's icons are white: give them a dark tile
+        img.style.background = iconBg;
+        img.style.borderRadius = '5px';
+        img.style.padding = '2px';
+        img.style.boxSizing = 'border-box';
+      }
       inner.appendChild(img);
     }
     var headline = document.createElement('div');
@@ -972,6 +984,64 @@ try {
     return d.innerHTML;
   }
 
+  // ---- MeteoAlarm ----
+  // The dashboard's language -> the CAP language codes national services use.
+  var MA_LANG = { cz: 'cs', gr: 'el', cn: 'zh', br: 'br', no: 'nb', en_US: 'en' };
+  function maLanguage(alert){
+    var langs = alert.languages || [];
+    var want = 'en';
+    try { want = (window.DivumWXI18N && DivumWXI18N.getLanguage()) || 'en'; } catch (e) {}
+    want = (MA_LANG[want] || want).slice(0, 2).toLowerCase();
+    function pick(code){
+      for (var i = 0; i < langs.length; i++) if (String(langs[i].code || '').slice(0, 2).toLowerCase() === code) return langs[i];
+      return null;
+    }
+    return pick(want) || (want === 'nb' ? pick('no') : null) || pick('en') || langs[0] || {};
+  }
+  function maAreas(alert){
+    var names = [];
+    (alert.areas || []).forEach(function(a){ if (a.desc && names.indexOf(a.desc) === -1) names.push(a.desc); });
+    if (names.length > 3) return names.slice(0, 3).join(', ') + ' +' + (names.length - 3);
+    return names.join(', ');
+  }
+  // The Met Office calls level 3 'Amber', not 'Orange': UK warnings (a station
+  // in the UK, or a warning for UK areas) are labelled that way.
+  function maLevelName(a, inUk){
+    var uk = inUk === true || (a.areas || []).some(function(ar){
+      return ar.country === 'UK' || /^UK\d/.test(String(ar.code || ''));
+    });
+    return (uk && a.level === 3) ? 'Amber' : (a.level_name || '');
+  }
+  function meteoalarmSections(doc, inUk){
+    var out = [];
+    var nowS = Date.now() / 1000;
+    (doc && doc.alerts || []).forEach(function(a){
+      if (a.expires && a.expires < nowS) return;      // ended since the file was written
+      var lang = maLanguage(a);
+      var red = a.level >= 4;
+      var areas = maAreas(a);
+      var headline = '<b>' + escapeHtml(maLevelName(a, inUk)) + ' ' + escapeHtml(DivumWXI18N.t('warning')) + ':</b> ' +
+        escapeHtml(a.title || a.type || '') + (areas ? ' — ' + escapeHtml(areas) : '') + '. ' +
+        (a.onset ? escapeHtml(fmtEpochDate(a.onset) || '') : '') +
+        (a.expires ? ' – ' + escapeHtml(fmtEpochDate(a.expires) || '') : '') + '. ';
+      var host = '';
+      try { host = a.web ? new URL(a.web).host : ''; } catch (e) {}
+      var desc = (lang.headline ? '<b>' + escapeHtml(lang.headline) + '</b><br>' : '') +
+        (lang.description_html || '') +
+        (lang.instruction_html ? '<br><br>' + lang.instruction_html : '') +
+        (a.advice ? '<br><br><i>' + escapeHtml(a.advice) + '</i>' : '') +
+        '<br><br>' + (a.sender ? escapeHtml(a.sender) + '. ' : '') +
+        (a.web && /^https?:/i.test(a.web) ? '<a href="' + escapeHtml(a.web) + '" target="_blank" rel="noopener">' + escapeHtml(host || a.web) + '</a> · ' : '') +
+        '<a href="https://www.meteoalarm.org/" target="_blank" rel="noopener">MeteoAlarm</a>';
+      out.push(buildSection({
+        bg: a.color || '#FFDB23', text: red ? 'white' : 'black',
+        icon: './img/meteoalarm/' + (a.icon || 'meteoalarm_000.svg'), iconBg: 'rgba(29,44,78,0.85)',
+        headlineHtml: headline, descriptionHtml: desc
+      }));
+    });
+    return out;
+  }
+
   function render(sections){
     mount.innerHTML = '';
     sections.forEach(function(s){ mount.appendChild(s); });
@@ -987,7 +1057,8 @@ try {
       fetchJson('./jsondata/flood.txt'),
       fetchText('./jsondata/metofficerss.txt'),
       fetchJson('./jsondata/archive.json'),
-      fetchJson('./jsondata/almanac.json')
+      fetchJson('./jsondata/almanac.json'),
+      fetchJson('./jsondata/meteoalarm.json')
     ]).then(function(results){
       var auroraText = results[0].status === 'fulfilled' ? results[0].value : null;
       var cold = results[1].status === 'fulfilled' ? results[1].value : null;
@@ -997,6 +1068,8 @@ try {
       var rssText = results[5].status === 'fulfilled' ? results[5].value : null;
       var archive = results[6].status === 'fulfilled' ? results[6].value : {};
       var almanac = results[7].status === 'fulfilled' ? results[7].value : {};
+      var meteoalarm = results[8].status === 'fulfilled' ? results[8].value : null;
+      var useMeteoalarm = (archive.meta && archive.meta.warnings_source) === 'meteoalarm';
       var stationLocation = (archive.meta && archive.meta.station_location) || 'this location';
 
       if (ADVISORY_ZONE !== 'unitedkingdom') return;
@@ -1069,10 +1142,12 @@ try {
         }));
       }
 
-      var owmAlerts = (owm && owm.alerts) || [];
+      var owmAlerts = useMeteoalarm ? [] : ((owm && owm.alerts) || []);
       owmAlerts = dedupeAlerts(owmAlerts);
       var rssFallbackUsed = false;
-      if (owmAlerts.length > 0) {
+      if (useMeteoalarm) {
+        meteoalarmSections(meteoalarm, archive.meta && archive.meta.in_uk).forEach(function(sec){ sections.push(sec); });
+      } else if (owmAlerts.length > 0) {
         owmAlerts.forEach(function(alert){
           var event = alert.event || '';
           var level = levelFromEventText(event);

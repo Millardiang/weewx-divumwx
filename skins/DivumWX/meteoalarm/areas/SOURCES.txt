@@ -1,0 +1,22 @@
+Area outlines used by the Meteoalarm map and polygon matching
+=============================================================
+
+Most countries: MeteoAlarm area geometry from the geocodes.json file in the
+MIT-licensed "meteoalarm" Python package, https://github.com/NiklasJordan/meteoalarm
+
+United Kingdom (UK.geojson), built with tools/build_uk_areas.py from:
+
+  Great Britain - Counties and Unitary Authorities (December 2019), Office for
+  National Statistics, via https://github.com/ONSvisual/topojson_boundaries
+    Source: Office for National Statistics licensed under the Open Government
+    Licence v.3.0. Contains OS data (c) Crown copyright and database right 2019.
+
+  Northern Ireland - OSNI Open Data Largescale Boundaries, County Boundaries,
+  Land & Property Services
+    Contains LPS Intellectual Property (c) Crown copyright and database right 2016.
+    This information is licensed under the terms of the Open Government Licence
+    (http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3).
+
+The outlines are simplified (to about 300 m) and, for metropolitan counties and
+Greater London, merged from their districts to match MeteoAlarm's areas.
+Neither ONS nor LPS endorses this software.
