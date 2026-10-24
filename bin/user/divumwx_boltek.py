@@ -1,6 +1,6 @@
 """
 ##############################################################################################
-# divumwx_boltek.py version 1.1.1
+# divumwx_boltek.py version 1.2.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -26,6 +26,12 @@ strikes, and keeps rewriting it while it runs:
          "type": 1, "polarity": 1,              1 = cloud-to-ground; 1 = +, 0 = -
          "compoundType": 2, "correlated": false, "NMEAChecksum": 255}, ...],
      "StormData": []}
+
+Distances and bearings are measured from the station position in weewx.conf
+([Station] latitude/longitude), worked out from each strike's lat/lon, so
+they're right even if NexStorm's StationLat/Lon differ (NexStorm's own
+dist/bng are used only for a strike without a position, or if weewx.conf
+has no position). boltek.json's station_lat/lon are weewx.conf's.
 
 (dist and bng agree with the strike's lat/lon to within 1 km and 0.1 deg.
 type/polarity are read as above; compoundType, correlated and NMEAChecksum
@@ -89,6 +95,7 @@ weewx.conf (written by install.py on first install; every key optional):
 
 import json
 import logging
+import math
 import os
 import threading
 import time
@@ -100,7 +107,7 @@ from weeutil.weeutil import to_int
 
 log = logging.getLogger(__name__)
 
-BOLTEK_VERSION = '1.1.1'
+BOLTEK_VERSION = '1.2.0'
 
 # One record per archive_interval (dateTime is the END of the interval).
 # 'strikes', 'cg', 'ic', 'close' and 'noise' are counts during the interval;
@@ -155,8 +162,32 @@ def type_label(stype, polarity):
     return sign + 'CG' if stype == CG_TYPE else 'Type %d' % stype
 
 
-def parse_strike(entry):
-    """One StrikeData entry -> dict, or None if it has no usable time."""
+def distance_bearing(lat1, lon1, lat2, lon2):
+    """Great-circle distance (km) and initial bearing (degrees true) from
+    point 1 to point 2."""
+    p1, p2 = math.radians(lat1), math.radians(lat2)
+    dl = math.radians(lon2 - lon1)
+    a = math.sin((p2 - p1) / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
+    km = 2 * 6371.0088 * math.asin(min(1.0, math.sqrt(a)))
+    y = math.sin(dl) * math.cos(p2)
+    x = math.cos(p1) * math.sin(p2) - math.sin(p1) * math.cos(p2) * math.cos(dl)
+    return km, (math.degrees(math.atan2(y, x)) + 360) % 360
+
+
+def station_position(config_dict):
+    """(lat, lon) from weewx.conf [Station], or None."""
+    try:
+        st = config_dict.get('Station', {})
+        lat, lon = float(st['latitude']), float(st['longitude'])
+    except (KeyError, TypeError, ValueError, AttributeError):
+        return None
+    return (lat, lon) if -90 <= lat <= 90 and -180 <= lon <= 180 else None
+
+
+def parse_strike(entry, station=None):
+    """One StrikeData entry -> dict, or None if it has no usable time.
+    With station (lat, lon), distance and bearing are measured from it,
+    using the strike's own lat/lon; otherwise NexStorm's dist/bng."""
     if not isinstance(entry, dict):
         return None
     ms = _num(entry.get('millis'), int)
@@ -167,6 +198,8 @@ def parse_strike(entry):
     lat, lon = _num(entry.get('lat')), _num(entry.get('lon'))
     km = _num(entry.get('dist'))
     bng = _num(entry.get('bng'))
+    if station and lat is not None and lon is not None:
+        km, bng = distance_bearing(station[0], station[1], lat, lon)
     return {
         'ms': ms,
         't': ms // 1000,
@@ -181,9 +214,9 @@ def parse_strike(entry):
     }
 
 
-def parse_ngxarchive(text):
+def parse_ngxarchive(text, station=None):
     """ngxarchive.json's contents -> dict. Raises ValueError if it can't be
-    read."""
+    read. station: (lat, lon) from weewx.conf to measure strikes from."""
     try:
         doc = json.loads(text.lstrip('﻿'))
     except ValueError as e:
@@ -191,7 +224,7 @@ def parse_ngxarchive(text):
     if not isinstance(doc, dict) or 'StrikeData' not in doc:
         raise ValueError("not NexStorm's ngxarchive.json (no StrikeData)")
     raw = doc.get('StrikeData') if isinstance(doc.get('StrikeData'), list) else []
-    strikes = sorted((s for s in (parse_strike(e) for e in raw) if s), key=lambda s: s['ms'])
+    strikes = sorted((s for s in (parse_strike(e, station) for e in raw) if s), key=lambda s: s['ms'])
     ts = _num(doc.get('TimestampEpoch'))
     return {
         'file_time': None if not ts else int(ts / 1000.0 if ts > 1e11 else ts),
@@ -202,8 +235,13 @@ def parse_ngxarchive(text):
         'detector_model': doc.get('DetectorModel') or None,
         'software_version': doc.get('SoftwareVersion') or None,
         'antenna_alignment': _num(doc.get('AntennaAlignment')),
-        'station_lat': _num(doc.get('StationLat')),
-        'station_lon': _num(doc.get('StationLon')),
+        # weewx.conf's position (what distances are measured from), or
+        # NexStorm's if weewx.conf has none; NexStorm's is kept as well.
+        'station_lat': station[0] if station else _num(doc.get('StationLat')),
+        'station_lon': station[1] if station else _num(doc.get('StationLon')),
+        'nexstorm_lat': _num(doc.get('StationLat')),
+        'nexstorm_lon': _num(doc.get('StationLon')),
+        'station_source': 'weewx.conf' if station else 'NexStorm',
     }
 
 
@@ -224,6 +262,8 @@ class BoltekLightningService(StdService):
         self.json_file = os.path.join(site, bc.get('json_file', 'jsondata/boltek.json'))
         self.history_file = os.path.join(site, bc.get('history_file', 'jsondata/boltek_history.json'))
         self.close_km = float(bc.get('close_distance', 16))
+        # Strikes are measured from weewx.conf's station position.
+        self.station = station_position(config_dict)
         self.poll_interval = max(2, to_int(bc.get('poll_interval', 10)))
         self.archive_interval = max(60, to_int(bc.get('archive_interval', 300)))
         self.stale_after = max(60, to_int(bc.get('stale_after', 600)))
@@ -233,8 +273,11 @@ class BoltekLightningService(StdService):
         self._stop = threading.Event()
         self._thread = threading.Thread(target=self._run, name='BoltekLightning', daemon=True)
         self._thread.start()
-        log.info("Boltek lightning %s: reading %s every %ss, writing %s, database binding %s"
-                 % (BOLTEK_VERSION, self.ngxarchive_file, self.poll_interval, self.json_file, self.binding))
+        log.info("Boltek lightning %s: reading %s every %ss, writing %s, database binding %s, "
+                 "distances from %s"
+                 % (BOLTEK_VERSION, self.ngxarchive_file, self.poll_interval, self.json_file, self.binding,
+                    "weewx.conf's station position %.4f, %.4f" % self.station if self.station
+                    else "NexStorm's station position (no position in weewx.conf [Station])"))
 
     def shutDown(self):
         self._stop.set()
@@ -486,7 +529,7 @@ class BoltekRecorder(object):
             return None
         try:
             with open(path, 'r', encoding='utf-8', errors='replace') as fh:
-                reading = parse_ngxarchive(fh.read())
+                reading = parse_ngxarchive(fh.read(), getattr(self.cfg, 'station', None))
         except (OSError, ValueError) as e:
             # NexStorm may be part-way through rewriting it: try again next time.
             msg = str(e)
@@ -608,6 +651,9 @@ class BoltekRecorder(object):
                 'antenna_alignment': r['antenna_alignment'],
                 'station_lat': r['station_lat'],
                 'station_lon': r['station_lon'],
+                'station_source': r['station_source'],
+                'nexstorm_lat': r['nexstorm_lat'],
+                'nexstorm_lon': r['nexstorm_lon'],
                 'strikes_listed': len(r['strikes']),
                 # Strikes counted since the service started.
                 'counted': self.session['listed'],

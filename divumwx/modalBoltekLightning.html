@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# modalBoltekLightning.html version 1.2.0
+# modalBoltekLightning.html version 1.2.1
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -686,7 +686,7 @@ select.bk-tf{ padding-right:8px; }
     var gTrails = svg.append('g'), gStrikes = svg.append('g'), gStation = svg.append('g'), gFx = svg.append('g');
 
     var projection = null, path = null, world = null;
-    var center = null, stationName = 'Station';
+    var center = null, stationName = 'Station', centerFromWeewx = false;
     var unit = null, rangeIdx = null, userRange = false;
     var strikes = [], seen = {}, firstUpdate = true, lastLive = null;
 
@@ -891,7 +891,10 @@ select.bk-tf{ padding-right:8px; }
     function update(j){
       lastLive = j;
       var rt = (j && j.realtime) || {};
-      if (rt.station_lat != null && rt.station_lon != null) setCenter([+rt.station_lon, +rt.station_lat]);
+      // The station is weewx.conf's position (archive.json meta, below);
+      // boltek.json's station_lat/lon (also weewx.conf's, from 1.2.0 of the
+      // service) are used only until that arrives.
+      if (!centerFromWeewx && rt.station_lat != null && rt.station_lon != null) setCenter([+rt.station_lon, +rt.station_lat]);
       var list = (rt.recent_strikes || []).map(function(a){
         var s = { t: a[0], km: a[1], bng: a[2], lat: a[3], lon: a[4], label: a[5] };
         if ((s.lat == null || s.lon == null) && center && s.km != null && s.bng != null) {
@@ -930,12 +933,16 @@ select.bk-tf{ padding-right:8px; }
       .catch(function(){ return d3.json('./jsondata/countries-110m.json'); })
       .then(function(w){ world = w; drawLand(); })
       .catch(function(e){ console.warn('modalBoltekLightning: map data failed to load —', e && e.message); });
-    // the station's name (and position until NexStorm's arrives) from WeeWX
+    // the station's name and position (weewx.conf [Station]) from archive.json
     getJson('./jsondata/archive.json').then(function(a){
       var m = (a && a.meta) || {};
       setStationName(m.station_location);
       var lat = parseFloat(m.latitude), lon = parseFloat(m.longitude);
-      if (!center && isFinite(lat) && isFinite(lon)) { center = [lon, lat]; if (lastLive) update(lastLive); }
+      if (isFinite(lat) && isFinite(lon)) {
+        centerFromWeewx = true;
+        if (!center) { center = [lon, lat]; if (lastLive) update(lastLive); }
+        else setCenter([lon, lat]);
+      }
     }).catch(function(){});
 
     setInterval(function(){ drawStrikes(false); }, 30 * 1000);   // ages move on
