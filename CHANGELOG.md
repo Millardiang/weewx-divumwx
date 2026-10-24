@@ -90,20 +90,6 @@
   `install.py`, `bin/user/divumwx_cards.py`, `jsondata/archive.json.tmpl`,
   `INSTALLATION_GUIDE.md`. New: `modalWebcam.html` 1.0.0.
 
-### Boltek Lightning: distances from your weewx.conf position
-- Strike distances and bearings (card: Last Distance and Bearing; modal:
-  the map, its rings, panel and tooltips, and the live strip; the database's
-  closest-strike and close-strike counts) are now measured from the station
-  position in `weewx.conf` (`[Station]` latitude/longitude), worked out from
-  each strike's own latitude/longitude, rather than taken from NexStorm,
-  whose `StationLat`/`StationLon` may differ. The strike map is centred on
-  the `weewx.conf` position. NexStorm's figures are used only for a strike
-  without a position, or when `weewx.conf` has none. Records already in the
-  database keep the distances they were saved with.
-- `boltek.json` `station_lat`/`station_lon` are now `weewx.conf`'s
-  (`station_source` says which), with NexStorm's as `nexstorm_lat`/`nexstorm_lon`.
-- Changed: `divumwx_boltek.py` 1.2.0, `modalBoltekLightning.html` 1.2.1.
-
 ### Boltek Lightning: live strike map
 - **modalBoltekLightning.html** opens on a new **Strike Map** tab (the
   chart and records are on the **Chart & Records** tab; the choice is
@@ -275,6 +261,13 @@
   `lexendIndex.html` 1.1.0, `index.html` (card mount, bundle hash),
   `install.py`, `build_card_bundle.py`, `lang/en.conf`,
   `lang/en_US.conf`. New: `modalWindyRadar.html` 1.0.0.
+- Fixed: the card could show "Station location unavailable" while the
+  modal worked. It read `archive.json` once, as the dashboard loaded, and
+  gave up if that one read failed (a busy server, or the file caught while
+  WeeWX was rewriting it). It now keeps trying (after 5 s, then less often,
+  up to once a minute) until it gets the position, and remembers the last
+  position in the browser so the radar shows straight away meanwhile;
+  hovering the red status dot says why. `cardWindyRadar.js` 1.0.1.
 
 ## 1.7.0 — Celestial and Skyfield pages
 

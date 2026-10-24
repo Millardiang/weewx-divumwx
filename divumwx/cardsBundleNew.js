@@ -10750,7 +10750,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardWindyRadar.js version 1.0.0
+# cardWindyRadar.js version 1.0.1
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -10762,7 +10762,10 @@ try {
 // still map. The map here is look-only: like other cards, clicking
 // anywhere on the card opens the larger, interactive map
 // (modalWindyRadar.html), and hovering says so. Station latitude/longitude
-// come from archive.json meta.
+// come from archive.json meta (weewx.conf [Station]). If archive.json can't
+// be read as the page loads (busy server, file being rewritten), the card
+// keeps trying until it can, and meanwhile uses the position it last read
+// in this browser.
 (function(){
   var ARCHIVE_JSON_URL = './jsondata/archive.json';
   var MODAL_URL = 'modalWindyRadar.html';
@@ -11064,30 +11067,78 @@ try {
     showFrame(newFrame(), false, gen);
   }
 
+  // The last position read, kept in this browser so a failed first read
+  // doesn't leave the card blank.
+  var COORDS_KEY = 'divumwxWindyStationCoords';
+  function cachedCoords(){
+    try {
+      var c = JSON.parse(localStorage.getItem(COORDS_KEY) || 'null');
+      if (c && isFinite(parseFloat(c.lat)) && isFinite(parseFloat(c.lon))) return c;
+    } catch (e) {}
+    return null;
+  }
+  function saveCoords(){
+    try { localStorage.setItem(COORDS_KEY, JSON.stringify({ lat: lat, lon: lon, name: stationName })); } catch (e) {}
+  }
+
+  var configError = '';
+  // Resolves true once archive.json gave a position.
   function fetchConfig(){
     return fetch(ARCHIVE_JSON_URL + '?_=' + Date.now(), { cache: 'no-store' })
       .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
       .then(function(data){
         var m = (data && data.meta) || {};
-        var la = parseFloat(m.latitude), lo = parseFloat(m.longitude);
-        if (isFinite(la) && isFinite(lo)) { lat = la.toFixed(3); lon = lo.toFixed(3); }
         if (m.station_location) stationName = String(m.station_location);
+        var la = parseFloat(m.latitude), lo = parseFloat(m.longitude);
+        if (!isFinite(la) || !isFinite(lo)) throw new Error('no latitude/longitude in archive.json');
+        var changed = lat !== la.toFixed(3) || lon !== lo.toFixed(3);
+        lat = la.toFixed(3); lon = lo.toFixed(3);
+        saveCoords();
+        return changed;
       })
+      .then(function(changed){ configError = ''; return { ok: true, changed: changed }; })
       .catch(function(e){
+        configError = e.message;
         console.warn('cardWindyRadar: config fetch failed --', e.message);
+        return { ok: false };
       });
   }
 
-  fetchConfig().then(function(){
-    cardLink.setAttribute('data-title', modalTitle());
-    if (lat === null) {
-      message.textContent = 'Station location unavailable';
-      setStatus(false);
-      return;
-    }
+  var started = false, retryMs = 5000;
+  function begin(){
+    if (started) return;
+    started = true;
     load();
     setInterval(load, RELOAD_MS);
-  });
+  }
+  function attempt(){
+    fetchConfig().then(function(res){
+      cardLink.setAttribute('data-title', modalTitle());
+      if (res.ok) {
+        if (started && res.changed) load();   // was showing a remembered position
+        begin();
+        return;
+      }
+      if (!started) {
+        var c = cachedCoords();
+        if (c) {
+          lat = String(c.lat); lon = String(c.lon);
+          if (!stationName && c.name) stationName = c.name;
+          cardLink.setAttribute('data-title', modalTitle());
+          begin();
+        } else {
+          message.textContent = 'Waiting for the station location\u2026';
+          message.style.display = 'flex';
+          setStatus(false);
+        }
+      }
+      statusDot.title = "Can't read the station location from jsondata/archive.json (" + configError + '); trying again';
+      // Keep trying, less often each time, until archive.json can be read.
+      setTimeout(attempt, retryMs);
+      retryMs = Math.min(retryMs * 2, 60000);
+    });
+  }
+  attempt();
 
   window.addEventListener('i18nready', function(){
     titleLabel.textContent = DivumWXI18N.t('Windy Radar');
