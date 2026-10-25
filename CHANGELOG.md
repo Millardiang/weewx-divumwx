@@ -2,6 +2,13 @@
 
 ## Unreleased — for 2.0.0
 
+### Lightning and Boltek Lightning cards: taller conductor
+- The green lightning conductor is now 2.5 times as tall (45 instead of 18
+  SVG units), and the flash above it is 27 units shorter to match, so the
+  graphic's top and ground point stay where they were
+  (`cardLightning.js` 1.0.1, `cardBoltekLightning.js` 1.1.1, in
+  `cardsBundleNew.js`; cache-buster updated in all four dashboard pages).
+
 ### Fix: card modals collapsing to a thin strip
 - On browsers whose scrollbars take up space (Windows, and Linux desktops
   without overlay scrollbars), some card modals shrank to a narrow strip as

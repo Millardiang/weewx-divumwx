@@ -7765,7 +7765,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardLightning.js version 1.0.0
+# cardLightning.js version 1.0.1
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -8028,10 +8028,13 @@ try {
     svg.remove();
     svg = svgSel.append('svg').attr('viewBox', '0 0 ' + W + ' ' + H).attr('width', '100%').attr('height', '100%');
 
-    var trunkX = 90, trunkTopY = 20, trunkBottomY = 130;
-    svg.append('line').attr('x1', trunkX).attr('x2', trunkX).attr('y1', trunkBottomY).attr('y2', trunkBottomY + 18)
+    // Conductor 45 tall (2.5x the original 18); the flash is 27 shorter to match,
+    // so the ground point stays at 148.
+    var rodH = 45;
+    var trunkX = 90, trunkTopY = 20, trunkBottomY = 148 - rodH;
+    svg.append('line').attr('x1', trunkX).attr('x2', trunkX).attr('y1', trunkBottomY).attr('y2', trunkBottomY + rodH)
       .style('stroke', '#2e8b57').style('stroke-width', 3).style('stroke-linecap', 'round');
-    drawGroundGlow(svg, trunkX, trunkBottomY + 18);
+    drawGroundGlow(svg, trunkX, trunkBottomY + rodH);
     drawStrike(svg, trunkX, trunkTopY, trunkBottomY);
 
     // ---- Right pane: 7 readouts as label/value chip rows ----
@@ -8081,7 +8084,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardBoltekLightning.js version 1.1.0
+# cardBoltekLightning.js version 1.1.1
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -8362,10 +8365,13 @@ try {
     svg.remove();
     svg = svgSel.append('svg').attr('viewBox', '0 0 ' + W + ' ' + H).attr('width', '100%').attr('height', '100%');
 
-    var trunkX = 90, trunkTopY = 20, trunkBottomY = 130;
-    svg.append('line').attr('x1', trunkX).attr('x2', trunkX).attr('y1', trunkBottomY).attr('y2', trunkBottomY + 18)
+    // Conductor 45 tall (2.5x the original 18); the flash is 27 shorter to match,
+    // so the ground point stays at 148.
+    var rodH = 45;
+    var trunkX = 90, trunkTopY = 20, trunkBottomY = 148 - rodH;
+    svg.append('line').attr('x1', trunkX).attr('x2', trunkX).attr('y1', trunkBottomY).attr('y2', trunkBottomY + rodH)
       .style('stroke', '#2e8b57').style('stroke-width', 3).style('stroke-linecap', 'round');
-    drawGroundGlow(svg, trunkX, trunkBottomY + 18);
+    drawGroundGlow(svg, trunkX, trunkBottomY + rodH);
     drawStrike(svg, trunkX, trunkTopY, trunkBottomY);
 
     // ---- Right pane: 8 readouts as label/value chip rows ----
