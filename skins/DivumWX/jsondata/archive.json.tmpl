@@ -1,4 +1,9 @@
 #errorCatcher Echo
+## Trailing windows ("last hour", "last 10 minutes", "last 24 hours") use
+## $divumwx_last(seconds) from divumwx_cards.py, not WeeWX's $span(...): on the
+## night the clocks go back, $span can put the start in the repeated hour, an
+## hour late, and the whole file then fails ("start time is greater than stop
+## time").
 ##
 ## archive.json.tmpl — flat JSON snapshot of current/today/trend observation
 ## data, converted from the real dvmCombinedData PHP module. This replaces
@@ -372,9 +377,9 @@ null
 "et": {
 #if $current.ET.has_data
 "current": $current.ET.format(format_string="%.4f", None_string="null", add_label=False, localize=False),
-"hour": $span($hour_delta=1).ET.sum.format(format_string="%.4f", None_string="null", add_label=False, localize=False),
+"hour": $divumwx_last(3600).ET.sum.format(format_string="%.4f", None_string="null", add_label=False, localize=False),
 "day": $day.ET.sum.format(format_string="%.4f", None_string="null", add_label=False, localize=False),
-"last24h": $span($hour_delta=24).ET.sum.format(format_string="%.4f", None_string="null", add_label=False, localize=False),
+"last24h": $divumwx_last(86400).ET.sum.format(format_string="%.4f", None_string="null", add_label=False, localize=False),
 "week": $week.ET.sum.format(format_string="%.4f", None_string="null", add_label=False, localize=False),
 "month": $month.ET.sum.format(format_string="%.4f", None_string="null", add_label=False, localize=False),
 "year": $year.ET.sum.format(format_string="%.4f", None_string="null", add_label=False, localize=False),
@@ -469,8 +474,8 @@ null
 #if $current.rain.has_data
   "rate": $current.rainRate.format(format_string="%.2f", None_string="null", add_label=False, localize=False),
   "maxRate": $day.rainRate.max.format(format_string="%.2f", None_string="null", add_label=False, localize=False),
-  "hour": $span($hour_delta=1).rain.sum.format(format_string="%.2f", None_string="0", add_label=False, localize=False),
-  "last24h": $span($hour_delta=24).rain.sum.format(format_string="%.2f", None_string="0", add_label=False, localize=False),
+  "hour": $divumwx_last(3600).rain.sum.format(format_string="%.2f", None_string="0", add_label=False, localize=False),
+  "last24h": $divumwx_last(86400).rain.sum.format(format_string="%.2f", None_string="0", add_label=False, localize=False),
   "yesterday": $yesterday.rain.sum.format(format_string="%.2f", None_string="0", add_label=False, localize=False),
   "day": $day.rain.sum.format(format_string="%.2f", None_string="0", add_label=False, localize=False),
   "week": $week.rain.sum.format(format_string="%.2f", None_string="0", add_label=False, localize=False),
@@ -510,8 +515,8 @@ null
     ## reach into raw archive history, to pin down exactly when that
     ## event started.
     ## ------------------------------------------------------------------
-    #set $trailing1hMm = $span($hour_delta=1).rain.sum.mm.raw
-    #set $trailing24hMm = $span($hour_delta=24).rain.sum.mm.raw
+    #set $trailing1hMm = $divumwx_last(3600).rain.sum.mm.raw
+    #set $trailing24hMm = $divumwx_last(86400).rain.sum.mm.raw
     #set $trailing1hMm = ($trailing1hMm if $trailing1hMm is not None else 0.0)
     #set $trailing24hMm = ($trailing24hMm if $trailing24hMm is not None else 0.0)
     #if $trailing1hMm < 1.0 or $trailing24hMm < 1.0
@@ -571,8 +576,8 @@ null
 #if $current.hail.has_data
 "p_rain": {
 "rate": $current.hailRate.format(format_string="%.2f", None_string="null", add_label=False, localize=False),
-"hour": $span($hour_delta=1).hail.sum.format(format_string="%.2f", None_string="0", add_label=False, localize=False),
-"last24h": $span($hour_delta=24).hail.sum.format(format_string="%.2f", None_string="0", add_label=False, localize=False),
+"hour": $divumwx_last(3600).hail.sum.format(format_string="%.2f", None_string="0", add_label=False, localize=False),
+"last24h": $divumwx_last(86400).hail.sum.format(format_string="%.2f", None_string="0", add_label=False, localize=False),
 "yesterday": $yesterday.hail.sum.format(format_string="%.2f", None_string="0", add_label=False, localize=False),
 "day": $day.hail.sum.format(format_string="%.2f", None_string="0", add_label=False, localize=False),
 "week": $week.hail.sum.format(format_string="%.2f", None_string="0", add_label=False, localize=False),
@@ -592,8 +597,8 @@ null
   ## for the full "why 'hail'" explanation). Same fast-path-first
   ## structure too: the cheap $span(...).hail.sum.mm checks cover "no
   ## piezo event right now" without ever touching the archive database.
-  #set $pTrailing1hMm = $span($hour_delta=1).hail.sum.mm.raw
-  #set $pTrailing24hMm = $span($hour_delta=24).hail.sum.mm.raw
+  #set $pTrailing1hMm = $divumwx_last(3600).hail.sum.mm.raw
+  #set $pTrailing24hMm = $divumwx_last(86400).hail.sum.mm.raw
   #set $pTrailing1hMm = ($pTrailing1hMm if $pTrailing1hMm is not None else 0.0)
   #set $pTrailing24hMm = ($pTrailing24hMm if $pTrailing24hMm is not None else 0.0)
   #if $pTrailing1hMm < 1.0 or $pTrailing24hMm < 1.0
@@ -807,7 +812,7 @@ null
 "wind_chill": $current.windchill.format(format_string="%.2f", None_string="null", add_label=False, localize=False),
 "humidex": $current.humidex.format(format_string="%.2f", None_string="null", add_label=False, localize=False),
 "day_avg": $day.outTemp.avg.format(format_string="%.2f", None_string="null", add_label=False, localize=False),
-"day_avg_last_hour": $span($time_delta=3600).outTemp.avg.format(format_string="%.2f", None_string="null", add_label=False, localize=False),
+"day_avg_last_hour": $divumwx_last(3600).outTemp.avg.format(format_string="%.2f", None_string="null", add_label=False, localize=False),
 "day_max": $day.outTemp.max.format(format_string="%.2f", None_string="null", add_label=False, localize=False),
 "day_maxtime": $safeMs($day.outTemp.maxtime.raw),
 "day_min": $day.outTemp.min.format(format_string="%.2f", None_string="null", add_label=False, localize=False),
@@ -979,7 +984,7 @@ null
 "wind": {
 #if $current.windSpeed.has_data and $current.windGust.has_data
 "direction": $current.windDir.format(format_string="%.0f", None_string="null", add_label=False, localize=False),
-"direction_10m_avg": $span($time_delta=600).windDir.avg.format(format_string="%.0f", None_string="null", add_label=False, localize=False),
+"direction_10m_avg": $divumwx_last(600).windDir.avg.format(format_string="%.0f", None_string="null", add_label=False, localize=False),
 "speed": $current.windSpeed.format(format_string="%.1f", None_string="null", add_label=False, localize=False),
 "gust": $current.windGust.format(format_string="%.1f", None_string="null", add_label=False, localize=False),
 "speed_avg": $day.windSpeed.avg.format(format_string="%.1f", None_string="null", add_label=False, localize=False),
@@ -990,9 +995,9 @@ null
 ## Wind run — WeeWX's own running total, in the report's distance unit
 ## (no more reconstructing it client-side from hourly-max samples).
 "wind_run": $day.windrun.sum.format(format_string="%.1f", None_string="null", add_label=False, localize=False),
-"speed_10m_avg": $span($time_delta=600).windSpeed.avg.format(format_string="%.1f", None_string="null", add_label=False, localize=False),
-"speed_10m_max": $span($time_delta=600).windSpeed.max.format(format_string="%.1f", None_string="null", add_label=False, localize=False),
-"gust_10m_max": $span($time_delta=600).windGust.max.format(format_string="%.1f", None_string="null", add_label=False, localize=False),
+"speed_10m_avg": $divumwx_last(600).windSpeed.avg.format(format_string="%.1f", None_string="null", add_label=False, localize=False),
+"speed_10m_max": $divumwx_last(600).windSpeed.max.format(format_string="%.1f", None_string="null", add_label=False, localize=False),
+"gust_10m_max": $divumwx_last(600).windGust.max.format(format_string="%.1f", None_string="null", add_label=False, localize=False),
 "speed_yesterday_max": $day($days_ago=1).windSpeed.max.format(format_string="%.1f", None_string="null", add_label=False, localize=False),
 "speed_yesterday_maxtime": $safeMs($day($days_ago=1).windSpeed.maxtime.raw),
 "gust_yesterday_max": $day($days_ago=1).windGust.max.format(format_string="%.1f", None_string="null", add_label=False, localize=False),

@@ -264,6 +264,14 @@ class DivumwxCards(SearchList):
         strings_payload['_default'] = lang
 
         search_list_extension = {
+            # $divumwx_last(seconds[, data_binding=...]): the last `seconds`
+            # before the report time, counted in real seconds -- use in
+            # place of $span(time_delta=...)/$span(hour_delta=...).
+            # WeeWX's $span works the start out as a local clock time, which
+            # on the night the clocks go back can fall in the repeated hour
+            # and come out an hour late, after the report time ("start time
+            # is greater than stop time"), failing the whole template.
+            'divumwx_last': self._last_span(timespan, db_lookup),
             'divumwx_enabled_cards': json.dumps(list(enabled_cards)),
             'divumwx_webcam_title': json.dumps(webcam_title),
             'divumwx_webcam_image': json.dumps(webcam_image),
@@ -281,6 +289,21 @@ class DivumwxCards(SearchList):
             'divumwx_version': json.dumps(DIVUMWX_VERSION),
         }
         return [search_list_extension]
+
+    def _last_span(self, timespan, db_lookup):
+        from weewx.tags import TimespanBinder
+        from weeutil.weeutil import TimeSpan
+        gen = self.generator
+        stop = timespan.stop
+
+        def divumwx_last(seconds, data_binding=None):
+            # Same as WeeWX's $span (context 'day', the report's formatter,
+            # converter and skin options), but start = stop - seconds.
+            return TimespanBinder(TimeSpan(stop - int(seconds), stop), db_lookup,
+                                  data_binding=data_binding, context='day',
+                                  formatter=gen.formatter, converter=gen.converter,
+                                  skin_dict=gen.skin_dict)
+        return divumwx_last
 
     def _read_all_lang_strings(self):
         """Read every skins/DivumWX/lang/*.conf file's [Texts] section

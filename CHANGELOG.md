@@ -44,6 +44,22 @@
   `index.html`, `hyperIndex.html`, `lexendIndex.html` and `kiosk.html`
   (kiosk's had been left on an older bundle).
 
+### Fix: archive.json and charts.json failing on the night the clocks go back
+- On the autumn clock change (e.g. 01:00-02:00 on 25 October 2026 in the UK)
+  archive.json.tmpl failed with "start time ... is greater than stop time"
+  and wasn't written for the repeated hour. WeeWX's `$span(time_delta=...)`
+  / `$span(hour_delta=...)` works the start out as a local clock time; in
+  the repeated hour that time happens twice and the system may pick the
+  later one, after the report time. (WeeWX 5.5.2; it depends on the
+  system's C library, so not every machine shows it.)
+- The templates now use `$divumwx_last(seconds)` (new tag from
+  `divumwx_cards.py`) for every trailing window: the last hour, 10 minutes
+  and 24 hours in `archive.json.tmpl` and the 24-hour charts in
+  `charts.json.tmpl`. It counts back in real seconds, so it can't fail, and
+  "last 24 hours" is now 24 real hours across a clock change.
+- Changed: `bin/user/divumwx_cards.py`, `jsondata/archive.json.tmpl`,
+  `jsondata/charts.json.tmpl`.
+
 ### DivumWX extras: its own database again when the station has one
 - Restored: stations with DivumWX's own extras database
   (`[DataBindings]` `[[divumwx_extras_binding]]`, normally

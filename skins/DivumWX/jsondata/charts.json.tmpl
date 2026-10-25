@@ -1,4 +1,9 @@
 ##errorCatcher Echo
+## Trailing windows ("last hour", "last 10 minutes", "last 24 hours") use
+## $divumwx_last(seconds) from divumwx_cards.py, not WeeWX's $span(...): on the
+## night the clocks go back, $span can put the start in the repeated hour, an
+## hour late, and the whole file then fails ("start time is greater than stop
+## time").
 ##
 ## DivumWX's extra fields (air density, cloud cover, pollen, VPD, aerosol,
 ## pm4_0, ...) are read through $divumwx_extras_binding (divumwx_cards.py):
@@ -64,35 +69,35 @@
 {##airquality
 #set $fv = []
 #try
-#set $fv = $span(hour_delta=24).pm1_0.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json
+#set $fv = $divumwx_last(86400).pm1_0.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json
 #except
 #pass
 #end try
 "pm1_0Hourly": $fv,
 #set $fv = []
 #try
-#set $fv = $span(hour_delta=24).pm2_5.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json
+#set $fv = $divumwx_last(86400).pm2_5.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json
 #except
 #pass
 #end try
 "pm2_5Hourly": $fv,
 #set $fv = []
 #try
-#set $fv = $span(hour_delta=24, data_binding=$divumwx_extras_binding).pm4_0.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json
+#set $fv = $divumwx_last(86400, data_binding=$divumwx_extras_binding).pm4_0.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json
 #except
 #pass
 #end try
 "pm4_0Hourly": $fv,
 #set $fv = []
 #try
-#set $fv = $span(hour_delta=24).pm10_0.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json
+#set $fv = $divumwx_last(86400).pm10_0.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json
 #except
 #pass
 #end try
 "pm10_0Hourly": $fv,
 #set $fv = []
 #try
-#set $fv = $span(hour_delta=24, data_binding=$divumwx_extras_binding).aerosol_optical_depth.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(3).json
+#set $fv = $divumwx_last(86400, data_binding=$divumwx_extras_binding).aerosol_optical_depth.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(3).json
 #except
 #pass
 #end try
@@ -133,9 +138,9 @@
 #end try
 "aodMax": $fv,
 ##barometer and airdensity
-"baromAvgHourly": $span(hour_delta=24).barometer.series(aggregate_type='avg', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').hPa.round(1).json,
-"baromMaxHourly": $span(hour_delta=24).barometer.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').hPa.round(1).json,
-"baromMinHourly": $span(hour_delta=24).barometer.series(aggregate_type='min', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').hPa.round(1).json,
+"baromAvgHourly": $divumwx_last(86400).barometer.series(aggregate_type='avg', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').hPa.round(1).json,
+"baromMaxHourly": $divumwx_last(86400).barometer.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').hPa.round(1).json,
+"baromMinHourly": $divumwx_last(86400).barometer.series(aggregate_type='min', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').hPa.round(1).json,
 "baromMax": $alltime.barometer.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').hPa.round(0).json,
 "baromMin": $alltime.barometer.series(aggregate_type='min', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').hPa.round(0).json,
 "baromAvg": $alltime.barometer.series(aggregate_type='avg', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').hPa.round(0).json,
@@ -171,7 +176,7 @@
 ##evapotranspiration
 #set $fv = []
 #try
-#set $fv = $span(hour_delta=24).ET.series(aggregate_type='avg', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').mm.round(2).json
+#set $fv = $divumwx_last(86400).ET.series(aggregate_type='avg', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').mm.round(2).json
 #except
 #pass
 #end try
@@ -200,42 +205,42 @@
 ##greenhouse gases
 #set $fv = []
 #try
-#set $fv = $span(hour_delta=24).co.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(3).json
+#set $fv = $divumwx_last(86400).co.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(3).json
 #except
 #pass
 #end try
 "coHourly": $fv,
 #set $fv = []
 #try
-#set $fv = $span(hour_delta=24).co2.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json
+#set $fv = $divumwx_last(86400).co2.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json
 #except
 #pass
 #end try
 "co2Hourly": $fv,
 #set $fv = []
 #try
-#set $fv = $span(hour_delta=24).nh3.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(4).json
+#set $fv = $divumwx_last(86400).nh3.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(4).json
 #except
 #pass
 #end try
 "nh3Hourly": $fv,
 #set $fv = []
 #try
-#set $fv = $span(hour_delta=24).no2.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(4).json
+#set $fv = $divumwx_last(86400).no2.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(4).json
 #except
 #pass
 #end try
 "no2Hourly": $fv,
 #set $fv = []
 #try
-#set $fv = $span(hour_delta=24).o3.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(4).json
+#set $fv = $divumwx_last(86400).o3.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(4).json
 #except
 #pass
 #end try
 "o3Hourly": $fv,
 #set $fv = []
 #try
-#set $fv = $span(hour_delta=24).so2.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(4).json
+#set $fv = $divumwx_last(86400).so2.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(4).json
 #except
 #pass
 #end try
@@ -285,14 +290,14 @@
 ##lightning
 #set $fv = []
 #try
-#set $fv = $span(hour_delta=24).lightning_strike_count.series(aggregate_type='sum', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json
+#set $fv = $divumwx_last(86400).lightning_strike_count.series(aggregate_type='sum', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
 #pass
 #end try
 "lightCountHourly": $fv,
 #set $fv = []
 #try
-#set $fv = $span(hour_delta=24).lightning_distance.series(aggregate_type='avg', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json
+#set $fv = $divumwx_last(86400).lightning_distance.series(aggregate_type='avg', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json
 #except
 #pass
 #end try
@@ -314,42 +319,42 @@
 ##pollen
 #set $fv = []
 #try
-#set $fv = $span(hour_delta=24, data_binding=$divumwx_extras_binding).alder_pollen.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json
+#set $fv = $divumwx_last(86400, data_binding=$divumwx_extras_binding).alder_pollen.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
 #pass
 #end try
 "alderHourly": $fv,
 #set $fv = []
 #try
-#set $fv = $span(hour_delta=24, data_binding=$divumwx_extras_binding).birch_pollen.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json
+#set $fv = $divumwx_last(86400, data_binding=$divumwx_extras_binding).birch_pollen.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
 #pass
 #end try
 "birchHourly": $fv,
 #set $fv = []
 #try
-#set $fv = $span(hour_delta=24, data_binding=$divumwx_extras_binding).olive_pollen.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json
+#set $fv = $divumwx_last(86400, data_binding=$divumwx_extras_binding).olive_pollen.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
 #pass
 #end try
 "oliveHourly": $fv,
 #set $fv = []
 #try
-#set $fv = $span(hour_delta=24, data_binding=$divumwx_extras_binding).grass_pollen.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json
+#set $fv = $divumwx_last(86400, data_binding=$divumwx_extras_binding).grass_pollen.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
 #pass
 #end try
 "grassHourly": $fv,
 #set $fv = []
 #try
-#set $fv = $span(hour_delta=24, data_binding=$divumwx_extras_binding).mugwort_pollen.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json
+#set $fv = $divumwx_last(86400, data_binding=$divumwx_extras_binding).mugwort_pollen.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
 #pass
 #end try
 "mugwortHourly": $fv,
 #set $fv = []
 #try
-#set $fv = $span(hour_delta=24, data_binding=$divumwx_extras_binding).ragweed_pollen.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json
+#set $fv = $divumwx_last(86400, data_binding=$divumwx_extras_binding).ragweed_pollen.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
 #pass
 #end try
@@ -397,21 +402,21 @@
 #end try
 "ragweed": $fv,
 ##rain
-"rainHourly": $span(hour_delta=24).rain.series(aggregate_type='sum', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').mm.round(1).json,
-"rainRateHourly": $span(hour_delta=24).rain.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').mm.round(1).json,
+"rainHourly": $divumwx_last(86400).rain.series(aggregate_type='sum', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').mm.round(1).json,
+"rainRateHourly": $divumwx_last(86400).rain.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').mm.round(1).json,
 "rain": $alltime.rain.series(aggregate_type='sum', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').mm.round(1).json,
 "rainRate": $alltime.rain.series(aggregate_type='sum', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').mm.round(0).json,
 #if $current.hail.has_data
 #set $fv = []
 #try
-#set $fv = $span(hour_delta=24).hail.series(aggregate_type='sum', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').mm.round(1).json
+#set $fv = $divumwx_last(86400).hail.series(aggregate_type='sum', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').mm.round(1).json
 #except
 #pass
 #end try
 "prainHourly": $fv,
 #set $fv = []
 #try
-#set $fv = $span(hour_delta=24).hailRate.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').mm_per_hour.round(1).json
+#set $fv = $divumwx_last(86400).hailRate.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').mm_per_hour.round(1).json
 #except
 #pass
 #end try
@@ -439,13 +444,13 @@
 "outHumidMin": $alltime.outHumidity.series(aggregate_type='min', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').round(0).json,
 "outDewMax": $alltime.dewpoint.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').degree_C.round(0).json,
 "outDewMin": $alltime.dewpoint.series(aggregate_type='min', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').degree_C.round(0).json,
-"outTempHourly": $span(hour_delta=24).outTemp.series(aggregate_type='avg', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').degree_C.round(1).json,
-"outDewHourly": $span(hour_delta=24).dewpoint.series(aggregate_type='avg', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').degree_C.round(1).json,
-"outHumidHourly": $span(hour_delta=24).outHumidity.series(aggregate_type='avg', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+"outTempHourly": $divumwx_last(86400).outTemp.series(aggregate_type='avg', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').degree_C.round(1).json,
+"outDewHourly": $divumwx_last(86400).dewpoint.series(aggregate_type='avg', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').degree_C.round(1).json,
+"outHumidHourly": $divumwx_last(86400).outHumidity.series(aggregate_type='avg', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json,
 ##vpd
 #set $fv = []
 #try
-#set $fv = $span(hour_delta=24, data_binding=$divumwx_extras_binding).vpd.series(aggregate_type='avg', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json
+#set $fv = $divumwx_last(86400, data_binding=$divumwx_extras_binding).vpd.series(aggregate_type='avg', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
 #pass
 #end try
@@ -472,9 +477,9 @@
 #end try
 "vpdAvg": $fv,
 ##wind
-"windSpeedHourly": $span(hour_delta=24).windSpeed.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').meter_per_second.round(1).json,
-"windGustHourly": $span(hour_delta=24).windGust.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').meter_per_second.round(1).json,
-"windDirHourly": $span(hour_delta=24).windDir.series(aggregate_type='avg', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json,
+"windSpeedHourly": $divumwx_last(86400).windSpeed.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').meter_per_second.round(1).json,
+"windGustHourly": $divumwx_last(86400).windGust.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').meter_per_second.round(1).json,
+"windDirHourly": $divumwx_last(86400).windDir.series(aggregate_type='avg', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json,
 "windSpeedMax": $alltime.windSpeed.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').meter_per_second.round(1).json,
 "windSpeedAvg": $alltime.windSpeed.series(aggregate_type='avg', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').meter_per_second.round(1).json,
 "windGustMax": $alltime.windGust.series(aggregate_type='max', aggregate_interval=86400, time_series='start', time_unit='unix_epoch_ms').meter_per_second.round(0).json,
@@ -483,21 +488,21 @@
 ##solar and energy
 #set $fv = []
 #try
-#set $fv = $span(hour_delta=24).radiation.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json
+#set $fv = $divumwx_last(86400).radiation.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
 #pass
 #end try
 "solarRadiationHourly": $fv,
 #set $fv = []
 #try
-#set $fv = $span(hour_delta=24).radiation.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json
+#set $fv = $divumwx_last(86400).radiation.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(0).json
 #except
 #pass
 #end try
 "solarHourly": $fv,
 #set $fv = []
 #try
-#set $fv = $span(hour_delta=24).UV.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json
+#set $fv = $divumwx_last(86400).UV.series(aggregate_type='max', aggregate_interval=3600, time_series='start', time_unit='unix_epoch_ms').round(1).json
 #except
 #pass
 #end try
