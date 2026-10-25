@@ -507,7 +507,20 @@ window.addEventListener('message', (e) => {
   const target = Math.min(e.data.height + headerH, window.innerHeight * 0.92);
   chartModalBox.style.height = target + 'px';
   if (typeof e.data.width === 'number' && e.data.width > 0) {
-    const targetW = Math.min(e.data.width, window.innerWidth * 0.96);
+    // The modal reports its body width, which excludes the iframe's own
+    // vertical scrollbar. On browsers with classic (non-overlay) scrollbars,
+    // e.g. Windows, sizing the box to that width shrank the iframe, which
+    // shrank the body, which shrank the box again - collapsing tall modals
+    // (Solar Dial, Earth Daylight) to a thin strip. Add the gutter back.
+    let gutter = 0;
+    try {
+      const fw = chartModalIframe.contentWindow;
+      if (fw && fw.document && fw.document.documentElement) {
+        gutter = Math.max(0, fw.innerWidth - fw.document.documentElement.clientWidth);
+      }
+    } catch (err) { gutter = 0; }
+    const maxW = window.innerWidth * 0.96;
+    const targetW = Math.min(Math.max(e.data.width + gutter, Math.min(320, maxW)), maxW);
     chartModalBox.style.width = targetW + 'px';
     chartModalBox.style.maxWidth = targetW + 'px';
   }

@@ -2,6 +2,20 @@
 
 ## Unreleased — for 2.0.0
 
+### Fix: card modals collapsing to a thin strip
+- On browsers whose scrollbars take up space (Windows, and Linux desktops
+  without overlay scrollbars), some card modals shrank to a narrow strip as
+  soon as they opened. It was reported on Solar Dial and Earth Daylight, and
+  also affected METAR, Constellations and Meteor Showers.
+- Cause: the modal reports its page width so the dashboard can size the box.
+  That width leaves out the modal's own vertical scrollbar, so each resize
+  made the box a scrollbar narrower, which triggered another report, and so
+  on until the box collapsed.
+- Fix: the dashboard now adds the modal's scrollbar width back before
+  resizing the box, and never makes the box narrower than 320 px (or the
+  window, if smaller). Changed in `index.html`, `hyperIndex.html`,
+  `lexendIndex.html` and `kiosk.html`; no modal pages needed changing.
+
 ### Live lightning map (Blitzortung.org network)
 - New live lightning map, `js/lightningLive.js` 1.0.0: strikes from the
   Blitzortung.org community network, as they happen, on a D3 Equal Earth map
