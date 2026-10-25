@@ -110,7 +110,7 @@ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LIC
 * Tom Keffer, Matthew Wall and colleagues for their unstinting development, support and maintenance of WeeWX.
 * Sean Balfour, a long time collaborator who created by far the greater majority of the images/visualisations used in the cards and modals rendered using D3.
 * The late David Marshall, my very first collaborator, for his ingenious method of estimating cloud cover by counting pixels on radar images.
-* Mike Isacson for providing test server resources and being brave enough to test early developments.
+* Mike Isaac for providing test server resources and being brave enough to test early developments.
 * John A Kline for his superb weewx-celestial and weewx-skyfield extensions on which the Celestial and Skyfield page designs are based.
 * Vince Skahan constantly giving me food for thought.
 * Early adopters, in particular Kjell, Gert, Jon, Gary, Alex and many others for helping me squash some bugs, helpful suggestions and excellent feedback.
