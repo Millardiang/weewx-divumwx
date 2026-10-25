@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# charts.html version 1.0.1
+# charts.html version 1.0.2
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -174,6 +174,11 @@ body.season-autumn { --bs-card-bg: #f2e6d8; }
 .aurora-thresh-swatch{width:13px;height:13px;border-radius:2px;flex-shrink:0;}
 
 .meteogram-toolbar{display:flex;align-items:center;margin-bottom:14px;}
+/* Lightning: Chart & Records / Live Map (js/lightningLive.js) */
+.lightning-view-bar{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;margin:-8px 0 12px;}
+[data-embed="1"] .lightning-view-bar{margin:0 0 12px;}
+[data-embed="1"] #lightningLiveCard{border:0 !important;box-shadow:none !important;background:transparent !important;padding:0 !important;margin-bottom:0 !important;}
+.lightning-live-card .ll-btn.on{color:#1B1407;}
 .meteogram-wrap{width:100%;overflow-x:auto;}
 #meteogramContainer{min-width:1260px;max-width:1820px;height:520px;margin:0 auto;}
 
@@ -339,6 +344,11 @@ footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Lexend', syst
     <button type="button" id="openMetarBtn" class="chart-tf-btn">METAR</button>
   </div>
 
+  <div class="lightning-view-bar" id="lightningViewBar" style="display:none;">
+    <button type="button" class="chart-tf-btn active" data-lview="chart">Chart &amp; Records</button>
+    <button type="button" class="chart-tf-btn" data-lview="live" title="Live strikes from the Blitzortung.org network">Live Map</button>
+  </div>
+
   <div class="records-tabs" id="recordsTabs">
     <button class="records-tab" data-cat="temperature">Temperature</button>
     <button class="records-tab" data-cat="wind">Wind &amp; Gust</button>
@@ -421,6 +431,10 @@ footer{font-size:12px;color:var(--bs-secondary-color);font-family:'Lexend', syst
         <div class="extreme-values-note" id="extremeValuesNote">Maximum values shown for each period. Prevailing direction uses vector averaging.</div>
       </div>
     </div>
+  </div>
+
+  <div class="card p-4 mb-4 lightning-live-card" id="lightningLiveCard" style="display:none;">
+    <div id="lightningLiveMount"></div>
   </div>
 
   <div id="recordsSection">
@@ -1376,6 +1390,59 @@ applyTabLabels();
   });
 })();
 
+// ---- Lightning: Chart & Records / Live Map ----
+// The live map (Blitzortung.org's network, js/lightningLive.js) and its
+// scripts are only loaded the first time it's opened; the feed is connected
+// only while it's showing. The choice is remembered.
+let lightningView = 'chart';
+try { lightningView = localStorage.getItem('lightningModalView') === 'live' ? 'live' : 'chart'; } catch (e) {}
+let lightningLive = null, lightningLiveLoading = false;
+function loadScriptOnce(src){
+  return new Promise(function(resolve, reject){
+    if (document.querySelector('script[data-src="' + src + '"]')) return resolve();
+    const el = document.createElement('script');
+    el.src = src; el.setAttribute('data-src', src);
+    el.onload = resolve; el.onerror = function(){ reject(new Error('could not load ' + src)); };
+    document.head.appendChild(el);
+  });
+}
+function syncLightningView(){
+  const isL = currentCategory === 'lightning';
+  const live = isL && lightningView === 'live';
+  document.getElementById('lightningViewBar').style.display = isL ? 'flex' : 'none';
+  document.querySelectorAll('#lightningViewBar [data-lview]').forEach(function(b){
+    b.classList.toggle('active', b.dataset.lview === (live ? 'live' : 'chart'));
+  });
+  document.getElementById('lightningLiveCard').style.display = live ? '' : 'none';
+  document.getElementById('chartCard').style.display = live ? 'none' : '';
+  if (live) document.getElementById('recordsSection').style.display = 'none';
+  if (live) {
+    if (lightningLive) lightningLive.show();
+    else if (!lightningLiveLoading) {
+      lightningLiveLoading = true;
+      const p = window.topojson ? Promise.resolve() : loadScriptOnce('js/topojson.3.0.2.min.js');
+      p.then(function(){ return loadScriptOnce('js/lightningLive.js'); }).then(function(){
+        lightningLive = DivumLiveLightning.mount(document.getElementById('lightningLiveMount'));
+        if (currentCategory === 'lightning' && lightningView === 'live') lightningLive.show();
+      }).catch(function(e){
+        console.warn('charts-d3 (lightning): live map unavailable —', e.message);
+        document.getElementById('lightningLiveMount').textContent = DivumWXI18N.t('The live map could not be loaded.');
+      }).then(function(){ lightningLiveLoading = false; });
+    }
+  } else if (lightningLive) lightningLive.hide();
+  return live;
+}
+document.getElementById('lightningViewBar').addEventListener('click', function(e){
+  const b = e.target.closest('[data-lview]'); if (!b) return;
+  lightningView = b.dataset.lview === 'live' ? 'live' : 'chart';
+  try { localStorage.setItem('lightningModalView', lightningView); } catch (err) {}
+  renderChart();
+  if (lightningView === 'chart') renderRecordsPanel();
+});
+document.querySelectorAll('#lightningViewBar [data-lview]').forEach(function(b){
+  DivumWXI18N.applyLabel(b, b.dataset.lview === 'live' ? 'Live Map' : 'Chart & Records');
+});
+
 function populateHistoricalYears(){
   const sel = document.getElementById('chartHistYear');
   if(!dataSeries) return;
@@ -1397,7 +1464,7 @@ function populateHistoricalYears(){
 }
 
 function setActiveTimeframeButton(){
-  document.querySelectorAll('.chart-tf-btn').forEach(btn=>{
+  document.querySelectorAll('.chart-tf-btn[data-tf]').forEach(btn=>{
     btn.classList.toggle('active', btn.dataset.tf === currentTimeframe);
   });
   document.getElementById('chartHistYear').classList.toggle('active', currentTimeframe === 'historical');
@@ -1867,6 +1934,7 @@ function renderChart(){
   document.getElementById('chartContainer').style.display = (isMeteogram || isWindrose) ? 'none' : '';
   document.getElementById('chartLegend').style.display = isSpecial ? 'none' : '';
   document.getElementById('recordsSection').style.display = isSpecial ? 'none' : '';
+  if (syncLightningView()) return;
 
   if(isAurora){
     document.getElementById('chartCategoryNote').textContent = '';

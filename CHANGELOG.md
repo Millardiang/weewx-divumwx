@@ -2,6 +2,37 @@
 
 ## Unreleased — for 2.0.0
 
+### Live lightning map (Blitzortung.org network)
+- New live lightning map, `js/lightningLive.js` 1.0.0: strikes from the
+  Blitzortung.org community network, as they happen, on a D3 Equal Earth map
+  centred on the station (weewx.conf's position and name). It opens on the
+  station's region and can zoom out to the whole world.
+  - Each strike flashes, with brief lines to the detectors that located it,
+    as on Blitzortung's own map.
+  - A strike within 100 km of the station sends a tracer to the station.
+  - Dots are coloured by age, over the last hour.
+  - A panel shows the counts for the last minute and the last 10 minutes,
+    the strikes within 100 km, and the nearest strike.
+  - Hovering over a strike shows its time, position, detector count and
+    distance.
+  - Night shading.
+  - Distances follow the dashboard's units.
+  - Colours follow the Equal Earth map's palette, and the dashboard's theme
+    and season.
+  - It uses the local D3, TopoJSON and coastline files, and needs no key.
+  - The feed is only connected while the map is showing.
+  - Blitzortung's credit line is always shown. Their data is for private,
+    non-commercial use.
+- Boltek Lightning modal (`modalBoltekLightning.html` 1.3.0): new
+  **Live Network** tab, next to Strike Map and Chart & Records, to compare
+  the network's strikes with the station's own. The chosen tab is
+  remembered.
+- Lightning chart modal (`charts-d3.html` 1.0.2): new **Chart & Records /
+  Live Map** buttons, on the lightning chart only. The live map's scripts
+  are loaded only when it's first opened. The choice is remembered.
+  - Fix: the timeframe highlight no longer clears other buttons' highlights
+    (the wind rose period buttons, for one).
+
 ### MeteoAlarm weather warnings (Europe)
 - New warnings source for the alert bar: **MeteoAlarm**
   (www.meteoalarm.org), the official warnings of the European national
