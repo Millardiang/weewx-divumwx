@@ -2,6 +2,14 @@
 
 ## Unreleased — for 2.0.0
 
+### UK units: distances in miles
+- The UK unit system now shows distances in miles (`units.js` 1.0.2:
+  `uk.dist` is `mi`, was `km`). This covers the lightning and earthquake
+  cards and modals, the live lightning map, and the lightning chart.
+  Visibility was already in miles.
+- `units.js` is now loaded with a `?v=1.0.2` cache-buster on every page, so
+  browsers pick up unit changes.
+
 ### Earthquake distances follow the dashboard's unit system
 - Earthquake card (`cardEarthquake.js` 1.0.1) and modal
   (`modalEarthquakeMap.html` 1.1.2): the distance to the epicentre and the

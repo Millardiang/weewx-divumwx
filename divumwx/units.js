@@ -1,13 +1,13 @@
 /*
 ##############################################################################################
-# units.js version 1.0.1
+# units.js version 1.0.2
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
 */
 
 const SYSTEMS = {
-  uk:       {temp:'C', wind:'mph', pressure:'hpa',  rain:'mm', dist:'km', vis:'mi', alt:'m',  vspeed:'ms',  conc:'µg/m³'},
+  uk:       {temp:'C', wind:'mph', pressure:'hpa',  rain:'mm', dist:'mi', vis:'mi', alt:'m',  vspeed:'ms',  conc:'µg/m³'},
   us:       {temp:'F', wind:'mph', pressure:'inhg', rain:'in', dist:'mi', vis:'mi', alt:'m',  vspeed:'ms',  conc:'µg/m³'},
   metric:   {temp:'C', wind:'kmh', pressure:'hpa',  rain:'mm', dist:'km', vis:'km', alt:'m',  vspeed:'ms',  conc:'µg/m³'},
   scandi:   {temp:'C', wind:'ms',  pressure:'hpa',  rain:'mm', dist:'km', vis:'km', alt:'m',  vspeed:'ms',  conc:'µg/m³'},
