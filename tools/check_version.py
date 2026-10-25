@@ -10,7 +10,7 @@ Run from the repository root before tagging a release:
 Exits non-zero, listing each mismatch, if anything is out of step.
 
 Versions are X.Y.Z, or X.Y.Z-<pre-release> for a release candidate, e.g.
-2.0.0-RC1 (tagged ver.2.0.0-RC1). For a pre-release the README title and the
+2.0.0-RC2 (tagged ver.2.0.0-RC2). For a pre-release the README title and the
 latest changelog entry may give the version it leads up to (2.0.0), and the
 changelog's top entry may still be "## Unreleased — for 2.0.0"; every other
 label must show the full version.

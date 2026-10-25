@@ -2,6 +2,13 @@
 
 ## Unreleased — for 2.0.0
 
+### Version 2.0.0-RC2
+- `DIVUMWX_VERSION` is now `2.0.0-RC2`.
+- The last 1.7.0 labels now say 2.0.0-RC2: the `index.html` header and footer
+  fallback, the `divumwf.html` brand badge, and `INSTALLATION_GUIDE.md`.
+- The install guide downloads from the release tag `ver.2.0.0-RC2` instead
+  of the `version-2.0.0-RC1` branch. `tools/check_version.py` passes.
+
 ### Lightning distances follow the dashboard's unit system
 - Lightning and Boltek Lightning cards (`cardLightning.js` 1.0.2,
   `cardBoltekLightning.js` 1.1.2): Last Distance was always shown in km,
