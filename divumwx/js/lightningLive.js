@@ -1,6 +1,6 @@
 /*
 ##############################################################################################
-# lightningLive.js version 1.0.0
+# lightningLive.js version 1.0.1
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -98,7 +98,8 @@
     return 'km';
   }
   function kmTo(v, u){ return u === 'mi' ? v * 0.621371 : u === 'nm' ? v * 0.539957 : v; }
-  function fmtDist(km){ var u = distUnit(), v = kmTo(km, u); return (v < 10 ? v.toFixed(1) : Math.round(v).toLocaleString()) + ' ' + u; }
+  function fmtDist(km){ var u = distUnit(), v = kmTo(km, u); return (v < 10 ? v.toFixed(1) : Math.round(v).toLocaleString()) + ' ' + uLabel(u); }
+  function uLabel(u){ return u === 'nm' ? 'NM' : u; }
   function tz(){ try { return StationTime.getTZ(); } catch (e) { return undefined; } }
   function fmtClock(ms){
     try { return new Intl.DateTimeFormat('en-GB', { timeZone: tz(), hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }).format(new Date(ms)); }
@@ -375,7 +376,7 @@
       var total = strikes.length - head, u = distUnit();
       infoEl.innerHTML = t('Strikes') + ' &nbsp;1 min <b>' + c1.toLocaleString() + '</b> &nbsp;&middot;&nbsp; 10 min <b>' + c10.toLocaleString() +
         '</b> &nbsp;&middot;&nbsp; ' + t('on map') + ' <b>' + total.toLocaleString() + '</b>' +
-        (home ? '<br>' + t('Within') + ' ' + Math.round(kmTo(radiusKm, u)) + ' ' + u + ' (1 h) <b>' + near.toLocaleString() + '</b>' +
+        (home ? '<br>' + t('Within') + ' ' + Math.round(kmTo(radiusKm, u)) + ' ' + uLabel(u) + ' (1 h) <b>' + near.toLocaleString() + '</b>' +
           (best ? ' &nbsp;&middot;&nbsp; ' + t('Nearest') + ' <b>' + fmtDist(best.km) + '</b> ' + fmtAge(now - best.t) + ' ' + t('ago') : '') : '');
       var msg = '';
       if (statusEl.classList.contains('off')) msg = t('The Blitzortung feed can’t be reached at the moment — retrying');

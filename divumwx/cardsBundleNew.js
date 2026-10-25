@@ -7765,7 +7765,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardLightning.js version 1.0.1
+# cardLightning.js version 1.0.2
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -8022,6 +8022,22 @@ try {
     });
   }
 
+
+  // ---- Distance units: data arrives in km; show it in the dashboard's unit ----
+  function distUnit(){
+    try {
+      var key = localStorage.getItem('dashboardUnitSystem') || 'uk';
+      if (typeof SYSTEMS !== 'undefined' && SYSTEMS[key] && SYSTEMS[key].dist) return SYSTEMS[key].dist;
+    } catch (e) {}
+    return 'km';
+  }
+  var distUnitNow = distUnit();
+  function fmtDistKm(km){
+    var u = distUnitNow;
+    var v = u === 'mi' ? km * 0.621371 : u === 'nm' ? km * 0.539957 : km;
+    return v.toFixed(1) + ' ' + (u === 'nm' ? 'NM' : u === 'mi' ? 'mi' : 'km');
+  }
+
   function renderCard(v){
     var svgSel = d3.select(leftPane);
     var svg = svgSel.select('svg');
@@ -8044,12 +8060,20 @@ try {
     yearText.textContent = v.yearStrikes.toLocaleString();
     alltimeText.textContent = v.alltimeStrikes.toLocaleString();
     lastDetectedText.textContent = v.lastDetected;
-    lastDistanceText.textContent = v.lastDistance.toFixed(1) + ' km';
+    lastDistanceText.textContent = fmtDistKm(v.lastDistance);
   }
 
   var lastData = null;
   window.addEventListener('i18nready', function(){
     if (lastData) renderCard(lastData);
+  });
+  window.addEventListener('unitsystemchange', function(e){
+    var cfg = e.detail && e.detail.config;
+    distUnitNow = (cfg && cfg.dist) || distUnit();
+    if (lastData) renderCard(lastData);
+  });
+  window.addEventListener('storage', function(e){
+    if (e.key === 'dashboardUnitSystem') { distUnitNow = distUnit(); if (lastData) renderCard(lastData); }
   });
   function refresh(){
     fetch(ARCHIVE_JSON_URL + ((ARCHIVE_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
@@ -8084,7 +8108,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardBoltekLightning.js version 1.1.1
+# cardBoltekLightning.js version 1.1.2
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -8359,6 +8383,22 @@ try {
     });
   }
 
+
+  // ---- Distance units: data arrives in km; show it in the dashboard's unit ----
+  function distUnit(){
+    try {
+      var key = localStorage.getItem('dashboardUnitSystem') || 'uk';
+      if (typeof SYSTEMS !== 'undefined' && SYSTEMS[key] && SYSTEMS[key].dist) return SYSTEMS[key].dist;
+    } catch (e) {}
+    return 'km';
+  }
+  var distUnitNow = distUnit();
+  function fmtDistKm(km){
+    var u = distUnitNow;
+    var v = u === 'mi' ? km * 0.621371 : u === 'nm' ? km * 0.539957 : km;
+    return v.toFixed(1) + ' ' + (u === 'nm' ? 'NM' : u === 'mi' ? 'mi' : 'km');
+  }
+
   function renderCard(v){
     var svgSel = d3.select(leftPane);
     var svg = svgSel.select('svg');
@@ -8381,13 +8421,21 @@ try {
     yearText.textContent = v.yearStrikes.toLocaleString();
     alltimeText.textContent = v.alltimeStrikes.toLocaleString();
     lastDetectedText.textContent = v.lastDetected;
-    lastDistanceText.textContent = v.lastDistance === null ? '\u2014' : v.lastDistance.toFixed(1) + ' km';
+    lastDistanceText.textContent = v.lastDistance === null ? '\u2014' : fmtDistKm(v.lastDistance);
     bearingText.textContent = bearingLabel(v.bearing);
   }
 
   var lastData = null;
   window.addEventListener('i18nready', function(){
     if (lastData) renderCard(lastData);
+  });
+  window.addEventListener('unitsystemchange', function(e){
+    var cfg = e.detail && e.detail.config;
+    distUnitNow = (cfg && cfg.dist) || distUnit();
+    if (lastData) renderCard(lastData);
+  });
+  window.addEventListener('storage', function(e){
+    if (e.key === 'dashboardUnitSystem') { distUnitNow = distUnit(); if (lastData) renderCard(lastData); }
   });
   function refresh(){
     fetch(BOLTEK_JSON_URL + '?_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })

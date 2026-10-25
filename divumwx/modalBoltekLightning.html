@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# modalBoltekLightning.html version 1.3.0
+# modalBoltekLightning.html version 1.3.1
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -278,7 +278,7 @@ select.bk-tf{ padding-right:8px; }
 
 <script src="js/d3.7.9.0.min.js"></script>
 <script src="js/topojson.3.0.2.min.js"></script>
-<script src="js/lightningLive.js"></script>
+<script src="js/lightningLive.js?v=1.0.1"></script>
 <script src="units.js"></script>
 <script src="stationTime.js"></script>
 <script>
@@ -353,7 +353,7 @@ select.bk-tf{ padding-right:8px; }
   function fmtDist(km){
     if (km == null) return '—';
     var u = distUnit();
-    return kmTo(km, u).toFixed(1) + ' ' + u;
+    return kmTo(km, u).toFixed(1) + ' ' + (u === 'nm' ? 'NM' : u);
   }
   window.addEventListener('storage', function(e){ if (e.key === 'dashboardUnitSystem') { render(); renderLive(); } });
 
@@ -537,7 +537,7 @@ select.bk-tf{ padding-right:8px; }
     g.append('g').attr('class', 'axis').call(d3.axisLeft(y).ticks(6).tickFormat(d3.format('~s')));
     var yr = g.append('g').attr('class', 'axis').attr('transform', 'translate(' + iw + ',0)').call(d3.axisRight(y2).ticks(6));
     g.append('text').attr('x', -M.left + 4).attr('y', -6).attr('fill', cssVar('--bs-secondary-color')).attr('font-size', 10.5).text('(strikes)');
-    g.append('text').attr('x', iw + M.right - 4).attr('y', -6).attr('text-anchor', 'end').attr('fill', cssVar('--bs-secondary-color')).attr('font-size', 10.5).text('(' + u + ')');
+    g.append('text').attr('x', iw + M.right - 4).attr('y', -6).attr('text-anchor', 'end').attr('fill', cssVar('--bs-secondary-color')).attr('font-size', 10.5).text('(' + (u === 'nm' ? 'NM' : u) + ')');
     if (hidden.dist) yr.style('opacity', 0.3);
 
     // Stacked bars
@@ -673,7 +673,8 @@ select.bk-tf{ padding-right:8px; }
     // [age limit (minutes), colour, legend]
     var AGES = [[5, '#FFFFFF', '< 5 min'], [15, '#FFF200', '5–15'], [30, '#FFB300', '15–30'],
                 [60, '#FF6A00', '30–60'], [90, '#E0301E', '60–90'], [120, '#8E1730', '90–120 min']];
-    var RANGES = { km: [[300, 100], [600, 200], [1000, 250]], mi: [[200, 50], [400, 100], [600, 200]] };
+    var RANGES = { km: [[300, 100], [600, 200], [1000, 250]], mi: [[200, 50], [400, 100], [600, 200]],
+                   nm: [[150, 50], [300, 100], [500, 125]] };
     var COMPASS = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
     var KM_PER_DEG = 111.195;
 
@@ -698,8 +699,9 @@ select.bk-tf{ padding-right:8px; }
     var unit = null, rangeIdx = null, userRange = false;
     var strikes = [], seen = {}, firstUpdate = true, lastLive = null;
 
-    function units(){ var u = distUnit(); return u === 'mi' ? 'mi' : 'km'; }
-    function toKm(v, u){ return u === 'mi' ? v * 1.609344 : v; }
+    function units(){ var u = distUnit(); return RANGES[u] ? u : 'km'; }
+    function toKm(v, u){ return u === 'mi' ? v * 1.609344 : u === 'nm' ? v * 1.852 : v; }
+    function unitLabel(u){ return u === 'nm' ? 'NM' : u; }
     function compass(deg){ return COMPASS[Math.round((((deg % 360) + 360) % 360) / 22.5) % 16]; }
     function ageColor(ageS){
       var m = ageS / 60;
@@ -727,7 +729,7 @@ select.bk-tf{ padding-right:8px; }
       var u = units();
       rangesEl.innerHTML = '<span class="bk-info" style="font-style:normal;margin-right:2px">Range</span>' +
         rangeList().map(function(r, i){
-          return '<button class="bk-tf' + (i === rangeIdx ? ' active' : '') + '" data-i="' + i + '">' + r[0] + ' ' + u + '</button>';
+          return '<button class="bk-tf' + (i === rangeIdx ? ' active' : '') + '" data-i="' + i + '">' + r[0] + ' ' + unitLabel(u) + '</button>';
         }).join('');
     }
     rangesEl.addEventListener('click', function(e){
@@ -783,7 +785,7 @@ select.bk-tf{ padding-right:8px; }
         var km = toKm(v, u);
         gRings.append('path').datum(d3.geoCircle().center(center).radius(km / KM_PER_DEG).precision(2)()).attr('class', 'm-ring').attr('d', path);
         var p = projection(destination(km, 35));   // labelled to the NNE, clear of the compass letters
-        if (p) gRings.append('text').attr('class', 'm-ring-label').attr('x', p[0] + 3).attr('y', p[1] - 3).text(v + ' ' + u);
+        if (p) gRings.append('text').attr('class', 'm-ring-label').attr('x', p[0] + 3).attr('y', p[1] - 3).text(v + ' ' + unitLabel(u));
       }
       var outer = toKm(r[0], u) * 1.045;
       [['N', 0], ['E', 90], ['S', 180], ['W', 270]].forEach(function(c){

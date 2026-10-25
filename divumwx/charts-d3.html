@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# charts.html version 1.0.2
+# charts.html version 1.0.3
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -539,6 +539,13 @@ function convPressure(hpa, unit){
   }
 }
 function convRain(mm, unit){ return unit==='in' ? mm2in(mm) : mm; }
+function distToKm(v, unit){
+  switch(unit){
+    case 'mi': return v / 0.621371;
+    case 'nm': return v / 0.539957;
+    default: return v;
+  }
+}
 function convDist(km, unit){
   switch(unit){
     case 'mi': return km2mi(km);
@@ -1421,7 +1428,7 @@ function syncLightningView(){
     else if (!lightningLiveLoading) {
       lightningLiveLoading = true;
       const p = window.topojson ? Promise.resolve() : loadScriptOnce('js/topojson.3.0.2.min.js');
-      p.then(function(){ return loadScriptOnce('js/lightningLive.js'); }).then(function(){
+      p.then(function(){ return loadScriptOnce('js/lightningLive.js?v=1.0.1'); }).then(function(){
         lightningLive = DivumLiveLightning.mount(document.getElementById('lightningLiveMount'));
         if (currentCategory === 'lightning' && lightningView === 'live') lightningLive.show();
       }).catch(function(e){
@@ -1507,7 +1514,9 @@ function tooltipRowHTML(name, val, unit, color){
     displayVal = Math.round(val);
     extra = val===0?'⚡':val<5?'⚡':val<20?'⚡⚡':'⚡⚡⚡';
   } else if(name === 'Distance' || name === 'Nearest'){
-    extra = val<5?'🔴 VERY CLOSE!':val<10?'🟠 Close':val<20?'🟡 Moderate':'🟢 Far';
+    // val is in the chosen distance unit; the categories are in km.
+    const km = distToKm(val, SYSTEMS[currentSystem].dist);
+    extra = km<5?'🔴 VERY CLOSE!':km<10?'🟠 Close':km<20?'🟡 Moderate':'🟢 Far';
   } else if(name === 'Cloud Cover'){
     extra = val<=10?'☀️ Clear':val<=30?'🌤️ Mostly Clear':val<=60?'⛅ Partly Cloudy':val<=85?'☁️ Mostly Cloudy':'🌧️ Overcast';
   } else if(name === 'Visibility'){
@@ -1527,7 +1536,13 @@ function bandsFor(d){
   let bands = null;
   if(d.kind === 'uv') bands = [[0,3,'#1F8C3F'],[3,6,'#F7E400'],[6,8,'#F85900'],[8,11,'#D8001D'],[11,15,'#6B49C8']];
   else if(d.kind === 'dist') bands = [[0,1,'#D8001D'],[1,4,'#E36B57'],[4,10,'#D6BE4E'],[10,20,'#6FB6DD'],[20,999,'#5BBB8A']];
-  if(d.name === 'Distance') bands = [[0,5,'#D8001D'],[5,10,'#E36B57'],[10,20,'#D6BE4E'],[20,999,'#6FB6DD']];
+  // Lightning distance (hourly 'Distance' and daily 'Nearest').
+  if(d.name === 'Distance' || d.name === 'Nearest') bands = [[0,5,'#D8001D'],[5,10,'#E36B57'],[10,20,'#D6BE4E'],[20,999,'#6FB6DD']];
+  // Distance bands are defined in km; the axis is in the chosen distance unit.
+  if(bands && d.kind === 'dist'){
+    const u = SYSTEMS[currentSystem].dist;
+    bands = bands.map(([y0,y1,c]) => [convDist(y0, u), convDist(y1, u), c]);
+  }
   return bands;
 }
 function drawBands(g, d, yScale, innerW){

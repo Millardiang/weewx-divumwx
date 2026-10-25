@@ -2,6 +2,26 @@
 
 ## Unreleased — for 2.0.0
 
+### Lightning distances follow the dashboard's unit system
+- Lightning and Boltek Lightning cards (`cardLightning.js` 1.0.2,
+  `cardBoltekLightning.js` 1.1.2): Last Distance was always shown in km,
+  whatever the unit system. It's now converted to km, mi or NM, and the cards
+  update straight away when the unit system is changed.
+- Lightning chart (`charts-d3.html` 1.0.3):
+  - The coloured distance bands behind the distance line were drawn at their
+    km values on an axis in mi or NM (the "very close" band reached 5 mi
+    instead of 5 km). They're now converted.
+  - The tooltip's Very Close / Close / Moderate / Far category compared the
+    converted value with km limits. It now uses the km value.
+  - The daily "Nearest" line had the visibility bands. It now has the
+    lightning bands.
+- Boltek Lightning modal (`modalBoltekLightning.html` 1.3.1): with the ICAO
+  unit system the strike map's rings and range buttons were in km while its
+  readouts were in NM. The map now has NM ranges (150 / 300 / 500 NM), and NM
+  is labelled "NM" throughout.
+- Live lightning map (`js/lightningLive.js` 1.0.1): NM labelled "NM", and the
+  script now has a `?v=` cache-buster where it's loaded.
+
 ### Lightning and Boltek Lightning cards: taller conductor
 - The green lightning conductor is now 2.5 times as tall (45 instead of 18
   SVG units), and the flash above it is 27 units shorter to match, so the
