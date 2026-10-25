@@ -1019,11 +1019,32 @@ DIVUMWX_EXTRA_COLUMNS = [
 ]
 
 
+DIVUMWX_EXTRAS_BINDING = 'divumwx_extras_binding'
+
+
+def extras_database_exists(cfg, binding=DIVUMWX_EXTRAS_BINDING):
+    """True if weewx.conf binds DivumWX's own extras database (normally
+    divumwx_extras.sdb, from earlier versions) and it exists. Same test as
+    bin/user/divumwx.py's DivumwxExtrasService, which then saves the extras
+    there instead of on the main archive table."""
+    try:
+        import weewx.manager
+        db_name = cfg['DataBindings'][binding]['database']
+        db_dict = weewx.manager.get_database_dict_from_config(cfg, db_name)
+    except Exception:
+        return False
+    if 'sqlite' in str(db_dict.get('driver', '')).lower() or 'SQLITE_ROOT' in db_dict:
+        return os.path.isfile(os.path.join(db_dict.get('SQLITE_ROOT', ''), db_dict.get('database_name', '')))
+    return True
+
+
 def add_missing_extras_columns(cfg, printer):
     """
-    Check the main archive table (wx_binding) for DivumWX's custom
-    columns, and add whichever ones are missing. Fully idempotent --
-    existing columns are left completely untouched.
+    Check the table DivumWX's extras are saved in for its custom columns,
+    and add whichever ones are missing: DivumWX's own extras database if
+    this station has one (see extras_database_exists), otherwise the main
+    archive table (wx_binding). Fully idempotent -- existing columns are
+    left completely untouched.
 
     NOTE for uninstall: this is a ONE-WAY operation. weectl extension
     uninstall has no mechanism to drop columns, and older SQLite doesn't
@@ -1032,12 +1053,16 @@ def add_missing_extras_columns(cfg, printer):
     """
     import weewx.manager
 
+    binding = DIVUMWX_EXTRAS_BINDING if extras_database_exists(cfg) else 'wx_binding'
+    where = "DivumWX's extras database" if binding != 'wx_binding' else "the main archive table"
+    if binding != 'wx_binding':
+        printer.out("DivumWX's extras database (divumwx_extras_binding) exists, so the extra "
+                    "fields are kept there, not in the main archive.", level=1)
     try:
-        dbmanager = weewx.manager.open_manager_with_config(cfg, 'wx_binding')
+        dbmanager = weewx.manager.open_manager_with_config(cfg, binding)
     except Exception as e:
-        printer.out(f"WARNING: could not open the main archive database to "
-                    f"check/add DivumWX's extra columns ({e}). Skipping — "
-                    f"columns may need to be added by hand.", level=1)
+        printer.out(f"WARNING: could not open {where} to check/add DivumWX's extra "
+                    f"columns ({e}). Skipping — WeeWX adds them when it next starts.", level=1)
         return
 
     try:
@@ -1051,15 +1076,15 @@ def add_missing_extras_columns(cfg, printer):
                 added.append(col_name)
             except Exception as e:
                 failed.append(col_name)
-                printer.out(f"WARNING: failed to add column '{col_name}' to the "
-                            f"archive table: {e}", level=1)
+                printer.out(f"WARNING: failed to add column '{col_name}' to "
+                            f"{where}: {e}", level=1)
 
         if added:
-            printer.out(f"Added {len(added)} new column(s) to the main archive "
-                        f"table: {', '.join(added)}", level=1)
+            printer.out(f"Added {len(added)} new column(s) to {where}: "
+                        f"{', '.join(added)}", level=1)
         else:
-            printer.out("All DivumWX extra columns already present in the "
-                        "main archive table — nothing to add.", level=2)
+            printer.out(f"All DivumWX extra columns already present in "
+                        f"{where} — nothing to add.", level=2)
         if failed:
             printer.out(f"{len(failed)} column(s) could not be added: "
                         f"{', '.join(failed)}. DivumwxExtrasService will skip "

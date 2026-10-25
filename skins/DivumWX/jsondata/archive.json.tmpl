@@ -267,7 +267,7 @@ null
 "aqi": {
 "pm1_0": $current.pm1_0.format(format_string="%.1f", None_string="null", add_label=False, localize=False),
 "pm2_5": $current.pm2_5.format(format_string="%.1f", None_string="null", add_label=False, localize=False),
-"pm4_0": $current.pm4_0.format(format_string="%.1f", None_string="null", add_label=False, localize=False),
+"pm4_0": $current(data_binding=$divumwx_extras_binding).pm4_0.format(format_string="%.1f", None_string="null", add_label=False, localize=False),
 "pm10_0": $current.pm10_0.format(format_string="%.1f", None_string="null", add_label=False, localize=False)
 },
 

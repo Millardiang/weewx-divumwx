@@ -236,6 +236,17 @@ class DivumwxCards(SearchList):
         warnings_source = str(cards_section.get('warnings_source', '') or '').strip().lower()
         if warnings_source not in ('openweather', 'meteoalarm'):
             warnings_source = 'openweather'
+        # Which data binding DivumWX's extra fields are read from: its own
+        # extras database when the station has one (see
+        # user.divumwx.extras_database_exists, the same test the
+        # DivumwxExtrasService uses to decide where to save them), else the
+        # main archive. Used by charts.json.tmpl / archive.json.tmpl as
+        # $divumwx_extras_binding.
+        try:
+            from user.divumwx import extras_database_exists, EXTRAS_BINDING
+            extras_binding = EXTRAS_BINDING if extras_database_exists(self.generator.config_dict) else 'wx_binding'
+        except Exception:
+            extras_binding = 'wx_binding'
         page_background = str(cards_section.get('page_background', '') or '').strip().lower()
         if page_background not in ('seasonal', 'solid'):
             page_background = 'seasonal'
@@ -261,6 +272,8 @@ class DivumwxCards(SearchList):
             'divumwx_station_image_path': json.dumps(station_image_path),
             'divumwx_in_uk': json.dumps(in_uk),
             'divumwx_page_background': json.dumps(page_background),
+            # A plain string (not JSON): a data binding name for template tags.
+            'divumwx_extras_binding': extras_binding,
             'divumwx_warnings_source': json.dumps(warnings_source),
             'divumwx_lang': json.dumps(lang),
             'divumwx_strings_payload': json.dumps(strings_payload),

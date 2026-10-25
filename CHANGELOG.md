@@ -44,6 +44,37 @@
   `index.html`, `hyperIndex.html`, `lexendIndex.html` and `kiosk.html`
   (kiosk's had been left on an older bundle).
 
+### DivumWX extras: its own database again when the station has one
+- Restored: stations with DivumWX's own extras database
+  (`[DataBindings]` `[[divumwx_extras_binding]]`, normally
+  `divumwx_extras.sdb` from earlier versions) keep their extra fields there
+  again. DivumwxExtrasService had been saving them only as extra columns on
+  WeeWX's main archive table, so the extras database stopped getting
+  records (on 31 July 2026 on Steeple Claydon's). Now, when that binding is
+  set and its database exists (for SQLite, the file is there), each
+  archive record's extras (sunshine time, air density, cloud cover, VPD,
+  pollen, piezo rain, ...) are saved as a record of their own in it, in its
+  own unit system, replacing any record already there for that time.
+  Otherwise they go on the main archive table as before. The log says which
+  at startup.
+- The installer makes the same choice: missing extra columns are added to
+  the extras database when there is one, and the main archive is left
+  alone.
+- Charts and `archive.json` read the extras from the same place:
+  `divumwx_cards.py` publishes `$divumwx_extras_binding` (the extras
+  database's binding, or `wx_binding`), used by every extras series in
+  `charts.json.tmpl` (air density, cloud cover, pollen, VPD, aerosol,
+  pm4_0) and by `archive.json.tmpl`'s pm4_0; its other extras already fall
+  back to the extras database.
+- Missing extra columns are added by the service itself when WeeWX starts
+  (with their daily summaries), in whichever database it uses, and logged.
+  Only the 34 the installer adds; the solar/battery/inverter columns are
+  never added automatically.
+- "No extras fields" is logged once, with the reason, then only at debug
+  level, instead of a warning on every archive record.
+- Changed: `bin/user/divumwx.py`, `bin/user/divumwx_cards.py`, `install.py`,
+  `jsondata/charts.json.tmpl`, `jsondata/archive.json.tmpl`.
+
 ### Climate report: colour-coded temperatures
 - On **climate.html**, every temperature (mean, high and low, on the
   Monthly and Yearly tabs, including the summary and annual rows) is now

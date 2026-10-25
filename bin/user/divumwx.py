@@ -3825,18 +3825,49 @@ schema = [('dateTime',          'INTEGER NOT NULL UNIQUE PRIMARY KEY'),
 
 # Column names derived from schema for filtering loop packets
 SCHEMA_COLS = set(col for col, _ in schema)
+# The solar/battery/inverter columns (solar_assistant_mqtt) are only for
+# stations that have that kit, so, as in install.py's DIVUMWX_EXTRA_COLUMNS,
+# they're never added automatically -- only saved if they already exist.
+SOLAR_COL_PREFIXES = ('pv_', 'battery_', 'grid_', 'load_', 'inverter_', 'ac_output_')
+AUTO_ADD_COLS = set(col for col in SCHEMA_COLS
+                    if col not in ('dateTime', 'usUnits', 'interval') and not col.startswith(SOLAR_COL_PREFIXES))
+
+# Where the extras are kept. A station that has DivumWX's own extras database
+# ([DataBindings][[divumwx_extras_binding]], normally divumwx_extras.sdb, from
+# earlier DivumWX versions) keeps using it; otherwise the extras are extra
+# columns on WeeWX's main archive table (wx_binding).
+EXTRAS_BINDING = 'divumwx_extras_binding'
+
+
+def extras_database_exists(config_dict, binding=EXTRAS_BINDING):
+    """True if weewx.conf binds `binding` to a database that exists (for
+    SQLite, the file is there; any other database type, configured is
+    enough)."""
+    try:
+        import weewx.manager
+        db_name = config_dict['DataBindings'][binding]['database']
+        db_dict = weewx.manager.get_database_dict_from_config(config_dict, db_name)
+    except Exception:
+        return False
+    if 'sqlite' in str(db_dict.get('driver', '')).lower() or 'SQLITE_ROOT' in db_dict:
+        return os.path.isfile(os.path.join(db_dict.get('SQLITE_ROOT', ''), db_dict.get('database_name', '')))
+    return True
 
 
 class DivumwxExtrasService(StdService):
 
-    # Extra fields now live directly on the main archive table
-    # (wx_binding), added by install.py's add_missing_extras_columns()
-    # via ALTER TABLE — not a separate divumwx_extras database. This
-    # sidesteps the whole class of bug the separate-binding approach
-    # had (a config 'schema' string that had to resolve, via
-    # weeutil.weeutil.get_object(), to exactly the right object — get
-    # it wrong and WeeWX's own CREATE TABLE code crashed weewxd at
-    # startup). Opening an EXISTING table needs no such resolution.
+    # Where the extra fields are saved:
+    #  - in DivumWX's own extras database, when this station has one
+    #    ([DataBindings][[divumwx_extras_binding]] pointing at a database
+    #    that exists, normally divumwx_extras.sdb from earlier versions):
+    #    one record per archive record, in that database's own table;
+    #  - otherwise as extra columns on the main archive table (wx_binding),
+    #    updating the row StdArchive has just written.
+    # Either way the table must already exist: it's never created here, so
+    # no 'schema' string has to resolve at startup (getting that wrong
+    # used to crash weewxd in StdEngine.loadServices()). Missing columns
+    # are added (see AUTO_ADD_COLS). install.py's add_missing_extras_columns()
+    # makes the same choice of database.
     EXTRAS_ENABLED = True
 
     def __init__(self, engine, config_dict):
@@ -3849,9 +3880,26 @@ class DivumwxExtrasService(StdService):
                           '— no extras data will be persisted until this is re-enabled.')
             return
 
-        # Open the MAIN archive database — never creates (the table
-        # obviously already exists; it's weewx's own core database).
-        self.dbm = self.engine.db_binder.get_manager(data_binding='wx_binding')
+        # DivumWX's own extras database if this station has one (records
+        # of their own, one per archive record), else the main archive
+        # table (extra columns on WeeWX's own rows). Neither is created
+        # here: the extras database already exists, and so does weewx.sdb.
+        self.own_db = extras_database_exists(config_dict)
+        self.binding = EXTRAS_BINDING if self.own_db else 'wx_binding'
+        try:
+            self.dbm = self.engine.db_binder.get_manager(data_binding=self.binding)
+        except Exception as e:
+            if not self.own_db:
+                raise
+            syslog.syslog(syslog.LOG_ERR,
+                          'DivumwxExtrasService: cannot open %s (%s); saving the extras in the '
+                          'main archive table instead' % (self.binding, e))
+            self.own_db, self.binding = False, 'wx_binding'
+            self.dbm = self.engine.db_binder.get_manager(data_binding=self.binding)
+        syslog.syslog(syslog.LOG_INFO,
+                      'DivumwxExtrasService: saving the extras in %s'
+                      % ('DivumWX\'s own extras database (%s, table %s)' % (self.binding, self.dbm.table_name)
+                         if self.own_db else 'the main archive table (wx_binding)'))
 
         # Which of our custom columns actually exist on the live table
         # right now. install.py adds them at install time, but this
@@ -3861,13 +3909,32 @@ class DivumwxExtrasService(StdService):
         # every column here is optional/supplementary, never something
         # the rest of weewx depends on existing.
         db_cols = set(self.dbm.connection.columnsOf(self.dbm.table_name))
-        self.available_cols = db_cols & SCHEMA_COLS
-        missing = SCHEMA_COLS - db_cols
+        missing = AUTO_ADD_COLS - db_cols
         if missing:
-            syslog.syslog(syslog.LOG_WARNING,
-                          'DivumwxExtrasService: %d expected column(s) missing from the '
-                          'archive table (run weectl extension install to add them): %s'
-                          % (len(missing), sorted(missing)))
+            # install.py normally adds these, but that can fail (e.g. the
+            # database was busy while WeeWX was running). WeeWX itself has
+            # the database open here, so add them now rather than leave
+            # every extras field unsaved until a reinstall. add_column()
+            # also creates each column's daily-summary table.
+            col_types = dict(schema)
+            added, failed = [], []
+            for col in sorted(missing):
+                try:
+                    self.dbm.add_column(col, col_types.get(col, 'REAL').split()[0])
+                    added.append(col)
+                except Exception as e:
+                    failed.append('%s (%s)' % (col, e))
+            if added:
+                syslog.syslog(syslog.LOG_INFO,
+                              'DivumwxExtrasService: added %d missing column(s) to %s: %s'
+                              % (len(added), self.binding, ', '.join(added)))
+            if failed:
+                syslog.syslog(syslog.LOG_WARNING,
+                              'DivumwxExtrasService: %d column(s) could not be added to the archive '
+                              'table, so they won\'t be saved: %s' % (len(failed), '; '.join(failed)))
+            db_cols = set(self.dbm.connection.columnsOf(self.dbm.table_name))
+        self.available_cols = db_cols & SCHEMA_COLS
+        self.skip_logged = False
 
         self.latest_loop_packet = None
 
@@ -3904,7 +3971,26 @@ class DivumwxExtrasService(StdService):
         updates = {col: merged[col] for col in self.available_cols
                    if col not in ('dateTime', 'usUnits', 'interval') and col in merged}
 
-        if updates:
+        if updates and self.own_db:
+            # A record of its own in the extras database, in that database's
+            # unit system; replaces any record already there for this time.
+            rec = {'dateTime': event.record['dateTime'], 'usUnits': event.record['usUnits'],
+                   'interval': event.record.get('interval')}
+            rec.update(updates)
+            try:
+                if self.dbm.std_unit_system is not None and rec['usUnits'] != self.dbm.std_unit_system:
+                    rec = weewx.units.to_std_system(rec, self.dbm.std_unit_system)
+                try:
+                    self.dbm.addRecord(rec, log_success=False, update=True)
+                except TypeError:   # a WeeWX without addRecord(update=...)
+                    if not self.dbm.getSql('SELECT dateTime FROM %s WHERE dateTime=?' % self.dbm.table_name,
+                                           (rec['dateTime'],)):
+                        self.dbm.addRecord(rec, log_success=False)
+            except Exception as e:
+                syslog.syslog(syslog.LOG_ERR,
+                              'DivumwxExtrasService: failed to save record for dateTime %d in %s: %s'
+                              % (event.record['dateTime'], self.binding, e))
+        elif updates:
             set_clause = ', '.join('%s=?' % col for col in updates)
             values = list(updates.values()) + [event.record['dateTime']]
             try:
@@ -3917,9 +4003,20 @@ class DivumwxExtrasService(StdService):
                               'DivumwxExtrasService: failed to update record for dateTime %d: %s'
                               % (event.record['dateTime'], e))
         else:
-            syslog.syslog(syslog.LOG_WARNING,
-                          'DivumwxExtrasService: no extras fields found, skipping record for dateTime %d'
-                          % event.record['dateTime'])
+            # Said once (then only at debug level), with the likely reason,
+            # rather than on every archive record.
+            usable = len(self.available_cols - {'dateTime', 'usUnits', 'interval'})
+            msg = ('DivumwxExtrasService: no extras fields to save for dateTime %d (%s)'
+                   % (event.record['dateTime'],
+                      'none of the extras columns exist in %s' % self.binding if not usable else
+                      '%d extras columns exist, but this record and the last loop packet carry none of '
+                      'them; is SunshineDuration listed before DivumwxExtrasService in archive_services?'
+                      % usable))
+            if not self.skip_logged:
+                syslog.syslog(syslog.LOG_WARNING, msg + ' -- further skips are logged at debug level')
+                self.skip_logged = True
+            else:
+                syslog.syslog(syslog.LOG_DEBUG, msg)
 
     def shutDown(self):
         # self.dbm is the SHARED wx_binding manager (StdArchive and
