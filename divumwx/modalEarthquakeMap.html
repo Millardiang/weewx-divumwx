@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# modalEarthquakeMap.html version 1.1.1
+# modalEarthquakeMap.html version 1.1.2
 #  Combines the former modalEarthquake.html (recent-earthquakes card grid) and
 #  modalEarthquakeMap.html (live D3 world map) into one modal, map at top.
 #  1.1.0: the map is drawn in the Equal Earth projection (was Mercator), in
@@ -21,6 +21,7 @@
 <link rel="stylesheet" href="css/equalEarthMap.css">
 <meta name="viewport" content="width = device-width, initial-scale = 1, shrink-to-fit = yes">
 <script src="stationTime.js"></script>
+<script src="units.js"></script>
 <style>
 :root {
   --bg-color: #0A0F22;
@@ -508,6 +509,24 @@ function haversineKm(lat1, lon1, lat2, lon2){
 }
 function num(x, fallback){ return (typeof x === 'number' && !isNaN(x)) ? x : (fallback || 0); }
 
+// Distances follow the dashboard's unit system (km / mi / NM); depth is in
+// mi for 'mi', otherwise km. The feed and the maths are in km.
+function distUnit(){
+  try {
+    var key = localStorage.getItem('dashboardUnitSystem') || 'uk';
+    if (typeof SYSTEMS !== 'undefined' && SYSTEMS[key] && SYSTEMS[key].dist) return SYSTEMS[key].dist;
+  } catch (e) {}
+  return 'km';
+}
+function fmtDistKm(km){
+  var u = distUnit();
+  var v = u === 'mi' ? km * 0.621371 : u === 'nm' ? km * 0.539957 : km;
+  return Math.round(v).toLocaleString() + ' ' + (u === 'nm' ? 'NM' : u === 'mi' ? 'mi' : 'km');
+}
+function fmtDepthKm(km){
+  return distUnit() === 'mi' ? Math.round(km * 0.621371) + ' mi' : Math.round(km) + ' km';
+}
+
 function stationParts(date, tz){
   var parts = {};
   new Intl.DateTimeFormat('en-GB', {
@@ -545,10 +564,10 @@ function buildCard(f, stationLat, stationLon, stationLocation){
   if (!title) return null;
 
   var lat = num(props.lat, 0), lon = num(props.lon, 0);
-  var depthKm = Math.round(num(props.depth, 0));
-  var eqDistKm = Math.round(haversineKm(stationLat, stationLon, lat, lon));
+  var depthKm = num(props.depth, 0);
+  var eqDistKm = haversineKm(stationLat, stationLon, lat, lon);
   var isRegional = eqDistKm < 2100;
-  var formattedDistance = eqDistKm + ' km from ' + stationLocation;
+  var formattedDistance = fmtDistKm(eqDistKm) + (stationLocation ? ' from ' + stationLocation : '');
 
   var d = props.time ? new Date(props.time) : null;
   var validDate = d && !isNaN(d.getTime());
@@ -601,7 +620,7 @@ function buildCard(f, stationLat, stationLon, stationLocation){
 
   var depthEl = document.createElement('div');
   depthEl.className = 'depth';
-  depthEl.textContent = 'Depth ' + depthKm + 'km';
+  depthEl.textContent = 'Depth ' + fmtDepthKm(depthKm);
 
   var distanceEl = document.createElement('div');
   distanceEl.className = 'distance';
@@ -666,6 +685,10 @@ Promise.allSettled([
   }
   var arch = archResult.status === 'fulfilled' ? archResult.value : {};
   render(eqResult.value, arch);
+  // Redraw if the unit system is changed while the modal is open.
+  window.addEventListener('storage', function(e){
+    if (e.key === 'dashboardUnitSystem') render(eqResult.value, arch);
+  });
 });
 </script>
 

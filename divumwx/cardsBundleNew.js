@@ -10107,7 +10107,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardEarthquake.js version 1.0.0
+# cardEarthquake.js version 1.0.1
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -10144,6 +10144,25 @@ try {
     if (isNaN(d.getTime())) return '\u2014';
     var p = stationParts(d);
     return p.hour + ':' + p.minute + ':' + p.second + ' ' + (+p.day) + ' ' + p.month + ' ' + p.year;
+  }
+
+  // ---- Distance units: distances arrive in km; show them in the dashboard's
+  // unit (km / mi / NM). Depth is in mi for 'mi', otherwise km. ----
+  function distUnit(){
+    try {
+      var key = localStorage.getItem('dashboardUnitSystem') || 'uk';
+      if (typeof SYSTEMS !== 'undefined' && SYSTEMS[key] && SYSTEMS[key].dist) return SYSTEMS[key].dist;
+    } catch (e) {}
+    return 'km';
+  }
+  var distUnitNow = distUnit();
+  function fmtDistKm(km){
+    var u = distUnitNow;
+    var v = u === 'mi' ? km * 0.621371 : u === 'nm' ? km * 0.539957 : km;
+    return v.toFixed(1) + ' ' + (u === 'nm' ? 'NM' : u === 'mi' ? 'mi' : 'km');
+  }
+  function fmtDepthKm(km){
+    return distUnitNow === 'mi' ? (km * 0.621371).toFixed(1) + ' mi' : km.toFixed(1) + ' km';
   }
 
   function haversineKm(lat1, lon1, lat2, lon2){
@@ -10377,14 +10396,22 @@ try {
     // ---- Right pane: 5 readouts as label/value chip rows ----
     locationText.textContent = v.location;
     timeText.textContent = v.time;
-    depthText.textContent = v.depth.toFixed(1) + ' km';
-    epicenterText.textContent = v.distanceKm.toFixed(1) + ' km' + (v.station ? ' (from ' + v.station + ')' : '');
+    depthText.textContent = fmtDepthKm(v.depth);
+    epicenterText.textContent = fmtDistKm(v.distanceKm) + (v.station ? ' (from ' + v.station + ')' : '');
     categoryText.textContent = DivumWXI18N.t(v.cat.label);
   }
 
   var lastData = null;
   window.addEventListener('i18nready', function(){
     if (lastData) renderCard(lastData);
+  });
+  window.addEventListener('unitsystemchange', function(e){
+    var cfg = e.detail && e.detail.config;
+    distUnitNow = (cfg && cfg.dist) || distUnit();
+    if (lastData) renderCard(lastData);
+  });
+  window.addEventListener('storage', function(e){
+    if (e.key === 'dashboardUnitSystem') { distUnitNow = distUnit(); if (lastData) renderCard(lastData); }
   });
   function refresh(){
     Promise.allSettled([

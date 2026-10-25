@@ -2,6 +2,17 @@
 
 ## Unreleased — for 2.0.0
 
+### Earthquake distances follow the dashboard's unit system
+- Earthquake card (`cardEarthquake.js` 1.0.1) and modal
+  (`modalEarthquakeMap.html` 1.1.2): the distance to the epicentre and the
+  depth were always shown in km. The distance now follows the unit system
+  (km / mi / NM). Depth is in mi for US units, otherwise km (a quake's depth
+  isn't given in NM).
+- The card updates straight away when the unit system changes; an open
+  modal redraws.
+- The modal no longer shows "… km from " with nothing after it when the
+  station has no location name.
+
 ### Version 2.0.0-RC2
 - `DIVUMWX_VERSION` is now `2.0.0-RC2`.
 - The last 1.7.0 labels now say 2.0.0-RC2: the `index.html` header and footer
