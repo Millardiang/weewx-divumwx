@@ -21,10 +21,11 @@ It has NO knowledge of, and will NOT undo:
     WXXTypes overrides)
   - enable=false having been written onto the third-party SkyfieldReport/
     CelestialReport stanzas
-  - the archive-table columns added via ALTER TABLE (irreversible via
-    WeeWX's extension framework regardless -- there's no "drop column on
-    uninstall" concept, and older SQLite can't even DROP COLUMN without a
-    full table rebuild)
+  - DivumWX's own extras database (divumwx_extras.sdb) and its
+    [DataBindings]/[Databases] sections -- your data, so left for you to
+    keep or delete; and, on stations first set up with an earlier 2.0.0
+    build, the DivumWX columns those builds added to the main archive
+    (removable with weectl database drop-columns)
 
 This script handles everything above that CAN be reversed. It does NOT
 call 'weectl extension uninstall' itself -- run this first, review its
@@ -209,8 +210,11 @@ DIVUMWX_CALCULATIONS_KEYS = {
 
 DIVUMWX_ROOT_SUBDIR = 'divumwx'
 
-# Mirrors install.py's own DIVUMWX_EXTRA_COLUMNS -- reproduced here only
-# for the final report, never used to actually touch the database.
+# Every column DivumWX's extras schema has (bin/user/divumwx.py `schema`).
+# Earlier 2.0.0 builds added some of these to the main archive; the final
+# report reads which are actually there (read-only), so the drop-columns
+# command it prints only names existing columns -- weectl does nothing at
+# all if any named column is missing.
 DIVUMWX_EXTRA_COLUMN_NAMES = [
     'aerosol_optical_depth', 'AirDensity', 'cloudcover', 'dust',
     'lightning_last_det_time', 'alder_pollen', 'birch_pollen', 'olive_pollen',
@@ -346,21 +350,37 @@ def restore_thirdparty_reports(cfg, dry_run, assume_yes):
     print(f"{prefix}: {', '.join(present)}")
 
 
-def report_database_columns():
+def report_database_columns(cfg=None):
     print()
     print("=" * 70)
-    print("DATABASE COLUMNS -- NOT TOUCHED BY THIS SCRIPT")
+    print("DATABASES -- NOT TOUCHED BY THIS SCRIPT")
     print("=" * 70)
-    print(f"DivumWX's install.py added {len(DIVUMWX_EXTRA_COLUMN_NAMES)} column(s) "
-          "to the main archive table via ALTER TABLE. This is a ONE-WAY "
-          "operation -- WeeWX's extension framework has no mechanism to "
-          "drop columns, and SQLite historically requires rebuilding the "
-          "whole table to remove one. These columns are being left in "
-          "place. If you want them gone, that's a manual database "
-          "operation you'll need to do yourself (and back up the archive "
-          "database first). Columns added:")
-    for name in DIVUMWX_EXTRA_COLUMN_NAMES:
-        print(f"  - {name}")
+    print("DivumWX keeps its extra fields in its own database, divumwx_extras.sdb "
+          "(weewx.conf [DataBindings][[divumwx_extras_binding]] and "
+          "[Databases][[divumwx_extras_db]]). It's your data, so it's left in "
+          "place: delete the file and those two sections if you don't want it.")
+    print()
+    print("Stations first set up with an earlier DivumWX 2.0.0 build may also "
+          "have DivumWX columns in the main archive (weewx.sdb); DivumWX no "
+          "longer uses them. To remove whichever of these exist -- back up "
+          "weewx.sdb first and stop WeeWX:")
+    present = None
+    if cfg is not None:
+        try:
+            import weewx.manager
+            with weewx.manager.open_manager_with_config(cfg, 'wx_binding') as dbm:
+                cols = set(dbm.connection.columnsOf(dbm.table_name))
+            present = [c for c in DIVUMWX_EXTRA_COLUMN_NAMES if c in cols]
+        except Exception:
+            present = None
+    if present == []:
+        print("Your main archive has none of them -- nothing to remove.")
+    elif present:
+        print("    weectl database drop-columns " + " ".join(present) + " --binding=wx_binding")
+    else:
+        print("(Couldn't read the main archive's columns. Run weectl database drop-columns "
+              "with whichever of these it has -- it does nothing if any named column is missing:)")
+        print("    " + " ".join(DIVUMWX_EXTRA_COLUMN_NAMES))
     print("=" * 70)
 
 
@@ -402,7 +422,7 @@ def main():
     else:
         print("\n[dry-run] weewx.conf NOT saved.")
 
-    report_database_columns()
+    report_database_columns(cfg)
 
     print()
     print("Next step: run 'weectl extension uninstall divumwx' to remove "

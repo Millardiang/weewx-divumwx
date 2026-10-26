@@ -214,20 +214,22 @@ null
 },
 
 "air_density": {
+## DivumWX's own extras database first; WeeWX's main archive only as a
+## fallback (DivumWX no longer keeps its fields there).
 #set $adObj = None
-#try
-#set $adObj = $current.AirDensity
-#except
-#pass
-#end try
 #set $adUseExtras = False
-#if $adObj is None or not $adObj.has_data
 #try
 #set $adExtrasObj = $current(data_binding='divumwx_extras_binding').AirDensity
 #if $adExtrasObj.has_data
 #set $adObj = $adExtrasObj
 #set $adUseExtras = True
 #end if
+#except
+#pass
+#end try
+#if $adObj is None
+#try
+#set $adObj = $current.AirDensity
 #except
 #pass
 #end try
@@ -666,18 +668,20 @@ null
 #pass
 #end try
 #end if
+## DivumWX's own extras database first; WeeWX's main archive only as a
+## fallback (DivumWX no longer keeps its fields there).
 #set $skyCloudCoverObj = None
-#try
-#set $skyCloudCoverObj = $current.cloudcover
-#except
-#pass
-#end try
-#if $skyCloudCoverObj is None or not $skyCloudCoverObj.has_data
 #try
 #set $skyCloudCoverExtras = $current(data_binding='divumwx_extras_binding').cloudcover
 #if $skyCloudCoverExtras.has_data
 #set $skyCloudCoverObj = $skyCloudCoverExtras
 #end if
+#except
+#pass
+#end try
+#if $skyCloudCoverObj is None
+#try
+#set $skyCloudCoverObj = $current.cloudcover
 #except
 #pass
 #end try
@@ -712,13 +716,9 @@ null
 "lux": $current.luminosity.format(format_string="%.1f", None_string="null", add_label=False, localize=False),
 "day_lux_max": $day.luminosity.max.format(format_string="%.1f", None_string="null", add_label=False, localize=False),
 "day_lux_maxtime": $safeMs($day.luminosity.maxtime.raw),
+## DivumWX's own extras database first; WeeWX's main archive only as a
+## fallback (DivumWX no longer keeps its fields there).
 #set $solarThresholdObj = None
-#try
-#set $solarThresholdObj = $current.threshold
-#except
-#pass
-#end try
-#if $solarThresholdObj is None or not $solarThresholdObj.has_data
 #try
 #set $solarThresholdExtras = $current(data_binding='divumwx_extras_binding').threshold
 #if $solarThresholdExtras.has_data
@@ -727,29 +727,35 @@ null
 #except
 #pass
 #end try
+#if $solarThresholdObj is None
+#try
+#set $solarThresholdObj = $current.threshold
+#except
+#pass
+#end try
 #end if
 #set $solarSunDurationRaw = None
 #try
-#set $solarSunDurationRaw = $day.sunshine_time.sum.raw
+#set $solarSunDurationRaw = $day(data_binding='divumwx_extras_binding').sunshine_time.sum.raw
 #except
 #pass
 #end try
 #if $solarSunDurationRaw is None
 #try
-#set $solarSunDurationRaw = $day(data_binding='divumwx_extras_binding').sunshine_time.sum.raw
+#set $solarSunDurationRaw = $day.sunshine_time.sum.raw
 #except
 #pass
 #end try
 #end if
 #set $solarSunshineYestRaw = None
 #try
-#set $solarSunshineYestRaw = $yesterday.sunshine_time.sum.raw
+#set $solarSunshineYestRaw = $yesterday(data_binding='divumwx_extras_binding').sunshine_time.sum.raw
 #except
 #pass
 #end try
 #if $solarSunshineYestRaw is None
 #try
-#set $solarSunshineYestRaw = $yesterday(data_binding='divumwx_extras_binding').sunshine_time.sum.raw
+#set $solarSunshineYestRaw = $yesterday.sunshine_time.sum.raw
 #except
 #pass
 #end try
@@ -868,20 +874,22 @@ null
 },
 
 "vpd": {
+## DivumWX's own extras database first; WeeWX's main archive only as a
+## fallback (DivumWX no longer keeps its fields there).
 #set $vpdObj = None
-#try
-#set $vpdObj = $current.vpd
-#except
-#pass
-#end try
 #set $vpdUseExtras = False
-#if $vpdObj is None or not $vpdObj.has_data
 #try
 #set $vpdExtrasObj = $current(data_binding='divumwx_extras_binding').vpd
 #if $vpdExtrasObj.has_data
 #set $vpdObj = $vpdExtrasObj
 #set $vpdUseExtras = True
 #end if
+#except
+#pass
+#end try
+#if $vpdObj is None
+#try
+#set $vpdObj = $current.vpd
 #except
 #pass
 #end try

@@ -978,55 +978,73 @@ def disable_thirdparty_astronomy_reports(cfg, printer, report_names=('SkyfieldRe
                     f"{', '.join(changed)}", level=1)
 
 
-# Custom archive fields DivumWX needs, added directly onto the MAIN
-# weewx archive table (wx_binding) via ALTER TABLE, rather than a
-# separate divumwx_extras database + data binding.
-DIVUMWX_EXTRA_COLUMNS = [
-    ('aerosol_optical_depth', 'REAL'),
-    ('AirDensity', 'REAL'),
-    ('cloudcover', 'REAL'),
-    ('dust', 'REAL'),
-    ('lightning_last_det_time', 'INTEGER'),
-    ('alder_pollen', 'REAL'),
-    ('birch_pollen', 'REAL'),
-    ('olive_pollen', 'REAL'),
-    ('grass_pollen', 'REAL'),
-    ('mugwort_pollen', 'REAL'),
-    ('ragweed_pollen', 'REAL'),
-    ('p_rain', 'REAL'),
-    ('p_rainRate', 'REAL'),
-    ('p_hourRain', 'REAL'),
-    ('p_dayRain', 'REAL'),
-    ('p_weekRain', 'REAL'),
-    ('p_monthRain', 'REAL'),
-    ('p_yearRain', 'REAL'),
-    ('p_stormRain', 'REAL'),
-    ('isRaining', 'REAL'),
-    ('hourRain', 'REAL'),
-    ('dayRain', 'REAL'),
-    ('weekRain', 'REAL'),
-    ('monthRain', 'REAL'),
-    ('yearRain', 'REAL'),
-    ('stormRain', 'REAL'),
-    ('sunshine_time', 'REAL'),
-    ('sunshine_time_hours', 'REAL'),
-    ('is_sunshine', 'REAL'),
-    ('threshold', 'REAL'),
-    ('vpd', 'REAL'),
-    ('pm4_0', 'REAL'),
-    ('pm2_5_SDS', 'REAL'),
-    ('pm10_0_SDS', 'REAL'),
-]
-
-
+# DivumWX's extra fields live in DivumWX's OWN database, never in WeeWX's
+# main archive. WeeWX's guidelines: "Extensions should not modify the
+# database schemas. If it requires data not found in the default databases,
+# an extension should provide its own database and schema."
+# (DivumWX 2.0.0 betas/RCs added these columns to weewx.sdb with ALTER
+# TABLE; copy_extras_history_from_main() moves that history across.)
 DIVUMWX_EXTRAS_BINDING = 'divumwx_extras_binding'
+DIVUMWX_EXTRAS_DATABASE = 'divumwx_extras_db'
+DIVUMWX_EXTRAS_BINDING_DEFAULTS = {
+    'database': DIVUMWX_EXTRAS_DATABASE,
+    'table_name': 'archive',
+    'manager': 'weewx.manager.DaySummaryManager',
+    # The module-level `schema` list in bin/user/divumwx.py -- NOT the
+    # DivumwxExtrasService class (that crashes weewxd at startup).
+    'schema': 'user.divumwx.schema',
+}
+DIVUMWX_EXTRAS_DATABASE_DEFAULTS = {
+    'database_name': 'divumwx_extras.sdb',
+    'database_type': 'SQLite',
+}
+DIVUMWX_EXTRAS_KEY_COLUMNS = ('dateTime', 'usUnits', 'interval')
+
+
+def load_extras_schema():
+    """DivumWX's extras schema -- the `schema = [(name, type), ...]` list in
+    bin/user/divumwx.py -- read from the release being installed. Parsed
+    with ast rather than imported: bin/user isn't importable while weectl
+    runs this file. Returns a list of (name, type) tuples, or None."""
+    import ast
+    here = os.path.dirname(os.path.abspath(__file__))
+    path = os.path.join(here, 'bin', 'user', 'divumwx.py')
+    try:
+        tree = ast.parse(open(path, encoding='utf-8').read(), path)
+    except Exception:
+        return None
+    for node in tree.body:
+        if (isinstance(node, ast.Assign) and len(node.targets) == 1
+                and isinstance(node.targets[0], ast.Name) and node.targets[0].id == 'schema'):
+            try:
+                value = ast.literal_eval(node.value)
+            except Exception:
+                return None
+            return [(str(c), str(t)) for c, t in value]
+    return None
+
+
+def apply_extras_database_merge(cfg):
+    """Add [DataBindings][[divumwx_extras_binding]] and its
+    [Databases][[divumwx_extras_db]] if they're missing. Set once: an
+    existing binding or database section (e.g. one the station owner set
+    up by hand) is left exactly as it is. Returns the sections added."""
+    added = []
+    bindings = cfg.setdefault('DataBindings', {})
+    if DIVUMWX_EXTRAS_BINDING not in bindings:
+        bindings[DIVUMWX_EXTRAS_BINDING] = dict(DIVUMWX_EXTRAS_BINDING_DEFAULTS)
+        added.append(f'[DataBindings][[{DIVUMWX_EXTRAS_BINDING}]]')
+    db_name = bindings[DIVUMWX_EXTRAS_BINDING].get('database', DIVUMWX_EXTRAS_DATABASE)
+    databases = cfg.setdefault('Databases', {})
+    if db_name not in databases:
+        databases[db_name] = dict(DIVUMWX_EXTRAS_DATABASE_DEFAULTS)
+        added.append(f'[Databases][[{db_name}]]')
+    return added
 
 
 def extras_database_exists(cfg, binding=DIVUMWX_EXTRAS_BINDING):
-    """True if weewx.conf binds DivumWX's own extras database (normally
-    divumwx_extras.sdb, from earlier versions) and it exists. Same test as
-    bin/user/divumwx.py's DivumwxExtrasService, which then saves the extras
-    there instead of on the main archive table."""
+    """True if weewx.conf binds DivumWX's extras database and it exists
+    (for SQLite, the file is there). Same test as bin/user/divumwx.py."""
     try:
         import weewx.manager
         db_name = cfg['DataBindings'][binding]['database']
@@ -1038,59 +1056,185 @@ def extras_database_exists(cfg, binding=DIVUMWX_EXTRAS_BINDING):
     return True
 
 
-def add_missing_extras_columns(cfg, printer):
-    """
-    Check the table DivumWX's extras are saved in for its custom columns,
-    and add whichever ones are missing: DivumWX's own extras database if
-    this station has one (see extras_database_exists), otherwise the main
-    archive table (wx_binding). Fully idempotent -- existing columns are
-    left completely untouched.
-
-    NOTE for uninstall: this is a ONE-WAY operation. weectl extension
-    uninstall has no mechanism to drop columns, and older SQLite doesn't
-    support DROP COLUMN without a full table rebuild -- see
-    divumwx_uninstall_helper.py for how this is documented at removal time.
-    """
+def _extras_is_main_database(cfg):
+    """True if the extras binding resolves to the same database as wx_binding."""
     import weewx.manager
-
-    binding = DIVUMWX_EXTRAS_BINDING if extras_database_exists(cfg) else 'wx_binding'
-    where = "DivumWX's extras database" if binding != 'wx_binding' else "the main archive table"
-    if binding != 'wx_binding':
-        printer.out("DivumWX's extras database (divumwx_extras_binding) exists, so the extra "
-                    "fields are kept there, not in the main archive.", level=1)
+    bindings = cfg.get('DataBindings', {})
+    ours = bindings.get(DIVUMWX_EXTRAS_BINDING, {}).get('database')
+    theirs = bindings.get('wx_binding', {}).get('database', 'archive_sqlite')
+    if ours == theirs:
+        return True
     try:
-        dbmanager = weewx.manager.open_manager_with_config(cfg, binding)
+        a = weewx.manager.get_database_dict_from_config(cfg, ours)
+        b = weewx.manager.get_database_dict_from_config(cfg, theirs)
+    except Exception:
+        return False
+    return all(a.get(k) == b.get(k) for k in ('database_name', 'SQLITE_ROOT', 'host'))
+
+
+def open_extras_database(cfg, schema):
+    """Open DivumWX's extras database, creating it (with `schema`) if it
+    doesn't exist. Returns a weewx.manager.DaySummaryManager."""
+    import weewx.manager
+    binding = cfg['DataBindings'][DIVUMWX_EXTRAS_BINDING]
+    db_dict = weewx.manager.get_database_dict_from_config(cfg, binding['database'])
+    return weewx.manager.DaySummaryManager.open_with_create(
+        db_dict, table_name=binding.get('table_name', 'archive'), schema=schema)
+
+
+def ensure_extras_database(cfg, printer):
+    """Make sure DivumWX's own extras database is configured and exists,
+    with every column in DivumWX's schema. Never touches WeeWX's main
+    archive. Returns the schema used (or None if the database couldn't be
+    set up -- DivumwxExtrasService then creates it when WeeWX starts)."""
+    for section in apply_extras_database_merge(cfg):
+        printer.out(f"Added {section} to weewx.conf (DivumWX's own extras database).", level=1)
+    if _extras_is_main_database(cfg):
+        printer.out(f"WARNING: [DataBindings][[{DIVUMWX_EXTRAS_BINDING}]] points at WeeWX's main "
+                    "database. DivumWX never writes there, so its extra fields won't be saved "
+                    "until it points at a database of its own (normally divumwx_extras.sdb).", level=1)
+        return None
+    schema = load_extras_schema()
+    if not schema:
+        printer.out("WARNING: couldn't read DivumWX's extras schema from bin/user/divumwx.py; "
+                    "the extras database will be created when WeeWX next starts.", level=1)
+        return None
+    existed = extras_database_exists(cfg)
+    try:
+        dbm = open_extras_database(cfg, schema)
     except Exception as e:
-        printer.out(f"WARNING: could not open {where} to check/add DivumWX's extra "
-                    f"columns ({e}). Skipping — WeeWX adds them when it next starts.", level=1)
-        return
-
+        printer.out(f"WARNING: couldn't open or create DivumWX's extras database ({e}). "
+                    "WeeWX will create it when it next starts.", level=1)
+        return None
     try:
-        existing_cols = set(dbmanager.connection.columnsOf(dbmanager.table_name))
+        if not existed:
+            printer.out(f"Created DivumWX's extras database ({dbm.database_name}).", level=1)
+        cols = set(dbm.connection.columnsOf(dbm.table_name))
         added, failed = [], []
-        for col_name, col_type in DIVUMWX_EXTRA_COLUMNS:
-            if col_name in existing_cols:
+        for name, col_type in schema:
+            if name in cols:
                 continue
             try:
-                dbmanager.add_column(col_name, col_type)
-                added.append(col_name)
+                dbm.add_column(name, col_type.split()[0])
+                added.append(name)
             except Exception as e:
-                failed.append(col_name)
-                printer.out(f"WARNING: failed to add column '{col_name}' to "
-                            f"{where}: {e}", level=1)
-
+                failed.append(f"{name} ({e})")
         if added:
-            printer.out(f"Added {len(added)} new column(s) to {where}: "
+            printer.out(f"Added {len(added)} new column(s) to DivumWX's extras database: "
                         f"{', '.join(added)}", level=1)
-        else:
-            printer.out(f"All DivumWX extra columns already present in "
-                        f"{where} — nothing to add.", level=2)
         if failed:
-            printer.out(f"{len(failed)} column(s) could not be added: "
-                        f"{', '.join(failed)}. DivumwxExtrasService will skip "
-                        f"writing these fields until they exist.", level=1)
+            printer.out(f"WARNING: {len(failed)} column(s) couldn't be added to DivumWX's extras "
+                        f"database: {'; '.join(failed)}. WeeWX tries again when it starts.", level=1)
     finally:
-        dbmanager.close()
+        dbm.close()
+    return schema
+
+
+def copy_extras_history_from_main(cfg, schema, printer, ask):
+    """Earlier DivumWX 2.0.0 builds kept the extras as extra columns on the
+    main archive (weewx.sdb). Copy that history into DivumWX's own extras
+    database: every main-archive record that has any DivumWX field and
+    whose time the extras database doesn't cover yet -- no record there
+    within half an archive interval (existing extras records are never
+    changed, and nothing is slotted in between them). Then rebuild the extras database's daily
+    summaries. Read-only on weewx.sdb. `ask(question)` returns True to go
+    ahead. Returns the number of records copied (0 if nothing to do or
+    declined)."""
+    import weewx.manager
+    import weewx.units
+    import weedb
+    if not schema or _extras_is_main_database(cfg):
+        return 0
+    extra_names = [c for c, _ in schema if c not in DIVUMWX_EXTRAS_KEY_COLUMNS]
+    try:
+        main = weewx.manager.open_manager_with_config(cfg, 'wx_binding')
+    except Exception as e:
+        printer.out(f"Couldn't open the main archive to look for older DivumWX data ({e}); "
+                    "skipping.", level=2)
+        return 0
+    try:
+        main_cols = set(main.connection.columnsOf(main.table_name))
+        cols = [c for c in extra_names if c in main_cols]
+        if not cols:
+            return 0
+        dbm = open_extras_database(cfg, schema)
+        try:
+            import bisect
+            have_sorted = [r[0] for r in dbm.genSql(f"SELECT dateTime FROM {dbm.table_name} ORDER BY dateTime")]
+
+            def covered(ts, interval):
+                # An extras record at, or within half an archive interval of,
+                # this time: the extras database already covers it (a record
+                # in between would double-count sums such as sunshine time).
+                half = max(30, int(interval or 5) * 30)
+                i = bisect.bisect_left(have_sorted, ts - half + 1)
+                return i < len(have_sorted) and have_sorted[i] < ts + half
+            any_set = ' OR '.join(f'"{c}" IS NOT NULL' for c in cols)
+            sql = (f'SELECT dateTime, usUnits, interval, {", ".join(chr(34) + c + chr(34) for c in cols)} '
+                   f'FROM {main.table_name} WHERE {any_set} ORDER BY dateTime')
+            todo = sum(1 for r in main.genSql(f'SELECT dateTime, interval FROM {main.table_name} WHERE {any_set}')
+                       if not covered(r[0], r[1]))
+            if not todo:
+                return 0
+            if not ask(f"Your main WeeWX database has {todo} record(s) of DivumWX data (from an "
+                       f"earlier DivumWX 2.0.0 build) that aren't in DivumWX's own extras "
+                       f"database. Copy them across? weewx.sdb is only read, not changed. (y/n) "):
+                printer.out("Not copied. You'll be asked again the next time the installer runs.",
+                            level=1)
+                return 0
+            printer.out(f"Copying {todo} record(s) into DivumWX's extras database...", level=1)
+            std = dbm.std_unit_system
+            copied = 0
+            batch = []
+            ext_cols = set(dbm.connection.columnsOf(dbm.table_name))
+            cols_ok = [c for c in cols if c in ext_cols]
+
+            def flush():
+                if not batch:
+                    return
+                with weedb.Transaction(dbm.connection) as cursor:
+                    for rec in batch:
+                        keys = [k for k in rec if k in ext_cols]
+                        cursor.execute(
+                            f'INSERT INTO {dbm.table_name} ({", ".join(chr(34) + k + chr(34) for k in keys)}) '
+                            f'VALUES ({", ".join("?" * len(keys))})', [rec[k] for k in keys])
+                batch.clear()
+
+            for row in main.genSql(sql):
+                if covered(row[0], row[2]):
+                    continue
+                rec = {'dateTime': row[0], 'usUnits': row[1], 'interval': row[2]}
+                rec.update((c, v) for c, v in zip(cols, row[3:]) if c in cols_ok and v is not None)
+                if std is None:
+                    std = rec['usUnits']        # a new, empty extras database takes the main one's
+                elif rec['usUnits'] != std:
+                    rec = weewx.units.to_std_system(rec, std)
+                batch.append(rec)
+                copied += 1
+                if len(batch) >= 1000:
+                    flush()
+            flush()
+            # Rebuild the daily summaries over the whole extras database,
+            # as `weectl database rebuild-daily --binding=divumwx_extras_binding` does.
+            printer.out("Rebuilding the extras database's daily summaries...", level=1)
+            dbm.drop_daily()
+        finally:
+            dbm.close()
+        dbm = open_extras_database(cfg, schema)
+        try:
+            dbm.backfill_day_summary(progress_fn=lambda *a: None)
+        finally:
+            dbm.close()
+        printer.out(f"Copied {copied} record(s) of DivumWX data into its own extras database.",
+                    level=1)
+        printer.out("DivumWX no longer uses its columns in your main WeeWX database. They can stay "
+                    "(they do no harm), or, once you're happy the data is in divumwx_extras.sdb, "
+                    "you can remove them -- back up weewx.sdb first, stop WeeWX, then run:\n"
+                    f"    weectl database drop-columns {' '.join(cols)} --binding=wx_binding",
+                    level=1)
+        return copied
+    finally:
+        main.close()
 
 
 DIVUMWX_DATAINJECT_SOURCES = {
@@ -3483,7 +3627,16 @@ class DivumwxInstaller(ExtensionInstaller):
 
         apply_calculation_merges(cfg, fresh_install=fresh_install)
 
-        add_missing_extras_columns(cfg, printer)
+        # DivumWX's own extras database (never extra columns in weewx.sdb),
+        # plus any history an earlier 2.0.0 build kept in weewx.sdb.
+        extras_schema = ensure_extras_database(cfg, printer)
+        try:
+            copy_extras_history_from_main(cfg, extras_schema, printer,
+                                          lambda q: y_or_n(q) == 'y')
+        except Exception as e:
+            printer.out(f"WARNING: couldn't copy DivumWX's older data from the main archive "
+                        f"into its extras database ({e}). Nothing in weewx.sdb was changed. "
+                        "Stop WeeWX and run the installer again to retry.", level=1)
 
         apply_standalone_sections_merge(cfg)
 

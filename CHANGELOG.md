@@ -2,6 +2,47 @@
 
 ## Unreleased — for 2.0.0
 
+### DivumWX no longer changes WeeWX's database
+WeeWX's guidelines: "Extensions should not modify the database schemas. If
+it requires data not found in the default databases, an extension should
+provide its own database and schema."
+
+- DivumWX's extra fields (pollen, dust, AOD, cloud cover, sunshine, VPD,
+  air density, piezo rain, solar/battery, …) are now always kept in DivumWX's
+  own database, `divumwx_extras.sdb`.
+- Earlier 2.0.0 builds added 34 columns to the main archive (`weewx.sdb`)
+  and wrote the fields there. Nothing in DivumWX now adds columns to
+  `weewx.sdb` or writes to it.
+- **Installer:**
+  - It adds `[DataBindings][[divumwx_extras_binding]]` and
+    `[Databases][[divumwx_extras_db]]` to weewx.conf if they're missing.
+    Existing ones, such as a hand-made setup, are left exactly as they are.
+  - It creates `divumwx_extras.sdb` with every DivumWX column, or adds any
+    missing columns to an existing one.
+  - If `weewx.sdb` has DivumWX data from an earlier 2.0.0 build, it offers to
+    copy it across. It copies only times the extras database doesn't already
+    cover, then rebuilds the extras database's daily summaries.
+  - `weewx.sdb` is only read. The installer then prints the
+    `weectl database drop-columns` command for removing the old columns,
+    for anyone who wants to.
+- **`DivumwxExtrasService`:**
+  - It always writes to `divumwx_extras_binding`, and creates the database
+    if it's missing.
+  - If weewx.conf has no binding (files updated without re-running the
+    installer), it uses the default one and logs that the installer should
+    be re-run. Otherwise WeeWX would quietly send the unknown binding to the
+    main database.
+  - It refuses a binding that points at the main database.
+  - Missing columns are only ever added to its own database.
+- `archive.json` reads air density, cloud cover, the sunshine threshold,
+  sunshine time and VPD from the extras database first, with the main
+  archive only as a fallback. On an upgraded station whose old columns had
+  stopped updating, sunshine time was previously read from the stale
+  columns.
+- `divumwx_uninstall_helper.py` describes the extras database. It prints the
+  drop-columns command for whichever old columns a station actually has
+  (weectl does nothing if any named column is missing).
+
 ### Solar Energy cards in the installer
 - `cardSolarEnergy` and `cardSolarEnergyFlow` are now optional cards in the
   installer, asked as "Include cardSolarEnergy (only for SolarAssistant
