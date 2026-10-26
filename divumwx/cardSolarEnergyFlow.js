@@ -2,7 +2,7 @@
 try {
 /*
 ##############################################################################################
-# cardSolarEnergyFlow.js version 1.0.0
+# cardSolarEnergyFlow.js version 1.0.3
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -17,6 +17,7 @@ try {
   var CLOUD_JSON_URL   = './jsondata/cloud_coverage.json';
   var POLL_MS = 10 * 1000;
 
+
   function pad2(n){ return n < 10 ? '0' + n : String(n); }
   function stationNow(){
     var p = {};
@@ -27,7 +28,6 @@ try {
     }).formatToParts(new Date()).forEach(function(x){ p[x.type] = x.value; });
     return new Date(Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second));
   }
-  function num(x){ return (typeof x === 'number' && !isNaN(x)) ? x : null; }
 
   function pickPvIcon(cloudCoverPct, isDay){
     if (!isDay) return 'meteocons/fill/svg/clear-night.svg';
@@ -38,11 +38,11 @@ try {
     return 'meteocons/fill/svg/overcast-day.svg';
   }
 
-  var UPS_LOAD_TOPIC = 'solar_assistant/inverter_1/ups_load_power/state';
-
-  function topicValue(solarData, topic){
-    var entry = solarData && solarData.data && solarData.data[topic];
-    return entry ? entry.value : null;
+  function pickPvPowerColor(watts){
+    if (watts <= 0) return 'silver';
+    if (watts <= 1500) return '#FFD700';
+    if (watts <= 3000) return '#ffa242';
+    return '#ff7400';
   }
 
   var mount = document.getElementById('solarEnergyFlowCard27');
@@ -51,6 +51,7 @@ try {
   mount.style.position = 'relative';
   mount.style.display = 'flex';
   mount.style.flexDirection = 'column';
+
   mount.style.borderBottom = '0';
 
   var overlayTextColor = 'var(--bs-body-color)';
@@ -73,6 +74,7 @@ try {
 
   var titleLabel = document.createElement('span');
   DivumWXI18N.applyLabel(titleLabel, 'Solar Power Flow');
+  DivumWXI18N.applyAttr(titleLabel, 'title', 'Solar Power Flow');
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -106,185 +108,190 @@ try {
     statusTime.textContent = pad2(t.getUTCHours()) + ':' + pad2(t.getUTCMinutes()) + ':' + pad2(t.getUTCSeconds());
   }
 
-  var stage = document.createElement('div');
-  stage.style.position = 'relative';
-  stage.style.width = '100%';
-  stage.style.height = '175px';
-  stage.style.boxSizing = 'border-box';
-  stage.style.overflow = 'hidden';
-  stage.style.padding = '3px 4px 2px';
-  mount.appendChild(stage);
+  // ---- 60:40 content split (left: PV icon + hero power value, right: readouts) ----
+  var contentWrap = document.createElement('div');
+  contentWrap.style.height = '175px';
+  contentWrap.style.width = '100%';
+  contentWrap.style.boxSizing = 'border-box';
+  contentWrap.style.overflow = 'hidden';
+  contentWrap.style.display = 'flex';
+  contentWrap.style.alignItems = 'stretch';
+  mount.appendChild(contentWrap);
 
-  var inner = document.createElement('div');
-  inner.style.position = 'absolute';
-  inner.style.top = '3px';
-  inner.style.left = '4px';
-  inner.style.right = '4px';
-  inner.style.bottom = '2px';
-  stage.appendChild(inner);
+  var divider = document.createElement('div');
+  divider.style.position = 'absolute';
+  divider.style.left = '60%';
+  divider.style.top = '6px';
+  divider.style.bottom = '6px';
+  divider.style.width = '1px';
+  divider.style.background = 'var(--bs-border-color)';
+  divider.style.pointerEvents = 'none';
+  mount.appendChild(divider);
 
-  var NODES = {
-    solar:   { l: 30, t: 1,  w: 40, h: 17 },
-    grid:    { l: 2,  t: 41, w: 26, h: 17 },
-    inv:     { l: 38, t: 33, w: 24, h: 34 },
-    load:    { l: 70, t: 28, w: 28, h: 15 },
-    ups:     { l: 70, t: 56, w: 28, h: 15 },
-    battery: { l: 18, t: 79, w: 64, h: 20 }
+  var leftPane = document.createElement('div');
+  leftPane.style.flex = '0 0 60%';
+  leftPane.style.width = '60%';
+  leftPane.style.height = '175px';
+  leftPane.style.boxSizing = 'border-box';
+  leftPane.style.overflow = 'hidden';
+  leftPane.style.display = 'flex';
+  leftPane.style.flexDirection = 'column';
+  leftPane.style.alignItems = 'center';
+  leftPane.style.justifyContent = 'center';
+  contentWrap.appendChild(leftPane);
+
+  var graphicWrap = document.createElement('div');
+  graphicWrap.style.position = 'relative';
+  graphicWrap.style.width = '100%';
+  graphicWrap.style.height = '100%';
+  graphicWrap.style.flex = '1 1 auto';
+  graphicWrap.style.boxSizing = 'border-box';
+  leftPane.appendChild(graphicWrap);
+
+  // ---- Compact Solar Power Flow diagram (same design as the charts modal's
+  //      Flow Diagram, re-laid out for the 189 x 175 px left pane) ----
+  // PV feeds the inverter from the left, Grid from the top, Battery from the
+  // bottom; the inverter feeds the Essential and Non-Essential circuits on the
+  // right. Each tracer takes the colour of the box the power flows FROM.
+  var FLOW_C = { pv: '#F28C1B', grid: '#E53935', batt: '#2EA043', inv: '#2B8CEB', ess: '#43A047', non: '#F28C1B' };
+  var FLOW_MIN_W = 1;
+
+  if (!document.getElementById('solarEnergyFlowMiniStyle')) {
+    var flowStyle = document.createElement('style');
+    flowStyle.id = 'solarEnergyFlowMiniStyle';
+    flowStyle.textContent =
+      ':root{--seh-chip-bg:#EFECE2;}body.dark{--seh-chip-bg:#0A0F22;}' +
+      '.sfm svg{display:block;width:100%;height:100%;}' +
+      '.sfm text{font-family:Lexend,"Helvetica Neue",Helvetica,Arial,sans-serif;text-anchor:middle;}' +
+      '.sfm-box rect.sfm-bg{fill:color-mix(in srgb, var(--c) 20%, var(--seh-chip-bg));stroke:var(--c);stroke-width:1.2;}' +
+      '.sfm-box.idle{--c:#9AA0A8 !important;}' +
+      '.sfm-box .sfm-icon{color:var(--c);}' +
+      '.sfm-name{font-size:6px;font-weight:600;fill:var(--bs-body-color,#1D2C4E);font-variant-caps:small-caps;letter-spacing:.03em;}' +
+      '.sfm-box.idle .sfm-name{opacity:.7;}' +
+      '.sfm-val{font-size:8.5px;font-weight:700;fill:var(--c);}' +
+      '.sfm-sub{font-size:5.5px;font-weight:600;}' +
+      '.sfm-wire{fill:none;stroke:var(--bs-border-color,#C9CFD8);stroke-width:2;stroke-linecap:round;}' +
+      '.sfm-tr{fill:none;stroke-width:2;stroke-linecap:round;stroke-dasharray:5 7;animation:sfmFlow var(--dur,1.6s) linear infinite;}' +
+      '@keyframes sfmFlow{from{stroke-dashoffset:12;}to{stroke-dashoffset:0;}}' +
+      '@media (prefers-reduced-motion: reduce){.sfm-tr{animation:none;stroke-dasharray:none;}}';
+    document.head.appendChild(flowStyle);
+  }
+
+  // Wires in their "forward" direction (source end first).
+  var FLOW_WIRE = {
+    pv:      'M48 87 H67',
+    grid:    'M95 39 V63',   gridRev: 'M95 63 V39',
+    batt:    'M95 136 V111', battRev: 'M95 111 V136',
+    load:    'M123 87 H134',
+    ess:     'M134 87 V51 H141',
+    non:     'M134 87 V123 H141'
   };
-  function edges(n){ return { l: n.l, r: n.l + n.w, t: n.t, b: n.t + n.h, cx: n.l + n.w/2, cy: n.t + n.h/2 }; }
-  var E = {}; for (var k in NODES) E[k] = edges(NODES[k]);
 
-  var COLORS = { green: '#33cc55', red: '#e6483f', amber: '#f2a93b', grey: '#4a4a4e' };
-
-  if (!document.getElementById('solarEnergyFlowDashStyle')) {
-    var dashStyle = document.createElement('style');
-    dashStyle.id = 'solarEnergyFlowDashStyle';
-    dashStyle.textContent =
-      '@keyframes solarEnergyFlowDash { to { stroke-dashoffset: -40; } }' +
-      '.flow-dash { animation: solarEnergyFlowDash 1.1s linear infinite; }';
-    document.head.appendChild(dashStyle);
+  function flowDur(w){
+    var a = Math.min(Math.abs(w || 0), 5000);
+    return (2.4 - 1.8 * Math.sqrt(a / 5000)).toFixed(2) + 's';
+  }
+  function flowTracer(on, d, color, w){
+    return on ? '<path class="sfm-tr" d="'+d+'" stroke="'+color+'" style="--dur:'+flowDur(w)+'"/>' : '';
+  }
+  function flowBox(id, c, idle, x, y, w, h, inner, title){
+    return '<g class="sfm-box'+(idle ? ' idle' : '')+'" style="--c:'+c+'"><title>'+title+'</title>' +
+      '<rect class="sfm-bg" x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="5"/>'+inner+'</g>';
+  }
+  var GLYPH = {
+    sun: '<g class="sfm-icon" stroke="currentColor" stroke-width="1.3" stroke-linecap="round">' +
+         '<circle r="4.2" fill="currentColor" stroke="none"/>' +
+         '<line y1="-6.5" y2="-8.5"/><line y1="6.5" y2="8.5"/><line x1="-6.5" x2="-8.5"/><line x1="6.5" x2="8.5"/>' +
+         '<line x1="-4.6" y1="-4.6" x2="-6" y2="-6"/><line x1="4.6" y1="4.6" x2="6" y2="6"/>' +
+         '<line x1="-4.6" y1="4.6" x2="-6" y2="6"/><line x1="4.6" y1="-4.6" x2="6" y2="-6"/></g>',
+    plug: '<path class="sfm-icon" fill="currentColor" d="M-2.6 -8 h1.6 v3 h2 v-3 h1.6 v3 h1.5 a.8 .8 0 0 1 .8 .8 v3 a3.8 3.8 0 0 1 -3 3.7 v1.7 l1 1.5 h-5.4 l1 -1.5 v-1.7 a3.8 3.8 0 0 1 -3 -3.7 v-3 a.8 .8 0 0 1 .8 -.8 h1.1 z"/>',
+    inv: '<g class="sfm-icon" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">' +
+         '<path d="M-6 -4 h3 a2.2 2.2 0 0 1 0 4.4 h-1.7 a2.2 2.2 0 0 0 0 4.4 h3.3"/>' +
+         '<rect x=".6" y="1.8" width="3.8" height="5.4" rx="1.1" fill="currentColor" stroke="none"/>' +
+         '<line x1="4.4" y1="3.2" x2="6.6" y2="3.2"/><line x1="4.4" y1="5.8" x2="6.6" y2="5.8"/></g>',
+    shield: '<path class="sfm-icon" fill="currentColor" d="M0 -6.5 L5 -4.6 V-.5 C5 3.2 2.8 5.5 0 6.7 C-2.8 5.5 -5 3.2 -5 -.5 V-4.6 Z"/>',
+    house: '<path class="sfm-icon" fill="currentColor" d="M0 -6.5 L6.5 -.5 H4.6 V6 H1.4 V2 H-1.4 V6 H-4.6 V-.5 H-6.5 Z"/>'
+  };
+  function glyphBattery(soc){
+    var lvl = Math.max(0, Math.min(100, typeof soc === 'number' ? soc : 0)) / 100;
+    var h = (12.4 * lvl).toFixed(1), y = (6.2 - 12.4 * lvl).toFixed(1);
+    return '<g class="sfm-icon"><rect x="-1.6" y="-8.6" width="3.2" height="1.6" rx=".5" fill="currentColor"/>' +
+      '<rect x="-4" y="-7.2" width="8" height="14.6" rx="1.3" fill="none" stroke="currentColor" stroke-width="1.1"/>' +
+      '<rect x="-2.8" y="'+y+'" width="5.6" height="'+h+'" rx=".5" fill="currentColor"/></g>';
+  }
+  function flowText(cls, x, y, s, extra){
+    return '<text class="'+cls+'" x="'+x+'" y="'+y+'"'+(extra || '')+'>'+s+'</text>';
   }
 
-  function buildLine(from, to, state){
-    var a = E[from], b = E[to];
-    var vertical = Math.abs(a.cx - b.cx) < Math.abs(a.cy - b.cy);
-    var x1, y1, x2, y2;
-    if (vertical) {
-      x1 = x2 = (a.cx + b.cx) / 2;
-      y1 = (a.cy < b.cy) ? a.b : a.t;
-      y2 = (a.cy < b.cy) ? b.t : b.b;
+  var rightPane = document.createElement('div');
+  rightPane.style.flex = '0 0 40%';
+  rightPane.style.width = '40%';
+  rightPane.style.boxSizing = 'border-box';
+  rightPane.style.overflow = 'hidden';
+  rightPane.style.display = 'flex';
+  rightPane.style.flexDirection = 'column';
+  rightPane.style.justifyContent = 'center';
+  rightPane.style.padding = '0 10px 0 14px';
+  contentWrap.appendChild(rightPane);
+
+  function addChipRow(label, opts){
+    var wrap = opts && opts.wrap;
+    var row = document.createElement('div');
+    row.style.display = 'flex';
+    row.style.flexDirection = 'column';
+    row.style.justifyContent = 'center';
+    row.style.boxSizing = 'border-box';
+    row.style.borderBottom = '1px solid var(--bs-border-color)';
+    if (wrap) {
+      row.style.minHeight = '20px';
+      row.style.padding = '3px 0';
     } else {
-      y1 = y2 = (a.cy + b.cy) / 2;
-      x1 = (a.cx < b.cx) ? a.r : a.l;
-      x2 = (a.cx < b.cx) ? b.l : b.r;
+      row.style.height = '20px';
+      row.style.overflow = 'hidden';
     }
-    var c = COLORS[state] || COLORS.grey;
-    var s = '<line x1="'+x1+'%" y1="'+y1+'%" x2="'+x2+'%" y2="'+y2+'%" stroke="'+c+'" stroke-width="2.5" stroke-linecap="round" vector-effect="non-scaling-stroke"/>';
-    if (state !== 'grey') {
-      s += '<line class="flow-dash" x1="'+x1+'%" y1="'+y1+'%" x2="'+x2+'%" y2="'+y2+'%" stroke="'+c+'" stroke-width="2.5" stroke-linecap="round" ' +
-           'stroke-dasharray="5 9" opacity="0.9" vector-effect="non-scaling-stroke"/>';
+
+    var labelEl = document.createElement('span');
+    DivumWXI18N.applyLabel(labelEl, label);
+    labelEl.style.fontSize = '7px';
+    labelEl.style.fontVariantCaps = 'small-caps';
+    labelEl.style.letterSpacing = '.06em';
+    labelEl.style.color = overlayTextColor;
+    labelEl.style.opacity = '0.85';
+    labelEl.style.whiteSpace = 'nowrap';
+    row.appendChild(labelEl);
+
+    var valueEl = document.createElement('span');
+    valueEl.style.fontSize = '9.5px';
+    valueEl.style.fontFamily = '"IBM Plex Mono", ui-monospace, monospace';
+    valueEl.style.color = 'var(--bw-accent)';
+    if (wrap) {
+      valueEl.style.whiteSpace = 'normal';
+      valueEl.style.wordBreak = 'break-word';
+      valueEl.style.lineHeight = '1.25';
+    } else {
+      valueEl.style.whiteSpace = 'nowrap';
+      valueEl.style.overflow = 'hidden';
+      valueEl.style.textOverflow = 'ellipsis';
     }
-    return s;
+    row.appendChild(valueEl);
+
+    rightPane.appendChild(row);
+    return valueEl;
   }
 
-  function iconPylon(color){
-    return '<svg viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">' +
-      '<path d="M12 2 L19 22 M12 2 L5 22"/><path d="M8.2 12.5 H15.8 M7 16.5 H17 M9.3 8.7 H14.7"/>' +
-      '<path d="M4 22 H20"/><line x1="12" y1="2" x2="12" y2="6"/></svg>';
-  }
-  function iconHouse(color){
-    return '<svg viewBox="0 0 24 24" fill="'+color+'"><path d="M12 2.7 L22 11 H19V21 H14V15 H10V21 H5V11 H2 Z"/></svg>';
-  }
-  function iconUPS(color){
-    return '<svg viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">' +
-      '<rect x="3" y="5" width="18" height="14" rx="2"/>' +
-      '<path d="M13 8 L9 13 H12 L11 16 L15 11 H12 Z" fill="'+color+'" stroke="none"/></svg>';
-  }
-  function iconBattery(color, pct){
-    var innerW = 16 * Math.max(0, Math.min(100, (typeof pct === 'number' ? pct : 0))) / 100;
-    return '<svg viewBox="0 0 24 24" fill="none">' +
-      '<rect x="2" y="7" width="19" height="10" rx="2" stroke="'+color+'" stroke-width="2"/>' +
-      '<rect x="22" y="10" width="2" height="4" rx="1" fill="'+color+'"/>' +
-      '<rect x="4" y="9" width="'+innerW+'" height="6" fill="'+color+'"/></svg>';
-  }
-  function iconInverter(){
-    return '<svg viewBox="0 0 24 30" fill="none">' +
-      '<rect x="1" y="1" width="22" height="28" rx="4" fill="#e9e9ec"/>' +
-      '<rect x="6" y="6" width="12" height="6" rx="1.5" fill="#2b2b2e"/>' +
-      '<path d="M2 19 H22" stroke="#c8c8cc" stroke-width="1"/></svg>';
-  }
-
-  function ring(pct, color){
-    var r = 9, c = 2 * Math.PI * r;
-    var p = (typeof pct === 'number' && !isNaN(pct)) ? Math.max(0, Math.min(100, pct)) : 0;
-    var off = c * (1 - p / 100);
-    return '<svg viewBox="0 0 24 24">' +
-      '<circle cx="12" cy="12" r="'+r+'" fill="none" stroke="#333" stroke-width="3"/>' +
-      '<circle cx="12" cy="12" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="3" stroke-linecap="round" ' +
-      'stroke-dasharray="'+c+'" stroke-dashoffset="'+off+'" transform="rotate(-90 12 12)"/></svg>';
-  }
-
-  function nodeStyle(n){
-    return 'position:absolute;left:'+n.l+'%;top:'+n.t+'%;width:'+n.w+'%;height:'+n.h+'%;' +
-      'background:#1c1c1e;border-radius:8px;box-sizing:border-box;display:flex;align-items:center;gap:5px;padding:0 6px;overflow:hidden;';
-  }
-  var INVERTER_STYLE = 'flex-direction:column;justify-content:center;gap:2px;padding:4px;';
-  var BATTERY_TEXT_STYLE = 'flex:1 1 auto;min-width:0;';
-
-  var ICON_WRAP = 'flex:0 0 auto;width:16px;height:16px;display:flex;align-items:center;justify-content:center;';
-  var TEXT_WRAP = 'display:flex;flex-direction:column;line-height:1.05;overflow:hidden;min-width:0;';
-  var VALUE_STYLE = 'color:#fff;font-weight:700;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:\'IBM Plex Mono\',ui-monospace,monospace;';
-  var LABEL_STYLE = 'color:'+overlayTextColor+';opacity:.85;font-size:7.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
-
-  function fmtPower(w){
-    return (typeof w === 'number' && !isNaN(w)) ? Math.round(Math.abs(w)) + ' W' : '\u2014';
-  }
-
-  function renderCard(v){
-    var solarState  = (v.pvPower !== null && v.pvPower > 0) ? 'green' : 'grey';
-    var gridState   = (v.gridPower === null) ? 'grey' : (v.gridPower < 0 ? 'green' : (v.gridPower > 0 ? 'red' : 'grey'));
-    var loadState   = (v.loadPower !== null && v.loadPower > 0) ? 'green' : 'grey';
-    var upsState    = (v.upsLoadPower !== null && v.upsLoadPower > 0) ? 'green' : 'grey';
-    var battState   = (v.batteryPower === null) ? 'grey' : (v.batteryPower < 0 ? 'green' : (v.batteryPower > 0 ? 'amber' : 'grey'));
-    var battColor   = COLORS[battState === 'grey' ? 'grey' : battState];
-    var gridColor   = COLORS[gridState === 'grey' ? 'grey' : gridState];
-
-    var svg = '<svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;top:0;left:0;width:100%;height:100%;">' +
-      buildLine('solar', 'inv', solarState) +
-      buildLine('grid', 'inv', gridState) +
-      buildLine('inv', 'load', loadState) +
-      buildLine('inv', 'ups', upsState) +
-      buildLine('inv', 'battery', battState) +
-      '</svg>';
-
-    var html = svg;
-
-    html += '<div style="'+nodeStyle(NODES.solar)+'">' +
-      '<span style="'+ICON_WRAP+'"><img src="'+v.icon+'" style="width:100%;height:100%;object-fit:contain;"/></span>' +
-      '<span style="'+TEXT_WRAP+'"><span style="'+VALUE_STYLE+'">'+fmtPower(v.pvPower)+'</span>' +
-      '<span style="'+LABEL_STYLE+'" data-i18n-label="Solar PV"></span></span></div>';
-
-    html += '<div style="'+nodeStyle(NODES.grid)+'">' +
-      '<span style="'+ICON_WRAP+'">'+iconPylon(gridColor)+'</span>' +
-      '<span style="'+TEXT_WRAP+'"><span style="'+VALUE_STYLE+'">'+fmtPower(v.gridPower)+'</span>' +
-      '<span style="'+LABEL_STYLE+'" data-i18n-label="Grid"></span></span></div>';
-
-    html += '<div style="'+nodeStyle(NODES.inv)+INVERTER_STYLE+'">' +
-      '<span style="width:22px;height:28px;flex:0 0 auto;">'+iconInverter()+'</span>' +
-      '<span style="'+LABEL_STYLE+'color:var(--bs-body-color);" data-i18n-label="Inverter"></span></div>';
-
-    html += '<div style="'+nodeStyle(NODES.load)+'">' +
-      '<span style="'+ICON_WRAP+'">'+iconHouse(loadState === 'grey' ? COLORS.grey : '#3ecf6a')+'</span>' +
-      '<span style="'+TEXT_WRAP+'"><span style="'+VALUE_STYLE+'">'+fmtPower(v.loadPower)+'</span>' +
-      '<span style="'+LABEL_STYLE+'" data-i18n-label="Load"></span></span></div>';
-
-    html += '<div style="'+nodeStyle(NODES.ups)+'">' +
-      '<span style="'+ICON_WRAP+'">'+iconUPS(upsState === 'grey' ? COLORS.grey : '#a970ff')+'</span>' +
-      '<span style="'+TEXT_WRAP+'"><span style="'+VALUE_STYLE+'">'+fmtPower(v.upsLoadPower)+'</span>' +
-      '<span style="'+LABEL_STYLE+'" data-i18n-label="UPS Load"></span></span></div>';
-
-    var battStateLabel = (v.batteryPower === null) ? '' :
-      (v.batteryPower < 0 ? DivumWXI18N.t('Charging') : (v.batteryPower > 0 ? DivumWXI18N.t('Discharging') : DivumWXI18N.t('Idle')));
-    html += '<div style="'+nodeStyle(NODES.battery)+'">' +
-      '<span style="'+ICON_WRAP+'">'+iconBattery(battColor, v.batterySOC)+'</span>' +
-      '<span style="'+TEXT_WRAP+BATTERY_TEXT_STYLE+'">' +
-      '<span style="'+VALUE_STYLE+'">'+fmtPower(v.batteryPower)+' <span style="color:#9a9a9e;font-weight:600;">'+
-      (typeof v.batterySOC === 'number' ? v.batterySOC.toFixed(0) : '\u2014')+'%</span></span>' +
-      '<span style="color:'+battColor+';font-size:7px;font-weight:600;white-space:nowrap;">'+battStateLabel+'</span></span>' +
-      '<span style="flex:0 0 auto;width:16px;height:16px;margin-left:4px;">'+ring(v.batterySOC, battColor)+'</span></div>';
-
-    inner.innerHTML = html;
-
-    inner.querySelectorAll('[data-i18n-label]').forEach(function(el){
-      el.textContent = DivumWXI18N.t(el.getAttribute('data-i18n-label'));
-    });
-  }
+  var gridText      = addChipRow('Grid', { wrap: true });
+  var batteryText    = addChipRow('Battery', { wrap: true });
+  var loadText          = addChipRow('Total Load');
+  var dailyEnergyText       = addChipRow('Solar Daily Energy');
+  var dailyExportText          = addChipRow('Grid Daily Export');
+  var efficiencyText              = addChipRow('PV Efficiency');
+  efficiencyText.parentElement.style.borderBottom = 'none';
 
   var cardLink = document.createElement('a');
   cardLink.className = 'card-whole-link';
   cardLink.href = 'charts-d3.html?type=solar&embed=1';
-  cardLink.setAttribute('data-modal', 'Solar Energy');
-  DivumWXI18N.applyAttr(cardLink, 'data-title', 'Solar Energy Chart & Records');
+  DivumWXI18N.applyAttr(cardLink, 'data-modal', 'Solar Power Flow');
+  DivumWXI18N.applyAttr(cardLink, 'data-title', 'Solar Power Flow Chart & Records');
   cardLink.setAttribute('data-type', 'iframe');
   cardLink.setAttribute('data-url', 'charts-d3.html?type=solar&embed=1');
   cardLink.style.position = 'absolute';
@@ -294,6 +301,96 @@ try {
   cardLink.style.bottom = '0';
   cardLink.style.display = 'block';
   mount.appendChild(cardLink);
+
+  function fmtPower(w){
+    return (typeof w === 'number' && !isNaN(w)) ? Math.round(Math.abs(w)) + ' W' : '\u2014';
+  }
+  function fmtEnergy(kwh){
+    return (typeof kwh === 'number' && !isNaN(kwh)) ? kwh.toFixed(2) + ' kWh' : '\u2014';
+  }
+
+  function renderDiagram(v){
+    var T = function(k){ return DivumWXI18N.t(k); };
+    var pvOn   = v.pvPower !== null && v.pvPower > FLOW_MIN_W;
+    // Grid: + import (grid -> inverter), - export (inverter -> grid)
+    var gIn    = v.gridPower !== null && v.gridPower >  FLOW_MIN_W;
+    var gOut   = v.gridPower !== null && v.gridPower < -FLOW_MIN_W;
+    // Battery: - discharging (battery -> inverter), + charging (inverter -> battery)
+    var bDis   = v.batteryPower !== null && v.batteryPower < -FLOW_MIN_W;
+    var bChg   = v.batteryPower !== null && v.batteryPower >  FLOW_MIN_W;
+    var loadOn = v.totalLoadPower !== null && v.totalLoadPower > FLOW_MIN_W;
+    var essOn  = v.upsLoadPower !== null && v.upsLoadPower > FLOW_MIN_W;
+    var nonOn  = v.houseLoadPower !== null && v.houseLoadPower > FLOW_MIN_W;
+
+    var gridMode = v.gridPower === null ? '' : gIn ? T('Import') : gOut ? T('Export') : T('Idle');
+    var battMode = v.batteryPower === null ? '' : bDis ? T('Discharging') : bChg ? T('Charging') : T('Idle');
+    var soc = (typeof v.batterySOC === 'number' && !isNaN(v.batterySOC)) ? Math.round(v.batterySOC) + '%' : '—';
+
+    var svg = '<svg viewBox="0 0 190 175" preserveAspectRatio="xMidYMid meet" role="img">';
+    svg += '<path class="sfm-wire" d="'+FLOW_WIRE.pv+'"/><path class="sfm-wire" d="'+FLOW_WIRE.grid+'"/>' +
+      '<path class="sfm-wire" d="'+FLOW_WIRE.batt+'"/><path class="sfm-wire" d="'+FLOW_WIRE.load+'"/>' +
+      '<path class="sfm-wire" d="'+FLOW_WIRE.ess+'"/><path class="sfm-wire" d="'+FLOW_WIRE.non+'"/>';
+    svg += flowTracer(pvOn, FLOW_WIRE.pv, FLOW_C.pv, v.pvPower) +
+      flowTracer(gIn || gOut, gIn ? FLOW_WIRE.grid : FLOW_WIRE.gridRev, gIn ? FLOW_C.grid : FLOW_C.inv, v.gridPower) +
+      flowTracer(bDis || bChg, bDis ? FLOW_WIRE.batt : FLOW_WIRE.battRev, bDis ? FLOW_C.batt : FLOW_C.inv, v.batteryPower) +
+      flowTracer(loadOn, FLOW_WIRE.load, FLOW_C.inv, v.totalLoadPower) +
+      flowTracer(essOn, FLOW_WIRE.ess, FLOW_C.inv, v.upsLoadPower) +
+      flowTracer(nonOn, FLOW_WIRE.non, FLOW_C.inv, v.houseLoadPower);
+
+    // PV Solar (left)
+    svg += flowBox('pv', FLOW_C.pv, !pvOn, 3, 63, 45, 48,
+      '<g transform="translate(25.5 76)">'+GLYPH.sun+'</g>' +
+      flowText('sfm-name', 25.5, 95, T('PV Solar')) + flowText('sfm-val', 25.5, 105, fmtPower(v.pvPower)), T('PV Solar'));
+    // Grid (top)
+    svg += flowBox('grid', FLOW_C.grid, !gIn && !gOut, 67, 2, 56, 37,
+      '<g transform="translate(76 20.5)">'+GLYPH.plug+'</g>' +
+      flowText('sfm-name', 101, 11, T('Grid')) +
+      flowText('sfm-val', 101, 22, fmtPower(v.gridPower)) +
+      flowText('sfm-sub', 101, 32, gridMode, ' fill="'+(gOut ? FLOW_C.batt : 'var(--c)')+'"'), T('Grid'));
+    // Inverter (centre)
+    svg += flowBox('inv', FLOW_C.inv, v.online === false, 67, 63, 56, 48,
+      '<g transform="translate(77 87)">'+GLYPH.inv+'</g>' +
+      flowText('sfm-name', 102, 80, T('Inverter')) +
+      flowText('sfm-val', 102, 92, fmtPower(v.totalLoadPower)) +
+      flowText('sfm-sub', 102, 102, v.online === false ? T('Offline') : T('Online'), ' fill="'+(v.online === false ? FLOW_C.grid : FLOW_C.batt)+'"'), T('Inverter'));
+    // Battery (bottom)
+    svg += flowBox('batt', FLOW_C.batt, v.batterySOC === null && !bDis && !bChg, 63, 136, 64, 37,
+      '<g transform="translate(72 154.5)">'+glyphBattery(v.batterySOC)+'</g>' +
+      flowText('sfm-name', 101, 144.5, T('Battery')) +
+      flowText('sfm-val', 101, 155.5, soc + '<tspan class="sfm-sub" dx="2.5" style="fill:var(--bs-body-color);opacity:.75">' + fmtPower(v.batteryPower) + '</tspan>') +
+      flowText('sfm-sub', 101, 166, battMode, ' fill="'+(bDis ? '#E58A00' : bChg ? FLOW_C.inv : 'var(--bs-body-color)')+'"'), T('Battery'));
+    // Essential and Non-Essential (right)
+    svg += flowBox('ess', FLOW_C.ess, !essOn, 141, 30, 47, 42,
+      '<g transform="translate(164.5 41)">'+GLYPH.shield+'</g>' +
+      flowText('sfm-name', 164.5, 57, T('Essential')) + flowText('sfm-val', 164.5, 67, fmtPower(v.upsLoadPower)), T('Essential'));
+    svg += flowBox('non', FLOW_C.non, !nonOn, 141, 102, 47, 42,
+      '<g transform="translate(164.5 113)">'+GLYPH.house+'</g>' +
+      flowText('sfm-name', 164.5, 129, T('Non-Essential')) + flowText('sfm-val', 164.5, 139, fmtPower(v.houseLoadPower)), T('Non-Essential'));
+    svg += '</svg>';
+
+    graphicWrap.className = 'sfm';
+    graphicWrap.innerHTML = svg;
+  }
+
+  function renderCard(v){
+    renderDiagram(v);
+
+    gridText.textContent = v.gridState + ' ' + fmtPower(v.gridPower);
+    batteryText.textContent = v.batteryState + ' ' + fmtPower(v.batteryPower) + ', ' +
+      (typeof v.batterySOC === 'number' ? v.batterySOC.toFixed(0) : '\u2014') + '%';
+    loadText.textContent = fmtPower(v.totalLoadPower);
+    dailyEnergyText.textContent = fmtEnergy(v.solarDailyEnergy);
+    dailyExportText.textContent = fmtEnergy(v.gridDailyExport);
+    efficiencyText.textContent = (typeof v.pvEfficiency === 'number' && !isNaN(v.pvEfficiency))
+      ? v.pvEfficiency.toFixed(1) + '%' : '\u2014';
+  }
+
+  function num(x){ return (typeof x === 'number' && !isNaN(x)) ? x : null; }
+
+  function topicValue(solarData, topic){
+    var entry = solarData && solarData.data && solarData.data[topic];
+    return entry ? entry.value : null;
+  }
 
   function refresh(){
     Promise.allSettled([
@@ -308,9 +405,10 @@ try {
       if (archResult.status === 'rejected') console.warn('cardSolarEnergyFlow: archive.json fetch failed --', archResult.reason.message);
       if (solarResult.status === 'rejected') console.warn('cardSolarEnergyFlow: solar_data.json fetch failed --', solarResult.reason.message);
       if (astroResult.status === 'rejected') console.warn('cardSolarEnergyFlow: almanac.json fetch failed --', astroResult.reason.message);
-      if (cloudResult.status === 'rejected'){
+
+      if(cloudResult.status === 'rejected'){
         console.info('cardSolarEnergyFlow: cloud_coverage.json fetch failed (falling back to loop.json/archive.json) --', cloudResult.reason.message);
-      } else if (typeof cloudResult.value.cloudPercent !== 'number' || isNaN(cloudResult.value.cloudPercent)){
+      } else if(typeof cloudResult.value.cloudPercent !== 'number' || isNaN(cloudResult.value.cloudPercent)){
         console.info('cardSolarEnergyFlow: cloud_coverage.json fetched but cloudPercent is missing/invalid (falling back) --', JSON.stringify(cloudResult.value));
       }
 
@@ -321,29 +419,59 @@ try {
       var solarData = solarResult.status === 'fulfilled' ? solarResult.value : {};
       var alm = astroResult.status === 'fulfilled' ? astroResult.value : {};
 
-      var pvPower          = num(topicValue(solarData, 'solar_assistant/inverter_1/pv_power/state'));
-      var gridPowerRaw      = num(topicValue(solarData, 'solar_assistant/inverter_1/grid_power/state'));
-      var loadPower           = num(topicValue(solarData, 'solar_assistant/inverter_1/load_power/state'));
-      var upsLoadPower           = num(topicValue(solarData, UPS_LOAD_TOPIC));
-      var batteryPowerRaw          = num(topicValue(solarData, 'solar_assistant/total/battery_power/state'));
-      var batterySOC                  = num(topicValue(solarData, 'solar_assistant/total/battery_state_of_charge/state'));
+      var pvPower       = num(topicValue(solarData, 'solar_assistant/inverter_1/pv_power/state'));
+      var gridPowerRaw   = num(topicValue(solarData, 'solar_assistant/inverter_1/grid_power/state'));
+      // Solar Assistant's load_power_non-essential reading is the TOTAL (house + UPS) on this
+      // inverter; load_power is the house load without the UPS (non-essential = load_power + essential).
+      var totalLoadPower  = num(topicValue(solarData, 'solar_assistant/inverter_1/load_power_non-essential/state'));
+      var batteryPowerRaw   = num(topicValue(solarData, 'solar_assistant/total/battery_power/state'));
+      var batterySOC             = num(topicValue(solarData, 'solar_assistant/total/battery_state_of_charge/state'));
+      var pvEnergyToday               = num(topicValue(solarData, 'solar_assistant/total/pv_energy/state'));
+      var gridEnergyOutToday               = num(topicValue(solarData, 'solar_assistant/total/grid_energy_out/state'));
+
+      var houseLoadPower  = num(topicValue(solarData, 'solar_assistant/inverter_1/load_power/state'));
+      var upsLoadPower       = num(topicValue(solarData, 'solar_assistant/inverter_1/load_power_essential/state'));
 
       var sunAlt = num(alm['almanac.sun.alt']);
       var isDay = (sunAlt !== null) ? (sunAlt > 0) : (o.isDay === 1);
+
       var cloudPercentFromCamera = (cloudCoverage && typeof cloudCoverage.cloudPercent === 'number' && !isNaN(cloudCoverage.cloudPercent))
         ? cloudCoverage.cloudPercent : null;
       var cloudCoverPct = (isDay && cloudPercentFromCamera !== null)
         ? cloudPercentFromCamera
         : ((typeof o.cloudcover === 'number') ? o.cloudcover : (sky.cloud_cover || 0));
+      console.info('cardSolarEnergyFlow: cloud cover source —', {
+        isDay: isDay, sunAlt: sunAlt, cameraAvailable: cloudPercentFromCamera !== null,
+        cameraValue: cloudPercentFromCamera, usedValue: cloudCoverPct,
+        source: (isDay && cloudPercentFromCamera !== null) ? 'cloud_coverage.json' : 'loop.json/archive.json'
+      });
+
+      var batteryState = (batteryPowerRaw !== null && batteryPowerRaw < 0) ? DivumWXI18N.t('Discharging') : DivumWXI18N.t('Charging');
+
+      var gridState = (gridPowerRaw !== null && gridPowerRaw < 0) ? DivumWXI18N.t('Exporting') : DivumWXI18N.t('Importing');
+
+      // The array's rated watts, from the installer (archive.json meta.solar_array_watts).
+      // Not set: no efficiency figure.
+      var arrayWatts = (arch.meta && typeof arch.meta.solar_array_watts === 'number' && arch.meta.solar_array_watts > 0)
+        ? arch.meta.solar_array_watts : null;
+      var pvEfficiency = (pvPower !== null && arrayWatts !== null) ? (pvPower / arrayWatts * 100) : null;
 
       renderCard({
         icon: pickPvIcon(cloudCoverPct, isDay),
+        iconColor: pickPvPowerColor(pvPower),
         pvPower: pvPower,
-        gridPower: gridPowerRaw,
-        loadPower: loadPower,
-        upsLoadPower: upsLoadPower,
+        pvEfficiency: pvEfficiency,
+        batteryState: batteryState,
         batteryPower: batteryPowerRaw,
-        batterySOC: batterySOC
+        batterySOC: batterySOC,
+        gridState: gridState,
+        gridPower: gridPowerRaw,
+        totalLoadPower: totalLoadPower,
+        houseLoadPower: houseLoadPower,
+        upsLoadPower: upsLoadPower,
+        solarDailyEnergy: pvEnergyToday,
+        gridDailyExport: gridEnergyOutToday,
+        online: solarResult.status === 'fulfilled' && solarData.connected === true
       });
 
       var solarConnected = solarResult.status === 'fulfilled' && solarData.connected === true;
@@ -355,6 +483,7 @@ try {
   }
   refresh();
   setInterval(refresh, POLL_MS);
+
   window.addEventListener('i18nready', refresh);
 })();
 } catch (e) {
