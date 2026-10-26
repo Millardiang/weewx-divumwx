@@ -8108,7 +8108,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardBoltekLightning.js version 1.1.2
+# cardBoltekLightning.js version 1.1.3
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -8445,9 +8445,21 @@ try {
         function num(x){ return (typeof x === 'number' && !isNaN(x)) ? x : null; }
         function count(x){ var n = num(x); return n === null ? 0 : n; }
 
+        // Today: NexStorm's own StrikeCount, the day total Boltek itself shows,
+        // while the file is from today (station time) -- a file NexStorm
+        // stopped writing yesterday would carry yesterday's count over.
+        // Otherwise DivumWX's own count of today's listed strikes.
+        function stationDay(ms){
+          return new Intl.DateTimeFormat('en-CA', { timeZone: StationTime.getTZ(),
+            year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(ms));
+        }
+        var fileTime = num(rt.file_time) || num(b.file_time);
+        var nexstormToday = (num(rt.strike_count) !== null && fileTime && stationDay(fileTime * 1000) === stationDay(Date.now()))
+          ? num(rt.strike_count) : null;
+
         lastData = {
           current: num(rt.strikes_per_minute),     // strikes in the last minute
-          dayStrikes: count(t.today),
+          dayStrikes: nexstormToday !== null ? nexstormToday : count(t.today),
           // NexStorm's own last-60-minutes count if the file has one,
           // else the Boltek database's
           hourStrikes: num(rt.strikes_60min) !== null ? num(rt.strikes_60min) : num(t.last_hour),

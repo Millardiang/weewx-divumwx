@@ -1,6 +1,6 @@
 """
 ##############################################################################################
-# divumwx_boltek.py version 1.2.0
+# divumwx_boltek.py version 1.2.1
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -107,7 +107,7 @@ from weeutil.weeutil import to_int
 
 log = logging.getLogger(__name__)
 
-BOLTEK_VERSION = '1.2.0'
+BOLTEK_VERSION = '1.2.1'
 
 # One record per archive_interval (dateTime is the END of the interval).
 # 'strikes', 'cg', 'ic', 'close' and 'noise' are counts during the interval;
@@ -319,7 +319,7 @@ class BoltekRecorder(object):
         self.read_error = None      # why the last read failed, for boltek.json
         self.strike_count = None    # NexStorm's StrikeCount (for reference only)
         self.baseline_s = 0         # strikes at or before this were saved by an earlier run
-        self.counted = {}           # key -> time, of strikes counted this run
+        self.counted = {}           # key -> [time, how many listed with that key were counted], this run
         self.recent = {}            # key -> (time, km), last hour, for rate/average/tendency
         self.last_strike = {}       # newest listed strike
         self.session = {'listed': 0}
@@ -390,10 +390,26 @@ class BoltekRecorder(object):
         # New = not counted yet, newer than what's saved, and not in the
         # future (a strike time ahead of this clock by more than 5 minutes
         # means a clock is wrong: it would block later strikes).
-        new = [s for s in reading['strikes']
-               if s['key'] not in self.counted and self.baseline_s < s['t'] <= now + 300]
-        for s in new:
-            self.counted[s['key']] = s['t']
+        # NexStorm gives strike times to the whole second, and the strokes
+        # of one flash can come in the same second at the same place, so
+        # several listed strikes can share a key. Each is a strike of its
+        # own: count the n-th strike with a key once n of them are listed
+        # (a later rewrite of the file that adds another counts it too).
+        new = []
+        seen = {}
+        for s in reading['strikes']:
+            if not (self.baseline_s < s['t'] <= now + 300):
+                continue
+            k = s['key']
+            seen[k] = seen.get(k, 0) + 1
+            done = self.counted.get(k)
+            if done is None or seen[k] > done[1]:
+                new.append(dict(s, nth=seen[k]))
+        for k, n in seen.items():
+            done = self.counted.get(k)
+            if done is None or n > done[1]:
+                t = next(x['t'] for x in reading['strikes'] if x['key'] == k)
+                self.counted[k] = [t, n]
         self.strike_count = reading['strike_count']
 
         past = {}
@@ -415,7 +431,7 @@ class BoltekRecorder(object):
                     b['min_km'] = s['km']
                 b['last'] = s
             if s['t'] > now - 3600:
-                self.recent[s['key']] = (s['t'], s['km'])
+                self.recent[(s['key'], s['nth'])] = (s['t'], s['km'])
         if past:
             self._add_to_saved(past)
         self.session['listed'] += len(new)
@@ -428,7 +444,7 @@ class BoltekRecorder(object):
         # Forget what can no longer matter.
         self.recent = dict((k, v) for k, v in self.recent.items() if v[0] > now - 3600)
         oldest = min([s['t'] for s in reading['strikes']] or [now])
-        self.counted = dict((k, t) for k, t in self.counted.items() if t >= oldest - 1)
+        self.counted = dict((k, v) for k, v in self.counted.items() if v[0] >= oldest - 1)
 
         rate = self._rate(now)
         if rate is not None and (self.pending_max_rate is None or rate > self.pending_max_rate):

@@ -1,5 +1,42 @@
 # DivumWX Changelog
 
+## Released — for 2.0.1
+
+### Boltek: every stroke of a flash is counted
+- NexStorm gives strike times to the whole second. The strokes of one
+  cloud-to-ground flash often come in the same second at the same spot, and
+  NexStorm lists each one.
+- The Boltek service recognised a strike by its time and position, so a
+  second identical stroke, added when NexStorm next rewrote
+  `ngxarchive.json`, was taken for one already counted and dropped. Daily
+  and longer totals came out lower than NexStorm's own count.
+- Identical entries are now counted as separate strikes
+  (`divumwx_boltek.py` 1.2.1).
+- In a simulation of five three-stroke flashes plus five single strikes, the
+  old code counted 10 of 20 strikes; it now counts all 20.
+- Strikes missed before this fix aren't recovered.
+
+### Boltek card: Today is NexStorm's day total
+- The Boltek Lightning card's **Today** now shows NexStorm's own
+  `StrikeCount` (`realtime.strike_count` in `boltek.json`), the day total
+  Boltek itself uses (`cardBoltekLightning.js` 1.1.3).
+- If NexStorm hasn't written `ngxarchive.json` today (station time), the
+  card falls back to DivumWX's own count of today's strikes, so a stopped
+  NexStorm can't carry yesterday's total into today.
+- The year and all-time totals, Last Hour and the Boltek database are
+  unchanged: they're still DivumWX's own counts of the strikes NexStorm
+  lists.
+
+### Leftover files
+- The 2.0.0 tidy-up's file deletions are done now; they didn't make it into
+  the 2.0.0 release. `merge_helpers.py`, the stale root
+  `user/divumwx_version.py` and the unused `divumwx/modalLightningEurope.html`
+  are gone. Upgrades remove the last one from the web folder.
+- `divumwx/cardSolarEnergyFlow.js` stays: it's the source of the redesigned
+  Solar Energy Flow card.
+- The `cardsBundleNew.js` `?v=` cache-buster is back to the first 8
+  characters of the bundle's sha256 on all four dashboard pages.
+
 ## 2.0.0 — Full release, 26 October 2026
 
 ### Version 2.0.0
@@ -12,9 +49,9 @@
 - **Leftover files removed:**
   - `merge_helpers.py` (legacy, superseded by `install.py`) and the stale
     root `user/divumwx_version.py` (1.3.1) are gone from the repository.
-  - So are `divumwx/cardSolarEnergyFlow.js`, an old copy of the bundled card
-    that nothing loaded, and `divumwx/modalLightningEurope.html`, which no card
-    opens. Upgrades remove both from the web folder.
+  - So is `divumwx/modalLightningEurope.html`, which no card opens. Upgrades
+    remove it from the web folder. (These deletions landed after the
+    release; see 2.0.1.)
 - **Files next to weewx.conf:** the installer copies the repository's root
   files there.
   - It no longer copies the maintainer tool `extract_strings.py`, which
