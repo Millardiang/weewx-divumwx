@@ -1953,7 +1953,102 @@ DIVUMWX_RAIN_CARD_CHOICES = {
 DIVUMWX_OPTIONAL_CARDS_ORDER = [
     'cardSolarRadiation', 'cardUvIndex', 'cardLightning', 'cardAirquality',
     'cardVapourPressureDeficit', 'cardEvapoTranspiration', 'cardWebcam', 'cardStationImage',
+    'cardSolarEnergy', 'cardSolarEnergyFlow',
 ]
+
+# Shown after the card's name in its install question.
+DIVUMWX_OPTIONAL_CARD_NOTES = {
+    'cardSolarEnergy': '(only for SolarAssistant subscribers)',
+    'cardSolarEnergyFlow': '(only for SolarAssistant subscribers)',
+}
+
+# The SolarAssistant cards read jsondata/solar_data.json, written by a
+# SolarAssistant MQTT service (bin/user/solar_assistant_mqtt.py, set up by
+# hand). Card questions are only asked on a first install, so an install
+# from before these cards were offered is asked about them once, by
+# ask_solar_cards_once(); the answer is recorded in
+# [DivumWXCards] solar_cards_asked.
+DIVUMWX_SOLAR_CARDS = ['cardSolarEnergy', 'cardSolarEnergyFlow']
+
+
+# The solar array's rated (peak) power in watts, for the solar cards' PV
+# efficiency figure (PV power as a % of it). Kept as
+# [DivumWXCards] solar_array_watts and published as archive.json
+# meta.solar_array_watts. Unset: the cards show the efficiency as a dash.
+DIVUMWX_SOLAR_ARRAY_KEY = 'solar_array_watts'
+DIVUMWX_SOLAR_ARRAY_QUESTION = ("Rated size of your solar array, in watts (e.g. 4050) or kW "
+                                "(e.g. 4.05kW) -- Enter to skip")
+
+
+def parse_solar_array_watts(value):
+    """A rated array size -> whole watts, or None if it isn't one.
+    Accepts watts ('4050', '4050W', '4050 Wp') or kilowatts with a unit
+    ('4.05kW', '4.05 kWp'). A bare number under 50 is refused rather than
+    taken as watts: it's almost certainly kW typed without the unit."""
+    import re as _re
+    m = _re.fullmatch(r'\s*([0-9]+(?:\.[0-9]+)?)\s*(kwp|kw|wp|w)?\s*', str(value if value is not None else ''), _re.I)
+    if not m:
+        return None
+    n, unit = float(m.group(1)), (m.group(2) or '').lower()
+    watts = n * 1000 if unit.startswith('k') else n
+    if not unit and n < 50:
+        return None
+    return int(round(watts)) if 0 < watts < 10000000 else None
+
+
+def ask_solar_array_once(cfg, prompt, tries=3):
+    """Ask for the array size when a solar card is enabled and no valid size
+    is saved yet -- on a first install, an upgrade, or after the cards were
+    added by hand. `prompt(question)` returns the answer. A blank answer
+    skips (asked again next time); an invalid one is asked again, up to
+    `tries` times. Returns the watts saved, or None."""
+    dc = cfg.get('DivumWXCards')
+    if dc is None:
+        return None
+    cards = dc.get('enabled_cards') or []
+    cards = [cards] if isinstance(cards, str) else list(cards)
+    if not any(c in cards for c in DIVUMWX_SOLAR_CARDS):
+        return None
+    if parse_solar_array_watts(dc.get(DIVUMWX_SOLAR_ARRAY_KEY)) is not None:
+        return None
+    for _ in range(tries):
+        answer = (prompt(DIVUMWX_SOLAR_ARRAY_QUESTION) or '').strip()
+        if not answer:
+            return None
+        watts = parse_solar_array_watts(answer)
+        if watts is not None:
+            dc[DIVUMWX_SOLAR_ARRAY_KEY] = str(watts)
+            return watts
+    return None
+
+
+def optional_card_question(card_name, running_total=None):
+    """The y/n question for an optional card, with its note if it has one."""
+    note = DIVUMWX_OPTIONAL_CARD_NOTES.get(card_name)
+    q = 'Include %s%s?' % (card_name, ' ' + note if note else '')
+    if running_total is not None:
+        q += ' (%d/%d so far)' % (running_total, DIVUMWX_CARD_TARGET_TOTAL)
+    return q + ' (y/n) '
+
+
+def ask_solar_cards_once(cfg, ask):
+    """Upgrades: ask once about the SolarAssistant cards, for an install
+    whose card list was written before they were offered. `ask(card_name)`
+    returns True for yes. Returns the cards added (possibly none), or None
+    if nothing was asked."""
+    dc = cfg.get('DivumWXCards')
+    if dc is None or not dc.get('enabled_cards') or dc.get('solar_cards_asked'):
+        return None
+    cards = dc.get('enabled_cards')
+    cards = [cards] if isinstance(cards, str) else list(cards)
+    added = []
+    for card in DIVUMWX_SOLAR_CARDS:
+        if card not in cards and ask(card):
+            cards.append(card)
+            added.append(card)
+    dc['enabled_cards'] = cards
+    dc['solar_cards_asked'] = 'yes'
+    return added
 
 # The lightning slot holds one card, depending on the detector: anyone who
 # includes cardLightning is then asked whether it's a Boltek (NexStorm), and
@@ -1962,7 +2057,7 @@ DIVUMWX_OPTIONAL_CARDS_ORDER = [
 DIVUMWX_LIGHTNING_CARDS = {'other': 'cardLightning', 'boltek': 'cardBoltekLightning'}
 DIVUMWX_BOLTEK_QUESTION = "Is your lightning detector a Boltek (NexStorm)? (y/n) "
 
-DIVUMWX_CARD_TARGET_TOTAL = 26  # theoretical max (8 mandatory + 8 automatic + 2 rain "both" + 8 optional) -- every optional card now always gets asked about
+DIVUMWX_CARD_TARGET_TOTAL = 28  # theoretical max (8 mandatory + 8 automatic + 2 rain "both" + 10 optional) -- every optional card now always gets asked about
 
 DIVUMWX_WEBCAM_DEFAULT_TITLE = 'Webcam'
 DIVUMWX_WEBCAM_DEFAULT_IMAGE = 'img/picam.jpg'
@@ -3619,8 +3714,7 @@ class DivumwxInstaller(ExtensionInstaller):
                                 + ", ".join(DIVUMWX_OPTIONAL_CARDS_ORDER[DIVUMWX_OPTIONAL_CARDS_ORDER.index(card_name):]),
                                 level=1)
                     break
-                include = y_or_n(f"Include {card_name}? ({running_total}/"
-                                  f"{DIVUMWX_CARD_TARGET_TOTAL} so far) (y/n) ") == 'y'
+                include = y_or_n(optional_card_question(card_name, running_total)) == 'y'
                 if include and card_name == DIVUMWX_LIGHTNING_CARDS['other']:
                     # One lightning slot: a Boltek gets its own card instead.
                     lightning_detector = 'boltek' if y_or_n(DIVUMWX_BOLTEK_QUESTION) == 'y' else 'other'
@@ -3649,6 +3743,8 @@ class DivumwxInstaller(ExtensionInstaller):
                 station_image_title=station_image_title, station_image_path=station_image_path)
             if lightning_detector:
                 cfg['DivumWXCards']['lightning_detector'] = lightning_detector
+            # The SolarAssistant cards were asked about in the loop above.
+            cfg['DivumWXCards']['solar_cards_asked'] = 'yes'
 
         # Every run, outside the gate above: on an upgrade, turn on any
         # automatic card added since this install's card list was written
@@ -3661,6 +3757,15 @@ class DivumwxInstaller(ExtensionInstaller):
         # (only when a lightning card is shown) and swap cards if it's a Boltek.
         detector = ask_lightning_detector_once(
             cfg, lambda: y_or_n(DIVUMWX_BOLTEK_QUESTION) == 'y')
+        # Upgrades from before the SolarAssistant cards were offered: ask once.
+        solar_added = ask_solar_cards_once(cfg, lambda c: y_or_n(optional_card_question(c)) == 'y')
+        if solar_added:
+            printer.out("Added %s. They read jsondata/solar_data.json: set the SolarAssistant "
+                        "MQTT service's json_output_path to that file." % ', '.join(solar_added), level=1)
+        # Any solar card shown and no array size saved yet: ask for it.
+        solar_watts = ask_solar_array_once(cfg, lambda q: weecfg.prompt_with_options(q))
+        if solar_watts:
+            printer.out("Solar array: %d W ([DivumWXCards] %s)." % (solar_watts, DIVUMWX_SOLAR_ARRAY_KEY), level=1)
         # Webcams (1-4, each 24hr or daylight): a first install that chose
         # cardWebcam, or an upgrade from before multiple webcams, once.
         # Before [Timelapse] below, which takes webcam 1's image.

@@ -1,6 +1,6 @@
 /*
 ##############################################################################################
-# siteHeader.js version 1.0.3
+# siteHeader.js version 1.0.4
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -323,4 +323,25 @@ window.addEventListener('i18nready', function(){
   } else {
     syncButton();
   }
+})();
+
+// ---------------------------------------------------------------------
+// Browser tab title: the station's location ($station.location in
+// weewx.conf, published as archive.json meta.station_location) in place of
+// the generic "DivumWX Weather" on the dashboard pages. Pages with their
+// own title (Records, Astronomy, ...) keep it. If the location is missing
+// or archive.json can't be read, the original title stays.
+(function applyStationTitle(){
+  if (!/^DivumWX Weather\b/.test(document.title)) return;
+  fetch('./jsondata/archive.json?_=' + Date.now(), { cache: 'no-store' })
+    .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function(arch){
+      var loc = arch && arch.meta && arch.meta.station_location;
+      if (typeof loc !== 'string' || !loc.trim()) return;
+      // Decode any HTML entities WeeWX may have written (e.g. &#233;).
+      var t = document.createElement('textarea');
+      t.innerHTML = loc.trim();
+      document.title = t.value;
+    })
+    .catch(function(){});
 })();

@@ -11234,7 +11234,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardSolarEnergy.js version 1.0.0
+# cardSolarEnergy.js version 1.0.1
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -11249,7 +11249,6 @@ try {
   var CLOUD_JSON_URL   = './jsondata/cloud_coverage.json';
   var POLL_MS = 10 * 1000;
 
-  var ARRAY_RATED_WATTS = 4050;
 
   function pad2(n){ return n < 10 ? '0' + n : String(n); }
   function stationNow(){
@@ -11637,7 +11636,11 @@ try {
 
       var gridState = (gridPowerRaw !== null && gridPowerRaw < 0) ? DivumWXI18N.t('Exporting') : DivumWXI18N.t('Importing');
 
-      var pvEfficiency = (pvPower !== null) ? (pvPower / ARRAY_RATED_WATTS * 100) : null;
+      // The array's rated watts, from the installer (archive.json meta.solar_array_watts).
+      // Not set: no efficiency figure.
+      var arrayWatts = (arch.meta && typeof arch.meta.solar_array_watts === 'number' && arch.meta.solar_array_watts > 0)
+        ? arch.meta.solar_array_watts : null;
+      var pvEfficiency = (pvPower !== null && arrayWatts !== null) ? (pvPower / arrayWatts * 100) : null;
 
       renderCard({
         icon: pickPvIcon(cloudCoverPct, isDay),
@@ -11674,7 +11677,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardSolarEnergyFlow.js version 1.0.1
+# cardSolarEnergyFlow.js version 1.0.2
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -11689,7 +11692,6 @@ try {
   var CLOUD_JSON_URL   = './jsondata/cloud_coverage.json';
   var POLL_MS = 10 * 1000;
 
-  var ARRAY_RATED_WATTS = 4050;
 
   function pad2(n){ return n < 10 ? '0' + n : String(n); }
   function stationNow(){
@@ -12160,7 +12162,11 @@ try {
 
       var gridState = (gridPowerRaw !== null && gridPowerRaw < 0) ? DivumWXI18N.t('Exporting') : DivumWXI18N.t('Importing');
 
-      var pvEfficiency = (pvPower !== null) ? (pvPower / ARRAY_RATED_WATTS * 100) : null;
+      // The array's rated watts, from the installer (archive.json meta.solar_array_watts).
+      // Not set: no efficiency figure.
+      var arrayWatts = (arch.meta && typeof arch.meta.solar_array_watts === 'number' && arch.meta.solar_array_watts > 0)
+        ? arch.meta.solar_array_watts : null;
+      var pvEfficiency = (pvPower !== null && arrayWatts !== null) ? (pvPower / arrayWatts * 100) : null;
 
       renderCard({
         icon: pickPvIcon(cloudCoverPct, isDay),

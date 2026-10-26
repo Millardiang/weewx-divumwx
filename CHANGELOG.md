@@ -2,6 +2,49 @@
 
 ## Unreleased — for 2.0.0
 
+### Solar Energy cards in the installer
+- `cardSolarEnergy` and `cardSolarEnergyFlow` are now optional cards in the
+  installer, asked as "Include cardSolarEnergy (only for SolarAssistant
+  subscribers)?". The card total goes from 26 to 28.
+- An existing install is asked about them once on upgrade; the answer is
+  recorded as `[DivumWXCards] solar_cards_asked`.
+- Both cards now have a place on `index.html`, `hyperIndex.html` and
+  `lexendIndex.html` (beside Solar Radiation). Before, the Energy Flow card
+  had a place on none of them, and the Solar Energy card wasn't on
+  `index.html`. Stations that don't enable them don't see them.
+- The cards read `jsondata/solar_data.json`, written by the SolarAssistant
+  MQTT service (`json_output_path`). That service is still set up by hand.
+- Solar array size is now a setting instead of a fixed 4050 W
+  (`cardSolarEnergy.js` 1.0.1, `cardSolarEnergyFlow.js` 1.0.2).
+  - The installer asks for it ("Rated size of your solar array…", in W or
+    kW) whenever a solar card is shown and no size is saved yet: on a first
+    install, an upgrade, or after adding the cards by hand.
+  - It's kept as `[DivumWXCards] solar_array_watts` and published as
+    `archive.json` `meta.solar_array_watts`.
+  - PV Efficiency is PV power as a percentage of it. With no size set, it
+    shows "—".
+
+### Browser tab shows the station's location
+- The dashboards and the Climate, Gauges and Location Forecast pages used
+  to be titled "DivumWX Weather". The tab now shows `$station.location`
+  from weewx.conf (`archive.json` `meta.station_location`).
+- Pages with their own title (Records, Astronomy, …) keep it
+  (`siteHeader.js` 1.0.4, loaded with a `?v=1.0.4` cache-buster on every
+  page).
+
+### Rain cards on stations that don't send rain while it's dry
+- `archive.json` dropped the whole `rain` block whenever the latest archive
+  record had no rain value: the event, day, month and year totals and the
+  rate.
+- WeeWX records no rain value when the station's driver sent none in that
+  interval, and some drivers only send rain while it's raining. On those
+  stations both rain cards showed zeros whenever it was dry, and the rain
+  event flickered on and off between bucket tips.
+- The block is now written whenever the station has a rain field. Ecowitt and
+  Davis stations always send 0 when dry, so they never saw this.
+- The event calculation itself already converted correctly from any
+  database unit system (checked on an inches database).
+
 ### UK units: distances in miles
 - The UK unit system now shows distances in miles (`units.js` 1.0.2:
   `uk.dist` is `mi`, was `km`). This covers the lightning and earthquake

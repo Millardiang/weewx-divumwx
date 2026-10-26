@@ -208,6 +208,7 @@ null
 "station_image_path": $divumwx_station_image_path,#slurp
 "in_uk": $divumwx_in_uk,#slurp
 "page_background": $divumwx_page_background,#slurp
+"solar_array_watts": $divumwx_solar_array_watts,#slurp
 "warnings_source": $divumwx_warnings_source,#slurp
 "lang": $divumwx_lang#slurp
 },
@@ -471,7 +472,13 @@ null
 },
 
 "rain": {
-#if $current.rain.has_data
+## exists(), not has_data: has_data is false whenever the latest archive
+## record's rain is None, which is how WeeWX records an interval in which
+## the driver sent no rain value at all (some drivers only send rain while
+## it's raining). With has_data the whole block -- day/month/year totals
+## and the rain event -- disappeared on those stations whenever it was dry.
+## Ecowitt and Davis always send 0, so they never hit this.
+#if $current.rain.exists()
   "rate": $current.rainRate.format(format_string="%.2f", None_string="null", add_label=False, localize=False),
   "maxRate": $day.rainRate.max.format(format_string="%.2f", None_string="null", add_label=False, localize=False),
   "hour": $divumwx_last(3600).rain.sum.format(format_string="%.2f", None_string="0", add_label=False, localize=False),

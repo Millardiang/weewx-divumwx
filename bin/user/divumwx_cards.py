@@ -250,6 +250,14 @@ class DivumwxCards(SearchList):
         page_background = str(cards_section.get('page_background', '') or '').strip().lower()
         if page_background not in ('seasonal', 'solid'):
             page_background = 'seasonal'
+        # solar_array_watts: the solar array's rated size in watts, from the
+        # installer ([DivumWXCards] solar_array_watts), for the solar cards'
+        # PV efficiency. Published as null when unset or not a positive number.
+        try:
+            solar_array_watts = float(str(cards_section.get('solar_array_watts', '') or '').strip().rstrip('Ww'))
+            solar_array_watts = int(round(solar_array_watts)) if solar_array_watts > 0 else None
+        except ValueError:
+            solar_array_watts = None
 
         # Read from [StdReport][[DivumWXReport]], not [DivumWXCards] -- this
         # is WeeWX's own real report-level lang setting (the same one
@@ -280,6 +288,7 @@ class DivumwxCards(SearchList):
             'divumwx_station_image_path': json.dumps(station_image_path),
             'divumwx_in_uk': json.dumps(in_uk),
             'divumwx_page_background': json.dumps(page_background),
+            'divumwx_solar_array_watts': json.dumps(solar_array_watts),
             # A plain string (not JSON): a data binding name for template tags.
             'divumwx_extras_binding': extras_binding,
             'divumwx_warnings_source': json.dumps(warnings_source),
