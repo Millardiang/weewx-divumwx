@@ -1,7 +1,7 @@
 """weewx-DivumWX extension installer.
 
 Structured as a real WeeWX ExtensionInstaller (weecfg.extension).
-Single, self-contained file — no separate merge_helpers.py to import.
+Single, self-contained file -- nothing else to import.
 This file's job:
   1. verify WeeWX version and required dependencies before touching
      anything (see check_all_dependencies below),
@@ -2644,10 +2644,44 @@ DIVUMWX_FRONTEND_EXCLUDED_FILES = {'bootstrap.min.js'}
 # here either.
 DIVUMWX_ROOT_DOCS_EXCLUDED_FILES = {
     '.gitignore',
-    # Dev-only tooling for maintainers building the bundled cardsBundle
-    # from source -- not something an installed site needs a copy of.
+    # Dev-only tooling for maintainers (building the bundled cardsBundle,
+    # finding strings to translate) -- not something an installed site
+    # needs a copy of.
     'build_card_bundle.py',
+    'extract_strings.py',
 }
+
+# Repo-root files earlier DivumWX releases copied next to weewx.conf that are
+# no longer shipped there: name -> text that only DivumWX's copy contains, so
+# a station owner's own file of the same name is never removed.
+DIVUMWX_RETIRED_ROOT_FILES = {
+    'merge_helpers.py': '_apply_owned_subsection',
+    'extract_strings.py': 'Scans a JS card file for candidate user-facing strings',
+}
+
+
+def remove_retired_root_files(dest_dir, printer):
+    """Remove repo-root files an earlier release copied into dest_dir (the
+    weewx.conf folder) that this release doesn't ship there. Only DivumWX's
+    own copies are removed (see DIVUMWX_RETIRED_ROOT_FILES). Returns the
+    names removed."""
+    removed = []
+    for name, marker in DIVUMWX_RETIRED_ROOT_FILES.items():
+        path = os.path.join(dest_dir, name)
+        if not os.path.isfile(path) or os.path.islink(path):
+            continue
+        try:
+            with open(path, encoding='utf-8', errors='replace') as fh:
+                if marker not in fh.read():
+                    continue
+            os.remove(path)
+            removed.append(name)
+        except OSError as e:
+            printer.out(f"WARNING: couldn't remove the old DivumWX file {path}: {e}", level=1)
+    if removed:
+        printer.out(f"Removed {len(removed)} file(s) an earlier DivumWX release left next to "
+                    f"weewx.conf: {', '.join(removed)}", level=1)
+    return removed
 
 
 def copy_divumwx_frontend(source_dir, dest_dir, printer):
@@ -3392,6 +3426,10 @@ class DivumwxInstaller(ExtensionInstaller):
                     'bin/user/stats.py',
                     'bin/user/time_since.py',
                     'bin/user/CustomSimulator.py',
+                    # Shipped for SolarAssistant subscribers, not registered:
+                    # it needs paho-mqtt and the station's MQTT broker. See
+                    # INSTALLATION_GUIDE.md, "Solar energy cards".
+                    'bin/user/solar_assistant_mqtt.py',
                     # Source lives at the extension's repo root, not
                     # under bin/user/ -- _gen_file_paths() still resolves
                     # this correctly to bin/user/divumwx_uninstall_helper.py
@@ -3593,6 +3631,7 @@ class DivumwxInstaller(ExtensionInstaller):
         # exactly right here: WeeWX resolved it to find weewx.conf itself.
         weewx_conf_dir = os.path.dirname(engine.config_path)
         copied_root_files = copy_divumwx_root_files(extension_dir, weewx_conf_dir, printer)
+        remove_retired_root_files(weewx_conf_dir, printer)
         set_divumwx_root_files_ownership(weewx_conf_dir, engine.config_path, printer, copied_root_files)
 
         # --- In additions-file order ---

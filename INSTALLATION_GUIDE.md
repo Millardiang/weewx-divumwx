@@ -1,6 +1,6 @@
 # DivumWX Installation Guide
 
-This guide covers DivumWX **2.0.0-RC2**. It assumes you already have a stable
+This guide covers DivumWX **2.0.0**. It assumes you already have a stable
 WeeWX 5 installation running with your own hardware driver.
 
 Tested on Debian 13 (Trixie) with:
@@ -50,7 +50,7 @@ sudo apt install python3-skyfield python3-requests
 ### Install or upgrade
 
 ```
-sudo weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/tags/ver.2.0.0-RC2.zip
+sudo weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/tags/ver.2.0.0.zip
 sudo systemctl restart weewx
 sudo weectl report run DivumWXReport
 ```
@@ -61,7 +61,7 @@ account WeeWX runs as (normally `weewx`). No manual `chown` is needed.
 ### Check the installation
 
 ```
-weectl extension list          # should show divumwx 1.0.1
+weectl extension list          # should show divumwx 2.0.0
 sudo journalctl -u weewx -n 100 --no-pager | grep -i divumwx
 ```
 
@@ -96,7 +96,7 @@ sudo mkdir -p /var/www/html/divumwx
 sudo chown -R $(whoami):$(whoami) /var/www/html/divumwx
 
 source ~/weewx-venv/bin/activate
-weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/tags/ver.2.0.0-RC2.zip
+weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/tags/ver.2.0.0.zip
 sudo systemctl restart weewx
 weectl report run DivumWXReport
 ```
@@ -113,17 +113,36 @@ sudo systemctl restart weewx
 
 ---
 
-## Upgrading from a beta or 1.0.0
+## Upgrading from an earlier version
 
 1. Back up `weewx.conf`, your WeeWX database, and the `divumwx` web directory.
-2. Run the install command for your layout (A or B above) with the new tag.
-3. Press Enter at each prompt to keep your existing settings, or type a new
+2. Stop WeeWX (`sudo systemctl stop weewx`), so the installer can work on the
+   databases without WeeWX writing to them at the same time.
+3. Run the install command for your layout (A or B above) with the new tag.
+4. Press Enter at each prompt to keep your existing settings, or type a new
    value to change it. Changed values are applied.
-4. The installer removes frontend files that an earlier DivumWX release
+5. The installer removes frontend files that an earlier DivumWX release
    installed but this release no longer ships. Your own files in the web
    directory (webcam images, timelapse output and generated data) are left
    alone. The list of files removed is printed during the install.
-5. Restart WeeWX.
+6. Start WeeWX again (`sudo systemctl start weewx`).
+
+### DivumWX's own database
+
+DivumWX keeps its extra data (pollen, dust, cloud cover, sunshine, VPD, air
+density, piezo rain, solar and battery readings, ...) in a database of its
+own, `divumwx_extras.sdb`, next to WeeWX's. It doesn't add anything to
+WeeWX's database. The installer adds `[DataBindings][[divumwx_extras_binding]]`
+and `[Databases][[divumwx_extras_db]]` to `weewx.conf` and creates the
+database.
+
+Earlier 2.0.0 test builds (betas and release candidates) kept this data as
+extra columns in WeeWX's own database. When you upgrade from one of them, the
+installer offers to copy that history across into `divumwx_extras.sdb`
+(WeeWX's database is only read). Afterwards it prints a
+`weectl database drop-columns ...` command. You can use that to remove the old
+columns from WeeWX's database once you're happy the data has been copied:
+back up `weewx.sdb` first and stop WeeWX. Leaving the columns does no harm.
 
 ## Weather warnings (MeteoAlarm)
 
@@ -195,9 +214,10 @@ ignore all of this; the service just waits for a file that never arrives.
 1. In NexStorm, have it write or upload its `ngxarchive.json` to the
    DivumWX web folder (next to `index.html`). If it goes somewhere else,
    set `ngxarchive_file` under `[BoltekLightning]` to its full path.
-2. Distances come from the file in kilometres. The card shows kilometres;
-   the chart page follows the dashboard's unit setting. Strikes within
-   `close_distance` (default 16 km) count as close strikes.
+2. Distances come from the file in kilometres. The card, the strike map and
+   the chart follow the dashboard's unit setting (km, miles or nautical
+   miles). Strikes within `close_distance` (always in km, default 16) count as
+   close strikes.
 3. Restart WeeWX. The card turns green once the file is updating. The
    strikes already listed in the file are picked up the first time, at the
    times they happened; the totals for the year and all time build up from
@@ -205,6 +225,40 @@ ignore all of this; the service just waits for a file that never arrives.
    Click the card for its live strike map (each new strike flashes and
    traces to the station) and its chart & records, built from the same
    database.
+
+## Solar energy cards (SolarAssistant)
+
+The **Solar Energy** and **Solar Energy Flow** cards show a home solar system's
+PV output, battery, grid and house load from
+[SolarAssistant](https://solar-assistant.io). They're only for
+SolarAssistant subscribers, and the installer marks them that way when it asks
+about them. Answer yes to either one and the installer then asks for your
+array's rated size (for example `4050` or `4.05kW`). The cards use it for the
+PV efficiency figure. It's kept as `solar_array_watts` under `[DivumWXCards]`.
+
+The cards read `jsondata/solar_data.json`, which DivumWX's SolarAssistant
+service writes from SolarAssistant's MQTT feed. The installer copies the
+service but doesn't switch it on, because it needs your MQTT broker's details:
+
+1. Install the MQTT library: `sudo apt install python3-paho-mqtt` (Debian
+   package install) or `pip install paho-mqtt` in WeeWX's virtual environment.
+2. Add the service to `weewx.conf`, under `[Engine]` `[[Services]]`, at the
+   end of `data_services`: `user.solar_assistant_mqtt.SolarAssistantMQTT`
+3. Add its section to `weewx.conf`, pointing `json_output_path` at the
+   DivumWX web folder's `jsondata` directory:
+
+   ```
+   [SolarAssistant]
+       mqtt_broker_host = 192.168.1.50      # your SolarAssistant / MQTT broker
+       mqtt_broker_port = 1883
+       mqtt_username = ""
+       mqtt_password = ""
+       json_output_path = /var/www/html/divumwx/jsondata/solar_data.json
+   ```
+4. Restart WeeWX.
+
+The service also adds the solar readings to WeeWX's loop packets, so DivumWX
+saves them in its own database along with its other extras.
 
 ## Troubleshooting
 

@@ -8,6 +8,11 @@ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LIC
 * **Up to four webcams** - each card can show its live image around the clock, or from sunrise to sunset with a night-time page after dark. Webcam 1 opens the timelapse; the others open a larger live view.
 * **Earthquake map in the Equal Earth projection** - the last 24 hours of USGS earthquakes replayed on a map matching DivumWX's Equal Earth map, with live day and night shading.
 * **Colour-coded climate reports** - every temperature in the monthly and yearly climate summaries is tinted on the same scale as the forecast pages, with a colour key in your chosen units.
+* **Live lightning map** - strikes from the [Blitzortung.org](https://www.blitzortung.org) community network as they happen, on an Equal Earth map centred on your station: each strike flashes with lines to the detectors that located it, and close strikes send a tracer to the station. Opens from the Lightning card's chart page, and as a "Live Network" tab on the Boltek modal; no API key needed.
+* **Solar Energy and Solar Energy Flow cards** (only for [SolarAssistant](https://solar-assistant.io) subscribers) - PV output, battery, grid and house load, with PV efficiency worked out from your array's rated size.
+* **Distances in your units** - lightning and earthquake distances follow the dashboard's unit setting (km, miles or nautical miles); the UK setting now shows miles.
+* **Your station's name in the browser tab** - taken from `location` in weewx.conf.
+* **DivumWX keeps its data in its own database** - DivumWX's extra fields are stored in `divumwx_extras.sdb` and WeeWX's own database is left exactly as WeeWX made it, as WeeWX's guidelines ask. Upgrading from a 2.0.0 test build, the installer offers to copy that data across.
 * The installer asks about each of these; on an upgrade your current settings are offered as the defaults. See [CHANGELOG.md](CHANGELOG.md) for the details.
 
 # Installation
@@ -32,7 +37,9 @@ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LIC
 * Charts, heatmaps, gauges, card images all rendered using D3.
 * weewx.conf configurable weather APIs.
 * Weather warnings from MeteoAlarm (Europe) or OpenWeatherMap, plus UK heat and cold health alerts, flood alerts, Met Office warnings and aurora alerts.
-* Lightning: a standard lightning card, or a Boltek (NexStorm) card with its own database, a live strike map and chart and records.
+* Lightning: a standard lightning card, or a Boltek (NexStorm) card with its own database, a live strike map and chart and records, plus a live map of the Blitzortung.org network.
+* Solar Energy and Solar Energy Flow cards for SolarAssistant subscribers.
+* DivumWX's extra data kept in its own database (divumwx_extras.sdb); WeeWX's own database is never changed.
 * Windy precipitation radar and a live Equal Earth earthquake map.
 * Monthly and yearly climate reports with colour-coded temperatures.
 * Toggle between themes - Auto (day and night - default), Light or Dark. The dark and light themes are inspired by John Kline's styling of his Celestial Live and Skyfield extensions.
@@ -53,7 +60,7 @@ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LIC
 
         Sensor types
         When tipping rain only selected at install, rain values used
-        When piezo rain install selected on install, rain values used
+        When piezo rain only selected at install, rain values used
         When both tipping and piezo selected on install, p_rain values used for piezo rain sensor
 
         Rain Event field only appears in either of the rain cards when value is not null and >0
@@ -120,6 +127,8 @@ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LIC
 * Windy for the precipitation radar.
 * USGS for the earthquake feed.
 * Boltek and Astrogenic (NexStorm) for lightning detection data.
+* Blitzortung.org and its volunteer station operators for the live lightning network data.
+* SolarAssistant for the solar, battery and grid data behind the solar energy cards.
 * Natural Earth and world-atlas (Mike Bostock) for the country outlines used by the maps.
 * Aviation Weather for METAR data.
 * UK MetOffice for UK weather alerts and warnings.

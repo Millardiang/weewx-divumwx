@@ -1,6 +1,42 @@
 # DivumWX Changelog
 
-## Unreleased — for 2.0.0
+## 2.0.0 — Full release, 26 October 2026
+
+### Version 2.0.0
+- `DIVUMWX_VERSION` is now `2.0.0`, after release candidates RC1 and RC2.
+  The `index.html` header and footer fallback, the `divumwf.html` badge
+  and `INSTALLATION_GUIDE.md` all say 2.0.0.
+- The install guide downloads from the release tag `ver.2.0.0`.
+
+### Release tidy-up
+- **Leftover files removed:**
+  - `merge_helpers.py` (legacy, superseded by `install.py`) and the stale
+    root `user/divumwx_version.py` (1.3.1) are gone from the repository.
+  - So are `divumwx/cardSolarEnergyFlow.js`, an old copy of the bundled card
+    that nothing loaded, and `divumwx/modalLightningEurope.html`, which no card
+    opens. Upgrades remove both from the web folder.
+- **Files next to weewx.conf:** the installer copies the repository's root
+  files there.
+  - It no longer copies the maintainer tool `extract_strings.py`, which
+    joins `build_card_bundle.py` in being left out.
+  - On upgrade it removes `merge_helpers.py` and `extract_strings.py` if an
+    earlier release put them there. It recognises DivumWX's own copies by
+    their contents and never touches a file of the owner's own.
+- **SolarAssistant service:** `bin/user/solar_assistant_mqtt.py` is now
+  installed with the extension, but not switched on, because it needs
+  paho-mqtt and the station's MQTT broker. `INSTALLATION_GUIDE.md` has a new
+  "Solar energy cards (SolarAssistant)" section.
+- **`INSTALLATION_GUIDE.md`:**
+  - The upgrade steps now stop WeeWX before installing.
+  - A new section covers DivumWX's own database and copying data across from
+    a 2.0.0 test build.
+  - The Boltek section now says distances follow the unit setting.
+  - "Check the installation" says 2.0.0, not 1.0.1.
+- **`README.md`:**
+  - "What's new" and "Features" cover the live lightning map, the solar
+    energy cards, distances in your units, the station name in the browser
+    tab and DivumWX's own database.
+  - Blitzortung.org and SolarAssistant are credited.
 
 ### DivumWX no longer changes WeeWX's database
 WeeWX's guidelines: "Extensions should not modify the database schemas. If
