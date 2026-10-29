@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<!--
+##############################################################################################
+# solarFlowKiosk.html version 1.0.3
+#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  GPLv3
+#
+#  Standalone, full-screen Solar Power Flow diagram for kiosk browsers / wall tablets.
+#  Same diagram and data as the Solar Power Flow modal (charts-d3.html?type=solar),
+#  without the charts, records or site chrome.
+#
+#  The All Time panel and Today's Peak Usage need solar_assistant_mqtt.py 4.6 or later
+#  (the "alltime" and "today_peak" blocks in solar_data.json); with an older service
+#  they just show dashes.
+#
+#  Optional URL parameters:
+#    theme=dark|light|auto   force a theme (default: the dashboard's saved theme, else auto;
+#                            auto follows day/night from jsondata/loop.json)
+#    title=0                 hide the title / status bar
+#    key=0                   hide the colour key
+#    reload=N                reload the page every N hours (default 6, 0 = never)
+#  e.g. solarFlowKiosk.html?theme=dark&key=0
+##############################################################################################
+-->
+<html lang="en" data-bs-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Solar Flow">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Solar Power Flow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+  // Apply the theme before first paint so a dark kiosk never flashes white.
+  (function(){
+    var q = new URL(location.href).searchParams.get('theme');
+    var saved = null;
+    try { saved = localStorage.getItem('dashboardThemeMode'); } catch (e) {}
+    var mode = (q === 'dark' || q === 'light' || q === 'auto') ? q
+             : (saved === 'dark' || saved === 'light' || saved === 'auto') ? saved
+             : saved === 'seasonal' ? 'light' : 'auto';
+    var dark = mode === 'dark' || (mode === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    document.documentElement.setAttribute('data-bs-theme', dark ? 'dark' : 'light');
+    window.__sfThemeMode = mode;
+  })();
+</script>
+<style>
+:root,
+[data-bs-theme="light"]{
+  --bs-body-bg:#EFECE2;
+  --bs-body-color:#1D2C4E;
+  --bs-secondary-color:#5C6672;
+  --bs-border-color:#C9CFD8;
+  --bs-card-bg:#FFFFFF;
+}
+[data-bs-theme="dark"]{
+  --bs-body-bg:#0A0F22;
+  --bs-body-color:#E9E4D4;
+  --bs-secondary-color:#8B93B8;
+  --bs-border-color:#2A3358;
+  --bs-card-bg:#111834;
+}
+
+html,body{margin:0;height:100%;overflow:hidden;}
+body{
+  background:var(--bs-body-bg);color:var(--bs-body-color);
+  font-family:'Lexend','Helvetica Neue',Helvetica,Arial,sans-serif;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
+  -webkit-tap-highlight-color:transparent;overscroll-behavior:none;
+  transition:background-color .4s ease, color .4s ease;
+}
+.sf-page{
+  box-sizing:border-box;height:100vh;height:100dvh;display:flex;flex-direction:column;
+  padding:max(12px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+          max(12px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+}
+
+.sf-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex:0 0 auto;padding:0 4px 4px;}
+.sf-title{font-size:clamp(16px, 2.4vw, 26px);font-weight:600;letter-spacing:.01em;}
+.sf-status{display:flex;align-items:center;gap:8px;font-size:clamp(12px, 1.5vw, 16px);color:var(--bs-secondary-color);font-variant-numeric:tabular-nums;}
+.sf-status-dot{width:10px;height:10px;border-radius:50%;background:#999;transition:background .4s;}
+
+.sf-stage{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;}
+#solarFlowSvg{display:block;width:100%;height:100%;}
+
+/* ---- Diagram styles (based on charts-d3.html, with finer lines for the kiosk) ---- */
+#solarFlowSvg text{font-family:'Lexend','Helvetica Neue',Helvetica,Arial,sans-serif;text-anchor:middle;}
+.sf-box rect.sf-box-bg{fill:color-mix(in srgb, var(--c) 16%, var(--bs-card-bg));stroke:var(--c);stroke-width:1.5;transition:fill .4s, stroke .4s;}
+.sf-box.idle{--c:#9AA0A8 !important;}
+.sf-box .sf-icon{color:var(--c);fill:none;stroke:currentColor;stroke-width:2.25;stroke-linecap:round;stroke-linejoin:round;transition:color .4s;}
+.sf-box .sf-icon .sf-fill{fill:currentColor;stroke:none;opacity:.85;}
+.sf-name{font-size:21px;font-weight:600;fill:var(--bs-body-color);}
+.sf-big{font-size:29px;font-weight:700;fill:var(--c);}
+.sf-val{font-size:22px;font-weight:600;fill:var(--bs-secondary-color);}
+.sf-sub{font-size:17px;font-weight:500;}
+.sf-box.idle .sf-name{fill:var(--bs-secondary-color);}
+.sf-wire{fill:none;stroke:var(--bs-border-color);stroke-width:2;stroke-linecap:round;}
+.sf-tracer{fill:none;stroke-width:2.5;stroke-linecap:round;stroke-dasharray:18 22;animation:sfFlow var(--dur, 1.6s) linear infinite;transition:stroke .4s, opacity .4s;}
+.sf-tracer.off{opacity:0;animation:none;}
+@keyframes sfFlow{from{stroke-dashoffset:40;}to{stroke-dashoffset:0;}}
+@media (prefers-reduced-motion: reduce){.sf-tracer{animation:none;stroke-dasharray:none;opacity:.85;}}
+.sf-pill rect{fill:var(--bs-card-bg);stroke:var(--bs-border-color);stroke-width:1;}
+.sf-pill text{font-size:19px;font-weight:700;fill:var(--bs-body-color);}
+
+/* Today's totals panel (not connected to the flow) */
+.sf-day-bg{fill:var(--bs-card-bg);stroke:var(--bs-border-color);stroke-width:1.5;}
+#solarFlowSvg .sf-day text{text-anchor:start;}
+#solarFlowSvg .sf-day text.sf-day-val{text-anchor:end;}
+.sf-day-title{font-size:15px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;fill:var(--bs-secondary-color);}
+.sf-day-rule{stroke:var(--bs-border-color);stroke-width:1;}
+.sf-day-since{font-size:14px;font-weight:500;fill:var(--bs-secondary-color);}
+#solarFlowSvg .sf-day text.sf-day-since{text-anchor:end;}
+.sf-box .sf-icon .sf-thin{stroke-width:1.75;}
+.sf-day-lbl{font-size:18px;font-weight:500;fill:var(--bs-body-color);}
+.sf-day-val{font-size:19px;font-weight:700;fill:var(--bs-body-color);font-variant-numeric:tabular-nums;}
+.sf-day-val .sf-at{font-weight:500;fill:var(--bs-secondary-color);}
+
+.sf-key-row{flex:0 0 auto;margin:6px 4px 0;font-size:clamp(11px, 1.4vw, 15px);color:var(--bs-secondary-color);display:flex;flex-wrap:wrap;justify-content:center;gap:6px 22px;}
+.sf-key{display:inline-flex;align-items:center;gap:8px;}
+.sf-key i{display:inline-block;width:22px;height:3px;border-radius:2px;}
+
+.hide-title .sf-head{display:none;}
+.hide-key .sf-key-row{display:none;}
+</style>
+</head>
+<body>
+<div class="sf-page" id="sfPage">
+  <div class="sf-head">
+    <div class="sf-title" data-sf-label="Solar Power Flow">Solar Power Flow</div>
+    <div class="sf-status"><span class="sf-status-dot" id="sfStatusDot"></span><span id="sfStatusTime">&mdash;</span></div>
+  </div>
+
+  <div class="sf-stage">
+    <svg id="solarFlowSvg" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Solar power flow diagram">
+      <path class="sf-wire" d="M230 300 H390"/>
+      <path class="sf-wire" d="M500 160 V230"/>
+      <path class="sf-wire" d="M500 440 V370"/>
+      <path class="sf-wire" d="M610 300 H790"/>
+      <path class="sf-wire" d="M790 300 V175 H810"/>
+      <path class="sf-wire" d="M790 300 V425 H810"/>
+
+      <path class="sf-tracer off" id="sfTrPv"/>
+      <path class="sf-tracer off" id="sfTrGrid"/>
+      <path class="sf-tracer off" id="sfTrBatt"/>
+      <path class="sf-tracer off" id="sfTrLoad"/>
+      <path class="sf-tracer off" id="sfTrEss"/>
+      <path class="sf-tracer off" id="sfTrNon"/>
+
+      <g class="sf-pill" transform="translate(310 262)"><rect x="-56" y="-22" width="112" height="44" rx="10"/><text y="7" id="sfPillPv">&mdash;</text></g>
+      <g class="sf-pill" transform="translate(600 195)"><rect x="-56" y="-22" width="112" height="44" rx="10"/><text y="7" id="sfPillGrid">&mdash;</text></g>
+      <g class="sf-pill" transform="translate(600 405)"><rect x="-56" y="-22" width="112" height="44" rx="10"/><text y="7" id="sfPillBatt">&mdash;</text></g>
+      <g class="sf-pill" transform="translate(700 262)"><rect x="-56" y="-22" width="112" height="44" rx="10"/><text y="7" id="sfPillLoad">&mdash;</text></g>
+
+      <!-- Today's totals: stand-alone panel, not part of the flow -->
+      <g class="sf-day">
+        <rect class="sf-day-bg" x="30" y="10" width="340" height="206" rx="16"/>
+        <text class="sf-day-title" x="50" y="40" data-sf-label="Today">Today</text>
+        <g class="sf-day-row" transform="translate(0 70)">
+          <circle cx="56" cy="-6" r="5" fill="#2B8CEB"/>
+          <text class="sf-day-lbl" x="72" data-sf-label="Total Usage">Total Usage</text>
+          <text class="sf-day-val" x="350" id="sfDayUse">&mdash;</text>
+        </g>
+        <g class="sf-day-row" transform="translate(0 100)">
+          <circle cx="56" cy="-6" r="5" fill="#F28C1B"/>
+          <text class="sf-day-lbl" x="72" data-sf-label="Total Generation">Total Generation</text>
+          <text class="sf-day-val" x="350" id="sfDayGen">&mdash;</text>
+        </g>
+        <g class="sf-day-row" transform="translate(0 130)">
+          <circle cx="56" cy="-6" r="5" fill="#E53935"/>
+          <text class="sf-day-lbl" x="72" data-sf-label="Total Import">Total Import</text>
+          <text class="sf-day-val" x="350" id="sfDayImp">&mdash;</text>
+        </g>
+        <g class="sf-day-row" transform="translate(0 160)">
+          <circle cx="56" cy="-6" r="5" fill="#2EA043"/>
+          <text class="sf-day-lbl" x="72" data-sf-label="Total Export">Total Export</text>
+          <text class="sf-day-val" x="350" id="sfDayExp">&mdash;</text>
+        </g>
+        <line class="sf-day-rule" x1="50" y1="175" x2="350" y2="175"/>
+        <g class="sf-day-row" transform="translate(0 200)">
+          <path d="M51 -2 L56 -11 L61 -2 Z" fill="#2B8CEB"/>
+          <text class="sf-day-lbl" x="72" data-sf-label="Peak Usage">Peak Usage</text>
+          <text class="sf-day-val" x="350" id="sfDayPeak">&mdash;</text>
+        </g>
+      </g>
+
+      <!-- All-time totals since solar data was first recorded: stand-alone panel -->
+      <g class="sf-day">
+        <rect class="sf-day-bg" x="30" y="410" width="340" height="180" rx="16"/>
+        <text class="sf-day-title" x="50" y="440" data-sf-label="All Time">All Time</text>
+        <text class="sf-day-since" x="350" y="440" id="sfAllSince"></text>
+        <g class="sf-day-row" transform="translate(0 472)">
+          <circle cx="56" cy="-6" r="5" fill="#2B8CEB"/>
+          <text class="sf-day-lbl" x="72" data-sf-label="Total Usage">Total Usage</text>
+          <text class="sf-day-val" x="350" id="sfAllUse">&mdash;</text>
+        </g>
+        <g class="sf-day-row" transform="translate(0 502)">
+          <circle cx="56" cy="-6" r="5" fill="#F28C1B"/>
+          <text class="sf-day-lbl" x="72" data-sf-label="Total Generation">Total Generation</text>
+          <text class="sf-day-val" x="350" id="sfAllGen">&mdash;</text>
+        </g>
+        <g class="sf-day-row" transform="translate(0 532)">
+          <circle cx="56" cy="-6" r="5" fill="#E53935"/>
+          <text class="sf-day-lbl" x="72" data-sf-label="Total Import">Total Import</text>
+          <text class="sf-day-val" x="350" id="sfAllImp">&mdash;</text>
+        </g>
+        <g class="sf-day-row" transform="translate(0 562)">
+          <circle cx="56" cy="-6" r="5" fill="#2EA043"/>
+          <text class="sf-day-lbl" x="72" data-sf-label="Total Export">Total Export</text>
+          <text class="sf-day-val" x="350" id="sfAllExp">&mdash;</text>
+        </g>
+      </g>
+
+      <g class="sf-box" id="sfBoxPv" style="--c:#F28C1B">
+        <rect class="sf-box-bg" x="30" y="228" width="200" height="144" rx="18"/>
+        <!-- Sun -->
+        <g class="sf-icon" transform="translate(130 258) scale(1.15)">
+          <circle r="9"/>
+          <path d="M0 -15 V-21 M0 15 V21 M-15 0 H-21 M15 0 H21 M-10.6 -10.6 L-14.8 -14.8 M10.6 10.6 L14.8 14.8 M-10.6 10.6 L-14.8 14.8 M10.6 -10.6 L14.8 -14.8"/>
+        </g>
+        <text class="sf-name" x="130" y="315" data-sf-label="PV Solar">PV Solar</text>
+        <text class="sf-big" x="130" y="352" id="sfValPv">&mdash;</text>
+      </g>
+
+      <g class="sf-box" id="sfBoxGrid" style="--c:#E53935">
+        <rect class="sf-box-bg" x="390" y="10" width="220" height="150" rx="18"/>
+        <!-- Transmission pylon -->
+        <g class="sf-icon" transform="translate(445 85) scale(1.15)">
+          <path d="M-9 22 L-3 -22 H3 L9 22"/>
+          <path d="M-18 -13 H18 M-13 -3 H13"/>
+          <path d="M-18 -13 V-9 M18 -13 V-9 M-13 -3 V1 M13 -3 V1"/>
+          <path d="M-5.6 -3 L7.4 12 M5.6 -3 L-7.4 12 M-7.4 12 L9 22 M7.4 12 L-9 22"/>
+        </g>
+        <text class="sf-name" x="530" y="48" data-sf-label="Grid">Grid</text>
+        <text class="sf-big" x="530" y="86" id="sfGridMode">&mdash;</text>
+        <text class="sf-val" x="530" y="116" id="sfValGrid">&mdash;</text>
+        <text class="sf-sub" x="530" y="143" id="sfGridConn" fill="var(--c)"></text>
+      </g>
+
+      <g class="sf-box" id="sfBoxInv" style="--c:#2B8CEB">
+        <rect class="sf-box-bg" x="390" y="230" width="220" height="140" rx="18"/>
+        <!-- Inverter: wall-mounted unit with display, status lights and cooling fins -->
+        <g class="sf-icon" transform="translate(447 300) scale(1.15)">
+          <rect x="-16" y="-22" width="32" height="44" rx="5"/>
+          <rect x="-10" y="-16" width="20" height="13" rx="2"/>
+          <path class="sf-thin" d="M-7 -9.5 C-5 -14 -3 -14 -1 -9.5 S3 -5 5 -9.5"/>
+          <circle class="sf-fill" cx="-6" cy="3" r="1.6"/><circle class="sf-fill" cx="0" cy="3" r="1.6"/><circle class="sf-fill" cx="6" cy="3" r="1.6"/>
+          <path d="M-9 10 H9 M-9 15 H9"/>
+        </g>
+        <text class="sf-name" x="535" y="280" data-sf-label="Inverter">Inverter</text>
+        <text class="sf-val" x="535" y="314" id="sfValInv" style="fill:var(--c)">&mdash;</text>
+        <text class="sf-sub" x="535" y="345" id="sfInvStatus">&mdash;</text>
+      </g>
+
+      <g class="sf-box" id="sfBoxBatt" style="--c:#2EA043">
+        <rect class="sf-box-bg" x="390" y="440" width="220" height="150" rx="18"/>
+        <!-- Battery with live charge level -->
+        <g class="sf-icon" transform="translate(445 517) scale(1.15)">
+          <rect x="-13" y="-22" width="26" height="46" rx="5"/>
+          <path d="M-5 -26 H5"/>
+          <rect class="sf-fill" x="-8" y="-17" width="16" height="36" rx="2" id="sfBattLevel"/>
+        </g>
+        <text class="sf-name" x="530" y="478" data-sf-label="Battery">Battery</text>
+        <text class="sf-big" x="530" y="516" id="sfBattSoc">&mdash;</text>
+        <text class="sf-val" x="530" y="546" id="sfValBatt">&mdash;</text>
+        <text class="sf-sub" x="530" y="573" id="sfBattState"></text>
+      </g>
+
+      <g class="sf-box" id="sfBoxEss" style="--c:#43A047">
+        <rect class="sf-box-bg" x="810" y="100" width="170" height="150" rx="18"/>
+        <!-- Shield with tick -->
+        <g class="sf-icon" transform="translate(895 150) scale(1.15)">
+          <path d="M0 -22 L17 -15.5 V-2 C17 10 9.5 18.5 0 22 C-9.5 18.5 -17 10 -17 -2 V-15.5 Z"/>
+          <path d="M-7 0 L-2 5.5 L8 -5"/>
+        </g>
+        <text class="sf-name" x="895" y="204" data-sf-label="Essential">Essential</text>
+        <text class="sf-big" x="895" y="238" id="sfValEss">&mdash;</text>
+      </g>
+
+      <g class="sf-box" id="sfBoxNon" style="--c:#F28C1B">
+        <rect class="sf-box-bg" x="810" y="350" width="170" height="150" rx="18"/>
+        <!-- House -->
+        <g class="sf-icon" transform="translate(895 400) scale(1.15)">
+          <path d="M-20 -1 L0 -20 L20 -1"/>
+          <path d="M-14 -7 V20 H14 V-7"/>
+          <path d="M-4.5 20 V9 H4.5 V20"/>
+        </g>
+        <text class="sf-name" x="895" y="454" data-sf-label="Non-Essential">Non-Essential</text>
+        <text class="sf-big" x="895" y="488" id="sfValNon">&mdash;</text>
+      </g>
+    </svg>
+  </div>
+
+  <div class="sf-key-row">
+    <span class="sf-key"><i style="background:#F28C1B"></i><span data-sf-label="From PV">From PV</span></span>
+    <span class="sf-key"><i style="background:#E53935"></i><span data-sf-label="From Grid">From Grid</span></span>
+    <span class="sf-key"><i style="background:#2EA043"></i><span data-sf-label="From Battery">From Battery</span></span>
+    <span class="sf-key"><i style="background:#2B8CEB"></i><span data-sf-label="From Inverter">From Inverter</span></span>
+  </div>
+</div>
+
+<script src="cardI18n.js?v=s3n2026a"></script>
+<script src="stationTime.js"></script>
+<script>
+(function(){
+  const params = new URL(location.href).searchParams;
+  const page = document.getElementById('sfPage');
+  if (params.get('title') === '0') page.classList.add('hide-title');
+  if (params.get('key') === '0') page.classList.add('hide-key');
+
+  const T = k => (window.DivumWXI18N ? DivumWXI18N.t(k) : k);
+  const $ = id => document.getElementById(id);
+
+  function stationParts(date){
+    const parts = {};
+    new Intl.DateTimeFormat('en-GB', {
+      timeZone: (window.StationTime ? window.StationTime.getTZ() : undefined), hourCycle: 'h23',
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    }).formatToParts(date).forEach(p => { parts[p.type] = p.value; });
+    return parts;
+  }
+
+  // ===================== Theme =====================
+  // Same rules as the dashboard: dark / light / auto (day = light, night = dark,
+  // from loop.json's isDay). Picks up changes made on the main dashboard too.
+  const root = document.documentElement;
+  const forced = params.get('theme');
+  let themeMode = window.__sfThemeMode || 'auto';
+  let lastIsDay = null;
+  function applyTheme(){
+    const dark = themeMode === 'dark' ||
+      (themeMode === 'auto' && (lastIsDay != null ? !lastIsDay : window.matchMedia('(prefers-color-scheme: dark)').matches));
+    root.setAttribute('data-bs-theme', dark ? 'dark' : 'light');
+  }
+  function pollIsDay(){
+    if (themeMode !== 'auto') return;
+    fetch('./jsondata/loop.json?_=' + Date.now(), { cache: 'no-store' })
+      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(j => { const o = (j && j.observations) || {}; if (o.isDay != null) { lastIsDay = !!o.isDay; applyTheme(); } })
+      .catch(e => console.warn('solarFlowKiosk: loop.json (theme) fetch failed --', e.message));
+  }
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+  window.addEventListener('storage', e => {
+    if (e.key === 'dashboardThemeMode' && !forced) {
+      const v = e.newValue;
+      themeMode = (v === 'dark' || v === 'light') ? v : v === 'seasonal' ? 'light' : 'auto';
+      applyTheme(); pollIsDay();
+    }
+  });
+  applyTheme();
+  pollIsDay();
+  setInterval(pollIsDay, 60 * 1000);
+
+  // ===================== Solar Power Flow =====================
+  // Logic identical to charts-d3.html's solarFlow: reads jsondata/solar_data.json
+  // every 10 s. Each tracer takes the colour of the box the power leaves.
+  const SOLAR_JSON_URL = './jsondata/solar_data.json';
+  const POLL_MS = 10 * 1000;
+  const FLOW_MIN_W = 1;
+  const C = { pv:'#F28C1B', grid:'#E53935', batt:'#2EA043', inv:'#2B8CEB' };
+  const WIRE = {
+    pv:'M230 300 H390', grid:'M500 160 V230', gridRev:'M500 230 V160',
+    batt:'M500 440 V370', battRev:'M500 370 V440',
+    load:'M610 300 H790', ess:'M790 300 V175 H810', non:'M790 300 V425 H810'
+  };
+  const num = x => {
+    if (typeof x === 'string' && x.trim() !== '' && !isNaN(+x)) x = +x;
+    return (typeof x === 'number' && !isNaN(x)) ? x : null;
+  };
+  const topic = (d, k) => { const e = d && d.data && d.data[k]; return e ? e.value : null; };
+  const fmtW = w => {
+    if (w === null) return '—';
+    const a = Math.abs(w);
+    return a >= 10000 ? (a / 1000).toFixed(1) + ' kW' : Math.round(a) + ' W';
+  };
+  // Faster dashes for bigger flows: ~2.4 s at a trickle, ~0.6 s at 5 kW and up.
+  const dur = w => (2.4 - 1.8 * Math.sqrt(Math.min(Math.abs(w || 0), 5000) / 5000)).toFixed(2) + 's';
+  function tracer(id, on, d, color, w){
+    const el = $(id);
+    if (!on) { el.classList.add('off'); return; }
+    el.setAttribute('d', d);
+    el.style.stroke = color;
+    el.style.setProperty('--dur', dur(w));
+    el.classList.remove('off');
+  }
+  const idle = (id, v) => $(id).classList.toggle('idle', !!v);
+  const txt = (id, s) => { $(id).textContent = s; };
+
+  function render(v){
+    const pvOn = v.pv !== null && v.pv > FLOW_MIN_W;
+    idle('sfBoxPv', !pvOn);
+    txt('sfValPv', fmtW(v.pv)); txt('sfPillPv', fmtW(v.pv));
+    tracer('sfTrPv', pvOn, WIRE.pv, C.pv, v.pv);
+
+    // Grid: + import (grid -> inverter), - export (inverter -> grid)
+    const gIn = v.grid !== null && v.grid > FLOW_MIN_W, gOut = v.grid !== null && v.grid < -FLOW_MIN_W;
+    idle('sfBoxGrid', !gIn && !gOut);
+    txt('sfGridMode', v.grid === null ? '—' : gIn ? T('Import') : gOut ? T('Export') : T('Idle'));
+    $('sfGridMode').style.fill = gOut ? C.batt : '';
+    txt('sfValGrid', fmtW(v.grid)); txt('sfPillGrid', fmtW(v.grid));
+    txt('sfGridConn', v.gridVolts === null ? '' : (v.gridVolts > 100 ? T('Connected') : T('Disconnected')));
+    tracer('sfTrGrid', gIn || gOut, gIn ? WIRE.grid : WIRE.gridRev, gIn ? C.grid : C.inv, v.grid);
+
+    // Battery: - discharging (battery -> inverter), + charging (inverter -> battery)
+    const bDis = v.batt !== null && v.batt < -FLOW_MIN_W, bChg = v.batt !== null && v.batt > FLOW_MIN_W;
+    idle('sfBoxBatt', v.soc === null && !bDis && !bChg);
+    txt('sfBattSoc', v.soc === null ? '—' : Math.round(v.soc) + '%');
+    txt('sfValBatt', fmtW(v.batt)); txt('sfPillBatt', fmtW(v.batt));
+    const bs = $('sfBattState');
+    bs.textContent = v.batt === null ? '' : bDis ? T('Discharging') : bChg ? T('Charging') : T('Idle');
+    bs.setAttribute('fill', bDis ? '#E58A00' : bChg ? C.inv : 'var(--bs-secondary-color)');
+    const lvl = Math.max(0, Math.min(100, v.soc === null ? 0 : v.soc)) / 100;
+    // Inner fill: 36 tall, bottom edge at y=19 in the icon's coordinates.
+    $('sfBattLevel').setAttribute('height', (36 * lvl).toFixed(1));
+    $('sfBattLevel').setAttribute('y', (19 - 36 * lvl).toFixed(1));
+    tracer('sfTrBatt', bDis || bChg, bDis ? WIRE.batt : WIRE.battRev, bDis ? C.batt : C.inv, v.batt);
+
+    // Inverter and the two load circuits
+    const loadOn = v.total !== null && v.total > FLOW_MIN_W;
+    const essOn = v.ess !== null && v.ess > FLOW_MIN_W, nonOn = v.non !== null && v.non > FLOW_MIN_W;
+    idle('sfBoxInv', !v.online);
+    txt('sfValInv', fmtW(v.total)); txt('sfPillLoad', fmtW(v.total));
+    txt('sfInvStatus', v.online ? T('Online') : T('Offline'));
+    $('sfInvStatus').setAttribute('fill', v.online ? '#2EA043' : '#E53935');
+    tracer('sfTrLoad', loadOn, WIRE.load, C.inv, v.total);
+    idle('sfBoxEss', !essOn); txt('sfValEss', fmtW(v.ess)); tracer('sfTrEss', essOn, WIRE.ess, C.inv, v.ess);
+    idle('sfBoxNon', !nonOn); txt('sfValNon', fmtW(v.non)); tracer('sfTrNon', nonOn, WIRE.non, C.inv, v.non);
+
+    // Today's totals (Solar Assistant's daily counters, kWh)
+    txt('sfDayUse', fmtKWh(v.dayUse));
+    txt('sfDayGen', fmtKWh(v.dayGen));
+    txt('sfDayImp', fmtKWh(v.dayImp));
+    txt('sfDayExp', fmtKWh(v.dayExp));
+  }
+
+  // Today's peak total load and when it happened (server's "today_peak" block)
+  function renderPeak(pk){
+    const el = $('sfDayPeak');
+    const w = pk && num(pk.power), ts = pk && num(pk.time);
+    if (w === null || !w) { el.textContent = '—'; return; }
+    const val = w >= 1000 ? (w / 1000).toFixed(2) + ' kW' : Math.round(w) + ' W';
+    if (!ts) { el.textContent = val; return; }
+    const p = stationParts(new Date(ts * 1000));
+    el.textContent = val + ' ';
+    const at = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+    at.setAttribute('class', 'sf-at');
+    at.textContent = T('at') + ' ' + p.hour + ':' + p.minute;
+    el.appendChild(at);
+  }
+  // All-time totals (from the server's "alltime" block; kWh)
+  function renderAll(a){
+    const est = a && a.usage_estimated_days > 0;
+    txt('sfAllUse', a ? (est ? '≈ ' : '') + fmtBig(num(a.usage)) : '—');
+    txt('sfAllGen', a ? fmtBig(num(a.generation)) : '—');
+    txt('sfAllImp', a ? fmtBig(num(a.import)) : '—');
+    txt('sfAllExp', a ? fmtBig(num(a.export)) : '—');
+    const since = a && num(a.since);
+    txt('sfAllSince', since ? T('since') + ' ' + new Intl.DateTimeFormat(undefined, {
+      day: 'numeric', month: 'short', year: 'numeric',
+      timeZone: window.StationTime ? window.StationTime.getTZ() : undefined }).format(new Date(since * 1000)) : '');
+  }
+  const fmtBig = k => k === null ? '—' : k >= 100000 ? (k / 1000).toFixed(1) + ' MWh'
+    : k >= 1000 ? Math.round(k).toLocaleString() + ' kWh' : k.toFixed(1) + ' kWh';
+  const fmtKWh = k => k === null ? '—' : k.toFixed(k >= 100 ? 1 : 2) + ' kWh';
+
+  function setStatus(ok){
+    $('sfStatusDot').style.background = ok ? '#2ecc71' : '#e74c3c';
+    const p = stationParts(new Date());
+    txt('sfStatusTime', p.hour + ':' + p.minute + ':' + p.second);
+  }
+
+  function refresh(){
+    fetch(SOLAR_JSON_URL + '?_=' + Date.now(), { cache: 'no-store' })
+      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(d => {
+        const P = 'solar_assistant/inverter_1/', TOT = 'solar_assistant/total/';
+        // load_power is the house (non-essential) circuit,
+        // load_power_non-essential is the total of both circuits.
+        const ess = num(topic(d, P + 'load_power_essential/state'));
+        const non = num(topic(d, P + 'load_power/state'));
+        let total = num(topic(d, P + 'load_power_non-essential/state'));
+        if (total === null && (ess !== null || non !== null)) total = (ess || 0) + (non || 0);
+        render({
+          pv: num(topic(d, P + 'pv_power/state')),
+          grid: num(topic(d, P + 'grid_power/state')),
+          gridVolts: num(topic(d, P + 'grid_voltage/state')),
+          batt: num(topic(d, TOT + 'battery_power/state')),
+          soc: num(topic(d, TOT + 'battery_state_of_charge/state')),
+          ess, non, total,
+          dayUse: num(topic(d, TOT + 'load_energy/state')),
+          dayGen: num(topic(d, TOT + 'pv_energy/state')),
+          dayImp: num(topic(d, TOT + 'grid_energy_in/state')),
+          dayExp: num(topic(d, TOT + 'grid_energy_out/state')),
+          online: d.connected === true
+        });
+        renderAll(d.alltime || null);
+        renderPeak(d.today_peak || null);
+        setStatus(d.connected === true);
+      })
+      .catch(e => {
+        console.warn('solarFlowKiosk: solar_data.json fetch failed --', e.message);
+        setStatus(false);
+      });
+  }
+
+  function labels(){
+    document.querySelectorAll('[data-sf-label]').forEach(el => { el.textContent = T(el.getAttribute('data-sf-label')); });
+    document.title = T('Solar Power Flow');
+  }
+  window.addEventListener('i18nready', labels);
+  labels();
+
+  // Poll only while the screen is showing; refresh at once when it comes back.
+  let timer = null;
+  function start(){ if (!timer) { refresh(); timer = setInterval(refresh, POLL_MS); } }
+  function stop(){ if (timer) { clearInterval(timer); timer = null; } }
+
+  // ===================== Kiosk helpers =====================
+  // Keep the iPad screen awake where the Screen Wake Lock API is supported
+  // (Safari 16.4+). Kiosk apps with their own "keep awake" setting don't need it.
+  let wakeLock = null;
+  async function keepAwake(){
+    try {
+      if ('wakeLock' in navigator && document.visibilityState === 'visible' && !wakeLock) {
+        wakeLock = await navigator.wakeLock.request('screen');
+        wakeLock.addEventListener('release', () => { wakeLock = null; });
+      }
+    } catch (e) { /* not allowed or unsupported -- harmless */ }
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') { start(); pollIsDay(); keepAwake(); } else { stop(); }
+  });
+  // Some browsers only grant a wake lock after a user gesture.
+  document.addEventListener('click', keepAwake);
+
+  // Periodic full reload so a tablet left running for weeks picks up site updates.
+  // Skipped while the server is unreachable, so the last diagram stays on screen.
+  const reloadH = params.has('reload') ? Number(params.get('reload')) : 6;
+  if (reloadH > 0 && isFinite(reloadH)) {
+    setTimeout(function tryReload(){
+      fetch(location.pathname + '?_=' + Date.now(), { method: 'HEAD', cache: 'no-store' })
+        .then(r => { if (r.ok) location.reload(); else throw new Error(); })
+        .catch(() => setTimeout(tryReload, 5 * 60 * 1000));
+    }, reloadH * 3600 * 1000);
+  }
+
+  start();
+  keepAwake();
+})();
+</script>
+</body>
+</html>

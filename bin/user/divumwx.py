@@ -3819,6 +3819,7 @@ schema = [('dateTime',          'INTEGER NOT NULL UNIQUE PRIMARY KEY'),
         ('load_power_essential',            'REAL'),
         ('load_power_non_essential',        'REAL'),
         ('load_percentage',                 'REAL'),
+        ('load_energy_today',               'REAL'),
         ('inverter_temp',                   'REAL'),
         ('ac_output_frequency',             'REAL'),
         ('ac_output_voltage',               'REAL')]

@@ -2,7 +2,7 @@
 try {
 /*
 ##############################################################################################
-# cardSolarEnergyFlow.js version 1.0.3
+# cardSolarEnergyFlow.js version 1.0.4
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -163,16 +163,17 @@ try {
       ':root{--seh-chip-bg:#EFECE2;}body.dark{--seh-chip-bg:#0A0F22;}' +
       '.sfm svg{display:block;width:100%;height:100%;}' +
       '.sfm text{font-family:Lexend,"Helvetica Neue",Helvetica,Arial,sans-serif;text-anchor:middle;}' +
-      '.sfm-box rect.sfm-bg{fill:color-mix(in srgb, var(--c) 20%, var(--seh-chip-bg));stroke:var(--c);stroke-width:1.2;}' +
+      '.sfm-box rect.sfm-bg{fill:color-mix(in srgb, var(--c) 16%, var(--seh-chip-bg));stroke:var(--c);stroke-width:.7;}' +
       '.sfm-box.idle{--c:#9AA0A8 !important;}' +
-      '.sfm-box .sfm-icon{color:var(--c);}' +
+      '.sfm-box .sfm-icon{color:var(--c);fill:none;stroke:currentColor;stroke-width:3.4;stroke-linecap:round;stroke-linejoin:round;}' +
+      '.sfm-box .sfm-icon .sfm-fill{fill:currentColor;stroke:none;opacity:.85;}' +
       '.sfm-name{font-size:6px;font-weight:600;fill:var(--bs-body-color,#1D2C4E);font-variant-caps:small-caps;letter-spacing:.03em;}' +
       '.sfm-box.idle .sfm-name{opacity:.7;}' +
       '.sfm-val{font-size:8.5px;font-weight:700;fill:var(--c);}' +
       '.sfm-sub{font-size:5.5px;font-weight:600;}' +
-      '.sfm-wire{fill:none;stroke:var(--bs-border-color,#C9CFD8);stroke-width:2;stroke-linecap:round;}' +
-      '.sfm-tr{fill:none;stroke-width:2;stroke-linecap:round;stroke-dasharray:5 7;animation:sfmFlow var(--dur,1.6s) linear infinite;}' +
-      '@keyframes sfmFlow{from{stroke-dashoffset:12;}to{stroke-dashoffset:0;}}' +
+      '.sfm-wire{fill:none;stroke:var(--bs-border-color,#C9CFD8);stroke-width:1;stroke-linecap:round;}' +
+      '.sfm-tr{fill:none;stroke-width:1.2;stroke-linecap:round;stroke-dasharray:4 5;animation:sfmFlow var(--dur,1.6s) linear infinite;}' +
+      '@keyframes sfmFlow{from{stroke-dashoffset:9;}to{stroke-dashoffset:0;}}' +
       '@media (prefers-reduced-motion: reduce){.sfm-tr{animation:none;stroke-dasharray:none;}}';
     document.head.appendChild(flowStyle);
   }
@@ -198,26 +199,28 @@ try {
     return '<g class="sfm-box'+(idle ? ' idle' : '')+'" style="--c:'+c+'"><title>'+title+'</title>' +
       '<rect class="sfm-bg" x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="5"/>'+inner+'</g>';
   }
+  // Outline icons -- the same drawings as the Flow Diagram in the charts
+  // modal and solarFlowKiosk.html, scaled down from their +-24 unit grid.
+  var GLYPH_SCALE = 0.31;
+  function glyph(inner){ return '<g class="sfm-icon" transform="scale(' + GLYPH_SCALE + ')">' + inner + '</g>'; }
   var GLYPH = {
-    sun: '<g class="sfm-icon" stroke="currentColor" stroke-width="1.3" stroke-linecap="round">' +
-         '<circle r="4.2" fill="currentColor" stroke="none"/>' +
-         '<line y1="-6.5" y2="-8.5"/><line y1="6.5" y2="8.5"/><line x1="-6.5" x2="-8.5"/><line x1="6.5" x2="8.5"/>' +
-         '<line x1="-4.6" y1="-4.6" x2="-6" y2="-6"/><line x1="4.6" y1="4.6" x2="6" y2="6"/>' +
-         '<line x1="-4.6" y1="4.6" x2="-6" y2="6"/><line x1="4.6" y1="-4.6" x2="6" y2="-6"/></g>',
-    plug: '<path class="sfm-icon" fill="currentColor" d="M-2.6 -8 h1.6 v3 h2 v-3 h1.6 v3 h1.5 a.8 .8 0 0 1 .8 .8 v3 a3.8 3.8 0 0 1 -3 3.7 v1.7 l1 1.5 h-5.4 l1 -1.5 v-1.7 a3.8 3.8 0 0 1 -3 -3.7 v-3 a.8 .8 0 0 1 .8 -.8 h1.1 z"/>',
-    inv: '<g class="sfm-icon" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">' +
-         '<path d="M-6 -4 h3 a2.2 2.2 0 0 1 0 4.4 h-1.7 a2.2 2.2 0 0 0 0 4.4 h3.3"/>' +
-         '<rect x=".6" y="1.8" width="3.8" height="5.4" rx="1.1" fill="currentColor" stroke="none"/>' +
-         '<line x1="4.4" y1="3.2" x2="6.6" y2="3.2"/><line x1="4.4" y1="5.8" x2="6.6" y2="5.8"/></g>',
-    shield: '<path class="sfm-icon" fill="currentColor" d="M0 -6.5 L5 -4.6 V-.5 C5 3.2 2.8 5.5 0 6.7 C-2.8 5.5 -5 3.2 -5 -.5 V-4.6 Z"/>',
-    house: '<path class="sfm-icon" fill="currentColor" d="M0 -6.5 L6.5 -.5 H4.6 V6 H1.4 V2 H-1.4 V6 H-4.6 V-.5 H-6.5 Z"/>'
+    sun: glyph('<circle r="9"/><path d="M0 -15 V-21 M0 15 V21 M-15 0 H-21 M15 0 H21 M-10.6 -10.6 L-14.8 -14.8 ' +
+               'M10.6 10.6 L14.8 14.8 M-10.6 10.6 L-14.8 14.8 M10.6 -10.6 L14.8 -14.8"/>'),
+    pylon: glyph('<path d="M-9 22 L-3 -22 H3 L9 22"/><path d="M-18 -13 H18 M-13 -3 H13"/>' +
+                 '<path d="M-18 -13 V-9 M18 -13 V-9 M-13 -3 V1 M13 -3 V1"/>' +
+                 '<path d="M-5.6 -3 L7.4 12 M5.6 -3 L-7.4 12 M-7.4 12 L9 22 M7.4 12 L-9 22"/>'),
+    inv: glyph('<rect x="-16" y="-22" width="32" height="44" rx="5"/><rect x="-10" y="-16" width="20" height="13" rx="2"/>' +
+               '<path d="M-7 -9.5 C-5 -14 -3 -14 -1 -9.5 S3 -5 5 -9.5" style="stroke-width:2.6"/>' +
+               '<circle class="sfm-fill" cx="-6" cy="3" r="1.9"/><circle class="sfm-fill" cx="0" cy="3" r="1.9"/>' +
+               '<circle class="sfm-fill" cx="6" cy="3" r="1.9"/><path d="M-9 10 H9 M-9 15 H9"/>'),
+    shield: glyph('<path d="M0 -22 L17 -15.5 V-2 C17 10 9.5 18.5 0 22 C-9.5 18.5 -17 10 -17 -2 V-15.5 Z"/><path d="M-7 0 L-2 5.5 L8 -5"/>'),
+    house: glyph('<path d="M-20 -1 L0 -20 L20 -1"/><path d="M-14 -7 V20 H14 V-7"/><path d="M-4.5 20 V9 H4.5 V20"/>')
   };
   function glyphBattery(soc){
     var lvl = Math.max(0, Math.min(100, typeof soc === 'number' ? soc : 0)) / 100;
-    var h = (12.4 * lvl).toFixed(1), y = (6.2 - 12.4 * lvl).toFixed(1);
-    return '<g class="sfm-icon"><rect x="-1.6" y="-8.6" width="3.2" height="1.6" rx=".5" fill="currentColor"/>' +
-      '<rect x="-4" y="-7.2" width="8" height="14.6" rx="1.3" fill="none" stroke="currentColor" stroke-width="1.1"/>' +
-      '<rect x="-2.8" y="'+y+'" width="5.6" height="'+h+'" rx=".5" fill="currentColor"/></g>';
+    var h = (36 * lvl).toFixed(1), y = (19 - 36 * lvl).toFixed(1);
+    return glyph('<rect x="-13" y="-22" width="26" height="46" rx="5"/><path d="M-5 -26 H5"/>' +
+      '<rect class="sfm-fill" x="-8" y="' + y + '" width="16" height="' + h + '" rx="2"/>');
   }
   function flowText(cls, x, y, s, extra){
     return '<text class="'+cls+'" x="'+x+'" y="'+y+'"'+(extra || '')+'>'+s+'</text>';
@@ -343,7 +346,7 @@ try {
       flowText('sfm-name', 25.5, 95, T('PV Solar')) + flowText('sfm-val', 25.5, 105, fmtPower(v.pvPower)), T('PV Solar'));
     // Grid (top)
     svg += flowBox('grid', FLOW_C.grid, !gIn && !gOut, 67, 2, 56, 37,
-      '<g transform="translate(76 20.5)">'+GLYPH.plug+'</g>' +
+      '<g transform="translate(76 20.5)">'+GLYPH.pylon+'</g>' +
       flowText('sfm-name', 101, 11, T('Grid')) +
       flowText('sfm-val', 101, 22, fmtPower(v.gridPower)) +
       flowText('sfm-sub', 101, 32, gridMode, ' fill="'+(gOut ? FLOW_C.batt : 'var(--c)')+'"'), T('Grid'));
