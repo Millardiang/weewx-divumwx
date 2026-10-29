@@ -1,6 +1,50 @@
 # DivumWX Changelog
 
-## Released — for 2.0.1
+## 2.0.1 — 29 October 2026
+
+### Version 2.0.1
+- `DIVUMWX_VERSION` is now `2.0.1`. The `index.html` header and footer
+  fallback, the `divumwf.html` badge, the README title and
+  `INSTALLATION_GUIDE.md` all say 2.0.1.
+- The install guide downloads from the release tag `ver.2.0.1`.
+
+### Solar Power Flow: kiosk page
+- New `divumwx/solarFlowKiosk.html`: the Solar Power Flow diagram on its own,
+  full screen, for a wall tablet or kiosk browser. It reads
+  `jsondata/solar_data.json` every 10 s, follows the dashboard's theme
+  (or `?theme=dark|light|auto`), and can hide its title bar (`?title=0`) and
+  colour key (`?key=0`). It keeps the screen awake where the browser allows,
+  and reloads every 6 hours (`?reload=N`, `0` = never) to pick up updates.
+
+### Solar Power Flow: Today and All Time panels
+- The kiosk page and the charts modal's Flow Diagram have two new panels:
+  - **Today**: Total Usage, Generation, Import and Export (SolarAssistant's
+    daily counters) and the day's **Peak Usage** with its time.
+  - **All Time**: the same four totals since solar data was first recorded,
+    with the start date, and the all-time **Peak Usage** with its date.
+- The totals come from `solar_assistant_mqtt.py` 4.7, which adds `alltime`
+  and `today_peak` blocks to `solar_data.json`:
+  - All-time totals add up each earlier day's final counter (the daily
+    summaries' maximum) in DivumWX's extras database, plus today's live
+    counters.
+  - Today's peak is followed live from every MQTT load reading, and picked
+    up again from the database after a restart. The all-time peak is the
+    highest earlier day in the database, or today's if that's higher;
+    earlier days only know the values saved at each archive record.
+- `load_energy_today` is a new extras column, so daily usage is recorded
+  from now on; it's added to an existing extras database when WeeWX starts.
+  For days before it was recorded, usage is worked out as PV + import +
+  battery out − export − battery in, and the All Time figure shows "≈".
+- With an older SolarAssistant service the new figures just show dashes.
+
+### Solar Power Flow: lighter design
+- Finer box borders and flow lines, and new outline icons: sun, power pylon
+  (was a plug), a wall-mounted inverter with display, battery (still
+  showing the charge level), shield with a tick, and house.
+- The same design on the kiosk page, the charts modal and the Solar Energy
+  Flow card (`cardSolarEnergyFlow.js` 1.0.4; the card has no Today or All
+  Time panels).
+
 
 ### Boltek: every stroke of a flash is counted
 - NexStorm gives strike times to the whole second. The strokes of one

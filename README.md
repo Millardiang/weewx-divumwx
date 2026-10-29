@@ -1,6 +1,10 @@
-# Welcome to the DivumWX skin for WeeWX Version 2.0.0
+# Welcome to the DivumWX skin for WeeWX Version 2.0.1
 Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LICENSE Version 3](https://github.com/Millardiang/weewx-divumwx/blob/main/license.txt)
  
+# What's new in 2.0.1
+* **Solar Power Flow kiosk page** (SolarAssistant subscribers) - `solarFlowKiosk.html` shows the flow diagram full screen for a wall tablet, with today's and all-time usage, generation, import, export and peak usage. The charts modal shows the same, and the diagram has a lighter design with new icons.
+* **Boltek** - every stroke of a flash is now counted, and the card's Today matches NexStorm's own day total.
+
 # What's new in 2.0.0
 * **MeteoAlarm weather warnings for Europe** - the official warnings of the European national weather services (the EUMETNET countries, the UK included) in the dashboard's alert bar, with no API key needed. Choose your warning areas on the [weewx-meteoalarm](https://github.com/Millardiang/weewx-meteoalarm) area map during installation; warnings are shown in the dashboard's language where the national service publishes it. OpenWeatherMap alerts remain available as the alternative.
 * **Boltek lightning detectors** - a Boltek Lightning card fed by NexStorm's native ngxarchive.json, with its own strike database, and a modal with a **live strike map** (Equal Earth, centred on your station): strikes coloured by age, and each new strike flashes and sends a tracer streaking to the station. Charts and records for 24 hours to all time on a second tab.

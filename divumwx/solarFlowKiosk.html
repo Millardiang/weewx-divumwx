@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# solarFlowKiosk.html version 1.0.3
+# solarFlowKiosk.html version 1.0.4
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 #
@@ -9,7 +9,7 @@
 #  Same diagram and data as the Solar Power Flow modal (charts-d3.html?type=solar),
 #  without the charts, records or site chrome.
 #
-#  The All Time panel and Today's Peak Usage need solar_assistant_mqtt.py 4.6 or later
+#  The All Time panel and Today's Peak Usage need solar_assistant_mqtt.py 4.7 or later
 #  (the "alltime" and "today_peak" blocks in solar_data.json); with an older service
 #  they just show dashes.
 #
@@ -119,6 +119,7 @@ body{
 .sf-day-lbl{font-size:18px;font-weight:500;fill:var(--bs-body-color);}
 .sf-day-val{font-size:19px;font-weight:700;fill:var(--bs-body-color);font-variant-numeric:tabular-nums;}
 .sf-day-val .sf-at{font-weight:500;fill:var(--bs-secondary-color);}
+.sf-day-val .sf-on{font-size:14px;font-weight:500;fill:var(--bs-secondary-color);}
 
 .sf-key-row{flex:0 0 auto;margin:6px 4px 0;font-size:clamp(11px, 1.4vw, 15px);color:var(--bs-secondary-color);display:flex;flex-wrap:wrap;justify-content:center;gap:6px 22px;}
 .sf-key{display:inline-flex;align-items:center;gap:8px;}
@@ -190,28 +191,34 @@ body{
 
       <!-- All-time totals since solar data was first recorded: stand-alone panel -->
       <g class="sf-day">
-        <rect class="sf-day-bg" x="30" y="410" width="340" height="180" rx="16"/>
-        <text class="sf-day-title" x="50" y="440" data-sf-label="All Time">All Time</text>
-        <text class="sf-day-since" x="350" y="440" id="sfAllSince"></text>
-        <g class="sf-day-row" transform="translate(0 472)">
+        <rect class="sf-day-bg" x="30" y="384" width="340" height="206" rx="16"/>
+        <text class="sf-day-title" x="50" y="414" data-sf-label="All Time">All Time</text>
+        <text class="sf-day-since" x="350" y="414" id="sfAllSince"></text>
+        <g class="sf-day-row" transform="translate(0 444)">
           <circle cx="56" cy="-6" r="5" fill="#2B8CEB"/>
           <text class="sf-day-lbl" x="72" data-sf-label="Total Usage">Total Usage</text>
           <text class="sf-day-val" x="350" id="sfAllUse">&mdash;</text>
         </g>
-        <g class="sf-day-row" transform="translate(0 502)">
+        <g class="sf-day-row" transform="translate(0 474)">
           <circle cx="56" cy="-6" r="5" fill="#F28C1B"/>
           <text class="sf-day-lbl" x="72" data-sf-label="Total Generation">Total Generation</text>
           <text class="sf-day-val" x="350" id="sfAllGen">&mdash;</text>
         </g>
-        <g class="sf-day-row" transform="translate(0 532)">
+        <g class="sf-day-row" transform="translate(0 504)">
           <circle cx="56" cy="-6" r="5" fill="#E53935"/>
           <text class="sf-day-lbl" x="72" data-sf-label="Total Import">Total Import</text>
           <text class="sf-day-val" x="350" id="sfAllImp">&mdash;</text>
         </g>
-        <g class="sf-day-row" transform="translate(0 562)">
+        <g class="sf-day-row" transform="translate(0 534)">
           <circle cx="56" cy="-6" r="5" fill="#2EA043"/>
           <text class="sf-day-lbl" x="72" data-sf-label="Total Export">Total Export</text>
           <text class="sf-day-val" x="350" id="sfAllExp">&mdash;</text>
+        </g>
+        <line class="sf-day-rule" x1="50" y1="549" x2="350" y2="549"/>
+        <g class="sf-day-row" transform="translate(0 574)">
+          <path d="M51 -2 L56 -11 L61 -2 Z" fill="#2B8CEB"/>
+          <text class="sf-day-lbl" x="72" data-sf-label="Peak Usage">Peak Usage</text>
+          <text class="sf-day-val" x="350" id="sfAllPeak">&mdash;</text>
         </g>
       </g>
 
@@ -439,18 +446,35 @@ body{
 
   // Today's peak total load and when it happened (server's "today_peak" block)
   function renderPeak(pk){
-    const el = $('sfDayPeak');
-    const w = pk && num(pk.power), ts = pk && num(pk.time);
-    if (w === null || !w) { el.textContent = '—'; return; }
-    const val = w >= 1000 ? (w / 1000).toFixed(2) + ' kW' : Math.round(w) + ' W';
-    if (!ts) { el.textContent = val; return; }
-    const p = stationParts(new Date(ts * 1000));
-    el.textContent = val + ' ';
-    const at = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
-    at.setAttribute('class', 'sf-at');
-    at.textContent = T('at') + ' ' + p.hour + ':' + p.minute;
-    el.appendChild(at);
+    const ts = pk && num(pk.time);
+    peakText('sfDayPeak', pk && num(pk.power), ts, 'sf-at', () => {
+      const p = stationParts(new Date(ts * 1000));
+      return T('at') + ' ' + p.hour + ':' + p.minute;
+    });
   }
+  // "<power> <suffix>", the suffix (time or date) in a lighter tspan.
+  function peakText(id, w, ts, cls, suffix){
+    const el = $(id);
+    if (w === null || w === undefined || !w) { el.textContent = '—'; return; }
+    const val = w >= 1000 ? (w / 1000).toFixed(w >= 10000 ? 1 : 2) + ' kW' : Math.round(w) + ' W';
+    if (!ts) { el.textContent = val; return; }
+    el.textContent = val + ' ';
+    const sp = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+    sp.setAttribute('class', cls);
+    sp.textContent = suffix();
+    el.appendChild(sp);
+  }
+  const fmtDate = ts => new Intl.DateTimeFormat(undefined, {
+    day: 'numeric', month: 'short', year: 'numeric',
+    timeZone: window.StationTime ? window.StationTime.getTZ() : undefined }).format(new Date(ts * 1000));
+  // Compact date for the all-time peak row: "21 Oct ’26".
+  const fmtShortDate = ts => {
+    const p = {};
+    new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'short', year: '2-digit',
+      timeZone: window.StationTime ? window.StationTime.getTZ() : undefined })
+      .formatToParts(new Date(ts * 1000)).forEach(x => { p[x.type] = x.value; });
+    return p.day + ' ' + p.month + ' \u2019' + p.year;
+  };
   // All-time totals (from the server's "alltime" block; kWh)
   function renderAll(a){
     const est = a && a.usage_estimated_days > 0;
@@ -459,9 +483,9 @@ body{
     txt('sfAllImp', a ? fmtBig(num(a.import)) : '—');
     txt('sfAllExp', a ? fmtBig(num(a.export)) : '—');
     const since = a && num(a.since);
-    txt('sfAllSince', since ? T('since') + ' ' + new Intl.DateTimeFormat(undefined, {
-      day: 'numeric', month: 'short', year: 'numeric',
-      timeZone: window.StationTime ? window.StationTime.getTZ() : undefined }).format(new Date(since * 1000)) : '');
+    txt('sfAllSince', since ? T('since') + ' ' + fmtDate(since) : '');
+    const pts = a && num(a.peak_time);
+    peakText('sfAllPeak', a && num(a.peak_power), pts, 'sf-on', () => fmtShortDate(pts));
   }
   const fmtBig = k => k === null ? '—' : k >= 100000 ? (k / 1000).toFixed(1) + ' MWh'
     : k >= 1000 ? Math.round(k).toLocaleString() + ' kWh' : k.toFixed(1) + ' kWh';

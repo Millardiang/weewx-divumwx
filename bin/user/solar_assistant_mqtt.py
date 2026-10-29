@@ -6,6 +6,8 @@ Uses ACTUAL topic names from your Solar Assistant installation
      solar data was first recorded (see _update_alltime).
 4.6: ...and a "today_peak" block -- today's peak total load and when it
      happened (see _note_load).
+4.7: "alltime" also carries the all-time peak total load and when it happened
+     (peak_power / peak_time).
 """
 
 import json
@@ -19,7 +21,7 @@ import paho.mqtt.client as mqtt
 import weewx
 from weewx.engine import StdService
 
-VERSION = "4.6-PEAK"
+VERSION = "4.7-ALLTIME-PEAK"
 
 log = logging.getLogger(__name__)
 
@@ -401,10 +403,20 @@ class SolarAssistantMQTT(StdService):
                     estimated += 1
             past['usage'] = usage
             first = [min(v) for k, v in days.items() if v and k in ('generation', 'import', 'export', 'usage')]
+            # Highest total load on any day before today (from the saved
+            # archive records, so a spike between two records isn't seen).
+            past_peak = None
+            if 'load_power_non_essential' in getattr(dbm, 'daykeys', ()):
+                row = dbm.getSql('SELECT max, maxtime FROM %s_day_load_power_non_essential '
+                                 'WHERE dateTime < ? AND max IS NOT NULL AND maxtime IS NOT NULL '
+                                 'ORDER BY max DESC LIMIT 1' % dbm.table_name, (today,))
+                if row:
+                    past_peak = (float(row[0]), int(row[1]))
             alltime = {
                 'since': min(first) if first else today,
                 'usage_estimated_days': estimated,
                 'past': past,
+                'past_peak': past_peak,
             }
             with self.data_lock:
                 self.alltime_past = alltime
@@ -424,6 +436,13 @@ class SolarAssistantMQTT(StdService):
             except (TypeError, ValueError):
                 today = 0.0
             out[key] = round(self.alltime_past['past'].get(key, 0.0) + today, 2)
+        # All-time peak: the best earlier day, or today's live peak if higher.
+        best = self.alltime_past.get('past_peak')
+        tp = self._peak_block()
+        if tp and (best is None or tp['power'] > best[0]):
+            best = (tp['power'], tp['time'])
+        out['peak_power'] = round(best[0]) if best else None
+        out['peak_time'] = best[1] if best else None
         return out
 
     def _write_json(self):
