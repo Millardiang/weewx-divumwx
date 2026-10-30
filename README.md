@@ -1,6 +1,9 @@
-# Welcome to the DivumWX skin for WeeWX Version 2.0.2
+# Welcome to the DivumWX skin for WeeWX Version 2.0.3
 Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LICENSE Version 3](https://github.com/Millardiang/weewx-divumwx/blob/main/license.txt)
  
+# What's new in 2.0.3
+* **Lightning and air quality fixes** - the Lightning card works on stations that count strikes without recording a distance, and the Air Quality card reads Ecowitt PM2.5 sensors (`pm25_1`). The installation guide shows how to map other drivers' field names.
+
 # What's new in 2.0.2
 * **Only the cards you chose** - fixes every card showing, including ones turned down at install, on stations without cloud cover or a solar sensor.
 

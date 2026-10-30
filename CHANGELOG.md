@@ -1,5 +1,33 @@
 # DivumWX Changelog
 
+## 2.0.3 — 30 October 2026
+
+### Version 2.0.3
+- Bug-fix release. `DIVUMWX_VERSION` is now `2.0.3`. The `index.html`
+  header and footer fallback, the `divumwf.html` badge, the README title
+  and `INSTALLATION_GUIDE.md` all say 2.0.3.
+- The install guide downloads from the release tag `ver.2.0.3`.
+
+### Lightning card empty
+- `archive.json` wrote `"last_distance":    N/A` (WeeWX's text for no
+  value) on a station that counts strikes but has never recorded a
+  `lightning_distance`, so the file wasn't valid JSON: the Lightning card
+  stayed empty and every card showed. It's now `null` until a strike with
+  a distance is recorded. Checked on a simulator station with strike counts
+  and no distance.
+- Drivers that publish the distance under another name (some Ecowitt
+  drivers use `lightning_dist`) can map it in `weewx.conf`; see the
+  installation guide.
+
+### Air quality card: Ecowitt PM2.5
+- The Air Quality card only looked for WeeWX's `pm2_5`. It now also reads
+  the names drivers use for the same reading, e.g. Ecowitt WH41/WH43
+  channel 1 as `pm25_1`, then the last archive record's value
+  (`cardAirquality.js` 1.0.1). Checked with an Ecowitt `loop.json`: "No
+  particle sensor data available" before, PM2.5 7.0 µg/m³ after.
+- For charts and records, map the field in `weewx.conf` too (see the
+  installation guide).
+
 ## 2.0.2 — 30 October 2026
 
 ### Version 2.0.2

@@ -9155,7 +9155,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardAirquality.js version 1.0.0
+# cardAirquality.js version 1.0.1
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -9233,12 +9233,26 @@ try {
     return ICON_BASE + (DAQI_ICONS[band] || 'goodair') + '.svg' + ICON_VER;
   }
 
+  // `alt`: other names drivers publish the same reading under, tried in
+  // order when the WeeWX name isn't in loop.json (e.g. Ecowitt's WH41/WH43
+  // channel 1 as pm25_1). Then the last archive record's value
+  // (archive_<key>), which also carries a [StdCalibrate] mapping such as
+  // pm2_5 = pm25_1 -- loop.json is written before calibration runs.
   var POLLUTANTS = [
-    { key: 'pm2_5',  label: 'PM2.5' },
-    { key: 'pm10_0', label: 'PM10.0' },
-    { key: 'pm1_0',  label: 'PM1.0' },
-    { key: 'pm4_0',  label: 'PM4.0' }
+    { key: 'pm2_5',  label: 'PM2.5', alt: ['pm25_1', 'pm25_ch1', 'pm2_5_1', 'pm2_51_0'] },
+    { key: 'pm10_0', label: 'PM10.0', alt: ['pm10', 'pm10_1', 'pm10_ch1'] },
+    { key: 'pm1_0',  label: 'PM1.0', alt: ['pm1', 'pm1_1'] },
+    { key: 'pm4_0',  label: 'PM4.0', alt: ['pm4', 'pm4_1'] }
   ];
+  function reading(o, p){
+    var names = [p.key].concat(p.alt || [], 'archive_' + p.key);
+    for (var i = 0; i < names.length; i++) {
+      var v = o[names[i]];
+      if (typeof v === 'string' && v.trim() !== '' && !isNaN(+v)) v = +v;
+      if (typeof v === 'number' && !isNaN(v)) return v;
+    }
+    return null;
+  }
 
   var mount = document.getElementById('airqualityCard20');
   if (!mount) return;
@@ -9558,8 +9572,8 @@ try {
         var o = loop.observations || {};
         var raw = {};
         POLLUTANTS.forEach(function(p){
-          var val = o[p.key];
-          if (typeof val === 'number' && !isNaN(val)) raw[p.key] = val;
+          var val = reading(o, p);
+          if (val !== null) raw[p.key] = val;
         });
 
         lastData = raw;

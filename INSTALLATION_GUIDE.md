@@ -1,6 +1,6 @@
 # DivumWX Installation Guide
 
-This guide covers DivumWX **2.0.2**. It assumes you already have a stable
+This guide covers DivumWX **2.0.3**. It assumes you already have a stable
 WeeWX 5 installation running with your own hardware driver.
 
 Tested on Debian 13 (Trixie) with:
@@ -50,7 +50,7 @@ sudo apt install python3-skyfield python3-requests
 ### Install or upgrade
 
 ```
-sudo weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/tags/ver.2.0.2.zip
+sudo weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/tags/ver.2.0.3.zip
 sudo systemctl restart weewx
 sudo weectl report run DivumWXReport
 ```
@@ -61,7 +61,7 @@ account WeeWX runs as (normally `weewx`). No manual `chown` is needed.
 ### Check the installation
 
 ```
-weectl extension list          # should show divumwx 2.0.2
+weectl extension list          # should show divumwx 2.0.3
 sudo journalctl -u weewx -n 100 --no-pager | grep -i divumwx
 ```
 
@@ -96,7 +96,7 @@ sudo mkdir -p /var/www/html/divumwx
 sudo chown -R $(whoami):$(whoami) /var/www/html/divumwx
 
 source ~/weewx-venv/bin/activate
-weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/tags/ver.2.0.2.zip
+weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/tags/ver.2.0.3.zip
 sudo systemctl restart weewx
 weectl report run DivumWXReport
 ```
@@ -259,6 +259,30 @@ service but doesn't switch it on, because it needs your MQTT broker's details:
 
 The service also adds the solar readings to WeeWX's loop packets, so DivumWX
 saves them in its own database along with its other extras.
+
+## Sensor field names (Ecowitt and other drivers)
+
+DivumWX reads WeeWX's standard field names. Some drivers publish a reading
+under another name; for example, some Ecowitt drivers give PM2.5 as
+`pm25_1` and lightning distance as `lightning_dist`, where WeeWX expects
+`pm2_5` and `lightning_distance`. You can see the names your driver uses
+in `jsondata/loop.json`.
+
+To map them, add the standard names to `[StdCalibrate]` in `weewx.conf`
+(add the lines to `[[Corrections]]` if the section is already there):
+
+```
+[StdCalibrate]
+    [[Corrections]]
+        pm2_5 = pm25_1
+        lightning_distance = lightning_dist
+```
+
+Then restart WeeWX. The readings are saved under the standard names from
+then on, so they appear in the charts, records and Lightning card. Only add
+a line if your driver doesn't already provide the standard name. If your
+driver has its own field map (e.g. `field_map_extensions`), mapping the
+field there works too.
 
 ## Troubleshooting
 

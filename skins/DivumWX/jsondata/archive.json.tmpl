@@ -457,7 +457,21 @@ null
 "month_strike_count": $month.lightning_strike_count.sum.format(None_string="0", add_label=False, localize=False),
 "year_strike_count": $year.lightning_strike_count.sum.format(None_string="0", add_label=False, localize=False),
 "alltime_strike_count": $alltime.lightning_strike_count.sum.format(None_string="0", add_label=False, localize=False),
-"last_distance": $alltime.lightning_distance.lastnonzero.format(add_label=False, localize=False),
+## last_distance: null until a strike with a distance has been recorded.
+## Formatted without None_string it came out as WeeWX's "   N/A", which
+## isn't valid JSON -- the whole file then failed to parse (lightning card
+## empty, every card shown) on stations that count strikes but have no
+## lightning_distance, e.g. an Ecowitt driver publishing lightning_dist.
+#set $lastStrikeDist = "null"
+#try
+#set $lastStrikeDistObj = $alltime.lightning_distance.lastnonzero
+#if $lastStrikeDistObj.has_data
+#set $lastStrikeDist = $lastStrikeDistObj.format(None_string="null", add_label=False, localize=False)
+#end if
+#except
+#pass
+#end try
+"last_distance": $lastStrikeDist,
 ## Fixed this session: the previous version wrote the literal '"last_time":
 ## ' text before evaluating $lastStrikeTs -- Cheetah does not buffer or
 ## roll back literal output already written when a #try body's expression

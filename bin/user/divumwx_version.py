@@ -11,4 +11,4 @@ Change it here, and only here, when cutting a release. Then run
 in the frontend match.
 """
 
-DIVUMWX_VERSION = "2.0.2"
+DIVUMWX_VERSION = "2.0.3"
