@@ -929,7 +929,7 @@ try {
       img.className = 'alert-icon';
       img.src = icon;
       img.alt = '';
-      if (iconBg) {   // MeteoAlarm's icons are white: give them a dark tile
+      if (iconBg) {   // optional tile behind an icon
         img.style.background = iconBg;
         img.style.borderRadius = '5px';
         img.style.padding = '2px';
@@ -1012,6 +1012,12 @@ try {
     });
     return (uk && a.level === 3) ? 'Amber' : (a.level_name || '');
   }
+  // Black symbol in a triangle of the warning's colour: meteoalarm_<symbol>_<level>.svg
+  function maIcon(a){
+    var name = String(a.icon || 'meteoalarm_000.svg');
+    if (a.level >= 1 && a.level <= 4) name = name.replace(/\.svg$/, '_' + a.level + '.svg');
+    return './img/meteoalarm/' + name;
+  }
   function meteoalarmSections(doc, inUk){
     var out = [];
     var nowS = Date.now() / 1000;
@@ -1035,7 +1041,7 @@ try {
         '<a href="https://www.meteoalarm.org/" target="_blank" rel="noopener">MeteoAlarm</a>';
       out.push(buildSection({
         bg: a.color || '#FFDB23', text: red ? 'white' : 'black',
-        icon: './img/meteoalarm/' + (a.icon || 'meteoalarm_000.svg'), iconBg: 'rgba(29,44,78,0.85)',
+        icon: maIcon(a),
         headlineHtml: headline, descriptionHtml: desc
       }));
     });
