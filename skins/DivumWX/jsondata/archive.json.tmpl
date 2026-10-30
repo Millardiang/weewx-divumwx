@@ -275,7 +275,19 @@ null
 "aqi": {
 "pm1_0": $current.pm1_0.format(format_string="%.1f", None_string="null", add_label=False, localize=False),
 "pm2_5": $current.pm2_5.format(format_string="%.1f", None_string="null", add_label=False, localize=False),
-"pm4_0": $current(data_binding=$divumwx_extras_binding).pm4_0.format(format_string="%.1f", None_string="null", add_label=False, localize=False),
+## pm4_0 is only in DivumWX's extras database. Only formatted if it has
+## data: for a field the database doesn't know, WeeWX's value helper
+## formats as ?'pm4_0'? rather than raising, which isn't valid JSON.
+#set $aqiPm40 = "null"
+#try
+#set $aqiPm40Obj = $current(data_binding=$divumwx_extras_binding).pm4_0
+#if $aqiPm40Obj.has_data
+#set $aqiPm40 = $aqiPm40Obj.format(format_string="%.1f", None_string="null", add_label=False, localize=False)
+#end if
+#except
+#pass
+#end try
+"pm4_0": $aqiPm40,
 "pm10_0": $current.pm10_0.format(format_string="%.1f", None_string="null", add_label=False, localize=False)
 },
 
@@ -679,9 +691,16 @@ null
 #except
 #pass
 #end try
+## Only taken if it has data: an obs type the main archive doesn't know
+## doesn't raise here, it prints #errorCatcher's ?'name'? placeholder
+## later, which makes the whole file invalid JSON (and the dashboard then
+## shows every card, because it can't read meta.enabled_cards).
 #if $skyCloudCoverObj is None
 #try
-#set $skyCloudCoverObj = $current.cloudcover
+#set $skyCloudCoverMain = $current.cloudcover
+#if $skyCloudCoverMain.has_data
+#set $skyCloudCoverObj = $skyCloudCoverMain
+#end if
 #except
 #pass
 #end try
@@ -727,9 +746,16 @@ null
 #except
 #pass
 #end try
+## Only taken if it has data: an obs type the main archive doesn't know
+## doesn't raise here, it prints #errorCatcher's ?'name'? placeholder
+## later, which makes the whole file invalid JSON (and the dashboard then
+## shows every card, because it can't read meta.enabled_cards).
 #if $solarThresholdObj is None
 #try
-#set $solarThresholdObj = $current.threshold
+#set $solarThresholdMain = $current.threshold
+#if $solarThresholdMain.has_data
+#set $solarThresholdObj = $solarThresholdMain
+#end if
 #except
 #pass
 #end try

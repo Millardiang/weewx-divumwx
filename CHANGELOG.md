@@ -1,5 +1,29 @@
 # DivumWX Changelog
 
+## 2.0.2 — 30 October 2026
+
+### Version 2.0.2
+- Bug-fix release. `DIVUMWX_VERSION` is now `2.0.2`. The `index.html`
+  header and footer fallback, the `divumwf.html` badge, the README title
+  and `INSTALLATION_GUIDE.md` all say 2.0.2.
+- The install guide downloads from the release tag `ver.2.0.2`.
+
+### Unwanted cards showing
+- On some stations every card showed, including ones turned down at install
+  (Solar Energy, Solar Power Flow, VPD, ET, a second lightning card…).
+- Cause: `archive.json` wasn't valid JSON. Where DivumWX's extras database
+  had no cloud cover (or no sunshine threshold), the template fell back to
+  WeeWX's main archive, which doesn't know that field, and WeeWX wrote its
+  `?'cloudcover'?` placeholder into the file. A station without the extras
+  database got the same for `pm4_0`. The dashboard couldn't read
+  `meta.enabled_cards`, so it showed every card, and everything else that
+  reads `archive.json` failed too.
+- `archive.json.tmpl` now only uses those values when they have data, so a
+  station without them gets `0`/`null`. Checked with a simulator station,
+  with and without the extras database: the file is valid JSON either way.
+- The four dashboard pages also still find the card list in an
+  `archive.json` that isn't valid JSON, rather than showing every card.
+
 ## 2.0.1 — 29 October 2026
 
 ### Version 2.0.1

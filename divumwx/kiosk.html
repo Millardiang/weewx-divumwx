@@ -551,7 +551,15 @@ document.getElementById('kioskCloseBtn').addEventListener('click', () => {
 
 (function(){
   fetch('./jsondata/archive.json' + '?_=' + Date.now(), { cache: 'no-store' })
-    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(r){ return r.ok ? r.text() : null; })
+    .then(function(text){
+      // If archive.json isn't valid JSON (one bad value in the report), still
+      // find the card list in it rather than falling back to showing every card.
+      if (!text) return null;
+      try { return JSON.parse(text); } catch (e) {}
+      var m = text.match(/"enabled_cards"\s*:\s*(\[[^\]]*\])/);
+      try { return m ? { meta: { enabled_cards: JSON.parse(m[1]) } } : null; } catch (e) { return null; }
+    })
     .then(function(data){
       var enabled = data && data.meta && data.meta.enabled_cards;
       if (!Array.isArray(enabled) || enabled.length === 0) return;

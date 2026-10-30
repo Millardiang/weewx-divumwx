@@ -1,6 +1,9 @@
-# Welcome to the DivumWX skin for WeeWX Version 2.0.1
+# Welcome to the DivumWX skin for WeeWX Version 2.0.2
 Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LICENSE Version 3](https://github.com/Millardiang/weewx-divumwx/blob/main/license.txt)
  
+# What's new in 2.0.2
+* **Only the cards you chose** - fixes every card showing, including ones turned down at install, on stations without cloud cover or a solar sensor.
+
 # What's new in 2.0.1
 * **Solar Power Flow kiosk page** (SolarAssistant subscribers) - `solarFlowKiosk.html` shows the flow diagram full screen for a wall tablet, with today's and all-time usage, generation, import, export and peak usage. The charts modal shows the same, and the diagram has a lighter design with new icons.
 * **Boltek** - every stroke of a flash is now counted, and the card's Today matches NexStorm's own day total.

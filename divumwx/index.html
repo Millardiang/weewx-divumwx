@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# index.html version 2.0.1
+# index.html version 2.0.2
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -575,7 +575,7 @@ setInterval(() => {
     </div>
     <div class="footer-center">
       <div class="footer-credit">Charts, Heatmaps, Gauges and Card Images D3 rendered &middot; Weather Icons by Meteocons</div>
-      <div class="footer-version mono">DivumWX v<span id="footerDivumwxVer">2.0.1</span> &middot; WeeWX ver <span id="footerWeewxVer">x.x.x</span>, Python ver <span id="footerPyVer">y.y.y</span>, OS version <span id="footerOsVer">z.z.z &middot; Weather Icons by Meteocons</span></div>
+      <div class="footer-version mono">DivumWX v<span id="footerDivumwxVer">2.0.2</span> &middot; WeeWX ver <span id="footerWeewxVer">x.x.x</span>, Python ver <span id="footerPyVer">y.y.y</span>, OS version <span id="footerOsVer">z.z.z &middot; Weather Icons by Meteocons</span></div>
     </div>
     <div class="footer-right">
       <a href="http://weewx.com" title="WeeWX Weather Software" target="_blank" rel="noopener" class="footer-weewx-link">
@@ -911,7 +911,15 @@ window.addEventListener('load', updateFooterVisibility);
 // ==== CARD VISIBILITY (replaces the old dynamic-script-loader approach) ====
 (function(){
   fetch('./jsondata/archive.json' + '?_=' + Date.now(), { cache: 'no-store' })
-    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(r){ return r.ok ? r.text() : null; })
+    .then(function(text){
+      // If archive.json isn't valid JSON (one bad value in the report), still
+      // find the card list in it rather than falling back to showing every card.
+      if (!text) return null;
+      try { return JSON.parse(text); } catch (e) {}
+      var m = text.match(/"enabled_cards"\s*:\s*(\[[^\]]*\])/);
+      try { return m ? { meta: { enabled_cards: JSON.parse(m[1]) } } : null; } catch (e) { return null; }
+    })
     .then(function(data){
       var enabled = data && data.meta && data.meta.enabled_cards;
       if (!Array.isArray(enabled) || enabled.length === 0) return;
