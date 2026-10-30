@@ -71,6 +71,9 @@ log = logging.getLogger(__name__)
 
 VERSION = "1.0.0"   # divumwx_meteoalarm; based on weewx-meteoalarm 1.0.0
 FEED_URL = "https://feeds.meteoalarm.org/api/v1/warnings/feeds-{slug}"
+# Bump when matching changes, so cached results from older code are thrown away
+# (the cache outlives a restart, and would otherwise hide new matches for cache_max_age).
+MATCH_VERSION = 2
 USER_AGENT = "DivumWX-meteoalarm/%s" % VERSION
 
 # area-code prefix -> feed name
@@ -325,8 +328,12 @@ def fetch_feed(feed, opts):
     return data
 
 
-def area_hits(info, codes, aliases, polygon):
-    """Which of our areas an alert <info> block covers, as dicts code/desc/note."""
+def area_hits(info, codes, aliases, polygon, code_shapes=None):
+    """Which of our areas an alert <info> block covers, as dicts code/desc/note.
+
+    code_shapes ({EMMA_ID: [ring, ...]}) lets an alert that names no area of ours,
+    but is drawn as a polygon or circle (the Met Office tags warnings by forecast
+    region, e.g. "London & South East England"), match the areas its outline crosses."""
     hits = []
     for area in as_list(info.get("area")):
         desc = area.get("areaDesc", "")
@@ -344,16 +351,24 @@ def area_hits(info, codes, aliases, polygon):
                 hits.append({"code": alias + "*", "desc": desc,
                              "note": "EMMA_ID %s matched through %s geocode %s." % (alias, name, value)})
                 matched = True
-        if polygon and not matched:
-            shapes = [parse_cap_polygon(p) for p in as_list(area.get("polygon"))]
-            shapes += [circle_to_polygon(c) for c in as_list(area.get("circle"))]
-            if any(rings_intersect(polygon, s) for s in shapes if s):
-                hits.append({"code": "polygon", "desc": desc,
-                             "note": "Matched because the alert's own outline crosses your polygon."})
+        if matched:
+            continue
+        outlines = [s for s in [parse_cap_polygon(p) for p in as_list(area.get("polygon"))]
+                    + [circle_to_polygon(c) for c in as_list(area.get("circle"))] if s]
+        if not outlines:
+            continue
+        for code, rings in sorted((code_shapes or {}).items()):
+            if any(rings_intersect(o, r) for o in outlines for r in rings):
+                hits.append({"code": code, "desc": desc,
+                             "note": "EMMA_ID %s matched because the warning's outline crosses it." % code})
+                matched = True
+        if polygon and not matched and any(rings_intersect(polygon, s) for s in outlines):
+            hits.append({"code": "polygon", "desc": desc,
+                         "note": "Matched because the alert's own outline crosses your polygon."})
     return hits
 
 
-def collect(feeds, codes, aliases, polygon, now):
+def collect(feeds, codes, aliases, polygon, now, code_shapes=None):
     """{warning id: {language: info}} for current alerts (or starting within 24 h) in our areas."""
     warns = {}
     for feed_name, feed in feeds.items():
@@ -372,7 +387,7 @@ def collect(feeds, codes, aliases, polygon, now):
                 if (effective - now).total_seconds() > 24 * 3600:
                     continue
                 for info in infos:
-                    hits = area_hits(info, codes, aliases, polygon)
+                    hits = area_hits(info, codes, aliases, polygon, code_shapes)
                     if hits:
                         entry = {k: v for k, v in info.items() if k != "area"}
                         entry.update(forus=hits, sent=alert.get("sent"))
@@ -382,7 +397,7 @@ def collect(feeds, codes, aliases, polygon, now):
 
 def load_warnings(opts, areas, codes):
     """Cached warnings, refreshed from the feeds when older than cache_max_age."""
-    signature = {"codes": sorted(codes), "polygon": opts.polygon_text}
+    signature = {"codes": sorted(codes), "polygon": opts.polygon_text, "match": MATCH_VERSION}
     try:
         with open(opts.cache_file, encoding="utf-8") as fh:
             cache = json.load(fh)
@@ -403,7 +418,13 @@ def load_warnings(opts, areas, codes):
         data = fetch_feed(name, opts)
         if data:
             feeds[name] = data
-    warnings = collect(feeds, set(codes), areas.aliases, opts.polygon, datetime.now(timezone.utc))
+    code_shapes = {}
+    for c in codes:
+        entry = areas.index.get(c)
+        if entry:
+            code_shapes[c] = areas.shapes(entry[1]).get(c, [])
+    code_shapes = {c: r for c, r in code_shapes.items() if r}
+    warnings = collect(feeds, set(codes), areas.aliases, opts.polygon, datetime.now(timezone.utc), code_shapes)
     fetched = time.time()
     try:
         with open(opts.cache_file, "w", encoding="utf-8") as fh:
