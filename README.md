@@ -4,6 +4,7 @@ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LIC
 # What's new in 2.0.4
 * **MeteoAlarm** - UK warnings issued for a whole region (the Met Office's way) now reach the alert bar for the counties inside it, and the warning icons are black symbols in a triangle of the warning's colour.
 * **Solar Power Flow** - the kiosk and the charts modal show today's and the all-time peak solar efficiency.
+* **Country flag** - the station's country flag after the site title, from its time zone or `[DivumWXCards] country_code`.
 * **Fixes** - the Nearby METAR popup shows its weather icon again, and the AuroraWatch UK and UKHSA health alerts only show for stations in the UK.
 
 # What's new in 2.0.3

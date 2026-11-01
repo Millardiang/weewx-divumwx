@@ -81,6 +81,13 @@ Provides three tags:
                                works; the frontend fetch is the other
                                half (see cardStationImage.js).
 
+    $divumwx_country_code    — the station's country as two lower-case
+                               letters (e.g. "gb"), for the flag after the
+                               site title: [DivumWXCards] country_code if
+                               set ('none' hides the flag), else the time
+                               zone's country from the system's zone.tab.
+                               JSON null when unknown.
+
     $divumwx_in_uk           — the installer's own "are you in the UK?"
                                answer ([DivumWXCards] in_uk, set by
                                install.py's in_england/in_uk prompts),
@@ -169,6 +176,79 @@ except ImportError:  # divumwx_version.py missing (partial manual install)
     DIVUMWX_VERSION = None
 
 
+# ---------------------------------------------------------------------------
+# The station's country, for the flag after the site title.
+ZONEINFO = '/usr/share/zoneinfo'
+
+
+def system_timezone():
+    """The system time zone name, worked out the same way as archive.json's "timezone"."""
+    try:
+        with open('/etc/timezone') as fh:
+            name = fh.read().strip()
+        if name:
+            return name
+    except OSError:
+        pass
+    try:
+        return os.path.realpath('/etc/localtime').split('zoneinfo/')[-1]
+    except OSError:
+        return 'UTC'
+
+
+def timezone_country(tz_name, zoneinfo=ZONEINFO):
+    """ISO 3166 country code (lower case) of an IANA time zone, from the
+    system's zone.tab, or None (UTC, Etc/..., or not found). Old names such
+    as 'GB' or 'US/Eastern' are followed to the zone they link to."""
+    if not tz_name:
+        return None
+    zones = {}
+    for tab in ('zone.tab', 'zone1970.tab'):   # zone1970.tab lists several codes: keep the first
+        try:
+            with open(os.path.join(zoneinfo, tab), encoding='utf-8') as fh:
+                for line in fh:
+                    if line.startswith('#') or not line.strip():
+                        continue
+                    parts = line.split('\t')
+                    if len(parts) >= 3:
+                        zones.setdefault(parts[2].strip(), parts[0].split(',')[0].strip().lower())
+        except OSError:
+            continue
+    if tz_name in zones:
+        return zones[tz_name]
+    links = {}
+    try:
+        with open(os.path.join(zoneinfo, 'tzdata.zi'), encoding='utf-8') as fh:
+            for line in fh:
+                if line.startswith('L '):
+                    _l, target, alias = line.split()[:3]
+                    links[alias] = target
+    except OSError:
+        pass
+    seen = set()
+    while tz_name in links and tz_name not in seen:
+        seen.add(tz_name)
+        tz_name = links[tz_name]
+        if tz_name in zones:
+            return zones[tz_name]
+    try:   # a zone file that is a symlink to another
+        real = os.path.relpath(os.path.realpath(os.path.join(zoneinfo, tz_name)), zoneinfo)
+        return zones.get(real)
+    except (OSError, ValueError):
+        return None
+
+
+def station_country(cards_section):
+    """[DivumWXCards] country_code if set ('none' hides the flag), else the
+    time zone's country. Two lower-case letters, or None."""
+    raw = str(cards_section.get('country_code', '') or '').strip().lower()
+    if raw in ('none', 'off', 'no', 'false'):
+        return None
+    if raw:
+        return raw if (len(raw) == 2 and raw.isalpha()) else None
+    return timezone_country(system_timezone())
+
+
 class DivumwxCards(SearchList):
 
     def __init__(self, generator):
@@ -224,6 +304,10 @@ class DivumwxCards(SearchList):
         # accepts 'true'/'yes'/'1' etc. too, same as the rest of WeeWX.
         in_uk_raw = cards_section.get('in_uk', None)
         in_uk = to_bool(in_uk_raw) if in_uk_raw not in (None, '') else None
+
+        # country_code: the station's country for the flag after the site
+        # title -- [DivumWXCards] country_code, else from the time zone.
+        country_code = station_country(cards_section)
 
         # page_background: the installer's "seasonal or solid" answer
         # ([DivumWXCards] page_background). Anything unset or unrecognised
@@ -287,6 +371,7 @@ class DivumwxCards(SearchList):
             'divumwx_station_image_title': json.dumps(station_image_title),
             'divumwx_station_image_path': json.dumps(station_image_path),
             'divumwx_in_uk': json.dumps(in_uk),
+            'divumwx_country_code': json.dumps(country_code),
             'divumwx_page_background': json.dumps(page_background),
             'divumwx_solar_array_watts': json.dumps(solar_array_watts),
             # A plain string (not JSON): a data binding name for template tags.

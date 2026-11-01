@@ -8,6 +8,18 @@
   README title and `INSTALLATION_GUIDE.md` all say 2.0.4.
 - The install guide downloads from the release tag `ver.2.0.4`.
 
+### Country flag after the site title
+- The header shows the station's country flag after the title, on every
+  page with the shared header (`siteHeader.js` 1.0.5). The country is
+  `[DivumWXCards] country_code` (two letters, e.g. `ie`; `none` hides the
+  flag) or, when that isn't set, the country of the station's time zone
+  from the system's `zone.tab`. It's published as `archive.json`
+  `meta.country_code` (`divumwx_cards.py`). Stations on UTC show no flag
+  until `country_code` is set.
+- `img/flags/` was missing 25 countries, including every country starting
+  with M (Mexico, Malaysia, Malta, Morocco...), Belarus and Antarctica.
+  They're added from flag-icons 7.6.0 (MIT), the set the others come from.
+
 ### MeteoAlarm: UK warnings by region
 - The Met Office tags its warnings in the MeteoAlarm feed by forecast region
   (e.g. "London & South East England") and gives each an outline, not the

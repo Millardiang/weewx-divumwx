@@ -1,6 +1,6 @@
 /*
 ##############################################################################################
-# siteHeader.js version 1.0.4
+# siteHeader.js version 1.0.5
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -21,8 +21,45 @@ function includeHTML(callback) {
       .then(function(res){ if (!res.ok) throw new Error('HTTP ' + res.status); return res.text(); })
       .then(function(html){ el.innerHTML = html; el.removeAttribute('w3-include-html'); })
       .catch(function(e){ console.warn('siteHeader: include failed for', file, '\u2014', e.message); el.innerHTML = ''; })
-      .finally(function(){ pending--; if (pending === 0 && callback) callback(); });
+      .finally(function(){
+        pending--;
+        if (pending === 0) { addStationFlag(); if (callback) callback(); }
+      });
   });
+}
+
+// ---------------------------------------------------------------------
+// The station's country flag after the site title: img/flags/<cc>.svg for
+// archive.json meta.country_code ([DivumWXCards] country_code, else the
+// station's time zone). Nothing is shown when there's no code or no flag.
+// ---------------------------------------------------------------------
+function addStationFlag(){
+  var title = document.querySelector('.site-title');
+  var brand = title && title.querySelector('.brand-text');
+  if (!brand || title.querySelector('.site-flag')) return;
+  // Pages in skyfield/ and celestial/ sit one folder down.
+  var dirs = window.location.pathname.split('/').filter(Boolean);
+  if (dirs.length && dirs[dirs.length - 1].indexOf('.') !== -1) dirs.pop();
+  var base = (dirs.length && ['skyfield', 'celestial'].indexOf(dirs[dirs.length - 1]) !== -1) ? '../' : './';
+  fetch(base + 'jsondata/archive.json?_=' + Date.now(), { cache: 'no-store' })
+    .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function(data){
+      var cc = data && data.meta && data.meta.country_code;
+      if (typeof cc !== 'string' || !/^[a-z]{2}$/.test(cc) || title.querySelector('.site-flag')) return;
+      var img = document.createElement('img');
+      img.className = 'site-flag';
+      img.src = base + 'img/flags/' + cc + '.svg';
+      img.alt = '';
+      try {
+        var lang = (window.DivumWXI18N && DivumWXI18N.getLanguage && DivumWXI18N.getLanguage()) || undefined;
+        img.title = new Intl.DisplayNames(lang ? [String(lang).replace('_', '-')] : undefined, { type: 'region' }).of(cc.toUpperCase());
+      } catch (e) {}
+      img.style.cssText = 'height:.85em;width:auto;aspect-ratio:4/3;margin-left:.5em;vertical-align:-.06em;' +
+        'border-radius:2px;box-shadow:0 0 0 1px rgba(0,0,0,.18);';
+      img.onerror = function(){ img.remove(); };
+      brand.insertAdjacentElement('afterend', img);
+    })
+    .catch(function(e){ console.warn('siteHeader: no station flag \u2014', e.message); });
 }
 
 // ---------------------------------------------------------------------
