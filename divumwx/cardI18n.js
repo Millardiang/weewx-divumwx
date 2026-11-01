@@ -1,7 +1,7 @@
 try {
 /*
 ##############################################################################################
-# cardI18n.js version 1.0.1
+# cardI18n.js version 1.0.2
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -61,7 +61,7 @@ try {
     cz: 'cz',
     da: 'dk',
     de: 'de',
-    en: 'gb',
+    en: 'gb-eng',   // Standard (UK) English: England's flag, as en_US has the US flag
     en_US: 'us',
     es: 'es',
     eu: 'es-pv',
@@ -85,6 +85,12 @@ try {
   };
 
   function countryCodeToEmoji(cc){
+    // England, Scotland and Wales: the black flag + tag letters + cancel tag.
+    var nation = /^gb-(eng|sct|wls)$/.exec(cc || '');
+    if (nation) {
+      return String.fromCodePoint.apply(null, [0x1F3F4].concat(
+        ('gb' + nation[1]).split('').map(function(c){ return 0xE0000 + c.charCodeAt(0); }), [0xE007F]));
+    }
     if (!cc || cc.length !== 2) return '';
     var A = 0x1F1E6, base = 'a'.charCodeAt(0);
     return String.fromCodePoint(A + (cc.charCodeAt(0) - base)) +
