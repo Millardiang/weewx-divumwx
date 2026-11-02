@@ -1,6 +1,10 @@
-# Welcome to the DivumWX skin for WeeWX Version 2.0.4
+# Welcome to the DivumWX skin for WeeWX Version 2.1.0
 Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LICENSE Version 3](https://github.com/Millardiang/weewx-divumwx/blob/main/license.txt)
  
+# What's new in 2.1.0
+* **Boltek via NSD Bridge** - the Boltek service reads NSD Bridge's `NSDRealtime.json` (NSD Bridge replaces NSBackend/NSList on the NexStorm PC), from a file or straight from NSD Bridge over HTTP. In-cloud strikes are now counted alongside cloud-to-ground, and the strike map shows every strike from the last two hours. NexStorm's `ngxarchive.json` still works.
+* **Ready-made Boltek files** - `[BoltekLightning] convert = false` uses `boltek.json` and `boltek_history.json` exactly as supplied, with no conversion or database, and can copy them into place from a path or URL.
+
 # What's new in 2.0.4
 * **MeteoAlarm** - UK warnings issued for a whole region (the Met Office's way) now reach the alert bar for the counties inside it, and the warning icons are black symbols in a triangle of the warning's colour.
 * **Solar Power Flow** - the kiosk and the charts modal show today's and the all-time peak solar efficiency.

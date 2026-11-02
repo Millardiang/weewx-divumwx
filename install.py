@@ -2479,7 +2479,12 @@ def apply_boltek_merge(cfg, site_root=None):
     and needs [BoltekLightning] plus its own data binding and database.
     WeeWX itself creates the database file and its table the first time
     the service opens the binding, so nothing else is needed on disk. On a
-    station without a Boltek the service just waits for ngxarchive.json.
+    station without a Boltek the service just waits for its file.
+
+    The service reads NSD Bridge's NSDRealtime.json or NexStorm's
+    ngxarchive.json (it tells them apart from the contents). New installs
+    get source_file = NSDRealtime.json; an existing ngxarchive_file (the
+    key's name before Boltek service 1.3.0) is left as it is and still used.
 
     1.0.0 read NSDRealtime.txt; its realtime_file and distance_unit keys are
     removed when they still have their defaults (they're no longer used).
@@ -2494,8 +2499,9 @@ def apply_boltek_merge(cfg, site_root=None):
         cfg['BoltekLightning'] = {}
         report['boltek_section_created'] = True
     bl = cfg['BoltekLightning']
+    if 'source_file' not in bl and 'ngxarchive_file' not in bl:
+        bl['source_file'] = 'NSDRealtime.json'
     defaults = [
-        ('ngxarchive_file', 'ngxarchive.json'),
         ('close_distance', '16'),
         ('poll_interval', '10'),
         ('archive_interval', '300'),
@@ -2504,6 +2510,7 @@ def apply_boltek_merge(cfg, site_root=None):
         ('json_file', 'jsondata/boltek.json'),
         ('history_file', 'jsondata/boltek_history.json'),
         ('binding', DIVUMWX_BOLTEK_BINDING),
+        ('convert', 'true'),
     ]
     for key, old in (('realtime_file', 'NSDRealtime.txt'), ('distance_unit', 'km')):
         if bl.get(key) == old:
@@ -2512,12 +2519,20 @@ def apply_boltek_merge(cfg, site_root=None):
     for key, value in defaults:
         if key not in bl:
             bl[key] = value
-    if hasattr(bl, 'comments') and not bl.comments.get('ngxarchive_file'):
-        bl.comments['ngxarchive_file'] = [
-            "# Where Boltek's NexStorm puts ngxarchive.json: relative to the",
-            "# DivumWX site folder, or an absolute path.",
+    src_key = 'source_file' if 'source_file' in bl else 'ngxarchive_file'
+    if hasattr(bl, 'comments') and not bl.comments.get(src_key):
+        bl.comments[src_key] = [
+            "# NSD Bridge's NSDRealtime.json (or NexStorm's ngxarchive.json): a path",
+            "# relative to the DivumWX site folder, an absolute path, or a URL such",
+            "# as http://nexstorm-pc:8090/data/NSDRealtime.json.",
         ]
         bl.comments['close_distance'] = ["# Strikes this close (km) count as close strikes."]
+    if hasattr(bl, 'comments') and not bl.comments.get('convert'):
+        bl.comments['convert'] = [
+            "# false: boltek.json and boltek_history.json are supplied ready-made, so",
+            "# nothing is converted. If they're elsewhere, set direct_json_source and",
+            "# direct_history_source (paths or URLs) and they're copied into place.",
+        ]
 
     cfg.setdefault('DataBindings', {})
     if DIVUMWX_BOLTEK_BINDING not in cfg['DataBindings']:
@@ -3968,8 +3983,8 @@ class DivumwxInstaller(ExtensionInstaller):
                         level=1)
         if detector == 'boltek':
             printer.out("Using the Boltek Lightning card (cardBoltekLightning) in place of "
-                        "cardLightning. Point [BoltekLightning] ngxarchive_file at NexStorm's "
-                        "ngxarchive.json if it isn't in the DivumWX web folder.", level=1)
+                        "cardLightning. Point [BoltekLightning] source_file at NSD Bridge's "
+                        "NSDRealtime.json (a path or a URL) if it isn't in the DivumWX web folder.", level=1)
 
         # --- [Timelapse] ---
         # Deliberately OUTSIDE the "if 'enabled_cards' not in ..." gate above:

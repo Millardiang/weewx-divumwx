@@ -1,5 +1,79 @@
 # DivumWX Changelog
 
+## 2.1.0 — 2 November 2026
+
+### Version 2.1.0
+- Feature release. `DIVUMWX_VERSION` is now `2.1.0`. The `index.html`
+  header and footer fallback, the `divumwf.html` badge, the README title and
+  `INSTALLATION_GUIDE.md` all say 2.1.0.
+- The install guide downloads from the release tag `ver.2.1.0`.
+- `cardsBundleNew.js` 1.1.1 (`cardBoltekLightning.js` 1.1.4), with its new
+  `?v=` hash on `index.html`, `lexendIndex.html` 1.1.1, `hyperIndex.html`
+  1.1.1 and `kiosk.html` 1.0.1. `js/lightningLive.js` 1.0.2.
+
+### Boltek: reads NSD Bridge's NSDRealtime.json
+- The Boltek service (`divumwx_boltek.py` 1.3.0) now reads **NSD Bridge's
+  `NSDRealtime.json`**, the file written by NSD Bridge (the replacement for
+  NSBackend/NSList on the NexStorm PC). It still reads NexStorm's
+  `ngxarchive.json`; it tells the two apart from the contents, so nothing
+  else needs setting.
+- **`source_file` can be a URL**, e.g.
+  `http://nexstorm-pc:8090/data/NSDRealtime.json` from NSD Bridge's built-in
+  web server, so no FTP or shared folder is needed. Unchanged content is
+  skipped, and if the PC can't be reached the card goes red with the reason.
+- `[BoltekLightning] source_file` replaces `ngxarchive_file`. The old key is
+  still read, and existing settings are left alone on upgrade. New installs
+  get `source_file = NSDRealtime.json`.
+- **In-cloud strikes are counted.** NSDRealtime.json says whether a strike
+  is cloud-to-ground or in-cloud, so the database's `ic` column (always 0
+  with ngxarchive.json) is filled in. The modal's chart shows the CG/IC
+  split, and labels read `+IC` / `-IC` as well as `+CG` / `-CG`.
+- The card's **Today** uses NSD Bridge's `strikes_today`, as it used
+  NexStorm's `StrikeCount` before. Distances in miles (`distance_unit = mi`
+  in NSD Bridge) are converted to km.
+- NSDRealtime.json lists all of today's strikes, so on the first start, and
+  after WeeWX has been stopped, the day's strikes go into the database at
+  the times they happened. As before, none is counted twice, including
+  repeated strokes of one flash.
+- If NSD Bridge's strike list is switched off (`realtime_json_strikes`), the
+  card shows a message saying which setting to turn on.
+- Checked against a real NSDRealtime.json from NSD Bridge, read both as a
+  file and over HTTP: the strike count, the CG/IC split and the last strike
+  matched NSD Bridge exactly.
+
+### Boltek strike map: everything from boltek.json
+- The strike map takes all its strikes from `jsondata/boltek.json`. It
+  never reads NexStorm's or NSD Bridge's files itself, so it also works
+  with `convert = false`.
+- `boltek.json`'s `realtime.recent_strikes` now holds every strike from the
+  map's last two hours (at least the newest 100, at most 5,000), not just
+  the newest 100. With NSDRealtime.json's full-day list, a busy storm is no
+  longer cut short on the map.
+- The map's caption and status messages name the actual source ("data: NSD
+  Bridge" or "NexStorm") instead of always "NexStorm"
+  (`modalBoltekLightning.html` 1.3.2). The card's status tooltip says
+  "Receiving lightning data".
+- Checked in a browser with 400 strikes over three hours: all 266 from the
+  last two hours were drawn, and the page requested only `boltek.json`,
+  `boltek_history.json`, `archive.json` and the map outlines.
+
+### Boltek: ready-made boltek.json and boltek_history.json
+- New `[BoltekLightning] convert` setting (default `true`). With
+  `convert = false` the service reads no source file, converts nothing and
+  doesn't use the Boltek database. The card and modal use `boltek.json` and
+  `boltek_history.json` exactly as supplied.
+- If the ready-made files are elsewhere, `direct_json_source` and
+  `direct_history_source` (paths or URLs) are copied to `json_file` /
+  `history_file` every `poll_interval` when they change. A half-written or
+  invalid file is never copied over a good one.
+- The installer adds `convert = true` to existing `[BoltekLightning]`
+  sections, so nothing changes until it is set to `false`.
+
+### Credits
+- The Boltek files (`divumwx_boltek.py`, `modalBoltekLightning.html`,
+  `cardBoltekLightning.js` in `cardsBundleNew.js`, `js/lightningLive.js`)
+  are now copyright Ian Millard and Mike Isaac.
+
 ## 2.0.4 — 31 October 2026
 
 ### Version 2.0.4

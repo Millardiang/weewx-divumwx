@@ -1,7 +1,7 @@
 /*
 ##############################################################################################
-# lightningLive.js version 1.0.1
-#  Copyright (C) 2026 Ian Millard, Sean Balfour
+# lightningLive.js version 1.0.2
+#  Copyright (C) 2026 Ian Millard, Mike Isaac
 #  GPLv3
 ##############################################################################################
   Live lightning map: strikes from the Blitzortung.org community network

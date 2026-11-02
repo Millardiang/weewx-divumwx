@@ -1,23 +1,45 @@
 """
 ##############################################################################################
-# divumwx_boltek.py version 1.2.1
-#  Copyright (C) 2026 Ian Millard, Sean Balfour
+# divumwx_boltek.py version 1.3.0
+#  Copyright (C) 2026 Ian Millard, Mike Isaac
 #  GPLv3
 ##############################################################################################
 
 Boltek lightning detector support for DivumWX.
 
-Boltek's NexStorm writes ngxarchive.json, its native record of recent
-strikes, and keeps rewriting it while it runs:
+Strikes come from one of two files; the format is recognised from the
+contents, so either works with the same settings:
+
+1. NSD Bridge's NSDRealtime.json (NSD Bridge replaces the old NSBackend /
+   NSList on the NexStorm PC). Rewritten every 10 seconds:
+
+    {"timestamp": 1793180215,                   when written (Unix s)
+     "strikes_today": 102,                      NSD Bridge's day total
+     "rate_per_min": 18, ...,                   (other realtime values)
+     "station": {"lat": 51.4545, "lon": -2.5879, "distance_unit": "km"},
+     "strikes_window": "today",                 or "N min"
+     "strikes_count": 102,
+     "strikes": [                               newest first
+        {"timestamp": 1793180213,              strike time (Unix s)
+         "direction": 183, "bearing": 183.4,    degrees true (alignment applied)
+         "distance": 261,                       in station.distance_unit
+         "type": "cc+",                         cg+ cg- cc+ cc- (cc = in-cloud)
+         "lat": 49.1112, "lon": -2.8005}, ...]}   strike position (null if
+                                                NSD Bridge has no station set)
+
+   NSD Bridge can also serve it over HTTP, so source_file may be a URL such
+   as http://nexstorm-pc:8090/data/NSDRealtime.json (set http_listen =
+   0.0.0.0:8090 in nsdbridge.ini).
+
+2. NexStorm's own ngxarchive.json (used by 1.1.x - 1.2.x):
 
     {"TimestampEpoch": 1792751132017,          when written (Unix ms)
      "StationLat": 51.00, "StationLon": -3.11,
      "SoftwareVersion": "1.9.6.8317", "DetectorModel": "LD-350",
      "AntennaAlignment": 0,
-     "StrikeCount": 4623,                       a NexStorm total, NOT used (see below)
+     "StrikeCount": 4623,                       NexStorm's day total
      "StormCount": 0,
-     "StrikeData": [                            one entry per strike, recent ones
-                                                (a rolling window, ~2 hours)
+     "StrikeData": [                            recent strikes (~2 hours)
         {"time": 35105,                         seconds after local midnight
          "millis": 1792745105000,               strike time (Unix ms)
          "dist": 617,                           km
@@ -29,13 +51,14 @@ strikes, and keeps rewriting it while it runs:
 
 Distances and bearings are measured from the station position in weewx.conf
 ([Station] latitude/longitude), worked out from each strike's lat/lon, so
-they're right even if NexStorm's StationLat/Lon differ (NexStorm's own
-dist/bng are used only for a strike without a position, or if weewx.conf
-has no position). boltek.json's station_lat/lon are weewx.conf's.
+they're right even if the file's station position differs (the file's own
+distance/bearing are used only for a strike without a position, or if
+weewx.conf has no position). boltek.json's station_lat/lon are weewx.conf's.
 
-(dist and bng agree with the strike's lat/lon to within 1 km and 0.1 deg.
-type/polarity are read as above; compoundType, correlated and NMEAChecksum
-aren't identified yet and are kept but not used.)
+The file's day total (strikes_today / StrikeCount) is passed on in
+boltek.json as realtime.strike_count for the card's Today; it isn't used to
+count strikes. NSDRealtime.json tells cloud-to-ground from in-cloud, so its
+strikes fill the database's cg and ic columns; ngxarchive.json's only cg.
 
 BoltekLightningService reads it every poll_interval seconds and:
 
@@ -55,16 +78,17 @@ BoltekLightningService reads it every poll_interval seconds and:
     (including the latest strikes, for maps), and jsondata/boltek_history.json
     (hourly and daily totals) for its chart & records modal.
 
-It runs on its own background thread, so a slow or missing file never
+It runs on its own background thread, so a slow or missing file (or URL) never
 holds up WeeWX's loop. If the file isn't there yet the service just waits
 quietly (one log line), so it's safe on stations without a Boltek.
 
 weewx.conf (written by install.py on first install; every key optional):
 
     [BoltekLightning]
-        # Where NexStorm puts ngxarchive.json. Relative paths are taken
-        # from the DivumWX site folder; absolute paths are used as-is.
-        ngxarchive_file = ngxarchive.json
+        # NSD Bridge's NSDRealtime.json (or NexStorm's ngxarchive.json):
+        # a path relative to the DivumWX site folder, an absolute path, or
+        # an http(s):// URL. (ngxarchive_file, its old name, still works.)
+        source_file = NSDRealtime.json
         # Strikes this close (km) count as close strikes.
         close_distance = 16
         # Seconds between reads of the file.
@@ -78,6 +102,16 @@ weewx.conf (written by install.py on first install; every key optional):
         # Output for the card, relative to the site folder.
         json_file = jsondata/boltek.json
         history_file = jsondata/boltek_history.json
+        # false: boltek.json and boltek_history.json are supplied ready-made
+        # (e.g. by another DivumWX station), so source_file isn't read,
+        # nothing is converted and the Boltek database isn't used.
+        convert = true
+        # With convert = false, where the ready-made files come from (a path
+        # relative to the site folder, an absolute path, or a URL). They're
+        # copied to json_file / history_file whenever they change. Leave
+        # blank if they're already written straight to those paths.
+        direct_json_source =
+        direct_history_source =
         binding = boltek_binding
 
     [DataBindings]
@@ -97,8 +131,10 @@ import json
 import logging
 import math
 import os
+import hashlib
 import threading
 import time
+import urllib.request
 
 import weewx
 import weewx.manager
@@ -107,7 +143,7 @@ from weeutil.weeutil import to_int
 
 log = logging.getLogger(__name__)
 
-BOLTEK_VERSION = '1.2.1'
+BOLTEK_VERSION = '1.3.0'
 
 # One record per archive_interval (dateTime is the END of the interval).
 # 'strikes', 'cg', 'ic', 'close' and 'noise' are counts during the interval;
@@ -142,8 +178,11 @@ schema = [
     ('session_noise', 'INTEGER'),
 ]
 
-CG_TYPE = 1                 # StrikeData 'type' for cloud-to-ground
-RECENT_IN_JSON = 100        # latest strikes passed on in boltek.json
+CG_TYPE = 1                 # 'type' for cloud-to-ground (ngxarchive's value)
+IC_TYPE = 0                 # 'type' given to NSDRealtime.json's in-cloud strikes
+RECENT_IN_JSON = 100        # strikes always passed on in boltek.json (newest)
+MAP_WINDOW = 2 * 3600       # ...plus every strike from this long ago, for the strike map
+MAP_MAX = 5000              # but never more than this many
 TENDENCY = {0: 'Steady', 1: 'Approaching', 2: 'Receding'}
 
 
@@ -154,12 +193,17 @@ def _num(v, cast=float):
         return None
 
 
-def type_label(stype, polarity):
-    """'+CG' / '-CG' for cloud-to-ground strikes; 'Type n' otherwise."""
+def type_label(stype, polarity, ic=False):
+    """'+CG' / '-CG' for cloud-to-ground strikes, '+IC' / '-IC' for in-cloud
+    ones (known only from NSDRealtime.json); 'Type n' otherwise."""
     if stype is None:
         return None
     sign = '+' if polarity == 1 else '-' if polarity == 0 else ''
-    return sign + 'CG' if stype == CG_TYPE else 'Type %d' % stype
+    if stype == CG_TYPE:
+        return sign + 'CG'
+    if ic:
+        return sign + 'IC'
+    return 'Type %d' % stype
 
 
 def distance_bearing(lat1, lon1, lat2, lon2):
@@ -206,7 +250,7 @@ def parse_strike(entry, station=None):
         'km': None if km is None else round(km, 1),
         'bearing': None if bng is None else round(bng % 360, 1),
         'lat': lat, 'lon': lon,
-        'type': stype, 'polarity': pol,
+        'type': stype, 'polarity': pol, 'ic': False,
         'label': type_label(stype, pol),
         # A strike's identity: its time plus position (two strikes in the
         # same millisecond would be at different places).
@@ -227,6 +271,7 @@ def parse_ngxarchive(text, station=None):
     strikes = sorted((s for s in (parse_strike(e, station) for e in raw) if s), key=lambda s: s['ms'])
     ts = _num(doc.get('TimestampEpoch'))
     return {
+        'format': 'ngxarchive',
         'file_time': None if not ts else int(ts / 1000.0 if ts > 1e11 else ts),
         'strike_count': _num(doc.get('StrikeCount'), int),
         'storm_count': _num(doc.get('StormCount'), int),
@@ -245,6 +290,92 @@ def parse_ngxarchive(text, station=None):
     }
 
 
+NSD_TYPES = {'cg+': (CG_TYPE, 1, False), 'cg-': (CG_TYPE, 0, False),
+             'cc+': (IC_TYPE, 1, True), 'cc-': (IC_TYPE, 0, True)}
+MILE_KM = 1.609344
+
+
+def parse_nsd_strike(entry, station=None, km_per_unit=1.0):
+    """One NSDRealtime.json 'strikes' entry -> dict (as parse_strike), or
+    None if it has no usable time."""
+    if not isinstance(entry, dict):
+        return None
+    t = _num(entry.get('timestamp'), int)
+    if not t:
+        return None
+    stype, pol, ic = NSD_TYPES.get(str(entry.get('type', '')).lower(), (None, None, False))
+    lat, lon = _num(entry.get('lat')), _num(entry.get('lon'))
+    km = _num(entry.get('distance'))
+    if km is not None:
+        km *= km_per_unit
+    bng = _num(entry.get('bearing'))
+    if bng is None:
+        bng = _num(entry.get('direction'))
+    direction = _num(entry.get('direction'), int)
+    if station and lat is not None and lon is not None:
+        km, bng = distance_bearing(station[0], station[1], lat, lon)
+    return {
+        'ms': t * 1000,
+        't': t,
+        'km': None if km is None else round(km, 1),
+        'bearing': None if bng is None else round(bng % 360, 1),
+        'lat': lat, 'lon': lon,
+        'type': stype, 'polarity': pol, 'ic': ic,
+        'label': type_label(stype, pol, ic),
+        # Identity: time (whole seconds), plus NSD Bridge's whole-degree
+        # direction and distance as it stores them, so the same strike is
+        # recognised however it reappears (e.g. restored after a restart).
+        'key': 'nsd/%d/%s/%s/%s' % (t, direction, entry.get('distance'), entry.get('type')),
+    }
+
+
+def parse_nsdrealtime(doc, station=None):
+    """NSD Bridge's NSDRealtime.json (already decoded) -> dict, as
+    parse_ngxarchive returns."""
+    st = doc.get('station') if isinstance(doc.get('station'), dict) else {}
+    unit = str(st.get('distance_unit') or 'km').lower()
+    km_per_unit = MILE_KM if unit == 'mi' else 1.0
+    raw = doc.get('strikes')
+    if not isinstance(raw, list):
+        raise ValueError("NSDRealtime.json has no strike list: set realtime_json_strikes=true "
+                         "in nsdbridge.ini (NSD Bridge 1.2 or later)")
+    strikes = sorted((s for s in (parse_nsd_strike(e, station, km_per_unit) for e in raw) if s),
+                     key=lambda s: s['ms'])
+    ts = _num(doc.get('timestamp'), int)
+    file_lat, file_lon = _num(st.get('lat')), _num(st.get('lon'))
+    return {
+        'format': 'nsdbridge',
+        'file_time': ts or None,
+        'strike_count': _num(doc.get('strikes_today'), int),
+        'storm_count': None,
+        'storms': [],
+        'strikes': strikes,
+        'strikes_window': doc.get('strikes_window'),
+        'detector_model': None,
+        'software_version': 'NSD Bridge',
+        'antenna_alignment': None,
+        'station_lat': station[0] if station else file_lat,
+        'station_lon': station[1] if station else file_lon,
+        'nexstorm_lat': file_lat,
+        'nexstorm_lon': file_lon,
+        'station_source': 'weewx.conf' if station else ('NSD Bridge' if file_lat is not None else None),
+    }
+
+
+def parse_source(text, station=None):
+    """The file's contents -> dict, whichever format it is. Raises
+    ValueError if it can't be read."""
+    try:
+        doc = json.loads(text.lstrip('\ufeff'))
+    except ValueError as e:
+        raise ValueError('not valid JSON (%s)' % e)
+    if isinstance(doc, dict) and 'StrikeData' in doc:
+        return parse_ngxarchive(text, station)
+    if isinstance(doc, dict) and ('strikes_today' in doc or 'strikes' in doc) and 'timestamp' in doc:
+        return parse_nsdrealtime(doc, station)
+    raise ValueError("neither NSD Bridge's NSDRealtime.json nor NexStorm's ngxarchive.json")
+
+
 class BoltekLightningService(StdService):
 
     def __init__(self, engine, config_dict):
@@ -258,7 +389,11 @@ class BoltekLightningService(StdService):
         site_root = str(bc.get('site_root', 'divumwx')).strip()
         site = os.path.join(html_root, site_root) if site_root else html_root
 
-        self.ngxarchive_file = os.path.join(site, bc.get('ngxarchive_file', 'ngxarchive.json'))
+        # source_file (ngxarchive_file before 1.3.0): a path or an http(s) URL.
+        src = str(bc.get('source_file') or bc.get('ngxarchive_file') or 'NSDRealtime.json').strip()
+        self.source_is_url = src.lower().startswith(('http://', 'https://'))
+        self.ngxarchive_file = src if self.source_is_url else os.path.join(site, src)
+        self.source_file = self.ngxarchive_file
         self.json_file = os.path.join(site, bc.get('json_file', 'jsondata/boltek.json'))
         self.history_file = os.path.join(site, bc.get('history_file', 'jsondata/boltek_history.json'))
         self.close_km = float(bc.get('close_distance', 16))
@@ -269,8 +404,30 @@ class BoltekLightningService(StdService):
         self.stale_after = max(60, to_int(bc.get('stale_after', 600)))
         self.binding = bc.get('binding', 'boltek_binding')
         self.config_dict = config_dict
+        # convert = false: boltek.json and boltek_history.json are supplied
+        # ready-made, so nothing is read, converted or stored here. If they
+        # are somewhere else (a path or a URL), they're copied into place.
+        self.convert = str(bc.get('convert', 'true')).strip().lower() not in ('false', 'no', 'off', '0')
+        self.direct_sources = []
+        for key, dst in (('direct_json_source', self.json_file), ('direct_history_source', self.history_file)):
+            v = str(bc.get(key) or '').strip()
+            if v:
+                is_url = v.lower().startswith(('http://', 'https://'))
+                path = v if is_url else os.path.join(site, v)
+                if is_url or os.path.abspath(path) != os.path.abspath(dst):
+                    self.direct_sources.append((path, dst))
 
         self._stop = threading.Event()
+        if not self.convert:
+            self._thread = threading.Thread(target=self._run_direct, name='BoltekLightning', daemon=True)
+            self._thread.start()
+            if self.direct_sources:
+                log.info("Boltek lightning %s: convert = false; copying %s every %ss"
+                         % (BOLTEK_VERSION, ', '.join('%s -> %s' % x for x in self.direct_sources), self.poll_interval))
+            else:
+                log.info("Boltek lightning %s: convert = false; using %s and %s as supplied (nothing converted)"
+                         % (BOLTEK_VERSION, self.json_file, self.history_file))
+            return
         self._thread = threading.Thread(target=self._run, name='BoltekLightning', daemon=True)
         self._thread.start()
         log.info("Boltek lightning %s: reading %s every %ss, writing %s, database binding %s, "
@@ -283,6 +440,18 @@ class BoltekLightningService(StdService):
         self._stop.set()
         if self._thread.is_alive():
             self._thread.join(timeout=10)
+
+    def _run_direct(self):
+        """convert = false: keep the ready-made files in place."""
+        if not self.direct_sources:
+            return              # they're already where the dashboard reads them
+        copier = DirectCopier(self.direct_sources, self.poll_interval)
+        while not self._stop.is_set():
+            try:
+                copier.tick()
+            except Exception as e:  # never take WeeWX down with us
+                log.error("Boltek lightning: copying ready-made files: %s" % e)
+            self._stop.wait(self.poll_interval)
 
     def _run(self):
         try:
@@ -300,6 +469,57 @@ class BoltekLightningService(StdService):
                 dbm.close()
             except Exception:
                 pass
+
+
+class DirectCopier(object):
+    """With convert = false: copies ready-made boltek.json /
+    boltek_history.json from where they're supplied (a path or a URL) into
+    the dashboard's jsondata folder, unchanged. Only valid JSON is copied,
+    so a half-written source never replaces a good file, and only when it
+    has changed."""
+
+    def __init__(self, pairs, poll_interval=10):
+        self.pairs = pairs
+        self.timeout = min(30, max(5, poll_interval))
+        self.last = {}          # source -> digest of what was last copied
+        self.logged = {}        # source -> last problem logged
+
+    def _fetch(self, src):
+        if src.lower().startswith(('http://', 'https://')):
+            req = urllib.request.Request(src, headers={'User-Agent': 'DivumWX-Boltek/' + BOLTEK_VERSION,
+                                                       'Cache-Control': 'no-cache'})
+            with urllib.request.urlopen(req, timeout=self.timeout) as resp:
+                return resp.read()
+        with open(src, 'rb') as fh:
+            return fh.read()
+
+    def tick(self):
+        for src, dst in self.pairs:
+            try:
+                body = self._fetch(src)
+                json.loads(body.decode('utf-8', 'replace').lstrip('\ufeff'))
+            except Exception as e:
+                msg = str(getattr(e, 'reason', None) or e)
+                if self.logged.get(src) != msg:
+                    log.info("Boltek lightning: can't copy %s (%s); will keep trying" % (src, msg))
+                    self.logged[src] = msg
+                continue
+            if self.logged.pop(src, None):
+                log.info("Boltek lightning: copying %s again" % src)
+            digest = hashlib.sha1(body).hexdigest()
+            if digest == self.last.get(src):
+                continue
+            try:
+                os.makedirs(os.path.dirname(dst), exist_ok=True)
+                tmp = dst + '.tmp'
+                with open(tmp, 'wb') as fh:
+                    fh.write(body)
+                os.replace(tmp, dst)
+                self.last[src] = digest
+            except OSError as e:
+                if self.logged.get(dst) != str(e):
+                    log.error("Boltek lightning: can't write %s: %s" % (dst, e))
+                    self.logged[dst] = str(e)
 
 
 class BoltekRecorder(object):
@@ -362,8 +582,14 @@ class BoltekRecorder(object):
             if row:
                 self.last_strike = {'t': row[0], 'km': row[1], 'bearing': row[2], 'type': row[3],
                                     'label': type_label(row[3], None)}
+                if row[3] == IC_TYPE and self.cfg_source_is_nsd():
+                    self.last_strike['label'] = type_label(row[3], None, ic=True)
         except Exception as e:
             log.debug("Boltek lightning: nothing to resume from (%s)" % e)
+
+    def cfg_source_is_nsd(self):
+        src = str(getattr(self.cfg, 'ngxarchive_file', '')).lower()
+        return 'ngxarchive' not in src
 
     # ---- main loop ----
 
@@ -416,7 +642,8 @@ class BoltekRecorder(object):
         current_end = self.interval_start + self.cfg.archive_interval
         for s in new:
             close = s['km'] is not None and s['km'] <= self.cfg.close_km
-            counts = {'strikes': 1, 'cg': 1 if s['type'] == CG_TYPE else 0, 'ic': 0, 'close': 1 if close else 0}
+            counts = {'strikes': 1, 'cg': 1 if s['type'] == CG_TYPE else 0, 'ic': 1 if s.get('ic') else 0,
+                      'close': 1 if close else 0}
             end = self._end_for(s['t'])
             if end >= current_end:
                 for c in self.COUNTS:
@@ -529,13 +756,15 @@ class BoltekRecorder(object):
     # ---- the file ----
 
     def _read(self):
+        if getattr(self.cfg, 'source_is_url', False):
+            return self._read_url()
         path = self.cfg.ngxarchive_file
         try:
             st = os.stat(path)
         except OSError as e:
             self.read_error = "can't open %s (%s)" % (path, e.strerror or e)
             if not self.missing_logged:
-                log.info("Boltek lightning: waiting for %s (NexStorm's ngxarchive.json)" % path)
+                log.info("Boltek lightning: waiting for %s" % path)
                 self.missing_logged = True
             return None
         if self.missing_logged:
@@ -545,18 +774,53 @@ class BoltekRecorder(object):
             return None
         try:
             with open(path, 'r', encoding='utf-8', errors='replace') as fh:
-                reading = parse_ngxarchive(fh.read(), getattr(self.cfg, 'station', None))
+                reading = parse_source(fh.read(), getattr(self.cfg, 'station', None))
         except (OSError, ValueError) as e:
-            # NexStorm may be part-way through rewriting it: try again next time.
-            msg = str(e)
-            self.read_error = "can't read %s: %s" % (os.path.basename(path), msg)
-            if msg != self.error_logged:
-                log.error("Boltek lightning: can't read %s: %s" % (path, msg))
-                self.error_logged = msg
-            return None
+            # The file may be part-way through being rewritten: try again next time.
+            return self._read_failed(path, str(e))
         self.error_logged = None
         self.read_error = None
         self.last_mtime = st.st_mtime
+        return reading
+
+    def _read_failed(self, where, msg):
+        self.read_error = "can't read %s: %s" % (os.path.basename(where.rstrip('/')) or where, msg)
+        if msg != self.error_logged:
+            log.error("Boltek lightning: can't read %s: %s" % (where, msg))
+            self.error_logged = msg
+        return None
+
+    def _read_url(self):
+        """Fetch the file from a URL (e.g. NSD Bridge's built-in web
+        server). Unchanged content is skipped, like an unchanged file."""
+        url = self.cfg.ngxarchive_file
+        req = urllib.request.Request(url, headers={'User-Agent': 'DivumWX-Boltek/' + BOLTEK_VERSION,
+                                                   'Cache-Control': 'no-cache'})
+        try:
+            with urllib.request.urlopen(req, timeout=min(30, max(5, self.cfg.poll_interval))) as resp:
+                body = resp.read()
+        except Exception as e:
+            msg = str(getattr(e, 'reason', None) or e)
+            if self.missing_logged != msg:
+                log.info("Boltek lightning: can't fetch %s (%s); will keep trying" % (url, msg))
+                self.missing_logged = msg
+            self.read_error = "can't fetch %s (%s)" % (url, msg)
+            return None
+        if self.missing_logged:
+            log.info("Boltek lightning: fetching %s again" % url)
+            self.missing_logged = False
+        digest = hashlib.sha1(body).hexdigest()
+        if digest == getattr(self, '_last_digest', None):
+            return None
+        try:
+            reading = parse_source(body.decode('utf-8', 'replace'), getattr(self.cfg, 'station', None))
+        except ValueError as e:
+            return self._read_failed(url, str(e))
+        self._last_digest = digest
+        self.error_logged = None
+        self.read_error = None
+        # When it last changed, by this machine's clock (for "stale").
+        self.last_mtime = self.clock()
         return reading
 
     # ---- the database ----
@@ -638,13 +902,13 @@ class BoltekRecorder(object):
         error = self.read_error
         if error is None and stale and r is not None:
             error = "%s hasn't changed for %d minutes" % (
-                os.path.basename(self.cfg.ngxarchive_file), (now - newest) // 60)
+                os.path.basename(self.cfg.ngxarchive_file.rstrip('/')), (now - newest) // 60)
         ls = self.last_strike or {}
         realtime = None
         if r is not None:
             tendency = self._tendency(now)
             realtime = {
-                'format': 'ngxarchive',
+                'format': r.get('format', 'ngxarchive'),
                 'file_time': file_time,
                 'strike_count': r['strike_count'],
                 'storm_count': r['storm_count'],
@@ -676,13 +940,15 @@ class BoltekRecorder(object):
                 'storms': r['storms'],
                 # Newest first: [time, km, bearing, lat, lon, label]
                 'recent_strikes': [[s['t'], s['km'], s['bearing'], s['lat'], s['lon'], s['label']]
-                                   for s in reversed(r['strikes'][-RECENT_IN_JSON:])],
+                                   for s in reversed(self._map_strikes(r['strikes'], now))],
             }
         data = {
             'version': BOLTEK_VERSION,
             'generated': int(now),
-            'source_file': os.path.basename(self.cfg.ngxarchive_file),
-            'file_found': os.path.exists(self.cfg.ngxarchive_file),
+            'source_file': (self.cfg.ngxarchive_file if getattr(self.cfg, 'source_is_url', False)
+                            else os.path.basename(self.cfg.ngxarchive_file)),
+            'file_found': (r is not None and self.read_error is None if getattr(self.cfg, 'source_is_url', False)
+                           else os.path.exists(self.cfg.ngxarchive_file)),
             'file_time': file_time,
             'stale': stale,
             'error': error,
@@ -708,6 +974,17 @@ class BoltekRecorder(object):
             if str(e) != self.error_logged:
                 log.error("Boltek lightning: can't write %s: %s" % (path, e))
                 self.error_logged = str(e)
+
+    @staticmethod
+    def _map_strikes(strikes, now):
+        """Strikes for boltek.json's recent_strikes (oldest first): every
+        strike from the strike map's last two hours, and at least the newest
+        RECENT_IN_JSON, capped at MAP_MAX. NSDRealtime.json lists a whole
+        day, so a busy storm would otherwise be cut short on the map."""
+        recent = [s for s in strikes if s['t'] > now - MAP_WINDOW]
+        if len(recent) < RECENT_IN_JSON:
+            recent = strikes[-RECENT_IN_JSON:]
+        return recent[-MAP_MAX:]
 
     # ---- history for the chart & records modal ----
 

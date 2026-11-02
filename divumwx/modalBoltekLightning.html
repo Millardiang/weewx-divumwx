@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# modalBoltekLightning.html version 1.3.1
-#  Copyright (C) 2026 Ian Millard, Sean Balfour
+# modalBoltekLightning.html version 1.3.2
+#  Copyright (C) 2026 Ian Millard, Mike Isaac
 #  GPLv3
 ##############################################################################################
   Live strike map, chart & records for a Boltek lightning detector, opened
@@ -10,9 +10,11 @@
   station, in the Equal Earth map's colours) shows the last two hours of
   strikes coloured by age; each new strike flashes and sends a tracer to
   the station. Add ?demo=1 to the URL to see it with made-up strikes. Reads jsondata/boltek_history.json (hourly and daily totals
-  from the Boltek database) and jsondata/boltek.json (live readings from
-  NexStorm's ngxarchive.json), both written by
-  user.divumwx_boltek.BoltekLightningService.
+  from the Boltek database) and jsondata/boltek.json (live readings and
+  recent strikes from NSD Bridge's NSDRealtime.json or NexStorm's
+  ngxarchive.json), both written by user.divumwx_boltek.BoltekLightningService
+  (or supplied ready-made, with [BoltekLightning] convert = false).
+  The strike map reads only jsondata/boltek.json.
   The Live Network tab shows the Blitzortung.org community network's live
   strikes (js/lightningLive.js), for comparison with the station's own.
 -->
@@ -241,7 +243,7 @@ select.bk-tf{ padding-right:8px; }
     </div>
     <div class="bk-toolbar" style="margin:8px 0 0">
       <div class="bk-age" id="bkAgeLegend"></div>
-      <span class="bk-info" id="bkMapNote">Equal Earth projection centred on the station &middot; last 2 hours &middot; data: NexStorm</span>
+      <span class="bk-info" id="bkMapNote">Equal Earth projection centred on the station &middot; last 2 hours &middot; data: <span id="bkMapSource">boltek.json</span></span>
     </div>
   </div>
   </div>
@@ -278,7 +280,7 @@ select.bk-tf{ padding-right:8px; }
 
 <script src="js/d3.7.9.0.min.js"></script>
 <script src="js/topojson.3.0.2.min.js"></script>
-<script src="js/lightningLive.js?v=1.0.1"></script>
+<script src="js/lightningLive.js?v=1.0.2"></script>
 <script src="units.js?v=1.0.2"></script>
 <script src="stationTime.js"></script>
 <script>
@@ -426,8 +428,8 @@ select.bk-tf{ padding-right:8px; }
     function add(cond, label, value, sub, dot){ if (cond) chips.push(chip(label, value, sub, dot)); }
     add(true, 'Status', status, live && live.file_time ? fmtHour(live.file_time * 1000) : '',
         !live ? '' : live.stale ? 'high' : 'clear');
-    // Only what the readings include: ngxarchive.json has no alarm or
-    // noise, so those chips are left out.
+    // Only what the readings include: boltek.json has no alarm or noise
+    // readings (neither source file provides them), so those chips are left out.
     add(has(r.alarm), 'Alarm', r.alarm_label || String(r.alarm), '', { 0: 'clear', 1: 'caution', 2: 'high' }[r.alarm]);
     add(has(r.tendency), 'Storm', TENDENCY[r.tendency] || 'Code ' + r.tendency);
     add(true, 'Rate', has(r.strikes_per_minute) ? r.strikes_per_minute : '\u2014', '/min');
@@ -651,7 +653,8 @@ select.bk-tf{ padding-right:8px; }
   // sits at the projection's centre, where it's least distorted: range
   // rings come out round and north is up). Strikes from boltek.json's
   // realtime.recent_strikes ([time, km, bearing, lat, lon, type], newest
-  // first; NexStorm lists about the last two hours) are coloured by age.
+  // first; the service passes on every strike from the last two hours) are
+  // coloured by age.
   // A strike that wasn't there at the last poll flashes, and a tracer runs
   // along the great circle from it to the station.
   var DEMO = /[?&]demo=1\b/.test(location.search);
@@ -844,7 +847,7 @@ select.bk-tf{ padding-right:8px; }
         (near ? '<br>Nearest (1 h) <b>' + fmtDist(near.km) + '</b> ' + compass(near.bng) : '') +
         (last ? '<br>Latest <b>' + (last.label || 'strike') + '</b> ' + fmtDist(last.km) + ' ' + compass(last.bng) + ' &middot; ' + fmtSec(last.t) : '');
       var msg = !lastLive ? 'No live data yet'
-        : lastLive.stale ? 'NexStorm data isn’t updating' + (lastLive.error ? ': ' + lastLive.error : '')
+        : lastLive.stale ? 'Lightning data isn’t updating' + (lastLive.error ? ': ' + lastLive.error : '')
         : !inWin.length ? 'No strikes in the last 2 hours — each new strike will flash and trace to the station' : '';
       emptyEl.textContent = msg; emptyEl.hidden = !msg;
     }
@@ -901,6 +904,8 @@ select.bk-tf{ padding-right:8px; }
     function update(j){
       lastLive = j;
       var rt = (j && j.realtime) || {};
+      var srcEl = document.getElementById('bkMapSource');
+      if (srcEl) srcEl.textContent = rt.format === 'nsdbridge' ? 'NSD Bridge' : rt.format === 'ngxarchive' ? 'NexStorm' : 'boltek.json';
       // The station is weewx.conf's position (archive.json meta, below);
       // boltek.json's station_lat/lon (also weewx.conf's, from 1.2.0 of the
       // service) are used only until that arrives.

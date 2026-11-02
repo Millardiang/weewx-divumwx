@@ -1,6 +1,6 @@
 # DivumWX Installation Guide
 
-This guide covers DivumWX **2.0.4**. It assumes you already have a stable
+This guide covers DivumWX **2.1.0**. It assumes you already have a stable
 WeeWX 5 installation running with your own hardware driver.
 
 Tested on Debian 13 (Trixie) with:
@@ -50,7 +50,7 @@ sudo apt install python3-skyfield python3-requests
 ### Install or upgrade
 
 ```
-sudo weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/tags/ver.2.0.4.zip
+sudo weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/tags/ver.2.1.0.zip
 sudo systemctl restart weewx
 sudo weectl report run DivumWXReport
 ```
@@ -61,7 +61,7 @@ account WeeWX runs as (normally `weewx`). No manual `chown` is needed.
 ### Check the installation
 
 ```
-weectl extension list          # should show divumwx 2.0.4
+weectl extension list          # should show divumwx 2.1.0
 sudo journalctl -u weewx -n 100 --no-pager | grep -i divumwx
 ```
 
@@ -96,7 +96,7 @@ sudo mkdir -p /var/www/html/divumwx
 sudo chown -R $(whoami):$(whoami) /var/www/html/divumwx
 
 source ~/weewx-venv/bin/activate
-weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/tags/ver.2.0.4.zip
+weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/tags/ver.2.1.0.zip
 sudo systemctl restart weewx
 weectl report run DivumWXReport
 ```
@@ -211,16 +211,37 @@ separate Boltek database, `divumwx_boltek.sdb`, which WeeWX creates next to
 its own database the first time it starts. Stations without a Boltek can
 ignore all of this; the service just waits for a file that never arrives.
 
-1. In NexStorm, have it write or upload its `ngxarchive.json` to the
-   DivumWX web folder (next to `index.html`). If it goes somewhere else,
-   set `ngxarchive_file` under `[BoltekLightning]` to its full path.
+1. On the NexStorm PC, run **NSD Bridge** (it reads NexStorm's live data and
+   writes `NSDRealtime.json`). Get the file to WeeWX in one of these ways,
+   and set `source_file` under `[BoltekLightning]` to match:
+   - **Over HTTP** (simplest): in `nsdbridge.ini` set
+     `http_listen = 0.0.0.0:8090` (and allow port 8090 in Windows Firewall),
+     then set `source_file = http://<nexstorm-pc>:8090/data/NSDRealtime.json`.
+   - **As a file**: have NSD Bridge copy (`mirror_dir`) or FTP it into the
+     DivumWX web folder (next to `index.html`); the default
+     `source_file = NSDRealtime.json` then finds it. If it goes somewhere
+     else, give its full path.
+
+   NSD Bridge's `station_lat` / `station_lon` should be set, so each strike
+   has a position. `realtime_json_strikes` must stay on (the default).
+   NexStorm's own `ngxarchive.json` still works too: point `source_file` at
+   it. Before this version the key was called `ngxarchive_file`, which is
+   still read.
 2. Distances come from the file in kilometres. The card, the strike map and
    the chart follow the dashboard's unit setting (km, miles or nautical
    miles). Strikes within `close_distance` (always in km, default 16) count as
    close strikes.
+   **Already have `boltek.json` and `boltek_history.json`?** If these are
+   made somewhere else (for example by another DivumWX station), set
+   `convert = false` under `[BoltekLightning]`. DivumWX then doesn't read
+   `source_file`, convert anything or keep a Boltek database; the card and
+   modal use the files as supplied. If they don't arrive straight in
+   `jsondata/`, set `direct_json_source` and `direct_history_source` to their
+   paths or URLs, and they're copied into place whenever they change (only
+   complete, valid files are copied).
 3. Restart WeeWX. The card turns green once the file is updating. The
-   strikes already listed in the file are picked up the first time, at the
-   times they happened; the totals for the year and all time build up from
+   strikes already listed in the file (with NSD Bridge, all of today's) are
+   picked up the first time, at the times they happened; the totals for the year and all time build up from
    then on. If the dot stays red, hover over it to see why.
    Click the card for its live strike map (each new strike flashes and
    traces to the station) and its chart & records, built from the same

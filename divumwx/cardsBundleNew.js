@@ -1,6 +1,6 @@
 /*
 ##############################################################################################
-# cardsBundleNew.js version 1.1.0
+# cardsBundleNew.js version 1.1.1
 ##############################################################################################
 */
 
@@ -8130,8 +8130,8 @@ try {
 try {
 /*
 ##############################################################################################
-# cardBoltekLightning.js version 1.1.3
-#  Copyright (C) 2026 Ian Millard, Sean Balfour
+# cardBoltekLightning.js version 1.1.4
+#  Copyright (C) 2026 Ian Millard, Mike Isaac
 #  GPLv3
 ##############################################################################################
 */
@@ -8139,8 +8139,8 @@ try {
 // ===================== cardBoltekLightning.js =====================
 // Boltek lightning detector card: the same readouts as the Lightning card,
 // plus the bearing of the last strike, from jsondata/boltek.json. That file
-// is written by user.divumwx_boltek.BoltekLightningService from NexStorm's
-// native ngxarchive.json (every strike with its time, distance and bearing)
+// is written by user.divumwx_boltek.BoltekLightningService from NSD Bridge's
+// NSDRealtime.json or NexStorm's ngxarchive.json (or supplied ready-made)
 // and the Boltek database it keeps. Distances arrive in km.
 // Clicking the card opens modalBoltekLightning.html (chart & records from
 // the Boltek database).
@@ -8493,10 +8493,10 @@ try {
           year: stationNow().getUTCFullYear()
         };
         renderCard(lastData);
-        // Green only while ngxarchive.json is updating; red when it's missing
+        // Green only while boltek.json's source is updating; red when it's missing
         // or hasn't changed for a while (see stale_after in [BoltekLightning]).
         setStatus(!b.stale);
-        statusWrap.title = b.error || (b.stale ? 'No recent data from NexStorm' : 'Receiving NexStorm data');
+        statusWrap.title = b.error || (b.stale ? 'No recent lightning data' : 'Receiving lightning data');
       }).catch(function(e){
         console.warn('cardBoltekLightning: refresh failed --', e.message);
         setStatus(false);
