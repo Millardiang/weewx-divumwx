@@ -168,19 +168,9 @@ null
 #set $osVersion = platform.platform()
 #end try
 "os_version": "$osVersion",#slurp
-#try
-#set $tzName = open('/etc/timezone').read().strip()
-#if not $tzName
-#set $tzName = os.path.realpath('/etc/localtime').split('zoneinfo/')[-1]
-#end if
-#except
-#try
-#set $tzName = os.path.realpath('/etc/localtime').split('zoneinfo/')[-1]
-#except
-#set $tzName = 'UTC'
-#end try
-#end try
-"timezone": "$tzName",#slurp
+## The time zone name comes from user.divumwx_cards.system_timezone(), the
+## same one the header flag's country is taken from.
+"timezone": $divumwx_timezone,#slurp
 "latitude": $station.stn_info.latitude_f,
 "longitude": $station.stn_info.longitude_f,
 "elevation_m": $station.altitude.meter.raw,

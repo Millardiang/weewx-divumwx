@@ -1,5 +1,34 @@
 # DivumWX Changelog
 
+## 2.1.1 — 3 November 2026
+
+### Version 2.1.1
+- Bug-fix release. `DIVUMWX_VERSION` is now `2.1.1`. The `index.html`
+  header and footer fallback, the `divumwf.html` badge (1.0.3), the README
+  title and `INSTALLATION_GUIDE.md` all say 2.1.1.
+- The install guide downloads from the release tag `ver.2.1.1`.
+
+### Wrong country flag in the header
+- A Danish station showed the German flag. Stations in Norway and Sweden
+  showed the German flag too; the Netherlands and Luxembourg showed the
+  Belgian flag, and Monaco the French one.
+- Cause: when the system has no `/etc/timezone`, the time zone was taken
+  from where `/etc/localtime` finally leads, following every link. Since
+  tzdata 2022b these zones are aliases of another (Europe/Copenhagen,
+  Oslo and Stockholm of Europe/Berlin; Amsterdam and Luxembourg of
+  Europe/Brussels; Monaco of Europe/Paris). Where tzdata installs aliases as
+  symlinks, the chain ended in the other country's zone.
+- `divumwx_cards.py` now works out the zone the user chose: the `TZ`
+  environment variable, then `/etc/timezone`, then the zone
+  `/etc/localtime` points to, following only that one link.
+- `archive.json`'s `meta.timezone` comes from the same code (it showed
+  e.g. `Europe/Berlin` for a Danish station). Times were not affected:
+  the aliased zones keep the same clock as the zone they point to.
+- If the flag is still wrong, or `/etc/localtime` is a copy rather than a
+  link, set `[DivumWXCards] country_code` (e.g. `dk`) to choose it.
+- Checked on a copy of such a system for all six countries: the old code
+  gave the neighbouring country's flag, the new code the right one.
+
 ## 2.1.0 — 2 November 2026
 
 ### Version 2.1.0

@@ -181,19 +181,54 @@ except ImportError:  # divumwx_version.py missing (partial manual install)
 ZONEINFO = '/usr/share/zoneinfo'
 
 
-def system_timezone():
-    """The system time zone name, worked out the same way as archive.json's "timezone"."""
+def _zone_name(value):
+    """'Europe/Copenhagen' from a TZ value or a path such as
+    '/usr/share/zoneinfo/Europe/Copenhagen' or '../usr/share/zoneinfo/...';
+    None if it isn't one."""
+    value = (value or '').strip().lstrip(':')
+    if 'zoneinfo/' in value:
+        value = value.split('zoneinfo/')[-1]
+    if not value or value.startswith('/') or ' ' in value:
+        return None
+    return value
+
+
+def system_timezone(environ=None, etc='/etc'):
+    """The system time zone name, as the user set it. Published as
+    archive.json's "timezone" and used for the flag's country.
+
+    Tried in order: the TZ environment variable; /etc/timezone (Debian,
+    Raspberry Pi OS); the zone /etc/localtime points to, following ONE link
+    only. Not os.path.realpath(): since tzdata 2022b several zones are
+    aliases of others (Europe/Copenhagen, Oslo, Stockholm -> Berlin;
+    Amsterdam, Luxembourg -> Brussels; Monaco -> Paris ...), and where
+    tzdata installs those as symlinks, following the whole chain turned a
+    Danish station into a German one."""
+    environ = os.environ if environ is None else environ
+    name = _zone_name(environ.get('TZ'))
+    if name:
+        return name
     try:
-        with open('/etc/timezone') as fh:
-            name = fh.read().strip()
+        with open(os.path.join(etc, 'timezone')) as fh:
+            name = _zone_name(fh.read())
         if name:
             return name
     except OSError:
         pass
+    localtime = os.path.join(etc, 'localtime')
     try:
-        return os.path.realpath('/etc/localtime').split('zoneinfo/')[-1]
+        name = _zone_name(os.readlink(localtime))
+        if name:
+            return name
     except OSError:
-        return 'UTC'
+        pass
+    try:   # last resort (e.g. a link to a link that isn't under zoneinfo)
+        name = _zone_name(os.path.realpath(localtime))
+        if name:
+            return name
+    except OSError:
+        pass
+    return 'UTC'
 
 
 def timezone_country(tz_name, zoneinfo=ZONEINFO):
@@ -372,6 +407,8 @@ class DivumwxCards(SearchList):
             'divumwx_station_image_path': json.dumps(station_image_path),
             'divumwx_in_uk': json.dumps(in_uk),
             'divumwx_country_code': json.dumps(country_code),
+            # The station's time zone name for archive.json meta.timezone.
+            'divumwx_timezone': json.dumps(system_timezone()),
             'divumwx_page_background': json.dumps(page_background),
             'divumwx_solar_array_watts': json.dumps(solar_array_watts),
             # A plain string (not JSON): a data binding name for template tags.

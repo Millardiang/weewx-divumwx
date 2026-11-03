@@ -1,6 +1,9 @@
-# Welcome to the DivumWX skin for WeeWX Version 2.1.0
+# Welcome to the DivumWX skin for WeeWX Version 2.1.1
 Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LICENSE Version 3](https://github.com/Millardiang/weewx-divumwx/blob/main/license.txt)
  
+# What's new in 2.1.1
+* **Right country flag in Denmark, Norway, Sweden, the Netherlands, Luxembourg and Monaco** - these stations could show the German, Belgian or French flag after the site title.
+
 # What's new in 2.1.0
 * **Boltek via NSD Bridge** - the Boltek service reads NSD Bridge's `NSDRealtime.json` (NSD Bridge replaces NSBackend/NSList on the NexStorm PC), from a file or straight from NSD Bridge over HTTP. In-cloud strikes are now counted alongside cloud-to-ground, and the strike map shows every strike from the last two hours. NexStorm's `ngxarchive.json` still works.
 * **Ready-made Boltek files** - `[BoltekLightning] convert = false` uses `boltek.json` and `boltek_history.json` exactly as supplied, with no conversion or database, and can copy them into place from a path or URL.
