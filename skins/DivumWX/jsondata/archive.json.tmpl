@@ -477,9 +477,16 @@ null
 ## raw-timestamp-or-null conversion) for last_time, and an inline
 ## ternary (fully evaluated before any output is written, so it can't
 ## leave a partial literal behind either) for time_ago_seconds.
+## Keyed on lightning_strike_count, not lightning_distance: Ecowitt
+## gateways report lightning_dist as the distance of the *last* strike and
+## repeat it in every loop packet, so with lightning_distance mapped from
+## lightning_dist every archive record has a distance > 0 and the newest
+## one was always the current record -- "Last Detected" showed the current
+## time (issue #67). A strike count > 0 is an actual detection on every
+## driver.
 #set $lastStrikeTs = None
 #try
-#set $lastStrikeTs = $time_at('lightning_distance>0').raw
+#set $lastStrikeTs = $time_at('lightning_strike_count>0').raw
 #except
 #pass
 #end try
