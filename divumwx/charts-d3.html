@@ -2104,6 +2104,19 @@ function attachAxisHover(g, svg, {x, seriesData, innerW, innerH, margin, sys, da
     .on('mouseleave', () => { hideTip(); hoverLine.style('opacity',0); hoverDots.style('opacity',0); });
 }
 
+// Timeline for a chart: the first of the category's series that has any
+// data, not always the first one. Air Quality lists PM1.0 first, but many
+// particulate sensors (e.g. Ecowitt WH41/WH45) have no PM1.0, so taking
+// series [0] left the timeline empty and the chart blank while PM2.5/PM10
+// data (and the Records panel built from it) were there.
+function baseSeries(defs){
+  for (const d of defs) {
+    const pts = (dataSeries[d.series] || []).filter(pt => pt && pt[1] != null);
+    if (pts.length) return pts;
+  }
+  return [];
+}
+
 function renderDailyD3(sys, cat, {trailingDays, historicalYear}={}){
   clearChartArea();
   const colors = chartColors();
@@ -2111,7 +2124,7 @@ function renderDailyD3(sys, cat, {trailingDays, historicalYear}={}){
   renderLegend(allDefs);
   const container = document.getElementById('chartContainer');
 
-  const base = (dataSeries[allDefs[0].series] || []).filter(pt => pt && pt[1] != null);
+  const base = baseSeries(allDefs);
   if(!base.length){ emptyMsg(container, colors, DivumWXI18N.t('No data available yet.')); return; }
 
   let points;
@@ -2203,7 +2216,7 @@ function renderHourlyD3(sys, cat){
   }
   renderLegend(allDefs);
 
-  const base = (dataSeries[allDefs[0].series] || []).filter(pt => pt && pt[1] != null);
+  const base = baseSeries(allDefs);
   if(!base.length){ emptyMsg(container, colors, DivumWXI18N.t('No 24-hour data available yet.')); return; }
   const dates = base.map(pt => pt[0]);
   const labels = dates.map(t => new Date(t).getHours().toString().padStart(2,'0') + ':00');
