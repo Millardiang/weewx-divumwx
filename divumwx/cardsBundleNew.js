@@ -1,6 +1,6 @@
 /*
 ##############################################################################################
-# cardsBundleNew.js version 1.1.1
+# cardsBundleNew.js version 1.1.2
 ##############################################################################################
 */
 
@@ -10507,7 +10507,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardWebcam.js version 1.1.0
+# cardWebcam.js version 1.1.1
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -10583,9 +10583,12 @@ try {
   }
 
   function makeCard(n, mount){
-    var cam = { title: n === 1 ? 'Looking Towards North West of Steeple Claydon, UK' : 'Webcam ' + n,
+    var cam = { title: null, description: null,
                 image: n === 1 ? 'img/picam.jpg' : 'img/webcam' + n + '.jpg', mode: 'daylight' };
     var dayLabel = function(){ return DivumWXI18N.t('Webcam') + (n > 1 ? ' ' + n : ''); };
+    // The card's label: the webcamN_title set in [DivumWXCards], or
+    // "Webcam N" when there isn't one.
+    var camLabel = function(){ return cam.title || dayLabel(); };
 
     mount.innerHTML = '';
     mount.style.position = 'relative';
@@ -10598,7 +10601,7 @@ try {
       'align-items:center;justify-content:space-between;gap:8px;padding:0 14px;font-size:9px;background:transparent;';
     titleBar.style.color = 'var(--bs-body-color)';
     var titleLabel = document.createElement('span');
-    titleLabel.textContent = dayLabel();
+    titleLabel.textContent = camLabel();
     titleLabel.style.cssText = 'font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
     var statusWrap = document.createElement('span');
     statusWrap.style.cssText = 'display:flex;align-items:center;gap:4px;flex-shrink:0;opacity:.85;';
@@ -10628,7 +10631,7 @@ try {
       if (n === 1) {
         imgLink.href = 'modalTimelapse.html';
         imgLink.setAttribute('data-modal', 'Timelapse');
-        imgLink.setAttribute('data-title', DivumWXI18N.t('Timelapse') + ' - ' + cam.title);
+        imgLink.setAttribute('data-title', DivumWXI18N.t('Timelapse') + ' - ' + camLabel());
         imgLink.setAttribute('data-modal-width', '760px');
         imgLink.setAttribute('data-modal-height', '460px');
         imgLink.setAttribute('data-url', 'modalTimelapse.html');
@@ -10636,12 +10639,16 @@ try {
         var url = 'modalWebcam.html?cam=' + n;
         imgLink.href = url;
         imgLink.setAttribute('data-modal', 'Webcam');
-        imgLink.setAttribute('data-title', dayLabel() + ' - ' + cam.title);
+        imgLink.setAttribute('data-title', camLabel());
         imgLink.setAttribute('data-modal-width', '1000px');
         imgLink.setAttribute('data-modal-height', '680px');
         imgLink.setAttribute('data-url', url);
       }
-      titleBar.title = cam.title;
+      // Hover text: the title, then the webcamN_description if there is one.
+      var tip = cam.description ? camLabel() + '\n' + cam.description : camLabel();
+      titleBar.title = tip;
+      imgLink.title = tip;
+      if (img) img.alt = camLabel();
     }
     setLink();
 
@@ -10657,12 +10664,12 @@ try {
         // Daylight webcams show the night-time page after dark. (If day or
         // night can't be told, show the live image.)
         if (cam.mode !== '24hr' && day === false){
-          titleLabel.textContent = n === 1 ? DivumWXI18N.t('Timelapse') : dayLabel();
+          titleLabel.textContent = n === 1 ? DivumWXI18N.t('Timelapse') + ' - ' + camLabel() : camLabel();
           img.src = 'img/nightTime.svg';
           setStatus(false);
           return;
         }
-        titleLabel.textContent = dayLabel();
+        titleLabel.textContent = camLabel();
         var imageOk = null, fresh = null;
         function done(){ if (imageOk !== null && fresh !== null) setStatus(imageOk && fresh); }
         img.onload = function(){ imageOk = true; done(); };
@@ -10686,6 +10693,7 @@ try {
       if (c) configured = true;
       if (c) {
         if (c.title) cam.title = c.title;
+        if (c.description) cam.description = c.description;
         if (c.image) cam.image = c.image;
         if (c.mode === '24hr' || c.mode === 'daylight') cam.mode = c.mode;
       } else if (n === 1 && meta) {   // before meta.webcams existed

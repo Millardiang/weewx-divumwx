@@ -1,5 +1,46 @@
 # DivumWX Changelog
 
+## 2.1.2 — 5 November 2026
+
+### Version 2.1.2
+- Bug-fix release. `DIVUMWX_VERSION` is now `2.1.2`. The `index.html`
+  header and footer fallback, the `divumwf.html` badge (1.0.4), the README
+  title and `INSTALLATION_GUIDE.md` all say 2.1.2. `cardsBundleNew.js` is
+  1.1.2 (`cardWebcam.js` 1.1.1) and `charts-d3.html` 1.0.4.
+- The install guide downloads from the release tag `ver.2.1.2`.
+
+### Lightning "Last Detected" showed the current time (issue #67)
+- On Ecowitt stations the lightning card's Last Detected always showed the
+  current date and time.
+- Cause: `archive.json` took the last strike time from the newest archive
+  record with `lightning_distance > 0`. Ecowitt gateways send
+  `lightning_dist` as the distance of the *last* strike and repeat it in
+  every loop packet, so with `lightning_distance` mapped from it every
+  record matched, and the newest was the current one.
+- The last strike time now comes from the newest record with
+  `lightning_strike_count > 0`, an actual detection on every driver.
+
+### Air Quality chart was blank
+- The Air Quality modal showed the Records but no chart on stations whose
+  particulate sensor has no PM1.0 (e.g. Ecowitt WH41/WH45).
+- Cause: the 24-hour and daily charts took their timeline from the first
+  series in the category, which for Air Quality is PM1.0. With no PM1.0
+  data the timeline was empty, even though PM2.5/PM10 data was there.
+- `charts-d3.html` now takes the timeline from the first series that has
+  data. Other categories are unchanged.
+
+### Webcam titles
+- Each webcam card's label now shows its `webcamN_title` from
+  `[DivumWXCards]` instead of "Webcam", "Webcam 2" …, and so does the
+  card's popup title. "Webcam N" is still used when no title is set.
+- New optional `webcamN_description` (`webcam_description` for webcam 1):
+  a short write-up shown, under the title, when hovering over the card.
+  Published in `archive.json` `meta.webcams[].description` by
+  `divumwx_cards.py`.
+- Webcam 1's built-in default title was one station's own
+  ("Looking Towards North West of Steeple Claydon, UK"), shown on any
+  install with no `webcam_title`. It is now "Webcam".
+
 ## 2.1.1 — 3 November 2026
 
 ### Version 2.1.1

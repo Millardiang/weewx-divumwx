@@ -1,6 +1,11 @@
-# Welcome to the DivumWX skin for WeeWX Version 2.1.1
+# Welcome to the DivumWX skin for WeeWX Version 2.1.2
 Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LICENSE Version 3](https://github.com/Millardiang/weewx-divumwx/blob/main/license.txt)
  
+# What's new in 2.1.2
+* **Webcam titles** - each webcam card shows the title you gave it, and an optional `webcamN_description` appears when you hover over the card.
+* **Lightning Last Detected** - shows the time of the last strike on Ecowitt stations, not the current time.
+* **Air Quality chart** - draws on stations whose sensor has no PM1.0.
+
 # What's new in 2.1.1
 * **Right country flag in Denmark, Norway, Sweden, the Netherlands, Luxembourg and Monaco** - these stations could show the German, Belgian or French flag after the site title.
 

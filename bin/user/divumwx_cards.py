@@ -319,6 +319,9 @@ class DivumwxCards(SearchList):
                 'n': n,
                 'card': 'cardWebcam' if n == 1 else 'cardWebcam%d' % n,
                 'title': cards_section.get(prefix + '_title', '') or None,
+                # Optional webcamN_description: a short write-up shown
+                # when hovering over the card.
+                'description': cards_section.get(prefix + '_description', '') or None,
                 'image': image,
                 'mode': mode if mode in ('daylight', '24hr') else 'daylight',
             })
