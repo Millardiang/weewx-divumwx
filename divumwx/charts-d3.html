@@ -1666,7 +1666,7 @@ function syncLightningView(){
     else if (!lightningLiveLoading) {
       lightningLiveLoading = true;
       const p = window.topojson ? Promise.resolve() : loadScriptOnce('js/topojson.3.0.2.min.js');
-      p.then(function(){ return loadScriptOnce('js/lightningLive.js?v=1.0.1'); }).then(function(){
+      p.then(function(){ return loadScriptOnce('js/mapShading.js?v=1.0.1'); }).then(function(){ return loadScriptOnce('js/lightningLive.js?v=1.0.4'); }).then(function(){
         lightningLive = DivumLiveLightning.mount(document.getElementById('lightningLiveMount'));
         if (currentCategory === 'lightning' && lightningView === 'live') lightningLive.show();
       }).catch(function(e){

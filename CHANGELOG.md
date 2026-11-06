@@ -1,5 +1,39 @@
 # DivumWX Changelog
 
+## Unreleased
+
+### Equal Earth maps in the Earth Daylight card's colours
+- Every Equal Earth map now uses the Earth Daylight card's colours: the
+  Equal Earth page (globe and flat map), the World Daylight Map, the
+  Earthquakes map, the Boltek strike map and the live lightning map
+  (Boltek's Live Network tab and the Lightning chart's Live Map).
+  - Ocean blue and land green, each graded from light under the Sun to
+    dark on the far side of the Earth, as on the card. The gradient is
+    laid out on the globe rather than across the screen, so it is the
+    same in every view and stays right where a flat map wraps round.
+  - Borders dark green, graticule grey, the station red, the Sun
+    red-orange and the Moon grey.
+  - Night in four steps of the card's near-black, 35%, 50%, 60% and 70%
+    dark in total (the card's own steps reach 90%, which was too dark).
+  - The same colours in light and dark mode, as on the card.
+  - The globe's outline is the far ocean blue, so it doesn't stand out.
+  - A selected country (World Daylight Map and Equal Earth page) is now
+    yellow, the card's ecliptic colour.
+- Range rings, ring labels, compass letters and the station's name on the
+  Boltek strike map and the live lightning map are now white with a dark
+  edge, the same in light and dark mode, so they read on the light day
+  ocean, the green land and the dark night. (They were tuned for the old
+  dark-mode map and were hard to see.)
+- New `js/mapShading.js` draws the gradient and the night steps for all
+  the maps, so they can't drift apart.
+- The Earth Daylight card itself is unchanged.
+- Changed: `css/equalEarthMap.css` 1.1.2 (new `--map-ocean-far`,
+  `--map-land-far`, `--map-night-a1` to `-a4`, `--map-label`,
+  `--map-label-halo`, `--map-ring` and `--map-ring-casing`; `--map-night-alpha`
+  removed), `js/equalEarthMap.js` 1.1.0, `js/lightningLive.js` 1.0.4,
+  `equalEarthMap.html`, `modalDaylightMap.html`, `modalEarthquakeMap.html`,
+  `modalBoltekLightning.html`, `charts-d3.html`.
+
 ## 2.1.2 — 5 November 2026
 
 ### Version 2.1.2

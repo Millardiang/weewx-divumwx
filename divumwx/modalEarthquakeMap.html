@@ -18,7 +18,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
 <title>Recent Worldwide Earthquakes</title>
 <link rel="stylesheet" href="css/reset.min.css">
-<link rel="stylesheet" href="css/equalEarthMap.css">
+<link rel="stylesheet" href="css/equalEarthMap.css?v=1.1.2">
 <meta name="viewport" content="width = device-width, initial-scale = 1, shrink-to-fit = yes">
 <script src="stationTime.js"></script>
 <script src="units.js?v=1.0.2"></script>
@@ -88,11 +88,12 @@ body {
   width: 100%;
   height: auto;
 }
-.eq-ocean { fill: var(--map-ocean); }
 .eq-grid { fill: none; stroke: var(--map-grid); stroke-width: 0.5px; }
-.eq-land { fill: var(--map-land); }
 .eq-borders { fill: none; stroke: var(--map-coast); stroke-width: 0.5px; stroke-linejoin: round; }
-.eq-night { fill: rgba(var(--map-night), var(--map-night-alpha)); }
+.eq-night.n1 { fill: rgba(var(--map-night), var(--map-night-a1)); }
+.eq-night.n2 { fill: rgba(var(--map-night), var(--map-night-a2)); }
+.eq-night.n3 { fill: rgba(var(--map-night), var(--map-night-a3)); }
+.eq-night.n4 { fill: rgba(var(--map-night), var(--map-night-a4)); }
 .eq-rim { fill: none; stroke: var(--map-rim); stroke-width: 1.2px; }
 .quake-circle { fill: var(--eq-quake); opacity: 0.75; stroke: rgba(0,0,0,0.35); stroke-width: 0.5px; }
 .pulse-circle { fill: none; stroke: var(--eq-pulse); stroke-width: 1.5px; }
@@ -365,6 +366,7 @@ html[data-season="summer"] body, html[data-season="autumn"] body {
 
 <script src="js/d3.7.9.0.min.js"></script>
 <script src="js/topojson.3.0.2.min.js"></script>
+<script src="js/mapShading.js?v=1.0.1"></script>
 
 <script>
 // ==== Live world map: Equal Earth projection ====
@@ -388,8 +390,23 @@ html[data-season="summer"] body, html[data-season="autumn"] body {
       .attr('role', 'img')
       .attr('aria-label', 'World map of the last 24 hours of earthquakes, Equal Earth projection');
 
+  // The point under the Sun now (Astronomical Almanac low-precision formulae)
+  var sun = (function(){
+    var RAD = Math.PI / 180, n = Date.now() / 864e5 + 2440587.5 - 2451545.0;
+    var L = (280.460 + 0.9856474 * n) % 360, g = ((357.528 + 0.9856003 * n) % 360) * RAD;
+    var lam = (L + 1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g)) * RAD;
+    var eps = (23.439 - 0.0000004 * n) * RAD;
+    var ra = Math.atan2(Math.cos(eps) * Math.sin(lam), Math.cos(lam)) / RAD;
+    var dec = Math.asin(Math.sin(eps) * Math.sin(lam)) / RAD;
+    var gmst = (280.46061837 + 360.98564736629 * n) % 360;
+    return [((ra - gmst) % 360 + 540) % 360 - 180, dec];
+  })();
+  var COL = DivumMapShading.tokens(document.body);
+
   var gMap = svg.append('g').attr('id', 'world-map');
-  gMap.append('path').datum(sphere).attr('class', 'eq-ocean').attr('d', path);
+  // Ocean and land graded from light under the Sun to dark on the far side,
+  // in the Earth Daylight card's colours
+  DivumMapShading.fillSvg(gMap, path, sphere, COL.ocean, COL.oceanFar, sun, 'eqOceanClip');
   gMap.append('path').datum(d3.geoGraticule10()).attr('class', 'eq-grid').attr('d', path);
   var gLand = gMap.append('g');
   var gNight = gMap.append('g');
@@ -412,9 +429,8 @@ html[data-season="summer"] body, html[data-season="autumn"] body {
   function xy(lon, lat){ return projection([lon, lat]); }
 
   function drawLand(world){
-    gLand.append('path')
-       .datum(topojson.feature(world, world.objects.countries))
-       .attr('class', 'eq-land').attr('d', path);
+    DivumMapShading.fillSvg(gLand, path, topojson.feature(world, world.objects.countries),
+       COL.land, COL.landFar, sun, 'eqLandClip');
     gLand.append('path')
        .datum(topojson.mesh(world, world.objects.countries, function(a, b){ return a !== b; }))
        .attr('class', 'eq-borders').attr('d', path);
@@ -467,23 +483,12 @@ html[data-season="summer"] body, html[data-season="autumn"] body {
     d3.select('.map').append('div').attr('class', 'mapLoadError').text(msg);
   }
 
-  // Night side, shaded exactly as the Equal Earth map does: four nested
-  // circles round the antisolar point (sun 0, 6, 12 and 18 degrees below
-  // the horizon), each one a light wash, so twilight darkens in steps.
+  // Night side, shaded as the Earth Daylight card does: four nested circles
+  // round the antisolar point (Sun 0, 6, 12 and 18 degrees below the
+  // horizon), each darker than the last.
   function drawNight(){
-    var RAD = Math.PI / 180, now = new Date();
-    var n = now.valueOf() / 864e5 + 2440587.5 - 2451545.0;
-    var L = (280.460 + 0.9856474 * n) % 360, g = ((357.528 + 0.9856003 * n) % 360) * RAD;
-    var lam = (L + 1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g)) * RAD;
-    var eps = (23.439 - 0.0000004 * n) * RAD;
-    var ra = Math.atan2(Math.cos(eps) * Math.sin(lam), Math.cos(lam)) / RAD;
-    var dec = Math.asin(Math.sin(eps) * Math.sin(lam)) / RAD;
-    var gmst = (280.46061837 + 360.98564736629 * n) % 360;
-    var sunLon = ((ra - gmst) % 360 + 540) % 360 - 180;
-    var anti = [sunLon + 180, -dec];
-    [90, 96, 102, 108].forEach(function(z){
-      gNight.append('path').datum(d3.geoCircle().center(anti).radius(180 - z)())
-        .attr('class', 'eq-night').attr('d', path);
+    DivumMapShading.night([sun[0] + 180, -sun[1]]).forEach(function(c, i){
+      gNight.append('path').datum(c).attr('class', 'eq-night n' + (i + 1)).attr('d', path);
     });
   }
   drawNight();

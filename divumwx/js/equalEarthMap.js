@@ -1,6 +1,6 @@
 /*
 ##############################################################################################
-# equalEarthMap.js version 1.0.0
+# equalEarthMap.js version 1.1.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -159,10 +159,10 @@
   let C = {};
   function readColours() {
     const cs = getComputedStyle(document.body), v = k => cs.getPropertyValue(k).trim();
-    for (const k of ["ocean", "land", "coast", "grid", "rim", "sun", "station", "moon-lit", "moon-dark", "moon-track"]) C[k] = v("--map-" + k);
+    for (const k of ["ocean", "ocean-far", "land", "land-far", "coast", "grid", "rim", "sun", "station", "moon-lit", "moon-dark", "moon-track"]) C[k] = v("--map-" + k);
     C.card = v("--bs-card-bg") || "#FFFFFF";
     C.night = v("--map-night");
-    C.nightAlpha = parseFloat(v("--map-night-alpha")) || .15;
+    C.nightAlphas = DivumMapShading.tokens(document.body).nightAlphas;
     C.halo = v("--map-halo");
     C.select = v("--map-select");
     C.tissot = v("--map-tissot");
@@ -222,15 +222,18 @@
 
   // ---- Draw ----
   function layers(shade, ocean = true, shadeNight = true) {
-    if (ocean) { ctx.beginPath(); path(sphere); ctx.fillStyle = C.ocean; ctx.fill(); }
+    // ocean and land graded from light under the Sun to dark on the far side
+    if (ocean) DivumMapShading.fillCanvas(ctx, path, sphere, C.ocean, C["ocean-far"], sun);
     ctx.beginPath(); path(graticule); ctx.lineWidth = .5; ctx.strokeStyle = C.grid; ctx.stroke();
     if (land) {
-      ctx.beginPath(); path(land); ctx.fillStyle = C.land; ctx.fill();
+      DivumMapShading.fillCanvas(ctx, path, land, C.land, C["land-far"], sun);
       ctx.beginPath(); path(borders); ctx.lineWidth = .5; ctx.strokeStyle = C.coast; ctx.stroke();
     }
     if (night && shadeNight) {
-      ctx.fillStyle = `rgba(${C.night}, ${C.nightAlpha})`;
-      for (const b of bands) { ctx.beginPath(); path(b); ctx.fill(); }
+      bands.forEach((b, i) => {
+        ctx.fillStyle = `rgba(${C.night}, ${C.nightAlphas[i]})`;
+        ctx.beginPath(); path(b); ctx.fill();
+      });
     }
     if (shade > 0) { ctx.beginPath(); path(sphere); ctx.fillStyle = `rgba(${C.night}, ${shade})`; ctx.fill(); }
   }

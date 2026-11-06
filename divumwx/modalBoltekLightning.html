@@ -25,7 +25,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
 <title>Boltek Lightning</title>
-<link rel="stylesheet" href="css/equalEarthMap.css">
+<link rel="stylesheet" href="css/equalEarthMap.css?v=1.1.2">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 :root, [data-theme="light"]{
@@ -175,21 +175,26 @@ select.bk-tf{ padding-right:8px; }
 [hidden]{ display:none !important; }
 
 /* ---- Strike map (colours: css/equalEarthMap.css --map-*, keyed off body.dark/light) ---- */
-:root, [data-theme="light"]{ --bk-flash:#FFFFFF; --bk-trail:#F59E0B; --bk-comet:#FFF7C2; --bk-dot-edge:rgba(29,44,78,.75); --bk-ring:rgba(29,44,78,.28); --bk-ring-text:#3B4A6B; }
-[data-theme="dark"]{ --bk-flash:#FFFFFF; --bk-trail:#FFD54A; --bk-comet:#FFFDF0; --bk-dot-edge:rgba(0,0,0,.7); --bk-ring:rgba(233,228,212,.22); --bk-ring-text:#AEB8D8; }
-.bk-map{ position:relative; width:100%; border-radius:10px; overflow:hidden; background:var(--map-ocean); }
+:root, [data-theme="light"]{ --bk-flash:#FFFFFF; --bk-trail:#F59E0B; --bk-comet:#FFF7C2; --bk-dot-edge:rgba(29,44,78,.75); }
+[data-theme="dark"]{ --bk-flash:#FFFFFF; --bk-trail:#FFD54A; --bk-comet:#FFFDF0; --bk-dot-edge:rgba(0,0,0,.7); }
+.bk-map{ position:relative; width:100%; border-radius:10px; overflow:hidden; background:var(--map-ocean-far); }
 .bk-map svg{ display:block; width:100%; height:auto; }
-.bk-map .m-ocean{ fill:var(--map-ocean); }
+.bk-map .m-ocean{ fill:var(--map-ocean-far); }
 .bk-map .m-grid{ fill:none; stroke:var(--map-grid); stroke-width:.5px; }
-.bk-map .m-land{ fill:var(--map-land); }
 .bk-map .m-borders{ fill:none; stroke:var(--map-coast); stroke-width:.7px; stroke-linejoin:round; }
-.bk-map .m-night{ fill:rgba(var(--map-night), var(--map-night-alpha)); pointer-events:none; }
-.bk-map .m-ring{ fill:none; stroke:var(--bk-ring); stroke-width:1px; stroke-dasharray:4 4; }
-.bk-map .m-ring-label, .bk-map .m-compass{ fill:var(--bk-ring-text); font-size:11px; font-family:'Lexend', sans-serif; paint-order:stroke; stroke:var(--map-ocean); stroke-width:3px; stroke-linejoin:round; }
+.bk-map .m-night{ pointer-events:none; }
+.bk-map .m-night.n1{ fill:rgba(var(--map-night), var(--map-night-a1)); }
+.bk-map .m-night.n2{ fill:rgba(var(--map-night), var(--map-night-a2)); }
+.bk-map .m-night.n3{ fill:rgba(var(--map-night), var(--map-night-a3)); }
+.bk-map .m-night.n4{ fill:rgba(var(--map-night), var(--map-night-a4)); }
+/* Rings and text: light with a dark edge, readable on day, land and night */
+.bk-map .m-ring-casing{ fill:none; stroke:var(--map-ring-casing); stroke-width:3px; }
+.bk-map .m-ring{ fill:none; stroke:var(--map-ring); stroke-width:1.2px; stroke-dasharray:5 4; }
+.bk-map .m-ring-label, .bk-map .m-compass{ fill:var(--map-label); font-size:11px; font-weight:600; font-family:'Lexend', sans-serif; paint-order:stroke; stroke:var(--map-label-halo); stroke-width:3px; stroke-linejoin:round; }
 .bk-map .m-compass{ font-weight:700; font-size:12px; }
-.bk-map .m-station{ fill:var(--map-station); stroke:var(--bs-card-bg); stroke-width:2px; }
+.bk-map .m-station{ fill:var(--map-station); stroke:var(--map-label-halo); stroke-width:2px; }
 .bk-map .m-station-halo{ fill:none; stroke:var(--map-station); stroke-width:2px; }
-.bk-map .m-station-label{ fill:var(--map-station); font-size:12px; font-weight:600; font-family:'Lexend', sans-serif; paint-order:stroke; stroke:var(--bs-card-bg); stroke-width:3px; stroke-linejoin:round; }
+.bk-map .m-station-label{ fill:var(--map-label); font-size:12px; font-weight:600; font-family:'Lexend', sans-serif; paint-order:stroke; stroke:var(--map-label-halo); stroke-width:3px; stroke-linejoin:round; }
 .bk-map .m-strike{ stroke:var(--bk-dot-edge); stroke-width:.8px; cursor:pointer; }
 .bk-map .fx-core{ fill:var(--bk-flash); }
 .bk-map .fx-ring{ fill:none; stroke:var(--bk-flash); stroke-width:2px; }
@@ -280,7 +285,8 @@ select.bk-tf{ padding-right:8px; }
 
 <script src="js/d3.7.9.0.min.js"></script>
 <script src="js/topojson.3.0.2.min.js"></script>
-<script src="js/lightningLive.js?v=1.0.2"></script>
+<script src="js/mapShading.js?v=1.0.1"></script>
+<script src="js/lightningLive.js?v=1.0.4"></script>
 <script src="units.js?v=1.0.2"></script>
 <script src="stationTime.js"></script>
 <script>
@@ -694,7 +700,7 @@ select.bk-tf{ padding-right:8px; }
     glow.append('feGaussianBlur').attr('stdDeviation', 3).attr('result', 'b');
     var merge = glow.append('feMerge'); merge.append('feMergeNode').attr('in', 'b'); merge.append('feMergeNode').attr('in', 'SourceGraphic');
     svg.append('rect').attr('class', 'm-ocean').attr('width', W).attr('height', H);
-    var gGrid = svg.append('g'), gLand = svg.append('g'), gNight = svg.append('g'), gRings = svg.append('g');
+    var gOcean = svg.append('g'), gGrid = svg.append('g'), gLand = svg.append('g'), gNight = svg.append('g'), gRings = svg.append('g');
     var gTrails = svg.append('g'), gStrikes = svg.append('g'), gStation = svg.append('g'), gFx = svg.append('g');
 
     var projection = null, path = null, world = null;
@@ -758,27 +764,41 @@ select.bk-tf{ padding-right:8px; }
       path = d3.geoPath(projection);
       gGrid.selectAll('*').remove();
       gGrid.append('path').datum(d3.geoGraticule().step([5, 5])()).attr('class', 'm-grid').attr('d', path);
-      drawLand(); drawNight(); drawRings(); drawStation(); drawStrikes(true);
+      drawOcean(); drawLand(); drawNight(); drawRings(); drawStation(); drawStrikes(true);
     }
-    function drawLand(){
-      gLand.selectAll('*').remove();
-      if (!world || !path) return;
-      gLand.append('path').datum(topojson.feature(world, world.objects.countries)).attr('class', 'm-land').attr('d', path);
-      gLand.append('path').datum(topojson.mesh(world, world.objects.countries, function(a, b){ return a !== b; }))
-        .attr('class', 'm-borders').attr('d', path);
-    }
-    // Night side, as the Equal Earth map draws it: four washes round the
-    // antisolar point (sun 0, 6, 12 and 18 degrees below the horizon).
-    function drawNight(){
-      gNight.selectAll('*').remove();
-      if (!path) return;
+    // The point under the Sun now (Astronomical Almanac low-precision formulae)
+    function sunNow(){
       var RAD = Math.PI / 180, n = Date.now() / 864e5 + 2440587.5 - 2451545.0;
       var L = (280.460 + 0.9856474 * n) % 360, g = ((357.528 + 0.9856003 * n) % 360) * RAD;
       var lam = (L + 1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g)) * RAD, eps = (23.439 - 0.0000004 * n) * RAD;
       var ra = Math.atan2(Math.cos(eps) * Math.sin(lam), Math.cos(lam)) / RAD, dec = Math.asin(Math.sin(eps) * Math.sin(lam)) / RAD;
-      var sunLon = ((ra - (280.46061837 + 360.98564736629 * n) % 360) % 360 + 540) % 360 - 180;
-      [90, 96, 102, 108].forEach(function(z){
-        gNight.append('path').datum(d3.geoCircle().center([sunLon + 180, -dec]).radius(180 - z)()).attr('class', 'm-night').attr('d', path);
+      return [((ra - (280.46061837 + 360.98564736629 * n) % 360) % 360 + 540) % 360 - 180, dec];
+    }
+    // Ocean and land graded from light under the Sun to dark on the far
+    // side, in the Earth Daylight card's colours
+    function drawOcean(){
+      gOcean.selectAll('*').remove();
+      if (!path) return;
+      var c = DivumMapShading.tokens(document.body);
+      DivumMapShading.fillSvg(gOcean, path, { type: 'Sphere' }, c.ocean, c.oceanFar, sunNow(), 'bkOceanClip');
+    }
+    function drawLand(){
+      gLand.selectAll('*').remove();
+      if (!world || !path) return;
+      var c = DivumMapShading.tokens(document.body);
+      DivumMapShading.fillSvg(gLand, path, topojson.feature(world, world.objects.countries), c.land, c.landFar, sunNow(), 'bkLandClip');
+      gLand.append('path').datum(topojson.mesh(world, world.objects.countries, function(a, b){ return a !== b; }))
+        .attr('class', 'm-borders').attr('d', path);
+    }
+    // Night side, as the Earth Daylight card shades it: four steps round the
+    // antisolar point (Sun 0, 6, 12 and 18 degrees below the horizon), each
+    // darker than the last.
+    function drawNight(){
+      gNight.selectAll('*').remove();
+      if (!path) return;
+      var sun = sunNow();
+      DivumMapShading.night([sun[0] + 180, -sun[1]]).forEach(function(c, i){
+        gNight.append('path').datum(c).attr('class', 'm-night n' + (i + 1)).attr('d', path);
       });
     }
     function drawRings(){
@@ -786,7 +806,9 @@ select.bk-tf{ padding-right:8px; }
       var u = units(), r = rangeList()[rangeIdx];
       for (var v = r[1]; v <= r[0] + 0.001; v += r[1]) {
         var km = toKm(v, u);
-        gRings.append('path').datum(d3.geoCircle().center(center).radius(km / KM_PER_DEG).precision(2)()).attr('class', 'm-ring').attr('d', path);
+        var ring = d3.geoCircle().center(center).radius(km / KM_PER_DEG).precision(2)();
+        gRings.append('path').datum(ring).attr('class', 'm-ring-casing').attr('d', path);
+        gRings.append('path').datum(ring).attr('class', 'm-ring').attr('d', path);
         var p = projection(destination(km, 35));   // labelled to the NNE, clear of the compass letters
         if (p) gRings.append('text').attr('class', 'm-ring-label').attr('x', p[0] + 3).attr('y', p[1] - 3).text(v + ' ' + unitLabel(u));
       }

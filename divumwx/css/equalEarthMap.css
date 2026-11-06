@@ -1,6 +1,6 @@
 /*
 ##############################################################################################
-# equalEarthMap.css version 1.0.0
+# equalEarthMap.css version 1.1.2
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -10,40 +10,43 @@
    Expects the page to define the DivumWX card tokens (--bs-card-bg, --bw-accent, --bs-border-color, ...)
    and to set body.light / body.dark. */
 
-/* ---- Equal Earth globe ---- */
+/* ---- Map colours: the Earth Daylight card's palette ----
+   The same in light and dark, as on the card. Ocean and land are graded from
+   the first colour (under the Sun) to the -far colour (the far side of the
+   Earth) by js/mapShading.js. Night is four steps of --map-night, at
+   --map-night-a1 (the terminator) to --map-night-a4 (astronomical night).
+   The steps stack, so these values give 35%, 50%, 60% and 70% darkness in
+   total at each step. */
 :root {
-  --map-ocean: #D5E2EA;
-  --map-land: #B7C4A3;
-  --map-coast: #FFFFFF;
-  --map-grid: #A9BCC8;
-  --map-rim: #1D2C4E;
-  --map-night: 10, 15, 34;
-  --map-night-alpha: .13;
-  --map-halo: 74, 144, 217;
-  --map-sun: #E8A317;
-  --map-station: #B45309;
-  --map-moon-lit: #FBF8EE;
-  --map-moon-dark: #6B7488;
-  --map-moon-track: #4F5F82;
-  --map-select: #B45309;
+  --map-ocean: #D4E2FF;
+  --map-ocean-far: #5B7FC7;
+  --map-land: #5FD18F;
+  --map-land-far: #1F5C3D;
+  --map-coast: #1C3D29;
+  --map-grid: rgba(136, 136, 136, .5);
+  --map-rim: #5B7FC7;
+  --map-night: 14, 17, 22;
+  --map-night-a1: .35;
+  --map-night-a2: .2308;
+  --map-night-a3: .20;
+  --map-night-a4: .25;
+  --map-halo: 91, 127, 199;
+  --map-sun: #FF6347;
+  --map-station: #FF4444;
+  --map-moon-lit: #F5F5F5;
+  --map-moon-dark: #999999;
+  --map-moon-track: #999999;
+  --map-select: #F8D747;
+  /* Text and range rings drawn on the map: light with a dark edge, so they
+     read on the light day ocean, the green land and the dark night alike */
+  --map-label: #FFFFFF;
+  --map-label-halo: rgba(14, 17, 22, .8);
+  --map-ring: rgba(255, 255, 255, .9);
+  --map-ring-casing: rgba(14, 17, 22, .5);
   --map-tissot: 180, 65, 58;
   --map-bad: #B4413A;
 }
 body.dark {
-  --map-ocean: #16203F;
-  --map-land: #3E4F48;
-  --map-coast: #111834;
-  --map-grid: #2A3358;
-  --map-rim: #8B93B8;
-  --map-night: 0, 0, 0;
-  --map-night-alpha: .22;
-  --map-halo: 120, 170, 255;
-  --map-sun: #F5C542;
-  --map-station: #D3A94C;
-  --map-moon-lit: #EDE8D8;
-  --map-moon-dark: #2A3358;
-  --map-moon-track: #AEB8D8;
-  --map-select: #D3A94C;
   --map-tissot: 239, 122, 110;
   --map-bad: #EF7A6E;
 }

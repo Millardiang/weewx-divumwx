@@ -1,6 +1,6 @@
 /*
 ##############################################################################################
-# lightningLive.js version 1.0.2
+# lightningLive.js version 1.0.4
 #  Copyright (C) 2026 Ian Millard, Mike Isaac
 #  GPLv3
 ##############################################################################################
@@ -40,18 +40,20 @@
 
   // ---- Styles (injected once) ----
   var CSS = [
-    // Map colours: css/equalEarthMap.css's --map-* values, light then dark
-    '.ll-root{ --ll-ocean:#D5E2EA; --ll-land:#B7C4A3; --ll-coast:#FFFFFF; --ll-grid:#A9BCC8; --ll-rim:#1D2C4E;',
-    '  --ll-night:10,15,34; --ll-night-alpha:.13; --ll-station:#B45309; --ll-dot-edge:rgba(29,44,78,.75);',
-    '  --ll-sig:29,44,78; --ll-ring:rgba(29,44,78,.45); --ll-trail:#F59E0B; --ll-flash:255,255,255;',
+    // Map colours: css/equalEarthMap.css's --map-* values (the Earth Daylight
+    // card's palette, the same in light and dark)
+    '.ll-root{ --ll-ocean:#D4E2FF; --ll-ocean-far:#5B7FC7; --ll-land:#5FD18F; --ll-land-far:#1F5C3D;',
+    '  --ll-coast:#1C3D29; --ll-grid:rgba(136,136,136,.5); --ll-rim:#5B7FC7;',
+    '  --ll-night:14,17,22; --ll-night-a1:.35; --ll-night-a2:.2308; --ll-night-a3:.20; --ll-night-a4:.25;',
+    '  --ll-station:#FF4444; --ll-dot-edge:rgba(29,44,78,.75);',
+    '  --ll-label:#FFFFFF; --ll-label-halo:rgba(14,17,22,.8); --ll-home-ring:rgba(255,255,255,.9); --ll-home-casing:rgba(14,17,22,.5);',
+    '  --ll-sig:29,44,78; --ll-trail:#F59E0B; --ll-flash:255,255,255;',
     '  --ll-accent:var(--bw-accent,#B45309); --ll-panel:var(--bs-card-bg,#FFFFFF); --ll-text:var(--bs-body-color,#1D2C4E);',
     '  --ll-muted:var(--bs-secondary-color,#5C6672); --ll-border:var(--bs-border-color,#C9CFD8); --ll-btn:var(--bs-tertiary-bg,#F4F1E9);',
     '  --ll-good:var(--bw-good,#5BBB8A); --ll-warn:var(--bw-amber,#D97706); --ll-bad:var(--bw-danger,#E36B57);',
     '  font-family:\'Lexend\',\'Helvetica Neue\',Helvetica,Arial,sans-serif; color:var(--ll-text); }',
     '[data-theme="dark"] .ll-root, [data-bs-theme="dark"] .ll-root, body.dark .ll-root{',
-    '  --ll-ocean:#16203F; --ll-land:#3E4F48; --ll-coast:#111834; --ll-grid:#2A3358; --ll-rim:#8B93B8;',
-    '  --ll-night:0,0,0; --ll-night-alpha:.22; --ll-station:#D3A94C; --ll-dot-edge:rgba(0,0,0,.7);',
-    '  --ll-sig:233,228,212; --ll-ring:rgba(233,228,212,.4); --ll-trail:#FFD54A; --ll-accent:var(--bw-accent,#D3A94C); }',
+    '  --ll-accent:var(--bw-accent,#D3A94C); }',
     '.ll-bar{ display:flex; align-items:center; justify-content:space-between; gap:8px 12px; flex-wrap:wrap; margin-bottom:8px; }',
     '.ll-btns{ display:flex; gap:6px; flex-wrap:wrap; }',
     '.ll-btn{ font:700 12px \'Lexend\',\'Helvetica Neue\',Helvetica,Arial,sans-serif; padding:6px 13px; border-radius:999px;',
@@ -176,9 +178,12 @@
     var COL = {};
     function readColours(){
       var cs = getComputedStyle(host), v = function(n){ return cs.getPropertyValue(n).trim(); };
-      COL = { ocean: v('--ll-ocean'), land: v('--ll-land'), coast: v('--ll-coast'), grid: v('--ll-grid'), rim: v('--ll-rim'),
-              night: 'rgba(' + v('--ll-night') + ',' + v('--ll-night-alpha') + ')', station: v('--ll-station'),
-              edge: v('--ll-dot-edge'), sig: v('--ll-sig'), ring: v('--ll-ring'), trail: v('--ll-trail'), flash: v('--ll-flash'),
+      COL = { ocean: v('--ll-ocean'), oceanFar: v('--ll-ocean-far'), land: v('--ll-land'), landFar: v('--ll-land-far'),
+              coast: v('--ll-coast'), grid: v('--ll-grid'), rim: v('--ll-rim'),
+              night: [1, 2, 3, 4].map(function(i){ return 'rgba(' + v('--ll-night') + ',' + v('--ll-night-a' + i) + ')'; }),
+              station: v('--ll-station'),
+              label: v('--ll-label'), halo: v('--ll-label-halo'), homeRing: v('--ll-home-ring'), homeCasing: v('--ll-home-casing'),
+              edge: v('--ll-dot-edge'), sig: v('--ll-sig'), trail: v('--ll-trail'), flash: v('--ll-flash'),
               panel: v('--ll-panel') };
     }
 
@@ -242,22 +247,30 @@
       if (!built && !W) return;
       var c = xB; c.clearRect(0, 0, W, H);
       var hi = zt.k >= 3 && land50, land = hi ? land50 : land110, bord = hi ? bord50 : bord110;
-      c.beginPath(); pathB({ type: 'Sphere' }); c.fillStyle = COL.ocean; c.fill();
+      // ocean and land graded from light under the Sun to dark on the far side
+      // (js/mapShading.js); flat colours if that hasn't loaded
+      var anti = antisolar(), sun = [anti[0] - 180, -anti[1]], S = window.DivumMapShading;
+      if (S) S.fillCanvas(c, pathB, { type: 'Sphere' }, COL.ocean, COL.oceanFar, sun);
+      else { c.beginPath(); pathB({ type: 'Sphere' }); c.fillStyle = COL.ocean; c.fill(); }
       c.beginPath(); pathB(graticule); c.strokeStyle = COL.grid; c.lineWidth = .5; c.stroke();
       if (land) {
-        c.beginPath(); pathB(land); c.fillStyle = COL.land; c.fill();
+        if (S) S.fillCanvas(c, pathB, land, COL.land, COL.landFar, sun);
+        else { c.beginPath(); pathB(land); c.fillStyle = COL.land; c.fill(); }
         c.beginPath(); pathB(bord); c.strokeStyle = COL.coast; c.lineWidth = .7; c.lineJoin = 'round'; c.stroke();
       }
       if (showNight) {
-        var anti = antisolar();
-        c.fillStyle = COL.night;
-        [90, 84, 78, 72].forEach(function(r){ c.beginPath(); pathB(d3.geoCircle().center(anti).radius(r)()); c.fill(); });
+        [90, 84, 78, 72].forEach(function(r, i){
+          c.fillStyle = COL.night[i];
+          c.beginPath(); pathB(d3.geoCircle().center(anti).radius(r)()); c.fill();
+        });
       }
       c.beginPath(); pathB({ type: 'Sphere' }); c.strokeStyle = COL.rim; c.globalAlpha = .5; c.lineWidth = 1; c.stroke(); c.globalAlpha = 1;
       if (!home) return;
       // the station and its radius ring
       c.beginPath(); pathB(d3.geoCircle().center(home).radius(radiusKm / KM_PER_DEG)());
-      c.setLineDash([4, 4]); c.strokeStyle = COL.ring; c.lineWidth = 1; c.stroke(); c.setLineDash([]);
+      // light dashes over a dark line, so the ring reads on day, land and night
+      c.strokeStyle = COL.homeCasing; c.lineWidth = 3; c.stroke();
+      c.setLineDash([5, 4]); c.strokeStyle = COL.homeRing; c.lineWidth = 1.2; c.stroke(); c.setLineDash([]);
       var p = proj(home);
       if (p) {
         c.beginPath(); c.arc(p[0], p[1], 9, 0, 2 * Math.PI); c.strokeStyle = COL.station; c.globalAlpha = .35; c.lineWidth = 2; c.stroke(); c.globalAlpha = 1;
@@ -265,8 +278,8 @@
         c.strokeStyle = COL.panel; c.lineWidth = 2; c.stroke();
         if (zt.k >= 2) {
           c.font = '600 12px Lexend, sans-serif'; c.lineJoin = 'round';
-          c.strokeStyle = COL.panel; c.lineWidth = 3; c.strokeText(homeName, p[0] + 10, p[1] + 4);
-          c.fillStyle = COL.station; c.fillText(homeName, p[0] + 10, p[1] + 4);
+          c.strokeStyle = COL.halo; c.lineWidth = 3; c.strokeText(homeName, p[0] + 10, p[1] + 4);
+          c.fillStyle = COL.label; c.fillText(homeName, p[0] + 10, p[1] + 4);
         }
       }
     }
