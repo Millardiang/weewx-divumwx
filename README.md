@@ -1,6 +1,11 @@
-# Welcome to the DivumWX skin for WeeWX Version 2.1.2
+# Welcome to the DivumWX skin for WeeWX Version 2.1.3
 Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LICENSE Version 3](https://github.com/Millardiang/weewx-divumwx/blob/main/license.txt)
  
+# What's new in 2.1.3
+* **Equal Earth maps in the Earth Daylight card's colours** - the Equal Earth page, World Daylight, Earthquakes, Boltek and live lightning maps all share the card's blue ocean, green land and night shading, lit from the Sun, in light and dark mode.
+* **Clearer range rings and labels** - on the Boltek and live lightning maps.
+* **Met Office link on UK warnings only** - warnings for stations outside the UK no longer link to the Met Office.
+
 # What's new in 2.1.2
 * **Webcam titles** - each webcam card shows the title you gave it, and an optional `webcamN_description` appears when you hover over the card.
 * **Lightning Last Detected** - shows the time of the last strike on Ecowitt stations, not the current time.

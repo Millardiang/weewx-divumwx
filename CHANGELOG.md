@@ -1,6 +1,29 @@
 # DivumWX Changelog
 
-## Unreleased
+## 2.1.3 — 7 November 2026
+
+### Version 2.1.3
+- Release. `DIVUMWX_VERSION` is now `2.1.3`. The `index.html` header and
+  footer fallback, the `divumwf.html` badge (1.0.5), the README title and
+  `INSTALLATION_GUIDE.md` all say 2.1.3.
+- The install guide downloads from the release tag `ver.2.1.3`.
+
+### Met Office link on UK warnings only
+- The alert bar put a link to the Met Office's UK warnings page on every
+  OpenWeatherMap warning, wherever the station was. It now appears only
+  for a UK station; elsewhere the warning is shown without a link, as
+  OpenWeatherMap gives none for the issuing country's own service.
+- The Met Office RSS fallback is now used only for a UK station, so a
+  leftover `metofficerss.txt` on a site outside the UK can't show UK
+  warnings.
+- MeteoAlarm warnings are unchanged: they already link to the national
+  service that issued them.
+- "UK station" is the installer's own answer (`[DivumWXCards] in_uk`),
+  or the station's position when that isn't set, as for AuroraWatch and
+  the UKHSA health alerts.
+- Changed: `cardsBundleNew.js` 1.1.3 (`alertBar.js` 1.1.1), cache-buster
+  updated in `index.html`, `hyperIndex.html`, `lexendIndex.html` and
+  `kiosk.html`.
 
 ### Equal Earth maps in the Earth Daylight card's colours
 - Every Equal Earth map now uses the Earth Daylight card's colours: the

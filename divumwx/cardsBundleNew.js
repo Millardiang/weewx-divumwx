@@ -1,6 +1,6 @@
 /*
 ##############################################################################################
-# cardsBundleNew.js version 1.1.2
+# cardsBundleNew.js version 1.1.3
 ##############################################################################################
 */
 
@@ -704,7 +704,7 @@ try {
 try {
 /*
 ##############################################################################################
-# alertBar.js version 1.1.0
+# alertBar.js version 1.1.1
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -1176,15 +1176,20 @@ try {
           var cfg = getAlertLevelConfig(level);
           var begins = fmtDateTime(alert.start), expires = fmtDateTime(alert.end);
           var headline = escapeHtml(event) + ' ALERT. From ' + begins + ' to ' + expires + '.  ';
+          // The Met Office link only for a UK station's warnings: elsewhere the
+          // warning is from that country's own service, and OpenWeatherMap
+          // gives no link to it.
           var metofficeUrl = 'https://www.metoffice.gov.uk/weather/warnings-and-advice/uk-warnings';
           sections.push(buildSection({
             bg: cfg.bg, text: cfg.text, icon: TRIANGLE_ICON[level],
             headlineHtml: headline,
             descriptionHtml: escapeHtml(alert.description || '') + ' Tags: ' + escapeHtml((alert.tags || []).join(', ')) +
-              ' <a href="' + metofficeUrl + '">' + metofficeUrl + '</a>'
+              (inUk ? ' <a href="' + metofficeUrl + '">' + metofficeUrl + '</a>' : '')
           }));
         });
-      } else if (rssText) {
+      } else if (rssText && inUk) {
+        // Met Office warnings are for the UK only: a leftover metofficerss.txt
+        // on a site elsewhere is ignored.
         try {
           var rssWarnings = parseMetOfficeRss(rssText);
           if (rssWarnings.length > 0) rssFallbackUsed = true;
