@@ -1,12 +1,6 @@
 # DivumWX Changelog
 
-## 2.1.3 — 7 November 2026
-
-### Version 2.1.3
-- Release. `DIVUMWX_VERSION` is now `2.1.3`. The `index.html` header and
-  footer fallback, the `divumwf.html` badge (1.0.5), the README title and
-  `INSTALLATION_GUIDE.md` all say 2.1.3.
-- The install guide downloads from the release tag `ver.2.1.3`.
+## Unreleased
 
 ### Met Office link on UK warnings only
 - The alert bar put a link to the Met Office's UK warnings page on every
