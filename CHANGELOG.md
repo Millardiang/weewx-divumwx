@@ -1,5 +1,48 @@
 # DivumWX Changelog
 
+## 2.2.0 — 8 November 2026
+
+### Version 2.2.0
+- Minor release (new languages). `DIVUMWX_VERSION` is now `2.2.0`. The
+  `index.html` header and footer fallback, the `divumwf.html` badge
+  (1.0.6), the README title and `INSTALLATION_GUIDE.md` all say 2.2.0.
+- The install guide downloads from the release tag `ver.2.2.0`.
+- `index.html`'s header and footer fallback still said 2.1.2 in the 2.1.3
+  release; both are now correct, and the 2.1.3 changelog entry has its
+  `## 2.1.3` heading, so `tools/check_version.py` passes again.
+### Update packages
+- Each release now also gets an update package,
+  `divumwx-update-<old>-to-<new>.zip`, holding only the files changed since
+  the previous release. Install it with the usual
+  `weectl extension install <zip>`: it asks no questions, leaves
+  `weewx.conf` as it is, replaces only the changed files and removes any
+  the release deleted. It refuses, before changing anything, if the station
+  isn't on the release it was built from. `weectl extension list` and
+  `uninstall` work as before. See "Quick update with an update package" in
+  `INSTALLATION_GUIDE.md`.
+- The package is built and attached to the GitHub release automatically
+  when a release is published (`.github/workflows/update-package.yml`), or
+  by hand with `tools/build_update.py`. See "Update packages" in
+  `VERSIONING_SCHEME.md`.
+- New: `tools/build_update.py`, `.github/workflows/update-package.yml`,
+  `.gitignore`. Changed: `install.py` (update mode),
+  `INSTALLATION_GUIDE.md`, `VERSIONING_SCHEME.md`.
+### Bulgarian and Scottish Gaelic
+- Two new languages: Bulgarian (`bg`, Български) and Scottish Gaelic
+  (`gd`, Gàidhlig). Both carry every key in `lang/en.conf`, are offered
+  by the installer's language prompt, and appear in the site's language
+  selector.
+- The selector shows the Bulgarian flag for Bulgarian and the Saltire
+  for Scottish Gaelic (new `img/flags/gb-sct.svg`).
+- New: `skins/DivumWX/lang/bg.conf`, `skins/DivumWX/lang/gd.conf`,
+  `img/flags/gb-sct.svg`.
+- Changed: `install.py`, `cardI18n.js` 1.0.3, `cardsBundleNew.js` 1.1.4
+  (cache-buster updated in `index.html`, `hyperIndex.html`,
+  `lexendIndex.html` and `kiosk.html`; `cardI18n.js`'s in every page that
+  loads it), `README.md`.
+
+## 2.1.3 — 7 November 2026
+
 ### Version 2.1.3
 - Release. `DIVUMWX_VERSION` is now `2.1.3`. The `index.html` header and
   footer fallback, the `divumwf.html` badge (1.0.5), the README title and

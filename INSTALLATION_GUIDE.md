@@ -1,6 +1,6 @@
 # DivumWX Installation Guide
 
-This guide covers DivumWX **2.1.3**. It assumes you already have a stable
+This guide covers DivumWX **2.2.0**. It assumes you already have a stable
 WeeWX 5 installation running with your own hardware driver.
 
 Tested on Debian 13 (Trixie) with:
@@ -50,7 +50,7 @@ sudo apt install python3-skyfield python3-requests
 ### Install or upgrade
 
 ```
-sudo weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/tags/ver.2.1.3.zip
+sudo weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/tags/ver.2.2.0.zip
 sudo systemctl restart weewx
 sudo weectl report run DivumWXReport
 ```
@@ -61,7 +61,7 @@ account WeeWX runs as (normally `weewx`). No manual `chown` is needed.
 ### Check the installation
 
 ```
-weectl extension list          # should show divumwx 2.1.3
+weectl extension list          # should show divumwx 2.2.0
 sudo journalctl -u weewx -n 100 --no-pager | grep -i divumwx
 ```
 
@@ -96,7 +96,7 @@ sudo mkdir -p /var/www/html/divumwx
 sudo chown -R $(whoami):$(whoami) /var/www/html/divumwx
 
 source ~/weewx-venv/bin/activate
-weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/tags/ver.2.1.3.zip
+weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/tags/ver.2.2.0.zip
 sudo systemctl restart weewx
 weectl report run DivumWXReport
 ```
@@ -126,6 +126,39 @@ sudo systemctl restart weewx
    directory (webcam images, timelapse output and generated data) are left
    alone. The list of files removed is printed during the install.
 6. Start WeeWX again (`sudo systemctl start weewx`).
+
+### Quick update with an update package
+
+From 2.2.0 onwards, each release on the
+[releases page](https://github.com/Millardiang/weewx-divumwx/releases) also
+has an update package, named for the two releases it goes between, e.g.
+`divumwx-update-2.1.3-to-2.2.0.zip`. It holds only the files that changed,
+and it installs with the same `weectl` command as a full release, but:
+
+- it asks no questions and leaves your `weewx.conf` exactly as it is;
+- it replaces only the changed files, and removes any the new release
+  deleted;
+- it first checks that you're on the release it was built from. If you
+  aren't, it stops without changing anything. In that case, apply the update
+  packages for the releases in between, or do a full upgrade as above.
+
+Download it, then install it the usual way for your layout:
+
+```
+wget https://github.com/Millardiang/weewx-divumwx/releases/download/ver.2.2.0/divumwx-update-2.1.3-to-2.2.0.zip
+
+sudo weectl extension install divumwx-update-2.1.3-to-2.2.0.zip      # A. Debian package
+weectl extension install divumwx-update-2.1.3-to-2.2.0.zip           # B. pip (venv active)
+
+sudo systemctl restart weewx
+```
+
+`weectl extension list` then shows the new version, and
+`weectl extension uninstall divumwx` still removes everything as before.
+
+If the update prints a note that the installer's settings logic changed, the
+release notes say whether the release brings new settings. If it does, run
+the full upgrade above as well to be asked for them.
 
 ### DivumWX's own database
 

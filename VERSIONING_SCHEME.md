@@ -52,3 +52,38 @@ no-build-step site that typically means:
   page relies on.
 - In practice this should be rare on a site this size — most work here is
   PATCH or MINOR.
+
+### Update packages
+
+Each release also gets an **update package**: a zip of only the files that
+changed since the previous release, which stations install with
+`weectl extension install` without going through the full, interactive
+installer. `install.py` switches to update mode when it finds
+`divumwx_update.json` next to itself (see "Update packages" in
+`install.py`).
+
+- **Built automatically.** Publishing a GitHub release for a `ver.X.Y.Z` tag
+  runs `.github/workflows/update-package.yml`, which runs
+  `tools/check_version.py`, builds the package from the previous release
+  tag to the new one, and attaches it to the release as
+  `divumwx-update-<old>-to-<new>.zip`.
+- **By hand:** `python3 tools/build_update.py` (previous tag → `HEAD`),
+  `--from`/`--to` for any two refs, or `--worktree` to package work that
+  isn't committed yet. Output goes to `dist/`. The workflow can also be run
+  from the Actions tab, e.g. to build a package that skips a release.
+- **What goes in:** changed files under `bin/`, `skins/` and `divumwx/`,
+  changed repo-root files (the ones a full install copies next to
+  `weewx.conf`), and always `install.py` and `bin/user/divumwx_version.py`.
+  `tests/`, `tools/`, `.github/` and other dev files are left out. Files
+  deleted from those places are listed for removal.
+- **The version must be bumped.** The package records both releases'
+  `DIVUMWX_VERSION`, and a station only accepts it if it is on the older
+  one (or already on the newer one). A package between two refs with the
+  same version is refused at build time.
+- **weewx.conf is never changed by an update package.** If a release adds
+  or changes settings, say so in the release notes so stations run the full
+  installer. The builder flags a release whose `install.py` changed beyond
+  its file and language lists (`installer_changed`), and the package then
+  prints a note telling stations to check the release notes. If the change
+  doesn't touch settings, rebuild with `--installer-unchanged` (or tick the
+  matching box when running the workflow by hand).

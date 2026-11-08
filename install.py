@@ -424,13 +424,14 @@ DIVUMWX_REPORT_SEARCH_LIST_EXTENSIONS = [
 # lang/<code>.conf next to these (en.conf is the template to copy), (2) add
 # its files= entry in DivumwxInstaller.__init__ below, (3) add it here.
 #
-# All 30 below carry the full 740-key [Texts] set from en.conf (every
+# All 32 below carry the full 740-key [Texts] set from en.conf (every
 # card, not just the barometer trend phrases) -- verified via ConfigObj
 # parse + Cheetah render before being added here.
 DIVUMWX_LANG_CHOICES = {
     'en':    'English',
     'en_US': 'English (US)',
     'ar':    'العربية (Arabic)',
+    'bg':    'Български (Bulgarian)',
     'br':    'Brezhoneg (Breton)',
     'ca':    'Català (Catalan)',
     'cn':    '中文 (Chinese, Simplified)',
@@ -441,6 +442,7 @@ DIVUMWX_LANG_CHOICES = {
     'es':    'Español (Spanish)',
     'eu':    'Euskara (Basque)',
     'fr':    'Français (French)',
+    'gd':    'Gàidhlig (Scottish Gaelic)',
     'gr':    'Ελληνικά (Greek)',
     'hi':    'हिन्दी (Hindi)',
     'it':    'Italiano (Italian)',
@@ -2659,6 +2661,9 @@ DIVUMWX_FRONTEND_EXCLUDED_FILES = {'bootstrap.min.js'}
 # here either.
 DIVUMWX_ROOT_DOCS_EXCLUDED_FILES = {
     '.gitignore',
+    # Only present in an update package (see "Update packages" below);
+    # describes the package, isn't a document for the station owner.
+    'divumwx_update.json',
     # Dev-only tooling for maintainers (building the bundled cardsBundle,
     # finding strings to translate) -- not something an installed site
     # needs a copy of.
@@ -3381,6 +3386,265 @@ def apply_changed_answers(cfg, existing, answers, printer):
     return changes
 
 
+# =====================================================================
+# Update packages
+#
+# tools/build_update.py builds a small zip holding only the files that
+# changed between two releases, plus this install.py and a
+# divumwx_update.json describing the package. Installed with the same
+# `weectl extension install <zip>` command as a full release, but this
+# file sees the JSON next to itself and switches to update mode:
+#
+#   - it checks that the installed release is the one the package was
+#     built from (or already the target, so re-applying is harmless),
+#     BEFORE writing anything;
+#   - it copies only the files in the package (bin/user, skins, the
+#     divumwx/ frontend, and the repo-root documents), and removes the
+#     files the new release deleted;
+#   - it asks no questions and leaves weewx.conf's DivumWX settings as
+#     they are.
+#
+# WeeWX copies an installer's `files` list BEFORE calling configure(),
+# which would overwrite the installed files before the version check
+# could run. So in update mode __init__ hands WeeWX an empty list and
+# configure() copies the files itself once the check has passed.
+#
+# Uninstalling is unaffected: WeeWX keeps a copy of this install.py
+# (without the JSON) in its installer directory, and that copy always
+# loads in full mode with the complete files list.
+# =====================================================================
+
+DIVUMWX_UPDATE_MANIFEST = 'divumwx_update.json'
+DIVUMWX_UPDATE_FORMAT = 1
+
+
+def load_update_manifest(extension_dir):
+    """Returns the update package's manifest dict, or None for a full
+    release. Raises ValueError if the file is there but unusable -- an
+    update package must never fall back to a full, interactive install
+    with only a handful of files present."""
+    path = os.path.join(extension_dir, DIVUMWX_UPDATE_MANIFEST)
+    if not os.path.isfile(path):
+        return None
+    import json
+    with open(path, encoding='utf-8') as f:
+        manifest = json.load(f)
+    if manifest.get('format') != DIVUMWX_UPDATE_FORMAT:
+        raise ValueError(f"{DIVUMWX_UPDATE_MANIFEST}: unsupported format "
+                         f"{manifest.get('format')!r} (this installer reads format "
+                         f"{DIVUMWX_UPDATE_FORMAT})")
+    for key in ('from_version', 'to_version'):
+        if not isinstance(manifest.get(key), str) or not manifest[key]:
+            raise ValueError(f"{DIVUMWX_UPDATE_MANIFEST}: missing {key}")
+    for key in ('files', 'removed'):
+        value = manifest.setdefault(key, [])
+        if not isinstance(value, list) or not all(isinstance(p, str) and _safe_rel(p) for p in value):
+            raise ValueError(f"{DIVUMWX_UPDATE_MANIFEST}: {key} must be a list of relative paths")
+    return manifest
+
+
+def _installer_file_map(file_list, extension_dir=None):
+    """Maps each source path in an ExtensionInstaller files list to its
+    destination relative to WEEWX_ROOT, the same way WeeWX's own
+    ExtensionEngine._gen_file_paths() does. With extension_dir, only
+    sources present there are returned (an update package holds just
+    the changed ones)."""
+    mapping = {}
+    for dest_dir, sources in file_list:
+        for source in sources:
+            if extension_dir is not None and not os.path.isfile(os.path.join(extension_dir, source)):
+                continue
+            common = os.path.commonpath([dest_dir, source])
+            mapping[source] = os.path.normpath(os.path.join(dest_dir, os.path.relpath(source, common)))
+    return mapping
+
+
+def _atomic_copy(src, dest):
+    """Copy via a temporary file renamed into place, as WeeWX's own
+    installer does, so a running weewxd never sees a half-written file."""
+    import tempfile
+    os.makedirs(os.path.dirname(dest), exist_ok=True)
+    fd, tmp = tempfile.mkstemp(dir=os.path.dirname(dest), prefix=os.path.basename(dest) + '.tmp')
+    os.close(fd)
+    try:
+        shutil.copy(src, tmp)
+        os.replace(tmp, dest)
+    except BaseException:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
+
+
+def _read_version_file(path):
+    try:
+        with open(path, encoding='utf-8') as f:
+            match = re.search(r'^DIVUMWX_VERSION\s*=\s*["\']([^"\']+)["\']', f.read(), re.MULTILINE)
+        return match.group(1) if match else None
+    except OSError:
+        return None
+
+
+def installed_divumwx_version(weewx_root, html_root):
+    """The release currently installed, read before an update writes
+    anything: bin/user/divumwx_version.py, else the frontend manifest's
+    header line. None if DivumWX doesn't look installed."""
+    version = _read_version_file(os.path.join(weewx_root, 'bin', 'user', 'divumwx_version.py'))
+    if version:
+        return version
+    try:
+        with open(os.path.join(html_root, DIVUMWX_FRONTEND_MANIFEST), encoding='utf-8') as f:
+            match = re.match(r'# DivumWX (\S+) frontend manifest', f.readline())
+        return match.group(1) if match else None
+    except OSError:
+        return None
+
+
+def resolve_divumwx_html_root(cfg, weewx_root):
+    """Absolute DivumWX web root: the site's HTML_ROOT + 'divumwx' (or
+    HTML_ROOT itself if it already ends in 'divumwx')."""
+    site_html_root = cfg['StdReport']['HTML_ROOT']
+    if not os.path.isabs(site_html_root):
+        site_html_root = os.path.join(weewx_root, site_html_root)
+    if os.path.basename(os.path.normpath(site_html_root)) == DIVUMWX_ROOT_SUBDIR:
+        return os.path.normpath(site_html_root)
+    return os.path.join(site_html_root, DIVUMWX_ROOT_SUBDIR)
+
+
+def _remove_file_and_empty_parents(path, stop_dir):
+    os.remove(path)
+    parent = os.path.dirname(path)
+    while os.path.normpath(parent) != os.path.normpath(stop_dir):
+        try:
+            os.rmdir(parent)  # only succeeds if empty
+        except OSError:
+            break
+        parent = os.path.dirname(parent)
+
+
+def apply_update_package(manifest, extension_dir, update_files, engine):
+    """Update mode's whole job (see "Update packages" above). Raises
+    weecfg.extension.InstallError, before writing anything, if the
+    package doesn't fit the installed release. Returns a summary dict."""
+    from weecfg.extension import InstallError
+    cfg = engine.config_dict
+    printer = engine.printer
+    weewx_root = engine.root_dict['WEEWX_ROOT']
+    from_version, to_version = manifest['from_version'], manifest['to_version']
+    html_root = resolve_divumwx_html_root(cfg, weewx_root)
+
+    printer.out(f"DivumWX update package: {from_version} -> {to_version} "
+                f"({len(manifest['files'])} changed, {len(manifest['removed'])} removed file(s)).",
+                level=1)
+
+    installed = installed_divumwx_version(weewx_root, html_root)
+    if installed is None:
+        raise InstallError(
+            "DivumWX doesn't appear to be installed here, so there is nothing to update. "
+            "Install the full release instead (see INSTALLATION_GUIDE.md).")
+    if installed not in (from_version, to_version):
+        raise InstallError(
+            f"This update package takes DivumWX {from_version} to {to_version}, but "
+            f"DivumWX {installed} is installed. Nothing was changed. Apply the update "
+            f"package(s) for the releases in between, or install the full {to_version} "
+            "release instead.")
+    if installed == to_version:
+        printer.out(f"DivumWX {to_version} is already installed; re-applying the "
+                    "update's files.", level=1)
+
+    if not check_all_dependencies(printer):
+        raise InstallError("DivumWX update aborted -- see errors above. Nothing was changed.")
+
+    summary = {'copied': [], 'removed': []}
+
+    # bin/user and skins/, plus anything else the installer's files list
+    # carries (divumwx_uninstall_helper.py).
+    for source, dest_rel in sorted(update_files.items()):
+        _atomic_copy(os.path.join(extension_dir, source), os.path.join(weewx_root, dest_rel))
+        summary['copied'].append(dest_rel)
+
+    # The divumwx/ frontend.
+    frontend = [p for p in manifest['files'] if p.startswith(DIVUMWX_ROOT_SUBDIR + '/')]
+    frontend_rel = []
+    owner = resolve_service_owner(cfg, weewx_root, engine.config_path)
+    for repo_path in frontend:
+        rel = repo_path[len(DIVUMWX_ROOT_SUBDIR) + 1:]
+        src = os.path.join(extension_dir, repo_path)
+        if os.path.basename(rel) in DIVUMWX_FRONTEND_EXCLUDED_FILES or not os.path.isfile(src) \
+                or os.path.islink(src):
+            continue
+        dest = os.path.join(html_root, rel)
+        _atomic_copy(src, dest)
+        try:
+            os.chmod(dest, DIVUMWX_FRONTEND_MODE)
+            if owner is not None and hasattr(os, 'geteuid') and os.geteuid() == 0:
+                # The file and any folder it needed, up to the web root.
+                path = dest
+                while os.path.normpath(path) != os.path.normpath(html_root):
+                    os.lchown(path, owner[0], owner[1])
+                    path = os.path.dirname(path)
+        except OSError as e:
+            printer.out(f"WARNING: couldn't set permissions on {dest}: {e}", level=1)
+        frontend_rel.append(rel)
+        summary['copied'].append(os.path.join(html_root, rel))
+
+    # Files the new release deleted. Only paths DivumWX itself installs:
+    # bin/user, skins/ and the frontend.
+    removed_frontend = []
+    for repo_path in manifest['removed']:
+        if repo_path.startswith(DIVUMWX_ROOT_SUBDIR + '/'):
+            rel = repo_path[len(DIVUMWX_ROOT_SUBDIR) + 1:]
+            path, stop = os.path.join(html_root, rel), html_root
+            removed_frontend.append(rel)
+        elif repo_path.startswith(('bin/user/', 'skins/')):
+            path, stop = os.path.join(weewx_root, repo_path), weewx_root
+        else:
+            continue
+        if os.path.isfile(path) or os.path.islink(path):
+            try:
+                _remove_file_and_empty_parents(path, stop)
+                summary['removed'].append(path)
+            except OSError as e:
+                printer.out(f"WARNING: couldn't remove {path}: {e}", level=1)
+
+    # Keep the frontend manifest in step, so a later full install still
+    # prunes correctly. Without an earlier manifest, leave it to the next
+    # full install to write one.
+    previous = _read_manifest(html_root)
+    if previous is not None:
+        listed = (set(previous) | set(frontend_rel)) - set(removed_frontend)
+        try:
+            with open(os.path.join(html_root, DIVUMWX_FRONTEND_MANIFEST), 'w', encoding='utf-8') as f:
+                f.write(f"# DivumWX {to_version} frontend manifest -- written by the installer.\n"
+                        "# Files listed here are removed by a later install if that release\n"
+                        "# no longer ships them. Do not edit.\n")
+                f.write("\n".join(sorted(listed)) + "\n")
+        except OSError as e:
+            printer.out(f"WARNING: could not update {DIVUMWX_FRONTEND_MANIFEST}: {e}", level=1)
+
+    # Changed repo-root documents (README, CHANGELOG, install.py, ...),
+    # next to weewx.conf as a full install puts them.
+    weewx_conf_dir = os.path.dirname(engine.config_path)
+    copied_root = copy_divumwx_root_files(extension_dir, weewx_conf_dir, printer)
+    set_divumwx_root_files_ownership(weewx_conf_dir, engine.config_path, printer, copied_root)
+
+    printer.out(f"Updated {len(summary['copied'])} file(s) and removed "
+                f"{len(summary['removed'])}.", level=1)
+    for path in summary['copied']:
+        printer.out(f"  updated {path}", level=2)
+    for path in summary['removed']:
+        printer.out(f"  removed {path}", level=2)
+    if manifest.get('installer_changed'):
+        printer.out(
+            "NOTE: this release also changed the installer's own settings logic. "
+            "weewx.conf was left as it is; if the release notes mention new "
+            "settings, run the full installer for this release as well.", level=1)
+    printer.out(f"DivumWX updated to {to_version}. Restart WeeWX to load the "
+                "new code.", level=1)
+    return summary
+
+
 def loader():
     return DivumwxInstaller()
 
@@ -3475,6 +3739,7 @@ class DivumwxInstaller(ExtensionInstaller):
                     'skins/DivumWX/lang/en.conf',
                     'skins/DivumWX/lang/en_US.conf',
                     'skins/DivumWX/lang/ar.conf',
+                    'skins/DivumWX/lang/bg.conf',
                     'skins/DivumWX/lang/br.conf',
                     'skins/DivumWX/lang/ca.conf',
                     'skins/DivumWX/lang/cn.conf',
@@ -3485,6 +3750,7 @@ class DivumwxInstaller(ExtensionInstaller):
                     'skins/DivumWX/lang/es.conf',
                     'skins/DivumWX/lang/eu.conf',
                     'skins/DivumWX/lang/fr.conf',
+                    'skins/DivumWX/lang/gd.conf',
                     'skins/DivumWX/lang/gr.conf',
                     'skins/DivumWX/lang/hi.conf',
                     'skins/DivumWX/lang/it.conf',
@@ -3563,6 +3829,16 @@ class DivumwxInstaller(ExtensionInstaller):
             ],
         )
 
+        # Update package? (see "Update packages" above). WeeWX gets an
+        # empty files list; configure() copies the packaged files itself
+        # once it has checked the installed version.
+        self._extension_dir = os.path.dirname(os.path.abspath(__file__))
+        self._update = load_update_manifest(self._extension_dir)
+        self._update_files = {}
+        if self._update is not None:
+            self._update_files = _installer_file_map(self['files'], self._extension_dir)
+            self['files'] = []
+
     def configure(self, engine):
         """
         Everything WeeWX's native static-config injection can't express:
@@ -3570,6 +3846,11 @@ class DivumwxInstaller(ExtensionInstaller):
         defaults, secrets, and always-enforced structural fields.
         Returns True (config modified), False if pre-flight checks fail.
         """
+        if self._update is not None:
+            apply_update_package(self._update, self._extension_dir, self._update_files, engine)
+            # weewx.conf's DivumWX settings are left as they are.
+            return False
+
         cfg = engine.config_dict
         printer = engine.printer
 
@@ -3606,14 +3887,7 @@ class DivumwxInstaller(ExtensionInstaller):
 
         # Absolute install root, derived from the site's existing HTML_ROOT
         # + a fixed subdirectory.
-        site_html_root = cfg['StdReport']['HTML_ROOT']
-        if not os.path.isabs(site_html_root):
-            site_html_root = os.path.join(engine.root_dict['WEEWX_ROOT'], site_html_root)
-
-        if os.path.basename(os.path.normpath(site_html_root)) == DIVUMWX_ROOT_SUBDIR:
-            html_root = os.path.normpath(site_html_root)
-        else:
-            html_root = os.path.join(site_html_root, DIVUMWX_ROOT_SUBDIR)
+        html_root = resolve_divumwx_html_root(cfg, engine.root_dict['WEEWX_ROOT'])
         printer.out(f"DivumWX install root: {html_root}", level=2)
 
         # Copy the static frontend (divumwx/).
@@ -4004,7 +4278,7 @@ class DivumwxInstaller(ExtensionInstaller):
                 "will start but timelapse capture will stay disabled until "
                 "ffmpeg is installed (e.g. sudo apt install ffmpeg) and "
                 "weewx is restarted.", level=1)
-        timelapse_site_root = '' if os.path.basename(os.path.normpath(site_html_root)) \
+        timelapse_site_root = '' if os.path.basename(os.path.normpath(cfg['StdReport']['HTML_ROOT'])) \
             == DIVUMWX_ROOT_SUBDIR else DIVUMWX_ROOT_SUBDIR
         existing_webcam_image = cfg.get('DivumWXCards', {}).get('webcam_image')
         apply_timelapse_merge(

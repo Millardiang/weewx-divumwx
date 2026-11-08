@@ -1,6 +1,10 @@
-# Welcome to the DivumWX skin for WeeWX Version 2.1.3
+# Welcome to the DivumWX skin for WeeWX Version 2.2.0
 Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LICENSE Version 3](https://github.com/Millardiang/weewx-divumwx/blob/main/license.txt)
  
+# What's new in 2.2.0
+* **Bulgarian and Scottish Gaelic** - two new languages, offered at install and in the site's language selector.
+* **Update packages** - each release now has a small `divumwx-update-<old>-to-<new>.zip` with just the changed files. Install it with `weectl extension install`: no questions, and `weewx.conf` is left as it is.
+
 # What's new in 2.1.3
 * **Equal Earth maps in the Earth Daylight card's colours** - the Equal Earth page, World Daylight, Earthquakes, Boltek and live lightning maps all share the card's blue ocean, green land and night shading, lit from the Sun, in light and dark mode.
 * **Clearer range rings and labels** - on the Boltek and live lightning maps.
@@ -102,6 +106,7 @@ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LIC
 * Arabic
 * Basque
 * Breton
+* Bulgarian
 * Catalan
 * Chinese (Simplified)
 * Czech
@@ -121,6 +126,7 @@ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LIC
 * Norwegian
 * Polish
 * Portuguese
+* Scottish Gaelic
 * Spanish
 * Swedish
 * Tamil

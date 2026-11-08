@@ -1,7 +1,7 @@
 try {
 /*
 ##############################################################################################
-# cardI18n.js version 1.0.2
+# cardI18n.js version 1.0.3
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -54,6 +54,7 @@ try {
 
   var LANGUAGE_FLAG_COUNTRY = {
     ar: 'sa',
+    bg: 'bg',
     br: 'fr-bre',
     ca: 'es-ct',
     cn: 'cn',
@@ -66,6 +67,7 @@ try {
     es: 'es',
     eu: 'es-pv',
     fr: 'fr',
+    gd: 'gb-sct',
     gr: 'gr',
     hi: 'in',
     it: 'it',
