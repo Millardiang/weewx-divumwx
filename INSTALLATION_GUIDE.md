@@ -133,7 +133,19 @@ From 2.2.0 onwards, each release on the
 [releases page](https://github.com/Millardiang/weewx-divumwx/releases) also
 has an update package, named for the two releases it goes between, e.g.
 `divumwx-update-2.1.3-to-2.2.0.zip`. It holds only the files that changed,
-and it installs with the same `weectl` command as a full release, but:
+and it installs with the same `weectl` command as a full release.
+
+> **⚠️ You must already be on DivumWX 2.1.3 or later.**
+> Update packages start with 2.1.3 → 2.2.0. If your station is on 2.1.2 or
+> earlier, an update package will refuse to install. Upgrade to 2.1.3 or
+> later with a full install first (see "Upgrading from an earlier version"
+> above). After that, you can use update packages for every later release.
+>
+> Each package also only works from the exact release in its name: the
+> `2.1.3-to-2.2.0` package needs 2.1.3. To check what you have, run
+> `weectl extension list` and look at the version next to `divumwx`.
+
+What an update package does:
 
 - it asks no questions and leaves your `weewx.conf` exactly as it is;
 - it replaces only the changed files, and removes any the new release
