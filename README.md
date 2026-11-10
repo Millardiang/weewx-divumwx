@@ -1,6 +1,9 @@
-# Welcome to the DivumWX skin for WeeWX Version 2.2.0
+# Welcome to the DivumWX skin for WeeWX Version 2.2.1
 Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LICENSE Version 3](https://github.com/Millardiang/weewx-divumwx/blob/main/license.txt)
  
+# What's new in 2.2.1
+* **Rain Event fits the rain cards again** - on the Tipping Rain, Piezo Rain and Rainfall cards the event now shows on one line ("2.20 mm from 13:02"), so the bottom of the column is no longer cut off.
+
 # What's new in 2.2.0
 * **Bulgarian and Scottish Gaelic** - two new languages, offered at install and in the site's language selector.
 * **Update packages** - each release now has a small `divumwx-update-<old>-to-<new>.zip` with just the changed files. Install it with `weectl extension install`: no questions, and `weewx.conf` is left as it is.

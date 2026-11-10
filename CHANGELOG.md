@@ -1,5 +1,24 @@
 # DivumWX Changelog
 
+## 2.2.1 — 10 November 2026
+
+### Version 2.2.1
+- Patch release (bug fix). `DIVUMWX_VERSION` is now `2.2.1`. The
+  `index.html` header and footer fallback, the `divumwf.html` badge
+  (1.0.7), the README title and `INSTALLATION_GUIDE.md` all say 2.2.1, and
+  the install guide downloads from `ver.2.2.1`.
+### Rain Event no longer cut off on the rain cards
+- On the Tipping Rain, Piezo Rain and Rainfall cards, an active rain event
+  showed its start time on a second line ("since 13:01"). That made the
+  right-hand column taller than the card, so its last line was cut off and
+  the year label at the top was clipped (reported by Mike Isaac).
+- The event now shows on one line, like every other row: "2.20 mm from
+  13:02". "from" is translated (it was a fixed English "since"). If a long
+  translation doesn't fit, the line ends with "…" and the full text shows
+  when you hover over it.
+- Changed: `cardsBundleNew.js` 1.1.5 (cache-buster updated in
+  `index.html`, `hyperIndex.html`, `lexendIndex.html` and `kiosk.html`).
+
 ## 2.2.0 — 8 November 2026
 
 ### Version 2.2.0

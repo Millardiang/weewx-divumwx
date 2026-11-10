@@ -1,6 +1,6 @@
 /*
 ##############################################################################################
-# cardsBundleNew.js version 1.1.4
+# cardsBundleNew.js version 1.1.5
 ##############################################################################################
 */
 
@@ -3958,8 +3958,8 @@ try {
   var rateText = addChipRow('Rain Rate');
   var eventText = addChipRow('Rain Event');
 
-  eventText.style.whiteSpace = 'normal';
-  eventText.style.textOverflow = 'clip';
+  // One line, like the other rows: a second "since HH:MM" line made the
+  // column taller than the card and its last line was cut off.
   eventText.parentElement.style.borderBottom = 'none';
 
   var cardLink = document.createElement('a');
@@ -4130,7 +4130,9 @@ try {
     if (v.event > 0) {
       eventText.parentElement.style.display = '';
       rateText.parentElement.style.borderBottom = '1px solid var(--bs-border-color)';
-      eventText.innerHTML = rainLabel(v.event) + (stormLabel ? '<br>since ' + stormLabel : '');
+      var eventLine = rainLabel(v.event) + (v.stormStart ? ' ' + DivumWXI18N.t('from') + ' ' + stormLabel : '');
+      eventText.textContent = eventLine;
+      eventText.title = eventLine;
     } else {
       eventText.parentElement.style.display = 'none';
       rateText.parentElement.style.borderBottom = 'none';
@@ -4381,8 +4383,8 @@ try {
   var rateText = addChipRow('Rain Rate');
   var eventText = addChipRow('Rain Event');
 
-  eventText.style.whiteSpace = 'normal';
-  eventText.style.textOverflow = 'clip';
+  // One line, like the other rows: a second "since HH:MM" line made the
+  // column taller than the card and its last line was cut off.
   eventText.parentElement.style.borderBottom = 'none';
 
   var cardLink = document.createElement('a');
@@ -4517,7 +4519,9 @@ try {
     if (v.event > 0) {
       eventText.parentElement.style.display = '';
       rateText.parentElement.style.borderBottom = '1px solid var(--bs-border-color)';
-      eventText.innerHTML = rainLabel(v.event) + (stormLabel ? '<br>since ' + stormLabel : '');
+      var eventLine = rainLabel(v.event) + (v.stormStart ? ' ' + DivumWXI18N.t('from') + ' ' + stormLabel : '');
+      eventText.textContent = eventLine;
+      eventText.title = eventLine;
     } else {
       eventText.parentElement.style.display = 'none';
       rateText.parentElement.style.borderBottom = 'none';
@@ -4765,8 +4769,8 @@ try {
   var rateText = addChipRow('Rain Rate');
   var eventText = addChipRow('Rain Event');
 
-  eventText.style.whiteSpace = 'normal';
-  eventText.style.textOverflow = 'clip';
+  // One line, like the other rows: a second "since HH:MM" line made the
+  // column taller than the card and its last line was cut off.
   eventText.parentElement.style.borderBottom = 'none';
 
   var cardLink = document.createElement('a');
@@ -5092,7 +5096,9 @@ try {
     if (v.event > 0) {
       eventText.parentElement.style.display = '';
       rateText.parentElement.style.borderBottom = '1px solid var(--bs-border-color)';
-      eventText.innerHTML = rainLabel(v.event) + (stormLabel ? '<br>since ' + stormLabel : '');
+      var eventLine = rainLabel(v.event) + (v.stormStart ? ' ' + DivumWXI18N.t('from') + ' ' + stormLabel : '');
+      eventText.textContent = eventLine;
+      eventText.title = eventLine;
     } else {
       eventText.parentElement.style.display = 'none';
       rateText.parentElement.style.borderBottom = 'none';
