@@ -85,6 +85,12 @@ def main():
     if 'refs/heads/' in guide:
         problems.append("INSTALLATION_GUIDE.md: links to a branch archive; use the release tag")
 
+    if os.path.exists(os.path.join(ROOT, 'divumwx_update.json')):
+        problems.append("divumwx_update.json is in the repo root. It belongs only inside an update "
+                        "package (divumwx-update-*.zip) -- delete it, or every download of this "
+                        "release runs as an update package. Upload divumwx-<version>-changed-files.zip "
+                        "to the repo, never an update package's contents.")
+
     if problems:
         print(f"Version check FAILED for DivumWX {version}:")
         for p in problems:

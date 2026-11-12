@@ -18,6 +18,18 @@
   when you hover over it.
 - Changed: `cardsBundleNew.js` 1.1.5 (cache-buster updated in
   `index.html`, `hyperIndex.html`, `lexendIndex.html` and `kiosk.html`).
+### Full downloads no longer mistaken for an update package
+- The first 2.2.1 upload included an update package's
+  `divumwx_update.json` in the repo root, so the 2.2.1 and `main`
+  downloads ran as a 2.2.0 → 2.2.1 update and refused any station not on
+  2.2.0. The file is removed and the release re-tagged.
+- `install.py` now only runs as an update package when the folder holds
+  exactly the files `divumwx_update.json` lists. A full download that
+  picks up the file by mistake installs in full, with a note.
+- `tools/check_version.py` (run by the release workflow) now fails if
+  `divumwx_update.json` is in the repo.
+- Changed: `install.py`, `tools/check_version.py`. Removed:
+  `divumwx_update.json`.
 
 ## 2.2.0 — 8 November 2026
 

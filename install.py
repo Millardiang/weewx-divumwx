@@ -3440,7 +3440,30 @@ def load_update_manifest(extension_dir):
         value = manifest.setdefault(key, [])
         if not isinstance(value, list) or not all(isinstance(p, str) and _safe_rel(p) for p in value):
             raise ValueError(f"{DIVUMWX_UPDATE_MANIFEST}: {key} must be a list of relative paths")
+    if not _is_genuine_update_package(extension_dir, manifest):
+        return None
     return manifest
+
+
+def _is_genuine_update_package(extension_dir, manifest):
+    """True if the folder holds exactly the files the manifest lists.
+
+    A real update package does. A full release (a repo download, a
+    release zip) that has picked up a stray divumwx_update.json -- for
+    instance because an update package's contents were committed to the
+    repo -- holds hundreds of other files. Treating that as an update
+    would refuse every station not on the package's from_version, so
+    it's installed as the full release it really is."""
+    listed = set(manifest['files']) | {DIVUMWX_UPDATE_MANIFEST}
+    for dirpath, dirnames, filenames in os.walk(extension_dir):
+        dirnames[:] = [d for d in dirnames if d != '__pycache__']
+        for name in filenames:
+            if name.endswith('.pyc'):
+                continue
+            rel = os.path.relpath(os.path.join(dirpath, name), extension_dir).replace(os.sep, '/')
+            if rel not in listed:
+                return False
+    return True
 
 
 def _installer_file_map(file_list, extension_dir=None):
@@ -3834,6 +3857,9 @@ class DivumwxInstaller(ExtensionInstaller):
         # once it has checked the installed version.
         self._extension_dir = os.path.dirname(os.path.abspath(__file__))
         self._update = load_update_manifest(self._extension_dir)
+        self._stray_update_manifest = (
+            self._update is None
+            and os.path.isfile(os.path.join(self._extension_dir, DIVUMWX_UPDATE_MANIFEST)))
         self._update_files = {}
         if self._update is not None:
             self._update_files = _installer_file_map(self['files'], self._extension_dir)
@@ -3855,6 +3881,9 @@ class DivumwxInstaller(ExtensionInstaller):
         printer = engine.printer
 
         printer.out("Configuring DivumWX...", level=1)
+        if self._stray_update_manifest:
+            printer.out(f"Note: ignoring {DIVUMWX_UPDATE_MANIFEST} -- this is a full release, "
+                        "not an update package, so it installs in full.", level=1)
 
         # NOTE -- the DivumWXSkyfield/DivumWXCelestial astronomy report
         # pages (and the interactive prompt asking whether to install
