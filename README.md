@@ -1,6 +1,11 @@
-# Welcome to the DivumWX skin for WeeWX Version 2.2.1
+# Welcome to the DivumWX skin for WeeWX Version 2.3.0
 Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LICENSE Version 3](https://github.com/Millardiang/weewx-divumwx/blob/main/license.txt)
  
+# What's new in 2.3.0
+* **Indoor Temperature card** - a thermometer inside a house outline, styled like the outdoor one, with today's max/min, trend, indoor humidity, feels like, dew point and the outside temperature alongside. Offered by the installer (asked once on an upgrade); stations without an indoor sensor show "No Data".
+* **Air quality without a sensor** - stations with no particle sensor now see PM2.5 and PM10 for their location from Open-Meteo on the Air Quality card, marked "Source: Open-Meteo". No setup needed: DivumWX already fetches it. A particle sensor's own readings always take priority.
+* **Lightning card keeps updating** - on stations whose lightning sensor sends nothing between strikes, the card dropped to zeros after each quiet interval and only showed real figures after a strike. It now shows Today, Year, All-time and the last strike all the time, and "Last Hour" is the last 60 minutes rather than the previous clock hour.
+
 # What's new in 2.2.1
 * **Rain Event fits the rain cards again** - on the Tipping Rain, Piezo Rain and Rainfall cards the event now shows on one line ("2.20 mm from 13:02"), so the bottom of the column is no longer cut off.
 

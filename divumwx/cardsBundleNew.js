@@ -1,6 +1,6 @@
 /*
 ##############################################################################################
-# cardsBundleNew.js version 1.1.5
+# cardsBundleNew.js version 1.2.0
 ##############################################################################################
 */
 
@@ -2119,6 +2119,408 @@ try {
 })();
 } catch (e) {
   console.error("cardsBundle: cardTemperature.js failed:", e);
+}
+
+/* ===== cardIndoorTemp.js ===== */
+try {
+/*
+##############################################################################################
+# cardIndoorTemp.js version 1.0.0
+#  Copyright (C) 2026 Ian Millard
+#  GPLv3
+##############################################################################################
+*/
+
+// ===================== cardIndoorTemp.js =====================
+// Indoor temperature: a thermometer inside a house outline, with today's
+// max/min, trend, indoor humidity, feels like, dew point and the outside
+// temperature alongside. Live values from loop.json (inTemp, inHumidity,
+// outTemp); today's max/min, trend and feels like from archive.json's
+// "temp" section (indoor_*), humidity's day figures from "humid".
+
+(function(){
+  var LOOP_JSON_URL    = './jsondata/loop.json';
+  var ARCHIVE_JSON_URL = './jsondata/archive.json';
+  var POLL_MS = 30 * 1000;
+
+  var mount = document.getElementById('indoorTempCard31');
+  if (!mount || !window.d3) return;
+
+  var currentUnits = loadStoredUnits();
+  function loadStoredUnits(){
+    try {
+      var key = localStorage.getItem('dashboardUnitSystem') || 'uk';
+      if (typeof SYSTEMS !== 'undefined' && SYSTEMS[key]) return SYSTEMS[key];
+    } catch (e) {}
+    return { temp: 'C', wind: 'mph', rain: 'mm' };
+  }
+
+  mount.innerHTML = '';
+  mount.style.position = 'relative';
+  mount.style.display = 'flex';
+  mount.style.flexDirection = 'column';
+  mount.style.borderBottom = '0';
+
+  var overlayTextColor = 'var(--bs-body-color)';
+
+  // ---- Title bar (same as the other cards) ----
+  var titleBar = document.createElement('div');
+  titleBar.style.position = 'absolute';
+  titleBar.style.top = '-20px';
+  titleBar.style.left = '0';
+  titleBar.style.right = '0';
+  titleBar.style.height = '20px';
+  titleBar.style.boxSizing = 'border-box';
+  titleBar.style.display = 'flex';
+  titleBar.style.alignItems = 'center';
+  titleBar.style.justifyContent = 'space-between';
+  titleBar.style.gap = '8px';
+  titleBar.style.padding = '0 14px';
+  titleBar.style.fontSize = '9px';
+  titleBar.style.color = overlayTextColor;
+  titleBar.style.background = 'transparent';
+
+  var titleLabel = document.createElement('span');
+  titleLabel.textContent = DivumWXI18N.t('Indoor Temperature');
+  titleLabel.style.fontWeight = '600';
+  titleLabel.style.whiteSpace = 'nowrap';
+  titleLabel.style.overflow = 'hidden';
+  titleLabel.style.textOverflow = 'ellipsis';
+
+  var statusWrap = document.createElement('span');
+  statusWrap.style.display = 'flex';
+  statusWrap.style.alignItems = 'center';
+  statusWrap.style.gap = '4px';
+  statusWrap.style.flexShrink = '0';
+  statusWrap.style.opacity = '0.85';
+
+  var statusDot = document.createElement('span');
+  statusDot.style.width = '6px';
+  statusDot.style.height = '6px';
+  statusDot.style.borderRadius = '50%';
+  statusDot.style.background = '#999';
+  statusDot.style.flexShrink = '0';
+
+  var statusTime = document.createElement('span');
+  statusWrap.appendChild(statusDot);
+  statusWrap.appendChild(statusTime);
+  titleBar.appendChild(titleLabel);
+  titleBar.appendChild(statusWrap);
+  mount.appendChild(titleBar);
+
+  function setStatus(ok){
+    statusDot.style.background = ok ? '#2ecc71' : '#e74c3c';
+    var parts = {};
+    new Intl.DateTimeFormat('en-GB', {
+      timeZone: StationTime.getTZ(), hourCycle: 'h23',
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    }).formatToParts(new Date()).forEach(function(p){ parts[p.type] = p.value; });
+    statusTime.textContent = parts.hour + ':' + parts.minute + ':' + parts.second;
+  }
+
+  // ---- 60:40 content split (left: house + thermometer, right: readouts) ----
+  var contentWrap = document.createElement('div');
+  contentWrap.style.height = '175px';
+  contentWrap.style.width = '100%';
+  contentWrap.style.boxSizing = 'border-box';
+  contentWrap.style.overflow = 'hidden';
+  contentWrap.style.display = 'flex';
+  contentWrap.style.alignItems = 'stretch';
+  mount.appendChild(contentWrap);
+
+  var divider = document.createElement('div');
+  divider.style.position = 'absolute';
+  divider.style.left = '60%';
+  divider.style.top = '6px';
+  divider.style.bottom = '6px';
+  divider.style.width = '1px';
+  divider.style.background = 'var(--bs-border-color)';
+  divider.style.pointerEvents = 'none';
+  mount.appendChild(divider);
+
+  var leftPane = document.createElement('div');
+  leftPane.style.flex = '0 0 60%';
+  leftPane.style.width = '60%';
+  leftPane.style.height = '175px';
+  leftPane.style.boxSizing = 'border-box';
+  leftPane.style.overflow = 'hidden';
+  leftPane.style.display = 'flex';
+  leftPane.style.alignItems = 'center';
+  leftPane.style.justifyContent = 'center';
+  contentWrap.appendChild(leftPane);
+
+  var rightPane = document.createElement('div');
+  rightPane.style.flex = '0 0 40%';
+  rightPane.style.width = '40%';
+  rightPane.style.height = '175px';
+  rightPane.style.boxSizing = 'border-box';
+  rightPane.style.display = 'flex';
+  rightPane.style.flexDirection = 'column';
+  rightPane.style.justifyContent = 'center';
+  rightPane.style.padding = '0 10px 0 14px';
+  contentWrap.appendChild(rightPane);
+
+  function addChipRow(){
+    var row = document.createElement('div');
+    row.style.display = 'flex';
+    row.style.flexDirection = 'column';
+    row.style.justifyContent = 'center';
+    row.style.boxSizing = 'border-box';
+    row.style.overflow = 'hidden';
+    row.style.borderBottom = '1px solid var(--bs-border-color)';
+
+    var labelEl = document.createElement('span');
+    labelEl.style.fontSize = '7px';
+    labelEl.style.lineHeight = '1';
+    labelEl.style.fontVariantCaps = 'small-caps';
+    labelEl.style.letterSpacing = '.06em';
+    labelEl.style.color = 'var(--bs-body-color)';
+    labelEl.style.opacity = '0.85';
+    labelEl.style.whiteSpace = 'nowrap';
+    labelEl.style.overflow = 'hidden';
+    labelEl.style.textOverflow = 'ellipsis';
+    row.appendChild(labelEl);
+
+    var valueRow = document.createElement('span');
+    valueRow.style.display = 'flex';
+    valueRow.style.alignItems = 'baseline';
+    valueRow.style.gap = '4px';
+    row.appendChild(valueRow);
+
+    var valueEl = document.createElement('span');
+    valueEl.style.fontSize = '9.5px';
+    valueEl.style.lineHeight = '1.2';
+    valueEl.style.color = 'var(--bw-accent)';
+    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis'; valueEl.style.minWidth = '0'; valueEl.style.flex = '1 1 auto';
+    valueEl.style.fontFamily = '"IBM Plex Mono", ui-monospace, monospace';
+    valueRow.appendChild(valueEl);
+
+    var trendEl = document.createElement('span');
+    trendEl.style.fontSize = '10px';
+    valueRow.appendChild(trendEl);
+
+    rightPane.appendChild(row);
+    return { row: row, label: labelEl, value: valueEl, trend: trendEl };
+  }
+
+  var ROW_COUNT = 6;
+  var readoutRows = [];
+  for (var ri = 0; ri < ROW_COUNT; ri++) readoutRows.push(addChipRow());
+
+  var placeholder = document.createElement('div');
+  placeholder.style.position = 'absolute';
+  placeholder.style.inset = '0';
+  placeholder.style.display = 'none';
+  placeholder.style.alignItems = 'center';
+  placeholder.style.justifyContent = 'center';
+  placeholder.style.fontSize = '10px';
+  placeholder.style.color = overlayTextColor;
+  placeholder.style.opacity = '0.7';
+  mount.appendChild(placeholder);
+
+  function trendArrow(t){ return t > 0 ? '➚' : (t < 0 ? '➘' : '➙'); }
+
+  // Dew point from temperature (C) and relative humidity, Magnus formula.
+  function dewPointC(tC, rh){
+    if (tC === null || rh === null || rh <= 0) return null;
+    var a = 17.62, b = 243.12, g = Math.log(rh / 100) + a * tC / (b + tC);
+    return b * g / (a - g);
+  }
+
+  function render(v){
+    var unitsTemp = currentUnits.temp;
+    function tc(c){ return c === null ? null : (unitsTemp === 'F' ? (c * 9 / 5 + 32) : c); }
+    function td(d){ return unitsTemp === 'F' ? (d * 9 / 5) : d; }
+    function fmt(c){ return c === null ? '—' : tc(c).toFixed(1) + '°' + unitsTemp; }
+
+    titleLabel.textContent = DivumWXI18N.t('Indoor Temperature') + ' (°' + unitsTemp + ')';
+
+    var hasData = v.inTemp !== null;
+    placeholder.style.display = hasData ? 'none' : 'flex';
+    contentWrap.style.visibility = hasData ? 'visible' : 'hidden';
+    divider.style.visibility = hasData ? 'visible' : 'hidden';
+    if (!hasData){
+      placeholder.textContent = DivumWXI18N.t('No Data');
+      return;
+    }
+
+    var cur = tc(v.inTemp);
+    var dayMax = tc(v.dayMax !== null ? Math.max(v.dayMax, v.inTemp) : v.inTemp);
+    var dayMin = tc(v.dayMin !== null ? Math.min(v.dayMin, v.inTemp) : v.inTemp);
+
+    // ---- Left pane: house outline with a thermometer inside ----
+    // Same coordinate space as cardTemperature (viewBox -42 0 175 175, bulb
+    // at x=45), and the thermometer below is drawn with cardTemperature's
+    // own sizes and styles, then scaled into the house as one group.
+    var svgSel = d3.select(leftPane).select('svg');
+    if (svgSel.empty()){
+      svgSel = d3.select(leftPane).append('svg')
+        .attr('viewBox', '-42 0 175 175').attr('width', '100%').attr('height', '100%');
+    }
+    svgSel.selectAll('*').remove();
+    var svg = svgSel;
+    var tubeBorderColor = '#999999';
+    var color = v.inTempColor || 'var(--bw-accent)';
+
+    // House: pitched roof, walls, chimney, a window either side.
+    var apexX = 45, apexY = 3, eaveY = 58, roofL = -38, roofR = 128, wallL = -27, wallR = 117, floorY = 173;
+    function roofY(x){ return apexY + (eaveY - apexY) * Math.abs(x - apexX) / (apexX - roofL); }
+    svg.append('path')   // chimney, its sides ending at the roof
+      .attr('d', 'M92,' + roofY(92) + ' V10 H104 V' + roofY(104))
+      .style('fill', 'none').style('stroke', tubeBorderColor).style('stroke-width', 1.25).style('stroke-linejoin', 'round');
+    svg.append('path')   // walls and floor
+      .attr('d', 'M' + wallL + ',' + roofY(wallL) + ' V' + floorY + ' H' + wallR + ' V' + roofY(wallR))
+      .style('fill', 'var(--bs-body-color)').style('fill-opacity', 0.04)
+      .style('stroke', tubeBorderColor).style('stroke-width', 1.25).style('stroke-linejoin', 'round');
+    svg.append('path')   // roof
+      .attr('d', 'M' + roofL + ',' + eaveY + ' L' + apexX + ',' + apexY + ' L' + roofR + ',' + eaveY)
+      .style('fill', 'none').style('stroke', tubeBorderColor).style('stroke-width', 1.75)
+      .style('stroke-linejoin', 'round').style('stroke-linecap', 'round');
+    [[-19, 92], [91, 92]].forEach(function(w){   // windows, clear of the scale and Max/Min
+      svg.append('rect').attr('x', w[0]).attr('y', w[1]).attr('width', 18).attr('height', 18).attr('rx', 1.5)
+        .style('fill', 'none').style('stroke', tubeBorderColor).style('stroke-width', 0.75).style('opacity', 0.7);
+      svg.append('path').attr('d', 'M' + (w[0] + 9) + ',' + w[1] + ' v18 M' + w[0] + ',' + (w[1] + 9) + ' h18')
+        .style('stroke', tubeBorderColor).style('stroke-width', 0.6).style('opacity', 0.7);
+    });
+
+    // Thermometer: cardTemperature's drawing, scaled about the bulb's
+    // bottom so it stands on the floor. Text sizes are divided by the
+    // scale so they come out the same size as on the Temperature card.
+    var K = 0.78;
+    var g = svg.append('g').attr('transform', 'translate(45,' + (floorY - 3) + ') scale(' + K + ') translate(-45,-170)');
+    var fs = function(px){ return (px / K).toFixed(2) + 'px'; };
+
+    var height = 175;
+    var bulbRadius = 25.5, tubeWidth = 16.5, tubeBorderWidth = 1, innerBulbColor = 'rgb(230, 200, 200)';
+    var bottomY = height - 5, bulb_cy = bottomY - bulbRadius, bulb_cx = 45, top_cy = 5 + tubeWidth / 2;
+
+    var gradId = 'indoorBulbGradient';
+    var grad = g.append('defs').append('radialGradient').attr('id', gradId)
+      .attr('cx', '50%').attr('cy', '50%').attr('r', '50%').attr('fx', '50%').attr('fy', '50%');
+    grad.append('stop').attr('offset', '0%').style('stop-color', innerBulbColor);
+    grad.append('stop').attr('offset', '90%').style('stop-color', color);
+
+    var outlineHeight = bulb_cy - bulbRadius / 2 - 6.75;
+    g.append('rect')
+      .attr('rx', 7.5).attr('x', 37.5).attr('y', 7)
+      .attr('width', tubeWidth + 1 - tubeBorderWidth - 1.5).attr('height', outlineHeight)
+      .style('stroke', tubeBorderColor).style('stroke-width', '0.75px').attr('fill', 'none');
+
+    var step = unitsTemp === 'F' ? 4 : 2;
+    var domain = [ step * Math.floor(dayMin / step), step * Math.ceil(dayMax / step) ];
+    if (dayMin - domain[0] < 0.66 * step) domain[0] -= step;
+    if (domain[1] - dayMax < 0.66 * step) domain[1] += step;
+    var yScale = d3.scaleLinear().domain(domain).range([bulb_cy - bulbRadius / 2 - 8.5, top_cy + 5]);
+
+    g.append('rect')
+      .attr('x', 45 - (tubeWidth - tubeBorderWidth) / 2)
+      .attr('y', yScale(cur))
+      .attr('width', tubeWidth - tubeBorderWidth)
+      .attr('height', bulb_cy - yScale(cur))
+      .attr('fill', color);
+
+    g.append('circle')
+      .attr('cx', bulb_cx).attr('cy', bulb_cy).attr('r', bulbRadius - 6)
+      .style('fill', 'url(#' + gradId + ')').style('stroke-width', '2px');
+
+    var tickValues = d3.range((domain[1] - domain[0]) / step + 1).map(function(n){ return domain[0] + n * step; });
+    var tAxis = g.append('g')
+      .attr('transform', 'translate(' + (45 - tubeWidth / 2 - 5) + ', 0)')
+      .call(d3.axisLeft(yScale).tickValues(tickValues).tickSize(7).tickPadding(5));
+    tAxis.selectAll('.tick text').style('fill', 'var(--bs-body-color)').style('font-family', 'inherit').style('font-size', fs(8));
+    tAxis.select('path').style('stroke', 'none').style('fill', 'none');
+    tAxis.selectAll('.tick line').style('stroke', tubeBorderColor).style('stroke-linecap', 'round').style('stroke-width', '2px');
+
+    g.append('text')
+      .attr('x', 45).attr('y', bulb_cy + 6).style('text-anchor', 'middle').style('font-family', 'inherit')
+      .style('font-weight', '600').style('font-size', fs(cur.toFixed(1).length > 3 ? 12.5 : 13)).style('fill', 'black')
+      .text(cur.toFixed(1));
+
+    [[dayMin, 'Min', 8.5 / K], [dayMax, 'Max', -3 / K]].forEach(function(m){
+      g.append('text')
+        .attr('x', 45 + tubeWidth / 2 + 13).attr('y', yScale(m[0]) + m[2])
+        .attr('text-anchor', 'middle').style('font-family', 'inherit').style('fill', 'var(--bs-body-color)').style('font-size', fs(8))
+        .text(DivumWXI18N.t(m[1]));
+      g.append('line')
+        .attr('x1', 45 - tubeWidth / 2 + 20).attr('x2', 45 + tubeWidth / 2 + 22)
+        .attr('y1', yScale(m[0])).attr('y2', yScale(m[0]))
+        .attr('stroke', tubeBorderColor).style('stroke-linecap', 'round').attr('stroke-width', 1.0);
+    });
+
+    // ---- Right pane ----
+    var trend = td(v.trend || 0);
+    var dew = dewPointC(v.inTemp, v.inHumidity);
+    var rows = [
+      { label: 'Max | Min', value: dayMax.toFixed(1) + '°' + unitsTemp + ' | ' + dayMin.toFixed(1) + '°' + unitsTemp },
+      { label: 'Trend', value: trend.toFixed(1) + '°' + unitsTemp, trend: trend, color: color },
+      { label: 'Humidity', value: v.inHumidity === null ? '—' : v.inHumidity.toFixed(0) + '%' },
+      { label: 'Feels like', value: fmt(v.feelsLike) },
+      { label: 'Dewpoint', value: fmt(dew) },
+      { label: 'Outside Temperature', value: fmt(v.outTemp) }
+    ];
+    var rowHeight = 175 / rows.length;
+    rows.forEach(function(d, i){
+      var r = readoutRows[i];
+      r.row.style.height = rowHeight + 'px';
+      r.row.style.borderBottom = i === rows.length - 1 ? 'none' : '1px solid var(--bs-border-color)';
+      r.label.textContent = DivumWXI18N.t(d.label);
+      r.value.textContent = d.value;
+      if (d.trend === undefined || d.trend === null) {
+        r.trend.textContent = '';
+      } else {
+        r.trend.style.color = d.color;
+        r.trend.textContent = trendArrow(d.trend);
+      }
+    });
+  }
+
+  var lastData = null;
+  function refresh(){
+    Promise.allSettled([
+      fetch(LOOP_JSON_URL + '?_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
+      fetch(ARCHIVE_JSON_URL + '?_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    ]).then(function(results){
+      var loop = results[0].status === 'fulfilled' ? results[0].value : {};
+      var arch = results[1].status === 'fulfilled' ? results[1].value : {};
+      var o = loop.observations || {};
+      var t = arch.temp || {}, h = arch.humid || {};
+      function num(){
+        for (var i = 0; i < arguments.length; i++){
+          var x = arguments[i];
+          if (typeof x === 'string' && x.trim() !== '' && !isNaN(+x)) x = +x;
+          if (typeof x === 'number' && !isNaN(x)) return x;
+        }
+        return null;
+      }
+      lastData = {
+        inTemp:       num(o.inTemp, t.indoor_current),
+        inHumidity:   num(o.inHumidity, h.indoors_current),
+        dayMax:       num(t.indoor_day_max),
+        dayMin:       num(t.indoor_day_min),
+        trend:        num(t.indoor_trend),
+        feelsLike:    num(t.indoor_feels_like_c),
+        outTemp:      num(o.outTemp, t.outside_current),
+        inTempColor:  o.inTempColor,
+        outTempColor: o.outTempColor
+      };
+      render(lastData);
+      setStatus(results[0].status === 'fulfilled' && results[1].status === 'fulfilled');
+    }).catch(function(e){
+      console.warn('cardIndoorTemp: refresh failed --', e.message);
+      setStatus(false);
+    });
+  }
+  refresh();
+  setInterval(refresh, POLL_MS);
+
+  window.addEventListener('unitsystemchange', function(e){
+    if (e.detail && e.detail.config) { currentUnits = e.detail.config; if (lastData) render(lastData); }
+  });
+  window.addEventListener('i18nready', function(){ if (lastData) render(lastData); });
+  window.addEventListener('themechange', function(){ if (lastData) render(lastData); });
+})();
+} catch (e) {
+  console.error("cardsBundle: cardIndoorTemp.js failed:", e);
 }
 
 /* ===== cardForecast.js ===== */
@@ -9190,7 +9592,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardAirquality.js version 1.0.1
+# cardAirquality.js version 1.1.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -9200,6 +9602,12 @@ try {
 
 (function(){
   var LOOP_JSON_URL = './jsondata/loop.json';
+  // No particle sensor: fall back to Open-Meteo's modelled PM2.5/PM10 for
+  // the station's location, which WeatherAPIService already fetches into
+  // airquality.txt (the gases and pollen cards read the same file). Not
+  // used if its "current" hour is more than FALLBACK_MAX_AGE_H old.
+  var FALLBACK_URL = './jsondata/airquality.txt';
+  var FALLBACK_MAX_AGE_H = 3;
   var POLL_MS = 30 * 1000;
 
   function pad2(n){ return n < 10 ? '0' + n : String(n); }
@@ -9526,8 +9934,8 @@ try {
   var pollutantPills = [];
   var currentLayoutKey = undefined;
 
-  function ensureGrid(available){
-    var layoutKey = available.map(function(p){ return p.key; }).join(',');
+  function ensureGrid(available, source){
+    var layoutKey = available.map(function(p){ return p.key; }).join(',') + '|' + (source || '');
     if (layoutKey === currentLayoutKey) return;
     currentLayoutKey = layoutKey;
 
@@ -9564,6 +9972,12 @@ try {
       var chipValue = addChipRow(p.label);
       return { key: p.key, els: built, chipValue: chipValue };
     });
+    if (source === 'openmeteo') {
+      // Modelled, not measured: say where the figures come from.
+      var sourceValue = addChipRow(DivumWXI18N.t('Source:').replace(/:\s*$/, ''));
+      sourceValue.textContent = DivumWXI18N.t('Open\u2011Meteo');
+      sourceValue.style.color = 'var(--bs-body-color)';
+    }
     rightPane.lastElementChild.style.borderBottom = 'none';
   }
 
@@ -9571,7 +9985,7 @@ try {
     var available = POLLUTANTS.filter(function(p){
       return Object.prototype.hasOwnProperty.call(v, p.key);
     });
-    ensureGrid(available);
+    ensureGrid(available, v._source);
 
     if (available.length === 0){
       overallLabel.style.color = overlayTextColor;
@@ -9600,6 +10014,27 @@ try {
     overallValue.style.background = overallColor;
   }
 
+  // Open-Meteo's PM2.5/PM10 from airquality.txt, or {} if missing or stale.
+  // "current.time" is the station's local time (timezone=auto), so it's
+  // compared with the station clock.
+  function fallbackReadings(){
+    return fetch(FALLBACK_URL + '?_=' + Date.now(), {cache:'no-store'})
+      .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+      .then(function(aq){
+        var cur = (aq && aq.current) || {};
+        var m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(cur.time || '');
+        if (!m) return {};
+        var at = Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]);
+        if ((stationNow().getTime() - at) / 3600000 > FALLBACK_MAX_AGE_H) return {};
+        var out = {};
+        if (typeof cur.pm2_5 === 'number' && !isNaN(cur.pm2_5)) out.pm2_5 = cur.pm2_5;
+        if (typeof cur.pm10 === 'number' && !isNaN(cur.pm10)) out.pm10_0 = cur.pm10;
+        if (out.pm2_5 !== undefined || out.pm10_0 !== undefined) out._source = 'openmeteo';
+        return out;
+      })
+      .catch(function(){ return {}; });
+  }
+
   var lastData = null;
   function refresh(){
     fetch(LOOP_JSON_URL + ((LOOP_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
@@ -9610,7 +10045,10 @@ try {
           var val = reading(o, p);
           if (val !== null) raw[p.key] = val;
         });
-
+        // A particle sensor always wins; otherwise Open-Meteo's figures.
+        return Object.keys(raw).length ? raw : fallbackReadings();
+      })
+      .then(function(raw){
         lastData = raw;
         renderCard(lastData);
         setStatus(true);

@@ -1,5 +1,57 @@
 # DivumWX Changelog
 
+## 2.3.0 — 16 November 2026
+
+### Version 2.3.0
+- Minor release (new card and feature, plus a lightning card fix). 2.2.2
+  was prepared but never released; its fix is here instead.
+  `DIVUMWX_VERSION` is now `2.3.0`. The `index.html` header and footer
+  fallback, the `divumwf.html` badge (1.0.9), the README title and
+  `INSTALLATION_GUIDE.md` all say 2.3.0, and the install guide downloads
+  from `ver.2.3.0`.
+### Indoor Temperature card (requested by Remy)
+- New card `cardIndoorTemp`: a thermometer inside a house outline, scaled
+  to today's indoor range with Max and Min marked, plus Max | Min, Trend,
+  indoor Humidity, Feels like, Dewpoint (worked out from indoor temperature
+  and humidity) and the Outside Temperature. Live from `loop.json`, today's
+  figures from `archive.json`; follows the unit and language choices. A
+  station without an indoor sensor sees "No Data". Its title, "Indoor
+  Temperature", is a new phrase, translated in every language file; its
+  other labels already had translations.
+- The installer offers it with the other optional cards (the card total is
+  now 29). An upgrade with the full installer asks about it once, recorded
+  in `[DivumWXCards] optional_cards_asked`; any later new optional cards
+  can be added to `DIVUMWX_NEW_OPTIONAL_CARDS` the same way.
+- An update package doesn't change `weewx.conf`, so it installs the card
+  but doesn't switch it on: run the full installer, or add `cardIndoorTemp`
+  to `[DivumWXCards] enabled_cards` by hand.
+### Air quality from Open-Meteo when there's no particle sensor (requested by Remy)
+- With no PM sensor readings, the Air Quality card now shows Open-Meteo's
+  PM2.5 and PM10 for the station's location, from `jsondata/airquality.txt`
+  (already fetched every 15 minutes for the gases and pollen cards), with a
+  "Source: Open-Meteo" line. Not used if its current hour is more than 3
+  hours old. A sensor's readings always take priority.
+- Changed: `cardsBundleNew.js` 1.2.0 (cardIndoorTemp.js 1.0.0,
+  cardAirquality.js 1.1.0; cache-buster updated in `index.html`,
+  `hyperIndex.html`, `lexendIndex.html` and `kiosk.html`), `index.html`,
+  `hyperIndex.html`, `lexendIndex.html` (the new card's slot), `install.py`,
+  every `skins/DivumWX/lang/*.conf` (the "Indoor Temperature" phrase).
+
+### Lightning card stuck at zeros between strikes
+- The lightning section of `archive.json` was only written when the latest
+  archive record had a strike count. Some lightning sensors send no value
+  at all in an interval without strikes, and WeeWX then records it as
+  empty. On those stations, every quiet interval left the card at zeros
+  (Today, Last Hour, Year, All-time and Last Detected all blank), and real
+  figures only appeared if a report happened to run just after a strike --
+  so forcing a report run seemed to be the only thing that updated it
+  (reported by Ray). The section is now written whenever the station has a
+  lightning column, the same fix the rain section had earlier.
+- "Last Hour" is now the last 60 minutes, like the rain cards. It was the
+  previous clock hour (e.g. 17:00-18:00 at 18:30), so it changed only on
+  the hour and showed 0 while strikes were coming in.
+- Changed: `skins/DivumWX/jsondata/archive.json.tmpl`.
+
 ## 2.2.1 — 10 November 2026
 
 ### Version 2.2.1
