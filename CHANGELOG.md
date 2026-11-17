@@ -37,6 +37,36 @@
   `hyperIndex.html`, `lexendIndex.html` (the new card's slot), `install.py`,
   every `skins/DivumWX/lang/*.conf` (the "Indoor Temperature" phrase).
 
+### Readout values hidden by long translations (Solar Dial in German)
+- On desktop in German, the Solar Dial card's sunrise, sunset and
+  moonrise/moonset times were invisible: their labels ("Sonnenuntergang
+  (letztes Licht)", ...) wrapped onto a second line in a fixed-height row,
+  pushing the time out of sight. English and phone layouts were fine,
+  because the labels fitted there. The same could happen on most cards:
+  checking every card in all 32 languages found wrapped labels on 20 of
+  them, e.g. the Current Conditions and Earth Daylight cards in German.
+- Card labels now stay on one line. One that doesn't fit first loses its
+  letter spacing, then shrinks slightly (to 6px at the smallest); only if
+  it still doesn't fit does it end in "…", with the full text on hover.
+  In all 32 languages at 1400px wide, no label wraps; 27 are shortened,
+  22 of them "Grid Daily Export" on the two solar-energy cards.
+- New in `cardsBundleNew.js`: fitLabels.js 1.0.0; `cardI18n.js` 1.0.4
+  (labels get a tooltip; cache-buster updated in every page that loads it).
+### Fewer requests for files the station doesn't have
+- The dashboard asked for several optional files every 30 seconds whether
+  or not the station had them, filling the browser console with 404s:
+  the warnings feeds (`cold.txt`, `heat.txt`, `flood.txt`,
+  `openweathermap.txt`, `meteoalarm.json`, `metofficerss.txt`,
+  `aurora.txt`), `cloud_coverage.json` (the separate weewx-Cloud_coverage
+  extension) and `solar_data.json` (SolarAssistant; requested even with
+  the solar cards switched off). In a 40-second test with all cards on:
+  43 requests for missing files before, none after.
+- `archive.json` now lists which of these files the station has
+  (`meta.available_files`, checked on every report run), and the dashboard
+  only requests those (optionalFiles.js 1.0.0 in `cardsBundleNew.js`). A
+  feature switched on later is picked up within 5 minutes of its file
+  appearing. With an older `archive.json` nothing is skipped.
+- Changed: `bin/user/divumwx_cards.py`, `archive.json.tmpl`.
 ### Lightning card stuck at zeros between strikes
 - The lightning section of `archive.json` was only written when the latest
   archive record had a strike count. Some lightning sensors send no value

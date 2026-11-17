@@ -4,6 +4,8 @@ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LIC
 # What's new in 2.3.0
 * **Indoor Temperature card** - a thermometer inside a house outline, styled like the outdoor one, with today's max/min, trend, indoor humidity, feels like, dew point and the outside temperature alongside. Offered by the installer (asked once on an upgrade); stations without an indoor sensor show "No Data".
 * **Air quality without a sensor** - stations with no particle sensor now see PM2.5 and PM10 for their location from Open-Meteo on the Air Quality card, marked "Source: Open-Meteo". No setup needed: DivumWX already fetches it. A particle sensor's own readings always take priority.
+* **Long translations no longer hide values** - in German on desktop, the Solar Dial's sunrise, sunset and moon times were invisible behind wrapped labels. Labels on every card now stay on one line, shrinking a little or ending in "…" if a translation is long.
+* **Fewer 404s in the browser console** - the dashboard only requests optional files (warnings feeds, cloud cover, solar data) that the station actually has.
 * **Lightning card keeps updating** - on stations whose lightning sensor sends nothing between strikes, the card dropped to zeros after each quiet interval and only showed real figures after a strike. It now shows Today, Year, All-time and the last strike all the time, and "Last Hour" is the last 60 minutes rather than the previous clock hour.
 
 # What's new in 2.2.1

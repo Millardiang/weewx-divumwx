@@ -1,7 +1,7 @@
 try {
 /*
 ##############################################################################################
-# cardI18n.js version 1.0.3
+# cardI18n.js version 1.0.4
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -34,6 +34,8 @@ try {
 
   function applyLabel(el, key){
     el.textContent = t(key);
+    // Full text on hover, for when a long translation is cut short with "…".
+    el.title = t(key);
     registeredLabels.push({ el: el, key: key });
   }
 
@@ -113,7 +115,7 @@ try {
   }
 
   function reapplyAll(){
-    registeredLabels.forEach(function(p){ p.el.textContent = t(p.key); });
+    registeredLabels.forEach(function(p){ p.el.textContent = t(p.key); p.el.title = t(p.key); });
     registeredAttrs.forEach(function(p){ p.el.setAttribute(p.attr, t(p.key)); });
   }
 
