@@ -37,6 +37,27 @@
   `hyperIndex.html`, `lexendIndex.html` (the new card's slot), `install.py`,
   every `skins/DivumWX/lang/*.conf` (the "Indoor Temperature" phrase).
 
+### One shared copy of loop.json, archive.json and almanac.json per page
+- Every card and page script read these files itself, each on its own
+  timer: about 50 readers on the dashboard, most every 30 seconds, though
+  archive.json only changes once per archive interval. One dashboard tab
+  made 285 requests for them in 170 seconds (reported, with the
+  measurements, by Johannes); with every card switched on, 375.
+- New `sharedData.js`, loaded first on every page that reads them (33
+  pages), keeps one copy of each file per page and shares it: reads within
+  2 s (loop.json), 30 s (almanac.json) or 60 s (archive.json) of the last
+  download get that copy, and reads made at the same moment share one
+  download. Each reader still gets its own parsed copy, so no card can
+  change another's data, and no card code changed. The live gauges read
+  loop.json every 3 seconds and still get a fresh copy each time.
+- A download that fails or isn't valid JSON -- e.g. a file caught half
+  uploaded over FTP -- falls back to the last good copy, for up to 2
+  minutes (loop.json) or 15 minutes (the others); after that, readers see
+  the real error and show as offline as before.
+- Measured over 170 seconds with every card on: 375 requests before, 26
+  after (93% fewer), with the same values on all 33 cards. Disabled cards'
+  reads are now answered from the shared copy, so they no longer cause
+  any requests.
 ### Seasonal background on every page, not just the kiosk
 - The seasonal page background only appeared on `kiosk.html`: it was the
   only page that loaded `seasonalBackground.js`, which picks the season
