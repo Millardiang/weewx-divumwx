@@ -37,6 +37,17 @@
   `hyperIndex.html`, `lexendIndex.html` (the new card's slot), `install.py`,
   every `skins/DivumWX/lang/*.conf` (the "Indoor Temperature" phrase).
 
+### Pages no longer depend on an outside site for D3
+- Seven pages loaded the D3 charting library from cdnjs.cloudflare.com (or
+  d3js.org) instead of DivumWX's own copy: Live Gauges (`gauges.html`),
+  `heatmaps.html`, `charts-d3.html`, the Wind Rose, Orrery and Astro Clock
+  pop-ups, and `sunDisc.html`. With that site unreachable -- no internet,
+  a blocked or slow CDN, a local-network-only kiosk -- they failed with
+  "d3 is not defined". They now load the bundled `js/d3.7.9.0.min.js`,
+  the same version, already used by the dashboard. Checked with all
+  outside sites blocked: before, all seven failed; after, all load D3
+  7.9.0 with no errors and the gauges draw and update.
+- No page now loads a script from an outside site.
 ### One shared copy of loop.json, archive.json and almanac.json per page
 - Every card and page script read these files itself, each on its own
   timer: about 50 readers on the dashboard, most every 30 seconds, though
