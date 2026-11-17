@@ -37,6 +37,28 @@
   `hyperIndex.html`, `lexendIndex.html` (the new card's slot), `install.py`,
   every `skins/DivumWX/lang/*.conf` (the "Indoor Temperature" phrase).
 
+### "JSON decode error" for airquality.txt (and other feeds) now and then
+- `fetch_and_save()` wrote each `[WeatherAPI]` feed straight into its file
+  with `open(path, 'w')`, which empties the file before writing. Anything
+  reading it in that moment -- DivumWX's own readers in another thread, or
+  the dashboard through the web server -- got an empty file, logged as
+  `JSON decode error ... Expecting value: line 1 column 1 (char 0)`, though
+  the file looked fine afterwards (reported, with the diagnosis, on
+  `airquality.txt`). Every feed is now written to a temporary file and
+  swapped in with `os.replace()`, so readers see the old file or the new
+  one, never an empty one. A stress test (a writer flat out, two readers)
+  failed 66% of reads before and none of 65,000 after.
+- A response that isn't valid -- an error page, an empty or cut-off body,
+  or XML that doesn't parse for the two XML feeds -- is now logged and
+  ignored, keeping the last good file instead of replacing it. Built-in
+  feeds are checked as JSON unless they declare XML (AuroraWatch, Met
+  Office RSS); custom feeds are only checked if they declare a
+  `content_type`.
+- The same in-place writes were fixed for SolarAssistant's
+  `solar_data.json` (read by the dashboard every 30 seconds), the
+  `loop.json` starter file and field list, and the Meteoalarm cache.
+- Changed: `bin/user/divumwx.py`, `bin/user/solar_assistant_mqtt.py`,
+  `bin/user/divumwx_meteoalarm.py`.
 ### Readout values hidden by long translations (Solar Dial in German)
 - On desktop in German, the Solar Dial card's sunrise, sunset and
   moonrise/moonset times were invisible: their labels ("Sonnenuntergang

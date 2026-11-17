@@ -15,6 +15,7 @@ Uses ACTUAL topic names from your Solar Assistant installation
 """
 
 import json
+import os
 import logging
 import time
 import threading
@@ -495,8 +496,13 @@ class SolarAssistantMQTT(StdService):
                     'data': dict(self.mqtt_data)
                 }
             
-            with open(self.json_output_path, 'w') as f:
+            # Temporary file + os.replace(): the dashboard reads this every
+            # 30 seconds, and opening it with 'w' would leave it empty for a
+            # moment, so a read in that moment got no data.
+            tmp = self.json_output_path + '.tmp'
+            with open(tmp, 'w') as f:
                 json.dump(data_to_write, f, indent=2)
+            os.replace(tmp, self.json_output_path)
             
         except Exception as e:
             log.error(f"SolarAssistantMQTT: JSON error: {e}")
