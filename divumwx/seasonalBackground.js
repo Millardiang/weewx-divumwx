@@ -1,6 +1,6 @@
 /*
 ##############################################################################################
-# seasonalBackground.js version 1.0.0
+# seasonalBackground.js version 1.0.1
 #  Picks the page body background photo for the current meteorological season at
 #  the station's location, swapping seasons for the southern hemisphere, or
 #  leaves the plain theme colour when the installer's "Page background" answer

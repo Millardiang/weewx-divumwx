@@ -37,6 +37,20 @@
   `hyperIndex.html`, `lexendIndex.html` (the new card's slot), `install.py`,
   every `skins/DivumWX/lang/*.conf` (the "Indoor Temperature" phrase).
 
+### Seasonal background on every page, not just the kiosk
+- The seasonal page background only appeared on `kiosk.html`: it was the
+  only page that loaded `seasonalBackground.js`, which picks the season
+  (swapped for the southern hemisphere). The other 15 pages had the styles
+  for it in `header.css` but never set a season, so they showed the plain
+  theme colour. Every page that loads `header.css` now loads the script,
+  in `<head>` so the photo is there from the first paint. Checked on all
+  16 pages at 51.9°N (autumn in November) and 32.7°S (spring).
+- `seasonalBackground.js` 1.0.1 (loaded as `?v=1.0.1`). Changed:
+  `astronomy.html`, `charts-d3.html`, `climate.html`,
+  `constellations.html`, `divumwf.html`, `equalEarthMap.html`,
+  `gauges.html`, `heatmaps.html`, `hyperIndex.html`, `index.html`,
+  `kiosk.html`, `lexendIndex.html`, `locationforecast.html`,
+  `meteorShowers.html`, `records.html`, `visualisations.html`.
 ### "JSON decode error" for airquality.txt (and other feeds) now and then
 - `fetch_and_save()` wrote each `[WeatherAPI]` feed straight into its file
   with `open(path, 'w')`, which empties the file before writing. Anything
