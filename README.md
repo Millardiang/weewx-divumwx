@@ -3,6 +3,7 @@ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LIC
  
 # What's new in 2.3.0
 * **Indoor Temperature card** - a thermometer inside a house outline, styled like the outdoor one, with today's max/min, trend, indoor humidity, feels like, dew point and the outside temperature alongside. Offered by the installer (asked once on an upgrade); stations without an indoor sensor show "No Data".
+* **Air quality index for your country** - the Air Quality card uses the UK's DAQI in the UK, the European Air Quality Index in the countries Meteoalarm covers, and the US EPA AQI everywhere else, chosen from the station's country. `[DivumWXCards] aq_scheme` can pick one outright.
 * **Air quality without a sensor** - stations with no particle sensor now see PM2.5 and PM10 for their location from Open-Meteo on the Air Quality card, marked "Source: Open-Meteo". No setup needed: DivumWX already fetches it. A particle sensor's own readings always take priority.
 * **Works without internet access** - the Live Gauges, Heatmaps and Charts pages and three pop-ups loaded their charting library from an outside site and failed without it; they now use DivumWX's own copy.
 * **Far fewer requests** - the dashboard now shares one copy of loop.json, archive.json and almanac.json between all its cards instead of each card downloading them itself: 93% fewer requests per visitor, and a half-uploaded file no longer blanks the cards.

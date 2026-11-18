@@ -25,17 +25,43 @@
 - An update package doesn't change `weewx.conf`, so it installs the card
   but doesn't switch it on: run the full installer, or add `cardIndoorTemp`
   to `[DivumWXCards] enabled_cards` by hand.
+- The house is about 15% lower than first drawn (same roof pitch); the
+  thermometer is the same size and sits lower to match.
 ### Air quality from Open-Meteo when there's no particle sensor (requested by Remy)
 - With no PM sensor readings, the Air Quality card now shows Open-Meteo's
   PM2.5 and PM10 for the station's location, from `jsondata/airquality.txt`
   (already fetched every 15 minutes for the gases and pollen cards), with a
   "Source: Open-Meteo" line. Not used if its current hour is more than 3
   hours old. A sensor's readings always take priority.
-- Changed: `cardsBundleNew.js` 1.2.0 (cardIndoorTemp.js 1.0.0,
-  cardAirquality.js 1.1.0; cache-buster updated in `index.html`,
+- Changed: `cardsBundleNew.js` 1.2.0 (cardIndoorTemp.js 1.0.1,
+  cardAirquality.js 1.2.0; cache-buster updated in `index.html`,
   `hyperIndex.html`, `lexendIndex.html` and `kiosk.html`), `index.html`,
   `hyperIndex.html`, `lexendIndex.html` (the new card's slot), `install.py`,
   every `skins/DivumWX/lang/*.conf` (the "Indoor Temperature" phrase).
+
+### Air quality index follows the station's country
+- The Air Quality card rates PM readings on the index used where the
+  station is: the UK's DAQI in the UK (as before), the European Air Quality
+  Index (EAQI, Good to Extremely poor, the EEA's 2024 bands) in the
+  countries Meteoalarm covers, and the US EPA AQI (Good to Hazardous, May
+  2024 PM2.5 breakpoints) everywhere else. The title names the index; with
+  EPA each reading also shows its AQI number, and the overall pill the
+  highest. Colours and face icons follow each index's own scale, with white
+  text on its darker colours. PM1.0 and PM4.0 are rated on the PM2.5 scale.
+  Works the same for a particle sensor's readings and the Open-Meteo
+  fallback.
+- The country is `[DivumWXCards] country_code` when set, else the station's
+  time zone (as for the flag; `country_code = none` only hides the flag),
+  else the installer's "in the UK" answer, else the station's position.
+  `[DivumWXCards] aq_scheme = daqi | eaqi | epa` picks one outright; unset
+  or `auto` decides by country. Published as `archive.json` `meta.aq_scheme`.
+- New phrases "Fair", "Poor", "Very poor", "Extremely poor", "Airquality
+  (EU EAQI)" and "Airquality (US EPA AQI)", translated in every language
+  file.
+- Changed: `cardsBundleNew.js` (cardAirquality.js 1.2.0; cache-buster
+  updated), `bin/user/divumwx_cards.py` (`aq_scheme()`,
+  `$divumwx_aq_scheme`), `skins/DivumWX/jsondata/archive.json.tmpl`, every
+  `skins/DivumWX/lang/*.conf`.
 
 ### Pages no longer depend on an outside site for D3
 - Seven pages loaded the D3 charting library from cdnjs.cloudflare.com (or

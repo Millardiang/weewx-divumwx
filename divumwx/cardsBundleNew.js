@@ -2254,7 +2254,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardIndoorTemp.js version 1.0.0
+# cardIndoorTemp.js version 1.0.1
 #  Copyright (C) 2026 Ian Millard
 #  GPLv3
 ##############################################################################################
@@ -2492,10 +2492,12 @@ try {
     var color = v.inTempColor || 'var(--bw-accent)';
 
     // House: pitched roof, walls, chimney, a window either side.
-    var apexX = 45, apexY = 3, eaveY = 58, roofL = -38, roofR = 128, wallL = -27, wallR = 117, floorY = 173;
+    // About 15% shorter than the 175-unit drawing and centred in it; same
+    // roof pitch. The thermometer is placed from floorY, so it moves with it.
+    var apexX = 45, apexY = 16, eaveY = 71, roofL = -38, roofR = 128, wallL = -27, wallR = 117, floorY = 161;
     function roofY(x){ return apexY + (eaveY - apexY) * Math.abs(x - apexX) / (apexX - roofL); }
     svg.append('path')   // chimney, its sides ending at the roof
-      .attr('d', 'M92,' + roofY(92) + ' V10 H104 V' + roofY(104))
+      .attr('d', 'M92,' + roofY(92) + ' V' + (apexY + 7) + ' H104 V' + roofY(104))
       .style('fill', 'none').style('stroke', tubeBorderColor).style('stroke-width', 1.25).style('stroke-linejoin', 'round');
     svg.append('path')   // walls and floor
       .attr('d', 'M' + wallL + ',' + roofY(wallL) + ' V' + floorY + ' H' + wallR + ' V' + roofY(wallR))
@@ -2505,7 +2507,7 @@ try {
       .attr('d', 'M' + roofL + ',' + eaveY + ' L' + apexX + ',' + apexY + ' L' + roofR + ',' + eaveY)
       .style('fill', 'none').style('stroke', tubeBorderColor).style('stroke-width', 1.75)
       .style('stroke-linejoin', 'round').style('stroke-linecap', 'round');
-    [[-19, 92], [91, 92]].forEach(function(w){   // windows, clear of the scale and Max/Min
+    [[-19, 97], [91, 97]].forEach(function(w){   // windows, clear of the scale and Max/Min
       svg.append('rect').attr('x', w[0]).attr('y', w[1]).attr('width', 18).attr('height', 18).attr('rx', 1.5)
         .style('fill', 'none').style('stroke', tubeBorderColor).style('stroke-width', 0.75).style('opacity', 0.7);
       svg.append('path').attr('d', 'M' + (w[0] + 9) + ',' + w[1] + ' v18 M' + w[0] + ',' + (w[1] + 9) + ' h18')
@@ -9763,7 +9765,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardAirquality.js version 1.1.0
+# cardAirquality.js version 1.2.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -9820,32 +9822,114 @@ try {
     { max: 100, band: 9,  desc: 'High' },
     { max: Infinity, band: 10, desc: 'Very High' }
   ];
-  var DAQI_BANDS = { pm1_0: STANDARD_BANDS, pm2_5: STANDARD_BANDS, pm4_0: STANDARD_BANDS, pm10_0: PM10_BANDS };
-  var DAQI_COLORS = {
-    1: '#98fb98', 2: '#bfff00', 3: '#008000', 4: '#ffff00', 5: '#ffbf00',
-    6: '#bfff00', 7: '#fa8072', 8: '#ff0000', 9: '#800000', 10: '#800080'
-  };
-
-  function calculateDAQI(value, pollutant){
-    var bands = DAQI_BANDS[pollutant];
-    for (var i = 0; i < bands.length; i++){
-      if (value <= bands[i].max) return bands[i];
-    }
-    return bands[0];
-  }
+  // European Air Quality Index (EEA, bands revised 2024 to the WHO 2021
+  // guidelines), hourly concentrations in µg/m³.
+  var EAQI_PM25 = [
+    { max: 5,   band: 1, desc: 'Good' },
+    { max: 15,  band: 2, desc: 'Fair' },
+    { max: 50,  band: 3, desc: 'Moderate' },
+    { max: 90,  band: 4, desc: 'Poor' },
+    { max: 140, band: 5, desc: 'Very poor' },
+    { max: Infinity, band: 6, desc: 'Extremely poor' }
+  ];
+  var EAQI_PM10 = [
+    { max: 15,  band: 1, desc: 'Good' },
+    { max: 45,  band: 2, desc: 'Fair' },
+    { max: 120, band: 3, desc: 'Moderate' },
+    { max: 195, band: 4, desc: 'Poor' },
+    { max: 270, band: 5, desc: 'Very poor' },
+    { max: Infinity, band: 6, desc: 'Extremely poor' }
+  ];
+  // US EPA AQI (PM2.5 breakpoints as revised in May 2024). lo/hi are the
+  // concentration range, ilo/ihi the index range it maps onto.
+  var EPA_PM25 = [
+    { max: 9.0,   band: 1, desc: 'Good',      lo: 0,     hi: 9.0,   ilo: 0,   ihi: 50 },
+    { max: 35.4,  band: 2, desc: 'Moderate',  lo: 9.1,   hi: 35.4,  ilo: 51,  ihi: 100 },
+    { max: 55.4,  band: 3, desc: 'Unhealthy for sensitive groups', lo: 35.5, hi: 55.4, ilo: 101, ihi: 150 },
+    { max: 125.4, band: 4, desc: 'Unhealthy', lo: 55.5,  hi: 125.4, ilo: 151, ihi: 200 },
+    { max: 225.4, band: 5, desc: 'Very unhealthy', lo: 125.5, hi: 225.4, ilo: 201, ihi: 300 },
+    { max: Infinity, band: 6, desc: 'Hazardous', lo: 225.5, hi: 325.4, ilo: 301, ihi: 500 }
+  ];
+  var EPA_PM10 = [
+    { max: 54,  band: 1, desc: 'Good',      lo: 0,   hi: 54,  ilo: 0,   ihi: 50 },
+    { max: 154, band: 2, desc: 'Moderate',  lo: 55,  hi: 154, ilo: 51,  ihi: 100 },
+    { max: 254, band: 3, desc: 'Unhealthy for sensitive groups', lo: 155, hi: 254, ilo: 101, ihi: 150 },
+    { max: 354, band: 4, desc: 'Unhealthy', lo: 255, hi: 354, ilo: 151, ihi: 200 },
+    { max: 424, band: 5, desc: 'Very unhealthy', lo: 355, hi: 424, ilo: 201, ihi: 300 },
+    { max: Infinity, band: 6, desc: 'Hazardous', lo: 425, hi: 604, ilo: 301, ihi: 500 }
+  ];
 
   var ICON_BASE = './svg/aqi/';
   var ICON_VER = '?ver=1.4';
-  var DAQI_ICONS = {
-    1: 'goodair', 2: 'goodair', 3: 'goodair',
-    4: 'modair',  5: 'modair',  6: 'modair',
-    7: 'uhfsair',
-    8: 'uhair',   9: 'uhair',
-    10: 'vhair'
+  // Which index the card uses: archive.json meta.aq_scheme, set from the
+  // station's country -- "daqi" for the UK, "eaqi" for the countries
+  // Meteoalarm covers, "epa" everywhere else. PM1.0/PM4.0 have no bands of
+  // their own in any of them, so they're rated on the PM2.5 scale.
+  var SCHEMES = {
+    daqi: {
+      title: 'Airquality (UK DAQI)',
+      bands: { pm1_0: STANDARD_BANDS, pm2_5: STANDARD_BANDS, pm4_0: STANDARD_BANDS, pm10_0: PM10_BANDS },
+      colors: {
+        1: '#98fb98', 2: '#bfff00', 3: '#008000', 4: '#ffff00', 5: '#ffbf00',
+        6: '#bfff00', 7: '#fa8072', 8: '#ff0000', 9: '#800000', 10: '#800080'
+      },
+      icons: {
+        1: 'goodair', 2: 'goodair', 3: 'goodair',
+        4: 'modair',  5: 'modair',  6: 'modair',
+        7: 'uhfsair',
+        8: 'uhair',   9: 'uhair',
+        10: 'vhair'
+      }
+    },
+    eaqi: {
+      title: 'Airquality (EU EAQI)',
+      bands: { pm1_0: EAQI_PM25, pm2_5: EAQI_PM25, pm4_0: EAQI_PM25, pm10_0: EAQI_PM10 },
+      colors: { 1: '#50f0e6', 2: '#50ccaa', 3: '#f0e641', 4: '#ff5050', 5: '#960032', 6: '#7d2181' },
+      icons: { 1: 'goodair', 2: 'modair', 3: 'uhfsair', 4: 'uhair', 5: 'vhair', 6: 'hazair' }
+    },
+    epa: {
+      title: 'Airquality (US EPA AQI)',
+      bands: { pm1_0: EPA_PM25, pm2_5: EPA_PM25, pm4_0: EPA_PM25, pm10_0: EPA_PM10 },
+      colors: { 1: '#00e400', 2: '#ffff00', 3: '#ff7e00', 4: '#ff0000', 5: '#8f3f97', 6: '#7e0023' },
+      icons: { 1: 'goodair', 2: 'modair', 3: 'uhfsair', 4: 'uhair', 5: 'vhair', 6: 'hazair' }
+    }
   };
-  function iconUrl(band){
-    return ICON_BASE + (DAQI_ICONS[band] || 'goodair') + '.svg' + ICON_VER;
+  var schemeKey = 'daqi';
+  function scheme(){ return SCHEMES[schemeKey]; }
+
+  function rate(value, pollutant){
+    var bands = scheme().bands[pollutant];
+    for (var i = 0; i < bands.length; i++){
+      if (value <= bands[i].max) return bands[i];
+    }
+    return bands[bands.length - 1];
   }
+  // The EPA index number for a reading (EPA truncates PM2.5 to one decimal
+  // and PM10 to a whole number first); null for the other schemes.
+  function epaIndex(value, pollutant){
+    if (schemeKey !== 'epa') return null;
+    var c = pollutant === 'pm10_0' ? Math.floor(value) : Math.floor(value * 10) / 10;
+    var b = rate(c, pollutant);
+    if (c >= b.hi) return b.ihi;
+    return Math.round((b.ihi - b.ilo) / (b.hi - b.lo) * (c - b.lo) + b.ilo);
+  }
+  function iconUrl(band){
+    return ICON_BASE + (scheme().icons[band] || 'goodair') + '.svg' + ICON_VER;
+  }
+  // Dark text on light band colours, white on the dark ones.
+  function textOn(hex){
+    var n = parseInt(hex.slice(1), 16);
+    var l = (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255;
+    return l < 0.5 ? '#ffffff' : '#111111';
+  }
+
+  // The scheme from archive.json; kept between visits so the title doesn't
+  // flick from the default on the next load.
+  var SCHEME_CACHE_KEY = 'divumwxAqScheme';
+  try {
+    var cachedScheme = localStorage.getItem(SCHEME_CACHE_KEY);
+    if (SCHEMES[cachedScheme]) schemeKey = cachedScheme;
+  } catch (e) {}
 
   // `alt`: other names drivers publish the same reading under, tried in
   // order when the WeeWX name isn't in loop.json (e.g. Ecowitt's WH41/WH43
@@ -9896,7 +9980,7 @@ try {
   titleBar.style.background = 'transparent';
 
   var titleLabel = document.createElement('span');
-  DivumWXI18N.applyLabel(titleLabel, 'Airquality (UK DAQI)');
+  DivumWXI18N.applyLabel(titleLabel, scheme().title);
   titleLabel.style.fontWeight = '600';
   titleLabel.style.whiteSpace = 'nowrap';
   titleLabel.style.overflow = 'hidden';
@@ -9994,6 +10078,8 @@ try {
   overallValue.style.color = '#111111';
   overallValue.style.padding = '1px 10px';
   overallValue.style.borderRadius = '9px';
+  // One line: "Unhealthy for sensitive groups" is long for the pill.
+  overallValue.style.whiteSpace = 'nowrap'; overallValue.style.overflow = 'hidden'; overallValue.style.textOverflow = 'ellipsis'; overallValue.style.maxWidth = '100%'; overallValue.style.boxSizing = 'border-box'; overallValue.style.verticalAlign = 'top';
   overallCaption.appendChild(overallValue);
 
   var rightPane = document.createElement('div');
@@ -10172,23 +10258,58 @@ try {
       return;
     }
 
-    var highestBand = 1, overallDesc = 'Low';
+    var colors = scheme().colors;
+    var worst = null, worstIndex = null;
     pollutantPills.forEach(function(p){
       var value = v[p.key];
-      var daqi = calculateDAQI(value, p.key);
-      var color = DAQI_COLORS[daqi.band];
+      var rating = rate(value, p.key);
+      var color = colors[rating.band];
 
       p.els.circle.style.background = color;
-      p.els.icon.src = iconUrl(daqi.band);
+      p.els.icon.src = iconUrl(rating.band);
       p.els.label.style.background = color;
+      p.els.label.style.color = textOn(color);
       p.chipValue.textContent = value.toFixed(1) + ' \u00B5g/m\u00B3';
-      if (daqi.band > highestBand){ highestBand = daqi.band; overallDesc = DivumWXI18N.t(daqi.desc); }
+      var idx = epaIndex(value, p.key);
+      if (idx !== null) {
+        p.chipValue.textContent += ' \u00B7 ' + idx;
+        if (worstIndex === null || idx > worstIndex) worstIndex = idx;
+      }
+      if (!worst || rating.band > worst.band) worst = rating;
     });
 
-    var overallColor = DAQI_COLORS[highestBand];
+    // The overall rating is the worst pollutant's (all three schemes).
+    var desc = DivumWXI18N.t(worst.desc);
+    var overallColor = colors[worst.band];
     overallLabel.style.color = overlayTextColor;
-    overallValue.textContent = overallDesc;
+    overallValue.textContent = worstIndex !== null ? worstIndex + ' \u00B7 ' + desc : desc;
+    overallValue.title = overallValue.textContent;
     overallValue.style.background = overallColor;
+    overallValue.style.color = textOn(overallColor);
+    // A long rating ("Unhealthy for sensitive groups") is fitted before it's
+    // cut short with "…": smaller, then without the index number (which is
+    // still beside each reading on the right).
+    overallValue.style.fontSize = '12px';
+    function tooWide(){ return overallValue.scrollWidth > overallValue.clientWidth; }
+    if (tooWide()) overallValue.style.fontSize = '10px';
+    if (tooWide() && worstIndex !== null) { overallValue.textContent = desc; }
+    if (tooWide()) overallValue.style.fontSize = '9px';
+  }
+
+  // meta.aq_scheme from archive.json (through the shared data layer, so no
+  // extra request when another card has just read it).
+  function loadScheme(){
+    return fetch('./jsondata/archive.json', {cache:'no-store'})
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(a){
+        var key = a && a.meta && a.meta.aq_scheme;
+        if (!SCHEMES[key] || key === schemeKey) return;
+        schemeKey = key;
+        try { localStorage.setItem(SCHEME_CACHE_KEY, key); } catch (e) {}
+        DivumWXI18N.applyLabel(titleLabel, scheme().title);
+        if (lastData) renderCard(lastData);
+      })
+      .catch(function(){});
   }
 
   // Open-Meteo's PM2.5/PM10 from airquality.txt, or {} if missing or stale.
@@ -10234,8 +10355,10 @@ try {
         setStatus(false);
       });
   }
+  loadScheme();
   refresh();
   setInterval(refresh, POLL_MS);
+  setInterval(loadScheme, 10 * 60 * 1000);
 
   window.addEventListener('themechange', function(){
     if (lastData) renderCard(lastData);

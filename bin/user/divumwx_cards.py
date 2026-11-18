@@ -88,6 +88,11 @@ Provides three tags:
                                zone's country from the system's zone.tab.
                                JSON null when unknown.
 
+    $divumwx_aq_scheme       — the Air Quality card's index: "daqi" (UK),
+                               "eaqi" (Meteoalarm countries) or "epa"
+                               (elsewhere); [DivumWXCards] aq_scheme
+                               overrides. See aq_scheme().
+
     $divumwx_in_uk           — the installer's own "are you in the UK?"
                                answer ([DivumWXCards] in_uk, set by
                                install.py's in_england/in_uk prompts),
@@ -284,6 +289,50 @@ def station_country(cards_section):
     return timezone_country(system_timezone())
 
 
+# ---------------------------------------------------------------------------
+# Which air-quality index the Air Quality card uses.
+# Countries Meteoalarm covers (ISO codes; the same list as FEEDS in
+# user.divumwx_meteoalarm, which uses "UK" for gb and "EI" as a second code
+# for Ireland). The UK has its own index, so it isn't counted here.
+EAQI_COUNTRIES = frozenset((
+    'at', 'ba', 'be', 'bg', 'ch', 'cy', 'cz', 'de', 'dk', 'ee', 'es', 'fi',
+    'fr', 'gr', 'hr', 'hu', 'ie', 'il', 'is', 'it', 'lt', 'lu', 'lv', 'md',
+    'me', 'mk', 'mt', 'nl', 'no', 'pl', 'pt', 'ro', 'rs', 'se', 'si', 'sk',
+))
+DAQI_COUNTRIES = frozenset(('gb', 'gg', 'je', 'im'))
+AQ_SCHEMES = ('daqi', 'eaqi', 'epa')
+# Rough box around the Meteoalarm countries (lon/lat), as in install.py, for
+# when the country can't be told.
+METEOALARM_BOX = (-32.0, 27.0, 45.0, 72.0)
+
+
+def aq_scheme(cards_section, latitude=None, longitude=None, in_uk=None):
+    """'daqi' (UK), 'eaqi' (Meteoalarm countries) or 'epa' (everywhere else).
+
+    [DivumWXCards] aq_scheme picks one outright; unset or 'auto' goes by the
+    station's country ([DivumWXCards] country_code, else the time zone's --
+    'none', which only hides the flag, still counts the time zone). With no
+    country: the installer's in_uk answer, then the station's position."""
+    raw = str(cards_section.get('aq_scheme', '') or '').strip().lower()
+    if raw in AQ_SCHEMES:
+        return raw
+    country = str(cards_section.get('country_code', '') or '').strip().lower()
+    if not (len(country) == 2 and country.isalpha()):
+        country = timezone_country(system_timezone())
+    if country:
+        if country in DAQI_COUNTRIES:
+            return 'daqi'
+        return 'eaqi' if country in EAQI_COUNTRIES else 'epa'
+    if in_uk:
+        return 'daqi'
+    try:
+        lat, lon = float(latitude), float(longitude)
+    except (TypeError, ValueError):
+        return 'epa'
+    west, south, east, north = METEOALARM_BOX
+    return 'eaqi' if (west <= lon <= east and south <= lat <= north) else 'epa'
+
+
 class DivumwxCards(SearchList):
 
     def __init__(self, generator):
@@ -346,6 +395,11 @@ class DivumwxCards(SearchList):
         # country_code: the station's country for the flag after the site
         # title -- [DivumWXCards] country_code, else from the time zone.
         country_code = station_country(cards_section)
+        stn_info = getattr(self.generator, 'stn_info', None)
+        air_quality_scheme = aq_scheme(cards_section,
+                                       getattr(stn_info, 'latitude_f', None),
+                                       getattr(stn_info, 'longitude_f', None),
+                                       in_uk)
 
         # page_background: the installer's "seasonal or solid" answer
         # ([DivumWXCards] page_background). Anything unset or unrecognised
@@ -417,6 +471,8 @@ class DivumwxCards(SearchList):
             # A plain string (not JSON): a data binding name for template tags.
             'divumwx_extras_binding': extras_binding,
             'divumwx_warnings_source': json.dumps(warnings_source),
+            # Air Quality card index: "daqi", "eaqi" or "epa" (aq_scheme()).
+            'divumwx_aq_scheme': json.dumps(air_quality_scheme),
             'divumwx_lang': json.dumps(lang),
             'divumwx_strings_payload': json.dumps(strings_payload),
             # Release version for the dashboard footer (archive.json meta).
