@@ -1822,7 +1822,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardTemperature.js version 1.0.0
+# cardTemperature.js version 1.0.1
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -1840,21 +1840,6 @@ try {
     if (diff >= 0.6) return 1;
     if (diff <= -0.6) return -1;
     return 0;
-  }
-
-  // ---- Media mode (2 or 1 dashboard columns) ----
-
-  function currentColumnCount(){
-    var grid = document.querySelector('.wrapper');
-    if (!grid) return null;
-    var cols = window.getComputedStyle(grid).getPropertyValue('grid-template-columns');
-    if (!cols) return null;
-    var tracks = cols.trim().split(/\s+/).filter(Boolean);
-    return tracks.length || null;
-  }
-  function isMediaMode(){
-    var n = currentColumnCount();
-    return n !== null && n <= 2;
   }
 
   var currentUnits = loadStoredUnits();
@@ -2036,7 +2021,7 @@ try {
   }
 
   var readoutRows = [];
-  for (var ri = 0; ri < 9; ri++) readoutRows.push(addChipRow());
+  for (var ri = 0; ri < 8; ri++) readoutRows.push(addChipRow());
   readoutRows[readoutRows.length - 1].row.style.borderBottom = 'none';
 
   var cardLink = document.createElement('a');
@@ -2077,7 +2062,6 @@ try {
     var currentTemp   = tc(v.currentTemp);
     var globalMaxTemp = tc(v.globalMaxTemp);
     var globalMinTemp = tc(v.globalMinTemp);
-    var inTemp        = tc(v.inTemp);
     var appTemp       = tc(v.appTemp);
     var heatIndex      = tc(v.heatIndex);
     var avgToday        = tc(v.avgToday);
@@ -2153,12 +2137,12 @@ try {
 
     // ---- Right pane: label/value/trend rows ----
 
-    var mediaMode = isMediaMode();
 
+    // Indoor temperature has its own card (cardIndoorTemp), so it's no longer
+    // listed here.
     var weatherData = [
       { id: 'maxMin',      label: DivumWXI18N.t('Max | Min'),   value: globalMaxTemp.toFixed(1) + '\u00B0' + unitsTemp + ' | ' + globalMinTemp.toFixed(1) + '\u00B0' + unitsTemp, color: 'transparent', trend: 0 },
       { id: 'trend',       label: DivumWXI18N.t('Trend'),       value: trend_outTemp.toFixed(1) + '\u00B0' + unitsTemp, color: v.tempColor, trend: trend_outTemp },
-      { id: 'indoorTemp',  label: DivumWXI18N.t('Indoor Temp'), value: inTemp.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorInTemp, trend: v.trend_inTemp },
       { id: 'apparent',    label: DivumWXI18N.t('Apparent'),    value: appTemp.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorAppTemp, trend: getTrend(v.appTemp, v.appTemp_3hours) },
       { id: 'humidity',    label: DivumWXI18N.t('Humidity'),    value: v.humidity.toFixed(0) + '%', color: v.colorHumidityOut, trend: v.trend_outHumidity },
       { id: 'heatIndex',   label: DivumWXI18N.t('Heat Index'),  value: heatIndex.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorHeatindex, trend: getTrend(v.heatIndex, v.heatIndex_3hours) },
@@ -2166,9 +2150,6 @@ try {
       { id: 'dewpoint',    label: DivumWXI18N.t('Dewpoint'),    value: dewpoint.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorDewpoint, trend: v.trend_dewpoint },
       { id: 'windchill',   label: DivumWXI18N.t('Windchill'),   value: windChill.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorWindchill, trend: getTrend(v.windChill, v.windChill_3hours) }
     ];
-    if (mediaMode) {
-      weatherData = weatherData.filter(function(d){ return d.id !== 'indoorTemp'; });
-    }
 
     var rowHeight = 175 / weatherData.length;
     for (var ri2 = 0; ri2 < readoutRows.length; ri2++){
@@ -2212,7 +2193,6 @@ try {
         globalMaxTemp: num(t.day_max, o.outTemp),
         globalMinTemp: num(t.day_min, o.outTemp),
         currentTemp:   num(o.outTemp, 0),
-        colorInTemp:        o.inTempColor       || 'var(--bw-accent)',
         tempColor:          o.outTempColor      || 'var(--bw-accent)',
         colorAppTemp:       o.apparentTempColor || 'var(--bw-accent)',
         colorHumidityOut:   'var(--bs-body-color)',
@@ -2228,9 +2208,7 @@ try {
         trend_dewpoint: num(dw.trend, 0),
         trend_outHumidity: num(h.trend, 0),
         humidity: num(o.outHumidity, 0),
-        trend_inTemp: num(t.indoor_trend, 0),
         trend_outTemp: num(t.outside_trend, 0),
-        inTemp: num(o.inTemp, 0),
         avgToday: num(t.day_avg, 0),
         dewpoint: num(o.dewpoint, 0),
         appTemp: num(o.apparentTemp, 0),

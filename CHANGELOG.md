@@ -27,6 +27,9 @@
   to `[DivumWXCards] enabled_cards` by hand.
 - The house is about 15% lower than first drawn (same roof pitch); the
   thermometer is the same size and sits lower to match.
+- The outdoor Temperature card no longer lists Indoor Temp, now that it
+  has its own card: eight rows instead of nine, so they're less cramped
+  (cardTemperature.js 1.0.1).
 ### Air quality from Open-Meteo when there's no particle sensor (requested by Remy)
 - With no PM sensor readings, the Air Quality card now shows Open-Meteo's
   PM2.5 and PM10 for the station's location, from `jsondata/airquality.txt`
