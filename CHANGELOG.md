@@ -28,8 +28,12 @@
 - The house is about 15% lower than first drawn (same roof pitch); the
   thermometer is the same size and sits lower to match.
 - The outdoor Temperature card no longer lists Indoor Temp, now that it
-  has its own card: eight rows instead of nine, so they're less cramped
-  (cardTemperature.js 1.0.1).
+  has its own card. Apparent, Heat Index and Windchill are replaced by one
+  "Feels like" row, as the Met Office and US NWS use the term: wind chill
+  at 10 °C or below, heat index at 26.7 °C (80 °F) or above, otherwise the
+  air temperature. Its colour and trend arrow follow whichever of the
+  three applies. Six rows instead of nine, so they're no longer cramped
+  (cardTemperature.js 1.1.0).
 ### Air quality from Open-Meteo when there's no particle sensor (requested by Remy)
 - With no PM sensor readings, the Air Quality card now shows Open-Meteo's
   PM2.5 and PM10 for the station's location, from `jsondata/airquality.txt`
@@ -41,6 +45,28 @@
   `hyperIndex.html`, `lexendIndex.html` and `kiosk.html`), `index.html`,
   `hyperIndex.html`, `lexendIndex.html` (the new card's slot), `install.py`,
   every `skins/DivumWX/lang/*.conf` (the "Indoor Temperature" phrase).
+
+### Rain event: one rule for every gauge
+- The rain event now starts once a wet spell has brought 0.4 mm of rain
+  (0.02 in on stations showing rain in inches) and runs until there has
+  been a 24-hour period without rain. Its total and start time ("from
+  HH:MM") are the whole spell's, from its first rain. Before, an event
+  started with any rain and ended after an hour with under 1 mm, so a
+  shower with a dry hour in the middle was split into two events.
+- The same rule applies to every make of tipping-bucket gauge and to the
+  piezo gauge: it's worked out from the archive's own rain columns, never
+  from a driver's stormRain/eventRain/erain_piezo counter.
+- Changed: `bin/user/divumwx.py` (`calc_rain_event()`,
+  `rain_event_threshold_mm()`), `skins/DivumWX/jsondata/archive.json.tmpl`.
+
+### Rain cards: layout with a rain event showing
+- When a rain event was in progress, the Piezo Rain, Rainfall and Tipping
+  Rain cards' readings ran off the card: the year row was cut off at the
+  top and the Rain Event row at the bottom, with a gap above it. The event
+  row lost its column layout when it was shown again, and six rows didn't
+  fit the card at the usual spacing. The row now keeps its layout and the
+  rows close up while the event is showing (cardPiezoRain.js,
+  cardRainfall.js, cardTippingRain.js 1.0.1).
 
 ### Air quality index follows the station's country
 - The Air Quality card rates PM readings on the index used where the

@@ -14,6 +14,7 @@ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LIC
 * **Lightning card keeps updating** - on stations whose lightning sensor sends nothing between strikes, the card dropped to zeros after each quiet interval and only showed real figures after a strike. It now shows Today, Year, All-time and the last strike all the time, and "Last Hour" is the last 60 minutes rather than the previous clock hour.
 
 # What's new in 2.2.1
+* **Rain event: one rule for every gauge** - an event starts once 0.4 mm (0.02 in) of rain has fallen and ends after 24 hours without rain, for every make of tipping-bucket gauge and for piezo sensors.
 * **Rain Event fits the rain cards again** - on the Tipping Rain, Piezo Rain and Rainfall cards the event now shows on one line ("2.20 mm from 13:02"), so the bottom of the column is no longer cut off.
 
 # What's new in 2.2.0
@@ -102,13 +103,11 @@ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LIC
 * Introducing DivumWF Forecast - install on your mobile phone desktop as a take-anywhere forecasting app.
 * Rain event: -
 
-        Definition
-        A rain event is calculated using a continuous accumulation logic:
-        Start: The event counter begins tracking rainfall as soon as precipitation is detected.
-        Continuation: It keeps accumulating the total as long as the rain continues.
-        Reset / End Condition: The rain event value resets to zero (signaling that the event has ended) when accumulated rainfall drops below 1 mm (0.039 in) and the preceding 1-hour window registers no further rainfall (or when the last 24-hour rainfall total remains under 1 mm with a dry final hour).
-
-        If a new storm or shower starts after that threshold is met, a new "rain event" begins tracking from zero.
+        Definition (the same for every make of rain gauge and piezo sensor)
+        Start: an event starts once a wet spell has brought 0.4 mm of rain (0.02 in on stations showing rain in inches). Its total and start time are counted from the spell's first rain.
+        Continuation: it keeps accumulating for as long as rain keeps falling, including through dry gaps shorter than 24 hours.
+        End: the event ends when there has been a 24-hour period without rain; the value then resets to zero.
+        A spell that brings less than 0.4 mm (0.02 in) before a 24-hour dry period is not an event.
 
         Sensor types
         When tipping rain only selected at install, rain values used

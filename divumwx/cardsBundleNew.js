@@ -1822,7 +1822,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardTemperature.js version 1.0.1
+# cardTemperature.js version 1.1.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -2021,7 +2021,7 @@ try {
   }
 
   var readoutRows = [];
-  for (var ri = 0; ri < 8; ri++) readoutRows.push(addChipRow());
+  for (var ri = 0; ri < 6; ri++) readoutRows.push(addChipRow());
   readoutRows[readoutRows.length - 1].row.style.borderBottom = 'none';
 
   var cardLink = document.createElement('a');
@@ -2062,11 +2062,9 @@ try {
     var currentTemp   = tc(v.currentTemp);
     var globalMaxTemp = tc(v.globalMaxTemp);
     var globalMinTemp = tc(v.globalMinTemp);
-    var appTemp       = tc(v.appTemp);
-    var heatIndex      = tc(v.heatIndex);
+    var feelsLike     = tc(v.feelsLike);
     var avgToday        = tc(v.avgToday);
     var dewpoint         = tc(v.dewpoint);
-    var windChill        = tc(v.windChill);
     var trend_outTemp   = td(v.trend_outTemp);
 
     titleLabel.textContent = DivumWXI18N.t('Temperature') + ' (\u00B0' + unitsTemp + ')';
@@ -2138,17 +2136,15 @@ try {
     // ---- Right pane: label/value/trend rows ----
 
 
-    // Indoor temperature has its own card (cardIndoorTemp), so it's no longer
-    // listed here.
+    // Indoor temperature has its own card (cardIndoorTemp); apparent, heat
+    // index and wind chill are folded into one "Feels like" row.
     var weatherData = [
       { id: 'maxMin',      label: DivumWXI18N.t('Max | Min'),   value: globalMaxTemp.toFixed(1) + '\u00B0' + unitsTemp + ' | ' + globalMinTemp.toFixed(1) + '\u00B0' + unitsTemp, color: 'transparent', trend: 0 },
       { id: 'trend',       label: DivumWXI18N.t('Trend'),       value: trend_outTemp.toFixed(1) + '\u00B0' + unitsTemp, color: v.tempColor, trend: trend_outTemp },
-      { id: 'apparent',    label: DivumWXI18N.t('Apparent'),    value: appTemp.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorAppTemp, trend: getTrend(v.appTemp, v.appTemp_3hours) },
+      { id: 'feelsLike',   label: DivumWXI18N.t('Feels like'),  value: feelsLike.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorFeelsLike, trend: getTrend(v.feelsLike, v.feelsLike_3hours) },
       { id: 'humidity',    label: DivumWXI18N.t('Humidity'),    value: v.humidity.toFixed(0) + '%', color: v.colorHumidityOut, trend: v.trend_outHumidity },
-      { id: 'heatIndex',   label: DivumWXI18N.t('Heat Index'),  value: heatIndex.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorHeatindex, trend: getTrend(v.heatIndex, v.heatIndex_3hours) },
       { id: 'avgToday',    label: DivumWXI18N.t('Avg Today'),   value: avgToday.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorOutTempDayAvg, trend: getTrend(v.avgToday, v.avgToday_3hours) },
-      { id: 'dewpoint',    label: DivumWXI18N.t('Dewpoint'),    value: dewpoint.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorDewpoint, trend: v.trend_dewpoint },
-      { id: 'windchill',   label: DivumWXI18N.t('Windchill'),   value: windChill.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorWindchill, trend: getTrend(v.windChill, v.windChill_3hours) }
+      { id: 'dewpoint',    label: DivumWXI18N.t('Dewpoint'),    value: dewpoint.toFixed(1) + '\u00B0' + unitsTemp, color: v.colorDewpoint, trend: v.trend_dewpoint }
     ];
 
     var rowHeight = 175 / weatherData.length;
@@ -2189,30 +2185,36 @@ try {
       var t = arch.temp || {}, dw = arch.dew || {}, h = arch.humid || {};
       function num(x, fallback){ return (typeof x === 'number' && !isNaN(x)) ? x : (fallback || 0); }
 
+      // Feels like, as the Met Office and US NWS use it: wind chill when it's
+      // cold (10 °C or below; WeeWX's windChill is already the air
+      // temperature in light wind), heat index when it's hot (26.7 °C/80 °F
+      // or above), otherwise the air temperature. Loop values are °C.
+      var outC = num(o.outTemp, 0);
+      var feelsSrc = outC <= 10 ? 'chill' : (outC >= 26.7 ? 'heat' : 'air');
+      var FEELS = {
+        chill: { now: o.windChill, avg3h: t.wind_chill_avg_3h, color: o.windChillColor },
+        heat:  { now: o.heatIndex, avg3h: t.heat_index_avg_3h, color: o.heatIndexColor },
+        air:   { now: o.outTemp,   avg3h: t.outside_avg_3h,    color: o.outTempColor }
+      }[feelsSrc];
+
       lastData = {
+        feelsLike:        num(FEELS.now, outC),
+        feelsLike_3hours: num(FEELS.avg3h, num(FEELS.now, outC)),
+        colorFeelsLike:   FEELS.color || 'var(--bw-accent)',
         globalMaxTemp: num(t.day_max, o.outTemp),
         globalMinTemp: num(t.day_min, o.outTemp),
         currentTemp:   num(o.outTemp, 0),
         tempColor:          o.outTempColor      || 'var(--bw-accent)',
-        colorAppTemp:       o.apparentTempColor || 'var(--bw-accent)',
         colorHumidityOut:   'var(--bs-body-color)',
-        colorHeatindex:     o.heatIndexColor    || 'var(--bw-accent)',
         colorOutTempDayAvg: 'var(--bs-body-color)',
         colorDewpoint:      o.dewpointColor     || 'var(--bw-accent)',
-        colorWindchill:     o.windChillColor    || 'var(--bw-accent)',
-        windChill_3hours: num(t.wind_chill_avg_3h, o.windChill),
         avgToday_3hours:  num(t.outside_avg_3h, t.day_avg),
-        heatIndex_3hours: num(t.heat_index_avg_3h, o.heatIndex),
-        appTemp_3hours:   num(t.feels_like_avg_3h, o.apparentTemp),
-        windChill: num(o.windChill, 0),
         trend_dewpoint: num(dw.trend, 0),
         trend_outHumidity: num(h.trend, 0),
         humidity: num(o.outHumidity, 0),
         trend_outTemp: num(t.outside_trend, 0),
         avgToday: num(t.day_avg, 0),
-        dewpoint: num(o.dewpoint, 0),
-        appTemp: num(o.apparentTemp, 0),
-        heatIndex: num(o.heatIndex, 0)
+        dewpoint: num(o.dewpoint, 0)
       };
       render(lastData);
       setStatus(loopResult.status === 'fulfilled' && archResult.status === 'fulfilled');
@@ -4282,7 +4284,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardPiezoRain.js version 1.0.0
+# cardPiezoRain.js version 1.0.1
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -4651,7 +4653,9 @@ try {
     yearText.textContent = rainLabel(v.year);
     var stormLabel = timeLabelFor(v.stormStart);
     if (v.event > 0) {
-      eventText.parentElement.style.display = '';
+      // 'flex', not '': clearing it turned the row into a plain block, so
+      // label and value ran inline with a gap above them.
+      eventText.parentElement.style.display = 'flex';
       rateText.parentElement.style.borderBottom = '1px solid var(--bs-border-color)';
       var eventLine = rainLabel(v.event) + (v.stormStart ? ' ' + DivumWXI18N.t('from') + ' ' + stormLabel : '');
       eventText.textContent = eventLine;
@@ -4660,6 +4664,15 @@ try {
       eventText.parentElement.style.display = 'none';
       rateText.parentElement.style.borderBottom = 'none';
     }
+    // Six rows don't fit the 175px pane at the usual spacing (the year row
+    // was cut off at the top and the event at the bottom): tighten them
+    // while the rain event row is showing.
+    var compact = v.event > 0;
+    Array.prototype.forEach.call(rightPane.children, function(row){
+      row.style.padding = compact ? '1px 0' : '3px 0';
+      row.style.gap = compact ? '0' : '1px';
+      Array.prototype.forEach.call(row.children, function(el){ el.style.lineHeight = compact ? '1.2' : ''; });
+    });
   }
 
   var lastData = null;
@@ -4710,7 +4723,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardRainfall.js version 1.0.0
+# cardRainfall.js version 1.0.1
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -5043,7 +5056,9 @@ try {
     yearText.textContent = rainLabel(v.year);
     var stormLabel = timeLabelFor(v.stormStart);
     if (v.event > 0) {
-      eventText.parentElement.style.display = '';
+      // 'flex', not '': clearing it turned the row into a plain block, so
+      // label and value ran inline with a gap above them.
+      eventText.parentElement.style.display = 'flex';
       rateText.parentElement.style.borderBottom = '1px solid var(--bs-border-color)';
       var eventLine = rainLabel(v.event) + (v.stormStart ? ' ' + DivumWXI18N.t('from') + ' ' + stormLabel : '');
       eventText.textContent = eventLine;
@@ -5052,6 +5067,15 @@ try {
       eventText.parentElement.style.display = 'none';
       rateText.parentElement.style.borderBottom = 'none';
     }
+    // Six rows don't fit the 175px pane at the usual spacing (the year row
+    // was cut off at the top and the event at the bottom): tighten them
+    // while the rain event row is showing.
+    var compact = v.event > 0;
+    Array.prototype.forEach.call(rightPane.children, function(row){
+      row.style.padding = compact ? '1px 0' : '3px 0';
+      row.style.gap = compact ? '0' : '1px';
+      Array.prototype.forEach.call(row.children, function(el){ el.style.lineHeight = compact ? '1.2' : ''; });
+    });
   }
 
   var lastData = null;
@@ -5101,7 +5125,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardTippingRain.js version 1.0.0
+# cardTippingRain.js version 1.0.1
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -5623,7 +5647,9 @@ try {
     yearText.textContent = rainLabel(v.year);
     var stormLabel = timeLabelFor(v.stormStart);
     if (v.event > 0) {
-      eventText.parentElement.style.display = '';
+      // 'flex', not '': clearing it turned the row into a plain block, so
+      // label and value ran inline with a gap above them.
+      eventText.parentElement.style.display = 'flex';
       rateText.parentElement.style.borderBottom = '1px solid var(--bs-border-color)';
       var eventLine = rainLabel(v.event) + (v.stormStart ? ' ' + DivumWXI18N.t('from') + ' ' + stormLabel : '');
       eventText.textContent = eventLine;
@@ -5632,6 +5658,15 @@ try {
       eventText.parentElement.style.display = 'none';
       rateText.parentElement.style.borderBottom = 'none';
     }
+    // Six rows don't fit the 175px pane at the usual spacing (the year row
+    // was cut off at the top and the event at the bottom): tighten them
+    // while the rain event row is showing.
+    var compact = v.event > 0;
+    Array.prototype.forEach.call(rightPane.children, function(row){
+      row.style.padding = compact ? '1px 0' : '3px 0';
+      row.style.gap = compact ? '0' : '1px';
+      Array.prototype.forEach.call(row.children, function(el){ el.style.lineHeight = compact ? '1.2' : ''; });
+    });
   }
 
   var lastData = null;

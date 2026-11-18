@@ -540,45 +540,17 @@ null
   #set $storm_end_val = None
   #set $eventRainStr = "0.00"
   #try
-    ## ------------------------------------------------------------------
-    ## "rainEvent" (aka "stormRain") -- rewritten to the user's own
-    ## continuous-accumulation definition:
-    ##   - starts accumulating as soon as rain is detected;
-    ##   - keeps accumulating while rain continues;
-    ##   - resets to zero once the trailing 1-hour window has under 1mm
-    ##     of rain (effectively "no further rainfall"), or the trailing
-    ##     24-hour window has under 1mm total with a dry final hour --
-    ##     whichever comes first;
-    ##   - a new event then starts tracking from zero once rain resumes.
-    ## This no longer depends on the station/driver's own native
-    ## stormRain or eventRain fields at all -- their reset behaviour is
-    ## opaque and hardware/firmware-specific, and didn't match this
-    ## definition. It's computed instead from the plain 'rain' archive
-    ## column every WeeWX station has, regardless of hardware, which
-    ## also means the old stormRain-vs-eventRain branch (for stations
-    ## exposing one native field or the other) is gone -- one
-    ## calculation now covers both kinds of station.
-    ##
-    ## See divumwx.py's calc_rain_event() section for the full reset-logic
-    ## and its own test suite. This template only does the cheap part:
-    ## $span(...).rain.sum already gives exactly the trailing 1h/24h
-    ## sums the reset condition needs, in mm regardless of the report's
-    ## configured display unit, with no custom code at all -- covering
-    ## "definitely no event right now" (the common case for most
-    ## stations most of the time) without ever touching the archive
-    ## database directly. Only when it's actually mid-event does this
-    ## reach into raw archive history, to pin down exactly when that
-    ## event started.
-    ## ------------------------------------------------------------------
-    #set $trailing1hMm = $divumwx_last(3600).rain.sum.mm.raw
+    ## The rain event, the same rule for every make of gauge (see
+    ## calc_rain_event() in divumwx.py): a wet spell runs from its first
+    ## rain until 24 hours pass without any, and counts as an event once
+    ## it has brought 0.4 mm (0.02 in when rain is shown in inches).
+    ## Worked out from the plain 'rain' column, not the driver's own
+    ## stormRain/eventRain. No rain in the last 24 hours means no event, so
+    ## the archive is only read when there has been some.
+    #import user.divumwx
+    #set $evThresholdMm = $user.divumwx.rain_event_threshold_mm($unit.unit_type.rain)
     #set $trailing24hMm = $divumwx_last(86400).rain.sum.mm.raw
-    #set $trailing1hMm = ($trailing1hMm if $trailing1hMm is not None else 0.0)
-    #set $trailing24hMm = ($trailing24hMm if $trailing24hMm is not None else 0.0)
-    #if $trailing1hMm < 1.0 or $trailing24hMm < 1.0
-      ## No event currently active -- report when the last one ended, if
-      ## one's ever happened. Same $time_since() pattern the old
-      ## stormRain-based code already used, just checking the always-
-      ## present 'rain' type instead of a driver-specific one.
+    #if not $trailing24hMm
       #set $eventRainStr = "0.00"
       #set $lastRainTs = None
       #try
@@ -590,17 +562,11 @@ null
         #set $storm_end_val = int($lastRainTs * 1000)
       #end if
     #else
-      ## Currently mid-event -- the one case that actually needs to walk
-      ## raw archive history to find exactly when it started (see
-      ## divumwx.py's calc_rain_event() docstring for why). Note the
-      ## #import itself runs unconditionally regardless of where it
-      ## sits in this file -- Cheetah hoists every #import to the top of
-      ## the compiled module -- but the actual database scan inside
-      ## calc_rain_event() only ever runs when this branch is reached.
-      #import user.divumwx
-      #set $eventMm, $eventStartTs, $_unusedEndTs = $user.divumwx.calc_rain_event($db_lookup(), $current.dateTime.raw)
+      #set $eventMm, $eventStartTs, $eventEndTs = $user.divumwx.calc_rain_event($db_lookup(), $current.dateTime.raw, 'rain', $evThresholdMm)
       #if $eventStartTs is not None
         #set $storm_start_val = int($eventStartTs * 1000)
+      #elif $eventEndTs is not None
+        #set $storm_end_val = int($eventEndTs * 1000)
       #end if
       #set $eventMmConverted = $weewx.units.convert(($eventMm, 'mm', 'group_rain'), $unit.unit_type.rain)[0]
       #set $eventRainStr = ("%.2f" % $eventMmConverted if $eventMmConverted is not None else "0.00")
@@ -642,21 +608,12 @@ null
 #set $p_storm_end_val = None
 #set $eventRainPiezoStr = "0.00"
 #try
-  ## Same continuous-accumulation rewrite as the main "rain" block above,
-  ## applied to the piezo gauge -- replaces the native erain_piezo
-  ## accumulator (a hardware/firmware-defined counter, structurally the
-  ## same kind of opaque-reset field stormRain/eventRain were for the
-  ## main gauge) with calc_rain_event() reading obs_type='hail', which is
-  ## where this deployment's piezo readings already live for the rate/
-  ## sum fields just above (see divumwx.py's calc_rain_event() docstring
-  ## for the full "why 'hail'" explanation). Same fast-path-first
-  ## structure too: the cheap $span(...).hail.sum.mm checks cover "no
-  ## piezo event right now" without ever touching the archive database.
-  #set $pTrailing1hMm = $divumwx_last(3600).hail.sum.mm.raw
+  ## The same rain event rule as the main "rain" block above, for the
+  ## piezo gauge, whose readings are in the 'hail' column.
+  #import user.divumwx
+  #set $pThresholdMm = $user.divumwx.rain_event_threshold_mm($unit.unit_type.rain)
   #set $pTrailing24hMm = $divumwx_last(86400).hail.sum.mm.raw
-  #set $pTrailing1hMm = ($pTrailing1hMm if $pTrailing1hMm is not None else 0.0)
-  #set $pTrailing24hMm = ($pTrailing24hMm if $pTrailing24hMm is not None else 0.0)
-  #if $pTrailing1hMm < 1.0 or $pTrailing24hMm < 1.0
+  #if not $pTrailing24hMm
     #set $eventRainPiezoStr = "0.00"
     #set $pLastRainTs = None
     #try
@@ -668,10 +625,11 @@ null
       #set $p_storm_end_val = int($pLastRainTs * 1000)
     #end if
   #else
-    #import user.divumwx
-    #set $pEventMm, $pEventStartTs, $_pUnusedEndTs = $user.divumwx.calc_rain_event($db_lookup(), $current.dateTime.raw, 'hail')
+    #set $pEventMm, $pEventStartTs, $pEventEndTs = $user.divumwx.calc_rain_event($db_lookup(), $current.dateTime.raw, 'hail', $pThresholdMm)
     #if $pEventStartTs is not None
       #set $p_storm_start_val = int($pEventStartTs * 1000)
+    #elif $pEventEndTs is not None
+      #set $p_storm_end_val = int($pEventEndTs * 1000)
     #end if
     #set $pEventMmConverted = $weewx.units.convert(($pEventMm, 'mm', 'group_rain'), $unit.unit_type.rain)[0]
     #set $eventRainPiezoStr = ("%.2f" % $pEventMmConverted if $pEventMmConverted is not None else "0.00")
