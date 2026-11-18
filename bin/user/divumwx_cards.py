@@ -421,8 +421,37 @@ class DivumwxCards(SearchList):
             'divumwx_strings_payload': json.dumps(strings_payload),
             # Release version for the dashboard footer (archive.json meta).
             'divumwx_version': json.dumps(DIVUMWX_VERSION),
+            'divumwx_available_files': json.dumps(self._available_files()),
         }
         return [search_list_extension]
+
+    # Optional files in jsondata/ that only exist when their feature is
+    # switched on or a separate extension writes them. archive.json's
+    # meta.available_files says which of these are there, so the browser
+    # skips the rest instead of requesting them every 30 seconds for a 404.
+    OPTIONAL_JSONDATA_FILES = (
+        'cold.txt',              # [WeatherAPI][[ColdAlert]] (England)
+        'heat.txt',              # [WeatherAPI][[HeatAlert]] (England)
+        'flood.txt',             # [WeatherAPI][[Flood]] (England)
+        'openweathermap.txt',    # [WeatherAPI] OpenWeather alerts
+        'meteoalarm.json',       # user.divumwx_meteoalarm
+        'metofficerss.txt',      # Met Office RSS warnings
+        'aurora.txt',            # AuroraWatch UK
+        'cloud_coverage.json',   # the separate weewx-Cloud_coverage extension
+        'solar_data.json',       # SolarAssistant (solar cards)
+        'airquality.txt',        # Open-Meteo air quality
+    )
+
+    def _available_files(self):
+        """Which OPTIONAL_JSONDATA_FILES exist in this report's jsondata
+        directory right now. Checked on every report run, so a feature
+        switched on later is picked up at the next archive interval."""
+        skin_dict = getattr(self.generator, 'skin_dict', {})
+        weewx_root = self.generator.config_dict.get('WEEWX_ROOT', '')
+        html_root = skin_dict.get('HTML_ROOT', '')
+        jsondata = os.path.join(weewx_root, html_root, 'jsondata')
+        return [name for name in self.OPTIONAL_JSONDATA_FILES
+                if os.path.isfile(os.path.join(jsondata, name))]
 
     def _last_span(self, timespan, db_lookup):
         from weewx.tags import TimespanBinder

@@ -118,6 +118,26 @@ except ImportError:
     log.warning("skyfield library not available. SkyfieldLoopData service will do nothing.")
 
 
+def atomic_write_text(path, text, encoding='utf-8'):
+    """Replace `path` with `text` atomically: write a temporary file in the
+    same directory, then os.replace() it over the target, so a reader sees
+    the old contents or the new, never an empty or half-written file. The
+    temporary file is made with open(), not tempfile.mkstemp(), so it gets
+    the usual permissions (mkstemp's 0600 would hide it from the web
+    server)."""
+    tmp = path + '.tmp'
+    try:
+        with open(tmp, 'w', encoding=encoding) as f:
+            f.write(text)
+        os.replace(tmp, path)
+    except BaseException:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
+
+
 class CloudCoverageOverrideService(StdService):
     """
     Overrides the loop packet's native 'cloudcover' field with a
@@ -1700,8 +1720,7 @@ class LiveDataService(StdService):
     def _initialize_json_file(self):
         try:
             os.makedirs(os.path.dirname(self.json_file), exist_ok=True)
-            with open(self.json_file, 'w') as f:
-                json.dump({'observations': {}, 'metadata': {}}, f)
+            atomic_write_text(self.json_file, json.dumps({'observations': {}, 'metadata': {}}))
         except Exception as e:
             log.error(f"JSON init failed: {e}")
 
@@ -1716,8 +1735,7 @@ class LiveDataService(StdService):
 
     def _save_known_fields(self):
         try:
-            with open(self.field_file, 'w') as f:
-                json.dump(sorted(list(self.known_fields)), f, indent=2)
+            atomic_write_text(self.field_file, json.dumps(sorted(list(self.known_fields)), indent=2))
         except Exception:
             pass
 
@@ -2382,6 +2400,27 @@ class WeatherAPIPoller:
 
         return url
     
+    def _response_problem(self, text):
+        """Why `text` shouldn't replace the last good file, or None if it's
+        fine. Built-in sources are JSON unless they say 'xml'; a custom
+        source is only checked if it declares a content_type."""
+        kind = self.api_config.get('content_type')
+        if kind is None and not self.api_config.get('is_custom', False):
+            kind = 'json'
+        if not text or not text.strip():
+            return 'empty response'
+        try:
+            if kind == 'json':
+                json.loads(text)
+            elif kind == 'xml':
+                import xml.etree.ElementTree as ET
+                ET.fromstring(text.encode('utf-8'))
+        except ValueError as e:          # json.JSONDecodeError is a ValueError
+            return f'not valid JSON ({e})'
+        except Exception as e:           # ET.ParseError
+            return f'not valid XML ({e})'
+        return None
+
     def fetch_and_save(self) -> bool:
         """
         Fetch data from API and save to file
@@ -2416,12 +2455,25 @@ class WeatherAPIPoller:
             response = requests.get(url, headers=headers, timeout=30)
             response.raise_for_status()
             
-            # Save raw response to file
+            # An error page or half a response mustn't replace the last
+            # good file: readers would get nothing until the next poll.
+            problem = self._response_problem(response.text)
+            if problem:
+                logerr(f"{self.name}: {problem} -- keeping the previous "
+                       f"{os.path.basename(self.data_path)}")
+                return False
+
+            # Write to a temporary file and swap it in. Opening the real
+            # file with 'w' empties it first, and anything reading it in
+            # that moment -- user.divumwx's own readers in another thread,
+            # or the dashboard via the web server -- got an empty file
+            # ("Expecting value: line 1 column 1 (char 0)"). os.replace()
+            # is atomic: readers see the old file or the new one, never
+            # an empty one.
             data_dir = os.path.dirname(self.data_path)
             if data_dir:
                 os.makedirs(data_dir, exist_ok=True)
-            with open(self.data_path, 'w') as f:
-                f.write(response.text)
+            atomic_write_text(self.data_path, response.text)
             
             # Routine per-poll confirmation -- DEBUG, not INFO. This can
             # fire as often as every poll_interval (as low as 300s, and

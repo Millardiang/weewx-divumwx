@@ -2097,13 +2097,22 @@ DIVUMWX_RAIN_CARD_CHOICES = {
 }
 
 DIVUMWX_OPTIONAL_CARDS_ORDER = [
-    'cardSolarRadiation', 'cardUvIndex', 'cardLightning', 'cardAirquality',
+    'cardSolarRadiation', 'cardUvIndex', 'cardIndoorTemp', 'cardLightning', 'cardAirquality',
     'cardVapourPressureDeficit', 'cardEvapoTranspiration', 'cardWebcam', 'cardStationImage',
     'cardSolarEnergy', 'cardSolarEnergyFlow',
 ]
 
+# Optional cards added in a release after an install's card list was first
+# written. A first install asks about them in the optional-card loop; an
+# upgrade asks about each once, through ask_new_optional_cards_once(), and
+# records it in [DivumWXCards] optional_cards_asked.
+DIVUMWX_NEW_OPTIONAL_CARDS = [
+    'cardIndoorTemp',   # 2.3.0
+]
+
 # Shown after the card's name in its install question.
 DIVUMWX_OPTIONAL_CARD_NOTES = {
+    'cardIndoorTemp': '(indoor temperature, needs an indoor sensor)',
     'cardSolarEnergy': '(only for SolarAssistant subscribers)',
     'cardSolarEnergyFlow': '(only for SolarAssistant subscribers)',
 }
@@ -2177,6 +2186,32 @@ def optional_card_question(card_name, running_total=None):
     return q + ' (y/n) '
 
 
+def ask_new_optional_cards_once(cfg, ask):
+    """Upgrades: ask once about each optional card in
+    DIVUMWX_NEW_OPTIONAL_CARDS that this install hasn't been asked about.
+    `ask(card_name)` returns True for yes. Returns the cards added
+    (possibly none), or None if nothing was asked."""
+    dc = cfg.get('DivumWXCards')
+    if dc is None or not dc.get('enabled_cards'):
+        return None
+    asked = dc.get('optional_cards_asked') or []
+    asked = [asked] if isinstance(asked, str) else list(asked)
+    todo = [c for c in DIVUMWX_NEW_OPTIONAL_CARDS if c not in asked]
+    if not todo:
+        return None
+    cards = dc.get('enabled_cards')
+    cards = [cards] if isinstance(cards, str) else list(cards)
+    added = []
+    for card in todo:
+        if card not in cards and ask(card):
+            cards.append(card)
+            added.append(card)
+        asked.append(card)
+    dc['enabled_cards'] = cards
+    dc['optional_cards_asked'] = asked
+    return added
+
+
 def ask_solar_cards_once(cfg, ask):
     """Upgrades: ask once about the SolarAssistant cards, for an install
     whose card list was written before they were offered. `ask(card_name)`
@@ -2203,7 +2238,7 @@ def ask_solar_cards_once(cfg, ask):
 DIVUMWX_LIGHTNING_CARDS = {'other': 'cardLightning', 'boltek': 'cardBoltekLightning'}
 DIVUMWX_BOLTEK_QUESTION = "Is your lightning detector a Boltek (NexStorm)? (y/n) "
 
-DIVUMWX_CARD_TARGET_TOTAL = 28  # theoretical max (8 mandatory + 8 automatic + 2 rain "both" + 10 optional) -- every optional card now always gets asked about
+DIVUMWX_CARD_TARGET_TOTAL = 29  # theoretical max (8 mandatory + 8 automatic + 2 rain "both" + 11 optional) -- every optional card now always gets asked about
 
 DIVUMWX_WEBCAM_DEFAULT_TITLE = 'Webcam'
 DIVUMWX_WEBCAM_DEFAULT_IMAGE = 'img/picam.jpg'
@@ -4253,8 +4288,10 @@ class DivumwxInstaller(ExtensionInstaller):
                 station_image_title=station_image_title, station_image_path=station_image_path)
             if lightning_detector:
                 cfg['DivumWXCards']['lightning_detector'] = lightning_detector
-            # The SolarAssistant cards were asked about in the loop above.
+            # The SolarAssistant cards were asked about in the loop above,
+            # and so were the newer optional cards.
             cfg['DivumWXCards']['solar_cards_asked'] = 'yes'
+            cfg['DivumWXCards']['optional_cards_asked'] = list(DIVUMWX_NEW_OPTIONAL_CARDS)
 
         # Every run, outside the gate above: on an upgrade, turn on any
         # automatic card added since this install's card list was written
@@ -4267,6 +4304,9 @@ class DivumwxInstaller(ExtensionInstaller):
         # (only when a lightning card is shown) and swap cards if it's a Boltek.
         detector = ask_lightning_detector_once(
             cfg, lambda: y_or_n(DIVUMWX_BOLTEK_QUESTION) == 'y')
+        # Upgrades from before a newer optional card was offered: ask once.
+        for card in ask_new_optional_cards_once(cfg, lambda c: y_or_n(optional_card_question(c)) == 'y') or []:
+            printer.out(f"Added {card} to [DivumWXCards] enabled_cards.", level=1)
         # Upgrades from before the SolarAssistant cards were offered: ask once.
         solar_added = ask_solar_cards_once(cfg, lambda c: y_or_n(optional_card_question(c)) == 'y')
         if solar_added:

@@ -211,6 +211,7 @@ null
 "page_background": $divumwx_page_background,#slurp
 "solar_array_watts": $divumwx_solar_array_watts,#slurp
 "warnings_source": $divumwx_warnings_source,#slurp
+"available_files": $divumwx_available_files,#slurp
 "lang": $divumwx_lang#slurp
 },
 
@@ -451,9 +452,19 @@ null
 },
 
 "lightning": {
-#if $current.lightning_strike_count.has_data
+## exists(), not has_data -- same fix as the "rain" block below. has_data is
+## false whenever the latest archive record's lightning_strike_count is None,
+## which is how WeeWX records an interval in which the driver sent no
+## lightning value (some only send one when there's a strike). With has_data
+## the whole block -- today/hour/year totals, last strike -- disappeared on
+## those stations whenever the last interval was quiet, so the card sat at
+## zeros and only showed real figures if a report ran just after a strike.
+#if $current.lightning_strike_count.exists()
 "day_strike_count": $day.lightning_strike_count.sum.format(None_string="0", add_label=False, localize=False),
-"hour_strike_count": $hour($hours_ago=1).lightning_strike_count.sum.format(None_string="0", add_label=False, localize=False),
+## Last 60 minutes, like the rain card's "hour". Was $hour($hours_ago=1):
+## the previous clock hour, so "Last Hour" only changed on the hour and
+## showed 0 (or the hour before's count) while strikes were coming in.
+"hour_strike_count": $divumwx_last(3600).lightning_strike_count.sum.format(None_string="0", add_label=False, localize=False),
 "current_strike_count": $current.lightning_strike_count.format(None_string="0", add_label=False, localize=False),
 "month_strike_count": $month.lightning_strike_count.sum.format(None_string="0", add_label=False, localize=False),
 "year_strike_count": $year.lightning_strike_count.sum.format(None_string="0", add_label=False, localize=False),

@@ -11,9 +11,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<script src="sharedData.js?v=1.0.0"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DivumWX Weather &mdash; Atkinson Hyperlegible</title>
 <link rel="stylesheet" href="header.css?v=s3n2026j">
+<script src="seasonalBackground.js?v=1.0.1"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
@@ -172,6 +174,7 @@ setInterval(() => {
   <div id="currentModule" data-card-id="cardCurrent" class="card" draggable="true"></div>
   <div id="forecastCard4" data-card-id="cardForecast" class="card" draggable="true"></div>
   <div id="thermometerCard3" data-card-id="cardTemperature" class="card" draggable="true"></div>
+  <div id="indoorTempCard31" data-card-id="cardIndoorTemp" class="card" draggable="true"></div>
   <div id="anemometerCard5" data-card-id="cardAnemometer" class="card" draggable="true"></div>
   <div id="compassCard6" data-card-id="cardWindCompass" class="card" draggable="true"></div>
   <div id="barometerCard7" data-card-id="cardBarometer" class="card" draggable="true"></div>
@@ -564,6 +567,6 @@ window.addEventListener('load', updateFooterVisibility);
 <script src="js/d3.7.9.0.min.js"></script>
 <script src="js/d3-geo-projection.4.0.0.min.js"></script>
 <script src="js/topojson.3.0.2.min.js"></script>
-<script src="cardsBundleNew.js?v=d1d9ff77"></script>
+<script src="cardsBundleNew.js?v=2a5680f3"></script>
 </body>
 </html>

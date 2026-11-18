@@ -1,6 +1,6 @@
 /*
 ##############################################################################################
-# cardsBundleNew.js version 1.1.5
+# cardsBundleNew.js version 1.2.0
 ##############################################################################################
 */
 
@@ -34,6 +34,8 @@ try {
 
   function applyLabel(el, key){
     el.textContent = t(key);
+    // Full text on hover, for when a long translation is cut short with "…".
+    el.title = t(key);
     registeredLabels.push({ el: el, key: key });
   }
 
@@ -114,7 +116,7 @@ try {
   }
 
   function reapplyAll(){
-    registeredLabels.forEach(function(p){ p.el.textContent = t(p.key); });
+    registeredLabels.forEach(function(p){ p.el.textContent = t(p.key); p.el.title = t(p.key); });
     registeredAttrs.forEach(function(p){ p.el.setAttribute(p.attr, t(p.key)); });
   }
 
@@ -175,6 +177,67 @@ try {
 } catch (e) {
   console.error("cardsBundle: cardI18n.js failed:", e);
 }
+/* ===== fitLabels.js ===== */
+try {
+/*
+##############################################################################################
+# fitLabels.js version 1.0.0
+#  Copyright (C) 2026 Ian Millard
+#  GPLv3
+##############################################################################################
+*/
+
+// Card readout labels are one line (7px small caps) in a fixed-height row.
+// A long translation that doesn't fit first loses its letter spacing, then
+// shrinks in quarter-pixel steps down to 6px; only if it still doesn't fit
+// does it end in "…" (the full text is in its tooltip). Re-run, debounced,
+// whenever card text changes (a card being built, a language switch) and
+// when the window is resized. Each pass starts from the label's own style,
+// so a label shrunk in a narrow window grows back in a wider one.
+(function(){
+  var MIN_PX = 6, BASE_PX = 7;
+  function fitAll(){
+    var labels = document.querySelectorAll('.card span, .card div');
+    for (var i = 0; i < labels.length; i++){
+      var el = labels[i];
+      var st = el.style;
+      if (st.whiteSpace !== 'nowrap' || st.textOverflow !== 'ellipsis') continue;
+      if (st.fontVariantCaps !== 'small-caps') continue;
+      if (!el.dataset.fitBase){
+        if (st.fontSize !== BASE_PX + 'px') continue;
+        el.dataset.fitBase = '1';
+        el.dataset.fitSpacing = st.letterSpacing || '';
+      }
+      st.fontSize = BASE_PX + 'px';
+      st.letterSpacing = el.dataset.fitSpacing;
+      if (!el.clientWidth || el.scrollWidth <= el.clientWidth) continue;
+      st.letterSpacing = '0';
+      var px = BASE_PX;
+      while (el.scrollWidth > el.clientWidth && px > MIN_PX){
+        px -= 0.25;
+        st.fontSize = px + 'px';
+      }
+    }
+  }
+  var timer = null, fitting = false;
+  function schedule(){
+    if (fitting) return;
+    clearTimeout(timer);
+    timer = setTimeout(function(){ fitting = true; try { fitAll(); } finally { fitting = false; } }, 150);
+  }
+  window.addEventListener('resize', schedule);
+  window.addEventListener('i18nready', schedule);
+  function observe(){
+    new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true, characterData: true });
+    schedule();
+  }
+  if (document.body) observe(); else document.addEventListener('DOMContentLoaded', observe);
+  window.DivumWXFitLabels = fitAll;
+})();
+} catch (e) {
+  console.error("cardsBundle: fitLabels.js failed:", e);
+}
+
 /* ===== cardClockOutlook.js ===== */
 try {
 /*
@@ -702,6 +765,67 @@ try {
   console.error("cardsBundle: cardClockOutlook.js failed:", e);
 }
 
+/* ===== optionalFiles.js ===== */
+try {
+/*
+##############################################################################################
+# optionalFiles.js version 1.0.0
+#  Copyright (C) 2026 Ian Millard
+#  GPLv3
+##############################################################################################
+*/
+
+// Some jsondata files only exist when their feature is switched on, or a
+// separate extension writes them (warnings feeds, cloud_coverage.json,
+// solar_data.json, ...). archive.json's meta.available_files lists the ones
+// the station has; DivumWXOptional.fetchJson/fetchText skip the rest
+// without a request, instead of asking for a 404 every 30 seconds. A
+// skipped file rejects with err.skipped = true, so callers' existing
+// "file missing" fallbacks still apply. If archive.json has no
+// available_files (an older release), nothing is skipped.
+(function(){
+  var ARCHIVE_URL = './jsondata/archive.json';
+  var REFRESH_MS = 5 * 60 * 1000;
+  var available = null;   // null = not known: allow everything
+
+  function note(archive){
+    var list = archive && archive.meta && archive.meta.available_files;
+    if (Array.isArray(list)) available = list;
+  }
+  function load(){
+    return fetch(ARCHIVE_URL + '?_=' + Date.now(), {cache:'no-store'})
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(note)
+      .catch(function(){});
+  }
+  var ready = load();
+  setInterval(load, REFRESH_MS);
+
+  function fileName(url){ return String(url).split('?')[0].split('/').pop(); }
+  function has(url){ return available === null || available.indexOf(fileName(url)) !== -1; }
+  function get(url, as){
+    return ready.then(function(){
+      if (!has(url)) {
+        var e = new Error(fileName(url) + ' not available on this station (skipped)');
+        e.skipped = true;
+        throw e;
+      }
+      return fetch(url + (url.indexOf('?') > -1 ? '&' : '?') + '_=' + Date.now(), {cache:'no-store'})
+        .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return as === 'text' ? r.text() : r.json(); });
+    });
+  }
+
+  window.DivumWXOptional = {
+    note: note,
+    has: has,
+    fetchJson: function(url){ return get(url, 'json'); },
+    fetchText: function(url){ return get(url, 'text'); }
+  };
+})();
+} catch (e) {
+  console.error("cardsBundle: optionalFiles.js failed:", e);
+}
+
 /* ===== alertBar.js ===== */
 try {
 /*
@@ -1073,17 +1197,19 @@ try {
   }
 
   function refresh(){
+    var opt = window.DivumWXOptional;
     Promise.allSettled([
-      fetchText('./jsondata/aurora.txt'),
-      fetchJson('./jsondata/cold.txt'),
-      fetchJson('./jsondata/heat.txt'),
-      fetchJson('./jsondata/openweathermap.txt'),
-      fetchJson('./jsondata/flood.txt'),
-      fetchText('./jsondata/metofficerss.txt'),
+      opt.fetchText('./jsondata/aurora.txt'),
+      opt.fetchJson('./jsondata/cold.txt'),
+      opt.fetchJson('./jsondata/heat.txt'),
+      opt.fetchJson('./jsondata/openweathermap.txt'),
+      opt.fetchJson('./jsondata/flood.txt'),
+      opt.fetchText('./jsondata/metofficerss.txt'),
       fetchJson('./jsondata/archive.json'),
       fetchJson('./jsondata/almanac.json'),
-      fetchJson('./jsondata/meteoalarm.json')
+      opt.fetchJson('./jsondata/meteoalarm.json')
     ]).then(function(results){
+      if (results[6].status === 'fulfilled') opt.note(results[6].value);
       var auroraText = results[0].status === 'fulfilled' ? results[0].value : null;
       var cold = results[1].status === 'fulfilled' ? results[1].value : null;
       var heat = results[2].status === 'fulfilled' ? results[2].value : null;
@@ -1551,6 +1677,9 @@ try {
     labelEl.style.fontSize = '7px';
     labelEl.style.lineHeight = '1';
     labelEl.style.fontVariantCaps = 'small-caps';
+    // One line only: a long translation ends in "…" instead of wrapping
+    // and pushing the value out of its fixed-height row.
+    labelEl.style.whiteSpace = 'nowrap'; labelEl.style.overflow = 'hidden'; labelEl.style.textOverflow = 'ellipsis'; labelEl.style.maxWidth = '100%';
     labelEl.style.letterSpacing = '.06em';
     labelEl.style.color = labelColor;
     labelEl.style.opacity = '0.85';
@@ -1610,7 +1739,7 @@ try {
       fetch(LOOP_JSON_URL + ((LOOP_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
       fetch(ARCHIVE_JSON_URL + ((ARCHIVE_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
       fetch(ASTRO_JSON_URL + ((ASTRO_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
-      fetch(CLOUD_JSON_URL + ((CLOUD_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
+      window.DivumWXOptional.fetchJson(CLOUD_JSON_URL),
       fetch(ME_JSON_URL + ((ME_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
     ]).then(function(results){
       var loopResult = results[0], archResult = results[1], astroResult = results[2], cloudResult = results[3], metarResult = results[4];
@@ -1619,7 +1748,7 @@ try {
       if(astroResult.status === 'rejected') console.warn('cardCurrent: almanac.json fetch failed —', astroResult.reason.message);
 
       if(cloudResult.status === 'rejected'){
-        console.info('cardCurrent: cloud_coverage.json fetch failed (falling back to loop.json/archive.json) —', cloudResult.reason.message);
+        if (!cloudResult.reason.skipped) console.info('cardCurrent: cloud_coverage.json fetch failed (falling back to loop.json/archive.json) —', cloudResult.reason.message);
       } else if(typeof cloudResult.value.cloudPercent !== 'number' || isNaN(cloudResult.value.cloudPercent)){
         console.info('cardCurrent: cloud_coverage.json fetched but cloudPercent is missing/invalid (falling back) —', JSON.stringify(cloudResult.value));
       }
@@ -2119,6 +2248,408 @@ try {
 })();
 } catch (e) {
   console.error("cardsBundle: cardTemperature.js failed:", e);
+}
+
+/* ===== cardIndoorTemp.js ===== */
+try {
+/*
+##############################################################################################
+# cardIndoorTemp.js version 1.0.0
+#  Copyright (C) 2026 Ian Millard
+#  GPLv3
+##############################################################################################
+*/
+
+// ===================== cardIndoorTemp.js =====================
+// Indoor temperature: a thermometer inside a house outline, with today's
+// max/min, trend, indoor humidity, feels like, dew point and the outside
+// temperature alongside. Live values from loop.json (inTemp, inHumidity,
+// outTemp); today's max/min, trend and feels like from archive.json's
+// "temp" section (indoor_*), humidity's day figures from "humid".
+
+(function(){
+  var LOOP_JSON_URL    = './jsondata/loop.json';
+  var ARCHIVE_JSON_URL = './jsondata/archive.json';
+  var POLL_MS = 30 * 1000;
+
+  var mount = document.getElementById('indoorTempCard31');
+  if (!mount || !window.d3) return;
+
+  var currentUnits = loadStoredUnits();
+  function loadStoredUnits(){
+    try {
+      var key = localStorage.getItem('dashboardUnitSystem') || 'uk';
+      if (typeof SYSTEMS !== 'undefined' && SYSTEMS[key]) return SYSTEMS[key];
+    } catch (e) {}
+    return { temp: 'C', wind: 'mph', rain: 'mm' };
+  }
+
+  mount.innerHTML = '';
+  mount.style.position = 'relative';
+  mount.style.display = 'flex';
+  mount.style.flexDirection = 'column';
+  mount.style.borderBottom = '0';
+
+  var overlayTextColor = 'var(--bs-body-color)';
+
+  // ---- Title bar (same as the other cards) ----
+  var titleBar = document.createElement('div');
+  titleBar.style.position = 'absolute';
+  titleBar.style.top = '-20px';
+  titleBar.style.left = '0';
+  titleBar.style.right = '0';
+  titleBar.style.height = '20px';
+  titleBar.style.boxSizing = 'border-box';
+  titleBar.style.display = 'flex';
+  titleBar.style.alignItems = 'center';
+  titleBar.style.justifyContent = 'space-between';
+  titleBar.style.gap = '8px';
+  titleBar.style.padding = '0 14px';
+  titleBar.style.fontSize = '9px';
+  titleBar.style.color = overlayTextColor;
+  titleBar.style.background = 'transparent';
+
+  var titleLabel = document.createElement('span');
+  titleLabel.textContent = DivumWXI18N.t('Indoor Temperature');
+  titleLabel.style.fontWeight = '600';
+  titleLabel.style.whiteSpace = 'nowrap';
+  titleLabel.style.overflow = 'hidden';
+  titleLabel.style.textOverflow = 'ellipsis';
+
+  var statusWrap = document.createElement('span');
+  statusWrap.style.display = 'flex';
+  statusWrap.style.alignItems = 'center';
+  statusWrap.style.gap = '4px';
+  statusWrap.style.flexShrink = '0';
+  statusWrap.style.opacity = '0.85';
+
+  var statusDot = document.createElement('span');
+  statusDot.style.width = '6px';
+  statusDot.style.height = '6px';
+  statusDot.style.borderRadius = '50%';
+  statusDot.style.background = '#999';
+  statusDot.style.flexShrink = '0';
+
+  var statusTime = document.createElement('span');
+  statusWrap.appendChild(statusDot);
+  statusWrap.appendChild(statusTime);
+  titleBar.appendChild(titleLabel);
+  titleBar.appendChild(statusWrap);
+  mount.appendChild(titleBar);
+
+  function setStatus(ok){
+    statusDot.style.background = ok ? '#2ecc71' : '#e74c3c';
+    var parts = {};
+    new Intl.DateTimeFormat('en-GB', {
+      timeZone: StationTime.getTZ(), hourCycle: 'h23',
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    }).formatToParts(new Date()).forEach(function(p){ parts[p.type] = p.value; });
+    statusTime.textContent = parts.hour + ':' + parts.minute + ':' + parts.second;
+  }
+
+  // ---- 60:40 content split (left: house + thermometer, right: readouts) ----
+  var contentWrap = document.createElement('div');
+  contentWrap.style.height = '175px';
+  contentWrap.style.width = '100%';
+  contentWrap.style.boxSizing = 'border-box';
+  contentWrap.style.overflow = 'hidden';
+  contentWrap.style.display = 'flex';
+  contentWrap.style.alignItems = 'stretch';
+  mount.appendChild(contentWrap);
+
+  var divider = document.createElement('div');
+  divider.style.position = 'absolute';
+  divider.style.left = '60%';
+  divider.style.top = '6px';
+  divider.style.bottom = '6px';
+  divider.style.width = '1px';
+  divider.style.background = 'var(--bs-border-color)';
+  divider.style.pointerEvents = 'none';
+  mount.appendChild(divider);
+
+  var leftPane = document.createElement('div');
+  leftPane.style.flex = '0 0 60%';
+  leftPane.style.width = '60%';
+  leftPane.style.height = '175px';
+  leftPane.style.boxSizing = 'border-box';
+  leftPane.style.overflow = 'hidden';
+  leftPane.style.display = 'flex';
+  leftPane.style.alignItems = 'center';
+  leftPane.style.justifyContent = 'center';
+  contentWrap.appendChild(leftPane);
+
+  var rightPane = document.createElement('div');
+  rightPane.style.flex = '0 0 40%';
+  rightPane.style.width = '40%';
+  rightPane.style.height = '175px';
+  rightPane.style.boxSizing = 'border-box';
+  rightPane.style.display = 'flex';
+  rightPane.style.flexDirection = 'column';
+  rightPane.style.justifyContent = 'center';
+  rightPane.style.padding = '0 10px 0 14px';
+  contentWrap.appendChild(rightPane);
+
+  function addChipRow(){
+    var row = document.createElement('div');
+    row.style.display = 'flex';
+    row.style.flexDirection = 'column';
+    row.style.justifyContent = 'center';
+    row.style.boxSizing = 'border-box';
+    row.style.overflow = 'hidden';
+    row.style.borderBottom = '1px solid var(--bs-border-color)';
+
+    var labelEl = document.createElement('span');
+    labelEl.style.fontSize = '7px';
+    labelEl.style.lineHeight = '1';
+    labelEl.style.fontVariantCaps = 'small-caps';
+    labelEl.style.letterSpacing = '.06em';
+    labelEl.style.color = 'var(--bs-body-color)';
+    labelEl.style.opacity = '0.85';
+    labelEl.style.whiteSpace = 'nowrap';
+    labelEl.style.overflow = 'hidden';
+    labelEl.style.textOverflow = 'ellipsis';
+    row.appendChild(labelEl);
+
+    var valueRow = document.createElement('span');
+    valueRow.style.display = 'flex';
+    valueRow.style.alignItems = 'baseline';
+    valueRow.style.gap = '4px';
+    row.appendChild(valueRow);
+
+    var valueEl = document.createElement('span');
+    valueEl.style.fontSize = '9.5px';
+    valueEl.style.lineHeight = '1.2';
+    valueEl.style.color = 'var(--bw-accent)';
+    valueEl.style.whiteSpace = 'nowrap'; valueEl.style.overflow = 'hidden'; valueEl.style.textOverflow = 'ellipsis'; valueEl.style.minWidth = '0'; valueEl.style.flex = '1 1 auto';
+    valueEl.style.fontFamily = '"IBM Plex Mono", ui-monospace, monospace';
+    valueRow.appendChild(valueEl);
+
+    var trendEl = document.createElement('span');
+    trendEl.style.fontSize = '10px';
+    valueRow.appendChild(trendEl);
+
+    rightPane.appendChild(row);
+    return { row: row, label: labelEl, value: valueEl, trend: trendEl };
+  }
+
+  var ROW_COUNT = 6;
+  var readoutRows = [];
+  for (var ri = 0; ri < ROW_COUNT; ri++) readoutRows.push(addChipRow());
+
+  var placeholder = document.createElement('div');
+  placeholder.style.position = 'absolute';
+  placeholder.style.inset = '0';
+  placeholder.style.display = 'none';
+  placeholder.style.alignItems = 'center';
+  placeholder.style.justifyContent = 'center';
+  placeholder.style.fontSize = '10px';
+  placeholder.style.color = overlayTextColor;
+  placeholder.style.opacity = '0.7';
+  mount.appendChild(placeholder);
+
+  function trendArrow(t){ return t > 0 ? '➚' : (t < 0 ? '➘' : '➙'); }
+
+  // Dew point from temperature (C) and relative humidity, Magnus formula.
+  function dewPointC(tC, rh){
+    if (tC === null || rh === null || rh <= 0) return null;
+    var a = 17.62, b = 243.12, g = Math.log(rh / 100) + a * tC / (b + tC);
+    return b * g / (a - g);
+  }
+
+  function render(v){
+    var unitsTemp = currentUnits.temp;
+    function tc(c){ return c === null ? null : (unitsTemp === 'F' ? (c * 9 / 5 + 32) : c); }
+    function td(d){ return unitsTemp === 'F' ? (d * 9 / 5) : d; }
+    function fmt(c){ return c === null ? '—' : tc(c).toFixed(1) + '°' + unitsTemp; }
+
+    titleLabel.textContent = DivumWXI18N.t('Indoor Temperature') + ' (°' + unitsTemp + ')';
+
+    var hasData = v.inTemp !== null;
+    placeholder.style.display = hasData ? 'none' : 'flex';
+    contentWrap.style.visibility = hasData ? 'visible' : 'hidden';
+    divider.style.visibility = hasData ? 'visible' : 'hidden';
+    if (!hasData){
+      placeholder.textContent = DivumWXI18N.t('No Data');
+      return;
+    }
+
+    var cur = tc(v.inTemp);
+    var dayMax = tc(v.dayMax !== null ? Math.max(v.dayMax, v.inTemp) : v.inTemp);
+    var dayMin = tc(v.dayMin !== null ? Math.min(v.dayMin, v.inTemp) : v.inTemp);
+
+    // ---- Left pane: house outline with a thermometer inside ----
+    // Same coordinate space as cardTemperature (viewBox -42 0 175 175, bulb
+    // at x=45), and the thermometer below is drawn with cardTemperature's
+    // own sizes and styles, then scaled into the house as one group.
+    var svgSel = d3.select(leftPane).select('svg');
+    if (svgSel.empty()){
+      svgSel = d3.select(leftPane).append('svg')
+        .attr('viewBox', '-42 0 175 175').attr('width', '100%').attr('height', '100%');
+    }
+    svgSel.selectAll('*').remove();
+    var svg = svgSel;
+    var tubeBorderColor = '#999999';
+    var color = v.inTempColor || 'var(--bw-accent)';
+
+    // House: pitched roof, walls, chimney, a window either side.
+    var apexX = 45, apexY = 3, eaveY = 58, roofL = -38, roofR = 128, wallL = -27, wallR = 117, floorY = 173;
+    function roofY(x){ return apexY + (eaveY - apexY) * Math.abs(x - apexX) / (apexX - roofL); }
+    svg.append('path')   // chimney, its sides ending at the roof
+      .attr('d', 'M92,' + roofY(92) + ' V10 H104 V' + roofY(104))
+      .style('fill', 'none').style('stroke', tubeBorderColor).style('stroke-width', 1.25).style('stroke-linejoin', 'round');
+    svg.append('path')   // walls and floor
+      .attr('d', 'M' + wallL + ',' + roofY(wallL) + ' V' + floorY + ' H' + wallR + ' V' + roofY(wallR))
+      .style('fill', 'var(--bs-body-color)').style('fill-opacity', 0.04)
+      .style('stroke', tubeBorderColor).style('stroke-width', 1.25).style('stroke-linejoin', 'round');
+    svg.append('path')   // roof
+      .attr('d', 'M' + roofL + ',' + eaveY + ' L' + apexX + ',' + apexY + ' L' + roofR + ',' + eaveY)
+      .style('fill', 'none').style('stroke', tubeBorderColor).style('stroke-width', 1.75)
+      .style('stroke-linejoin', 'round').style('stroke-linecap', 'round');
+    [[-19, 92], [91, 92]].forEach(function(w){   // windows, clear of the scale and Max/Min
+      svg.append('rect').attr('x', w[0]).attr('y', w[1]).attr('width', 18).attr('height', 18).attr('rx', 1.5)
+        .style('fill', 'none').style('stroke', tubeBorderColor).style('stroke-width', 0.75).style('opacity', 0.7);
+      svg.append('path').attr('d', 'M' + (w[0] + 9) + ',' + w[1] + ' v18 M' + w[0] + ',' + (w[1] + 9) + ' h18')
+        .style('stroke', tubeBorderColor).style('stroke-width', 0.6).style('opacity', 0.7);
+    });
+
+    // Thermometer: cardTemperature's drawing, scaled about the bulb's
+    // bottom so it stands on the floor. Text sizes are divided by the
+    // scale so they come out the same size as on the Temperature card.
+    var K = 0.78;
+    var g = svg.append('g').attr('transform', 'translate(45,' + (floorY - 3) + ') scale(' + K + ') translate(-45,-170)');
+    var fs = function(px){ return (px / K).toFixed(2) + 'px'; };
+
+    var height = 175;
+    var bulbRadius = 25.5, tubeWidth = 16.5, tubeBorderWidth = 1, innerBulbColor = 'rgb(230, 200, 200)';
+    var bottomY = height - 5, bulb_cy = bottomY - bulbRadius, bulb_cx = 45, top_cy = 5 + tubeWidth / 2;
+
+    var gradId = 'indoorBulbGradient';
+    var grad = g.append('defs').append('radialGradient').attr('id', gradId)
+      .attr('cx', '50%').attr('cy', '50%').attr('r', '50%').attr('fx', '50%').attr('fy', '50%');
+    grad.append('stop').attr('offset', '0%').style('stop-color', innerBulbColor);
+    grad.append('stop').attr('offset', '90%').style('stop-color', color);
+
+    var outlineHeight = bulb_cy - bulbRadius / 2 - 6.75;
+    g.append('rect')
+      .attr('rx', 7.5).attr('x', 37.5).attr('y', 7)
+      .attr('width', tubeWidth + 1 - tubeBorderWidth - 1.5).attr('height', outlineHeight)
+      .style('stroke', tubeBorderColor).style('stroke-width', '0.75px').attr('fill', 'none');
+
+    var step = unitsTemp === 'F' ? 4 : 2;
+    var domain = [ step * Math.floor(dayMin / step), step * Math.ceil(dayMax / step) ];
+    if (dayMin - domain[0] < 0.66 * step) domain[0] -= step;
+    if (domain[1] - dayMax < 0.66 * step) domain[1] += step;
+    var yScale = d3.scaleLinear().domain(domain).range([bulb_cy - bulbRadius / 2 - 8.5, top_cy + 5]);
+
+    g.append('rect')
+      .attr('x', 45 - (tubeWidth - tubeBorderWidth) / 2)
+      .attr('y', yScale(cur))
+      .attr('width', tubeWidth - tubeBorderWidth)
+      .attr('height', bulb_cy - yScale(cur))
+      .attr('fill', color);
+
+    g.append('circle')
+      .attr('cx', bulb_cx).attr('cy', bulb_cy).attr('r', bulbRadius - 6)
+      .style('fill', 'url(#' + gradId + ')').style('stroke-width', '2px');
+
+    var tickValues = d3.range((domain[1] - domain[0]) / step + 1).map(function(n){ return domain[0] + n * step; });
+    var tAxis = g.append('g')
+      .attr('transform', 'translate(' + (45 - tubeWidth / 2 - 5) + ', 0)')
+      .call(d3.axisLeft(yScale).tickValues(tickValues).tickSize(7).tickPadding(5));
+    tAxis.selectAll('.tick text').style('fill', 'var(--bs-body-color)').style('font-family', 'inherit').style('font-size', fs(8));
+    tAxis.select('path').style('stroke', 'none').style('fill', 'none');
+    tAxis.selectAll('.tick line').style('stroke', tubeBorderColor).style('stroke-linecap', 'round').style('stroke-width', '2px');
+
+    g.append('text')
+      .attr('x', 45).attr('y', bulb_cy + 6).style('text-anchor', 'middle').style('font-family', 'inherit')
+      .style('font-weight', '600').style('font-size', fs(cur.toFixed(1).length > 3 ? 12.5 : 13)).style('fill', 'black')
+      .text(cur.toFixed(1));
+
+    [[dayMin, 'Min', 8.5 / K], [dayMax, 'Max', -3 / K]].forEach(function(m){
+      g.append('text')
+        .attr('x', 45 + tubeWidth / 2 + 13).attr('y', yScale(m[0]) + m[2])
+        .attr('text-anchor', 'middle').style('font-family', 'inherit').style('fill', 'var(--bs-body-color)').style('font-size', fs(8))
+        .text(DivumWXI18N.t(m[1]));
+      g.append('line')
+        .attr('x1', 45 - tubeWidth / 2 + 20).attr('x2', 45 + tubeWidth / 2 + 22)
+        .attr('y1', yScale(m[0])).attr('y2', yScale(m[0]))
+        .attr('stroke', tubeBorderColor).style('stroke-linecap', 'round').attr('stroke-width', 1.0);
+    });
+
+    // ---- Right pane ----
+    var trend = td(v.trend || 0);
+    var dew = dewPointC(v.inTemp, v.inHumidity);
+    var rows = [
+      { label: 'Max | Min', value: dayMax.toFixed(1) + '°' + unitsTemp + ' | ' + dayMin.toFixed(1) + '°' + unitsTemp },
+      { label: 'Trend', value: trend.toFixed(1) + '°' + unitsTemp, trend: trend, color: color },
+      { label: 'Humidity', value: v.inHumidity === null ? '—' : v.inHumidity.toFixed(0) + '%' },
+      { label: 'Feels like', value: fmt(v.feelsLike) },
+      { label: 'Dewpoint', value: fmt(dew) },
+      { label: 'Outside Temperature', value: fmt(v.outTemp) }
+    ];
+    var rowHeight = 175 / rows.length;
+    rows.forEach(function(d, i){
+      var r = readoutRows[i];
+      r.row.style.height = rowHeight + 'px';
+      r.row.style.borderBottom = i === rows.length - 1 ? 'none' : '1px solid var(--bs-border-color)';
+      r.label.textContent = DivumWXI18N.t(d.label);
+      r.value.textContent = d.value;
+      if (d.trend === undefined || d.trend === null) {
+        r.trend.textContent = '';
+      } else {
+        r.trend.style.color = d.color;
+        r.trend.textContent = trendArrow(d.trend);
+      }
+    });
+  }
+
+  var lastData = null;
+  function refresh(){
+    Promise.allSettled([
+      fetch(LOOP_JSON_URL + '?_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
+      fetch(ARCHIVE_JSON_URL + '?_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    ]).then(function(results){
+      var loop = results[0].status === 'fulfilled' ? results[0].value : {};
+      var arch = results[1].status === 'fulfilled' ? results[1].value : {};
+      var o = loop.observations || {};
+      var t = arch.temp || {}, h = arch.humid || {};
+      function num(){
+        for (var i = 0; i < arguments.length; i++){
+          var x = arguments[i];
+          if (typeof x === 'string' && x.trim() !== '' && !isNaN(+x)) x = +x;
+          if (typeof x === 'number' && !isNaN(x)) return x;
+        }
+        return null;
+      }
+      lastData = {
+        inTemp:       num(o.inTemp, t.indoor_current),
+        inHumidity:   num(o.inHumidity, h.indoors_current),
+        dayMax:       num(t.indoor_day_max),
+        dayMin:       num(t.indoor_day_min),
+        trend:        num(t.indoor_trend),
+        feelsLike:    num(t.indoor_feels_like_c),
+        outTemp:      num(o.outTemp, t.outside_current),
+        inTempColor:  o.inTempColor,
+        outTempColor: o.outTempColor
+      };
+      render(lastData);
+      setStatus(results[0].status === 'fulfilled' && results[1].status === 'fulfilled');
+    }).catch(function(e){
+      console.warn('cardIndoorTemp: refresh failed --', e.message);
+      setStatus(false);
+    });
+  }
+  refresh();
+  setInterval(refresh, POLL_MS);
+
+  window.addEventListener('unitsystemchange', function(e){
+    if (e.detail && e.detail.config) { currentUnits = e.detail.config; if (lastData) render(lastData); }
+  });
+  window.addEventListener('i18nready', function(){ if (lastData) render(lastData); });
+  window.addEventListener('themechange', function(){ if (lastData) render(lastData); });
+})();
+} catch (e) {
+  console.error("cardsBundle: cardIndoorTemp.js failed:", e);
 }
 
 /* ===== cardForecast.js ===== */
@@ -2689,6 +3220,9 @@ try {
     DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
+    // One line only: a long translation ends in "…" instead of wrapping
+    // and pushing the value out of its fixed-height row.
+    labelEl.style.whiteSpace = 'nowrap'; labelEl.style.overflow = 'hidden'; labelEl.style.textOverflow = 'ellipsis'; labelEl.style.maxWidth = '100%';
     labelEl.style.letterSpacing = '.06em';
     labelEl.style.color = 'var(--bs-body-color)';
     labelEl.style.opacity = '0.85';
@@ -3142,6 +3676,9 @@ try {
     DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
+    // One line only: a long translation ends in "…" instead of wrapping
+    // and pushing the value out of its fixed-height row.
+    labelEl.style.whiteSpace = 'nowrap'; labelEl.style.overflow = 'hidden'; labelEl.style.textOverflow = 'ellipsis'; labelEl.style.maxWidth = '100%';
     labelEl.style.letterSpacing = '.06em';
     labelEl.style.color = 'var(--bs-body-color)';
     labelEl.style.opacity = '0.85';
@@ -3552,6 +4089,9 @@ try {
     DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
+    // One line only: a long translation ends in "…" instead of wrapping
+    // and pushing the value out of its fixed-height row.
+    labelEl.style.whiteSpace = 'nowrap'; labelEl.style.overflow = 'hidden'; labelEl.style.textOverflow = 'ellipsis'; labelEl.style.maxWidth = '100%';
     labelEl.style.letterSpacing = '.06em';
     labelEl.style.color = 'var(--bs-body-color)';
     labelEl.style.opacity = '0.85';
@@ -3935,6 +4475,9 @@ try {
     DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
+    // One line only: a long translation ends in "…" instead of wrapping
+    // and pushing the value out of its fixed-height row.
+    labelEl.style.whiteSpace = 'nowrap'; labelEl.style.overflow = 'hidden'; labelEl.style.textOverflow = 'ellipsis'; labelEl.style.maxWidth = '100%';
     labelEl.style.letterSpacing = '.06em';
     labelEl.style.color = 'var(--bs-body-color)';
     labelEl.style.opacity = '0.85';
@@ -4360,6 +4903,9 @@ try {
     DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
+    // One line only: a long translation ends in "…" instead of wrapping
+    // and pushing the value out of its fixed-height row.
+    labelEl.style.whiteSpace = 'nowrap'; labelEl.style.overflow = 'hidden'; labelEl.style.textOverflow = 'ellipsis'; labelEl.style.maxWidth = '100%';
     labelEl.style.letterSpacing = '.06em';
     labelEl.style.color = 'var(--bs-body-color)';
     labelEl.style.opacity = '0.85';
@@ -4746,6 +5292,9 @@ try {
     DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
+    // One line only: a long translation ends in "…" instead of wrapping
+    // and pushing the value out of its fixed-height row.
+    labelEl.style.whiteSpace = 'nowrap'; labelEl.style.overflow = 'hidden'; labelEl.style.textOverflow = 'ellipsis'; labelEl.style.maxWidth = '100%';
     labelEl.style.letterSpacing = '.06em';
     labelEl.style.color = 'var(--bs-body-color)';
     labelEl.style.opacity = '0.85';
@@ -5296,6 +5845,9 @@ try {
     DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
+    // One line only: a long translation ends in "…" instead of wrapping
+    // and pushing the value out of its fixed-height row.
+    labelEl.style.whiteSpace = 'nowrap'; labelEl.style.overflow = 'hidden'; labelEl.style.textOverflow = 'ellipsis'; labelEl.style.maxWidth = '100%';
     labelEl.style.letterSpacing = '.06em';
     labelEl.style.color = 'var(--bs-body-color)';
     labelEl.style.opacity = '0.85';
@@ -5620,6 +6172,9 @@ try {
     DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
+    // One line only: a long translation ends in "…" instead of wrapping
+    // and pushing the value out of its fixed-height row.
+    labelEl.style.whiteSpace = 'nowrap'; labelEl.style.overflow = 'hidden'; labelEl.style.textOverflow = 'ellipsis'; labelEl.style.maxWidth = '100%';
     labelEl.style.letterSpacing = '.06em';
     labelEl.style.color = 'var(--bs-body-color)';
     labelEl.style.opacity = '0.85';
@@ -5955,6 +6510,9 @@ try {
     DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
+    // One line only: a long translation ends in "…" instead of wrapping
+    // and pushing the value out of its fixed-height row.
+    labelEl.style.whiteSpace = 'nowrap'; labelEl.style.overflow = 'hidden'; labelEl.style.textOverflow = 'ellipsis'; labelEl.style.maxWidth = '100%';
     labelEl.style.letterSpacing = '.06em';
     labelEl.style.color = 'var(--bs-body-color)';
     labelEl.style.opacity = '0.85';
@@ -6357,6 +6915,9 @@ try {
     DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
+    // One line only: a long translation ends in "…" instead of wrapping
+    // and pushing the value out of its fixed-height row.
+    labelEl.style.whiteSpace = 'nowrap'; labelEl.style.overflow = 'hidden'; labelEl.style.textOverflow = 'ellipsis'; labelEl.style.maxWidth = '100%';
     labelEl.style.letterSpacing = '.06em';
     labelEl.style.color = 'var(--bs-body-color)';
     labelEl.style.opacity = '0.85';
@@ -6799,6 +7360,9 @@ try {
     DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
+    // One line only: a long translation ends in "…" instead of wrapping
+    // and pushing the value out of its fixed-height row.
+    labelEl.style.whiteSpace = 'nowrap'; labelEl.style.overflow = 'hidden'; labelEl.style.textOverflow = 'ellipsis'; labelEl.style.maxWidth = '100%';
     labelEl.style.letterSpacing = '.06em';
     labelEl.style.color = 'var(--bs-body-color)';
     labelEl.style.opacity = '0.85';
@@ -7961,6 +8525,9 @@ try {
     DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
+    // One line only: a long translation ends in "…" instead of wrapping
+    // and pushing the value out of its fixed-height row.
+    labelEl.style.whiteSpace = 'nowrap'; labelEl.style.overflow = 'hidden'; labelEl.style.textOverflow = 'ellipsis'; labelEl.style.maxWidth = '100%';
     labelEl.style.letterSpacing = '.06em';
     labelEl.style.color = 'var(--bs-body-color)';
     labelEl.style.opacity = '0.85';
@@ -8321,6 +8888,9 @@ try {
     DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
+    // One line only: a long translation ends in "…" instead of wrapping
+    // and pushing the value out of its fixed-height row.
+    labelEl.style.whiteSpace = 'nowrap'; labelEl.style.overflow = 'hidden'; labelEl.style.textOverflow = 'ellipsis'; labelEl.style.maxWidth = '100%';
     labelEl.style.letterSpacing = '.06em';
     labelEl.style.color = 'var(--bs-body-color)';
     labelEl.style.opacity = '0.85';
@@ -8696,6 +9266,9 @@ try {
     DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
+    // One line only: a long translation ends in "…" instead of wrapping
+    // and pushing the value out of its fixed-height row.
+    labelEl.style.whiteSpace = 'nowrap'; labelEl.style.overflow = 'hidden'; labelEl.style.textOverflow = 'ellipsis'; labelEl.style.maxWidth = '100%';
     labelEl.style.letterSpacing = '.06em';
     labelEl.style.color = 'var(--bs-body-color)';
     labelEl.style.opacity = '0.85';
@@ -9190,7 +9763,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardAirquality.js version 1.0.1
+# cardAirquality.js version 1.1.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -9200,6 +9773,12 @@ try {
 
 (function(){
   var LOOP_JSON_URL = './jsondata/loop.json';
+  // No particle sensor: fall back to Open-Meteo's modelled PM2.5/PM10 for
+  // the station's location, which WeatherAPIService already fetches into
+  // airquality.txt (the gases and pollen cards read the same file). Not
+  // used if its "current" hour is more than FALLBACK_MAX_AGE_H old.
+  var FALLBACK_URL = './jsondata/airquality.txt';
+  var FALLBACK_MAX_AGE_H = 3;
   var POLL_MS = 30 * 1000;
 
   function pad2(n){ return n < 10 ? '0' + n : String(n); }
@@ -9400,6 +9979,9 @@ try {
   DivumWXI18N.applyLabel(overallLabel, 'Overall');
   overallLabel.style.fontSize = '7px';
   overallLabel.style.fontVariantCaps = 'small-caps';
+  // One line only: a long translation ends in "…" instead of wrapping
+  // and pushing the value out of its fixed-height row.
+  overallLabel.style.whiteSpace = 'nowrap'; overallLabel.style.overflow = 'hidden'; overallLabel.style.textOverflow = 'ellipsis'; overallLabel.style.maxWidth = '100%';
   overallLabel.style.letterSpacing = '.06em';
   overallLabel.style.color = overlayTextColor;
   overallLabel.style.opacity = '0.85';
@@ -9507,6 +10089,9 @@ try {
     labelEl.textContent = label;
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
+    // One line only: a long translation ends in "…" instead of wrapping
+    // and pushing the value out of its fixed-height row.
+    labelEl.style.whiteSpace = 'nowrap'; labelEl.style.overflow = 'hidden'; labelEl.style.textOverflow = 'ellipsis'; labelEl.style.maxWidth = '100%';
     labelEl.style.letterSpacing = '.06em';
     labelEl.style.color = 'var(--bs-body-color)';
     labelEl.style.opacity = '0.85';
@@ -9526,8 +10111,8 @@ try {
   var pollutantPills = [];
   var currentLayoutKey = undefined;
 
-  function ensureGrid(available){
-    var layoutKey = available.map(function(p){ return p.key; }).join(',');
+  function ensureGrid(available, source){
+    var layoutKey = available.map(function(p){ return p.key; }).join(',') + '|' + (source || '');
     if (layoutKey === currentLayoutKey) return;
     currentLayoutKey = layoutKey;
 
@@ -9564,6 +10149,12 @@ try {
       var chipValue = addChipRow(p.label);
       return { key: p.key, els: built, chipValue: chipValue };
     });
+    if (source === 'openmeteo') {
+      // Modelled, not measured: say where the figures come from.
+      var sourceValue = addChipRow(DivumWXI18N.t('Source:').replace(/:\s*$/, ''));
+      sourceValue.textContent = DivumWXI18N.t('Open\u2011Meteo');
+      sourceValue.style.color = 'var(--bs-body-color)';
+    }
     rightPane.lastElementChild.style.borderBottom = 'none';
   }
 
@@ -9571,7 +10162,7 @@ try {
     var available = POLLUTANTS.filter(function(p){
       return Object.prototype.hasOwnProperty.call(v, p.key);
     });
-    ensureGrid(available);
+    ensureGrid(available, v._source);
 
     if (available.length === 0){
       overallLabel.style.color = overlayTextColor;
@@ -9600,6 +10191,27 @@ try {
     overallValue.style.background = overallColor;
   }
 
+  // Open-Meteo's PM2.5/PM10 from airquality.txt, or {} if missing or stale.
+  // "current.time" is the station's local time (timezone=auto), so it's
+  // compared with the station clock.
+  function fallbackReadings(){
+    return fetch(FALLBACK_URL + '?_=' + Date.now(), {cache:'no-store'})
+      .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+      .then(function(aq){
+        var cur = (aq && aq.current) || {};
+        var m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(cur.time || '');
+        if (!m) return {};
+        var at = Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]);
+        if ((stationNow().getTime() - at) / 3600000 > FALLBACK_MAX_AGE_H) return {};
+        var out = {};
+        if (typeof cur.pm2_5 === 'number' && !isNaN(cur.pm2_5)) out.pm2_5 = cur.pm2_5;
+        if (typeof cur.pm10 === 'number' && !isNaN(cur.pm10)) out.pm10_0 = cur.pm10;
+        if (out.pm2_5 !== undefined || out.pm10_0 !== undefined) out._source = 'openmeteo';
+        return out;
+      })
+      .catch(function(){ return {}; });
+  }
+
   var lastData = null;
   function refresh(){
     fetch(LOOP_JSON_URL + ((LOOP_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
@@ -9610,7 +10222,10 @@ try {
           var val = reading(o, p);
           if (val !== null) raw[p.key] = val;
         });
-
+        // A particle sensor always wins; otherwise Open-Meteo's figures.
+        return Object.keys(raw).length ? raw : fallbackReadings();
+      })
+      .then(function(raw){
         lastData = raw;
         renderCard(lastData);
         setStatus(true);
@@ -9797,6 +10412,9 @@ try {
     DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
+    // One line only: a long translation ends in "…" instead of wrapping
+    // and pushing the value out of its fixed-height row.
+    labelEl.style.whiteSpace = 'nowrap'; labelEl.style.overflow = 'hidden'; labelEl.style.textOverflow = 'ellipsis'; labelEl.style.maxWidth = '100%';
     labelEl.style.letterSpacing = '.06em';
     labelEl.style.color = 'var(--bs-body-color)';
     labelEl.style.opacity = '0.85';
@@ -10047,6 +10665,9 @@ try {
     DivumWXI18N.applyLabel(labelEl, label);
     labelEl.style.fontSize = '7px';
     labelEl.style.fontVariantCaps = 'small-caps';
+    // One line only: a long translation ends in "…" instead of wrapping
+    // and pushing the value out of its fixed-height row.
+    labelEl.style.whiteSpace = 'nowrap'; labelEl.style.overflow = 'hidden'; labelEl.style.textOverflow = 'ellipsis'; labelEl.style.maxWidth = '100%';
     labelEl.style.letterSpacing = '.06em';
     labelEl.style.color = 'var(--bs-body-color)';
     labelEl.style.opacity = '0.85';
@@ -11527,6 +12148,9 @@ try {
   DivumWXI18N.applyLabel(pvHeroLabel, 'PV Array Generating');
   pvHeroLabel.style.fontSize = '9px';
   pvHeroLabel.style.fontVariantCaps = 'small-caps';
+  // One line only: a long translation ends in "…" instead of wrapping
+  // and pushing the value out of its fixed-height row.
+  pvHeroLabel.style.whiteSpace = 'nowrap'; pvHeroLabel.style.overflow = 'hidden'; pvHeroLabel.style.textOverflow = 'ellipsis'; pvHeroLabel.style.maxWidth = '100%';
   pvHeroLabel.style.letterSpacing = '.06em';
   pvHeroLabel.style.color = overlayTextColor;
   pvHeroLabel.style.opacity = '0.85';
@@ -11654,18 +12278,18 @@ try {
     Promise.allSettled([
       fetch(LOOP_JSON_URL + ((LOOP_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
       fetch(ARCHIVE_JSON_URL + ((ARCHIVE_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
-      fetch(SOLAR_JSON_URL + ((SOLAR_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
+      window.DivumWXOptional.fetchJson(SOLAR_JSON_URL),
       fetch(ASTRO_JSON_URL + ((ASTRO_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
-      fetch(CLOUD_JSON_URL + ((CLOUD_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+      window.DivumWXOptional.fetchJson(CLOUD_JSON_URL)
     ]).then(function(results){
       var loopResult = results[0], archResult = results[1], solarResult = results[2], astroResult = results[3], cloudResult = results[4];
       if (loopResult.status === 'rejected') console.warn('cardSolarEnergy: loop.json fetch failed --', loopResult.reason.message);
       if (archResult.status === 'rejected') console.warn('cardSolarEnergy: archive.json fetch failed --', archResult.reason.message);
-      if (solarResult.status === 'rejected') console.warn('cardSolarEnergy: solar_data.json fetch failed --', solarResult.reason.message);
+      if (solarResult.status === 'rejected' && !solarResult.reason.skipped) console.warn('cardSolarEnergy: solar_data.json fetch failed --', solarResult.reason.message);
       if (astroResult.status === 'rejected') console.warn('cardSolarEnergy: almanac.json fetch failed --', astroResult.reason.message);
 
       if(cloudResult.status === 'rejected'){
-        console.info('cardSolarEnergy: cloud_coverage.json fetch failed (falling back to loop.json/archive.json) --', cloudResult.reason.message);
+        if (!cloudResult.reason.skipped) console.info('cardSolarEnergy: cloud_coverage.json fetch failed (falling back to loop.json/archive.json) --', cloudResult.reason.message);
       } else if(typeof cloudResult.value.cloudPercent !== 'number' || isNaN(cloudResult.value.cloudPercent)){
         console.info('cardSolarEnergy: cloud_coverage.json fetched but cloudPercent is missing/invalid (falling back) --', JSON.stringify(cloudResult.value));
       }
@@ -12143,18 +12767,18 @@ try {
     Promise.allSettled([
       fetch(LOOP_JSON_URL + ((LOOP_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
       fetch(ARCHIVE_JSON_URL + ((ARCHIVE_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
-      fetch(SOLAR_JSON_URL + ((SOLAR_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
+      window.DivumWXOptional.fetchJson(SOLAR_JSON_URL),
       fetch(ASTRO_JSON_URL + ((ASTRO_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }),
-      fetch(CLOUD_JSON_URL + ((CLOUD_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+      window.DivumWXOptional.fetchJson(CLOUD_JSON_URL)
     ]).then(function(results){
       var loopResult = results[0], archResult = results[1], solarResult = results[2], astroResult = results[3], cloudResult = results[4];
       if (loopResult.status === 'rejected') console.warn('cardSolarEnergyFlow: loop.json fetch failed --', loopResult.reason.message);
       if (archResult.status === 'rejected') console.warn('cardSolarEnergyFlow: archive.json fetch failed --', archResult.reason.message);
-      if (solarResult.status === 'rejected') console.warn('cardSolarEnergyFlow: solar_data.json fetch failed --', solarResult.reason.message);
+      if (solarResult.status === 'rejected' && !solarResult.reason.skipped) console.warn('cardSolarEnergyFlow: solar_data.json fetch failed --', solarResult.reason.message);
       if (astroResult.status === 'rejected') console.warn('cardSolarEnergyFlow: almanac.json fetch failed --', astroResult.reason.message);
 
       if(cloudResult.status === 'rejected'){
-        console.info('cardSolarEnergyFlow: cloud_coverage.json fetch failed (falling back to loop.json/archive.json) --', cloudResult.reason.message);
+        if (!cloudResult.reason.skipped) console.info('cardSolarEnergyFlow: cloud_coverage.json fetch failed (falling back to loop.json/archive.json) --', cloudResult.reason.message);
       } else if(typeof cloudResult.value.cloudPercent !== 'number' || isNaN(cloudResult.value.cloudPercent)){
         console.info('cardSolarEnergyFlow: cloud_coverage.json fetched but cloudPercent is missing/invalid (falling back) --', JSON.stringify(cloudResult.value));
       }

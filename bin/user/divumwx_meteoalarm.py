@@ -427,8 +427,10 @@ def load_warnings(opts, areas, codes):
     warnings = collect(feeds, set(codes), areas.aliases, opts.polygon, datetime.now(timezone.utc), code_shapes)
     fetched = time.time()
     try:
-        with open(opts.cache_file, "w", encoding="utf-8") as fh:
+        tmp = opts.cache_file + ".tmp"   # swapped in, so a reader never sees it half-written
+        with open(tmp, "w", encoding="utf-8") as fh:
             json.dump({"fetched": fetched, "signature": signature, "warnings": warnings}, fh)
+        os.replace(tmp, opts.cache_file)
     except OSError as e:
         log.error("meteoalarm: cannot write cache %s: %s", opts.cache_file, e)
     return warnings, fetched

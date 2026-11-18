@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# divumwf.html version 1.0.7
+# divumwf.html version 1.0.9
 #  DivumWF -- Divum Weather Forecast: a mobile-first "forecast for anywhere in the world"
 #  section, sharing DivumWX's theme, navbar, unit system and i18n with the rest of the site.
 #  Copyright (C) 2026 Ian Millard
@@ -11,6 +11,7 @@
 <html lang="en" data-bs-theme="light">
 <head>
 <meta charset="UTF-8">
+<script src="sharedData.js?v=1.0.0"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -18,6 +19,7 @@
 <title>DivumWF &mdash; Weather Forecast</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="header.css?v=s3n2026k">
+<script src="seasonalBackground.js?v=1.0.1"></script>
 <link rel="icon" href="favicon.ico">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -331,7 +333,7 @@ body{
   <div class="wf-appbar">
     <div class="wf-brand">
       <span class="wf-brand-name">DivumWF</span>
-      <span class="wf-brand-version" id="wfBrandVersion">v2.2.1</span>
+      <span class="wf-brand-version" id="wfBrandVersion">v2.3.0</span>
     </div>
     <button type="button" class="wf-gear-btn" id="wfSettingsBtn" title="Settings" aria-label="Settings"></button>
   </div>
@@ -419,7 +421,7 @@ body{
 
 </div>
 
-<script src="cardI18n.js?v=s3n2026c"></script>
+<script src="cardI18n.js?v=s3n2026d"></script>
 <script src="siteHeader.js?v=1.0.4"></script>
 <script src="units.js?v=1.0.2"></script>
 <script src="divumwf.js"></script>

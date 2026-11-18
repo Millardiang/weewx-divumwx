@@ -1,5 +1,155 @@
 # DivumWX Changelog
 
+## 2.3.0 — 16 November 2026
+
+### Version 2.3.0
+- Minor release (new card and feature, plus a lightning card fix). 2.2.2
+  was prepared but never released; its fix is here instead.
+  `DIVUMWX_VERSION` is now `2.3.0`. The `index.html` header and footer
+  fallback, the `divumwf.html` badge (1.0.9), the README title and
+  `INSTALLATION_GUIDE.md` all say 2.3.0, and the install guide downloads
+  from `ver.2.3.0`.
+### Indoor Temperature card (requested by Remy)
+- New card `cardIndoorTemp`: a thermometer inside a house outline, scaled
+  to today's indoor range with Max and Min marked, plus Max | Min, Trend,
+  indoor Humidity, Feels like, Dewpoint (worked out from indoor temperature
+  and humidity) and the Outside Temperature. Live from `loop.json`, today's
+  figures from `archive.json`; follows the unit and language choices. A
+  station without an indoor sensor sees "No Data". Its title, "Indoor
+  Temperature", is a new phrase, translated in every language file; its
+  other labels already had translations.
+- The installer offers it with the other optional cards (the card total is
+  now 29). An upgrade with the full installer asks about it once, recorded
+  in `[DivumWXCards] optional_cards_asked`; any later new optional cards
+  can be added to `DIVUMWX_NEW_OPTIONAL_CARDS` the same way.
+- An update package doesn't change `weewx.conf`, so it installs the card
+  but doesn't switch it on: run the full installer, or add `cardIndoorTemp`
+  to `[DivumWXCards] enabled_cards` by hand.
+### Air quality from Open-Meteo when there's no particle sensor (requested by Remy)
+- With no PM sensor readings, the Air Quality card now shows Open-Meteo's
+  PM2.5 and PM10 for the station's location, from `jsondata/airquality.txt`
+  (already fetched every 15 minutes for the gases and pollen cards), with a
+  "Source: Open-Meteo" line. Not used if its current hour is more than 3
+  hours old. A sensor's readings always take priority.
+- Changed: `cardsBundleNew.js` 1.2.0 (cardIndoorTemp.js 1.0.0,
+  cardAirquality.js 1.1.0; cache-buster updated in `index.html`,
+  `hyperIndex.html`, `lexendIndex.html` and `kiosk.html`), `index.html`,
+  `hyperIndex.html`, `lexendIndex.html` (the new card's slot), `install.py`,
+  every `skins/DivumWX/lang/*.conf` (the "Indoor Temperature" phrase).
+
+### Pages no longer depend on an outside site for D3
+- Seven pages loaded the D3 charting library from cdnjs.cloudflare.com (or
+  d3js.org) instead of DivumWX's own copy: Live Gauges (`gauges.html`),
+  `heatmaps.html`, `charts-d3.html`, the Wind Rose, Orrery and Astro Clock
+  pop-ups, and `sunDisc.html`. With that site unreachable -- no internet,
+  a blocked or slow CDN, a local-network-only kiosk -- they failed with
+  "d3 is not defined". They now load the bundled `js/d3.7.9.0.min.js`,
+  the same version, already used by the dashboard. Checked with all
+  outside sites blocked: before, all seven failed; after, all load D3
+  7.9.0 with no errors and the gauges draw and update.
+- No page now loads a script from an outside site.
+### One shared copy of loop.json, archive.json and almanac.json per page
+- Every card and page script read these files itself, each on its own
+  timer: about 50 readers on the dashboard, most every 30 seconds, though
+  archive.json only changes once per archive interval. One dashboard tab
+  made 285 requests for them in 170 seconds (reported, with the
+  measurements, by Johannes); with every card switched on, 375.
+- New `sharedData.js`, loaded first on every page that reads them (33
+  pages), keeps one copy of each file per page and shares it: reads within
+  2 s (loop.json), 30 s (almanac.json) or 60 s (archive.json) of the last
+  download get that copy, and reads made at the same moment share one
+  download. Each reader still gets its own parsed copy, so no card can
+  change another's data, and no card code changed. The live gauges read
+  loop.json every 3 seconds and still get a fresh copy each time.
+- A download that fails or isn't valid JSON -- e.g. a file caught half
+  uploaded over FTP -- falls back to the last good copy, for up to 2
+  minutes (loop.json) or 15 minutes (the others); after that, readers see
+  the real error and show as offline as before.
+- Measured over 170 seconds with every card on: 375 requests before, 26
+  after (93% fewer), with the same values on all 33 cards. Disabled cards'
+  reads are now answered from the shared copy, so they no longer cause
+  any requests.
+### Seasonal background on every page, not just the kiosk
+- The seasonal page background only appeared on `kiosk.html`: it was the
+  only page that loaded `seasonalBackground.js`, which picks the season
+  (swapped for the southern hemisphere). The other 15 pages had the styles
+  for it in `header.css` but never set a season, so they showed the plain
+  theme colour. Every page that loads `header.css` now loads the script,
+  in `<head>` so the photo is there from the first paint. Checked on all
+  16 pages at 51.9°N (autumn in November) and 32.7°S (spring).
+- `seasonalBackground.js` 1.0.1 (loaded as `?v=1.0.1`). Changed:
+  `astronomy.html`, `charts-d3.html`, `climate.html`,
+  `constellations.html`, `divumwf.html`, `equalEarthMap.html`,
+  `gauges.html`, `heatmaps.html`, `hyperIndex.html`, `index.html`,
+  `kiosk.html`, `lexendIndex.html`, `locationforecast.html`,
+  `meteorShowers.html`, `records.html`, `visualisations.html`.
+### "JSON decode error" for airquality.txt (and other feeds) now and then
+- `fetch_and_save()` wrote each `[WeatherAPI]` feed straight into its file
+  with `open(path, 'w')`, which empties the file before writing. Anything
+  reading it in that moment -- DivumWX's own readers in another thread, or
+  the dashboard through the web server -- got an empty file, logged as
+  `JSON decode error ... Expecting value: line 1 column 1 (char 0)`, though
+  the file looked fine afterwards (reported, with the diagnosis, on
+  `airquality.txt`). Every feed is now written to a temporary file and
+  swapped in with `os.replace()`, so readers see the old file or the new
+  one, never an empty one. A stress test (a writer flat out, two readers)
+  failed 66% of reads before and none of 65,000 after.
+- A response that isn't valid -- an error page, an empty or cut-off body,
+  or XML that doesn't parse for the two XML feeds -- is now logged and
+  ignored, keeping the last good file instead of replacing it. Built-in
+  feeds are checked as JSON unless they declare XML (AuroraWatch, Met
+  Office RSS); custom feeds are only checked if they declare a
+  `content_type`.
+- The same in-place writes were fixed for SolarAssistant's
+  `solar_data.json` (read by the dashboard every 30 seconds), the
+  `loop.json` starter file and field list, and the Meteoalarm cache.
+- Changed: `bin/user/divumwx.py`, `bin/user/solar_assistant_mqtt.py`,
+  `bin/user/divumwx_meteoalarm.py`.
+### Readout values hidden by long translations (Solar Dial in German)
+- On desktop in German, the Solar Dial card's sunrise, sunset and
+  moonrise/moonset times were invisible: their labels ("Sonnenuntergang
+  (letztes Licht)", ...) wrapped onto a second line in a fixed-height row,
+  pushing the time out of sight. English and phone layouts were fine,
+  because the labels fitted there. The same could happen on most cards:
+  checking every card in all 32 languages found wrapped labels on 20 of
+  them, e.g. the Current Conditions and Earth Daylight cards in German.
+- Card labels now stay on one line. One that doesn't fit first loses its
+  letter spacing, then shrinks slightly (to 6px at the smallest); only if
+  it still doesn't fit does it end in "…", with the full text on hover.
+  In all 32 languages at 1400px wide, no label wraps; 27 are shortened,
+  22 of them "Grid Daily Export" on the two solar-energy cards.
+- New in `cardsBundleNew.js`: fitLabels.js 1.0.0; `cardI18n.js` 1.0.4
+  (labels get a tooltip; cache-buster updated in every page that loads it).
+### Fewer requests for files the station doesn't have
+- The dashboard asked for several optional files every 30 seconds whether
+  or not the station had them, filling the browser console with 404s:
+  the warnings feeds (`cold.txt`, `heat.txt`, `flood.txt`,
+  `openweathermap.txt`, `meteoalarm.json`, `metofficerss.txt`,
+  `aurora.txt`), `cloud_coverage.json` (the separate weewx-Cloud_coverage
+  extension) and `solar_data.json` (SolarAssistant; requested even with
+  the solar cards switched off). In a 40-second test with all cards on:
+  43 requests for missing files before, none after.
+- `archive.json` now lists which of these files the station has
+  (`meta.available_files`, checked on every report run), and the dashboard
+  only requests those (optionalFiles.js 1.0.0 in `cardsBundleNew.js`). A
+  feature switched on later is picked up within 5 minutes of its file
+  appearing. With an older `archive.json` nothing is skipped.
+- Changed: `bin/user/divumwx_cards.py`, `archive.json.tmpl`.
+### Lightning card stuck at zeros between strikes
+- The lightning section of `archive.json` was only written when the latest
+  archive record had a strike count. Some lightning sensors send no value
+  at all in an interval without strikes, and WeeWX then records it as
+  empty. On those stations, every quiet interval left the card at zeros
+  (Today, Last Hour, Year, All-time and Last Detected all blank), and real
+  figures only appeared if a report happened to run just after a strike --
+  so forcing a report run seemed to be the only thing that updated it
+  (reported by Ray). The section is now written whenever the station has a
+  lightning column, the same fix the rain section had earlier.
+- "Last Hour" is now the last 60 minutes, like the rain cards. It was the
+  previous clock hour (e.g. 17:00-18:00 at 18:30), so it changed only on
+  the hour and showed 0 while strikes were coming in.
+- Changed: `skins/DivumWX/jsondata/archive.json.tmpl`.
+
 ## 2.2.1 — 10 November 2026
 
 ### Version 2.2.1

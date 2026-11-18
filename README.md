@@ -1,6 +1,17 @@
-# Welcome to the DivumWX skin for WeeWX Version 2.2.1
+# Welcome to the DivumWX skin for WeeWX Version 2.3.0
 Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LICENSE Version 3](https://github.com/Millardiang/weewx-divumwx/blob/main/license.txt)
  
+# What's new in 2.3.0
+* **Indoor Temperature card** - a thermometer inside a house outline, styled like the outdoor one, with today's max/min, trend, indoor humidity, feels like, dew point and the outside temperature alongside. Offered by the installer (asked once on an upgrade); stations without an indoor sensor show "No Data".
+* **Air quality without a sensor** - stations with no particle sensor now see PM2.5 and PM10 for their location from Open-Meteo on the Air Quality card, marked "Source: Open-Meteo". No setup needed: DivumWX already fetches it. A particle sensor's own readings always take priority.
+* **Works without internet access** - the Live Gauges, Heatmaps and Charts pages and three pop-ups loaded their charting library from an outside site and failed without it; they now use DivumWX's own copy.
+* **Far fewer requests** - the dashboard now shares one copy of loop.json, archive.json and almanac.json between all its cards instead of each card downloading them itself: 93% fewer requests per visitor, and a half-uploaded file no longer blanks the cards.
+* **Seasonal background on every page** - it only appeared on the kiosk page; every page now shows the season's photo (seasons swapped for the southern hemisphere), unless the installer's page background was set to solid.
+* **No more occasional "JSON decode error" for airquality.txt** - feed files (air quality, warnings, forecasts, solar data) are now replaced in one step, so nothing ever reads a half-written file, and a bad response no longer overwrites the last good data.
+* **Long translations no longer hide values** - in German on desktop, the Solar Dial's sunrise, sunset and moon times were invisible behind wrapped labels. Labels on every card now stay on one line, shrinking a little or ending in "…" if a translation is long.
+* **Fewer 404s in the browser console** - the dashboard only requests optional files (warnings feeds, cloud cover, solar data) that the station actually has.
+* **Lightning card keeps updating** - on stations whose lightning sensor sends nothing between strikes, the card dropped to zeros after each quiet interval and only showed real figures after a strike. It now shows Today, Year, All-time and the last strike all the time, and "Last Hour" is the last 60 minutes rather than the previous clock hour.
+
 # What's new in 2.2.1
 * **Rain Event fits the rain cards again** - on the Tipping Rain, Piezo Rain and Rainfall cards the event now shows on one line ("2.20 mm from 13:02"), so the bottom of the column is no longer cut off.
 
