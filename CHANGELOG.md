@@ -77,7 +77,14 @@
   theme colour. Every page that loads `header.css` now loads the script,
   in `<head>` so the photo is there from the first paint. Checked on all
   16 pages at 51.9°N (autumn in November) and 32.7°S (spring).
-- `seasonalBackground.js` 1.0.1 (loaded as `?v=1.0.1`). Changed:
+- The season now follows the date at the station (`meta.timezone` in
+  `archive.json`), not on the viewer's device, so it changes at the
+  station's midnight wherever the page is viewed: a UK station switches to
+  winter at 00:00 on 1 December UK time, even for a visitor in Los Angeles
+  where it's still 30 November. Without a station time zone, the device's
+  date is used as before. Re-checked every 10 minutes (was hourly), so an
+  open kiosk changes within 10 minutes of the station's midnight.
+- `seasonalBackground.js` 1.0.2 (loaded as `?v=1.0.2`). Changed:
   `astronomy.html`, `charts-d3.html`, `climate.html`,
   `constellations.html`, `divumwf.html`, `equalEarthMap.html`,
   `gauges.html`, `heatmaps.html`, `hyperIndex.html`, `index.html`,
