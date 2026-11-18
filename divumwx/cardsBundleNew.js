@@ -4284,7 +4284,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardPiezoRain.js version 1.0.1
+# cardPiezoRain.js version 1.0.2
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -4314,6 +4314,14 @@ try {
     if (!epochMs) return null;
     var p = stationParts(new Date(epochMs));
     return p.hour + ':' + p.minute;
+  }
+  var MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  // "16 Nov 11:05" in station time -- a rain event can run for days, so the
+  // start needs its date as well as its time.
+  function dateTimeLabelFor(epochMs){
+    if (!epochMs) return null;
+    var p = stationParts(new Date(epochMs));
+    return (+p.day) + ' ' + DivumWXI18N.t(MONTHS_SHORT[+p.month - 1]) + ' ' + p.hour + ':' + p.minute;
   }
 
   var WATER_COLOR = '#007fff';
@@ -4483,9 +4491,18 @@ try {
   var rateText = addChipRow('Rain Rate');
   var eventText = addChipRow('Rain Event');
 
-  // One line, like the other rows: a second "since HH:MM" line made the
-  // column taller than the card and its last line was cut off.
+  // The total on the value line; the start ("from 16 Nov 11:05") on a
+  // smaller line under it. The rows close up while the event shows (see
+  // render), which leaves room for it.
   eventText.parentElement.style.borderBottom = 'none';
+  // The event's start, date and time, on a second, smaller line.
+  var eventSince = document.createElement('span');
+  eventSince.style.fontSize = '8px';
+  eventSince.style.fontFamily = '"IBM Plex Mono", ui-monospace, monospace';
+  eventSince.style.color = 'var(--bs-body-color)';
+  eventSince.style.opacity = '0.85';
+  eventSince.style.whiteSpace = 'nowrap'; eventSince.style.overflow = 'hidden'; eventSince.style.textOverflow = 'ellipsis'; eventSince.style.display = 'block'; eventSince.style.width = '100%';
+  eventText.parentElement.appendChild(eventSince);
 
   var cardLink = document.createElement('a');
   cardLink.className = 'card-whole-link';
@@ -4651,18 +4668,26 @@ try {
     last24hText.textContent = rainLabel(v.last24h);
     rateText.textContent = rainLabel(v.rate) + '/hr';
     yearText.textContent = rainLabel(v.year);
-    var stormLabel = timeLabelFor(v.stormStart);
     if (v.event > 0) {
       // 'flex', not '': clearing it turned the row into a plain block, so
       // label and value ran inline with a gap above them.
       eventText.parentElement.style.display = 'flex';
       rateText.parentElement.style.borderBottom = '1px solid var(--bs-border-color)';
-      var eventLine = rainLabel(v.event) + (v.stormStart ? ' ' + DivumWXI18N.t('from') + ' ' + stormLabel : '');
-      eventText.textContent = eventLine;
-      eventText.title = eventLine;
+      var sinceLine = v.stormStart ? DivumWXI18N.t('from') + ' ' + dateTimeLabelFor(v.stormStart) : '';
+      eventText.textContent = rainLabel(v.event);
+      eventSince.textContent = sinceLine;
+      eventSince.style.display = sinceLine ? 'block' : 'none';
+      eventText.parentElement.title = rainLabel(v.event) + (sinceLine ? ' ' + sinceLine : '');
     } else {
       eventText.parentElement.style.display = 'none';
       rateText.parentElement.style.borderBottom = 'none';
+    }
+    if (v.noData) {
+      [yearText, monthText, hourText, last24hText, rateText].forEach(function(el){ el.textContent = '\u2014'; });
+      // The figure on the gauge's head (today's rain, " mm"/" in").
+      d3.select(leftPane).select('svg').selectAll('text')
+        .filter(function(){ return / (mm|in)$/.test(this.textContent); })
+        .text('\u2014');
     }
     // Six rows don't fit the 175px pane at the usual spacing (the year row
     // was cut off at the top and the event at the bottom): tighten them
@@ -4689,7 +4714,15 @@ try {
       var arch = archResult.status === 'fulfilled' ? archResult.value : {};
       var o = loop.observations || {};
 
-      var pRain = (arch.p_rain && typeof arch.p_rain === 'object') ? arch.p_rain : (arch.rain || {});
+      // archive.json "p_rain" is the piezo gauge. Without it the card shows
+      // the main gauge ("rain") -- right on a piezo-only station, where
+      // that is the piezo gauge, but not with two gauges ([DivumWXCards]
+      // rain_sensor = both): then it would just copy the Tipping Rain
+      // card, so it shows no readings instead.
+      var hasPiezo = !!(arch.p_rain && typeof arch.p_rain === 'object');
+      var meta = arch.meta || {};
+      var noPiezoData = !hasPiezo && meta.rain_sensor === 'both';
+      var pRain = hasPiezo ? arch.p_rain : (noPiezoData ? {} : (arch.rain || {}));
       function num(x, fallback){ return (typeof x === 'number' && !isNaN(x)) ? x : (fallback || 0); }
 
       lastData = {
@@ -4705,8 +4738,9 @@ try {
         rainColor: o.rainColor || 'var(--bw-accent)',
         rateColor: o.rainRateColor || 'var(--bw-accent)'
       };
+      lastData.noData = noPiezoData;
       renderCard(lastData);
-      setStatus(loopResult.status === 'fulfilled' && archResult.status === 'fulfilled');
+      setStatus(loopResult.status === 'fulfilled' && archResult.status === 'fulfilled' && !noPiezoData);
     }).catch(function(e){
       console.warn('cardPiezoRain: refresh failed —', e.message);
       setStatus(false);
@@ -4723,7 +4757,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardRainfall.js version 1.0.1
+# cardRainfall.js version 1.0.2
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -4753,6 +4787,14 @@ try {
     if (!epochMs) return null;
     var p = stationParts(new Date(epochMs));
     return p.hour + ':' + p.minute;
+  }
+  var MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  // "16 Nov 11:05" in station time -- a rain event can run for days, so the
+  // start needs its date as well as its time.
+  function dateTimeLabelFor(epochMs){
+    if (!epochMs) return null;
+    var p = stationParts(new Date(epochMs));
+    return (+p.day) + ' ' + DivumWXI18N.t(MONTHS_SHORT[+p.month - 1]) + ' ' + p.hour + ':' + p.minute;
   }
 
   var WATER_COLOR = '#007fff';
@@ -4922,9 +4964,18 @@ try {
   var rateText = addChipRow('Rain Rate');
   var eventText = addChipRow('Rain Event');
 
-  // One line, like the other rows: a second "since HH:MM" line made the
-  // column taller than the card and its last line was cut off.
+  // The total on the value line; the start ("from 16 Nov 11:05") on a
+  // smaller line under it. The rows close up while the event shows (see
+  // render), which leaves room for it.
   eventText.parentElement.style.borderBottom = 'none';
+  // The event's start, date and time, on a second, smaller line.
+  var eventSince = document.createElement('span');
+  eventSince.style.fontSize = '8px';
+  eventSince.style.fontFamily = '"IBM Plex Mono", ui-monospace, monospace';
+  eventSince.style.color = 'var(--bs-body-color)';
+  eventSince.style.opacity = '0.85';
+  eventSince.style.whiteSpace = 'nowrap'; eventSince.style.overflow = 'hidden'; eventSince.style.textOverflow = 'ellipsis'; eventSince.style.display = 'block'; eventSince.style.width = '100%';
+  eventText.parentElement.appendChild(eventSince);
 
   var cardLink = document.createElement('a');
   cardLink.className = 'card-whole-link';
@@ -5054,15 +5105,16 @@ try {
     last24hText.textContent = rainLabel(v.last24h);
     rateText.textContent = rainLabel(v.rate) + '/hr';
     yearText.textContent = rainLabel(v.year);
-    var stormLabel = timeLabelFor(v.stormStart);
     if (v.event > 0) {
       // 'flex', not '': clearing it turned the row into a plain block, so
       // label and value ran inline with a gap above them.
       eventText.parentElement.style.display = 'flex';
       rateText.parentElement.style.borderBottom = '1px solid var(--bs-border-color)';
-      var eventLine = rainLabel(v.event) + (v.stormStart ? ' ' + DivumWXI18N.t('from') + ' ' + stormLabel : '');
-      eventText.textContent = eventLine;
-      eventText.title = eventLine;
+      var sinceLine = v.stormStart ? DivumWXI18N.t('from') + ' ' + dateTimeLabelFor(v.stormStart) : '';
+      eventText.textContent = rainLabel(v.event);
+      eventSince.textContent = sinceLine;
+      eventSince.style.display = sinceLine ? 'block' : 'none';
+      eventText.parentElement.title = rainLabel(v.event) + (sinceLine ? ' ' + sinceLine : '');
     } else {
       eventText.parentElement.style.display = 'none';
       rateText.parentElement.style.borderBottom = 'none';
@@ -5125,7 +5177,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardTippingRain.js version 1.0.1
+# cardTippingRain.js version 1.0.2
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -5155,6 +5207,14 @@ try {
     if (!epochMs) return null;
     var p = stationParts(new Date(epochMs));
     return p.hour + ':' + p.minute;
+  }
+  var MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  // "16 Nov 11:05" in station time -- a rain event can run for days, so the
+  // start needs its date as well as its time.
+  function dateTimeLabelFor(epochMs){
+    if (!epochMs) return null;
+    var p = stationParts(new Date(epochMs));
+    return (+p.day) + ' ' + DivumWXI18N.t(MONTHS_SHORT[+p.month - 1]) + ' ' + p.hour + ':' + p.minute;
   }
   var WATER_COLOR = '#007fff';
 
@@ -5322,9 +5382,18 @@ try {
   var rateText = addChipRow('Rain Rate');
   var eventText = addChipRow('Rain Event');
 
-  // One line, like the other rows: a second "since HH:MM" line made the
-  // column taller than the card and its last line was cut off.
+  // The total on the value line; the start ("from 16 Nov 11:05") on a
+  // smaller line under it. The rows close up while the event shows (see
+  // render), which leaves room for it.
   eventText.parentElement.style.borderBottom = 'none';
+  // The event's start, date and time, on a second, smaller line.
+  var eventSince = document.createElement('span');
+  eventSince.style.fontSize = '8px';
+  eventSince.style.fontFamily = '"IBM Plex Mono", ui-monospace, monospace';
+  eventSince.style.color = 'var(--bs-body-color)';
+  eventSince.style.opacity = '0.85';
+  eventSince.style.whiteSpace = 'nowrap'; eventSince.style.overflow = 'hidden'; eventSince.style.textOverflow = 'ellipsis'; eventSince.style.display = 'block'; eventSince.style.width = '100%';
+  eventText.parentElement.appendChild(eventSince);
 
   var cardLink = document.createElement('a');
   cardLink.className = 'card-whole-link';
@@ -5645,15 +5714,16 @@ try {
     last24hText.textContent = rainLabel(v.last24h);
     rateText.textContent = rainLabel(v.rate) + '/hr';
     yearText.textContent = rainLabel(v.year);
-    var stormLabel = timeLabelFor(v.stormStart);
     if (v.event > 0) {
       // 'flex', not '': clearing it turned the row into a plain block, so
       // label and value ran inline with a gap above them.
       eventText.parentElement.style.display = 'flex';
       rateText.parentElement.style.borderBottom = '1px solid var(--bs-border-color)';
-      var eventLine = rainLabel(v.event) + (v.stormStart ? ' ' + DivumWXI18N.t('from') + ' ' + stormLabel : '');
-      eventText.textContent = eventLine;
-      eventText.title = eventLine;
+      var sinceLine = v.stormStart ? DivumWXI18N.t('from') + ' ' + dateTimeLabelFor(v.stormStart) : '';
+      eventText.textContent = rainLabel(v.event);
+      eventSince.textContent = sinceLine;
+      eventSince.style.display = sinceLine ? 'block' : 'none';
+      eventText.parentElement.title = rainLabel(v.event) + (sinceLine ? ' ' + sinceLine : '');
     } else {
       eventText.parentElement.style.display = 'none';
       rateText.parentElement.style.borderBottom = 'none';

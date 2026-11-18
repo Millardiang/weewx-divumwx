@@ -46,6 +46,26 @@
   `hyperIndex.html`, `lexendIndex.html` (the new card's slot), `install.py`,
   every `skins/DivumWX/lang/*.conf` (the "Indoor Temperature" phrase).
 
+### Piezo Rain card shows the piezo gauge
+- The Piezo Rain card was showing the tipping bucket's figures on stations
+  with both gauges: it only looked for piezo rain in WeeWX's `hail` column,
+  and fell back to the main gauge when that was empty. Ecowitt drivers
+  send a piezo gauge (WS85/WS90) as running totals (`p_dayRain`,
+  `p_yearRain`, ...), which DivumWX keeps in its own database, and the card
+  now reads those: rate, last hour, today, this month and this year from
+  the driver's totals, and the last 24 hours, yesterday and the rain event
+  from the rise in `p_yearRain` between archive records -- so the piezo
+  event follows the same 0.4 mm / 24-hour rule as the tipping bucket's.
+  Stations that record the piezo gauge in `hail` work as before.
+- With `[DivumWXCards] rain_sensor = both` and no piezo readings, the
+  card shows "—" and a red status dot instead of copying the Tipping Rain
+  card. A piezo-only station still shows the main gauge, which is its
+  piezo gauge.
+- Changed: `bin/user/divumwx.py` (`piezo_rain_summary()`),
+  `bin/user/divumwx_cards.py` (`$divumwx_rain_sensor`, archive.json
+  `meta.rain_sensor`), `skins/DivumWX/jsondata/archive.json.tmpl`,
+  `cardsBundleNew.js` (cardPiezoRain.js 1.0.2).
+
 ### Rain event: one rule for every gauge
 - The rain event now starts once a wet spell has brought 0.4 mm of rain
   (0.02 in on stations showing rain in inches) and runs until there has
@@ -53,6 +73,10 @@
   HH:MM") are the whole spell's, from its first rain. Before, an event
   started with any rain and ended after an hour with under 1 mm, so a
   shower with a dry hour in the middle was split into two events.
+- The event's start shows its date as well as its time ("from 16 Nov
+  11:05", month names translated), on a smaller second line under the
+  total, since an event can now run for days (cardPiezoRain.js,
+  cardRainfall.js, cardTippingRain.js 1.0.2).
 - The same rule applies to every make of tipping-bucket gauge and to the
   piezo gauge: it's worked out from the archive's own rain columns, never
   from a driver's stormRain/eventRain/erain_piezo counter.

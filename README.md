@@ -14,6 +14,7 @@ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LIC
 * **Lightning card keeps updating** - on stations whose lightning sensor sends nothing between strikes, the card dropped to zeros after each quiet interval and only showed real figures after a strike. It now shows Today, Year, All-time and the last strike all the time, and "Last Hour" is the last 60 minutes rather than the previous clock hour.
 
 # What's new in 2.2.1
+* **Piezo Rain card shows the piezo gauge** - with both gauges, the Piezo Rain card now reads the piezo gauge's own totals (p_dayRain, p_yearRain, ...) instead of repeating the tipping bucket's figures.
 * **Rain event: one rule for every gauge** - an event starts once 0.4 mm (0.02 in) of rain has fallen and ends after 24 hours without rain, for every make of tipping-bucket gauge and for piezo sensors.
 * **Rain Event fits the rain cards again** - on the Tipping Rain, Piezo Rain and Rainfall cards the event now shows on one line ("2.20 mm from 13:02"), so the bottom of the column is no longer cut off.
 
@@ -112,7 +113,7 @@ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LIC
         Sensor types
         When tipping rain only selected at install, rain values used
         When piezo rain only selected at install, rain values used
-        When both tipping and piezo selected on install, p_rain values used for piezo rain sensor
+        When both tipping and piezo selected on install, the Piezo Rain card uses the piezo gauge's own readings (p_dayRain, p_yearRain, ... from Ecowitt drivers, kept in DivumWX's database; or WeeWX's hail column), and shows no figures rather than the tipping bucket's if there are none
 
         Rain Event field only appears in either of the rain cards when value is not null and >0
 

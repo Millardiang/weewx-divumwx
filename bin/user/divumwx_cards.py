@@ -463,6 +463,10 @@ class DivumwxCards(SearchList):
             'divumwx_station_image_title': json.dumps(station_image_title),
             'divumwx_station_image_path': json.dumps(station_image_path),
             'divumwx_in_uk': json.dumps(in_uk),
+            # "tipping", "piezo" or "both" ([DivumWXCards] rain_sensor), so
+            # the Piezo Rain card knows not to show the tipping bucket's
+            # figures as its own when there are two gauges.
+            'divumwx_rain_sensor': json.dumps(str(cards_section.get('rain_sensor', '') or '').strip().lower() or None),
             'divumwx_country_code': json.dumps(country_code),
             # The station's time zone name for archive.json meta.timezone.
             'divumwx_timezone': json.dumps(system_timezone()),

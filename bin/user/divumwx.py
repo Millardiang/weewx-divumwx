@@ -6759,25 +6759,23 @@ def _rainevent_mm(rec, obs_type='rain'):
     return value if value is not None else 0.0
 
 
-def _rainevent_scan(records, now_ts, obs_type='rain', threshold_mm=RAINEVENT_MIN_MM):
+def _rainevent_scan(rain_series, now_ts, threshold_mm=RAINEVENT_MIN_MM):
     """
-    Walks archive records (oldest first) and returns a dict:
+    Walks (dateTime, rain_mm) pairs, oldest first -- the rain that fell in
+    each archive interval -- and returns a dict:
       event_mm  -- the running event's total in mm (0.0 if none is running)
       start_ts  -- when the running event's spell began (None if none)
       end_ts    -- with no event running, when the last rain fell (None if
-                   no rain at all in the records)
-      spell_ts  -- when the latest spell began, running or not (used by
-                   calc_rain_event to tell whether the records reach back
-                   far enough)
+                   no rain at all in the series)
+      spell_ts  -- when the latest spell began, running or not (used to
+                   tell whether the series reaches back far enough)
     """
     spell_start = None
     spell_mm = 0.0
     last_rain = None
-    for rec in records:
-        rain_mm = _rainevent_mm(rec, obs_type)
-        if rain_mm <= 0:
+    for dt, rain_mm in rain_series:
+        if not rain_mm or rain_mm <= 0:
             continue
-        dt = rec['dateTime']
         if last_rain is None or dt - last_rain >= RAINEVENT_DRY_GAP:
             spell_start, spell_mm = dt, 0.0
         spell_mm += rain_mm
@@ -6795,6 +6793,22 @@ def _rainevent_scan(records, now_ts, obs_type='rain', threshold_mm=RAINEVENT_MIN
     }
 
 
+def _rain_event_from(series_for, now_ts, threshold_mm, lookback_seconds, max_lookback_seconds):
+    """Runs _rainevent_scan over series_for(start, now_ts), reading further
+    back while the latest spell begins within 24 hours of the start of
+    what was read (it might really have begun earlier)."""
+    lookback = lookback_seconds
+    while True:
+        start = now_ts - lookback
+        result = _rainevent_scan(series_for(start, now_ts), now_ts, threshold_mm)
+        truncated = (result['spell_ts'] is not None
+                     and result['spell_ts'] - start < RAINEVENT_DRY_GAP)
+        if truncated and lookback < max_lookback_seconds:
+            lookback = min(lookback * 2, max_lookback_seconds)
+            continue
+        return result['event_mm'], result['start_ts'], result['end_ts']
+
+
 def calc_rain_event(manager, now_ts, obs_type='rain', threshold_mm=RAINEVENT_MIN_MM,
                     lookback_seconds=RAINEVENT_DEFAULT_LOOKBACK,
                     max_lookback_seconds=RAINEVENT_MAX_LOOKBACK):
@@ -6805,23 +6819,119 @@ def calc_rain_event(manager, now_ts, obs_type='rain', threshold_mm=RAINEVENT_MIN
     manager: the database manager holding obs_type -- $db_lookup() from
         the template.
     now_ts: $current.dateTime.raw from the template.
-    obs_type: 'rain' for the standard gauge, 'hail' for the piezo gauge.
+    obs_type: 'rain' for the standard gauge, 'hail' for a piezo gauge
+        recorded in the 'hail' column.
     threshold_mm: the smallest event, in mm -- rain_event_threshold_mm()
         of the report's rain unit.
 
-    Returns (event_mm, start_ts, end_ts) -- see _rainevent_scan(). A spell
-    that begins within 24 hours of the start of the records read might
-    really have begun earlier, so the window is doubled and read again
-    (up to max_lookback_seconds).
+    Returns (event_mm, start_ts, end_ts) -- see _rainevent_scan().
     """
-    lookback = lookback_seconds
-    while True:
-        start = now_ts - lookback
-        records = list(manager.genBatchRecords(start, now_ts))
-        result = _rainevent_scan(records, now_ts, obs_type, threshold_mm)
-        truncated = (result['spell_ts'] is not None
-                     and result['spell_ts'] - start < RAINEVENT_DRY_GAP)
-        if truncated and lookback < max_lookback_seconds:
-            lookback = min(lookback * 2, max_lookback_seconds)
+    def series_for(start, end):
+        return [(rec['dateTime'], _rainevent_mm(rec, obs_type))
+                for rec in manager.genBatchRecords(start, end)]
+    return _rain_event_from(series_for, now_ts, threshold_mm,
+                            lookback_seconds, max_lookback_seconds)
+
+
+##############################################################################
+#
+# Piezo rain from DivumWX's own database (divumwx_extras_binding).
+#
+# Ecowitt drivers send a piezo gauge (WS85/WS90) as running totals --
+# p_hourRain, p_dayRain, p_weekRain, p_monthRain, p_yearRain, p_rainRate
+# (some drivers also send lower-case copies) -- not as the rain that fell in
+# each interval, and DivumwxExtrasService stores the latest of them with
+# every archive record. The Piezo Rain card's totals come straight from
+# those counters; the rain in each interval, which the last-24-hour and
+# yesterday totals and the rain event need, is the rise in p_yearRain from
+# one record to the next (the whole new value when it drops back at the
+# start of a year). So the piezo event follows the same rule as the
+# tipping bucket's -- see calc_rain_event() -- not the driver's own
+# p_rainevent counter.
+#
+##############################################################################
+
+PIEZO_COUNTERS = (
+    # (archive.json key, extras column, unit group)
+    ('rate', 'p_rainRate', 'group_rainrate'),
+    ('hour', 'p_hourRain', 'group_rain'),
+    ('day', 'p_dayRain', 'group_rain'),
+    ('week', 'p_weekRain', 'group_rain'),
+    ('month', 'p_monthRain', 'group_rain'),
+    ('year', 'p_yearRain', 'group_rain'),
+)
+PIEZO_MAX_AGE = 2 * 3600    # a latest piezo reading older than this isn't shown
+
+
+def _piezo_value(rec, column, group, target_unit):
+    """rec[column] (in rec's unit system) in target_unit, or None."""
+    raw = rec.get(column)
+    if raw is None:
+        return None
+    try:
+        unit = weewx.units.std_groups[rec['usUnits']][group]
+        return weewx.units.convert((float(raw), unit, group), target_unit)[0]
+    except (KeyError, TypeError, ValueError):
+        return None
+
+
+def _piezo_series(manager, start, end):
+    """(dateTime, mm) -- the piezo rain in each record's interval, from the
+    rise in p_yearRain."""
+    series, prev = [], None
+    for rec in manager.genBatchRecords(start, end):
+        year_mm = _piezo_value(rec, 'p_yearRain', 'group_rain', 'mm')
+        if year_mm is None:
             continue
-        return result['event_mm'], result['start_ts'], result['end_ts']
+        if prev is not None:
+            rise = year_mm - prev if year_mm >= prev else year_mm
+            series.append((rec['dateTime'], rise))
+        prev = year_mm
+    return series
+
+
+def piezo_rain_summary(manager, now_ts, rain_unit, rainrate_unit, day_start_ts,
+                       yesterday_start_ts, threshold_mm=RAINEVENT_MIN_MM):
+    """
+    The Piezo Rain card's figures from the DivumWX extras database, as a
+    dict of archive.json "p_rain" values (numbers in rain_unit /
+    rainrate_unit, storm_start/storm_end in ms), or None when that database
+    has no recent piezo readings.
+
+    manager: $db_lookup('divumwx_extras_binding') from the template.
+    now_ts: $current.dateTime.raw.
+    day_start_ts, yesterday_start_ts: $day.start.raw, $yesterday.start.raw.
+    """
+    try:
+        last_ts = manager.lastGoodStamp()
+    except Exception:
+        return None
+    if not last_ts or now_ts - last_ts > PIEZO_MAX_AGE:
+        return None
+    latest = manager.getRecord(last_ts)
+    if not latest or latest.get('p_yearRain') is None:
+        return None
+
+    out = {}
+    for key, column, group in PIEZO_COUNTERS:
+        target = rainrate_unit if group == 'group_rainrate' else rain_unit
+        out[key] = _piezo_value(latest, column, group, target)
+
+    def to_report(mm):
+        return weewx.units.convert((mm, 'mm', 'group_rain'), rain_unit)[0]
+
+    def total(start, end):
+        # Read an hour before start too: the first record read has no rise.
+        return to_report(sum(mm for dt, mm in _piezo_series(manager, start - 3600, end)
+                             if start < dt <= end))
+
+    out['last24h'] = total(now_ts - 86400, now_ts)
+    out['yesterday'] = total(yesterday_start_ts, day_start_ts)
+
+    event_mm, start_ts, end_ts = _rain_event_from(
+        lambda start, end: _piezo_series(manager, start, end), now_ts, threshold_mm,
+        RAINEVENT_DEFAULT_LOOKBACK, RAINEVENT_MAX_LOOKBACK)
+    out['event'] = to_report(event_mm)
+    out['storm_start'] = int(start_ts * 1000) if start_ts else None
+    out['storm_end'] = int(end_ts * 1000) if end_ts else None
+    return out

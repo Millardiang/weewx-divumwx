@@ -212,6 +212,7 @@ null
 "solar_array_watts": $divumwx_solar_array_watts,#slurp
 "warnings_source": $divumwx_warnings_source,#slurp
 "aq_scheme": $divumwx_aq_scheme,#slurp
+"rain_sensor": $divumwx_rain_sensor,#slurp
 "available_files": $divumwx_available_files,#slurp
 "lang": $divumwx_lang#slurp
 },
@@ -594,8 +595,31 @@ null
 #end if
 },
 
-#if $current.hail.has_data
+## Piezo rain gauge. Ecowitt drivers send it as running totals (p_dayRain,
+## p_yearRain, ...), which DivumWX keeps in its own database; that comes
+## first (see piezo_rain_summary() in divumwx.py). Stations that record
+## their piezo gauge in WeeWX's 'hail' column use the block after it.
+## Without either, there's no "p_rain" and the Piezo Rain card shows the
+## main gauge only on a piezo-only station.
+#import user.divumwx
+#set $piezo = None
+#try
+  #set $piezo = $user.divumwx.piezo_rain_summary($db_lookup('divumwx_extras_binding'), $current.dateTime.raw, $unit.unit_type.rain, $unit.unit_type.rainRate, $day.start.raw, $yesterday.start.raw, $user.divumwx.rain_event_threshold_mm($unit.unit_type.rain))
+#except
+  #set $piezo = None
+#end try
+#if $piezo is not None
 "p_rain": {
+"source": "extras",
+#for $pk in ('rate', 'hour', 'last24h', 'yesterday', 'day', 'week', 'month', 'year', 'event')
+"$pk": $('null' if $piezo[$pk] is None else '%.2f' % $piezo[$pk]),
+#end for
+"storm_start": $('null' if $piezo['storm_start'] is None else $piezo['storm_start']),
+"storm_end": $('null' if $piezo['storm_end'] is None else $piezo['storm_end'])
+},
+#elif $current.hail.has_data
+"p_rain": {
+"source": "hail",
 "rate": $current.hailRate.format(format_string="%.2f", None_string="null", add_label=False, localize=False),
 "hour": $divumwx_last(3600).hail.sum.format(format_string="%.2f", None_string="0", add_label=False, localize=False),
 "last24h": $divumwx_last(86400).hail.sum.format(format_string="%.2f", None_string="0", add_label=False, localize=False),
