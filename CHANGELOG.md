@@ -1,5 +1,37 @@
 # DivumWX Changelog
 
+## 2.4.0 — 19 November 2026
+
+### Version 2.4.0
+- Minor release (a new option). `DIVUMWX_VERSION` is now `2.4.0`. The
+  `index.html` header and footer fallback, the `divumwf.html` badge
+  (1.0.10), the README title and `INSTALLATION_GUIDE.md` all say 2.4.0,
+  and the install guide downloads from `ver.2.4.0`.
+
+### Air Quality card: fill a sensor's missing PM2.5/PM10 from Open-Meteo
+- Requested by a user whose sensor sends only PM2.5. New option
+  `[DivumWXCards] aq_fill_online` (default off): with it on, when a
+  particle sensor reports PM2.5 but not PM10, or PM10 but not PM2.5, the
+  missing one is taken from Open-Meteo's modelled figures for the
+  station, which DivumWX already fetches into `jsondata/airquality.txt`.
+  The sensor's own readings always win; a "Source" row names what came
+  from Open-Meteo ("PM10.0 · Open-Meteo"), and the overall rating covers
+  both. Open-Meteo has no PM1.0 or PM4.0, so those are only shown when the
+  sensor reports them. Open-Meteo figures more than 3 hours old aren't
+  used, as for stations with no sensor.
+- The installer asks about it every run ("Fill missing PM2.5/PM10 from
+  Open-Meteo?"; Enter keeps the current answer, "n" on a fresh install).
+  An update package doesn't ask: add `aq_fill_online = True` to
+  `[DivumWXCards]` in `weewx.conf` and restart WeeWX.
+- Published as `archive.json` `meta.aq_fill_online`.
+- Changed: `cardsBundleNew.js` (cardAirquality.js 1.3.0; cache-buster
+  updated), `bin/user/divumwx_cards.py` (`$divumwx_aq_fill_online`),
+  `skins/DivumWX/jsondata/archive.json.tmpl`, `install.py`.
+
+### README
+- The 2.3.0 notes on the Piezo Rain card and the rain event rule were
+  listed under 2.2.1 by mistake; they're now under 2.3.0.
+
 ## 2.3.0 — 16 November 2026
 
 ### Version 2.3.0

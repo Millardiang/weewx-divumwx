@@ -3334,6 +3334,8 @@ def read_existing_answers(cfg):
     if page_background not in DIVUMWX_PAGE_BACKGROUND_CHOICES:
         page_background = None
 
+    aq_fill_online = _bool_answer(_cfg_get(cfg, 'DivumWXCards', 'aq_fill_online'))
+
     in_uk = _bool_answer(_cfg_get(cfg, 'DivumWXCards', 'in_uk'))
     if in_uk is None:
         in_uk = _bool_answer(_cfg_get(cfg, 'WeatherAPI', 'MetOfficeRSS', 'enabled'))
@@ -3351,6 +3353,7 @@ def read_existing_answers(cfg):
         'location_digit': location_digit,
         'region_code': region_code if region_code in DIVUMWX_METOFFICE_REGIONS else None,
         'page_background': page_background,
+        'aq_fill_online': aq_fill_online,
     }
 
 
@@ -4157,6 +4160,18 @@ class DivumwxInstaller(ExtensionInstaller):
             default=existing['page_background'] or DIVUMWX_PAGE_BACKGROUND_DEFAULT,
             options=list(DIVUMWX_PAGE_BACKGROUND_CHOICES.keys()))
         cfg['DivumWXCards']['page_background'] = page_background
+
+        # Air Quality card: a particle sensor that reports only some of
+        # PM2.5/PM10 can have the others filled in from Open-Meteo (which
+        # has no PM1.0/PM4.0). Asked every run like the background; Enter
+        # keeps the current answer, 'n' on a fresh install.
+        printer.out("Air Quality card: if your particle sensor doesn't report PM2.5 or PM10,", level=1)
+        printer.out("the missing one can be taken from Open-Meteo for your location.", level=1)
+        aq_fill_online = weecfg.prompt_with_options(
+            "Fill missing PM2.5/PM10 from Open-Meteo? (y/n)",
+            default=existing['aq_fill_online'] or 'n',
+            options=['y', 'n'])
+        cfg['DivumWXCards']['aq_fill_online'] = 'True' if aq_fill_online == 'y' else 'False'
 
         apply_weatherapi_flood_merge(cfg, html_root=html_root, in_england=in_england)
 

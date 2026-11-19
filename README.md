@@ -1,7 +1,12 @@
-# Welcome to the DivumWX skin for WeeWX Version 2.3.0
+# Welcome to the DivumWX skin for WeeWX Version 2.4.0
 Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LICENSE Version 3](https://github.com/Millardiang/weewx-divumwx/blob/main/license.txt)
  
+# What's new in 2.4.0
+* **Combine a particle sensor with Open-Meteo** - if your particle sensor reports only PM2.5 (or only PM10), the Air Quality card can take the missing one from Open-Meteo for your location, marked "Source: PM10.0 · Open-Meteo". Optional: answer yes at install, or set `[DivumWXCards] aq_fill_online = True`. Open-Meteo has no PM1.0 or PM4.0, so those still need a sensor that reports them.
+
 # What's new in 2.3.0
+* **Piezo Rain card shows the piezo gauge** - with both gauges, the Piezo Rain card now reads the piezo gauge's own totals (p_dayRain, p_yearRain, ...) instead of repeating the tipping bucket's figures.
+* **Rain event: one rule for every gauge** - an event starts once 0.4 mm (0.02 in) of rain has fallen and ends after 24 hours without rain, for every make of tipping-bucket gauge and for piezo sensors.
 * **Indoor Temperature card** - a thermometer inside a house outline, styled like the outdoor one, with today's max/min, trend, indoor humidity, feels like, dew point and the outside temperature alongside. Offered by the installer (asked once on an upgrade); stations without an indoor sensor show "No Data".
 * **Air quality index for your country** - the Air Quality card uses the UK's DAQI in the UK, the European Air Quality Index in the countries Meteoalarm covers, and the US EPA AQI everywhere else, chosen from the station's country. `[DivumWXCards] aq_scheme` can pick one outright.
 * **Air quality without a sensor** - stations with no particle sensor now see PM2.5 and PM10 for their location from Open-Meteo on the Air Quality card, marked "Source: Open-Meteo". No setup needed: DivumWX already fetches it. A particle sensor's own readings always take priority.
@@ -14,8 +19,6 @@ Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LIC
 * **Lightning card keeps updating** - on stations whose lightning sensor sends nothing between strikes, the card dropped to zeros after each quiet interval and only showed real figures after a strike. It now shows Today, Year, All-time and the last strike all the time, and "Last Hour" is the last 60 minutes rather than the previous clock hour.
 
 # What's new in 2.2.1
-* **Piezo Rain card shows the piezo gauge** - with both gauges, the Piezo Rain card now reads the piezo gauge's own totals (p_dayRain, p_yearRain, ...) instead of repeating the tipping bucket's figures.
-* **Rain event: one rule for every gauge** - an event starts once 0.4 mm (0.02 in) of rain has fallen and ends after 24 hours without rain, for every make of tipping-bucket gauge and for piezo sensors.
 * **Rain Event fits the rain cards again** - on the Tipping Rain, Piezo Rain and Rainfall cards the event now shows on one line ("2.20 mm from 13:02"), so the bottom of the column is no longer cut off.
 
 # What's new in 2.2.0

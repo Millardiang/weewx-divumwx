@@ -93,6 +93,10 @@ Provides three tags:
                                (elsewhere); [DivumWXCards] aq_scheme
                                overrides. See aq_scheme().
 
+    $divumwx_aq_fill_online  — [DivumWXCards] aq_fill_online: true fills a
+                               particle sensor's missing PM2.5/PM10 from
+                               Open-Meteo on the Air Quality card.
+
     $divumwx_in_uk           — the installer's own "are you in the UK?"
                                answer ([DivumWXCards] in_uk, set by
                                install.py's in_england/in_uk prompts),
@@ -396,6 +400,10 @@ class DivumwxCards(SearchList):
         # title -- [DivumWXCards] country_code, else from the time zone.
         country_code = station_country(cards_section)
         stn_info = getattr(self.generator, 'stn_info', None)
+        try:
+            aq_fill_online = to_bool(cards_section.get('aq_fill_online', False))
+        except ValueError:
+            aq_fill_online = False
         air_quality_scheme = aq_scheme(cards_section,
                                        getattr(stn_info, 'latitude_f', None),
                                        getattr(stn_info, 'longitude_f', None),
@@ -477,6 +485,9 @@ class DivumwxCards(SearchList):
             'divumwx_warnings_source': json.dumps(warnings_source),
             # Air Quality card index: "daqi", "eaqi" or "epa" (aq_scheme()).
             'divumwx_aq_scheme': json.dumps(air_quality_scheme),
+            # [DivumWXCards] aq_fill_online = true: a particle sensor's
+            # missing PM2.5/PM10 are filled from Open-Meteo (default off).
+            'divumwx_aq_fill_online': json.dumps(aq_fill_online),
             'divumwx_lang': json.dumps(lang),
             'divumwx_strings_payload': json.dumps(strings_payload),
             # Release version for the dashboard footer (archive.json meta).

@@ -9848,7 +9848,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardAirquality.js version 1.2.0
+# cardAirquality.js version 1.3.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -10323,6 +10323,16 @@ try {
       var sourceValue = addChipRow(DivumWXI18N.t('Source:').replace(/:\s*$/, ''));
       sourceValue.textContent = DivumWXI18N.t('Open\u2011Meteo');
       sourceValue.style.color = 'var(--bs-body-color)';
+    } else if (source && source.indexOf('mixed:') === 0) {
+      // Sensor readings with some filled in from Open-Meteo: name those.
+      var filledLabels = source.slice(6).split(',').map(function(k){
+        var pol = POLLUTANTS.filter(function(p){ return p.key === k; })[0];
+        return pol ? pol.label : k;
+      });
+      var mixedValue = addChipRow(DivumWXI18N.t('Source:').replace(/:\s*$/, ''));
+      mixedValue.textContent = filledLabels.join(', ') + ' \u00B7 ' + DivumWXI18N.t('Open\u2011Meteo');
+      mixedValue.title = mixedValue.textContent;
+      mixedValue.style.color = 'var(--bs-body-color)';
     }
     rightPane.lastElementChild.style.borderBottom = 'none';
   }
@@ -10385,6 +10395,12 @@ try {
     return fetch('./jsondata/archive.json', {cache:'no-store'})
       .then(function(r){ return r.ok ? r.json() : null; })
       .then(function(a){
+        var fill = !!(a && a.meta && a.meta.aq_fill_online === true);
+        if (fill !== fillOnline) {
+          fillOnline = fill;
+          try { localStorage.setItem(FILL_CACHE_KEY, fill ? '1' : '0'); } catch (e) {}
+          refresh();
+        }
         var key = a && a.meta && a.meta.aq_scheme;
         if (!SCHEMES[key] || key === schemeKey) return;
         schemeKey = key;
@@ -10416,6 +10432,27 @@ try {
       .catch(function(){ return {}; });
   }
 
+  // [DivumWXCards] aq_fill_online (archive.json meta.aq_fill_online): with
+  // a particle sensor that doesn't report PM2.5 or PM10, take the missing
+  // one(s) from Open-Meteo. Open-Meteo has no PM1.0/PM4.0, so those can
+  // only come from a sensor. Off by default: the sensor's figures alone.
+  var FILL_CACHE_KEY = 'divumwxAqFillOnline';
+  var fillOnline = false;
+  try { fillOnline = localStorage.getItem(FILL_CACHE_KEY) === '1'; } catch (e) {}
+  var FILLABLE = ['pm2_5', 'pm10_0'];
+
+  function withOnlineFill(raw){
+    if (!fillOnline) return raw;
+    var missing = FILLABLE.filter(function(k){ return !(k in raw); });
+    if (!missing.length) return raw;
+    return fallbackReadings().then(function(online){
+      var filled = missing.filter(function(k){ return k in online; });
+      filled.forEach(function(k){ raw[k] = online[k]; });
+      if (filled.length) raw._source = 'mixed:' + filled.join(',');
+      return raw;
+    });
+  }
+
   var lastData = null;
   function refresh(){
     fetch(LOOP_JSON_URL + ((LOOP_JSON_URL).indexOf('?')>-1?'&':'?') + '_=' + Date.now(), {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
@@ -10427,7 +10464,9 @@ try {
           if (val !== null) raw[p.key] = val;
         });
         // A particle sensor always wins; otherwise Open-Meteo's figures.
-        return Object.keys(raw).length ? raw : fallbackReadings();
+        // With aq_fill_online, a sensor's missing PM2.5/PM10 come from
+        // Open-Meteo too.
+        return Object.keys(raw).length ? withOnlineFill(raw) : fallbackReadings();
       })
       .then(function(raw){
         lastData = raw;
