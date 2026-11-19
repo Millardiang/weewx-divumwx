@@ -223,6 +223,82 @@ minutes (`[DivumWXMeteoalarm]` `poll_interval`) and shown in the
 dashboard's language when the national service publishes one, otherwise in
 English.
 
+## Site visitors (Cloudflare Web Analytics)
+
+The footer can show **Visits: N today · M in 30 days**; clicking it opens a
+report with visits and page views for today, 7 days, 30 days and since the
+service started, a 30-day chart, and the top pages, countries, referring
+sites, browsers, operating systems and devices.
+
+The figures come from [Cloudflare Web Analytics](https://www.cloudflare.com/web-analytics/)
+(free). It counts page views in the visitor's browser, so it's right however
+the site is reached, **Cloudflare Tunnel (`cloudflared`) included**: nothing
+is read from Apache's or nginx's log, no web server settings change, and no
+IP address reaches the station. Bots aren't counted.
+
+1. **Turn on Web Analytics for the site.** In the Cloudflare dashboard go to
+   **Web Analytics > Add a site**, choose your site's hostname (the one
+   your tunnel serves, e.g. `weather.example.com`) and finish. With a
+   tunnel the hostname is already proxied by Cloudflare, so the automatic
+   setup works: Cloudflare adds its counting script to your pages itself
+   and nothing in DivumWX needs editing. (A site not proxied by Cloudflare
+   uses the manual setup instead: paste the `<script>` snippet Cloudflare
+   gives you just before `</body>` in the DivumWX pages.)
+2. **Make an API token** so WeeWX can read the figures: **My Profile >
+   API Tokens > Create Token > Create Custom Token**, with one permission,
+   **Account > Account Analytics > Read**, for your account. Copy the token.
+3. **Add it to `weewx.conf`** and restart WeeWX:
+
+   ```
+   [DivumWXVisitors]
+       api_token = <the token>
+   ```
+
+   If the `[Engine] [[Services]] data_services` line doesn't already end in
+   `user.divumwx_visitors.VisitorsService` (an update package doesn't change
+   `weewx.conf`), add `, user.divumwx_visitors.VisitorsService` to it.
+
+After a few minutes the footer shows the figures. Everything else is found
+from the token: the account, and the Web Analytics site matching
+`[Station] station_url`. All settings are optional:
+
+```
+[DivumWXVisitors]
+    api_token = ...
+    account_id = auto      # the Account ID, if the token reaches more than one account
+    hostname = auto        # the site's public hostname; auto = [Station] station_url
+    site_tag = auto        # or the Web Analytics site tag
+    poll_interval = 900    # seconds between updates (minimum 300)
+```
+
+To check a token without waiting for WeeWX:
+
+```
+# WeeWX installed with pip:
+~/weewx-venv/bin/python3 ~/weewx-data/bin/user/divumwx_visitors.py --token <token> --hostname weather.example.com
+# WeeWX installed from a Debian/RPM package:
+python3 /etc/weewx/bin/user/divumwx_visitors.py --token <token> --hostname weather.example.com
+```
+
+It prints the account and site it found and the figures, or what's wrong.
+
+Notes:
+- A *visit* is Cloudflare's measure: someone arriving from another site, a
+  search, a link or a bookmark. Moving between pages of the site adds page
+  views, not visits. There's no count of unique people.
+- Your own views count when you open the site at its public address. Open
+  it at the station's local address (e.g. `http://192.168.1.20/divumwx/`)
+  and Cloudflare never sees them.
+- Ad and tracker blockers stop some browsers from being counted.
+- Busy sites may be sampled by Cloudflare; the report then says the figures
+  are estimates.
+- Cloudflare keeps 30 days that can be read at once, so DivumWX keeps its
+  own daily totals in `divumwx_visitors_state.json` beside the WeeWX
+  database; the "Since" total grows from when the service first ran.
+- If something goes wrong (an expired token, say), the report keeps the
+  last figures and shows Cloudflare's reason, and the WeeWX log has a
+  `visitors:` line.
+
 ## Webcams
 
 When you include the webcam card, the installer asks how many webcams you

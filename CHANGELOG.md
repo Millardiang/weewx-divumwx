@@ -3,7 +3,7 @@
 ## 2.4.0 — 19 November 2026
 
 ### Version 2.4.0
-- Minor release (a new option). `DIVUMWX_VERSION` is now `2.4.0`. The
+- Minor release (new options and the site visitor report). `DIVUMWX_VERSION` is now `2.4.0`. The
   `index.html` header and footer fallback, the `divumwf.html` badge
   (1.0.10), the README title and `INSTALLATION_GUIDE.md` all say 2.4.0,
   and the install guide downloads from `ver.2.4.0`.
@@ -27,6 +27,45 @@
 - Changed: `cardsBundleNew.js` (cardAirquality.js 1.3.0; cache-buster
   updated), `bin/user/divumwx_cards.py` (`$divumwx_aq_fill_online`),
   `skins/DivumWX/jsondata/archive.json.tmpl`, `install.py`.
+
+### Site visitors, from Cloudflare Web Analytics
+- New `user.divumwx_visitors.VisitorsService` (`divumwx_visitors.py` 1.0.0)
+  writes `jsondata/visitors.json` every 15 minutes from Cloudflare Web
+  Analytics' GraphQL API: visits and page views for today (from the
+  station's midnight), 7 days, 30 days and since the service started, a
+  30-day daily series, monthly totals, and the top pages, countries,
+  referring sites, browsers, operating systems and device types. Bots
+  aren't counted.
+- Counted in the visitor's browser, so it works behind Cloudflare Tunnel or
+  any proxy, needs no web server changes or log access, and no IP address
+  reaches the station. Idle until `[DivumWXVisitors] api_token` is set (a
+  token with Account > Account Analytics > Read); the account and the Web
+  Analytics site are found from the token and `[Station] station_url`.
+  Problems (a refused token, no data for the hostname, a token reaching
+  several accounts) are reported in the WeeWX log and the report, with the
+  last figures kept.
+- Daily totals are kept in `divumwx_visitors_state.json` beside the WeeWX
+  database, so the "Since" total goes back beyond Cloudflare's 30 days.
+- The dashboard footer (`index.html`, `hyperIndex.html`, `lexendIndex.html`)
+  shows "Visits: N today · M in 30 days" (`siteHeader.js` 1.1.0, now loaded
+  as `?v=1.1.0` by every page; they were still asking for 1.0.4). Clicking
+  it opens the report (`visitorReport.js` 1.0.0, loaded only then). Nothing
+  shows until the service has written `visitors.json`.
+- 21 new phrases for the footer and report, translated in every language
+  file. `install.py` registers the service and ships the new file.
+  `tests/test_visitors.py` runs the service against a fake Cloudflare API.
+  See "Site visitors" in the installation guide.
+- An update package installs the files but doesn't change `weewx.conf`:
+  add `user.divumwx_visitors.VisitorsService` to `data_services` and an
+  `[DivumWXVisitors]` section with `api_token`, then restart WeeWX.
+- First built for 2.3.0 but never merged; a log-based version committed
+  earlier on this branch is replaced by this one.
+- Page version banners bumped for the cache-buster change: `charts-d3.html`
+  1.0.5, `climate.html` 1.1.1, `gauges.html` 1.1.1, `hyperIndex.html` 1.1.2,
+  `lexendIndex.html` 1.1.2, `locationforecast.html` 1.0.1,
+  `visualisations.html` 1.0.1, `astronomy.html` 1.1.2,
+  `constellations.html` 1.0.1, `equalEarthMap.html` 1.3.1,
+  `heatmaps.html` 1.0.1, `meteorShowers.html` 1.0.1, `records.html` 1.0.1.
 
 ### README
 - The 2.3.0 notes on the Piezo Rain card and the rain event rule were

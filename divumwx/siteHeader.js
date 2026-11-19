@@ -1,6 +1,6 @@
 /*
 ##############################################################################################
-# siteHeader.js version 1.0.5
+# siteHeader.js version 1.1.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -381,4 +381,51 @@ window.addEventListener('i18nready', function(){
       document.title = t.value;
     })
     .catch(function(){});
+})();
+
+// ---------------------------------------------------------------------
+// Site visitors: "Visits: N today · M in 30 days" in the footer, from
+// jsondata/visitors.json (user.divumwx_visitors, Cloudflare Web Analytics).
+// Clicking it loads visitorReport.js and opens the full report. Nothing is
+// shown when the file is missing, i.e. the service isn't set up.
+(function addVisitorFooter(){
+  function run(){
+    var centre = document.querySelector('footer .footer-center');
+    if (!centre || centre.querySelector('.footer-visitors')) return;
+    var dirs = window.location.pathname.split('/').filter(Boolean);
+    if (dirs.length && dirs[dirs.length - 1].indexOf('.') !== -1) dirs.pop();
+    var base = (dirs.length && ['skyfield', 'celestial'].indexOf(dirs[dirs.length - 1]) !== -1) ? '../' : './';
+    fetch(base + 'jsondata/visitors.json?_=' + Date.now(), { cache: 'no-store' })
+      .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function(doc){
+        if (!doc || !doc.today || !doc.month || centre.querySelector('.footer-visitors')) return;
+        var T = function(s){ return (window.DivumWXI18N && DivumWXI18N.t) ? DivumWXI18N.t(s) : s; };
+        var a = document.createElement('a');
+        a.href = '#';
+        a.className = 'footer-visitors footer-version';
+        a.style.cssText = 'color:inherit;text-decoration:none;border-bottom:1px dotted currentColor;cursor:pointer;';
+        var label = function(){
+          var lang;
+          try { lang = (window.DivumWXI18N && DivumWXI18N.getLanguage && DivumWXI18N.getLanguage()) || undefined; } catch (e) {}
+          var n = function(v){ try { return Number(v || 0).toLocaleString(lang ? [String(lang).replace('_', '-')] : undefined); } catch (e) { return String(v || 0); } };
+          a.textContent = T('Visits') + ': ' + n(doc.today.visits) + ' ' + T('today') + ' · ' +
+                          n(doc.month.visits) + ' ' + T('in 30 days');
+          a.title = T('Site visitors');
+        };
+        label();
+        window.addEventListener('i18nready', label);
+        a.addEventListener('click', function(e){
+          e.preventDefault();
+          var go = function(){ window.DivumWXVisitorReport.open(doc, base); };
+          if (window.DivumWXVisitorReport) return go();
+          var s = document.createElement('script');
+          s.src = base + 'visitorReport.js?v=1.0.0';
+          s.onload = go;
+          document.head.appendChild(s);
+        });
+        centre.appendChild(a);
+      })
+      .catch(function(){});
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run); else run();
 })();

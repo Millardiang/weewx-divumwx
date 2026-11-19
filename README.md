@@ -2,6 +2,7 @@
 Copyright :copyright: 2026 Ian Millard and Sean Balfour, [GNU GENERAL PUBLIC LICENSE Version 3](https://github.com/Millardiang/weewx-divumwx/blob/main/license.txt)
  
 # What's new in 2.4.0
+* **Site visitors** - visits today and this month in the footer, with a full report (pages, countries, referrers, browsers, devices) from Cloudflare Web Analytics; works behind Cloudflare Tunnel.
 * **Combine a particle sensor with Open-Meteo** - if your particle sensor reports only PM2.5 (or only PM10), the Air Quality card can take the missing one from Open-Meteo for your location, marked "Source: PM10.0 · Open-Meteo". Optional: answer yes at install, or set `[DivumWXCards] aq_fill_online = True`. Open-Meteo has no PM1.0 or PM4.0, so those still need a sensor that reports them.
 
 # What's new in 2.3.0

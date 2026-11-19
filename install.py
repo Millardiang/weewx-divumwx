@@ -3219,7 +3219,9 @@ DIVUMWX_DATA_SERVICES = ['user.divumwx.SkyfieldLoopData', 'user.divumwx.DataInje
                          'user.divumwx.LiveDataService', 'user.divumwx.WeatherAPIService',
                          'user.divumwx.TimelapseService',
                          'user.divumwx_boltek.BoltekLightningService',
-                         'user.divumwx_meteoalarm.MeteoalarmService']
+                         'user.divumwx_meteoalarm.MeteoalarmService',
+                         # Idle until [DivumWXVisitors] api_token is set.
+                         'user.divumwx_visitors.VisitorsService']
 DIVUMWX_XTYPE_SERVICES = ['user.divumwx.AirDensityService', 'user.divumwx.vpdService',
                           'user.divumwx.LastNonZeroService']
 DIVUMWX_ARCHIVE_SERVICES = ['user.divumwx.SunshineDuration', 'user.divumwx.DivumwxExtrasService']
@@ -3761,6 +3763,7 @@ class DivumwxInstaller(ExtensionInstaller):
                     'bin/user/divumwx_cards.py',
                     'bin/user/divumwx_boltek.py',
                     'bin/user/divumwx_meteoalarm.py',
+                    'bin/user/divumwx_visitors.py',
                     'bin/user/divumwx_version.py',
                     'bin/user/lastrain.py',
                     'bin/user/stats.py',
