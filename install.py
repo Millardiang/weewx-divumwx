@@ -1964,6 +1964,59 @@ def load_divumwx_meteoalarm(source_dir=None):
         return None
 
 
+def load_divumwx_visitors(source_dir=None):
+    """Import this package's bin/user/divumwx_visitors.py (for its API token
+    check), or None if it can't be loaded."""
+    import importlib.util
+    source_dir = source_dir or os.path.dirname(os.path.abspath(__file__))
+    path = os.path.join(source_dir, 'bin', 'user', 'divumwx_visitors.py')
+    try:
+        spec = importlib.util.spec_from_file_location('divumwx_visitors_setup', path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+    except Exception:
+        return None
+
+
+def configure_visitors(cfg, printer, use_cloudflare, current_token, ask=None, source_dir=None):
+    """[DivumWXVisitors] api_token from the installer's questions. The service
+    (registered either way) stays idle without a token. A stored token is
+    never shown: Enter keeps it. A pasted value is checked with the
+    service's own clean_token(), so a 32-character Web Analytics snippet
+    token or a Global API Key is caught here, not later in the footer."""
+    if ask is None:
+        def ask(question):
+            return weecfg.prompt_with_options(question, default='')
+    section = cfg.setdefault('DivumWXVisitors', {})
+    if not use_cloudflare:
+        if current_token:
+            section['api_token'] = ''
+            printer.out("Site visitor report switched off (api_token cleared).", level=1)
+        return
+    mod = load_divumwx_visitors(source_dir)
+    while True:
+        if current_token:
+            raw = ask("Enter your Cloudflare API token (one is already configured -- "
+                      "press Enter to keep it, or paste a new one)")
+        else:
+            raw = ask("Enter your Cloudflare API token (leave blank to add it later)")
+        raw = (raw or '').strip()
+        if not raw:
+            if not current_token:
+                printer.out("No token yet: add api_token under [DivumWXVisitors] in weewx.conf "
+                            "and restart WeeWX to start the visitor report.", level=1)
+            return
+        token, problem = mod.clean_token(raw) if mod else (raw, None)
+        if problem:
+            printer.out(problem, level=1)
+            printer.out("Try again, or press Enter to %s." % ("keep the current token" if current_token
+                                                              else "add it later"), level=1)
+            continue
+        section['api_token'] = token
+        return
+
+
 def meteoalarm_areas_set(cfg):
     ma = cfg.get('Meteoalarm', {})
     poly = ma.get('polygon')
@@ -3338,6 +3391,8 @@ def read_existing_answers(cfg):
 
     aq_fill_online = _bool_answer(_cfg_get(cfg, 'DivumWXCards', 'aq_fill_online'))
 
+    visitors_token = str(_cfg_get(cfg, 'DivumWXVisitors', 'api_token') or '').strip()
+
     in_uk = _bool_answer(_cfg_get(cfg, 'DivumWXCards', 'in_uk'))
     if in_uk is None:
         in_uk = _bool_answer(_cfg_get(cfg, 'WeatherAPI', 'MetOfficeRSS', 'enabled'))
@@ -3356,6 +3411,10 @@ def read_existing_answers(cfg):
         'region_code': region_code if region_code in DIVUMWX_METOFFICE_REGIONS else None,
         'page_background': page_background,
         'aq_fill_online': aq_fill_online,
+        # Only whether a token is set is offered back as a default; the
+        # token itself is never echoed (see configure_visitors()).
+        'cf_analytics': 'y' if visitors_token else None,
+        'cf_api_token': visitors_token or None,
     }
 
 
@@ -4175,6 +4234,18 @@ class DivumwxInstaller(ExtensionInstaller):
             default=existing['aq_fill_online'] or 'n',
             options=['y', 'n'])
         cfg['DivumWXCards']['aq_fill_online'] = 'True' if aq_fill_online == 'y' else 'False'
+
+        # Site visitors: Cloudflare Web Analytics. Asked every run like the
+        # questions above; Enter keeps the current answer ('y' when a token
+        # is already set), 'n' on a fresh install.
+        printer.out("Site visitors: the footer can show visits to your site from Cloudflare Web", level=1)
+        printer.out("Analytics (free, and it works behind a Cloudflare Tunnel). It needs an API", level=1)
+        printer.out("token with Account > Account Analytics > Read (My Profile > API Tokens).", level=1)
+        cf_analytics = weecfg.prompt_with_options(
+            "Do you use Cloudflare Web Analytics? (y/n)",
+            default=existing['cf_analytics'] or 'n',
+            options=['y', 'n'])
+        configure_visitors(cfg, printer, cf_analytics == 'y', existing['cf_api_token'])
 
         apply_weatherapi_flood_merge(cfg, html_root=html_root, in_england=in_england)
 
