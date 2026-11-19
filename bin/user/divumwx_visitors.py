@@ -1,7 +1,7 @@
 """
 ##############################################################################################
 # divumwx_visitors.py version 1.0.0
-#  Copyright (C) 2026 Ian Millard, Sean Balfour
+#  Copyright (C) 2026 Ian Millard
 #  GPLv3
 ##############################################################################################
 
@@ -67,6 +67,31 @@ TOP_N = 15
 HEX32 = re.compile(r"^[0-9a-f]{32}$")
 
 
+def clean_token(raw):
+    """(token, problem). Undoes the usual copy-and-paste slips: spaces or a line
+    break inside it, quotes, the <...> from the example, a 'Bearer ' prefix.
+    problem says why the value can't be an API token (None if it can be)."""
+    t = re.sub(r"\s+", "", str(raw or ""))
+    for _ in range(3):
+        t = t.strip("\"'<>")
+        if t.lower().startswith("bearer"):
+            t = t[6:].lstrip(":")
+    if not t:
+        return t, "[DivumWXVisitors] api_token is empty"
+    if re.fullmatch(r"[0-9a-f]{37}", t):
+        return t, ("api_token looks like your Global API Key, which can't be used here. Create an "
+                   "API token instead (My Profile > API Tokens > Create Token) with Account > "
+                   "Account Analytics > Read")
+    if t.lower().startswith("v1.0-"):
+        return t, ("api_token looks like an Origin CA key, not an API token. Create an API token "
+                   "(My Profile > API Tokens > Create Token) with Account > Account Analytics > Read")
+    bad = sorted(set(re.sub(r"[A-Za-z0-9_.\-]", "", t)))
+    if bad:
+        return t, ("api_token contains %s, which an API token never has: copy it again from "
+                   "Cloudflare" % " ".join(repr(c) for c in bad[:5]))
+    return t, None
+
+
 class CloudflareError(Exception):
     pass
 
@@ -80,11 +105,13 @@ class Cloudflare:
     """Just enough of Cloudflare's API to read Web Analytics figures."""
 
     def __init__(self, token, api_base=API_BASE, timeout=30):
-        self.token = token.strip()
+        self.token, self.token_problem = clean_token(token)
         self.api_base = api_base.rstrip("/")
         self.timeout = timeout
 
     def _request(self, path, body=None):
+        if self.token_problem:
+            raise CloudflareError(self.token_problem)
         req = urllib.request.Request(
             self.api_base + path,
             data=None if body is None else json.dumps(body).encode("utf-8"),
@@ -98,7 +125,18 @@ class Cloudflare:
                 doc = json.loads(e.read().decode("utf-8"))
             except Exception:
                 raise CloudflareError("Cloudflare answered HTTP %s" % e.code)
-            msgs = [m.get("message", "") for m in (doc.get("errors") or []) if isinstance(m, dict)]
+            errs = [m for m in (doc.get("errors") or []) if isinstance(m, dict)]
+            msgs = []
+            for m in errs:   # Cloudflare's reason is often in error_chain ('Invalid format for Authorization header')
+                chain = [c.get("message", "") for c in m.get("error_chain") or [] if isinstance(c, dict)]
+                msgs.append(" - ".join(filter(None, [m.get("message", "")] + chain)))
+            codes = {m.get("code") for m in errs} | {c.get("code") for m in errs
+                                                     for c in m.get("error_chain") or [] if isinstance(c, dict)}
+            if codes & {6003, 6100, 6101, 6102, 6103, 6111}:
+                raise CloudflareError("Cloudflare couldn't read the API token (%s). Use an API token, not "
+                                      "the Global API Key, and copy all of it into [DivumWXVisitors] "
+                                      "api_token on one line, with nothing around it."
+                                      % ("; ".join(filter(None, msgs)) or "HTTP %s" % e.code))
             if e.code in (401, 403):
                 raise CloudflareError("Cloudflare refused the API token (%s). Check that it has "
                                       "Account > Account Analytics > Read."
