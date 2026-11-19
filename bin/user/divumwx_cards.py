@@ -81,6 +81,11 @@ Provides three tags:
                                works; the frontend fetch is the other
                                half (see cardStationImage.js).
 
+    $divumwx_loop_interval   — [LiveData] update_interval in seconds (an
+                               int, 2 when unset): how often loop.json is
+                               written; the dashboard's live cards refresh
+                               as often (sharedData.js).
+
     $divumwx_country_code    — the station's country as two lower-case
                                letters (e.g. "gb"), for the flag after the
                                site title: [DivumWXCards] country_code if
@@ -399,6 +404,14 @@ class DivumwxCards(SearchList):
         # country_code: the station's country for the flag after the site
         # title -- [DivumWXCards] country_code, else from the time zone.
         country_code = station_country(cards_section)
+
+        # loop_interval: how often LiveDataService writes loop.json
+        # ([LiveData] update_interval, 2 s by default, as in divumwx.py), so
+        # the dashboard's live cards can refresh as often (sharedData.js).
+        try:
+            loop_interval = max(1, int(float(self.generator.config_dict.get('LiveData', {}).get('update_interval', 2))))
+        except (TypeError, ValueError):
+            loop_interval = 2
         stn_info = getattr(self.generator, 'stn_info', None)
         try:
             aq_fill_online = to_bool(cards_section.get('aq_fill_online', False))
@@ -476,6 +489,7 @@ class DivumwxCards(SearchList):
             # figures as its own when there are two gauges.
             'divumwx_rain_sensor': json.dumps(str(cards_section.get('rain_sensor', '') or '').strip().lower() or None),
             'divumwx_country_code': json.dumps(country_code),
+            'divumwx_loop_interval': loop_interval,
             # The station's time zone name for archive.json meta.timezone.
             'divumwx_timezone': json.dumps(system_timezone()),
             'divumwx_page_background': json.dumps(page_background),

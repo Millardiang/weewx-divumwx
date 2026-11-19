@@ -1,6 +1,6 @@
 /*
 ##############################################################################################
-# cardsBundleNew.js version 1.2.0
+# cardsBundleNew.js version 1.3.0
 ##############################################################################################
 */
 
@@ -1367,7 +1367,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardCurrent.js version 1.0.1
+# cardCurrent.js version 1.1.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -1812,7 +1812,10 @@ try {
     });
   }
   refresh();
-  setInterval(refresh, POLL_MS);
+  // Refresh as often as WeeWX writes loop.json, with the other live cards
+  // (sharedData.js); POLL_MS without it.
+  if (window.DivumWXData && window.DivumWXData.live) window.DivumWXData.live(refresh, POLL_MS);
+  else setInterval(refresh, POLL_MS);
 })();
 } catch (e) {
   console.error("cardsBundle: cardCurrent.js failed:", e);
@@ -1822,7 +1825,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardTemperature.js version 1.1.0
+# cardTemperature.js version 1.2.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -2224,7 +2227,10 @@ try {
     });
   }
   refresh();
-  setInterval(refresh, POLL_MS);
+  // Refresh as often as WeeWX writes loop.json, with the other live cards
+  // (sharedData.js); POLL_MS without it.
+  if (window.DivumWXData && window.DivumWXData.live) window.DivumWXData.live(refresh, POLL_MS);
+  else setInterval(refresh, POLL_MS);
 })();
 } catch (e) {
   console.error("cardsBundle: cardTemperature.js failed:", e);
@@ -2234,7 +2240,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardIndoorTemp.js version 1.0.1
+# cardIndoorTemp.js version 1.1.0
 #  Copyright (C) 2026 Ian Millard
 #  GPLv3
 ##############################################################################################
@@ -2622,7 +2628,10 @@ try {
     });
   }
   refresh();
-  setInterval(refresh, POLL_MS);
+  // Refresh as often as WeeWX writes loop.json, with the other live cards
+  // (sharedData.js); POLL_MS without it.
+  if (window.DivumWXData && window.DivumWXData.live) window.DivumWXData.live(refresh, POLL_MS);
+  else setInterval(refresh, POLL_MS);
 
   window.addEventListener('unitsystemchange', function(e){
     if (e.detail && e.detail.config) { currentUnits = e.detail.config; if (lastData) render(lastData); }
@@ -3007,7 +3016,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardAnemometer.js version 1.0.0
+# cardAnemometer.js version 1.1.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -3456,7 +3465,10 @@ try {
     });
   }
   refresh();
-  setInterval(refresh, POLL_MS);
+  // Refresh as often as WeeWX writes loop.json, with the other live cards
+  // (sharedData.js); POLL_MS without it.
+  if (window.DivumWXData && window.DivumWXData.live) window.DivumWXData.live(refresh, POLL_MS);
+  else setInterval(refresh, POLL_MS);
 })();
 } catch (e) {
   console.error("cardsBundle: cardAnemometer.js failed:", e);
@@ -3466,7 +3478,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardWindCompass.js version 1.0.0
+# cardWindCompass.js version 1.1.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -3888,7 +3900,10 @@ try {
     });
   }
   refresh();
-  setInterval(refresh, POLL_MS);
+  // Refresh as often as WeeWX writes loop.json, with the other live cards
+  // (sharedData.js); POLL_MS without it.
+  if (window.DivumWXData && window.DivumWXData.live) window.DivumWXData.live(refresh, POLL_MS);
+  else setInterval(refresh, POLL_MS);
 })();
 } catch (e) {
   console.error("cardsBundle: cardWindCompass.js failed:", e);
@@ -3898,7 +3913,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardBarometer.js version 1.0.1
+# cardBarometer.js version 1.1.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -4274,7 +4289,10 @@ try {
     });
   }
   refresh();
-  setInterval(refresh, POLL_MS);
+  // Refresh as often as WeeWX writes loop.json, with the other live cards
+  // (sharedData.js); POLL_MS without it.
+  if (window.DivumWXData && window.DivumWXData.live) window.DivumWXData.live(refresh, POLL_MS);
+  else setInterval(refresh, POLL_MS);
 })();
 } catch (e) {
   console.error("cardsBundle: cardBarometer.js failed:", e);
@@ -4284,7 +4302,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardPiezoRain.js version 1.0.2
+# cardPiezoRain.js version 1.1.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -4747,7 +4765,10 @@ try {
     });
   }
   refresh();
-  setInterval(refresh, POLL_MS);
+  // Refresh as often as WeeWX writes loop.json, with the other live cards
+  // (sharedData.js); POLL_MS without it.
+  if (window.DivumWXData && window.DivumWXData.live) window.DivumWXData.live(refresh, POLL_MS);
+  else setInterval(refresh, POLL_MS);
 })();
 } catch (e) {
   console.error("cardsBundle: cardPiezoRain.js failed:", e);
@@ -4757,7 +4778,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardRainfall.js version 1.0.2
+# cardRainfall.js version 1.1.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -5167,7 +5188,10 @@ try {
     });
   }
   refresh();
-  setInterval(refresh, POLL_MS);
+  // Refresh as often as WeeWX writes loop.json, with the other live cards
+  // (sharedData.js); POLL_MS without it.
+  if (window.DivumWXData && window.DivumWXData.live) window.DivumWXData.live(refresh, POLL_MS);
+  else setInterval(refresh, POLL_MS);
 })();
 } catch (e) {
   console.error("cardsBundle: cardRainfall.js failed:", e);
@@ -5177,7 +5201,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardTippingRain.js version 1.0.2
+# cardTippingRain.js version 1.1.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -5772,7 +5796,10 @@ try {
     });
   }
   refresh();
-  setInterval(refresh, POLL_MS);
+  // Refresh as often as WeeWX writes loop.json, with the other live cards
+  // (sharedData.js); POLL_MS without it.
+  if (window.DivumWXData && window.DivumWXData.live) window.DivumWXData.live(refresh, POLL_MS);
+  else setInterval(refresh, POLL_MS);
 })();
 } catch (e) {
   console.error("cardsBundle: cardTippingRain.js failed:", e);
@@ -5782,7 +5809,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardSolarRadiation.js version 1.0.0
+# cardSolarRadiation.js version 1.1.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -6099,7 +6126,10 @@ try {
     });
   }
   refresh();
-  setInterval(refresh, POLL_MS);
+  // Refresh as often as WeeWX writes loop.json, with the other live cards
+  // (sharedData.js); POLL_MS without it.
+  if (window.DivumWXData && window.DivumWXData.live) window.DivumWXData.live(refresh, POLL_MS);
+  else setInterval(refresh, POLL_MS);
 })();
 } catch (e) {
   console.error("cardsBundle: cardSolarRadiation.js failed:", e);
@@ -6109,7 +6139,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardUvIndex.js version 1.0.0
+# cardUvIndex.js version 1.1.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -6438,7 +6468,10 @@ try {
     });
   }
   refresh();
-  setInterval(refresh, POLL_MS);
+  // Refresh as often as WeeWX writes loop.json, with the other live cards
+  // (sharedData.js); POLL_MS without it.
+  if (window.DivumWXData && window.DivumWXData.live) window.DivumWXData.live(refresh, POLL_MS);
+  else setInterval(refresh, POLL_MS);
 })();
 } catch (e) {
   console.error("cardsBundle: cardUvIndex.js failed:", e);
@@ -6448,7 +6481,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardHumidity.js version 1.0.0
+# cardHumidity.js version 1.1.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -6787,7 +6820,10 @@ try {
     });
   }
   refresh();
-  setInterval(refresh, POLL_MS);
+  // Refresh as often as WeeWX writes loop.json, with the other live cards
+  // (sharedData.js); POLL_MS without it.
+  if (window.DivumWXData && window.DivumWXData.live) window.DivumWXData.live(refresh, POLL_MS);
+  else setInterval(refresh, POLL_MS);
 })();
 } catch (e) {
   console.error("cardsBundle: cardHumidity.js failed:", e);
@@ -9182,7 +9218,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardPollen.js version 1.0.0
+# cardPollen.js version 1.1.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -9478,7 +9514,10 @@ try {
       });
   }
   refresh();
-  setInterval(refresh, POLL_MS);
+  // Refresh as often as WeeWX writes loop.json, with the other live cards
+  // (sharedData.js); POLL_MS without it.
+  if (window.DivumWXData && window.DivumWXData.live) window.DivumWXData.live(refresh, POLL_MS);
+  else setInterval(refresh, POLL_MS);
 })();
 } catch (e) {
   console.error("cardsBundle: cardPollen.js failed:", e);
@@ -9488,7 +9527,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardGreenhouseGas.js version 1.0.0
+# cardGreenhouseGas.js version 1.1.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -9838,7 +9877,10 @@ try {
       });
   }
   refresh();
-  setInterval(refresh, POLL_MS);
+  // Refresh as often as WeeWX writes loop.json, with the other live cards
+  // (sharedData.js); POLL_MS without it.
+  if (window.DivumWXData && window.DivumWXData.live) window.DivumWXData.live(refresh, POLL_MS);
+  else setInterval(refresh, POLL_MS);
 })();
 } catch (e) {
   console.error("cardsBundle: cardGreenhouseGas.js failed:", e);
@@ -9848,7 +9890,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardAirquality.js version 1.3.0
+# cardAirquality.js version 1.4.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -10479,7 +10521,10 @@ try {
   }
   loadScheme();
   refresh();
-  setInterval(refresh, POLL_MS);
+  // Refresh as often as WeeWX writes loop.json, with the other live cards
+  // (sharedData.js); POLL_MS without it.
+  if (window.DivumWXData && window.DivumWXData.live) window.DivumWXData.live(refresh, POLL_MS);
+  else setInterval(refresh, POLL_MS);
   setInterval(loadScheme, 10 * 60 * 1000);
 
   window.addEventListener('themechange', function(){

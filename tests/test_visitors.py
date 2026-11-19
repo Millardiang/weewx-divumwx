@@ -13,7 +13,8 @@ ACCOUNT = 'a' * 32
 SITE = 'b' * 32
 today = date.today()
 seen = []          # queries received
-cfg = {'accounts': [{'id': ACCOUNT, 'name': 'Station'}], 'bot_ok': True, 'token': 'good', 'datetime_ok': True}
+GOOD = 'g' * 40; BAD = 'b' * 40
+cfg = {'accounts': [{'id': ACCOUNT, 'name': 'Station'}], 'bot_ok': True, 'token': GOOD, 'datetime_ok': True}
 
 def g(count, visits, **dims):
     return {'count': count, 'sum': {'visits': visits}, 'dimensions': dims}
@@ -49,6 +50,9 @@ class H(http.server.BaseHTTPRequestHandler):
         self.send_header('Content-Type', 'application/json'); self.send_header('Content-Length', str(len(b)))
         self.end_headers(); self.wfile.write(b)
     def _auth(self):
+        if not re.fullmatch(r'Bearer [A-Za-z0-9_.-]+', self.headers.get('Authorization') or ''):
+            self._send(400, {'success': False, 'errors': [{'code': 6003, 'message': 'Invalid request headers',
+                'error_chain': [{'code': 6111, 'message': 'Invalid format for Authorization header'}]}]}); return False
         if self.headers.get('Authorization') != 'Bearer ' + cfg['token']:
             self._send(403, {'success': False, 'errors': [{'code': 10000, 'message': 'Authentication error'}]}); return False
         return True
@@ -63,7 +67,7 @@ threading.Thread(target=srv.serve_forever, daemon=True).start()
 API = 'http://127.0.0.1:%d' % port
 
 # 1. everything found from the token and hostname
-v = V.Visitors('good', hostname='weather.example.com', api_base=API)
+v = V.Visitors(GOOD, hostname='weather.example.com', api_base=API)
 doc = v.fetch()
 check(v.state['account_id'] == ACCOUNT and v.state['site_tag'] == SITE, 'account and site tag found from token + hostname')
 check(doc['today'] == {'views': 7, 'visits': 2}, 'today = since local midnight')
@@ -76,50 +80,72 @@ check(all('bot: 0' in q for q in seen if 'daily:' in q), 'bots filtered out')
 check(all('siteTag: "%s"' % SITE in q for q in seen if 'daily:' in q), 'queries filtered to the site')
 
 # 2. no hostname: busiest site chosen, with a note
-v2 = V.Visitors('good', api_base=API); d2 = v2.fetch()
+v2 = V.Visitors(GOOD, api_base=API); d2 = v2.fetch()
 check(v2.state['site_tag'] == SITE and d2['notes'] and 'busiest' in d2['notes'][0], 'two sites, no hostname: busiest + note')
 
 # 3. hostname with no data: clear message
 try:
-    V.Visitors('good', hostname='nope.example.com', api_base=API).fetch(); check(False, 'unknown hostname raises')
+    V.Visitors(GOOD, hostname='nope.example.com', api_base=API).fetch(); check(False, 'unknown hostname raises')
 except V.CloudflareError as e:
     check('weather.example.com' in str(e), 'unknown hostname: lists the hosts Cloudflare has')
 
 # 4. bad token
 try:
-    V.Visitors('bad', api_base=API).fetch(); check(False, 'bad token raises')
+    V.Visitors(BAD, api_base=API).fetch(); check(False, 'bad token raises')
 except V.CloudflareError as e:
     check('Account Analytics' in str(e), 'bad token: says which permission is needed')
+
+# 4b. copy-and-paste slips are undone; keys that aren't API tokens are named
+for raw in ('Bearer ' + GOOD, '<%s>' % GOOD, '"%s"' % GOOD, GOOD[:20] + '\n' + GOOD[20:], ' %s ' % GOOD,
+            'cfut_' + 'x' * 48):
+    if raw.startswith('cfut_'): cfg['token'] = raw
+    check(V.Visitors(raw, hostname='weather.example.com', api_base=API).fetch()['month']['views'] > 0,
+          'token %r cleaned up' % raw)
+for raw, word in (('0123456789abcdef0123456789abcdef01234', 'Global API Key'), ('v1.0-abc-def', 'Origin CA'),
+                  ('cfk_' + 'a' * 48, 'Global API Key'), ('0123456789abcdef' * 2, 'Web Analytics'),
+                  ('short', '5 characters'),
+                  ('good#1', "'#'"), ('', 'empty')):
+    try:
+        V.Visitors(raw, api_base=API).fetch(); check(False, '%r raises' % raw)
+    except V.CloudflareError as e:
+        check(word in str(e), '%r: %s named' % (raw, word))
+# 4c. Cloudflare's own 6003: its reason and a hint (a request the fake API can't parse)
+cfg['token'] = GOOD
+c4 = V.Cloudflare(GOOD, api_base=API); c4.token = 'good bad'
+try:
+    c4.accounts(); check(False, '6003 raises')
+except V.CloudflareError as e:
+    check('Invalid format for Authorization header' in str(e) and 'cfut_' in str(e), '6003: reason and hint shown')
 
 # 5. two accounts: asks for account_id
 cfg['accounts'].append({'id': 'd' * 32, 'name': 'Other'})
 try:
-    V.Visitors('good', api_base=API).fetch(); check(False, 'two accounts raises')
+    V.Visitors(GOOD, api_base=API).fetch(); check(False, 'two accounts raises')
 except V.CloudflareError as e:
     check('account_id' in str(e), 'two accounts: asks for account_id')
 cfg['accounts'].pop()
 
 # 6. schema without bot / datetime: falls back
 cfg['bot_ok'] = False; cfg['datetime_ok'] = False
-d6 = V.Visitors('good', hostname='weather.example.com', api_base=API).fetch()
+d6 = V.Visitors(GOOD, hostname='weather.example.com', api_base=API).fetch()
 check(d6['today'] == {'views': 10, 'visits': 3}, 'no bot/datetime filters: still works, UTC day for today')
 cfg['bot_ok'] = True; cfg['datetime_ok'] = True
 
 # 7. the service: writes visitors.json and state, keeps figures on a later error
 d = tempfile.mkdtemp()
 conf = {'WEEWX_ROOT': d, 'StdReport': {'HTML_ROOT': d}, 'Station': {'station_url': 'https://weather.example.com/'},
-        'DivumWXVisitors': {'api_token': 'good', 'site_root': '', 'api_base': API}}
+        'DivumWXVisitors': {'api_token': GOOD, 'site_root': '', 'api_base': API}}
 svc = V.VisitorsService(None, conf); time.sleep(1.0); svc.shutDown()
 out = json.load(open(d + '/jsondata/visitors.json'))
 st = json.load(open(d + '/archive/divumwx_visitors_state.json'))
 check(out['month']['views'] > 0 and out['host'] == 'weather.example.com', 'service wrote visitors.json (hostname from station_url)')
 check(st['site_tag'] == SITE and len(st['days']) == 30, 'state keeps the site tag and daily history')
 check(oct(os.stat(d + '/jsondata/visitors.json').st_mode)[-3:] == '644', 'visitors.json readable by the web server')
-cfg['token'] = 'changed'
+cfg['token'] = 'c' * 40
 svc.update(); out2 = json.load(open(d + '/jsondata/visitors.json'))
 check(out2['error'] and out2['month'] == out['month'], 'on error: last figures kept, error shown')
-check('good' not in json.dumps(out2), 'token never published')
-cfg['token'] = 'good'
+check(GOOD not in json.dumps(out2), 'token never published')
+cfg['token'] = GOOD
 
 # 8. no token: does nothing
 d8 = tempfile.mkdtemp()
@@ -127,7 +153,7 @@ V.VisitorsService(None, {'WEEWX_ROOT': d8, 'StdReport': {'HTML_ROOT': d8}, 'Divu
 check(not os.path.exists(d8 + '/divumwx/jsondata/visitors.json'), 'no api_token: not running')
 
 # 9. history beyond 30 days carries into total and monthly
-v9 = V.Visitors('good', hostname='weather.example.com', api_base=API,
+v9 = V.Visitors(GOOD, hostname='weather.example.com', api_base=API,
                 state={'days': {(today - timedelta(days=90)).isoformat(): [100, 40]}})
 d9 = v9.fetch()
 check(d9['total']['views'] == 100 + sum(10 + i for i in range(30)) and d9['total']['since'] == (today - timedelta(days=90)).isoformat(),

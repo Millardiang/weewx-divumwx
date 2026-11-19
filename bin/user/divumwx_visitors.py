@@ -78,7 +78,7 @@ def clean_token(raw):
             t = t[6:].lstrip(":")
     if not t:
         return t, "[DivumWXVisitors] api_token is empty"
-    if re.fullmatch(r"[0-9a-f]{37}", t):
+    if re.fullmatch(r"[0-9a-f]{37,45}", t) or t.lower().startswith("cfk_"):
         return t, ("api_token looks like your Global API Key, which can't be used here. Create an "
                    "API token instead (My Profile > API Tokens > Create Token) with Account > "
                    "Account Analytics > Read")
@@ -89,6 +89,16 @@ def clean_token(raw):
     if bad:
         return t, ("api_token contains %s, which an API token never has: copy it again from "
                    "Cloudflare" % " ".join(repr(c) for c in bad[:5]))
+    # API tokens are 40 characters, or (created since 2026) cfut_/cfat_ + 40 + a checksum.
+    if not t.lower().startswith(("cfut_", "cfat_")) and len(t) != 40:
+        what = ""
+        if re.fullmatch(r"[0-9a-fA-F]{32}", t):
+            what = (" A 32-character value like this is the \"token\" in the Web Analytics JavaScript "
+                    "snippet, an account or zone ID, or the API token's ID, not the token itself.")
+        return t, ("api_token is %d characters long, but a Cloudflare API token is 40 characters, or "
+                   "starts with cfut_ or cfat_.%s Create a token under My Profile > API Tokens > "
+                   "Create Token (Account > Account Analytics > Read) and copy the value shown once "
+                   "at the end." % (len(t), what))
     return t, None
 
 
@@ -133,10 +143,12 @@ class Cloudflare:
             codes = {m.get("code") for m in errs} | {c.get("code") for m in errs
                                                      for c in m.get("error_chain") or [] if isinstance(c, dict)}
             if codes & {6003, 6100, 6101, 6102, 6103, 6111}:
-                raise CloudflareError("Cloudflare couldn't read the API token (%s). Use an API token, not "
-                                      "the Global API Key, and copy all of it into [DivumWXVisitors] "
-                                      "api_token on one line, with nothing around it."
-                                      % ("; ".join(filter(None, msgs)) or "HTTP %s" % e.code))
+                raise CloudflareError("Cloudflare couldn't read the API token (%s). The value given is %d "
+                                      "characters%s; check it is the whole token shown once when it was "
+                                      "created (40 characters, or starting cfut_ or cfat_)."
+                                      % ("; ".join(filter(None, msgs)) or "HTTP %s" % e.code, len(self.token),
+                                         ", starting " + self.token[:5] if self.token[:5].lower()
+                                         in ("cfut_", "cfat_") else ""))
             if e.code in (401, 403):
                 raise CloudflareError("Cloudflare refused the API token (%s). Check that it has "
                                       "Account > Account Analytics > Read."

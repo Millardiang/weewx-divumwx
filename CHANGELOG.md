@@ -44,6 +44,16 @@
   Problems (a refused token, no data for the hostname, a token reaching
   several accounts) are reported in the WeeWX log and the report, with the
   last figures kept.
+- The token is tidied before use (spaces, line breaks, quotes, `<` `>`, a
+  `Bearer ` prefix), a Global API Key or Origin CA key is named instead of
+  being sent, a value of the wrong length (such as the 32-character token
+  from the Web Analytics snippet) is named, and Cloudflare's "Invalid
+  request headers" (6003) comes with its detailed reason and what to fix.
+- The installer asks "Do you use Cloudflare Web Analytics? (y/n)" every
+  run and, on "y", for the API token, which it checks with the service's
+  own test before saving it as `[DivumWXVisitors] api_token`. A saved
+  token is never shown: Enter keeps it, and "n" clears it. An update
+  package doesn't ask (it never changes `weewx.conf`).
 - Daily totals are kept in `divumwx_visitors_state.json` beside the WeeWX
   database, so the "Since" total goes back beyond Cloudflare's 30 days.
 - The dashboard footer (`index.html`, `hyperIndex.html`, `lexendIndex.html`)
@@ -66,6 +76,34 @@
   `visualisations.html` 1.0.1, `astronomy.html` 1.1.2,
   `constellations.html` 1.0.1, `equalEarthMap.html` 1.3.1,
   `heatmaps.html` 1.0.1, `meteorShowers.html` 1.0.1, `records.html` 1.0.1.
+
+### Dashboard cards follow the station's update interval
+- The live cards re-read `loop.json` every 30 seconds whatever the station's
+  `[LiveData] update_interval`, so with 5-second loop data a card's values
+  changed only every 30 s. They now refresh together, as often as WeeWX
+  writes `loop.json` (at least every 3 s), through one shared timer in
+  `sharedData.js` 1.1.0 (`DivumWXData.live`). Still one `loop.json` download
+  per refresh for the whole page.
+- The interval is published as `archive.json` `meta.loop_interval`
+  (`$divumwx_loop_interval` in `divumwx_cards.py`). Without it the cards
+  keep 30 s.
+- The timer pauses while the tab is hidden and catches up when it's shown.
+- `cloud_coverage.json`, `me.txt` and `airquality.txt`, which those cards
+  read on every refresh but which change slowly, are shared for a minute.
+- The cards that follow it: Current, Temperature, Indoor Temperature,
+  Anemometer, Wind Compass, Barometer, Piezo Rain, Rainfall, Tipping Rain,
+  Solar Radiation, UV Index, Humidity, Pollen, Greenhouse Gas and Air
+  Quality. Cards whose data changes slowly (archive, astronomy, forecasts,
+  outside feeds) keep their own timers.
+- Changed: `cardsBundleNew.js` 1.3.0 (cardCurrent.js 1.1.0,
+  cardTemperature.js 1.2.0, cardIndoorTemp.js 1.1.0, cardAnemometer.js
+  1.1.0, cardWindCompass.js 1.1.0, cardBarometer.js 1.1.0,
+  cardPiezoRain.js 1.1.0, cardRainfall.js 1.1.0, cardTippingRain.js 1.1.0,
+  cardSolarRadiation.js 1.1.0, cardUvIndex.js 1.1.0, cardHumidity.js
+  1.1.0, cardPollen.js 1.1.0, cardGreenhouseGas.js 1.1.0,
+  cardAirquality.js 1.4.0; cache-buster updated), `sharedData.js` 1.1.0
+  (loaded as `?v=1.1.0` by the three dashboards), `bin/user/divumwx_cards.py`,
+  `skins/DivumWX/jsondata/archive.json.tmpl`.
 
 ### README
 - The 2.3.0 notes on the Piezo Rain card and the rain event rule were

@@ -246,8 +246,14 @@ IP address reaches the station. Bots aren't counted.
    gives you just before `</body>` in the DivumWX pages.)
 2. **Make an API token** so WeeWX can read the figures: **My Profile >
    API Tokens > Create Token > Create Custom Token**, with one permission,
-   **Account > Account Analytics > Read**, for your account. Copy the token.
-3. **Add it to `weewx.conf`** and restart WeeWX:
+   **Account > Account Analytics > Read**, for your account. Copy the token:
+   it's shown only once, and is 40 characters or starts with `cfut_`.
+3. **Give it to DivumWX.** The full installer asks *Do you use Cloudflare
+   Web Analytics? (y/n)* and then for the token, checks it looks like an
+   API token, and saves it. On a later run Enter keeps the saved token
+   (which is never shown), and answering `n` clears it, switching the
+   report off. Without the installer (after an update package, say), add
+   it to `weewx.conf` yourself and restart WeeWX:
 
    ```
    [DivumWXVisitors]
@@ -295,6 +301,11 @@ Notes:
 - Cloudflare keeps 30 days that can be read at once, so DivumWX keeps its
   own daily totals in `divumwx_visitors_state.json` beside the WeeWX
   database; the "Since" total grows from when the service first ran.
+- "Invalid request headers" means Cloudflare couldn't read the token. An
+  API token is 40 characters, or (since 2026) starts `cfut_` or `cfat_`,
+  and is shown only once, when it's created. The `"token"` in the Web
+  Analytics JavaScript snippet (32 characters) is not it, and neither is
+  the Global API Key; the report says which one it has been given.
 - If something goes wrong (an expired token, say), the report keeps the
   last figures and shows Cloudflare's reason, and the WeeWX log has a
   `visitors:` line.
