@@ -6875,19 +6875,65 @@ def _piezo_value(rec, column, group, target_unit):
         return None
 
 
+PIEZO_MAX_RISE_MM = 50.0   # more than this between two records is a glitch, not rain
+PIEZO_SETTLE_RECORDS = 3   # records a new p_yearRain level must hold to be believed
+
+
+def _piezo_rises(points):
+    """
+    (dateTime, mm) rain per interval from (dateTime, p_yearRain in mm)
+    points, oldest first. The counter isn't trusted blindly -- a stray
+    record (a packet from another gateway, a driver restart, a value from
+    a different counter) mustn't count as rain:
+      - rain is only the rise above the highest reading so far, so a dip
+        and the climb back from it count nothing;
+      - a rise of more than PIEZO_MAX_RISE_MM between records is ignored;
+        if the counter stays at the new level for PIEZO_SETTLE_RECORDS
+        records it becomes the new baseline, still without counting it;
+      - the counter going back to near zero in the first days of a
+        station-local new year is the yearly reset: the new reading is
+        that year's rain so far.
+    """
+    series = []
+    high = None
+    pending, pending_count = None, 0
+    for dt, value in points:
+        if high is None:
+            high = value
+            continue
+        year_turned = (time.localtime(dt).tm_year != time.localtime(dt - 86400 * 3).tm_year
+                       and value < high and value < PIEZO_MAX_RISE_MM)
+        if year_turned:
+            series.append((dt, value))
+            high, pending, pending_count = value, None, 0
+            continue
+        rise = value - high
+        if rise <= 0:
+            series.append((dt, 0.0))
+            pending, pending_count = None, 0
+        elif rise <= PIEZO_MAX_RISE_MM:
+            series.append((dt, rise))
+            high, pending, pending_count = value, None, 0
+        else:
+            series.append((dt, 0.0))
+            if pending is not None and abs(value - pending) <= PIEZO_MAX_RISE_MM:
+                pending_count += 1
+            else:
+                pending, pending_count = value, 1
+            if pending_count >= PIEZO_SETTLE_RECORDS:
+                high, pending, pending_count = value, None, 0
+    return series
+
+
 def _piezo_series(manager, start, end):
     """(dateTime, mm) -- the piezo rain in each record's interval, from the
-    rise in p_yearRain."""
-    series, prev = [], None
+    rise in p_yearRain (see _piezo_rises())."""
+    points = []
     for rec in manager.genBatchRecords(start, end):
         year_mm = _piezo_value(rec, 'p_yearRain', 'group_rain', 'mm')
-        if year_mm is None:
-            continue
-        if prev is not None:
-            rise = year_mm - prev if year_mm >= prev else year_mm
-            series.append((rec['dateTime'], rise))
-        prev = year_mm
-    return series
+        if year_mm is not None:
+            points.append((rec['dateTime'], year_mm))
+    return _piezo_rises(points)
 
 
 def piezo_rain_summary(manager, now_ts, rain_unit, rainrate_unit, day_start_ts,
