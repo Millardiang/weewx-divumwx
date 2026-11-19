@@ -56,6 +56,10 @@
   the driver's totals, and the last 24 hours, yesterday and the rain event
   from the rise in `p_yearRain` between archive records -- so the piezo
   event follows the same 0.4 mm / 24-hour rule as the tipping bucket's.
+  A stray `p_yearRain` reading doesn't count as rain: only rises above
+  the highest reading so far count, a jump of more than 50 mm between
+  records is ignored (and becomes the new baseline only if it holds for 3
+  records), and a drop counts as the yearly reset only around New Year.
   Stations that record the piezo gauge in `hail` work as before.
 - With `[DivumWXCards] rain_sensor = both` and no piezo readings, the
   card shows "—" and a red status dot instead of copying the Tipping Rain
@@ -163,7 +167,11 @@
   where it's still 30 November. Without a station time zone, the device's
   date is used as before. Re-checked every 10 minutes (was hourly), so an
   open kiosk changes within 10 minutes of the station's midnight.
-- `seasonalBackground.js` 1.0.2 (loaded as `?v=1.0.2`). Changed:
+- A page opened inside a dashboard modal (charts, gauges, heatmaps and the
+  rest, shown in the modal's frame) keeps its plain theme colour; the
+  photo is only for pages shown on their own. Opened directly in a tab,
+  those pages still get the seasonal photo.
+- `seasonalBackground.js` 1.0.3 (loaded as `?v=1.0.3`). Changed:
   `astronomy.html`, `charts-d3.html`, `climate.html`,
   `constellations.html`, `divumwf.html`, `equalEarthMap.html`,
   `gauges.html`, `heatmaps.html`, `hyperIndex.html`, `index.html`,

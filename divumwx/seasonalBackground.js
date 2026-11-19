@@ -1,6 +1,6 @@
 /*
 ##############################################################################################
-# seasonalBackground.js version 1.0.2
+# seasonalBackground.js version 1.0.3
 #  Picks the page body background photo for the current meteorological season at
 #  the station's location, swapping seasons for the southern hemisphere, or
 #  leaves the plain theme colour when the installer's "Page background" answer
@@ -22,6 +22,10 @@
 #  timezone the device's date is used. Re-checked every 10 minutes and
 #  whenever the tab becomes visible, so a page left open (e.g. a kiosk)
 #  changes over on its own.
+#
+#  A page shown inside another (a dashboard modal's iframe) keeps its plain
+#  theme colour: the photo belongs to the page behind it, not to every chart
+#  window opened over it.
 */
 (function () {
   'use strict';
@@ -71,9 +75,13 @@
     return (lat == null || lat >= 0) ? northern : SOUTHERN_SWAP[northern];
   }
 
+  var inFrame = (function () {
+    try { return window.self !== window.top; } catch (e) { return true; }
+  })();
+
   function apply() {
     var root = document.documentElement;
-    if (mode === 'solid') {
+    if (mode === 'solid' || inFrame) {
       root.removeAttribute('data-bg-season');
       return;
     }
@@ -110,6 +118,7 @@
   }
 
   apply();
+  if (inFrame) return;
   refreshSettings();
   setInterval(apply, RECHECK_MS);
   document.addEventListener('visibilitychange', function () {
