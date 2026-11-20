@@ -379,6 +379,27 @@ ignore all of this; the service just waits for a file that never arrives.
    traces to the station) and its chart & records, built from the same
    database.
 
+## Sensor batteries card (Ecowitt)
+
+For stations using the [weewx-ecowittGateway](https://github.com/Millardiang/weewx-ecowittGateway)
+driver or service (2.1.x). The card shows a battery for each Ecowitt sensor
+in use, filled to its level, with each sensor's reading alongside and any low
+ones listed first:
+
+- WH25, WH26, WN31, WN32, WH65 and WH69 report **OK** or **Low**;
+- the other sensors report a level out of 5 (**0/5** or **1/5** is low), plus
+  the battery voltage where the gateway gives one (`4/5 · 1.52 V`); **DC
+  power** means a sensor running from mains (level 6);
+- a sensor whose signal is 0 (the gateway can't hear it), or that has no
+  battery value, isn't shown.
+
+It reads the `<sensor>_batt`, `_sig` and `_volt` fields in `loop.json`, and
+the standard columns the driver can fill instead (`inTempBatteryStatus`,
+`outTempBatteryStatus`, `batteryStatus1`–`8`). Nothing to set up: the
+installer offers the card when `weewx.conf` has an `[EcowittGateway]`
+section (an upgrade asks once), or add `cardEcowittBatteries` to
+`[DivumWXCards] enabled_cards` yourself.
+
 ## Solar energy cards (SolarAssistant)
 
 The **Solar Energy** and **Solar Energy Flow** cards show a home solar system's

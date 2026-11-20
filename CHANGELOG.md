@@ -105,6 +105,31 @@
   (loaded as `?v=1.1.0` by the three dashboards), `bin/user/divumwx_cards.py`,
   `skins/DivumWX/jsondata/archive.json.tmpl`.
 
+### New card: Sensor Batteries (Ecowitt)
+- `cardEcowittBatteries.js` 1.0.0, for stations using the
+  weewx-ecowittGateway driver or service. Image zone: a battery per sensor
+  in use, filled to its level (green, amber at 2/5, red when low, blue with
+  a bolt on DC power). Text zone: "All OK" or how many are low, then each
+  sensor's code, reading (OK/Low, n/5, voltage) and type, low ones first.
+- Reads `<sensor>_batt` with `_sig` and `_volt` from `loop.json`: WH25,
+  WH26, WN31, WN32, WH65 and WH69 as 0/1; the rest as a level 0-5 (0 or 1
+  low, 6 on DC power). The driver's standard columns
+  (`inTempBatteryStatus`, `outTempBatteryStatus`, `batteryStatus1`-`8` with
+  `signal1`-`8`) are read too when the driver fields aren't there; rain-,
+  hail- and windBatteryStatus are left to the level fields they come from.
+  A sensor with signal 0 or no battery value (None, 9) isn't shown.
+- Refreshes every 30 s (battery levels change slowly), from the shared
+  `loop.json` copy.
+- `install.py` offers it after the Indoor Temperature card when
+  `weewx.conf` has an `[EcowittGateway]` section; an upgrade asks once, and
+  a station without the driver isn't asked (it is once the driver is
+  added). `DIVUMWX_CARD_TARGET_TOTAL` is now 30.
+- 15 new phrases, translated in every language file.
+- Changed: `cardsBundleNew.js` 1.4.0 (cardEcowittBatteries.js 1.0.0;
+  cache-buster updated), the card's slot in `index.html`, `hyperIndex.html`
+  and `lexendIndex.html`, `install.py`, `build_card_bundle.py`, `lang/*.conf`,
+  `INSTALLATION_GUIDE.md` ("Sensor batteries card (Ecowitt)").
+
 ### README
 - The 2.3.0 notes on the Piezo Rain card and the rain event rule were
   listed under 2.2.1 by mistake; they're now under 2.3.0.

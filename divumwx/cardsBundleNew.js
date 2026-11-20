@@ -1,6 +1,6 @@
 /*
 ##############################################################################################
-# cardsBundleNew.js version 1.3.0
+# cardsBundleNew.js version 1.4.0
 ##############################################################################################
 */
 
@@ -13149,4 +13149,275 @@ try {
 })();
 } catch (e) {
   console.error("cardsBundle: cardSolarEnergyFlow.js failed:", e);
+}
+
+/* ===== cardEcowittBatteries.js ===== */
+try {
+/*
+##############################################################################################
+# cardEcowittBatteries.js version 1.0.0
+#  Copyright (C) 2026 Ian Millard
+#  GPLv3
+##############################################################################################
+*/
+
+// ===================== cardEcowittBatteries.js =====================
+// Battery state of the Ecowitt sensors in use, from the weewx-ecowittGateway
+// driver or service (loop.json). Image zone: a battery per sensor, filled to
+// its level. Text zone: each sensor's name and reading, low ones first.
+//
+// Fields (driver 2.1.x): <sensor>_batt with <sensor>_sig (0-4) and, for some,
+// <sensor>_volt, e.g. wh40_batt, wh51_ch2_batt, ws90_volt.
+//   - wh25, wh26, wn31, wn32, wn32p, wh65, wh69: 0 = OK, 1 = low.
+//   - every other sensor: a level 0-5 (0 or 1 low), 6 = on DC power.
+// With the driver's use_station_columns, some are renamed to WeeWX's
+// standard columns: inTempBatteryStatus (WH25/WN32), outTempBatteryStatus
+// (WH26/WN32P/WH69), batteryStatus1-8 (WN31 ch1-8, signals signal1-8), all
+// 0/1. rain-, hail- and windBatteryStatus are left out: the level stays in
+// the driver's own field (wh40_batt ...), which is shown instead.
+// A sensor is shown only while it's in use: a battery value that is a
+// number (not None, not 9) and a signal that isn't 0.
+
+(function(){
+  var LOOP_JSON_URL = './jsondata/loop.json';
+  var POLL_MS = 30 * 1000;
+
+  var mount = document.getElementById('ecowittBatteryCard32');
+  if (!mount) return;
+
+  var T = function(s){ try { return DivumWXI18N.t(s); } catch (e) { return s; } };
+
+  // ---- What each sensor is ----
+  var BINARY = { wh25: 1, wh26: 1, wn31: 1, wn32: 1, wn32p: 1, wh65: 1, wh69: 1 };
+  var KIND = {
+    wh25: 'Indoor', wn32: 'Indoor', wh26: 'Outdoor', wn32p: 'Outdoor',
+    wh65: 'Sensor array', wh69: 'Sensor array', ws90: 'Sensor array',
+    ws85: 'Wind & rain', ws80: 'Wind', wh68: 'Wind', ws68: 'Wind',
+    wh40: 'Rain', wh57: 'Lightning', wh45: 'CO2', wh41: 'PM2.5', wh43: 'PM2.5',
+    wn31: 'Temp/Humidity', wn34: 'Temperature probe', wn35: 'Leaf wetness',
+    wh51: 'Soil moisture', wh54: 'Distance', wh55: 'Leak'
+  };
+  // Order on the card: the outdoor array and gauges, then indoor, then channels.
+  var ORDER = ['wh69', 'wh65', 'ws90', 'ws85', 'ws80', 'wh68', 'ws68', 'wh40', 'wh57', 'wh26', 'wn32p',
+               'wh25', 'wn32', 'wh45', 'wh41', 'wh43', 'wn31', 'wn34', 'wn35', 'wh51', 'wh54', 'wh55'];
+  var FIELD_RE = /^(w[hns]\d+p?)(?:_ch(\d+))?_batt$/;
+  var COLOURS = { ok: '#2ecc71', mid: '#f39c12', low: '#e74c3c', dc: '#3498db', none: '#999999' };
+
+  function num(v){
+    if (v === null || v === undefined || v === '' || v === 'None') return null;
+    var n = Number(v);
+    return isFinite(n) ? n : null;
+  }
+
+  // One entry per sensor in use: {model, ch, kind, binary, value, volt}
+  function sensorsFrom(loop){
+    var out = [], seen = {};
+    function add(model, ch, value, sig, volt, binary){
+      var key = model + (ch ? '_ch' + ch : '');
+      if (seen[key]) return;
+      if (value === null || value === 9 || value < 0 || value > 6) return;
+      if (binary && value !== 0 && value !== 1) return;
+      if (sig !== null && sig <= 0) return;                 // not heard: not in use
+      seen[key] = 1;
+      out.push({ model: model, ch: ch ? Number(ch) : 0, binary: binary, value: value, volt: volt });
+    }
+    Object.keys(loop).forEach(function(k){
+      var m = FIELD_RE.exec(k);
+      if (!m) return;
+      var base = k.slice(0, -('_batt'.length));
+      add(m[1], m[2], num(loop[k]), num(loop[base + '_sig']), num(loop[base + '_volt']), !!BINARY[m[1]]);
+    });
+    // The driver's standard WeeWX columns, only alongside other Ecowitt fields
+    // (another station's own battery columns aren't Ecowitt sensors).
+    var ecowitt = out.length > 0 || Object.keys(loop).some(function(k){ return /^w[hns]\d+p?(_ch\d+)?_sig$/.test(k); });
+    if (ecowitt) {
+      var sig = function(){ for (var i = 0; i < arguments.length; i++) { var s = num(loop[arguments[i]]); if (s !== null) return s; } return null; };
+      if ('inTempBatteryStatus' in loop) {
+        var inModel = ('wn32_sig' in loop && !('wh25_sig' in loop)) ? 'wn32' : 'wh25';
+        add(inModel, null, num(loop.inTempBatteryStatus), sig(inModel + '_sig'), null, true);
+      }
+      if ('outTempBatteryStatus' in loop) {
+        var outModel = 'wn32p_sig' in loop ? 'wn32p' : ('wh69_sig' in loop ? 'wh69' : 'wh26');
+        add(outModel, null, num(loop.outTempBatteryStatus), sig(outModel + '_sig'), null, true);
+      }
+      for (var n = 1; n <= 8; n++) {
+        if (('batteryStatus' + n) in loop)
+          add('wn31', String(n), num(loop['batteryStatus' + n]), sig('signal' + n, 'wn31_ch' + n + '_sig'), null, true);
+      }
+    }
+    out.forEach(function(s){
+      s.dc = !s.binary && s.value === 6;
+      s.low = s.binary ? s.value === 1 : (!s.dc && s.value <= 1);
+      s.fill = s.binary ? (s.low ? 0.2 : 1) : (s.dc ? 1 : s.value / 5);
+      s.colour = s.dc ? COLOURS.dc : s.low ? COLOURS.low : (!s.binary && s.value === 2) ? COLOURS.mid : COLOURS.ok;
+    });
+    out.sort(function(a, b){
+      var ia = ORDER.indexOf(a.model), ib = ORDER.indexOf(b.model);
+      ia = ia < 0 ? 99 : ia; ib = ib < 0 ? 99 : ib;
+      return ia - ib || a.model.localeCompare(b.model) || a.ch - b.ch;
+    });
+    return out;
+  }
+
+  function codeOf(s){ return s.model.toUpperCase() + (s.ch ? ' #' + s.ch : ''); }
+  function nameOf(s){ return KIND[s.model] ? T(KIND[s.model]) : ''; }
+  function readingOf(s){
+    if (s.binary) return s.low ? T('Low') : T('OK');
+    if (s.dc) return T('DC power');
+    var t = s.value + '/5';
+    if (s.volt !== null && s.volt > 0) t += ' · ' + s.volt.toFixed(2) + ' V';
+    return t;
+  }
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+  // ---- Layout: title bar, then 60:40 image zone / text zone ----
+  mount.innerHTML = '';
+  mount.style.position = 'relative';
+  mount.style.display = 'flex';
+  mount.style.flexDirection = 'column';
+  mount.style.borderBottom = '0';
+
+  var titleBar = document.createElement('div');
+  titleBar.style.cssText = 'position:absolute;top:-20px;left:0;right:0;height:20px;box-sizing:border-box;display:flex;' +
+    'align-items:center;justify-content:space-between;gap:8px;padding:0 14px;font-size:9px;' +
+    'color:var(--bs-body-color);background:transparent;';
+  var titleLabel = document.createElement('span');
+  titleLabel.style.cssText = 'font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+  var statusWrap = document.createElement('span');
+  statusWrap.style.cssText = 'display:flex;align-items:center;gap:4px;flex-shrink:0;opacity:.85;';
+  var statusDot = document.createElement('span');
+  statusDot.style.cssText = 'width:6px;height:6px;border-radius:50%;background:#999;flex-shrink:0;';
+  var statusTime = document.createElement('span');
+  statusWrap.appendChild(statusDot);
+  statusWrap.appendChild(statusTime);
+  titleBar.appendChild(titleLabel);
+  titleBar.appendChild(statusWrap);
+  mount.appendChild(titleBar);
+
+  function setStatus(ok){
+    statusDot.style.background = ok ? '#2ecc71' : '#e74c3c';
+    var parts = {};
+    try {
+      new Intl.DateTimeFormat('en-GB', {
+        timeZone: StationTime.getTZ(), hourCycle: 'h23', hour: '2-digit', minute: '2-digit', second: '2-digit'
+      }).formatToParts(new Date()).forEach(function(p){ parts[p.type] = p.value; });
+      statusTime.textContent = parts.hour + ':' + parts.minute + ':' + parts.second;
+    } catch (e) { statusTime.textContent = ''; }
+  }
+
+  var contentWrap = document.createElement('div');
+  contentWrap.style.cssText = 'height:175px;width:100%;box-sizing:border-box;overflow:hidden;display:flex;align-items:stretch;';
+  mount.appendChild(contentWrap);
+
+  var divider = document.createElement('div');
+  divider.style.cssText = 'position:absolute;left:60%;top:6px;bottom:6px;width:1px;background:var(--bs-border-color);pointer-events:none;';
+  mount.appendChild(divider);
+
+  var leftPane = document.createElement('div');
+  leftPane.style.cssText = 'flex:0 0 60%;width:60%;height:175px;box-sizing:border-box;overflow:hidden;display:flex;' +
+    'align-items:center;justify-content:center;padding:6px 8px;';
+  contentWrap.appendChild(leftPane);
+
+  var rightPane = document.createElement('div');
+  rightPane.style.cssText = 'flex:0 0 40%;width:40%;height:175px;box-sizing:border-box;display:flex;flex-direction:column;' +
+    'padding:6px 10px 6px 12px;color:var(--bs-body-color);font-size:10px;line-height:1.25;';
+  contentWrap.appendChild(rightPane);
+
+  // ---- Image zone: one battery per sensor ----
+  function batteryIcon(x, y, s){
+    // A 24 x 40 upright cell with a cap, filled from the bottom.
+    var w = 24, h = 40, pad = 3, inner = h - 2 * pad;
+    var fh = Math.max(s.fill > 0 ? 3 : 0, Math.round(inner * Math.min(1, s.fill)));
+    var g = '<g transform="translate(' + x + ',' + y + ')">' +
+      '<title>' + esc(codeOf(s) + (nameOf(s) ? ' · ' + nameOf(s) : '') + ': ' + readingOf(s)) + '</title>' +
+      '<rect x="8" y="-4" width="8" height="5" rx="1.5" fill="var(--bs-border-color,#999)"/>' +
+      '<rect x="0.75" y="0.75" width="' + (w - 1.5) + '" height="' + (h - 1.5) + '" rx="4" fill="none" ' +
+        'stroke="' + (s.low ? COLOURS.low : 'var(--bs-secondary-color,#888)') + '" stroke-width="1.5"/>' +
+      '<rect x="' + pad + '" y="' + (h - pad - fh) + '" width="' + (w - 2 * pad) + '" height="' + fh + '" rx="2" fill="' + s.colour + '"/>';
+    if (s.dc) {   // a lightning bolt: on mains/DC power
+      g += '<path d="M14 9 L8 21 L12 21 L10 31 L17 17 L13 17 L15 9 Z" fill="#fff" opacity=".9"/>';
+    } else if (s.low) {
+      g += '<text x="12" y="16" text-anchor="middle" font-size="13" font-weight="700" fill="' + COLOURS.low + '">!</text>';
+    }
+    g += '<text x="12" y="' + (h + 11) + '" text-anchor="middle" font-size="8" fill="var(--bs-body-color)">' +
+      esc(s.model.toUpperCase()) + '</text>';
+    if (s.ch) g += '<text x="12" y="' + (h + 20) + '" text-anchor="middle" font-size="7" opacity=".7" fill="var(--bs-body-color)">#' + s.ch + '</text>';
+    return g + '</g>';
+  }
+
+  function drawImage(list){
+    if (!list.length) {
+      leftPane.innerHTML = '<svg viewBox="-4 -8 40 64" width="40%" height="70%" role="img" aria-label="' + esc(T('Battery')) + '">' +
+        batteryIcon(4, 0, { fill: 0, colour: COLOURS.none, model: '', ch: 0, low: false, dc: false, binary: true, value: 0 })
+          .replace(/<title>[\s\S]*?<\/title>/, '').replace(/<text[\s\S]*?<\/text>/g, '') + '</svg>';
+      return;
+    }
+    var n = list.length;
+    var cols = n <= 4 ? n : n <= 8 ? 4 : n <= 15 ? 5 : n <= 24 ? 6 : 8;
+    var rows = Math.ceil(n / cols);
+    var cw = 34, ch = 66;
+    var vbW = cols * cw, vbH = rows * ch;
+    var out = '<svg viewBox="-5 -8 ' + (vbW + 4) + ' ' + (vbH + 4) + '" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" ' +
+      'role="img" aria-label="' + esc(T('Sensor Batteries')) + '">';
+    list.forEach(function(s, i){
+      var r = Math.floor(i / cols), c = i % cols;
+      var inRow = Math.min(cols, n - r * cols);                 // centre a short last row
+      var x = (c + (cols - inRow) / 2) * cw;
+      out += batteryIcon(x, r * ch, s);
+    });
+    leftPane.innerHTML = out + '</svg>';
+  }
+
+  // ---- Text zone: summary, then a row per sensor ----
+  function drawText(list){
+    var low = list.filter(function(s){ return s.low; });
+    var head;
+    if (!list.length) {
+      head = '<div style="opacity:.8">' + esc(T('No Ecowitt sensor batteries reported')) + '</div>';
+    } else if (low.length) {
+      head = '<div style="font-weight:700;color:' + COLOURS.low + ';font-size:12px">' + low.length + ' ' + esc(T('Low')) + '</div>';
+    } else {
+      head = '<div style="font-weight:700;color:' + COLOURS.ok + ';font-size:12px">' + esc(T('All OK')) + '</div>';
+    }
+    // Two lines a sensor: code and reading, then what the sensor is.
+    var rows = list.slice().sort(function(a, b){ return (b.low ? 1 : 0) - (a.low ? 1 : 0); }).map(function(s){
+      return '<div style="padding:2px 0;border-bottom:1px solid var(--bs-border-color-translucent,rgba(128,128,128,.15))">' +
+        '<div style="display:flex;justify-content:space-between;gap:6px">' +
+          '<b style="font-weight:600;white-space:nowrap">' + esc(codeOf(s)) + '</b>' +
+          '<span style="white-space:nowrap;font-variant-numeric:tabular-nums;color:' + (s.low ? COLOURS.low : s.dc ? COLOURS.dc : 'inherit') +
+            (s.low ? ';font-weight:700' : '') + '">' + esc(readingOf(s)) + '</span></div>' +
+        (nameOf(s) ? '<div style="font-size:9px;opacity:.65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(nameOf(s)) + '</div>' : '') +
+        '</div>';
+    }).join('');
+    rightPane.innerHTML = '<div style="margin-bottom:4px">' + head + '</div>' +
+      '<div style="flex:1 1 auto;overflow-y:auto;scrollbar-width:thin;padding-right:2px">' + rows + '</div>';
+  }
+
+  function refresh(){
+    titleLabel.textContent = T('Sensor Batteries');
+    return fetch(LOOP_JSON_URL + '?_=' + Date.now(), { cache: 'no-store' })
+      .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function(loop){
+        var list = sensorsFrom(loop || {});
+        drawImage(list);
+        drawText(list);
+        setStatus(true);
+      })
+      .catch(function(e){
+        console.warn('cardEcowittBatteries: refresh failed --', e.message);
+        setStatus(false);
+      });
+  }
+
+  // Exposed for tests.
+  window.DivumWXEcowittBatteries = { sensorsFrom: sensorsFrom };
+
+  refresh();
+  // Battery levels change over days, so the 30 s timer is plenty (not the
+  // live cards' loop interval); loop.json comes from sharedData.js's copy.
+  setInterval(refresh, POLL_MS);
+  window.addEventListener('i18nready', refresh);
+})();
+} catch (e) {
+  console.error("cardsBundle: cardEcowittBatteries.js failed:", e);
 }

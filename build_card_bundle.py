@@ -75,6 +75,7 @@ CARD_FILES = [
     'cardWebcam.js',
     'cardStationImage.js',
     'cardWindyRadar.js',
+    'cardEcowittBatteries.js',
 ]
 
 

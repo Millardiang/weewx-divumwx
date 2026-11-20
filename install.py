@@ -2150,9 +2150,9 @@ DIVUMWX_RAIN_CARD_CHOICES = {
 }
 
 DIVUMWX_OPTIONAL_CARDS_ORDER = [
-    'cardSolarRadiation', 'cardUvIndex', 'cardIndoorTemp', 'cardLightning', 'cardAirquality',
-    'cardVapourPressureDeficit', 'cardEvapoTranspiration', 'cardWebcam', 'cardStationImage',
-    'cardSolarEnergy', 'cardSolarEnergyFlow',
+    'cardSolarRadiation', 'cardUvIndex', 'cardIndoorTemp', 'cardEcowittBatteries', 'cardLightning',
+    'cardAirquality', 'cardVapourPressureDeficit', 'cardEvapoTranspiration', 'cardWebcam',
+    'cardStationImage', 'cardSolarEnergy', 'cardSolarEnergyFlow',
 ]
 
 # Optional cards added in a release after an install's card list was first
@@ -2161,11 +2161,13 @@ DIVUMWX_OPTIONAL_CARDS_ORDER = [
 # records it in [DivumWXCards] optional_cards_asked.
 DIVUMWX_NEW_OPTIONAL_CARDS = [
     'cardIndoorTemp',   # 2.3.0
+    'cardEcowittBatteries',   # 2.4.0
 ]
 
 # Shown after the card's name in its install question.
 DIVUMWX_OPTIONAL_CARD_NOTES = {
     'cardIndoorTemp': '(indoor temperature, needs an indoor sensor)',
+    'cardEcowittBatteries': '(battery state of your Ecowitt sensors, from weewx-ecowittGateway)',
     'cardSolarEnergy': '(only for SolarAssistant subscribers)',
     'cardSolarEnergyFlow': '(only for SolarAssistant subscribers)',
 }
@@ -2230,6 +2232,24 @@ def ask_solar_array_once(cfg, prompt, tries=3):
     return None
 
 
+# Cards offered only when the station has what they show. The Ecowitt
+# battery card reads the weewx-ecowittGateway driver's (or service's)
+# <sensor>_batt fields; both set up an [EcowittGateway] section.
+def uses_ecowitt_gateway(cfg):
+    return 'EcowittGateway' in (cfg or {})
+
+
+DIVUMWX_OPTIONAL_CARD_NEEDS = {
+    'cardEcowittBatteries': uses_ecowitt_gateway,
+}
+
+
+def optional_card_offered(cfg, card_name):
+    """False when an optional card needs something this station hasn't got."""
+    need = DIVUMWX_OPTIONAL_CARD_NEEDS.get(card_name)
+    return need is None or bool(need(cfg))
+
+
 def optional_card_question(card_name, running_total=None):
     """The y/n question for an optional card, with its note if it has one."""
     note = DIVUMWX_OPTIONAL_CARD_NOTES.get(card_name)
@@ -2249,7 +2269,9 @@ def ask_new_optional_cards_once(cfg, ask):
         return None
     asked = dc.get('optional_cards_asked') or []
     asked = [asked] if isinstance(asked, str) else list(asked)
-    todo = [c for c in DIVUMWX_NEW_OPTIONAL_CARDS if c not in asked]
+    # A card the station can't use isn't asked about, nor marked asked:
+    # it's offered once the station has what it needs.
+    todo = [c for c in DIVUMWX_NEW_OPTIONAL_CARDS if c not in asked and optional_card_offered(cfg, c)]
     if not todo:
         return None
     cards = dc.get('enabled_cards')
@@ -2291,7 +2313,7 @@ def ask_solar_cards_once(cfg, ask):
 DIVUMWX_LIGHTNING_CARDS = {'other': 'cardLightning', 'boltek': 'cardBoltekLightning'}
 DIVUMWX_BOLTEK_QUESTION = "Is your lightning detector a Boltek (NexStorm)? (y/n) "
 
-DIVUMWX_CARD_TARGET_TOTAL = 29  # theoretical max (8 mandatory + 8 automatic + 2 rain "both" + 11 optional) -- every optional card now always gets asked about
+DIVUMWX_CARD_TARGET_TOTAL = 30  # theoretical max (8 mandatory + 8 automatic + 2 rain "both" + 12 optional) -- every optional card now always gets asked about
 
 DIVUMWX_WEBCAM_DEFAULT_TITLE = 'Webcam'
 DIVUMWX_WEBCAM_DEFAULT_IMAGE = 'img/picam.jpg'
@@ -4348,6 +4370,8 @@ class DivumwxInstaller(ExtensionInstaller):
                                 + ", ".join(DIVUMWX_OPTIONAL_CARDS_ORDER[DIVUMWX_OPTIONAL_CARDS_ORDER.index(card_name):]),
                                 level=1)
                     break
+                if not optional_card_offered(cfg, card_name):
+                    continue
                 include = y_or_n(optional_card_question(card_name, running_total)) == 'y'
                 if include and card_name == DIVUMWX_LIGHTNING_CARDS['other']:
                     # One lightning slot: a Boltek gets its own card instead.
