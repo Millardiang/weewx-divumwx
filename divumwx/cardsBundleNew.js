@@ -13166,7 +13166,7 @@ try {
 // driver or service (loop.json). Image zone: a battery per sensor, filled to
 // its level. Text zone: each sensor's name and reading, low ones first.
 //
-// Fields (driver 2.1.x): <sensor>_batt with <sensor>_sig (0-4) and, for some,
+// Fields (driver 2.1.x), in loop.json's "observations": <sensor>_batt with <sensor>_sig (0-4) and, for some,
 // <sensor>_volt, e.g. wh40_batt, wh51_ch2_batt, ws90_volt.
 //   - wh25, wh26, wn31, wn32, wn32p, wh65, wh69: 0 = OK, 1 = low.
 //   - every other sensor: a level 0-5 (0 or 1 low), 6 = on DC power.
@@ -13448,7 +13448,9 @@ try {
     var meta = getJson(ARCHIVE_JSON_URL).then(function(d){ return (d && d.meta) || {}; }, function(){ return {}; });
     return Promise.all([getJson(LOOP_JSON_URL), meta])
       .then(function(res){
-        var list = applySettings(sensorsFrom(res[0] || {}), res[1]);
+        // loop.json keeps its readings under "observations" (as the other cards read it)
+        var doc = res[0] || {};
+        var list = applySettings(sensorsFrom(doc.observations || doc), res[1]);
         drawImage(list);
         drawText(list);
         setStatus(true);

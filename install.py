@@ -2340,6 +2340,8 @@ def detect_ecowitt_batteries(cfg, days=ECOWITT_BATTERY_DAYS):
             ecw = os.path.join(cfg.get('WEEWX_ROOT', ''), cfg.get('StdReport', {}).get('HTML_ROOT', 'public_html'), ecw)
     for label, path in (('loop.json', loop_file), ('ecwLoop.json', ecw)):
         doc = _read_json_file(path) if path else None
+        if isinstance(doc, dict) and isinstance(doc.get('observations'), dict):
+            doc = doc['observations']          # DivumWX's loop.json keeps its readings here
         if isinstance(doc, dict):
             found |= batteries_in_loop(doc)
             sources.append(label)
