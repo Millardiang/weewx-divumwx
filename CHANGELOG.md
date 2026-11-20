@@ -118,16 +118,28 @@
   `signal1`-`8`) are read too when the driver fields aren't there; rain-,
   hail- and windBatteryStatus are left to the level fields they come from.
   A sensor with signal 0 or no battery value (None, 9) isn't shown.
+- Which sensors, like the Ecowitt console emulator: the installer works
+  them out every run, from `loop.json`, the driver's `ecwLoop.json` (when
+  enabled) and the station's and additions databases (readings in the last
+  30 days), confirms the list (Enter keeps it; sensors already listed are
+  kept, new ones added) and asks a name for each channel sensor. Saved as
+  `[DivumWXCards] battery_sensors` and `[[battery_names]]`, published as
+  `archive.json` `meta.battery_sensors` / `meta.battery_names`
+  (`$divumwx_battery_sensors`, `$divumwx_battery_names` in
+  `divumwx_cards.py`). The card then shows exactly those sensors, a name in
+  place of the type, and a listed sensor that isn't heard as "No signal"
+  (dashed, with a ?). Without a list it shows every sensor heard.
 - Refreshes every 30 s (battery levels change slowly), from the shared
   `loop.json` copy.
 - `install.py` offers it after the Indoor Temperature card when
   `weewx.conf` has an `[EcowittGateway]` section; an upgrade asks once, and
   a station without the driver isn't asked (it is once the driver is
   added). `DIVUMWX_CARD_TARGET_TOTAL` is now 30.
-- 15 new phrases, translated in every language file.
+- 16 new phrases, translated in every language file.
 - Changed: `cardsBundleNew.js` 1.4.0 (cardEcowittBatteries.js 1.0.0;
   cache-buster updated), the card's slot in `index.html`, `hyperIndex.html`
-  and `lexendIndex.html`, `install.py`, `build_card_bundle.py`, `lang/*.conf`,
+  and `lexendIndex.html`, `install.py`, `bin/user/divumwx_cards.py`,
+  `skins/DivumWX/jsondata/archive.json.tmpl`, `build_card_bundle.py`, `lang/*.conf`,
   `INSTALLATION_GUIDE.md` ("Sensor batteries card (Ecowitt)").
 
 ### README

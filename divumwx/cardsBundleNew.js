@@ -13175,11 +13175,17 @@ try {
 // (WH26/WN32P/WH69), batteryStatus1-8 (WN31 ch1-8, signals signal1-8), all
 // 0/1. rain-, hail- and windBatteryStatus are left out: the level stays in
 // the driver's own field (wh40_batt ...), which is shown instead.
-// A sensor is shown only while it's in use: a battery value that is a
-// number (not None, not 9) and a signal that isn't 0.
+// Which sensors: archive.json meta.battery_sensors, the list the installer
+// works out from what the station has reported ([DivumWXCards]
+// battery_sensors, e.g. wh40, wh51_ch2), with names from meta.battery_names
+// for the channel sensors. A listed sensor that isn't heard (signal 0, no
+// battery value) is shown as "No signal". Without a list, every sensor in
+// use is shown: a battery value that is a number (not None, not 9) and a
+// signal that isn't 0.
 
 (function(){
   var LOOP_JSON_URL = './jsondata/loop.json';
+  var ARCHIVE_JSON_URL = './jsondata/archive.json';
   var POLL_MS = 30 * 1000;
 
   var mount = document.getElementById('ecowittBatteryCard32');
@@ -13219,7 +13225,7 @@ try {
       if (binary && value !== 0 && value !== 1) return;
       if (sig !== null && sig <= 0) return;                 // not heard: not in use
       seen[key] = 1;
-      out.push({ model: model, ch: ch ? Number(ch) : 0, binary: binary, value: value, volt: volt });
+      out.push({ key: key, model: model, ch: ch ? Number(ch) : 0, binary: binary, value: value, volt: volt });
     }
     Object.keys(loop).forEach(function(k){
       var m = FIELD_RE.exec(k);
@@ -13245,12 +13251,18 @@ try {
           add('wn31', String(n), num(loop['batteryStatus' + n]), sig('signal' + n, 'wn31_ch' + n + '_sig'), null, true);
       }
     }
-    out.forEach(function(s){
+    out.forEach(state);
+    return sortSensors(out);
+  }
+
+  function state(s){
       s.dc = !s.binary && s.value === 6;
       s.low = s.binary ? s.value === 1 : (!s.dc && s.value <= 1);
       s.fill = s.binary ? (s.low ? 0.2 : 1) : (s.dc ? 1 : s.value / 5);
       s.colour = s.dc ? COLOURS.dc : s.low ? COLOURS.low : (!s.binary && s.value === 2) ? COLOURS.mid : COLOURS.ok;
-    });
+  }
+
+  function sortSensors(out){
     out.sort(function(a, b){
       var ia = ORDER.indexOf(a.model), ib = ORDER.indexOf(b.model);
       ia = ia < 0 ? 99 : ia; ib = ib < 0 ? 99 : ib;
@@ -13259,9 +13271,33 @@ try {
     return out;
   }
 
+  // The installer's list: exactly those sensors; one not heard is "No signal".
+  function applySettings(heard, meta){
+    var keys = meta && Array.isArray(meta.battery_sensors) ? meta.battery_sensors : null;
+    var names = (meta && meta.battery_names && typeof meta.battery_names === 'object') ? meta.battery_names : {};
+    var list = heard;
+    if (keys && keys.length) {
+      var byKey = {};
+      heard.forEach(function(s){ byKey[s.key] = s; });
+      list = [];
+      keys.forEach(function(k){
+        k = String(k).toLowerCase();
+        var m = /^(w[hns]\d+p?)(?:_ch(\d+))?$/.exec(k);
+        if (!m) return;
+        list.push(byKey[k] || { key: k, model: m[1], ch: m[2] ? Number(m[2]) : 0, nosignal: true,
+                                fill: 0, colour: COLOURS.none, low: false, dc: false, binary: !!BINARY[m[1]] });
+      });
+      sortSensors(list);
+    }
+    list.forEach(function(s){ s.name = names[s.key] ? String(names[s.key]) : ''; });
+    return list;
+  }
+
   function codeOf(s){ return s.model.toUpperCase() + (s.ch ? ' #' + s.ch : ''); }
-  function nameOf(s){ return KIND[s.model] ? T(KIND[s.model]) : ''; }
+  function kindOf(s){ return KIND[s.model] ? T(KIND[s.model]) : ''; }
+  function nameOf(s){ return s.name || kindOf(s); }
   function readingOf(s){
+    if (s.nosignal) return T('No signal');
     if (s.binary) return s.low ? T('Low') : T('OK');
     if (s.dc) return T('DC power');
     var t = s.value + '/5';
@@ -13329,13 +13365,17 @@ try {
     var w = 24, h = 40, pad = 3, inner = h - 2 * pad;
     var fh = Math.max(s.fill > 0 ? 3 : 0, Math.round(inner * Math.min(1, s.fill)));
     var g = '<g transform="translate(' + x + ',' + y + ')">' +
-      '<title>' + esc(codeOf(s) + (nameOf(s) ? ' · ' + nameOf(s) : '') + ': ' + readingOf(s)) + '</title>' +
+      '<title>' + esc(codeOf(s) + (s.name ? ' \u00b7 ' + s.name : '') + (kindOf(s) ? ' \u00b7 ' + kindOf(s) : '') +
+        ': ' + readingOf(s)) + '</title>' +
       '<rect x="8" y="-4" width="8" height="5" rx="1.5" fill="var(--bs-border-color,#999)"/>' +
       '<rect x="0.75" y="0.75" width="' + (w - 1.5) + '" height="' + (h - 1.5) + '" rx="4" fill="none" ' +
-        'stroke="' + (s.low ? COLOURS.low : 'var(--bs-secondary-color,#888)') + '" stroke-width="1.5"/>' +
+        'stroke="' + (s.low ? COLOURS.low : 'var(--bs-secondary-color,#888)') + '" stroke-width="1.5"' +
+        (s.nosignal ? ' stroke-dasharray="3 2" opacity=".6"' : '') + '/>' +
       '<rect x="' + pad + '" y="' + (h - pad - fh) + '" width="' + (w - 2 * pad) + '" height="' + fh + '" rx="2" fill="' + s.colour + '"/>';
     if (s.dc) {   // a lightning bolt: on mains/DC power
       g += '<path d="M14 9 L8 21 L12 21 L10 31 L17 17 L13 17 L15 9 Z" fill="#fff" opacity=".9"/>';
+    } else if (s.nosignal) {
+      g += '<text x="12" y="25" text-anchor="middle" font-size="13" font-weight="700" fill="' + COLOURS.none + '">?</text>';
     } else if (s.low) {
       g += '<text x="12" y="16" text-anchor="middle" font-size="13" font-weight="700" fill="' + COLOURS.low + '">!</text>';
     }
@@ -13371,20 +13411,26 @@ try {
   // ---- Text zone: summary, then a row per sensor ----
   function drawText(list){
     var low = list.filter(function(s){ return s.low; });
+    var lost = list.filter(function(s){ return s.nosignal; });
     var head;
     if (!list.length) {
       head = '<div style="opacity:.8">' + esc(T('No Ecowitt sensor batteries reported')) + '</div>';
-    } else if (low.length) {
-      head = '<div style="font-weight:700;color:' + COLOURS.low + ';font-size:12px">' + low.length + ' ' + esc(T('Low')) + '</div>';
+    } else if (low.length || lost.length) {
+      head = '<div style="font-weight:700;font-size:12px;line-height:1.2">' +
+        (low.length ? '<div style="color:' + COLOURS.low + '">' + low.length + ' ' + esc(T('Low')) + '</div>' : '') +
+        (lost.length ? '<div style="color:var(--bs-secondary-color,#888);font-size:11px">' + lost.length + ' ' + esc(T('No signal')) + '</div>' : '') +
+        '</div>';
     } else {
       head = '<div style="font-weight:700;color:' + COLOURS.ok + ';font-size:12px">' + esc(T('All OK')) + '</div>';
     }
     // Two lines a sensor: code and reading, then what the sensor is.
-    var rows = list.slice().sort(function(a, b){ return (b.low ? 1 : 0) - (a.low ? 1 : 0); }).map(function(s){
+    var rank = function(s){ return s.low ? 2 : s.nosignal ? 1 : 0; };
+    var rows = list.slice().sort(function(a, b){ return rank(b) - rank(a); }).map(function(s){
       return '<div style="padding:2px 0;border-bottom:1px solid var(--bs-border-color-translucent,rgba(128,128,128,.15))">' +
         '<div style="display:flex;justify-content:space-between;gap:6px">' +
           '<b style="font-weight:600;white-space:nowrap">' + esc(codeOf(s)) + '</b>' +
-          '<span style="white-space:nowrap;font-variant-numeric:tabular-nums;color:' + (s.low ? COLOURS.low : s.dc ? COLOURS.dc : 'inherit') +
+          '<span style="white-space:nowrap;font-variant-numeric:tabular-nums;color:' +
+            (s.low ? COLOURS.low : s.dc ? COLOURS.dc : s.nosignal ? 'var(--bs-secondary-color,#888)' : 'inherit') +
             (s.low ? ';font-weight:700' : '') + '">' + esc(readingOf(s)) + '</span></div>' +
         (nameOf(s) ? '<div style="font-size:9px;opacity:.65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(nameOf(s)) + '</div>' : '') +
         '</div>';
@@ -13395,10 +13441,14 @@ try {
 
   function refresh(){
     titleLabel.textContent = T('Sensor Batteries');
-    return fetch(LOOP_JSON_URL + '?_=' + Date.now(), { cache: 'no-store' })
-      .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-      .then(function(loop){
-        var list = sensorsFrom(loop || {});
+    var getJson = function(url){
+      return fetch(url + '?_=' + Date.now(), { cache: 'no-store' })
+        .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+    };
+    var meta = getJson(ARCHIVE_JSON_URL).then(function(d){ return (d && d.meta) || {}; }, function(){ return {}; });
+    return Promise.all([getJson(LOOP_JSON_URL), meta])
+      .then(function(res){
+        var list = applySettings(sensorsFrom(res[0] || {}), res[1]);
         drawImage(list);
         drawText(list);
         setStatus(true);
@@ -13410,7 +13460,7 @@ try {
   }
 
   // Exposed for tests.
-  window.DivumWXEcowittBatteries = { sensorsFrom: sensorsFrom };
+  window.DivumWXEcowittBatteries = { sensorsFrom: sensorsFrom, applySettings: applySettings };
 
   refresh();
   // Battery levels change over days, so the 30 s timer is plenty (not the

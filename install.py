@@ -2250,6 +2250,217 @@ def optional_card_offered(cfg, card_name):
     return need is None or bool(need(cfg))
 
 
+# ---- Sensor Batteries card: which Ecowitt sensors to show ------------------
+# Like weewx-ecowitt_console_emulator's installer, the sensors are worked out
+# from what the station has actually reported, and saved as settings the
+# card follows ([DivumWXCards] battery_sensors and [[battery_names]], put in
+# archive.json by divumwx_cards.py). A sensor is named by its driver field
+# without _batt: wh40, ws90, wh51_ch2, wn31_ch1.
+ECOWITT_BATTERY_FIELD = re.compile(r'^(w[hns]\d+p?)(?:_ch(\d+))?_batt$')
+ECOWITT_BATTERY_KEY = re.compile(r'^w[hns]\d+p?(?:_ch\d+)?$')
+# The driver's standard WeeWX columns (use_station_columns) -> sensor
+ECOWITT_BATTERY_COLUMNS = dict({'inTempBatteryStatus': 'wh25', 'outTempBatteryStatus': 'wh26'},
+                               **{'batteryStatus%d' % n: 'wn31_ch%d' % n for n in range(1, 9)})
+# Card order: the outdoor array and gauges, indoor, then channels (as cardEcowittBatteries.js)
+ECOWITT_BATTERY_ORDER = ['wh69', 'wh65', 'ws90', 'ws85', 'ws80', 'wh68', 'ws68', 'wh40', 'wh57', 'wh26',
+                         'wn32p', 'wh25', 'wn32', 'wh45', 'wh41', 'wh43', 'wn31', 'wn34', 'wn35', 'wh51',
+                         'wh54', 'wh55']
+ECOWITT_BINARY_BATTERIES = ('wh25', 'wh26', 'wn31', 'wn32', 'wn32p', 'wh65', 'wh69')
+ECOWITT_BATTERY_DAYS = 30
+
+
+def battery_sensor_label(key):
+    """'wh51_ch2' -> 'WH51 #2'."""
+    m = re.match(r'^(w[hns]\d+p?)(?:_ch(\d+))?$', key)
+    return (m.group(1).upper() + (' #' + m.group(2) if m.group(2) else '')) if m else key
+
+
+def sort_battery_sensors(keys):
+    def k(key):
+        model, _, ch = key.partition('_ch')
+        i = ECOWITT_BATTERY_ORDER.index(model) if model in ECOWITT_BATTERY_ORDER else 99
+        return (i, model, int(ch) if ch.isdigit() else 0)
+    return sorted(set(keys), key=k)
+
+
+def _number(v):
+    try:
+        return None if v is None or v == '' or v == 'None' else float(v)
+    except (TypeError, ValueError):
+        return None
+
+
+def batteries_in_loop(loop):
+    """Sensors with a battery reading and a signal that isn't 0 in one loop
+    document (DivumWX's loop.json or the driver's ecwLoop.json)."""
+    found = set()
+    for field, value in (loop or {}).items():
+        m = ECOWITT_BATTERY_FIELD.match(field)
+        key = field[:-len('_batt')] if m else ECOWITT_BATTERY_COLUMNS.get(field)
+        if not key:
+            continue
+        base = field[:-len('_batt')] if m else None
+        v = _number(value)
+        if v is None or v == 9 or not 0 <= v <= 6:
+            continue
+        if not m:   # a standard column: its signal is signalN or the driver's field
+            n = field[len('batteryStatus'):] if field.startswith('batteryStatus') else ''
+            sig_fields = ['signal' + n, key + '_sig'] if n else [key + '_sig']
+        else:
+            sig_fields = [base + '_sig']
+        sig = next((_number(loop[f]) for f in sig_fields if f in loop), None)
+        if sig is not None and sig <= 0:
+            continue
+        found.add(key)
+    return found
+
+
+def _read_json_file(path):
+    import json
+    try:
+        with open(path, encoding='utf-8') as fh:
+            return json.load(fh)
+    except (OSError, ValueError):
+        return None
+
+
+def detect_ecowitt_batteries(cfg, days=ECOWITT_BATTERY_DAYS):
+    """The Ecowitt sensors with battery readings: heard now (DivumWX's
+    loop.json, the driver's ecwLoop.json) or in the last `days` days (the
+    station's and the driver's additions databases). Returns (sensors in card
+    order, sources read); sensors is None if nothing could be read."""
+    found, sources = set(), []
+    loop_file = (cfg.get('LiveData') or {}).get('json_file')
+    eg = cfg.get('EcowittGateway') or {}
+    lj = eg.get('loop_json') or {}
+    ecw = None
+    if str(lj.get('enable', 'False')).lower() == 'true':
+        ecw = os.path.expanduser(str(lj.get('path', 'ecwLoop.json')))
+        if not os.path.isabs(ecw):
+            ecw = os.path.join(cfg.get('WEEWX_ROOT', ''), cfg.get('StdReport', {}).get('HTML_ROOT', 'public_html'), ecw)
+    for label, path in (('loop.json', loop_file), ('ecwLoop.json', ecw)):
+        doc = _read_json_file(path) if path else None
+        if isinstance(doc, dict):
+            found |= batteries_in_loop(doc)
+            sources.append(label)
+    try:
+        import time
+        import weewx.manager
+    except ImportError:
+        weewx = None
+    else:
+        for binding in ('wx_binding', 'ecowitt_binding'):
+            if binding not in cfg.get('DataBindings', {}):
+                continue
+            try:
+                mgr = weewx.manager.open_manager_with_config(cfg, binding)
+            except Exception:
+                continue
+            try:
+                since = (mgr.lastGoodStamp() or time.time()) - days * 86400
+                cols = [c for c in mgr.sqlkeys if ECOWITT_BATTERY_FIELD.match(c) or c in ECOWITT_BATTERY_COLUMNS]
+                for col in cols:
+                    key = col[:-len('_batt')] if col.endswith('_batt') else ECOWITT_BATTERY_COLUMNS[col]
+                    if key in found:
+                        continue
+                    row = mgr.getSql("SELECT 1 FROM %s WHERE %s IS NOT NULL AND %s <> 9 AND dateTime > ? LIMIT 1"
+                                     % (mgr.table_name, col, col), (since,))
+                    if row:
+                        found.add(key)
+                sources.append('%s (last %d days)' % (binding, days))
+            except Exception:
+                pass
+            finally:
+                mgr.close()
+    if not sources:
+        return None, sources
+    return sort_battery_sensors(found), sources
+
+
+def parse_battery_sensors(text):
+    """'WH40, wh51 #2, wn31_ch1' -> (['wh40', 'wh51_ch2', 'wn31_ch1'], [not understood])."""
+    keys, bad = [], []
+    for part in re.split(r'[,\s]+(?![#0-9])', str(text or '').strip()):
+        p = part.strip().lower().replace(' ', '')
+        if not p:
+            continue
+        p = re.sub(r'#(\d+)$', r'_ch\1', p)
+        (keys if ECOWITT_BATTERY_KEY.match(p) else bad).append(p if ECOWITT_BATTERY_KEY.match(p) else part)
+    return sort_battery_sensors(keys), bad
+
+
+def configure_battery_sensors(cfg, printer, ask, detect=detect_ecowitt_batteries):
+    """With the Sensor Batteries card shown: work out which sensors have
+    batteries, confirm the list (Enter keeps it) and ask a name for each
+    channel sensor. Saves [DivumWXCards] battery_sensors and [[battery_names]].
+    `ask(question, default)` returns the answer. Returns the list saved, or
+    None if nothing was asked."""
+    dc = cfg.get('DivumWXCards')
+    cards = (dc or {}).get('enabled_cards') or []
+    cards = [cards] if isinstance(cards, str) else list(cards)
+    if dc is None or 'cardEcowittBatteries' not in cards:
+        return None
+    current = dc.get('battery_sensors') or []
+    current = [current] if isinstance(current, str) else list(current)
+    current = [c for c in current if ECOWITT_BATTERY_KEY.match(str(c))]
+    found, sources = detect(cfg)
+    if found is None and not current:
+        printer.out("Sensor Batteries card: couldn't read loop.json or the database yet, so it will "
+                    "show every sensor it hears. Run the installer again once WeeWX has run to "
+                    "set the list.", level=1)
+        return None
+    found = found or []
+    new = [k for k in found if k not in current]
+    default = sort_battery_sensors(current + new)
+    if found:
+        printer.out("Sensor batteries found (%s): %s" % (', '.join(sources),
+                    ', '.join(battery_sensor_label(k) for k in found)), level=1)
+    gone = [k for k in current if k not in found]
+    if gone and found:
+        printer.out("Not heard in the last %d days (kept; shown as 'No signal' on the card): %s"
+                    % (ECOWITT_BATTERY_DAYS, ', '.join(battery_sensor_label(k) for k in gone)), level=1)
+    if not default:
+        printer.out("Sensor Batteries card: no Ecowitt sensor batteries found yet, so it will show "
+                    "every sensor it hears.", level=1)
+        return None
+    keys = default
+    for _ in range(3):
+        answer = ask("Sensors on the Sensor Batteries card (Enter keeps this list; or type yours, "
+                     "e.g. WH40, WH51 #2)", ', '.join(battery_sensor_label(k) for k in default))
+        if not str(answer or '').strip():
+            keys = default
+            break
+        keys, bad = parse_battery_sensors(answer)
+        if not bad and keys:
+            break
+        printer.out("Not understood: %s. Use the codes shown, e.g. WH40, WS90, WH51 #2."
+                    % ', '.join(bad or ['(empty list)']), level=1)
+    else:
+        keys = default
+    dc['battery_sensors'] = keys
+    names = dc.get('battery_names')
+    if not isinstance(names, dict):
+        dc['battery_names'] = {}
+        names = dc['battery_names']
+    for key in keys:
+        if '_ch' not in key:
+            continue
+        cur = str(names.get(key, '') or '')
+        ans = ask("Name for %s (Enter keeps%s, 'none' for none)"
+                  % (battery_sensor_label(key), ' it' if cur else ' none'), cur)
+        ans = str(ans if ans is not None else '').strip()
+        if ans.lower() == 'none':
+            names.pop(key, None)
+        elif ans:
+            names[key] = ans[:24]
+    for key in list(names):
+        if key not in keys:
+            del names[key]
+    printer.out("Sensor Batteries card: %s." % ', '.join(
+        battery_sensor_label(k) + (' (%s)' % names[k] if k in names else '') for k in keys), level=1)
+    return keys
+
+
 def optional_card_question(card_name, running_total=None):
     """The y/n question for an optional card, with its note if it has one."""
     note = DIVUMWX_OPTIONAL_CARD_NOTES.get(card_name)
@@ -4437,6 +4648,10 @@ class DivumwxInstaller(ExtensionInstaller):
         if webcam_count:
             printer.out("Webcams: %d (cards %s)." % (webcam_count, ', '.join(DIVUMWX_WEBCAM_CARDS[:webcam_count])),
                         level=1)
+        # Sensor Batteries card: the sensors in use, every run (sensors come
+        # and go), with names for the channel sensors.
+        configure_battery_sensors(
+            cfg, printer, lambda q, d: weecfg.prompt_with_options(q, default=d))
         if detector == 'boltek':
             printer.out("Using the Boltek Lightning card (cardBoltekLightning) in place of "
                         "cardLightning. Point [BoltekLightning] source_file at NSD Bridge's "

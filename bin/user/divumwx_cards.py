@@ -81,6 +81,14 @@ Provides three tags:
                                works; the frontend fetch is the other
                                half (see cardStationImage.js).
 
+    $divumwx_battery_sensors — [DivumWXCards] battery_sensors, the Sensor
+                               Batteries card's Ecowitt sensors (wh40,
+                               wh51_ch2 ...), as a JSON list, or null to
+                               show every sensor heard. Set by install.py.
+
+    $divumwx_battery_names   — [DivumWXCards] [[battery_names]] as a JSON
+                               object, {"wh51_ch2": "Greenhouse"}.
+
     $divumwx_loop_interval   — [LiveData] update_interval in seconds (an
                                int, 2 when unset): how often loop.json is
                                written; the dashboard's live cards refresh
@@ -176,6 +184,7 @@ import glob
 import json
 import logging
 import os.path
+import re
 
 import configobj
 
@@ -405,6 +414,18 @@ class DivumwxCards(SearchList):
         # title -- [DivumWXCards] country_code, else from the time zone.
         country_code = station_country(cards_section)
 
+        # battery_sensors / battery_names: the Sensor Batteries card's
+        # sensors (wh40, wh51_ch2 ...) and their names, set by the installer
+        # from what the station reports. Unset: the card shows every sensor
+        # it hears.
+        bs = cards_section.get('battery_sensors')
+        bs = [bs] if isinstance(bs, str) else list(bs or [])
+        bs = [str(k).strip().lower() for k in bs if re.match(r'^w[hns]\d+p?(?:_ch\d+)?$', str(k).strip().lower())]
+        battery_sensors = bs or None
+        bn = cards_section.get('battery_names')
+        battery_names = {str(k).lower(): str(v)[:24] for k, v in (bn.items() if isinstance(bn, dict) else [])
+                         if str(v).strip() and (battery_sensors is None or str(k).lower() in battery_sensors)}
+
         # loop_interval: how often LiveDataService writes loop.json
         # ([LiveData] update_interval, 2 s by default, as in divumwx.py), so
         # the dashboard's live cards can refresh as often (sharedData.js).
@@ -490,6 +511,8 @@ class DivumwxCards(SearchList):
             'divumwx_rain_sensor': json.dumps(str(cards_section.get('rain_sensor', '') or '').strip().lower() or None),
             'divumwx_country_code': json.dumps(country_code),
             'divumwx_loop_interval': loop_interval,
+            'divumwx_battery_sensors': json.dumps(battery_sensors),
+            'divumwx_battery_names': json.dumps(battery_names, ensure_ascii=False),
             # The station's time zone name for archive.json meta.timezone.
             'divumwx_timezone': json.dumps(system_timezone()),
             'divumwx_page_background': json.dumps(page_background),

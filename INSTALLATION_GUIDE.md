@@ -390,15 +390,42 @@ ones listed first:
 - the other sensors report a level out of 5 (**0/5** or **1/5** is low), plus
   the battery voltage where the gateway gives one (`4/5 · 1.52 V`); **DC
   power** means a sensor running from mains (level 6);
-- a sensor whose signal is 0 (the gateway can't hear it), or that has no
-  battery value, isn't shown.
+- a sensor on the card's list that the gateway can't hear (signal 0, or no
+  battery value) shows as **No signal**, so a dead battery doesn't just
+  make the sensor disappear.
 
 It reads the `<sensor>_batt`, `_sig` and `_volt` fields in `loop.json`, and
 the standard columns the driver can fill instead (`inTempBatteryStatus`,
-`outTempBatteryStatus`, `batteryStatus1`–`8`). Nothing to set up: the
-installer offers the card when `weewx.conf` has an `[EcowittGateway]`
-section (an upgrade asks once), or add `cardEcowittBatteries` to
-`[DivumWXCards] enabled_cards` yourself.
+`outTempBatteryStatus`, `batteryStatus1`–`8`). The installer offers the card
+when `weewx.conf` has an `[EcowittGateway]` section (an upgrade asks once).
+
+**Which sensors.** Like the Ecowitt console emulator, the installer works
+out which sensors have batteries, every time it runs: those reporting now
+(DivumWX's `loop.json`, and the driver's `ecwLoop.json` if it's turned on)
+and those with readings in the last 30 days (the station's database and the
+driver's additions database). It shows the list (sensors already on it are
+kept, new ones added) and asks for a name for each channel sensor:
+
+```
+Sensor batteries found (loop.json, wx_binding (last 30 days)): WS90, WH40, WN31 #2, WH51 #3
+Sensors on the Sensor Batteries card (Enter keeps this list; or type yours, e.g. WH40, WH51 #2) [WS90, WH40, WN31 #2, WH51 #3]:
+Name for WN31 #2 (Enter keeps none, 'none' for none) []: Garage
+Name for WH51 #3 (Enter keeps none, 'none' for none) []: Greenhouse
+```
+
+The answers are saved in `weewx.conf`, where you can also change them:
+
+```
+[DivumWXCards]
+    battery_sensors = ws90, wh40, wn31_ch2, wh51_ch3
+    [[battery_names]]
+        wn31_ch2 = Garage
+        wh51_ch3 = Greenhouse
+```
+
+A sensor is its driver field without `_batt` (`wh40`, `wh51_ch3`). The card
+shows exactly these sensors, a name in place of the sensor's type. Without
+`battery_sensors` (before WeeWX has run, say) it shows every sensor it hears.
 
 ## Solar energy cards (SolarAssistant)
 
