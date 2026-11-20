@@ -106,11 +106,14 @@
   `skins/DivumWX/jsondata/archive.json.tmpl`.
 
 ### New card: Sensor Batteries (Ecowitt)
-- `cardEcowittBatteries.js` 1.0.0, for stations using the
+- `cardEcowittBatteries.js` 1.0.1, for stations using the
   weewx-ecowittGateway driver or service. Image zone: a battery per sensor
   in use, filled to its level (green, amber at 2/5, red when low, blue with
-  a bolt on DC power). Text zone: "All OK" or how many are low, then each
-  sensor's code, reading (OK/Low, n/5, voltage) and type, low ones first.
+  a bolt on DC power). Text zone: the other cards' chip rows (small-caps label over a
+  monospaced value in the theme's accent): a Battery row ("All OK", or how
+  many are low or not heard), then each sensor (code and type, or its name)
+  with its reading, low ones first; low, DC power and No signal keep their
+  colours. More than six rows scroll.
 - Reads `<sensor>_batt` with `_sig` and `_volt` from `loop.json`: WH25,
   WH26, WN31, WN32, WH65 and WH69 as 0/1; the rest as a level 0-5 (0 or 1
   low, 6 on DC power). The driver's standard columns
@@ -136,7 +139,7 @@
   a station without the driver isn't asked (it is once the driver is
   added). `DIVUMWX_CARD_TARGET_TOTAL` is now 30.
 - 16 new phrases, translated in every language file.
-- Changed: `cardsBundleNew.js` 1.4.0 (cardEcowittBatteries.js 1.0.0;
+- Changed: `cardsBundleNew.js` 1.4.0 (cardEcowittBatteries.js 1.0.1;
   cache-buster updated), the card's slot in `index.html`, `hyperIndex.html`
   and `lexendIndex.html`, `install.py`, `bin/user/divumwx_cards.py`,
   `skins/DivumWX/jsondata/archive.json.tmpl`, `build_card_bundle.py`, `lang/*.conf`,
