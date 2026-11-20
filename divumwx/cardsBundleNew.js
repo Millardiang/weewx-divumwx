@@ -11431,7 +11431,7 @@ try {
 try {
 /*
 ##############################################################################################
-# cardWebcam.js version 1.1.1
+# cardWebcam.js version 1.2.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
@@ -11443,8 +11443,9 @@ try {
 // one's title, image and display come from archive.json meta.webcams
 // (written from [DivumWXCards] by the installer; webcam 1 also falls back to
 // meta.webcam_title / meta.webcam_image):
-//   'daylight' - the live image from sunrise to sunset, and the night-time
-//                page after dark (how the webcam card always worked);
+//   'daylight' - the live image from sunrise to sunset, and its night-time
+//                image after dark (night_image, set by the installer;
+//                img/nightTime.svg when there isn't one or it won't load);
 //   '24hr'     - the live image all the time.
 // Webcam 1's card opens the timelapse (made from its image); the others open
 // modalWebcam.html?cam=N, a larger live view.
@@ -11508,7 +11509,8 @@ try {
 
   function makeCard(n, mount){
     var cam = { title: null, description: null,
-                image: n === 1 ? 'img/picam.jpg' : 'img/webcam' + n + '.jpg', mode: 'daylight' };
+                image: n === 1 ? 'img/picam.jpg' : 'img/webcam' + n + '.jpg', mode: 'daylight',
+                nightImage: null };
     var dayLabel = function(){ return DivumWXI18N.t('Webcam') + (n > 1 ? ' ' + n : ''); };
     // The card's label: the webcamN_title set in [DivumWXCards], or
     // "Webcam N" when there isn't one.
@@ -11585,11 +11587,14 @@ try {
     function refresh(){
       isDayNow().then(function(day){
         lastIsDay = day;
-        // Daylight webcams show the night-time page after dark. (If day or
-        // night can't be told, show the live image.)
+        // Daylight webcams show their night-time image after dark, or the
+        // night-time page if it isn't set or won't load. (If day or night
+        // can't be told, show the live image.)
         if (cam.mode !== '24hr' && day === false){
           titleLabel.textContent = n === 1 ? DivumWXI18N.t('Timelapse') + ' - ' + camLabel() : camLabel();
-          img.src = 'img/nightTime.svg';
+          img.onload = null;
+          img.onerror = function(){ img.onerror = null; img.src = 'img/nightTime.svg'; };
+          img.src = cam.nightImage || 'img/nightTime.svg';
           setStatus(false);
           return;
         }
@@ -11620,6 +11625,7 @@ try {
         if (c.description) cam.description = c.description;
         if (c.image) cam.image = c.image;
         if (c.mode === '24hr' || c.mode === 'daylight') cam.mode = c.mode;
+        if (c.night_image) cam.nightImage = c.night_image;
       } else if (n === 1 && meta) {   // before meta.webcams existed
         if (meta.webcam_title) cam.title = meta.webcam_title;
         if (meta.webcam_image) cam.image = meta.webcam_image;

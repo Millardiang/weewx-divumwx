@@ -2530,6 +2530,7 @@ DIVUMWX_CARD_TARGET_TOTAL = 30  # theoretical max (8 mandatory + 8 automatic + 2
 
 DIVUMWX_WEBCAM_DEFAULT_TITLE = 'Webcam'
 DIVUMWX_WEBCAM_DEFAULT_IMAGE = 'img/picam.jpg'
+DIVUMWX_WEBCAM_DEFAULT_NIGHT_IMAGE = 'img/nighttime.jpg'
 
 # Up to four webcams. Webcam 1 is cardWebcam (its click opens the timelapse,
 # which is made from its image); webcams 2-4 are extra cards that open
@@ -2539,7 +2540,8 @@ DIVUMWX_WEBCAM_DEFAULT_IMAGE = 'img/picam.jpg'
 # webcam 1 (the keys it always had), webcam2_* .. webcam4_* for the others,
 # and webcam_count (also marks that the questions have been answered).
 # Each webcam's mode: 'daylight' shows the live image from sunrise to sunset
-# and the night-time page after dark (how the webcam card always worked);
+# and a night-time image after dark (webcam_night_image / webcamN_night_image,
+# img/nighttime.jpg by default; the built-in night page if it can't be loaded);
 # '24hr' shows the live image all the time.
 DIVUMWX_WEBCAM_MAX = 4
 DIVUMWX_WEBCAM_CARDS = ['cardWebcam', 'cardWebcam2', 'cardWebcam3', 'cardWebcam4']
@@ -2619,6 +2621,11 @@ def webcam_keys(n):
     return prefix + '_title', prefix + '_image', prefix + '_mode'
 
 
+def webcam_night_key(n):
+    """[DivumWXCards] key for webcam n's night-time image (daylight mode)."""
+    return ('webcam' if n == 1 else 'webcam%d' % n) + '_night_image'
+
+
 def webcam_default_image(n):
     return DIVUMWX_WEBCAM_DEFAULT_IMAGE if n == 1 else 'img/webcam%d.jpg' % n
 
@@ -2637,6 +2644,8 @@ def apply_webcam_answers(cfg, cams):
         dc[ik] = cam.get('image') or webcam_default_image(n)
         mode = cam.get('mode') if cam.get('mode') in DIVUMWX_WEBCAM_MODES else DIVUMWX_WEBCAM_DEFAULT_MODE
         dc[mk] = mode
+        if mode == 'daylight' and cam.get('night_image'):
+            dc[webcam_night_key(n)] = cam['night_image']
     dc['webcam_count'] = str(count)
     cards = dc.get('enabled_cards') or []
     cards = [cards] if isinstance(cards, str) else list(cards)
@@ -2685,12 +2694,50 @@ def ask_webcams_once(cfg, prompt, printer=None):
                        % (label, webcam_default_image(n)),
                        dc.get(ik) or webcam_default_image(n), None)
         mode = prompt("%s display: '24hr' (live all day and night) or 'daylight' (live from "
-                      "sunrise to sunset, night-time page after dark)?" % label,
+                      "sunrise to sunset, night-time image after dark)?" % label,
                       dc.get(mk) if dc.get(mk) in DIVUMWX_WEBCAM_MODES else DIVUMWX_WEBCAM_DEFAULT_MODE,
                       DIVUMWX_WEBCAM_MODES)
-        cams.append({'title': title, 'image': image, 'mode': mode})
+        night = None
+        if mode == 'daylight':
+            night = ask_webcam_night_image(dc, n, prompt)
+        cams.append({'title': title, 'image': image, 'mode': mode, 'night_image': night})
     apply_webcam_answers(cfg, cams)
     return count
+
+
+def ask_webcam_night_image(dc, n, prompt):
+    """Ask for daylight webcam n's night-time image path; the current one (or
+    img/nighttime.jpg) is the default."""
+    label = 'Webcam %d' % n
+    answer = prompt("%s night-time image path, shown after dark, relative to the DivumWX html "
+                    "root (e.g. '%s')" % (label, DIVUMWX_WEBCAM_DEFAULT_NIGHT_IMAGE),
+                    dc.get(webcam_night_key(n)) or DIVUMWX_WEBCAM_DEFAULT_NIGHT_IMAGE, None)
+    return str(answer or '').strip() or DIVUMWX_WEBCAM_DEFAULT_NIGHT_IMAGE
+
+
+def ask_webcam_night_images_once(cfg, prompt):
+    """Upgrades: the webcam questions were answered before there was a
+    night-time image, so ask it once for each daylight webcam without one.
+    `prompt(question, default, options)` as in ask_webcams_once(). Returns
+    the webcams asked about."""
+    dc = cfg.get('DivumWXCards', {})
+    cards = dc.get('enabled_cards') or []
+    cards = [cards] if isinstance(cards, str) else list(cards)
+    try:
+        count = int(dc.get('webcam_count') or 0)
+    except ValueError:
+        count = 0
+    if 'cardWebcam' not in cards or not count:
+        return []
+    asked = []
+    for n in range(1, min(count, DIVUMWX_WEBCAM_MAX) + 1):
+        tk, ik, mk = webcam_keys(n)
+        mode = dc.get(mk) if dc.get(mk) in DIVUMWX_WEBCAM_MODES else DIVUMWX_WEBCAM_DEFAULT_MODE
+        if mode != 'daylight' or dc.get(webcam_night_key(n)):
+            continue
+        dc[webcam_night_key(n)] = ask_webcam_night_image(dc, n, prompt)
+        asked.append(n)
+    return asked
 
 
 def apply_new_default_cards(cfg):
@@ -4650,6 +4697,12 @@ class DivumwxInstaller(ExtensionInstaller):
         if webcam_count:
             printer.out("Webcams: %d (cards %s)." % (webcam_count, ', '.join(DIVUMWX_WEBCAM_CARDS[:webcam_count])),
                         level=1)
+        else:
+            # Upgrades: daylight webcams set up before the night-time image.
+            for n in ask_webcam_night_images_once(
+                    cfg, lambda q, d, o: weecfg.prompt_with_options(q, default=d, options=o)):
+                printer.out("Webcam %d night-time image: %s ([DivumWXCards] %s)."
+                            % (n, cfg['DivumWXCards'][webcam_night_key(n)], webcam_night_key(n)), level=1)
         # Sensor Batteries card: the sensors in use, every run (sensors come
         # and go), with names for the channel sensors.
         configure_battery_sensors(

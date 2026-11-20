@@ -53,7 +53,7 @@ Provides three tags:
 
     $divumwx_webcams         — JSON array of the (up to four) webcams, one
                                object each: {"n", "card", "title",
-                               "image", "mode"}, in order (webcam 1 =
+                               "image", "mode", "night_image"}, in order (webcam 1 =
                                cardWebcam from webcam_title/webcam_image/
                                webcam_mode; 2-4 = cardWebcam2..4 from
                                webcam2_* .. webcam4_*). Only webcams with
@@ -391,6 +391,9 @@ class DivumwxCards(SearchList):
                 'description': cards_section.get(prefix + '_description', '') or None,
                 'image': image,
                 'mode': mode if mode in ('daylight', '24hr') else 'daylight',
+                # Shown after dark in daylight mode (the card falls back to
+                # img/nightTime.svg if it can't load it).
+                'night_image': cards_section.get(prefix + '_night_image', '') or None,
             })
         station_image_title = cards_section.get('station_image_title', '') or None
         station_image_path = cards_section.get('station_image_path', '') or None

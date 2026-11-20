@@ -142,6 +142,20 @@
   `skins/DivumWX/jsondata/archive.json.tmpl`, `build_card_bundle.py`, `lang/*.conf`,
   `INSTALLATION_GUIDE.md` ("Sensor batteries card (Ecowitt)").
 
+### Webcams: your own night-time image
+- A `daylight` webcam showed the fixed `img/nightTime.svg` after dark. When
+  a webcam is set to `daylight`, the installer now asks for a night-time
+  image path (default `img/nighttime.jpg`, relative to the DivumWX web
+  folder), saved as `[DivumWXCards] webcam_night_image` (webcam 1) or
+  `webcam2_night_image` to `webcam4_night_image`. An upgrade whose daylight
+  webcams don't have one yet is asked once.
+- Published in `archive.json` `meta.webcams` as `night_image`
+  (`divumwx_cards.py`). The webcam cards and the larger live view show it
+  after dark, and `img/nightTime.svg` when it isn't set or can't be loaded.
+- Changed: `install.py`, `bin/user/divumwx_cards.py`, `cardsBundleNew.js`
+  (cardWebcam.js 1.2.0; cache-buster updated), `modalWebcam.html` 1.1.0,
+  `INSTALLATION_GUIDE.md`.
+
 ### README
 - The 2.3.0 notes on the Piezo Rain card and the rain event rule were
   listed under 2.2.1 by mistake; they're now under 2.3.0.

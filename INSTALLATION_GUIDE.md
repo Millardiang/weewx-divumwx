@@ -317,17 +317,21 @@ have (up to four) and, for each one, its title, the path of its image
 (relative to the DivumWX web folder, e.g. `img/picam.jpg`) and how it's
 shown:
 
-- `daylight`: the live image from sunrise to sunset, and the night-time
-  page (`img/nightTime.svg`, which you can replace with your own) after
-  dark. This is how the webcam card has always worked.
+- `daylight`: the live image from sunrise to sunset, and a night-time
+  image after dark. The installer then asks for that image's path
+  (default `img/nighttime.jpg`, relative to the DivumWX web folder; put
+  your own picture there). If it isn't there or can't be loaded, the
+  built-in night-time page (`img/nightTime.svg`) is shown instead.
 - `24hr`: the live image all day and night, for a camera that sees in the
   dark.
 
 Webcam 1's card opens the timelapse, which is made from its image; the
 other webcams open a larger live view. An upgrade that already shows the
 webcam card is asked these questions once, with its current title and
-image offered as the defaults. To change them later, edit `webcam_title`,
-`webcam_image` and `webcam_mode` (webcam 1) or `webcam2_*` to `webcam4_*`
+image offered as the defaults; one whose daylight webcams were set up before
+the night-time image is asked just for that, once. To change them later,
+edit `webcam_title`, `webcam_image`, `webcam_mode` and `webcam_night_image`
+(webcam 1) or `webcam2_*` to `webcam4_*`
 under `[DivumWXCards]` in `weewx.conf`, and add or remove `cardWebcam2` to
 `cardWebcam4` in its `enabled_cards`.
 
