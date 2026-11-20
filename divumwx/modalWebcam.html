@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <!--
 ##############################################################################################
-# modalWebcam.html version 1.0.0
+# modalWebcam.html version 1.1.0
 #  Copyright (C) 2026 Ian Millard, Sean Balfour
 #  GPLv3
 ##############################################################################################
   Larger live view of one webcam, opened from webcam cards 2-4
   (modalWebcam.html?cam=N; webcam 1's card opens the timelapse). Title, image
   and display mode come from archive.json meta.webcams. A 'daylight' webcam
-  shows the night-time page after dark, as its card does; a '24hr' one is
-  always live. The image refreshes every 30 seconds.
+  shows its night-time image (night_image) after dark, as its card does, or
+  the night-time page if it isn't set or won't load; a '24hr' one is always
+  live. The image refreshes every 30 seconds.
 -->
 <html lang="en">
 <head>
@@ -74,7 +75,7 @@ body{ background:var(--bs-body-bg); color:var(--bs-body-color); font-family:'Lex
 (function(){
   var POLL_MS = 30 * 1000, STALE_S = 600;
   var n = Math.max(1, Math.min(4, parseInt((/[?&]cam=(\d)/.exec(location.search) || [])[1] || '2', 10)));
-  var cam = { title: 'Webcam ' + n, image: n === 1 ? 'img/picam.jpg' : 'img/webcam' + n + '.jpg', mode: 'daylight' };
+  var cam = { title: 'Webcam ' + n, image: n === 1 ? 'img/picam.jpg' : 'img/webcam' + n + '.jpg', mode: 'daylight', nightImage: null };
 
   // ---- Theme and season follow the dashboard ----
   function applyTheme(){
@@ -120,7 +121,10 @@ body{ background:var(--bs-body-bg); color:var(--bs-body-color); font-family:'Lex
   function refresh(){
     isDay().then(function(day){
       if (cam.mode !== '24hr' && day === false) {
-        imgEl.src = 'img/nightTime.svg';
+        // Its night-time image, or the night-time page if unset or it won't load.
+        imgEl.onload = null;
+        imgEl.onerror = function(){ imgEl.onerror = null; imgEl.src = 'img/nightTime.svg'; };
+        imgEl.src = cam.nightImage || 'img/nightTime.svg';
         msgEl.textContent = 'Live view from sunrise to sunset'; msgEl.hidden = false;
         setStatus(false, 'Night');
         return;
@@ -143,7 +147,7 @@ body{ background:var(--bs-body-bg); color:var(--bs-body-color); font-family:'Lex
   getJson('./jsondata/archive.json').then(function(a){
     var m = (a && a.meta) || {};
     var c = (Array.isArray(m.webcams) ? m.webcams : []).filter(function(w){ return w && w.n === n; })[0];
-    if (c) { cam.title = c.title || cam.title; cam.image = c.image || cam.image; cam.mode = c.mode === '24hr' ? '24hr' : 'daylight'; }
+    if (c) { cam.title = c.title || cam.title; cam.image = c.image || cam.image; cam.mode = c.mode === '24hr' ? '24hr' : 'daylight'; cam.nightImage = c.night_image || null; }
   }).catch(function(){}).then(function(){
     document.getElementById('wcTitle').textContent = cam.title;
     document.title = cam.title;

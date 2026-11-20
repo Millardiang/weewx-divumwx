@@ -53,7 +53,7 @@ Provides three tags:
 
     $divumwx_webcams         — JSON array of the (up to four) webcams, one
                                object each: {"n", "card", "title",
-                               "image", "mode"}, in order (webcam 1 =
+                               "image", "mode", "night_image"}, in order (webcam 1 =
                                cardWebcam from webcam_title/webcam_image/
                                webcam_mode; 2-4 = cardWebcam2..4 from
                                webcam2_* .. webcam4_*). Only webcams with
@@ -81,6 +81,19 @@ Provides three tags:
                                works; the frontend fetch is the other
                                half (see cardStationImage.js).
 
+    $divumwx_battery_sensors — [DivumWXCards] battery_sensors, the Sensor
+                               Batteries card's Ecowitt sensors (wh40,
+                               wh51_ch2 ...), as a JSON list, or null to
+                               show every sensor heard. Set by install.py.
+
+    $divumwx_battery_names   — [DivumWXCards] [[battery_names]] as a JSON
+                               object, {"wh51_ch2": "Greenhouse"}.
+
+    $divumwx_loop_interval   — [LiveData] update_interval in seconds (an
+                               int, 2 when unset): how often loop.json is
+                               written; the dashboard's live cards refresh
+                               as often (sharedData.js).
+
     $divumwx_country_code    — the station's country as two lower-case
                                letters (e.g. "gb"), for the flag after the
                                site title: [DivumWXCards] country_code if
@@ -92,6 +105,10 @@ Provides three tags:
                                "eaqi" (Meteoalarm countries) or "epa"
                                (elsewhere); [DivumWXCards] aq_scheme
                                overrides. See aq_scheme().
+
+    $divumwx_aq_fill_online  — [DivumWXCards] aq_fill_online: true fills a
+                               particle sensor's missing PM2.5/PM10 from
+                               Open-Meteo on the Air Quality card.
 
     $divumwx_in_uk           — the installer's own "are you in the UK?"
                                answer ([DivumWXCards] in_uk, set by
@@ -167,6 +184,7 @@ import glob
 import json
 import logging
 import os.path
+import re
 
 import configobj
 
@@ -373,6 +391,9 @@ class DivumwxCards(SearchList):
                 'description': cards_section.get(prefix + '_description', '') or None,
                 'image': image,
                 'mode': mode if mode in ('daylight', '24hr') else 'daylight',
+                # Shown after dark in daylight mode (the card falls back to
+                # img/nightTime.svg if it can't load it).
+                'night_image': cards_section.get(prefix + '_night_image', '') or None,
             })
         station_image_title = cards_section.get('station_image_title', '') or None
         station_image_path = cards_section.get('station_image_path', '') or None
@@ -395,7 +416,31 @@ class DivumwxCards(SearchList):
         # country_code: the station's country for the flag after the site
         # title -- [DivumWXCards] country_code, else from the time zone.
         country_code = station_country(cards_section)
+
+        # battery_sensors / battery_names: the Sensor Batteries card's
+        # sensors (wh40, wh51_ch2 ...) and their names, set by the installer
+        # from what the station reports. Unset: the card shows every sensor
+        # it hears.
+        bs = cards_section.get('battery_sensors')
+        bs = [bs] if isinstance(bs, str) else list(bs or [])
+        bs = [str(k).strip().lower() for k in bs if re.match(r'^w[hns]\d+p?(?:_ch\d+)?$', str(k).strip().lower())]
+        battery_sensors = bs or None
+        bn = cards_section.get('battery_names')
+        battery_names = {str(k).lower(): str(v)[:24] for k, v in (bn.items() if isinstance(bn, dict) else [])
+                         if str(v).strip() and (battery_sensors is None or str(k).lower() in battery_sensors)}
+
+        # loop_interval: how often LiveDataService writes loop.json
+        # ([LiveData] update_interval, 2 s by default, as in divumwx.py), so
+        # the dashboard's live cards can refresh as often (sharedData.js).
+        try:
+            loop_interval = max(1, int(float(self.generator.config_dict.get('LiveData', {}).get('update_interval', 2))))
+        except (TypeError, ValueError):
+            loop_interval = 2
         stn_info = getattr(self.generator, 'stn_info', None)
+        try:
+            aq_fill_online = to_bool(cards_section.get('aq_fill_online', False))
+        except ValueError:
+            aq_fill_online = False
         air_quality_scheme = aq_scheme(cards_section,
                                        getattr(stn_info, 'latitude_f', None),
                                        getattr(stn_info, 'longitude_f', None),
@@ -468,6 +513,9 @@ class DivumwxCards(SearchList):
             # figures as its own when there are two gauges.
             'divumwx_rain_sensor': json.dumps(str(cards_section.get('rain_sensor', '') or '').strip().lower() or None),
             'divumwx_country_code': json.dumps(country_code),
+            'divumwx_loop_interval': loop_interval,
+            'divumwx_battery_sensors': json.dumps(battery_sensors),
+            'divumwx_battery_names': json.dumps(battery_names, ensure_ascii=False),
             # The station's time zone name for archive.json meta.timezone.
             'divumwx_timezone': json.dumps(system_timezone()),
             'divumwx_page_background': json.dumps(page_background),
@@ -477,6 +525,9 @@ class DivumwxCards(SearchList):
             'divumwx_warnings_source': json.dumps(warnings_source),
             # Air Quality card index: "daqi", "eaqi" or "epa" (aq_scheme()).
             'divumwx_aq_scheme': json.dumps(air_quality_scheme),
+            # [DivumWXCards] aq_fill_online = true: a particle sensor's
+            # missing PM2.5/PM10 are filled from Open-Meteo (default off).
+            'divumwx_aq_fill_online': json.dumps(aq_fill_online),
             'divumwx_lang': json.dumps(lang),
             'divumwx_strings_payload': json.dumps(strings_payload),
             # Release version for the dashboard footer (archive.json meta).

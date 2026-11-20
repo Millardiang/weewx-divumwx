@@ -1,6 +1,6 @@
 # DivumWX Installation Guide
 
-This guide covers DivumWX **2.3.0**. It assumes you already have a stable
+This guide covers DivumWX **2.4.0**. It assumes you already have a stable
 WeeWX 5 installation running with your own hardware driver.
 
 Tested on Debian 13 (Trixie) with:
@@ -50,7 +50,7 @@ sudo apt install python3-skyfield python3-requests
 ### Install or upgrade
 
 ```
-sudo weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/tags/ver.2.3.0.zip
+sudo weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/tags/ver.2.4.0.zip
 sudo systemctl restart weewx
 sudo weectl report run DivumWXReport
 ```
@@ -61,7 +61,7 @@ account WeeWX runs as (normally `weewx`). No manual `chown` is needed.
 ### Check the installation
 
 ```
-weectl extension list          # should show divumwx 2.3.0
+weectl extension list          # should show divumwx 2.4.0
 sudo journalctl -u weewx -n 100 --no-pager | grep -i divumwx
 ```
 
@@ -96,7 +96,7 @@ sudo mkdir -p /var/www/html/divumwx
 sudo chown -R $(whoami):$(whoami) /var/www/html/divumwx
 
 source ~/weewx-venv/bin/activate
-weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/tags/ver.2.3.0.zip
+weectl extension install https://github.com/Millardiang/weewx-divumwx/archive/refs/tags/ver.2.4.0.zip
 sudo systemctl restart weewx
 weectl report run DivumWXReport
 ```
@@ -223,6 +223,93 @@ minutes (`[DivumWXMeteoalarm]` `poll_interval`) and shown in the
 dashboard's language when the national service publishes one, otherwise in
 English.
 
+## Site visitors (Cloudflare Web Analytics)
+
+The footer can show **Visits: N today · M in 30 days**; clicking it opens a
+report with visits and page views for today, 7 days, 30 days and since the
+service started, a 30-day chart, and the top pages, countries, referring
+sites, browsers, operating systems and devices.
+
+The figures come from [Cloudflare Web Analytics](https://www.cloudflare.com/web-analytics/)
+(free). It counts page views in the visitor's browser, so it's right however
+the site is reached, **Cloudflare Tunnel (`cloudflared`) included**: nothing
+is read from Apache's or nginx's log, no web server settings change, and no
+IP address reaches the station. Bots aren't counted.
+
+1. **Turn on Web Analytics for the site.** In the Cloudflare dashboard go to
+   **Web Analytics > Add a site**, choose your site's hostname (the one
+   your tunnel serves, e.g. `weather.example.com`) and finish. With a
+   tunnel the hostname is already proxied by Cloudflare, so the automatic
+   setup works: Cloudflare adds its counting script to your pages itself
+   and nothing in DivumWX needs editing. (A site not proxied by Cloudflare
+   uses the manual setup instead: paste the `<script>` snippet Cloudflare
+   gives you just before `</body>` in the DivumWX pages.)
+2. **Make an API token** so WeeWX can read the figures: **My Profile >
+   API Tokens > Create Token > Create Custom Token**, with one permission,
+   **Account > Account Analytics > Read**, for your account. Copy the token:
+   it's shown only once, and is 40 characters or starts with `cfut_`.
+3. **Give it to DivumWX.** The full installer asks *Do you use Cloudflare
+   Web Analytics? (y/n)* and then for the token, checks it looks like an
+   API token, and saves it. On a later run Enter keeps the saved token
+   (which is never shown), and answering `n` clears it, switching the
+   report off. Without the installer (after an update package, say), add
+   it to `weewx.conf` yourself and restart WeeWX:
+
+   ```
+   [DivumWXVisitors]
+       api_token = <the token>
+   ```
+
+   If the `[Engine] [[Services]] data_services` line doesn't already end in
+   `user.divumwx_visitors.VisitorsService` (an update package doesn't change
+   `weewx.conf`), add `, user.divumwx_visitors.VisitorsService` to it.
+
+After a few minutes the footer shows the figures. Everything else is found
+from the token: the account, and the Web Analytics site matching
+`[Station] station_url`. All settings are optional:
+
+```
+[DivumWXVisitors]
+    api_token = ...
+    account_id = auto      # the Account ID, if the token reaches more than one account
+    hostname = auto        # the site's public hostname; auto = [Station] station_url
+    site_tag = auto        # or the Web Analytics site tag
+    poll_interval = 900    # seconds between updates (minimum 300)
+```
+
+To check a token without waiting for WeeWX:
+
+```
+# WeeWX installed with pip:
+~/weewx-venv/bin/python3 ~/weewx-data/bin/user/divumwx_visitors.py --token <token> --hostname weather.example.com
+# WeeWX installed from a Debian/RPM package:
+python3 /etc/weewx/bin/user/divumwx_visitors.py --token <token> --hostname weather.example.com
+```
+
+It prints the account and site it found and the figures, or what's wrong.
+
+Notes:
+- A *visit* is Cloudflare's measure: someone arriving from another site, a
+  search, a link or a bookmark. Moving between pages of the site adds page
+  views, not visits. There's no count of unique people.
+- Your own views count when you open the site at its public address. Open
+  it at the station's local address (e.g. `http://192.168.1.20/divumwx/`)
+  and Cloudflare never sees them.
+- Ad and tracker blockers stop some browsers from being counted.
+- Busy sites may be sampled by Cloudflare; the report then says the figures
+  are estimates.
+- Cloudflare keeps 30 days that can be read at once, so DivumWX keeps its
+  own daily totals in `divumwx_visitors_state.json` beside the WeeWX
+  database; the "Since" total grows from when the service first ran.
+- "Invalid request headers" means Cloudflare couldn't read the token. An
+  API token is 40 characters, or (since 2026) starts `cfut_` or `cfat_`,
+  and is shown only once, when it's created. The `"token"` in the Web
+  Analytics JavaScript snippet (32 characters) is not it, and neither is
+  the Global API Key; the report says which one it has been given.
+- If something goes wrong (an expired token, say), the report keeps the
+  last figures and shows Cloudflare's reason, and the WeeWX log has a
+  `visitors:` line.
+
 ## Webcams
 
 When you include the webcam card, the installer asks how many webcams you
@@ -230,17 +317,21 @@ have (up to four) and, for each one, its title, the path of its image
 (relative to the DivumWX web folder, e.g. `img/picam.jpg`) and how it's
 shown:
 
-- `daylight`: the live image from sunrise to sunset, and the night-time
-  page (`img/nightTime.svg`, which you can replace with your own) after
-  dark. This is how the webcam card has always worked.
+- `daylight`: the live image from sunrise to sunset, and a night-time
+  image after dark. The installer then asks for that image's path
+  (default `img/nighttime.jpg`, relative to the DivumWX web folder; put
+  your own picture there). If it isn't there or can't be loaded, the
+  built-in night-time page (`img/nightTime.svg`) is shown instead.
 - `24hr`: the live image all day and night, for a camera that sees in the
   dark.
 
 Webcam 1's card opens the timelapse, which is made from its image; the
 other webcams open a larger live view. An upgrade that already shows the
 webcam card is asked these questions once, with its current title and
-image offered as the defaults. To change them later, edit `webcam_title`,
-`webcam_image` and `webcam_mode` (webcam 1) or `webcam2_*` to `webcam4_*`
+image offered as the defaults; one whose daylight webcams were set up before
+the night-time image is asked just for that, once. To change them later,
+edit `webcam_title`, `webcam_image`, `webcam_mode` and `webcam_night_image`
+(webcam 1) or `webcam2_*` to `webcam4_*`
 under `[DivumWXCards]` in `weewx.conf`, and add or remove `cardWebcam2` to
 `cardWebcam4` in its `enabled_cards`.
 
@@ -291,6 +382,54 @@ ignore all of this; the service just waits for a file that never arrives.
    Click the card for its live strike map (each new strike flashes and
    traces to the station) and its chart & records, built from the same
    database.
+
+## Sensor batteries card (Ecowitt)
+
+For stations using the [weewx-ecowittGateway](https://github.com/Millardiang/weewx-ecowittGateway)
+driver or service (2.1.x). The card shows a battery for each Ecowitt sensor
+in use, filled to its level, with each sensor's reading alongside and any low
+ones listed first:
+
+- WH25, WH26, WN31, WN32, WH65 and WH69 report **OK** or **Low**;
+- the other sensors report a level out of 5 (**0/5** or **1/5** is low), plus
+  the battery voltage where the gateway gives one (`4/5 · 1.52 V`); **DC
+  power** means a sensor running from mains (level 6);
+- a sensor on the card's list that the gateway can't hear (signal 0, or no
+  battery value) shows as **No signal**, so a dead battery doesn't just
+  make the sensor disappear.
+
+It reads the `<sensor>_batt`, `_sig` and `_volt` fields in `loop.json`, and
+the standard columns the driver can fill instead (`inTempBatteryStatus`,
+`outTempBatteryStatus`, `batteryStatus1`–`8`). The installer offers the card
+when `weewx.conf` has an `[EcowittGateway]` section (an upgrade asks once).
+
+**Which sensors.** Like the Ecowitt console emulator, the installer works
+out which sensors have batteries, every time it runs: those reporting now
+(DivumWX's `loop.json`, and the driver's `ecwLoop.json` if it's turned on)
+and those with readings in the last 30 days (the station's database and the
+driver's additions database). It shows the list (sensors already on it are
+kept, new ones added) and asks for a name for each channel sensor:
+
+```
+Sensor batteries found (loop.json, wx_binding (last 30 days)): WS90, WH40, WN31 #2, WH51 #3
+Sensors on the Sensor Batteries card (Enter keeps this list; or type yours, e.g. WH40, WH51 #2) [WS90, WH40, WN31 #2, WH51 #3]:
+Name for WN31 #2 (Enter keeps none, 'none' for none) []: Garage
+Name for WH51 #3 (Enter keeps none, 'none' for none) []: Greenhouse
+```
+
+The answers are saved in `weewx.conf`, where you can also change them:
+
+```
+[DivumWXCards]
+    battery_sensors = ws90, wh40, wn31_ch2, wh51_ch3
+    [[battery_names]]
+        wn31_ch2 = Garage
+        wh51_ch3 = Greenhouse
+```
+
+A sensor is its driver field without `_batt` (`wh40`, `wh51_ch3`). The card
+shows exactly these sensors, a name in place of the sensor's type. Without
+`battery_sensors` (before WeeWX has run, say) it shows every sensor it hears.
 
 ## Solar energy cards (SolarAssistant)
 

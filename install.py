@@ -1964,6 +1964,59 @@ def load_divumwx_meteoalarm(source_dir=None):
         return None
 
 
+def load_divumwx_visitors(source_dir=None):
+    """Import this package's bin/user/divumwx_visitors.py (for its API token
+    check), or None if it can't be loaded."""
+    import importlib.util
+    source_dir = source_dir or os.path.dirname(os.path.abspath(__file__))
+    path = os.path.join(source_dir, 'bin', 'user', 'divumwx_visitors.py')
+    try:
+        spec = importlib.util.spec_from_file_location('divumwx_visitors_setup', path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+    except Exception:
+        return None
+
+
+def configure_visitors(cfg, printer, use_cloudflare, current_token, ask=None, source_dir=None):
+    """[DivumWXVisitors] api_token from the installer's questions. The service
+    (registered either way) stays idle without a token. A stored token is
+    never shown: Enter keeps it. A pasted value is checked with the
+    service's own clean_token(), so a 32-character Web Analytics snippet
+    token or a Global API Key is caught here, not later in the footer."""
+    if ask is None:
+        def ask(question):
+            return weecfg.prompt_with_options(question, default='')
+    section = cfg.setdefault('DivumWXVisitors', {})
+    if not use_cloudflare:
+        if current_token:
+            section['api_token'] = ''
+            printer.out("Site visitor report switched off (api_token cleared).", level=1)
+        return
+    mod = load_divumwx_visitors(source_dir)
+    while True:
+        if current_token:
+            raw = ask("Enter your Cloudflare API token (one is already configured -- "
+                      "press Enter to keep it, or paste a new one)")
+        else:
+            raw = ask("Enter your Cloudflare API token (leave blank to add it later)")
+        raw = (raw or '').strip()
+        if not raw:
+            if not current_token:
+                printer.out("No token yet: add api_token under [DivumWXVisitors] in weewx.conf "
+                            "and restart WeeWX to start the visitor report.", level=1)
+            return
+        token, problem = mod.clean_token(raw) if mod else (raw, None)
+        if problem:
+            printer.out(problem, level=1)
+            printer.out("Try again, or press Enter to %s." % ("keep the current token" if current_token
+                                                              else "add it later"), level=1)
+            continue
+        section['api_token'] = token
+        return
+
+
 def meteoalarm_areas_set(cfg):
     ma = cfg.get('Meteoalarm', {})
     poly = ma.get('polygon')
@@ -2097,9 +2150,9 @@ DIVUMWX_RAIN_CARD_CHOICES = {
 }
 
 DIVUMWX_OPTIONAL_CARDS_ORDER = [
-    'cardSolarRadiation', 'cardUvIndex', 'cardIndoorTemp', 'cardLightning', 'cardAirquality',
-    'cardVapourPressureDeficit', 'cardEvapoTranspiration', 'cardWebcam', 'cardStationImage',
-    'cardSolarEnergy', 'cardSolarEnergyFlow',
+    'cardSolarRadiation', 'cardUvIndex', 'cardIndoorTemp', 'cardEcowittBatteries', 'cardLightning',
+    'cardAirquality', 'cardVapourPressureDeficit', 'cardEvapoTranspiration', 'cardWebcam',
+    'cardStationImage', 'cardSolarEnergy', 'cardSolarEnergyFlow',
 ]
 
 # Optional cards added in a release after an install's card list was first
@@ -2108,11 +2161,13 @@ DIVUMWX_OPTIONAL_CARDS_ORDER = [
 # records it in [DivumWXCards] optional_cards_asked.
 DIVUMWX_NEW_OPTIONAL_CARDS = [
     'cardIndoorTemp',   # 2.3.0
+    'cardEcowittBatteries',   # 2.4.0
 ]
 
 # Shown after the card's name in its install question.
 DIVUMWX_OPTIONAL_CARD_NOTES = {
     'cardIndoorTemp': '(indoor temperature, needs an indoor sensor)',
+    'cardEcowittBatteries': '(battery state of your Ecowitt sensors, from weewx-ecowittGateway)',
     'cardSolarEnergy': '(only for SolarAssistant subscribers)',
     'cardSolarEnergyFlow': '(only for SolarAssistant subscribers)',
 }
@@ -2177,6 +2232,237 @@ def ask_solar_array_once(cfg, prompt, tries=3):
     return None
 
 
+# Cards offered only when the station has what they show. The Ecowitt
+# battery card reads the weewx-ecowittGateway driver's (or service's)
+# <sensor>_batt fields; both set up an [EcowittGateway] section.
+def uses_ecowitt_gateway(cfg):
+    return 'EcowittGateway' in (cfg or {})
+
+
+DIVUMWX_OPTIONAL_CARD_NEEDS = {
+    'cardEcowittBatteries': uses_ecowitt_gateway,
+}
+
+
+def optional_card_offered(cfg, card_name):
+    """False when an optional card needs something this station hasn't got."""
+    need = DIVUMWX_OPTIONAL_CARD_NEEDS.get(card_name)
+    return need is None or bool(need(cfg))
+
+
+# ---- Sensor Batteries card: which Ecowitt sensors to show ------------------
+# Like weewx-ecowitt_console_emulator's installer, the sensors are worked out
+# from what the station has actually reported, and saved as settings the
+# card follows ([DivumWXCards] battery_sensors and [[battery_names]], put in
+# archive.json by divumwx_cards.py). A sensor is named by its driver field
+# without _batt: wh40, ws90, wh51_ch2, wn31_ch1.
+ECOWITT_BATTERY_FIELD = re.compile(r'^(w[hns]\d+p?)(?:_ch(\d+))?_batt$')
+ECOWITT_BATTERY_KEY = re.compile(r'^w[hns]\d+p?(?:_ch\d+)?$')
+# The driver's standard WeeWX columns (use_station_columns) -> sensor
+ECOWITT_BATTERY_COLUMNS = dict({'inTempBatteryStatus': 'wh25', 'outTempBatteryStatus': 'wh26'},
+                               **{'batteryStatus%d' % n: 'wn31_ch%d' % n for n in range(1, 9)})
+# Card order: the outdoor array and gauges, indoor, then channels (as cardEcowittBatteries.js)
+ECOWITT_BATTERY_ORDER = ['wh69', 'wh65', 'ws90', 'ws85', 'ws80', 'wh68', 'ws68', 'wh40', 'wh57', 'wh26',
+                         'wn32p', 'wh25', 'wn32', 'wh45', 'wh41', 'wh43', 'wn31', 'wn34', 'wn35', 'wh51',
+                         'wh54', 'wh55']
+ECOWITT_BINARY_BATTERIES = ('wh25', 'wh26', 'wn31', 'wn32', 'wn32p', 'wh65', 'wh69')
+ECOWITT_BATTERY_DAYS = 30
+
+
+def battery_sensor_label(key):
+    """'wh51_ch2' -> 'WH51 #2'."""
+    m = re.match(r'^(w[hns]\d+p?)(?:_ch(\d+))?$', key)
+    return (m.group(1).upper() + (' #' + m.group(2) if m.group(2) else '')) if m else key
+
+
+def sort_battery_sensors(keys):
+    def k(key):
+        model, _, ch = key.partition('_ch')
+        i = ECOWITT_BATTERY_ORDER.index(model) if model in ECOWITT_BATTERY_ORDER else 99
+        return (i, model, int(ch) if ch.isdigit() else 0)
+    return sorted(set(keys), key=k)
+
+
+def _number(v):
+    try:
+        return None if v is None or v == '' or v == 'None' else float(v)
+    except (TypeError, ValueError):
+        return None
+
+
+def batteries_in_loop(loop):
+    """Sensors with a battery reading and a signal that isn't 0 in one loop
+    document (DivumWX's loop.json or the driver's ecwLoop.json)."""
+    found = set()
+    for field, value in (loop or {}).items():
+        m = ECOWITT_BATTERY_FIELD.match(field)
+        key = field[:-len('_batt')] if m else ECOWITT_BATTERY_COLUMNS.get(field)
+        if not key:
+            continue
+        base = field[:-len('_batt')] if m else None
+        v = _number(value)
+        if v is None or v == 9 or not 0 <= v <= 6:
+            continue
+        if not m:   # a standard column: its signal is signalN or the driver's field
+            n = field[len('batteryStatus'):] if field.startswith('batteryStatus') else ''
+            sig_fields = ['signal' + n, key + '_sig'] if n else [key + '_sig']
+        else:
+            sig_fields = [base + '_sig']
+        sig = next((_number(loop[f]) for f in sig_fields if f in loop), None)
+        if sig is not None and sig <= 0:
+            continue
+        found.add(key)
+    return found
+
+
+def _read_json_file(path):
+    import json
+    try:
+        with open(path, encoding='utf-8') as fh:
+            return json.load(fh)
+    except (OSError, ValueError):
+        return None
+
+
+def detect_ecowitt_batteries(cfg, days=ECOWITT_BATTERY_DAYS):
+    """The Ecowitt sensors with battery readings: heard now (DivumWX's
+    loop.json, the driver's ecwLoop.json) or in the last `days` days (the
+    station's and the driver's additions databases). Returns (sensors in card
+    order, sources read); sensors is None if nothing could be read."""
+    found, sources = set(), []
+    loop_file = (cfg.get('LiveData') or {}).get('json_file')
+    eg = cfg.get('EcowittGateway') or {}
+    lj = eg.get('loop_json') or {}
+    ecw = None
+    if str(lj.get('enable', 'False')).lower() == 'true':
+        ecw = os.path.expanduser(str(lj.get('path', 'ecwLoop.json')))
+        if not os.path.isabs(ecw):
+            ecw = os.path.join(cfg.get('WEEWX_ROOT', ''), cfg.get('StdReport', {}).get('HTML_ROOT', 'public_html'), ecw)
+    for label, path in (('loop.json', loop_file), ('ecwLoop.json', ecw)):
+        doc = _read_json_file(path) if path else None
+        if isinstance(doc, dict) and isinstance(doc.get('observations'), dict):
+            doc = doc['observations']          # DivumWX's loop.json keeps its readings here
+        if isinstance(doc, dict):
+            found |= batteries_in_loop(doc)
+            sources.append(label)
+    try:
+        import time
+        import weewx.manager
+    except ImportError:
+        weewx = None
+    else:
+        for binding in ('wx_binding', 'ecowitt_binding'):
+            if binding not in cfg.get('DataBindings', {}):
+                continue
+            try:
+                mgr = weewx.manager.open_manager_with_config(cfg, binding)
+            except Exception:
+                continue
+            try:
+                since = (mgr.lastGoodStamp() or time.time()) - days * 86400
+                cols = [c for c in mgr.sqlkeys if ECOWITT_BATTERY_FIELD.match(c) or c in ECOWITT_BATTERY_COLUMNS]
+                for col in cols:
+                    key = col[:-len('_batt')] if col.endswith('_batt') else ECOWITT_BATTERY_COLUMNS[col]
+                    if key in found:
+                        continue
+                    row = mgr.getSql("SELECT 1 FROM %s WHERE %s IS NOT NULL AND %s <> 9 AND dateTime > ? LIMIT 1"
+                                     % (mgr.table_name, col, col), (since,))
+                    if row:
+                        found.add(key)
+                sources.append('%s (last %d days)' % (binding, days))
+            except Exception:
+                pass
+            finally:
+                mgr.close()
+    if not sources:
+        return None, sources
+    return sort_battery_sensors(found), sources
+
+
+def parse_battery_sensors(text):
+    """'WH40, wh51 #2, wn31_ch1' -> (['wh40', 'wh51_ch2', 'wn31_ch1'], [not understood])."""
+    keys, bad = [], []
+    for part in re.split(r'[,\s]+(?![#0-9])', str(text or '').strip()):
+        p = part.strip().lower().replace(' ', '')
+        if not p:
+            continue
+        p = re.sub(r'#(\d+)$', r'_ch\1', p)
+        (keys if ECOWITT_BATTERY_KEY.match(p) else bad).append(p if ECOWITT_BATTERY_KEY.match(p) else part)
+    return sort_battery_sensors(keys), bad
+
+
+def configure_battery_sensors(cfg, printer, ask, detect=detect_ecowitt_batteries):
+    """With the Sensor Batteries card shown: work out which sensors have
+    batteries, confirm the list (Enter keeps it) and ask a name for each
+    channel sensor. Saves [DivumWXCards] battery_sensors and [[battery_names]].
+    `ask(question, default)` returns the answer. Returns the list saved, or
+    None if nothing was asked."""
+    dc = cfg.get('DivumWXCards')
+    cards = (dc or {}).get('enabled_cards') or []
+    cards = [cards] if isinstance(cards, str) else list(cards)
+    if dc is None or 'cardEcowittBatteries' not in cards:
+        return None
+    current = dc.get('battery_sensors') or []
+    current = [current] if isinstance(current, str) else list(current)
+    current = [c for c in current if ECOWITT_BATTERY_KEY.match(str(c))]
+    found, sources = detect(cfg)
+    if found is None and not current:
+        printer.out("Sensor Batteries card: couldn't read loop.json or the database yet, so it will "
+                    "show every sensor it hears. Run the installer again once WeeWX has run to "
+                    "set the list.", level=1)
+        return None
+    found = found or []
+    new = [k for k in found if k not in current]
+    default = sort_battery_sensors(current + new)
+    if found:
+        printer.out("Sensor batteries found (%s): %s" % (', '.join(sources),
+                    ', '.join(battery_sensor_label(k) for k in found)), level=1)
+    gone = [k for k in current if k not in found]
+    if gone and found:
+        printer.out("Not heard in the last %d days (kept; shown as 'No signal' on the card): %s"
+                    % (ECOWITT_BATTERY_DAYS, ', '.join(battery_sensor_label(k) for k in gone)), level=1)
+    if not default:
+        printer.out("Sensor Batteries card: no Ecowitt sensor batteries found yet, so it will show "
+                    "every sensor it hears.", level=1)
+        return None
+    keys = default
+    for _ in range(3):
+        answer = ask("Sensors on the Sensor Batteries card (Enter keeps this list; or type yours, "
+                     "e.g. WH40, WH51 #2)", ', '.join(battery_sensor_label(k) for k in default))
+        if not str(answer or '').strip():
+            keys = default
+            break
+        keys, bad = parse_battery_sensors(answer)
+        if not bad and keys:
+            break
+        printer.out("Not understood: %s. Use the codes shown, e.g. WH40, WS90, WH51 #2."
+                    % ', '.join(bad or ['(empty list)']), level=1)
+    else:
+        keys = default
+    dc['battery_sensors'] = keys
+    names = dc.get('battery_names')
+    if not isinstance(names, dict):
+        dc['battery_names'] = {}
+        names = dc['battery_names']
+    for key in keys:
+        if '_ch' not in key:
+            continue
+        cur = str(names.get(key, '') or '')
+        ans = ask("Name for %s (Enter keeps%s, 'none' for none)"
+                  % (battery_sensor_label(key), ' it' if cur else ' none'), cur)
+        ans = str(ans if ans is not None else '').strip()
+        if ans.lower() == 'none':
+            names.pop(key, None)
+        elif ans:
+            names[key] = ans[:24]
+    for key in list(names):
+        if key not in keys:
+            del names[key]
+    printer.out("Sensor Batteries card: %s." % ', '.join(
+        battery_sensor_label(k) + (' (%s)' % names[k] if k in names else '') for k in keys), level=1)
+    return keys
+
+
 def optional_card_question(card_name, running_total=None):
     """The y/n question for an optional card, with its note if it has one."""
     note = DIVUMWX_OPTIONAL_CARD_NOTES.get(card_name)
@@ -2196,7 +2482,9 @@ def ask_new_optional_cards_once(cfg, ask):
         return None
     asked = dc.get('optional_cards_asked') or []
     asked = [asked] if isinstance(asked, str) else list(asked)
-    todo = [c for c in DIVUMWX_NEW_OPTIONAL_CARDS if c not in asked]
+    # A card the station can't use isn't asked about, nor marked asked:
+    # it's offered once the station has what it needs.
+    todo = [c for c in DIVUMWX_NEW_OPTIONAL_CARDS if c not in asked and optional_card_offered(cfg, c)]
     if not todo:
         return None
     cards = dc.get('enabled_cards')
@@ -2238,10 +2526,11 @@ def ask_solar_cards_once(cfg, ask):
 DIVUMWX_LIGHTNING_CARDS = {'other': 'cardLightning', 'boltek': 'cardBoltekLightning'}
 DIVUMWX_BOLTEK_QUESTION = "Is your lightning detector a Boltek (NexStorm)? (y/n) "
 
-DIVUMWX_CARD_TARGET_TOTAL = 29  # theoretical max (8 mandatory + 8 automatic + 2 rain "both" + 11 optional) -- every optional card now always gets asked about
+DIVUMWX_CARD_TARGET_TOTAL = 30  # theoretical max (8 mandatory + 8 automatic + 2 rain "both" + 12 optional) -- every optional card now always gets asked about
 
 DIVUMWX_WEBCAM_DEFAULT_TITLE = 'Webcam'
 DIVUMWX_WEBCAM_DEFAULT_IMAGE = 'img/picam.jpg'
+DIVUMWX_WEBCAM_DEFAULT_NIGHT_IMAGE = 'img/nighttime.jpg'
 
 # Up to four webcams. Webcam 1 is cardWebcam (its click opens the timelapse,
 # which is made from its image); webcams 2-4 are extra cards that open
@@ -2251,7 +2540,8 @@ DIVUMWX_WEBCAM_DEFAULT_IMAGE = 'img/picam.jpg'
 # webcam 1 (the keys it always had), webcam2_* .. webcam4_* for the others,
 # and webcam_count (also marks that the questions have been answered).
 # Each webcam's mode: 'daylight' shows the live image from sunrise to sunset
-# and the night-time page after dark (how the webcam card always worked);
+# and a night-time image after dark (webcam_night_image / webcamN_night_image,
+# img/nighttime.jpg by default; the built-in night page if it can't be loaded);
 # '24hr' shows the live image all the time.
 DIVUMWX_WEBCAM_MAX = 4
 DIVUMWX_WEBCAM_CARDS = ['cardWebcam', 'cardWebcam2', 'cardWebcam3', 'cardWebcam4']
@@ -2331,6 +2621,11 @@ def webcam_keys(n):
     return prefix + '_title', prefix + '_image', prefix + '_mode'
 
 
+def webcam_night_key(n):
+    """[DivumWXCards] key for webcam n's night-time image (daylight mode)."""
+    return ('webcam' if n == 1 else 'webcam%d' % n) + '_night_image'
+
+
 def webcam_default_image(n):
     return DIVUMWX_WEBCAM_DEFAULT_IMAGE if n == 1 else 'img/webcam%d.jpg' % n
 
@@ -2349,6 +2644,8 @@ def apply_webcam_answers(cfg, cams):
         dc[ik] = cam.get('image') or webcam_default_image(n)
         mode = cam.get('mode') if cam.get('mode') in DIVUMWX_WEBCAM_MODES else DIVUMWX_WEBCAM_DEFAULT_MODE
         dc[mk] = mode
+        if mode == 'daylight' and cam.get('night_image'):
+            dc[webcam_night_key(n)] = cam['night_image']
     dc['webcam_count'] = str(count)
     cards = dc.get('enabled_cards') or []
     cards = [cards] if isinstance(cards, str) else list(cards)
@@ -2397,12 +2694,50 @@ def ask_webcams_once(cfg, prompt, printer=None):
                        % (label, webcam_default_image(n)),
                        dc.get(ik) or webcam_default_image(n), None)
         mode = prompt("%s display: '24hr' (live all day and night) or 'daylight' (live from "
-                      "sunrise to sunset, night-time page after dark)?" % label,
+                      "sunrise to sunset, night-time image after dark)?" % label,
                       dc.get(mk) if dc.get(mk) in DIVUMWX_WEBCAM_MODES else DIVUMWX_WEBCAM_DEFAULT_MODE,
                       DIVUMWX_WEBCAM_MODES)
-        cams.append({'title': title, 'image': image, 'mode': mode})
+        night = None
+        if mode == 'daylight':
+            night = ask_webcam_night_image(dc, n, prompt)
+        cams.append({'title': title, 'image': image, 'mode': mode, 'night_image': night})
     apply_webcam_answers(cfg, cams)
     return count
+
+
+def ask_webcam_night_image(dc, n, prompt):
+    """Ask for daylight webcam n's night-time image path; the current one (or
+    img/nighttime.jpg) is the default."""
+    label = 'Webcam %d' % n
+    answer = prompt("%s night-time image path, shown after dark, relative to the DivumWX html "
+                    "root (e.g. '%s')" % (label, DIVUMWX_WEBCAM_DEFAULT_NIGHT_IMAGE),
+                    dc.get(webcam_night_key(n)) or DIVUMWX_WEBCAM_DEFAULT_NIGHT_IMAGE, None)
+    return str(answer or '').strip() or DIVUMWX_WEBCAM_DEFAULT_NIGHT_IMAGE
+
+
+def ask_webcam_night_images_once(cfg, prompt):
+    """Upgrades: the webcam questions were answered before there was a
+    night-time image, so ask it once for each daylight webcam without one.
+    `prompt(question, default, options)` as in ask_webcams_once(). Returns
+    the webcams asked about."""
+    dc = cfg.get('DivumWXCards', {})
+    cards = dc.get('enabled_cards') or []
+    cards = [cards] if isinstance(cards, str) else list(cards)
+    try:
+        count = int(dc.get('webcam_count') or 0)
+    except ValueError:
+        count = 0
+    if 'cardWebcam' not in cards or not count:
+        return []
+    asked = []
+    for n in range(1, min(count, DIVUMWX_WEBCAM_MAX) + 1):
+        tk, ik, mk = webcam_keys(n)
+        mode = dc.get(mk) if dc.get(mk) in DIVUMWX_WEBCAM_MODES else DIVUMWX_WEBCAM_DEFAULT_MODE
+        if mode != 'daylight' or dc.get(webcam_night_key(n)):
+            continue
+        dc[webcam_night_key(n)] = ask_webcam_night_image(dc, n, prompt)
+        asked.append(n)
+    return asked
 
 
 def apply_new_default_cards(cfg):
@@ -3219,7 +3554,9 @@ DIVUMWX_DATA_SERVICES = ['user.divumwx.SkyfieldLoopData', 'user.divumwx.DataInje
                          'user.divumwx.LiveDataService', 'user.divumwx.WeatherAPIService',
                          'user.divumwx.TimelapseService',
                          'user.divumwx_boltek.BoltekLightningService',
-                         'user.divumwx_meteoalarm.MeteoalarmService']
+                         'user.divumwx_meteoalarm.MeteoalarmService',
+                         # Idle until [DivumWXVisitors] api_token is set.
+                         'user.divumwx_visitors.VisitorsService']
 DIVUMWX_XTYPE_SERVICES = ['user.divumwx.AirDensityService', 'user.divumwx.vpdService',
                           'user.divumwx.LastNonZeroService']
 DIVUMWX_ARCHIVE_SERVICES = ['user.divumwx.SunshineDuration', 'user.divumwx.DivumwxExtrasService']
@@ -3334,6 +3671,10 @@ def read_existing_answers(cfg):
     if page_background not in DIVUMWX_PAGE_BACKGROUND_CHOICES:
         page_background = None
 
+    aq_fill_online = _bool_answer(_cfg_get(cfg, 'DivumWXCards', 'aq_fill_online'))
+
+    visitors_token = str(_cfg_get(cfg, 'DivumWXVisitors', 'api_token') or '').strip()
+
     in_uk = _bool_answer(_cfg_get(cfg, 'DivumWXCards', 'in_uk'))
     if in_uk is None:
         in_uk = _bool_answer(_cfg_get(cfg, 'WeatherAPI', 'MetOfficeRSS', 'enabled'))
@@ -3351,6 +3692,11 @@ def read_existing_answers(cfg):
         'location_digit': location_digit,
         'region_code': region_code if region_code in DIVUMWX_METOFFICE_REGIONS else None,
         'page_background': page_background,
+        'aq_fill_online': aq_fill_online,
+        # Only whether a token is set is offered back as a default; the
+        # token itself is never echoed (see configure_visitors()).
+        'cf_analytics': 'y' if visitors_token else None,
+        'cf_api_token': visitors_token or None,
     }
 
 
@@ -3758,6 +4104,7 @@ class DivumwxInstaller(ExtensionInstaller):
                     'bin/user/divumwx_cards.py',
                     'bin/user/divumwx_boltek.py',
                     'bin/user/divumwx_meteoalarm.py',
+                    'bin/user/divumwx_visitors.py',
                     'bin/user/divumwx_version.py',
                     'bin/user/lastrain.py',
                     'bin/user/stats.py',
@@ -4158,6 +4505,30 @@ class DivumwxInstaller(ExtensionInstaller):
             options=list(DIVUMWX_PAGE_BACKGROUND_CHOICES.keys()))
         cfg['DivumWXCards']['page_background'] = page_background
 
+        # Air Quality card: a particle sensor that reports only some of
+        # PM2.5/PM10 can have the others filled in from Open-Meteo (which
+        # has no PM1.0/PM4.0). Asked every run like the background; Enter
+        # keeps the current answer, 'n' on a fresh install.
+        printer.out("Air Quality card: if your particle sensor doesn't report PM2.5 or PM10,", level=1)
+        printer.out("the missing one can be taken from Open-Meteo for your location.", level=1)
+        aq_fill_online = weecfg.prompt_with_options(
+            "Fill missing PM2.5/PM10 from Open-Meteo? (y/n)",
+            default=existing['aq_fill_online'] or 'n',
+            options=['y', 'n'])
+        cfg['DivumWXCards']['aq_fill_online'] = 'True' if aq_fill_online == 'y' else 'False'
+
+        # Site visitors: Cloudflare Web Analytics. Asked every run like the
+        # questions above; Enter keeps the current answer ('y' when a token
+        # is already set), 'n' on a fresh install.
+        printer.out("Site visitors: the footer can show visits to your site from Cloudflare Web", level=1)
+        printer.out("Analytics (free, and it works behind a Cloudflare Tunnel). It needs an API", level=1)
+        printer.out("token with Account > Account Analytics > Read (My Profile > API Tokens).", level=1)
+        cf_analytics = weecfg.prompt_with_options(
+            "Do you use Cloudflare Web Analytics? (y/n)",
+            default=existing['cf_analytics'] or 'n',
+            options=['y', 'n'])
+        configure_visitors(cfg, printer, cf_analytics == 'y', existing['cf_api_token'])
+
         apply_weatherapi_flood_merge(cfg, html_root=html_root, in_england=in_england)
 
         apply_weatherapi_aurorawatch_merge(
@@ -4259,6 +4630,8 @@ class DivumwxInstaller(ExtensionInstaller):
                                 + ", ".join(DIVUMWX_OPTIONAL_CARDS_ORDER[DIVUMWX_OPTIONAL_CARDS_ORDER.index(card_name):]),
                                 level=1)
                     break
+                if not optional_card_offered(cfg, card_name):
+                    continue
                 include = y_or_n(optional_card_question(card_name, running_total)) == 'y'
                 if include and card_name == DIVUMWX_LIGHTNING_CARDS['other']:
                     # One lightning slot: a Boltek gets its own card instead.
@@ -4324,6 +4697,16 @@ class DivumwxInstaller(ExtensionInstaller):
         if webcam_count:
             printer.out("Webcams: %d (cards %s)." % (webcam_count, ', '.join(DIVUMWX_WEBCAM_CARDS[:webcam_count])),
                         level=1)
+        else:
+            # Upgrades: daylight webcams set up before the night-time image.
+            for n in ask_webcam_night_images_once(
+                    cfg, lambda q, d, o: weecfg.prompt_with_options(q, default=d, options=o)):
+                printer.out("Webcam %d night-time image: %s ([DivumWXCards] %s)."
+                            % (n, cfg['DivumWXCards'][webcam_night_key(n)], webcam_night_key(n)), level=1)
+        # Sensor Batteries card: the sensors in use, every run (sensors come
+        # and go), with names for the channel sensors.
+        configure_battery_sensors(
+            cfg, printer, lambda q, d: weecfg.prompt_with_options(q, default=d))
         if detector == 'boltek':
             printer.out("Using the Boltek Lightning card (cardBoltekLightning) in place of "
                         "cardLightning. Point [BoltekLightning] source_file at NSD Bridge's "

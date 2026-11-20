@@ -1,5 +1,179 @@
 # DivumWX Changelog
 
+## 2.4.0 — 19 November 2026
+
+### Version 2.4.0
+- Minor release (new options and the site visitor report). `DIVUMWX_VERSION` is now `2.4.0`. The
+  `index.html` header and footer fallback, the `divumwf.html` badge
+  (1.0.10), the README title and `INSTALLATION_GUIDE.md` all say 2.4.0,
+  and the install guide downloads from `ver.2.4.0`.
+
+### Air Quality card: fill a sensor's missing PM2.5/PM10 from Open-Meteo
+- Requested by a user whose sensor sends only PM2.5. New option
+  `[DivumWXCards] aq_fill_online` (default off): with it on, when a
+  particle sensor reports PM2.5 but not PM10, or PM10 but not PM2.5, the
+  missing one is taken from Open-Meteo's modelled figures for the
+  station, which DivumWX already fetches into `jsondata/airquality.txt`.
+  The sensor's own readings always win; a "Source" row names what came
+  from Open-Meteo ("PM10.0 · Open-Meteo"), and the overall rating covers
+  both. Open-Meteo has no PM1.0 or PM4.0, so those are only shown when the
+  sensor reports them. Open-Meteo figures more than 3 hours old aren't
+  used, as for stations with no sensor.
+- The installer asks about it every run ("Fill missing PM2.5/PM10 from
+  Open-Meteo?"; Enter keeps the current answer, "n" on a fresh install).
+  An update package doesn't ask: add `aq_fill_online = True` to
+  `[DivumWXCards]` in `weewx.conf` and restart WeeWX.
+- Published as `archive.json` `meta.aq_fill_online`.
+- Changed: `cardsBundleNew.js` (cardAirquality.js 1.3.0; cache-buster
+  updated), `bin/user/divumwx_cards.py` (`$divumwx_aq_fill_online`),
+  `skins/DivumWX/jsondata/archive.json.tmpl`, `install.py`.
+
+### Site visitors, from Cloudflare Web Analytics
+- New `user.divumwx_visitors.VisitorsService` (`divumwx_visitors.py` 1.0.0)
+  writes `jsondata/visitors.json` every 15 minutes from Cloudflare Web
+  Analytics' GraphQL API: visits and page views for today (from the
+  station's midnight), 7 days, 30 days and since the service started, a
+  30-day daily series, monthly totals, and the top pages, countries,
+  referring sites, browsers, operating systems and device types. Bots
+  aren't counted.
+- Counted in the visitor's browser, so it works behind Cloudflare Tunnel or
+  any proxy, needs no web server changes or log access, and no IP address
+  reaches the station. Idle until `[DivumWXVisitors] api_token` is set (a
+  token with Account > Account Analytics > Read); the account and the Web
+  Analytics site are found from the token and `[Station] station_url`.
+  Problems (a refused token, no data for the hostname, a token reaching
+  several accounts) are reported in the WeeWX log and the report, with the
+  last figures kept.
+- The token is tidied before use (spaces, line breaks, quotes, `<` `>`, a
+  `Bearer ` prefix), a Global API Key or Origin CA key is named instead of
+  being sent, a value of the wrong length (such as the 32-character token
+  from the Web Analytics snippet) is named, and Cloudflare's "Invalid
+  request headers" (6003) comes with its detailed reason and what to fix.
+- The installer asks "Do you use Cloudflare Web Analytics? (y/n)" every
+  run and, on "y", for the API token, which it checks with the service's
+  own test before saving it as `[DivumWXVisitors] api_token`. A saved
+  token is never shown: Enter keeps it, and "n" clears it. An update
+  package doesn't ask (it never changes `weewx.conf`).
+- Daily totals are kept in `divumwx_visitors_state.json` beside the WeeWX
+  database, so the "Since" total goes back beyond Cloudflare's 30 days.
+- The dashboard footer (`index.html`, `hyperIndex.html`, `lexendIndex.html`)
+  shows "Visits: N today · M in 30 days" (`siteHeader.js` 1.1.0, now loaded
+  as `?v=1.1.0` by every page; they were still asking for 1.0.4). Clicking
+  it opens the report (`visitorReport.js` 1.0.0, loaded only then). Nothing
+  shows until the service has written `visitors.json`.
+- 21 new phrases for the footer and report, translated in every language
+  file. `install.py` registers the service and ships the new file.
+  `tests/test_visitors.py` runs the service against a fake Cloudflare API.
+  See "Site visitors" in the installation guide.
+- An update package installs the files but doesn't change `weewx.conf`:
+  add `user.divumwx_visitors.VisitorsService` to `data_services` and an
+  `[DivumWXVisitors]` section with `api_token`, then restart WeeWX.
+- First built for 2.3.0 but never merged; a log-based version committed
+  earlier on this branch is replaced by this one.
+- Page version banners bumped for the cache-buster change: `charts-d3.html`
+  1.0.5, `climate.html` 1.1.1, `gauges.html` 1.1.1, `hyperIndex.html` 1.1.2,
+  `lexendIndex.html` 1.1.2, `locationforecast.html` 1.0.1,
+  `visualisations.html` 1.0.1, `astronomy.html` 1.1.2,
+  `constellations.html` 1.0.1, `equalEarthMap.html` 1.3.1,
+  `heatmaps.html` 1.0.1, `meteorShowers.html` 1.0.1, `records.html` 1.0.1.
+
+### Dashboard cards follow the station's update interval
+- The live cards re-read `loop.json` every 30 seconds whatever the station's
+  `[LiveData] update_interval`, so with 5-second loop data a card's values
+  changed only every 30 s. They now refresh together, as often as WeeWX
+  writes `loop.json` (at least every 3 s), through one shared timer in
+  `sharedData.js` 1.1.0 (`DivumWXData.live`). Still one `loop.json` download
+  per refresh for the whole page.
+- The interval is published as `archive.json` `meta.loop_interval`
+  (`$divumwx_loop_interval` in `divumwx_cards.py`). Without it the cards
+  keep 30 s.
+- The timer pauses while the tab is hidden and catches up when it's shown.
+- `cloud_coverage.json`, `me.txt` and `airquality.txt`, which those cards
+  read on every refresh but which change slowly, are shared for a minute.
+- The cards that follow it: Current, Temperature, Indoor Temperature,
+  Anemometer, Wind Compass, Barometer, Piezo Rain, Rainfall, Tipping Rain,
+  Solar Radiation, UV Index, Humidity, Pollen, Greenhouse Gas and Air
+  Quality. Cards whose data changes slowly (archive, astronomy, forecasts,
+  outside feeds) keep their own timers.
+- Changed: `cardsBundleNew.js` 1.3.0 (cardCurrent.js 1.1.0,
+  cardTemperature.js 1.2.0, cardIndoorTemp.js 1.1.0, cardAnemometer.js
+  1.1.0, cardWindCompass.js 1.1.0, cardBarometer.js 1.1.0,
+  cardPiezoRain.js 1.1.0, cardRainfall.js 1.1.0, cardTippingRain.js 1.1.0,
+  cardSolarRadiation.js 1.1.0, cardUvIndex.js 1.1.0, cardHumidity.js
+  1.1.0, cardPollen.js 1.1.0, cardGreenhouseGas.js 1.1.0,
+  cardAirquality.js 1.4.0; cache-buster updated), `sharedData.js` 1.1.0
+  (loaded as `?v=1.1.0` by the three dashboards), `bin/user/divumwx_cards.py`,
+  `skins/DivumWX/jsondata/archive.json.tmpl`.
+
+### New card: Sensor Batteries (Ecowitt)
+- `cardEcowittBatteries.js` 1.0.1, for stations using the
+  weewx-ecowittGateway driver or service. Image zone: a battery per sensor
+  in use, filled to its level (green, amber at 2/5, red when low, blue with
+  a bolt on DC power). Text zone: the other cards' chip rows (small-caps label over a
+  monospaced value in the theme's accent): a Battery row ("All OK", or how
+  many are low or not heard), then each sensor (code and type, or its name)
+  with its reading, low ones first; low, DC power and No signal keep their
+  colours. More than six rows scroll.
+- Reads `<sensor>_batt` with `_sig` and `_volt` from `loop.json`: WH25,
+  WH26, WN31, WN32, WH65 and WH69 as 0/1; the rest as a level 0-5 (0 or 1
+  low, 6 on DC power). The driver's standard columns
+  (`inTempBatteryStatus`, `outTempBatteryStatus`, `batteryStatus1`-`8` with
+  `signal1`-`8`) are read too when the driver fields aren't there; rain-,
+  hail- and windBatteryStatus are left to the level fields they come from.
+  A sensor with signal 0 or no battery value (None, 9) isn't shown.
+- Which sensors, like the Ecowitt console emulator: the installer works
+  them out every run, from `loop.json`, the driver's `ecwLoop.json` (when
+  enabled) and the station's and additions databases (readings in the last
+  30 days), confirms the list (Enter keeps it; sensors already listed are
+  kept, new ones added) and asks a name for each channel sensor. Saved as
+  `[DivumWXCards] battery_sensors` and `[[battery_names]]`, published as
+  `archive.json` `meta.battery_sensors` / `meta.battery_names`
+  (`$divumwx_battery_sensors`, `$divumwx_battery_names` in
+  `divumwx_cards.py`). The card then shows exactly those sensors, a name in
+  place of the type, and a listed sensor that isn't heard as "No signal"
+  (dashed, with a ?). Without a list it shows every sensor heard.
+- Refreshes every 30 s (battery levels change slowly), from the shared
+  `loop.json` copy.
+- `install.py` offers it after the Indoor Temperature card when
+  `weewx.conf` has an `[EcowittGateway]` section; an upgrade asks once, and
+  a station without the driver isn't asked (it is once the driver is
+  added). `DIVUMWX_CARD_TARGET_TOTAL` is now 30.
+- 16 new phrases, translated in every language file.
+- Changed: `cardsBundleNew.js` 1.4.0 (cardEcowittBatteries.js 1.0.1;
+  cache-buster updated), the card's slot in `index.html`, `hyperIndex.html`
+  and `lexendIndex.html`, `install.py`, `bin/user/divumwx_cards.py`,
+  `skins/DivumWX/jsondata/archive.json.tmpl`, `build_card_bundle.py`, `lang/*.conf`,
+  `INSTALLATION_GUIDE.md` ("Sensor batteries card (Ecowitt)").
+
+### Webcams: your own night-time image
+- A `daylight` webcam showed the fixed `img/nightTime.svg` after dark. When
+  a webcam is set to `daylight`, the installer now asks for a night-time
+  image path (default `img/nighttime.jpg`, relative to the DivumWX web
+  folder), saved as `[DivumWXCards] webcam_night_image` (webcam 1) or
+  `webcam2_night_image` to `webcam4_night_image`. An upgrade whose daylight
+  webcams don't have one yet is asked once.
+- Published in `archive.json` `meta.webcams` as `night_image`
+  (`divumwx_cards.py`). The webcam cards and the larger live view show it
+  after dark, and `img/nightTime.svg` when it isn't set or can't be loaded.
+- Changed: `install.py`, `bin/user/divumwx_cards.py`, `cardsBundleNew.js`
+  (cardWebcam.js 1.2.0; cache-buster updated), `modalWebcam.html` 1.1.0,
+  `INSTALLATION_GUIDE.md`.
+
+### Footer back on one- and two-column screens
+- The dashboard hid its footer when it showed one or two cards per row.
+  It now shows a compact footer there instead: just the DivumWX version and
+  the site visitor line (still opening the report). The logos, the credits
+  line and the WeeWX, Python and OS versions are left for wider screens
+  (`footer-compact`, with the system details in a `.footer-sysinfo` span).
+- `hyperIndex.html` and `lexendIndex.html` showed a fixed "DivumWX-H-0.0.1";
+  they now show the DivumWX version from `archive.json`, as `index.html`
+  does.
+- Changed: `index.html`, `hyperIndex.html` 1.2.0, `lexendIndex.html` 1.2.0.
+
+### README
+- The 2.3.0 notes on the Piezo Rain card and the rain event rule were
+  listed under 2.2.1 by mistake; they're now under 2.3.0.
+
 ## 2.3.0 — 16 November 2026
 
 ### Version 2.3.0
