@@ -90,8 +90,22 @@ footer {
   position: relative;
   justify-content: space-between;
 }
-footer.footer-hidden {
+/* One or two cards per row: a compact footer with just the DivumWX version
+   and the site visitor line (siteHeader.js), no logos, credits or system
+   details. */
+footer.footer-compact {
+  justify-content: center;
+  min-height: 0;
+  padding: 6px 10px;
+}
+footer.footer-compact .footer-left,
+footer.footer-compact .footer-right,
+footer.footer-compact .footer-credit,
+footer.footer-compact .footer-sysinfo {
   display: none;
+}
+footer.footer-compact .footer-center {
+  flex: 1 1 auto;
 }
 .footer-left, .footer-right {
   flex: 1 1 0;
@@ -579,7 +593,7 @@ setInterval(() => {
     </div>
     <div class="footer-center">
       <div class="footer-credit">Charts, Heatmaps, Gauges and Card Images D3 rendered &middot; Weather Icons by Meteocons</div>
-      <div class="footer-version mono">DivumWX v<span id="footerDivumwxVer">2.4.0</span> &middot; WeeWX ver <span id="footerWeewxVer">x.x.x</span>, Python ver <span id="footerPyVer">y.y.y</span>, OS version <span id="footerOsVer">z.z.z &middot; Weather Icons by Meteocons</span></div>
+      <div class="footer-version mono">DivumWX v<span id="footerDivumwxVer">2.4.0</span><span class="footer-sysinfo"> &middot; WeeWX ver <span id="footerWeewxVer">x.x.x</span>, Python ver <span id="footerPyVer">y.y.y</span>, OS version <span id="footerOsVer">z.z.z &middot; Weather Icons by Meteocons</span></span></div>
     </div>
     <div class="footer-right">
       <a href="http://weewx.com" title="WeeWX Weather Software" target="_blank" rel="noopener" class="footer-weewx-link">
@@ -841,7 +855,9 @@ function hideIncompleteRow() {
 function updateFooterVisibility() {
   const footerEl = document.querySelector('footer');
   if (!footerEl) return;
-  footerEl.classList.toggle('footer-hidden', cardsPerRow() <= 2);
+  // One or two cards per row: the compact footer (DivumWX version and the
+  // visitor line only), instead of hiding it.
+  footerEl.classList.toggle('footer-compact', cardsPerRow() <= 2);
 }
 
 // ==== NAVBAR COLLAPSE ====
@@ -939,6 +955,6 @@ window.addEventListener('load', updateFooterVisibility);
 <script src="js/d3.7.9.0.min.js"></script>
 <script src="js/d3-geo-projection.4.0.0.min.js"></script>
 <script src="js/topojson.3.0.2.min.js"></script>
-<script src="cardsBundleNew.js?v=e5a3398a"></script>
+<script src="cardsBundleNew.js?v=4123ce57"></script>
 </body>
 </html>

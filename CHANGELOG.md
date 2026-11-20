@@ -159,6 +159,17 @@
   (cardWebcam.js 1.2.0; cache-buster updated), `modalWebcam.html` 1.1.0,
   `INSTALLATION_GUIDE.md`.
 
+### Footer back on one- and two-column screens
+- The dashboard hid its footer when it showed one or two cards per row.
+  It now shows a compact footer there instead: just the DivumWX version and
+  the site visitor line (still opening the report). The logos, the credits
+  line and the WeeWX, Python and OS versions are left for wider screens
+  (`footer-compact`, with the system details in a `.footer-sysinfo` span).
+- `hyperIndex.html` and `lexendIndex.html` showed a fixed "DivumWX-H-0.0.1";
+  they now show the DivumWX version from `archive.json`, as `index.html`
+  does.
+- Changed: `index.html`, `hyperIndex.html` 1.2.0, `lexendIndex.html` 1.2.0.
+
 ### README
 - The 2.3.0 notes on the Piezo Rain card and the rain event rule were
   listed under 2.2.1 by mistake; they're now under 2.3.0.
