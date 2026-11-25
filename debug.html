@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<!--
+##############################################################################################
+# debug.html version 1.0.0
+#  Administrator's variable inspector: every value DivumWX reads, from every
+#  data file in jsondata/, plus the browser-side settings it keeps.
+#  Copyright (C) 2026 Ian Millard
+#  GPLv3
+##############################################################################################
+#
+#  Not linked from any page, marked noindex, and it only draws on the machine
+#  itself or the local network (localhost, 127.x, ::1, 10.x, 172.16-31.x,
+#  192.168.x, 169.254.x, *.local, *.lan, *.home.arpa). Anywhere else it shows
+#  the same "Nothing to see here" as jsondata/. The files it reads are public
+#  anyway; this only keeps the tool out of sight.
+#
+#  To use it through the public address as well, run this once in the
+#  browser's console on the site (it is remembered by that browser only):
+#      localStorage.setItem('divumwxDebug', '1')
+#  and to turn it off again:
+#      localStorage.removeItem('divumwxDebug')
+#
+#  It does not load sharedData.js: every read goes straight to the server
+#  with no-store, so what you see is what is on disk right now.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="no-referrer">
+<title>DivumWX variables</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #fff; --ink: #1d2430; --muted: #687385; --line: #e2e6ec;
+    --accent: #2f6fdb; --ok: #1f8a4c; --warn: #b7791f; --bad: #c53030; --hl: #fff3bf;
+    --t-num: #2f6fdb; --t-str: #1f7a5a; --t-bool: #8a3ffc; --t-null: #c53030;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  [data-theme="dark"] {
+    --bg: #12151b; --panel: #1a1f27; --ink: #e5e9f0; --muted: #8b95a5; --line: #2a313c;
+    --accent: #6ea0ff; --ok: #4cc38a; --warn: #e0b354; --bad: #ff7b7b; --hl: #4a4220;
+    --t-num: #7fb0ff; --t-str: #6fd3a8; --t-bool: #c7a4ff; --t-null: #ff8f8f;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 14px/1.45 system-ui, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; }
+  header { position: sticky; top: 0; z-index: 5; background: var(--panel);
+    border-bottom: 1px solid var(--line); padding: 10px 16px; }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+  h1 { font-size: 16px; margin: 0 12px 0 0; font-weight: 600; }
+  h1 small { color: var(--muted); font-weight: 400; }
+  input[type=search] { flex: 1 1 220px; min-width: 180px; padding: 6px 10px; font: inherit;
+    border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink); }
+  button, label.chk { font: inherit; font-size: 13px; padding: 5px 10px; border-radius: 6px;
+    border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer;
+    white-space: nowrap; user-select: none; }
+  button:hover, label.chk:hover { border-color: var(--accent); }
+  label.chk input { margin: 0 5px 0 0; vertical-align: -1px; }
+  .summary { color: var(--muted); font-size: 12.5px; margin-top: 6px; }
+  .summary b { color: var(--ink); font-weight: 600; }
+  main { padding: 14px 16px 60px; max-width: 1500px; margin: 0 auto; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted);
+    margin: 22px 0 8px; font-weight: 600; }
+  details.file { background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    margin: 0 0 8px; overflow: hidden; }
+  details.file > summary { list-style: none; cursor: pointer; padding: 8px 12px;
+    display: grid; grid-template-columns: 14px minmax(160px, 1.2fr) 70px 80px 120px 140px minmax(160px, 2fr);
+    gap: 10px; align-items: center; }
+  details.file > summary::-webkit-details-marker { display: none; }
+  details.file > summary::before { content: "▸"; color: var(--muted); }
+  details.file[open] > summary::before { content: "▾"; }
+  details.file[open] > summary { border-bottom: 1px solid var(--line); }
+  .fname { font-family: var(--mono); font-weight: 600; overflow-wrap: anywhere; }
+  .cell { font-size: 12.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .note { font-size: 12.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pill { display: inline-block; font-size: 11.5px; font-weight: 600; padding: 1px 7px; border-radius: 10px;
+    border: 1px solid currentColor; }
+  .s-ok { color: var(--ok); } .s-warn { color: var(--warn); } .s-bad { color: var(--bad); } .s-off { color: var(--muted); }
+  .body { padding: 8px 12px 12px; }
+  .tools { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; align-items: center; }
+  .tools .cell { margin-left: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; table-layout: fixed; }
+  th, td { text-align: left; padding: 3px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; position: sticky; top: 0; background: var(--panel); }
+  td.path { font-family: var(--mono); overflow-wrap: anywhere; width: 42%; }
+  td.path .f { color: var(--muted); }
+  td.type { width: 70px; color: var(--muted); }
+  td.val { font-family: var(--mono); overflow-wrap: anywhere; white-space: pre-wrap; }
+  td.hint { width: 190px; color: var(--muted); font-size: 12px; }
+  tr:hover td { background: color-mix(in srgb, var(--accent) 7%, transparent); }
+  tr.copied td { background: var(--hl); }
+  .v-number { color: var(--t-num); } .v-string { color: var(--t-str); } .v-boolean { color: var(--t-bool); }
+  .v-null, .v-empty, .v-nan { color: var(--t-null); font-style: italic; }
+  .v-more { color: var(--muted); font-style: italic; }
+  mark { background: var(--hl); color: inherit; padding: 0; }
+  pre.raw { font-family: var(--mono); font-size: 12px; white-space: pre-wrap; overflow-wrap: anywhere;
+    max-height: 520px; overflow: auto; margin: 0; padding: 8px; background: var(--bg); border-radius: 6px; }
+  .err { color: var(--bad); font-family: var(--mono); font-size: 12.5px; }
+  .empty { color: var(--muted); padding: 6px 0; }
+  .gate { min-height: 100vh; display: flex; align-items: center; justify-content: center; color: var(--muted); }
+  @media (max-width: 900px) {
+    details.file > summary { grid-template-columns: 14px 1fr auto; }
+    details.file > summary .cell:not(.status), details.file > summary .note { display: none; }
+    td.hint { display: none; }
+  }
+</style>
+</head>
+<body>
+<div id="gate" class="gate" hidden>Nothing to see here.</div>
+
+<div id="app" hidden>
+<header>
+  <div class="bar">
+    <h1>DivumWX variables <small id="station"></small></h1>
+    <input id="q" type="search" placeholder="Filter by name or value, e.g. outTemp, meta., null  (/regex/ works too)" autocomplete="off" spellcheck="false">
+    <label class="chk" title="Only show values that are null, empty, NaN or N/A"><input id="onlyMissing" type="checkbox">Missing only</label>
+    <label class="chk" title="Re-read loop.json every 3 seconds"><input id="live" type="checkbox">Live loop.json</label>
+    <button id="reload" title="Read every file again">Reload all</button>
+    <button id="expand">Expand all</button>
+    <button id="download" title="Every file and setting in one JSON file, for a bug report">Download bundle</button>
+    <button id="theme" title="Light / dark">◐</button>
+  </div>
+  <div class="summary" id="summary">Loading…</div>
+</header>
+<main>
+  <h2>Data files (jsondata/)</h2>
+  <div id="files"></div>
+  <h2>Static lookup files</h2>
+  <div id="static"></div>
+  <h2>Browser settings (localStorage, this browser only)</h2>
+  <div id="storage"></div>
+  <h2>This page's environment</h2>
+  <div id="env"></div>
+</main>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ---- Gate: local machine / local network, or an opted-in browser ------------------
+  function storageGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function isLocalHost(h) {
+    h = String(h || '').toLowerCase().replace(/^\[|\]$/g, '');
+    if (!h || h === 'localhost' || h === '::1' || h.endsWith('.localhost')) return true;
+    if (/\.(local|lan|home|internal|home\.arpa)$/.test(h) || h.indexOf('.') === -1 && h.indexOf(':') === -1) return true;
+    var m = /^(\d+)\.(\d+)\.\d+\.\d+$/.exec(h);
+    if (m) {
+      var a = +m[1], b = +m[2];
+      return a === 127 || a === 10 || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || (a === 169 && b === 254);
+    }
+    return /^f[cd][0-9a-f]{2}:/.test(h) || /^fe80:/.test(h);   // IPv6 unique-local / link-local
+  }
+  if (!(isLocalHost(location.hostname) || storageGet('divumwxDebug') === '1' || location.protocol === 'file:')) {
+    document.getElementById('gate').hidden = false;
+    return;
+  }
+  document.getElementById('app').hidden = false;
+
+  // ---- Every file DivumWX reads from jsondata/ ----------------------------------------
+  //  (what writes it is from install.py / bin/user/divumwx.py)
+  var FILES = [
+    ['loop.json',            'Live loop data — [LiveData] / divumwx loop service, every loop packet'],
+    ['archive.json',         'Main dashboard data + meta — WeatherData report (archive.json.tmpl)'],
+    ['almanac.json',         'Sun / moon / planets — SkyfieldLoopData'],
+    ['sky.json',             'Skyfield page slow data — SkyfieldLoopData _SkyAtlas'],
+    ['charts.json',          'Chart series — AllCharts report (charts.json.tmpl)'],
+    ['strings.json',         'Translations for the chosen language — Strings report (strings.json.tmpl)'],
+    ['onthisday.json',       'On This Day summary — OnThisDay report (onthisday.json.tmpl)'],
+    ['onthisday/{MM}.json',  'On This Day, this month\'s file — divumwx_onthisday'],
+    ['cloud_coverage.json',  'Cloud cover — CloudCoverageOverride'],
+    ['airquality.txt',       'Air quality — weatherapi [Airquality] (Open-Meteo)'],
+    ['particles.txt',        'Particle sensor feed — weatherapi'],
+    ['forecastcard.txt',     'Forecast card — weatherapi forecast'],
+    ['me.txt',               'Nearby METAR — weatherapi METAR'],
+    ['eq.txt',               'Earthquakes (USGS) — weatherapi [Earthquakes]'],
+    ['ki.txt',               'Planetary K-index — weatherapi [Ki]'],
+    ['k2.txt',               'K-index (second source) — weatherapi [K2]'],
+    ['ovation.txt',          'Aurora OVATION — weatherapi [Ovation]'],
+    ['aurora.txt',           'AuroraWatch UK — weatherapi (UK only)'],
+    ['flood.txt',            'Flood warnings — weatherapi (UK only)'],
+    ['heat.txt',             'UKHSA heat-health alert — weatherapi (UK only)'],
+    ['cold.txt',             'UKHSA cold-health alert — weatherapi (UK only)'],
+    ['metofficerss.txt',     'Met Office warnings RSS — weatherapi (UK only)'],
+    ['meteoalarm.json',      'MeteoAlarm warnings — divumwx_meteoalarm'],
+    ['openweathermap.txt',   'OpenWeatherMap alerts — weatherapi (alternative to MeteoAlarm)'],
+    ['xweather.txt',         'Xweather feed — weatherapi'],
+    ['custom.txt',           'Custom feed — weatherapi'],
+    ['homeassistant.txt',    'Home Assistant feed — weatherapi'],
+    ['boltek.txt',           'Boltek feed — weatherapi'],
+    ['boltek.json',          'Boltek lightning — divumwx_boltek'],
+    ['boltek_history.json',  'Boltek strike history — divumwx_boltek'],
+    ['solar_data.json',      'SolarAssistant — solar_assistant_mqtt'],
+    ['visitors.json',        'Site visitors — divumwx_visitors (Cloudflare)'],
+    ['meteocons_wmo_map.json','WMO code → meteocon icon map (shipped)'],
+    ['lookupWmoIcons.json',  'WMO code → icon lookup (shipped)']
+  ];
+  // Map geometry: large, never changes — checked, not listed value by value.
+  var STATIC = [
+    ['countries-110m.json', 'World map, 1:110m (shipped)'],
+    ['countries-50m.json',  'World map, 1:50m (shipped)'],
+    ['worldmap.json',       'World map (shipped)']
+  ];
+  var LONG_ARRAY = 12;       // arrays longer than this are folded until "Show all"
+  var MAX_SEARCH_ROWS = 3000;
+
+  var mm = String(new Date().getMonth() + 1).padStart(2, '0');
+  FILES = FILES.map(function (f) { return { name: f[0].replace('{MM}', mm), note: f[1] }; });
+  STATIC = STATIC.map(function (f) { return { name: f[0], note: f[1], static: true }; });
+
+  var state = {};   // name -> { status, ok, text, json, size, modified, ms, error, rows, fullRows }
+  var $ = function (id) { return document.getElementById(id); };
+
+  // ---- Theme follows the dashboard's own setting ---------------------------------------
+  function applyTheme(t) { document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light'); }
+  var theme = storageGet('dashboardThemeMode') || storageGet('theme') ||
+    (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  applyTheme(theme);
+  $('theme').onclick = function () {
+    theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    applyTheme(theme);
+  };
+
+  // ---- Helpers ---------------------------------------------------------------------------
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function bytes(n) { if (n == null) return '—'; return n < 1024 ? n + ' B' : n < 1048576 ? (n / 1024).toFixed(1) + ' KB' : (n / 1048576).toFixed(2) + ' MB'; }
+  function ago(ms) {
+    if (ms == null || isNaN(ms)) return '';
+    var s = Math.round((Date.now() - ms) / 1000), neg = s < 0; s = Math.abs(s);
+    var t = s < 90 ? s + ' s' : s < 5400 ? Math.round(s / 60) + ' min' : s < 172800 ? (s / 3600).toFixed(1) + ' h' : Math.round(s / 86400) + ' d';
+    return neg ? 'in ' + t : t + ' ago';
+  }
+  function fmtDate(ms) { try { return new Date(ms).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'medium' }); } catch (e) { return new Date(ms).toString(); } }
+  function typeOf(v) { return v === null ? 'null' : Array.isArray(v) ? 'array' : typeof v; }
+  function isMissing(v) {
+    if (v === null || v === undefined) return true;
+    if (typeof v === 'number') return isNaN(v);
+    if (typeof v === 'string') { var t = v.trim().toLowerCase(); return t === '' || t === 'n/a' || t === 'nan' || t === 'none' || t === 'null' || t === '--' || t === 'undefined'; }
+    return false;
+  }
+  // A number that reads as a time stamp gets the date alongside it.
+  function timeHint(path, v) {
+    if (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(v)) { var d = Date.parse(v); return isNaN(d) ? '' : ago(d); }
+    var n = typeof v === 'number' ? v : (typeof v === 'string' && /^\d{9,13}$/.test(v) ? +v : NaN);
+    if (!isFinite(n)) return '';
+    var ms = n > 9.4e11 && n < 4.1e12 ? n : n > 9.4e8 && n < 4.1e9 ? n * 1000 : NaN;
+    if (isNaN(ms)) return '';
+    // Only where the name says it's a time, so a plain big number isn't dated.
+    if (!/time|date|epoch|stamp|generated|updated|issued|expires|onset|rise|set|last|_at$|^ts$|^t$/i.test(path.replace(/\[\d+\]/g, ''))) return '';
+    return fmtDate(ms) + ' · ' + ago(ms);
+  }
+  function showVal(v) {
+    var t = typeOf(v);
+    if (t === 'null') return '<span class="v-null">null</span>';
+    if (t === 'string') return v === '' ? '<span class="v-empty">"" (empty)</span>' : '<span class="v-string">' + esc(JSON.stringify(v)) + '</span>';
+    if (t === 'number') return isNaN(v) ? '<span class="v-nan">NaN</span>' : '<span class="v-number">' + v + '</span>';
+    if (t === 'boolean') return '<span class="v-boolean">' + v + '</span>';
+    if (t === 'array') return '<span class="v-more">[] (empty array)</span>';
+    if (t === 'object') return '<span class="v-more">{} (empty object)</span>';
+    return esc(String(v));
+  }
+
+  // Flatten to dotted paths. Long arrays are folded to their first and last
+  // few items unless `full`; folded items are counted, not dropped silently.
+  function flatten(obj, full) {
+    var rows = [];
+    (function walk(v, path) {
+      if (v !== null && typeof v === 'object') {
+        var isArr = Array.isArray(v), keys = isArr ? null : Object.keys(v);
+        var n = isArr ? v.length : keys.length;
+        if (!n) { rows.push({ p: path, v: v }); return; }
+        if (isArr) {
+          var fold = !full && n > LONG_ARRAY, head = fold ? 3 : n;
+          for (var i = 0; i < head; i++) walk(v[i], path + '[' + i + ']');
+          if (fold) {
+            rows.push({ p: path + '[3…' + (n - 3) + ']', v: undefined, more: (n - 5) + ' more items (array of ' + n + ') — "Show all" lists them' });
+            for (var j = n - 2; j < n; j++) walk(v[j], path + '[' + j + ']');
+          }
+        } else {
+          keys.forEach(function (k) { walk(v[k], path ? path + '.' + k : k); });
+        }
+      } else rows.push({ p: path || '(value)', v: v });
+    })(obj, '');
+    return rows;
+  }
+
+  // .txt feeds are usually JSON; METAR and the like may be plain text.
+  function parse(text) {
+    var t = text.replace(/^﻿/, '').trim();
+    if (!t) return { kind: 'empty' };
+    try { return { kind: 'json', json: JSON.parse(t) }; } catch (e) {
+      if (/^\s*</.test(t)) return { kind: 'xml', err: null };
+      if (/^[\[{]/.test(t)) return { kind: 'badjson', err: e.message };
+      // key=value or key: value lines become variables too
+      var lines = t.split(/\r?\n/), kv = {}, hits = 0;
+      lines.forEach(function (l) { var m = /^\s*([\w.\-\[\] ]{1,60}?)\s*[=:]\s*(.*)$/.exec(l); if (m) { kv[m[1]] = m[2]; hits++; } });
+      if (hits && hits >= lines.length * 0.6) return { kind: 'kv', json: kv };
+      return { kind: 'text' };
+    }
+  }
+
+  // ---- Reading -------------------------------------------------------------------------
+  function load(f) {
+    var t0 = performance.now();
+    return fetch('jsondata/' + f.name + '?_=' + Date.now(), { cache: 'no-store' }).then(function (r) {
+      return r.text().then(function (text) {
+        var lm = r.headers.get('last-modified');
+        var s = { status: r.status, ok: r.ok, text: text, size: new Blob([text]).size,
+                  modified: lm ? Date.parse(lm) : null, ms: Math.round(performance.now() - t0) };
+        if (!r.ok) return s;
+        if (/^\s*<!doctype html|^\s*<html/i.test(text) && !/\.html$/.test(f.name)) {
+          s.ok = false; s.status = r.status + ' (HTML)'; s.error = 'The server answered with an HTML page, not this file (a missing file behind a catch-all rule?)';
+          return s;
+        }
+        if (f.static) { try { JSON.parse(text); s.kind = 'json'; } catch (e) { s.kind = 'badjson'; s.error = e.message; } return s; }
+        var p = parse(text);
+        s.kind = p.kind; s.json = p.json; s.error = p.err;
+        return s;
+      });
+    }, function (e) { return { status: 'network error', ok: false, error: String(e && e.message || e), ms: Math.round(performance.now() - t0) }; })
+    .then(function (s) {
+      if (s.json !== undefined) s.rows = flatten(s.json, false);
+      state[f.name] = s;
+      return s;
+    });
+  }
+
+  function statusPill(s) {
+    if (!s) return '<span class="pill s-off">…</span>';
+    if (s.status === 404) return '<span class="pill s-off" title="Not written on this station — fine if that feature is off">absent</span>';
+    if (!s.ok) return '<span class="pill s-bad">' + esc(s.status) + '</span>';
+    if (s.kind === 'badjson') return '<span class="pill s-bad" title="' + esc(s.error || '') + '">bad JSON</span>';
+    if (s.kind === 'empty') return '<span class="pill s-warn">empty</span>';
+    return '<span class="pill s-ok">' + esc(s.kind === 'json' ? 'JSON' : s.kind === 'kv' ? 'key=value' : s.kind) + '</span>';
+  }
+  function countVars(s) { return s && s.json !== undefined ? flatten(s.json, true).length : 0; }
+  function missingCount(s) { return s && s.json !== undefined ? flatten(s.json, true).filter(function (r) { return isMissing(r.v); }).length : 0; }
+
+  // Age: the file's own Last-Modified, else a time stamp inside it.
+  function fileTime(s) {
+    if (!s) return null;
+    if (s.modified) return s.modified;
+    var j = s.json;
+    var cand = j && (j.meta && (j.meta.generated || j.meta.updated) || j.generated || j.dateTime || j.timestamp || j.updated);
+    if (cand == null) return null;
+    var n = +cand; if (!isFinite(n)) { n = Date.parse(cand); return isNaN(n) ? null : n; }
+    return n > 4.1e9 ? n : n * 1000;
+  }
+  function ageClass(f, ms) {
+    if (!ms) return '';
+    var age = (Date.now() - ms) / 1000;
+    var limit = f.name === 'loop.json' ? 120 : f.name === 'almanac.json' || f.name === 'archive.json' ? 1800 : 86400 * 2;
+    if (/^(meteocons_wmo_map|lookupWmoIcons)\.json$/.test(f.name)) return '';
+    return age > limit ? 's-warn' : '';
+  }
+
+  // ---- Drawing -------------------------------------------------------------------------
+  var openFull = {};   // name -> show long arrays in full
+
+  function fileBlock(f) {
+    var d = document.createElement('details');
+    d.className = 'file'; d.dataset.name = f.name;
+    d.innerHTML = '<summary></summary><div class="body"></div>';
+    d.addEventListener('toggle', function () { if (d.open) drawBody(f, d); });
+    return d;
+  }
+
+  function drawSummary(f, d) {
+    var s = state[f.name], t = fileTime(s), n = countVars(s), miss = missingCount(s);
+    d.querySelector('summary').innerHTML =
+      '<span class="fname">' + esc(f.name) + '</span>' +
+      '<span class="cell status">' + statusPill(s) + '</span>' +
+      '<span class="cell">' + (s && s.status !== 404 ? bytes(s.size) : '') + '</span>' +
+      '<span class="cell">' + (f.static ? '' : n ? n + ' vars' + (miss ? ' · <span class="s-bad" title="null, empty, NaN or N/A">' + miss + ' missing</span>' : '') : '') + '</span>' +
+      '<span class="cell ' + ageClass(f, t) + '" title="' + (t ? esc(fmtDate(t)) : '') + '">' + (t ? ago(t) : '') + '</span>' +
+      '<span class="note" title="' + esc(f.note) + '">' + esc(f.note) + '</span>';
+  }
+
+  function drawBody(f, d) {
+    var s = state[f.name], body = d.querySelector('.body');
+    if (!s) { body.innerHTML = '<div class="empty">Loading…</div>'; return; }
+    var html = '<div class="tools">';
+    if (s.text != null && s.ok) html += '<button data-act="raw">Raw</button><button data-act="copy">Copy JSON</button>';
+    if (s.json !== undefined && flatten(s.json, true).length !== s.rows.length || openFull[f.name])
+      html += '<button data-act="full">' + (openFull[f.name] ? 'Fold long arrays' : 'Show all') + '</button>';
+    html += '<button data-act="reload">Reload</button>';
+    html += '<span class="cell">HTTP ' + esc(s.status) + (s.ms != null ? ' · ' + s.ms + ' ms' : '') +
+      (s.modified ? ' · Last-Modified ' + esc(fmtDate(s.modified)) : '') + ' · <a href="jsondata/' + esc(f.name) + '" target="_blank" rel="noopener">open</a></span></div>';
+    if (s.error) html += '<div class="err">' + esc(s.error) + '</div>';
+    if (s.status === 404) html += '<div class="empty">Not on this server. Normal if the feature that writes it is turned off or not installed.</div>';
+    if (s.json !== undefined) html += rowsTable(s.rows, f.name, false);
+    else if (s.ok && s.text != null && !f.static) html += '<pre class="raw">' + esc(s.text.slice(0, 200000)) + '</pre>';
+    html += '<pre class="raw" data-raw hidden></pre>';
+    body.innerHTML = html;
+  }
+
+  function hl(text, q) {
+    var e = esc(text);
+    if (!q || q.re) { if (q && q.re) { try { return e.replace(new RegExp(q.re.source, q.re.flags.replace('g', '') + 'g'), function (m) { return '<mark>' + m + '</mark>'; }); } catch (x) {} } return e; }
+    var i = text.toLowerCase().indexOf(q.s);
+    if (i < 0) return e;
+    return esc(text.slice(0, i)) + '<mark>' + esc(text.slice(i, i + q.s.length)) + '</mark>' + esc(text.slice(i + q.s.length));
+  }
+
+  function rowsTable(rows, file, withFile, q) {
+    var onlyMissing = $('onlyMissing').checked;
+    var list = rows.filter(function (r) { return !onlyMissing || isMissing(r.v); });
+    if (!list.length) return '<div class="empty">' + (onlyMissing ? 'No missing values.' : 'No values.') + '</div>';
+    var h = '<table><thead><tr><th>' + (withFile ? 'File / variable' : 'Variable') + '</th><th class="type" style="width:70px">Type</th><th>Value</th><th style="width:190px">Note</th></tr></thead><tbody>';
+    list.forEach(function (r) {
+      var fileName = r.f || file;
+      if (r.more) { h += '<tr><td class="path">' + esc(r.p) + '</td><td class="type"></td><td class="val v-more" colspan="2">' + esc(r.more) + '</td></tr>'; return; }
+      var t = typeOf(r.v);
+      h += '<tr data-copy="' + esc(r.p) + '"><td class="path" title="Click to copy the path">' + (withFile ? '<span class="f">' + esc(fileName) + ' › </span>' : '') + hl(r.p, q) +
+        '</td><td class="type">' + t + '</td><td class="val">' + (q && t === 'string' ? '<span class="v-string">' + hl(JSON.stringify(r.v), q) + '</span>' : showVal(r.v)) +
+        '</td><td class="hint">' + esc(timeHint(r.p, r.v)) + '</td></tr>';
+    });
+    return h + '</tbody></table>';
+  }
+
+  // Search across every file at once.
+  function drawSearch() {
+    var raw = $('q').value.trim(), only = $('onlyMissing').checked;
+    var box = $('searchResults');
+    if (!raw && !only) { if (box) box.remove(); $('files').hidden = false; return; }
+    var q = null;
+    if (raw) {
+      var m = /^\/(.+)\/([a-z]*)$/.exec(raw);
+      if (m) { try { q = { re: new RegExp(m[1], m[2].indexOf('i') < 0 ? m[2] + 'i' : m[2]) }; } catch (e) { q = { s: raw.toLowerCase() }; } }
+      else q = { s: raw.toLowerCase() };
+    }
+    var hits = [], total = 0;
+    FILES.forEach(function (f) {
+      var s = state[f.name]; if (!s || s.json === undefined) return;
+      flatten(s.json, true).forEach(function (r) {
+        if (only && !isMissing(r.v)) return;
+        if (q) {
+          var hay = (f.name + ' ' + r.p + ' ' + (typeof r.v === 'string' ? r.v : JSON.stringify(r.v)));
+          if (q.re ? !q.re.test(hay) : hay.toLowerCase().indexOf(q.s) < 0) return;
+        }
+        total++;
+        if (hits.length < MAX_SEARCH_ROWS) hits.push({ f: f.name, p: r.p, v: r.v });
+      });
+    });
+    if (!box) { box = document.createElement('div'); box.id = 'searchResults'; $('files').before(box); }
+    $('files').hidden = true;
+    box.innerHTML = '<details class="file" open><summary style="grid-template-columns:14px 1fr"><span><b>' + total + '</b> match' + (total === 1 ? '' : 'es') +
+      (total > hits.length ? ' (first ' + hits.length + ' shown)' : '') + ' across all files</span></summary><div class="body">' + rowsTable(hits, null, true, q) + '</div></details>';
+  }
+
+  function drawStorage() {
+    var rows = [], keys = [];
+    try { for (var i = 0; i < localStorage.length; i++) keys.push(localStorage.key(i)); } catch (e) {}
+    keys.sort().forEach(function (k) {
+      var v = storageGet(k), parsed = v;
+      try { parsed = JSON.parse(v); } catch (e) {}
+      if (parsed !== null && typeof parsed === 'object') flatten(parsed, false).forEach(function (r) { rows.push({ p: k + (r.p ? '.' + r.p : ''), v: r.v, more: r.more }); });
+      else rows.push({ p: k, v: v });
+    });
+    var known = ['dashboardUnitSystem', 'dashboardThemeMode', 'dashboardLanguage', 'theme', 'cardOrder',
+      'boltekModalView', 'lightningModalView', 'solarModalView', 'divumwxMeeusView', 'divumwxDebug'];
+    known.forEach(function (k) { if (keys.indexOf(k) < 0) rows.push({ p: k, v: undefined, more: 'not set (default in use)' }); });
+    $('storage').innerHTML = '<details class="file" open><summary style="grid-template-columns:14px 1fr"><span><b>' + keys.length + '</b> keys set for ' + esc(location.origin) +
+      '</span></summary><div class="body">' + rowsTable(rows, 'localStorage', false) + '</div></details>';
+  }
+
+  function envObj() {
+    var tz; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (e) {}
+    return {
+      page: location.href, origin: location.origin, gate: isLocalHost(location.hostname) ? 'local address' : 'opted in (localStorage divumwxDebug)',
+      browserTime: new Date().toString(), browserTimeZone: tz, browserLanguage: navigator.language, languages: (navigator.languages || []).join(', '),
+      userAgent: navigator.userAgent, screen: screen.width + '×' + screen.height + ' @' + (window.devicePixelRatio || 1) + 'x',
+      viewport: innerWidth + '×' + innerHeight, cookiesEnabled: navigator.cookieEnabled, online: navigator.onLine,
+      prefersDark: !!(window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches)
+    };
+  }
+  function drawEnv() {
+    $('env').innerHTML = '<details class="file" open><summary style="grid-template-columns:14px 1fr"><span>Browser and page</span></summary><div class="body">' +
+      rowsTable(flatten(envObj(), true), 'env', false) + '</div></details>';
+  }
+
+  function drawTop() {
+    var ok = 0, absent = 0, bad = 0, vars = 0, miss = 0;
+    FILES.forEach(function (f) {
+      var s = state[f.name]; if (!s) return;
+      if (s.status === 404) absent++; else if (!s.ok || s.kind === 'badjson') bad++; else ok++;
+      vars += countVars(s); miss += missingCount(s);
+    });
+    var meta = state['archive.json'] && state['archive.json'].json && state['archive.json'].json.meta || {};
+    $('station').textContent = [meta.station_location, meta.divumwx_version && 'DivumWX ' + meta.divumwx_version, meta.software_version && 'WeeWX ' + meta.software_version].filter(Boolean).join(' · ');
+    $('summary').innerHTML = '<b>' + vars + '</b> variables in <b>' + ok + '</b> files · ' + (miss ? '<span class="s-bad"><b>' + miss + '</b> missing values</span> · ' : '') +
+      absent + ' files absent · ' + (bad ? '<span class="s-bad"><b>' + bad + '</b> with errors</span> · ' : '') + 'read ' + new Date().toLocaleTimeString();
+  }
+
+  // ---- Wiring --------------------------------------------------------------------------
+  var blocks = {};
+  FILES.concat(STATIC).forEach(function (f) {
+    var d = fileBlock(f); blocks[f.name] = d;
+    (f.static ? $('static') : $('files')).appendChild(d);
+    drawSummary(f, d);
+  });
+
+  function refresh(f) {
+    return load(f).then(function () {
+      drawSummary(f, blocks[f.name]);
+      if (blocks[f.name].open) drawBody(f, blocks[f.name]);
+    });
+  }
+  function reloadAll() {
+    $('summary').textContent = 'Loading…';
+    return Promise.all(FILES.concat(STATIC).map(refresh)).then(function () { drawTop(); drawSearch(); drawStorage(); drawEnv(); });
+  }
+
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-act]');
+    if (b) {
+      var d = b.closest('details.file'), name = d.dataset.name, f = FILES.concat(STATIC).filter(function (x) { return x.name === name; })[0], s = state[name];
+      if (b.dataset.act === 'reload') refresh(f).then(function () { drawTop(); drawSearch(); });
+      if (b.dataset.act === 'full') { openFull[name] = !openFull[name]; s.rows = flatten(s.json, openFull[name]); drawBody(f, d); }
+      if (b.dataset.act === 'raw') {
+        var pre = d.querySelector('[data-raw]');
+        if (pre.hidden) { var txt = s.text; if (s.kind === 'json') { try { txt = JSON.stringify(JSON.parse(s.text), null, 2); } catch (x) {} } pre.textContent = txt.length > 400000 ? txt.slice(0, 400000) + '\n… (' + bytes(txt.length) + ' in all; use "open")' : txt; }
+        pre.hidden = !pre.hidden;
+      }
+      if (b.dataset.act === 'copy') copy(s.json !== undefined ? JSON.stringify(s.json, null, 2) : s.text, b);
+      return;
+    }
+    var tr = e.target.closest('tr[data-copy]');
+    if (tr && e.target.closest('td.path')) {
+      copy(tr.dataset.copy, null);
+      tr.classList.add('copied'); setTimeout(function () { tr.classList.remove('copied'); }, 600);
+    }
+  });
+
+  function copy(text, btn) {
+    var done = function () { if (btn) { var t = btn.textContent; btn.textContent = 'Copied'; setTimeout(function () { btn.textContent = t; }, 900); } };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done, fallback); else fallback();
+    function fallback() { var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch (x) {} ta.remove(); done(); }
+  }
+
+  var timer;
+  $('q').addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(drawSearch, 150); });
+  $('onlyMissing').addEventListener('change', function () {
+    drawSearch(); drawStorage(); drawEnv();
+    Object.keys(blocks).forEach(function (n) { if (blocks[n].open) drawBody(FILES.concat(STATIC).filter(function (x) { return x.name === n; })[0], blocks[n]); });
+  });
+  $('reload').onclick = reloadAll;
+  $('expand').onclick = function () {
+    var anyClosed = FILES.some(function (f) { return !blocks[f.name].open; });
+    FILES.forEach(function (f) { blocks[f.name].open = anyClosed; });
+    this.textContent = anyClosed ? 'Collapse all' : 'Expand all';
+  };
+
+  var liveTimer = null;
+  $('live').addEventListener('change', function () {
+    clearInterval(liveTimer);
+    if (this.checked) liveTimer = setInterval(function () {
+      if (document.hidden) return;
+      refresh(FILES[0]).then(function () { drawTop(); if ($('q').value || $('onlyMissing').checked) drawSearch(); });
+    }, 3000);
+  });
+
+  $('download').onclick = function () {
+    var out = { generated: new Date().toISOString(), environment: envObj(), localStorage: {}, files: {} };
+    try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); out.localStorage[k] = storageGet(k); } } catch (e) {}
+    FILES.forEach(function (f) {
+      var s = state[f.name]; if (!s) return;
+      out.files[f.name] = { status: s.status, size: s.size, lastModified: s.modified ? new Date(s.modified).toISOString() : null, format: s.kind || null, error: s.error || null,
+        data: s.json !== undefined ? s.json : s.ok ? s.text : null };
+    });
+    STATIC.forEach(function (f) { var s = state[f.name]; if (s) out.files[f.name] = { status: s.status, size: s.size, format: s.kind || null, error: s.error || null }; });
+    var blob = new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'divumwx-debug-' + new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19) + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  };
+
+  // debug.html?q=outTemp opens with that filter; ?missing=1 with "Missing only".
+  try {
+    var qs = new URLSearchParams(location.search);
+    if (qs.get('q')) $('q').value = qs.get('q');
+    if (qs.get('missing') === '1') $('onlyMissing').checked = true;
+  } catch (e) {}
+
+  // Open the two files people look at most.
+  reloadAll().then(function () {
+    ['loop.json', 'archive.json'].forEach(function (n) { if (state[n] && state[n].ok) blocks[n].open = true; });
+  });
+})();
+</script>
+</body>
+</html>
